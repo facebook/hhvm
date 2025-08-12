@@ -4,38 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/deprecated-public-fields-for-cpp-ref/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/deprecated-public-fields-for-cpp-ref/gen-cpp2/module_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/deprecated-public-fields-for-cpp-ref/gen-cpp2/module_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/deprecated-public-fields-for-cpp-ref/gen-cpp2/module_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::Foo>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::Foo>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -84,9 +59,6 @@ Foo::Foo(apache::thrift::FragileConstructor, ::std::unique_ptr<::cpp2::Foo> foo_
     __fbthrift_field_bar(std::move(bar__arg)) { 
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void Foo::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_foo.reset();
@@ -115,7 +87,6 @@ void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
   swap(a.__fbthrift_field_foo, b.__fbthrift_field_foo);
   swap(a.__fbthrift_field_bar, b.__fbthrift_field_bar);
 }
-
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<

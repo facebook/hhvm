@@ -4,38 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/deprecated_terse_writes_types.h"
-#include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/deprecated_terse_writes_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/deprecated_terse_writes_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/deprecated_terse_writes_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "deprecated_terse_writes";
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::apache::thrift::test::TerseFoo>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::apache::thrift::test::TerseFoo>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace apache::thrift::test {
@@ -84,9 +59,6 @@ TerseFoo::TerseFoo(apache::thrift::FragileConstructor, ::std::vector<double> fie
   __isset.set(folly::index_constant<2>(), true);
   __isset.set(folly::index_constant<3>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void TerseFoo::__fbthrift_clear() {
   // clear all fields
@@ -158,32 +130,7 @@ void swap([[maybe_unused]] TerseFoo& a, [[maybe_unused]] TerseFoo& b) {
 }
 
 
-
 } // namespace apache::thrift::test
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::apache::thrift::test::TerseLazyFoo>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::apache::thrift::test::TerseLazyFoo>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace apache::thrift::test {
@@ -285,83 +232,6 @@ TerseLazyFoo::TerseLazyFoo(apache::thrift::FragileConstructor, ::std::vector<dou
   __isset.set(folly::index_constant<3>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-const ::std::vector<double>& TerseLazyFoo::__fbthrift_read_field_field3() const {
-  const auto isDeserialized = __fbthrift_isDeserialized_.field3.load(std::memory_order_relaxed);
-  if (!(isDeserialized & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED)) {
-    __fbthrift_read_field_field3_slow();
-  }
-  return __fbthrift_field_field3;
-}
-
-::std::vector<double>& TerseLazyFoo::__fbthrift_read_field_field3() {
-  const auto isDeserialized = __fbthrift_isDeserialized_.field3.load(std::memory_order_relaxed);
-  if (!(isDeserialized & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED)) {
-    __fbthrift_read_field_field3_slow();
-  } else if (isDeserialized & ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
-    __fbthrift_isDeserialized_.field3 = ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED;
-  }
-  return __fbthrift_field_field3;
-}
-
-void TerseLazyFoo::__fbthrift_read_field_field3_slow() const {
-  auto lock = std::unique_lock(__fbthrift_deserializationMutex_);
-  if (__fbthrift_isDeserialized_.field3 & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) {
-    return;
-  }
-  switch (__fbthrift_protocol_) {
-    case ::apache::thrift::protocol::T_COMPACT_PROTOCOL:
-      __fbthrift_read_field_field3_impl<::apache::thrift::CompactProtocolReader>();
-      break;
-    case ::apache::thrift::protocol::T_BINARY_PROTOCOL:
-      __fbthrift_read_field_field3_impl<::apache::thrift::BinaryProtocolReader>();
-      break;
-    default:
-      CHECK(false) << int(__fbthrift_protocol_);
-  }
-  __fbthrift_serializedData_.field3 = {};
-  __fbthrift_isDeserialized_.field3 = ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED;
-}
-
-const ::std::vector<::std::int32_t>& TerseLazyFoo::__fbthrift_read_field_field4() const {
-  const auto isDeserialized = __fbthrift_isDeserialized_.field4.load(std::memory_order_relaxed);
-  if (!(isDeserialized & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED)) {
-    __fbthrift_read_field_field4_slow();
-  }
-  return __fbthrift_field_field4;
-}
-
-::std::vector<::std::int32_t>& TerseLazyFoo::__fbthrift_read_field_field4() {
-  const auto isDeserialized = __fbthrift_isDeserialized_.field4.load(std::memory_order_relaxed);
-  if (!(isDeserialized & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED)) {
-    __fbthrift_read_field_field4_slow();
-  } else if (isDeserialized & ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
-    __fbthrift_isDeserialized_.field4 = ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED;
-  }
-  return __fbthrift_field_field4;
-}
-
-void TerseLazyFoo::__fbthrift_read_field_field4_slow() const {
-  auto lock = std::unique_lock(__fbthrift_deserializationMutex_);
-  if (__fbthrift_isDeserialized_.field4 & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) {
-    return;
-  }
-  switch (__fbthrift_protocol_) {
-    case ::apache::thrift::protocol::T_COMPACT_PROTOCOL:
-      __fbthrift_read_field_field4_impl<::apache::thrift::CompactProtocolReader>();
-      break;
-    case ::apache::thrift::protocol::T_BINARY_PROTOCOL:
-      __fbthrift_read_field_field4_impl<::apache::thrift::BinaryProtocolReader>();
-      break;
-    default:
-      CHECK(false) << int(__fbthrift_protocol_);
-  }
-  __fbthrift_serializedData_.field4 = {};
-  __fbthrift_isDeserialized_.field4 = ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED;
-}
-
-#endif
-
 void TerseLazyFoo::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_field1.clear();
@@ -424,32 +294,7 @@ void swap([[maybe_unused]] TerseLazyFoo& a, [[maybe_unused]] TerseLazyFoo& b) {
 }
 
 
-
 } // namespace apache::thrift::test
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::apache::thrift::test::TerseOptionalFoo>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::apache::thrift::test::TerseOptionalFoo>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace apache::thrift::test {
@@ -498,9 +343,6 @@ TerseOptionalFoo::TerseOptionalFoo(apache::thrift::FragileConstructor, ::std::ve
   __isset.set(folly::index_constant<2>(), true);
   __isset.set(folly::index_constant<3>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void TerseOptionalFoo::__fbthrift_clear() {
   // clear all fields
@@ -572,32 +414,7 @@ void swap([[maybe_unused]] TerseOptionalFoo& a, [[maybe_unused]] TerseOptionalFo
 }
 
 
-
 } // namespace apache::thrift::test
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::apache::thrift::test::TerseOptionalLazyFoo>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::apache::thrift::test::TerseOptionalLazyFoo>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace apache::thrift::test {
@@ -699,83 +516,6 @@ TerseOptionalLazyFoo::TerseOptionalLazyFoo(apache::thrift::FragileConstructor, :
   __isset.set(folly::index_constant<3>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-const ::std::vector<double>& TerseOptionalLazyFoo::__fbthrift_read_field_field3() const {
-  const auto isDeserialized = __fbthrift_isDeserialized_.field3.load(std::memory_order_relaxed);
-  if (!(isDeserialized & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED)) {
-    __fbthrift_read_field_field3_slow();
-  }
-  return __fbthrift_field_field3;
-}
-
-::std::vector<double>& TerseOptionalLazyFoo::__fbthrift_read_field_field3() {
-  const auto isDeserialized = __fbthrift_isDeserialized_.field3.load(std::memory_order_relaxed);
-  if (!(isDeserialized & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED)) {
-    __fbthrift_read_field_field3_slow();
-  } else if (isDeserialized & ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
-    __fbthrift_isDeserialized_.field3 = ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED;
-  }
-  return __fbthrift_field_field3;
-}
-
-void TerseOptionalLazyFoo::__fbthrift_read_field_field3_slow() const {
-  auto lock = std::unique_lock(__fbthrift_deserializationMutex_);
-  if (__fbthrift_isDeserialized_.field3 & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) {
-    return;
-  }
-  switch (__fbthrift_protocol_) {
-    case ::apache::thrift::protocol::T_COMPACT_PROTOCOL:
-      __fbthrift_read_field_field3_impl<::apache::thrift::CompactProtocolReader>();
-      break;
-    case ::apache::thrift::protocol::T_BINARY_PROTOCOL:
-      __fbthrift_read_field_field3_impl<::apache::thrift::BinaryProtocolReader>();
-      break;
-    default:
-      CHECK(false) << int(__fbthrift_protocol_);
-  }
-  __fbthrift_serializedData_.field3 = {};
-  __fbthrift_isDeserialized_.field3 = ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED;
-}
-
-const ::std::vector<::std::int32_t>& TerseOptionalLazyFoo::__fbthrift_read_field_field4() const {
-  const auto isDeserialized = __fbthrift_isDeserialized_.field4.load(std::memory_order_relaxed);
-  if (!(isDeserialized & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED)) {
-    __fbthrift_read_field_field4_slow();
-  }
-  return __fbthrift_field_field4;
-}
-
-::std::vector<::std::int32_t>& TerseOptionalLazyFoo::__fbthrift_read_field_field4() {
-  const auto isDeserialized = __fbthrift_isDeserialized_.field4.load(std::memory_order_relaxed);
-  if (!(isDeserialized & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED)) {
-    __fbthrift_read_field_field4_slow();
-  } else if (isDeserialized & ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
-    __fbthrift_isDeserialized_.field4 = ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED;
-  }
-  return __fbthrift_field_field4;
-}
-
-void TerseOptionalLazyFoo::__fbthrift_read_field_field4_slow() const {
-  auto lock = std::unique_lock(__fbthrift_deserializationMutex_);
-  if (__fbthrift_isDeserialized_.field4 & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) {
-    return;
-  }
-  switch (__fbthrift_protocol_) {
-    case ::apache::thrift::protocol::T_COMPACT_PROTOCOL:
-      __fbthrift_read_field_field4_impl<::apache::thrift::CompactProtocolReader>();
-      break;
-    case ::apache::thrift::protocol::T_BINARY_PROTOCOL:
-      __fbthrift_read_field_field4_impl<::apache::thrift::BinaryProtocolReader>();
-      break;
-    default:
-      CHECK(false) << int(__fbthrift_protocol_);
-  }
-  __fbthrift_serializedData_.field4 = {};
-  __fbthrift_isDeserialized_.field4 = ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED;
-}
-
-#endif
-
 void TerseOptionalLazyFoo::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_field1.clear();
@@ -836,7 +576,6 @@ void swap([[maybe_unused]] TerseOptionalLazyFoo& a, [[maybe_unused]] TerseOption
   a.__fbthrift_isDeserialized_.field4.store(b.__fbthrift_isDeserialized_.field4.exchange(a.__fbthrift_isDeserialized_.field4.load(relaxed), relaxed), relaxed);
   swap(a.__isset, b.__isset);
 }
-
 
 
 } // namespace apache::thrift::test

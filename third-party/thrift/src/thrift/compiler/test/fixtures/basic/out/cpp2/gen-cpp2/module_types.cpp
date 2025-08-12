@@ -4,8 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -46,30 +45,6 @@ bool TEnumTraits<::test::fixtures::basic::HackEnum>::findValue(std::string_view 
 
 }} // apache::thrift
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::basic::MyStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic::MyStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::basic {
@@ -147,9 +122,6 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int64_t MyIntField
   __isset.set(folly::index_constant<7>(), true);
   __isset.set(folly::index_constant<8>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void MyStruct::__fbthrift_clear() {
   // clear all fields
@@ -255,7 +227,6 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   swap(a.__isset, b.__isset);
 }
 
-
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         MyStruct,
@@ -264,30 +235,6 @@ static_assert(
     "inconsistent use of json option");
 
 } // namespace test::fixtures::basic
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::basic::Containers>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic::Containers>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::basic {
@@ -336,9 +283,6 @@ Containers::Containers(apache::thrift::FragileConstructor, ::std::vector<::std::
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void Containers::__fbthrift_clear() {
   // clear all fields
@@ -397,32 +341,7 @@ void swap([[maybe_unused]] Containers& a, [[maybe_unused]] Containers& b) {
 }
 
 
-
 } // namespace test::fixtures::basic
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::basic::MyDataItem>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic::MyDataItem>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::basic {
@@ -441,9 +360,6 @@ std::string_view MyDataItem::__fbthrift_get_class_name() {
 
 
 MyDataItem::MyDataItem(apache::thrift::FragileConstructor) {}
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void MyDataItem::__fbthrift_clear() {
   // clear all fields
@@ -470,32 +386,7 @@ void swap([[maybe_unused]] MyDataItem& a, [[maybe_unused]] MyDataItem& b) {
 }
 
 
-
 } // namespace test::fixtures::basic
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::basic::MyUnion>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic::MyUnion>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace apache { namespace thrift {
@@ -621,7 +512,6 @@ void swap(MyUnion& a, MyUnion& b) {
   b = std::move(temp);
 }
 
-
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         MyUnion,
@@ -636,30 +526,6 @@ static_assert(
     "inconsistent use of json option");
 
 } // namespace test::fixtures::basic
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::basic::MyException>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic::MyException>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::basic {
@@ -713,9 +579,6 @@ MyException::MyException(apache::thrift::FragileConstructor, ::std::int64_t MyIn
   __isset.set(folly::index_constant<2>(), true);
   __isset.set(folly::index_constant<3>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void MyException::__fbthrift_clear() {
   // clear all fields
@@ -776,7 +639,6 @@ void swap([[maybe_unused]] MyException& a, [[maybe_unused]] MyException& b) {
   swap(a.__isset, b.__isset);
 }
 
-
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         MyException,
@@ -791,30 +653,6 @@ static_assert(
     "inconsistent use of json option");
 
 } // namespace test::fixtures::basic
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::basic::MyExceptionWithMessage>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::basic {
@@ -872,9 +710,6 @@ MyExceptionWithMessage::MyExceptionWithMessage(apache::thrift::FragileConstructo
   __isset.set(folly::index_constant<2>(), true);
   __isset.set(folly::index_constant<3>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void MyExceptionWithMessage::__fbthrift_clear() {
   // clear all fields
@@ -935,7 +770,6 @@ void swap([[maybe_unused]] MyExceptionWithMessage& a, [[maybe_unused]] MyExcepti
   swap(a.__isset, b.__isset);
 }
 
-
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         MyExceptionWithMessage,
@@ -950,30 +784,6 @@ static_assert(
     "inconsistent use of json option");
 
 } // namespace test::fixtures::basic
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::basic::ReservedKeyword>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic::ReservedKeyword>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::basic {
@@ -995,9 +805,6 @@ ReservedKeyword::ReservedKeyword(apache::thrift::FragileConstructor, ::std::int3
     __fbthrift_field_reserved_field(std::move(reserved_field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void ReservedKeyword::__fbthrift_clear() {
   // clear all fields
@@ -1037,32 +844,7 @@ void swap([[maybe_unused]] ReservedKeyword& a, [[maybe_unused]] ReservedKeyword&
 }
 
 
-
 } // namespace test::fixtures::basic
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::basic::UnionToBeRenamed>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace apache { namespace thrift {
@@ -1157,7 +939,6 @@ void swap(UnionToBeRenamed& a, UnionToBeRenamed& b) {
   a = std::move(b);
   b = std::move(temp);
 }
-
 
 
 } // namespace test::fixtures::basic

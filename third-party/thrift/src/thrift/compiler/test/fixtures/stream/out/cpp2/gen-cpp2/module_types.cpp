@@ -4,38 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/stream/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/stream/gen-cpp2/module_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/stream/gen-cpp2/module_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/stream/gen-cpp2/module_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::FooStreamEx>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::FooStreamEx>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -64,9 +39,6 @@ FooStreamEx& FooStreamEx::operator=([[maybe_unused]] FooStreamEx&& other) noexce
 
 FooStreamEx::FooStreamEx(apache::thrift::FragileConstructor) {}
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void FooStreamEx::__fbthrift_clear() {
   // clear all fields
 }
@@ -92,32 +64,7 @@ void swap([[maybe_unused]] FooStreamEx& a, [[maybe_unused]] FooStreamEx& b) {
 }
 
 
-
 } // namespace cpp2
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::FooEx>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::FooEx>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -146,9 +93,6 @@ FooEx& FooEx::operator=([[maybe_unused]] FooEx&& other) noexcept {
 
 FooEx::FooEx(apache::thrift::FragileConstructor) {}
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void FooEx::__fbthrift_clear() {
   // clear all fields
 }
@@ -174,32 +118,7 @@ void swap([[maybe_unused]] FooEx& a, [[maybe_unused]] FooEx& b) {
 }
 
 
-
 } // namespace cpp2
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::FooEx2>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::FooEx2>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -228,9 +147,6 @@ FooEx2& FooEx2::operator=([[maybe_unused]] FooEx2&& other) noexcept {
 
 FooEx2::FooEx2(apache::thrift::FragileConstructor) {}
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void FooEx2::__fbthrift_clear() {
   // clear all fields
 }
@@ -254,7 +170,6 @@ bool FooEx2::operator<([[maybe_unused]] const FooEx2& rhs) const {
 void swap([[maybe_unused]] FooEx2& a, [[maybe_unused]] FooEx2& b) {
   using ::std::swap;
 }
-
 
 
 } // namespace cpp2

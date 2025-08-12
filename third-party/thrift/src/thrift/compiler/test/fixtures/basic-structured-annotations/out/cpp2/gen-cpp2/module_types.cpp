@@ -4,8 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/module_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/module_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -30,30 +29,6 @@ bool TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>::findVa
 }} // apache::thrift
 
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::basic-structured-annotations::runtime_annotation>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-structured-annotations::runtime_annotation>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
-
 
 namespace test::fixtures::basic-structured-annotations {
 
@@ -71,9 +46,6 @@ std::string_view runtime_annotation::__fbthrift_get_class_name() {
 
 
 runtime_annotation::runtime_annotation(apache::thrift::FragileConstructor) {}
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void runtime_annotation::__fbthrift_clear() {
   // clear all fields
@@ -100,32 +72,7 @@ void swap([[maybe_unused]] runtime_annotation& a, [[maybe_unused]] runtime_annot
 }
 
 
-
 } // namespace test::fixtures::basic-structured-annotations
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_annotation_inline>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_inline>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::basic-structured-annotations {
@@ -173,9 +120,6 @@ structured_annotation_inline::structured_annotation_inline(apache::thrift::Fragi
   __isset.set(folly::index_constant<1>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void structured_annotation_inline::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_count = ::std::int64_t();
@@ -216,32 +160,7 @@ void swap([[maybe_unused]] structured_annotation_inline& a, [[maybe_unused]] str
 }
 
 
-
 } // namespace test::fixtures::basic-structured-annotations
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::basic-structured-annotations {
@@ -284,9 +203,6 @@ structured_annotation_with_default::structured_annotation_with_default(apache::t
   __isset.set(folly::index_constant<0>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void structured_annotation_with_default::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_name = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
@@ -316,32 +232,7 @@ void swap([[maybe_unused]] structured_annotation_with_default& a, [[maybe_unused
 }
 
 
-
 } // namespace test::fixtures::basic-structured-annotations
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::basic-structured-annotations {
@@ -403,9 +294,6 @@ structured_annotation_recursive::structured_annotation_recursive(apache::thrift:
   __isset.set(folly::index_constant<1>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void structured_annotation_recursive::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_name = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
@@ -446,7 +334,6 @@ void swap([[maybe_unused]] structured_annotation_recursive& a, [[maybe_unused]] 
   swap(a.__isset, b.__isset);
 }
 
-
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         structured_annotation_recursive,
@@ -461,30 +348,6 @@ static_assert(
     "inconsistent use of json option");
 
 } // namespace test::fixtures::basic-structured-annotations
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::basic-structured-annotations {
@@ -506,9 +369,6 @@ structured_annotation_forward::structured_annotation_forward(apache::thrift::Fra
     __fbthrift_field_count(std::move(count__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void structured_annotation_forward::__fbthrift_clear() {
   // clear all fields
@@ -548,32 +408,7 @@ void swap([[maybe_unused]] structured_annotation_forward& a, [[maybe_unused]] st
 }
 
 
-
 } // namespace test::fixtures::basic-structured-annotations
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_annotation_nested>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_nested>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::basic-structured-annotations {
@@ -619,9 +454,6 @@ structured_annotation_nested::structured_annotation_nested(apache::thrift::Fragi
   __isset.set(folly::index_constant<1>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void structured_annotation_nested::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_name = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
@@ -660,7 +492,6 @@ void swap([[maybe_unused]] structured_annotation_nested& a, [[maybe_unused]] str
   swap(a.__isset, b.__isset);
 }
 
-
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         structured_annotation_nested,
@@ -669,30 +500,6 @@ static_assert(
     "inconsistent use of json option");
 
 } // namespace test::fixtures::basic-structured-annotations
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::basic-structured-annotations::MyStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-structured-annotations::MyStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::basic-structured-annotations {
@@ -748,9 +555,6 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int64_t annotated_
   __isset.set(folly::index_constant<3>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void MyStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_annotated_field = ::std::int64_t();
@@ -804,32 +608,7 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
 }
 
 
-
 } // namespace test::fixtures::basic-structured-annotations
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::basic-structured-annotations::MyException>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-structured-annotations::MyException>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::basic-structured-annotations {
@@ -871,9 +650,6 @@ MyException::MyException(apache::thrift::FragileConstructor, ::std::string conte
   __isset.set(folly::index_constant<0>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void MyException::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_context = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
@@ -903,32 +679,7 @@ void swap([[maybe_unused]] MyException& a, [[maybe_unused]] MyException& b) {
 }
 
 
-
 } // namespace test::fixtures::basic-structured-annotations
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::basic-structured-annotations::MyUnion>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-structured-annotations::MyUnion>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace apache { namespace thrift {
@@ -1035,7 +786,6 @@ void swap(MyUnion& a, MyUnion& b) {
   a = std::move(b);
   b = std::move(temp);
 }
-
 
 
 } // namespace test::fixtures::basic-structured-annotations

@@ -4,8 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/any/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/any/gen-cpp2/module_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/any/gen-cpp2/module_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 #include <thrift/conformance/cpp2/AnyRegistry.h>
@@ -43,30 +42,6 @@ void __fbthrift_static_init_MyException() {
     false);
 }
 } // namespace facebook::thrift::compiler::test::fixtures::any
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace facebook::thrift::compiler::test::fixtures::any {
@@ -109,9 +84,6 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::string myString__a
   __isset.set(folly::index_constant<0>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void MyStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_myString = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
@@ -141,33 +113,8 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
 }
 
 
-
 } // namespace detail
 } // namespace facebook::thrift::compiler::test::fixtures::any
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyUnion>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace apache { namespace thrift {
@@ -267,32 +214,7 @@ void swap(MyUnion& a, MyUnion& b) {
 }
 
 
-
 } // namespace facebook::thrift::compiler::test::fixtures::any
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::MyException>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::compiler::test::fixtures::any::MyException>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace facebook::thrift::compiler::test::fixtures::any {
@@ -334,9 +256,6 @@ MyException::MyException(apache::thrift::FragileConstructor, ::std::string myStr
   __isset.set(folly::index_constant<0>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void MyException::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_myString = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
@@ -364,7 +283,6 @@ void swap([[maybe_unused]] MyException& a, [[maybe_unused]] MyException& b) {
   swap(a.__fbthrift_field_myString, b.__fbthrift_field_myString);
   swap(a.__isset, b.__isset);
 }
-
 
 
 } // namespace facebook::thrift::compiler::test::fixtures::any

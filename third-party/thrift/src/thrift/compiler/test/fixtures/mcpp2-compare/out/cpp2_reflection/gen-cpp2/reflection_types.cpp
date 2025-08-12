@@ -4,38 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/reflection_types.h"
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/reflection_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/reflection_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/reflection_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "reflection";
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::ReflectionStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::ReflectionStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -53,9 +28,6 @@ ReflectionStruct::ReflectionStruct(apache::thrift::FragileConstructor, ::std::in
     __fbthrift_field_fieldA(std::move(fieldA__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void ReflectionStruct::__fbthrift_clear() {
   // clear all fields
@@ -93,13 +65,6 @@ void swap([[maybe_unused]] ReflectionStruct& a, [[maybe_unused]] ReflectionStruc
   swap(a.__fbthrift_field_fieldA, b.__fbthrift_field_fieldA);
   swap(a.__isset, b.__isset);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-template void ReflectionStruct::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
-template uint32_t ReflectionStruct::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
-template uint32_t ReflectionStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
-template uint32_t ReflectionStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
-#endif
 
 
 } // namespace cpp2

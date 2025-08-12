@@ -4,8 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/module_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/basic-stack-arguments/gen-cpp2/module_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -29,30 +28,6 @@ bool TEnumTraits<::cpp2::MyEnum>::findValue(std::string_view name, type* out) no
 
 }} // apache::thrift
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::MyStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::MyStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -95,9 +70,6 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int64_t MyIntField
   __isset.set(folly::index_constant<1>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void MyStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_MyIntField = ::std::int64_t();
@@ -136,7 +108,6 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   swap(a.__fbthrift_field_MyStringField, b.__fbthrift_field_MyStringField);
   swap(a.__isset, b.__isset);
 }
-
 
 
 } // namespace cpp2

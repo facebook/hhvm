@@ -4,38 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::CustomException>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::CustomException>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -73,9 +48,6 @@ CustomException::CustomException(apache::thrift::FragileConstructor, ::std::stri
   __isset.set(folly::index_constant<0>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void CustomException::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_message = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
@@ -105,32 +77,7 @@ void swap([[maybe_unused]] CustomException& a, [[maybe_unused]] CustomException&
 }
 
 
-
 } // namespace cpp2
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::ShouldBeBoxed>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::ShouldBeBoxed>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -168,9 +115,6 @@ ShouldBeBoxed::ShouldBeBoxed(apache::thrift::FragileConstructor, ::std::string s
   __isset.set(folly::index_constant<0>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void ShouldBeBoxed::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_sessionId = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
@@ -198,7 +142,6 @@ void swap([[maybe_unused]] ShouldBeBoxed& a, [[maybe_unused]] ShouldBeBoxed& b) 
   swap(a.__fbthrift_field_sessionId, b.__fbthrift_field_sessionId);
   swap(a.__isset, b.__isset);
 }
-
 
 
 } // namespace cpp2

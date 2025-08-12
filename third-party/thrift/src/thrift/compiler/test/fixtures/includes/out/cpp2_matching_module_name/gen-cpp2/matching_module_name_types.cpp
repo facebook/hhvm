@@ -4,38 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/includes/gen-cpp2/matching_module_name_types.h"
-#include "thrift/compiler/test/fixtures/includes/gen-cpp2/matching_module_name_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/includes/gen-cpp2/matching_module_name_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/matching_module_name_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "matching_module_name";
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::matching_module_name::MyStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::matching_module_name::MyStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace matching_module_name {
@@ -53,9 +28,6 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::matching_module_name::O
     __fbthrift_field_OtherStructField(std::move(OtherStructField__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void MyStruct::__fbthrift_clear() {
   // clear all fields
@@ -92,7 +64,6 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   swap(a.__fbthrift_field_OtherStructField, b.__fbthrift_field_OtherStructField);
   swap(a.__isset, b.__isset);
 }
-
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<

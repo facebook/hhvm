@@ -4,8 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -29,30 +28,6 @@ bool TEnumTraits<::facebook::thrift::test::Result>::findValue(std::string_view n
 
 }} // apache::thrift
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::facebook::thrift::test::CustomException>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::CustomException>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace facebook::thrift::test {
@@ -99,9 +74,6 @@ CustomException::CustomException(apache::thrift::FragileConstructor, ::std::stri
   __isset.set(folly::index_constant<1>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void CustomException::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_name = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
@@ -140,7 +112,6 @@ void swap([[maybe_unused]] CustomException& a, [[maybe_unused]] CustomException&
   swap(a.__fbthrift_field_result, b.__fbthrift_field_result);
   swap(a.__isset, b.__isset);
 }
-
 
 
 } // namespace facebook::thrift::test

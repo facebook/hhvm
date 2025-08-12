@@ -67,10 +67,6 @@
 {{> module_types_cpp/fragile_ctor}}
 {{/struct:legacy_api?}}
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-{{> module_types_cpp/lazy_deserialization}}
-#endif
-
 void {{struct:cpp_underlying_name}}::__fbthrift_clear() {
   // clear all fields
 {{#struct:fields}}

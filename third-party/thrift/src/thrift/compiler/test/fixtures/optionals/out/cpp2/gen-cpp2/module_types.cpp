@@ -4,8 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -30,30 +29,6 @@ bool TEnumTraits<::cpp2::Animal>::findValue(std::string_view name, type* out) no
 }} // apache::thrift
 
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::Color>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::Color>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
-
 
 namespace cpp2 {
 
@@ -76,9 +51,6 @@ Color::Color(apache::thrift::FragileConstructor, double red__arg, double green__
   __isset.set(folly::index_constant<2>(), true);
   __isset.set(folly::index_constant<3>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void Color::__fbthrift_clear() {
   // clear all fields
@@ -151,32 +123,7 @@ void swap([[maybe_unused]] Color& a, [[maybe_unused]] Color& b) {
 }
 
 
-
 } // namespace cpp2
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::Vehicle>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::Vehicle>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -230,9 +177,6 @@ Vehicle::Vehicle(apache::thrift::FragileConstructor, ::cpp2::Color color__arg, :
   __isset.set(folly::index_constant<3>(), true);
   __isset.set(folly::index_constant<4>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void Vehicle::__fbthrift_clear() {
   // clear all fields
@@ -315,7 +259,6 @@ void swap([[maybe_unused]] Vehicle& a, [[maybe_unused]] Vehicle& b) {
   swap(a.__isset, b.__isset);
 }
 
-
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         Vehicle,
@@ -324,30 +267,6 @@ static_assert(
     "inconsistent use of json option");
 
 } // namespace cpp2
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::Person>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::Person>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -424,9 +343,6 @@ Person::Person(apache::thrift::FragileConstructor, ::cpp2::PersonID id__arg, ::s
   __isset.set(folly::index_constant<8>(), true);
   __isset.set(folly::index_constant<9>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void Person::__fbthrift_clear() {
   // clear all fields
@@ -561,7 +477,6 @@ void swap([[maybe_unused]] Person& a, [[maybe_unused]] Person& b) {
   swap(a.__fbthrift_field_vehicles, b.__fbthrift_field_vehicles);
   swap(a.__isset, b.__isset);
 }
-
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<

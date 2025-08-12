@@ -4,38 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/default_values/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/default_values/gen-cpp2/module_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/default_values/gen-cpp2/module_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/default_values/gen-cpp2/module_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace facebook::thrift::compiler::test::fixtures::default_values {
@@ -57,9 +32,6 @@ TrivialStruct::TrivialStruct(apache::thrift::FragileConstructor, ::std::int32_t 
     __fbthrift_field_int_value(std::move(int_value__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void TrivialStruct::__fbthrift_clear() {
   // clear all fields
@@ -99,32 +71,7 @@ void swap([[maybe_unused]] TrivialStruct& a, [[maybe_unused]] TrivialStruct& b) 
 }
 
 
-
 } // namespace facebook::thrift::compiler::test::fixtures::default_values
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace facebook::thrift::compiler::test::fixtures::default_values {
@@ -154,9 +101,6 @@ StructWithNoCustomDefaultValues::StructWithNoCustomDefaultValues(apache::thrift:
   __isset.set(folly::index_constant<2>(), true);
   __isset.set(folly::index_constant<3>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void StructWithNoCustomDefaultValues::__fbthrift_clear() {
   // clear all fields
@@ -251,7 +195,6 @@ void swap([[maybe_unused]] StructWithNoCustomDefaultValues& a, [[maybe_unused]] 
   swap(a.__isset, b.__isset);
 }
 
-
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         StructWithNoCustomDefaultValues,
@@ -272,30 +215,6 @@ static_assert(
     "inconsistent use of json option");
 
 } // namespace facebook::thrift::compiler::test::fixtures::default_values
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace facebook::thrift::compiler::test::fixtures::default_values {
@@ -325,9 +244,6 @@ StructWithCustomDefaultValues::StructWithCustomDefaultValues(apache::thrift::Fra
   __isset.set(folly::index_constant<2>(), true);
   __isset.set(folly::index_constant<3>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void StructWithCustomDefaultValues::__fbthrift_clear() {
   // clear all fields
@@ -421,7 +337,6 @@ void swap([[maybe_unused]] StructWithCustomDefaultValues& a, [[maybe_unused]] St
   swap(a.__fbthrift_field_required_struct, b.__fbthrift_field_required_struct);
   swap(a.__isset, b.__isset);
 }
-
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<

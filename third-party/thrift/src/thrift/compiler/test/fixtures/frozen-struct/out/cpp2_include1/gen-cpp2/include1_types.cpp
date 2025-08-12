@@ -4,38 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_types.h"
-#include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "include1";
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::some::ns::IncludedA>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::some::ns::IncludedA>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace some::ns {
@@ -78,9 +53,6 @@ IncludedA::IncludedA(apache::thrift::FragileConstructor, ::std::int32_t i32Field
   __isset.set(folly::index_constant<1>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void IncludedA::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_i32Field = ::std::int32_t();
@@ -119,7 +91,6 @@ void swap([[maybe_unused]] IncludedA& a, [[maybe_unused]] IncludedA& b) {
   swap(a.__fbthrift_field_strField, b.__fbthrift_field_strField);
   swap(a.__isset, b.__isset);
 }
-
 
 
 } // namespace some::ns

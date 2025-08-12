@@ -4,38 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/nimble/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/nimble/gen-cpp2/module_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/nimble/gen-cpp2/module_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/nimble/gen-cpp2/module_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::BasicTypes>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::BasicTypes>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -58,9 +33,6 @@ BasicTypes::BasicTypes(apache::thrift::FragileConstructor, ::std::int32_t first_
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void BasicTypes::__fbthrift_clear() {
   // clear all fields
@@ -139,7 +111,6 @@ void swap([[maybe_unused]] BasicTypes& a, [[maybe_unused]] BasicTypes& b) {
   swap(a.__fbthrift_field_isTrue, b.__fbthrift_field_isTrue);
   swap(a.__isset, b.__isset);
 }
-
 
 
 } // namespace cpp2

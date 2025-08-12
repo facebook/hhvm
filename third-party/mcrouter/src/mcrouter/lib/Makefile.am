@@ -96,15 +96,17 @@ libmcrouter_a_SOURCES = \
   carbon/Util.h \
   carbon/Variant.h \
   carbon/gen-cpp2/carbon_result_types.cpp \
-  carbon/gen-cpp2/carbon_result_types_compact.cpp \
   carbon/gen-cpp2/carbon_result_types_binary.cpp \
+  carbon/gen-cpp2/carbon_result_types_compact.cpp \
+  carbon/gen-cpp2/carbon_result_types_serialization.cpp \
   carbon/gen-cpp2/carbon_result_types.h \
   carbon/gen-cpp2/carbon_result_types_custom_protocol.h \
   carbon/gen-cpp2/carbon_result_data.cpp \
   carbon/gen-cpp2/carbon_result_data.h \
   carbon/gen-cpp2/carbon_types.cpp \
-  carbon/gen-cpp2/carbon_types_compact.cpp \
   carbon/gen-cpp2/carbon_types_binary.cpp \
+  carbon/gen-cpp2/carbon_types_compact.cpp \
+  carbon/gen-cpp2/carbon_types_serialization.cpp \
   carbon/gen-cpp2/carbon_types.h \
   carbon/gen-cpp2/carbon_types_custom_protocol.h \
   carbon/gen-cpp2/carbon_data.cpp \
@@ -199,8 +201,9 @@ libmcrouter_a_SOURCES = \
   network/gen/MemcacheMessagesThrift.cpp \
   network/gen/MemcacheMessages.h \
   network/gen/gen-cpp2/Common_types.cpp \
-  network/gen/gen-cpp2/Common_types_compact.cpp \
   network/gen/gen-cpp2/Common_types_binary.cpp \
+  network/gen/gen-cpp2/Common_types_compact.cpp \
+  network/gen/gen-cpp2/Common_types_serialization.cpp \
   network/gen/gen-cpp2/Common_types.h \
   network/gen/gen-cpp2/Common_types_custom_protocol.h \
   network/gen/gen-cpp2/Common_data.cpp \
@@ -210,15 +213,17 @@ libmcrouter_a_SOURCES = \
   network/gen/gen-cpp2/MemcacheService_constants.cpp \
   network/gen/gen-cpp2/MemcacheService_constants.h \
   network/gen/gen-cpp2/MemcacheService_types.cpp \
-  network/gen/gen-cpp2/MemcacheService_types_compact.cpp \
   network/gen/gen-cpp2/MemcacheService_types_binary.cpp \
+  network/gen/gen-cpp2/MemcacheService_types_compact.cpp \
+  network/gen/gen-cpp2/MemcacheService_types_serialization.cpp \
   network/gen/gen-cpp2/MemcacheService_types.h \
   network/gen/gen-cpp2/MemcacheService_types_custom_protocol.h \
   network/gen/gen-cpp2/MemcacheService_data.cpp \
   network/gen/gen-cpp2/MemcacheService_data.h \
   network/gen/gen-cpp2/Memcache_types.cpp \
-  network/gen/gen-cpp2/Memcache_types_compact.cpp \
   network/gen/gen-cpp2/Memcache_types_binary.cpp \
+  network/gen/gen-cpp2/Memcache_types_compact.cpp \
+  network/gen/gen-cpp2/Memcache_types_serialization.cpp \
   network/gen/gen-cpp2/Memcache_types.h \
   network/gen/gen-cpp2/Memcache_types_custom_protocol.h \
   network/gen/gen-cpp2/Memcache_data.cpp \

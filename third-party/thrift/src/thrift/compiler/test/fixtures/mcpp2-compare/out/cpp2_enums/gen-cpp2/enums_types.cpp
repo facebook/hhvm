@@ -4,8 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/enums_types.h"
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/enums_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/enums_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -98,30 +97,6 @@ bool TEnumTraits<::facebook::ns::qwerty::AnEnumE>::findValue(std::string_view na
 }} // apache::thrift
 
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::facebook::ns::qwerty::SomeStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::ns::qwerty::SomeStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
-
 
 namespace facebook::ns::qwerty {
 
@@ -138,9 +113,6 @@ SomeStruct::SomeStruct(apache::thrift::FragileConstructor, ::std::int32_t fieldA
     __fbthrift_field_fieldA(std::move(fieldA__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void SomeStruct::__fbthrift_clear() {
   // clear all fields
@@ -178,13 +150,6 @@ void swap([[maybe_unused]] SomeStruct& a, [[maybe_unused]] SomeStruct& b) {
   swap(a.__fbthrift_field_fieldA, b.__fbthrift_field_fieldA);
   swap(a.__isset, b.__isset);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-template void SomeStruct::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
-template uint32_t SomeStruct::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
-template uint32_t SomeStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
-template uint32_t SomeStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
-#endif
 
 
 } // namespace facebook::ns::qwerty

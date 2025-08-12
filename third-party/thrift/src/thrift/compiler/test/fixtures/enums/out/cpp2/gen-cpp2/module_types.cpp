@@ -4,8 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/enums/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/enums/gen-cpp2/module_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/enums/gen-cpp2/module_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -132,30 +131,6 @@ bool TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2>::findValue(std::string
 }} // apache::thrift
 
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::enums::SomeStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::enums::SomeStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
-
 
 namespace test::fixtures::enums {
 
@@ -210,9 +185,6 @@ SomeStruct::SomeStruct(apache::thrift::FragileConstructor, ::test::fixtures::enu
   __isset.set(folly::index_constant<2>(), true);
   __isset.set(folly::index_constant<3>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void SomeStruct::__fbthrift_clear() {
   // clear all fields
@@ -284,32 +256,7 @@ void swap([[maybe_unused]] SomeStruct& a, [[maybe_unused]] SomeStruct& b) {
 }
 
 
-
 } // namespace test::fixtures::enums
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::enums::MyStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::enums::MyStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::enums {
@@ -337,9 +284,6 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::test::fixtures::enums::
   __isset.set(folly::index_constant<2>(), true);
   __isset.set(folly::index_constant<3>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void MyStruct::__fbthrift_clear() {
   // clear all fields
@@ -410,7 +354,6 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   swap(a.__fbthrift_field_me1_t2, b.__fbthrift_field_me1_t2);
   swap(a.__isset, b.__isset);
 }
-
 
 
 } // namespace test::fixtures::enums

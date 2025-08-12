@@ -4,38 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types.h"
-#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "shared";
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::thrift::shared_interactions::DoSomethingResult>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::thrift::shared_interactions::DoSomethingResult>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace thrift::shared_interactions {
@@ -78,9 +53,6 @@ DoSomethingResult::DoSomethingResult(apache::thrift::FragileConstructor, ::std::
   __isset.set(folly::index_constant<1>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void DoSomethingResult::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_s_res = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
@@ -119,7 +91,6 @@ void swap([[maybe_unused]] DoSomethingResult& a, [[maybe_unused]] DoSomethingRes
   swap(a.__fbthrift_field_i_res, b.__fbthrift_field_i_res);
   swap(a.__isset, b.__isset);
 }
-
 
 
 } // namespace thrift::shared_interactions

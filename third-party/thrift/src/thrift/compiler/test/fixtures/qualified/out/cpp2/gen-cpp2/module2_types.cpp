@@ -4,38 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_types.h"
-#include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module2";
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::module2::Struct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::module2::Struct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace module2 {
@@ -70,9 +45,6 @@ Struct::Struct(apache::thrift::FragileConstructor, ::module0::Struct first__arg,
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void Struct::__fbthrift_clear() {
   // clear all fields
@@ -120,7 +92,6 @@ void swap([[maybe_unused]] Struct& a, [[maybe_unused]] Struct& b) {
   swap(a.__isset, b.__isset);
 }
 
-
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         Struct,
@@ -135,30 +106,6 @@ static_assert(
     "inconsistent use of json option");
 
 } // namespace module2
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::module2::BigStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::module2::BigStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace module2 {
@@ -193,9 +140,6 @@ BigStruct::BigStruct(apache::thrift::FragileConstructor, ::module2::Struct s__ar
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void BigStruct::__fbthrift_clear() {
   // clear all fields
@@ -243,7 +187,6 @@ void swap([[maybe_unused]] BigStruct& a, [[maybe_unused]] BigStruct& b) {
   swap(a.__fbthrift_field_id, b.__fbthrift_field_id);
   swap(a.__isset, b.__isset);
 }
-
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<

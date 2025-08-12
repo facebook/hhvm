@@ -4,8 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_types.h"
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -30,30 +29,6 @@ bool TEnumTraits<::a::different::ns::AnEnum>::findValue(std::string_view name, t
 }} // apache::thrift
 
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::a::different::ns::AStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::a::different::ns::AStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
-
 
 namespace a::different::ns {
 
@@ -70,9 +45,6 @@ AStruct::AStruct(apache::thrift::FragileConstructor, ::std::int32_t FieldA__arg)
     __fbthrift_field_FieldA(std::move(FieldA__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void AStruct::__fbthrift_clear() {
   // clear all fields
@@ -111,39 +83,8 @@ void swap([[maybe_unused]] AStruct& a, [[maybe_unused]] AStruct& b) {
   swap(a.__isset, b.__isset);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-template void AStruct::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
-template uint32_t AStruct::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
-template uint32_t AStruct::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
-template uint32_t AStruct::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
-#endif
-
 
 } // namespace a::different::ns
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::a::different::ns::AStructB>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::a::different::ns::AStructB>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace a::different::ns {
@@ -179,9 +120,6 @@ AStructB::AStructB(apache::thrift::FragileConstructor, ::std::shared_ptr<const :
     __fbthrift_field_FieldA(std::move(FieldA__arg)) { 
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void AStructB::__fbthrift_clear() {
   // clear all fields
   if (this->__fbthrift_field_FieldA) this->__fbthrift_field_FieldA = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::a::different::ns::AStruct>>();
@@ -207,13 +145,6 @@ void swap([[maybe_unused]] AStructB& a, [[maybe_unused]] AStructB& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_FieldA, b.__fbthrift_field_FieldA);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-template void AStructB::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
-template uint32_t AStructB::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
-template uint32_t AStructB::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
-template uint32_t AStructB::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
-#endif
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<

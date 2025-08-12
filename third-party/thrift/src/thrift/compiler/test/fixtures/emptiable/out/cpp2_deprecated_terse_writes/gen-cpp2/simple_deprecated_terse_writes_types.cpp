@@ -4,8 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_deprecated_terse_writes_types.h"
-#include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_deprecated_terse_writes_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_deprecated_terse_writes_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -30,30 +29,6 @@ bool TEnumTraits<::apache::thrift::test::MyEnum>::findValue(std::string_view nam
 }} // apache::thrift
 
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::apache::thrift::test::MyStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::apache::thrift::test::MyStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
-
 
 namespace apache::thrift::test {
 
@@ -67,9 +42,6 @@ std::string_view MyStruct::__fbthrift_get_class_name() {
 
 
 MyStruct::MyStruct(apache::thrift::FragileConstructor) {}
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void MyStruct::__fbthrift_clear() {
   // clear all fields
@@ -96,32 +68,7 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
 }
 
 
-
 } // namespace apache::thrift::test
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::apache::thrift::test::EmptiableStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::apache::thrift::test::EmptiableStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace apache::thrift::test {
@@ -218,9 +165,6 @@ EmptiableStruct::EmptiableStruct(apache::thrift::FragileConstructor, bool bool_f
   __isset.set(folly::index_constant<12>(), true);
   __isset.set(folly::index_constant<13>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void EmptiableStruct::__fbthrift_clear() {
   // clear all fields
@@ -392,7 +336,6 @@ void swap([[maybe_unused]] EmptiableStruct& a, [[maybe_unused]] EmptiableStruct&
   swap(a.__isset, b.__isset);
 }
 
-
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         EmptiableStruct,
@@ -401,30 +344,6 @@ static_assert(
     "inconsistent use of json option");
 
 } // namespace apache::thrift::test
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::apache::thrift::test::NotEmptiableStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace apache::thrift::test {
@@ -521,9 +440,6 @@ NotEmptiableStruct::NotEmptiableStruct(apache::thrift::FragileConstructor, bool 
   __isset.set(folly::index_constant<12>(), true);
   __isset.set(folly::index_constant<13>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void NotEmptiableStruct::__fbthrift_clear() {
   // clear all fields
@@ -681,7 +597,6 @@ void swap([[maybe_unused]] NotEmptiableStruct& a, [[maybe_unused]] NotEmptiableS
   swap(a.__fbthrift_field_struct_field, b.__fbthrift_field_struct_field);
   swap(a.__isset, b.__isset);
 }
-
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<

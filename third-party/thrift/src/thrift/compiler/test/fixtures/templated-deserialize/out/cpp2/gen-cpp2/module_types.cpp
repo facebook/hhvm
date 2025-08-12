@@ -4,8 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/templated-deserialize/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/templated-deserialize/gen-cpp2/module_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/templated-deserialize/gen-cpp2/module_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -30,30 +29,6 @@ bool TEnumTraits<::cpp2::MyEnumA>::findValue(std::string_view name, type* out) n
 }} // apache::thrift
 
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::SmallStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::SmallStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
-
 
 namespace cpp2 {
 
@@ -72,9 +47,6 @@ SmallStruct::SmallStruct(apache::thrift::FragileConstructor, bool small_A__arg, 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void SmallStruct::__fbthrift_clear() {
   // clear all fields
@@ -125,32 +97,7 @@ void swap([[maybe_unused]] SmallStruct& a, [[maybe_unused]] SmallStruct& b) {
 }
 
 
-
 } // namespace cpp2
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::containerStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::containerStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -306,9 +253,6 @@ containerStruct::containerStruct(apache::thrift::FragileConstructor, bool fieldA
   __isset.set(folly::index_constant<12>(), true);
   __isset.set(folly::index_constant<13>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void containerStruct::__fbthrift_clear() {
   // clear all fields
@@ -472,7 +416,6 @@ void swap([[maybe_unused]] containerStruct& a, [[maybe_unused]] containerStruct&
   swap(a.__fbthrift_field_fieldX, b.__fbthrift_field_fieldX);
   swap(a.__isset, b.__isset);
 }
-
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<

@@ -4,8 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -29,30 +28,6 @@ bool TEnumTraits<::cpp2::YourEnum>::findValue(std::string_view name, type* out) 
 
 }} // apache::thrift
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::MyStructNestedAnnotation>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::MyStructNestedAnnotation>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -90,9 +65,6 @@ MyStructNestedAnnotation::MyStructNestedAnnotation(apache::thrift::FragileConstr
   __isset.set(folly::index_constant<0>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void MyStructNestedAnnotation::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_name = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
@@ -122,32 +94,7 @@ void swap([[maybe_unused]] MyStructNestedAnnotation& a, [[maybe_unused]] MyStruc
 }
 
 
-
 } // namespace cpp2
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::detail::YourUnion>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::detail::YourUnion>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace apache { namespace thrift {
@@ -232,33 +179,8 @@ void swap(YourUnion& a, YourUnion& b) {
 }
 
 
-
 } // namespace detail
 } // namespace cpp2
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::detail::YourException>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::detail::YourException>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -288,9 +210,6 @@ YourException& YourException::operator=([[maybe_unused]] YourException&& other) 
 
 YourException::YourException(apache::thrift::FragileConstructor) {}
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void YourException::__fbthrift_clear() {
   // clear all fields
 }
@@ -316,33 +235,8 @@ void swap([[maybe_unused]] YourException& a, [[maybe_unused]] YourException& b) 
 }
 
 
-
 } // namespace detail
 } // namespace cpp2
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::detail::YourStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::detail::YourStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -441,9 +335,6 @@ YourStruct::YourStruct(apache::thrift::FragileConstructor, ::std::int64_t majorV
   __isset.set(folly::index_constant<8>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void YourStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_majorVer = ::std::int64_t();
@@ -513,7 +404,6 @@ void swap([[maybe_unused]] YourStruct& a, [[maybe_unused]] YourStruct& b) {
   swap(a.__isset, b.__isset);
 }
 
-
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         YourStruct,
@@ -523,30 +413,6 @@ static_assert(
 
 } // namespace detail
 } // namespace cpp2
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::SecretStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::SecretStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -589,9 +455,6 @@ SecretStruct::SecretStruct(apache::thrift::FragileConstructor, ::std::int64_t id
   __isset.set(folly::index_constant<1>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void SecretStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_id = ::std::int64_t();
@@ -630,7 +493,6 @@ void swap([[maybe_unused]] SecretStruct& a, [[maybe_unused]] SecretStruct& b) {
   swap(a.__fbthrift_field_password, b.__fbthrift_field_password);
   swap(a.__isset, b.__isset);
 }
-
 
 
 } // namespace cpp2

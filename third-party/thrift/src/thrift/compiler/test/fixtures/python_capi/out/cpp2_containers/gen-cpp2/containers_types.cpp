@@ -4,38 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_types.h"
-#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "containers";
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::python_capi::TemplateLists>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::python_capi::TemplateLists>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::python_capi {
@@ -92,9 +67,6 @@ TemplateLists::TemplateLists(apache::thrift::FragileConstructor, std::vector<::s
   __isset.set(folly::index_constant<3>(), true);
   __isset.set(folly::index_constant<4>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void TemplateLists::__fbthrift_clear() {
   // clear all fields
@@ -167,32 +139,7 @@ void swap([[maybe_unused]] TemplateLists& a, [[maybe_unused]] TemplateLists& b) 
 }
 
 
-
 } // namespace test::fixtures::python_capi
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::python_capi::TemplateSets>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::python_capi::TemplateSets>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::python_capi {
@@ -257,9 +204,6 @@ TemplateSets::TemplateSets(apache::thrift::FragileConstructor, std::set<::std::s
   __isset.set(folly::index_constant<5>(), true);
   __isset.set(folly::index_constant<6>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void TemplateSets::__fbthrift_clear() {
   // clear all fields
@@ -358,32 +302,7 @@ void swap([[maybe_unused]] TemplateSets& a, [[maybe_unused]] TemplateSets& b) {
 }
 
 
-
 } // namespace test::fixtures::python_capi
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::python_capi::TemplateMaps>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::python_capi::TemplateMaps>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::python_capi {
@@ -448,9 +367,6 @@ TemplateMaps::TemplateMaps(apache::thrift::FragileConstructor, std::map<::std::s
   __isset.set(folly::index_constant<5>(), true);
   __isset.set(folly::index_constant<6>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void TemplateMaps::__fbthrift_clear() {
   // clear all fields
@@ -549,32 +465,7 @@ void swap([[maybe_unused]] TemplateMaps& a, [[maybe_unused]] TemplateMaps& b) {
 }
 
 
-
 } // namespace test::fixtures::python_capi
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::python_capi::TWrapped>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::python_capi::TWrapped>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::python_capi {
@@ -620,9 +511,6 @@ TWrapped::TWrapped(apache::thrift::FragileConstructor, ::std::string fieldA__arg
   __isset.set(folly::index_constant<1>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void TWrapped::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_fieldA = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
@@ -654,32 +542,7 @@ void swap([[maybe_unused]] TWrapped& a, [[maybe_unused]] TWrapped& b) {
 }
 
 
-
 } // namespace test::fixtures::python_capi
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::python_capi::IndirectionA>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::python_capi::IndirectionA>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::python_capi {
@@ -721,9 +584,6 @@ IndirectionA::IndirectionA(apache::thrift::FragileConstructor, ::test::fixtures:
   __isset.set(folly::index_constant<0>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void IndirectionA::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_lst.clear();
@@ -760,7 +620,6 @@ void swap([[maybe_unused]] IndirectionA& a, [[maybe_unused]] IndirectionA& b) {
   swap(a.__isset, b.__isset);
 }
 
-
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         IndirectionA,
@@ -769,30 +628,6 @@ static_assert(
     "inconsistent use of json option");
 
 } // namespace test::fixtures::python_capi
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::python_capi::IndirectionB>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::python_capi::IndirectionB>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::python_capi {
@@ -834,9 +669,6 @@ IndirectionB::IndirectionB(apache::thrift::FragileConstructor, ::test::fixtures:
   __isset.set(folly::index_constant<0>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void IndirectionB::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_lst.clear();
@@ -873,7 +705,6 @@ void swap([[maybe_unused]] IndirectionB& a, [[maybe_unused]] IndirectionB& b) {
   swap(a.__isset, b.__isset);
 }
 
-
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         IndirectionB,
@@ -882,30 +713,6 @@ static_assert(
     "inconsistent use of json option");
 
 } // namespace test::fixtures::python_capi
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::python_capi::IndirectionC>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::python_capi::IndirectionC>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace test::fixtures::python_capi {
@@ -947,9 +754,6 @@ IndirectionC::IndirectionC(apache::thrift::FragileConstructor, ::test::fixtures:
   __isset.set(folly::index_constant<0>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void IndirectionC::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_lst.clear();
@@ -985,7 +789,6 @@ void swap([[maybe_unused]] IndirectionC& a, [[maybe_unused]] IndirectionC& b) {
   swap(a.__fbthrift_field_lst, b.__fbthrift_field_lst);
   swap(a.__isset, b.__isset);
 }
-
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<

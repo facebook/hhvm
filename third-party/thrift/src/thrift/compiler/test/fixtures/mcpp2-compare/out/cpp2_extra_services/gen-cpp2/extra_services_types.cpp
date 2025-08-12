@@ -4,38 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/extra_services_types.h"
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/extra_services_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/extra_services_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/extra_services_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "extra_services";
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::extra::svc::containerStruct2>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::extra::svc::containerStruct2>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace extra::svc {
@@ -134,9 +109,6 @@ containerStruct2::containerStruct2(apache::thrift::FragileConstructor, bool fiel
   __isset.set(folly::index_constant<7>(), true);
   __isset.set(folly::index_constant<8>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void containerStruct2::__fbthrift_clear() {
   // clear all fields
@@ -276,13 +248,6 @@ void swap([[maybe_unused]] containerStruct2& a, [[maybe_unused]] containerStruct
   swap(a.__fbthrift_field_opt_fieldE, b.__fbthrift_field_opt_fieldE);
   swap(a.__isset, b.__isset);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-template void containerStruct2::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
-template uint32_t containerStruct2::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
-template uint32_t containerStruct2::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
-template uint32_t containerStruct2::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
-#endif
 
 
 } // namespace extra::svc

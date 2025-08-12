@@ -4,38 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/field_interceptor/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/field_interceptor/gen-cpp2/module_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/field_interceptor/gen-cpp2/module_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/field_interceptor/gen-cpp2/module_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::facebook::thrift::test::InterceptedFields>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::InterceptedFields>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace facebook::thrift::test {
@@ -95,9 +70,6 @@ InterceptedFields::InterceptedFields(apache::thrift::FragileConstructor, ::std::
   __isset.set(folly::index_constant<0>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void InterceptedFields::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_access_field = ::std::int32_t();
@@ -135,7 +107,6 @@ void swap([[maybe_unused]] InterceptedFields& a, [[maybe_unused]] InterceptedFie
   swap(a.__fbthrift_field_access_optional_boxed_field, b.__fbthrift_field_access_optional_boxed_field);
   swap(a.__isset, b.__isset);
 }
-
 
 
 } // namespace facebook::thrift::test

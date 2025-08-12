@@ -4,38 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/sink/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/sink/gen-cpp2/module_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/sink/gen-cpp2/module_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/sink/gen-cpp2/module_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::InitialResponse>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::InitialResponse>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -73,9 +48,6 @@ InitialResponse::InitialResponse(apache::thrift::FragileConstructor, ::std::stri
   __isset.set(folly::index_constant<0>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void InitialResponse::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_content = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
@@ -105,32 +77,7 @@ void swap([[maybe_unused]] InitialResponse& a, [[maybe_unused]] InitialResponse&
 }
 
 
-
 } // namespace cpp2
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::FinalResponse>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::FinalResponse>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -168,9 +115,6 @@ FinalResponse::FinalResponse(apache::thrift::FragileConstructor, ::std::string c
   __isset.set(folly::index_constant<0>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void FinalResponse::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_content = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
@@ -200,32 +144,7 @@ void swap([[maybe_unused]] FinalResponse& a, [[maybe_unused]] FinalResponse& b) 
 }
 
 
-
 } // namespace cpp2
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::SinkPayload>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::SinkPayload>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -263,9 +182,6 @@ SinkPayload::SinkPayload(apache::thrift::FragileConstructor, ::std::string conte
   __isset.set(folly::index_constant<0>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void SinkPayload::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_content = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
@@ -295,32 +211,7 @@ void swap([[maybe_unused]] SinkPayload& a, [[maybe_unused]] SinkPayload& b) {
 }
 
 
-
 } // namespace cpp2
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::CompatibleWithKeywordSink>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::CompatibleWithKeywordSink>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -358,9 +249,6 @@ CompatibleWithKeywordSink::CompatibleWithKeywordSink(apache::thrift::FragileCons
   __isset.set(folly::index_constant<0>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void CompatibleWithKeywordSink::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_sink = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
@@ -390,32 +278,7 @@ void swap([[maybe_unused]] CompatibleWithKeywordSink& a, [[maybe_unused]] Compat
 }
 
 
-
 } // namespace cpp2
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::InitialException>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::InitialException>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -453,9 +316,6 @@ InitialException::InitialException(apache::thrift::FragileConstructor, ::std::st
   __isset.set(folly::index_constant<0>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void InitialException::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_reason = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
@@ -485,32 +345,7 @@ void swap([[maybe_unused]] InitialException& a, [[maybe_unused]] InitialExceptio
 }
 
 
-
 } // namespace cpp2
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::SinkException1>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::SinkException1>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -548,9 +383,6 @@ SinkException1::SinkException1(apache::thrift::FragileConstructor, ::std::string
   __isset.set(folly::index_constant<0>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void SinkException1::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_reason = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
@@ -580,32 +412,7 @@ void swap([[maybe_unused]] SinkException1& a, [[maybe_unused]] SinkException1& b
 }
 
 
-
 } // namespace cpp2
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::SinkException2>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::SinkException2>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -644,9 +451,6 @@ SinkException2::SinkException2(apache::thrift::FragileConstructor, ::std::int64_
   __isset.set(folly::index_constant<0>(), true);
 }
 
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
-
 void SinkException2::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_reason = ::std::int64_t();
@@ -683,7 +487,6 @@ void swap([[maybe_unused]] SinkException2& a, [[maybe_unused]] SinkException2& b
   swap(a.__fbthrift_field_reason, b.__fbthrift_field_reason);
   swap(a.__isset, b.__isset);
 }
-
 
 
 } // namespace cpp2

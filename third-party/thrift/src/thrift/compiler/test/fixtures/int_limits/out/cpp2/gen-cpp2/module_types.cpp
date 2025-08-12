@@ -4,38 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/int_limits/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/int_limits/gen-cpp2/module_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/int_limits/gen-cpp2/module_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/int_limits/gen-cpp2/module_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::Limits>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::Limits>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace cpp2 {
@@ -94,9 +69,6 @@ Limits::Limits(apache::thrift::FragileConstructor, ::std::int64_t max_i64_field_
   __isset.set(folly::index_constant<6>(), true);
   __isset.set(folly::index_constant<7>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void Limits::__fbthrift_clear() {
   // clear all fields
@@ -211,7 +183,6 @@ void swap([[maybe_unused]] Limits& a, [[maybe_unused]] Limits& b) {
   swap(a.__fbthrift_field_min_byte_field, b.__fbthrift_field_min_byte_field);
   swap(a.__isset, b.__isset);
 }
-
 
 
 } // namespace cpp2

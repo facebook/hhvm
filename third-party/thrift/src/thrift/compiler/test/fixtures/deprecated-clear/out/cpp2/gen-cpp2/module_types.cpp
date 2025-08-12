@@ -4,8 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "thrift/compiler/test/fixtures/deprecated-clear/gen-cpp2/module_types.h"
-#include "thrift/compiler/test/fixtures/deprecated-clear/gen-cpp2/module_types_custom_protocol.h"
+#include "thrift/compiler/test/fixtures/deprecated-clear/gen-cpp2/module_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
@@ -29,30 +28,6 @@ bool TEnumTraits<::apache::thrift::test::MyEnum>::findValue(std::string_view nam
 
 }} // apache::thrift
 
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::apache::thrift::test::StructWithDefaultStruct>::translateFieldName(
-    std::string_view _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::apache::thrift::test::StructWithDefaultStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-#endif
 
 
 namespace apache::thrift::test {
@@ -150,9 +125,6 @@ StructWithDefaultStruct::StructWithDefaultStruct(apache::thrift::FragileConstruc
   __isset.set(folly::index_constant<11>(), true);
   __isset.set(folly::index_constant<12>(), true);
 }
-
-#ifndef __FBTHRIFT_SEPARATE_SERIALIZATION
-#endif
 
 void StructWithDefaultStruct::__fbthrift_clear() {
   // clear all fields
@@ -301,7 +273,6 @@ void swap([[maybe_unused]] StructWithDefaultStruct& a, [[maybe_unused]] StructWi
   swap(a.__fbthrift_field_map_field, b.__fbthrift_field_map_field);
   swap(a.__isset, b.__isset);
 }
-
 
 
 } // namespace apache::thrift::test

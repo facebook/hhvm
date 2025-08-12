@@ -204,7 +204,7 @@ struct variable_component {
    * For a prototype-qualified lookup, it takes the form "prototype:property".
    * For a raw identifier lookup, it is just "property".
    */
-  const std::string_view as_string() const;
+  const std::string& as_string() const;
 
  private:
   // Store string representation to avoid regenerating repeatedly

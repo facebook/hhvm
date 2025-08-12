@@ -69,7 +69,9 @@ TEST(DslTest, make_named_non_polymorphic_native_handle) {
       std::move(proto_builder).make();
 
   EXPECT_EQ("foo", proto->name());
-  EXPECT_NE(nullptr, proto->find_descriptor("prop"));
+  EXPECT_NE(nullptr, proto->find_descriptor("", "prop"));
+  EXPECT_NE(nullptr, proto->find_descriptor("foo", "prop"));
+  EXPECT_EQ(nullptr, proto->find_descriptor("bar", "prop"));
 }
 
 TEST(DslTest, test_alias_inheritance) {

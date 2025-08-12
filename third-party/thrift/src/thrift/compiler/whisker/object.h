@@ -996,8 +996,15 @@ class prototype<void> {
   /**
    * Tries to look up a descriptor defined in this prototype. If there is no
    * entry for an identifier in this map, this should return nullptr.
+   * The optional qualifier parameter can be used to access parent defined
+   * members instead of overriding child members.
+   * If the qualifier argument is empty, the first descriptor (if any) matching
+   * the property name is returned.
+   * If the qualifier argument is non-empty, the descriptor (if any) defined on
+   * the first prototype matching the qualifier or its parents is returned.
    */
-  virtual const descriptor* find_descriptor(std::string_view) const = 0;
+  virtual const descriptor* find_descriptor(
+      std::string_view qualifier, std::string_view property) const = 0;
   /**
    * Returns the names of all descriptors defined in this prototype.
    */
@@ -1047,15 +1054,29 @@ template <typename T = void>
 class basic_prototype : public prototype<T> {
  public:
   const prototype<>::descriptor* find_descriptor(
-      std::string_view name) const override {
-    if (auto found = descriptors_.find(name); found != descriptors_.end()) {
+      std::string_view qualifier, std::string_view property) const override {
+    // If not found locally, recurse through the prototype chain until the first
+    // matching descriptor is found. This is similar to JavaScript:
+    //   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Inheritance_and_the_prototype_chain
+
+    if (!qualifier.empty() && qualifier != name_) {
+      // Explicit qualifier requested which doesn't match this prototype
+      // Try parents if available - a parent may match the qualifier
+      return parent_ == nullptr ? nullptr
+                                : parent_->find_descriptor(qualifier, property);
+    }
+
+    // No explicit qualifier requested, or this prototype matches the qualifier
+    if (auto found = descriptors_.find(property); found != descriptors_.end()) {
+      // Found on this prototype
       return &found->second;
     }
 
-    // Recurse through the prototype chain until the first matching descriptor
-    // is found. This is similar to JavaScript:
-    //   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Inheritance_and_the_prototype_chain
-    return parent_ == nullptr ? nullptr : parent_->find_descriptor(name);
+    // Not found locally, but qualifier has already matched. Try parents
+    // regardless of qualifier, since a matching child is inheriting the
+    // property
+    return parent_ == nullptr ? nullptr
+                              : parent_->find_descriptor("", property);
   }
 
   std::set<std::string> keys() const override {
@@ -1420,8 +1441,8 @@ class prototype_database {
       explicit lazy_prototype(const prototype_database& db) : db_(db) {}
 
       const prototype<>::descriptor* find_descriptor(
-          std::string_view name) const final {
-        return this->resolve()->find_descriptor(name);
+          std::string_view qualifier, std::string_view property) const final {
+        return this->resolve()->find_descriptor(qualifier, property);
       }
       std::set<std::string> keys() const final {
         return this->resolve()->keys();

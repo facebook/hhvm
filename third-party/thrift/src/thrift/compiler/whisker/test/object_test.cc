@@ -215,6 +215,100 @@ TEST(ObjectTest, map_array_equality) {
   EXPECT_NE(array::ptr(), o2);
 }
 
+TEST(ObjectTest, prototype_find_descriptor) {
+  auto parent = prototype<>::from(
+      {{"parent_prop", w::true_}, {"overridden", w::string("base")}},
+      nullptr,
+      "parent");
+  auto child = prototype<>::from(
+      {{"child_prop", w::true_}, {"overridden", w::string("inherited")}},
+      parent,
+      "child");
+
+  // Unwrap a descriptor to a fixed value, or w::null
+  const auto unwrap_descriptor =
+      [](const prototype<>::descriptor* descriptor) -> object {
+    return descriptor == nullptr
+        ? w::null
+        : detail::variant_match(
+              *descriptor,
+              [](const prototype<>::fixed_object& fixed) -> object {
+                return fixed.value;
+              },
+              [](const auto&) -> object { return w::null; });
+  };
+
+  // Parent
+  EXPECT_EQ(
+      w::true_, unwrap_descriptor(parent->find_descriptor("", "parent_prop")))
+      << "parent_prop should be accessible with no name qualifier";
+  EXPECT_EQ(
+      w::true_,
+      unwrap_descriptor(parent->find_descriptor("parent", "parent_prop")))
+      << "parent_prop should be accessible with parent's name qualifier";
+
+  EXPECT_EQ(
+      w::string("base"),
+      unwrap_descriptor(parent->find_descriptor("", "overridden")))
+      << "overridden should be accessible with no name qualifier";
+  EXPECT_EQ(
+      w::string("base"),
+      unwrap_descriptor(parent->find_descriptor("parent", "overridden")))
+      << "overridden should be accessible with parent's name qualifier";
+
+  EXPECT_EQ(
+      w::null, unwrap_descriptor(parent->find_descriptor("", "child_prop")))
+      << "Non-existent property child_prop should not be accessible on parent";
+  EXPECT_EQ(
+      w::null,
+      unwrap_descriptor(parent->find_descriptor("child", "parent_prop")))
+      << "Child's name qualifier should not be accessible directly on parent";
+
+  // Child
+  EXPECT_EQ(
+      w::true_, unwrap_descriptor(child->find_descriptor("", "parent_prop")))
+      << "parent_prop should be accessible on child without name qualifier";
+  EXPECT_EQ(
+      w::true_,
+      unwrap_descriptor(child->find_descriptor("child", "parent_prop")))
+      << "parent_prop should be accessible with child's name qualifier";
+  EXPECT_EQ(
+      w::true_,
+      unwrap_descriptor(child->find_descriptor("parent", "parent_prop")))
+      << "parent_prop should be accessible with parent's name qualifier";
+
+  EXPECT_EQ(
+      w::true_, unwrap_descriptor(child->find_descriptor("", "child_prop")))
+      << "child_prop should be accessible on child";
+  EXPECT_EQ(
+      w::true_,
+      unwrap_descriptor(child->find_descriptor("child", "child_prop")))
+      << "child_prop should be accessible with child's name qualifier";
+
+  EXPECT_EQ(w::null, unwrap_descriptor(child->find_descriptor("", "bar")))
+      << "Non-existent property bar should return a null descriptor";
+
+  // By using "parent" as a name qualifier, child is being up-cast to parent, so
+  // "child_prop" is not accessible
+  EXPECT_EQ(
+      w::null,
+      unwrap_descriptor(child->find_descriptor("parent", "child_prop")))
+      << "child_prop should not be accessible with parent name qualifier";
+
+  EXPECT_EQ(
+      w::string("inherited"),
+      unwrap_descriptor(child->find_descriptor("", "overridden")))
+      << "overridden with no name qualifier should return the child's value";
+  EXPECT_EQ(
+      w::string("inherited"),
+      unwrap_descriptor(child->find_descriptor("child", "overridden")))
+      << "overridden with child's name qualifier should return the child's value";
+  EXPECT_EQ(
+      w::string("base"),
+      unwrap_descriptor(child->find_descriptor("parent", "overridden")))
+      << "overridden with parent's name qualifier should return the parent's value";
+}
+
 TEST(ObjectTest, copy) {
   object o1 = w::array(
       {w::i64(1),

@@ -64,7 +64,7 @@ variable_component::variable_component(
       : property.name;
 }
 
-const std::string_view variable_component::as_string() const {
+const std::string& variable_component::as_string() const {
   return as_string_;
 }
 
@@ -74,9 +74,7 @@ std::string variable_lookup::chain_string() const {
       [](this_ref) -> std::string { return "this"; },
       [](const std::vector<variable_component>& ids) -> std::string {
         return to_joined_string(
-            ids,
-            '.',
-            [](const variable_component& id) -> const std::string_view {
+            ids, '.', [](const variable_component& id) -> const std::string& {
               return id.as_string();
             });
       });

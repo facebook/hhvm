@@ -85,8 +85,10 @@ std::optional<object> find_property(
       },
       [](const native_function::ptr&) -> result { return std::nullopt; },
       [&](const native_handle<>& h) -> result {
-        if (const auto* descriptor =
-                h.proto()->find_descriptor(component.property.name)) {
+        if (const auto* descriptor = h.proto()->find_descriptor(
+                component.prototype.has_value() ? component.prototype->name
+                                                : "",
+                component.property.name)) {
           return detail::variant_match(
               *descriptor,
               [&](const prototype<>::property& prop) -> object {
@@ -200,9 +202,7 @@ eval_context::look_up_object(const ast::variable_lookup& lookup) {
               begin,
               end,
               std::back_inserter(result),
-              [](const auto& component) {
-                return std::string{component.as_string()};
-              });
+              [](const auto& component) { return component.as_string(); });
           return result;
         };
 
@@ -216,7 +216,7 @@ eval_context::look_up_object(const ast::variable_lookup& lookup) {
             }
           } catch (const eval_error& err) {
             return unexpected(eval_scope_lookup_error(
-                path.front().property.name,
+                path.front().as_string(),
                 make_searched_scopes(),
                 err.what() /* cause */));
           }
@@ -224,7 +224,7 @@ eval_context::look_up_object(const ast::variable_lookup& lookup) {
 
         if (!current.has_value()) {
           return unexpected(eval_scope_lookup_error(
-              path.front().property.name, make_searched_scopes()));
+              path.front().as_string(), make_searched_scopes()));
         }
         object parent = whisker::make::null;
 
@@ -237,7 +237,7 @@ eval_context::look_up_object(const ast::variable_lookup& lookup) {
               return unexpected(eval_property_lookup_error(
                   *current, /* missing_from */
                   make_success_path(path.begin(), component),
-                  component->property.name /* missing_name */));
+                  component->as_string() /* missing_name */));
             }
             parent = *current;
             current = next;
@@ -245,7 +245,7 @@ eval_context::look_up_object(const ast::variable_lookup& lookup) {
             return unexpected(eval_property_lookup_error(
                 *current, /* missing_from */
                 make_success_path(path.begin(), component),
-                component->property.name /* missing_name */,
+                component->as_string() /* missing_name */,
                 err.what() /* cause */));
           }
         }

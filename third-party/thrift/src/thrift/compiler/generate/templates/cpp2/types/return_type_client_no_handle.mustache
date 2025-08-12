@@ -14,32 +14,28 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#function:stream?}}{{!
-  }}{{#function:stream_has_first_response?}}apache::thrift::ResponseAndClientBufferedStream<{{!
-  }}{{#function:stream_first_response_type}}{{type:cpp_type}}{{/function:stream_first_response_type}},{{!
-  }}{{#function:stream_elem_type}}{{type:cpp_type}}{{/function:stream_elem_type}}>{{!
-  }}{{/function:stream_has_first_response?}}{{!
-  }}{{^function:stream_has_first_response?}}apache::thrift::ClientBufferedStream<{{!
-  }}{{#function:stream_elem_type}}{{type:cpp_type}}{{/function:stream_elem_type}}>{{!
-  }}{{/function:stream_has_first_response?}}{{!
-}}{{/function:stream?}}{{!
-
-}}{{^function:stream?}}{{!
-  }}{{#function:sink?}}{{!
-    }}{{#function:sink_has_first_response?}}{{!
-      }}apache::thrift::ResponseAndClientSink<{{!
-      }}{{#function:sink_first_response_type}}{{type:cpp_type}}{{/function:sink_first_response_type}}, {{!
-      }}{{#function:sink_elem_type}}{{type:cpp_type}}{{/function:sink_elem_type}}, {{!
-      }}{{#function:sink_final_response_type}}{{type:cpp_type}}{{/function:sink_final_response_type}}>{{!
-    }}{{/function:sink_has_first_response?}}{{!
-
-    }}{{^function:sink_has_first_response?}}{{!
-      }}apache::thrift::ClientSink<{{!
-      }}{{#function:sink_elem_type}}{{type:cpp_type}}{{/function:sink_elem_type}}, {{!
-      }}{{#function:sink_final_response_type}}{{type:cpp_type}}{{/function:sink_final_response_type}}>{{!
-    }}{{/function:sink_has_first_response?}}{{!
-  }}{{/function:sink?}}{{!
-  }}{{^function:sink?}}{{!
-    }}{{function:cpp_return_type}}{{!
-  }}{{/function:sink?}}{{!
-}}{{/function:stream?}}
+}}
+{{#pragma ignore-newlines}}
+{{#if function:stream?}}
+  {{#if function:stream_has_first_response?}}
+apache::thrift::ResponseAndClientBufferedStream<
+{{#function:stream_first_response_type}}{{type:cpp_type}}{{/function:stream_first_response_type}},
+{{#function:stream_elem_type}}{{type:cpp_type}}{{/function:stream_elem_type}}>
+  {{#else}}
+apache::thrift::ClientBufferedStream<
+{{#function:stream_elem_type}}{{type:cpp_type}}{{/function:stream_elem_type}}>
+  {{/if function:stream_has_first_response?}}
+{{#else if function:sink?}}
+  {{#if function:sink_has_first_response?}}
+apache::thrift::ResponseAndClientSink<
+{{#function:sink_first_response_type}}{{type:cpp_type}}{{/function:sink_first_response_type}}, {{!}}
+{{#function:sink_elem_type}}{{type:cpp_type}}{{/function:sink_elem_type}}, {{!}}
+{{#function:sink_final_response_type}}{{type:cpp_type}}{{/function:sink_final_response_type}}>
+  {{#else}}
+apache::thrift::ClientSink<
+{{#function:sink_elem_type}}{{type:cpp_type}}{{/function:sink_elem_type}}, {{!}}
+{{#function:sink_final_response_type}}{{type:cpp_type}}{{/function:sink_final_response_type}}>
+  {{/if function:sink_has_first_response?}}
+{{#else}}
+{{function:cpp_return_type}}
+{{/if function:stream?}}

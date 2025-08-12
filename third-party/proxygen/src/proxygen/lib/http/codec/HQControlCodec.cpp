@@ -209,7 +209,6 @@ size_t HQControlCodec::generateGoaway(
   auto writeRes = hq::writeGoaway(writeBuf, minUnseenId);
   if (writeRes.hasError()) {
     LOG(FATAL) << "error writing goaway with minUnseenId=" << minUnseenId;
-    return 0;
   }
   sentGoaway_ = true;
   return *writeRes;
@@ -245,7 +244,6 @@ size_t HQControlCodec::generateSettings(folly::IOBufQueue& writeBuf) {
   auto writeRes = writeSettings(writeBuf, settings);
   if (writeRes.hasError()) {
     LOG(FATAL) << "error writing settings frame";
-    return 0;
   }
   return *writeRes;
 }

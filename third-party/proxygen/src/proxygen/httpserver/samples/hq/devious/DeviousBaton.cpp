@@ -72,7 +72,6 @@ folly::Expected<folly::Unit, uint16_t> DeviousBaton::onRequest(
     LOG(ERROR) << "Invalid query parameters: " << ex.what();
     return folly::makeUnexpected(uint16_t(404));
   }
-  return folly::makeUnexpected(uint16_t(500));
 }
 
 void DeviousBaton::start() {

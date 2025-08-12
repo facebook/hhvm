@@ -28,7 +28,6 @@ CLANG_LAZY_INIT_TEST static const std::string hq = "hq";
 CLANG_LAZY_INIT_TEST static const std::string h3 = "h3";
 CLANG_LAZY_INIT_TEST static const std::string http_binary = "bhttp";
 CLANG_LAZY_INIT_TEST static const std::string tunnel_lite = "lite";
-CLANG_LAZY_INIT_TEST static const std::string empty;
 } // namespace
 
 extern CodecProtocol getCodecProtocolFromStr(folly::StringPiece protocolStr) {
@@ -67,7 +66,6 @@ extern const std::string& getCodecProtocolString(CodecProtocol proto) {
       return tunnel_lite;
   }
   LOG(FATAL) << "Unreachable";
-  return empty;
 }
 
 extern bool isValidCodecProtocolStr(folly::StringPiece protocolStr) {

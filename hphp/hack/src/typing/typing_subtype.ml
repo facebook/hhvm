@@ -6460,11 +6460,7 @@ end = struct
     | (r, Tprim Tnull) ->
       let pos = get_pos ty_sub in
       if can_index.ci_lhs_of_null_coalesce then
-        simplify_default
-          ~subtype_env
-          (MakeType.null (Reason.idx_string_from_decl pos))
-          can_index.ci_val
-          env
+        simplify_val (MakeType.null (Reason.idx_string_from_decl pos)) env
       else
         invalid
           ~fail:
@@ -6542,17 +6538,32 @@ end = struct
           rhs
           env
       | _ ->
-        Common.simplify_intersection_l
-          ~subtype_env
-          ~this_ty
-          ~fail
-          ~mk_prop
-          ~update_reason:
-            (Typing_env.update_reason ~f:(fun r_sub_prj ->
-                 Typing_reason.prj_inter_sub ~sub:r_sub ~sub_prj:r_sub_prj))
-          (sub_supportdyn, ty_subs)
-          rhs
-          env)
+        let (env, res) =
+          Typing_utils.run_on_intersection env ty_subs ~f:(fun env ty_sub ->
+              let (env, val_ty) =
+                Env.fresh_type_invariant env can_index.ci_array_pos
+              in
+              let (env, stp) =
+                simplify
+                  ~subtype_env
+                  ~this_ty
+                  ~lhs:{ sub_supportdyn; ty_sub }
+                  ~rhs:
+                    {
+                      reason_super;
+                      can_index = { can_index with ci_val = val_ty };
+                    }
+                  env
+              in
+              Option.iter
+                ~f:(Option.iter ~f:(Typing_error_utils.add_typing_error ~env))
+                (TL.get_error_if_unsat stp);
+              (env, (val_ty, stp)))
+        in
+        let (tys, stps) = List.unzip res in
+        let (env, ty) = Typing_intersection.intersect_list env r_sub tys in
+        let (env, sfv) = simplify_val ty env in
+        (env, List.fold_left stps ~init:sfv ~f:TL.conj))
     | (_, Tclass ((_, id), _, tup)) when String.equal id SN.Collections.cPair ->
       do_tuple_basic tup
     | (_, Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } }) ->
@@ -6631,6 +6642,7 @@ end = struct
         (sub_supportdyn, r_sub, dep_ty, ty_inner)
         rhs
         env
+    | (_, Tany _) -> simplify_val ty_sub env
     | _ -> invalid ~fail env
 end
 

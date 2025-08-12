@@ -1759,7 +1759,7 @@ class AllowUnsafeOptionalCustomDefaultValue implements \IThriftSyncStruct, \IThr
  * 
  * This annotation is merely introduced to allow existing use cases to be
  * grandfathered into the new compiler validation logic, which will reject
- * unoin fields with custom default values unless this annotation is
+ * union fields with custom default values unless this annotation is
  * specified.
  * 
  * This annotation MUST NOT be applied to a field that doesn't have a custom
@@ -1807,6 +1807,85 @@ class AllowUnsafeUnionFieldCustomDefaultValue implements \IThriftSyncStruct, \IT
     return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "thrift.AllowUnsafeUnionFieldCustomDefaultValue",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+/**
+ * Allows the target field of a struct or exception to be marked "required".
+ * 
+ * Use of this annotation is strongly DISCOURAGED and almost certainly in
+ * unexpected behavior. Indeed, the "required" field qualifier has been
+ * deprecated since 2018, and the behavior in generated code is inconsistent
+ * (most notably, it does NOT enforce any expectation on user code in C++ since
+ * 2021).
+ * 
+ * This annotation is merely introduced to allow existing use cases to be
+ * grandfathered into the new compiler validation logic, which will otherwise
+ * reject any "required" field.
+ *
+ * Original thrift struct:-
+ * AllowUnsafeRequiredFieldQualifier
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/AllowUnsafeRequiredFieldQualifier'))>>
+class AllowUnsafeRequiredFieldQualifier implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public static function fromMap_DEPRECATED(@KeyedContainer<string, mixed> $map)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'AllowUnsafeRequiredFieldQualifier';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "thrift.AllowUnsafeRequiredFieldQualifier",
         "is_union" => false,
       )
     );

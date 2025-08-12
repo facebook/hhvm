@@ -520,10 +520,27 @@
             "value" : {}
           }
         },
-        "docstring" : "Allows the target field of a union to have a custom default value specified\nin IDL.\n\nUse of this annotation is strongly DISCOURAGED, for reasons similar to\n`AllowUnsafeOptionalCustomDefaultValue` above, except that default values\nfor union fields make even less sense (imagine having multiple union fields\nwith custom default values!).\n\nThis annotation is merely introduced to allow existing use cases to be\ngrandfathered into the new compiler validation logic, which will reject\nunoin fields with custom default values unless this annotation is\nspecified.\n\nThis annotation MUST NOT be applied to a field that doesn't have a custom\ndefault value, or that is not in a union.\n",
+        "docstring" : "Allows the target field of a union to have a custom default value specified\nin IDL.\n\nUse of this annotation is strongly DISCOURAGED, for reasons similar to\n`AllowUnsafeOptionalCustomDefaultValue` above, except that default values\nfor union fields make even less sense (imagine having multiple union fields\nwith custom default values!).\n\nThis annotation is merely introduced to allow existing use cases to be\ngrandfathered into the new compiler validation logic, which will reject\nunion fields with custom default values unless this annotation is\nspecified.\n\nThis annotation MUST NOT be applied to a field that doesn't have a custom\ndefault value, or that is not in a union.\n",
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 329
+      },
+      "AllowUnsafeRequiredFieldQualifier" : {
+        "name" : "AllowUnsafeRequiredFieldQualifier",
+        "structured_annotations": {
+          "scope.Field" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Field",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
+        },
+        "docstring" : "Allows the target field of a struct or exception to be marked \"required\".\n\nUse of this annotation is strongly DISCOURAGED and almost certainly in\nunexpected behavior. Indeed, the \"required\" field qualifier has been\ndeprecated since 2018, and the behavior in generated code is inconsistent\n(most notably, it does NOT enforce any expectation on user code in C++ since\n2021).\n\nThis annotation is merely introduced to allow existing use cases to be\ngrandfathered into the new compiler validation logic, which will otherwise\nreject any \"required\" field.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 345
       }
   },
   "source_path" : "thrift/annotation/thrift",

@@ -34,7 +34,7 @@ import com.facebook.thrift.protocol.*;
  * 
  * This annotation is merely introduced to allow existing use cases to be
  * grandfathered into the new compiler validation logic, which will reject
- * unoin fields with custom default values unless this annotation is
+ * union fields with custom default values unless this annotation is
  * specified.
  * 
  * This annotation MUST NOT be applied to a field that doesn't have a custom

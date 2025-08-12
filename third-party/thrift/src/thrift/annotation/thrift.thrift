@@ -320,7 +320,7 @@ struct AllowUnsafeOptionalCustomDefaultValue {}
  *
  * This annotation is merely introduced to allow existing use cases to be
  * grandfathered into the new compiler validation logic, which will reject
- * unoin fields with custom default values unless this annotation is
+ * union fields with custom default values unless this annotation is
  * specified.
  *
  * This annotation MUST NOT be applied to a field that doesn't have a custom
@@ -328,3 +328,19 @@ struct AllowUnsafeOptionalCustomDefaultValue {}
  */
 @scope.Field
 struct AllowUnsafeUnionFieldCustomDefaultValue {}
+
+/**
+ * Allows the target field of a struct or exception to be marked "required".
+ *
+ * Use of this annotation is strongly DISCOURAGED and almost certainly in
+ * unexpected behavior. Indeed, the "required" field qualifier has been
+ * deprecated since 2018, and the behavior in generated code is inconsistent
+ * (most notably, it does NOT enforce any expectation on user code in C++ since
+ * 2021).
+ *
+ * This annotation is merely introduced to allow existing use cases to be
+ * grandfathered into the new compiler validation logic, which will otherwise
+ * reject any "required" field.
+ */
+@scope.Field
+struct AllowUnsafeRequiredFieldQualifier {}

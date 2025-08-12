@@ -542,6 +542,27 @@
           "column" : 50
         }
       }
+    },
+    "AllowUnsafeRequiredFieldQualifier" : {
+      "lineno" : 345,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Field" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 345,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 346,
+          "column" : 44
+        }
+      }
     }
   }
 }

@@ -30,5 +30,5 @@ def write_file(path, content):
         f.write(content)
 
 
-def run_binary(build_rule, path):
-    subprocess.check_call([build_rule, path])
+def run_binary(build_rule, path, *args):
+    subprocess.check_call([build_rule, path, *args])

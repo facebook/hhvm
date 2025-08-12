@@ -209,9 +209,9 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
           std::move(*field.identity()),
           *field.presence(),
           typeSystem->typeOf(*field.type()),
-          field.customDefaultValue().has_value()
+          field.customDefaultPartialRecord().has_value()
               ? std::optional{SerializableRecord::fromThrift(
-                    std::move(*field.customDefaultValue()))}
+                    std::move(*field.customDefaultPartialRecord()))}
               : std::nullopt,
           makeAnnots(std::move(*field.annotations())));
     }
@@ -477,7 +477,8 @@ TypeSystemBuilder::DefinitionHelper::Field(
   def.presence() = presence;
   def.type() = type;
   if (customDefault.has_value()) {
-    def.customDefaultValue() = SerializableRecord::toThrift(*customDefault);
+    def.customDefaultPartialRecord() =
+        SerializableRecord::toThrift(*customDefault);
   }
   def.annotations() = detail::toRawAnnotations(annotations);
   return def;

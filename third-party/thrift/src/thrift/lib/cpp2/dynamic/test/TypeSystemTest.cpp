@@ -430,13 +430,13 @@ TEST(TypeSystemTest, CustomDefaultFieldValues) {
   EXPECT_EQ(
       structWithDefaultsDef.structDef()
           ->fields()[0]
-          .customDefaultValue()
+          .customDefaultPartialRecord()
           ->getType(),
       SerializableRecordUnion::Type::int32Datum);
   EXPECT_EQ(
       structWithDefaultsDef.structDef()
           ->fields()[0]
-          .customDefaultValue()
+          .customDefaultPartialRecord()
           ->int32Datum(),
       42);
 }

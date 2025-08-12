@@ -455,7 +455,7 @@ std::vector<SerializableFieldDefinition> toSerializableField(
     fieldDef.presence() = field.presence();
     fieldDef.type() = field.type().id();
     if (const auto* customDefault = field.customDefault()) {
-      fieldDef.customDefaultValue() =
+      fieldDef.customDefaultPartialRecord() =
           SerializableRecord::toThrift(*customDefault);
     }
     fieldDef.annotations() = detail::toRawAnnotations(field.annotations());

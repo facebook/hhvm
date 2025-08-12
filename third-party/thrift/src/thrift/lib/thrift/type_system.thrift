@@ -66,7 +66,12 @@ struct SerializableFieldDefinition {
   1: FieldIdentity identity;
   2: PresenceQualifier presence;
   3: type_id.TypeId type;
-  4: optional record.SerializableRecord customDefaultValue;
+  /**
+   * If present, the field has a custom default value specified.
+   *
+   * The partial record must be embeddable to this type system for the corresponding field type.
+   */
+  4: optional record.SerializableRecord customDefaultPartialRecord;
   /**
    * The uri key must resolve to struct definition, and the record value must be
    * valid for the specified uri key.

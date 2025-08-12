@@ -849,20 +849,20 @@ class FieldDefinition final : folly::MoveOnly {
       FieldIdentity identity,
       PresenceQualifier presence,
       TypeRef type,
-      std::optional<SerializableRecord> customDefaultValue,
+      std::optional<SerializableRecord> customDefaultPartialRecord,
       AnnotationsMap annotations)
       : identity_(std::move(identity)),
         presence_(presence),
         type_(std::move(type)),
-        customDefaultValue_(std::move(customDefaultValue)),
+        customDefaultPartialRecord_(std::move(customDefaultPartialRecord)),
         annotations_(std::move(annotations)) {}
 
   const FieldIdentity& identity() const { return identity_; }
   PresenceQualifier presence() const { return presence_; }
   const TypeRef& type() const { return type_; }
   const SerializableRecord* FOLLY_NULLABLE customDefault() const {
-    return customDefaultValue_.has_value()
-        ? std::addressof(*customDefaultValue_)
+    return customDefaultPartialRecord_.has_value()
+        ? std::addressof(*customDefaultPartialRecord_)
         : nullptr;
   }
 
@@ -876,7 +876,7 @@ class FieldDefinition final : folly::MoveOnly {
   FieldIdentity identity_;
   PresenceQualifier presence_;
   TypeRef type_;
-  std::optional<SerializableRecord> customDefaultValue_;
+  std::optional<SerializableRecord> customDefaultPartialRecord_;
   AnnotationsMap annotations_;
 };
 

@@ -590,7 +590,7 @@ using MutableSetTypeInfo = SetTypeInfoImpl<MutableSetHandler, false>;
 size_t writeMapSorted(
     const void* context,
     const void* object,
-    PyObject* (*toItems)(PyObject* dict),
+    UniquePyObjectPtr (*toItemList)(PyObject* dict),
     size_t (*writer)(
         const void* context, const void* keyElem, const void* valueElem));
 
@@ -645,7 +645,7 @@ class MapTypeInfoImpl final : public MapTypeInfoBase {
       size_t (*writer)(
           const void* context, const void* keyElem, const void* valueElem)) {
     if (UNLIKELY(protocolSortKeys) || KeySorted) {
-      return writeMapSorted(context, object, Handler::toItems, writer);
+      return writeMapSorted(context, object, Handler::toItemList, writer);
     }
     return Handler::writeUnsorted(context, object, writer);
   }
@@ -702,7 +702,15 @@ class ImmutableMapHandler {
   // Since immutable map representation is tuple, this is a no-op.
   // Since maps can't have duplicate keys, the value (second value in tuple)
   // will never be used for comparison, only the first value of each.
-  static PyObject* toItems(PyObject* dictTuple) { return dictTuple; }
+  static UniquePyObjectPtr toItemList(PyObject* dictTuple) {
+    // copy the tuple of key-value pairs into list of key-value pairs
+    PyObject* list = PySequence_List(dictTuple);
+    if (!list) {
+      THRIFT_PY3_CHECK_ERROR();
+    }
+    // the UniquePyObjectPtr will free the list when done
+    return UniquePyObjectPtr(list);
+  }
 
   static void* clear(void* object) { return setContainer(object); }
 
@@ -734,13 +742,13 @@ class MutableMapHandler {
     return PyDict_Size(const_cast<PyObject*>(object));
   }
 
-  // Result is used by writeMapSorted as input to PySequence_List
-  static PyObject* toItems(PyObject* dict) {
-    PyObject* keys = PyDict_Items(dict);
-    if (keys == nullptr) {
+  // Returns sortable list of key-value pairs from dict
+  static UniquePyObjectPtr toItemList(PyObject* dict) {
+    PyObject* itemList = PyDict_Items(dict);
+    if (itemList == nullptr) {
       THRIFT_PY3_CHECK_ERROR();
     }
-    return keys;
+    return UniquePyObjectPtr(itemList);
   }
 
   static void* clear(void* objectPtr) { return setMutableMap(objectPtr); }

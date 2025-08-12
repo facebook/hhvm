@@ -1623,23 +1623,19 @@ void ImmutableMapHandler::read(
 size_t writeMapSorted(
     const void* context,
     const void* object,
-    PyObject* (*toItems)(PyObject* dict_),
+    UniquePyObjectPtr (*toItemList)(PyObject* dict_),
     size_t (*writer)(
         const void* context, const void* keyElem, const void* valueElem)) {
   PyObject* dict = const_cast<PyObject*>(toPyObject(object));
-  PyObject* keys = toItems(dict);
-  UniquePyObjectPtr listPtr = UniquePyObjectPtr{PySequence_List(keys)};
-  if (!listPtr) {
-    THRIFT_PY3_CHECK_ERROR();
-  }
-  if (PyList_Sort(listPtr.get()) == -1) {
+  UniquePyObjectPtr itemList = toItemList(dict);
+  if (PyList_Sort(itemList.get()) == -1) {
     THRIFT_PY3_CHECK_ERROR();
   }
 
   size_t written = 0;
-  const Py_ssize_t size = PyList_Size(listPtr.get());
+  const Py_ssize_t size = PyList_Size(itemList.get());
   for (std::uint32_t i = 0; i < size; ++i) {
-    PyObject* pair = PyList_GET_ITEM(listPtr.get(), i);
+    PyObject* pair = PyList_GET_ITEM(itemList.get(), i);
     PyObject* key = PyTuple_GET_ITEM(pair, 0);
     PyObject* value = PyTuple_GET_ITEM(pair, 1);
     written += writer(context, &key, &value);

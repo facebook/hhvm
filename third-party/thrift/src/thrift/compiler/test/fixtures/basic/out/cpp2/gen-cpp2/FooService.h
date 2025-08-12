@@ -103,14 +103,42 @@ class FooServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcesso
  private:
   static const FooServiceAsyncProcessor::ProcessMap kOwnProcessMap_;
  private:
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'simple_rpc'
+  //
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_simple_rpc(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_simple_rpc(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_simple_rpc(apache::thrift::ServerRequest&& serverRequest);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::SerializedResponse return_simple_rpc(apache::thrift::ContextStack* ctx);
+  static apache::thrift::SerializedResponse return_simple_rpc(
+      apache::thrift::ContextStack* ctx);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_simple_rpc(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_simple_rpc(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'simple_rpc'
+  //
+
+  //
+  // End of Service Methods
+  //
  public:
   FooServiceAsyncProcessor(::apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>* iface) :
       iface_(iface) {}

@@ -136,25 +136,89 @@ class GoodServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   static const GoodServiceAsyncProcessor::ProcessMap kOwnProcessMap_;
   static const GoodServiceAsyncProcessor::InteractionConstructorMap interactionConstructorMap_;
  private:
-  std::unique_ptr<apache::thrift::Tile> createBadInteraction() {
-    return iface_->createBadInteraction();
-  }
+  //
+  // Service Methods
+  //
+
+ std::unique_ptr<apache::thrift::Tile> createBadInteraction() {
+   return iface_->createBadInteraction();
+ }
+  //
+  // End of Service Methods
+  //
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'bar'
+  //
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_bar(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_bar(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_bar(apache::thrift::ServerRequest&& serverRequest);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::SerializedResponse return_bar(apache::thrift::ContextStack* ctx, ::std::int32_t const& _return);
+  static apache::thrift::SerializedResponse return_bar(
+      apache::thrift::ContextStack* ctx,
+      ::std::int32_t const& _return);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_bar(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_bar(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'bar'
+  //
+
+  //
+  // End of Service Methods
+  //
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'foo'
+  //
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_BadInteraction_foo(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_BadInteraction_foo(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_BadInteraction_foo(apache::thrift::ServerRequest&& serverRequest);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::SerializedResponse return_BadInteraction_foo(apache::thrift::ContextStack* ctx);
+  static apache::thrift::SerializedResponse return_BadInteraction_foo(
+      apache::thrift::ContextStack* ctx);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_BadInteraction_foo(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_BadInteraction_foo(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'foo'
+  //
+
+  //
+  // End of Service Methods
+  //
  public:
   GoodServiceAsyncProcessor(::apache::thrift::ServiceHandler<::cpp2::GoodService>* iface) :
       iface_(iface) {}

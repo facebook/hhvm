@@ -134,22 +134,80 @@ class BoxServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcesso
   static const BoxServiceAsyncProcessor::ProcessMap kOwnProcessMap_;
   static const BoxServiceAsyncProcessor::InteractionConstructorMap interactionConstructorMap_;
  private:
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'getABoxSession'
+  //
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_getABoxSession(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_getABoxSession(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_getABoxSession(apache::thrift::ServerRequest&& serverRequest);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::SerializedResponse return_getABoxSession(apache::thrift::ContextStack* ctx, ::cpp2::ShouldBeBoxed const& _return);
+  static apache::thrift::SerializedResponse return_getABoxSession(
+      apache::thrift::ContextStack* ctx,
+      ::cpp2::ShouldBeBoxed const& _return);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_getABoxSession(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_getABoxSession(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'getABoxSession'
+  //
+
+  //
+  // End of Service Methods
+  //
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'getABox'
+  //
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_BoxedInteraction_getABox(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_BoxedInteraction_getABox(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_BoxedInteraction_getABox(apache::thrift::ServerRequest&& serverRequest);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::SerializedResponse return_BoxedInteraction_getABox(apache::thrift::ContextStack* ctx, ::cpp2::ShouldBeBoxed const& _return);
+  static apache::thrift::SerializedResponse return_BoxedInteraction_getABox(
+      apache::thrift::ContextStack* ctx,
+      ::cpp2::ShouldBeBoxed const& _return);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_BoxedInteraction_getABox(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_BoxedInteraction_getABox(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'getABox'
+  //
+
+  //
+  // End of Service Methods
+  //
  public:
   BoxServiceAsyncProcessor(::apache::thrift::ServiceHandler<::cpp2::BoxService>* iface) :
       iface_(iface) {}

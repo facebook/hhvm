@@ -113,14 +113,43 @@ class ExtendedServiceAsyncProcessor : public ::facebook::thrift::test::BaseServi
  private:
   static const ExtendedServiceAsyncProcessor::ProcessMap kOwnProcessMap_;
  private:
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'init'
+  //
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_init(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_init(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_init(apache::thrift::ServerRequest&& serverRequest);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::SerializedResponse return_init(apache::thrift::ContextStack* ctx, ::std::int64_t const& _return);
+  static apache::thrift::SerializedResponse return_init(
+      apache::thrift::ContextStack* ctx,
+      ::std::int64_t const& _return);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_init(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_init(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'init'
+  //
+
+  //
+  // End of Service Methods
+  //
  public:
   ExtendedServiceAsyncProcessor(::apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>* iface) :
       ::facebook::thrift::test::BaseServiceAsyncProcessor(iface),

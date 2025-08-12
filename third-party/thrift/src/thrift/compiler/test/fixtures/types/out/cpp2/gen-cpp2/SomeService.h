@@ -115,22 +115,80 @@ class SomeServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
  private:
   static const SomeServiceAsyncProcessor::ProcessMap kOwnProcessMap_;
  private:
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'bounce_map'
+  //
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_bounce_map(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_bounce_map(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_bounce_map(apache::thrift::ServerRequest&& serverRequest);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::SerializedResponse return_bounce_map(apache::thrift::ContextStack* ctx, ::apache::thrift::fixtures::types::SomeMap const& _return);
+  static apache::thrift::SerializedResponse return_bounce_map(
+      apache::thrift::ContextStack* ctx,
+      ::apache::thrift::fixtures::types::SomeMap const& _return);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_bounce_map(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_bounce_map(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'bounce_map'
+  //
+
+  //
+  // End of Service Methods
+  //
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'binary_keyed_map'
+  //
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_binary_keyed_map(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_binary_keyed_map(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_binary_keyed_map(apache::thrift::ServerRequest&& serverRequest);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::SerializedResponse return_binary_keyed_map(apache::thrift::ContextStack* ctx, ::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t> const& _return);
+  static apache::thrift::SerializedResponse return_binary_keyed_map(
+      apache::thrift::ContextStack* ctx,
+      ::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t> const& _return);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_binary_keyed_map(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_binary_keyed_map(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'binary_keyed_map'
+  //
+
+  //
+  // End of Service Methods
+  //
  public:
   SomeServiceAsyncProcessor(::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>* iface) :
       iface_(iface) {}

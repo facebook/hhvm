@@ -143,33 +143,126 @@ class InteractLocallyAsyncProcessor : public ::apache::thrift::GeneratedAsyncPro
   static const InteractLocallyAsyncProcessor::ProcessMap kOwnProcessMap_;
   static const InteractLocallyAsyncProcessor::InteractionConstructorMap interactionConstructorMap_;
  private:
-  std::unique_ptr<apache::thrift::Tile> createSharedInteraction() {
-    return iface_->createSharedInteraction();
-  }
+  //
+  // Service Methods
+  //
+
+ std::unique_ptr<apache::thrift::Tile> createSharedInteraction() {
+   return iface_->createSharedInteraction();
+ }
+  //
+  // End of Service Methods
+  //
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'init'
+  //
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_SharedInteraction_init(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_SharedInteraction_init(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_SharedInteraction_init(apache::thrift::ServerRequest&& serverRequest);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::SerializedResponse return_SharedInteraction_init(apache::thrift::ContextStack* ctx, ::std::int32_t const& _return);
+  static apache::thrift::SerializedResponse return_SharedInteraction_init(
+      apache::thrift::ContextStack* ctx,
+      ::std::int32_t const& _return);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_SharedInteraction_init(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_SharedInteraction_init(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'init'
+  //
+
+  //
+  // End of Service Methods
+  //
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'do_something'
+  //
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_SharedInteraction_do_something(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_SharedInteraction_do_something(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_SharedInteraction_do_something(apache::thrift::ServerRequest&& serverRequest);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::SerializedResponse return_SharedInteraction_do_something(apache::thrift::ContextStack* ctx, ::thrift::shared_interactions::DoSomethingResult const& _return);
+  static apache::thrift::SerializedResponse return_SharedInteraction_do_something(
+      apache::thrift::ContextStack* ctx,
+      ::thrift::shared_interactions::DoSomethingResult const& _return);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_SharedInteraction_do_something(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_SharedInteraction_do_something(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'do_something'
+  //
+
+  //
+  // End of Service Methods
+  //
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'tear_down'
+  //
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_SharedInteraction_tear_down(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_SharedInteraction_tear_down(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_SharedInteraction_tear_down(apache::thrift::ServerRequest&& serverRequest);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::SerializedResponse return_SharedInteraction_tear_down(apache::thrift::ContextStack* ctx);
+  static apache::thrift::SerializedResponse return_SharedInteraction_tear_down(
+      apache::thrift::ContextStack* ctx);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_SharedInteraction_tear_down(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_SharedInteraction_tear_down(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'tear_down'
+  //
+
+  //
+  // End of Service Methods
+  //
  public:
   InteractLocallyAsyncProcessor(::apache::thrift::ServiceHandler<::thrift::shared_interactions::InteractLocally>* iface) :
       iface_(iface) {}

@@ -103,14 +103,43 @@ class ServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBa
  private:
   static const ServiceAsyncProcessor::ProcessMap kOwnProcessMap_;
  private:
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'func'
+  //
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_func(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_func(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_func(apache::thrift::ServerRequest&& serverRequest);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::SerializedResponse return_func(apache::thrift::ContextStack* ctx, ::facebook::thrift::test::MyI32_4873 const& _return);
+  static apache::thrift::SerializedResponse return_func(
+      apache::thrift::ContextStack* ctx,
+      ::facebook::thrift::test::MyI32_4873 const& _return);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_func(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_func(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'func'
+  //
+
+  //
+  // End of Service Methods
+  //
  public:
   ServiceAsyncProcessor(::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>* iface) :
       iface_(iface) {}

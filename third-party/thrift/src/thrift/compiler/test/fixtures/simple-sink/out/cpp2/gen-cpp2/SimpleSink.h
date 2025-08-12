@@ -100,14 +100,47 @@ class SimpleSinkAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcesso
  private:
   static const SimpleSinkAsyncProcessor::ProcessMap kOwnProcessMap_;
  private:
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'simple'
+  //
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_simple(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_simple(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_simple(apache::thrift::ServerRequest&& serverRequest);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> return_simple(apache::thrift::ContextStack* ctx, /* TODO (@sazonovk) */&& _return, folly::Executor::KeepAlive<> executor);
+  static std::pair<
+      apache::thrift::SerializedResponse,
+      apache::thrift::detail::SinkConsumerImpl>
+  return_simple(
+      apache::thrift::ContextStack* ctx,
+      /* TODO (@sazonovk) */&& _return,
+      folly::Executor::KeepAlive<> executor);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_simple(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_simple(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'simple'
+  //
+
+  //
+  // End of Service Methods
+  //
  public:
   SimpleSinkAsyncProcessor(::apache::thrift::ServiceHandler<::cpp2::SimpleSink>* iface) :
       iface_(iface) {}

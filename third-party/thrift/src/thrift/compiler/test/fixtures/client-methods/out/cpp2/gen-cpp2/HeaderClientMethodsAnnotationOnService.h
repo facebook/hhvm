@@ -110,22 +110,80 @@ class HeaderClientMethodsAnnotationOnServiceAsyncProcessor : public ::apache::th
  private:
   static const HeaderClientMethodsAnnotationOnServiceAsyncProcessor::ProcessMap kOwnProcessMap_;
  private:
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'echo'
+  //
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_echo(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_echo(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_echo(apache::thrift::ServerRequest&& serverRequest);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::SerializedResponse return_echo(apache::thrift::ContextStack* ctx, ::cpp2::EchoResponse const& _return);
+  static apache::thrift::SerializedResponse return_echo(
+      apache::thrift::ContextStack* ctx,
+      ::cpp2::EchoResponse const& _return);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_echo(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_echo(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'echo'
+  //
+
+  //
+  // End of Service Methods
+  //
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'echo_2'
+  //
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_echo_2(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_echo_2(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_echo_2(apache::thrift::ServerRequest&& serverRequest);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::SerializedResponse return_echo_2(apache::thrift::ContextStack* ctx, ::cpp2::EchoResponse const& _return);
+  static apache::thrift::SerializedResponse return_echo_2(
+      apache::thrift::ContextStack* ctx,
+      ::cpp2::EchoResponse const& _return);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_echo_2(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_echo_2(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'echo_2'
+  //
+
+  //
+  // End of Service Methods
+  //
  public:
   HeaderClientMethodsAnnotationOnServiceAsyncProcessor(::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>* iface) :
       iface_(iface) {}

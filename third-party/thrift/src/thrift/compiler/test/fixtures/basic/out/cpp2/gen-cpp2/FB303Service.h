@@ -103,14 +103,43 @@ class FB303ServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProces
  private:
   static const FB303ServiceAsyncProcessor::ProcessMap kOwnProcessMap_;
  private:
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'simple_rpc'
+  //
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_simple_rpc(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_simple_rpc(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_simple_rpc(apache::thrift::ServerRequest&& serverRequest);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::SerializedResponse return_simple_rpc(apache::thrift::ContextStack* ctx, ::test::fixtures::basic::ReservedKeyword const& _return);
+  static apache::thrift::SerializedResponse return_simple_rpc(
+      apache::thrift::ContextStack* ctx,
+      ::test::fixtures::basic::ReservedKeyword const& _return);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_simple_rpc(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_simple_rpc(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'simple_rpc'
+  //
+
+  //
+  // End of Service Methods
+  //
  public:
   FB303ServiceAsyncProcessor(::apache::thrift::ServiceHandler<::test::fixtures::basic::FB303Service>* iface) :
       iface_(iface) {}

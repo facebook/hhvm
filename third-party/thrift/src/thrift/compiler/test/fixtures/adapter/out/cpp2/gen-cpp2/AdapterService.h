@@ -114,22 +114,80 @@ class AdapterServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProc
  private:
   static const AdapterServiceAsyncProcessor::ProcessMap kOwnProcessMap_;
  private:
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'count'
+  //
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_count(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_count(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_count(apache::thrift::ServerRequest&& serverRequest);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::SerializedResponse return_count(apache::thrift::ContextStack* ctx, ::facebook::thrift::test::CountingStruct const& _return);
+  static apache::thrift::SerializedResponse return_count(
+      apache::thrift::ContextStack* ctx,
+      ::facebook::thrift::test::CountingStruct const& _return);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_count(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_count(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'count'
+  //
+
+  //
+  // End of Service Methods
+  //
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'adaptedTypes'
+  //
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_adaptedTypes(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_adaptedTypes(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_adaptedTypes(apache::thrift::ServerRequest&& serverRequest);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::SerializedResponse return_adaptedTypes(apache::thrift::ContextStack* ctx, ::facebook::thrift::test::HeapAllocated const& _return);
+  static apache::thrift::SerializedResponse return_adaptedTypes(
+      apache::thrift::ContextStack* ctx,
+      ::facebook::thrift::test::HeapAllocated const& _return);
+
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_adaptedTypes(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_adaptedTypes(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'adaptedTypes'
+  //
+
+  //
+  // End of Service Methods
+  //
  public:
   AdapterServiceAsyncProcessor(::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>* iface) :
       iface_(iface) {}

@@ -14,32 +14,77 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#function:return_type}}{{^function:starts_interaction?}}
+}}{{#service:functions?}}
+  //
+  // Service Methods
+  //
+
+{{/service:functions?}}
+{{#function:return_type}}{{^function:starts_interaction?}}
+  //
+  // Method '{{function:name}}'
+  //
   template <typename ProtocolIn_, typename ProtocolOut_>
-  void setUpAndProcess_{{function:prefixed_name}}(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  void setUpAndProcess_{{function:prefixed_name}}(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_{{function:prefixed_name}}(apache::thrift::ServerRequest&& serverRequest);
+
 {{^function:oneway?}}
   template <class ProtocolIn_, class ProtocolOut_>
 {{^function:cpp_recv_arg?}}
-  static apache::thrift::SerializedResponse return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx);
+  static apache::thrift::SerializedResponse return_{{function:prefixed_name}}(
+      apache::thrift::ContextStack* ctx);
+
 {{/function:cpp_recv_arg?}}
 {{#function:cpp_recv_arg?}}
-  {{^function:stream?}}{{^function:sink?}}
-  static apache::thrift::SerializedResponse return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx, {{function:cpp_return_type}} const& _return);
-  {{/function:sink?}}{{/function:stream?}}
-  {{#function:stream?}}
-  static apache::thrift::ResponseAndServerStreamFactory return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx, folly::Executor::KeepAlive<> executor, {{function:cpp_return_type}}&& _return);
-  {{/function:stream?}}
-  {{#function:sink?}}
-  static std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> return_{{function:prefixed_name}}(apache::thrift::ContextStack* ctx, {{function:cpp_return_type}}&& _return, folly::Executor::KeepAlive<> executor);
-  {{/function:sink?}}
+ {{^function:stream?}}{{^function:sink?}}
+  static apache::thrift::SerializedResponse return_{{function:prefixed_name}}(
+      apache::thrift::ContextStack* ctx,
+      {{function:cpp_return_type}} const& _return);
+
+ {{/function:sink?}}{{/function:stream?}}
+ {{#function:stream?}}
+  static apache::thrift::ResponseAndServerStreamFactory return_{{function:prefixed_name}}(
+      apache::thrift::ContextStack* ctx,
+      folly::Executor::KeepAlive<> executor,
+      {{function:cpp_return_type}}&& _return);
+
+ {{/function:stream?}}
+ {{#function:sink?}}
+  static std::pair<
+      apache::thrift::SerializedResponse,
+      apache::thrift::detail::SinkConsumerImpl>
+  return_{{function:prefixed_name}}(
+      apache::thrift::ContextStack* ctx,
+      {{function:cpp_return_type}}&& _return,
+      folly::Executor::KeepAlive<> executor);
+
+ {{/function:sink?}}
 {{/function:cpp_recv_arg?}}
   template <class ProtocolIn_, class ProtocolOut_>
-  static void throw_wrapped_{{function:prefixed_name}}(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  static void throw_wrapped_{{function:prefixed_name}}(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
 {{/function:oneway?}}
+  //
+  // End of Method '{{function:name}}'
+  //
+
 {{/function:starts_interaction?}}{{#function:starts_interaction?}}
-  std::unique_ptr<apache::thrift::Tile> {{function:cpp_name}}() {
-    return iface_->{{function:cpp_name}}();
-  }
-{{/function:starts_interaction?}}{{/function:return_type}}
+ std::unique_ptr<apache::thrift::Tile> {{function:cpp_name}}() {
+   return iface_->{{function:cpp_name}}();
+ }
+{{/function:starts_interaction?}}{{/function:return_type}}{{#service:functions?}}
+  //
+  // End of Service Methods
+  //
+{{/service:functions?}}

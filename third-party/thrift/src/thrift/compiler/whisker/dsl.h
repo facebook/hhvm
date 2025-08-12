@@ -39,6 +39,20 @@ template <typename T>
 struct function_argument_result;
 } // namespace detail
 
+// Compile time fixed string that can be used as a non-type template parameter
+// for prototype qualifiers.
+// Ideally should be replaced with an alias to a Boost/folly/std implementation
+// once one is available that will compile successfully in NTTP literals.
+template <std::size_t N>
+struct fixed_string {
+  char data[N];
+  /* implicit */ consteval fixed_string(const char (&str)[N]) {
+    std::copy_n(str, N, data);
+  }
+
+  constexpr operator std::string_view() const { return data; }
+};
+
 /**
  * A polymorphic native_handle is intended to be used with polymorphic types to
  * extract native_handle arguments from an inheritence chain.
@@ -50,6 +64,13 @@ struct function_argument_result;
  * types as potential alternatives. The argument will be checked against only
  * those types. Note that this limits the API to strictly known types at the
  * callsite.
+ *
+ * The (optional) qualifier NTTP can be used in contexts like loops which
+ * implicitly change the scope from the parent object to the looped type. By
+ * using an explicit qualifier for the prototype, the type of the template
+ * variable can be explicitly specified for readability and as an assertion of
+ * the type being operated on. Qualifiers can also be used to explicitly access
+ * parent prototype members on child objects.
  *
  * Example:
  *
@@ -71,12 +92,14 @@ struct function_argument_result;
  *     });
  *
  */
-template <typename Base, typename... SubClass>
+template <fixed_string Qualifier, typename Base, typename... SubClass>
 struct polymorphic_native_handle {
   static_assert(std::is_polymorphic_v<Base>);
   static_assert((std::is_base_of_v<Base, SubClass> && ...));
 
   using element_type = Base;
+
+  static constexpr std::string_view qualifier() { return Qualifier; }
 
   /**
    * Tries to match a dynamically-typed native handle against each of the
@@ -109,10 +132,45 @@ struct polymorphic_native_handle {
   }
 };
 
+template <fixed_string Qualifier, typename T>
+// Native handle for a non-polymorphic type with a qualifier
+struct named_native_handle {
+  using element_type = T;
+
+  static constexpr std::string_view qualifier() { return Qualifier; }
+};
+
 namespace detail {
+template <typename T>
+concept is_qualified_native_handle = requires(T) {
+  { T::qualifier() } -> std::same_as<std::string_view>;
+};
+
+// The function only exists to allow implementation of the concept
+// is_polymorphic_native_handle and is otherwise a no-op.
+// We can't currently implement the concept identically to
+// is_named_non_polymorphic_native_handle using an immediately-invoked lambda,
+// because an immediately-invoked lambda with NTTP and template parameter pack
+// does not compile under clang-15 (@fbsource//arvr/mode/artemis/opt).
+template <fixed_string Q, typename... U>
+consteval void is_polymorphic_native_handle_impl(
+    polymorphic_native_handle<Q, U...>) {
+  throw std::runtime_error("unreachable");
+}
+
+template <typename T>
+concept is_polymorphic_native_handle =
+    requires(T) { is_polymorphic_native_handle_impl(std::declval<T>()); };
+
+template <typename T>
+concept is_named_non_polymorphic_native_handle = requires(T) {
+  []<fixed_string Q, typename U>(named_native_handle<Q, U>) {
+  }(std::declval<T>());
+};
+
 template <typename...>
 struct flatten_poly_handle;
-}
+} // namespace detail
 
 /**
  * This template helper is intended to describe polymorphic_native_handle<...>
@@ -147,9 +205,9 @@ struct flatten_poly_handle;
  * You may notice that this API requires declaring the type hierarchy in the
  * inverse direction of the inheritance hierarchy as written in C++.
  */
-template <typename... Cases>
+template <fixed_string Q, typename... Cases>
 using make_polymorphic_native_handle =
-    typename detail::flatten_poly_handle<Cases...>::type;
+    typename detail::flatten_poly_handle<Cases...>::template type<Q>;
 
 /**
  * A class providing ergonomic APIs (sugar) for implementing native_functions.
@@ -388,9 +446,7 @@ class function : public native_function {
             "Expected type of {} to be `map`, but found `{}`.",
             describe_argument(),
             arg.describe_type());
-      } else if constexpr (whisker::detail::is_specialization_v<
-                               T,
-                               polymorphic_native_handle>) {
+      } else if constexpr (detail::is_polymorphic_native_handle<T>) {
         // polymorpic_native_handle<T, ...> (class hierarchy match)
         using element_type = typename T::element_type;
         const auto abort = [&] {
@@ -598,6 +654,11 @@ function::ptr make_function(F&& function) {
  * The handle's element type (S) is called the "self type" of the prototype. The
  * prototype is designed to operate as members of the self type only.
  *
+ * If the handle has a non-empty qualifier (`polymorphic_native_handle` or
+ * `named_native_handle`), then the resulting prototype will have the qualifier
+ * value as its name. The qualifier can then be used in templates to refer to
+ * properties/functions from that specific prototype implementation.
+ *
  * Example (property):
  *
  *    struct Foo {
@@ -635,14 +696,10 @@ class prototype_builder {
   template <
       typename Parent,
       std::enable_if_t<std::is_base_of_v<Parent, self_type>, int> = 0>
-  explicit prototype_builder(
-      prototype_ptr<Parent> parent, const std::string_view& name = "")
-      : parent_(std::move(parent)), name_(name) {
+  explicit prototype_builder(prototype_ptr<Parent> parent)
+      : parent_(std::move(parent)) {
     assert(parent_ != nullptr);
   }
-
-  explicit prototype_builder(const std::string_view& name)
-      : parent_(nullptr), name_(name) {}
 
   prototype_builder() = default;
 
@@ -658,7 +715,7 @@ class prototype_builder {
         std::move(name),
         dsl::make_function([f = std::decay_t<F>(std::forward<F>(function))](
                                function::context ctx) {
-          native_handle<self_type> self = ctx.self<Handle>();
+          native_handle<self_type> self = ctx.self<self_handle_type>();
           return f(*self);
         }));
   }
@@ -676,7 +733,7 @@ class prototype_builder {
     auto fn =
         dsl::make_function([f = std::decay_t<F>(std::forward<F>(function))](
                                function::context ctx) {
-          native_handle<self_type> self = ctx.self<Handle>();
+          native_handle<self_type> self = ctx.self<self_handle_type>();
           return f(*self, std::move(ctx));
         });
     try_emplace(
@@ -690,35 +747,30 @@ class prototype_builder {
    * changes can be made to this prototype builder.
    */
   result make() && {
-    return std::make_shared<basic_prototype<self_type>>(
-        std::move(descriptors_), std::move(parent_), std::move(name_));
+    if constexpr (detail::is_qualified_native_handle<Handle>) {
+      return std::make_shared<basic_prototype<self_type>>(
+          std::move(descriptors_), std::move(parent_), Handle::qualifier());
+    } else {
+      return std::make_shared<basic_prototype<self_type>>(
+          std::move(descriptors_), std::move(parent_), "");
+    }
   }
 
-  // Define a prototype which extends from a parent prototype of a super type.
-  // To extend the functionality of a prototype for the same type, use
-  // `patches`.
   template <
       typename Parent,
-      std::enable_if_t<
-          (std::is_base_of_v<Parent, self_type> &&
-           !std::is_same_v<Parent, self_type>),
-          int> = 0>
-  static prototype_builder extends(
-      prototype_ptr<Parent> parent, const std::string_view& name = "") {
-    return prototype_builder{std::move(parent), name};
-  }
-
-  // Define a prototype which extends from a parent prototype of the same type.
-  // This will return an extension builder which accepts the name (if any) of
-  // the parent.
-  static prototype_builder patches(prototype_ptr<self_type> parent) {
-    const std::string_view name = parent->name();
-    auto builder = prototype_builder{std::move(parent), name};
-
-    return builder;
+      std::enable_if_t<std::is_base_of_v<Parent, self_type>, int> = 0>
+  static prototype_builder extends(prototype_ptr<Parent> parent) {
+    return prototype_builder{std::move(parent)};
   }
 
  private:
+  // If Handle is named_native_handle<Q, T>, the type-erased handle type needs
+  // to be native_handle<T>, otherwise it is just Handle.
+  using self_handle_type = typename std::conditional_t<
+      detail::is_named_non_polymorphic_native_handle<Handle>,
+      native_handle<typename Handle::element_type>,
+      Handle>;
+
   void try_emplace(std::string name, prototype<>::descriptor descriptor) {
     auto [_, inserted] = descriptors_.emplace(name, std::move(descriptor));
     if (!inserted) {
@@ -729,17 +781,6 @@ class prototype_builder {
 
   prototype<>::ptr parent_;
   prototype<>::descriptors_map descriptors_;
-
-  /**
-   * Optional explicit name.
-   * The name can be used in contexts like loops which implicitly change the
-   * scope from the parent object to the looped type. By using an explicit name
-   * for the prototype, the type of the template variable can be explicitly
-   * specified for readability and as an assertion of the type being operated
-   * on. Names can also be used to explicitly access parent prototype members
-   * on child objects.
-   */
-  std::string_view name_;
 };
 
 /**
@@ -803,8 +844,9 @@ template <typename T>
 struct function_argument_result<native_handle<T>> : by_value<native_handle<T>> {
 };
 
-template <typename Base, typename... SubClasses>
-struct function_argument_result<polymorphic_native_handle<Base, SubClasses...>>
+template <fixed_string Q, typename Base, typename... SubClasses>
+struct function_argument_result<
+    polymorphic_native_handle<Q, Base, SubClasses...>>
     : by_value<native_handle<Base>> {};
 
 } // namespace detail
@@ -830,44 +872,60 @@ struct function_argument_result<polymorphic_native_handle<Base, SubClasses...>>
 // depth is flattened to a single poly<...>.
 namespace detail {
 
-template <typename... T>
-using poly = polymorphic_native_handle<T...>;
-template <typename... T>
-using flatten = typename flatten_poly_handle<T...>::type;
+template <fixed_string Q, typename... T>
+using poly = polymorphic_native_handle<Q, T...>;
+template <fixed_string Q, typename... T>
+using flatten = typename flatten_poly_handle<T...>::template type<Q>;
 
 // (1): (T) → poly<T>
 template <typename T>
+  requires(!is_polymorphic_native_handle<T>)
 struct flatten_poly_handle<T> {
-  using type = poly<T>;
+  template <fixed_string Q>
+  using type = poly<Q, T>;
 };
 // (2): (poly<T>) → poly<T>
-template <typename... T>
-struct flatten_poly_handle<poly<T...>> {
-  using type = poly<T...>;
+template <fixed_string X, typename... T>
+struct flatten_poly_handle<poly<X, T...>> {
+  template <fixed_string Q>
+  using type = poly<Q, T...>;
 };
 
 // (3): (T, U, rest...) → flatten(poly<T, U>, rest...)
 template <typename T, typename U, typename... Rest>
+  requires(!is_polymorphic_native_handle<T>) &&
+    (!is_polymorphic_native_handle<U>)
 struct flatten_poly_handle<T, U, Rest...> {
-  using type = flatten<poly<T, U>, Rest...>;
+  template <fixed_string Q>
+  using type = flatten<Q, poly<"", T, U>, Rest...>;
 };
 
 // (4): (T, poly<U...>, rest...) → flatten(poly<T, U...>, rest...)
-template <typename T, typename... U, typename... Rest>
-struct flatten_poly_handle<T, poly<U...>, Rest...> {
-  using type = flatten<poly<T, U...>, Rest...>;
+template <fixed_string X, typename T, typename... U, typename... Rest>
+  requires(!is_polymorphic_native_handle<T>)
+struct flatten_poly_handle<T, poly<X, U...>, Rest...> {
+  template <fixed_string Q>
+  using type = flatten<Q, poly<"", T, U...>, Rest...>;
 };
 
 // (5): (poly<T...>, U, rest....) → flatten(poly<T..., U>, rest...)
-template <typename... T, typename U, typename... Rest>
-struct flatten_poly_handle<poly<T...>, U, Rest...> {
-  using type = flatten<poly<T..., U>, Rest...>;
+template <fixed_string X, typename... T, typename U, typename... Rest>
+  requires(!is_polymorphic_native_handle<U>)
+struct flatten_poly_handle<poly<X, T...>, U, Rest...> {
+  template <fixed_string Q>
+  using type = flatten<Q, poly<"", T..., U>, Rest...>;
 };
 
 // (6) (poly<T...>, poly<U...>, rest...) → flatten(poly<T..., U...>, rest...)
-template <typename... T, typename... U, typename... Rest>
-struct flatten_poly_handle<poly<T...>, poly<U...>, Rest...> {
-  using type = flatten<poly<T...>, U..., Rest...>;
+template <
+    fixed_string X,
+    fixed_string Y,
+    typename... T,
+    typename... U,
+    typename... Rest>
+struct flatten_poly_handle<poly<X, T...>, poly<Y, U...>, Rest...> {
+  template <fixed_string Q>
+  using type = flatten<Q, poly<"", T...>, U..., Rest...>;
 };
 
 } // namespace detail

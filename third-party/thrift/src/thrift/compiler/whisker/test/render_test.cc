@@ -1116,6 +1116,7 @@ TEST_F(RenderTest, user_defined_function_polymorphic_native_ref_argument) {
   const auto describe =
       dsl::make_function([](dsl::function::context ctx) -> string {
         using base_handle = dsl::polymorphic_native_handle<
+            "",
             RenderTestPolyBase,
             RenderTestPolyMid,
             RenderTestPolyDerived>;
@@ -1253,7 +1254,7 @@ TEST_F(RenderTest, user_defined_function_native_ref_prototype) {
   SomeCppObject cpp_object;
 
   using base_handle_type =
-      dsl::polymorphic_native_handle<SomeCppObjectBase, SomeCppObject>;
+      dsl::polymorphic_native_handle<"", SomeCppObjectBase, SomeCppObject>;
   const auto base_proto = dsl::make_prototype<base_handle_type>([](auto&& def) {
     def.property("return42", [](const SomeCppObjectBase& self) {
       return w::i64(self.return42());

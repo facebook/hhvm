@@ -1282,7 +1282,7 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
   prototype<t_named>::ptr make_prototype_for_named(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_named(proto);
-    auto def = whisker::dsl::prototype_builder<h_named>::patches(base);
+    auto def = whisker::dsl::prototype_builder<h_named>::extends(base);
 
     def.property("py_name", &python::get_py3_name<t_named>);
 
@@ -1292,7 +1292,7 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
   prototype<t_program>::ptr make_prototype_for_program(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_program(proto);
-    auto def = whisker::dsl::prototype_builder<h_program>::patches(base);
+    auto def = whisker::dsl::prototype_builder<h_program>::extends(base);
 
     def.property("module_mangle", [&](const t_program& self) {
       return mangle_program_path(&self, get_option("root_module_prefix"));
@@ -1304,7 +1304,7 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
   prototype<t_service>::ptr make_prototype_for_service(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_service(proto);
-    auto def = whisker::dsl::prototype_builder<h_service>::patches(base);
+    auto def = whisker::dsl::prototype_builder<h_service>::extends(base);
 
     def.property("module_mangle", [&](const t_service& self) {
       return mangle_program_path(
@@ -1317,7 +1317,7 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
   prototype<t_type>::ptr make_prototype_for_type(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_type(proto);
-    auto def = whisker::dsl::prototype_builder<h_type>::patches(base);
+    auto def = whisker::dsl::prototype_builder<h_type>::extends(base);
 
     def.property("module_mangle", [&](const t_type& self) {
       return mangle_program_path(

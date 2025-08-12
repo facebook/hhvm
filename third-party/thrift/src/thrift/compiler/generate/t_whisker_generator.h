@@ -290,7 +290,8 @@ class t_whisker_generator : public t_generator {
   // polymorphic_native_handle describing its polymorphic hierarchy
   // (subclasses).
   template <typename... Cases>
-  using make_handle = whisker::dsl::make_polymorphic_native_handle<Cases...>;
+  using make_handle =
+      whisker::dsl::make_polymorphic_native_handle<"", Cases...>;
 
   using h_interaction = make_handle<t_interaction>;
   using h_service = make_handle<t_service>;

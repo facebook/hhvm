@@ -42,7 +42,7 @@ print_expr = { version = "0.0.0", path = "../../../print_expr" }
 priority-queue = "1.2.2"
 regex = "1.11.1"
 scope = { version = "0.0.0", path = "../scope" }
-serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "unbounded_depth"] }
+serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
 smallvec = { version = "1.15", features = ["impl_bincode", "serde", "specialization", "union"] }
 stack_depth = { version = "0.0.0", path = "../../../utils/cargo/stack_depth" }
 stack_limit = { version = "0.0.0", path = "../../../../utils/stack_limit" }

@@ -18,4 +18,4 @@ rc_pos = { version = "0.0.0", path = "../../../utils/rust/pos" }
 relative_path = { version = "0.0.0", path = "../../../utils/rust/relative_path" }
 serde = { version = "1.0.219", features = ["derive", "rc"] }
 serde_derive = "1.0.185"
-serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "unbounded_depth"] }
+serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }

@@ -1500,7 +1500,9 @@ void MutableListTypeInfo::consumeElem(
   reader(context, &elem);
   DCHECK(elem != nullptr);
   PyObject** pyObjPtr = toPyObjectPtr(objectPtr);
-  if (PyList_Append(*pyObjPtr, elem) == -1) {
+  const int appendResult = PyList_Append(*pyObjPtr, elem);
+  Py_DECREF(elem);
+  if (appendResult == -1) {
     THRIFT_PY3_CHECK_ERROR();
   }
 }
@@ -1522,10 +1524,11 @@ void SetTypeInfoTemplate_read(
   for (std::uint32_t i = 0; i < setSize; ++i) {
     PyObject* elem{};
     reader(context, &elem);
-    if (PySet_Add(set.get(), elem) == -1) {
+    const int addResult = PySet_Add(set.get(), elem);
+    Py_DECREF(elem);
+    if (addResult == -1) {
       THRIFT_PY3_CHECK_ERROR();
     }
-    Py_DECREF(elem);
   }
   setPyObject(objectPtr, std::move(set));
 }
@@ -1578,11 +1581,12 @@ void SetTypeInfo_consumeElem(
   // so PySet_Add will fail. Need to temporarily decrref.
   const Py_ssize_t currentRefCnt = Py_REFCNT(*pyObjPtr);
   Py_SET_REFCNT(*pyObjPtr, 1);
-  if (PySet_Add(*pyObjPtr, elem) == -1) {
+  const int addResult = PySet_Add(*pyObjPtr, elem);
+  Py_DECREF(elem);
+  if (addResult == -1) {
     Py_SET_REFCNT(*pyObjPtr, currentRefCnt);
     THRIFT_PY3_CHECK_ERROR();
   }
-  Py_DECREF(elem);
   Py_SET_REFCNT(*pyObjPtr, currentRefCnt);
 }
 
@@ -1739,7 +1743,12 @@ void MutableMapHandler::consumeElem(
   PyObject* mval = nullptr;
   valueReader(context, &mval);
   DCHECK(mval != nullptr);
-  PyDict_SetItem(*pyObjPtr, mkey, mval);
+  const int setResult = PyDict_SetItem(*pyObjPtr, mkey, mval);
+  Py_DECREF(mkey);
+  Py_DECREF(mval);
+  if (setResult == -1) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
 }
 
 DynamicStructInfo::DynamicStructInfo(

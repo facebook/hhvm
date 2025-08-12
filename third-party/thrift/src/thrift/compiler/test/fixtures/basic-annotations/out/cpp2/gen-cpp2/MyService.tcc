@@ -24,18 +24,42 @@ typedef apache::thrift::ThriftPresult<true> MyService_putDataById_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>, apache::thrift::FieldData<2, ::apache::thrift::type_class::string, ::std::string*>> MyService_lobDataById_pargs;
 typedef apache::thrift::ThriftPresult<false> MyService_cppDoNothing_pargs;
 typedef apache::thrift::ThriftPresult<true> MyService_cppDoNothing_presult;
+//
+// Service Methods
+//
+
+//
+// Method 'ping'
+//
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MyServiceAsyncProcessor::setUpAndProcess_ping(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
-  if (!setUpRequestProcessing(req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
+void MyServiceAsyncProcessor::setUpAndProcess_ping(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    apache::thrift::SerializedCompressedRequest&& serializedRequest,
+    apache::thrift::Cpp2RequestContext* ctx,
+    folly::EventBase* eb,
+    [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
+  if (!setUpRequestProcessing(
+          req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
     return;
   }
-  auto scope = iface_->getRequestExecutionScope(ctx, apache::thrift::concurrency::NORMAL);
+  auto scope = iface_->getRequestExecutionScope(
+      ctx, apache::thrift::concurrency::NORMAL);
   ctx->setRequestExecutionScope(std::move(scope));
-  processInThread(std::move(req), std::move(serializedRequest), ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, &MyServiceAsyncProcessor::executeRequest_ping<ProtocolIn_, ProtocolOut_>, this);
+  processInThread(
+      std::move(req),
+      std::move(serializedRequest),
+      ctx,
+      eb,
+      tm,
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      &MyServiceAsyncProcessor::
+          executeRequest_ping<ProtocolIn_, ProtocolOut_>,
+      this);
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MyServiceAsyncProcessor::executeRequest_ping(apache::thrift::ServerRequest&& serverRequest) {
+void MyServiceAsyncProcessor::executeRequest_ping(
+    apache::thrift::ServerRequest&& serverRequest) {
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
@@ -52,44 +76,56 @@ void MyServiceAsyncProcessor::executeRequest_ping(apache::thrift::ServerRequest&
   } args;
 
   auto ctxStack = apache::thrift::ContextStack::create(
-    this->getEventHandlersSharedPtr(),
-    this->getServiceName(),
-    "MyService.ping",
-    serverRequest.requestContext());
+      this->getEventHandlersSharedPtr(),
+      this->getServiceName(),
+      "MyService.ping",
+      serverRequest.requestContext());
   try {
     auto pargs = args.pargs();
-    deserializeRequest<ProtocolIn_>(pargs, "ping", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
-  }
-  catch (...) {
+    deserializeRequest<ProtocolIn_>(
+        pargs,
+        "ping",
+        apache::thrift::detail::ServerRequestHelper::compressedRequest(
+            std::move(serverRequest))
+            .uncompress(),
+        ctxStack.get());
+  } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
-    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ew
-        , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-        , serverRequest.requestContext()
-        , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
-        , "ping");
+    apache::thrift::detail::ap::process_handle_exn_deserialization<
+        ProtocolOut_>(
+        ew,
+        apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
+            serverRequest.requestContext(),
+        apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+        "ping");
     return;
   }
-  auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
-  auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  auto requestPileNotification =
+      apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(
+          serverRequest);
+  auto concurrencyControllerNotification =
+      apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(
+          serverRequest);
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
-    /* .serviceName =*/ this->getServiceName(),
-    /* .definingServiceName =*/ "MyService",
-    /* .methodName =*/ "ping",
-    /* .qualifiedMethodName =*/ "MyService.ping"};
-  auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
-    apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-    , std::move(ctxStack)
-    , std::move(methodNameInfo)
-    , return_ping<ProtocolIn_,ProtocolOut_>
-    , throw_wrapped_ping<ProtocolIn_, ProtocolOut_>
-    , serverRequest.requestContext()->getProtoSeqId()
-    , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
-    , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
-    , serverRequest.requestContext()
-    , requestPileNotification
-    , concurrencyControllerNotification, std::move(serverRequest.requestData())
-    );
+      /* .serviceName =*/ this->getServiceName(),
+      /* .definingServiceName =*/ "MyService",
+      /* .methodName =*/ "ping",
+      /* .qualifiedMethodName =*/ "MyService.ping"};
+  auto callback =
+      apache::thrift::HandlerCallbackPtr<void>::make(
+          apache::thrift::detail::ServerRequestHelper::request(
+              std::move(serverRequest)),
+          std::move(ctxStack),
+          std::move(methodNameInfo),
+          return_ping<ProtocolIn_, ProtocolOut_>,
+          throw_wrapped_ping<ProtocolIn_, ProtocolOut_>,
+          serverRequest.requestContext()->getProtoSeqId(),
+          apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+          apache::thrift::detail::ServerRequestHelper::executor(serverRequest),
+          serverRequest.requestContext(),
+          requestPileNotification,
+          concurrencyControllerNotification,
+          std::move(serverRequest.requestData()));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -97,16 +133,21 @@ void MyServiceAsyncProcessor::executeRequest_ping(apache::thrift::ServerRequest&
     };
   };
 #if FOLLY_HAS_COROUTINES
-  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
-    [](auto callback, auto executeHandler, ArgsState args) -> folly::coro::Task<void> {
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
+          *callback)) {
+    [](auto callback, auto executeHandler, ArgsState args)
+        -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+              argRefs));
       executeHandler(std::move(callback), std::move(args));
     }(std::move(callback), makeExecuteHandler(), std::move(args))
-              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
-              .startInlineUnsafe();
+               .scheduleOn(
+                   apache::thrift::detail::ServerRequestHelper::executor(
+                       serverRequest))
+               .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -116,53 +157,86 @@ void MyServiceAsyncProcessor::executeRequest_ping(apache::thrift::ServerRequest&
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_ping(apache::thrift::ContextStack* ctx) {
+apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_ping(
+    apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyService_ping_presult result;
   return serializeResponse("ping", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MyServiceAsyncProcessor::throw_wrapped_ping(apache::thrift::ResponseChannelRequest::UniquePtr req,[[maybe_unused]] int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MyServiceAsyncProcessor::throw_wrapped_ping(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    [[maybe_unused]] int32_t protoSeqId,
+    apache::thrift::ContextStack* ctx,
+    folly::exception_wrapper ew,
+    apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
   ::cpp2::MyService_ping_presult result;
-  if (ew.with_exception([&]( ::cpp2::MyException& e) {
-    if (ctx) {
-      ctx->userExceptionWrapped(true, ew);
-    }
-    ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-    ::apache::thrift::util::appendErrorClassificationToHeader< ::cpp2::MyException>(ew, *reqCtx);
-    result.get<0>().ref() = e;
-    result.setIsSet(0, true);
-  }
-  )) {} else
+  if (ew.with_exception([&](::cpp2::MyException& e) {
+        if (ctx) {
+          ctx->userExceptionWrapped(true, ew);
+        }
+        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
+        ::apache::thrift::util::appendErrorClassificationToHeader<::cpp2::MyException>(ew, *reqCtx);
+        result.get<0>().ref() = e;
+        result.setIsSet(0, true);
+      })) {
+  } else
   {
-    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "ping");
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<
+        ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "ping");
     return;
   }
   ProtocolOut_ prot;
   auto response = serializeResponse("ping", &prot, ctx, result);
   auto payload = std::move(response).extractPayload(
-      req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "ping");
+      req->includeEnvelope(),
+      prot.protocolType(),
+      protoSeqId,
+      apache::thrift::MessageType::T_REPLY,
+      "ping");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
   return req->sendReply(std::move(payload));
 }
+//
+// End of Method 'ping'
+//
 
+//
+// Method 'getRandomData'
+//
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MyServiceAsyncProcessor::setUpAndProcess_getRandomData(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
-  if (!setUpRequestProcessing(req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
+void MyServiceAsyncProcessor::setUpAndProcess_getRandomData(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    apache::thrift::SerializedCompressedRequest&& serializedRequest,
+    apache::thrift::Cpp2RequestContext* ctx,
+    folly::EventBase* eb,
+    [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
+  if (!setUpRequestProcessing(
+          req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
     return;
   }
-  auto scope = iface_->getRequestExecutionScope(ctx, apache::thrift::concurrency::NORMAL);
+  auto scope = iface_->getRequestExecutionScope(
+      ctx, apache::thrift::concurrency::NORMAL);
   ctx->setRequestExecutionScope(std::move(scope));
-  processInThread(std::move(req), std::move(serializedRequest), ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, &MyServiceAsyncProcessor::executeRequest_getRandomData<ProtocolIn_, ProtocolOut_>, this);
+  processInThread(
+      std::move(req),
+      std::move(serializedRequest),
+      ctx,
+      eb,
+      tm,
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      &MyServiceAsyncProcessor::
+          executeRequest_getRandomData<ProtocolIn_, ProtocolOut_>,
+      this);
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MyServiceAsyncProcessor::executeRequest_getRandomData(apache::thrift::ServerRequest&& serverRequest) {
+void MyServiceAsyncProcessor::executeRequest_getRandomData(
+    apache::thrift::ServerRequest&& serverRequest) {
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
@@ -179,44 +253,56 @@ void MyServiceAsyncProcessor::executeRequest_getRandomData(apache::thrift::Serve
   } args;
 
   auto ctxStack = apache::thrift::ContextStack::create(
-    this->getEventHandlersSharedPtr(),
-    this->getServiceName(),
-    "MyService.getRandomData",
-    serverRequest.requestContext());
+      this->getEventHandlersSharedPtr(),
+      this->getServiceName(),
+      "MyService.getRandomData",
+      serverRequest.requestContext());
   try {
     auto pargs = args.pargs();
-    deserializeRequest<ProtocolIn_>(pargs, "getRandomData", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
-  }
-  catch (...) {
+    deserializeRequest<ProtocolIn_>(
+        pargs,
+        "getRandomData",
+        apache::thrift::detail::ServerRequestHelper::compressedRequest(
+            std::move(serverRequest))
+            .uncompress(),
+        ctxStack.get());
+  } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
-    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ew
-        , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-        , serverRequest.requestContext()
-        , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
-        , "getRandomData");
+    apache::thrift::detail::ap::process_handle_exn_deserialization<
+        ProtocolOut_>(
+        ew,
+        apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
+            serverRequest.requestContext(),
+        apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+        "getRandomData");
     return;
   }
-  auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
-  auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  auto requestPileNotification =
+      apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(
+          serverRequest);
+  auto concurrencyControllerNotification =
+      apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(
+          serverRequest);
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
-    /* .serviceName =*/ this->getServiceName(),
-    /* .definingServiceName =*/ "MyService",
-    /* .methodName =*/ "getRandomData",
-    /* .qualifiedMethodName =*/ "MyService.getRandomData"};
-  auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
-    apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-    , std::move(ctxStack)
-    , std::move(methodNameInfo)
-    , return_getRandomData<ProtocolIn_,ProtocolOut_>
-    , throw_wrapped_getRandomData<ProtocolIn_, ProtocolOut_>
-    , serverRequest.requestContext()->getProtoSeqId()
-    , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
-    , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
-    , serverRequest.requestContext()
-    , requestPileNotification
-    , concurrencyControllerNotification, std::move(serverRequest.requestData())
-    );
+      /* .serviceName =*/ this->getServiceName(),
+      /* .definingServiceName =*/ "MyService",
+      /* .methodName =*/ "getRandomData",
+      /* .qualifiedMethodName =*/ "MyService.getRandomData"};
+  auto callback =
+      apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
+          apache::thrift::detail::ServerRequestHelper::request(
+              std::move(serverRequest)),
+          std::move(ctxStack),
+          std::move(methodNameInfo),
+          return_getRandomData<ProtocolIn_, ProtocolOut_>,
+          throw_wrapped_getRandomData<ProtocolIn_, ProtocolOut_>,
+          serverRequest.requestContext()->getProtoSeqId(),
+          apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+          apache::thrift::detail::ServerRequestHelper::executor(serverRequest),
+          serverRequest.requestContext(),
+          requestPileNotification,
+          concurrencyControllerNotification,
+          std::move(serverRequest.requestData()));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -224,16 +310,21 @@ void MyServiceAsyncProcessor::executeRequest_getRandomData(apache::thrift::Serve
     };
   };
 #if FOLLY_HAS_COROUTINES
-  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
-    [](auto callback, auto executeHandler, ArgsState args) -> folly::coro::Task<void> {
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
+          *callback)) {
+    [](auto callback, auto executeHandler, ArgsState args)
+        -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+              argRefs));
       executeHandler(std::move(callback), std::move(args));
     }(std::move(callback), makeExecuteHandler(), std::move(args))
-              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
-              .startInlineUnsafe();
+               .scheduleOn(
+                   apache::thrift::detail::ServerRequestHelper::executor(
+                       serverRequest))
+               .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -243,7 +334,9 @@ void MyServiceAsyncProcessor::executeRequest_getRandomData(apache::thrift::Serve
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_getRandomData(apache::thrift::ContextStack* ctx, ::std::string const& _return) {
+apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_getRandomData(
+    apache::thrift::ContextStack* ctx,
+    ::std::string const& _return) {
   ProtocolOut_ prot;
   ::cpp2::MyService_getRandomData_presult result;
   result.get<0>().value = const_cast<::std::string*>(&_return);
@@ -252,29 +345,57 @@ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_getRandomData
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MyServiceAsyncProcessor::throw_wrapped_getRandomData(apache::thrift::ResponseChannelRequest::UniquePtr req,[[maybe_unused]] int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MyServiceAsyncProcessor::throw_wrapped_getRandomData(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    [[maybe_unused]] int32_t protoSeqId,
+    apache::thrift::ContextStack* ctx,
+    folly::exception_wrapper ew,
+    apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
   {
-    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "getRandomData");
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<
+        ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "getRandomData");
     return;
   }
 }
+//
+// End of Method 'getRandomData'
+//
 
+//
+// Method 'hasDataById'
+//
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MyServiceAsyncProcessor::setUpAndProcess_hasDataById(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
-  if (!setUpRequestProcessing(req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
+void MyServiceAsyncProcessor::setUpAndProcess_hasDataById(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    apache::thrift::SerializedCompressedRequest&& serializedRequest,
+    apache::thrift::Cpp2RequestContext* ctx,
+    folly::EventBase* eb,
+    [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
+  if (!setUpRequestProcessing(
+          req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
     return;
   }
-  auto scope = iface_->getRequestExecutionScope(ctx, apache::thrift::concurrency::NORMAL);
+  auto scope = iface_->getRequestExecutionScope(
+      ctx, apache::thrift::concurrency::NORMAL);
   ctx->setRequestExecutionScope(std::move(scope));
-  processInThread(std::move(req), std::move(serializedRequest), ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, &MyServiceAsyncProcessor::executeRequest_hasDataById<ProtocolIn_, ProtocolOut_>, this);
+  processInThread(
+      std::move(req),
+      std::move(serializedRequest),
+      ctx,
+      eb,
+      tm,
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      &MyServiceAsyncProcessor::
+          executeRequest_hasDataById<ProtocolIn_, ProtocolOut_>,
+      this);
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MyServiceAsyncProcessor::executeRequest_hasDataById(apache::thrift::ServerRequest&& serverRequest) {
+void MyServiceAsyncProcessor::executeRequest_hasDataById(
+    apache::thrift::ServerRequest&& serverRequest) {
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
@@ -294,44 +415,56 @@ void MyServiceAsyncProcessor::executeRequest_hasDataById(apache::thrift::ServerR
   } args;
 
   auto ctxStack = apache::thrift::ContextStack::create(
-    this->getEventHandlersSharedPtr(),
-    this->getServiceName(),
-    "MyService.hasDataById",
-    serverRequest.requestContext());
+      this->getEventHandlersSharedPtr(),
+      this->getServiceName(),
+      "MyService.hasDataById",
+      serverRequest.requestContext());
   try {
     auto pargs = args.pargs();
-    deserializeRequest<ProtocolIn_>(pargs, "hasDataById", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
-  }
-  catch (...) {
+    deserializeRequest<ProtocolIn_>(
+        pargs,
+        "hasDataById",
+        apache::thrift::detail::ServerRequestHelper::compressedRequest(
+            std::move(serverRequest))
+            .uncompress(),
+        ctxStack.get());
+  } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
-    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ew
-        , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-        , serverRequest.requestContext()
-        , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
-        , "hasDataById");
+    apache::thrift::detail::ap::process_handle_exn_deserialization<
+        ProtocolOut_>(
+        ew,
+        apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
+            serverRequest.requestContext(),
+        apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+        "hasDataById");
     return;
   }
-  auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
-  auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  auto requestPileNotification =
+      apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(
+          serverRequest);
+  auto concurrencyControllerNotification =
+      apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(
+          serverRequest);
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
-    /* .serviceName =*/ this->getServiceName(),
-    /* .definingServiceName =*/ "MyService",
-    /* .methodName =*/ "hasDataById",
-    /* .qualifiedMethodName =*/ "MyService.hasDataById"};
-  auto callback = apache::thrift::HandlerCallbackPtr<bool>::make(
-    apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-    , std::move(ctxStack)
-    , std::move(methodNameInfo)
-    , return_hasDataById<ProtocolIn_,ProtocolOut_>
-    , throw_wrapped_hasDataById<ProtocolIn_, ProtocolOut_>
-    , serverRequest.requestContext()->getProtoSeqId()
-    , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
-    , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
-    , serverRequest.requestContext()
-    , requestPileNotification
-    , concurrencyControllerNotification, std::move(serverRequest.requestData())
-    );
+      /* .serviceName =*/ this->getServiceName(),
+      /* .definingServiceName =*/ "MyService",
+      /* .methodName =*/ "hasDataById",
+      /* .qualifiedMethodName =*/ "MyService.hasDataById"};
+  auto callback =
+      apache::thrift::HandlerCallbackPtr<bool>::make(
+          apache::thrift::detail::ServerRequestHelper::request(
+              std::move(serverRequest)),
+          std::move(ctxStack),
+          std::move(methodNameInfo),
+          return_hasDataById<ProtocolIn_, ProtocolOut_>,
+          throw_wrapped_hasDataById<ProtocolIn_, ProtocolOut_>,
+          serverRequest.requestContext()->getProtoSeqId(),
+          apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+          apache::thrift::detail::ServerRequestHelper::executor(serverRequest),
+          serverRequest.requestContext(),
+          requestPileNotification,
+          concurrencyControllerNotification,
+          std::move(serverRequest.requestData()));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -339,16 +472,21 @@ void MyServiceAsyncProcessor::executeRequest_hasDataById(apache::thrift::ServerR
     };
   };
 #if FOLLY_HAS_COROUTINES
-  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
-    [](auto callback, auto executeHandler, ArgsState args) -> folly::coro::Task<void> {
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
+          *callback)) {
+    [](auto callback, auto executeHandler, ArgsState args)
+        -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+              argRefs));
       executeHandler(std::move(callback), std::move(args));
     }(std::move(callback), makeExecuteHandler(), std::move(args))
-              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
-              .startInlineUnsafe();
+               .scheduleOn(
+                   apache::thrift::detail::ServerRequestHelper::executor(
+                       serverRequest))
+               .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -358,7 +496,9 @@ void MyServiceAsyncProcessor::executeRequest_hasDataById(apache::thrift::ServerR
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_hasDataById(apache::thrift::ContextStack* ctx, bool const& _return) {
+apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_hasDataById(
+    apache::thrift::ContextStack* ctx,
+    bool const& _return) {
   ProtocolOut_ prot;
   ::cpp2::MyService_hasDataById_presult result;
   result.get<0>().value = const_cast<bool*>(&_return);
@@ -367,29 +507,57 @@ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_hasDataById(a
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MyServiceAsyncProcessor::throw_wrapped_hasDataById(apache::thrift::ResponseChannelRequest::UniquePtr req,[[maybe_unused]] int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MyServiceAsyncProcessor::throw_wrapped_hasDataById(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    [[maybe_unused]] int32_t protoSeqId,
+    apache::thrift::ContextStack* ctx,
+    folly::exception_wrapper ew,
+    apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
   {
-    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "hasDataById");
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<
+        ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "hasDataById");
     return;
   }
 }
+//
+// End of Method 'hasDataById'
+//
 
+//
+// Method 'getDataById'
+//
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MyServiceAsyncProcessor::setUpAndProcess_getDataById(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
-  if (!setUpRequestProcessing(req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
+void MyServiceAsyncProcessor::setUpAndProcess_getDataById(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    apache::thrift::SerializedCompressedRequest&& serializedRequest,
+    apache::thrift::Cpp2RequestContext* ctx,
+    folly::EventBase* eb,
+    [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
+  if (!setUpRequestProcessing(
+          req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
     return;
   }
-  auto scope = iface_->getRequestExecutionScope(ctx, apache::thrift::concurrency::NORMAL);
+  auto scope = iface_->getRequestExecutionScope(
+      ctx, apache::thrift::concurrency::NORMAL);
   ctx->setRequestExecutionScope(std::move(scope));
-  processInThread(std::move(req), std::move(serializedRequest), ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, &MyServiceAsyncProcessor::executeRequest_getDataById<ProtocolIn_, ProtocolOut_>, this);
+  processInThread(
+      std::move(req),
+      std::move(serializedRequest),
+      ctx,
+      eb,
+      tm,
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      &MyServiceAsyncProcessor::
+          executeRequest_getDataById<ProtocolIn_, ProtocolOut_>,
+      this);
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MyServiceAsyncProcessor::executeRequest_getDataById(apache::thrift::ServerRequest&& serverRequest) {
+void MyServiceAsyncProcessor::executeRequest_getDataById(
+    apache::thrift::ServerRequest&& serverRequest) {
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
@@ -409,44 +577,56 @@ void MyServiceAsyncProcessor::executeRequest_getDataById(apache::thrift::ServerR
   } args;
 
   auto ctxStack = apache::thrift::ContextStack::create(
-    this->getEventHandlersSharedPtr(),
-    this->getServiceName(),
-    "MyService.getDataById",
-    serverRequest.requestContext());
+      this->getEventHandlersSharedPtr(),
+      this->getServiceName(),
+      "MyService.getDataById",
+      serverRequest.requestContext());
   try {
     auto pargs = args.pargs();
-    deserializeRequest<ProtocolIn_>(pargs, "getDataById", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
-  }
-  catch (...) {
+    deserializeRequest<ProtocolIn_>(
+        pargs,
+        "getDataById",
+        apache::thrift::detail::ServerRequestHelper::compressedRequest(
+            std::move(serverRequest))
+            .uncompress(),
+        ctxStack.get());
+  } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
-    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ew
-        , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-        , serverRequest.requestContext()
-        , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
-        , "getDataById");
+    apache::thrift::detail::ap::process_handle_exn_deserialization<
+        ProtocolOut_>(
+        ew,
+        apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
+            serverRequest.requestContext(),
+        apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+        "getDataById");
     return;
   }
-  auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
-  auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  auto requestPileNotification =
+      apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(
+          serverRequest);
+  auto concurrencyControllerNotification =
+      apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(
+          serverRequest);
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
-    /* .serviceName =*/ this->getServiceName(),
-    /* .definingServiceName =*/ "MyService",
-    /* .methodName =*/ "getDataById",
-    /* .qualifiedMethodName =*/ "MyService.getDataById"};
-  auto callback = apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
-    apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-    , std::move(ctxStack)
-    , std::move(methodNameInfo)
-    , return_getDataById<ProtocolIn_,ProtocolOut_>
-    , throw_wrapped_getDataById<ProtocolIn_, ProtocolOut_>
-    , serverRequest.requestContext()->getProtoSeqId()
-    , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
-    , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
-    , serverRequest.requestContext()
-    , requestPileNotification
-    , concurrencyControllerNotification, std::move(serverRequest.requestData())
-    );
+      /* .serviceName =*/ this->getServiceName(),
+      /* .definingServiceName =*/ "MyService",
+      /* .methodName =*/ "getDataById",
+      /* .qualifiedMethodName =*/ "MyService.getDataById"};
+  auto callback =
+      apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
+          apache::thrift::detail::ServerRequestHelper::request(
+              std::move(serverRequest)),
+          std::move(ctxStack),
+          std::move(methodNameInfo),
+          return_getDataById<ProtocolIn_, ProtocolOut_>,
+          throw_wrapped_getDataById<ProtocolIn_, ProtocolOut_>,
+          serverRequest.requestContext()->getProtoSeqId(),
+          apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+          apache::thrift::detail::ServerRequestHelper::executor(serverRequest),
+          serverRequest.requestContext(),
+          requestPileNotification,
+          concurrencyControllerNotification,
+          std::move(serverRequest.requestData()));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -454,16 +634,21 @@ void MyServiceAsyncProcessor::executeRequest_getDataById(apache::thrift::ServerR
     };
   };
 #if FOLLY_HAS_COROUTINES
-  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
-    [](auto callback, auto executeHandler, ArgsState args) -> folly::coro::Task<void> {
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
+          *callback)) {
+    [](auto callback, auto executeHandler, ArgsState args)
+        -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+              argRefs));
       executeHandler(std::move(callback), std::move(args));
     }(std::move(callback), makeExecuteHandler(), std::move(args))
-              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
-              .startInlineUnsafe();
+               .scheduleOn(
+                   apache::thrift::detail::ServerRequestHelper::executor(
+                       serverRequest))
+               .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -473,7 +658,9 @@ void MyServiceAsyncProcessor::executeRequest_getDataById(apache::thrift::ServerR
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_getDataById(apache::thrift::ContextStack* ctx, ::std::string const& _return) {
+apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_getDataById(
+    apache::thrift::ContextStack* ctx,
+    ::std::string const& _return) {
   ProtocolOut_ prot;
   ::cpp2::MyService_getDataById_presult result;
   result.get<0>().value = const_cast<::std::string*>(&_return);
@@ -482,29 +669,57 @@ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_getDataById(a
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MyServiceAsyncProcessor::throw_wrapped_getDataById(apache::thrift::ResponseChannelRequest::UniquePtr req,[[maybe_unused]] int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MyServiceAsyncProcessor::throw_wrapped_getDataById(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    [[maybe_unused]] int32_t protoSeqId,
+    apache::thrift::ContextStack* ctx,
+    folly::exception_wrapper ew,
+    apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
   {
-    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "getDataById");
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<
+        ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "getDataById");
     return;
   }
 }
+//
+// End of Method 'getDataById'
+//
 
+//
+// Method 'putDataById'
+//
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MyServiceAsyncProcessor::setUpAndProcess_putDataById(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
-  if (!setUpRequestProcessing(req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
+void MyServiceAsyncProcessor::setUpAndProcess_putDataById(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    apache::thrift::SerializedCompressedRequest&& serializedRequest,
+    apache::thrift::Cpp2RequestContext* ctx,
+    folly::EventBase* eb,
+    [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
+  if (!setUpRequestProcessing(
+          req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
     return;
   }
-  auto scope = iface_->getRequestExecutionScope(ctx, apache::thrift::concurrency::NORMAL);
+  auto scope = iface_->getRequestExecutionScope(
+      ctx, apache::thrift::concurrency::NORMAL);
   ctx->setRequestExecutionScope(std::move(scope));
-  processInThread(std::move(req), std::move(serializedRequest), ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, &MyServiceAsyncProcessor::executeRequest_putDataById<ProtocolIn_, ProtocolOut_>, this);
+  processInThread(
+      std::move(req),
+      std::move(serializedRequest),
+      ctx,
+      eb,
+      tm,
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      &MyServiceAsyncProcessor::
+          executeRequest_putDataById<ProtocolIn_, ProtocolOut_>,
+      this);
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MyServiceAsyncProcessor::executeRequest_putDataById(apache::thrift::ServerRequest&& serverRequest) {
+void MyServiceAsyncProcessor::executeRequest_putDataById(
+    apache::thrift::ServerRequest&& serverRequest) {
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
@@ -527,44 +742,56 @@ void MyServiceAsyncProcessor::executeRequest_putDataById(apache::thrift::ServerR
   } args;
 
   auto ctxStack = apache::thrift::ContextStack::create(
-    this->getEventHandlersSharedPtr(),
-    this->getServiceName(),
-    "MyService.putDataById",
-    serverRequest.requestContext());
+      this->getEventHandlersSharedPtr(),
+      this->getServiceName(),
+      "MyService.putDataById",
+      serverRequest.requestContext());
   try {
     auto pargs = args.pargs();
-    deserializeRequest<ProtocolIn_>(pargs, "putDataById", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
-  }
-  catch (...) {
+    deserializeRequest<ProtocolIn_>(
+        pargs,
+        "putDataById",
+        apache::thrift::detail::ServerRequestHelper::compressedRequest(
+            std::move(serverRequest))
+            .uncompress(),
+        ctxStack.get());
+  } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
-    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ew
-        , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-        , serverRequest.requestContext()
-        , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
-        , "putDataById");
+    apache::thrift::detail::ap::process_handle_exn_deserialization<
+        ProtocolOut_>(
+        ew,
+        apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
+            serverRequest.requestContext(),
+        apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+        "putDataById");
     return;
   }
-  auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
-  auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  auto requestPileNotification =
+      apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(
+          serverRequest);
+  auto concurrencyControllerNotification =
+      apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(
+          serverRequest);
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
-    /* .serviceName =*/ this->getServiceName(),
-    /* .definingServiceName =*/ "MyService",
-    /* .methodName =*/ "putDataById",
-    /* .qualifiedMethodName =*/ "MyService.putDataById"};
-  auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
-    apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-    , std::move(ctxStack)
-    , std::move(methodNameInfo)
-    , return_putDataById<ProtocolIn_,ProtocolOut_>
-    , throw_wrapped_putDataById<ProtocolIn_, ProtocolOut_>
-    , serverRequest.requestContext()->getProtoSeqId()
-    , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
-    , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
-    , serverRequest.requestContext()
-    , requestPileNotification
-    , concurrencyControllerNotification, std::move(serverRequest.requestData())
-    );
+      /* .serviceName =*/ this->getServiceName(),
+      /* .definingServiceName =*/ "MyService",
+      /* .methodName =*/ "putDataById",
+      /* .qualifiedMethodName =*/ "MyService.putDataById"};
+  auto callback =
+      apache::thrift::HandlerCallbackPtr<void>::make(
+          apache::thrift::detail::ServerRequestHelper::request(
+              std::move(serverRequest)),
+          std::move(ctxStack),
+          std::move(methodNameInfo),
+          return_putDataById<ProtocolIn_, ProtocolOut_>,
+          throw_wrapped_putDataById<ProtocolIn_, ProtocolOut_>,
+          serverRequest.requestContext()->getProtoSeqId(),
+          apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+          apache::thrift::detail::ServerRequestHelper::executor(serverRequest),
+          serverRequest.requestContext(),
+          requestPileNotification,
+          concurrencyControllerNotification,
+          std::move(serverRequest.requestData()));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -572,16 +799,21 @@ void MyServiceAsyncProcessor::executeRequest_putDataById(apache::thrift::ServerR
     };
   };
 #if FOLLY_HAS_COROUTINES
-  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
-    [](auto callback, auto executeHandler, ArgsState args) -> folly::coro::Task<void> {
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
+          *callback)) {
+    [](auto callback, auto executeHandler, ArgsState args)
+        -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+              argRefs));
       executeHandler(std::move(callback), std::move(args));
     }(std::move(callback), makeExecuteHandler(), std::move(args))
-              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
-              .startInlineUnsafe();
+               .scheduleOn(
+                   apache::thrift::detail::ServerRequestHelper::executor(
+                       serverRequest))
+               .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -591,36 +823,65 @@ void MyServiceAsyncProcessor::executeRequest_putDataById(apache::thrift::ServerR
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_putDataById(apache::thrift::ContextStack* ctx) {
+apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_putDataById(
+    apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyService_putDataById_presult result;
   return serializeResponse("putDataById", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MyServiceAsyncProcessor::throw_wrapped_putDataById(apache::thrift::ResponseChannelRequest::UniquePtr req,[[maybe_unused]] int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MyServiceAsyncProcessor::throw_wrapped_putDataById(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    [[maybe_unused]] int32_t protoSeqId,
+    apache::thrift::ContextStack* ctx,
+    folly::exception_wrapper ew,
+    apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
   {
-    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "putDataById");
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<
+        ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "putDataById");
     return;
   }
 }
+//
+// End of Method 'putDataById'
+//
 
+//
+// Method 'lobDataById'
+//
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MyServiceAsyncProcessor::setUpAndProcess_lobDataById(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
-  if (!setUpRequestProcessing(req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE, iface_)) {
+void MyServiceAsyncProcessor::setUpAndProcess_lobDataById(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    apache::thrift::SerializedCompressedRequest&& serializedRequest,
+    apache::thrift::Cpp2RequestContext* ctx,
+    folly::EventBase* eb,
+    [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
+  if (!setUpRequestProcessing(
+          req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE, iface_)) {
     return;
   }
-  auto scope = iface_->getRequestExecutionScope(ctx, apache::thrift::concurrency::NORMAL);
+  auto scope = iface_->getRequestExecutionScope(
+      ctx, apache::thrift::concurrency::NORMAL);
   ctx->setRequestExecutionScope(std::move(scope));
-  processInThread(std::move(req), std::move(serializedRequest), ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE, &MyServiceAsyncProcessor::executeRequest_lobDataById<ProtocolIn_, ProtocolOut_>, this);
+  processInThread(
+      std::move(req),
+      std::move(serializedRequest),
+      ctx,
+      eb,
+      tm,
+      apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+      &MyServiceAsyncProcessor::
+          executeRequest_lobDataById<ProtocolIn_, ProtocolOut_>,
+      this);
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MyServiceAsyncProcessor::executeRequest_lobDataById(apache::thrift::ServerRequest&& serverRequest) {
+void MyServiceAsyncProcessor::executeRequest_lobDataById(
+    apache::thrift::ServerRequest&& serverRequest) {
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
@@ -643,37 +904,45 @@ void MyServiceAsyncProcessor::executeRequest_lobDataById(apache::thrift::ServerR
   } args;
 
   auto ctxStack = apache::thrift::ContextStack::create(
-    this->getEventHandlersSharedPtr(),
-    this->getServiceName(),
-    "MyService.lobDataById",
-    serverRequest.requestContext());
+      this->getEventHandlersSharedPtr(),
+      this->getServiceName(),
+      "MyService.lobDataById",
+      serverRequest.requestContext());
   try {
     auto pargs = args.pargs();
-    deserializeRequest<ProtocolIn_>(pargs, "lobDataById", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
-  }
-  catch (...) {
+    deserializeRequest<ProtocolIn_>(
+        pargs,
+        "lobDataById",
+        apache::thrift::detail::ServerRequestHelper::compressedRequest(
+            std::move(serverRequest))
+            .uncompress(),
+        ctxStack.get());
+  } catch (...) {
     LOG(ERROR) << "exception in function lobDataById: " << folly::exceptionStr(std::current_exception());
-    apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)->runInEventBaseThread([req = apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))] {});
+    apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)->runInEventBaseThread(
+        [req = apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))] {});
     return;
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
-  auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  auto concurrencyControllerNotification =
+      apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(
+          serverRequest);
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
-    /* .serviceName =*/ this->getServiceName(),
-    /* .definingServiceName =*/ "MyService",
-    /* .methodName =*/ "lobDataById",
-    /* .qualifiedMethodName =*/ "MyService.lobDataById"};
+      /* .serviceName =*/ this->getServiceName(),
+      /* .definingServiceName =*/ "MyService",
+      /* .methodName =*/ "lobDataById",
+      /* .qualifiedMethodName =*/ "MyService.lobDataById"};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
-    apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-    , std::move(ctxStack)
-    , std::move(methodNameInfo)
-    , nullptr /* exceptionFuncPointer */
-    , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
-    , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
-    , serverRequest.requestContext()
-    , requestPileNotification
-    , concurrencyControllerNotification, std::move(serverRequest.requestData())
-    );
+      apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
+      std::move(ctxStack),
+      std::move(methodNameInfo),
+      nullptr /* exceptionFuncPointer */,
+      apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+      apache::thrift::detail::ServerRequestHelper::executor(serverRequest),
+      serverRequest.requestContext(),
+      requestPileNotification,
+      concurrencyControllerNotification,
+      std::move(serverRequest.requestData()));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -681,16 +950,21 @@ void MyServiceAsyncProcessor::executeRequest_lobDataById(apache::thrift::ServerR
     };
   };
 #if FOLLY_HAS_COROUTINES
-  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
-    [](auto callback, auto executeHandler, ArgsState args) -> folly::coro::Task<void> {
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
+          *callback)) {
+    [](auto callback, auto executeHandler, ArgsState args)
+        -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+              argRefs));
       executeHandler(std::move(callback), std::move(args));
     }(std::move(callback), makeExecuteHandler(), std::move(args))
-              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
-              .startInlineUnsafe();
+               .scheduleOn(
+                   apache::thrift::detail::ServerRequestHelper::executor(
+                       serverRequest))
+               .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -699,18 +973,42 @@ void MyServiceAsyncProcessor::executeRequest_lobDataById(apache::thrift::ServerR
 #endif // FOLLY_HAS_COROUTINES
 }
 
+//
+// End of Method 'lobDataById'
+//
+
+//
+// Method 'doNothing'
+//
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MyServiceAsyncProcessor::setUpAndProcess_cppDoNothing(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
-  if (!setUpRequestProcessing(req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
+void MyServiceAsyncProcessor::setUpAndProcess_cppDoNothing(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    apache::thrift::SerializedCompressedRequest&& serializedRequest,
+    apache::thrift::Cpp2RequestContext* ctx,
+    folly::EventBase* eb,
+    [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
+  if (!setUpRequestProcessing(
+          req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
     return;
   }
-  auto scope = iface_->getRequestExecutionScope(ctx, apache::thrift::concurrency::NORMAL);
+  auto scope = iface_->getRequestExecutionScope(
+      ctx, apache::thrift::concurrency::NORMAL);
   ctx->setRequestExecutionScope(std::move(scope));
-  processInThread(std::move(req), std::move(serializedRequest), ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, &MyServiceAsyncProcessor::executeRequest_cppDoNothing<ProtocolIn_, ProtocolOut_>, this);
+  processInThread(
+      std::move(req),
+      std::move(serializedRequest),
+      ctx,
+      eb,
+      tm,
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      &MyServiceAsyncProcessor::
+          executeRequest_cppDoNothing<ProtocolIn_, ProtocolOut_>,
+      this);
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MyServiceAsyncProcessor::executeRequest_cppDoNothing(apache::thrift::ServerRequest&& serverRequest) {
+void MyServiceAsyncProcessor::executeRequest_cppDoNothing(
+    apache::thrift::ServerRequest&& serverRequest) {
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
@@ -727,44 +1025,56 @@ void MyServiceAsyncProcessor::executeRequest_cppDoNothing(apache::thrift::Server
   } args;
 
   auto ctxStack = apache::thrift::ContextStack::create(
-    this->getEventHandlersSharedPtr(),
-    this->getServiceName(),
-    "MyService.doNothing",
-    serverRequest.requestContext());
+      this->getEventHandlersSharedPtr(),
+      this->getServiceName(),
+      "MyService.doNothing",
+      serverRequest.requestContext());
   try {
     auto pargs = args.pargs();
-    deserializeRequest<ProtocolIn_>(pargs, "doNothing", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
-  }
-  catch (...) {
+    deserializeRequest<ProtocolIn_>(
+        pargs,
+        "doNothing",
+        apache::thrift::detail::ServerRequestHelper::compressedRequest(
+            std::move(serverRequest))
+            .uncompress(),
+        ctxStack.get());
+  } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
-    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ew
-        , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-        , serverRequest.requestContext()
-        , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
-        , "doNothing");
+    apache::thrift::detail::ap::process_handle_exn_deserialization<
+        ProtocolOut_>(
+        ew,
+        apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
+            serverRequest.requestContext(),
+        apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+        "doNothing");
     return;
   }
-  auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
-  auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  auto requestPileNotification =
+      apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(
+          serverRequest);
+  auto concurrencyControllerNotification =
+      apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(
+          serverRequest);
   apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
-    /* .serviceName =*/ this->getServiceName(),
-    /* .definingServiceName =*/ "MyService",
-    /* .methodName =*/ "doNothing",
-    /* .qualifiedMethodName =*/ "MyService.doNothing"};
-  auto callback = apache::thrift::HandlerCallbackPtr<void>::make(
-    apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-    , std::move(ctxStack)
-    , std::move(methodNameInfo)
-    , return_cppDoNothing<ProtocolIn_,ProtocolOut_>
-    , throw_wrapped_cppDoNothing<ProtocolIn_, ProtocolOut_>
-    , serverRequest.requestContext()->getProtoSeqId()
-    , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
-    , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
-    , serverRequest.requestContext()
-    , requestPileNotification
-    , concurrencyControllerNotification, std::move(serverRequest.requestData())
-    );
+      /* .serviceName =*/ this->getServiceName(),
+      /* .definingServiceName =*/ "MyService",
+      /* .methodName =*/ "doNothing",
+      /* .qualifiedMethodName =*/ "MyService.doNothing"};
+  auto callback =
+      apache::thrift::HandlerCallbackPtr<void>::make(
+          apache::thrift::detail::ServerRequestHelper::request(
+              std::move(serverRequest)),
+          std::move(ctxStack),
+          std::move(methodNameInfo),
+          return_cppDoNothing<ProtocolIn_, ProtocolOut_>,
+          throw_wrapped_cppDoNothing<ProtocolIn_, ProtocolOut_>,
+          serverRequest.requestContext()->getProtoSeqId(),
+          apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+          apache::thrift::detail::ServerRequestHelper::executor(serverRequest),
+          serverRequest.requestContext(),
+          requestPileNotification,
+          concurrencyControllerNotification,
+          std::move(serverRequest.requestData()));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -772,16 +1082,21 @@ void MyServiceAsyncProcessor::executeRequest_cppDoNothing(apache::thrift::Server
     };
   };
 #if FOLLY_HAS_COROUTINES
-  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(*callback)) {
-    [](auto callback, auto executeHandler, ArgsState args) -> folly::coro::Task<void> {
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
+          *callback)) {
+    [](auto callback, auto executeHandler, ArgsState args)
+        -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+              argRefs));
       executeHandler(std::move(callback), std::move(args));
     }(std::move(callback), makeExecuteHandler(), std::move(args))
-              .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
-              .startInlineUnsafe();
+               .scheduleOn(
+                   apache::thrift::detail::ServerRequestHelper::executor(
+                       serverRequest))
+               .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -791,23 +1106,35 @@ void MyServiceAsyncProcessor::executeRequest_cppDoNothing(apache::thrift::Server
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_cppDoNothing(apache::thrift::ContextStack* ctx) {
+apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_cppDoNothing(
+    apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyService_cppDoNothing_presult result;
   return serializeResponse("doNothing", &prot, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MyServiceAsyncProcessor::throw_wrapped_cppDoNothing(apache::thrift::ResponseChannelRequest::UniquePtr req,[[maybe_unused]] int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MyServiceAsyncProcessor::throw_wrapped_cppDoNothing(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    [[maybe_unused]] int32_t protoSeqId,
+    apache::thrift::ContextStack* ctx,
+    folly::exception_wrapper ew,
+    apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
   {
-    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "doNothing");
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<
+        ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "doNothing");
     return;
   }
 }
+//
+// End of Method 'doNothing'
+//
 
+//
+// End of Service Methods
+//
 
 } // namespace cpp2

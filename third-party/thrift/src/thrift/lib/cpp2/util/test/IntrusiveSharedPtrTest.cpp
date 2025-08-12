@@ -16,6 +16,8 @@
 
 #include <gtest/gtest.h>
 
+#include <thread>
+
 #include <folly/synchronization/RelaxedAtomic.h>
 #include <thrift/lib/cpp2/util/IntrusiveSharedPtr.h>
 
@@ -785,4 +787,77 @@ TEST(IntrusiveSharedPtrTest, UseCountNullAssignment) {
 
   p2 = nullptr;
   EXPECT_EQ(p2.use_count(), 0);
+}
+
+// Deterministic test for memory ordering bug
+//
+// This test creates a race condition where one thread modifies non-atomic state
+// and releases its reference, while the main thread concurrently releases the
+// last reference and destroys the object. Without proper memory ordering in
+// IntrusiveSharedPtr, the destructor might not see the modification.
+TEST(IntrusiveSharedPtrTest, MemoryOrderingVisibilityOnDestruction) {
+  struct TestObject {
+    int non_atomic_data = 0;
+    int& destruction_observed_value;
+    BasicIntrusiveSharedPtrControlBlock controlBlock_;
+
+    explicit TestObject(int& observed_value_ref)
+        : destruction_observed_value(observed_value_ref) {}
+
+    ~TestObject() { destruction_observed_value = non_atomic_data; }
+
+    TestObject(const TestObject&) = delete;
+    TestObject& operator=(const TestObject&) = delete;
+    TestObject(TestObject&&) = delete;
+    TestObject& operator=(TestObject&&) = delete;
+
+    struct Access {
+      static auto acquireRef(TestObject& obj) noexcept {
+        obj.controlBlock_.acquireRef();
+      }
+      static auto releaseRef(TestObject& obj) noexcept {
+        return obj.controlBlock_.releaseRef();
+      }
+      static auto useCount(const TestObject& obj) noexcept {
+        return obj.controlBlock_.useCount();
+      }
+    };
+    using Ptr = IntrusiveSharedPtr<TestObject, Access>;
+  };
+
+  int destruction_observed_value = -1;
+
+  auto obj = TestObject::Ptr::make(destruction_observed_value);
+
+  std::thread th([copy = obj]() mutable {
+    copy->non_atomic_data = 42;
+
+    // If IntrusiveSharedPtr has proper memory ordering, then the modification
+    // above is visible to the destructor below in the main thread
+    copy.reset();
+  });
+
+  // Wait for the other thread to release its reference before the main thread
+  // releases the final reference and triggers the destructor
+  while (obj.use_count() > 1) {
+    std::this_thread::yield();
+  }
+
+  // Release the last reference - this triggers the race
+  // The destructor should see the modification made by the other thread if
+  // IntrusiveSharedPtr provides proper memory ordering. Otherwise, Thread
+  // Sanitizer is expected to report a data race here if it is enabled
+  obj.reset();
+
+  // This join() is a synchronization point but we specifically want to push the
+  // synchronization point until after the call to reset() above - we want to
+  // test whether reset() itself has sufficient internal synchronization between
+  // modifications to the object and destruction of the object
+  th.join();
+
+  // A sanity-check expectation
+  // Even if memory ordering is insufficient, this expectation is likely to pass
+  // by accident on most platforms most of the time
+  // The real point of the test is whether Thread Sanitizer reports a data race
+  EXPECT_EQ(destruction_observed_value, 42);
 }

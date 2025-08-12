@@ -30,6 +30,18 @@ module Is_as_always = struct
   }
 end
 
+module Null_coalesce_always = struct
+  type kind =
+    | Null_coalesce_always_null
+    | Null_coalesce_never_null
+
+  type t = {
+    kind: kind;
+    lhs_pos: Pos_or_decl.t;
+    lhs_ty: string;
+  }
+end
+
 module Sketchy_null_check = struct
   type kind =
     | Coalesce
@@ -176,5 +188,6 @@ type (_, _) kind =
   | Static_call_on_trait : (Static_call_on_trait.t, warn) kind
   | Static_property_override : (Static_property_override.t, warn) kind
   | String_to_class_pointer : (String_to_class_pointer.t, warn) kind
+  | Null_coalesce_always : (Null_coalesce_always.t, warn) kind
 
 type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

@@ -815,6 +815,7 @@ module Warning = struct
     | StaticCallOnTrait [@value 12020]
     | StaticPropertyOverride [@value 12021]
     | StringToClassPointer [@value 12022]
+    | NullCoalesceAlways [@value 12023]
   [@@deriving enum, ord, show { with_path = false }]
 end
 

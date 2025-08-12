@@ -40,7 +40,7 @@ trait CodegenAssertUnchanged {
     ?string $token = null,
   ): void {
     $token = $token ?? self::findToken();
-    $exp = self::getTokenToExpected()[$token ?? self::findToken()];
+    $exp = self::getTokenToExpected()[$token];
     expect($exp)->toEqual(
       $value,
       "The value for token (%s) has changed.\nExpected: %s\nActual: %s",

@@ -1,3 +1,7 @@
+WARN: File "coalesce_conditional_refinement.php", line 4, characters 3-29:
+This null coalesce will always evaluate to its left-hand side. (Warn[12023])
+  File "coalesce_conditional_refinement.php", line 4, characters 3-4:
+  The expression on the left has type `int` which can never be `null`.
 ERROR: File "coalesce_conditional_refinement.php", line 5, characters 10-11:
 Invalid return type (Typing[4110])
   File "coalesce_conditional_refinement.php", line 3, characters 25-27:

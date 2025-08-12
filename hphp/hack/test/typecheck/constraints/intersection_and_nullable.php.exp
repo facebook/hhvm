@@ -1,1 +1,4 @@
-No errors
+WARN: File "intersection_and_nullable.php", line 11, characters 40-48:
+This null coalesce will always evaluate to its left-hand side. (Warn[12023])
+  File "intersection_and_nullable.php", line 12, characters 5-7:
+  The expression on the left has type `float` which can never be `null`.

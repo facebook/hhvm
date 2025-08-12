@@ -1,3 +1,27 @@
+WARN: File "questionquestion.php", line 11, characters 5-16:
+This null coalesce will always evaluate to its right-hand side. (Warn[12023])
+  File "questionquestion.php", line 11, characters 5-8:
+  The expression on the left has type `null` which is always `null`.
+WARN: File "questionquestion.php", line 12, characters 5-13:
+This null coalesce will always evaluate to its right-hand side. (Warn[12023])
+  File "questionquestion.php", line 12, characters 5-8:
+  The expression on the left has type `null` which is always `null`.
+WARN: File "questionquestion.php", line 13, characters 5-14:
+This null coalesce will always evaluate to its right-hand side. (Warn[12023])
+  File "questionquestion.php", line 13, characters 5-8:
+  The expression on the left has type `null` which is always `null`.
+WARN: File "questionquestion.php", line 15, characters 5-12:
+This null coalesce will always evaluate to its left-hand side. (Warn[12023])
+  File "questionquestion.php", line 10, characters 31-40:
+  The expression on the left has type `ExampleInt` which can never be `null`.
+WARN: File "questionquestion.php", line 17, characters 11-20:
+This null coalesce will always evaluate to its right-hand side. (Warn[12023])
+  File "questionquestion.php", line 17, characters 11-14:
+  The expression on the left has type `null` which is always `null`.
+WARN: File "questionquestion.php", line 19, characters 12-21:
+This null coalesce will always evaluate to its right-hand side. (Warn[12023])
+  File "questionquestion.php", line 19, characters 12-15:
+  The expression on the left has type `null` which is always `null`.
 ERROR: File "questionquestion.php", line 30, characters 5-9:
 Unsupported expression tree syntax. (Parsing[1002])
 ERROR: File "questionquestion.php", line 30, characters 5-14:

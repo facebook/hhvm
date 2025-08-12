@@ -106,7 +106,7 @@ class ExpectObj<T> {
     );
     if ($ex_message is nonnull) {
       self::assert(
-        \strpos($thrown?->getMessage() ?? '', $ex_message) !== false,
+        \strpos($thrown?->getMessage(), $ex_message) !== false,
         $_failure_message ??
           'Expected the exception message to be "'.
           $ex_message.

@@ -1,3 +1,7 @@
+WARN: File "unused_awaitable13.php", line 15, characters 8-15:
+This null coalesce will always evaluate to its left-hand side. (Warn[12023])
+  File "unused_awaitable13.php", line 3, characters 21-34:
+  The expression on the left has type `Awaitable<int>` which can never be `null`.
 ERROR: File "unused_awaitable13.php", line 15, characters 8-9:
 This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
   File "unused_awaitable13.php", line 3, characters 21-34:

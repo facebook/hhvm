@@ -1,3 +1,11 @@
+WARN: File "map_corner_case.php", line 13, characters 10-32:
+This null coalesce will always evaluate to its right-hand side. (Warn[12023])
+  File "collections/Map.hhi", line 444, characters 35-37:
+  The expression on the left has type `null` which is always `null`.
+WARN: File "map_corner_case.php", line 14, characters 10-32:
+This null coalesce will always evaluate to its right-hand side. (Warn[12023])
+  File "collections/Map.hhi", line 444, characters 35-37:
+  The expression on the left has type `null` which is always `null`.
 ERROR: File "map_corner_case.php", line 24, characters 5-17:
 Invalid assignment (Typing[4110])
   File "map_corner_case.php", line 13, characters 27-32:

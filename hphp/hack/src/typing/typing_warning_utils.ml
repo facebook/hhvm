@@ -126,6 +126,42 @@ module Is_as_always = struct
   let quickfixes _ = []
 end
 
+module Null_coalesce_always = struct
+  type t = Typing_warning.Null_coalesce_always.t
+
+  let code = Codes.NullCoalesceAlways
+
+  let codes = [code]
+
+  let code _ = code
+
+  let claim { Typing_warning.Null_coalesce_always.kind; _ } =
+    let side =
+      match kind with
+      | Null_coalesce_always_null -> "right"
+      | Null_coalesce_never_null -> "left"
+    in
+    Format.sprintf
+      "This null coalesce will always evaluate to its %s-hand side."
+      side
+
+  let reasons { Typing_warning.Null_coalesce_always.kind; lhs_pos; lhs_ty; _ } =
+    let sub =
+      match kind with
+      | Null_coalesce_always_null -> "is always"
+      | Null_coalesce_never_null -> "can never be"
+    in
+    [
+      ( lhs_pos,
+        Format.sprintf
+          "The expression on the left has type %s which %s `null`."
+          (Markdown_lite.md_codify lhs_ty)
+          sub );
+    ]
+
+  let quickfixes _t = []
+end
+
 module Sketchy_null_check = struct
   type t = Typing_warning.Sketchy_null_check.t
 
@@ -595,6 +631,7 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
   | Typing_warning.Static_call_on_trait -> (module Static_call_on_trait)
   | Typing_warning.Static_property_override -> (module Static_property_override)
   | Typing_warning.String_to_class_pointer -> (module String_to_class_pointer)
+  | Typing_warning.Null_coalesce_always -> (module Null_coalesce_always)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :

@@ -4161,7 +4161,7 @@ function runner_precheck(): void {
   // Basic checking for runner.
   $server = HH\global_get('_SERVER');
   $env = HH\global_get('_ENV');
-  if (!((bool)$server ?? false) || !((bool)$env ?? false)) {
+  if (!((bool)$server) || !((bool)$env)) {
     error("\\HH\global_get('_SERVER')/\\HH\global_get('_ENV') variables not available");
   }
 }

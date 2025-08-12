@@ -212,6 +212,10 @@ class IntrusiveSharedPtr {
     return ptr_ != nullptr;
   }
 
+  long use_count() const noexcept {
+    return ptr_ == nullptr ? 0 : static_cast<long>(TAccess::useCount(*ptr_));
+  }
+
   void swap(IntrusiveSharedPtr& other) noexcept { std::swap(ptr_, other.ptr_); }
 
   [[deprecated("release() is unsafe in concurrent code"), nodiscard]] pointer

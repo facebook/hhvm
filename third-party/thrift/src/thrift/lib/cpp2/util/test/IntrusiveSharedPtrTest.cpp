@@ -46,6 +46,10 @@ struct LifetimeTracker {
         LifetimeTracker& obj) noexcept {
       return obj.releaseRef();
     }
+    static BasicIntrusiveSharedPtrControlBlock::RefCount useCount(
+        const LifetimeTracker& obj) noexcept {
+      return obj.controlBlock_.useCount();
+    }
   };
   using Ptr = IntrusiveSharedPtr<LifetimeTracker, InstrusivePtrAccess>;
   static_assert(
@@ -566,4 +570,219 @@ TEST(IntrusiveSharedPtrTest, Hash) {
   EXPECT_EQ(
       std::hash<LifetimeTracker::Ptr>()(p1),
       std::hash<LifetimeTracker*>()(nullptr));
+}
+
+TEST(IntrusiveSharedPtrTest, UseCountBasic) {
+  // Test use_count() for null pointer
+  LifetimeTracker::Ptr p1;
+  EXPECT_EQ(p1.use_count(), 0);
+
+  // Test use_count() for single owner
+  p1 = LifetimeTracker::Ptr::make();
+  EXPECT_EQ(p1.use_count(), 1);
+
+  // Test use_count() after reset
+  p1.reset();
+  EXPECT_EQ(p1.use_count(), 0);
+}
+
+TEST(IntrusiveSharedPtrTest, UseCountCopyConstruct) {
+  LifetimeTracker::Ptr p1 = LifetimeTracker::Ptr::make();
+  EXPECT_EQ(p1.use_count(), 1);
+
+  // Copy construction should increase use_count
+  LifetimeTracker::Ptr p2 = p1;
+  EXPECT_EQ(p1.use_count(), 2);
+  EXPECT_EQ(p2.use_count(), 2);
+
+  // Reset one copy, use_count should decrease
+  p1.reset();
+  EXPECT_EQ(p1.use_count(), 0);
+  EXPECT_EQ(p2.use_count(), 1);
+
+  // Reset the last copy, use_count should be 0
+  p2.reset();
+  EXPECT_EQ(p2.use_count(), 0);
+}
+
+TEST(IntrusiveSharedPtrTest, UseCountMoveConstruct) {
+  LifetimeTracker::Ptr p1 = LifetimeTracker::Ptr::make();
+  EXPECT_EQ(p1.use_count(), 1);
+
+  // Move construction should transfer ownership, not increase use_count
+  LifetimeTracker::Ptr p2 = std::move(p1);
+  // @lint-ignore CLANGTIDY bugprone-use-after-move
+  EXPECT_EQ(p1.use_count(), 0);
+  EXPECT_EQ(p2.use_count(), 1);
+
+  p2.reset();
+  EXPECT_EQ(p2.use_count(), 0);
+}
+
+TEST(IntrusiveSharedPtrTest, UseCountCopyAssign) {
+  LifetimeTracker::Ptr p1 = LifetimeTracker::Ptr::make();
+  LifetimeTracker::Ptr p2;
+  EXPECT_EQ(p1.use_count(), 1);
+  EXPECT_EQ(p2.use_count(), 0);
+
+  // Copy assignment should increase use_count
+  p2 = p1;
+  EXPECT_EQ(p1.use_count(), 2);
+  EXPECT_EQ(p2.use_count(), 2);
+
+  // Reset one copy
+  p1.reset();
+  EXPECT_EQ(p1.use_count(), 0);
+  EXPECT_EQ(p2.use_count(), 1);
+}
+
+TEST(IntrusiveSharedPtrTest, UseCountMoveAssign) {
+  LifetimeTracker::Ptr p1 = LifetimeTracker::Ptr::make();
+  LifetimeTracker::Ptr p2;
+  EXPECT_EQ(p1.use_count(), 1);
+  EXPECT_EQ(p2.use_count(), 0);
+
+  // Move assignment should transfer ownership, not increase use_count
+  p2 = std::move(p1);
+  // @lint-ignore CLANGTIDY bugprone-use-after-move
+  EXPECT_EQ(p1.use_count(), 0);
+  EXPECT_EQ(p2.use_count(), 1);
+
+  p2.reset();
+  EXPECT_EQ(p2.use_count(), 0);
+}
+
+TEST(IntrusiveSharedPtrTest, UseCountReassign) {
+  LifetimeTracker::Ptr p1 = LifetimeTracker::Ptr::make();
+  LifetimeTracker::Ptr p2 = LifetimeTracker::Ptr::make();
+  EXPECT_EQ(p1.use_count(), 1);
+  EXPECT_EQ(p2.use_count(), 1);
+
+  // Copy reassignment should decrease old object's count and increase new
+  // object's count
+  p2 = p1;
+  EXPECT_EQ(p1.use_count(), 2);
+  EXPECT_EQ(p2.use_count(), 2);
+
+  // Reset both copies
+  p1.reset();
+  EXPECT_EQ(p1.use_count(), 0);
+  EXPECT_EQ(p2.use_count(), 1);
+
+  p2.reset();
+  EXPECT_EQ(p2.use_count(), 0);
+}
+
+TEST(IntrusiveSharedPtrTest, UseCountMoveReassign) {
+  LifetimeTracker::Ptr p1 = LifetimeTracker::Ptr::make();
+  LifetimeTracker::Ptr p2 = LifetimeTracker::Ptr::make();
+  EXPECT_EQ(p1.use_count(), 1);
+  EXPECT_EQ(p2.use_count(), 1);
+
+  // Move reassignment should destroy old object and transfer ownership of new
+  // object
+  p2 = std::move(p1);
+  // @lint-ignore CLANGTIDY bugprone-use-after-move
+  EXPECT_EQ(p1.use_count(), 0);
+  EXPECT_EQ(p2.use_count(), 1);
+
+  p2.reset();
+  EXPECT_EQ(p2.use_count(), 0);
+}
+
+TEST(IntrusiveSharedPtrTest, UseCountMultipleCopies) {
+  LifetimeTracker::Ptr p1 = LifetimeTracker::Ptr::make();
+  EXPECT_EQ(p1.use_count(), 1);
+
+  // Create multiple copies
+  LifetimeTracker::Ptr p2 = p1;
+  LifetimeTracker::Ptr p3 = p1;
+  LifetimeTracker::Ptr p4 = p2;
+  EXPECT_EQ(p1.use_count(), 4);
+  EXPECT_EQ(p2.use_count(), 4);
+  EXPECT_EQ(p3.use_count(), 4);
+  EXPECT_EQ(p4.use_count(), 4);
+
+  // Reset copies one by one
+  p1.reset();
+  EXPECT_EQ(p1.use_count(), 0);
+  EXPECT_EQ(p2.use_count(), 3);
+  EXPECT_EQ(p3.use_count(), 3);
+  EXPECT_EQ(p4.use_count(), 3);
+
+  p2.reset();
+  EXPECT_EQ(p2.use_count(), 0);
+  EXPECT_EQ(p3.use_count(), 2);
+  EXPECT_EQ(p4.use_count(), 2);
+
+  p3.reset();
+  EXPECT_EQ(p3.use_count(), 0);
+  EXPECT_EQ(p4.use_count(), 1);
+
+  p4.reset();
+  EXPECT_EQ(p4.use_count(), 0);
+}
+
+TEST(IntrusiveSharedPtrTest, UseCountSwap) {
+  LifetimeTracker::Ptr p1 = LifetimeTracker::Ptr::make();
+  LifetimeTracker::Ptr p2 = LifetimeTracker::Ptr::make();
+  LifetimeTracker::Ptr p3 = p1; // p1 has use_count 2, p2 has use_count 1
+
+  EXPECT_EQ(p1.use_count(), 2);
+  EXPECT_EQ(p2.use_count(), 1);
+  EXPECT_EQ(p3.use_count(), 2);
+
+  // Swap should preserve use_counts for the objects
+  swap(p1, p2);
+  EXPECT_EQ(p1.use_count(), 1); // Now points to what p2 pointed to
+  EXPECT_EQ(p2.use_count(), 2); // Now points to what p1 pointed to
+  EXPECT_EQ(p3.use_count(), 2); // Still points to original p1 object
+}
+
+TEST(IntrusiveSharedPtrTest, UseCountSelfAssign) {
+  LifetimeTracker::Ptr p1 = LifetimeTracker::Ptr::make();
+  LifetimeTracker::Ptr p2 = p1;
+  EXPECT_EQ(p1.use_count(), 2);
+  EXPECT_EQ(p2.use_count(), 2);
+
+  // Self assignment should not change use_count
+  p1 = p1;
+  EXPECT_EQ(p1.use_count(), 2);
+  EXPECT_EQ(p2.use_count(), 2);
+
+  // Self move assignment should not change use_count
+  p1 = std::move(p1);
+  EXPECT_EQ(p1.use_count(), 2);
+  EXPECT_EQ(p2.use_count(), 2);
+}
+
+TEST(IntrusiveSharedPtrTest, UseCountFromUniquePtr) {
+  // Construction from unique_ptr should have use_count 1
+  LifetimeTracker::Ptr p1 = std::make_unique<LifetimeTracker>();
+  EXPECT_EQ(p1.use_count(), 1);
+
+  // Assignment from unique_ptr should have use_count 1
+  LifetimeTracker::Ptr p2;
+  p2 = std::make_unique<LifetimeTracker>();
+  EXPECT_EQ(p2.use_count(), 1);
+
+  // Copy should increase use_count
+  LifetimeTracker::Ptr p3 = p1;
+  EXPECT_EQ(p1.use_count(), 2);
+  EXPECT_EQ(p3.use_count(), 2);
+}
+
+TEST(IntrusiveSharedPtrTest, UseCountNullAssignment) {
+  LifetimeTracker::Ptr p1 = LifetimeTracker::Ptr::make();
+  LifetimeTracker::Ptr p2 = p1;
+  EXPECT_EQ(p1.use_count(), 2);
+  EXPECT_EQ(p2.use_count(), 2);
+
+  // Assignment to nullptr should reset use_count
+  p1 = nullptr;
+  EXPECT_EQ(p1.use_count(), 0);
+  EXPECT_EQ(p2.use_count(), 1);
+
+  p2 = nullptr;
+  EXPECT_EQ(p2.use_count(), 0);
 }

@@ -636,6 +636,7 @@ class t_mstch_rust_generator : public t_mstch_generator {
   std::string template_prefix() const override { return "rust"; }
 
   void generate_program() override;
+  void generate_split_types();
   void fill_validator_visitors(ast_validator&) const override;
 
  private:
@@ -649,8 +650,11 @@ class rust_mstch_program : public mstch_program {
       const t_program* program,
       mstch_context& ctx,
       mstch_element_position pos,
-      const rust_codegen_options* options)
-      : mstch_program(program, ctx, pos), options_(*options) {
+      const rust_codegen_options* options,
+      const int split_id = 0)
+      : mstch_program(program, ctx, pos),
+        options_(*options),
+        split_id_(split_id) {
     register_methods(
         this,
         {
@@ -702,6 +706,14 @@ class rust_mstch_program : public mstch_program {
              &rust_mstch_program::rust_gen_native_metadata},
             {"program:types_with_constructors",
              &rust_mstch_program::rust_types_with_constructors},
+            {"program:current_split_structs",
+             &rust_mstch_program::current_split_structs},
+            {"program:current_split_typedefs",
+             &rust_mstch_program::current_split_typedefs},
+            {"program:current_split_enums",
+             &rust_mstch_program::current_split_enums},
+            {"program:split_mode_enabled?",
+             &rust_mstch_program::split_mode_enabled},
         });
     register_has_option(
         "program:deprecated_optional_with_default_is_some?",
@@ -966,8 +978,137 @@ class rust_mstch_program : public mstch_program {
     return mstch::array(types.begin(), types.end());
   }
 
+  mstch::node current_split_structs() {
+    std::string id = program_->name() + get_program_namespace(program_);
+    return make_mstch_array_cached(
+        struct_split_assignments_[split_id_],
+        *context_.struct_factory,
+        context_.struct_cache,
+        id);
+  }
+
+  mstch::node current_split_typedefs() {
+    return make_mstch_typedefs(typedef_split_assignments_[split_id_]);
+  }
+
+  mstch::node current_split_enums() {
+    std::string id = program_->name() + get_program_namespace(program_);
+    return make_mstch_array_cached(
+        enum_split_assignments_[split_id_],
+        *context_.enum_factory,
+        context_.enum_cache,
+        id);
+  }
+  mstch::node split_mode_enabled() {
+    if (options_.types_split_count) {
+      initialize_type_split();
+      generate_split_data();
+      return true;
+    } else {
+      return false;
+    }
+  }
+
  private:
   const rust_codegen_options& options_;
+  const int split_id_;
+  std::map<int, std::vector<t_structured*>> struct_split_assignments_;
+  std::map<int, std::vector<t_typedef*>> typedef_split_assignments_;
+  std::map<int, std::vector<t_enum*>> enum_split_assignments_;
+  std::set<const t_named*> all_types;
+  std::set<const t_named*> dependent_types;
+
+  void initialize_type_split() {
+    // Collect all types in this program
+    for (const t_enum* enm : program_->enums()) {
+      all_types.insert(enm);
+    }
+    for (const t_typedef* typedf : program_->typedefs()) {
+      all_types.insert(typedf);
+    }
+    for (const t_structured* strct : program_->structured_definitions()) {
+      all_types.insert(strct);
+    }
+
+    // Identify dependencies within types
+    for (t_typedef* typedf : program_->typedefs()) {
+      if (generate_reference_set(typedf->get_type())) {
+        dependent_types.insert(typedf);
+      }
+    }
+    for (t_structured* strct : program_->structured_definitions()) {
+      for (const t_field& field : strct->fields()) {
+        if (generate_reference_set(field.get_type())) {
+          dependent_types.insert(strct);
+        }
+      }
+    }
+  }
+
+  void generate_split_data() {
+    auto next = [counter = 0, this]() mutable {
+      return ((counter++) % options_.types_split_count) + 1;
+    };
+    for (t_typedef* typedf : program_->typedefs()) {
+      if (dependent_types.count(typedf)) {
+        // place all dependent types in the first chunk
+        typedef_split_assignments_[0].emplace_back(typedf);
+      } else {
+        // place independent type in a shard that isn't zero
+        typedef_split_assignments_[next()].emplace_back(typedf);
+      }
+    }
+
+    for (t_structured* strct : program_->structured_definitions()) {
+      if (dependent_types.count(strct)) {
+        // place all dependent types in the first chunk
+        struct_split_assignments_[0].emplace_back(strct);
+      } else {
+        // place independent type in a shard that isn't zero
+        struct_split_assignments_[next()].emplace_back(strct);
+      }
+    }
+
+    for (t_enum* enm : program_->enums()) {
+      if (dependent_types.count(enm)) {
+        // place all dependent types in the first chunk
+        enum_split_assignments_[0].emplace_back(enm);
+      } else {
+        // place independent type in a shard that isn't zero
+        enum_split_assignments_[next()].emplace_back(enm);
+      }
+    }
+  }
+
+  // This function checks to see if a type is defined within the current crate
+  // by checking the `all_types` set for membership. If the type is within the
+  // `all_types` set, it adds the type to the `dependent_types` set and returns
+  // true. This function's return value is used to determine if the parent type
+  // needs to be added to the `dependent_types` set
+  bool generate_reference_set(const t_type* type) {
+    if (!type) {
+      return false;
+    }
+
+    bool dependent = false;
+
+    // Check if the type is defined within the current crate. If it is, add the
+    // type to the dependent type set.
+    if (all_types.count(type)) {
+      dependent_types.insert(type);
+      dependent = true;
+    }
+    // Recursively check container types
+    else if (const t_list* list_type = dynamic_cast<const t_list*>(type)) {
+      dependent = generate_reference_set(list_type->get_elem_type());
+    } else if (const t_set* set_type = dynamic_cast<const t_set*>(type)) {
+      dependent = generate_reference_set(set_type->get_elem_type());
+    } else if (const t_map* map_type = dynamic_cast<const t_map*>(type)) {
+      dependent = generate_reference_set(map_type->get_key_type()) ||
+          generate_reference_set(map_type->get_val_type());
+    }
+    return dependent;
+  }
 
  private:
   template <class T>
@@ -1157,9 +1298,10 @@ class rust_mstch_function : public mstch_function {
     auto upcamel_name = camelcase(function_->name());
     if (function_upcamel_names_.count(upcamel_name) > 1) {
       // If a service contains a pair of methods that collide converted to
-      // CamelCase, like a service containing both create_shard and createShard,
-      // then we name the exception types without any case conversion; instead
-      // of a CreateShardExn they'll get create_shardExn and createShardExn.
+      // CamelCase, like a service containing both create_shard and
+      // createShard, then we name the exception types without any case
+      // conversion; instead of a CreateShardExn they'll get create_shardExn
+      // and createShardExn.
       return function_->name();
     }
     return upcamel_name;
@@ -1183,9 +1325,9 @@ class rust_mstch_function : public mstch_function {
         sink ? sink->final_response_exceptions() : nullptr);
   }
   mstch::node rust_make_unique_exceptions(const t_structured* s) {
-    // When generating From<> impls for an error type, we must not generate one
-    // where more than one variant contains the same type of exception. Find
-    // only those exceptions that map uniquely to a variant.
+    // When generating From<> impls for an error type, we must not generate
+    // one where more than one variant contains the same type of exception.
+    // Find only those exceptions that map uniquely to a variant.
 
     std::vector<const t_field*> unique_exceptions;
     if (s) {
@@ -1405,10 +1547,10 @@ class rust_mstch_struct : public mstch_struct {
   mstch::node rust_doc() { return quoted_rust_doc(struct_); }
   mstch::node rust_derive() {
     if (auto annotation = find_structured_derive_annotation(*struct_)) {
-      // Always replace `crate::` with the package name of where this annotation
-      // originated to support derives applied with `@scope.Transitive`.
-      // If the annotation originates from the same module, this will just
-      // return `crate::` anyways to be a no-op.
+      // Always replace `crate::` with the package name of where this
+      // annotation originated to support derives applied with
+      // `@scope.Transitive`. If the annotation originates from the same
+      // module, this will just return `crate::` anyways to be a no-op.
       std::string package =
           get_types_import_name(annotation->program(), options_);
 
@@ -1515,10 +1657,10 @@ class rust_mstch_enum : public mstch_enum {
   }
   mstch::node rust_derive() {
     if (auto annotation = find_structured_derive_annotation(*enum_)) {
-      // Always replace `crate::` with the package name of where this annotation
-      // originated to support derives applied with `@scope.Transitive`.
-      // If the annotation originates from the same module, this will just
-      // return `crate::` anyways to be a no-op.
+      // Always replace `crate::` with the package name of where this
+      // annotation originated to support derives applied with
+      // `@scope.Transitive`. If the annotation originates from the same
+      // module, this will just return `crate::` anyways to be a no-op.
       std::string package =
           get_types_import_name(annotation->program(), options_);
 
@@ -1872,8 +2014,8 @@ class mstch_rust_value : public mstch_base {
  private:
   const t_const_value* const_value_;
 
-  // The type (potentially a typedef) by which the value's type is known to the
-  // current crate.
+  // The type (potentially a typedef) by which the value's type is known to
+  // the current crate.
   const t_type* local_type_;
 
   // The underlying type of the value after stepping through any non-newtype
@@ -2205,8 +2347,9 @@ class rust_mstch_typedef : public mstch_typedef {
   mstch::node rust_newtype() { return has_newtype_annotation(typedef_); }
   mstch::node rust_type() {
     // See 'typedef.mustache'. The context is writing a newtype: e.g. `pub
-    // struct T(pub X)`. If `X` has a `rust.Type` annotation `A` we should write
-    // `struct T(pub A)` If it does not, we should write `pub struct T (pub X)`.
+    // struct T(pub X)`. If `X` has a `rust.Type` annotation `A` we should
+    // write `struct T(pub A)` If it does not, we should write `pub struct T
+    // (pub X)`.
     std::string rust_type;
     if (const t_const* annot =
             typedef_->find_structured_annotation_or_null(kRustTypeUri)) {
@@ -2236,8 +2379,8 @@ class rust_mstch_typedef : public mstch_typedef {
   mstch::node rust_nonstandard() {
     // See 'typedef.mustache'. The context is writing serialization functions
     // for a newtype `pub struct T(pub X)`.
-    // If `X` has a type annotation `A` that is non-standard we should emit the
-    // phrase `crate::r#impl::write(&self.0, p)`. If `X` does not have an
+    // If `X` has a type annotation `A` that is non-standard we should emit
+    // the phrase `crate::r#impl::write(&self.0, p)`. If `X` does not have an
     // annotation or does but it is not non-standard we should write
     // `self.0.write(p)`.
     std::string rust_type;
@@ -2470,6 +2613,27 @@ void t_mstch_rust_generator::generate_program() {
   write_output("namespace-rust", namespace_rust + '\n');
   write_output("namespace-cpp2", namespace_cpp2 + '\n');
   write_output("service-names", service_names);
+}
+
+void t_mstch_rust_generator::generate_split_types() {
+  // Generate individual split files
+  for (int split_id = 0; split_id <= options_.types_split_count; ++split_id) {
+    auto split_program = std::make_shared<rust_mstch_program>(
+        program_,
+        mstch_context_,
+        mstch_element_position(),
+        &options_,
+        split_id);
+
+    render_to_file(
+        std::shared_ptr<mstch_base>(split_program),
+        "types.rs",
+        fmt::format("types_{}.rs", split_id));
+  }
+
+  // Generate main types.rs file
+  const auto& main_prog = cached_program(program_);
+  render_to_file(main_prog, "types.rs", "types.rs");
 }
 
 void t_mstch_rust_generator::set_mstch_factories() {

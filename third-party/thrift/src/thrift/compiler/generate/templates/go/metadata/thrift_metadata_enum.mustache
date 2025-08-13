@@ -26,7 +26,7 @@
         {{enum_value:value}}: "{{enum_value:name}}",
         {{/enum:values}}
     },
-    {{#enum:structured_annotations?}}
+    {{#if (not (array.empty? enum:structured_annotations))}}
     StructuredAnnotations: []*{{program:metadata_qualifier}}ThriftConstStruct{
         {{#enum:structured_annotations}}
         {{#structured_annotation:const}}
@@ -36,6 +36,6 @@
         {{/structured_annotation:const}}
         {{/enum:structured_annotations}}
     },
-    {{/enum:structured_annotations?}}
+    {{/if (not (array.empty? enum:structured_annotations))}}
 },
 {{!newline}}

@@ -18,13 +18,13 @@
 {{#program:structs}}
   "{{struct:name}}" : {
     "name" : "{{struct:name}}",
-    {{#struct:structured_annotations?}}
+    {{#if (not (array.empty? struct:structured_annotations))}}
     "structured_annotations": {
     {{#struct:structured_annotations}}
     {{> structured_annotations}}
     {{/struct:structured_annotations}}
     },
-    {{/struct:structured_annotations?}}
+    {{/if (not (array.empty? struct:structured_annotations))}}
     {{#struct:docs?}}
     "docstring" : {{struct:docstring}},
     {{/struct:docs?}}
@@ -51,13 +51,13 @@
         "required" : "opt-in-req-out",
         {{/field:opt_in_req_out?}}
         "type" : {{#field:type}}{{> type}}{{/field:type}}
-        {{#field:structured_annotations?}},
+        {{#if (not (array.empty? field:structured_annotations))}},
         "structured_annotations": {
         {{#field:structured_annotations}}
         {{> structured_annotations}}
         {{/field:structured_annotations}}
         }
-        {{/field:structured_annotations?}}
+        {{/if (not (array.empty? field:structured_annotations))}}
       }{{^last?}},{{/last?}}
       {{/struct:fields}}
     },

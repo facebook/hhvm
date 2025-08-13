@@ -31,7 +31,7 @@
         {{/function:go_server_supported?}}
         {{/service:functions}}
     },
-    {{#service:structured_annotations?}}
+    {{#if (not (array.empty? service:structured_annotations))}}
     StructuredAnnotations: []*{{program:metadata_qualifier}}ThriftConstStruct{
         {{#service:structured_annotations}}
         {{#structured_annotation:const}}
@@ -41,6 +41,6 @@
         {{/structured_annotation:const}}
         {{/service:structured_annotations}}
     },
-    {{/service:structured_annotations?}}
+    {{/if (not (array.empty? service:structured_annotations))}}
 },
 {{!newline}}

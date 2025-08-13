@@ -58,13 +58,13 @@
             {{#field:opt_in_req_out?}}
             "required" : "opt-in-req-out"
             {{/field:opt_in_req_out?}}
-            {{#field:structured_annotations?}},
+            {{#if (not (array.empty? field:structured_annotations))}},
             "structured_annotations": {
             {{#field:structured_annotations}}
             {{> structured_annotations}}
             {{/field:structured_annotations}}
             }
-            {{/field:structured_annotations?}}
+            {{/if (not (array.empty? field:structured_annotations))}}
           }{{^last?}},{{/last?}}
           {{/function:args}}
         },
@@ -76,34 +76,34 @@
             "name": "{{field:name}}",
             "type" : {{#field:type}}{{> type}}{{/field:type}},
             "id" : {{field:key}}{{!
-            }}{{#field:structured_annotations?}},
+            }}{{#if (not (array.empty? field:structured_annotations))}},
             "structured_annotations": {
             {{#field:structured_annotations}}
             {{> structured_annotations}}
             {{/field:structured_annotations}}
-            }{{/field:structured_annotations?}}
+            }{{/if (not (array.empty? field:structured_annotations))}}
           }{{^last?}},{{/last?}}
           {{/function:exceptions}}
         },
         {{/function:exceptions?}}
         "returnType" : {{> return_type}},
         "lineno" : {{function:lineno}}{{!
-        }}{{#function:structured_annotations?}},
+        }}{{#if (not (array.empty? function:structured_annotations))}},
         "structured_annotations": {
         {{#function:structured_annotations}}
         {{> structured_annotations}}
         {{/function:structured_annotations}}
-        }{{/function:structured_annotations?}}
+        }{{/if (not (array.empty? function:structured_annotations))}}
       }{{^last?}},{{/last?}}
       {{/service:functions}}
       {{/service:functions?}}
     }
-    {{#service:structured_annotations?}},
+    {{#if (not (array.empty? service:structured_annotations))}},
     "structured_annotations": {
     {{#service:structured_annotations}}
     {{> structured_annotations}}
     {{/service:structured_annotations}}
     }
-    {{/service:structured_annotations?}}
+    {{/if (not (array.empty? service:structured_annotations))}}
   }{{^last?}},{{/last?}}
 {{/program:services}}

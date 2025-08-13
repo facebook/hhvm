@@ -26,7 +26,7 @@
         {{> metadata/thrift_metadata_field}}
         {{/struct:fields_sorted}}
     },
-    {{#struct:structured_annotations?}}
+    {{#if (not (array.empty? struct:structured_annotations))}}
     StructuredAnnotations: []*{{program:metadata_qualifier}}ThriftConstStruct{
         {{#struct:structured_annotations}}
         {{#structured_annotation:const}}
@@ -36,6 +36,6 @@
         {{/structured_annotation:const}}
         {{/struct:structured_annotations}}
     },
-    {{/struct:structured_annotations?}}
+    {{/if (not (array.empty? struct:structured_annotations))}}
 }
 {{!newline}}

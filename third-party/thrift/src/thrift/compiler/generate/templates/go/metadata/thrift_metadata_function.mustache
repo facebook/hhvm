@@ -37,7 +37,7 @@
         {{/function:exceptions}}
     },
     {{/function:exceptions?}}
-    {{#function:structured_annotations?}}
+    {{#if (not (array.empty? function:structured_annotations))}}
     StructuredAnnotations: []*{{program:metadata_qualifier}}ThriftConstStruct{
         {{#function:structured_annotations}}
         {{#structured_annotation:const}}
@@ -47,6 +47,6 @@
         {{/structured_annotation:const}}
         {{/function:structured_annotations}}
     },
-    {{/function:structured_annotations?}}
+    {{/if (not (array.empty? function:structured_annotations))}}
 },
 {{!newline}}

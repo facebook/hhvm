@@ -72,7 +72,6 @@ class Client<::cpp2::MyNode> : public ::cpp2::MyRootAsyncClient {
   virtual folly::SemiFuture<folly::Unit> semifuture_do_mid(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyNode", "function": "do_mid"} */
   template <int = 0>
   folly::coro::Task<void> co_do_mid() {
@@ -83,16 +82,6 @@ class Client<::cpp2::MyNode> : public ::cpp2::MyRootAsyncClient {
   folly::coro::Task<void> co_do_mid(apache::thrift::RpcOptions& rpcOptions) {
     return co_do_mid<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyNode", "function": "do_mid"} */
-  folly::coro::Task<void> co_do_mid() {
-    co_await folly::coro::detachOnCancel(semifuture_do_mid());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyNode", "function": "do_mid"} */
-  folly::coro::Task<void> co_do_mid(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_do_mid(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_do_mid(apache::thrift::RpcOptions* rpcOptions) {

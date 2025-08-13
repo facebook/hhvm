@@ -68,7 +68,6 @@ class Client<::cpp2::DbMixedStackArguments> : public apache::thrift::GeneratedAs
   virtual folly::SemiFuture<::std::string> semifuture_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_getDataByKey0(const ::std::string& p_key) {
@@ -79,16 +78,6 @@ class Client<::cpp2::DbMixedStackArguments> : public apache::thrift::GeneratedAs
   folly::coro::Task<::std::string> co_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
     return co_getDataByKey0<true>(&rpcOptions, p_key);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
-  folly::coro::Task<::std::string> co_getDataByKey0(const ::std::string& p_key) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getDataByKey0(p_key));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
-  folly::coro::Task<::std::string> co_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getDataByKey0(rpcOptions, p_key));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::string> co_getDataByKey0(apache::thrift::RpcOptions* rpcOptions, const ::std::string& p_key) {
@@ -188,7 +177,6 @@ class Client<::cpp2::DbMixedStackArguments> : public apache::thrift::GeneratedAs
   virtual folly::SemiFuture<::std::string> semifuture_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_getDataByKey1(const ::std::string& p_key) {
@@ -199,16 +187,6 @@ class Client<::cpp2::DbMixedStackArguments> : public apache::thrift::GeneratedAs
   folly::coro::Task<::std::string> co_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
     return co_getDataByKey1<true>(&rpcOptions, p_key);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
-  folly::coro::Task<::std::string> co_getDataByKey1(const ::std::string& p_key) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getDataByKey1(p_key));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/split/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
-  folly::coro::Task<::std::string> co_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getDataByKey1(rpcOptions, p_key));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::string> co_getDataByKey1(apache::thrift::RpcOptions* rpcOptions, const ::std::string& p_key) {

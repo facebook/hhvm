@@ -72,7 +72,6 @@ class Client<::py3::simple::RederivedService> : public ::py3::simple::DerivedSer
   virtual folly::SemiFuture<::std::int32_t> semifuture_get_seven(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "RederivedService", "function": "get_seven"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_get_seven() {
@@ -83,16 +82,6 @@ class Client<::py3::simple::RederivedService> : public ::py3::simple::DerivedSer
   folly::coro::Task<::std::int32_t> co_get_seven(apache::thrift::RpcOptions& rpcOptions) {
     return co_get_seven<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "RederivedService", "function": "get_seven"} */
-  folly::coro::Task<::std::int32_t> co_get_seven() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_get_seven());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "RederivedService", "function": "get_seven"} */
-  folly::coro::Task<::std::int32_t> co_get_seven(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_get_seven(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_get_seven(apache::thrift::RpcOptions* rpcOptions) {

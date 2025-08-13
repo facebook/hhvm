@@ -75,7 +75,6 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
   virtual folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inline_string> semifuture_first(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   template <int = 0>
   folly::coro::Task<::test::fixtures::basic-structured-annotations::annotated_inline_string> co_first() {
@@ -86,16 +85,6 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
   folly::coro::Task<::test::fixtures::basic-structured-annotations::annotated_inline_string> co_first(apache::thrift::RpcOptions& rpcOptions) {
     return co_first<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
-  folly::coro::Task<::test::fixtures::basic-structured-annotations::annotated_inline_string> co_first() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_first());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
-  folly::coro::Task<::test::fixtures::basic-structured-annotations::annotated_inline_string> co_first(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_first(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::test::fixtures::basic-structured-annotations::annotated_inline_string> co_first(apache::thrift::RpcOptions* rpcOptions) {
@@ -195,7 +184,6 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
   virtual folly::SemiFuture<bool> semifuture_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   template <int = 0>
   folly::coro::Task<bool> co_second(::std::int64_t p_count) {
@@ -206,16 +194,6 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
   folly::coro::Task<bool> co_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
     return co_second<true>(&rpcOptions, p_count);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
-  folly::coro::Task<bool> co_second(::std::int64_t p_count) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_second(p_count));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
-  folly::coro::Task<bool> co_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_second(rpcOptions, p_count));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<bool> co_second(apache::thrift::RpcOptions* rpcOptions, ::std::int64_t p_count) {

@@ -72,7 +72,6 @@ class Client<::test::fixtures::basic::FB303Service> : public apache::thrift::Gen
   virtual folly::SemiFuture<::test::fixtures::basic::ReservedKeyword> semifuture_simple_rpc(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_int_parameter);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
   template <int = 0>
   folly::coro::Task<::test::fixtures::basic::ReservedKeyword> co_simple_rpc(::std::int32_t p_int_parameter) {
@@ -83,16 +82,6 @@ class Client<::test::fixtures::basic::FB303Service> : public apache::thrift::Gen
   folly::coro::Task<::test::fixtures::basic::ReservedKeyword> co_simple_rpc(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_int_parameter) {
     return co_simple_rpc<true>(&rpcOptions, p_int_parameter);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
-  folly::coro::Task<::test::fixtures::basic::ReservedKeyword> co_simple_rpc(::std::int32_t p_int_parameter) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_simple_rpc(p_int_parameter));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */
-  folly::coro::Task<::test::fixtures::basic::ReservedKeyword> co_simple_rpc(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_int_parameter) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_simple_rpc(rpcOptions, p_int_parameter));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::test::fixtures::basic::ReservedKeyword> co_simple_rpc(apache::thrift::RpcOptions* rpcOptions, ::std::int32_t p_int_parameter) {

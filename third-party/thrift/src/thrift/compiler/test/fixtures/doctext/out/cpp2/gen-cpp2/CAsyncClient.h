@@ -73,7 +73,6 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<folly::Unit> semifuture_f(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
   template <int = 0>
   folly::coro::Task<void> co_f() {
@@ -84,16 +83,6 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<void> co_f(apache::thrift::RpcOptions& rpcOptions) {
     return co_f<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
-  folly::coro::Task<void> co_f() {
-    co_await folly::coro::detachOnCancel(semifuture_f());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "f"} */
-  folly::coro::Task<void> co_f(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_f(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_f(apache::thrift::RpcOptions* rpcOptions) {
@@ -187,7 +176,6 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::cpp2::number>> semifuture_numbers(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
   template <int = 0>
   folly::coro::Task<apache::thrift::ClientBufferedStream<::cpp2::number>> co_numbers() {
@@ -198,16 +186,6 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<apache::thrift::ClientBufferedStream<::cpp2::number>> co_numbers(apache::thrift::RpcOptions& rpcOptions) {
     return co_numbers<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
-  folly::coro::Task<apache::thrift::ClientBufferedStream<::cpp2::number>> co_numbers() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_numbers());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "numbers"} */
-  folly::coro::Task<apache::thrift::ClientBufferedStream<::cpp2::number>> co_numbers(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_numbers(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<apache::thrift::ClientBufferedStream<::cpp2::number>> co_numbers(apache::thrift::RpcOptions* rpcOptions) {
@@ -307,7 +285,6 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<::std::string> semifuture_thing(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_thing(::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c) {
@@ -318,16 +295,6 @@ class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<::std::string> co_thing(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c) {
     return co_thing<true>(&rpcOptions, p_a, p_b, p_c);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
-  folly::coro::Task<::std::string> co_thing(::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_thing(p_a, p_b, p_c));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/doctext/src/module.thrift", "service": "C", "function": "thing"} */
-  folly::coro::Task<::std::string> co_thing(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_thing(rpcOptions, p_a, p_b, p_c));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::string> co_thing(apache::thrift::RpcOptions* rpcOptions, ::std::int32_t p_a, const ::std::string& p_b, const ::std::set<::std::int32_t>& p_c) {

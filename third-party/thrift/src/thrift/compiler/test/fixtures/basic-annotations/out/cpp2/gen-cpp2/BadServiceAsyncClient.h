@@ -75,7 +75,6 @@ class BadInteraction final : public apache::thrift::InteractionHandle {
   folly::SemiFuture<folly::Unit> semifuture_foo(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadInteraction", "function": "foo"} */
   template <int = 0>
   folly::coro::Task<void> co_foo() {
@@ -86,16 +85,6 @@ class BadInteraction final : public apache::thrift::InteractionHandle {
   folly::coro::Task<void> co_foo(apache::thrift::RpcOptions& rpcOptions) {
     return co_foo<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadInteraction", "function": "foo"} */
-  folly::coro::Task<void> co_foo() {
-    co_await folly::coro::detachOnCancel(semifuture_foo());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadInteraction", "function": "foo"} */
-  folly::coro::Task<void> co_foo(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_foo(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_foo(apache::thrift::RpcOptions* rpcOptions) {
@@ -188,7 +177,6 @@ class BadInteraction final : public apache::thrift::InteractionHandle {
   virtual folly::SemiFuture<::std::int32_t> semifuture_bar(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_bar() {
@@ -199,16 +187,6 @@ class BadInteraction final : public apache::thrift::InteractionHandle {
   folly::coro::Task<::std::int32_t> co_bar(apache::thrift::RpcOptions& rpcOptions) {
     return co_bar<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
-  folly::coro::Task<::std::int32_t> co_bar() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_bar());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "BadService", "function": "bar"} */
-  folly::coro::Task<::std::int32_t> co_bar(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_bar(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_bar(apache::thrift::RpcOptions* rpcOptions) {

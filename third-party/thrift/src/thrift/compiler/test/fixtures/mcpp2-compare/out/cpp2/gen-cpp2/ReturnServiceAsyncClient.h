@@ -89,7 +89,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<folly::Unit> semifuture_noReturn(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "noReturn"} */
   template <int = 0>
   folly::coro::Task<void> co_noReturn() {
@@ -100,16 +99,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<void> co_noReturn(apache::thrift::RpcOptions& rpcOptions) {
     return co_noReturn<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "noReturn"} */
-  folly::coro::Task<void> co_noReturn() {
-    co_await folly::coro::detachOnCancel(semifuture_noReturn());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "noReturn"} */
-  folly::coro::Task<void> co_noReturn(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_noReturn(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_noReturn(apache::thrift::RpcOptions* rpcOptions) {
@@ -207,7 +196,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<bool> semifuture_boolReturn(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "boolReturn"} */
   template <int = 0>
   folly::coro::Task<bool> co_boolReturn() {
@@ -218,16 +206,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<bool> co_boolReturn(apache::thrift::RpcOptions& rpcOptions) {
     return co_boolReturn<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "boolReturn"} */
-  folly::coro::Task<bool> co_boolReturn() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_boolReturn());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "boolReturn"} */
-  folly::coro::Task<bool> co_boolReturn(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_boolReturn(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<bool> co_boolReturn(apache::thrift::RpcOptions* rpcOptions) {
@@ -327,7 +305,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<::std::int16_t> semifuture_i16Return(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "i16Return"} */
   template <int = 0>
   folly::coro::Task<::std::int16_t> co_i16Return() {
@@ -338,16 +315,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<::std::int16_t> co_i16Return(apache::thrift::RpcOptions& rpcOptions) {
     return co_i16Return<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "i16Return"} */
-  folly::coro::Task<::std::int16_t> co_i16Return() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_i16Return());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "i16Return"} */
-  folly::coro::Task<::std::int16_t> co_i16Return(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_i16Return(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int16_t> co_i16Return(apache::thrift::RpcOptions* rpcOptions) {
@@ -447,7 +414,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<::std::int32_t> semifuture_i32Return(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "i32Return"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_i32Return() {
@@ -458,16 +424,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<::std::int32_t> co_i32Return(apache::thrift::RpcOptions& rpcOptions) {
     return co_i32Return<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "i32Return"} */
-  folly::coro::Task<::std::int32_t> co_i32Return() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_i32Return());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "i32Return"} */
-  folly::coro::Task<::std::int32_t> co_i32Return(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_i32Return(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_i32Return(apache::thrift::RpcOptions* rpcOptions) {
@@ -567,7 +523,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<::std::int64_t> semifuture_i64Return(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "i64Return"} */
   template <int = 0>
   folly::coro::Task<::std::int64_t> co_i64Return() {
@@ -578,16 +533,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<::std::int64_t> co_i64Return(apache::thrift::RpcOptions& rpcOptions) {
     return co_i64Return<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "i64Return"} */
-  folly::coro::Task<::std::int64_t> co_i64Return() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_i64Return());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "i64Return"} */
-  folly::coro::Task<::std::int64_t> co_i64Return(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_i64Return(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int64_t> co_i64Return(apache::thrift::RpcOptions* rpcOptions) {
@@ -687,7 +632,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<float> semifuture_floatReturn(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "floatReturn"} */
   template <int = 0>
   folly::coro::Task<float> co_floatReturn() {
@@ -698,16 +642,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<float> co_floatReturn(apache::thrift::RpcOptions& rpcOptions) {
     return co_floatReturn<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "floatReturn"} */
-  folly::coro::Task<float> co_floatReturn() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_floatReturn());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "floatReturn"} */
-  folly::coro::Task<float> co_floatReturn(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_floatReturn(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<float> co_floatReturn(apache::thrift::RpcOptions* rpcOptions) {
@@ -807,7 +741,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<double> semifuture_doubleReturn(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "doubleReturn"} */
   template <int = 0>
   folly::coro::Task<double> co_doubleReturn() {
@@ -818,16 +751,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<double> co_doubleReturn(apache::thrift::RpcOptions& rpcOptions) {
     return co_doubleReturn<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "doubleReturn"} */
-  folly::coro::Task<double> co_doubleReturn() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_doubleReturn());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "doubleReturn"} */
-  folly::coro::Task<double> co_doubleReturn(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_doubleReturn(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<double> co_doubleReturn(apache::thrift::RpcOptions* rpcOptions) {
@@ -927,7 +850,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<::std::string> semifuture_stringReturn(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "stringReturn"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_stringReturn() {
@@ -938,16 +860,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<::std::string> co_stringReturn(apache::thrift::RpcOptions& rpcOptions) {
     return co_stringReturn<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "stringReturn"} */
-  folly::coro::Task<::std::string> co_stringReturn() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_stringReturn());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "stringReturn"} */
-  folly::coro::Task<::std::string> co_stringReturn(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_stringReturn(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::string> co_stringReturn(apache::thrift::RpcOptions* rpcOptions) {
@@ -1047,7 +959,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<::std::string> semifuture_binaryReturn(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "binaryReturn"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_binaryReturn() {
@@ -1058,16 +969,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<::std::string> co_binaryReturn(apache::thrift::RpcOptions& rpcOptions) {
     return co_binaryReturn<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "binaryReturn"} */
-  folly::coro::Task<::std::string> co_binaryReturn() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_binaryReturn());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "binaryReturn"} */
-  folly::coro::Task<::std::string> co_binaryReturn(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_binaryReturn(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::string> co_binaryReturn(apache::thrift::RpcOptions* rpcOptions) {
@@ -1167,7 +1068,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<::std::map<::std::string, ::std::int64_t>> semifuture_mapReturn(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "mapReturn"} */
   template <int = 0>
   folly::coro::Task<::std::map<::std::string, ::std::int64_t>> co_mapReturn() {
@@ -1178,16 +1078,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<::std::map<::std::string, ::std::int64_t>> co_mapReturn(apache::thrift::RpcOptions& rpcOptions) {
     return co_mapReturn<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "mapReturn"} */
-  folly::coro::Task<::std::map<::std::string, ::std::int64_t>> co_mapReturn() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_mapReturn());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "mapReturn"} */
-  folly::coro::Task<::std::map<::std::string, ::std::int64_t>> co_mapReturn(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_mapReturn(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::map<::std::string, ::std::int64_t>> co_mapReturn(apache::thrift::RpcOptions* rpcOptions) {
@@ -1287,7 +1177,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<::some::valid::ns::simpleTypeDef> semifuture_simpleTypedefReturn(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "simpleTypedefReturn"} */
   template <int = 0>
   folly::coro::Task<::some::valid::ns::simpleTypeDef> co_simpleTypedefReturn() {
@@ -1298,16 +1187,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<::some::valid::ns::simpleTypeDef> co_simpleTypedefReturn(apache::thrift::RpcOptions& rpcOptions) {
     return co_simpleTypedefReturn<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "simpleTypedefReturn"} */
-  folly::coro::Task<::some::valid::ns::simpleTypeDef> co_simpleTypedefReturn() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_simpleTypedefReturn());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "simpleTypedefReturn"} */
-  folly::coro::Task<::some::valid::ns::simpleTypeDef> co_simpleTypedefReturn(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_simpleTypedefReturn(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::some::valid::ns::simpleTypeDef> co_simpleTypedefReturn(apache::thrift::RpcOptions* rpcOptions) {
@@ -1407,7 +1286,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<::some::valid::ns::complexStructTypeDef> semifuture_complexTypedefReturn(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "complexTypedefReturn"} */
   template <int = 0>
   folly::coro::Task<::some::valid::ns::complexStructTypeDef> co_complexTypedefReturn() {
@@ -1418,16 +1296,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<::some::valid::ns::complexStructTypeDef> co_complexTypedefReturn(apache::thrift::RpcOptions& rpcOptions) {
     return co_complexTypedefReturn<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "complexTypedefReturn"} */
-  folly::coro::Task<::some::valid::ns::complexStructTypeDef> co_complexTypedefReturn() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_complexTypedefReturn());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "complexTypedefReturn"} */
-  folly::coro::Task<::some::valid::ns::complexStructTypeDef> co_complexTypedefReturn(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_complexTypedefReturn(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::some::valid::ns::complexStructTypeDef> co_complexTypedefReturn(apache::thrift::RpcOptions* rpcOptions) {
@@ -1527,7 +1395,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<::std::vector<::some::valid::ns::mostComplexTypeDef>> semifuture_list_mostComplexTypedefReturn(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "list_mostComplexTypedefReturn"} */
   template <int = 0>
   folly::coro::Task<::std::vector<::some::valid::ns::mostComplexTypeDef>> co_list_mostComplexTypedefReturn() {
@@ -1538,16 +1405,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<::std::vector<::some::valid::ns::mostComplexTypeDef>> co_list_mostComplexTypedefReturn(apache::thrift::RpcOptions& rpcOptions) {
     return co_list_mostComplexTypedefReturn<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "list_mostComplexTypedefReturn"} */
-  folly::coro::Task<::std::vector<::some::valid::ns::mostComplexTypeDef>> co_list_mostComplexTypedefReturn() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_list_mostComplexTypedefReturn());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "list_mostComplexTypedefReturn"} */
-  folly::coro::Task<::std::vector<::some::valid::ns::mostComplexTypeDef>> co_list_mostComplexTypedefReturn(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_list_mostComplexTypedefReturn(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::vector<::some::valid::ns::mostComplexTypeDef>> co_list_mostComplexTypedefReturn(apache::thrift::RpcOptions* rpcOptions) {
@@ -1647,7 +1504,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<::some::valid::ns::MyEnumA> semifuture_enumReturn(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "enumReturn"} */
   template <int = 0>
   folly::coro::Task<::some::valid::ns::MyEnumA> co_enumReturn() {
@@ -1658,16 +1514,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<::some::valid::ns::MyEnumA> co_enumReturn(apache::thrift::RpcOptions& rpcOptions) {
     return co_enumReturn<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "enumReturn"} */
-  folly::coro::Task<::some::valid::ns::MyEnumA> co_enumReturn() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_enumReturn());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "enumReturn"} */
-  folly::coro::Task<::some::valid::ns::MyEnumA> co_enumReturn(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_enumReturn(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::some::valid::ns::MyEnumA> co_enumReturn(apache::thrift::RpcOptions* rpcOptions) {
@@ -1767,7 +1613,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<::std::vector<::some::valid::ns::MyEnumA>> semifuture_list_EnumReturn(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "list_EnumReturn"} */
   template <int = 0>
   folly::coro::Task<::std::vector<::some::valid::ns::MyEnumA>> co_list_EnumReturn() {
@@ -1778,16 +1623,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<::std::vector<::some::valid::ns::MyEnumA>> co_list_EnumReturn(apache::thrift::RpcOptions& rpcOptions) {
     return co_list_EnumReturn<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "list_EnumReturn"} */
-  folly::coro::Task<::std::vector<::some::valid::ns::MyEnumA>> co_list_EnumReturn() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_list_EnumReturn());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "list_EnumReturn"} */
-  folly::coro::Task<::std::vector<::some::valid::ns::MyEnumA>> co_list_EnumReturn(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_list_EnumReturn(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::vector<::some::valid::ns::MyEnumA>> co_list_EnumReturn(apache::thrift::RpcOptions* rpcOptions) {
@@ -1887,7 +1722,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<::some::valid::ns::MyStruct> semifuture_structReturn(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "structReturn"} */
   template <int = 0>
   folly::coro::Task<::some::valid::ns::MyStruct> co_structReturn() {
@@ -1898,16 +1732,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<::some::valid::ns::MyStruct> co_structReturn(apache::thrift::RpcOptions& rpcOptions) {
     return co_structReturn<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "structReturn"} */
-  folly::coro::Task<::some::valid::ns::MyStruct> co_structReturn() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_structReturn());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "structReturn"} */
-  folly::coro::Task<::some::valid::ns::MyStruct> co_structReturn(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_structReturn(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::some::valid::ns::MyStruct> co_structReturn(apache::thrift::RpcOptions* rpcOptions) {
@@ -2007,7 +1831,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<::std::set<::some::valid::ns::MyStruct>> semifuture_set_StructReturn(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "set_StructReturn"} */
   template <int = 0>
   folly::coro::Task<::std::set<::some::valid::ns::MyStruct>> co_set_StructReturn() {
@@ -2018,16 +1841,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<::std::set<::some::valid::ns::MyStruct>> co_set_StructReturn(apache::thrift::RpcOptions& rpcOptions) {
     return co_set_StructReturn<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "set_StructReturn"} */
-  folly::coro::Task<::std::set<::some::valid::ns::MyStruct>> co_set_StructReturn() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_set_StructReturn());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "set_StructReturn"} */
-  folly::coro::Task<::std::set<::some::valid::ns::MyStruct>> co_set_StructReturn(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_set_StructReturn(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::set<::some::valid::ns::MyStruct>> co_set_StructReturn(apache::thrift::RpcOptions* rpcOptions) {
@@ -2127,7 +1940,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<::some::valid::ns::ComplexUnion> semifuture_unionReturn(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "unionReturn"} */
   template <int = 0>
   folly::coro::Task<::some::valid::ns::ComplexUnion> co_unionReturn() {
@@ -2138,16 +1950,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<::some::valid::ns::ComplexUnion> co_unionReturn(apache::thrift::RpcOptions& rpcOptions) {
     return co_unionReturn<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "unionReturn"} */
-  folly::coro::Task<::some::valid::ns::ComplexUnion> co_unionReturn() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_unionReturn());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "unionReturn"} */
-  folly::coro::Task<::some::valid::ns::ComplexUnion> co_unionReturn(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_unionReturn(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::some::valid::ns::ComplexUnion> co_unionReturn(apache::thrift::RpcOptions* rpcOptions) {
@@ -2247,7 +2049,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<::std::vector<::some::valid::ns::ComplexUnion>> semifuture_list_UnionReturn(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "list_UnionReturn"} */
   template <int = 0>
   folly::coro::Task<::std::vector<::some::valid::ns::ComplexUnion>> co_list_UnionReturn() {
@@ -2258,16 +2059,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<::std::vector<::some::valid::ns::ComplexUnion>> co_list_UnionReturn(apache::thrift::RpcOptions& rpcOptions) {
     return co_list_UnionReturn<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "list_UnionReturn"} */
-  folly::coro::Task<::std::vector<::some::valid::ns::ComplexUnion>> co_list_UnionReturn() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_list_UnionReturn());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "list_UnionReturn"} */
-  folly::coro::Task<::std::vector<::some::valid::ns::ComplexUnion>> co_list_UnionReturn(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_list_UnionReturn(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::vector<::some::valid::ns::ComplexUnion>> co_list_UnionReturn(apache::thrift::RpcOptions* rpcOptions) {
@@ -2367,7 +2158,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<::some::valid::ns::IOBuf> semifuture_readDataEb(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_size);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "readDataEb"} */
   template <int = 0>
   folly::coro::Task<::some::valid::ns::IOBuf> co_readDataEb(::std::int64_t p_size) {
@@ -2378,16 +2168,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<::some::valid::ns::IOBuf> co_readDataEb(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_size) {
     return co_readDataEb<true>(&rpcOptions, p_size);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "readDataEb"} */
-  folly::coro::Task<::some::valid::ns::IOBuf> co_readDataEb(::std::int64_t p_size) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_readDataEb(p_size));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "readDataEb"} */
-  folly::coro::Task<::some::valid::ns::IOBuf> co_readDataEb(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_size) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_readDataEb(rpcOptions, p_size));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::some::valid::ns::IOBuf> co_readDataEb(apache::thrift::RpcOptions* rpcOptions, ::std::int64_t p_size) {
@@ -2487,7 +2267,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   virtual folly::SemiFuture<::some::valid::ns::IOBufPtr> semifuture_readData(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_size);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "readData"} */
   template <int = 0>
   folly::coro::Task<::some::valid::ns::IOBufPtr> co_readData(::std::int64_t p_size) {
@@ -2498,16 +2277,6 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
   folly::coro::Task<::some::valid::ns::IOBufPtr> co_readData(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_size) {
     return co_readData<true>(&rpcOptions, p_size);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "readData"} */
-  folly::coro::Task<::some::valid::ns::IOBufPtr> co_readData(::std::int64_t p_size) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_readData(p_size));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ReturnService", "function": "readData"} */
-  folly::coro::Task<::some::valid::ns::IOBufPtr> co_readData(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_size) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_readData(rpcOptions, p_size));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::some::valid::ns::IOBufPtr> co_readData(apache::thrift::RpcOptions* rpcOptions, ::std::int64_t p_size) {

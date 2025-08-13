@@ -83,7 +83,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   folly::SemiFuture<::std::int32_t> semifuture_frobnicate(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyInteraction", "function": "frobnicate"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_frobnicate() {
@@ -94,16 +93,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   folly::coro::Task<::std::int32_t> co_frobnicate(apache::thrift::RpcOptions& rpcOptions) {
     return co_frobnicate<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyInteraction", "function": "frobnicate"} */
-  folly::coro::Task<::std::int32_t> co_frobnicate() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_frobnicate());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyInteraction", "function": "frobnicate"} */
-  folly::coro::Task<::std::int32_t> co_frobnicate(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_frobnicate(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_frobnicate(apache::thrift::RpcOptions* rpcOptions) {
@@ -189,7 +178,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   folly::SemiFuture<folly::Unit> semifuture_ping(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyInteraction", "function": "ping"} */
   template <int = 0>
   folly::coro::Task<void> co_ping() {
@@ -200,16 +188,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   folly::coro::Task<void> co_ping(apache::thrift::RpcOptions& rpcOptions) {
     return co_ping<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyInteraction", "function": "ping"} */
-  folly::coro::Task<void> co_ping() {
-    co_await folly::coro::detachOnCancel(semifuture_ping());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyInteraction", "function": "ping"} */
-  folly::coro::Task<void> co_ping(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_ping(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_ping(apache::thrift::RpcOptions* rpcOptions) {
@@ -271,7 +249,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   folly::SemiFuture<apache::thrift::ClientBufferedStream<bool>> semifuture_truthify(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyInteraction", "function": "truthify"} */
   template <int = 0>
   folly::coro::Task<apache::thrift::ClientBufferedStream<bool>> co_truthify() {
@@ -282,16 +259,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   folly::coro::Task<apache::thrift::ClientBufferedStream<bool>> co_truthify(apache::thrift::RpcOptions& rpcOptions) {
     return co_truthify<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyInteraction", "function": "truthify"} */
-  folly::coro::Task<apache::thrift::ClientBufferedStream<bool>> co_truthify() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_truthify());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyInteraction", "function": "truthify"} */
-  folly::coro::Task<apache::thrift::ClientBufferedStream<bool>> co_truthify(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_truthify(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<apache::thrift::ClientBufferedStream<bool>> co_truthify(apache::thrift::RpcOptions* rpcOptions) {
@@ -410,7 +377,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   folly::SemiFuture<::std::int32_t> semifuture_frobnicate(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyInteractionFast", "function": "frobnicate"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_frobnicate() {
@@ -421,16 +387,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   folly::coro::Task<::std::int32_t> co_frobnicate(apache::thrift::RpcOptions& rpcOptions) {
     return co_frobnicate<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyInteractionFast", "function": "frobnicate"} */
-  folly::coro::Task<::std::int32_t> co_frobnicate() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_frobnicate());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyInteractionFast", "function": "frobnicate"} */
-  folly::coro::Task<::std::int32_t> co_frobnicate(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_frobnicate(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_frobnicate(apache::thrift::RpcOptions* rpcOptions) {
@@ -516,7 +472,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   folly::SemiFuture<folly::Unit> semifuture_ping(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyInteractionFast", "function": "ping"} */
   template <int = 0>
   folly::coro::Task<void> co_ping() {
@@ -527,16 +482,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   folly::coro::Task<void> co_ping(apache::thrift::RpcOptions& rpcOptions) {
     return co_ping<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyInteractionFast", "function": "ping"} */
-  folly::coro::Task<void> co_ping() {
-    co_await folly::coro::detachOnCancel(semifuture_ping());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyInteractionFast", "function": "ping"} */
-  folly::coro::Task<void> co_ping(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_ping(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_ping(apache::thrift::RpcOptions* rpcOptions) {
@@ -598,7 +543,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   folly::SemiFuture<apache::thrift::ClientBufferedStream<bool>> semifuture_truthify(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyInteractionFast", "function": "truthify"} */
   template <int = 0>
   folly::coro::Task<apache::thrift::ClientBufferedStream<bool>> co_truthify() {
@@ -609,16 +553,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   folly::coro::Task<apache::thrift::ClientBufferedStream<bool>> co_truthify(apache::thrift::RpcOptions& rpcOptions) {
     return co_truthify<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyInteractionFast", "function": "truthify"} */
-  folly::coro::Task<apache::thrift::ClientBufferedStream<bool>> co_truthify() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_truthify());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyInteractionFast", "function": "truthify"} */
-  folly::coro::Task<apache::thrift::ClientBufferedStream<bool>> co_truthify(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_truthify(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<apache::thrift::ClientBufferedStream<bool>> co_truthify(apache::thrift::RpcOptions* rpcOptions) {
@@ -737,7 +671,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   folly::SemiFuture<folly::Unit> semifuture_frobnicate(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "SerialInteraction", "function": "frobnicate"} */
   template <int = 0>
   folly::coro::Task<void> co_frobnicate() {
@@ -748,16 +681,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   folly::coro::Task<void> co_frobnicate(apache::thrift::RpcOptions& rpcOptions) {
     return co_frobnicate<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "SerialInteraction", "function": "frobnicate"} */
-  folly::coro::Task<void> co_frobnicate() {
-    co_await folly::coro::detachOnCancel(semifuture_frobnicate());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "SerialInteraction", "function": "frobnicate"} */
-  folly::coro::Task<void> co_frobnicate(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_frobnicate(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_frobnicate(apache::thrift::RpcOptions* rpcOptions) {
@@ -854,7 +777,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   virtual folly::SemiFuture<folly::Unit> semifuture_foo(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyService", "function": "foo"} */
   template <int = 0>
   folly::coro::Task<void> co_foo() {
@@ -865,16 +787,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   folly::coro::Task<void> co_foo(apache::thrift::RpcOptions& rpcOptions) {
     return co_foo<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyService", "function": "foo"} */
-  folly::coro::Task<void> co_foo() {
-    co_await folly::coro::detachOnCancel(semifuture_foo());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyService", "function": "foo"} */
-  folly::coro::Task<void> co_foo(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_foo(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_foo(apache::thrift::RpcOptions* rpcOptions) {
@@ -971,7 +883,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   > eager_semifuture_interact(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_arg);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyService", "function": "interact"} */
   template <int = 0>
   folly::coro::Task<apache::thrift::Client<::cpp2::MyService>::MyInteraction> co_interact(::std::int32_t p_arg) {
@@ -982,16 +893,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   folly::coro::Task<apache::thrift::Client<::cpp2::MyService>::MyInteraction> co_interact(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_arg) {
     return co_interact<true>(&rpcOptions, p_arg);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyService", "function": "interact"} */
-  folly::coro::Task<apache::thrift::Client<::cpp2::MyService>::MyInteraction> co_interact(::std::int32_t p_arg) {
-    co_await folly::coro::detachOnCancel(semifuture_interact(p_arg));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyService", "function": "interact"} */
-  folly::coro::Task<apache::thrift::Client<::cpp2::MyService>::MyInteraction> co_interact(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_arg) {
-    co_await folly::coro::detachOnCancel(semifuture_interact(rpcOptions, p_arg));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<apache::thrift::Client<::cpp2::MyService>::MyInteraction> co_interact(apache::thrift::RpcOptions* rpcOptions, ::std::int32_t p_arg) {
@@ -1082,7 +983,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   > eager_semifuture_interactFast(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyService", "function": "interactFast"} */
   template <int = 0>
   folly::coro::Task<std::pair<apache::thrift::Client<::cpp2::MyService>::MyInteractionFast, ::std::int32_t>> co_interactFast() {
@@ -1093,16 +993,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   folly::coro::Task<std::pair<apache::thrift::Client<::cpp2::MyService>::MyInteractionFast, ::std::int32_t>> co_interactFast(apache::thrift::RpcOptions& rpcOptions) {
     return co_interactFast<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyService", "function": "interactFast"} */
-  folly::coro::Task<std::pair<apache::thrift::Client<::cpp2::MyService>::MyInteractionFast, ::std::int32_t>> co_interactFast() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_interactFast());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyService", "function": "interactFast"} */
-  folly::coro::Task<std::pair<apache::thrift::Client<::cpp2::MyService>::MyInteractionFast, ::std::int32_t>> co_interactFast(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_interactFast(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<std::pair<apache::thrift::Client<::cpp2::MyService>::MyInteractionFast, ::std::int32_t>> co_interactFast(apache::thrift::RpcOptions* rpcOptions) {
@@ -1194,7 +1084,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   > eager_semifuture_serialize(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyService", "function": "serialize"} */
   template <int = 0>
   folly::coro::Task<std::pair<apache::thrift::Client<::cpp2::MyService>::SerialInteraction, apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>>> co_serialize() {
@@ -1205,16 +1094,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
   folly::coro::Task<std::pair<apache::thrift::Client<::cpp2::MyService>::SerialInteraction, apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>>> co_serialize(apache::thrift::RpcOptions& rpcOptions) {
     return co_serialize<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyService", "function": "serialize"} */
-  folly::coro::Task<std::pair<apache::thrift::Client<::cpp2::MyService>::SerialInteraction, apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>>> co_serialize() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_serialize());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "MyService", "function": "serialize"} */
-  folly::coro::Task<std::pair<apache::thrift::Client<::cpp2::MyService>::SerialInteraction, apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>>> co_serialize(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_serialize(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<std::pair<apache::thrift::Client<::cpp2::MyService>::SerialInteraction, apache::thrift::ResponseAndClientBufferedStream<::std::int32_t,::std::int32_t>>> co_serialize(apache::thrift::RpcOptions* rpcOptions) {

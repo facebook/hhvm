@@ -78,7 +78,6 @@ class Client<::facebook::thrift::test::ExtendedService> : public ::facebook::thr
   virtual folly::SemiFuture<::std::int64_t> semifuture_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "ExtendedService", "function": "init"} */
   template <int = 0>
   folly::coro::Task<::std::int64_t> co_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
@@ -89,16 +88,6 @@ class Client<::facebook::thrift::test::ExtendedService> : public ::facebook::thr
   folly::coro::Task<::std::int64_t> co_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1) {
     return co_init<true>(&rpcOptions, p_param0, p_param1);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "ExtendedService", "function": "init"} */
-  folly::coro::Task<::std::int64_t> co_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_init(p_param0, p_param1));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "ExtendedService", "function": "init"} */
-  folly::coro::Task<::std::int64_t> co_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_init(rpcOptions, p_param0, p_param1));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int64_t> co_init(apache::thrift::RpcOptions* rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1) {

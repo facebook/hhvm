@@ -74,7 +74,6 @@ class Client<::facebook::thrift::test::Service> : public apache::thrift::Generat
   virtual folly::SemiFuture<::facebook::thrift::test::MyI32_4873> semifuture_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
   template <int = 0>
   folly::coro::Task<::facebook::thrift::test::MyI32_4873> co_func(const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
@@ -85,16 +84,6 @@ class Client<::facebook::thrift::test::Service> : public apache::thrift::Generat
   folly::coro::Task<::facebook::thrift::test::MyI32_4873> co_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
     return co_func<true>(&rpcOptions, p_arg1, p_arg2, p_arg3);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
-  folly::coro::Task<::facebook::thrift::test::MyI32_4873> co_func(const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_func(p_arg1, p_arg2, p_arg3));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "Service", "function": "func"} */
-  folly::coro::Task<::facebook::thrift::test::MyI32_4873> co_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_func(rpcOptions, p_arg1, p_arg2, p_arg3));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::facebook::thrift::test::MyI32_4873> co_func(apache::thrift::RpcOptions* rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {

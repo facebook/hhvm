@@ -71,7 +71,6 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<folly::Unit> semifuture_query(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
   template <int = 0>
   folly::coro::Task<void> co_query(const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {
@@ -82,16 +81,6 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<void> co_query(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {
     return co_query<true>(&rpcOptions, p_s, p_i);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
-  folly::coro::Task<void> co_query(const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {
-    co_await folly::coro::detachOnCancel(semifuture_query(p_s, p_i));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "query"} */
-  folly::coro::Task<void> co_query(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {
-    co_await folly::coro::detachOnCancel(semifuture_query(rpcOptions, p_s, p_i));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_query(apache::thrift::RpcOptions* rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {
@@ -189,7 +178,6 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<folly::Unit> semifuture_has_arg_docs(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
   template <int = 0>
   folly::coro::Task<void> co_has_arg_docs(const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {
@@ -200,16 +188,6 @@ class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<void> co_has_arg_docs(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {
     return co_has_arg_docs<true>(&rpcOptions, p_s, p_i);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
-  folly::coro::Task<void> co_has_arg_docs(const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {
-    co_await folly::coro::detachOnCancel(semifuture_has_arg_docs(p_s, p_i));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift", "service": "MyService", "function": "has_arg_docs"} */
-  folly::coro::Task<void> co_has_arg_docs(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {
-    co_await folly::coro::detachOnCancel(semifuture_has_arg_docs(rpcOptions, p_s, p_i));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_has_arg_docs(apache::thrift::RpcOptions* rpcOptions, const ::cpp2::MyStruct& p_s, const ::cpp2::Included& p_i) {

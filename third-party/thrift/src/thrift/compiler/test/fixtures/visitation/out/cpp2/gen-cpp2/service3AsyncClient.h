@@ -75,7 +75,6 @@ class Client<::test_cpp2::cpp_reflection::service3> : public apache::thrift::Gen
   virtual folly::SemiFuture<folly::Unit> semifuture_methodA(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service3", "function": "methodA"} */
   template <int = 0>
   folly::coro::Task<void> co_methodA() {
@@ -86,16 +85,6 @@ class Client<::test_cpp2::cpp_reflection::service3> : public apache::thrift::Gen
   folly::coro::Task<void> co_methodA(apache::thrift::RpcOptions& rpcOptions) {
     return co_methodA<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service3", "function": "methodA"} */
-  folly::coro::Task<void> co_methodA() {
-    co_await folly::coro::detachOnCancel(semifuture_methodA());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service3", "function": "methodA"} */
-  folly::coro::Task<void> co_methodA(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_methodA(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_methodA(apache::thrift::RpcOptions* rpcOptions) {
@@ -193,7 +182,6 @@ class Client<::test_cpp2::cpp_reflection::service3> : public apache::thrift::Gen
   virtual folly::SemiFuture<folly::Unit> semifuture_methodB(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service3", "function": "methodB"} */
   template <int = 0>
   folly::coro::Task<void> co_methodB(::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z) {
@@ -204,16 +192,6 @@ class Client<::test_cpp2::cpp_reflection::service3> : public apache::thrift::Gen
   folly::coro::Task<void> co_methodB(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z) {
     return co_methodB<true>(&rpcOptions, p_x, p_y, p_z);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service3", "function": "methodB"} */
-  folly::coro::Task<void> co_methodB(::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z) {
-    co_await folly::coro::detachOnCancel(semifuture_methodB(p_x, p_y, p_z));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service3", "function": "methodB"} */
-  folly::coro::Task<void> co_methodB(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z) {
-    co_await folly::coro::detachOnCancel(semifuture_methodB(rpcOptions, p_x, p_y, p_z));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_methodB(apache::thrift::RpcOptions* rpcOptions, ::std::int32_t p_x, const ::test_cpp2::cpp_reflection::struct1& p_y, double p_z) {
@@ -311,7 +289,6 @@ class Client<::test_cpp2::cpp_reflection::service3> : public apache::thrift::Gen
   virtual folly::SemiFuture<::std::int32_t> semifuture_methodC(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service3", "function": "methodC"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_methodC() {
@@ -322,16 +299,6 @@ class Client<::test_cpp2::cpp_reflection::service3> : public apache::thrift::Gen
   folly::coro::Task<::std::int32_t> co_methodC(apache::thrift::RpcOptions& rpcOptions) {
     return co_methodC<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service3", "function": "methodC"} */
-  folly::coro::Task<::std::int32_t> co_methodC() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_methodC());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service3", "function": "methodC"} */
-  folly::coro::Task<::std::int32_t> co_methodC(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_methodC(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_methodC(apache::thrift::RpcOptions* rpcOptions) {
@@ -431,7 +398,6 @@ class Client<::test_cpp2::cpp_reflection::service3> : public apache::thrift::Gen
   virtual folly::SemiFuture<::std::int32_t> semifuture_methodD(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service3", "function": "methodD"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_methodD(::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k) {
@@ -442,16 +408,6 @@ class Client<::test_cpp2::cpp_reflection::service3> : public apache::thrift::Gen
   folly::coro::Task<::std::int32_t> co_methodD(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k) {
     return co_methodD<true>(&rpcOptions, p_i, p_j, p_k);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service3", "function": "methodD"} */
-  folly::coro::Task<::std::int32_t> co_methodD(::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_methodD(p_i, p_j, p_k));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service3", "function": "methodD"} */
-  folly::coro::Task<::std::int32_t> co_methodD(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_methodD(rpcOptions, p_i, p_j, p_k));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_methodD(apache::thrift::RpcOptions* rpcOptions, ::std::int32_t p_i, const ::test_cpp2::cpp_reflection::struct1& p_j, double p_k) {
@@ -551,7 +507,6 @@ class Client<::test_cpp2::cpp_reflection::service3> : public apache::thrift::Gen
   virtual folly::SemiFuture<::test_cpp2::cpp_reflection::struct2> semifuture_methodE(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service3", "function": "methodE"} */
   template <int = 0>
   folly::coro::Task<::test_cpp2::cpp_reflection::struct2> co_methodE() {
@@ -562,16 +517,6 @@ class Client<::test_cpp2::cpp_reflection::service3> : public apache::thrift::Gen
   folly::coro::Task<::test_cpp2::cpp_reflection::struct2> co_methodE(apache::thrift::RpcOptions& rpcOptions) {
     return co_methodE<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service3", "function": "methodE"} */
-  folly::coro::Task<::test_cpp2::cpp_reflection::struct2> co_methodE() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_methodE());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service3", "function": "methodE"} */
-  folly::coro::Task<::test_cpp2::cpp_reflection::struct2> co_methodE(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_methodE(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::test_cpp2::cpp_reflection::struct2> co_methodE(apache::thrift::RpcOptions* rpcOptions) {
@@ -671,7 +616,6 @@ class Client<::test_cpp2::cpp_reflection::service3> : public apache::thrift::Gen
   virtual folly::SemiFuture<::test_cpp2::cpp_reflection::struct3> semifuture_methodF(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service3", "function": "methodF"} */
   template <int = 0>
   folly::coro::Task<::test_cpp2::cpp_reflection::struct3> co_methodF(::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n) {
@@ -682,16 +626,6 @@ class Client<::test_cpp2::cpp_reflection::service3> : public apache::thrift::Gen
   folly::coro::Task<::test_cpp2::cpp_reflection::struct3> co_methodF(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n) {
     return co_methodF<true>(&rpcOptions, p_l, p_m, p_n);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service3", "function": "methodF"} */
-  folly::coro::Task<::test_cpp2::cpp_reflection::struct3> co_methodF(::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_methodF(p_l, p_m, p_n));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/visitation/src/module.thrift", "service": "service3", "function": "methodF"} */
-  folly::coro::Task<::test_cpp2::cpp_reflection::struct3> co_methodF(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_methodF(rpcOptions, p_l, p_m, p_n));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::test_cpp2::cpp_reflection::struct3> co_methodF(apache::thrift::RpcOptions* rpcOptions, ::std::int32_t p_l, const ::test_cpp2::cpp_reflection::struct1& p_m, double p_n) {

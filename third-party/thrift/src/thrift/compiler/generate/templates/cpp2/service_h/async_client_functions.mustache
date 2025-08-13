@@ -87,7 +87,6 @@
   {{!
   Coroutine functions are inline templates to prevent compile time and binary size regression
   }}
-#if __clang__
 {{> common/fun_docblock}}
   template <int = 0>
   folly::coro::Task<{{> types/return_type_client}}> co_{{function:cpp_name}}({{> service_common/function_param_list_client}}) {
@@ -98,20 +97,6 @@
   folly::coro::Task<{{> types/return_type_client}}> co_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}}) {
     return co_{{function:cpp_name}}<true>(&rpcOptions{{function:comma}}{{> service_common/param_list}});
   }
-#else
-  {{!
-  GCC coroutines implementation is less stable and results in ICE compiling the code below.
-  Use semifuture_ implementation instead.
-  }}
-{{> common/fun_docblock}}
-  folly::coro::Task<{{> types/return_type_client}}> co_{{function:cpp_name}}({{> service_common/function_param_list_client}}) {
-    {{#if function:stream?}}co_return {{#else}}{{#if (not type:void?)}}co_return {{/if (not type:void?)}}{{/if function:stream?}}co_await folly::coro::detachOnCancel(semifuture_{{function:cpp_name}}({{> service_common/param_list}}));
-  }
-{{> common/fun_docblock}}
-  folly::coro::Task<{{> types/return_type_client}}> co_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}}) {
-    {{#if function:stream?}}co_return {{#else}}{{#if (not type:void?)}}co_return {{/if (not type:void?)}}{{/if function:stream?}}co_await folly::coro::detachOnCancel(semifuture_{{function:cpp_name}}(rpcOptions{{function:comma}}{{> service_common/param_list}}));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<{{> types/return_type_client}}> co_{{function:cpp_name}}(apache::thrift::RpcOptions* rpcOptions{{function:comma}}{{> service_common/function_param_list_client}}) {

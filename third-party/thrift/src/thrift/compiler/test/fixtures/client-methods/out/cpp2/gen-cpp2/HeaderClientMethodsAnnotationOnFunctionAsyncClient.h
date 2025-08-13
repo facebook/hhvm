@@ -72,7 +72,6 @@ class Client<::cpp2::HeaderClientMethodsAnnotationOnFunction> : public apache::t
   virtual folly::SemiFuture<std::pair<::cpp2::EchoResponse, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_echo(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::EchoRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/client-methods/src/module.thrift", "service": "HeaderClientMethodsAnnotationOnFunction", "function": "echo"} */
   template <int = 0>
   folly::coro::Task<::cpp2::EchoResponse> co_echo(const ::cpp2::EchoRequest& p_request) {
@@ -83,16 +82,6 @@ class Client<::cpp2::HeaderClientMethodsAnnotationOnFunction> : public apache::t
   folly::coro::Task<::cpp2::EchoResponse> co_echo(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::EchoRequest& p_request) {
     return co_echo<true>(&rpcOptions, p_request);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/client-methods/src/module.thrift", "service": "HeaderClientMethodsAnnotationOnFunction", "function": "echo"} */
-  folly::coro::Task<::cpp2::EchoResponse> co_echo(const ::cpp2::EchoRequest& p_request) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_echo(p_request));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/client-methods/src/module.thrift", "service": "HeaderClientMethodsAnnotationOnFunction", "function": "echo"} */
-  folly::coro::Task<::cpp2::EchoResponse> co_echo(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::EchoRequest& p_request) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_echo(rpcOptions, p_request));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::cpp2::EchoResponse> co_echo(apache::thrift::RpcOptions* rpcOptions, const ::cpp2::EchoRequest& p_request) {
@@ -192,7 +181,6 @@ class Client<::cpp2::HeaderClientMethodsAnnotationOnFunction> : public apache::t
   virtual folly::SemiFuture<::cpp2::EchoResponse> semifuture_echo_2(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::EchoRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/client-methods/src/module.thrift", "service": "HeaderClientMethodsAnnotationOnFunction", "function": "echo_2"} */
   template <int = 0>
   folly::coro::Task<::cpp2::EchoResponse> co_echo_2(const ::cpp2::EchoRequest& p_request) {
@@ -203,16 +191,6 @@ class Client<::cpp2::HeaderClientMethodsAnnotationOnFunction> : public apache::t
   folly::coro::Task<::cpp2::EchoResponse> co_echo_2(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::EchoRequest& p_request) {
     return co_echo_2<true>(&rpcOptions, p_request);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/client-methods/src/module.thrift", "service": "HeaderClientMethodsAnnotationOnFunction", "function": "echo_2"} */
-  folly::coro::Task<::cpp2::EchoResponse> co_echo_2(const ::cpp2::EchoRequest& p_request) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_echo_2(p_request));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/client-methods/src/module.thrift", "service": "HeaderClientMethodsAnnotationOnFunction", "function": "echo_2"} */
-  folly::coro::Task<::cpp2::EchoResponse> co_echo_2(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::EchoRequest& p_request) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_echo_2(rpcOptions, p_request));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::cpp2::EchoResponse> co_echo_2(apache::thrift::RpcOptions* rpcOptions, const ::cpp2::EchoRequest& p_request) {

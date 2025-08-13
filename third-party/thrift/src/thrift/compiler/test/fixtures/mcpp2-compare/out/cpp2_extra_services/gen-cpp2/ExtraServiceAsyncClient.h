@@ -83,7 +83,6 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   virtual folly::SemiFuture<bool> semifuture_simple_function(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "simple_function"} */
   template <int = 0>
   folly::coro::Task<bool> co_simple_function() {
@@ -94,16 +93,6 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   folly::coro::Task<bool> co_simple_function(apache::thrift::RpcOptions& rpcOptions) {
     return co_simple_function<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "simple_function"} */
-  folly::coro::Task<bool> co_simple_function() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_simple_function());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "simple_function"} */
-  folly::coro::Task<bool> co_simple_function(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_simple_function(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<bool> co_simple_function(apache::thrift::RpcOptions* rpcOptions) {
@@ -203,7 +192,6 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   virtual folly::SemiFuture<folly::Unit> semifuture_throws_function(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function"} */
   template <int = 0>
   folly::coro::Task<void> co_throws_function() {
@@ -214,16 +202,6 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   folly::coro::Task<void> co_throws_function(apache::thrift::RpcOptions& rpcOptions) {
     return co_throws_function<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function"} */
-  folly::coro::Task<void> co_throws_function() {
-    co_await folly::coro::detachOnCancel(semifuture_throws_function());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function"} */
-  folly::coro::Task<void> co_throws_function(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_throws_function(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_throws_function(apache::thrift::RpcOptions* rpcOptions) {
@@ -321,7 +299,6 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   virtual folly::SemiFuture<bool> semifuture_throws_function2(apache::thrift::RpcOptions& rpcOptions, bool p_param1);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function2"} */
   template <int = 0>
   folly::coro::Task<bool> co_throws_function2(bool p_param1) {
@@ -332,16 +309,6 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   folly::coro::Task<bool> co_throws_function2(apache::thrift::RpcOptions& rpcOptions, bool p_param1) {
     return co_throws_function2<true>(&rpcOptions, p_param1);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function2"} */
-  folly::coro::Task<bool> co_throws_function2(bool p_param1) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_throws_function2(p_param1));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function2"} */
-  folly::coro::Task<bool> co_throws_function2(apache::thrift::RpcOptions& rpcOptions, bool p_param1) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_throws_function2(rpcOptions, p_param1));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<bool> co_throws_function2(apache::thrift::RpcOptions* rpcOptions, bool p_param1) {
@@ -441,7 +408,6 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   virtual folly::SemiFuture<::std::map<::std::int32_t, ::std::string>> semifuture_throws_function3(apache::thrift::RpcOptions& rpcOptions, bool p_param1, const ::std::string& p_param2);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function3"} */
   template <int = 0>
   folly::coro::Task<::std::map<::std::int32_t, ::std::string>> co_throws_function3(bool p_param1, const ::std::string& p_param2) {
@@ -452,16 +418,6 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   folly::coro::Task<::std::map<::std::int32_t, ::std::string>> co_throws_function3(apache::thrift::RpcOptions& rpcOptions, bool p_param1, const ::std::string& p_param2) {
     return co_throws_function3<true>(&rpcOptions, p_param1, p_param2);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function3"} */
-  folly::coro::Task<::std::map<::std::int32_t, ::std::string>> co_throws_function3(bool p_param1, const ::std::string& p_param2) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_throws_function3(p_param1, p_param2));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "throws_function3"} */
-  folly::coro::Task<::std::map<::std::int32_t, ::std::string>> co_throws_function3(apache::thrift::RpcOptions& rpcOptions, bool p_param1, const ::std::string& p_param2) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_throws_function3(rpcOptions, p_param1, p_param2));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::map<::std::int32_t, ::std::string>> co_throws_function3(apache::thrift::RpcOptions* rpcOptions, bool p_param1, const ::std::string& p_param2) {
@@ -561,7 +517,6 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   virtual folly::SemiFuture<folly::Unit> semifuture_oneway_void_ret(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret"} */
   template <int = 0>
   folly::coro::Task<void> co_oneway_void_ret() {
@@ -572,16 +527,6 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   folly::coro::Task<void> co_oneway_void_ret(apache::thrift::RpcOptions& rpcOptions) {
     return co_oneway_void_ret<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret"} */
-  folly::coro::Task<void> co_oneway_void_ret() {
-    co_await folly::coro::detachOnCancel(semifuture_oneway_void_ret());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret"} */
-  folly::coro::Task<void> co_oneway_void_ret(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_oneway_void_ret(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_oneway_void_ret(apache::thrift::RpcOptions* rpcOptions) {
@@ -652,7 +597,6 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   virtual folly::SemiFuture<folly::Unit> semifuture_oneway_void_ret_i32_i32_i32_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret_i32_i32_i32_i32_i32_param"} */
   template <int = 0>
   folly::coro::Task<void> co_oneway_void_ret_i32_i32_i32_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5) {
@@ -663,16 +607,6 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   folly::coro::Task<void> co_oneway_void_ret_i32_i32_i32_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5) {
     return co_oneway_void_ret_i32_i32_i32_i32_i32_param<true>(&rpcOptions, p_param1, p_param2, p_param3, p_param4, p_param5);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret_i32_i32_i32_i32_i32_param"} */
-  folly::coro::Task<void> co_oneway_void_ret_i32_i32_i32_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5) {
-    co_await folly::coro::detachOnCancel(semifuture_oneway_void_ret_i32_i32_i32_i32_i32_param(p_param1, p_param2, p_param3, p_param4, p_param5));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret_i32_i32_i32_i32_i32_param"} */
-  folly::coro::Task<void> co_oneway_void_ret_i32_i32_i32_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5) {
-    co_await folly::coro::detachOnCancel(semifuture_oneway_void_ret_i32_i32_i32_i32_i32_param(rpcOptions, p_param1, p_param2, p_param3, p_param4, p_param5));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_oneway_void_ret_i32_i32_i32_i32_i32_param(apache::thrift::RpcOptions* rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5) {
@@ -743,7 +677,6 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   virtual folly::SemiFuture<folly::Unit> semifuture_oneway_void_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret_map_setlist_param"} */
   template <int = 0>
   folly::coro::Task<void> co_oneway_void_ret_map_setlist_param(const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2) {
@@ -754,16 +687,6 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   folly::coro::Task<void> co_oneway_void_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2) {
     return co_oneway_void_ret_map_setlist_param<true>(&rpcOptions, p_param1, p_param2);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret_map_setlist_param"} */
-  folly::coro::Task<void> co_oneway_void_ret_map_setlist_param(const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2) {
-    co_await folly::coro::detachOnCancel(semifuture_oneway_void_ret_map_setlist_param(p_param1, p_param2));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret_map_setlist_param"} */
-  folly::coro::Task<void> co_oneway_void_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2) {
-    co_await folly::coro::detachOnCancel(semifuture_oneway_void_ret_map_setlist_param(rpcOptions, p_param1, p_param2));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_oneway_void_ret_map_setlist_param(apache::thrift::RpcOptions* rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2) {
@@ -834,7 +757,6 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   virtual folly::SemiFuture<folly::Unit> semifuture_oneway_void_ret_struct_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::MyStruct& p_param1);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret_struct_param"} */
   template <int = 0>
   folly::coro::Task<void> co_oneway_void_ret_struct_param(const ::some::valid::ns::MyStruct& p_param1) {
@@ -845,16 +767,6 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   folly::coro::Task<void> co_oneway_void_ret_struct_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::MyStruct& p_param1) {
     return co_oneway_void_ret_struct_param<true>(&rpcOptions, p_param1);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret_struct_param"} */
-  folly::coro::Task<void> co_oneway_void_ret_struct_param(const ::some::valid::ns::MyStruct& p_param1) {
-    co_await folly::coro::detachOnCancel(semifuture_oneway_void_ret_struct_param(p_param1));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret_struct_param"} */
-  folly::coro::Task<void> co_oneway_void_ret_struct_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::MyStruct& p_param1) {
-    co_await folly::coro::detachOnCancel(semifuture_oneway_void_ret_struct_param(rpcOptions, p_param1));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_oneway_void_ret_struct_param(apache::thrift::RpcOptions* rpcOptions, const ::some::valid::ns::MyStruct& p_param1) {
@@ -925,7 +837,6 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   virtual folly::SemiFuture<folly::Unit> semifuture_oneway_void_ret_listunion_param(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret_listunion_param"} */
   template <int = 0>
   folly::coro::Task<void> co_oneway_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1) {
@@ -936,16 +847,6 @@ class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServic
   folly::coro::Task<void> co_oneway_void_ret_listunion_param(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1) {
     return co_oneway_void_ret_listunion_param<true>(&rpcOptions, p_param1);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret_listunion_param"} */
-  folly::coro::Task<void> co_oneway_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1) {
-    co_await folly::coro::detachOnCancel(semifuture_oneway_void_ret_listunion_param(p_param1));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift", "service": "ExtraService", "function": "oneway_void_ret_listunion_param"} */
-  folly::coro::Task<void> co_oneway_void_ret_listunion_param(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1) {
-    co_await folly::coro::detachOnCancel(semifuture_oneway_void_ret_listunion_param(rpcOptions, p_param1));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_oneway_void_ret_listunion_param(apache::thrift::RpcOptions* rpcOptions, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1) {

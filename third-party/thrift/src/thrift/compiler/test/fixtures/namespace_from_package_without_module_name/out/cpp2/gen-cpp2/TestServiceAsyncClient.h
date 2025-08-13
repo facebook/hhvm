@@ -71,7 +71,6 @@ class Client<::test::namespace_from_package_without_module_name::TestService> : 
   virtual folly::SemiFuture<::std::int64_t> semifuture_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_int1);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/src/module.thrift", "service": "TestService", "function": "init"} */
   template <int = 0>
   folly::coro::Task<::std::int64_t> co_init(::std::int64_t p_int1) {
@@ -82,16 +81,6 @@ class Client<::test::namespace_from_package_without_module_name::TestService> : 
   folly::coro::Task<::std::int64_t> co_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_int1) {
     return co_init<true>(&rpcOptions, p_int1);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/src/module.thrift", "service": "TestService", "function": "init"} */
-  folly::coro::Task<::std::int64_t> co_init(::std::int64_t p_int1) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_init(p_int1));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/src/module.thrift", "service": "TestService", "function": "init"} */
-  folly::coro::Task<::std::int64_t> co_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_int1) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_init(rpcOptions, p_int1));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int64_t> co_init(apache::thrift::RpcOptions* rpcOptions, ::std::int64_t p_int1) {

@@ -72,7 +72,6 @@ class Client<::facebook::thrift::test::AdapterService> : public apache::thrift::
   virtual folly::SemiFuture<::facebook::thrift::test::CountingStruct> semifuture_count(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "count"} */
   template <int = 0>
   folly::coro::Task<::facebook::thrift::test::CountingStruct> co_count() {
@@ -83,16 +82,6 @@ class Client<::facebook::thrift::test::AdapterService> : public apache::thrift::
   folly::coro::Task<::facebook::thrift::test::CountingStruct> co_count(apache::thrift::RpcOptions& rpcOptions) {
     return co_count<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "count"} */
-  folly::coro::Task<::facebook::thrift::test::CountingStruct> co_count() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_count());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "count"} */
-  folly::coro::Task<::facebook::thrift::test::CountingStruct> co_count(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_count(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::facebook::thrift::test::CountingStruct> co_count(apache::thrift::RpcOptions* rpcOptions) {
@@ -192,7 +181,6 @@ class Client<::facebook::thrift::test::AdapterService> : public apache::thrift::
   virtual folly::SemiFuture<::facebook::thrift::test::HeapAllocated> semifuture_adaptedTypes(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::HeapAllocated& p_arg);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
   template <int = 0>
   folly::coro::Task<::facebook::thrift::test::HeapAllocated> co_adaptedTypes(const ::facebook::thrift::test::HeapAllocated& p_arg) {
@@ -203,16 +191,6 @@ class Client<::facebook::thrift::test::AdapterService> : public apache::thrift::
   folly::coro::Task<::facebook::thrift::test::HeapAllocated> co_adaptedTypes(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::HeapAllocated& p_arg) {
     return co_adaptedTypes<true>(&rpcOptions, p_arg);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
-  folly::coro::Task<::facebook::thrift::test::HeapAllocated> co_adaptedTypes(const ::facebook::thrift::test::HeapAllocated& p_arg) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_adaptedTypes(p_arg));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "adaptedTypes"} */
-  folly::coro::Task<::facebook::thrift::test::HeapAllocated> co_adaptedTypes(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::HeapAllocated& p_arg) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_adaptedTypes(rpcOptions, p_arg));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::facebook::thrift::test::HeapAllocated> co_adaptedTypes(apache::thrift::RpcOptions* rpcOptions, const ::facebook::thrift::test::HeapAllocated& p_arg) {

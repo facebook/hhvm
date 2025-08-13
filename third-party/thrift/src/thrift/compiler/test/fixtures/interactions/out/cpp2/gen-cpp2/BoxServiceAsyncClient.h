@@ -75,7 +75,6 @@ class BoxedInteraction final : public apache::thrift::InteractionHandle {
   folly::SemiFuture<::cpp2::ShouldBeBoxed> semifuture_getABox(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "BoxedInteraction", "function": "getABox"} */
   template <int = 0>
   folly::coro::Task<::cpp2::ShouldBeBoxed> co_getABox() {
@@ -86,16 +85,6 @@ class BoxedInteraction final : public apache::thrift::InteractionHandle {
   folly::coro::Task<::cpp2::ShouldBeBoxed> co_getABox(apache::thrift::RpcOptions& rpcOptions) {
     return co_getABox<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "BoxedInteraction", "function": "getABox"} */
-  folly::coro::Task<::cpp2::ShouldBeBoxed> co_getABox() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getABox());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "BoxedInteraction", "function": "getABox"} */
-  folly::coro::Task<::cpp2::ShouldBeBoxed> co_getABox(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getABox(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::cpp2::ShouldBeBoxed> co_getABox(apache::thrift::RpcOptions* rpcOptions) {
@@ -187,7 +176,6 @@ class BoxedInteraction final : public apache::thrift::InteractionHandle {
   > eager_semifuture_getABoxSession(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::ShouldBeBoxed& p_req);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "BoxService", "function": "getABoxSession"} */
   template <int = 0>
   folly::coro::Task<std::pair<apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction, ::cpp2::ShouldBeBoxed>> co_getABoxSession(const ::cpp2::ShouldBeBoxed& p_req) {
@@ -198,16 +186,6 @@ class BoxedInteraction final : public apache::thrift::InteractionHandle {
   folly::coro::Task<std::pair<apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction, ::cpp2::ShouldBeBoxed>> co_getABoxSession(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::ShouldBeBoxed& p_req) {
     return co_getABoxSession<true>(&rpcOptions, p_req);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "BoxService", "function": "getABoxSession"} */
-  folly::coro::Task<std::pair<apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction, ::cpp2::ShouldBeBoxed>> co_getABoxSession(const ::cpp2::ShouldBeBoxed& p_req) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getABoxSession(p_req));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/interactions/src/module.thrift", "service": "BoxService", "function": "getABoxSession"} */
-  folly::coro::Task<std::pair<apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction, ::cpp2::ShouldBeBoxed>> co_getABoxSession(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::ShouldBeBoxed& p_req) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getABoxSession(rpcOptions, p_req));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<std::pair<apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction, ::cpp2::ShouldBeBoxed>> co_getABoxSession(apache::thrift::RpcOptions* rpcOptions, const ::cpp2::ShouldBeBoxed& p_req) {

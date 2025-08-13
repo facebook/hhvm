@@ -71,7 +71,6 @@ class Client<::test::fixtures::basic::FooService> : public apache::thrift::Gener
   virtual folly::SemiFuture<folly::Unit> semifuture_simple_rpc(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FooService", "function": "simple_rpc"} */
   template <int = 0>
   folly::coro::Task<void> co_simple_rpc() {
@@ -82,16 +81,6 @@ class Client<::test::fixtures::basic::FooService> : public apache::thrift::Gener
   folly::coro::Task<void> co_simple_rpc(apache::thrift::RpcOptions& rpcOptions) {
     return co_simple_rpc<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FooService", "function": "simple_rpc"} */
-  folly::coro::Task<void> co_simple_rpc() {
-    co_await folly::coro::detachOnCancel(semifuture_simple_rpc());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FooService", "function": "simple_rpc"} */
-  folly::coro::Task<void> co_simple_rpc(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_simple_rpc(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_simple_rpc(apache::thrift::RpcOptions* rpcOptions) {

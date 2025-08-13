@@ -77,7 +77,6 @@ class Client<::facebook::thrift::test::PrimitivesService> : public apache::thrif
   virtual folly::SemiFuture<::std::int64_t> semifuture_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
   template <int = 0>
   folly::coro::Task<::std::int64_t> co_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
@@ -88,16 +87,6 @@ class Client<::facebook::thrift::test::PrimitivesService> : public apache::thrif
   folly::coro::Task<::std::int64_t> co_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1) {
     return co_init<true>(&rpcOptions, p_param0, p_param1);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
-  folly::coro::Task<::std::int64_t> co_init(::std::int64_t p_param0, ::std::int64_t p_param1) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_init(p_param0, p_param1));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "init"} */
-  folly::coro::Task<::std::int64_t> co_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_init(rpcOptions, p_param0, p_param1));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int64_t> co_init(apache::thrift::RpcOptions* rpcOptions, ::std::int64_t p_param0, ::std::int64_t p_param1) {
@@ -197,7 +186,6 @@ class Client<::facebook::thrift::test::PrimitivesService> : public apache::thrif
   virtual folly::SemiFuture<::facebook::thrift::test::Result> semifuture_method_that_throws(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
   template <int = 0>
   folly::coro::Task<::facebook::thrift::test::Result> co_method_that_throws() {
@@ -208,16 +196,6 @@ class Client<::facebook::thrift::test::PrimitivesService> : public apache::thrif
   folly::coro::Task<::facebook::thrift::test::Result> co_method_that_throws(apache::thrift::RpcOptions& rpcOptions) {
     return co_method_that_throws<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  folly::coro::Task<::facebook::thrift::test::Result> co_method_that_throws() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_method_that_throws());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "method_that_throws"} */
-  folly::coro::Task<::facebook::thrift::test::Result> co_method_that_throws(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_method_that_throws(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::facebook::thrift::test::Result> co_method_that_throws(apache::thrift::RpcOptions* rpcOptions) {
@@ -317,7 +295,6 @@ class Client<::facebook::thrift::test::PrimitivesService> : public apache::thrif
   virtual folly::SemiFuture<folly::Unit> semifuture_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::cpp2::I& p_i);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
   template <int = 0>
   folly::coro::Task<void> co_return_void_method(::std::int64_t p_id, const ::cpp2::I& p_i) {
@@ -328,16 +305,6 @@ class Client<::facebook::thrift::test::PrimitivesService> : public apache::thrif
   folly::coro::Task<void> co_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::cpp2::I& p_i) {
     return co_return_void_method<true>(&rpcOptions, p_id, p_i);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
-  folly::coro::Task<void> co_return_void_method(::std::int64_t p_id, const ::cpp2::I& p_i) {
-    co_await folly::coro::detachOnCancel(semifuture_return_void_method(p_id, p_i));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "PrimitivesService", "function": "return_void_method"} */
-  folly::coro::Task<void> co_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::cpp2::I& p_i) {
-    co_await folly::coro::detachOnCancel(semifuture_return_void_method(rpcOptions, p_id, p_i));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_return_void_method(apache::thrift::RpcOptions* rpcOptions, ::std::int64_t p_id, const ::cpp2::I& p_i) {

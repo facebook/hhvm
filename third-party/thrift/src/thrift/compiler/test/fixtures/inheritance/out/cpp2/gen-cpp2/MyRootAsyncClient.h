@@ -67,7 +67,6 @@ class Client<::cpp2::MyRoot> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<folly::Unit> semifuture_do_root(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyRoot", "function": "do_root"} */
   template <int = 0>
   folly::coro::Task<void> co_do_root() {
@@ -78,16 +77,6 @@ class Client<::cpp2::MyRoot> : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<void> co_do_root(apache::thrift::RpcOptions& rpcOptions) {
     return co_do_root<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyRoot", "function": "do_root"} */
-  folly::coro::Task<void> co_do_root() {
-    co_await folly::coro::detachOnCancel(semifuture_do_root());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyRoot", "function": "do_root"} */
-  folly::coro::Task<void> co_do_root(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_do_root(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_do_root(apache::thrift::RpcOptions* rpcOptions) {

@@ -72,7 +72,6 @@ class Client<::cpp2::MyLeaf> : public ::cpp2::MyNodeAsyncClient {
   virtual folly::SemiFuture<folly::Unit> semifuture_do_leaf(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
   template <int = 0>
   folly::coro::Task<void> co_do_leaf() {
@@ -83,16 +82,6 @@ class Client<::cpp2::MyLeaf> : public ::cpp2::MyNodeAsyncClient {
   folly::coro::Task<void> co_do_leaf(apache::thrift::RpcOptions& rpcOptions) {
     return co_do_leaf<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
-  folly::coro::Task<void> co_do_leaf() {
-    co_await folly::coro::detachOnCancel(semifuture_do_leaf());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/inheritance/src/module.thrift", "service": "MyLeaf", "function": "do_leaf"} */
-  folly::coro::Task<void> co_do_leaf(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_do_leaf(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_do_leaf(apache::thrift::RpcOptions* rpcOptions) {

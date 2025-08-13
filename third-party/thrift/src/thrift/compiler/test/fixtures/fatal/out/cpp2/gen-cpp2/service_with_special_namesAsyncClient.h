@@ -70,7 +70,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_get(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "get"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_get() {
@@ -81,16 +80,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_get(apache::thrift::RpcOptions& rpcOptions) {
     return co_get<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "get"} */
-  folly::coro::Task<::std::int32_t> co_get() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_get());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "get"} */
-  folly::coro::Task<::std::int32_t> co_get(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_get(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_get(apache::thrift::RpcOptions* rpcOptions) {
@@ -190,7 +179,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_getter(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "getter"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_getter() {
@@ -201,16 +189,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_getter(apache::thrift::RpcOptions& rpcOptions) {
     return co_getter<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "getter"} */
-  folly::coro::Task<::std::int32_t> co_getter() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getter());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "getter"} */
-  folly::coro::Task<::std::int32_t> co_getter(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getter(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_getter(apache::thrift::RpcOptions* rpcOptions) {
@@ -310,7 +288,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_lists(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "lists"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_lists() {
@@ -321,16 +298,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_lists(apache::thrift::RpcOptions& rpcOptions) {
     return co_lists<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "lists"} */
-  folly::coro::Task<::std::int32_t> co_lists() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_lists());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "lists"} */
-  folly::coro::Task<::std::int32_t> co_lists(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_lists(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_lists(apache::thrift::RpcOptions* rpcOptions) {
@@ -430,7 +397,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_maps(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "maps"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_maps() {
@@ -441,16 +407,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_maps(apache::thrift::RpcOptions& rpcOptions) {
     return co_maps<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "maps"} */
-  folly::coro::Task<::std::int32_t> co_maps() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_maps());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "maps"} */
-  folly::coro::Task<::std::int32_t> co_maps(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_maps(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_maps(apache::thrift::RpcOptions* rpcOptions) {
@@ -550,7 +506,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_name(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "name"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_name() {
@@ -561,16 +516,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_name(apache::thrift::RpcOptions& rpcOptions) {
     return co_name<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "name"} */
-  folly::coro::Task<::std::int32_t> co_name() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_name());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "name"} */
-  folly::coro::Task<::std::int32_t> co_name(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_name(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_name(apache::thrift::RpcOptions* rpcOptions) {
@@ -670,7 +615,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_name_to_value(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "name_to_value"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_name_to_value() {
@@ -681,16 +625,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_name_to_value(apache::thrift::RpcOptions& rpcOptions) {
     return co_name_to_value<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "name_to_value"} */
-  folly::coro::Task<::std::int32_t> co_name_to_value() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_name_to_value());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "name_to_value"} */
-  folly::coro::Task<::std::int32_t> co_name_to_value(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_name_to_value(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_name_to_value(apache::thrift::RpcOptions* rpcOptions) {
@@ -790,7 +724,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_names(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "names"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_names() {
@@ -801,16 +734,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_names(apache::thrift::RpcOptions& rpcOptions) {
     return co_names<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "names"} */
-  folly::coro::Task<::std::int32_t> co_names() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_names());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "names"} */
-  folly::coro::Task<::std::int32_t> co_names(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_names(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_names(apache::thrift::RpcOptions* rpcOptions) {
@@ -910,7 +833,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_prefix_tree(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "prefix_tree"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_prefix_tree() {
@@ -921,16 +843,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_prefix_tree(apache::thrift::RpcOptions& rpcOptions) {
     return co_prefix_tree<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "prefix_tree"} */
-  folly::coro::Task<::std::int32_t> co_prefix_tree() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_prefix_tree());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "prefix_tree"} */
-  folly::coro::Task<::std::int32_t> co_prefix_tree(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_prefix_tree(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_prefix_tree(apache::thrift::RpcOptions* rpcOptions) {
@@ -1030,7 +942,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_sets(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "sets"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_sets() {
@@ -1041,16 +952,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_sets(apache::thrift::RpcOptions& rpcOptions) {
     return co_sets<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "sets"} */
-  folly::coro::Task<::std::int32_t> co_sets() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_sets());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "sets"} */
-  folly::coro::Task<::std::int32_t> co_sets(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_sets(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_sets(apache::thrift::RpcOptions* rpcOptions) {
@@ -1150,7 +1051,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_setter(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "setter"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_setter() {
@@ -1161,16 +1061,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_setter(apache::thrift::RpcOptions& rpcOptions) {
     return co_setter<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "setter"} */
-  folly::coro::Task<::std::int32_t> co_setter() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_setter());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "setter"} */
-  folly::coro::Task<::std::int32_t> co_setter(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_setter(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_setter(apache::thrift::RpcOptions* rpcOptions) {
@@ -1270,7 +1160,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_str(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "str"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_str() {
@@ -1281,16 +1170,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_str(apache::thrift::RpcOptions& rpcOptions) {
     return co_str<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "str"} */
-  folly::coro::Task<::std::int32_t> co_str() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_str());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "str"} */
-  folly::coro::Task<::std::int32_t> co_str(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_str(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_str(apache::thrift::RpcOptions* rpcOptions) {
@@ -1390,7 +1269,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_strings(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "strings"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_strings() {
@@ -1401,16 +1279,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_strings(apache::thrift::RpcOptions& rpcOptions) {
     return co_strings<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "strings"} */
-  folly::coro::Task<::std::int32_t> co_strings() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_strings());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "strings"} */
-  folly::coro::Task<::std::int32_t> co_strings(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_strings(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_strings(apache::thrift::RpcOptions* rpcOptions) {
@@ -1510,7 +1378,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_type(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "type"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_type() {
@@ -1521,16 +1388,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_type(apache::thrift::RpcOptions& rpcOptions) {
     return co_type<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "type"} */
-  folly::coro::Task<::std::int32_t> co_type() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_type());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "type"} */
-  folly::coro::Task<::std::int32_t> co_type(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_type(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_type(apache::thrift::RpcOptions* rpcOptions) {
@@ -1630,7 +1487,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_value(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "value"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_value() {
@@ -1641,16 +1497,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_value(apache::thrift::RpcOptions& rpcOptions) {
     return co_value<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "value"} */
-  folly::coro::Task<::std::int32_t> co_value() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_value());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "value"} */
-  folly::coro::Task<::std::int32_t> co_value(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_value(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_value(apache::thrift::RpcOptions* rpcOptions) {
@@ -1750,7 +1596,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_value_to_name(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "value_to_name"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_value_to_name() {
@@ -1761,16 +1606,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_value_to_name(apache::thrift::RpcOptions& rpcOptions) {
     return co_value_to_name<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "value_to_name"} */
-  folly::coro::Task<::std::int32_t> co_value_to_name() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_value_to_name());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "value_to_name"} */
-  folly::coro::Task<::std::int32_t> co_value_to_name(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_value_to_name(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_value_to_name(apache::thrift::RpcOptions* rpcOptions) {
@@ -1870,7 +1705,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_values(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "values"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_values() {
@@ -1881,16 +1715,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_values(apache::thrift::RpcOptions& rpcOptions) {
     return co_values<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "values"} */
-  folly::coro::Task<::std::int32_t> co_values() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_values());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "values"} */
-  folly::coro::Task<::std::int32_t> co_values(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_values(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_values(apache::thrift::RpcOptions* rpcOptions) {
@@ -1990,7 +1814,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_id(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "id"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_id() {
@@ -2001,16 +1824,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_id(apache::thrift::RpcOptions& rpcOptions) {
     return co_id<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "id"} */
-  folly::coro::Task<::std::int32_t> co_id() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_id());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "id"} */
-  folly::coro::Task<::std::int32_t> co_id(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_id(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_id(apache::thrift::RpcOptions* rpcOptions) {
@@ -2110,7 +1923,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_ids(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "ids"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_ids() {
@@ -2121,16 +1933,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_ids(apache::thrift::RpcOptions& rpcOptions) {
     return co_ids<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "ids"} */
-  folly::coro::Task<::std::int32_t> co_ids() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_ids());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "ids"} */
-  folly::coro::Task<::std::int32_t> co_ids(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_ids(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_ids(apache::thrift::RpcOptions* rpcOptions) {
@@ -2230,7 +2032,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_descriptor(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "descriptor"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_descriptor() {
@@ -2241,16 +2042,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_descriptor(apache::thrift::RpcOptions& rpcOptions) {
     return co_descriptor<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "descriptor"} */
-  folly::coro::Task<::std::int32_t> co_descriptor() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_descriptor());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "descriptor"} */
-  folly::coro::Task<::std::int32_t> co_descriptor(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_descriptor(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_descriptor(apache::thrift::RpcOptions* rpcOptions) {
@@ -2350,7 +2141,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_descriptors(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "descriptors"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_descriptors() {
@@ -2361,16 +2151,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_descriptors(apache::thrift::RpcOptions& rpcOptions) {
     return co_descriptors<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "descriptors"} */
-  folly::coro::Task<::std::int32_t> co_descriptors() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_descriptors());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "descriptors"} */
-  folly::coro::Task<::std::int32_t> co_descriptors(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_descriptors(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_descriptors(apache::thrift::RpcOptions* rpcOptions) {
@@ -2470,7 +2250,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_key(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "key"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_key() {
@@ -2481,16 +2260,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_key(apache::thrift::RpcOptions& rpcOptions) {
     return co_key<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "key"} */
-  folly::coro::Task<::std::int32_t> co_key() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_key());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "key"} */
-  folly::coro::Task<::std::int32_t> co_key(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_key(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_key(apache::thrift::RpcOptions* rpcOptions) {
@@ -2590,7 +2359,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_keys(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "keys"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_keys() {
@@ -2601,16 +2369,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_keys(apache::thrift::RpcOptions& rpcOptions) {
     return co_keys<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "keys"} */
-  folly::coro::Task<::std::int32_t> co_keys() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_keys());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "keys"} */
-  folly::coro::Task<::std::int32_t> co_keys(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_keys(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_keys(apache::thrift::RpcOptions* rpcOptions) {
@@ -2710,7 +2468,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_annotation(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "annotation"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_annotation() {
@@ -2721,16 +2478,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_annotation(apache::thrift::RpcOptions& rpcOptions) {
     return co_annotation<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "annotation"} */
-  folly::coro::Task<::std::int32_t> co_annotation() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_annotation());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "annotation"} */
-  folly::coro::Task<::std::int32_t> co_annotation(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_annotation(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_annotation(apache::thrift::RpcOptions* rpcOptions) {
@@ -2830,7 +2577,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_annotations(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "annotations"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_annotations() {
@@ -2841,16 +2587,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_annotations(apache::thrift::RpcOptions& rpcOptions) {
     return co_annotations<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "annotations"} */
-  folly::coro::Task<::std::int32_t> co_annotations() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_annotations());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "annotations"} */
-  folly::coro::Task<::std::int32_t> co_annotations(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_annotations(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_annotations(apache::thrift::RpcOptions* rpcOptions) {
@@ -2950,7 +2686,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_member(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "member"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_member() {
@@ -2961,16 +2696,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_member(apache::thrift::RpcOptions& rpcOptions) {
     return co_member<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "member"} */
-  folly::coro::Task<::std::int32_t> co_member() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_member());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "member"} */
-  folly::coro::Task<::std::int32_t> co_member(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_member(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_member(apache::thrift::RpcOptions* rpcOptions) {
@@ -3070,7 +2795,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_members(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "members"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_members() {
@@ -3081,16 +2805,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_members(apache::thrift::RpcOptions& rpcOptions) {
     return co_members<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "members"} */
-  folly::coro::Task<::std::int32_t> co_members() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_members());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "members"} */
-  folly::coro::Task<::std::int32_t> co_members(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_members(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_members(apache::thrift::RpcOptions* rpcOptions) {
@@ -3190,7 +2904,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_field(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "field"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_field() {
@@ -3201,16 +2914,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_field(apache::thrift::RpcOptions& rpcOptions) {
     return co_field<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "field"} */
-  folly::coro::Task<::std::int32_t> co_field() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_field());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "field"} */
-  folly::coro::Task<::std::int32_t> co_field(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_field(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_field(apache::thrift::RpcOptions* rpcOptions) {
@@ -3310,7 +3013,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   virtual folly::SemiFuture<::std::int32_t> semifuture_fields(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "fields"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_fields() {
@@ -3321,16 +3023,6 @@ class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public a
   folly::coro::Task<::std::int32_t> co_fields(apache::thrift::RpcOptions& rpcOptions) {
     return co_fields<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "fields"} */
-  folly::coro::Task<::std::int32_t> co_fields() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_fields());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/fatal/src/module.thrift", "service": "service_with_special_names", "function": "fields"} */
-  folly::coro::Task<::std::int32_t> co_fields(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_fields(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_fields(apache::thrift::RpcOptions* rpcOptions) {

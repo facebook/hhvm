@@ -67,7 +67,6 @@ class Client<::cpp2::MyServicePrioParent> : public apache::thrift::GeneratedAsyn
   virtual folly::SemiFuture<folly::Unit> semifuture_ping(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
   template <int = 0>
   folly::coro::Task<void> co_ping() {
@@ -78,16 +77,6 @@ class Client<::cpp2::MyServicePrioParent> : public apache::thrift::GeneratedAsyn
   folly::coro::Task<void> co_ping(apache::thrift::RpcOptions& rpcOptions) {
     return co_ping<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
-  folly::coro::Task<void> co_ping() {
-    co_await folly::coro::detachOnCancel(semifuture_ping());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "ping"} */
-  folly::coro::Task<void> co_ping(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_ping(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_ping(apache::thrift::RpcOptions* rpcOptions) {
@@ -185,7 +174,6 @@ class Client<::cpp2::MyServicePrioParent> : public apache::thrift::GeneratedAsyn
   virtual folly::SemiFuture<folly::Unit> semifuture_pong(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
   template <int = 0>
   folly::coro::Task<void> co_pong() {
@@ -196,16 +184,6 @@ class Client<::cpp2::MyServicePrioParent> : public apache::thrift::GeneratedAsyn
   folly::coro::Task<void> co_pong(apache::thrift::RpcOptions& rpcOptions) {
     return co_pong<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
-  folly::coro::Task<void> co_pong() {
-    co_await folly::coro::detachOnCancel(semifuture_pong());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "MyServicePrioParent", "function": "pong"} */
-  folly::coro::Task<void> co_pong(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_pong(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_pong(apache::thrift::RpcOptions* rpcOptions) {

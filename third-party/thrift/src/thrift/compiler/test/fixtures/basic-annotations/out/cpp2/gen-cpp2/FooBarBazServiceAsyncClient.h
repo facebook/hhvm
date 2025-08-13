@@ -67,7 +67,6 @@ class Client<::cpp2::FooBarBazService> : public apache::thrift::GeneratedAsyncCl
   virtual folly::SemiFuture<folly::Unit> semifuture_foo(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "FooBarBazService", "function": "foo"} */
   template <int = 0>
   folly::coro::Task<void> co_foo() {
@@ -78,16 +77,6 @@ class Client<::cpp2::FooBarBazService> : public apache::thrift::GeneratedAsyncCl
   folly::coro::Task<void> co_foo(apache::thrift::RpcOptions& rpcOptions) {
     return co_foo<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "FooBarBazService", "function": "foo"} */
-  folly::coro::Task<void> co_foo() {
-    co_await folly::coro::detachOnCancel(semifuture_foo());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "FooBarBazService", "function": "foo"} */
-  folly::coro::Task<void> co_foo(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_foo(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_foo(apache::thrift::RpcOptions* rpcOptions) {
@@ -185,7 +174,6 @@ class Client<::cpp2::FooBarBazService> : public apache::thrift::GeneratedAsyncCl
   virtual folly::SemiFuture<folly::Unit> semifuture_bar(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "FooBarBazService", "function": "bar"} */
   template <int = 0>
   folly::coro::Task<void> co_bar() {
@@ -196,16 +184,6 @@ class Client<::cpp2::FooBarBazService> : public apache::thrift::GeneratedAsyncCl
   folly::coro::Task<void> co_bar(apache::thrift::RpcOptions& rpcOptions) {
     return co_bar<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "FooBarBazService", "function": "bar"} */
-  folly::coro::Task<void> co_bar() {
-    co_await folly::coro::detachOnCancel(semifuture_bar());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "FooBarBazService", "function": "bar"} */
-  folly::coro::Task<void> co_bar(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_bar(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_bar(apache::thrift::RpcOptions* rpcOptions) {
@@ -303,7 +281,6 @@ class Client<::cpp2::FooBarBazService> : public apache::thrift::GeneratedAsyncCl
   virtual folly::SemiFuture<folly::Unit> semifuture_baz(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "FooBarBazService", "function": "baz"} */
   template <int = 0>
   folly::coro::Task<void> co_baz() {
@@ -314,16 +291,6 @@ class Client<::cpp2::FooBarBazService> : public apache::thrift::GeneratedAsyncCl
   folly::coro::Task<void> co_baz(apache::thrift::RpcOptions& rpcOptions) {
     return co_baz<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "FooBarBazService", "function": "baz"} */
-  folly::coro::Task<void> co_baz() {
-    co_await folly::coro::detachOnCancel(semifuture_baz());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/basic-annotations/src/module.thrift", "service": "FooBarBazService", "function": "baz"} */
-  folly::coro::Task<void> co_baz(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_baz(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_baz(apache::thrift::RpcOptions* rpcOptions) {

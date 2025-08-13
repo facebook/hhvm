@@ -71,7 +71,6 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<folly::Unit> semifuture_doBland(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "doBland"} */
   template <int = 0>
   folly::coro::Task<void> co_doBland() {
@@ -82,16 +81,6 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<void> co_doBland(apache::thrift::RpcOptions& rpcOptions) {
     return co_doBland<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "doBland"} */
-  folly::coro::Task<void> co_doBland() {
-    co_await folly::coro::detachOnCancel(semifuture_doBland());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "doBland"} */
-  folly::coro::Task<void> co_doBland(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_doBland(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_doBland(apache::thrift::RpcOptions* rpcOptions) {
@@ -189,7 +178,6 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<folly::Unit> semifuture_doRaise(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "doRaise"} */
   template <int = 0>
   folly::coro::Task<void> co_doRaise() {
@@ -200,16 +188,6 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<void> co_doRaise(apache::thrift::RpcOptions& rpcOptions) {
     return co_doRaise<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "doRaise"} */
-  folly::coro::Task<void> co_doRaise() {
-    co_await folly::coro::detachOnCancel(semifuture_doRaise());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "doRaise"} */
-  folly::coro::Task<void> co_doRaise(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_doRaise(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_doRaise(apache::thrift::RpcOptions* rpcOptions) {
@@ -307,7 +285,6 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<::std::string> semifuture_get200(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "get200"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_get200() {
@@ -318,16 +295,6 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<::std::string> co_get200(apache::thrift::RpcOptions& rpcOptions) {
     return co_get200<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "get200"} */
-  folly::coro::Task<::std::string> co_get200() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_get200());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "get200"} */
-  folly::coro::Task<::std::string> co_get200(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_get200(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::string> co_get200(apache::thrift::RpcOptions* rpcOptions) {
@@ -427,7 +394,6 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<::std::string> semifuture_get500(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "get500"} */
   template <int = 0>
   folly::coro::Task<::std::string> co_get500() {
@@ -438,16 +404,6 @@ class Client<::cpp2::Raiser> : public apache::thrift::GeneratedAsyncClient {
   folly::coro::Task<::std::string> co_get500(apache::thrift::RpcOptions& rpcOptions) {
     return co_get500<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "get500"} */
-  folly::coro::Task<::std::string> co_get500() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_get500());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/exceptions/src/module.thrift", "service": "Raiser", "function": "get500"} */
-  folly::coro::Task<::std::string> co_get500(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_get500(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::string> co_get500(apache::thrift::RpcOptions* rpcOptions) {

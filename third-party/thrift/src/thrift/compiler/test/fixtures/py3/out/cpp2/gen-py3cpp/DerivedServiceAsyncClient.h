@@ -72,7 +72,6 @@ class Client<::py3::simple::DerivedService> : public ::py3::simple::SimpleServic
   virtual folly::SemiFuture<::std::int32_t> semifuture_get_six(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "DerivedService", "function": "get_six"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_get_six() {
@@ -83,16 +82,6 @@ class Client<::py3::simple::DerivedService> : public ::py3::simple::SimpleServic
   folly::coro::Task<::std::int32_t> co_get_six(apache::thrift::RpcOptions& rpcOptions) {
     return co_get_six<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "DerivedService", "function": "get_six"} */
-  folly::coro::Task<::std::int32_t> co_get_six() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_get_six());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "service": "DerivedService", "function": "get_six"} */
-  folly::coro::Task<::std::int32_t> co_get_six(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_get_six(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_get_six(apache::thrift::RpcOptions* rpcOptions) {

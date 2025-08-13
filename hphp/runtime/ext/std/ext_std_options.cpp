@@ -63,6 +63,9 @@ const StaticString s_DEFAULT_TEMP_DIR(P_tmpdir);
 const StaticString s_used_bytes("used_bytes");
 const StaticString s_used_local_bytes("used_local_bytes");
 const StaticString s_used_persistent_bytes("used_persistent_bytes");
+const StaticString s_used("used");
+const StaticString s_capacity("capacity");
+const StaticString s_global("global");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1073,6 +1076,21 @@ Array HHVM_FUNCTION(rds_bytes) {
   info.set(s_used_persistent_bytes, static_cast<int64_t>(rds::usedPersistentBytes()));
   return info.toArray();
 }
+
+Array HHVM_FUNCTION(tc_usage) {
+  auto dict = Array::CreateDict();
+  auto usage = jit::tc::getUsageInfo();
+  for (auto& info: usage) {
+    DictInit shape(3);
+    shape.set(s_used, info.used);
+    shape.set(s_capacity, info.capacity);
+    shape.set(s_global, info.global);
+    dict.set(String(info.name), shape.toArray());
+  }
+
+  return dict;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void StandardExtension::registerNativeOptions() {
@@ -1125,6 +1143,7 @@ void StandardExtension::registerNativeOptions() {
   HHVM_FE(set_pre_timeout_handler);
   HHVM_FE(sys_get_temp_dir);
   HHVM_FE(version_compare);
+  HHVM_FE(tc_usage);
   HHVM_NAMED_FE_STR("rds_bytes", HHVM_FN(rds_bytes), nativeFuncs());
 
 #ifdef CLOCK_REALTIME

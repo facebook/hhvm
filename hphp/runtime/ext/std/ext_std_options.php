@@ -418,6 +418,13 @@ function rds_bytes(): shape(
   "used_persistent_bytes" => int,
 );
 
+<<__Native>>
+function tc_usage(): dict<string, shape(
+  "capacity" => int,
+  "used" => int,
+  "global" => bool
+)>;
+
 
 } // root namespace
 

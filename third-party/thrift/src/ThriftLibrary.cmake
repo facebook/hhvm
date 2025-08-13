@@ -223,14 +223,16 @@ macro(thrift_generate
     ${output_path}/gen-${language}/${source_file_name}_data.h
     ${output_path}/gen-${language}/${source_file_name}_metadata.h
     ${output_path}/gen-${language}/${source_file_name}_types.h
-    ${output_path}/gen-${language}/${source_file_name}_types.tcc
+    ${output_path}/gen-${language}/${source_file_name}_types.tcch
+    ${output_path}/gen-${language}/${source_file_name}_types_custom_protocol.h
   )
   set("${target_file_name}-${language}-SOURCES"
     ${output_path}/gen-${language}/${source_file_name}_constants.cpp
     ${output_path}/gen-${language}/${source_file_name}_data.cpp
     ${output_path}/gen-${language}/${source_file_name}_types.cpp
-    ${output_path}/gen-${language}/${source_file_name}_types_compact.cpp
     ${output_path}/gen-${language}/${source_file_name}_types_binary.cpp
+    ${output_path}/gen-${language}/${source_file_name}_types_compact.cpp
+    ${output_path}/gen-${language}/${source_file_name}_types_serialization.cpp
   )
   if("${options}" MATCHES "layouts")
     set("${target_file_name}-${language}-SOURCES"

@@ -145,8 +145,12 @@ let get_receiver_ids env ty =
     match get_node ty with
     | Tclass ((_, cid), _, tyl) -> RIclass (cid, tyl) :: acc
     | Toption ty
-    | Tdependent (_, ty)
-    | Tnewtype (_, _, ty) ->
+    | Tdependent (_, ty) ->
+      aux seen acc ty
+    | Tnewtype (n, tyargs, _) ->
+      let (_env, ty) =
+        Typing_utils.get_newtype_super env (get_reason ty) n tyargs
+      in
       aux seen acc ty
     | Tunion tys
     | Tintersection tys ->

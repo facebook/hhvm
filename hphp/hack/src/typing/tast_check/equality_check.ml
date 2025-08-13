@@ -41,7 +41,8 @@ let opaque_enum_expander =
   object
     inherit Type_mapper.tvar_expanding_type_mapper as super
 
-    method! on_tnewtype env r cid tyl cstr =
+    method! on_tnewtype env r cid tyl _cstr =
+      let (env, cstr) = Typing_utils.get_newtype_super env r cid tyl in
       match get_node cstr with
       | Tprim Tarraykey when Typing_env.is_enum env cid ->
         let (env, cstr') = enum_base_type env cid in

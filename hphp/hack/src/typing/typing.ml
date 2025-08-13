@@ -8589,7 +8589,9 @@ end = struct
       end else
         let (env, class_ty) = Inter.intersect_list env r upper_bounds in
         synth_polymorphic_static_method class_id class_ty method_name env
-    | (_, Tnewtype (_, _, class_ty))
+    | (r, Tnewtype (n, tyl, _)) ->
+      let (env, class_ty) = TUtils.get_newtype_super env r n tyl in
+      synth_polymorphic_static_method class_id class_ty method_name env
     | (_, Tdependent (_, class_ty)) ->
       synth_polymorphic_static_method class_id class_ty method_name env
     | (r, Tunion class_tys) ->
@@ -13006,7 +13008,22 @@ end = struct
         Inter.intersect_list env (get_reason cty) (List.map ~f:fst pairs)
       in
       (env, (ty, []), rval_err)
-    | (_, Tnewtype (_, _, ty))
+    | (r, Tnewtype (n, tyargs, _)) ->
+      let (env, ty) = Typing_utils.get_newtype_super env r n tyargs in
+      class_get_inner
+        ~is_method
+        ~is_const
+        ~transform_fty
+        ~this_ty
+        ~explicit_targs
+        ~incl_tc
+        ~coerce_from_ty
+        ~is_function_pointer
+        ~is_attribute_param
+        env
+        cid
+        ty
+        (p, mid)
     | (_, Tdependent (_, ty)) ->
       class_get_inner
         ~is_method

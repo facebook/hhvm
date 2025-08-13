@@ -1153,8 +1153,18 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
     in
     merge_ty_err ty_err_opt
     @@ obj_get_inner_intersection { args with is_nonnull } env on_error id r tyl
-  | (_, Tdependent (_, ty))
-  | (_, Tnewtype (_, _, ty)) ->
+  | (_, Tdependent (_, ty)) ->
+    merge_ty_err expand_ty_err_opt @@ obj_get_inner args env ty id on_error
+  | (r, Tnewtype (name, tyl, _)) ->
+    let (env, ty) = Typing_utils.get_newtype_super env r name tyl in
+    (* Unfortunately the bound on a newtype may itself be a type variable *)
+    let ((env, _ty_err_opt), ty) =
+      Typing_solver.expand_type_and_solve
+        env
+        ~description_of_expected:"an object"
+        args.obj_pos
+        ty
+    in
     merge_ty_err expand_ty_err_opt @@ obj_get_inner args env ty id on_error
   | (r, Tgeneric name) when not (SSet.mem name args.seen) ->
     let args = { args with seen = SSet.add name args.seen } in

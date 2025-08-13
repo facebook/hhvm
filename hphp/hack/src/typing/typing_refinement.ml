@@ -851,7 +851,10 @@ and split_ty
         ~init
         ~expansions
         upper_bounds
-    | Tnewtype (name, tyl, as_ty) ->
+    | Tnewtype (name, tyl, _) ->
+      let (env, as_ty) =
+        Typing_utils.get_newtype_super env (get_reason ty) name tyl
+      in
       let init = TyPartition.mk_span ~env ~predicate ty in
       let expansions = SSet.add name expansions in
       begin

@@ -872,7 +872,8 @@ let rec array_get
         (* We must be under_dynamic_assumptions because
            apply_rules_with_index_value_ty_mismatches otherwise descends into the newtype *)
         got_dynamic ()
-      | Tnewtype (ts, [ty], bound) -> begin
+      | Tnewtype (ts, [ty], _bound) -> begin
+        let (env, bound) = TUtils.get_newtype_super env r ts [ty] in
         match deref bound with
         | ( r,
             Tshape

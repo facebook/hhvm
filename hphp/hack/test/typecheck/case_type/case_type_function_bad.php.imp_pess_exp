@@ -10,10 +10,8 @@ ERROR: File "case_type_function_bad.php", line 6, characters 11-23:
 Invalid case type declaration. More than one variant of `NoFunctionRef` could contain values with the same runtime tag (Typing[4475])
   File "case_type_function_bad.php", line 7, characters 5-40:
   This is the type `HH\FunctionRef<(function(): ~string)>`, which includes **built-in values**
-  File "case_type_function_bad.php", line 7, characters 20-39:
+  File "case_type_function_bad.php", line 7, characters 5-40:
     via the constraint on the newtype `HH\FunctionRef`
-  File "typenames.hhi", line 7, characters 29-29:
-    via this generic `T`
   File "case_type_function_bad.php", line 8, characters 5-21:
   It may overlap with `(function(): ~int)`, which includes **built-in values**
   File "case_type_function_bad.php", line 6, characters 11-23:

@@ -906,66 +906,70 @@ end = struct
     | Tnewtype (name, _, _)
       when String.equal name Naming_special_names.Classes.cEnumClassLabel ->
       (env, label_to_datatypes ~trail)
-    | Tnewtype (name, ty_args, as_ty) -> begin
-      (* A Tnewtype is either an opaque alias (defined with keyword `newtype`)
-       * or a case type.
-       * For opaque type aliases, we look at the upper bound, but for case types,
-       * we expand. *)
-      match Env.get_typedef env name with
-      | Decl_entry.Found
-          { td_type_assignment = CaseType (variant, variants); td_tparams; _ }
-        ->
-        (* Here we should expand the case type instead of looking at the upper bound.
-         * If we do not expand, then we will over approximate the datatype.
-         * Consider:
-         *
-         *  case type Type1 = bool | int;
-         *  case type Type2 = Type1 | string;
-         *
-         * If we do not expand we will reject the definition of `Type2`
-         * because we will believe the datatype for `Type1` contains `string`.
-         * By expanding we can allow this definition. *)
-        let localize env ty =
-          Typing_utils.localize
-            ~ety_env:
-              (* The this_ty does not need to be set because case types cannot
-               * appear within classes thus cannot use the this type.
-               * If we ever change that this could need to be changed *)
-              {
-                empty_expand_env with
-                substs = Decl_subst.make_locl td_tparams ty_args;
-              }
-            env
-            ty
-        in
-        (* Ignore case type where clauses for now.
-         * This will over-approximate the datatype because it will include all
-         * the variants' types regardless of satisfaction of the where clause.
-         * Over-approximation is safe, but incomplete: e.g. the following is OK
-         * but results in an error if where clauses are ignored.
-         *   case type Type1<T> = bool where T as arraykey | int;
-         *   case type Type2 = bool | Type1<float>;
-         * We can revisit should there be a use case for this.
-         *)
-        let tyl = List.map (variant :: variants) ~f:fst in
-        List.fold tyl ~init:(env, Set.empty) ~f:(fun (env, acc) variant ->
-            let ((env, _ty_err_opt), variant) = localize env variant in
-            let trail =
-              DataTypeReason.case_type ~trail (get_reason variant) name
-            in
-            let (env, dty) = cycle_handler ~env ~trail variant in
-            let data_types = Set.union acc dty in
-            (env, data_types))
-      | _ ->
-        let trail_f =
-          if Env.is_enum env name || Env.is_enum_class env name then
-            DataTypeReason.enum ~trail
-          else
-            DataTypeReason.newtype ~trail
-        in
-        let trail = trail_f (get_reason as_ty) name in
-        cycle_handler ~env ~trail as_ty
-    end
+    | Tnewtype (name, ty_args, _) ->
+      let (env, as_ty) =
+        Typing_utils.get_newtype_super env (get_reason ty) name ty_args
+      in
+      begin
+        (* A Tnewtype is either an opaque alias (defined with keyword `newtype`)
+         * or a case type.
+         * For opaque type aliases, we look at the upper bound, but for case types,
+         * we expand. *)
+        match Env.get_typedef env name with
+        | Decl_entry.Found
+            { td_type_assignment = CaseType (variant, variants); td_tparams; _ }
+          ->
+          (* Here we should expand the case type instead of looking at the upper bound.
+           * If we do not expand, then we will over approximate the datatype.
+           * Consider:
+           *
+           *  case type Type1 = bool | int;
+           *  case type Type2 = Type1 | string;
+           *
+           * If we do not expand we will reject the definition of `Type2`
+           * because we will believe the datatype for `Type1` contains `string`.
+           * By expanding we can allow this definition. *)
+          let localize env ty =
+            Typing_utils.localize
+              ~ety_env:
+                (* The this_ty does not need to be set because case types cannot
+                 * appear within classes thus cannot use the this type.
+                 * If we ever change that this could need to be changed *)
+                {
+                  empty_expand_env with
+                  substs = Decl_subst.make_locl td_tparams ty_args;
+                }
+              env
+              ty
+          in
+          (* Ignore case type where clauses for now.
+           * This will over-approximate the datatype because it will include all
+           * the variants' types regardless of satisfaction of the where clause.
+           * Over-approximation is safe, but incomplete: e.g. the following is OK
+           * but results in an error if where clauses are ignored.
+           *   case type Type1<T> = bool where T as arraykey | int;
+           *   case type Type2 = bool | Type1<float>;
+           * We can revisit should there be a use case for this.
+           *)
+          let tyl = List.map (variant :: variants) ~f:fst in
+          List.fold tyl ~init:(env, Set.empty) ~f:(fun (env, acc) variant ->
+              let ((env, _ty_err_opt), variant) = localize env variant in
+              let trail =
+                DataTypeReason.case_type ~trail (get_reason variant) name
+              in
+              let (env, dty) = cycle_handler ~env ~trail variant in
+              let data_types = Set.union acc dty in
+              (env, data_types))
+        | _ ->
+          let trail_f =
+            if Env.is_enum env name || Env.is_enum_class env name then
+              DataTypeReason.enum ~trail
+            else
+              DataTypeReason.newtype ~trail
+          in
+          let trail = trail_f (get_reason as_ty) name in
+          cycle_handler ~env ~trail as_ty
+      end
     | Tclass ((_, cls), _, args) ->
       let generics = Tag.generics_for_class_and_tyl env cls args in
       Class.to_datatypes

@@ -145,17 +145,29 @@ let rec freshen_inside_ty env ty :
     when String.equal name Naming_special_names.Classes.cSupportDyn ->
     let* (env, ty) = freshen_inside_ty env ty in
     return (env, MakeType.supportdyn r ty)
-  | Tnewtype (name, tyl, ty) ->
+  | Tnewtype (name, tyl, ty_bound) ->
     if List.is_empty tyl then
       default ()
-    else
-      let tparams = Env.get_class_or_typedef_tparams env name in
-      if List.is_empty tparams then
-        default ()
-      else
-        let variancel = List.map tparams ~f:(fun t -> t.tp_variance) in
-        let* (env, tyl) = freshen_tparams env variancel tyl in
-        return (env, mk (r, Tnewtype (name, tyl, ty)))
+    else begin
+      match Env.get_typedef env name with
+      | Decl_entry.Found td -> begin
+        match td.td_as_constraint with
+        | None -> default ()
+        | Some ty -> begin
+          match get_node ty with
+          | Tgeneric _ -> default ()
+          | _ ->
+            let tparams = Env.get_class_or_typedef_tparams env name in
+            if List.is_empty tparams then
+              default ()
+            else
+              let variancel = List.map tparams ~f:(fun t -> t.tp_variance) in
+              let* (env, tyl) = freshen_tparams env variancel tyl in
+              return (env, mk (r, Tnewtype (name, tyl, ty_bound)))
+        end
+      end
+      | _ -> default ()
+    end
   | Tclass ((p, cid), e, tyl) ->
     if List.is_empty tyl then
       default ()
@@ -844,8 +856,9 @@ let widen env widen_concrete_type ty =
          *)
         | (_, Tgeneric "this") -> (env, ty)
         (* For abstract types, just widen to the bound, if possible *)
-        | (_, Tdependent (_, ty))
-        | (_, Tnewtype (_, _, ty)) ->
+        | (_, Tdependent (_, ty)) -> widen env ty
+        | (r, Tnewtype (n, tyl, _)) ->
+          let (env, ty) = Typing_utils.get_newtype_super env r n tyl in
           widen env ty
         | _ ->
           let (env, ty_opt) = widen_concrete_type env ty in

@@ -167,18 +167,21 @@ let apply_rules_with_array_index_value_ty_mismatches
       (env, (ty, arr_ty_mismatch, key_ty_mismatch, val_ty_mismatch))
     (* Special case for `TypeStructure<_> as shape { ... }`, because some clients care about the
      * fact that we have the special type TypeStructure *)
-    | (_, Tnewtype (cid, _, bound))
-      when String.equal cid SN.FB.cTypeStructure
-           && is_shape bound
-           && ignore_type_structure ->
-      default ()
-    (* Enums with arraykey upper bound are treated as "abstract" *)
-    | (_, Tnewtype (cid, _, bound))
-      when Env.is_enum env cid && is_arraykey bound ->
-      default ()
+    | (r, Tnewtype (cid, tyl, _)) ->
+      let (env, bound) = Typing_utils.get_newtype_super env r cid tyl in
+      if
+        String.equal cid SN.FB.cTypeStructure
+        && is_shape bound
+        && ignore_type_structure
+      then
+        default ()
+      (* Enums with arraykey upper bound are treated as "abstract" *)
+      else if Env.is_enum env cid && is_arraykey bound then
+        default ()
+      else
+        iter ~supportdyn ~is_nonnull env bound
     (* If there is an explicit upper bound, delegate to it *)
-    | (_, (Tnewtype (_, _, ty) | Tdependent (_, ty))) ->
-      iter ~supportdyn ~is_nonnull env ty
+    | (_, Tdependent (_, ty)) -> iter ~supportdyn ~is_nonnull env ty
     (* For type parameters with upper bounds, delegate to intersection of the upper bounds *)
     | (r, Tgeneric _) ->
       let (env, tyl) = get_transitive_upper_bounds env ty in

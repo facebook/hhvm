@@ -80,7 +80,7 @@ class Async({{#service:extends}}{{!
     ) -> {{#function:return_type}}{{!
         }}{{#function:returns_tuple?}}_typing.Tuple[{{/function:returns_tuple?}}{{!
         }}{{#function:creates_interaction?}}{{service:name}}_{{function:created_interaction}}.Async{{!
-            }}{{#function:stream?}}, {{> types/pep484_return_type}}{{/function:stream?}}{{!
+            }}{{#function:sink_or_stream?}}, {{> types/pep484_return_type}}{{/function:sink_or_stream?}}{{!
             }}{{^type:void?}}, {{> types/pep484_return_type}}{{/type:void?}}{{/function:creates_interaction?}}{{!
         }}{{^function:creates_interaction?}}{{> types/pep484_return_type}}{{/function:creates_interaction?}}{{!
         }}{{#function:returns_tuple?}}]{{/function:returns_tuple?}}{{!
@@ -111,15 +111,15 @@ class Async({{#service:extends}}{{!
             is_mutable_types=True,{{!
 }}{{/program:generate_mutable_types}}
         )
-        {{#function:stream?}}
-        _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
-        {{/function:stream?}}
+        {{#function:sink_or_stream?}}
+        _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+        {{/function:sink_or_stream?}}
         {{#function:return_type}}
         {{#function:early_client_return?}}
         # shortcut to success path for non-void returns
         if _fbthrift_resp.success is not None:
             return {{#function:creates_interaction?}}_fbthrift_interaction, {{/function:creates_interaction?}}{{!
-          }}_fbthrift_resp.success{{#function:stream?}}, _fbthrift_stream{{/function:stream?}}
+          }}_fbthrift_resp.success{{#function:sink_or_stream?}}, _fbthrift_sink_or_stream{{/function:sink_or_stream?}}
         {{/function:early_client_return?}}
         {{#function:exceptions}}
         # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `{{> fields/exception_field_name }}`{{!This is an intentionally mangled name.}}
@@ -130,7 +130,7 @@ class Async({{#service:extends}}{{!
         {{^function:void?}}
         return {{#function:creates_interaction?}}_fbthrift_interaction{{/function:creates_interaction?}}{{!
           }}{{#function:returns_tuple?}}, {{/function:returns_tuple?}}{{!
-          }}{{#function:stream?}}_fbthrift_stream{{/function:stream?}}
+          }}{{#function:sink_or_stream?}}_fbthrift_sink_or_stream{{/function:sink_or_stream?}}
         {{/function:void?}}
         {{/function:early_client_return?}}
         {{#function:with_regular_response?}}

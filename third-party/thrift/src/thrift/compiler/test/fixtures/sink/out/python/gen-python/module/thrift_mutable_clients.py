@@ -20,6 +20,7 @@ from thrift.python.client import (
     Client as _fbthrift_python_Client,
 )
 from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier
+from thrift.python.streaming.sink import ClientSink as _fbthrift_ClientSink
 from thrift.python.common import RpcOptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
@@ -66,37 +67,39 @@ class SinkService(_fbthrift_python_Client["SinkService.Async", "SinkService.Sync
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> None:
+        ) -> _fbthrift_ClientSink[_fbthrift__module__thrift_mutable_types.SinkPayload, _fbthrift__module__thrift_mutable_types.FinalResponse]:
             _fbthrift_resp = await self._send_request(
                 "SinkService",
                 "method",
                 _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_method_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_method_result,
+                (_fbthrift__module__thrift_mutable_types._fbthrift_SinkService_method_result, _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_method_result_sink_elem, _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_method_result_sink_final),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SinkService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
-            return 
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            return _fbthrift_sink_or_stream
     
         async def methodAndReponse(
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Tuple[None]:
+        ) -> _typing.Tuple[_fbthrift__module__thrift_mutable_types.InitialResponse, _fbthrift_ClientSink[_fbthrift__module__thrift_mutable_types.SinkPayload, _fbthrift__module__thrift_mutable_types.FinalResponse]]:
             _fbthrift_resp = await self._send_request(
                 "SinkService",
                 "methodAndReponse",
                 _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodAndReponse_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodAndReponse_result,
+                (_fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodAndReponse_result, _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodAndReponse_result_sink_elem, _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodAndReponse_result_sink_final),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SinkService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
-                return _fbthrift_resp.success
+                return _fbthrift_resp.success, _fbthrift_sink_or_stream
             raise _fbthrift_python_exceptions.ApplicationError(
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
@@ -106,89 +109,94 @@ class SinkService(_fbthrift_python_Client["SinkService.Async", "SinkService.Sync
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> None:
+        ) -> _fbthrift_ClientSink[_fbthrift__module__thrift_mutable_types.SinkPayload, _fbthrift__module__thrift_mutable_types.FinalResponse]:
             _fbthrift_resp = await self._send_request(
                 "SinkService",
                 "methodThrow",
                 _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodThrow_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodThrow_result,
+                (_fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodThrow_result, _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodThrow_result_sink_elem, _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodThrow_result_sink_final),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SinkService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
             # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `_ex0__ex`
             if (_fbthrift_ex := _fbthrift_resp._ex0__ex) is not None:
                 raise _fbthrift_ex
-            return 
+            return _fbthrift_sink_or_stream
     
         async def methodSinkThrow(
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> None:
+        ) -> _fbthrift_ClientSink[_fbthrift__module__thrift_mutable_types.SinkPayload, _fbthrift__module__thrift_mutable_types.FinalResponse]:
             _fbthrift_resp = await self._send_request(
                 "SinkService",
                 "methodSinkThrow",
                 _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodSinkThrow_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodSinkThrow_result,
+                (_fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodSinkThrow_result, _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodSinkThrow_result_sink_elem, _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodSinkThrow_result_sink_final),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SinkService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
-            return 
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            return _fbthrift_sink_or_stream
     
         async def methodFinalThrow(
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> None:
+        ) -> _fbthrift_ClientSink[_fbthrift__module__thrift_mutable_types.SinkPayload, _fbthrift__module__thrift_mutable_types.FinalResponse]:
             _fbthrift_resp = await self._send_request(
                 "SinkService",
                 "methodFinalThrow",
                 _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodFinalThrow_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodFinalThrow_result,
+                (_fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodFinalThrow_result, _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodFinalThrow_result_sink_elem, _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodFinalThrow_result_sink_final),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SinkService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
-            return 
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            return _fbthrift_sink_or_stream
     
         async def methodBothThrow(
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> None:
+        ) -> _fbthrift_ClientSink[_fbthrift__module__thrift_mutable_types.SinkPayload, _fbthrift__module__thrift_mutable_types.FinalResponse]:
             _fbthrift_resp = await self._send_request(
                 "SinkService",
                 "methodBothThrow",
                 _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodBothThrow_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodBothThrow_result,
+                (_fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodBothThrow_result, _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodBothThrow_result_sink_elem, _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodBothThrow_result_sink_final),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SinkService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
-            return 
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            return _fbthrift_sink_or_stream
     
         async def methodFast(
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> None:
+        ) -> _fbthrift_ClientSink[_fbthrift__module__thrift_mutable_types.SinkPayload, _fbthrift__module__thrift_mutable_types.FinalResponse]:
             _fbthrift_resp = await self._send_request(
                 "SinkService",
                 "methodFast",
                 _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodFast_args(),
-                _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodFast_result,
+                (_fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodFast_result, _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodFast_result_sink_elem, _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodFast_result_sink_final),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="SinkService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
-            return 
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            return _fbthrift_sink_or_stream
     
     
     # pyre-ignore[4]: Missing annotation.

@@ -16,5 +16,9 @@
 
 }}{{!
  The client return type tuple
-}}{{#function:stream?}}({{/function:stream?}}{{> types/function_return_type }}{{!
-}}{{#function:stream?}}, {{> types/function_second_return_type }}){{/function:stream?}}
+}}{{#function:sink_or_stream?}}({{/function:sink_or_stream?}}{{> types/function_return_type }}{{!
+}}{{#function:sink_or_stream?}}, {{> types/function_second_return_type }}{{/function:sink_or_stream?}}{{!
+}}{{#function:sink?}}{{!
+    }}, {{program:module_mangle}}__{{> types/types_import_path}}._fbthrift_{{service:name}}_{{function:name}}_result_sink_final{{!
+}}{{/function:sink?}}{{!
+}}{{#function:sink_or_stream?}}){{/function:sink_or_stream?}}

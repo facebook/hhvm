@@ -20,6 +20,7 @@ from thrift.python.client import (
     Client as _fbthrift_python_Client,
 )
 from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier
+from thrift.python.streaming.sink import ClientSink as _fbthrift_ClientSink
 from thrift.python.common import RpcOptions
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
@@ -142,10 +143,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 uri_or_name="MyService",
                 rpc_options=rpc_options,
             )
-            _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
-                return _fbthrift_interaction, _fbthrift_resp.success, _fbthrift_stream
+                return _fbthrift_interaction, _fbthrift_resp.success, _fbthrift_sink_or_stream
             raise _fbthrift_python_exceptions.ApplicationError(
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
@@ -303,28 +304,29 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
                 uri_or_name="MyInteraction",
                 rpc_options=rpc_options,
             )
-            _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
-            return _fbthrift_stream
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            return _fbthrift_sink_or_stream
     
         async def encode(
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Tuple[None]:
+        ) -> _typing.Tuple[_typing.AbstractSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "MyInteraction.encode",
                 _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_args(),
-                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result,
+                (_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result, _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result_sink_elem, _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result_sink_final),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteraction",
                 uri_or_name="MyInteraction",
                 rpc_options=rpc_options,
             )
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
-                return _fbthrift_resp.success
+                return _fbthrift_resp.success, _fbthrift_sink_or_stream
             raise _fbthrift_python_exceptions.ApplicationError(
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
@@ -441,28 +443,29 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
                 uri_or_name="MyInteractionFast",
                 rpc_options=rpc_options,
             )
-            _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
-            return _fbthrift_stream
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            return _fbthrift_sink_or_stream
     
         async def encode(
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Tuple[None]:
+        ) -> _typing.Tuple[_typing.AbstractSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "MyInteractionFast.encode",
                 _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_args(),
-                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_result,
+                (_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_result, _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_result_sink_elem, _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_result_sink_final),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteractionFast",
                 uri_or_name="MyInteractionFast",
                 rpc_options=rpc_options,
             )
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
-                return _fbthrift_resp.success
+                return _fbthrift_resp.success, _fbthrift_sink_or_stream
             raise _fbthrift_python_exceptions.ApplicationError(
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
@@ -671,10 +674,10 @@ class Factories(_fbthrift_python_Client["Factories.Async", "Factories.Sync"]):
                 uri_or_name="Factories",
                 rpc_options=rpc_options,
             )
-            _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
-                return _fbthrift_interaction, _fbthrift_resp.success, _fbthrift_stream
+                return _fbthrift_interaction, _fbthrift_resp.success, _fbthrift_sink_or_stream
             raise _fbthrift_python_exceptions.ApplicationError(
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
@@ -832,28 +835,29 @@ class Factories_MyInteraction(_fbthrift_python_Client["Factories_MyInteraction.A
                 uri_or_name="MyInteraction",
                 rpc_options=rpc_options,
             )
-            _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
-            return _fbthrift_stream
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            return _fbthrift_sink_or_stream
     
         async def encode(
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Tuple[None]:
+        ) -> _typing.Tuple[_typing.AbstractSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
             _fbthrift_resp = await self._send_request(
                 "Factories",
                 "MyInteraction.encode",
                 _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_args(),
-                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result,
+                (_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result, _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result_sink_elem, _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result_sink_final),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteraction",
                 uri_or_name="MyInteraction",
                 rpc_options=rpc_options,
             )
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
-                return _fbthrift_resp.success
+                return _fbthrift_resp.success, _fbthrift_sink_or_stream
             raise _fbthrift_python_exceptions.ApplicationError(
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
@@ -970,28 +974,29 @@ class Factories_MyInteractionFast(_fbthrift_python_Client["Factories_MyInteracti
                 uri_or_name="MyInteractionFast",
                 rpc_options=rpc_options,
             )
-            _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
-            return _fbthrift_stream
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            return _fbthrift_sink_or_stream
     
         async def encode(
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Tuple[None]:
+        ) -> _typing.Tuple[_typing.AbstractSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
             _fbthrift_resp = await self._send_request(
                 "Factories",
                 "MyInteractionFast.encode",
                 _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_args(),
-                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_result,
+                (_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_result, _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_result_sink_elem, _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_result_sink_final),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteractionFast",
                 uri_or_name="MyInteractionFast",
                 rpc_options=rpc_options,
             )
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
-                return _fbthrift_resp.success
+                return _fbthrift_resp.success, _fbthrift_sink_or_stream
             raise _fbthrift_python_exceptions.ApplicationError(
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
@@ -1280,28 +1285,29 @@ class Perform_MyInteraction(_fbthrift_python_Client["Perform_MyInteraction.Async
                 uri_or_name="MyInteraction",
                 rpc_options=rpc_options,
             )
-            _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
-            return _fbthrift_stream
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            return _fbthrift_sink_or_stream
     
         async def encode(
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Tuple[None]:
+        ) -> _typing.Tuple[_typing.AbstractSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
             _fbthrift_resp = await self._send_request(
                 "Perform",
                 "MyInteraction.encode",
                 _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_args(),
-                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result,
+                (_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result, _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result_sink_elem, _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result_sink_final),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteraction",
                 uri_or_name="MyInteraction",
                 rpc_options=rpc_options,
             )
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
-                return _fbthrift_resp.success
+                return _fbthrift_resp.success, _fbthrift_sink_or_stream
             raise _fbthrift_python_exceptions.ApplicationError(
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
@@ -1418,28 +1424,29 @@ class Perform_MyInteractionFast(_fbthrift_python_Client["Perform_MyInteractionFa
                 uri_or_name="MyInteractionFast",
                 rpc_options=rpc_options,
             )
-            _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
-            return _fbthrift_stream
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            return _fbthrift_sink_or_stream
     
         async def encode(
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Tuple[None]:
+        ) -> _typing.Tuple[_typing.AbstractSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
             _fbthrift_resp = await self._send_request(
                 "Perform",
                 "MyInteractionFast.encode",
                 _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_args(),
-                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_result,
+                (_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_result, _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_result_sink_elem, _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteractionFast_encode_result_sink_final),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteractionFast",
                 uri_or_name="MyInteractionFast",
                 rpc_options=rpc_options,
             )
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
-                return _fbthrift_resp.success
+                return _fbthrift_resp.success, _fbthrift_sink_or_stream
             raise _fbthrift_python_exceptions.ApplicationError(
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
@@ -1734,28 +1741,29 @@ class InteractWithShared_MyInteraction(_fbthrift_python_Client["InteractWithShar
                 uri_or_name="MyInteraction",
                 rpc_options=rpc_options,
             )
-            _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
-            return _fbthrift_stream
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
+            return _fbthrift_sink_or_stream
     
         async def encode(
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.Tuple[None]:
+        ) -> _typing.Tuple[_typing.AbstractSet[builtins.int], _fbthrift_ClientSink[builtins.str, builtins.bytes]]:
             _fbthrift_resp = await self._send_request(
                 "InteractWithShared",
                 "MyInteraction.encode",
                 _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_args(),
-                _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result,
+                (_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result, _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result_sink_elem, _fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyInteraction_encode_result_sink_final),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteraction",
                 uri_or_name="MyInteraction",
                 rpc_options=rpc_options,
             )
+            _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
-                return _fbthrift_resp.success
+                return _fbthrift_resp.success, _fbthrift_sink_or_stream
             raise _fbthrift_python_exceptions.ApplicationError(
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",

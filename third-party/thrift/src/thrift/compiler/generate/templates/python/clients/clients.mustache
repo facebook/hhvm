@@ -32,6 +32,9 @@ from {{program:base_library_package}}.client import (
     Client as _fbthrift_python_Client,
 )
 from {{program:base_library_package}}.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier
+{{#program:has_sink_functions?}}
+from {{program:base_library_package}}.streaming.sink import ClientSink as _fbthrift_ClientSink
+{{/program:has_sink_functions?}}
 from {{program:base_library_package}}.common import RpcOptions{{!
 }}{{#program:generate_mutable_types}}
 import {{program:base_library_package}}.mutable_containers as _fbthrift_python_mutable_containers

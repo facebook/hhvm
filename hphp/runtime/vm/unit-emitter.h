@@ -290,8 +290,8 @@ public:
 
   Location::Range m_fatalLoc;
   FatalOp m_fatalOp;
+  LowStringPtr m_moduleName{makeStaticString(Module::DEFAULT)};
   std::string m_fatalMsg;
-  const StringData* m_moduleName{makeStaticString(Module::DEFAULT)};
   PackageInfo m_packageInfo;
 
   /*

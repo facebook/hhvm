@@ -565,33 +565,33 @@ namespace {
 
     if (inst->src(0)->isA(TFunc)) {
       auto const func = srcLoc(env, inst, 0).reg();
-      auto const targetModule = v.makeReg();
 
       if (Cfg::Repo::Authoritative) {
+        auto const calleeModuleName = v.makeReg();
         auto const shared = v.makeReg();
         auto const sfExtra = v.makeReg();
         v << load{func[Func::sharedOff()], shared};
         v << testlim{(int32_t)Func::hasExtendedSharedDataMask(),
                      shared[Func::sharedAllFlags()], sfExtra};
-        cond(v, CC_Z, sfExtra, targetModule,
+        cond(v, CC_Z, sfExtra, calleeModuleName,
           [&] (Vout& v) {
-            auto const tm1 = v.makeReg();
+            auto const ret = v.makeReg();
             auto const unit = v.makeReg();
             v << load{func[Func::unitOff()], unit};
-            v << load{unit[Unit::moduleNameOff()], tm1};
-            return tm1;
+            emitLdLowPtr(v, unit[Unit::moduleNameOff()], ret, sizeof(LowStringPtr));
+            return ret;
           },
           [&] (Vout& v) {
-            auto const tm2 = v.makeReg();
-            v << load{shared[Func::extendedSharedOriginalModuleName()], tm2};
-            return tm2;
+            auto const ret = v.makeReg();
+            emitLdLowPtr(v, shared[Func::extendedSharedOriginalModuleName()], ret, sizeof(LowStringPtr));
+            return ret;
           });
+        emitCmpLowPtr(v, sf, callerModuleName, calleeModuleName);
       } else {
         auto const unit = v.makeReg();
         v << load{func[Func::unitOff()], unit};
-        v << load{unit[Unit::moduleNameOff()], targetModule};
+        emitCmpLowPtr(v, sf, callerModuleName, unit[Unit::moduleNameOff()]);
       };
-      emitCmpLowPtr(v, sf, callerModuleName, targetModule);
     } else {
       assertx(inst->src(0)->isA(TCls));
       auto const unit = v.makeReg();

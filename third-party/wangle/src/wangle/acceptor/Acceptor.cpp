@@ -45,8 +45,6 @@ using std::chrono::milliseconds;
 
 namespace wangle {
 
-static const std::string empty_string;
-
 Acceptor::Acceptor(std::shared_ptr<const ServerSocketConfig> accConfig)
     : accConfig_(std::move(accConfig)),
       socketOptions_(accConfig_->getSocketOptions()),

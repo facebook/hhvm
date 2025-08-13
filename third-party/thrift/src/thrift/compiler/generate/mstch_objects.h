@@ -807,26 +807,8 @@ class mstch_type : public mstch_base {
         this,
         {
             {"type:self", &mstch_type::self},
-            {"type:void?", &mstch_type::is_void},
-            {"type:string?", &mstch_type::is_string},
-            {"type:binary?", &mstch_type::is_binary},
             {"type:numeric_or_void?", &mstch_type::is_numeric_or_void},
-            {"type:bool?", &mstch_type::is_bool},
-            {"type:byte?", &mstch_type::is_byte},
-            {"type:i16?", &mstch_type::is_i16},
-            {"type:i32?", &mstch_type::is_i32},
-            {"type:i64?", &mstch_type::is_i64},
-            {"type:double?", &mstch_type::is_double},
-            {"type:float?", &mstch_type::is_float},
-            {"type:floating_point?", &mstch_type::is_floating_point},
-            {"type:structured?", &mstch_type::is_structured},
-            {"type:union?", &mstch_type::is_union},
-            {"type:enum?", &mstch_type::is_enum},
             {"type:base?", &mstch_type::is_base},
-            {"type:container?", &mstch_type::is_container},
-            {"type:list?", &mstch_type::is_list},
-            {"type:set?", &mstch_type::is_set},
-            {"type:map?", &mstch_type::is_map},
             {"type:structured", &mstch_type::get_structured},
             {"type:enum", &mstch_type::get_enum},
             {"type:list_elem_type", &mstch_type::get_list_type},
@@ -839,16 +821,6 @@ class mstch_type : public mstch_base {
   }
 
   whisker::object self() { return make_self(*type_); }
-  mstch::node is_void() { return resolved_type_->is_void(); }
-  mstch::node is_string() { return resolved_type_->is_string(); }
-  mstch::node is_binary() { return resolved_type_->is_binary(); }
-  mstch::node is_bool() { return resolved_type_->is_bool(); }
-  mstch::node is_byte() { return resolved_type_->is_byte(); }
-  mstch::node is_i16() { return resolved_type_->is_i16(); }
-  mstch::node is_i32() { return resolved_type_->is_i32(); }
-  mstch::node is_i64() { return resolved_type_->is_i64(); }
-  mstch::node is_double() { return resolved_type_->is_double(); }
-  mstch::node is_float() { return resolved_type_->is_float(); }
 
   mstch::node is_numeric_or_void() {
     return resolved_type_->is_void() || resolved_type_->is_bool() ||
@@ -856,17 +828,7 @@ class mstch_type : public mstch_base {
         resolved_type_->is_i32() || resolved_type_->is_i64() ||
         resolved_type_->is_double() || resolved_type_->is_float();
   }
-  mstch::node is_floating_point() {
-    return resolved_type_->is_floating_point();
-  }
-  mstch::node is_structured() { return resolved_type_->is<t_structured>(); }
-  mstch::node is_union() { return resolved_type_->is<t_union>(); }
-  mstch::node is_enum() { return resolved_type_->is<t_enum>(); }
   mstch::node is_base() { return resolved_type_->is<t_primitive_type>(); }
-  mstch::node is_container() { return resolved_type_->is<t_container>(); }
-  mstch::node is_list() { return resolved_type_->is<t_list>(); }
-  mstch::node is_set() { return resolved_type_->is<t_set>(); }
-  mstch::node is_map() { return resolved_type_->is<t_map>(); }
   virtual std::string get_type_namespace(const t_program*) { return ""; }
   mstch::node get_structured();
   mstch::node get_enum();

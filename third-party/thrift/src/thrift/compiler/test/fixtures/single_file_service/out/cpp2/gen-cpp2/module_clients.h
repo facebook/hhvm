@@ -36,6 +36,19 @@ class A;
 } // namespace cpp2
 namespace apache::thrift {
 
+namespace detail {
+
+template<>
+struct ServiceMethodTypesFootprint<::cpp2::A> {
+  // The types that appear in the definitions of service methods.
+  // e.g. if it appears as a type of an input, output, exception sink or stream
+  // parameter of a client stub, it appears here,
+  using TypesInMethods = folly::tag_t<
+  void,
+  ::cpp2::Foo>;
+};
+} // namespace detail
+
 template <>
 class Client<::cpp2::A> : public apache::thrift::GeneratedAsyncClient {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::cpp2::A>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
@@ -296,6 +309,20 @@ namespace cpp2 {
 class B;
 } // namespace cpp2
 namespace apache::thrift {
+
+namespace detail {
+
+template<>
+struct ServiceMethodTypesFootprint<::cpp2::B> {
+  // The types that appear in the definitions of service methods.
+  // e.g. if it appears as a type of an input, output, exception sink or stream
+  // parameter of a client stub, it appears here,
+  using TypesInMethods = folly::tag_t<
+  ::cpp2::Foo,
+  void,
+  ::std::int32_t>;
+};
+} // namespace detail
 
 template <>
 class Client<::cpp2::B> : public ::cpp2::AAsyncClient {
@@ -579,6 +606,18 @@ namespace cpp2 {
 class C;
 } // namespace cpp2
 namespace apache::thrift {
+
+namespace detail {
+
+template<>
+struct ServiceMethodTypesFootprint<::cpp2::C> {
+  // The types that appear in the definitions of service methods.
+  // e.g. if it appears as a type of an input, output, exception sink or stream
+  // parameter of a client stub, it appears here,
+  using TypesInMethods = folly::tag_t<
+  void>;
+};
+} // namespace detail
 
 template <>
 class Client<::cpp2::C> : public apache::thrift::GeneratedAsyncClient {

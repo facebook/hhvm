@@ -233,6 +233,17 @@ class ServiceHandler;
 template <class ServiceTag>
 class Client;
 
+namespace detail {
+
+// Specializations of ServiceMethodTypesFootprint<ServiceTag> provide a
+// "TypesInMethods" list that contains all the types that appear in the
+// definitions of service methods.
+// e.g. if it appears as a type of an input, output, exception sink or stream
+// parameter of a client stub, it appears here,
+template <class ServiceTag>
+struct ServiceMethodTypesFootprint;
+} // namespace detail
+
 } // namespace apache::thrift
 
 namespace google {

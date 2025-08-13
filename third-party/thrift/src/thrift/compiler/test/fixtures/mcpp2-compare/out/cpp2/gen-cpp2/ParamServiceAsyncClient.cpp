@@ -68,6 +68,8 @@ typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<4, ::apac
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::variant, ::some::valid::ns::ComplexUnion*>> ParamService_union_ret_i32_i32_param_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::string, ::std::string*>> ParamService_listunion_string_param_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::list<::apache::thrift::type_class::variant>, ::std::vector<::some::valid::ns::ComplexUnion>*>> ParamService_listunion_string_param_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::some::valid::ns::containerStruct*>, apache::thrift::FieldData<2, ::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>*>, apache::thrift::FieldData<3, ::apache::thrift::type_class::integral, ::some::valid::ns::CppFakeI32*>, apache::thrift::FieldData<4, ::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::some::valid::ns::FollySmallVectorI64*>, apache::thrift::FieldData<5, ::apache::thrift::type_class::set<::apache::thrift::type_class::string>, ::some::valid::ns::SortedVectorSetString*>, apache::thrift::FieldData<6, ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::floating_point>, ::some::valid::ns::FakeMap*>, apache::thrift::FieldData<7, ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::structure>, ::some::valid::ns::UnorderedMapStruct*>, apache::thrift::FieldData<8, ::apache::thrift::type_class::binary, ::some::valid::ns::IOBuf*>, apache::thrift::FieldData<9, ::apache::thrift::type_class::binary, ::some::valid::ns::IOBufPtr*>, apache::thrift::FieldData<10, ::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>*>, apache::thrift::FieldData<11, ::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::std::vector<::std::string>*>, apache::thrift::FieldData<12, ::apache::thrift::type_class::set<::apache::thrift::type_class::string>, ::std::set<::std::string>*>, apache::thrift::FieldData<13, ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::string>, ::std::map<::std::int64_t, ::std::string>*>, apache::thrift::FieldData<14, ::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::some::valid::ns::std_list*>, apache::thrift::FieldData<15, ::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::some::valid::ns::std_deque*>, apache::thrift::FieldData<16, ::apache::thrift::type_class::set<::apache::thrift::type_class::string>, ::some::valid::ns::folly_set*>, apache::thrift::FieldData<17, ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::string>, ::some::valid::ns::folly_map*>, apache::thrift::FieldData<18, ::apache::thrift::type_class::binary, ::some::valid::ns::IOBuf*>, apache::thrift::FieldData<19, ::apache::thrift::type_class::binary, ::some::valid::ns::IOBufPtr*>, apache::thrift::FieldData<20, ::apache::thrift::type_class::structure, ::some::valid::ns::containerStruct*>> ParamService_annotatedParams_pargs;
+typedef apache::thrift::ThriftPresult<true> ParamService_annotatedParams_presult;
 } // namespace some::valid::ns
 template <typename RpcOptions>
 void apache::thrift::Client<::some::valid::ns::ParamService>::fbthrift_send_void_ret_i16_param(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata) {
@@ -383,6 +385,17 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::fbthrift_send_list
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "listunion_string_param",
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "ParamService");
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), std::move(interceptorFrameworkMetadata));
+}
+
+template <typename RpcOptions>
+void apache::thrift::Client<::some::valid::ns::ParamService>::fbthrift_send_annotatedParams(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata) {
+
+  static ::apache::thrift::MethodMetadata::Data* methodMetadata =
+        new ::apache::thrift::MethodMetadata::Data(
+                "annotatedParams",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "ParamService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), std::move(interceptorFrameworkMetadata));
@@ -6307,6 +6320,228 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::recv_instance_list
 
 folly::exception_wrapper apache::thrift::Client<::some::valid::ns::ParamService>::recv_instance_wrapped_listunion_string_param(::std::vector<::some::valid::ns::ComplexUnion>& _return, ::apache::thrift::ClientReceiveState& state) {
   return recv_wrapped_listunion_string_param(_return, state);
+}
+
+void apache::thrift::Client<::some::valid::ns::ParamService>::annotatedParams(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct) {
+  ::apache::thrift::RpcOptions rpcOptions;
+  annotatedParams(rpcOptions, std::move(callback), p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct);
+}
+
+void apache::thrift::Client<::some::valid::ns::ParamService>::annotatedParams(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct) {
+  auto [ctx, header] = annotatedParamsCtx(&rpcOptions);
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie(p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct);
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
+  auto [wrappedCallback, contextStack] = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(std::move(callback), std::move(ctx));
+  fbthrift_serialize_and_send_annotatedParams(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct);
+}
+
+apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::ParamService>::fbthrift_serialize_annotatedParams(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::some::valid::ns::ParamService_annotatedParams_pargs args;
+    args.get<0>().value = const_cast<::some::valid::ns::containerStruct*>(&p_no_annotation);
+    args.get<1>().value = const_cast<::std::set<::std::int32_t>*>(&p_opt_ref_type_shared);
+    args.get<2>().value = &p_base_type;
+    args.get<3>().value = const_cast<::some::valid::ns::FollySmallVectorI64*>(&p_list_type);
+    args.get<4>().value = const_cast<::some::valid::ns::SortedVectorSetString*>(&p_set_type);
+    args.get<5>().value = const_cast<::some::valid::ns::FakeMap*>(&p_map_type);
+    args.get<6>().value = const_cast<::some::valid::ns::UnorderedMapStruct*>(&p_map_struct_type);
+    args.get<7>().value = const_cast<::some::valid::ns::IOBuf*>(&p_iobuf_type);
+    args.get<8>().value = const_cast<::some::valid::ns::IOBufPtr*>(&p_iobuf_ptr);
+    args.get<9>().value = const_cast<::std::vector<::std::int32_t>*>(&p_list_i32_template);
+    args.get<10>().value = const_cast<::std::vector<::std::string>*>(&p_list_string_template);
+    args.get<11>().value = const_cast<::std::set<::std::string>*>(&p_set_template);
+    args.get<12>().value = const_cast<::std::map<::std::int64_t, ::std::string>*>(&p_map_template);
+    args.get<13>().value = const_cast<::some::valid::ns::std_list*>(&p_typedef_list_template);
+    args.get<14>().value = const_cast<::some::valid::ns::std_deque*>(&p_typedef_deque_template);
+    args.get<15>().value = const_cast<::some::valid::ns::folly_set*>(&p_typedef_set_template);
+    args.get<16>().value = const_cast<::some::valid::ns::folly_map*>(&p_typedef_map_template);
+    args.get<17>().value = const_cast<::some::valid::ns::IOBuf*>(&p_iobuf_type_val);
+    args.get<18>().value = const_cast<::some::valid::ns::IOBufPtr*>(&p_iobuf_ptr_val);
+    args.get<19>().value = const_cast<::some::valid::ns::containerStruct*>(&p_struct_struct);
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "annotatedParams",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
+  });
+}
+
+void apache::thrift::Client<::some::valid::ns::ParamService>::fbthrift_serialize_and_send_annotatedParams(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_annotatedParams(rpcOptions, *header, contextStack, p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct);
+  std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
+  if (contextStack != nullptr) {
+    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
+  }
+  if (stealRpcOptions) {
+    fbthrift_send_annotatedParams(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback), std::move(interceptorFrameworkMetadata));
+  } else {
+    fbthrift_send_annotatedParams(std::move(request), rpcOptions, std::move(header), std::move(callback), std::move(interceptorFrameworkMetadata));
+  }
+}
+
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::annotatedParamsCtx(apache::thrift::RpcOptions* rpcOptions) {
+  auto header = std::make_shared<apache::thrift::transport::THeader>(
+      apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
+  header->setProtocolId(channel_->getProtocolId());
+  if (rpcOptions) {
+    header->setHeaders(rpcOptions->releaseWriteHeaders());
+  }
+
+  auto ctx = apache::thrift::ContextStack::createWithClientContext(
+      handlers_,
+      interceptors_,
+      getServiceName(),
+      "ParamService.annotatedParams",
+      *header);
+
+  return {std::move(ctx), std::move(header)};
+}
+
+void apache::thrift::Client<::some::valid::ns::ParamService>::sync_annotatedParams(const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct) {
+  ::apache::thrift::RpcOptions rpcOptions;
+  sync_annotatedParams(rpcOptions, p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct);
+}
+
+void apache::thrift::Client<::some::valid::ns::ParamService>::sync_annotatedParams(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct) {
+  apache::thrift::ClientReceiveState returnState;
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto ctxAndHeader = annotatedParamsCtx(&rpcOptions);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  auto* contextStack  = ctxAndHeader.first.get();
+  if (contextStack != nullptr) {
+    auto argsAsRefs = std::tie(p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct);
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), ctxAndHeader.second.get(), rpcOptions).throwUnlessValue();
+  }
+  callback.waitUntilDone(
+    evb,
+    [&] {
+      fbthrift_serialize_and_send_annotatedParams(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback), p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct);
+    });
+  if (contextStack != nullptr) {
+    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
+  }
+  if (returnState.isException()) {
+    returnState.exception().throw_exception();
+  }
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctxAndHeader.first));
+  SCOPE_EXIT {
+    if (returnState.header() && !returnState.header()->getHeaders().empty()) {
+      rpcOptions.setReadHeaders(returnState.header()->releaseHeaders());
+    }
+  };
+  return folly::fibers::runInMainContext([&] {
+      recv_annotatedParams(returnState);
+  });
+}
+
+
+template <typename CallbackType>
+folly::SemiFuture<folly::Unit> apache::thrift::Client<::some::valid::ns::ParamService>::fbthrift_semifuture_annotatedParams(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> promise;
+  auto semifuture = promise.getSemiFuture();
+  auto ctxAndHeader = annotatedParamsCtx(&rpcOptions);
+  auto wrappedCallbackAndContextStack = apache::thrift::GeneratedAsyncClient::template prepareRequestClientCallback<false /* kIsOneWay */>(
+    std::make_unique<CallbackType>(std::move(promise), recv_wrapped_annotatedParams, channel_),
+    std::move(ctxAndHeader.first));
+  auto header = std::move(ctxAndHeader.second);
+  auto* contextStack = wrappedCallbackAndContextStack.second;
+  auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
+  std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
+  if (contextStack != nullptr) {
+    auto argsAsRefs = std::tie(p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct);
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions);
+        exTry.hasException()) {
+      return folly::makeSemiFuture<folly::Unit>(std::move(exTry).exception());
+    }
+    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
+  }
+  apache::thrift::SerializedRequest request = fbthrift_serialize_annotatedParams(rpcOptions, *header, contextStack, p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct);
+  fbthrift_send_annotatedParams(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback), std::move(interceptorFrameworkMetadata));
+  return std::move(semifuture).deferValue(CallbackHelper::processClientInterceptorsAndExtractResult);
+}
+
+folly::Future<folly::Unit> apache::thrift::Client<::some::valid::ns::ParamService>::future_annotatedParams(const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct) {
+  ::apache::thrift::RpcOptions rpcOptions;
+  return future_annotatedParams(rpcOptions, p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct);
+}
+
+folly::SemiFuture<folly::Unit> apache::thrift::Client<::some::valid::ns::ParamService>::semifuture_annotatedParams(const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct) {
+  ::apache::thrift::RpcOptions rpcOptions;
+  return semifuture_annotatedParams(rpcOptions, p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct);
+}
+
+folly::Future<folly::Unit> apache::thrift::Client<::some::valid::ns::ParamService>::future_annotatedParams(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct) {
+  using CallbackType = apache::thrift::FutureCallback<folly::Unit>;
+  return fbthrift_semifuture_annotatedParams<CallbackType>(rpcOptions, p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct).toUnsafeFuture();
+}
+
+folly::SemiFuture<folly::Unit> apache::thrift::Client<::some::valid::ns::ParamService>::semifuture_annotatedParams(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct) {
+  using CallbackType = apache::thrift::SemiFutureCallback<folly::Unit>;
+  return fbthrift_semifuture_annotatedParams<CallbackType>(rpcOptions, p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct);
+}
+
+
+void apache::thrift::Client<::some::valid::ns::ParamService>::annotatedParams(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct) {
+  annotatedParams(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct);
+}
+
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
+folly::exception_wrapper apache::thrift::Client<::some::valid::ns::ParamService>::recv_wrapped_annotatedParams(::apache::thrift::ClientReceiveState& state) {
+  if (state.isException()) {
+    return std::move(state.exception());
+  }
+  if (!state.hasResponseBuffer()) {
+    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+  }
+
+  using result = ::some::valid::ns::ParamService_annotatedParams_presult;
+  switch (state.protocolId()) {
+    case apache::thrift::protocol::T_BINARY_PROTOCOL:
+    {
+      apache::thrift::BinaryProtocolReader reader;
+      return apache::thrift::detail::ac::recv_wrapped<result>(
+          &reader, state);
+    }
+    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
+    {
+      apache::thrift::CompactProtocolReader reader;
+      return apache::thrift::detail::ac::recv_wrapped<result>(
+          &reader, state);
+    }
+    default:
+    {
+    }
+  }
+  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+}
+
+void apache::thrift::Client<::some::valid::ns::ParamService>::recv_annotatedParams(::apache::thrift::ClientReceiveState& state) {
+  auto ew = recv_wrapped_annotatedParams(state);
+  if (ew) {
+    ew.throw_exception();
+  }
+}
+
+void apache::thrift::Client<::some::valid::ns::ParamService>::recv_instance_annotatedParams(::apache::thrift::ClientReceiveState& state) {
+  recv_annotatedParams(state);
+}
+
+folly::exception_wrapper apache::thrift::Client<::some::valid::ns::ParamService>::recv_instance_wrapped_annotatedParams(::apache::thrift::ClientReceiveState& state) {
+  return recv_wrapped_annotatedParams(state);
 }
 
 

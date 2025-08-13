@@ -27,6 +27,28 @@ class ExtraService;
 } // namespace extra::svc
 namespace apache::thrift {
 
+namespace detail {
+
+template<>
+struct ServiceMethodTypesFootprint<::extra::svc::ExtraService> {
+  // The types that appear in the definitions of service methods.
+  // e.g. if it appears as a type of an input, output, exception sink or stream
+  // parameter of a client stub, it appears here,
+  using TypesInMethods = folly::tag_t<
+  bool,
+  ::some::valid::ns::AnException,
+  ::some::valid::ns::AnotherException,
+  void,
+  ::std::string,
+  ::std::map<::std::int32_t, ::std::string>,
+  ::std::int32_t,
+  ::std::map<::std::string, ::std::int64_t>,
+  ::std::set<::std::vector<::std::string>>,
+  ::some::valid::ns::MyStruct,
+  ::std::vector<::some::valid::ns::ComplexUnion>>;
+};
+} // namespace detail
+
 template <>
 class Client<::extra::svc::ExtraService> : public ::some::valid::ns::ParamServiceAsyncClient {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::extra::svc::ExtraService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");

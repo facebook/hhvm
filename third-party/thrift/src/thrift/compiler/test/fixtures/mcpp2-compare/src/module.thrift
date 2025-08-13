@@ -445,6 +445,36 @@ service ParamService {
   set<MyStruct> setstruct_ret_set_param(8: set<string> param1);
   ComplexUnion union_ret_i32_i32_param(4: i32 param1, 2: i32 param2);
   list<ComplexUnion> listunion_string_param(1: string param1);
+
+  void annotatedParams(
+    1: containerStruct no_annotation,
+    2: set<i32> opt_ref_type_shared,
+    3: CppFakeI32 base_type,
+    4: FollySmallVectorI64 list_type,
+    5: SortedVectorSetString set_type,
+    6: FakeMap map_type,
+    7: UnorderedMapStruct map_struct_type,
+    8: IOBuf iobuf_type,
+    9: IOBufPtr iobuf_ptr,
+    @cpp.Type{template = "std::list"}
+    10: list<i32> list_i32_template,
+    @cpp.Type{template = "std::deque"}
+    11: list<string> list_string_template,
+    @cpp.Type{template = "folly::sorted_vector_set"}
+    12: set<string> set_template,
+    @cpp.Type{template = "folly::sorted_vector_map"}
+    13: map<i64, string> map_template,
+    14: std_list typedef_list_template,
+    15: std_deque typedef_deque_template,
+    16: folly_set typedef_set_template,
+    17: folly_map typedef_map_template,
+    18: IOBuf iobuf_type_val = "value",
+    19: IOBufPtr iobuf_ptr_val = "value2",
+    20: containerStruct struct_struct = {
+      "fieldD": "some string",
+      "fieldI": false,
+    },
+  );
 }
 
 @cpp.Type{name = "folly::IOBuf"}

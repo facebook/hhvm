@@ -200,6 +200,28 @@ class ParamServiceClientWrapper : public ::thrift::py3::ClientWrapper {
     folly::Future<std::vector<::some::valid::ns::ComplexUnion>> listunion_string_param(
       apache::thrift::RpcOptions& rpcOptions,
       std::string arg_param1);
+    folly::Future<folly::Unit> annotatedParams(
+      apache::thrift::RpcOptions& rpcOptions,
+      ::some::valid::ns::containerStruct arg_no_annotation,
+      std::set<int32_t> arg_opt_ref_type_shared,
+      CppFakeI32 arg_base_type,
+      folly::small_vector<int64_t, 8 > arg_list_type,
+      folly::sorted_vector_set<std::string> arg_set_type,
+      FakeMap arg_map_type,
+      std::unordered_map<std::string, containerStruct> arg_map_struct_type,
+      folly::IOBuf arg_iobuf_type,
+      std::unique_ptr<folly::IOBuf> arg_iobuf_ptr,
+      std::vector<int32_t> arg_list_i32_template,
+      std::vector<std::string> arg_list_string_template,
+      std::set<std::string> arg_set_template,
+      std::map<int64_t,std::string> arg_map_template,
+      std::list<int32_t> arg_typedef_list_template,
+      std::deque<std::string> arg_typedef_deque_template,
+      folly::sorted_vector_set<std::string> arg_typedef_set_template,
+      folly::sorted_vector_map<int64_t,std::string> arg_typedef_map_template,
+      folly::IOBuf arg_iobuf_type_val,
+      std::unique_ptr<folly::IOBuf> arg_iobuf_ptr_val,
+      ::some::valid::ns::containerStruct arg_struct_struct);
 };
 
 

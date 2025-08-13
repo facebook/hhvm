@@ -1007,6 +1007,35 @@ cdef class ParamServiceInterface(
             param1):
         raise NotImplementedError("async def listunion_string_param is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_annotatedParams = {
+        'return': 'None',
+        'no_annotation': 'module.types.containerStruct', 'opt_ref_type_shared': '_typing.AbstractSet[int]', 'base_type': 'int', 'list_type': '_typing.Sequence[int]', 'set_type': '_typing.AbstractSet[str]', 'map_type': '_typing.Mapping[int, float]', 'map_struct_type': '_typing.Mapping[str, module.types.containerStruct]', 'iobuf_type': '_fbthrift_iobuf.IOBuf', 'iobuf_ptr': '_fbthrift_iobuf.IOBuf', 'list_i32_template': '_typing.Sequence[int]', 'list_string_template': '_typing.Sequence[str]', 'set_template': '_typing.AbstractSet[str]', 'map_template': '_typing.Mapping[int, str]', 'typedef_list_template': '_typing.Sequence[int]', 'typedef_deque_template': '_typing.Sequence[str]', 'typedef_set_template': '_typing.AbstractSet[str]', 'typedef_map_template': '_typing.Mapping[int, str]', 'iobuf_type_val': '_fbthrift_iobuf.IOBuf', 'iobuf_ptr_val': '_fbthrift_iobuf.IOBuf', 'struct_struct': 'module.types.containerStruct', 
+    }
+
+    async def annotatedParams(
+            self,
+            no_annotation,
+            opt_ref_type_shared,
+            base_type,
+            list_type,
+            set_type,
+            map_type,
+            map_struct_type,
+            iobuf_type,
+            iobuf_ptr,
+            list_i32_template,
+            list_string_template,
+            set_template,
+            map_template,
+            typedef_list_template,
+            typedef_deque_template,
+            typedef_set_template,
+            typedef_map_template,
+            iobuf_type_val,
+            iobuf_ptr_val,
+            struct_struct):
+        raise NotImplementedError("async def annotatedParams is not implemented")
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
@@ -2652,6 +2681,81 @@ cdef api void call_cy_ParamService_listunion_string_param(
         )
     )
     __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+cdef api void call_cy_ParamService_annotatedParams(
+    object self,
+    Cpp2RequestContext* ctx,
+    cFollyPromise[cFollyUnit] cPromise,
+    unique_ptr[_module_cbindings.ccontainerStruct] no_annotation,
+    unique_ptr[cset[cint32_t]] opt_ref_type_shared,
+    _module_cbindings.CppFakeI32 base_type,
+    unique_ptr[_module_cbindings.folly_small_vector_int64_t_8] list_type,
+    unique_ptr[_module_cbindings.folly_sorted_vector_set_std_string] set_type,
+    unique_ptr[_module_cbindings.FakeMap] map_type,
+    unique_ptr[_module_cbindings.std_unordered_map_std_string_containerStruct] map_struct_type,
+    unique_ptr[_fbthrift_iobuf.cIOBuf] iobuf_type,
+    unique_ptr[unique_ptr[_fbthrift_iobuf.cIOBuf]] iobuf_ptr,
+    unique_ptr[vector[cint32_t]] list_i32_template,
+    unique_ptr[vector[string]] list_string_template,
+    unique_ptr[cset[string]] set_template,
+    unique_ptr[cmap[cint64_t,string]] map_template,
+    unique_ptr[_module_cbindings.std_list[cint32_t]] typedef_list_template,
+    unique_ptr[_module_cbindings.std_deque[string]] typedef_deque_template,
+    unique_ptr[_module_cbindings.folly_sorted_vector_set[string]] typedef_set_template,
+    unique_ptr[_module_cbindings.folly_sorted_vector_map[cint64_t,string]] typedef_map_template,
+    unique_ptr[_fbthrift_iobuf.cIOBuf] iobuf_type_val,
+    unique_ptr[unique_ptr[_fbthrift_iobuf.cIOBuf]] iobuf_ptr_val,
+    unique_ptr[_module_cbindings.ccontainerStruct] struct_struct
+) noexcept:
+    cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
+    arg_no_annotation = _module_types.containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.ccontainerStruct](no_annotation.release()))
+    arg_opt_ref_type_shared = _module_types.Set__i32__from_cpp(deref(opt_ref_type_shared))
+    arg_base_type = base_type
+    arg_list_type = _module_types.folly_small_vector_int64_t_8__List__i64__from_cpp(deref(list_type))
+    arg_set_type = _module_types.folly_sorted_vector_set_std_string__Set__string__from_cpp(deref(set_type))
+    arg_map_type = _module_types.FakeMap__Map__i64_double__from_cpp(deref(map_type))
+    arg_map_struct_type = _module_types.std_unordered_map_std_string_containerStruct__Map__string_containerStruct__from_cpp(deref(map_struct_type))
+    arg_iobuf_type = _fbthrift_iobuf.from_unique_ptr(move_iobuf(iobuf_type))
+    arg_iobuf_ptr = _fbthrift_iobuf.from_unique_ptr(move_iobuf(deref(iobuf_ptr)))
+    arg_list_i32_template = _module_types.List__i32__from_cpp(deref(list_i32_template))
+    arg_list_string_template = _module_types.List__string__from_cpp(deref(list_string_template))
+    arg_set_template = _module_types.Set__string__from_cpp(deref(set_template))
+    arg_map_template = _module_types.Map__i64_string__from_cpp(deref(map_template))
+    arg_typedef_list_template = _module_types.std_list__List__i32__from_cpp(deref(typedef_list_template))
+    arg_typedef_deque_template = _module_types.std_deque__List__string__from_cpp(deref(typedef_deque_template))
+    arg_typedef_set_template = _module_types.folly_sorted_vector_set__Set__string__from_cpp(deref(typedef_set_template))
+    arg_typedef_map_template = _module_types.folly_sorted_vector_map__Map__i64_string__from_cpp(deref(typedef_map_template))
+    arg_iobuf_type_val = _fbthrift_iobuf.from_unique_ptr(move_iobuf(iobuf_type_val))
+    arg_iobuf_ptr_val = _fbthrift_iobuf.from_unique_ptr(move_iobuf(deref(iobuf_ptr_val)))
+    arg_struct_struct = _module_types.containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.ccontainerStruct](struct_struct.release()))
+    __context = RequestContext._fbthrift_create(ctx)
+    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    asyncio.get_event_loop().create_task(
+        ParamService_annotatedParams_coro(
+            self,
+            __promise,
+            arg_no_annotation,
+            arg_opt_ref_type_shared,
+            arg_base_type,
+            arg_list_type,
+            arg_set_type,
+            arg_map_type,
+            arg_map_struct_type,
+            arg_iobuf_type,
+            arg_iobuf_ptr,
+            arg_list_i32_template,
+            arg_list_string_template,
+            arg_set_template,
+            arg_map_template,
+            arg_typedef_list_template,
+            arg_typedef_deque_template,
+            arg_typedef_set_template,
+            arg_typedef_map_template,
+            arg_iobuf_type_val,
+            arg_iobuf_ptr_val,
+            arg_struct_struct
+        )
+    )
+    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
 cdef api void call_cy_ParamService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
@@ -3574,6 +3678,74 @@ async def ParamService_listunion_string_param_coro(
         ))
     else:
         promise.cPromise.setValue(make_unique[vector[_module_cbindings.cComplexUnion]](_module_types.List__ComplexUnion__make_instance(result)))
+
+async def ParamService_annotatedParams_coro(
+    object self,
+    Promise_cFollyUnit promise,
+    no_annotation,
+    opt_ref_type_shared,
+    base_type,
+    list_type,
+    set_type,
+    map_type,
+    map_struct_type,
+    iobuf_type,
+    iobuf_ptr,
+    list_i32_template,
+    list_string_template,
+    set_template,
+    map_template,
+    typedef_list_template,
+    typedef_deque_template,
+    typedef_set_template,
+    typedef_map_template,
+    iobuf_type_val,
+    iobuf_ptr_val,
+    struct_struct
+):
+    try:
+        result = await self.annotatedParams(
+                    no_annotation,
+                    opt_ref_type_shared,
+                    base_type,
+                    list_type,
+                    set_type,
+                    map_type,
+                    map_struct_type,
+                    iobuf_type,
+                    iobuf_ptr,
+                    list_i32_template,
+                    list_string_template,
+                    set_template,
+                    map_template,
+                    typedef_list_template,
+                    typedef_deque_template,
+                    typedef_set_template,
+                    typedef_map_template,
+                    iobuf_type_val,
+                    iobuf_ptr_val,
+                    struct_struct)
+    except __ApplicationError as ex:
+        # If the handler raised an ApplicationError convert it to a C++ one
+        promise.cPromise.setException(cTApplicationException(
+            ex.type.value, ex.message.encode('UTF-8')
+        ))
+    except Exception as ex:
+        print(
+            "Unexpected error in service handler ParamService.annotatedParams:",
+            file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
+        ))
+    except asyncio.CancelledError as ex:
+        print("Coroutine was cancelled in service handler ParamService.annotatedParams:", file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
+        ))
+    else:
+        promise.cPromise.setValue(c_unit)
 
 async def ParamService_onStartServing_coro(
     object self,

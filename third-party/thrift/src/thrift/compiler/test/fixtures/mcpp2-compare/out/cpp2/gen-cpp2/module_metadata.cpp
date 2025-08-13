@@ -1235,6 +1235,166 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamSe
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));
 }
+void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamService>>::gen_annotatedParams([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  func.name() = "annotatedParams";
+  auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
+  func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_no_annotation_1;
+  module_ParamService_annotatedParams_no_annotation_1.id() = 1;
+  module_ParamService_annotatedParams_no_annotation_1.name() = "no_annotation";
+  module_ParamService_annotatedParams_no_annotation_1.is_optional() = false;
+  auto module_ParamService_annotatedParams_no_annotation_1_type = std::make_unique<Struct<::some::valid::ns::containerStruct>>("module.containerStruct");
+  module_ParamService_annotatedParams_no_annotation_1_type->writeAndGenType(*module_ParamService_annotatedParams_no_annotation_1.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_no_annotation_1));
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_opt_ref_type_shared_2;
+  module_ParamService_annotatedParams_opt_ref_type_shared_2.id() = 2;
+  module_ParamService_annotatedParams_opt_ref_type_shared_2.name() = "opt_ref_type_shared";
+  module_ParamService_annotatedParams_opt_ref_type_shared_2.is_optional() = false;
+  auto module_ParamService_annotatedParams_opt_ref_type_shared_2_type = std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE));
+  module_ParamService_annotatedParams_opt_ref_type_shared_2_type->writeAndGenType(*module_ParamService_annotatedParams_opt_ref_type_shared_2.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_opt_ref_type_shared_2));
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_base_type_3;
+  module_ParamService_annotatedParams_base_type_3.id() = 3;
+  module_ParamService_annotatedParams_base_type_3.name() = "base_type";
+  module_ParamService_annotatedParams_base_type_3.is_optional() = false;
+  auto module_ParamService_annotatedParams_base_type_3_type = std::make_unique<Typedef>("module.CppFakeI32", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("CppFakeI32") } }).cv_struct_ref(),  });
+  module_ParamService_annotatedParams_base_type_3_type->writeAndGenType(*module_ParamService_annotatedParams_base_type_3.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_base_type_3));
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_list_type_4;
+  module_ParamService_annotatedParams_list_type_4.id() = 4;
+  module_ParamService_annotatedParams_list_type_4.name() = "list_type";
+  module_ParamService_annotatedParams_list_type_4.is_optional() = false;
+  auto module_ParamService_annotatedParams_list_type_4_type = std::make_unique<Typedef>("module.FollySmallVectorI64", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("folly::small_vector<int64_t, 8 /* maxInline */>") } }).cv_struct_ref(),  });
+  module_ParamService_annotatedParams_list_type_4_type->writeAndGenType(*module_ParamService_annotatedParams_list_type_4.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_list_type_4));
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_set_type_5;
+  module_ParamService_annotatedParams_set_type_5.id() = 5;
+  module_ParamService_annotatedParams_set_type_5.name() = "set_type";
+  module_ParamService_annotatedParams_set_type_5.is_optional() = false;
+  auto module_ParamService_annotatedParams_set_type_5_type = std::make_unique<Typedef>("module.SortedVectorSetString", std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("folly::sorted_vector_set<std::string>") } }).cv_struct_ref(),  });
+  module_ParamService_annotatedParams_set_type_5_type->writeAndGenType(*module_ParamService_annotatedParams_set_type_5.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_set_type_5));
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_map_type_6;
+  module_ParamService_annotatedParams_map_type_6.id() = 6;
+  module_ParamService_annotatedParams_map_type_6.name() = "map_type";
+  module_ParamService_annotatedParams_map_type_6.is_optional() = false;
+  auto module_ParamService_annotatedParams_map_type_6_type = std::make_unique<Typedef>("module.FakeMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("FakeMap") } }).cv_struct_ref(),  });
+  module_ParamService_annotatedParams_map_type_6_type->writeAndGenType(*module_ParamService_annotatedParams_map_type_6.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_map_type_6));
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_map_struct_type_7;
+  module_ParamService_annotatedParams_map_struct_type_7.id() = 7;
+  module_ParamService_annotatedParams_map_struct_type_7.name() = "map_struct_type";
+  module_ParamService_annotatedParams_map_struct_type_7.is_optional() = false;
+  auto module_ParamService_annotatedParams_map_struct_type_7_type = std::make_unique<Typedef>("module.UnorderedMapStruct", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Struct<::some::valid::ns::containerStruct>>("module.containerStruct")), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("std::unordered_map<std::string, containerStruct>") } }).cv_struct_ref(),  });
+  module_ParamService_annotatedParams_map_struct_type_7_type->writeAndGenType(*module_ParamService_annotatedParams_map_struct_type_7.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_map_struct_type_7));
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_iobuf_type_8;
+  module_ParamService_annotatedParams_iobuf_type_8.id() = 8;
+  module_ParamService_annotatedParams_iobuf_type_8.name() = "iobuf_type";
+  module_ParamService_annotatedParams_iobuf_type_8.is_optional() = false;
+  auto module_ParamService_annotatedParams_iobuf_type_8_type = std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("folly::IOBuf") } }).cv_struct_ref(),  });
+  module_ParamService_annotatedParams_iobuf_type_8_type->writeAndGenType(*module_ParamService_annotatedParams_iobuf_type_8.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_iobuf_type_8));
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_iobuf_ptr_9;
+  module_ParamService_annotatedParams_iobuf_ptr_9.id() = 9;
+  module_ParamService_annotatedParams_iobuf_ptr_9.name() = "iobuf_ptr";
+  module_ParamService_annotatedParams_iobuf_ptr_9.is_optional() = false;
+  auto module_ParamService_annotatedParams_iobuf_ptr_9_type = std::make_unique<Typedef>("module.IOBufPtr", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("std::unique_ptr<folly::IOBuf>") } }).cv_struct_ref(),  });
+  module_ParamService_annotatedParams_iobuf_ptr_9_type->writeAndGenType(*module_ParamService_annotatedParams_iobuf_ptr_9.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_iobuf_ptr_9));
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_list_i32_template_10;
+  module_ParamService_annotatedParams_list_i32_template_10.id() = 10;
+  module_ParamService_annotatedParams_list_i32_template_10.name() = "list_i32_template";
+  module_ParamService_annotatedParams_list_i32_template_10.is_optional() = false;
+  module_ParamService_annotatedParams_list_i32_template_10.structured_annotations() = {
+      *cvStruct("cpp.Type", { {"template", cvString("std::list") } }).cv_struct_ref(),
+  };
+  auto module_ParamService_annotatedParams_list_i32_template_10_type = std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE));
+  module_ParamService_annotatedParams_list_i32_template_10_type->writeAndGenType(*module_ParamService_annotatedParams_list_i32_template_10.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_list_i32_template_10));
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_list_string_template_11;
+  module_ParamService_annotatedParams_list_string_template_11.id() = 11;
+  module_ParamService_annotatedParams_list_string_template_11.name() = "list_string_template";
+  module_ParamService_annotatedParams_list_string_template_11.is_optional() = false;
+  module_ParamService_annotatedParams_list_string_template_11.structured_annotations() = {
+      *cvStruct("cpp.Type", { {"template", cvString("std::deque") } }).cv_struct_ref(),
+  };
+  auto module_ParamService_annotatedParams_list_string_template_11_type = std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
+  module_ParamService_annotatedParams_list_string_template_11_type->writeAndGenType(*module_ParamService_annotatedParams_list_string_template_11.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_list_string_template_11));
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_set_template_12;
+  module_ParamService_annotatedParams_set_template_12.id() = 12;
+  module_ParamService_annotatedParams_set_template_12.name() = "set_template";
+  module_ParamService_annotatedParams_set_template_12.is_optional() = false;
+  module_ParamService_annotatedParams_set_template_12.structured_annotations() = {
+      *cvStruct("cpp.Type", { {"template", cvString("folly::sorted_vector_set") } }).cv_struct_ref(),
+  };
+  auto module_ParamService_annotatedParams_set_template_12_type = std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
+  module_ParamService_annotatedParams_set_template_12_type->writeAndGenType(*module_ParamService_annotatedParams_set_template_12.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_set_template_12));
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_map_template_13;
+  module_ParamService_annotatedParams_map_template_13.id() = 13;
+  module_ParamService_annotatedParams_map_template_13.name() = "map_template";
+  module_ParamService_annotatedParams_map_template_13.is_optional() = false;
+  module_ParamService_annotatedParams_map_template_13.structured_annotations() = {
+      *cvStruct("cpp.Type", { {"template", cvString("folly::sorted_vector_map") } }).cv_struct_ref(),
+  };
+  auto module_ParamService_annotatedParams_map_template_13_type = std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
+  module_ParamService_annotatedParams_map_template_13_type->writeAndGenType(*module_ParamService_annotatedParams_map_template_13.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_map_template_13));
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_typedef_list_template_14;
+  module_ParamService_annotatedParams_typedef_list_template_14.id() = 14;
+  module_ParamService_annotatedParams_typedef_list_template_14.name() = "typedef_list_template";
+  module_ParamService_annotatedParams_typedef_list_template_14.is_optional() = false;
+  auto module_ParamService_annotatedParams_typedef_list_template_14_type = std::make_unique<Typedef>("module.std_list", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::list") } }).cv_struct_ref(),  });
+  module_ParamService_annotatedParams_typedef_list_template_14_type->writeAndGenType(*module_ParamService_annotatedParams_typedef_list_template_14.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_typedef_list_template_14));
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_typedef_deque_template_15;
+  module_ParamService_annotatedParams_typedef_deque_template_15.id() = 15;
+  module_ParamService_annotatedParams_typedef_deque_template_15.name() = "typedef_deque_template";
+  module_ParamService_annotatedParams_typedef_deque_template_15.is_optional() = false;
+  auto module_ParamService_annotatedParams_typedef_deque_template_15_type = std::make_unique<Typedef>("module.std_deque", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::deque") } }).cv_struct_ref(),  });
+  module_ParamService_annotatedParams_typedef_deque_template_15_type->writeAndGenType(*module_ParamService_annotatedParams_typedef_deque_template_15.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_typedef_deque_template_15));
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_typedef_set_template_16;
+  module_ParamService_annotatedParams_typedef_set_template_16.id() = 16;
+  module_ParamService_annotatedParams_typedef_set_template_16.name() = "typedef_set_template";
+  module_ParamService_annotatedParams_typedef_set_template_16.is_optional() = false;
+  auto module_ParamService_annotatedParams_typedef_set_template_16_type = std::make_unique<Typedef>("module.folly_set", std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::sorted_vector_set") } }).cv_struct_ref(),  });
+  module_ParamService_annotatedParams_typedef_set_template_16_type->writeAndGenType(*module_ParamService_annotatedParams_typedef_set_template_16.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_typedef_set_template_16));
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_typedef_map_template_17;
+  module_ParamService_annotatedParams_typedef_map_template_17.id() = 17;
+  module_ParamService_annotatedParams_typedef_map_template_17.name() = "typedef_map_template";
+  module_ParamService_annotatedParams_typedef_map_template_17.is_optional() = false;
+  auto module_ParamService_annotatedParams_typedef_map_template_17_type = std::make_unique<Typedef>("module.folly_map", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::sorted_vector_map") } }).cv_struct_ref(),  });
+  module_ParamService_annotatedParams_typedef_map_template_17_type->writeAndGenType(*module_ParamService_annotatedParams_typedef_map_template_17.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_typedef_map_template_17));
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_iobuf_type_val_18;
+  module_ParamService_annotatedParams_iobuf_type_val_18.id() = 18;
+  module_ParamService_annotatedParams_iobuf_type_val_18.name() = "iobuf_type_val";
+  module_ParamService_annotatedParams_iobuf_type_val_18.is_optional() = false;
+  auto module_ParamService_annotatedParams_iobuf_type_val_18_type = std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("folly::IOBuf") } }).cv_struct_ref(),  });
+  module_ParamService_annotatedParams_iobuf_type_val_18_type->writeAndGenType(*module_ParamService_annotatedParams_iobuf_type_val_18.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_iobuf_type_val_18));
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_iobuf_ptr_val_19;
+  module_ParamService_annotatedParams_iobuf_ptr_val_19.id() = 19;
+  module_ParamService_annotatedParams_iobuf_ptr_val_19.name() = "iobuf_ptr_val";
+  module_ParamService_annotatedParams_iobuf_ptr_val_19.is_optional() = false;
+  auto module_ParamService_annotatedParams_iobuf_ptr_val_19_type = std::make_unique<Typedef>("module.IOBufPtr", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("std::unique_ptr<folly::IOBuf>") } }).cv_struct_ref(),  });
+  module_ParamService_annotatedParams_iobuf_ptr_val_19_type->writeAndGenType(*module_ParamService_annotatedParams_iobuf_ptr_val_19.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_iobuf_ptr_val_19));
+  ::apache::thrift::metadata::ThriftField module_ParamService_annotatedParams_struct_struct_20;
+  module_ParamService_annotatedParams_struct_struct_20.id() = 20;
+  module_ParamService_annotatedParams_struct_struct_20.name() = "struct_struct";
+  module_ParamService_annotatedParams_struct_struct_20.is_optional() = false;
+  auto module_ParamService_annotatedParams_struct_struct_20_type = std::make_unique<Struct<::some::valid::ns::containerStruct>>("module.containerStruct");
+  module_ParamService_annotatedParams_struct_struct_20_type->writeAndGenType(*module_ParamService_annotatedParams_struct_struct_20.type(), metadata);
+  func.arguments()->push_back(std::move(module_ParamService_annotatedParams_struct_struct_20));
+  func.is_oneway() = false;
+  service.functions()->push_back(std::move(func));
+}
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
@@ -1279,6 +1439,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
     ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamService>>::gen_setstruct_ret_set_param,
     ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamService>>::gen_union_ret_i32_i32_param,
     ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamService>>::gen_listunion_string_param,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamService>>::gen_annotatedParams,
   };
   for (auto& function_gen : functions) {
     function_gen(metadata, module_ParamService);

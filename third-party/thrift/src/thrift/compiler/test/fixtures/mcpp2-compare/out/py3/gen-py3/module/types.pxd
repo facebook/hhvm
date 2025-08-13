@@ -526,6 +526,36 @@ cdef object Map__List__Set__string_string__from_cpp(const cmap[vector[cset[strin
 cdef cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]] Map__Set__List__i32_Map__List__Set__string_string__make_instance(object items) except *
 cdef object Map__Set__List__i32_Map__List__Set__string_string__from_cpp(const cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]]&) except *
 
+cdef cset[cint32_t] Set__i32__make_instance(object items) except *
+cdef object Set__i32__from_cpp(const cset[cint32_t]&) except *
+
+cdef _module_cbindings.folly_small_vector_int64_t_8 folly_small_vector_int64_t_8__List__i64__make_instance(object items) except *
+cdef object folly_small_vector_int64_t_8__List__i64__from_cpp(const _module_cbindings.folly_small_vector_int64_t_8&) except *
+
+cdef _module_cbindings.folly_sorted_vector_set_std_string folly_sorted_vector_set_std_string__Set__string__make_instance(object items) except *
+cdef object folly_sorted_vector_set_std_string__Set__string__from_cpp(const _module_cbindings.folly_sorted_vector_set_std_string&) except *
+
+cdef _module_cbindings.FakeMap FakeMap__Map__i64_double__make_instance(object items) except *
+cdef object FakeMap__Map__i64_double__from_cpp(const _module_cbindings.FakeMap&) except *
+
+cdef _module_cbindings.std_unordered_map_std_string_containerStruct std_unordered_map_std_string_containerStruct__Map__string_containerStruct__make_instance(object items) except *
+cdef object std_unordered_map_std_string_containerStruct__Map__string_containerStruct__from_cpp(const _module_cbindings.std_unordered_map_std_string_containerStruct&) except *
+
+cdef cmap[cint64_t,string] Map__i64_string__make_instance(object items) except *
+cdef object Map__i64_string__from_cpp(const cmap[cint64_t,string]&) except *
+
+cdef _module_cbindings.std_list[cint32_t] std_list__List__i32__make_instance(object items) except *
+cdef object std_list__List__i32__from_cpp(const _module_cbindings.std_list[cint32_t]&) except *
+
+cdef _module_cbindings.std_deque[string] std_deque__List__string__make_instance(object items) except *
+cdef object std_deque__List__string__from_cpp(const _module_cbindings.std_deque[string]&) except *
+
+cdef _module_cbindings.folly_sorted_vector_set[string] folly_sorted_vector_set__Set__string__make_instance(object items) except *
+cdef object folly_sorted_vector_set__Set__string__from_cpp(const _module_cbindings.folly_sorted_vector_set[string]&) except *
+
+cdef _module_cbindings.folly_sorted_vector_map[cint64_t,string] folly_sorted_vector_map__Map__i64_string__make_instance(object items) except *
+cdef object folly_sorted_vector_map__Map__i64_string__from_cpp(const _module_cbindings.folly_sorted_vector_map[cint64_t,string]&) except *
+
 cdef vector[string] List__binary__make_instance(object items) except *
 cdef object List__binary__from_cpp(const vector[string]&) except *
 
@@ -550,9 +580,6 @@ cdef object List__Set__SimpleUnion__from_cpp(const vector[cset[_module_cbindings
 cdef cmap[string,cbool] Map__string_bool__make_instance(object items) except *
 cdef object Map__string_bool__from_cpp(const cmap[string,cbool]&) except *
 
-cdef cset[cint32_t] Set__i32__make_instance(object items) except *
-cdef object Set__i32__from_cpp(const cset[cint32_t]&) except *
-
 cdef cmap[string,cmap[string,cint32_t]] Map__string_Map__string_i32__make_instance(object items) except *
 cdef object Map__string_Map__string_i32__from_cpp(const cmap[string,cmap[string,cint32_t]]&) except *
 
@@ -573,30 +600,6 @@ cdef object Set__Set__bool__from_cpp(const cset[cset[cbool]]&) except *
 
 cdef cset[cset[cset[cbool]]] Set__Set__Set__bool__make_instance(object items) except *
 cdef object Set__Set__Set__bool__from_cpp(const cset[cset[cset[cbool]]]&) except *
-
-cdef _module_cbindings.folly_small_vector_int64_t_8 folly_small_vector_int64_t_8__List__i64__make_instance(object items) except *
-cdef object folly_small_vector_int64_t_8__List__i64__from_cpp(const _module_cbindings.folly_small_vector_int64_t_8&) except *
-
-cdef _module_cbindings.folly_sorted_vector_set_std_string folly_sorted_vector_set_std_string__Set__string__make_instance(object items) except *
-cdef object folly_sorted_vector_set_std_string__Set__string__from_cpp(const _module_cbindings.folly_sorted_vector_set_std_string&) except *
-
-cdef _module_cbindings.FakeMap FakeMap__Map__i64_double__make_instance(object items) except *
-cdef object FakeMap__Map__i64_double__from_cpp(const _module_cbindings.FakeMap&) except *
-
-cdef _module_cbindings.std_unordered_map_std_string_containerStruct std_unordered_map_std_string_containerStruct__Map__string_containerStruct__make_instance(object items) except *
-cdef object std_unordered_map_std_string_containerStruct__Map__string_containerStruct__from_cpp(const _module_cbindings.std_unordered_map_std_string_containerStruct&) except *
-
-cdef _module_cbindings.std_list[cint32_t] std_list__List__i32__make_instance(object items) except *
-cdef object std_list__List__i32__from_cpp(const _module_cbindings.std_list[cint32_t]&) except *
-
-cdef _module_cbindings.std_deque[string] std_deque__List__string__make_instance(object items) except *
-cdef object std_deque__List__string__from_cpp(const _module_cbindings.std_deque[string]&) except *
-
-cdef _module_cbindings.folly_sorted_vector_set[string] folly_sorted_vector_set__Set__string__make_instance(object items) except *
-cdef object folly_sorted_vector_set__Set__string__from_cpp(const _module_cbindings.folly_sorted_vector_set[string]&) except *
-
-cdef _module_cbindings.folly_sorted_vector_map[cint64_t,string] folly_sorted_vector_map__Map__i64_string__make_instance(object items) except *
-cdef object folly_sorted_vector_map__Map__i64_string__from_cpp(const _module_cbindings.folly_sorted_vector_map[cint64_t,string]&) except *
 
 cdef cmap[string,_fbthrift_iobuf.cIOBuf] Map__string_folly_IOBuf__binary__make_instance(object items) except *
 cdef object Map__string_folly_IOBuf__binary__from_cpp(const cmap[string,_fbthrift_iobuf.cIOBuf]&) except *

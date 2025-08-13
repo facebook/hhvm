@@ -186,6 +186,28 @@ class ParamServiceWrapper : virtual public ParamServiceSvIf {
     void async_tm_listunion_string_param(apache::thrift::HandlerCallbackPtr<std::unique_ptr<std::vector<::some::valid::ns::ComplexUnion>>> callback
         , std::unique_ptr<std::string> param1
     ) override;
+    void async_tm_annotatedParams(apache::thrift::HandlerCallbackPtr<void> callback
+        , std::unique_ptr<::some::valid::ns::containerStruct> no_annotation
+        , std::unique_ptr<std::set<int32_t>> opt_ref_type_shared
+        , CppFakeI32 base_type
+        , std::unique_ptr<folly::small_vector<int64_t, 8 >> list_type
+        , std::unique_ptr<folly::sorted_vector_set<std::string>> set_type
+        , std::unique_ptr<FakeMap> map_type
+        , std::unique_ptr<std::unordered_map<std::string, containerStruct>> map_struct_type
+        , std::unique_ptr<folly::IOBuf> iobuf_type
+        , std::unique_ptr<std::unique_ptr<folly::IOBuf>> iobuf_ptr
+        , std::unique_ptr<std::vector<int32_t>> list_i32_template
+        , std::unique_ptr<std::vector<std::string>> list_string_template
+        , std::unique_ptr<std::set<std::string>> set_template
+        , std::unique_ptr<std::map<int64_t,std::string>> map_template
+        , std::unique_ptr<std::list<int32_t>> typedef_list_template
+        , std::unique_ptr<std::deque<std::string>> typedef_deque_template
+        , std::unique_ptr<folly::sorted_vector_set<std::string>> typedef_set_template
+        , std::unique_ptr<folly::sorted_vector_map<int64_t,std::string>> typedef_map_template
+        , std::unique_ptr<folly::IOBuf> iobuf_type_val
+        , std::unique_ptr<std::unique_ptr<folly::IOBuf>> iobuf_ptr_val
+        , std::unique_ptr<::some::valid::ns::containerStruct> struct_struct
+    ) override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
 folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };

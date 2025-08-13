@@ -26,6 +26,18 @@ class DerivedService;
 } // namespace py3::simple
 namespace apache::thrift {
 
+namespace detail {
+
+template<>
+struct ServiceMethodTypesFootprint<::py3::simple::DerivedService> {
+  // The types that appear in the definitions of service methods.
+  // e.g. if it appears as a type of an input, output, exception sink or stream
+  // parameter of a client stub, it appears here,
+  using TypesInMethods = folly::tag_t<
+  ::std::int32_t>;
+};
+} // namespace detail
+
 template <>
 class Client<::py3::simple::DerivedService> : public ::py3::simple::SimpleServiceAsyncClient {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::py3::simple::DerivedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");

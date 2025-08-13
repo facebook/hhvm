@@ -21,6 +21,21 @@ class MyService;
 } // namespace cpp2
 namespace apache::thrift {
 
+namespace detail {
+
+template<>
+struct ServiceMethodTypesFootprint<::cpp2::MyService> {
+  // The types that appear in the definitions of service methods.
+  // e.g. if it appears as a type of an input, output, exception sink or stream
+  // parameter of a client stub, it appears here,
+  using TypesInMethods = folly::tag_t<
+  void,
+  ::std::string,
+  ::std::int64_t,
+  bool>;
+};
+} // namespace detail
+
 template <>
 class Client<::cpp2::MyService> : public apache::thrift::GeneratedAsyncClient {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::cpp2::MyService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");

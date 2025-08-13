@@ -24,6 +24,18 @@ class service_with_special_names;
 } // namespace test_cpp2::cpp_reflection
 namespace apache::thrift {
 
+namespace detail {
+
+template<>
+struct ServiceMethodTypesFootprint<::test_cpp2::cpp_reflection::service_with_special_names> {
+  // The types that appear in the definitions of service methods.
+  // e.g. if it appears as a type of an input, output, exception sink or stream
+  // parameter of a client stub, it appears here,
+  using TypesInMethods = folly::tag_t<
+  ::std::int32_t>;
+};
+} // namespace detail
+
 template <>
 class Client<::test_cpp2::cpp_reflection::service_with_special_names> : public apache::thrift::GeneratedAsyncClient {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::test_cpp2::cpp_reflection::service_with_special_names>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");

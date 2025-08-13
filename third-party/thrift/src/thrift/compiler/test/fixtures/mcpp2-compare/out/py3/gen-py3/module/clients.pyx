@@ -713,6 +713,19 @@ cdef void ParamService_listunion_string_param_callback(
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
+cdef void ParamService_annotatedParams_callback(
+    cFollyTry[cFollyUnit]&& result,
+    PyObject* userdata
+) noexcept:
+    client, pyfuture, options = <object> userdata  
+    if result.hasException():
+        pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
+    else:
+        try:
+            pyfuture.set_result(None)
+        except Exception as ex:
+            pyfuture.set_exception(ex.with_traceback(None))
+
 
 cdef object _EmptyService_annotations = _py_types.MappingProxyType({
 })
@@ -2260,6 +2273,102 @@ cdef class ParamService(thrift.py3.client.Client):
                 param1.encode('UTF-8'),
             ),
             ParamService_listunion_string_param_callback,
+            <PyObject *> __userdata
+        )
+        return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_annotatedParams = {
+        'return': 'None',
+        'no_annotation': 'module.types.containerStruct', 'opt_ref_type_shared': '_typing.AbstractSet[int]', 'base_type': 'int', 'list_type': '_typing.Sequence[int]', 'set_type': '_typing.AbstractSet[str]', 'map_type': '_typing.Mapping[int, float]', 'map_struct_type': '_typing.Mapping[str, module.types.containerStruct]', 'iobuf_type': '_fbthrift_iobuf.IOBuf', 'iobuf_ptr': '_fbthrift_iobuf.IOBuf', 'list_i32_template': '_typing.Sequence[int]', 'list_string_template': '_typing.Sequence[str]', 'set_template': '_typing.AbstractSet[str]', 'map_template': '_typing.Mapping[int, str]', 'typedef_list_template': '_typing.Sequence[int]', 'typedef_deque_template': '_typing.Sequence[str]', 'typedef_set_template': '_typing.AbstractSet[str]', 'typedef_map_template': '_typing.Mapping[int, str]', 'iobuf_type_val': '_fbthrift_iobuf.IOBuf', 'iobuf_ptr_val': '_fbthrift_iobuf.IOBuf', 'struct_struct': 'module.types.containerStruct', 
+    }
+
+    @cython.always_allow_keywords(True)
+    def annotatedParams(
+            ParamService self,
+            _module_types.containerStruct no_annotation not None,
+            opt_ref_type_shared not None,
+            base_type not None,
+            list_type not None,
+            set_type not None,
+            map_type not None,
+            map_struct_type not None,
+            _fbthrift_iobuf.IOBuf iobuf_type not None,
+            _fbthrift_iobuf.IOBuf iobuf_ptr not None,
+            list_i32_template not None,
+            list_string_template not None,
+            set_template not None,
+            map_template not None,
+            typedef_list_template not None,
+            typedef_deque_template not None,
+            typedef_set_template not None,
+            typedef_map_template not None,
+            _fbthrift_iobuf.IOBuf iobuf_type_val not None,
+            _fbthrift_iobuf.IOBuf iobuf_ptr_val not None,
+            _module_types.containerStruct struct_struct not None,
+            *,
+            __RpcOptions rpc_options=None
+    ):
+        if rpc_options is None:
+            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
+        if not isinstance(opt_ref_type_shared, _module_types.Set__i32):
+            opt_ref_type_shared = _module_types.Set__i32(opt_ref_type_shared)
+        if not isinstance(base_type, int):
+            raise TypeError(f'base_type is not a {int !r}.')
+        else:
+            base_type = <cint32_t> base_type
+        if not isinstance(list_type, _module_types.folly_small_vector_int64_t_8__List__i64):
+            list_type = _module_types.folly_small_vector_int64_t_8__List__i64(list_type)
+        if not isinstance(set_type, _module_types.folly_sorted_vector_set_std_string__Set__string):
+            set_type = _module_types.folly_sorted_vector_set_std_string__Set__string(set_type)
+        if not isinstance(map_type, _module_types.FakeMap__Map__i64_double):
+            map_type = _module_types.FakeMap__Map__i64_double(map_type)
+        if not isinstance(map_struct_type, _module_types.std_unordered_map_std_string_containerStruct__Map__string_containerStruct):
+            map_struct_type = _module_types.std_unordered_map_std_string_containerStruct__Map__string_containerStruct(map_struct_type)
+        if not isinstance(list_i32_template, _module_types.List__i32):
+            list_i32_template = _module_types.List__i32(list_i32_template)
+        if not isinstance(list_string_template, _module_types.List__string):
+            list_string_template = _module_types.List__string(list_string_template)
+        if not isinstance(set_template, _module_types.Set__string):
+            set_template = _module_types.Set__string(set_template)
+        if not isinstance(map_template, _module_types.Map__i64_string):
+            map_template = _module_types.Map__i64_string(map_template)
+        if not isinstance(typedef_list_template, _module_types.std_list__List__i32):
+            typedef_list_template = _module_types.std_list__List__i32(typedef_list_template)
+        if not isinstance(typedef_deque_template, _module_types.std_deque__List__string):
+            typedef_deque_template = _module_types.std_deque__List__string(typedef_deque_template)
+        if not isinstance(typedef_set_template, _module_types.folly_sorted_vector_set__Set__string):
+            typedef_set_template = _module_types.folly_sorted_vector_set__Set__string(typedef_set_template)
+        if not isinstance(typedef_map_template, _module_types.folly_sorted_vector_map__Map__i64_string):
+            typedef_map_template = _module_types.folly_sorted_vector_map__Map__i64_string(typedef_map_template)
+        self._check_connect_future()
+        __loop = self._loop
+        __future = __loop.create_future()
+        __userdata = (self, __future, rpc_options)
+        bridgeFutureWith[cFollyUnit](
+            self._executor,
+            down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).annotatedParams(rpc_options._cpp_obj, 
+                deref((<_module_types.containerStruct>no_annotation)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
+                _module_types.Set__i32__make_instance(opt_ref_type_shared),
+                base_type,
+                _module_types.folly_small_vector_int64_t_8__List__i64__make_instance(list_type),
+                _module_types.folly_sorted_vector_set_std_string__Set__string__make_instance(set_type),
+                _module_types.FakeMap__Map__i64_double__make_instance(map_type),
+                _module_types.std_unordered_map_std_string_containerStruct__Map__string_containerStruct__make_instance(map_struct_type),
+                deref((<_fbthrift_iobuf.IOBuf>iobuf_type).c_clone()),
+                ((<_fbthrift_iobuf.IOBuf>iobuf_ptr).c_clone()),
+                _module_types.List__i32__make_instance(list_i32_template),
+                _module_types.List__string__make_instance(list_string_template),
+                _module_types.Set__string__make_instance(set_template),
+                _module_types.Map__i64_string__make_instance(map_template),
+                _module_types.std_list__List__i32__make_instance(typedef_list_template),
+                _module_types.std_deque__List__string__make_instance(typedef_deque_template),
+                _module_types.folly_sorted_vector_set__Set__string__make_instance(typedef_set_template),
+                _module_types.folly_sorted_vector_map__Map__i64_string__make_instance(typedef_map_template),
+                deref((<_fbthrift_iobuf.IOBuf>iobuf_type_val).c_clone()),
+                ((<_fbthrift_iobuf.IOBuf>iobuf_ptr_val).c_clone()),
+                deref((<_module_types.containerStruct>struct_struct)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
+            ),
+            ParamService_annotatedParams_callback,
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)

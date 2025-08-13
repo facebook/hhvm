@@ -165,4 +165,25 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-py3/module/cli
       cint32_t arg_param2,)
     cFollyFuture[vector[_module_cbindings.cComplexUnion]] listunion_string_param(cRpcOptions, 
       string arg_param1,)
+    cFollyFuture[cFollyUnit] annotatedParams(cRpcOptions, 
+      _module_cbindings.ccontainerStruct arg_no_annotation,
+      cset[cint32_t] arg_opt_ref_type_shared,
+      _module_cbindings.CppFakeI32 arg_base_type,
+      _module_cbindings.folly_small_vector_int64_t_8 arg_list_type,
+      _module_cbindings.folly_sorted_vector_set_std_string arg_set_type,
+      _module_cbindings.FakeMap arg_map_type,
+      _module_cbindings.std_unordered_map_std_string_containerStruct arg_map_struct_type,
+      _fbthrift_iobuf.cIOBuf arg_iobuf_type,
+      unique_ptr[_fbthrift_iobuf.cIOBuf] arg_iobuf_ptr,
+      vector[cint32_t] arg_list_i32_template,
+      vector[string] arg_list_string_template,
+      cset[string] arg_set_template,
+      cmap[cint64_t,string] arg_map_template,
+      _module_cbindings.std_list[cint32_t] arg_typedef_list_template,
+      _module_cbindings.std_deque[string] arg_typedef_deque_template,
+      _module_cbindings.folly_sorted_vector_set[string] arg_typedef_set_template,
+      _module_cbindings.folly_sorted_vector_map[cint64_t,string] arg_typedef_map_template,
+      _fbthrift_iobuf.cIOBuf arg_iobuf_type_val,
+      unique_ptr[_fbthrift_iobuf.cIOBuf] arg_iobuf_ptr_val,
+      _module_cbindings.ccontainerStruct arg_struct_struct,)
 

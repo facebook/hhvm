@@ -22,6 +22,20 @@ class SomeService;
 } // namespace apache::thrift::fixtures::types
 namespace apache::thrift {
 
+namespace detail {
+
+template<>
+struct ServiceMethodTypesFootprint<::apache::thrift::fixtures::types::SomeService> {
+  // The types that appear in the definitions of service methods.
+  // e.g. if it appears as a type of an input, output, exception sink or stream
+  // parameter of a client stub, it appears here,
+  using TypesInMethods = folly::tag_t<
+  ::apache::thrift::fixtures::types::SomeMap,
+  ::std::vector<::std::int64_t>,
+  ::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>>;
+};
+} // namespace detail
+
 template <>
 class Client<::apache::thrift::fixtures::types::SomeService> : public apache::thrift::GeneratedAsyncClient {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::apache::thrift::fixtures::types::SomeService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");

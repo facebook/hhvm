@@ -89,6 +89,16 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__Set__string,
     Map__List__Set__string_string,
     Map__Set__List__i32_Map__List__Set__string_string,
+    Set__i32,
+    folly_small_vector_int64_t_8__List__i64,
+    folly_sorted_vector_set_std_string__Set__string,
+    FakeMap__Map__i64_double,
+    std_unordered_map_std_string_containerStruct__Map__string_containerStruct,
+    Map__i64_string,
+    std_list__List__i32,
+    std_deque__List__string,
+    folly_sorted_vector_set__Set__string,
+    folly_sorted_vector_map__Map__i64_string,
     List__binary,
     Map__MyEnumA_string,
     Set__i64,
@@ -97,7 +107,6 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     Set__SimpleUnion,
     List__Set__SimpleUnion,
     Map__string_bool,
-    Set__i32,
     Map__string_Map__string_i32,
     Map__string_Map__string_Map__string_i32,
     List__Set__i32,
@@ -105,14 +114,6 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     Set__bool,
     Set__Set__bool,
     Set__Set__Set__bool,
-    folly_small_vector_int64_t_8__List__i64,
-    folly_sorted_vector_set_std_string__Set__string,
-    FakeMap__Map__i64_double,
-    std_unordered_map_std_string_containerStruct__Map__string_containerStruct,
-    std_list__List__i32,
-    std_deque__List__string,
-    folly_sorted_vector_set__Set__string,
-    folly_sorted_vector_map__Map__i64_string,
     Map__string_folly_IOBuf__binary,
     Map__string_std_unique_ptr_folly_IOBuf__binary,
     Map__i32_string,
@@ -4098,6 +4099,228 @@ cdef object Map__Set__List__i32_Map__List__Set__string_string__from_cpp(const cm
         py_items[Set__List__i32__from_cpp(ckey)] = Map__List__Set__string_string__from_cpp(cval)
     return Map__Set__List__i32_Map__List__Set__string_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
+cdef cset[cint32_t] Set__i32__make_instance(object items) except *:
+    cdef cset[cint32_t] c_inst
+    cdef cint32_t c_item
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        c_item = <cint32_t> item
+        c_inst.insert(c_item)
+    return cmove(c_inst)
+
+cdef object Set__i32__from_cpp(const cset[cint32_t]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[cint32_t]] iter = __set_iter[cset[cint32_t]](c_set)
+    cdef cint32_t citem = 0
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(citem)
+    return Set__i32(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
+
+cdef _module_cbindings.folly_small_vector_int64_t_8 folly_small_vector_int64_t_8__List__i64__make_instance(object items) except *:
+    cdef _module_cbindings.folly_small_vector_int64_t_8 c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        item = <cint64_t> item
+        c_inst.push_back(item)
+    return cmove(c_inst)
+
+cdef object folly_small_vector_int64_t_8__List__i64__from_cpp(const _module_cbindings.folly_small_vector_int64_t_8& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(c_vec[idx])
+    return folly_small_vector_int64_t_8__List__i64(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef _module_cbindings.folly_sorted_vector_set_std_string folly_sorted_vector_set_std_string__Set__string__make_instance(object items) except *:
+    cdef _module_cbindings.folly_sorted_vector_set_std_string c_inst
+    cdef string c_item
+    if items is None:
+        return cmove(c_inst)
+    if isinstance(items, str):
+        raise TypeError("If you really want to pass a string into a _typing.AbstractSet[str] field, explicitly convert it first.")
+    for item in items:
+        if not isinstance(item, str):
+            raise TypeError(f"{item!r} is not of type str")
+        c_item = item.encode('UTF-8')
+        c_inst.insert(c_item)
+    return cmove(c_inst)
+
+cdef object folly_sorted_vector_set_std_string__Set__string__from_cpp(const _module_cbindings.folly_sorted_vector_set_std_string& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[_module_cbindings.folly_sorted_vector_set_std_string] iter = __set_iter[_module_cbindings.folly_sorted_vector_set_std_string](c_set)
+    cdef string citem
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(__init_unicode_from_cpp(citem))
+    return folly_sorted_vector_set_std_string__Set__string(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
+
+cdef _module_cbindings.FakeMap FakeMap__Map__i64_double__make_instance(object items) except *:
+    cdef _module_cbindings.FakeMap c_inst
+    cdef cint64_t c_key
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, int):
+            raise TypeError(f"{key!r} is not of type int")
+        c_key = <cint64_t> key
+        if not isinstance(item, (float, int)):
+            raise TypeError(f"{item!r} is not of type float")
+
+        c_inst[c_key] = item
+    return cmove(c_inst)
+
+cdef object FakeMap__Map__i64_double__from_cpp(const _module_cbindings.FakeMap& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[_module_cbindings.FakeMap] iter = __map_iter[_module_cbindings.FakeMap](c_map)
+    cdef cint64_t ckey = 0
+    cdef double cval = 0
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = cval
+    return FakeMap__Map__i64_double(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+
+cdef _module_cbindings.std_unordered_map_std_string_containerStruct std_unordered_map_std_string_containerStruct__Map__string_containerStruct__make_instance(object items) except *:
+    cdef _module_cbindings.std_unordered_map_std_string_containerStruct c_inst
+    cdef string c_key
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, str):
+            raise TypeError(f"{key!r} is not of type str")
+        c_key = key.encode('UTF-8')
+        if not isinstance(item, containerStruct):
+            raise TypeError(f"{item!r} is not of type containerStruct")
+
+        c_inst[c_key] = deref((<containerStruct>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+    return cmove(c_inst)
+
+cdef object std_unordered_map_std_string_containerStruct__Map__string_containerStruct__from_cpp(const _module_cbindings.std_unordered_map_std_string_containerStruct& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[_module_cbindings.std_unordered_map_std_string_containerStruct] iter = __map_iter[_module_cbindings.std_unordered_map_std_string_containerStruct](c_map)
+    cdef string ckey
+    cdef shared_ptr[_module_cbindings.ccontainerStruct] cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cval))
+    return std_unordered_map_std_string_containerStruct__Map__string_containerStruct(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+
+cdef cmap[cint64_t,string] Map__i64_string__make_instance(object items) except *:
+    cdef cmap[cint64_t,string] c_inst
+    cdef cint64_t c_key
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, int):
+            raise TypeError(f"{key!r} is not of type int")
+        c_key = <cint64_t> key
+        if not isinstance(item, str):
+            raise TypeError(f"{item!r} is not of type str")
+
+        c_inst[c_key] = item.encode('UTF-8')
+    return cmove(c_inst)
+
+cdef object Map__i64_string__from_cpp(const cmap[cint64_t,string]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[cint64_t,string]] iter = __map_iter[cmap[cint64_t,string]](c_map)
+    cdef cint64_t ckey = 0
+    cdef string cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = __init_unicode_from_cpp(cval)
+    return Map__i64_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+
+cdef _module_cbindings.std_list[cint32_t] std_list__List__i32__make_instance(object items) except *:
+    cdef _module_cbindings.std_list[cint32_t] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        item = <cint32_t> item
+        c_inst.push_back(item)
+    return cmove(c_inst)
+
+cdef object std_list__List__i32__from_cpp(const _module_cbindings.std_list[cint32_t]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(c_vec[idx])
+    return std_list__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef _module_cbindings.std_deque[string] std_deque__List__string__make_instance(object items) except *:
+    cdef _module_cbindings.std_deque[string] c_inst
+    if items is None:
+        return cmove(c_inst)
+    if isinstance(items, str):
+        raise TypeError("If you really want to pass a string into a _typing.Sequence[str] field, explicitly convert it first.")
+    for item in items:
+        if not isinstance(item, str):
+            raise TypeError(f"{item!r} is not of type str")
+        c_inst.push_back(item.encode('UTF-8'))
+    return cmove(c_inst)
+
+cdef object std_deque__List__string__from_cpp(const _module_cbindings.std_deque[string]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(__init_unicode_from_cpp(c_vec[idx]))
+    return std_deque__List__string(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef _module_cbindings.folly_sorted_vector_set[string] folly_sorted_vector_set__Set__string__make_instance(object items) except *:
+    cdef _module_cbindings.folly_sorted_vector_set[string] c_inst
+    cdef string c_item
+    if items is None:
+        return cmove(c_inst)
+    if isinstance(items, str):
+        raise TypeError("If you really want to pass a string into a _typing.AbstractSet[str] field, explicitly convert it first.")
+    for item in items:
+        if not isinstance(item, str):
+            raise TypeError(f"{item!r} is not of type str")
+        c_item = item.encode('UTF-8')
+        c_inst.insert(c_item)
+    return cmove(c_inst)
+
+cdef object folly_sorted_vector_set__Set__string__from_cpp(const _module_cbindings.folly_sorted_vector_set[string]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[_module_cbindings.folly_sorted_vector_set[string]] iter = __set_iter[_module_cbindings.folly_sorted_vector_set[string]](c_set)
+    cdef string citem
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(__init_unicode_from_cpp(citem))
+    return folly_sorted_vector_set__Set__string(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
+
+cdef _module_cbindings.folly_sorted_vector_map[cint64_t,string] folly_sorted_vector_map__Map__i64_string__make_instance(object items) except *:
+    cdef _module_cbindings.folly_sorted_vector_map[cint64_t,string] c_inst
+    cdef cint64_t c_key
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, int):
+            raise TypeError(f"{key!r} is not of type int")
+        c_key = <cint64_t> key
+        if not isinstance(item, str):
+            raise TypeError(f"{item!r} is not of type str")
+
+        c_inst[c_key] = item.encode('UTF-8')
+    return cmove(c_inst)
+
+cdef object folly_sorted_vector_map__Map__i64_string__from_cpp(const _module_cbindings.folly_sorted_vector_map[cint64_t,string]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[_module_cbindings.folly_sorted_vector_map[cint64_t,string]] iter = __map_iter[_module_cbindings.folly_sorted_vector_map[cint64_t,string]](c_map)
+    cdef cint64_t ckey = 0
+    cdef string cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = __init_unicode_from_cpp(cval)
+    return folly_sorted_vector_map__Map__i64_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+
 cdef vector[string] List__binary__make_instance(object items) except *:
     cdef vector[string] c_inst
     if items is None:
@@ -4271,27 +4494,6 @@ cdef object Map__string_bool__from_cpp(const cmap[string,cbool]& c_map) except *
         py_items[__init_unicode_from_cpp(ckey)] = cval
     return Map__string_bool(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
-cdef cset[cint32_t] Set__i32__make_instance(object items) except *:
-    cdef cset[cint32_t] c_inst
-    cdef cint32_t c_item
-    if items is None:
-        return cmove(c_inst)
-    for item in items:
-        if not isinstance(item, int):
-            raise TypeError(f"{item!r} is not of type int")
-        c_item = <cint32_t> item
-        c_inst.insert(c_item)
-    return cmove(c_inst)
-
-cdef object Set__i32__from_cpp(const cset[cint32_t]& c_set) except *:
-    cdef list py_items = []
-    cdef __set_iter[cset[cint32_t]] iter = __set_iter[cset[cint32_t]](c_set)
-    cdef cint32_t citem = 0
-    for i in range(c_set.size()):
-        iter.genNextItem(citem)
-        py_items.append(citem)
-    return Set__i32(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
-
 cdef cmap[string,cmap[string,cint32_t]] Map__string_Map__string_i32__make_instance(object items) except *:
     cdef cmap[string,cmap[string,cint32_t]] c_inst
     cdef string c_key
@@ -4458,182 +4660,6 @@ cdef object Set__Set__Set__bool__from_cpp(const cset[cset[cset[cbool]]]& c_set) 
         iter.genNextItem(citem)
         py_items.append(Set__Set__bool__from_cpp(citem))
     return Set__Set__Set__bool(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
-
-cdef _module_cbindings.folly_small_vector_int64_t_8 folly_small_vector_int64_t_8__List__i64__make_instance(object items) except *:
-    cdef _module_cbindings.folly_small_vector_int64_t_8 c_inst
-    if items is None:
-        return cmove(c_inst)
-    for item in items:
-        if not isinstance(item, int):
-            raise TypeError(f"{item!r} is not of type int")
-        item = <cint64_t> item
-        c_inst.push_back(item)
-    return cmove(c_inst)
-
-cdef object folly_small_vector_int64_t_8__List__i64__from_cpp(const _module_cbindings.folly_small_vector_int64_t_8& c_vec) except *:
-    cdef list py_list = []
-    cdef int idx = 0
-    for idx in range(c_vec.size()):
-        py_list.append(c_vec[idx])
-    return folly_small_vector_int64_t_8__List__i64(py_list, thrift.py3.types._fbthrift_list_private_ctor)
-
-cdef _module_cbindings.folly_sorted_vector_set_std_string folly_sorted_vector_set_std_string__Set__string__make_instance(object items) except *:
-    cdef _module_cbindings.folly_sorted_vector_set_std_string c_inst
-    cdef string c_item
-    if items is None:
-        return cmove(c_inst)
-    if isinstance(items, str):
-        raise TypeError("If you really want to pass a string into a _typing.AbstractSet[str] field, explicitly convert it first.")
-    for item in items:
-        if not isinstance(item, str):
-            raise TypeError(f"{item!r} is not of type str")
-        c_item = item.encode('UTF-8')
-        c_inst.insert(c_item)
-    return cmove(c_inst)
-
-cdef object folly_sorted_vector_set_std_string__Set__string__from_cpp(const _module_cbindings.folly_sorted_vector_set_std_string& c_set) except *:
-    cdef list py_items = []
-    cdef __set_iter[_module_cbindings.folly_sorted_vector_set_std_string] iter = __set_iter[_module_cbindings.folly_sorted_vector_set_std_string](c_set)
-    cdef string citem
-    for i in range(c_set.size()):
-        iter.genNextItem(citem)
-        py_items.append(__init_unicode_from_cpp(citem))
-    return folly_sorted_vector_set_std_string__Set__string(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
-
-cdef _module_cbindings.FakeMap FakeMap__Map__i64_double__make_instance(object items) except *:
-    cdef _module_cbindings.FakeMap c_inst
-    cdef cint64_t c_key
-    if items is None:
-        return cmove(c_inst)
-    for key, item in items.items():
-        if not isinstance(key, int):
-            raise TypeError(f"{key!r} is not of type int")
-        c_key = <cint64_t> key
-        if not isinstance(item, (float, int)):
-            raise TypeError(f"{item!r} is not of type float")
-
-        c_inst[c_key] = item
-    return cmove(c_inst)
-
-cdef object FakeMap__Map__i64_double__from_cpp(const _module_cbindings.FakeMap& c_map) except *:
-    cdef dict py_items = {}
-    cdef __map_iter[_module_cbindings.FakeMap] iter = __map_iter[_module_cbindings.FakeMap](c_map)
-    cdef cint64_t ckey = 0
-    cdef double cval = 0
-    for i in range(c_map.size()):
-        iter.genNextKeyVal(ckey, cval)
-        py_items[ckey] = cval
-    return FakeMap__Map__i64_double(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
-
-cdef _module_cbindings.std_unordered_map_std_string_containerStruct std_unordered_map_std_string_containerStruct__Map__string_containerStruct__make_instance(object items) except *:
-    cdef _module_cbindings.std_unordered_map_std_string_containerStruct c_inst
-    cdef string c_key
-    if items is None:
-        return cmove(c_inst)
-    for key, item in items.items():
-        if not isinstance(key, str):
-            raise TypeError(f"{key!r} is not of type str")
-        c_key = key.encode('UTF-8')
-        if not isinstance(item, containerStruct):
-            raise TypeError(f"{item!r} is not of type containerStruct")
-
-        c_inst[c_key] = deref((<containerStruct>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-    return cmove(c_inst)
-
-cdef object std_unordered_map_std_string_containerStruct__Map__string_containerStruct__from_cpp(const _module_cbindings.std_unordered_map_std_string_containerStruct& c_map) except *:
-    cdef dict py_items = {}
-    cdef __map_iter[_module_cbindings.std_unordered_map_std_string_containerStruct] iter = __map_iter[_module_cbindings.std_unordered_map_std_string_containerStruct](c_map)
-    cdef string ckey
-    cdef shared_ptr[_module_cbindings.ccontainerStruct] cval
-    for i in range(c_map.size()):
-        iter.genNextKeyVal(ckey, cval)
-        py_items[__init_unicode_from_cpp(ckey)] = containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cval))
-    return std_unordered_map_std_string_containerStruct__Map__string_containerStruct(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
-
-cdef _module_cbindings.std_list[cint32_t] std_list__List__i32__make_instance(object items) except *:
-    cdef _module_cbindings.std_list[cint32_t] c_inst
-    if items is None:
-        return cmove(c_inst)
-    for item in items:
-        if not isinstance(item, int):
-            raise TypeError(f"{item!r} is not of type int")
-        item = <cint32_t> item
-        c_inst.push_back(item)
-    return cmove(c_inst)
-
-cdef object std_list__List__i32__from_cpp(const _module_cbindings.std_list[cint32_t]& c_vec) except *:
-    cdef list py_list = []
-    cdef int idx = 0
-    for idx in range(c_vec.size()):
-        py_list.append(c_vec[idx])
-    return std_list__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
-
-cdef _module_cbindings.std_deque[string] std_deque__List__string__make_instance(object items) except *:
-    cdef _module_cbindings.std_deque[string] c_inst
-    if items is None:
-        return cmove(c_inst)
-    if isinstance(items, str):
-        raise TypeError("If you really want to pass a string into a _typing.Sequence[str] field, explicitly convert it first.")
-    for item in items:
-        if not isinstance(item, str):
-            raise TypeError(f"{item!r} is not of type str")
-        c_inst.push_back(item.encode('UTF-8'))
-    return cmove(c_inst)
-
-cdef object std_deque__List__string__from_cpp(const _module_cbindings.std_deque[string]& c_vec) except *:
-    cdef list py_list = []
-    cdef int idx = 0
-    for idx in range(c_vec.size()):
-        py_list.append(__init_unicode_from_cpp(c_vec[idx]))
-    return std_deque__List__string(py_list, thrift.py3.types._fbthrift_list_private_ctor)
-
-cdef _module_cbindings.folly_sorted_vector_set[string] folly_sorted_vector_set__Set__string__make_instance(object items) except *:
-    cdef _module_cbindings.folly_sorted_vector_set[string] c_inst
-    cdef string c_item
-    if items is None:
-        return cmove(c_inst)
-    if isinstance(items, str):
-        raise TypeError("If you really want to pass a string into a _typing.AbstractSet[str] field, explicitly convert it first.")
-    for item in items:
-        if not isinstance(item, str):
-            raise TypeError(f"{item!r} is not of type str")
-        c_item = item.encode('UTF-8')
-        c_inst.insert(c_item)
-    return cmove(c_inst)
-
-cdef object folly_sorted_vector_set__Set__string__from_cpp(const _module_cbindings.folly_sorted_vector_set[string]& c_set) except *:
-    cdef list py_items = []
-    cdef __set_iter[_module_cbindings.folly_sorted_vector_set[string]] iter = __set_iter[_module_cbindings.folly_sorted_vector_set[string]](c_set)
-    cdef string citem
-    for i in range(c_set.size()):
-        iter.genNextItem(citem)
-        py_items.append(__init_unicode_from_cpp(citem))
-    return folly_sorted_vector_set__Set__string(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
-
-cdef _module_cbindings.folly_sorted_vector_map[cint64_t,string] folly_sorted_vector_map__Map__i64_string__make_instance(object items) except *:
-    cdef _module_cbindings.folly_sorted_vector_map[cint64_t,string] c_inst
-    cdef cint64_t c_key
-    if items is None:
-        return cmove(c_inst)
-    for key, item in items.items():
-        if not isinstance(key, int):
-            raise TypeError(f"{key!r} is not of type int")
-        c_key = <cint64_t> key
-        if not isinstance(item, str):
-            raise TypeError(f"{item!r} is not of type str")
-
-        c_inst[c_key] = item.encode('UTF-8')
-    return cmove(c_inst)
-
-cdef object folly_sorted_vector_map__Map__i64_string__from_cpp(const _module_cbindings.folly_sorted_vector_map[cint64_t,string]& c_map) except *:
-    cdef dict py_items = {}
-    cdef __map_iter[_module_cbindings.folly_sorted_vector_map[cint64_t,string]] iter = __map_iter[_module_cbindings.folly_sorted_vector_map[cint64_t,string]](c_map)
-    cdef cint64_t ckey = 0
-    cdef string cval
-    for i in range(c_map.size()):
-        iter.genNextKeyVal(ckey, cval)
-        py_items[ckey] = __init_unicode_from_cpp(cval)
-    return folly_sorted_vector_map__Map__i64_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 cdef cmap[string,_fbthrift_iobuf.cIOBuf] Map__string_folly_IOBuf__binary__make_instance(object items) except *:
     cdef cmap[string,_fbthrift_iobuf.cIOBuf] c_inst

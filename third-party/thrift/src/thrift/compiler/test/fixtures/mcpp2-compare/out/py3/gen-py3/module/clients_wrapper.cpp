@@ -1198,6 +1198,68 @@ ParamServiceClientWrapper::listunion_string_param(
   return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
+folly::Future<folly::Unit>
+ParamServiceClientWrapper::annotatedParams(
+    apache::thrift::RpcOptions& rpcOptions,
+    ::some::valid::ns::containerStruct arg_no_annotation,
+    std::set<int32_t> arg_opt_ref_type_shared,
+    CppFakeI32 arg_base_type,
+    folly::small_vector<int64_t, 8 > arg_list_type,
+    folly::sorted_vector_set<std::string> arg_set_type,
+    FakeMap arg_map_type,
+    std::unordered_map<std::string, containerStruct> arg_map_struct_type,
+    folly::IOBuf arg_iobuf_type,
+    std::unique_ptr<folly::IOBuf> arg_iobuf_ptr,
+    std::vector<int32_t> arg_list_i32_template,
+    std::vector<std::string> arg_list_string_template,
+    std::set<std::string> arg_set_template,
+    std::map<int64_t,std::string> arg_map_template,
+    std::list<int32_t> arg_typedef_list_template,
+    std::deque<std::string> arg_typedef_deque_template,
+    folly::sorted_vector_set<std::string> arg_typedef_set_template,
+    folly::sorted_vector_map<int64_t,std::string> arg_typedef_map_template,
+    folly::IOBuf arg_iobuf_type_val,
+    std::unique_ptr<folly::IOBuf> arg_iobuf_ptr_val,
+    ::some::valid::ns::containerStruct arg_struct_struct) {
+  auto* client = static_cast<::some::valid::ns::ParamServiceAsyncClient*>(async_client_.get());
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
+  auto _future = _promise.getFuture();
+  auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
+    std::move(_promise), rpcOptions, client->recv_wrapped_annotatedParams, channel_);
+  try {
+    client->annotatedParams(
+      rpcOptions,
+      std::move(callback),
+      arg_no_annotation,
+      arg_opt_ref_type_shared,
+      arg_base_type,
+      arg_list_type,
+      arg_set_type,
+      arg_map_type,
+      arg_map_struct_type,
+      arg_iobuf_type,
+      arg_iobuf_ptr,
+      arg_list_i32_template,
+      arg_list_string_template,
+      arg_set_template,
+      arg_map_template,
+      arg_typedef_list_template,
+      arg_typedef_deque_template,
+      arg_typedef_set_template,
+      arg_typedef_map_template,
+      arg_iobuf_type_val,
+      arg_iobuf_ptr_val,
+      arg_struct_struct
+    );
+  } catch (...) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception()
+    ));
+  }
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
+}
+
 } // namespace some
 } // namespace valid
 } // namespace ns

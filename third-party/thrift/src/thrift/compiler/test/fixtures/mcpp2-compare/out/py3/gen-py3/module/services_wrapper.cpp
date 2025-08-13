@@ -1186,6 +1186,86 @@ void ParamServiceWrapper::async_tm_listunion_string_param(
         });
     });
 }
+void ParamServiceWrapper::async_tm_annotatedParams(
+  apache::thrift::HandlerCallbackPtr<void> callback
+    , std::unique_ptr<::some::valid::ns::containerStruct> no_annotation
+    , std::unique_ptr<std::set<int32_t>> opt_ref_type_shared
+    , CppFakeI32 base_type
+    , std::unique_ptr<folly::small_vector<int64_t, 8 >> list_type
+    , std::unique_ptr<folly::sorted_vector_set<std::string>> set_type
+    , std::unique_ptr<FakeMap> map_type
+    , std::unique_ptr<std::unordered_map<std::string, containerStruct>> map_struct_type
+    , std::unique_ptr<folly::IOBuf> iobuf_type
+    , std::unique_ptr<std::unique_ptr<folly::IOBuf>> iobuf_ptr
+    , std::unique_ptr<std::vector<int32_t>> list_i32_template
+    , std::unique_ptr<std::vector<std::string>> list_string_template
+    , std::unique_ptr<std::set<std::string>> set_template
+    , std::unique_ptr<std::map<int64_t,std::string>> map_template
+    , std::unique_ptr<std::list<int32_t>> typedef_list_template
+    , std::unique_ptr<std::deque<std::string>> typedef_deque_template
+    , std::unique_ptr<folly::sorted_vector_set<std::string>> typedef_set_template
+    , std::unique_ptr<folly::sorted_vector_map<int64_t,std::string>> typedef_map_template
+    , std::unique_ptr<folly::IOBuf> iobuf_type_val
+    , std::unique_ptr<std::unique_ptr<folly::IOBuf>> iobuf_ptr_val
+    , std::unique_ptr<::some::valid::ns::containerStruct> struct_struct
+) {
+  auto ctx = callback->getRequestContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     callback = std::move(callback),
+     no_annotation = std::move(no_annotation),
+     opt_ref_type_shared = std::move(opt_ref_type_shared),
+     base_type,
+     list_type = std::move(list_type),
+     set_type = std::move(set_type),
+     map_type = std::move(map_type),
+     map_struct_type = std::move(map_struct_type),
+     iobuf_type = std::move(iobuf_type),
+     iobuf_ptr = std::move(iobuf_ptr),
+     list_i32_template = std::move(list_i32_template),
+     list_string_template = std::move(list_string_template),
+     set_template = std::move(set_template),
+     map_template = std::move(map_template),
+     typedef_list_template = std::move(typedef_list_template),
+     typedef_deque_template = std::move(typedef_deque_template),
+     typedef_set_template = std::move(typedef_set_template),
+     typedef_map_template = std::move(typedef_map_template),
+     iobuf_type_val = std::move(iobuf_type_val),
+     iobuf_ptr_val = std::move(iobuf_ptr_val),
+     struct_struct = std::move(struct_struct)
+    ]() mutable {
+        auto [promise, future] = folly::makePromiseContract<folly::Unit>();
+        call_cy_ParamService_annotatedParams(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(no_annotation),
+            std::move(opt_ref_type_shared),
+            base_type,
+            std::move(list_type),
+            std::move(set_type),
+            std::move(map_type),
+            std::move(map_struct_type),
+            std::move(iobuf_type),
+            std::move(iobuf_ptr),
+            std::move(list_i32_template),
+            std::move(list_string_template),
+            std::move(set_template),
+            std::move(map_template),
+            std::move(typedef_list_template),
+            std::move(typedef_deque_template),
+            std::move(typedef_set_template),
+            std::move(typedef_map_template),
+            std::move(iobuf_type_val),
+            std::move(iobuf_ptr_val),
+            std::move(struct_struct)        );
+        std::move(future).via(this->executor).thenTry([callback = std::move(callback)](folly::Try<folly::Unit>&& t) {
+          (void)t;
+          callback->complete(std::move(t));
+        });
+    });
+}
 std::shared_ptr<apache::thrift::ServerInterface> ParamServiceInterface(PyObject *if_object, folly::Executor *exc) {
   return std::make_shared<ParamServiceWrapper>(if_object, exc);
 }

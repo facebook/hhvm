@@ -67,5 +67,6 @@ cdef class ParamServiceInterface(ServiceInterface):
     cdef bint _for_cython_setstruct_ret_set_param
     cdef bint _for_cython_union_ret_i32_i32_param
     cdef bint _for_cython_listunion_string_param
+    cdef bint _for_cython_annotatedParams
     pass
 

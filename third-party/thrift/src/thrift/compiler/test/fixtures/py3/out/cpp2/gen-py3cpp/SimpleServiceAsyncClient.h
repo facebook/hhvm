@@ -21,6 +21,60 @@ class SimpleService;
 } // namespace py3::simple
 namespace apache::thrift {
 
+namespace detail {
+
+template<>
+struct ServiceMethodTypesFootprint<::py3::simple::SimpleService> {
+  // The types that appear in the definitions of service methods.
+  // e.g. if it appears as a type of an input, output, exception sink or stream
+  // parameter of a client stub, it appears here,
+  using TypesInMethods = folly::tag_t<
+  ::std::int32_t,
+  void,
+  ::std::string,
+  ::py3::simple::SimpleStruct,
+  bool,
+  ::std::int8_t,
+  ::std::int16_t,
+  ::std::int64_t,
+  double,
+  ::py3::simple::SimpleException,
+  ::std::vector<::std::int16_t>,
+  ::std::vector<::std::int32_t>,
+  ::std::vector<::std::int64_t>,
+  ::std::vector<::std::string>,
+  ::std::vector<::py3::simple::SimpleStruct>,
+  ::std::set<::std::int32_t>,
+  ::std::set<::std::string>,
+  ::std::map<::std::string, ::std::string>,
+  ::std::map<::std::string, ::py3::simple::SimpleStruct>,
+  ::std::map<::std::string, ::std::int16_t>,
+  ::py3::simple::ComplexStruct,
+  ::std::vector<::std::int32_t>,
+  ::std::vector<::std::string>,
+  ::std::set<::std::string>,
+  ::std::vector<::std::string>,
+  ::std::map<::std::string, ::std::int16_t>,
+  ::py3::simple::AnEnum,
+  ::std::vector<::std::vector<::std::int32_t>>,
+  ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>,
+  ::std::vector<::std::set<::std::string>>,
+  ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>,
+  ::std::vector<::std::vector<::std::string>>,
+  ::std::vector<::std::set<::std::int32_t>>,
+  ::std::set<::std::int32_t>,
+  ::std::vector<::std::map<::std::string, ::std::string>>,
+  ::std::set<::std::string>,
+  ::std::string,
+  ::std::vector<::std::string>,
+  ::std::set<::std::string>,
+  ::std::vector<::py3::simple::AnEnum>,
+  ::std::vector<::py3::simple::AnEnum>,
+  ::py3::simple::BinaryUnion,
+  ::py3::simple::BinaryUnionStruct>;
+};
+} // namespace detail
+
 template <>
 class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsyncClient {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::py3::simple::SimpleService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");

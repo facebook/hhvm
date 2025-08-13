@@ -23,6 +23,68 @@ class ParamService;
 } // namespace some::valid::ns
 namespace apache::thrift {
 
+namespace detail {
+
+template<>
+struct ServiceMethodTypesFootprint<::some::valid::ns::ParamService> {
+  // The types that appear in the definitions of service methods.
+  // e.g. if it appears as a type of an input, output, exception sink or stream
+  // parameter of a client stub, it appears here,
+  using TypesInMethods = folly::tag_t<
+  ::std::int16_t,
+  void,
+  ::std::int8_t,
+  ::std::map<::std::string, ::std::int64_t>,
+  ::std::map<::std::string, ::std::int64_t>,
+  ::std::set<::std::vector<::std::string>>,
+  ::some::valid::ns::simpleTypeDef,
+  ::some::valid::ns::MyEnumA,
+  ::some::valid::ns::MyStruct,
+  ::std::vector<::some::valid::ns::ComplexUnion>,
+  ::std::int32_t,
+  ::std::int64_t,
+  bool,
+  ::std::map<::std::string, ::std::int64_t>,
+  ::some::valid::ns::ComplexUnion,
+  float,
+  double,
+  ::std::string,
+  ::std::set<::some::valid::ns::mostComplexTypeDef>,
+  ::std::set<::some::valid::ns::MyStruct>,
+  ::std::string,
+  ::std::map<::std::string, ::std::int64_t>,
+  ::std::map<::std::int32_t, ::std::vector<::std::string>>,
+  ::std::vector<::std::string>,
+  ::std::vector<bool>,
+  ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>,
+  ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>,
+  ::some::valid::ns::complexStructTypeDef,
+  ::std::vector<::some::valid::ns::simpleTypeDef>,
+  ::std::map<::std::string, ::std::int64_t>,
+  ::std::vector<::some::valid::ns::MyEnumA>,
+  ::std::set<::std::string>,
+  ::std::set<::some::valid::ns::MyStruct>,
+  ::std::vector<::some::valid::ns::ComplexUnion>,
+  ::some::valid::ns::containerStruct,
+  ::std::set<::std::int32_t>,
+  ::some::valid::ns::CppFakeI32,
+  ::some::valid::ns::FollySmallVectorI64,
+  ::some::valid::ns::SortedVectorSetString,
+  ::some::valid::ns::FakeMap,
+  ::some::valid::ns::UnorderedMapStruct,
+  ::some::valid::ns::IOBuf,
+  ::some::valid::ns::IOBufPtr,
+  ::std::vector<::std::int32_t>,
+  ::std::vector<::std::string>,
+  ::std::set<::std::string>,
+  ::std::map<::std::int64_t, ::std::string>,
+  ::some::valid::ns::std_list,
+  ::some::valid::ns::std_deque,
+  ::some::valid::ns::folly_set,
+  ::some::valid::ns::folly_map>;
+};
+} // namespace detail
+
 template <>
 class Client<::some::valid::ns::ParamService> : public apache::thrift::GeneratedAsyncClient {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::some::valid::ns::ParamService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
@@ -3497,6 +3559,124 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> listunion_string_paramCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<::std::vector<::some::valid::ns::ComplexUnion>> fbthrift_semifuture_listunion_string_param(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_param1);
+ public:
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "annotatedParams"} */
+  virtual void annotatedParams(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "annotatedParams"} */
+  virtual void annotatedParams(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct);
+ protected:
+  void fbthrift_serialize_and_send_annotatedParams(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct, bool stealRpcOptions = false);
+ public:
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "annotatedParams"} */
+  virtual void sync_annotatedParams(const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "annotatedParams"} */
+  virtual void sync_annotatedParams(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct);
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "annotatedParams"} */
+  virtual folly::Future<folly::Unit> future_annotatedParams(const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "annotatedParams"} */
+  virtual folly::SemiFuture<folly::Unit> semifuture_annotatedParams(const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "annotatedParams"} */
+  virtual folly::Future<folly::Unit> future_annotatedParams(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "annotatedParams"} */
+  virtual folly::SemiFuture<folly::Unit> semifuture_annotatedParams(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct);
+
+#if FOLLY_HAS_COROUTINES
+#if __clang__
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "annotatedParams"} */
+  template <int = 0>
+  folly::coro::Task<void> co_annotatedParams(const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct) {
+    return co_annotatedParams<false>(nullptr, p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct);
+  }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "annotatedParams"} */
+  template <int = 0>
+  folly::coro::Task<void> co_annotatedParams(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct) {
+    return co_annotatedParams<true>(&rpcOptions, p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct);
+  }
+#else
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "annotatedParams"} */
+  folly::coro::Task<void> co_annotatedParams(const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct) {
+    co_await folly::coro::detachOnCancel(semifuture_annotatedParams(p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct));
+  }
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "annotatedParams"} */
+  folly::coro::Task<void> co_annotatedParams(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct) {
+    co_await folly::coro::detachOnCancel(semifuture_annotatedParams(rpcOptions, p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct));
+  }
+#endif
+ private:
+  template <bool hasRpcOptions>
+  folly::coro::Task<void> co_annotatedParams(apache::thrift::RpcOptions* rpcOptions, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct) {
+    const folly::CancellationToken& cancelToken =
+        co_await folly::coro::co_current_cancellation_token;
+    const bool cancellable = cancelToken.canBeCancelled();
+    apache::thrift::ClientReceiveState returnState;
+    apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
+    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto [ctx, header] = annotatedParamsCtx(rpcOptions);
+    using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
+    auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
+    auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    if (ctx != nullptr) {
+      auto argsAsRefs = std::tie(p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct);
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+    }
+    if constexpr (hasRpcOptions) {
+      fbthrift_serialize_and_send_annotatedParams(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct);
+    } else {
+      fbthrift_serialize_and_send_annotatedParams(*defaultRpcOptions, header, ctx.get(), std::move(wrappedCallback), p_no_annotation, p_opt_ref_type_shared, p_base_type, p_list_type, p_set_type, p_map_type, p_map_struct_type, p_iobuf_type, p_iobuf_ptr, p_list_i32_template, p_list_string_template, p_set_template, p_map_template, p_typedef_list_template, p_typedef_deque_template, p_typedef_set_template, p_typedef_map_template, p_iobuf_type_val, p_iobuf_ptr_val, p_struct_struct);
+    }
+    if (cancellable) {
+      folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
+      co_await callback.co_waitUntilDone();
+    } else {
+      co_await callback.co_waitUntilDone();
+    }
+    if (ctx != nullptr) {
+      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
+    }
+    if (returnState.isException()) {
+      co_yield folly::coro::co_error(std::move(returnState.exception()));
+    }
+    returnState.resetProtocolId(protocolId);
+    returnState.resetCtx(std::move(ctx));
+    SCOPE_EXIT {
+      if (hasRpcOptions && returnState.header()) {
+        auto* rheader = returnState.header();
+        if (!rheader->getHeaders().empty()) {
+          rpcOptions->setReadHeaders(rheader->releaseHeaders());
+        }
+        rpcOptions->setRoutingData(rheader->releaseRoutingData());
+      }
+    };
+    if (auto ew = recv_wrapped_annotatedParams(returnState)) {
+      co_yield folly::coro::co_error(std::move(ew));
+    }
+  }
+ public:
+#endif // FOLLY_HAS_COROUTINES
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "annotatedParams"} */
+  virtual void annotatedParams(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct);
+
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "annotatedParams"} */
+  static folly::exception_wrapper recv_wrapped_annotatedParams(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "annotatedParams"} */
+  static void recv_annotatedParams(::apache::thrift::ClientReceiveState& state);
+  // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "annotatedParams"} */
+  virtual void recv_instance_annotatedParams(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/module.thrift", "service": "ParamService", "function": "annotatedParams"} */
+  virtual folly::exception_wrapper recv_instance_wrapped_annotatedParams(::apache::thrift::ClientReceiveState& state);
+ private:
+  apache::thrift::SerializedRequest fbthrift_serialize_annotatedParams(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct);
+  template <typename RpcOptions>
+  void fbthrift_send_annotatedParams(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> annotatedParamsCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<folly::Unit> fbthrift_semifuture_annotatedParams(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::containerStruct& p_no_annotation, const ::std::set<::std::int32_t>& p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, const ::some::valid::ns::FollySmallVectorI64& p_list_type, const ::some::valid::ns::SortedVectorSetString& p_set_type, const ::some::valid::ns::FakeMap& p_map_type, const ::some::valid::ns::UnorderedMapStruct& p_map_struct_type, const ::some::valid::ns::IOBuf& p_iobuf_type, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr, const ::std::vector<::std::int32_t>& p_list_i32_template, const ::std::vector<::std::string>& p_list_string_template, const ::std::set<::std::string>& p_set_template, const ::std::map<::std::int64_t, ::std::string>& p_map_template, const ::some::valid::ns::std_list& p_typedef_list_template, const ::some::valid::ns::std_deque& p_typedef_deque_template, const ::some::valid::ns::folly_set& p_typedef_set_template, const ::some::valid::ns::folly_map& p_typedef_map_template, const ::some::valid::ns::IOBuf& p_iobuf_type_val, const ::some::valid::ns::IOBufPtr& p_iobuf_ptr_val, const ::some::valid::ns::containerStruct& p_struct_struct);
  public:
 };
 

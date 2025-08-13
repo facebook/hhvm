@@ -25,6 +25,23 @@ class DecoratedService;
 } // namespace cpp2
 namespace apache::thrift {
 
+namespace detail {
+
+template<>
+struct ServiceMethodTypesFootprint<::cpp2::DecoratedService> {
+  // The types that appear in the definitions of service methods.
+  // e.g. if it appears as a type of an input, output, exception sink or stream
+  // parameter of a client stub, it appears here,
+  using TypesInMethods = folly::tag_t<
+  void,
+  ::std::string,
+  ::std::int64_t,
+  ::std::vector<::std::int64_t>,
+  ::cpp2::Request,
+  ::cpp2::Response>;
+};
+} // namespace detail
+
 template <>
 class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncClient {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::cpp2::DecoratedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
@@ -766,6 +783,23 @@ namespace cpp2 {
 class UndecoratedService;
 } // namespace cpp2
 namespace apache::thrift {
+
+namespace detail {
+
+template<>
+struct ServiceMethodTypesFootprint<::cpp2::UndecoratedService> {
+  // The types that appear in the definitions of service methods.
+  // e.g. if it appears as a type of an input, output, exception sink or stream
+  // parameter of a client stub, it appears here,
+  using TypesInMethods = folly::tag_t<
+  void,
+  ::std::string,
+  ::std::int64_t,
+  ::std::vector<::std::int64_t>,
+  ::cpp2::Request,
+  ::cpp2::Response>;
+};
+} // namespace detail
 
 template <>
 class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsyncClient {
@@ -1509,6 +1543,18 @@ class DecoratedService_ExtendsUndecoratedService;
 } // namespace cpp2
 namespace apache::thrift {
 
+namespace detail {
+
+template<>
+struct ServiceMethodTypesFootprint<::cpp2::DecoratedService_ExtendsUndecoratedService> {
+  // The types that appear in the definitions of service methods.
+  // e.g. if it appears as a type of an input, output, exception sink or stream
+  // parameter of a client stub, it appears here,
+  using TypesInMethods = folly::tag_t<
+  void>;
+};
+} // namespace detail
+
 template <>
 class Client<::cpp2::DecoratedService_ExtendsUndecoratedService> : public ::cpp2::UndecoratedServiceAsyncClient {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::cpp2::DecoratedService_ExtendsUndecoratedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
@@ -1650,6 +1696,18 @@ namespace cpp2 {
 class DecoratedService_ExtendsDecoratedService;
 } // namespace cpp2
 namespace apache::thrift {
+
+namespace detail {
+
+template<>
+struct ServiceMethodTypesFootprint<::cpp2::DecoratedService_ExtendsDecoratedService> {
+  // The types that appear in the definitions of service methods.
+  // e.g. if it appears as a type of an input, output, exception sink or stream
+  // parameter of a client stub, it appears here,
+  using TypesInMethods = folly::tag_t<
+  void>;
+};
+} // namespace detail
 
 template <>
 class Client<::cpp2::DecoratedService_ExtendsDecoratedService> : public ::cpp2::DecoratedServiceAsyncClient {
@@ -1793,6 +1851,18 @@ class UndecoratedService_ExtendsDecoratedService;
 } // namespace cpp2
 namespace apache::thrift {
 
+namespace detail {
+
+template<>
+struct ServiceMethodTypesFootprint<::cpp2::UndecoratedService_ExtendsDecoratedService> {
+  // The types that appear in the definitions of service methods.
+  // e.g. if it appears as a type of an input, output, exception sink or stream
+  // parameter of a client stub, it appears here,
+  using TypesInMethods = folly::tag_t<
+  void>;
+};
+} // namespace detail
+
 template <>
 class Client<::cpp2::UndecoratedService_ExtendsDecoratedService> : public ::cpp2::DecoratedServiceAsyncClient {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::cpp2::UndecoratedService_ExtendsDecoratedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
@@ -1934,6 +2004,18 @@ namespace cpp2 {
 class DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService;
 } // namespace cpp2
 namespace apache::thrift {
+
+namespace detail {
+
+template<>
+struct ServiceMethodTypesFootprint<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService> {
+  // The types that appear in the definitions of service methods.
+  // e.g. if it appears as a type of an input, output, exception sink or stream
+  // parameter of a client stub, it appears here,
+  using TypesInMethods = folly::tag_t<
+  ::std::string>;
+};
+} // namespace detail
 
 template <>
 class Client<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService> : public ::cpp2::UndecoratedService_ExtendsDecoratedServiceAsyncClient {

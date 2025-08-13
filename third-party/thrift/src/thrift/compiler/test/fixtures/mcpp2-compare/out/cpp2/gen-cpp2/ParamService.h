@@ -280,6 +280,15 @@ class ServiceHandler<::some::valid::ns::ParamService> : public apache::thrift::S
   virtual folly::coro::Task<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>> co_listunion_string_param(apache::thrift::RequestParams params, std::unique_ptr<::std::string> p_param1);
 #endif
   virtual void async_tm_listunion_string_param(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>> callback, std::unique_ptr<::std::string> p_param1);
+  virtual void sync_annotatedParams(std::unique_ptr<::some::valid::ns::containerStruct> /*no_annotation*/, std::unique_ptr<::std::set<::std::int32_t>> /*opt_ref_type_shared*/, ::some::valid::ns::CppFakeI32 /*base_type*/, std::unique_ptr<::some::valid::ns::FollySmallVectorI64> /*list_type*/, std::unique_ptr<::some::valid::ns::SortedVectorSetString> /*set_type*/, std::unique_ptr<::some::valid::ns::FakeMap> /*map_type*/, std::unique_ptr<::some::valid::ns::UnorderedMapStruct> /*map_struct_type*/, std::unique_ptr<::some::valid::ns::IOBuf> /*iobuf_type*/, std::unique_ptr<::some::valid::ns::IOBufPtr> /*iobuf_ptr*/, std::unique_ptr<::std::vector<::std::int32_t>> /*list_i32_template*/, std::unique_ptr<::std::vector<::std::string>> /*list_string_template*/, std::unique_ptr<::std::set<::std::string>> /*set_template*/, std::unique_ptr<::std::map<::std::int64_t, ::std::string>> /*map_template*/, std::unique_ptr<::some::valid::ns::std_list> /*typedef_list_template*/, std::unique_ptr<::some::valid::ns::std_deque> /*typedef_deque_template*/, std::unique_ptr<::some::valid::ns::folly_set> /*typedef_set_template*/, std::unique_ptr<::some::valid::ns::folly_map> /*typedef_map_template*/, std::unique_ptr<::some::valid::ns::IOBuf> /*iobuf_type_val*/, std::unique_ptr<::some::valid::ns::IOBufPtr> /*iobuf_ptr_val*/, std::unique_ptr<::some::valid::ns::containerStruct> /*struct_struct*/);
+  [[deprecated("Use sync_annotatedParams instead")]] virtual void annotatedParams(std::unique_ptr<::some::valid::ns::containerStruct> /*no_annotation*/, std::unique_ptr<::std::set<::std::int32_t>> /*opt_ref_type_shared*/, ::some::valid::ns::CppFakeI32 /*base_type*/, std::unique_ptr<::some::valid::ns::FollySmallVectorI64> /*list_type*/, std::unique_ptr<::some::valid::ns::SortedVectorSetString> /*set_type*/, std::unique_ptr<::some::valid::ns::FakeMap> /*map_type*/, std::unique_ptr<::some::valid::ns::UnorderedMapStruct> /*map_struct_type*/, std::unique_ptr<::some::valid::ns::IOBuf> /*iobuf_type*/, std::unique_ptr<::some::valid::ns::IOBufPtr> /*iobuf_ptr*/, std::unique_ptr<::std::vector<::std::int32_t>> /*list_i32_template*/, std::unique_ptr<::std::vector<::std::string>> /*list_string_template*/, std::unique_ptr<::std::set<::std::string>> /*set_template*/, std::unique_ptr<::std::map<::std::int64_t, ::std::string>> /*map_template*/, std::unique_ptr<::some::valid::ns::std_list> /*typedef_list_template*/, std::unique_ptr<::some::valid::ns::std_deque> /*typedef_deque_template*/, std::unique_ptr<::some::valid::ns::folly_set> /*typedef_set_template*/, std::unique_ptr<::some::valid::ns::folly_map> /*typedef_map_template*/, std::unique_ptr<::some::valid::ns::IOBuf> /*iobuf_type_val*/, std::unique_ptr<::some::valid::ns::IOBufPtr> /*iobuf_ptr_val*/, std::unique_ptr<::some::valid::ns::containerStruct> /*struct_struct*/);
+  virtual folly::Future<folly::Unit> future_annotatedParams(std::unique_ptr<::some::valid::ns::containerStruct> p_no_annotation, std::unique_ptr<::std::set<::std::int32_t>> p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, std::unique_ptr<::some::valid::ns::FollySmallVectorI64> p_list_type, std::unique_ptr<::some::valid::ns::SortedVectorSetString> p_set_type, std::unique_ptr<::some::valid::ns::FakeMap> p_map_type, std::unique_ptr<::some::valid::ns::UnorderedMapStruct> p_map_struct_type, std::unique_ptr<::some::valid::ns::IOBuf> p_iobuf_type, std::unique_ptr<::some::valid::ns::IOBufPtr> p_iobuf_ptr, std::unique_ptr<::std::vector<::std::int32_t>> p_list_i32_template, std::unique_ptr<::std::vector<::std::string>> p_list_string_template, std::unique_ptr<::std::set<::std::string>> p_set_template, std::unique_ptr<::std::map<::std::int64_t, ::std::string>> p_map_template, std::unique_ptr<::some::valid::ns::std_list> p_typedef_list_template, std::unique_ptr<::some::valid::ns::std_deque> p_typedef_deque_template, std::unique_ptr<::some::valid::ns::folly_set> p_typedef_set_template, std::unique_ptr<::some::valid::ns::folly_map> p_typedef_map_template, std::unique_ptr<::some::valid::ns::IOBuf> p_iobuf_type_val, std::unique_ptr<::some::valid::ns::IOBufPtr> p_iobuf_ptr_val, std::unique_ptr<::some::valid::ns::containerStruct> p_struct_struct);
+  virtual folly::SemiFuture<folly::Unit> semifuture_annotatedParams(std::unique_ptr<::some::valid::ns::containerStruct> p_no_annotation, std::unique_ptr<::std::set<::std::int32_t>> p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, std::unique_ptr<::some::valid::ns::FollySmallVectorI64> p_list_type, std::unique_ptr<::some::valid::ns::SortedVectorSetString> p_set_type, std::unique_ptr<::some::valid::ns::FakeMap> p_map_type, std::unique_ptr<::some::valid::ns::UnorderedMapStruct> p_map_struct_type, std::unique_ptr<::some::valid::ns::IOBuf> p_iobuf_type, std::unique_ptr<::some::valid::ns::IOBufPtr> p_iobuf_ptr, std::unique_ptr<::std::vector<::std::int32_t>> p_list_i32_template, std::unique_ptr<::std::vector<::std::string>> p_list_string_template, std::unique_ptr<::std::set<::std::string>> p_set_template, std::unique_ptr<::std::map<::std::int64_t, ::std::string>> p_map_template, std::unique_ptr<::some::valid::ns::std_list> p_typedef_list_template, std::unique_ptr<::some::valid::ns::std_deque> p_typedef_deque_template, std::unique_ptr<::some::valid::ns::folly_set> p_typedef_set_template, std::unique_ptr<::some::valid::ns::folly_map> p_typedef_map_template, std::unique_ptr<::some::valid::ns::IOBuf> p_iobuf_type_val, std::unique_ptr<::some::valid::ns::IOBufPtr> p_iobuf_ptr_val, std::unique_ptr<::some::valid::ns::containerStruct> p_struct_struct);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<void> co_annotatedParams(std::unique_ptr<::some::valid::ns::containerStruct> p_no_annotation, std::unique_ptr<::std::set<::std::int32_t>> p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, std::unique_ptr<::some::valid::ns::FollySmallVectorI64> p_list_type, std::unique_ptr<::some::valid::ns::SortedVectorSetString> p_set_type, std::unique_ptr<::some::valid::ns::FakeMap> p_map_type, std::unique_ptr<::some::valid::ns::UnorderedMapStruct> p_map_struct_type, std::unique_ptr<::some::valid::ns::IOBuf> p_iobuf_type, std::unique_ptr<::some::valid::ns::IOBufPtr> p_iobuf_ptr, std::unique_ptr<::std::vector<::std::int32_t>> p_list_i32_template, std::unique_ptr<::std::vector<::std::string>> p_list_string_template, std::unique_ptr<::std::set<::std::string>> p_set_template, std::unique_ptr<::std::map<::std::int64_t, ::std::string>> p_map_template, std::unique_ptr<::some::valid::ns::std_list> p_typedef_list_template, std::unique_ptr<::some::valid::ns::std_deque> p_typedef_deque_template, std::unique_ptr<::some::valid::ns::folly_set> p_typedef_set_template, std::unique_ptr<::some::valid::ns::folly_map> p_typedef_map_template, std::unique_ptr<::some::valid::ns::IOBuf> p_iobuf_type_val, std::unique_ptr<::some::valid::ns::IOBufPtr> p_iobuf_ptr_val, std::unique_ptr<::some::valid::ns::containerStruct> p_struct_struct);
+  virtual folly::coro::Task<void> co_annotatedParams(apache::thrift::RequestParams params, std::unique_ptr<::some::valid::ns::containerStruct> p_no_annotation, std::unique_ptr<::std::set<::std::int32_t>> p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, std::unique_ptr<::some::valid::ns::FollySmallVectorI64> p_list_type, std::unique_ptr<::some::valid::ns::SortedVectorSetString> p_set_type, std::unique_ptr<::some::valid::ns::FakeMap> p_map_type, std::unique_ptr<::some::valid::ns::UnorderedMapStruct> p_map_struct_type, std::unique_ptr<::some::valid::ns::IOBuf> p_iobuf_type, std::unique_ptr<::some::valid::ns::IOBufPtr> p_iobuf_ptr, std::unique_ptr<::std::vector<::std::int32_t>> p_list_i32_template, std::unique_ptr<::std::vector<::std::string>> p_list_string_template, std::unique_ptr<::std::set<::std::string>> p_set_template, std::unique_ptr<::std::map<::std::int64_t, ::std::string>> p_map_template, std::unique_ptr<::some::valid::ns::std_list> p_typedef_list_template, std::unique_ptr<::some::valid::ns::std_deque> p_typedef_deque_template, std::unique_ptr<::some::valid::ns::folly_set> p_typedef_set_template, std::unique_ptr<::some::valid::ns::folly_map> p_typedef_map_template, std::unique_ptr<::some::valid::ns::IOBuf> p_iobuf_type_val, std::unique_ptr<::some::valid::ns::IOBufPtr> p_iobuf_ptr_val, std::unique_ptr<::some::valid::ns::containerStruct> p_struct_struct);
+#endif
+  virtual void async_tm_annotatedParams(apache::thrift::HandlerCallbackPtr<void> callback, std::unique_ptr<::some::valid::ns::containerStruct> p_no_annotation, std::unique_ptr<::std::set<::std::int32_t>> p_opt_ref_type_shared, ::some::valid::ns::CppFakeI32 p_base_type, std::unique_ptr<::some::valid::ns::FollySmallVectorI64> p_list_type, std::unique_ptr<::some::valid::ns::SortedVectorSetString> p_set_type, std::unique_ptr<::some::valid::ns::FakeMap> p_map_type, std::unique_ptr<::some::valid::ns::UnorderedMapStruct> p_map_struct_type, std::unique_ptr<::some::valid::ns::IOBuf> p_iobuf_type, std::unique_ptr<::some::valid::ns::IOBufPtr> p_iobuf_ptr, std::unique_ptr<::std::vector<::std::int32_t>> p_list_i32_template, std::unique_ptr<::std::vector<::std::string>> p_list_string_template, std::unique_ptr<::std::set<::std::string>> p_set_template, std::unique_ptr<::std::map<::std::int64_t, ::std::string>> p_map_template, std::unique_ptr<::some::valid::ns::std_list> p_typedef_list_template, std::unique_ptr<::some::valid::ns::std_deque> p_typedef_deque_template, std::unique_ptr<::some::valid::ns::folly_set> p_typedef_set_template, std::unique_ptr<::some::valid::ns::folly_map> p_typedef_map_template, std::unique_ptr<::some::valid::ns::IOBuf> p_iobuf_type_val, std::unique_ptr<::some::valid::ns::IOBufPtr> p_iobuf_ptr_val, std::unique_ptr<::some::valid::ns::containerStruct> p_struct_struct);
  private:
   static ::some::valid::ns::ParamServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_void_ret_byte_i16_param{apache::thrift::detail::si::InvocationType::AsyncTm};
@@ -307,13 +316,14 @@ class ServiceHandler<::some::valid::ns::ParamService> : public apache::thrift::S
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_setstruct_ret_set_param{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_union_ret_i32_i32_param{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_listunion_string_param{apache::thrift::detail::si::InvocationType::AsyncTm};
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_annotatedParams{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
 namespace detail {
 template <> struct TSchemaAssociation<::some::valid::ns::ParamService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = 2975033722299010456;
-  static constexpr ::std::string_view definitionKey = {"\x32\x96\xf8\x45\xfe\x08\x5a\xdd\x51\x47\x9e\x12\xa8\xe4\x9a\x90", 16};
+  static constexpr int64_t programId = -7170422325064689213;
+  static constexpr ::std::string_view definitionKey = {"\xd1\x28\x4c\xbd\xd9\x54\xd3\xae\x81\x28\x15\x82\x25\xec\xe5\xde", 16};
 };
 }
 } // namespace apache::thrift
@@ -350,6 +360,7 @@ class ParamServiceSvNull : public ::apache::thrift::ServiceHandler<ParamService>
   void setstruct_ret_set_param(::std::set<::some::valid::ns::MyStruct>& /*_return*/, std::unique_ptr<::std::set<::std::string>> /*param1*/) override;
   void union_ret_i32_i32_param(::some::valid::ns::ComplexUnion& /*_return*/, ::std::int32_t /*param1*/, ::std::int32_t /*param2*/) override;
   void listunion_string_param(::std::vector<::some::valid::ns::ComplexUnion>& /*_return*/, std::unique_ptr<::std::string> /*param1*/) override;
+  void annotatedParams(std::unique_ptr<::some::valid::ns::containerStruct> /*no_annotation*/, std::unique_ptr<::std::set<::std::int32_t>> /*opt_ref_type_shared*/, ::some::valid::ns::CppFakeI32 /*base_type*/, std::unique_ptr<::some::valid::ns::FollySmallVectorI64> /*list_type*/, std::unique_ptr<::some::valid::ns::SortedVectorSetString> /*set_type*/, std::unique_ptr<::some::valid::ns::FakeMap> /*map_type*/, std::unique_ptr<::some::valid::ns::UnorderedMapStruct> /*map_struct_type*/, std::unique_ptr<::some::valid::ns::IOBuf> /*iobuf_type*/, std::unique_ptr<::some::valid::ns::IOBufPtr> /*iobuf_ptr*/, std::unique_ptr<::std::vector<::std::int32_t>> /*list_i32_template*/, std::unique_ptr<::std::vector<::std::string>> /*list_string_template*/, std::unique_ptr<::std::set<::std::string>> /*set_template*/, std::unique_ptr<::std::map<::std::int64_t, ::std::string>> /*map_template*/, std::unique_ptr<::some::valid::ns::std_list> /*typedef_list_template*/, std::unique_ptr<::some::valid::ns::std_deque> /*typedef_deque_template*/, std::unique_ptr<::some::valid::ns::folly_set> /*typedef_set_template*/, std::unique_ptr<::some::valid::ns::folly_map> /*typedef_map_template*/, std::unique_ptr<::some::valid::ns::IOBuf> /*iobuf_type_val*/, std::unique_ptr<::some::valid::ns::IOBufPtr> /*iobuf_ptr_val*/, std::unique_ptr<::some::valid::ns::containerStruct> /*struct_struct*/) override;
 };
 
 class ParamServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
@@ -1429,6 +1440,42 @@ class ParamServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProces
       apache::thrift::Cpp2RequestContext* reqCtx);
   //
   // End of Method 'listunion_string_param'
+  //
+
+  //
+  // End of Service Methods
+  //
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'annotatedParams'
+  //
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_annotatedParams(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_annotatedParams(apache::thrift::ServerRequest&& serverRequest);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static apache::thrift::SerializedResponse return_annotatedParams(
+      apache::thrift::ContextStack* ctx);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_annotatedParams(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'annotatedParams'
   //
 
   //

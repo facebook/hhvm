@@ -214,6 +214,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamS
   static void gen_setstruct_ret_set_param(ThriftMetadata& metadata, ThriftService& context);
   static void gen_union_ret_i32_i32_param(ThriftMetadata& metadata, ThriftService& context);
   static void gen_listunion_string_param(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_annotatedParams(ThriftMetadata& metadata, ThriftService& context);
 };
 } // namespace md
 } // namespace detail

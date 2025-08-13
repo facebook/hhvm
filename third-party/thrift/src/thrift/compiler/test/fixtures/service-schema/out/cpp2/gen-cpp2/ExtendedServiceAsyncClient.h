@@ -28,6 +28,18 @@ class ExtendedService;
 } // namespace facebook::thrift::test
 namespace apache::thrift {
 
+namespace detail {
+
+template<>
+struct ServiceMethodTypesFootprint<::facebook::thrift::test::ExtendedService> {
+  // The types that appear in the definitions of service methods.
+  // e.g. if it appears as a type of an input, output, exception sink or stream
+  // parameter of a client stub, it appears here,
+  using TypesInMethods = folly::tag_t<
+  ::std::int64_t>;
+};
+} // namespace detail
+
 template <>
 class Client<::facebook::thrift::test::ExtendedService> : public ::facebook::thrift::test::BaseServiceAsyncClient {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::facebook::thrift::test::ExtendedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");

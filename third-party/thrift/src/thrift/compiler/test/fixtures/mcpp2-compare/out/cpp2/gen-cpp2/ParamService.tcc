@@ -69,6 +69,8 @@ typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<4, ::apac
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::variant, ::some::valid::ns::ComplexUnion*>> ParamService_union_ret_i32_i32_param_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::string, ::std::string*>> ParamService_listunion_string_param_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::list<::apache::thrift::type_class::variant>, ::std::vector<::some::valid::ns::ComplexUnion>*>> ParamService_listunion_string_param_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::some::valid::ns::containerStruct*>, apache::thrift::FieldData<2, ::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int32_t>*>, apache::thrift::FieldData<3, ::apache::thrift::type_class::integral, ::some::valid::ns::CppFakeI32*>, apache::thrift::FieldData<4, ::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::some::valid::ns::FollySmallVectorI64*>, apache::thrift::FieldData<5, ::apache::thrift::type_class::set<::apache::thrift::type_class::string>, ::some::valid::ns::SortedVectorSetString*>, apache::thrift::FieldData<6, ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::floating_point>, ::some::valid::ns::FakeMap*>, apache::thrift::FieldData<7, ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::structure>, ::some::valid::ns::UnorderedMapStruct*>, apache::thrift::FieldData<8, ::apache::thrift::type_class::binary, ::some::valid::ns::IOBuf*>, apache::thrift::FieldData<9, ::apache::thrift::type_class::binary, ::some::valid::ns::IOBufPtr*>, apache::thrift::FieldData<10, ::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>*>, apache::thrift::FieldData<11, ::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::std::vector<::std::string>*>, apache::thrift::FieldData<12, ::apache::thrift::type_class::set<::apache::thrift::type_class::string>, ::std::set<::std::string>*>, apache::thrift::FieldData<13, ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::string>, ::std::map<::std::int64_t, ::std::string>*>, apache::thrift::FieldData<14, ::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::some::valid::ns::std_list*>, apache::thrift::FieldData<15, ::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::some::valid::ns::std_deque*>, apache::thrift::FieldData<16, ::apache::thrift::type_class::set<::apache::thrift::type_class::string>, ::some::valid::ns::folly_set*>, apache::thrift::FieldData<17, ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::string>, ::some::valid::ns::folly_map*>, apache::thrift::FieldData<18, ::apache::thrift::type_class::binary, ::some::valid::ns::IOBuf*>, apache::thrift::FieldData<19, ::apache::thrift::type_class::binary, ::some::valid::ns::IOBufPtr*>, apache::thrift::FieldData<20, ::apache::thrift::type_class::structure, ::some::valid::ns::containerStruct*>> ParamService_annotatedParams_pargs;
+typedef apache::thrift::ThriftPresult<true> ParamService_annotatedParams_presult;
 //
 // Service Methods
 //
@@ -4789,6 +4791,222 @@ void ParamServiceAsyncProcessor::throw_wrapped_listunion_string_param(
 }
 //
 // End of Method 'listunion_string_param'
+//
+
+//
+// Method 'annotatedParams'
+//
+template <typename ProtocolIn_, typename ProtocolOut_>
+void ParamServiceAsyncProcessor::setUpAndProcess_annotatedParams(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    apache::thrift::SerializedCompressedRequest&& serializedRequest,
+    apache::thrift::Cpp2RequestContext* ctx,
+    folly::EventBase* eb,
+    [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
+  if (!setUpRequestProcessing(
+          req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
+    return;
+  }
+  auto scope = iface_->getRequestExecutionScope(
+      ctx, apache::thrift::concurrency::NORMAL);
+  ctx->setRequestExecutionScope(std::move(scope));
+  processInThread(
+      std::move(req),
+      std::move(serializedRequest),
+      ctx,
+      eb,
+      tm,
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      &ParamServiceAsyncProcessor::
+          executeRequest_annotatedParams<ProtocolIn_, ProtocolOut_>,
+      this);
+}
+
+template <typename ProtocolIn_, typename ProtocolOut_>
+void ParamServiceAsyncProcessor::executeRequest_annotatedParams(
+    apache::thrift::ServerRequest&& serverRequest) {
+  // make sure getRequestContext is null
+  // so async calls don't accidentally use it
+  iface_->setRequestContext(nullptr);
+  struct ArgsState {
+    std::unique_ptr<::some::valid::ns::containerStruct> uarg_no_annotation = std::make_unique<::some::valid::ns::containerStruct>();
+    std::unique_ptr<::std::set<::std::int32_t>> uarg_opt_ref_type_shared = std::make_unique<::std::set<::std::int32_t>>();
+    ::some::valid::ns::CppFakeI32 uarg_base_type{0};
+    std::unique_ptr<::some::valid::ns::FollySmallVectorI64> uarg_list_type = std::make_unique<::some::valid::ns::FollySmallVectorI64>();
+    std::unique_ptr<::some::valid::ns::SortedVectorSetString> uarg_set_type = std::make_unique<::some::valid::ns::SortedVectorSetString>();
+    std::unique_ptr<::some::valid::ns::FakeMap> uarg_map_type = std::make_unique<::some::valid::ns::FakeMap>();
+    std::unique_ptr<::some::valid::ns::UnorderedMapStruct> uarg_map_struct_type = std::make_unique<::some::valid::ns::UnorderedMapStruct>();
+    std::unique_ptr<::some::valid::ns::IOBuf> uarg_iobuf_type = std::make_unique<::some::valid::ns::IOBuf>();
+    std::unique_ptr<::some::valid::ns::IOBufPtr> uarg_iobuf_ptr = std::make_unique<::some::valid::ns::IOBufPtr>();
+    std::unique_ptr<::std::vector<::std::int32_t>> uarg_list_i32_template = std::make_unique<::std::vector<::std::int32_t>>();
+    std::unique_ptr<::std::vector<::std::string>> uarg_list_string_template = std::make_unique<::std::vector<::std::string>>();
+    std::unique_ptr<::std::set<::std::string>> uarg_set_template = std::make_unique<::std::set<::std::string>>();
+    std::unique_ptr<::std::map<::std::int64_t, ::std::string>> uarg_map_template = std::make_unique<::std::map<::std::int64_t, ::std::string>>();
+    std::unique_ptr<::some::valid::ns::std_list> uarg_typedef_list_template = std::make_unique<::some::valid::ns::std_list>();
+    std::unique_ptr<::some::valid::ns::std_deque> uarg_typedef_deque_template = std::make_unique<::some::valid::ns::std_deque>();
+    std::unique_ptr<::some::valid::ns::folly_set> uarg_typedef_set_template = std::make_unique<::some::valid::ns::folly_set>();
+    std::unique_ptr<::some::valid::ns::folly_map> uarg_typedef_map_template = std::make_unique<::some::valid::ns::folly_map>();
+    std::unique_ptr<::some::valid::ns::IOBuf> uarg_iobuf_type_val = std::make_unique<::some::valid::ns::IOBuf>();
+    std::unique_ptr<::some::valid::ns::IOBufPtr> uarg_iobuf_ptr_val = std::make_unique<::some::valid::ns::IOBufPtr>();
+    std::unique_ptr<::some::valid::ns::containerStruct> uarg_struct_struct = std::make_unique<::some::valid::ns::containerStruct>();
+    ParamService_annotatedParams_pargs pargs() {
+      ParamService_annotatedParams_pargs args;
+      args.get<0>().value = uarg_no_annotation.get();
+      args.get<1>().value = uarg_opt_ref_type_shared.get();
+      args.get<2>().value = &uarg_base_type;
+      args.get<3>().value = uarg_list_type.get();
+      args.get<4>().value = uarg_set_type.get();
+      args.get<5>().value = uarg_map_type.get();
+      args.get<6>().value = uarg_map_struct_type.get();
+      args.get<7>().value = uarg_iobuf_type.get();
+      args.get<8>().value = uarg_iobuf_ptr.get();
+      args.get<9>().value = uarg_list_i32_template.get();
+      args.get<10>().value = uarg_list_string_template.get();
+      args.get<11>().value = uarg_set_template.get();
+      args.get<12>().value = uarg_map_template.get();
+      args.get<13>().value = uarg_typedef_list_template.get();
+      args.get<14>().value = uarg_typedef_deque_template.get();
+      args.get<15>().value = uarg_typedef_set_template.get();
+      args.get<16>().value = uarg_typedef_map_template.get();
+      args.get<17>().value = uarg_iobuf_type_val.get();
+      args.get<18>().value = uarg_iobuf_ptr_val.get();
+      args.get<19>().value = uarg_struct_struct.get();
+      return args;
+    }
+
+    auto asTupleOfRefs() & {
+      return std::tie(
+        std::as_const(*uarg_no_annotation),
+        std::as_const(*uarg_opt_ref_type_shared),
+        std::as_const(uarg_base_type),
+        std::as_const(*uarg_list_type),
+        std::as_const(*uarg_set_type),
+        std::as_const(*uarg_map_type),
+        std::as_const(*uarg_map_struct_type),
+        std::as_const(*uarg_iobuf_type),
+        std::as_const(*uarg_iobuf_ptr),
+        std::as_const(*uarg_list_i32_template),
+        std::as_const(*uarg_list_string_template),
+        std::as_const(*uarg_set_template),
+        std::as_const(*uarg_map_template),
+        std::as_const(*uarg_typedef_list_template),
+        std::as_const(*uarg_typedef_deque_template),
+        std::as_const(*uarg_typedef_set_template),
+        std::as_const(*uarg_typedef_map_template),
+        std::as_const(*uarg_iobuf_type_val),
+        std::as_const(*uarg_iobuf_ptr_val),
+        std::as_const(*uarg_struct_struct)
+      );
+    }
+  } args;
+
+  auto ctxStack = apache::thrift::ContextStack::create(
+      this->getEventHandlersSharedPtr(),
+      this->getServiceName(),
+      "ParamService.annotatedParams",
+      serverRequest.requestContext());
+  try {
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(
+        pargs,
+        "annotatedParams",
+        apache::thrift::detail::ServerRequestHelper::compressedRequest(
+            std::move(serverRequest))
+            .uncompress(),
+        ctxStack.get());
+  } catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
+    apache::thrift::detail::ap::process_handle_exn_deserialization<
+        ProtocolOut_>(
+        ew,
+        apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
+            serverRequest.requestContext(),
+        apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+        "annotatedParams");
+    return;
+  }
+  auto requestPileNotification =
+      apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(
+          serverRequest);
+  auto concurrencyControllerNotification =
+      apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(
+          serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+      /* .serviceName =*/ this->getServiceName(),
+      /* .definingServiceName =*/ "ParamService",
+      /* .methodName =*/ "annotatedParams",
+      /* .qualifiedMethodName =*/ "ParamService.annotatedParams"};
+  auto callback =
+      apache::thrift::HandlerCallbackPtr<void>::make(
+          apache::thrift::detail::ServerRequestHelper::request(
+              std::move(serverRequest)),
+          std::move(ctxStack),
+          std::move(methodNameInfo),
+          return_annotatedParams<ProtocolIn_, ProtocolOut_>,
+          throw_wrapped_annotatedParams<ProtocolIn_, ProtocolOut_>,
+          serverRequest.requestContext()->getProtoSeqId(),
+          apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+          apache::thrift::detail::ServerRequestHelper::executor(serverRequest),
+          serverRequest.requestContext(),
+          requestPileNotification,
+          concurrencyControllerNotification,
+          std::move(serverRequest.requestData()));
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
+      (void)args;
+      ifacePtr->async_tm_annotatedParams(std::move(cb), std::move(args.uarg_no_annotation), std::move(args.uarg_opt_ref_type_shared), args.uarg_base_type, std::move(args.uarg_list_type), std::move(args.uarg_set_type), std::move(args.uarg_map_type), std::move(args.uarg_map_struct_type), std::move(args.uarg_iobuf_type), std::move(args.uarg_iobuf_ptr), std::move(args.uarg_list_i32_template), std::move(args.uarg_list_string_template), std::move(args.uarg_set_template), std::move(args.uarg_map_template), std::move(args.uarg_typedef_list_template), std::move(args.uarg_typedef_deque_template), std::move(args.uarg_typedef_set_template), std::move(args.uarg_typedef_map_template), std::move(args.uarg_iobuf_type_val), std::move(args.uarg_iobuf_ptr_val), std::move(args.uarg_struct_struct));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
+          *callback)) {
+    [](auto callback, auto executeHandler, ArgsState args)
+        -> folly::coro::Task<void> {
+      auto argRefs = args.asTupleOfRefs();
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+          *callback,
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+              argRefs));
+      executeHandler(std::move(callback), std::move(args));
+    }(std::move(callback), makeExecuteHandler(), std::move(args))
+               .scheduleOn(
+                   apache::thrift::detail::ServerRequestHelper::executor(
+                       serverRequest))
+               .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback), std::move(args));
+  }
+#else
+  makeExecuteHandler()(std::move(callback), std::move(args));
+#endif // FOLLY_HAS_COROUTINES
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+apache::thrift::SerializedResponse ParamServiceAsyncProcessor::return_annotatedParams(
+    apache::thrift::ContextStack* ctx) {
+  ProtocolOut_ prot;
+  ::some::valid::ns::ParamService_annotatedParams_presult result;
+  return serializeResponse("annotatedParams", &prot, ctx, result);
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+void ParamServiceAsyncProcessor::throw_wrapped_annotatedParams(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    [[maybe_unused]] int32_t protoSeqId,
+    apache::thrift::ContextStack* ctx,
+    folly::exception_wrapper ew,
+    apache::thrift::Cpp2RequestContext* reqCtx) {
+  if (!ew) {
+    return;
+  }
+  {
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<
+        ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "annotatedParams");
+    return;
+  }
+}
+//
+// End of Method 'annotatedParams'
 //
 
 //

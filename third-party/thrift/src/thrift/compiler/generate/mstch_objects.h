@@ -648,6 +648,8 @@ class mstch_function : public mstch_base {
 
             // Shared Sink/Stream methods:
             {"function:sink_or_stream?", &mstch_function::has_sink_or_stream},
+            {"function:bidirectional_stream?",
+             &mstch_function::is_bidirectional_stream},
         });
   }
 
@@ -748,6 +750,9 @@ class mstch_function : public mstch_base {
 
   mstch::node has_sink_or_stream() {
     return function_->sink_or_stream() != nullptr;
+  }
+  mstch::node is_bidirectional_stream() {
+    return function_->sink() && function_->stream();
   }
 
  protected:

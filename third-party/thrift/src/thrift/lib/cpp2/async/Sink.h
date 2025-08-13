@@ -37,7 +37,7 @@ class FOLLY_EXPORT SinkThrew : public TApplicationException {
   using TApplicationException::TApplicationException;
 };
 
-template <typename T, typename R>
+template <typename T, typename R = void>
 class ClientSink {
 #if FOLLY_HAS_COROUTINES
   using PayloadSerializer = apache::thrift::detail::StreamElementEncoder<T>*;
@@ -151,6 +151,31 @@ class ResponseAndSinkConsumer {
 
   Response response;
   SinkConsumer<SinkElement, FinalResponse> sinkConsumer;
+};
+
+template <typename T>
+class ClientBufferedStream;
+
+template <typename Response, typename SinkElement, typename StreamElement>
+class ResponseAndBidirectionalStream {
+ public:
+  using ResponseType = Response;
+  using SinkElementType = SinkElement;
+  using StreamElementType = StreamElement;
+
+  Response response;
+  ClientSink<SinkElement> sink;
+  ClientBufferedStream<StreamElement> stream;
+};
+
+template <typename SinkElement, typename StreamElement>
+class BidirectionalStream {
+ public:
+  using SinkElementType = SinkElement;
+  using StreamElementType = StreamElement;
+
+  ClientSink<SinkElement> sink;
+  ClientBufferedStream<StreamElement> stream;
 };
 
 } // namespace apache::thrift

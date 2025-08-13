@@ -499,9 +499,9 @@ TEST(AstVisitorTest, stream) {
   auto service = std::make_unique<t_service>(&program, "Service");
   auto ret = t_type_ref();
   service->add_function(std::make_unique<t_function>(
-      &program, ret, "f1", nullptr, std::move(stream1)));
+      &program, ret, "f1", nullptr, nullptr, std::move(stream1)));
   service->add_function(std::make_unique<t_function>(
-      &program, ret, "f2", nullptr, std::move(stream2)));
+      &program, ret, "f2", nullptr, nullptr, std::move(stream2)));
   program.add_definition(std::move(service));
 
   auto visitor = ast_visitor();

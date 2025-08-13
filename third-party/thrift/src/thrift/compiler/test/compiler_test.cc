@@ -224,7 +224,7 @@ TEST(CompilerTest, return_sink) {
     service S {
       sink<i32, i32> getSink();
       i32, sink<i32, i32> getStreamWithInitialResponse();
-      sink<i32, i32>, i32 bad(); # expected-error: expected identifier
+      sink<i32, i32>, i32 bad(); # expected-error: expected 'sink' or 'stream' after the initial response type
     }
   )");
 }
@@ -234,7 +234,7 @@ TEST(CompilerTest, return_stream) {
     service S {
       stream<i32> getStream();
       i32, stream<i32> getStreamWithInitialResponse();
-      stream<i32>, i32 bad(); # expected-error: expected identifier
+      stream<i32>, i32 bad(); # expected-error: expected 'sink' or 'stream' after the initial response type
     }
   )");
 }
@@ -3142,4 +3142,82 @@ TEST(CompilerTest, required_field_qualifier) {
     }
   )",
       {"--extra-validation", "required_field_qualifier=warn"});
+}
+
+TEST(CompilerTest, bidirectional_streaming) {
+  check_compile(
+      R"(
+      interaction I {}
+      service S {
+        sink<i32>, stream<i32> foo();
+        i32, sink<i32>, stream<i32> bar();
+        I, sink<i32>, stream<i32> baz();
+        I, i32, sink<i32>, stream<i32> qux();
+      }
+      )",
+      {"--allow-unreleased-streaming"});
+
+  check_compile(
+      R"(
+      service S {
+        stream<i32>, sink<i32> foo(); # expected-error: expected 'sink' before 'stream'
+      }
+      )",
+      {"--allow-unreleased-streaming"});
+
+  check_compile(
+      R"(
+      service S {
+        i32, stream<i32>, sink<i32> foo(); # expected-error: expected 'sink' before 'stream'
+      }
+      )",
+      {"--allow-unreleased-streaming"});
+
+  check_compile(
+      R"(
+      service S {
+        sink<i32>, stream<i32>, i32 foo(); # expected-error: expected identifier
+      }
+      )",
+      {"--allow-unreleased-streaming"});
+
+  check_compile(
+      R"(
+      service S {
+        sink<i32>, sink<i32>, stream<i32> foo(); # expected-error: duplicate 'sink'
+      }
+      )",
+      {"--allow-unreleased-streaming"});
+
+  check_compile(
+      R"(
+      service S {
+        sink<i32>, stream<i32>, stream<i32> foo(); # expected-error: duplicate 'stream'
+      }
+      )",
+      {"--allow-unreleased-streaming"});
+
+  check_compile(
+      R"(
+      service S {
+        i32, sink<i32>, stream<i32>, stream<i32> foo(); # expected-error: expected identifier
+      }
+      )",
+      {"--allow-unreleased-streaming"});
+
+  check_compile(
+      R"(
+      service S {
+        i32, sink<i32, i32>, stream<i32> foo(); # expected-error: Final response type is not allowed with bidirectional streaming
+      }
+      )",
+      {"--allow-unreleased-streaming"});
+
+  check_compile(
+      R"(
+      service S {
+        i32, sink<i32> foo(); # expected-error: Final response type is required
+        i32, sink<i32>, stream<i32> foo(); # expected-error: Only one of sink or stream is allowed
+      }
+      )");
 }

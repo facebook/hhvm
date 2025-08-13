@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
-service SimpleSink {
-  sink<i32> simple();
+service BiDiService {
+  sink<i32>, stream<i16> simple();
+  string, sink<i32>, stream<i16> response();
 }

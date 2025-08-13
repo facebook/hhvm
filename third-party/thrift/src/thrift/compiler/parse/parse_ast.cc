@@ -635,12 +635,26 @@ class ast_builder : public parser_actions {
       }
     }
 
+    if (ret.sink && ret.stream) {
+      if (!params_.allow_unreleased_streaming) {
+        diags_.error(range.begin, "Only one of sink or stream is allowed");
+      }
+      if (ret.sink->final_response_type()) {
+        diags_.error(
+            range.begin,
+            "Final response type is not allowed with bidirectional streaming");
+      }
+    } else if (ret.sink && !ret.sink->final_response_type()) {
+      diags_.error(range.begin, "Final response type is required");
+    }
+
     auto function = std::make_unique<t_function>(
         &program_,
         return_type,
         fmt::to_string(name.str),
         nullptr,
-        std::move(ret.sink_or_stream),
+        std::move(ret.sink),
+        std::move(ret.stream),
         interaction);
     function->set_name_range(name.range());
     function->set_qualifier(qual);
@@ -665,8 +679,6 @@ class ast_builder : public parser_actions {
     if (final_response_spec) {
       sink->set_final_response_exceptions(
           std::move(final_response_spec->throws));
-    } else if (!params_.allow_unreleased_streaming) {
-      diags_.error(range.begin, "Final response type is required");
     }
     return sink;
   }

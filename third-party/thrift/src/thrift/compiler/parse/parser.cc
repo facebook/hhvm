@@ -477,12 +477,14 @@ class parser {
   }
 
   // return_clause:
-  //   return_type ["," (sink | stream)]
-  //   interaction_name ["," return_type] ["," (sink | stream)]
+  //   return_type ["," streaming]
+  //   interaction_name ["," return_type] ["," streaming]
   //
   // interaction_name: maybe_qualified_id
   //
   // return_type: type | "void"
+  //
+  // streaming: sink ["," stream] | stream
   return_clause parse_return_clause() {
     auto ret = return_clause();
     if (token_.kind == tok::identifier) {
@@ -502,11 +504,11 @@ class parser {
         consume_token();
         break;
       case tok::kw_sink:
-        ret.sink_or_stream = parse_sink();
-        return ret;
+        ret.sink = parse_sink();
+        break;
       case tok::kw_stream:
-        ret.sink_or_stream = parse_stream();
-        return ret;
+        ret.stream = parse_stream();
+        break;
       default:
         ret.type = parse_type();
         break;
@@ -519,13 +521,43 @@ class parser {
     }
     switch (token_.kind) {
       case tok::kw_sink:
-        ret.sink_or_stream = parse_sink();
+        if (ret.stream) {
+          report_expected("'sink' before 'stream'");
+        }
+        if (ret.sink) {
+          report_error("duplicate 'sink'");
+        }
+        ret.sink = parse_sink();
         break;
       case tok::kw_stream:
-        ret.sink_or_stream = parse_stream();
+        if (ret.stream) {
+          report_error("duplicate 'stream'");
+        }
+        ret.stream = parse_stream();
         break;
       default:
         report_expected("'sink' or 'stream' after the initial response type");
+    }
+    if (!try_consume_token(',')) {
+      return ret;
+    }
+    switch (token_.kind) {
+      case tok::kw_stream:
+        if (ret.stream) {
+          report_error("duplicate 'stream'");
+        }
+        ret.stream = parse_stream();
+        break;
+      case tok::kw_sink:
+        if (ret.stream) {
+          report_expected("'sink' before 'stream'");
+        }
+        if (ret.sink) {
+          report_error("duplicate 'sink'");
+        }
+        break;
+      default:
+        report_expected("identifier");
     }
     return ret;
   }

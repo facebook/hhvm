@@ -47,7 +47,8 @@ class t_function final : public t_named {
       t_type_ref return_type,
       std::string name,
       std::unique_ptr<t_paramlist> params = {},
-      std::unique_ptr<t_node> sink_or_stream = {},
+      std::unique_ptr<t_sink> sink = {},
+      std::unique_ptr<t_stream> stream = {},
       t_type_ref interaction = {});
   ~t_function() override;
 
@@ -68,15 +69,17 @@ class t_function final : public t_named {
   t_type_ref& return_type() { return return_type_; }
   bool has_return_type() const { return has_return_type_; }
 
-  t_node* sink_or_stream() { return sink_or_stream_.get(); }
-  const t_node* sink_or_stream() const { return sink_or_stream_.get(); }
+  t_node* sink_or_stream() {
+    return sink_ ? static_cast<t_node*>(sink_.get())
+                 : static_cast<t_node*>(stream_.get());
+  }
+  const t_node* sink_or_stream() const {
+    return sink_ ? static_cast<const t_node*>(sink_.get())
+                 : static_cast<const t_node*>(stream_.get());
+  }
 
-  const t_sink* sink() const {
-    return dynamic_cast<const t_sink*>(sink_or_stream_.get());
-  }
-  const t_stream* stream() const {
-    return dynamic_cast<const t_stream*>(sink_or_stream_.get());
-  }
+  const t_sink* sink() const { return sink_.get(); }
+  const t_stream* stream() const { return stream_.get(); }
 
   t_paramlist& params() { return *params_; }
   const t_paramlist& params() const { return *params_; }
@@ -100,7 +103,8 @@ class t_function final : public t_named {
   std::unique_ptr<t_paramlist> params_;
   std::unique_ptr<t_throws> exceptions_;
   t_function_qualifier qualifier_ = t_function_qualifier::none;
-  std::unique_ptr<t_node> sink_or_stream_;
+  std::unique_ptr<t_sink> sink_;
+  std::unique_ptr<t_stream> stream_;
   t_type_ref interaction_;
   bool has_return_type_ = false;
   bool is_interaction_constructor_ = false;

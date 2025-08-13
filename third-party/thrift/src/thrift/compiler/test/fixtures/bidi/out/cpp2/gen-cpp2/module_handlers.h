@@ -6,4 +6,4 @@
  */
 #pragma once
 
-#include "thrift/compiler/test/fixtures/simple-sink/gen-cpp2/SimpleSinkAsyncClient.h"
+#include "thrift/compiler/test/fixtures/bidi/gen-cpp2/BiDiService.h"

@@ -26,11 +26,13 @@ t_function::t_function(
     t_type_ref return_type,
     std::string name,
     std::unique_ptr<t_paramlist> params,
-    std::unique_ptr<t_node> sink_or_stream,
+    std::unique_ptr<t_sink> sink,
+    std::unique_ptr<t_stream> stream,
     t_type_ref interaction)
     : t_named(program, std::move(name)),
       params_(std::move(params)),
-      sink_or_stream_(std::move(sink_or_stream)),
+      sink_(std::move(sink)),
+      stream_(std::move(stream)),
       interaction_(interaction) {
   if (return_type) {
     return_type_ = return_type;
@@ -41,7 +43,6 @@ t_function::t_function(
   if (!params_) {
     params_ = std::make_unique<t_paramlist>(program);
   }
-  assert(!sink_or_stream_ || sink() || stream());
 }
 
 t_function::~t_function() = default;

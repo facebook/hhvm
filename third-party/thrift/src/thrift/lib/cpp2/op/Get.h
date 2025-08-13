@@ -454,7 +454,6 @@ inline constexpr detail::Get<Id, T> get = {};
 /// * get_value_or_null(foo.optional_ref())
 ///   // returns nullptr if optional field doesn't have a value.
 inline constexpr detail::GetValueOrNull get_value_or_null;
-inline constexpr detail::GetValueOrNull getValueOrNull;
 
 /// Gets the field ref type of Thrift field, for example:
 ///

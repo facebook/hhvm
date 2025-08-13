@@ -62,6 +62,7 @@ bool canDCE(const IRInstruction& inst) {
   case Ceil:
   case XorBool:
   case Mod:
+  case PseudoRandomInt:
   case ConvDblToBool:
   case ConvIntToBool:
   case ConvStrToBool:

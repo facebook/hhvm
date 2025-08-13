@@ -16,9 +16,11 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/random/ext_random.h"
+#include "hphp/runtime/ext/hsl/ext_hsl_random.h"
 #include <folly/Random.h>
 
 namespace HPHP {
+
 namespace {
 
   // This used to be pointing to Folly's DefaultGenerator, but that was changed
@@ -30,41 +32,44 @@ namespace {
   using DefaultGenerator = std::mt19937;
 #endif
   RDS_LOCAL(DefaultGenerator, tl_rng);
+} // anonymous namespace
 
-  int64_t HHVM_FUNCTION(HH_pseudorandom_int, int64_t min, int64_t max) {
-    return std::uniform_int_distribution<int64_t>(min, max)(*tl_rng);
+int64_t HHVM_FUNCTION(HH_pseudorandom_int, int64_t min, int64_t max) {
+  return std::uniform_int_distribution<int64_t>(min, max)(*tl_rng);
+}
+
+void HHVM_FUNCTION(HH_pseudorandom_seed, int64_t seed) {
+  tl_rng->seed(seed);
+}
+
+int64_t HHVM_FUNCTION(HH_random_int, int64_t min, int64_t max) {
+  return getRandomInt(min, max);
+}
+
+namespace {
+
+struct RandomExtension final : Extension {
+  RandomExtension() : Extension("hsl_random", "1.0", NO_ONCALL_YET) {}
+  void moduleRegisterNative() override {
+    // Clang 15 doesn't like the HHVM_FALIAS macro with \\N
+    HHVM_FALIAS_FE_STR(
+      "HH\\Lib\\_Private\\Native\\pseudorandom_int",
+      HH_pseudorandom_int
+    );
+    HHVM_FALIAS_FE_STR(
+      "HH\\Lib\\_Private\\Native\\pseudorandom_seed",
+      HH_pseudorandom_seed
+    );
+    HHVM_FALIAS_FE_STR(
+      "HH\\Lib\\_Private\\Native\\random_int",
+      HH_random_int
+    );
   }
 
-  void HHVM_FUNCTION(HH_pseudorandom_seed, int64_t seed) {
-    tl_rng->seed(seed);
+  void requestInit() override {
+    tl_rng->seed(folly::Random::secureRandom<int64_t>());
   }
-
-  int64_t HHVM_FUNCTION(HH_random_int, int64_t min, int64_t max) {
-    return getRandomInt(min, max);
-  }
-
-  struct RandomExtension final : Extension {
-    RandomExtension() : Extension("hsl_random", "1.0", NO_ONCALL_YET) {}
-    void moduleRegisterNative() override {
-      // Clang 15 doesn't like the HHVM_FALIAS macro with \\N
-      HHVM_FALIAS_FE_STR(
-        "HH\\Lib\\_Private\\Native\\pseudorandom_int",
-        HH_pseudorandom_int
-      );
-      HHVM_FALIAS_FE_STR(
-        "HH\\Lib\\_Private\\Native\\pseudorandom_seed",
-        HH_pseudorandom_seed
-      );
-      HHVM_FALIAS_FE_STR(
-        "HH\\Lib\\_Private\\Native\\random_int",
-        HH_random_int
-      );
-    }
-
-    void requestInit() override {
-      tl_rng->seed(folly::Random::secureRandom<int64_t>());
-    }
-  } s_random_extension;
+} s_random_extension;
 
 } // anonymous namespace
 } // namespace HPHP

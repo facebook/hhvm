@@ -1574,6 +1574,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckInit:
   case Nop:
   case Mod:
+  case PseudoRandomInt:
   case Conjure:
   case ConvBoolToInt:
   case ConvBoolToDbl:

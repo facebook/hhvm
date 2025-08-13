@@ -3789,6 +3789,14 @@ SSATmp* simplifyLdVecElem(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyPseudoRandomInt(State& env, const IRInstruction* inst) {
+  auto const src0 = inst->src(0);
+  auto const src1 = inst->src(1);
+  if (!src0->hasConstVal(TInt) || !src1->hasConstVal(TInt)) return nullptr;
+  if (src0->intVal() != src1->intVal()) return nullptr;
+  return cns(env, src0->intVal());
+}
+
 template <class F>
 SSATmp* simplifyByClass(State& /*env*/, const SSATmp* src, F f) {
   if (!src->isA(TObj)) return nullptr;
@@ -4229,6 +4237,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(Lshr)
       X(AbsDbl)
       X(AssertNonNull)
+      X(PseudoRandomInt)
       X(CallBuiltin)
       X(Ceil)
       X(CheckInit)

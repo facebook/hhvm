@@ -339,6 +339,12 @@ Instruction set
 
   Compute S0 mod S1. If S1 is -1 or 0 the results are undefined.
 
+| PseudoRandomInt, D(Int), S(Int) S(Int), NF
+
+  Generates a pseudorandom integer in the range of <S0, S1>.
+
+  Equivalent to HH\Lib\_Private\Native\pseudorandom_int(S0, S1).
+
 
 3. Type conversions
 

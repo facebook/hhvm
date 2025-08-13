@@ -41,6 +41,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/functioncredential/ext_functioncredential.h"
+#include "hphp/runtime/ext/hsl/ext_hsl_random.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 
 #include "hphp/util/assertions.h"
@@ -496,6 +497,10 @@ static CallMap s_callMap {
     {IterExtractBase, Iter::extractBase, DTV, SSync, {{TV, 0}, {SSA, 1}}},
     {IterInitObj, iter_init_object, DSSA, SSync, {{SSA, 0}}},
     {IterNextObj, iter_next_object, DSSA, SSync, {{SSA, 0}}},
+
+    /* Random */
+    {PseudoRandomInt, HHVM_FN(HH_pseudorandom_int), DSSA, SNone,
+                      {{SSA, 0}, {SSA, 1}}},
 };
 
 CallMap::CallMap(CallInfoList infos) {

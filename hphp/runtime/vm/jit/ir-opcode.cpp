@@ -125,7 +125,7 @@ OpInfo g_opInfo[] = {
     { #name,                                            \
       op_flags<name, dsts | flags>::value,              \
       {srcs}                                            \
-    },                                                  
+    },
   IR_OPCODES
 #undef O
   { 0 }
@@ -932,6 +932,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ProfileProp:
   case ProfileSwitchDest:
   case ProfileType:
+  case PseudoRandomInt:
   case PtrToElemAsInt:
   case RBTraceEntry:
   case RBTraceMsg:

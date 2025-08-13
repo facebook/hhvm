@@ -1065,6 +1065,14 @@ SSATmp* opt_container_last_key(IRGS& env, const ParamPrep& params) {
   return nullptr;
 }
 
+SSATmp* opt_pseudorandom_int(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 2) return nullptr;
+  // Types guaranteed to be int by param type enforcement.
+  auto const min = gen(env, AssertType, TInt, params[0].value);
+  auto const max = gen(env, AssertType, TInt, params[1].value);
+  return gen(env, PseudoRandomInt, min, max);
+}
+
 namespace {
 const StaticString
   s_MCHELPER_ON_GET_CLS("MethCallerHelper is used on meth_caller_get_class()"),
@@ -1347,6 +1355,7 @@ const hphp_fast_string_fmap<OptEmitFn> s_opt_emit_fns{
   {"HH\\Lib\\_Private\\Native\\last", opt_container_last},
   {"HH\\Lib\\_Private\\Native\\first_key", opt_container_first_key},
   {"HH\\Lib\\_Private\\Native\\last_key", opt_container_last_key},
+  {"HH\\Lib\\_Private\\Native\\pseudorandom_int", opt_pseudorandom_int},
   {"HH\\Lib\\_Private\\_Str\\vsprintf_l", opt_vsprintf_l},
   {"HH\\fun_get_function", opt_fun_get_function},
   {"HH\\class_meth_get_class", opt_class_meth_get_class},

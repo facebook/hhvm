@@ -382,44 +382,44 @@ mstch::node mstch_field::idl_type() {
     Map = 16
   };
 
-  // Mapping from compiler implementation details `type_t::type` to a public
-  // enum `BaseType`
-  t_type::type compiler_type =
-      field_->get_type()->get_true_type()->get_type_value();
+  // Mapping from compiler implementation details to a public enum `BaseType`
+  const t_type* true_type = field_->get_type()->get_true_type();
   auto idl_type = std::invoke([&]() -> std::optional<BaseType> {
-    switch (compiler_type) {
-      case t_type::type::t_void:
-        return BaseType::Void;
-      case t_type::type::t_bool:
-        return BaseType::Bool;
-      case t_type::type::t_byte:
-        return BaseType::Byte;
-      case t_type::type::t_i16:
-        return BaseType::I16;
-      case t_type::type::t_i32:
-        return BaseType::I32;
-      case t_type::type::t_i64:
-        return BaseType::I64;
-      case t_type::type::t_float:
-        return BaseType::Float;
-      case t_type::type::t_double:
-        return BaseType::Double;
-      case t_type::type::t_string:
-        return BaseType::String;
-      case t_type::type::t_binary:
-        return BaseType::Binary;
-      case t_type::type::t_list:
-        return BaseType::List;
-      case t_type::type::t_set:
-        return BaseType::Set;
-      case t_type::type::t_map:
-        return BaseType::Map;
-      case t_type::type::t_enum:
-        return BaseType::Enum;
-      case t_type::type::t_structured:
-        return BaseType::Struct;
-      case t_type::type::t_service:
-        return std::nullopt;
+    if (const auto* primitive = true_type->try_as<t_primitive_type>()) {
+      switch (primitive->primitive_type()) {
+        case t_primitive_type::type::t_void:
+          return BaseType::Void;
+        case t_primitive_type::type::t_bool:
+          return BaseType::Bool;
+        case t_primitive_type::type::t_byte:
+          return BaseType::Byte;
+        case t_primitive_type::type::t_i16:
+          return BaseType::I16;
+        case t_primitive_type::type::t_i32:
+          return BaseType::I32;
+        case t_primitive_type::type::t_i64:
+          return BaseType::I64;
+        case t_primitive_type::type::t_float:
+          return BaseType::Float;
+        case t_primitive_type::type::t_double:
+          return BaseType::Double;
+        case t_primitive_type::type::t_string:
+          return BaseType::String;
+        case t_primitive_type::type::t_binary:
+          return BaseType::Binary;
+      }
+    } else if (true_type->is<t_list>()) {
+      return BaseType::List;
+    } else if (true_type->is<t_set>()) {
+      return BaseType::Set;
+    } else if (true_type->is<t_map>()) {
+      return BaseType::Map;
+    } else if (true_type->is<t_enum>()) {
+      return BaseType::Enum;
+    } else if (true_type->is<t_structured>()) {
+      return BaseType::Struct;
+    } else if (true_type->is<t_service>()) {
+      return std::nullopt;
     }
     // unneccessary, but prevents a GCC warning
     return std::nullopt;
@@ -427,8 +427,8 @@ mstch::node mstch_field::idl_type() {
 
   if (idl_type == std::nullopt) {
     throw std::runtime_error(fmt::format(
-        "Mapping Error: Failed to map value '{}' from 't_type::type' to 'BaseType'",
-        static_cast<std::underlying_type_t<t_type::type>>(compiler_type)));
+        "Mapping Error: Failed to map type '{}' to 'BaseType'",
+        true_type->get_full_name()));
   }
 
   return static_cast<std::underlying_type_t<BaseType>>(*idl_type);

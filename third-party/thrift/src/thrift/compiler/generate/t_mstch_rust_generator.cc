@@ -1375,40 +1375,42 @@ class rust_mstch_function : public mstch_function {
               id));
         };
     auto get_ttype = [](const t_type& type) {
-      switch (type.get_true_type()->get_type_value()) {
-        case t_type::type::t_void:
-          return "Void";
-        case t_type::type::t_bool:
-          return "Bool";
-        case t_type::type::t_byte:
-          return "Byte";
-        case t_type::type::t_i16:
-          return "I16";
-        case t_type::type::t_i32:
-          return "I32";
-        case t_type::type::t_i64:
-          return "I64";
-        case t_type::type::t_float:
-          return "Float";
-        case t_type::type::t_double:
-          return "Double";
-        case t_type::type::t_string:
-          return "String";
-        case t_type::type::t_binary:
-          return "String";
-        case t_type::type::t_list:
-          return "List";
-        case t_type::type::t_set:
-          return "Set";
-        case t_type::type::t_map:
-          return "Map";
-        case t_type::type::t_enum:
-          return "I32";
-        case t_type::type::t_structured:
-          return "Struct";
-        default:
-          return "";
+      const t_type* true_type = type.get_true_type();
+      if (const auto* primitive = true_type->try_as<t_primitive_type>()) {
+        switch (primitive->primitive_type()) {
+          case t_primitive_type::type::t_void:
+            return "Void";
+          case t_primitive_type::type::t_bool:
+            return "Bool";
+          case t_primitive_type::type::t_byte:
+            return "Byte";
+          case t_primitive_type::type::t_i16:
+            return "I16";
+          case t_primitive_type::type::t_i32:
+            return "I32";
+          case t_primitive_type::type::t_i64:
+            return "I64";
+          case t_primitive_type::type::t_float:
+            return "Float";
+          case t_primitive_type::type::t_double:
+            return "Double";
+          case t_primitive_type::type::t_string:
+            return "String";
+          case t_primitive_type::type::t_binary:
+            return "String";
+        }
+      } else if (true_type->is<t_list>()) {
+        return "List";
+      } else if (true_type->is<t_set>()) {
+        return "Set";
+      } else if (true_type->is<t_map>()) {
+        return "Map";
+      } else if (true_type->is<t_enum>()) {
+        return "I32";
+      } else if (true_type->is<t_structured>()) {
+        return "Struct";
       }
+      return "";
     };
     for (const t_field& field : get_elems(function_->exceptions())) {
       add_return(field.name(), get_ttype(*field.type()), field.id());

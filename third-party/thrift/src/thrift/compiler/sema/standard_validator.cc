@@ -1477,18 +1477,18 @@ struct ValidateAnnotationPositions {
     }
   }
   void operator()(sema_context& ctx, const t_container& type) {
-    switch (type.get_type_value()) {
-      case t_type::type::t_list:
+    switch (type.container_type()) {
+      case t_container::type::t_list:
         if (owns_annotations(static_cast<const t_list&>(type).elem_type())) {
           err(ctx);
         }
         break;
-      case t_type::type::t_set:
+      case t_container::type::t_set:
         if (owns_annotations(static_cast<const t_set&>(type).elem_type())) {
           err(ctx);
         }
         break;
-      case t_type::type::t_map: {
+      case t_container::type::t_map: {
         const auto& t = static_cast<const t_map&>(type);
         if (owns_annotations(t.key_type()) || owns_annotations(t.val_type())) {
           err(ctx);

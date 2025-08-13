@@ -710,44 +710,46 @@ const std::string* get_go_tag_annotation(const t_named* node) {
 int get_field_size(const t_field* field, bool is_inside_union) {
   // Assume 64-bit architecture
   auto real_type = field->type()->get_true_type();
-  auto type_value = real_type->get_type_value();
   auto qualifier = field->qualifier();
   if ((qualifier == t_field_qualifier::optional || is_inside_union) &&
       !is_type_go_nilable(real_type)) {
     return 8; // pointer
   }
-  switch (type_value) {
-    case t_type::type::t_bool:
-      return 1;
-    case t_type::type::t_byte:
-      return 1;
-    case t_type::type::t_i16:
-      return 2;
-    case t_type::type::t_i32:
-      return 4;
-    case t_type::type::t_i64:
-      return 8;
-    case t_type::type::t_float:
-      return 4;
-    case t_type::type::t_double:
-      return 8;
-    case t_type::type::t_enum:
-      return 4; // Backed by int32
-    case t_type::type::t_string:
-      return 16; // Golang: unsafe.Sizeof("")
-    case t_type::type::t_binary:
-      return 24; // Golang: unsafe.Sizeof([]byte{})
-    case t_type::type::t_list:
-      return 24; // Golang: unsafe.Sizeof([]int{})
-    case t_type::type::t_set:
-      return 24; // Golang: unsafe.Sizeof([]int{})
-    case t_type::type::t_map:
-      return 8; // Golang: unsafe.Sizeof(map[string]string{})
-    case t_type::type::t_structured:
-      return 8; // pointer
-    default:
-      return 0;
+  if (const auto* primitive = real_type->try_as<t_primitive_type>()) {
+    switch (primitive->primitive_type()) {
+      case t_primitive_type::type::t_bool:
+        return 1;
+      case t_primitive_type::type::t_byte:
+        return 1;
+      case t_primitive_type::type::t_i16:
+        return 2;
+      case t_primitive_type::type::t_i32:
+        return 4;
+      case t_primitive_type::type::t_i64:
+        return 8;
+      case t_primitive_type::type::t_float:
+        return 4;
+      case t_primitive_type::type::t_double:
+        return 8;
+      case t_primitive_type::type::t_string:
+        return 16; // Golang: unsafe.Sizeof("")
+      case t_primitive_type::type::t_binary:
+        return 24; // Golang: unsafe.Sizeof([]byte{})
+      case t_primitive_type::type::t_void:
+        return 0;
+    }
+  } else if (real_type->is<t_enum>()) {
+    return 4; // Backed by int32
+  } else if (real_type->is<t_list>()) {
+    return 24; // Golang: unsafe.Sizeof([]int{})
+  } else if (real_type->is<t_set>()) {
+    return 24; // Golang: unsafe.Sizeof([]int{})
+  } else if (real_type->is<t_map>()) {
+    return 8; // Golang: unsafe.Sizeof(map[string]string{})
+  } else if (real_type->is<t_structured>()) {
+    return 8; // pointer
   }
+  return 0;
 }
 
 void optimize_fields_layout(std::vector<t_field*>& fields, bool is_union) {

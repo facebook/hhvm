@@ -27,6 +27,7 @@
 #include <fmt/core.h>
 
 #include <thrift/compiler/ast/t_field.h>
+#include <thrift/compiler/ast/type_visitor.h>
 #include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/cpp/name_resolver.h>
@@ -92,28 +93,33 @@ bool same_types(const t_type* a, const t_type* b) {
   const auto* resolved_a = a->get_true_type();
   const auto* resolved_b = b->get_true_type();
 
-  if (resolved_a->get_type_value() != resolved_b->get_type_value()) {
+  // Check if both types are the same kind and for primitives, the same type
+  if (resolved_a->is<t_primitive_type>() &&
+      resolved_b->is<t_primitive_type>()) {
+    // Both are primitives, check they are the same primitive type
+    const auto& prim_a = resolved_a->as<t_primitive_type>();
+    const auto& prim_b = resolved_b->as<t_primitive_type>();
+    if (prim_a.primitive_type() != prim_b.primitive_type()) {
+      return false;
+    }
+  } else if (typeid(*resolved_a) != typeid(*resolved_b)) {
+    // Use typeid for other types to check they are the same kind
     return false;
   }
 
-  switch (resolved_a->get_type_value()) {
-    case t_type::type::t_list: {
-      const auto* list_a = static_cast<const t_list*>(resolved_a);
-      const auto* list_b = static_cast<const t_list*>(resolved_b);
-      return same_types(list_a->get_elem_type(), list_b->get_elem_type());
-    }
-    case t_type::type::t_set: {
-      const auto* set_a = static_cast<const t_set*>(resolved_a);
-      const auto* set_b = static_cast<const t_set*>(resolved_b);
-      return same_types(set_a->get_elem_type(), set_b->get_elem_type());
-    }
-    case t_type::type::t_map: {
-      const auto* map_a = static_cast<const t_map*>(resolved_a);
-      const auto* map_b = static_cast<const t_map*>(resolved_b);
-      return same_types(map_a->get_key_type(), map_b->get_key_type()) &&
-          same_types(map_a->get_val_type(), map_b->get_val_type());
-    }
-    default:;
+  if (resolved_a->is<t_list>()) {
+    const auto* list_a = static_cast<const t_list*>(resolved_a);
+    const auto* list_b = static_cast<const t_list*>(resolved_b);
+    return same_types(list_a->get_elem_type(), list_b->get_elem_type());
+  } else if (resolved_a->is<t_set>()) {
+    const auto* set_a = static_cast<const t_set*>(resolved_a);
+    const auto* set_b = static_cast<const t_set*>(resolved_b);
+    return same_types(set_a->get_elem_type(), set_b->get_elem_type());
+  } else if (resolved_a->is<t_map>()) {
+    const auto* map_a = static_cast<const t_map*>(resolved_a);
+    const auto* map_b = static_cast<const t_map*>(resolved_b);
+    return same_types(map_a->get_key_type(), map_b->get_key_type()) &&
+        same_types(map_a->get_val_type(), map_b->get_val_type());
   }
   return true;
 }
@@ -1781,48 +1787,83 @@ class cpp_mstch_struct : public mstch_struct {
       return ret = kMaxAlign;
     }
 
-    const t_type* type = field->get_type();
-    switch (type->get_type_value()) {
-      case t_type::type::t_bool:
-      case t_type::type::t_byte:
-        return ret = 1;
-      case t_type::type::t_i16:
-        return ret = 2;
-      case t_type::type::t_i32:
-      case t_type::type::t_float:
-        return ret = 4;
-      case t_type::type::t_enum:
-        return ret = compute_alignment(type->get_true_type()->as<t_enum>());
-      case t_type::type::t_i64:
-      case t_type::type::t_double:
-      case t_type::type::t_string:
-      case t_type::type::t_binary:
-      case t_type::type::t_list:
-      case t_type::type::t_set:
-      case t_type::type::t_map:
-        return ret = 8;
-      case t_type::type::t_structured: {
-        size_t align = 1;
-        const t_structured* strct =
-            dynamic_cast<const t_structured*>(type->get_true_type());
-        assert(strct);
-        for (const auto& field_2 : strct->fields()) {
-          size_t field_align = compute_alignment(&field_2, memo);
-          align = std::max(align, field_align);
-          if (align == kMaxAlign) {
-            // No need to continue because the struct already has the maximum
-            // alignment.
-            return ret = align;
+    const t_type* type = field->type()->get_true_type();
+
+    size_t result = kMaxAlign;
+    type->visit(
+        [&](const t_primitive_type& primitive) {
+          switch (primitive.primitive_type()) {
+            case t_primitive_type::type::t_bool:
+            case t_primitive_type::type::t_byte:
+              result = 1;
+              break;
+            case t_primitive_type::type::t_i16:
+              result = 2;
+              break;
+            case t_primitive_type::type::t_i32:
+            case t_primitive_type::type::t_float:
+              result = 4;
+              break;
+            case t_primitive_type::type::t_i64:
+            case t_primitive_type::type::t_double:
+            case t_primitive_type::type::t_string:
+            case t_primitive_type::type::t_binary:
+              result = 8;
+              break;
+            case t_primitive_type::type::t_void:
+              result = kMaxAlign;
+              break;
           }
-        }
-        // The __isset member that is generated in the presence of non-required
-        // fields doesn't affect the alignment, because, having only bool
-        // fields, it has the alignments of 1.
-        return ret = align;
-      }
-      default:
-        return ret = kMaxAlign;
-    }
+        },
+        [&](const t_enum& enm) { result = compute_alignment(enm); },
+        [&](const t_list&) { result = 8; },
+        [&](const t_set&) { result = 8; },
+        [&](const t_map&) { result = 8; },
+        [&](const t_struct& strct) {
+          size_t align = 1;
+          for (const auto& field_2 : strct.fields()) {
+            size_t field_align = compute_alignment(&field_2, memo);
+            align = std::max(align, field_align);
+            if (align == kMaxAlign) {
+              // No need to continue because the struct already has the maximum
+              // alignment.
+              break;
+            }
+          }
+          // The __isset member that is generated in the presence of
+          // non-required fields doesn't affect the alignment, because, having
+          // only bool fields, it has the alignments of 1.
+          result = align;
+        },
+        [&](const t_union& union_) {
+          size_t align = 1;
+          for (const auto& field_2 : union_.fields()) {
+            size_t field_align = compute_alignment(&field_2, memo);
+            align = std::max(align, field_align);
+            if (align == kMaxAlign) {
+              // No need to continue because the union already has the maximum
+              // alignment.
+              break;
+            }
+          }
+          result = align;
+        },
+        [&](const t_exception& exception) {
+          size_t align = 1;
+          for (const auto& field_2 : exception.fields()) {
+            size_t field_align = compute_alignment(&field_2, memo);
+            align = std::max(align, field_align);
+            if (align == kMaxAlign) {
+              // No need to continue because the exception already has the
+              // maximum alignment.
+              break;
+            }
+          }
+          result = align;
+        },
+        [&](const auto&) { result = kMaxAlign; });
+
+    return ret = result;
   }
 
   static size_t compute_alignment(const t_enum& e) {
@@ -2271,22 +2312,18 @@ class cpp_mstch_field : public mstch_field {
  private:
   bool zero_copy_arg_impl(const t_type& type) {
     const auto& true_type = *type.get_true_type();
-    switch (true_type.get_type_value()) {
-      case t_type::type::t_binary:
-      case t_type::type::t_structured:
-        return true;
-      case t_type::type::t_list:
-        return zero_copy_arg_impl(*true_type.as<t_list>().get_elem_type());
-      case t_type::type::t_set:
-        return zero_copy_arg_impl(*true_type.as<t_set>().get_elem_type());
-      case t_type::type::t_map: {
-        const auto& m = true_type.as<t_map>();
-        return zero_copy_arg_impl(*m.get_key_type()) ||
-            zero_copy_arg_impl(*m.get_val_type());
-      }
-      default:
-        return false;
+    if (true_type.is_binary() || true_type.is<t_structured>()) {
+      return true;
+    } else if (true_type.is<t_list>()) {
+      return zero_copy_arg_impl(*true_type.as<t_list>().get_elem_type());
+    } else if (true_type.is<t_set>()) {
+      return zero_copy_arg_impl(*true_type.as<t_set>().get_elem_type());
+    } else if (true_type.is<t_map>()) {
+      const auto& m = true_type.as<t_map>();
+      return zero_copy_arg_impl(*m.get_key_type()) ||
+          zero_copy_arg_impl(*m.get_val_type());
     }
+    return false;
   }
 
   bool is_private() const {

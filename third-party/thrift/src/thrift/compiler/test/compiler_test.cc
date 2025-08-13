@@ -557,7 +557,7 @@ TEST(CompilerTest, list_initializer) {
 TEST(CompilerTest, set_initializer) {
   check_compile(R"(
     const set<string> wrongSet = {1: 2};
-    # expected-error@-1: cannot convert map to `set` in initialization of `wrongSet`
+    # expected-error@-1: cannot convert map to `set<string>` in initialization of `wrongSet`
 
     const set<i32> weirdSet = {};
     # expected-warning@-1: converting empty map to `set` in initialization of `weirdSet`
@@ -570,7 +570,7 @@ TEST(CompilerTest, set_initializer) {
 TEST(CompilerTest, map_initializer) {
   check_compile(R"(
     const map<i32, i32> wrongMap = [1, 32, 3];
-    # expected-error@-1: cannot convert list to `map` in initialization of `wrongMap`
+    # expected-error@-1: cannot convert list to `map<i32, i32>` in initialization of `wrongMap`
 
     const map<i32, i32> weirdMap = [];
     # expected-warning@-1: converting empty list to `map` in initialization of `weirdMap`
@@ -603,7 +603,7 @@ TEST(CompilerTest, struct_fields_wrong_type) {
 
     @Annot{val="hi", otherVal=5, structField=G{}}
       # expected-error@-1: cannot convert string to `i32` in initialization of `val`
-      # expected-error@-2: cannot convert integer to `list` in initialization of `otherVal`
+      # expected-error@-2: cannot convert integer to `list<string>` in initialization of `otherVal`
       # expected-error@-3: type mismatch: expected test.F, got test.G
     struct BadFields {
       1: i32 badInt = "str";

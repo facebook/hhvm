@@ -248,7 +248,7 @@ void match_type_with_const_value(
     const std::string& value_id = value->get_identifier();
     const scope::identifier id{value_id};
     const t_const* constant;
-    if (type->get_type_value() == t_type::type::t_enum) {
+    if (type->is<t_enum>()) {
       // Try to resolve enum values from typedefs
       // or enums defined after use.
       constant = try_resolve_enum_by_id(id, *value);
@@ -266,115 +266,95 @@ void match_type_with_const_value(
     value->assign(t_const_value(*constant->value()));
   }
 
-  switch (type->get_type_value()) {
-    case t_type::type::t_list: {
-      auto* elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
-      if (value->kind() == t_const_value::CV_LIST) {
-        for (auto list_val : value->get_list()) {
-          match_type_with_const_value(ctx, mctx, elem_type, list_val);
-        }
+  if (type->is<t_list>()) {
+    auto* elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
+    if (value->kind() == t_const_value::CV_LIST) {
+      for (auto list_val : value->get_list()) {
+        match_type_with_const_value(ctx, mctx, elem_type, list_val);
       }
-      break;
     }
-    case t_type::type::t_set: {
-      auto* elem_type = dynamic_cast<const t_set*>(type)->get_elem_type();
-      if (value->kind() == t_const_value::CV_LIST) {
-        for (auto set_val : value->get_list()) {
-          match_type_with_const_value(ctx, mctx, elem_type, set_val);
-        }
+  } else if (type->is<t_set>()) {
+    auto* elem_type = dynamic_cast<const t_set*>(type)->get_elem_type();
+    if (value->kind() == t_const_value::CV_LIST) {
+      for (auto set_val : value->get_list()) {
+        match_type_with_const_value(ctx, mctx, elem_type, set_val);
       }
-      break;
     }
-    case t_type::type::t_map: {
-      auto* key_type = dynamic_cast<const t_map*>(type)->get_key_type();
-      auto* val_type = dynamic_cast<const t_map*>(type)->get_val_type();
-      if (value->kind() == t_const_value::CV_MAP) {
-        for (auto map_val : value->get_map()) {
-          match_type_with_const_value(ctx, mctx, key_type, map_val.first);
-          match_type_with_const_value(ctx, mctx, val_type, map_val.second);
-        }
+  } else if (type->is<t_map>()) {
+    auto* key_type = dynamic_cast<const t_map*>(type)->get_key_type();
+    auto* val_type = dynamic_cast<const t_map*>(type)->get_val_type();
+    if (value->kind() == t_const_value::CV_MAP) {
+      for (auto map_val : value->get_map()) {
+        match_type_with_const_value(ctx, mctx, key_type, map_val.first);
+        match_type_with_const_value(ctx, mctx, val_type, map_val.second);
       }
-      break;
     }
-    case t_type::type::t_structured: {
-      const auto* structured = dynamic_cast<const t_structured*>(type);
-      if (auto ttype = value->ttype()) {
-        if (!ttype.resolved()) {
-          ctx.error(
-              value->ref_range().begin,
-              // Here we have expected type which allows us to output more
-              // detail to the error. Hence it's better to error here as opposed
-              // to later in validator which will only print 'unknown symbol'
-              "could not resolve type `{}` (expected `{}`)",
-              ttype.get_unresolved_type()->get_full_name(),
-              type->get_full_name());
-          // Resolve global placeholder to avoid the duplicate message
-          for (auto& td : mctx.bundle->root_program()
-                              ->global_scope()
-                              ->placeholder_typedefs()) {
-            if (!td.type() &&
-                td.name() == ttype.get_unresolved_type()->get_full_name()) {
-              td.set_type(t_type_ref::from_ptr(type));
-            }
-          }
-        } else if (ttype->get_true_type() != type) {
-          ctx.error(
-              value->ref_range().begin,
-              "type mismatch: expected {}, got {}",
-              type->get_full_name(),
-              ttype->get_full_name());
-        }
-      }
-      if (value->kind() == t_const_value::CV_MAP) {
-        for (const auto& [map_key, map_val] : value->get_map()) {
-          bool resolved = map_key->kind() != t_const_value::CV_IDENTIFIER;
-          auto name =
-              resolved ? map_key->get_string() : map_key->get_identifier();
-          auto field = structured->get_field_by_name(name);
-          if (!field) {
-            // Error reported by const_checker.
-            return;
-          }
-          if (!resolved) {
-            // TODO(sadroeck) - Deprecate this behavior
-            map_key->convert_identifier_to_string();
-          }
-          match_type_with_const_value(ctx, mctx, field->get_type(), map_val);
-        }
-      }
-      break;
-    }
-    case t_type::type::t_enum:
-      // Set constant value types as enums when they are declared with integers
-      // or identifiers.
-      if (!value->is_enum()) {
-        value->set_is_enum();
-        auto enm = dynamic_cast<const t_enum*>(type);
-        value->set_enum(enm);
-        if (value->kind() == t_const_value::CV_INTEGER) {
-          if (const auto* enum_value = enm->find_value(value->get_integer())) {
-            value->set_enum_value(enum_value);
+  } else if (type->is<t_structured>()) {
+    const auto* structured = dynamic_cast<const t_structured*>(type);
+    if (auto ttype = value->ttype()) {
+      if (!ttype.resolved()) {
+        ctx.error(
+            value->ref_range().begin,
+            // Here we have expected type which allows us to output more
+            // detail to the error. Hence it's better to error here as opposed
+            // to later in validator which will only print 'unknown symbol'
+            "could not resolve type `{}` (expected `{}`)",
+            ttype.get_unresolved_type()->get_full_name(),
+            type->get_full_name());
+        // Resolve global placeholder to avoid the duplicate message
+        for (auto& td : mctx.bundle->root_program()
+                            ->global_scope()
+                            ->placeholder_typedefs()) {
+          if (!td.type() &&
+              td.name() == ttype.get_unresolved_type()->get_full_name()) {
+            td.set_type(t_type_ref::from_ptr(type));
           }
         }
+      } else if (ttype->get_true_type() != type) {
+        ctx.error(
+            value->ref_range().begin,
+            "type mismatch: expected {}, got {}",
+            type->get_full_name(),
+            ttype->get_full_name());
       }
-      break;
-    case t_type::type::t_bool:
-    case t_type::type::t_byte:
-    case t_type::type::t_i16:
-    case t_type::type::t_i32:
-    case t_type::type::t_i64:
-    case t_type::type::t_float:
-    case t_type::type::t_double:
-    case t_type::type::t_string:
-    case t_type::type::t_binary:
-      // Remove enum_value if type is a base_type to use the integer instead.
-      if (value->is_enum()) {
-        value->set_enum_value(nullptr);
+    }
+    if (value->kind() == t_const_value::CV_MAP) {
+      for (const auto& [map_key, map_val] : value->get_map()) {
+        bool resolved = map_key->kind() != t_const_value::CV_IDENTIFIER;
+        auto name =
+            resolved ? map_key->get_string() : map_key->get_identifier();
+        auto field = structured->get_field_by_name(name);
+        if (!field) {
+          // Error reported by const_checker.
+          return;
+        }
+        if (!resolved) {
+          // TODO(sadroeck) - Deprecate this behavior
+          map_key->convert_identifier_to_string();
+        }
+        match_type_with_const_value(ctx, mctx, field->get_type(), map_val);
       }
-      break;
-    case t_type::type::t_void:
-    case t_type::type::t_service:
-      assert(false);
+    }
+  } else if (type->is<t_enum>()) {
+    // Set constant value types as enums when they are declared with integers
+    // or identifiers.
+    if (!value->is_enum()) {
+      value->set_is_enum();
+      auto enm = dynamic_cast<const t_enum*>(type);
+      value->set_enum(enm);
+      if (value->kind() == t_const_value::CV_INTEGER) {
+        if (const auto* enum_value = enm->find_value(value->get_integer())) {
+          value->set_enum_value(enum_value);
+        }
+      }
+    }
+  } else if (type->is<t_primitive_type>()) {
+    // Remove enum_value if type is a base_type to use the integer instead.
+    if (value->is_enum()) {
+      value->set_enum_value(nullptr);
+    }
+  } else if (type->is<t_service>()) {
+    assert(false);
   }
 
   value->set_ttype(t_type_ref::from_req_ptr(type));

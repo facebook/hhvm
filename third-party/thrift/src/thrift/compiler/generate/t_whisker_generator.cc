@@ -16,6 +16,7 @@
 
 #include <thrift/compiler/generate/t_whisker_generator.h>
 
+#include <thrift/compiler/ast/type_visitor.h>
 #include <thrift/compiler/detail/system.h>
 #include <thrift/compiler/generate/cpp/util.h>
 #include <thrift/compiler/generate/templates.h>
@@ -116,51 +117,35 @@ object resolve_derived_t_type(
     // not useful for detecting t_typedef. So we handle it separately.
     return object(proto.create<t_typedef>(*td));
   }
-  switch (self.get_type_value()) {
-    case t_type::type::t_void:
-    case t_type::type::t_bool:
-    case t_type::type::t_byte:
-    case t_type::type::t_i16:
-    case t_type::type::t_i32:
-    case t_type::type::t_i64:
-    case t_type::type::t_float:
-    case t_type::type::t_double:
-    case t_type::type::t_string:
-    case t_type::type::t_binary:
-      return t_type_as<t_primitive_type>(proto, self);
 
-    case t_type::type::t_list:
-      return t_type_as<t_list>(proto, self);
-    case t_type::type::t_set:
-      return t_type_as<t_set>(proto, self);
-    case t_type::type::t_map:
-      return t_type_as<t_map>(proto, self);
-
-    case t_type::type::t_enum:
-      return t_type_as<t_enum>(proto, self);
-    case t_type::type::t_structured: {
-      if (auto union_ = self.try_as<t_union>()) {
-        return object(proto.create<t_union>(*union_));
-      }
-      if (auto exception_ = self.try_as<t_exception>()) {
-        return object(proto.create<t_exception>(*exception_));
-      }
-      if (auto struct_ = self.try_as<t_struct>()) {
+  return self.visit(
+      [&](const t_primitive_type&) -> object {
+        return t_type_as<t_primitive_type>(proto, self);
+      },
+      [&](const t_list&) -> object { return t_type_as<t_list>(proto, self); },
+      [&](const t_set&) -> object { return t_type_as<t_set>(proto, self); },
+      [&](const t_map&) -> object { return t_type_as<t_map>(proto, self); },
+      [&](const t_enum&) -> object { return t_type_as<t_enum>(proto, self); },
+      [&](const t_union& union_) -> object {
+        return object(proto.create<t_union>(union_));
+      },
+      [&](const t_exception& exception_) -> object {
+        return object(proto.create<t_exception>(exception_));
+      },
+      [&](const t_struct& struct_) -> object {
         // All other t_struct subtypes (t_throws, t_paramlist) should be opaque
         // to Whisker to avoid additional tech debt.
-        return object(proto.create<t_struct>(*struct_));
-      }
-      throw std::logic_error("Unknown t_structured subtype");
-    }
-    case t_type::type::t_service:
-      // This is tech debt from a time before t_interaction was moved out of
-      // t_type (for return types). This case should no longer happen in
-      // practice.
-      throw std::logic_error("t_type -> t_service is not supported");
-    default:
-      break;
-  }
-  throw std::logic_error("Unknown t_type subtype");
+        return object(proto.create<t_struct>(struct_));
+      },
+      [&](const t_service&) -> object {
+        // This is tech debt from a time before t_interaction was moved out of
+        // t_type (for return types). This case should no longer happen in
+        // practice.
+        throw std::logic_error("t_type -> t_service is not supported");
+      },
+      [&](const auto&) -> object {
+        throw std::logic_error("Unknown t_type subtype");
+      });
 }
 
 // Compute the set of types that appear anywhere in the service

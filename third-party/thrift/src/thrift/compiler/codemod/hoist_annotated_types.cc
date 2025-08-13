@@ -72,8 +72,8 @@ class hoist_annotated_types {
   void visit_type(const t_container& type) {
     std::string replacement;
 
-    switch (type.get_type_value()) {
-      case t_type::type::t_list: {
+    switch (type.container_type()) {
+      case t_container::type::t_list: {
         const auto& t = static_cast<const t_list&>(type);
         if (!needs_replacement(t.elem_type())) {
           return;
@@ -87,7 +87,7 @@ class hoist_annotated_types {
             t_type_ref::from_ptr(typedefs_.at(name).ptr);
         break;
       }
-      case t_type::type::t_set: {
+      case t_container::type::t_set: {
         const auto& t = static_cast<const t_set&>(type);
         if (!needs_replacement(t.elem_type())) {
           return;
@@ -98,7 +98,7 @@ class hoist_annotated_types {
             t_type_ref::from_ptr(typedefs_.at(name).ptr);
         break;
       }
-      case t_type::type::t_map: {
+      case t_container::type::t_map: {
         const auto& t = static_cast<const t_map&>(type);
         if (!needs_replacement(t.key_type()) &&
             !needs_replacement(t.val_type())) {

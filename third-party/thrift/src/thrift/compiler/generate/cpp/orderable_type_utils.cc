@@ -184,7 +184,7 @@ bool type_is_orderable_walk(
   throw std::logic_error(fmt::format(
       "type_is_orderable_walk unhandled t_type: {} (of type {})",
       type.get_scoped_name(),
-      fmt::underlying(type.get_type_value())));
+      type.get_full_name()));
 }
 
 bool field_is_orderable_walk(

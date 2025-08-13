@@ -36,39 +36,27 @@ decltype(auto) visit_type(const t_type& ty, Visitors&&... visitors) {
   auto f = overload(std::forward<Visitors>(visitors)...);
   if (ty.is<t_typedef>()) {
     return std::invoke(f, dynamic_cast<const t_typedef&>(ty));
-  }
-  switch (ty.get_type_value()) {
-    case t_type::type::t_void:
-    case t_type::type::t_bool:
-    case t_type::type::t_byte:
-    case t_type::type::t_i16:
-    case t_type::type::t_i32:
-    case t_type::type::t_i64:
-    case t_type::type::t_float:
-    case t_type::type::t_double:
-    case t_type::type::t_string:
-    case t_type::type::t_binary:
-      return std::invoke(f, dynamic_cast<const t_primitive_type&>(ty));
-    case t_type::type::t_list:
-      return std::invoke(f, dynamic_cast<const t_list&>(ty));
-    case t_type::type::t_set:
-      return std::invoke(f, dynamic_cast<const t_set&>(ty));
-    case t_type::type::t_map:
-      return std::invoke(f, dynamic_cast<const t_map&>(ty));
-    case t_type::type::t_enum:
-      return std::invoke(f, dynamic_cast<const t_enum&>(ty));
-    case t_type::type::t_structured: {
-      if (const auto* s = ty.try_as<t_struct>()) {
-        return std::invoke(f, static_cast<const t_struct&>(*s));
-      } else if (const auto* u = ty.try_as<t_union>()) {
-        return std::invoke(f, static_cast<const t_union&>(*u));
-      } else if (const auto* ex = ty.try_as<t_exception>()) {
-        return std::invoke(f, static_cast<const t_exception&>(*ex));
-      }
-      throw std::logic_error("Missing visitor specialization for t_structured");
+  } else if (ty.is<t_primitive_type>()) {
+    return std::invoke(f, dynamic_cast<const t_primitive_type&>(ty));
+  } else if (ty.is<t_list>()) {
+    return std::invoke(f, dynamic_cast<const t_list&>(ty));
+  } else if (ty.is<t_set>()) {
+    return std::invoke(f, dynamic_cast<const t_set&>(ty));
+  } else if (ty.is<t_map>()) {
+    return std::invoke(f, dynamic_cast<const t_map&>(ty));
+  } else if (ty.is<t_enum>()) {
+    return std::invoke(f, dynamic_cast<const t_enum&>(ty));
+  } else if (ty.is<t_structured>()) {
+    if (const auto* s = ty.try_as<t_struct>()) {
+      return std::invoke(f, static_cast<const t_struct&>(*s));
+    } else if (const auto* u = ty.try_as<t_union>()) {
+      return std::invoke(f, static_cast<const t_union&>(*u));
+    } else if (const auto* ex = ty.try_as<t_exception>()) {
+      return std::invoke(f, static_cast<const t_exception&>(*ex));
     }
-    case t_type::type::t_service:
-      return std::invoke(f, dynamic_cast<const t_service&>(ty));
+    throw std::logic_error("Missing visitor specialization for t_structured");
+  } else if (ty.is<t_service>()) {
+    return std::invoke(f, dynamic_cast<const t_service&>(ty));
   }
   abort();
 }

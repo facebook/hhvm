@@ -103,7 +103,7 @@ class compatibility_checker {
       return;
     }
     const std::string& type_name = dynamic_cast<const t_container*>(type)
-        ? t_type::type_name(type->get_type_value())
+        ? type->get_full_name()
         : type->name();
     error(
         "cannot convert {} to `{}` in initialization of `{}`",

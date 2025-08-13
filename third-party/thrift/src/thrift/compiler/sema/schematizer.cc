@@ -240,108 +240,95 @@ std::unique_ptr<t_const_value> schematizer::gen_type(
     return schema;
   }
 
-  switch (resolved_type->get_type_value()) {
-    case t_type::type::t_void:
-      break;
-    case t_type::type::t_bool:
-      type_name->add_map(val("boolType"), val(0));
-      break;
-    case t_type::type::t_byte:
-      type_name->add_map(val("byteType"), val(0));
-      break;
-    case t_type::type::t_i16:
-      type_name->add_map(val("i16Type"), val(0));
-      break;
-    case t_type::type::t_i32:
-      type_name->add_map(val("i32Type"), val(0));
-      break;
-    case t_type::type::t_i64:
-      type_name->add_map(val("i64Type"), val(0));
-      break;
-    case t_type::type::t_double:
-      type_name->add_map(val("doubleType"), val(0));
-      break;
-    case t_type::type::t_float:
-      type_name->add_map(val("floatType"), val(0));
-      break;
-    case t_type::type::t_string:
-      type_name->add_map(val("stringType"), val(0));
-      break;
-    case t_type::type::t_binary:
-      type_name->add_map(val("binaryType"), val(0));
-      break;
-    case t_type::type::t_list:
-      type_name->add_map(val("listType"), val(0));
-      params = t_const_value::make_list();
-      params->add_list(gen_type(
-          generator,
-          program,
-          defns_schema,
-          *static_cast<const t_list&>(*resolved_type).elem_type()));
-      break;
-    case t_type::type::t_set:
-      type_name->add_map(val("setType"), val(0));
-      params = t_const_value::make_list();
-      params->add_list(gen_type(
-          generator,
-          program,
-          defns_schema,
-          *static_cast<const t_set&>(*resolved_type).elem_type()));
-      break;
-    case t_type::type::t_map:
-      type_name->add_map(val("mapType"), val(0));
-      params = t_const_value::make_list();
-      {
-        const auto& map = static_cast<const t_map&>(*resolved_type);
+  resolved_type->visit(
+      [&](const t_primitive_type& primitive) {
+        switch (primitive.primitive_type()) {
+          case t_primitive_type::type::t_void:
+            break;
+          case t_primitive_type::type::t_bool:
+            type_name->add_map(val("boolType"), val(0));
+            break;
+          case t_primitive_type::type::t_byte:
+            type_name->add_map(val("byteType"), val(0));
+            break;
+          case t_primitive_type::type::t_i16:
+            type_name->add_map(val("i16Type"), val(0));
+            break;
+          case t_primitive_type::type::t_i32:
+            type_name->add_map(val("i32Type"), val(0));
+            break;
+          case t_primitive_type::type::t_i64:
+            type_name->add_map(val("i64Type"), val(0));
+            break;
+          case t_primitive_type::type::t_double:
+            type_name->add_map(val("doubleType"), val(0));
+            break;
+          case t_primitive_type::type::t_float:
+            type_name->add_map(val("floatType"), val(0));
+            break;
+          case t_primitive_type::type::t_string:
+            type_name->add_map(val("stringType"), val(0));
+            break;
+          case t_primitive_type::type::t_binary:
+            type_name->add_map(val("binaryType"), val(0));
+            break;
+        }
+      },
+      [&](const t_list& list) {
+        type_name->add_map(val("listType"), val(0));
+        params = t_const_value::make_list();
+        params->add_list(
+            gen_type(generator, program, defns_schema, *list.elem_type()));
+      },
+      [&](const t_set& set) {
+        type_name->add_map(val("setType"), val(0));
+        params = t_const_value::make_list();
+        params->add_list(
+            gen_type(generator, program, defns_schema, *set.elem_type()));
+      },
+      [&](const t_map& map) {
+        type_name->add_map(val("mapType"), val(0));
+        params = t_const_value::make_list();
         params->add_list(
             gen_type(generator, program, defns_schema, *map.key_type()));
         params->add_list(
             gen_type(generator, program, defns_schema, *map.val_type()));
-      }
-      break;
-    case t_type::type::t_enum: {
-      if (defns_schema && generator) {
-        auto enum_schema =
-            generator->gen_schema(static_cast<const t_enum&>(*resolved_type));
-        add_as_definition(*defns_schema, "enumDef", std::move(enum_schema));
-      }
-      type_name->add_map(val("enumType"), type_uri(*resolved_type));
-      break;
-    }
-    case t_type::type::t_structured: {
-      if (defns_schema && generator) {
-        if (auto union_type = dynamic_cast<const t_union*>(resolved_type)) {
-          auto union_schema = generator->gen_schema(*union_type);
-          add_as_definition(*defns_schema, "unionDef", std::move(union_schema));
-        } else if (
-            auto exception_type =
-                dynamic_cast<const t_exception*>(resolved_type)) {
-          auto ex_schema = generator->gen_schema(*exception_type);
-          add_as_definition(
-              *defns_schema, "exceptionDef", std::move(ex_schema));
-        } else {
-          auto struct_type = static_cast<const t_struct*>(resolved_type);
-          auto struct_schema = generator->gen_schema(*struct_type);
+      },
+      [&](const t_enum& enum_type) {
+        if (defns_schema && generator) {
+          auto enum_schema = generator->gen_schema(enum_type);
+          add_as_definition(*defns_schema, "enumDef", std::move(enum_schema));
+        }
+        type_name->add_map(val("enumType"), type_uri(*resolved_type));
+      },
+      [&](const t_struct& struct_type) {
+        if (defns_schema && generator) {
+          auto struct_schema = generator->gen_schema(struct_type);
           add_as_definition(
               *defns_schema, "structDef", std::move(struct_schema));
         }
-      }
-      type_name->add_map(
-          val([&] {
-            if (dynamic_cast<const t_union*>(resolved_type)) {
-              return "unionType";
-            } else if (dynamic_cast<const t_exception*>(resolved_type)) {
-              return "exceptionType";
-            } else {
-              return "structType";
-            }
-          }()),
-          type_uri(*resolved_type));
-      break;
-    }
-    case t_type::type::t_service:
-      assert(false);
-  }
+        type_name->add_map(val("structType"), type_uri(*resolved_type));
+      },
+      [&](const t_union& union_type) {
+        if (defns_schema && generator) {
+          auto union_schema = generator->gen_schema(union_type);
+          add_as_definition(*defns_schema, "unionDef", std::move(union_schema));
+        }
+        type_name->add_map(val("unionType"), type_uri(*resolved_type));
+      },
+      [&](const t_exception& exception_type) {
+        if (defns_schema && generator) {
+          auto ex_schema = generator->gen_schema(exception_type);
+          add_as_definition(
+              *defns_schema, "exceptionDef", std::move(ex_schema));
+        }
+        type_name->add_map(val("exceptionType"), type_uri(*resolved_type));
+      },
+      [&](const t_service&) { assert(false); },
+      [&](const t_typedef&) {
+        // This should not happen since we resolve typedefs above
+        assert(false);
+      });
   schema->add_map(val("name"), std::move(type_name));
   if (params) {
     schema->add_map(val("params"), std::move(params));
@@ -367,61 +354,46 @@ void schematize_recursively(
     return;
   }
 
-  switch (resolved_type->get_type_value()) {
-    case t_type::type::t_void:
-    case t_type::type::t_bool:
-    case t_type::type::t_byte:
-    case t_type::type::t_i16:
-    case t_type::type::t_i32:
-    case t_type::type::t_i64:
-    case t_type::type::t_double:
-    case t_type::type::t_float:
-    case t_type::type::t_string:
-    case t_type::type::t_binary:
-      break;
-    case t_type::type::t_list:
-      schematize_recursively(
-          generator,
-          program,
-          defns_schema,
-          *static_cast<const t_list&>(*resolved_type).elem_type());
-      break;
-    case t_type::type::t_set:
-      schematize_recursively(
-          generator,
-          program,
-          defns_schema,
-          *static_cast<const t_set&>(*resolved_type).elem_type());
-      break;
-    case t_type::type::t_map: {
-      const auto& map = static_cast<const t_map&>(*resolved_type);
-      schematize_recursively(generator, program, defns_schema, *map.key_type());
-      schematize_recursively(generator, program, defns_schema, *map.val_type());
-      break;
-    }
-    case t_type::type::t_enum: {
-      auto enum_schema =
-          generator->gen_schema(static_cast<const t_enum&>(*resolved_type));
-      add_as_definition(*defns_schema, "enumDef", std::move(enum_schema));
-      break;
-    }
-    case t_type::type::t_structured: {
-      auto new_schema_2 = generator->gen_schema(
-          static_cast<const t_structured&>(*resolved_type));
-      std::string def_type = [&] {
-        if (resolved_type->is<t_union>()) {
-          return "unionDef";
-        } else if (resolved_type->is<t_exception>()) {
-          return "exceptionDef";
-        } else {
-          return "structDef";
-        }
-      }();
-      add_as_definition(*defns_schema, def_type, std::move(new_schema_2));
-      break;
-    }
-    default:
-      assert(false);
+  if (resolved_type->is<t_primitive_type>()) {
+    return;
+  } else if (resolved_type->is<t_list>()) {
+    schematize_recursively(
+        generator,
+        program,
+        defns_schema,
+        *static_cast<const t_list&>(*resolved_type).elem_type());
+  } else if (resolved_type->is<t_set>()) {
+    schematize_recursively(
+        generator,
+        program,
+        defns_schema,
+        *static_cast<const t_set&>(*resolved_type).elem_type());
+  } else if (resolved_type->is<t_map>()) {
+    const auto& map = static_cast<const t_map&>(*resolved_type);
+    schematize_recursively(generator, program, defns_schema, *map.key_type());
+    schematize_recursively(generator, program, defns_schema, *map.val_type());
+    return;
+  } else if (resolved_type->is<t_enum>()) {
+    auto enum_schema =
+        generator->gen_schema(static_cast<const t_enum&>(*resolved_type));
+    add_as_definition(*defns_schema, "enumDef", std::move(enum_schema));
+    return;
+  } else if (resolved_type->is<t_structured>()) {
+    auto new_schema_2 =
+        generator->gen_schema(static_cast<const t_structured&>(*resolved_type));
+    std::string def_type = [&] {
+      if (resolved_type->is<t_union>()) {
+        return "unionDef";
+      } else if (resolved_type->is<t_exception>()) {
+        return "exceptionDef";
+      } else {
+        return "structDef";
+      }
+    }();
+    add_as_definition(*defns_schema, def_type, std::move(new_schema_2));
+    return;
+  } else {
+    assert(false);
   }
 }
 
@@ -846,9 +818,7 @@ protocol_value_builder::protocol_value_builder() : ty_{nullptr} {}
       },
       [&](auto&&) -> protocol_value_builder {
         throw std::logic_error(fmt::format(
-            "Invalid name={} type={} for property look-up",
-            ty_->get_full_name(),
-            t_type::type_name(ty_->get_type_value())));
+            "Invalid name={} for property look-up", ty_->get_full_name()));
       });
 }
 
@@ -876,9 +846,7 @@ protocol_value_builder::protocol_value_builder() : ty_{nullptr} {}
       },
       [&](auto&&) -> protocol_value_builder {
         throw std::logic_error(fmt::format(
-            "Invalid name={} type={} for key look-up",
-            ty_->get_full_name(),
-            t_type::type_name(ty_->get_type_value())));
+            "Invalid name={} for key look-up", ty_->get_full_name()));
       });
 }
 
@@ -903,9 +871,8 @@ protocol_value_builder::protocol_value_builder() : ty_{nullptr} {}
       },
       [&](auto&&) -> protocol_value_builder {
         throw std::logic_error(fmt::format(
-            "Invalid name={} type={} for container element look-up",
-            ty_->get_full_name(),
-            t_type::type_name(ty_->get_type_value())));
+            "Invalid name={} for container element look-up",
+            ty_->get_full_name()));
       });
 }
 
@@ -922,7 +889,7 @@ protocol_value_builder::to_labeled_value(
     throw std::runtime_error(fmt::format(
         "Could not match value of kind {} to type {}",
         t_const_value::kind_to_string(protocol_value.kind()),
-        t_type::type_name(ty_->get_type_value())));
+        ty_->get_full_name()));
   };
 
   // Verify that the field is a valid type for a protocol value key

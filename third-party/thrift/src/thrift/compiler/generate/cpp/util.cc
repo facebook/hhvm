@@ -263,23 +263,13 @@ bool field_transitively_refers_to_unique(const t_field* field) {
     if (cpp2::is_binary_iobuf_unique_ptr(type)) {
       return true;
     }
-    switch (type->get_type_value()) {
-      case t_type::type::t_list: {
-        queue.push(static_cast<const t_list*>(type)->get_elem_type());
-        break;
-      }
-      case t_type::type::t_set: {
-        queue.push(static_cast<const t_set*>(type)->get_elem_type());
-        break;
-      }
-      case t_type::type::t_map: {
-        queue.push(static_cast<const t_map*>(type)->get_key_type());
-        queue.push(static_cast<const t_map*>(type)->get_val_type());
-        break;
-      }
-      default: {
-        break;
-      }
+    if (type->is<t_list>()) {
+      queue.push(static_cast<const t_list*>(type)->get_elem_type());
+    } else if (type->is<t_set>()) {
+      queue.push(static_cast<const t_set*>(type)->get_elem_type());
+    } else if (type->is<t_map>()) {
+      queue.push(static_cast<const t_map*>(type)->get_key_type());
+      queue.push(static_cast<const t_map*>(type)->get_val_type());
     }
   }
   return false;

@@ -6539,48 +6539,81 @@ end = struct
           rhs
           env
       | _ ->
-        let (env, res) =
-          Typing_utils.run_on_intersection env ty_subs ~f:(fun env ty_sub ->
-              let (env, val_ty) =
-                Env.fresh_type_invariant env can_index.ci_array_pos
-              in
-              let (env, stp) =
-                simplify
-                  ~subtype_env
-                  ~this_ty
-                  ~lhs:{ sub_supportdyn; ty_sub }
-                  ~rhs:
-                    {
-                      reason_super;
-                      can_index = { can_index with ci_val = val_ty };
-                    }
-                  env
-              in
-              Option.iter
-                ~f:(Option.iter ~f:(Typing_error_utils.add_typing_error ~env))
-                (TL.get_error_if_unsat stp);
-              (env, (val_ty, stp)))
+        let update_reason =
+          Typing_env.update_reason ~f:(fun r_sub_prj ->
+              Typing_reason.prj_inter_sub ~sub:r_sub ~sub_prj:r_sub_prj)
         in
-        let (tys, stps) = List.unzip res in
-        let (env, ty) = Typing_intersection.intersect_list env r_sub tys in
-        let (env, sfv) = simplify_val ty env in
-        (env, List.fold_left stps ~init:sfv ~f:TL.conj))
+        let rec loop ty_subs tys errs env =
+          match ty_subs with
+          | [] ->
+            (match tys with
+            | [] ->
+              let err = Typing_error.intersect_opt @@ List.filter_opt errs in
+              invalid ~fail:err env
+            | _ ->
+              let (env, ty) =
+                Typing_intersection.intersect_list env r_sub tys
+              in
+              simplify_val ty env)
+          | ty_sub :: ty_subs ->
+            let ty_sub = update_reason env ty_sub in
+            let (env, val_ty) = Env.fresh_type env can_index.ci_array_pos in
+            let (env, prop) =
+              simplify
+                ~subtype_env
+                ~this_ty
+                ~lhs:{ sub_supportdyn; ty_sub }
+                ~rhs:
+                  {
+                    reason_super;
+                    can_index = { can_index with ci_val = val_ty };
+                  }
+                env
+            in
+            (match TL.get_error_if_unsat prop with
+            | Some err -> loop ty_subs tys (err :: errs) env
+            | _ -> (env, prop) &&& loop ty_subs (val_ty :: tys) errs)
+        in
+        loop ty_subs [] [] env)
     | (_, Tclass ((_, id), _, tup)) when String.equal id SN.Collections.cPair ->
       do_tuple_basic tup
     | (_, Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } }) ->
       do_tuple_optional t_required t_optional (Some t_variadic)
     | (_, Ttuple { t_required; _ }) -> do_tuple_basic t_required
     | (r_sub, Tshape ts) -> do_shape r_sub ts
-    | (r_sub, Tgeneric generic_nm) ->
-      Common.simplify_generic_l
-        ~subtype_env
-        ~this_ty
-        ~fail
-        ~mk_prop
-        (sub_supportdyn, r_sub, generic_nm)
-        rhs
-        rhs
-        env
+    | (r_sub, Tgeneric _generic_nm) ->
+      let get_transitive_upper_bounds env ty =
+        let rec iter seen env acc tyl =
+          match tyl with
+          | [] -> (env, acc)
+          | ty :: tyl ->
+            let (env, ety) = Env.expand_type env ty in
+            (match get_node ety with
+            | Tgeneric n ->
+              if SSet.mem n seen then
+                iter seen env acc tyl
+              else
+                iter
+                  (SSet.add n seen)
+                  env
+                  acc
+                  (Typing_set.elements (Env.get_upper_bounds env n) @ tyl)
+            | _ -> iter seen env (Typing_set.add ty acc) tyl)
+        in
+        let (env, resl) = iter SSet.empty env Typing_set.empty [ty] in
+        (env, Typing_set.elements resl)
+      in
+      let (env, tyl) = get_transitive_upper_bounds env ty_sub in
+      if List.is_empty tyl then
+        invalid ~fail env
+      else
+        let (env, ty) = Typing_intersection.intersect_list env r_sub tyl in
+        simplify
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn; ty_sub = ty }
+          ~rhs
+          env
     | (r_sub, Tnewtype (name_sub, [ty_sub], _))
       when String.equal name_sub SN.Classes.cSupportDyn ->
       simplify

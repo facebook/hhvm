@@ -808,7 +808,6 @@ class mstch_type : public mstch_base {
         {
             {"type:self", &mstch_type::self},
             {"type:numeric_or_void?", &mstch_type::is_numeric_or_void},
-            {"type:base?", &mstch_type::is_base},
             {"type:structured", &mstch_type::get_structured},
             {"type:enum", &mstch_type::get_enum},
             {"type:list_elem_type", &mstch_type::get_list_type},
@@ -828,7 +827,6 @@ class mstch_type : public mstch_base {
         resolved_type_->is_i32() || resolved_type_->is_i64() ||
         resolved_type_->is_double() || resolved_type_->is_float();
   }
-  mstch::node is_base() { return resolved_type_->is<t_primitive_type>(); }
   virtual std::string get_type_namespace(const t_program*) { return ""; }
   mstch::node get_structured();
   mstch::node get_enum();

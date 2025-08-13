@@ -42,9 +42,9 @@
 {{> codec/encode_enum}}
 {{/type:enum}}
 {{/type:enum?}}
-{{#type:base?}}
+{{#type:primitive?}}
 {{> codec/encode_base}}
-{{/type:base?}}
+{{/type:primitive?}}
 {{#type:list?}}
 {{> codec/encode_list}}
 {{/type:list?}}

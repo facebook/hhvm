@@ -30,16 +30,16 @@ public final class {{program:constantClassName}} {
 
     {{^constant:javaIgnoreConstant?}}{{!
     }}{{#constant:type}}{{!
-    }}{{#type:base?}}
+    }}{{#type:primitive?}}
     public static final {{> Type}} {{constant:javaCapitalName}} = {{#constant:value}}{{> DefaultValue}}{{/constant:value}};
-    {{/type:base?}}{{!
-    }}{{^type:base?}}
+    {{/type:primitive?}}{{!
+    }}{{^type:primitive?}}
     public static final {{> Type}} {{constant:javaCapitalName}} = construct_{{constant:javaCapitalName}}();
 
     private static {{#constant:type}}{{> Type}}{{/constant:type}} construct_{{constant:javaCapitalName}}() {
       return {{#constant:value}}{{> DefaultValue}}{{/constant:value}};
     }
-    {{/type:base?}}{{!
+    {{/type:primitive?}}{{!
     }}{{/constant:type}}{{!
     }}{{/constant:javaIgnoreConstant?}}
     {{/program:constants}}

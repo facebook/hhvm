@@ -19,7 +19,7 @@
     Mustache template for generating typeinfo of a field in the struct field spec.
 }}{{!
 }}{{#field:type}}{{!
-    }}{{^type:base?}}lambda: {{/type:base?}}{{> types/typeinfo }}{{!
+    }}{{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }}{{!
     }}{{#type:container?}}{{^type:list?}}{{#field:sorted_key_serialize?}}{{!
     }}.enableKeySorted(){{!
     }}{{/field:sorted_key_serialize?}}{{/type:list?}}{{/type:container?}}{{!

@@ -46,13 +46,13 @@ on a struct.
   }}{{/field:shared_const_ref?}}{{!
 }}{{/type:container?}}{{!
 }}{{/field:reference?}}{{^field:reference?}}{{!
-}}{{#type:base?}}{{!
+}}{{#type:primitive?}}{{!
   }}{{#type:string?}}cmove(bytes_to_string({{/type:string?}}{{!
   }}{{#type:binary?}}cmove(bytes_to_string({{/type:binary?}}{{!
   }}_fbthrift_value{{!
   }}{{#type:string?}}.encode('utf-8'))){{/type:string?}}{{!
   }}{{#type:binary?}})){{/type:binary?}}{{!
-}}{{/type:base?}}{{!
+}}{{/type:primitive?}}{{!
 }}{{#type:enum?}}<{{> types/cython_cpp_type}}><int>_fbthrift_value{{/type:enum?}}{{!
 }}{{#type:structured?}}{{!
     }}deref((<{{> types/cython_python_type }}?> _fbthrift_value).{{> types/cpp_obj}}){{!

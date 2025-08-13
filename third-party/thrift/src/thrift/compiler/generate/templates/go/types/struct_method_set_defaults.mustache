@@ -28,12 +28,12 @@ func (x *{{struct:go_name}}) setDefaults() *{{struct:go_name}} {
         }}{{#field:value}}.
         {{field:go_setter_name}}{{#program:compat_setters?}}NonCompat{{/program:compat_setters?}}({{!
           }}{{#field:type}}{{!
-          }}{{^type:base?}}
+          }}{{^type:primitive?}}
               {{> const/value}},
-          {{/type:base?}}{{!
-          }}{{#type:base?}}{{!
+          {{/type:primitive?}}{{!
+          }}{{#type:primitive?}}{{!
               }}{{> const/value}}{{!
-          }}{{/type:base?}}{{!
+          }}{{/type:primitive?}}{{!
           }}{{/field:type}}{{!
         }}){{/field:value}}{{!
 

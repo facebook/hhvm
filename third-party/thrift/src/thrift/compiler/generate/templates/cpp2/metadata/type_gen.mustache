@@ -18,7 +18,7 @@
 }}std::make_unique<Typedef>("{{type:program_name}}.{{type:cpp_name}}", {{#type:typedef_type}}{{> metadata/type_gen}}{{/type:typedef_type}}, std::vector<ThriftConstStruct>{ {{#type:typedef}}{{#typedef:structured_annotations}}{{#structured_annotation:const_struct?}}{{> metadata/const_struct}}, {{/structured_annotation:const_struct?}}{{/typedef:structured_annotations}}{{/type:typedef}} }){{!
 }}{{/type:typedef?}}{{!
 }}{{^type:typedef?}}{{!
-}}{{#type:base?}}{{!
+}}{{#type:primitive?}}{{!
 }}std::make_unique<Primitive>({{!
 }}{{#type:bool?}}ThriftPrimitiveType::THRIFT_BOOL_TYPE{{/type:bool?}}{{!
 }}{{#type:byte?}}ThriftPrimitiveType::THRIFT_BYTE_TYPE{{/type:byte?}}{{!
@@ -30,8 +30,8 @@
 }}{{#type:binary?}}ThriftPrimitiveType::THRIFT_BINARY_TYPE{{/type:binary?}}{{!
 }}{{#type:string?}}ThriftPrimitiveType::THRIFT_STRING_TYPE{{/type:string?}}{{!
 }}{{#type:void?}}ThriftPrimitiveType::THRIFT_VOID_TYPE{{/type:void?}}){{!
-}}{{/type:base?}}{{!
-}}{{^type:base?}}{{!
+}}{{/type:primitive?}}{{!
+}}{{^type:primitive?}}{{!
 }}{{#type:list?}}std::make_unique<List>({{#type:list_elem_type}}{{> metadata/type_gen}}{{/type:list_elem_type}}){{/type:list?}}{{!
 }}{{#type:set?}}std::make_unique<Set>({{#type:set_elem_type}}{{> metadata/type_gen}}{{/type:set_elem_type}}){{/type:set?}}{{!
 }}{{#type:map?}}std::make_unique<Map>({{#type:key_type}}{{> metadata/type_gen}}{{/type:key_type}}, {{#type:value_type}}{{> metadata/type_gen}}{{/type:value_type}}){{/type:map?}}{{!
@@ -40,4 +40,4 @@
 }}{{#type:union?}}std::make_unique<Union<{{type:cpp_standard_type}}>>("{{type:program_name}}.{{type:name}}"){{/type:union?}}{{!
 }}{{^type:union?}}std::make_unique<Struct<{{type:cpp_standard_type}}>>("{{type:program_name}}.{{type:name}}"){{/type:union?}}{{!
 }}{{/type:structured?}}{{!
-}}{{/type:base?}}{{/type:typedef?}}
+}}{{/type:primitive?}}{{/type:typedef?}}

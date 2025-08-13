@@ -58,14 +58,14 @@ return self.__fbthrift_cached_{{field:py_name}}{{!
 return self.__fbthrift_cached_{{field:py_name}}{{!
 }}{{/field:reference?}}{{!
 }}{{^field:reference?}}{{!
-}}{{#type:base?}}{{!
+}}{{#type:primitive?}}{{!
   }}return {{!
     }}{{#type:bool?}}<pbool> {{/type:bool?}}{{!
     }}{{#type:string?}}(<bytes>{{/type:string?}}{{!
     }}deref(self.{{> types/cpp_obj}}).{{> types/cython_field_value_ref}}{{!
     }}{{#type:string?}}).decode('UTF-8'){{/type:string?}}{{!
-}}{{/type:base?}}{{!
-}}{{^type:base?}}{{!
+}}{{/type:primitive?}}{{!
+}}{{^type:primitive?}}{{!
 }}if self.__fbthrift_cached_{{field:py_name}} is None:
     self.__fbthrift_cached_{{field:py_name}} = {{!
       }}{{#type:enum}}translate_cpp_enum_to_python({{!
@@ -81,6 +81,6 @@ return self.__fbthrift_cached_{{field:py_name}}{{!
       }}self.{{> types/cpp_obj}}{{!
       }})){{/type:container?}}{{/type:enum?}}
 return self.__fbthrift_cached_{{field:py_name}}{{!
-}}{{/type:base?}}{{!
+}}{{/type:primitive?}}{{!
 }}{{/field:reference?}}{{!
 }}{{/type:customBinaryType?}}

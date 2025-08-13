@@ -35,11 +35,11 @@
 {{/type:typedef}}
 {{/type:typedef?}}
 {{^type:typedef?}}
-{{#type:base?}}
+{{#type:primitive?}}
 &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.{{> spec/codec_primitive_type}},
 },
-{{/type:base?}}
+{{/type:primitive?}}
 {{#type:enum?}}
 {{#type:enum}}
 &thrift.CodecEnumSpec{

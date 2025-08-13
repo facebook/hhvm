@@ -1172,6 +1172,10 @@ pub const inout_readonly_argument: Error = Cow::Borrowed(
     "This expression is readonly. We currently do not support passing readonly values to an inout parameter.",
 );
 
+pub const readonly_named_argument: Error = Cow::Borrowed(
+    "This expression is readonly. We currently do not support passing readonly values to a named parameter.",
+);
+
 pub const yield_readonly: Error = Cow::Borrowed(
     "This expression is readonly. We currently do not support yielding readonly values.",
 );

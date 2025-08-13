@@ -486,6 +486,8 @@ and pp_arg ppf arg =
   | Aast_defs.Anormal e -> pp_expr ppf e
   | Aast_defs.Ainout (pos, e) ->
     Fmt.(pair ~sep:sp pp_paramkind pp_expr) ppf (Ast_defs.Pinout pos, e)
+  | Aast_defs.Anamed ((_, name), e) ->
+    Fmt.(pair ~sep:equal_to string pp_expr) ppf (name, e)
 
 and pp_afield ppf = function
   | Aast.AFvalue expr -> pp_expr ppf expr

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2db4e5a753820f898a648cd8e551b3a3>>
+// @generated SignedSource<<b726209523b1c3b7cc3a9f26bb326e36>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1248,6 +1248,12 @@ impl Transform for Argument {
                 { __binding_1.transform(env, &mut pass.clone()) }
             }
             Argument::Anormal(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
+            Argument::Anamed(ref mut __binding_0, ref mut __binding_1) => {
+                {
+                    __binding_0.transform(env, &mut pass.clone())
+                }
+                { __binding_1.transform(env, &mut pass.clone()) }
+            }
         }
     }
 }

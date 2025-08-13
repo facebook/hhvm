@@ -1175,13 +1175,17 @@ impl RewriteState {
                     _ => {}
                 }
 
-                let mut args_without_inout = vec![];
+                let mut args_without_inout_and_named = vec![];
                 for arg in args {
                     match arg {
-                        ast::Argument::Anormal(e) => args_without_inout.push(e),
+                        ast::Argument::Anormal(e) => args_without_inout_and_named.push(e),
                         ast::Argument::Ainout(_, Expr(_, p, _)) => self.errors.push((
                             p,
                             "Expression trees do not support `inout` function calls.".into(),
+                        )),
+                        ast::Argument::Anamed(_, Expr(_, p, _)) => self.errors.push((
+                            p,
+                            "Expression trees do not support named parameters.".into(),
                         )),
                     }
                 }
@@ -1192,7 +1196,7 @@ impl RewriteState {
                     // Desugared: $0v->visitCall(new ExprPos(...), $0v->visitGlobalFunction(new ExprPos(...), $0fpXX), vec[])
                     Id(sid) => {
                         let (virtual_args, desugar_args) =
-                            self.rewrite_exprs(args_without_inout, visitor_name);
+                            self.rewrite_exprs(args_without_inout_and_named, visitor_name);
                         let len = self.global_function_pointers.len();
                         self.global_function_pointers.push(global_func_ptr(&sid));
                         let temp_variable = temp_function_pointer_lvar(&recv.1, len);
@@ -1271,20 +1275,29 @@ impl RewriteState {
                                 )),
                             ) if name == visitor_name => match s.1.as_ref() {
                                 // type check any special function calls
-                                et::BUILTIN_SHAPE_AT => {
-                                    handle_shapes_at(self, visitor_name, &pos, args_without_inout)
-                                }
-                                et::BUILTIN_SHAPE_PUT => {
-                                    handle_shapes_put(self, visitor_name, &pos, args_without_inout)
-                                }
-                                et::BUILTIN_SHAPE_IDX => {
-                                    handle_shapes_idx(self, visitor_name, &pos, args_without_inout)
-                                }
+                                et::BUILTIN_SHAPE_AT => handle_shapes_at(
+                                    self,
+                                    visitor_name,
+                                    &pos,
+                                    args_without_inout_and_named,
+                                ),
+                                et::BUILTIN_SHAPE_PUT => handle_shapes_put(
+                                    self,
+                                    visitor_name,
+                                    &pos,
+                                    args_without_inout_and_named,
+                                ),
+                                et::BUILTIN_SHAPE_IDX => handle_shapes_idx(
+                                    self,
+                                    visitor_name,
+                                    &pos,
+                                    args_without_inout_and_named,
+                                ),
                                 _ => handle_class_const(
                                     self,
                                     visitor_name,
                                     &pos,
-                                    args_without_inout,
+                                    args_without_inout_and_named,
                                     temp_variable.clone(),
                                 ),
                             },
@@ -1292,7 +1305,7 @@ impl RewriteState {
                                 self,
                                 visitor_name,
                                 &pos,
-                                args_without_inout,
+                                args_without_inout_and_named,
                                 temp_variable.clone(),
                             ),
                         };
@@ -1324,7 +1337,7 @@ impl RewriteState {
                             _ => true,
                         };
                         let (virtual_args, desugar_args) =
-                            self.rewrite_exprs(args_without_inout, visitor_name);
+                            self.rewrite_exprs(args_without_inout_and_named, visitor_name);
                         let rewritten_recv =
                             self.rewrite_expr(Expr((), recv.1, recv.2), visitor_name);
 

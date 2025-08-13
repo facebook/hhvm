@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<02fb11909c42d4658e6da3335f2f1723>>
+// @generated SignedSource<<7e553c2fe39f1d659c2ce4ae06425939>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2771,6 +2771,9 @@ impl<Ex, En> Argument<Ex, En> {
     pub fn mk_anormal(p0: Expr<Ex, En>) -> Self {
         Argument::Anormal(p0)
     }
+    pub fn mk_anamed(p0: Sid, p1: Expr<Ex, En>) -> Self {
+        Argument::Anamed(p0, p1)
+    }
     pub fn is_ainout(&self) -> bool {
         match self {
             Argument::Ainout(..) => true,
@@ -2780,6 +2783,12 @@ impl<Ex, En> Argument<Ex, En> {
     pub fn is_anormal(&self) -> bool {
         match self {
             Argument::Anormal(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_anamed(&self) -> bool {
+        match self {
+            Argument::Anamed(..) => true,
             _ => false,
         }
     }
@@ -2795,6 +2804,12 @@ impl<Ex, En> Argument<Ex, En> {
             _ => None,
         }
     }
+    pub fn as_anamed(&self) -> Option<(&Sid, &Expr<Ex, En>)> {
+        match self {
+            Argument::Anamed(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
     pub fn as_ainout_mut(&mut self) -> Option<(&mut Pos, &mut Expr<Ex, En>)> {
         match self {
             Argument::Ainout(p0, p1) => Some((p0, p1)),
@@ -2807,6 +2822,12 @@ impl<Ex, En> Argument<Ex, En> {
             _ => None,
         }
     }
+    pub fn as_anamed_mut(&mut self) -> Option<(&mut Sid, &mut Expr<Ex, En>)> {
+        match self {
+            Argument::Anamed(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
     pub fn as_ainout_into(self) -> Option<(Pos, Expr<Ex, En>)> {
         match self {
             Argument::Ainout(p0, p1) => Some((p0, p1)),
@@ -2816,6 +2837,12 @@ impl<Ex, En> Argument<Ex, En> {
     pub fn as_anormal_into(self) -> Option<Expr<Ex, En>> {
         match self {
             Argument::Anormal(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_anamed_into(self) -> Option<(Sid, Expr<Ex, En>)> {
+        match self {
+            Argument::Anamed(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }

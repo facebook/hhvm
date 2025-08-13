@@ -69,6 +69,8 @@ let handler =
         List.iter
           ~f:(function
             | Aast_defs.Anormal _ -> ()
+            (* TODO(named_params): Do we need to introduce checks here? *)
+            | Aast_defs.Anamed _ -> ()
             | Aast_defs.Ainout (_, e) -> check_types env e)
           args
       | _ -> ()

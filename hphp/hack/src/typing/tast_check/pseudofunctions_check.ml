@@ -16,7 +16,8 @@ let disallow_isset_inout_args_check env p = function
          && List.exists
               (function
                 | Aast_defs.Ainout _ -> true
-                | Aast_defs.Anormal _ -> false)
+                | Aast_defs.Anormal _ -> false
+                | Aast_defs.Anamed _ -> false)
               args ->
     Typing_error_utils.add_typing_error
       ~env:(Tast_env.tast_env_as_typing_env env)

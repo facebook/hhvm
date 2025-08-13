@@ -239,11 +239,13 @@ let get_argument_pos a =
   match a with
   | Anormal e -> get_expr_pos e
   | Ainout (_, e) -> get_expr_pos e
+  | Anamed (_, e) -> get_expr_pos e
 
 let arg_to_expr arg =
   match arg with
   | Anormal e -> e
   | Ainout (_, e) -> e
+  | Anamed (_, e) -> e
 
 let expr_to_arg pk e =
   match pk with

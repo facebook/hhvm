@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7736a9bfd654dba4f37756305a6f80dc>>
+// @generated SignedSource<<41c48e9b416e663d8ed597e9859bcba4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -79,6 +79,10 @@ impl<P: Params> NodeMut<P> for Argument<P::Ex, P::En> {
                 a1.accept(c, v)
             }
             Argument::Anormal(a0) => a0.accept(c, v),
+            Argument::Anamed(a0, a1) => {
+                a0.accept(c, v)?;
+                a1.accept(c, v)
+            }
         }
     }
 }

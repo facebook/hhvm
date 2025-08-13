@@ -538,6 +538,7 @@ fn emit_fatal_nast_check_error(err: &NastCheckError) -> Result<Unit, Error> {
         NastCheckError::InoutParamsSpecial(_) => todo!(),
         NastCheckError::InoutParamsMemoize { .. } => todo!(),
         NastCheckError::InoutInTransformedPseudofunction { .. } => todo!(),
+        NastCheckError::NamedInTransformedPseudofunction { .. } => todo!(),
         NastCheckError::ReadingFromAppend(_) => todo!(),
         NastCheckError::ListRvalue(_) => todo!(),
         NastCheckError::IllegalDestructor(_) => todo!(),

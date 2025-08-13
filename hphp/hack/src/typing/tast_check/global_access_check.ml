@@ -1037,7 +1037,16 @@ let visitor =
                     env
                     ctx
                     expr )
+              | Aast_defs.Anamed (_, ((ty, pos, _) as expr)) ->
+                ( ty,
+                  pos,
+                  get_global_vars_from_expr
+                    ~include_immutable:false
+                    env
+                    ctx
+                    expr )
             in
+
             if Option.is_some e_global_opt then
               raise_global_access_error
                 pos

@@ -966,6 +966,7 @@ module Visitor_DEPRECATED = struct
         match arg with
         | Aast_defs.Anormal e -> this#on_expr acc e
         | Aast_defs.Ainout (_pos, e) -> this#on_expr acc e
+        | Aast_defs.Anamed (_name, e) -> this#on_expr acc e
 
       method on_function_pointer acc e targs =
         let acc = this#on_function_ptr_id acc e in

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b5e6425bc9223f7f312c704fe3d801c4>>
+// @generated SignedSource<<894ddc3ebabf9c248c7a0d0dc7180b46>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -195,6 +195,11 @@ pub enum NastCheckError {
     },
     #[rust_to_ocaml(name = "Inout_in_transformed_pseudofunction")]
     InoutInTransformedPseudofunction {
+        pos: pos::Pos,
+        fn_name: String,
+    },
+    #[rust_to_ocaml(name = "Named_in_transformed_pseudofunction")]
+    NamedInTransformedPseudofunction {
         pos: pos::Pos,
         fn_name: String,
     },

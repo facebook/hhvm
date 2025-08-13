@@ -905,7 +905,7 @@ and ('ex, 'en) call_expr = {
   targs: 'ex targ list;
       (** explicit type annotations *)
   args: ('ex, 'en) argument list;
-      (** positional args, plus their calling convention *)
+      (** positional and named args, plus their calling convention *)
   unpacked_arg: ('ex, 'en) expr option;
       (** unpacked arg *)
 }
@@ -913,6 +913,7 @@ and ('ex, 'en) call_expr = {
 and ('ex, 'en) argument =
   | Ainout of (pos[@transform.opaque]) * ('ex, 'en) expr
   | Anormal of ('ex, 'en) expr
+  | Anamed of sid * ('ex, 'en) expr
 
 and ('ex, 'en) user_attribute = {
   ua_name: sid;

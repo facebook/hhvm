@@ -38,6 +38,10 @@ let on_stmt on_error stmt ~ctx =
           let err = Err.naming @@ Naming_error.Too_few_arguments fn_expr_pos in
           let expr = Err.invalid_expr expr in
           Error ((pos, Aast.Expr expr), err)
+        | [Aast_defs.Anamed (_, expr)] ->
+          let err = Err.naming @@ Naming_error.Too_few_arguments fn_expr_pos in
+          let expr = Err.invalid_expr expr in
+          Error ((pos, Aast.Expr expr), err)
         | Aast_defs.Anormal (cond_annot, cond_pos, cond) :: exprs ->
           let id_expr =
             Aast.Id (fn_name_pos, SN.AutoimportedFunctions.invariant_violation)
@@ -68,6 +72,20 @@ let on_stmt on_error stmt ~ctx =
               (Err.nast_check
               @@ Nast_check_error.Inout_in_transformed_pseudofunction
                    { pos = Pos.merge pk_p fn_expr_pos; fn_name = "invariant" })
+          in
+          check_args
+            err_opt
+            (Aast_defs.Anormal (cond_annot, cond_pos, cond) :: exprs)
+        | Aast_defs.Anamed ((name_pos, _), (cond_annot, cond_pos, cond))
+          :: exprs ->
+          let err_opt =
+            Some
+              (Err.nast_check
+              @@ Nast_check_error.Named_in_transformed_pseudofunction
+                   {
+                     pos = Pos.merge name_pos fn_expr_pos;
+                     fn_name = "invariant";
+                   })
           in
           check_args
             err_opt

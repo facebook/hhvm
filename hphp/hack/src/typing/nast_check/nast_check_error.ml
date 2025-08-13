@@ -108,6 +108,10 @@ type t =
       pos: Pos.t;
       fn_name: string;
     }
+  | Named_in_transformed_pseudofunction of {
+      pos: Pos.t;
+      fn_name: string;
+    }
   | Reading_from_append of Pos.t
   | List_rvalue of Pos.t
   | Illegal_destructor of Pos.t
@@ -498,6 +502,12 @@ let inout_in_transformed_pseudofunction pos fn_name =
     (pos, Printf.sprintf "Unexpected `inout` argument for `%s`" fn_name)
     []
 
+let named_in_transformed_pseudofunction pos fn_name =
+  User_error.make_err
+    Error_code.(to_enum NamedInTransformedPseudofunction)
+    (pos, Printf.sprintf "Unexpected named argument for `%s`" fn_name)
+    []
+
 let reading_from_append pos =
   User_error.make_err
     Error_code.(to_enum ReadingFromAppend)
@@ -882,6 +892,8 @@ let to_user_error t =
       inout_params_memoize pos param_pos
     | Inout_in_transformed_pseudofunction { pos; fn_name } ->
       inout_in_transformed_pseudofunction pos fn_name
+    | Named_in_transformed_pseudofunction { pos; fn_name } ->
+      named_in_transformed_pseudofunction pos fn_name
     | Reading_from_append pos -> reading_from_append pos
     | List_rvalue pos -> list_rvalue pos
     | Illegal_destructor pos -> illegal_destructor pos

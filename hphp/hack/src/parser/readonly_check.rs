@@ -725,6 +725,12 @@ impl<'ast> VisitorMut<'ast> for Checker {
                             Rty::Readonly => explicit_readonly(param),
                             Rty::Mutable => {}
                         },
+                        Argument::Anamed(_, param) => match rty_expr(context, param) {
+                            Rty::Readonly => {
+                                self.add_error(param.pos(), syntax_error::readonly_named_argument)
+                            }
+                            Rty::Mutable => {}
+                        },
                     }
                 }
             }

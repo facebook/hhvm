@@ -107,6 +107,10 @@ type t =
       pos: Pos.t;
       fn_name: string;
     }
+  | Named_in_transformed_pseudofunction of {
+      pos: Pos.t;
+      fn_name: string;
+    }
   | Reading_from_append of Pos.t
   | List_rvalue of Pos.t
   | Illegal_destructor of Pos.t

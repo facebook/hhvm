@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bb23cdb0c7fc0b7001b293ca7e317092>>
+// @generated SignedSource<<9abd3e55465a7a73c595609d3f5149a5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2067,7 +2067,7 @@ pub struct CallExpr<'a, Ex, En> {
     /// explicit type annotations
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub targs: &'a [&'a Targ<'a, Ex>],
-    /// positional args, plus their calling convention
+    /// positional and named args, plus their calling convention
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub args: &'a [Argument<'a, Ex, En>],
     /// unpacked arg
@@ -2103,6 +2103,9 @@ pub enum Argument<'a, Ex, En> {
     Ainout(&'a (&'a Pos<'a>, &'a Expr<'a, Ex, En>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Anormal(&'a Expr<'a, Ex, En>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
+    Anamed(&'a (Sid<'a>, &'a Expr<'a, Ex, En>)),
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Argument<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Argument<'arena, Ex, En>);

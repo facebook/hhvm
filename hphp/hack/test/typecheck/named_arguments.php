@@ -8,4 +8,6 @@ function foo(int $x): void {}
 function main(): void {
   // TODO(named_parameters): support this
   foo(x = 3);
+  $x = vec[1,2,3];
+  foo(...$x, x = 3);
 }

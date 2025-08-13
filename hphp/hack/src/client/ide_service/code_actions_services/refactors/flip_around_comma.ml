@@ -164,7 +164,9 @@ let visitor ~(cursor : Pos.t) =
                      function
                      | Ainout (inout_pos, expr) ->
                        Pos.merge inout_pos (pos_of_expr expr)
-                     | Anormal expr -> pos_of_expr expr)
+                     | Anormal expr -> pos_of_expr expr
+                     | Anamed ((name_pos, _), expr) ->
+                       Pos.merge name_pos (pos_of_expr expr))
             |> find_in_positions
           | Aast_defs.ValCollection (_, _, exprs)
           | Aast_defs.List exprs

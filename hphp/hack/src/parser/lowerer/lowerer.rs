@@ -1552,7 +1552,15 @@ fn p_expr_for_function_call_arguments<'a>(node: S<'a>, env: &mut Env<'a>) -> Res
             p_pos(decorator, env),
             p_expr(expression, env)?,
         )),
-        // TODO(named_parameters): lower named arguments
+        NamedArgument(NamedArgumentChildren {
+            name,
+            equal: _,
+            expression,
+        }) => {
+            let name = pos_name(name, env)?;
+            let expr = p_expr(expression, env)?;
+            Ok(aast::Argument::Anamed(name, expr))
+        }
         _ => Ok(aast::Argument::Anormal(p_expr(node, env)?)),
     }
 }

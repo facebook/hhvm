@@ -407,6 +407,11 @@ fn print_expr(
             write::paren(w, |w| {
                 write::concat_by(w, ", ", args, |w, arg| match arg {
                     ast::Argument::Anormal(e) => print_expr(ctx, w, env, e),
+                    ast::Argument::Anamed(name, e) => {
+                        w.write_all(name.name().as_bytes())?;
+                        w.write_all(b"=")?;
+                        print_expr(ctx, w, env, e)
+                    }
                     ast::Argument::Ainout(_, _) => Err(Error::fail("illegal default value").into()),
                 })?;
                 match unpacked_arg {

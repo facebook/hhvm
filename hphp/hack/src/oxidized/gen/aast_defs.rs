@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<838e4dd663242281b7c2ed9f2b2cc0ce>>
+// @generated SignedSource<<2be64502a72032d90fd2ed246694eebf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1602,7 +1602,7 @@ pub struct CallExpr<Ex, En> {
     pub func: Expr<Ex, En>,
     /// explicit type annotations
     pub targs: Vec<Targ<Ex>>,
-    /// positional args, plus their calling convention
+    /// positional and named args, plus their calling convention
     pub args: Vec<Argument<Ex, En>>,
     /// unpacked arg
     pub unpacked_arg: Option<Expr<Ex, En>>,
@@ -1627,6 +1627,7 @@ pub struct CallExpr<Ex, En> {
 pub enum Argument<Ex, En> {
     Ainout(Pos, Expr<Ex, En>),
     Anormal(Expr<Ex, En>),
+    Anamed(Sid, Expr<Ex, En>),
 }
 
 #[derive(

@@ -289,6 +289,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         match arg with
         | Anormal e -> Anormal (self#on_expr env_ e)
         | Ainout (p, e) -> Ainout (p, self#on_expr env_ e)
+        | Anamed (n, e) -> Anamed (n, self#on_expr env_ e)
       in
       match expr with
       | Collection (id, c_targ_opt, flds) ->

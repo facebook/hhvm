@@ -2756,6 +2756,13 @@ end = struct
             env
             p
             (Reason.type_variable p)
+        | Aast_defs.Anamed _ ->
+          (* TODO(named_params): We likely need to do more work here. *)
+          Env.fresh_type_reason
+            ~variance:Ast_defs.Invariant
+            env
+            p
+            (Reason.type_variable p)
         | Aast_defs.Anormal exp ->
           let ((), p, exp_) = exp in
           (match exp_ with
@@ -3013,6 +3020,9 @@ end = struct
       | Ainout (pos, e) ->
         let (env, te, ty) = expr_cb env e in
         (env, Ainout (pos, te), ty)
+      | Anamed (name, e) ->
+        let (env, te, ty) = expr_cb env e in
+        (env, Anamed (name, te), ty)
     in
     match el with
     | [] -> (env, [], [])
@@ -6605,6 +6615,7 @@ end = struct
         Assign.assign_ pos Reason.URparam_inout env e pos fp_type
       in
       env
+    | Aast_defs.Anamed _ -> env
     | Aast_defs.Anormal _ -> env
 
   and call
@@ -6745,7 +6756,18 @@ end = struct
                     let (env, _te, _ty) =
                       Assign.assign_ pos Reason.URparam_inout env elt pos efty
                     in
+
                     (env, (fun e -> Aast_defs.Ainout (iopos, e)), te, ty)
+                  | Aast_defs.Anamed (name, elt) ->
+                    (* TODO(named_params): We need to review this to make sure it's right. *)
+                    let (env, te, ty) =
+                      expr
+                        ~expected:(Some expected_arg_ty)
+                        ~ctxt:Context.default
+                        env
+                        elt
+                    in
+                    (env, (fun e -> Aast_defs.Anamed (name, e)), te, ty)
                 in
                 let (env, ty_err_opt) =
                   SubType.sub_type
@@ -6795,6 +6817,11 @@ end = struct
                       Assign.assign_ pos Reason.URparam_inout env elt pos efty
                     in
                     (env, Aast_defs.Ainout (iopos, te), ty)
+                  | Aast_defs.Anamed (name, elt) ->
+                    let (env, te, ty) =
+                      expr ~expected:None ~ctxt:Context.default env elt
+                    in
+                    (env, Aast_defs.Anamed (name, te), ty)
                 in
                 (env, te))
           in
@@ -6989,6 +7016,9 @@ end = struct
               match arg with
               | Aast_defs.Anormal e -> (Ast_defs.Pnormal, e)
               | Aast_defs.Ainout (pos, e) -> (Ast_defs.Pinout pos, e)
+              (* TODO(named_params): This is wrong. Once the named param Pnamed is
+               * in we can fix this. *)
+              | Aast_defs.Anamed (_name, e) -> (Ast_defs.Pnormal, e)
             in
             match opt_param with
             | Some param ->

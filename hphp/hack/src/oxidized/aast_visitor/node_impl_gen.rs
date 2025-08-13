@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f04dc0b669789b3a1bf81e68dbbf1242>>
+// @generated SignedSource<<7d5efd324483d5bc1630380a7d1ec7c2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -79,6 +79,10 @@ impl<P: Params> Node<P> for Argument<P::Ex, P::En> {
                 a1.accept(c, v)
             }
             Argument::Anormal(a0) => a0.accept(c, v),
+            Argument::Anamed(a0, a1) => {
+                a0.accept(c, v)?;
+                a1.accept(c, v)
+            }
         }
     }
 }

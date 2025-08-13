@@ -555,7 +555,7 @@ pub fn emit_expr<'a, 'd>(
     })
 }
 
-fn emit_exprs_and_error_on_inout<'a, 'd>(
+fn emit_exprs_and_error_on_inout_or_named<'a, 'd>(
     e: &mut Emitter<'d>,
     env: &Env<'a>,
     exprs: &[ast::Argument],
@@ -576,6 +576,17 @@ fn emit_exprs_and_error_on_inout<'a, 'd>(
                             fn_name
                         ),
                     )),
+                    ast::Argument::Anamed(name, expr) => {
+                        let pos =
+                            Pos::merge(name.pos(), expr.pos()).map_err(Error::unrecoverable)?;
+                        Err(Error::fatal_parse(
+                            &pos,
+                            format!(
+                                "Unexpected `named` argument on pseudofunction: `{}`",
+                                fn_name
+                            ),
+                        ))
+                    }
                 })
                 .collect::<Result<Vec<_>>>()?,
         ))
@@ -1812,7 +1823,7 @@ fn emit_tag_provenance_here<'a, 'd>(
         instr::pop_c()
     };
     Ok(InstrSeq::gather(vec![
-        emit_exprs_and_error_on_inout(e, env, es, "HH\\tag_provenance_here")?,
+        emit_exprs_and_error_on_inout_or_named(e, env, es, "HH\\tag_provenance_here")?,
         emit_pos(pos),
         pop,
     ]))
@@ -1836,7 +1847,7 @@ fn emit_array_mark_legacy<'a, 'd>(
         instr::instr(Instruct::Opcode(Opcode::ArrayUnmarkLegacy))
     };
     Ok(InstrSeq::gather(vec![
-        emit_exprs_and_error_on_inout(e, env, es, "HH\\array_mark_legacy")?,
+        emit_exprs_and_error_on_inout_or_named(e, env, es, "HH\\array_mark_legacy")?,
         emit_pos(pos),
         default,
         mark,
@@ -1855,7 +1866,7 @@ fn emit_idx<'a, 'd>(
         instr::empty()
     };
     Ok(InstrSeq::gather(vec![
-        emit_exprs_and_error_on_inout(e, env, es, "idx")?,
+        emit_exprs_and_error_on_inout_or_named(e, env, es, "idx")?,
         emit_pos(pos),
         default,
         instr::idx(),
@@ -2524,6 +2535,10 @@ fn emit_args_inout_setters<'a, 'd>(
             ast::Argument::Ainout(_, _) => Err(Error::unrecoverable(
                 "emit_arg_and_inout_setter: Unexpected inout expression type",
             )),
+            // TODO(named_params): Properly emit named args.
+            ast::Argument::Anamed(_, _) => Err(Error::unrecoverable(
+                "emit_arg_and_inout_setter: Named parameters not yet supported",
+            )),
             ast::Argument::Anormal(exp) => Ok((emit_expr(e, env, exp)?, instr::empty())),
         }
     }
@@ -3005,7 +3020,7 @@ fn emit_special_function<'a, 'd>(
                 }
                 _ => match get_call_builtin_func_info(e, lower_fq_name) {
                     Some((nargs, i)) if nargs == args.len() => Some(InstrSeq::gather(vec![
-                        emit_exprs_and_error_on_inout(e, env, args, lower_fq_name)?,
+                        emit_exprs_and_error_on_inout_or_named(e, env, args, lower_fq_name)?,
                         emit_pos(pos),
                         instr::instr(i),
                     ])),

@@ -14,6 +14,9 @@ impl<En, Ex> Argument<En, Ex> {
         match self {
             Argument::Anormal(e) => e,
             Argument::Ainout(_, e) => e,
+            // TODO(named_params): I'm not sure if it's ok to extract
+            // the expression here while losing the name.
+            Argument::Anamed(_, e) => e,
         }
     }
 
@@ -21,6 +24,7 @@ impl<En, Ex> Argument<En, Ex> {
         match self {
             Argument::Anormal(e) => e,
             Argument::Ainout(_, e) => e,
+            Argument::Anamed(_, e) => e,
         }
     }
 
@@ -28,6 +32,7 @@ impl<En, Ex> Argument<En, Ex> {
         match self {
             Argument::Anormal(e) => e,
             Argument::Ainout(_, e) => e,
+            Argument::Anamed(_, e) => e,
         }
     }
 

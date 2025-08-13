@@ -66,7 +66,7 @@ const char* const kPoolRouteInvalidFanout =
 const char* const kBucketizedSRRoute =
     R"({
    "type": "SRRoute",
-   "service_name": "twmemcache.shadow.bucketization-test",
+   "service_name": "mcrouter.test.thrifttest.oregon.ucache_ab_conveyor_shadow_proxy",
    "server_timeout": 200,
    "asynclog_name": "test.asynclog",
    "axonlog": false,
@@ -79,7 +79,7 @@ const char* const kBucketizedPoolRoute =
     R"({
    "type": "PoolRoute",
    "pool": { "name": "mock", "servers": [ ] },
-   "pool_id": "twmemcache.shadow.bucketization-test",
+   "pool_id": "mcrouter.test.thrifttest.oregon.ucache_ab_conveyor_shadow_proxy",
    "hash": "WeightedCh3",
    "asynclog_name": "test.asynclog",
    "axonlog": false,
@@ -91,7 +91,7 @@ const char* const kBucketizedPoolRoute =
 const char* const kSimpleSRRoute =
     R"({
    "type": "SRRoute",
-   "service_name": "twmemcache.shadow.bucketization-test",
+   "service_name": "mcrouter.test.thrifttest.oregon.ucache_ab_conveyor_shadow_proxy",
    "asynclog": false,
 })";
 
@@ -168,7 +168,7 @@ TEST(McRouteHandleProvider, sr_route) {
   auto rh = setup.getRoute(kSimpleSRRoute);
   EXPECT_TRUE(rh != nullptr);
   EXPECT_EQ(
-      "srroute|service=twmemcache.shadow.bucketization-test|timeout=1000|connect_timeout=1000|keep_routing_prefix=false|salt=|asynclog_name=|set_routing_key=true|client_id=|write_checksum=false|all_checksum=false|jump_threads=false|return_error_on_mc_delete_failure=false",
+      "srroute|service=mcrouter.test.thrifttest.oregon.ucache_ab_conveyor_shadow_proxy|timeout=1000|connect_timeout=1000|keep_routing_prefix=false|salt=|asynclog_name=|set_routing_key=true|client_id=|write_checksum=false|all_checksum=false|jump_threads=false|return_error_on_mc_delete_failure=false|set_shard_id=false|sm_scope=|sm_domain=|skip_thread_affinity=false|set_request_timeout=true",
       rh->routeName());
 }
 

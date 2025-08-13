@@ -88,7 +88,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   folly::SemiFuture<::std::int32_t> semifuture_add(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_a, ::std::int32_t p_b);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "Calculator", "function": "add"} */
   template <int = 0>
   folly::coro::Task<::std::int32_t> co_add(::std::int32_t p_a, ::std::int32_t p_b) {
@@ -99,16 +98,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   folly::coro::Task<::std::int32_t> co_add(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_a, ::std::int32_t p_b) {
     return co_add<true>(&rpcOptions, p_a, p_b);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "Calculator", "function": "add"} */
-  folly::coro::Task<::std::int32_t> co_add(::std::int32_t p_a, ::std::int32_t p_b) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_add(p_a, p_b));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "Calculator", "function": "add"} */
-  folly::coro::Task<::std::int32_t> co_add(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_a, ::std::int32_t p_b) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_add(rpcOptions, p_a, p_b));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::int32_t> co_add(apache::thrift::RpcOptions* rpcOptions, ::std::int32_t p_a, ::std::int32_t p_b) {
@@ -201,7 +190,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   virtual folly::SemiFuture<folly::Unit> semifuture_processIOBuf(apache::thrift::RpcOptions& rpcOptions, const ::cpp2_struct_footprint::IOBuf& p_buf, const ::cpp2_struct_footprint::IOBufPtr& p_ptr, ::cpp2_struct_footprint::I32Alias p_alias);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "processIOBuf"} */
   template <int = 0>
   folly::coro::Task<void> co_processIOBuf(const ::cpp2_struct_footprint::IOBuf& p_buf, const ::cpp2_struct_footprint::IOBufPtr& p_ptr, ::cpp2_struct_footprint::I32Alias p_alias) {
@@ -212,16 +200,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   folly::coro::Task<void> co_processIOBuf(apache::thrift::RpcOptions& rpcOptions, const ::cpp2_struct_footprint::IOBuf& p_buf, const ::cpp2_struct_footprint::IOBufPtr& p_ptr, ::cpp2_struct_footprint::I32Alias p_alias) {
     return co_processIOBuf<true>(&rpcOptions, p_buf, p_ptr, p_alias);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "processIOBuf"} */
-  folly::coro::Task<void> co_processIOBuf(const ::cpp2_struct_footprint::IOBuf& p_buf, const ::cpp2_struct_footprint::IOBufPtr& p_ptr, ::cpp2_struct_footprint::I32Alias p_alias) {
-    co_await folly::coro::detachOnCancel(semifuture_processIOBuf(p_buf, p_ptr, p_alias));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "processIOBuf"} */
-  folly::coro::Task<void> co_processIOBuf(apache::thrift::RpcOptions& rpcOptions, const ::cpp2_struct_footprint::IOBuf& p_buf, const ::cpp2_struct_footprint::IOBufPtr& p_ptr, ::cpp2_struct_footprint::I32Alias p_alias) {
-    co_await folly::coro::detachOnCancel(semifuture_processIOBuf(rpcOptions, p_buf, p_ptr, p_alias));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_processIOBuf(apache::thrift::RpcOptions* rpcOptions, const ::cpp2_struct_footprint::IOBuf& p_buf, const ::cpp2_struct_footprint::IOBufPtr& p_ptr, ::cpp2_struct_footprint::I32Alias p_alias) {
@@ -319,7 +297,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   virtual folly::SemiFuture<::cpp2_struct_footprint::SimpleStruct> semifuture_getStruct(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getStruct"} */
   template <int = 0>
   folly::coro::Task<::cpp2_struct_footprint::SimpleStruct> co_getStruct() {
@@ -330,16 +307,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   folly::coro::Task<::cpp2_struct_footprint::SimpleStruct> co_getStruct(apache::thrift::RpcOptions& rpcOptions) {
     return co_getStruct<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getStruct"} */
-  folly::coro::Task<::cpp2_struct_footprint::SimpleStruct> co_getStruct() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getStruct());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getStruct"} */
-  folly::coro::Task<::cpp2_struct_footprint::SimpleStruct> co_getStruct(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getStruct(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::cpp2_struct_footprint::SimpleStruct> co_getStruct(apache::thrift::RpcOptions* rpcOptions) {
@@ -439,7 +406,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   virtual folly::SemiFuture<folly::Unit> semifuture_setStruct(apache::thrift::RpcOptions& rpcOptions, const ::cpp2_struct_footprint::SimpleStruct& p_input);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "setStruct"} */
   template <int = 0>
   folly::coro::Task<void> co_setStruct(const ::cpp2_struct_footprint::SimpleStruct& p_input) {
@@ -450,16 +416,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   folly::coro::Task<void> co_setStruct(apache::thrift::RpcOptions& rpcOptions, const ::cpp2_struct_footprint::SimpleStruct& p_input) {
     return co_setStruct<true>(&rpcOptions, p_input);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "setStruct"} */
-  folly::coro::Task<void> co_setStruct(const ::cpp2_struct_footprint::SimpleStruct& p_input) {
-    co_await folly::coro::detachOnCancel(semifuture_setStruct(p_input));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "setStruct"} */
-  folly::coro::Task<void> co_setStruct(apache::thrift::RpcOptions& rpcOptions, const ::cpp2_struct_footprint::SimpleStruct& p_input) {
-    co_await folly::coro::detachOnCancel(semifuture_setStruct(rpcOptions, p_input));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_setStruct(apache::thrift::RpcOptions* rpcOptions, const ::cpp2_struct_footprint::SimpleStruct& p_input) {
@@ -557,7 +513,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   virtual folly::SemiFuture<folly::Unit> semifuture_setStructList(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::cpp2_struct_footprint::SimpleStruct>& p_items);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "setStructList"} */
   template <int = 0>
   folly::coro::Task<void> co_setStructList(const ::std::vector<::cpp2_struct_footprint::SimpleStruct>& p_items) {
@@ -568,16 +523,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   folly::coro::Task<void> co_setStructList(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::cpp2_struct_footprint::SimpleStruct>& p_items) {
     return co_setStructList<true>(&rpcOptions, p_items);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "setStructList"} */
-  folly::coro::Task<void> co_setStructList(const ::std::vector<::cpp2_struct_footprint::SimpleStruct>& p_items) {
-    co_await folly::coro::detachOnCancel(semifuture_setStructList(p_items));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "setStructList"} */
-  folly::coro::Task<void> co_setStructList(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::cpp2_struct_footprint::SimpleStruct>& p_items) {
-    co_await folly::coro::detachOnCancel(semifuture_setStructList(rpcOptions, p_items));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<void> co_setStructList(apache::thrift::RpcOptions* rpcOptions, const ::std::vector<::cpp2_struct_footprint::SimpleStruct>& p_items) {
@@ -675,7 +620,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   virtual folly::SemiFuture<::std::vector<::cpp2_struct_footprint::SimpleStruct>> semifuture_getStructList(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getStructList"} */
   template <int = 0>
   folly::coro::Task<::std::vector<::cpp2_struct_footprint::SimpleStruct>> co_getStructList() {
@@ -686,16 +630,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   folly::coro::Task<::std::vector<::cpp2_struct_footprint::SimpleStruct>> co_getStructList(apache::thrift::RpcOptions& rpcOptions) {
     return co_getStructList<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getStructList"} */
-  folly::coro::Task<::std::vector<::cpp2_struct_footprint::SimpleStruct>> co_getStructList() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getStructList());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getStructList"} */
-  folly::coro::Task<::std::vector<::cpp2_struct_footprint::SimpleStruct>> co_getStructList(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getStructList(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::vector<::cpp2_struct_footprint::SimpleStruct>> co_getStructList(apache::thrift::RpcOptions* rpcOptions) {
@@ -795,7 +729,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   virtual folly::SemiFuture<::std::map<::std::string, ::std::vector<::cpp2_struct_footprint::SimpleStruct>>> semifuture_getNestedContainer(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getNestedContainer"} */
   template <int = 0>
   folly::coro::Task<::std::map<::std::string, ::std::vector<::cpp2_struct_footprint::SimpleStruct>>> co_getNestedContainer() {
@@ -806,16 +739,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   folly::coro::Task<::std::map<::std::string, ::std::vector<::cpp2_struct_footprint::SimpleStruct>>> co_getNestedContainer(apache::thrift::RpcOptions& rpcOptions) {
     return co_getNestedContainer<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getNestedContainer"} */
-  folly::coro::Task<::std::map<::std::string, ::std::vector<::cpp2_struct_footprint::SimpleStruct>>> co_getNestedContainer() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getNestedContainer());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getNestedContainer"} */
-  folly::coro::Task<::std::map<::std::string, ::std::vector<::cpp2_struct_footprint::SimpleStruct>>> co_getNestedContainer(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getNestedContainer(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::map<::std::string, ::std::vector<::cpp2_struct_footprint::SimpleStruct>>> co_getNestedContainer(apache::thrift::RpcOptions* rpcOptions) {
@@ -915,7 +838,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   virtual folly::SemiFuture<::cpp2_struct_footprint::MyStruct> semifuture_getTypedefStruct(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getTypedefStruct"} */
   template <int = 0>
   folly::coro::Task<::cpp2_struct_footprint::MyStruct> co_getTypedefStruct() {
@@ -926,16 +848,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   folly::coro::Task<::cpp2_struct_footprint::MyStruct> co_getTypedefStruct(apache::thrift::RpcOptions& rpcOptions) {
     return co_getTypedefStruct<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getTypedefStruct"} */
-  folly::coro::Task<::cpp2_struct_footprint::MyStruct> co_getTypedefStruct() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getTypedefStruct());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getTypedefStruct"} */
-  folly::coro::Task<::cpp2_struct_footprint::MyStruct> co_getTypedefStruct(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getTypedefStruct(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::cpp2_struct_footprint::MyStruct> co_getTypedefStruct(apache::thrift::RpcOptions* rpcOptions) {
@@ -1035,7 +947,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   virtual folly::SemiFuture<::cpp2_struct_footprint::StructList> semifuture_getTypedefList(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getTypedefList"} */
   template <int = 0>
   folly::coro::Task<::cpp2_struct_footprint::StructList> co_getTypedefList() {
@@ -1046,16 +957,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   folly::coro::Task<::cpp2_struct_footprint::StructList> co_getTypedefList(apache::thrift::RpcOptions& rpcOptions) {
     return co_getTypedefList<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getTypedefList"} */
-  folly::coro::Task<::cpp2_struct_footprint::StructList> co_getTypedefList() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getTypedefList());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getTypedefList"} */
-  folly::coro::Task<::cpp2_struct_footprint::StructList> co_getTypedefList(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getTypedefList(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::cpp2_struct_footprint::StructList> co_getTypedefList(apache::thrift::RpcOptions* rpcOptions) {
@@ -1155,7 +1056,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   virtual folly::SemiFuture<::cpp2_struct_footprint::TestUnion> semifuture_getUnion(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getUnion"} */
   template <int = 0>
   folly::coro::Task<::cpp2_struct_footprint::TestUnion> co_getUnion() {
@@ -1166,16 +1066,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   folly::coro::Task<::cpp2_struct_footprint::TestUnion> co_getUnion(apache::thrift::RpcOptions& rpcOptions) {
     return co_getUnion<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getUnion"} */
-  folly::coro::Task<::cpp2_struct_footprint::TestUnion> co_getUnion() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getUnion());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getUnion"} */
-  folly::coro::Task<::cpp2_struct_footprint::TestUnion> co_getUnion(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getUnion(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::cpp2_struct_footprint::TestUnion> co_getUnion(apache::thrift::RpcOptions* rpcOptions) {
@@ -1274,7 +1164,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   > eager_semifuture_getCalculator(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getCalculator"} */
   template <int = 0>
   folly::coro::Task<apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::Calculator> co_getCalculator() {
@@ -1285,16 +1174,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   folly::coro::Task<apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::Calculator> co_getCalculator(apache::thrift::RpcOptions& rpcOptions) {
     return co_getCalculator<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getCalculator"} */
-  folly::coro::Task<apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::Calculator> co_getCalculator() {
-    co_await folly::coro::detachOnCancel(semifuture_getCalculator());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "getCalculator"} */
-  folly::coro::Task<apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::Calculator> co_getCalculator(apache::thrift::RpcOptions& rpcOptions) {
-    co_await folly::coro::detachOnCancel(semifuture_getCalculator(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::Calculator> co_getCalculator(apache::thrift::RpcOptions* rpcOptions) {
@@ -1382,7 +1261,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::cpp2_struct_footprint::SimpleStruct>> semifuture_streamStructs(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "streamStructs"} */
   template <int = 0>
   folly::coro::Task<apache::thrift::ClientBufferedStream<::cpp2_struct_footprint::SimpleStruct>> co_streamStructs() {
@@ -1393,16 +1271,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   folly::coro::Task<apache::thrift::ClientBufferedStream<::cpp2_struct_footprint::SimpleStruct>> co_streamStructs(apache::thrift::RpcOptions& rpcOptions) {
     return co_streamStructs<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "streamStructs"} */
-  folly::coro::Task<apache::thrift::ClientBufferedStream<::cpp2_struct_footprint::SimpleStruct>> co_streamStructs() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_streamStructs());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "streamStructs"} */
-  folly::coro::Task<apache::thrift::ClientBufferedStream<::cpp2_struct_footprint::SimpleStruct>> co_streamStructs(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_streamStructs(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<apache::thrift::ClientBufferedStream<::cpp2_struct_footprint::SimpleStruct>> co_streamStructs(apache::thrift::RpcOptions* rpcOptions) {
@@ -1498,7 +1366,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   virtual folly::SemiFuture<apache::thrift::ResponseAndClientBufferedStream<::cpp2_struct_footprint::Struct1,::cpp2_struct_footprint::SimpleStruct>> semifuture_streamWithSinkInitial(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_input);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "streamWithSinkInitial"} */
   template <int = 0>
   folly::coro::Task<apache::thrift::ResponseAndClientBufferedStream<::cpp2_struct_footprint::Struct1,::cpp2_struct_footprint::SimpleStruct>> co_streamWithSinkInitial(::std::int32_t p_input) {
@@ -1509,16 +1376,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   folly::coro::Task<apache::thrift::ResponseAndClientBufferedStream<::cpp2_struct_footprint::Struct1,::cpp2_struct_footprint::SimpleStruct>> co_streamWithSinkInitial(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_input) {
     return co_streamWithSinkInitial<true>(&rpcOptions, p_input);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "streamWithSinkInitial"} */
-  folly::coro::Task<apache::thrift::ResponseAndClientBufferedStream<::cpp2_struct_footprint::Struct1,::cpp2_struct_footprint::SimpleStruct>> co_streamWithSinkInitial(::std::int32_t p_input) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_streamWithSinkInitial(p_input));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "streamWithSinkInitial"} */
-  folly::coro::Task<apache::thrift::ResponseAndClientBufferedStream<::cpp2_struct_footprint::Struct1,::cpp2_struct_footprint::SimpleStruct>> co_streamWithSinkInitial(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_input) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_streamWithSinkInitial(rpcOptions, p_input));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<apache::thrift::ResponseAndClientBufferedStream<::cpp2_struct_footprint::Struct1,::cpp2_struct_footprint::SimpleStruct>> co_streamWithSinkInitial(apache::thrift::RpcOptions* rpcOptions, ::std::int32_t p_input) {
@@ -1614,7 +1471,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   virtual folly::SemiFuture<apache::thrift::ResponseAndClientBufferedStream<::cpp2_struct_footprint::Struct1,::cpp2_struct_footprint::SimpleStruct>> semifuture_streamWithSinkException(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_input);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "streamWithSinkException"} */
   template <int = 0>
   folly::coro::Task<apache::thrift::ResponseAndClientBufferedStream<::cpp2_struct_footprint::Struct1,::cpp2_struct_footprint::SimpleStruct>> co_streamWithSinkException(::std::int32_t p_input) {
@@ -1625,16 +1481,6 @@ class Calculator final : public apache::thrift::InteractionHandle {
   folly::coro::Task<apache::thrift::ResponseAndClientBufferedStream<::cpp2_struct_footprint::Struct1,::cpp2_struct_footprint::SimpleStruct>> co_streamWithSinkException(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_input) {
     return co_streamWithSinkException<true>(&rpcOptions, p_input);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "streamWithSinkException"} */
-  folly::coro::Task<apache::thrift::ResponseAndClientBufferedStream<::cpp2_struct_footprint::Struct1,::cpp2_struct_footprint::SimpleStruct>> co_streamWithSinkException(::std::int32_t p_input) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_streamWithSinkException(p_input));
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "FootprintTestService", "function": "streamWithSinkException"} */
-  folly::coro::Task<apache::thrift::ResponseAndClientBufferedStream<::cpp2_struct_footprint::Struct1,::cpp2_struct_footprint::SimpleStruct>> co_streamWithSinkException(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_input) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_streamWithSinkException(rpcOptions, p_input));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<apache::thrift::ResponseAndClientBufferedStream<::cpp2_struct_footprint::Struct1,::cpp2_struct_footprint::SimpleStruct>> co_streamWithSinkException(apache::thrift::RpcOptions* rpcOptions, ::std::int32_t p_input) {

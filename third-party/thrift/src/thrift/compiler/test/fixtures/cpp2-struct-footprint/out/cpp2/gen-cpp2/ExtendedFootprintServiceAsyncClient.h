@@ -72,7 +72,6 @@ class Client<::cpp2_struct_footprint::ExtendedFootprintService> : public ::cpp2_
   virtual folly::SemiFuture<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>> semifuture_getComplexMap(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
-#if __clang__
   /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "ExtendedFootprintService", "function": "getComplexMap"} */
   template <int = 0>
   folly::coro::Task<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>> co_getComplexMap() {
@@ -83,16 +82,6 @@ class Client<::cpp2_struct_footprint::ExtendedFootprintService> : public ::cpp2_
   folly::coro::Task<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>> co_getComplexMap(apache::thrift::RpcOptions& rpcOptions) {
     return co_getComplexMap<true>(&rpcOptions);
   }
-#else
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "ExtendedFootprintService", "function": "getComplexMap"} */
-  folly::coro::Task<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>> co_getComplexMap() {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getComplexMap());
-  }
-  /** Glean {"file": "thrift/compiler/test/fixtures/cpp2-struct-footprint/src/module.thrift", "service": "ExtendedFootprintService", "function": "getComplexMap"} */
-  folly::coro::Task<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>> co_getComplexMap(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await folly::coro::detachOnCancel(semifuture_getComplexMap(rpcOptions));
-  }
-#endif
  private:
   template <bool hasRpcOptions>
   folly::coro::Task<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>> co_getComplexMap(apache::thrift::RpcOptions* rpcOptions) {

@@ -41,12 +41,17 @@ let process_file_input ctx ~error_filter file_input =
     (errors, Relative_path.Map.singleton Relative_path.default tast)
 
 (* Single-threaded implementation *)
-let go_sequential file_inputs ctx ~error_filter :
+let go_sequential file_inputs ctx ~return_expanded_tast ~error_filter :
     Errors.t * Tast.program Tast_with_dynamic.t Relative_path.Map.t =
   let collect (errors_acc, tasts) file_input =
     let (errors, file_tast) = process_file_input ctx ~error_filter file_input in
     let errors_acc = Errors.merge errors errors_acc in
-    let tasts = Relative_path.Map.union tasts file_tast in
+    let tasts =
+      if return_expanded_tast then
+        Relative_path.Map.union tasts file_tast
+      else
+        Relative_path.Map.empty
+    in
     (errors_acc, tasts)
   in
   List.fold ~f:collect ~init:(Errors.empty, Relative_path.Map.empty) file_inputs
@@ -65,31 +70,36 @@ let worker_job ctx ~error_filter (_worker_id, acc) file_inputs =
     file_inputs
 
 (* Merge function for combining results from workers *)
-let merge_results (_worker_id, result) acc =
+let merge_results ~return_expanded_tast (_worker_id, result) acc =
   let (errors1, tasts1) = result in
   let (errors2, tasts2) = acc in
   let merged_errors = Errors.merge errors1 errors2 in
-  let merged_tasts = Relative_path.Map.union tasts1 tasts2 in
+  let merged_tasts =
+    if return_expanded_tast then
+      Relative_path.Map.union tasts1 tasts2
+    else
+      Relative_path.Map.empty
+  in
   (merged_errors, merged_tasts)
 
 (* Parallel implementation *)
-let go_parallel workers file_inputs ctx ~error_filter :
+let go_parallel workers file_inputs ctx ~return_expanded_tast ~error_filter :
     Errors.t * Tast.program Tast_with_dynamic.t Relative_path.Map.t =
   let job = worker_job ctx ~error_filter in
   let next = MultiWorker.next workers file_inputs in
   MultiWorker.call_with_worker_id
     workers
     ~job
-    ~merge:merge_results
+    ~merge:(merge_results ~return_expanded_tast)
     ~neutral:(Errors.empty, Relative_path.Map.empty)
     ~next
 
 (* Main entry point that decides whether to use parallel or sequential processing *)
-let go workers file_inputs ctx ~error_filter :
+let go workers file_inputs ctx ~return_expanded_tast ~error_filter :
     Errors.t * Tast.program Tast_with_dynamic.t Relative_path.Map.t =
   let num_files = List.length file_inputs in
   (* Use parallel processing if there are enough files to justify the overhead *)
   if num_files >= 10 then
-    go_parallel workers file_inputs ctx ~error_filter
+    go_parallel workers file_inputs ctx ~return_expanded_tast ~error_filter
   else
-    go_sequential file_inputs ctx ~error_filter
+    go_sequential file_inputs ctx ~return_expanded_tast ~error_filter

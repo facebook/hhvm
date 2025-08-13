@@ -92,6 +92,7 @@ let handle :
         genv.ServerEnv.workers
         file_names
         ctx
+        ~return_expanded_tast
         ~error_filter:
           {
             Tast_provider.ErrorFilter.error_filter;

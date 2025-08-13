@@ -25,7 +25,6 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <fmt/core.h>
 
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/uri.h>
@@ -88,6 +87,9 @@ struct rust_codegen_options {
   // initialization functions (c.f. `t_mstch_cpp2_generator::generate_program()`
   // https://fburl.com/code/np814p6y). Enabled by `--gen rust:any`.
   bool any_registry_initialization_enabled = false;
+
+  // split independent types into different compilation units.
+  int types_split_count = 0;
 };
 
 enum class FieldKind { Box, Arc, Inline };
@@ -269,8 +271,8 @@ std::string get_mock_import_name(
 }
 
 // Path to the crate root of the given service's mocks crate. Unlike
-// `get_mock_import_name`, for multifile Thrift libraries the module name is not
-// included here.
+// `get_mock_import_name`, for multifile Thrift libraries the module name is
+// not included here.
 std::string get_mock_crate(
     const t_program* program, const rust_codegen_options& options) {
   if (program == options.current_program) {
@@ -307,6 +309,19 @@ FieldKind field_kind(const t_named& node) {
     return FieldKind::Box;
   }
   return FieldKind::Inline;
+}
+
+int checked_stoi(const std::string& s, const std::string& msg) {
+  try {
+    std::size_t pos = 0;
+    int ret = std::stoi(s, &pos);
+    if (pos != s.size()) {
+      throw std::runtime_error(msg);
+    }
+    return ret;
+  } catch (...) {
+    throw std::runtime_error(msg);
+  }
 }
 
 void parse_include_srcs(
@@ -438,7 +453,8 @@ bool node_has_custom_rust_type(const t_named& node) {
 }
 
 // NOTE: a transitive _adapter_ is different from a transitive _annotation_. A
-// transitive adapter is defined as one applied transitively through types. E.g.
+// transitive adapter is defined as one applied transitively through types.
+// E.g.
 //
 // ```
 // @rust.Adapter{name = "Foo"}
@@ -449,7 +465,8 @@ bool node_has_custom_rust_type(const t_named& node) {
 // }
 // ```
 //
-// `Bar.field1` has a transitive adapter due to its type being an adapted type.
+// `Bar.field1` has a transitive adapter due to its type being an adapted
+// type.
 //
 // A transitive annotation is one that is applied through `@scope.Transitive`.
 // E.g.
@@ -493,8 +510,8 @@ mstch::node adapter_node(
   if (adapter_annotation != nullptr) {
     // Always replace `crate::` with the package name of where this annotation
     // originated to support adapters applied with `@scope.Transitive`.
-    // If the annotation originates from the same module, this will just return
-    // `crate::` anyways to be a no-op.
+    // If the annotation originates from the same module, this will just
+    // return `crate::` anyways to be a no-op.
     std::string package =
         get_types_import_name(adapter_annotation->program(), options);
 
@@ -692,6 +709,7 @@ class rust_mstch_program : public mstch_program {
     register_has_option(
         "program:deprecated_default_enum_min_i32?",
         "deprecated_default_enum_min_i32");
+    register_has_option("program:types_split_count?", "types_split_count");
   }
 
   mstch::node rust_has_direct_dependencies() {
@@ -2359,6 +2377,13 @@ void t_mstch_rust_generator::generate_program() {
 
   options_.any_registry_initialization_enabled = has_option("any");
 
+  std::optional<std::string> maybe_number = get_option("types_split_count");
+  if (maybe_number) {
+    options_.types_split_count = checked_stoi(
+        maybe_number.value(),
+        "Invalid types_split_count '" + maybe_number.value() + "'");
+  }
+
   parse_include_srcs(
       options_.types_include_srcs, get_option("types_include_srcs"));
   parse_include_srcs(
@@ -2428,7 +2453,14 @@ void t_mstch_rust_generator::generate_program() {
   set_mstch_factories();
 
   const auto& prog = cached_program(program_);
-  render_to_file(prog, "types.rs", "types.rs");
+  if (options_.types_split_count > 0) {
+    // TODO: swap with function that splits types, until then this branch
+    // doesn't do anything different.
+    render_to_file(prog, "types.rs", "types.rs");
+  } else {
+    render_to_file(prog, "types.rs", "types.rs");
+  }
+
   render_to_file(prog, "services.rs", "services.rs");
   render_to_file(prog, "errors.rs", "errors.rs");
   render_to_file(prog, "consts.rs", "consts.rs");
@@ -2496,8 +2528,8 @@ bool validate_program_annotations(sema_context& ctx, const t_program& program) {
             t->name());
       }
 
-      // To be spec compliant, adapted typedefs can be composed only if they are
-      // wrapped. For example, the following is not allowed:
+      // To be spec compliant, adapted typedefs can be composed only if they
+      // are wrapped. For example, the following is not allowed:
       //
       // ```
       // @rust.Adapter{name = "Foo"}
@@ -2558,5 +2590,6 @@ THRIFT_REGISTER_GENERATOR(
     "                     Additional Rust source files to include in each crate, `:` separated\n"
     "    include_docs=:   Markdown to include in front of crate-level documentation.\n"
     "    cratemap=map:    Mapping file from services to crate names\n"
-    "    types_crate=:    Name that the main crate uses to refer to its dependency on the types crate\n");
+    "    types_crate=:    Name that the main crate uses to refer to its dependency on the types crate\n"
+    "    types_split_count=:    Number of compilation units to split the independent types into\n");
 } // namespace apache::thrift::compiler::rust

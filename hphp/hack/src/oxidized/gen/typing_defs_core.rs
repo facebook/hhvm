@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b659b79d5cf3d2bc47eabc4ceb7d0c51>>
+// @generated SignedSource<<21a6805e6f7a0e216e0bbbc96893809d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1198,6 +1198,35 @@ pub struct CanIndex {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "cia_")]
+#[repr(C)]
+pub struct CanIndexAssign {
+    pub key: Ty,
+    pub write: Ty,
+    pub source: Ty,
+    pub val: Ty,
+    pub index_expr: nast::Expr,
+    pub expr_pos: pos::Pos,
+    pub array_pos: pos::Pos,
+    pub index_pos: pos::Pos,
+    pub write_pos: pos::Pos,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
     EqModuloPos,
     FromOcamlRep,
     Hash,
@@ -1269,6 +1298,8 @@ pub enum ConstraintType_ {
     ThasConst { name: String, ty: Ty },
     #[rust_to_ocaml(name = "Tcan_index")]
     TcanIndex(CanIndex),
+    #[rust_to_ocaml(name = "Tcan_index_assign")]
+    TcanIndexAssign(CanIndexAssign),
     #[rust_to_ocaml(name = "Tcan_traverse")]
     TcanTraverse(CanTraverse),
     /// The type of container destructuring via list() or splat `...`

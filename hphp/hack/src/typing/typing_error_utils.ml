@@ -5697,6 +5697,7 @@ end = struct
             (bound_desc ~prefix:" as " ~is_trivial:Typing_utils.is_mixed up)
       | (_, Tcan_traverse _) -> "an array that can be traversed with foreach"
       | (_, Tcan_index _) -> "an array that can be indexed"
+      | (_, Tcan_index_assign _) -> "an array that can be updated"
       | (_, Tdestructure _) ->
         Markdown_lite.md_codify
           (Typing_print.full_strip_ns_i

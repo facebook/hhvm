@@ -383,6 +383,8 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?tco_timeout:(int_opt "timeout" config)
     ?tco_disallow_invalid_arraykey:(bool_opt "disallow_invalid_arraykey" config)
     ?tco_constraint_array_index:(bool_opt "constraint_array_index" config)
+    ?tco_constraint_array_index_assign:
+      (bool_opt "constraint_array_index_assign" config)
     ?code_agnostic_fixme:(bool_opt "code_agnostic_fixme" config)
     ?allowed_fixme_codes_strict:
       (prepare_iset config "allowed_fixme_codes_strict")

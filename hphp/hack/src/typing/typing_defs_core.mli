@@ -657,6 +657,20 @@ type can_index = {
 }
 [@@deriving show]
 
+(* `$source[key] = write` update source to type val *)
+type can_index_assign = {
+  cia_key: locl_ty;
+  cia_write: locl_ty;
+  cia_source: locl_ty;
+  cia_val: locl_ty;
+  cia_index_expr: Nast.expr;
+  cia_expr_pos: Pos.t;
+  cia_array_pos: Pos.t;
+  cia_index_pos: Pos.t;
+  cia_write_pos: Pos.t;
+}
+[@@deriving show]
+
 (* A can_traverse represents the ability to do a foreach over a certain type.
    We should have t <: {ct_key; ct_val; ct_is_await} when type t supports foreach
    and doing the foreack will bind values of type ct_val, and optionally bind keys of
@@ -690,6 +704,7 @@ type constraint_type_ =
     }
       (** Check if the given type has a class constant that is compatible with [ty] *)
   | Tcan_index of can_index
+  | Tcan_index_assign of can_index_assign
   | Tcan_traverse of can_traverse
   | Tdestructure of destructure
       (** The type of a list destructuring assignment.

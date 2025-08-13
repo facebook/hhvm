@@ -230,6 +230,7 @@ end = struct
         "typing_defs_core::Destructure";
         "typing_defs_core::DestructureKind";
         "typing_defs_core::CanIndex";
+        "typing_defs_core::CanIndexAssign";
         "typing_defs_core::ConstraintType_";
         "typing_defs_core::ConstraintType";
         "typing_defs_core::InternalType";
@@ -274,6 +275,7 @@ let denylisted_types () =
   | Configuration.ByRef ->
     [
       ("typing_defs_core", "CanIndex");
+      ("typing_defs_core", "CanIndexAssign");
       ("typing_defs_core", "CanTraverse");
       ("typing_defs_core", "ConstraintType_");
       ("typing_defs_core", "ConstraintType");

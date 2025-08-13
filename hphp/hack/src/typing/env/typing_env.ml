@@ -1610,6 +1610,12 @@ module M = struct
           Tvid.Set.union tyvars acc_positive,
           Tvid.Set.union tyvars acc_negative )
     in
+    let rec unions_aux tvs acc =
+      match tvs with
+      | [] -> acc
+      | tv :: tvs -> unions_aux tvs (Tvid.Set.union acc tv)
+    in
+    let unions tvs = unions_aux tvs Tvid.Set.empty in
     let (env, ety) = expand_internal_type env ty in
     match ety with
     | LoclType ety ->
@@ -1724,8 +1730,8 @@ module M = struct
           | None -> (env, Tvid.Set.empty, Tvid.Set.empty)
         in
         ( env,
-          Tvid.Set.union (Tvid.Set.union positive1 positive2) positive3,
-          Tvid.Set.union (Tvid.Set.union negative1 negative2) negative3 )
+          unions [positive1; positive2; positive3],
+          unions [negative1; negative2; negative3] )
       | (_, Thas_member hm) ->
         let { hm_type; hm_name = _; hm_class_id = _; hm_explicit_targs = _ } =
           hm
@@ -1737,9 +1743,15 @@ module M = struct
         let (env, posup, negup) = get_tyvars env htm_upper in
         (env, Tvid.Set.union posup neglo, Tvid.Set.union poslo negup)
       | (_, Tcan_index ci) ->
-        let (env, pos1, neg1) = get_tyvars env ci.ci_val in
-        let (env, pos2, neg2) = get_tyvars env ci.ci_key in
+        let (env, pos1, neg1) = get_tyvars env ci.ci_key in
+        let (env, pos2, neg2) = get_tyvars env ci.ci_val in
         (env, Tvid.Set.union pos1 pos2, Tvid.Set.union neg1 neg2)
+      | (_, Tcan_index_assign cia) ->
+        let (env, pos1, neg1) = get_tyvars env cia.cia_key in
+        let (env, pos2, neg2) = get_tyvars env cia.cia_write in
+        let (env, pos3, neg3) = get_tyvars env cia.cia_source in
+        let (env, pos4, neg4) = get_tyvars env cia.cia_val in
+        (env, unions [pos1; pos2; pos3; pos4], unions [neg1; neg2; neg3; neg4])
       | (_, Tcan_traverse ct) ->
         let (env, pos1, neg1) = get_tyvars env ct.ct_val in
         let (env, pos2, neg2) =

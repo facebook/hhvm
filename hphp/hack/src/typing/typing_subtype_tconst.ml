@@ -63,6 +63,7 @@ let make_type_const_equal
       | (_, Thas_type_member _)
       | (_, Thas_member _)
       | (_, Tcan_index _)
+      | (_, Tcan_index_assign _)
       | (_, Tcan_traverse _)
       | (_, Ttype_switch _)
       | (_, Thas_const _)

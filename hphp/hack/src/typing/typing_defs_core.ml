@@ -1440,6 +1440,20 @@ type can_index = {
 }
 [@@deriving show]
 
+(* `$source[key] = write` update source to type val *)
+type can_index_assign = {
+  cia_key: locl_ty;
+  cia_write: locl_ty;
+  cia_source: locl_ty;
+  cia_val: locl_ty;
+  cia_index_expr: Nast.expr;
+  cia_expr_pos: Pos.t;
+  cia_array_pos: Pos.t;
+  cia_index_pos: Pos.t;
+  cia_write_pos: Pos.t;
+}
+[@@deriving show]
+
 type can_traverse = {
   ct_key: locl_ty option;
   ct_val: locl_ty;
@@ -1464,6 +1478,7 @@ type constraint_type_ =
     }
       (** Check if the given type has a class constant that is compatible with [ty] *)
   | Tcan_index of can_index
+  | Tcan_index_assign of can_index_assign
   | Tcan_traverse of can_traverse
   | Tdestructure of destructure
       (** The type of container destructuring via list() or splat `...` *)
@@ -1575,6 +1590,34 @@ let can_index_compare ~normalize_lists ci1 ci2 =
                     (fun _ ->
                       Aast.compare_pos ci1.ci_index_pos ci2.ci_index_pos)))))
 
+let can_index_assign_compare ~normalize_lists cia1 cia2 =
+  chain_compare
+    (ty_compare ~normalize_lists cia1.cia_key cia2.cia_key)
+    (fun _ ->
+      chain_compare
+        (ty_compare ~normalize_lists cia1.cia_write cia2.cia_write)
+        (fun _ ->
+          chain_compare
+            (ty_compare ~normalize_lists cia1.cia_source cia2.cia_source)
+            (fun _ ->
+              chain_compare
+                (ty_compare ~normalize_lists cia1.cia_val cia2.cia_val)
+                (fun _ ->
+                  chain_compare
+                    (Aast.compare_pos cia1.cia_expr_pos cia2.cia_expr_pos)
+                    (fun _ ->
+                      chain_compare
+                        (Aast.compare_pos cia1.cia_array_pos cia2.cia_array_pos)
+                        (fun _ ->
+                          chain_compare
+                            (Aast.compare_pos
+                               cia1.cia_index_pos
+                               cia2.cia_index_pos)
+                            (fun _ ->
+                              Aast.compare_pos
+                                cia1.cia_write_pos
+                                cia2.cia_write_pos)))))))
+
 let can_traverse_compare ~normalize_lists ct1 ct2 =
   chain_compare
     (Option.compare (ty_compare ~normalize_lists) ct1.ct_key ct2.ct_key)
@@ -1612,10 +1655,11 @@ let constraint_ty_con_ordinal cty =
   | Thas_member _ -> 0
   | Tdestructure _ -> 1
   | Tcan_index _ -> 2
-  | Tcan_traverse _ -> 3
-  | Thas_type_member _ -> 4
-  | Ttype_switch _ -> 5
-  | Thas_const _ -> 6
+  | Tcan_index_assign _ -> 3
+  | Tcan_traverse _ -> 4
+  | Thas_type_member _ -> 5
+  | Ttype_switch _ -> 6
+  | Thas_const _ -> 7
 
 let constraint_ty_compare ?(normalize_lists = false) ty1 ty2 =
   let (_, ty1) = deref_constraint_type ty1 in
@@ -1631,6 +1675,8 @@ let constraint_ty_compare ?(normalize_lists = false) ty1 ty2 =
             ty_compare upper1 upper2))
   | (Tcan_index ci1, Tcan_index ci2) ->
     can_index_compare ~normalize_lists ci1 ci2
+  | (Tcan_index_assign cia1, Tcan_index_assign cia2) ->
+    can_index_assign_compare ~normalize_lists cia1 cia2
   | (Tcan_traverse ct1, Tcan_traverse ct2) ->
     can_traverse_compare ~normalize_lists ct1 ct2
   | (Tdestructure d1, Tdestructure d2) ->
@@ -1648,8 +1694,9 @@ let constraint_ty_compare ?(normalize_lists = false) ty1 ty2 =
     chain_compare (String.compare name1 name2) (fun _ ->
         ty_compare ~normalize_lists ty1 ty2)
   | ( _,
-      ( Thas_member _ | Tcan_index _ | Tcan_traverse _ | Tdestructure _
-      | Thas_type_member _ | Ttype_switch _ | Thas_const _ ) ) ->
+      ( Thas_member _ | Tcan_index _ | Tcan_index_assign _ | Tcan_traverse _
+      | Tdestructure _ | Thas_type_member _ | Ttype_switch _ | Thas_const _ ) )
+    ->
     constraint_ty_con_ordinal ty2 - constraint_ty_con_ordinal ty1
 
 let constraint_ty_equal ?(normalize_lists = false) ty1 ty2 =

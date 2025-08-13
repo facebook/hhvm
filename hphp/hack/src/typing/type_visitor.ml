@@ -426,9 +426,13 @@ class type ['a] internal_type_visitor_type =
 
     method on_tcan_index : 'a -> Reason.t -> can_index -> 'a
 
+    method on_tcan_index_assign : 'a -> Reason.t -> can_index_assign -> 'a
+
     method on_tcan_traverse : 'a -> Reason.t -> can_traverse -> 'a
 
     method on_can_index : 'a -> Reason.t -> can_index -> 'a
+
+    method on_can_index_assign : 'a -> Reason.t -> can_index_assign -> 'a
 
     method on_can_traverse : 'a -> Reason.t -> can_traverse -> 'a
 
@@ -460,6 +464,7 @@ class ['a] internal_type_visitor : ['a] internal_type_visitor_type =
       | Thas_member hm -> this#on_thas_member acc r hm
       | Thas_type_member htm -> this#on_thas_type_member acc r htm
       | Tcan_index ci -> this#on_tcan_index acc r ci
+      | Tcan_index_assign cia -> this#on_tcan_index_assign acc r cia
       | Tcan_traverse ct -> this#on_tcan_traverse acc r ct
       | Tdestructure des -> this#on_tdestructure acc r des
       | Ttype_switch { predicate; ty_true; ty_false } ->
@@ -492,11 +497,19 @@ class ['a] internal_type_visitor : ['a] internal_type_visitor_type =
 
     method on_tcan_index acc r hm = this#on_can_index acc r hm
 
+    method on_tcan_index_assign acc r hm = this#on_can_index_assign acc r hm
+
     method on_tcan_traverse acc r hm = this#on_can_traverse acc r hm
 
     method on_can_index acc _r ci =
       let acc = this#on_locl_type acc ci.ci_key in
       this#on_locl_type acc ci.ci_val
+
+    method on_can_index_assign acc _r cia =
+      let acc = this#on_locl_type acc cia.cia_key in
+      let acc = this#on_locl_type acc cia.cia_write in
+      let acc = this#on_locl_type acc cia.cia_source in
+      this#on_locl_type acc cia.cia_val
 
     method on_can_traverse acc _r ct =
       let acc = this#on_locl_type_option acc ct.ct_key in

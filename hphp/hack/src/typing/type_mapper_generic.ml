@@ -344,6 +344,9 @@ class type ['env] constraint_type_mapper_type =
     method on_Tcan_index :
       'env -> Reason.t -> can_index -> 'env * constraint_type
 
+    method on_Tcan_index_assign :
+      'env -> Reason.t -> can_index_assign -> 'env * constraint_type
+
     method on_Tcan_traverse :
       'env -> Reason.t -> can_traverse -> 'env * constraint_type
 
@@ -382,6 +385,7 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
       | Thas_member hm -> this#on_Thas_member env r hm
       | Thas_type_member htm -> this#on_Thas_type_member env r htm
       | Tcan_index ci -> this#on_Tcan_index env r ci
+      | Tcan_index_assign cia -> this#on_Tcan_index_assign env r cia
       | Tcan_traverse ct -> this#on_Tcan_traverse env r ct
       | Tdestructure tyl -> this#on_Tdestructure env r tyl
       | Ttype_switch { predicate; ty_true; ty_false } ->
@@ -427,6 +431,39 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
         }
       in
       (env, mk_constraint_type (r, Tcan_index ci))
+
+    method on_Tcan_index_assign env r cia =
+      let {
+        cia_key;
+        cia_write;
+        cia_source;
+        cia_val;
+        cia_index_expr;
+        cia_expr_pos;
+        cia_array_pos;
+        cia_index_pos;
+        cia_write_pos;
+      } =
+        cia
+      in
+      let (env, cia_key) = this#on_type env cia_key in
+      let (env, cia_write) = this#on_type env cia_write in
+      let (env, cia_source) = this#on_type env cia_source in
+      let (env, cia_val) = this#on_type env cia_val in
+      let cia =
+        {
+          cia_key;
+          cia_write;
+          cia_source;
+          cia_val;
+          cia_index_expr;
+          cia_expr_pos;
+          cia_array_pos;
+          cia_index_pos;
+          cia_write_pos;
+        }
+      in
+      (env, mk_constraint_type (r, Tcan_index_assign cia))
 
     method on_Tcan_traverse env r ct =
       let { ct_key; ct_val; ct_is_await; ct_reason } = ct in

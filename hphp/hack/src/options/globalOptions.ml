@@ -104,6 +104,7 @@ type t = {
   tco_timeout: int;
   tco_disallow_invalid_arraykey: bool;
   tco_constraint_array_index: bool;
+  tco_constraint_array_index_assign: bool;
   code_agnostic_fixme: bool;
   allowed_fixme_codes_strict: ISet.t;
   log_levels: int SMap.t;
@@ -224,6 +225,7 @@ let default =
     tco_timeout = 0;
     tco_disallow_invalid_arraykey = true;
     tco_constraint_array_index = false;
+    tco_constraint_array_index_assign = false;
     code_agnostic_fixme = false;
     allowed_fixme_codes_strict = ISet.empty;
     log_levels = SMap.empty;
@@ -343,6 +345,7 @@ let set
     ?tco_timeout
     ?tco_disallow_invalid_arraykey
     ?tco_constraint_array_index
+    ?tco_constraint_array_index_assign
     ?code_agnostic_fixme
     ?allowed_fixme_codes_strict
     ?log_levels
@@ -499,6 +502,10 @@ let set
         options.tco_disallow_invalid_arraykey;
     tco_constraint_array_index =
       setting tco_constraint_array_index options.tco_constraint_array_index;
+    tco_constraint_array_index_assign =
+      setting
+        tco_constraint_array_index_assign
+        options.tco_constraint_array_index_assign;
     log_levels = setting log_levels options.log_levels;
     tco_remote_old_decls_no_limit =
       setting

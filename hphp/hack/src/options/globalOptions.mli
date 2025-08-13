@@ -99,6 +99,8 @@ type t = {
         like bools, floats, or null; as array keys. *)
   tco_constraint_array_index: bool;
       (** Flag to enable the constraint solver to infer that a type can be indexed *)
+  tco_constraint_array_index_assign: bool;
+      (** Flag to enable the constraint solver to infer that a type can be indexed then assigned *)
   code_agnostic_fixme: bool;
       (** HH_FIXME should silence *any* error, not just the one specified by code *)
   allowed_fixme_codes_strict: ISet.t;
@@ -322,6 +324,7 @@ val set :
   ?tco_timeout:int ->
   ?tco_disallow_invalid_arraykey:bool ->
   ?tco_constraint_array_index:bool ->
+  ?tco_constraint_array_index_assign:bool ->
   ?code_agnostic_fixme:bool ->
   ?allowed_fixme_codes_strict:ISet.t ->
   ?log_levels:int SMap.t ->

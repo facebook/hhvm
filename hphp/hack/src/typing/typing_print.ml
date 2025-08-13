@@ -654,6 +654,26 @@ module Full = struct
       Concat [text "can_index"; text "("; key_doc; comma_sep; val_doc; text ")"]
     )
 
+  let tcan_index_assign ~fuel k cia =
+    let (fuel, key_doc) = k ~fuel cia.cia_key in
+    let (fuel, write_doc) = k ~fuel cia.cia_write in
+    let (fuel, source_doc) = k ~fuel cia.cia_source in
+    let (fuel, val_doc) = k ~fuel cia.cia_val in
+    ( fuel,
+      Concat
+        [
+          text "can_index_assign";
+          text "(";
+          key_doc;
+          comma_sep;
+          write_doc;
+          comma_sep;
+          source_doc;
+          comma_sep;
+          val_doc;
+          text ")";
+        ] )
+
   let tcan_traverse ~fuel k ct =
     match ct.ct_key with
     | None ->
@@ -686,6 +706,25 @@ module Full = struct
             text (string_of_bool ct.ct_is_await);
             text ")";
           ] )
+
+  let thas_type_member ~fuel k htm =
+    let { htm_id = id; htm_lower = lo; htm_upper = up } = htm in
+    let subtype = Concat [Space; text "<:"; Space] in
+    let (fuel, lo_doc) = k ~fuel lo in
+    let (fuel, up_doc) = k ~fuel up in
+    let has_type_member_doc =
+      Concat
+        [
+          text "has_type_member(";
+          lo_doc;
+          subtype;
+          text id;
+          subtype;
+          up_doc;
+          text ")";
+        ]
+    in
+    (fuel, has_type_member_doc)
 
   let tdestructure ~fuel (k : fuel:Fuel.t -> locl_ty -> Fuel.t * Doc.t) d =
     let { d_required; d_optional; d_variadic; d_kind } = d in
@@ -1294,26 +1333,10 @@ module Full = struct
     let k ~fuel lty = locl_ty ~fuel ~hide_internals to_doc st penv lty in
     match x with
     | Thas_member hm -> thas_member ~fuel k hm
-    | Thas_type_member htm ->
-      let { htm_id = id; htm_lower = lo; htm_upper = up } = htm in
-      let subtype = Concat [Space; text "<:"; Space] in
-      let (fuel, lo_doc) = k ~fuel lo in
-      let (fuel, up_doc) = k ~fuel up in
-      let has_type_member_doc =
-        Concat
-          [
-            text "has_type_member(";
-            lo_doc;
-            subtype;
-            text id;
-            subtype;
-            up_doc;
-            text ")";
-          ]
-      in
-      (fuel, has_type_member_doc)
+    | Thas_type_member htm -> thas_type_member ~fuel k htm
     | Tdestructure d -> tdestructure ~fuel k d
     | Tcan_index ci -> tcan_index ~fuel k ci
+    | Tcan_index_assign cia -> tcan_index_assign ~fuel k cia
     | Tcan_traverse ct -> tcan_traverse ~fuel k ct
     | Ttype_switch { predicate; ty_true; ty_false } ->
       let (fuel, predicate_doc) =

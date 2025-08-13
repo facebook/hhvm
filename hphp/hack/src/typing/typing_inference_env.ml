@@ -711,6 +711,12 @@ module Size = struct
     | (_, Thas_type_member htm) ->
       1 + ty_size env htm.htm_lower + ty_size env htm.htm_upper
     | (_, Tcan_index ci) -> 1 + ty_size env ci.ci_val + ty_size env ci.ci_key
+    | (_, Tcan_index_assign cia) ->
+      1
+      + ty_size env cia.cia_key
+      + ty_size env cia.cia_write
+      + ty_size env cia.cia_source
+      + ty_size env cia.cia_val
     | (_, Tcan_traverse ct) ->
       1 + ty_size env ct.ct_val + type_size_option ~f:(ty_size env) ct.ct_key
     | (_, Ttype_switch { predicate = _; ty_true; ty_false }) ->

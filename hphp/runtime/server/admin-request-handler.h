@@ -77,6 +77,7 @@ private:
   bool handleDumpStaticStringsRequest(folly::File& file);
   bool handleRandomStaticStringsRequest(const std::string &cmd,
                                         Transport *transport);
+  bool handleDumpUnitsRequest(folly::File& file);
   bool handleVMRequest      (const std::string &cmd, Transport *transport);
   void handleProxyRequest(const std::string& cmd, Transport *transport);
   bool handleRandomApcRequest (const std::string &cmd, Transport *transport);
@@ -95,4 +96,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

@@ -388,6 +388,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "                  /tmp/apc_dump_meta\n"
         "/random-apc:      dump the key and size of a random APC entry\n"
         "    count         number of entries to return\n"
+        "/dump-units:      dump all loaded units to /tmp/loaded_units\n"
         "/treadmill:       dump treadmill information\n"
 
         "/pcre-cache-size: get pcre cache map size\n"
@@ -806,6 +807,16 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (strncmp(cmd.c_str(), "random-static-strings", 21) == 0) {
       handleRandomStaticStringsRequest(cmd, transport);
+      break;
+    }
+    if (strncmp(cmd.c_str(), "dump-units", 10) == 0) {
+      if (auto file = dump_file("loaded_units")) {
+        if (handleDumpUnitsRequest(file->file)) {
+          transport->sendString(folly::sformat("dumped to {}\n", file->path));
+        }
+      } else {
+        transport->sendString("Unable to mkdir or file already exists.\n");
+      }
       break;
     }
     if (strncmp(cmd.c_str(), "vm-", 3) == 0 &&
@@ -1433,6 +1444,18 @@ bool AdminRequestHandler::handleRandomStaticStringsRequest(
     output += formatStaticString(item);
   }
   transport->sendString(output);
+  return true;
+}
+
+bool AdminRequestHandler::handleDumpUnitsRequest(folly::File& file) {
+  if (!Cfg::Repo::Authoritative) return false;
+  auto const& loaded = loadedUnitsRepoAuth();
+  for (auto const unit : loaded) {
+    if (auto path = unit->origFilepath()) {
+      folly::writeFull(file.fd(), path->data(), path->size());
+      folly::writeFull(file.fd(), "\n", 1);
+    }
+  }
   return true;
 }
 

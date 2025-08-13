@@ -2412,14 +2412,6 @@ TEST(Compilertest, struct_optional_field_custom_defaul_error) {
       @thrift.AllowUnsafeOptionalCustomDefaultValue
       2: optional bool b = false;
     }
-
-    union TestUnion {
-      1: i32 c = 0;
-        # expected-warning@-1: Union field is implicitly optional and should not have custom default value: `c` (in union `TestUnion`).
-
-      @thrift.AllowUnsafeOptionalCustomDefaultValue
-      2: i32 d = 0;
-    }
   )",
       {"--extra-validation", "struct_optional_field_custom_default=error"});
 }
@@ -2429,23 +2421,89 @@ TEST(Compilertest, union_field_custom_default_error) {
       R"(
     include "thrift/annotation/thrift.thrift"
 
-    struct TestStruct {
-      1: optional bool a = false;
-        # expected-warning@-1: Optional field should not have custom default value: `a` (in `TestStruct`).
-
-      @thrift.AllowUnsafeOptionalCustomDefaultValue
-      2: optional bool b = false;
-    }
-
     union TestUnion {
       1: i32 c = 0;
         # expected-error@-1: Union field is implicitly optional and should not have custom default value: `c` (in union `TestUnion`).
 
-      @thrift.AllowUnsafeOptionalCustomDefaultValue
+      @thrift.AllowUnsafeUnionFieldCustomDefaultValue
       2: i32 d = 0;
     }
   )",
       {"--extra-validation", "union_field_custom_default=error"});
+}
+
+TEST(
+    Compilertest,
+    invalid_annotation_allow_unsafe_optional_custom_default_value) {
+  check_compile(
+      R"(
+    include "thrift/annotation/thrift.thrift"
+
+    struct TestStruct {
+      @thrift.AllowUnsafeOptionalCustomDefaultValue
+      1: optional bool a = false;
+
+      @thrift.AllowUnsafeOptionalCustomDefaultValue
+      2: bool b = false;
+        # expected-error@-2: Field annotated with @thrift.AllowUnsafeOptionalCustomDefaultValue must be in a struct or exception, optional and have a custom default value: `b` (in `TestStruct`)
+
+      @thrift.AllowUnsafeOptionalCustomDefaultValue
+      3: optional bool c;
+        # expected-error@-2: Field annotated with @thrift.AllowUnsafeOptionalCustomDefaultValue must be in a struct or exception, optional and have a custom default value: `c` (in `TestStruct`)
+    }
+
+    exception TestException {
+      @thrift.AllowUnsafeOptionalCustomDefaultValue
+      1: optional bool a = false;
+
+      @thrift.AllowUnsafeOptionalCustomDefaultValue
+      2: bool b = false;
+        # expected-error@-2: Field annotated with @thrift.AllowUnsafeOptionalCustomDefaultValue must be in a struct or exception, optional and have a custom default value: `b` (in `TestException`)
+
+      @thrift.AllowUnsafeOptionalCustomDefaultValue
+      3: optional bool c;
+        # expected-error@-2: Field annotated with @thrift.AllowUnsafeOptionalCustomDefaultValue must be in a struct or exception, optional and have a custom default value: `c` (in `TestException`)
+    }
+
+    union TestUnion {
+      @thrift.AllowUnsafeOptionalCustomDefaultValue
+      1: i32 d = 0;
+        # expected-error@-2: Field annotated with @thrift.AllowUnsafeOptionalCustomDefaultValue must be in a struct or exception, optional and have a custom default value: `d` (in `TestUnion`)
+        # expected-warning@-3: Union field is implicitly optional and should not have custom default value: `d` (in union `TestUnion`).
+    }
+  )");
+}
+
+TEST(
+    Compilertest,
+    invalid_annotation_allow_unsafe_union_field_custom_default_value) {
+  check_compile(
+      R"(
+    include "thrift/annotation/thrift.thrift"
+
+    union TestUnion {
+      @thrift.AllowUnsafeUnionFieldCustomDefaultValue
+      1: i32 a = 0;
+
+      @thrift.AllowUnsafeUnionFieldCustomDefaultValue
+      2: i32 b;
+        # expected-error@-2: Field annotated with @thrift.AllowUnsafeUnionFieldCustomDefaultValuemust be in a union and have a custom default value: `b` (in `TestUnion`)
+    }
+
+    struct TestStruct {
+      @thrift.AllowUnsafeUnionFieldCustomDefaultValue
+      1: optional bool a = false;
+        # expected-error@-2: Field annotated with @thrift.AllowUnsafeUnionFieldCustomDefaultValuemust be in a union and have a custom default value: `a` (in `TestStruct`)
+        # expected-warning@-3: Optional field should not have custom default value: `a` (in `TestStruct`).
+    }
+
+    exception TestException {
+      @thrift.AllowUnsafeUnionFieldCustomDefaultValue
+      1: optional bool a = false;
+        # expected-error@-2: Field annotated with @thrift.AllowUnsafeUnionFieldCustomDefaultValuemust be in a union and have a custom default value: `a` (in `TestException`)
+        # expected-warning@-3: Optional field should not have custom default value: `a` (in `TestException`).
+    }
+  )");
 }
 
 TEST(CompilerTest, cpp_deprecated_terse_write) {

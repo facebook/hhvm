@@ -770,40 +770,51 @@ void validate_field_default_value(sema_context& ctx, const t_field& field) {
   const sema_params& sema_parameters = ctx.sema_parameters();
   const t_structured& parent_node =
       dynamic_cast<const t_structured&>(*ctx.parent());
-  const t_field_qualifier field_qualifier = field.qualifier();
-  const bool is_union = parent_node.is<t_union>();
 
-  // All union fields are implicitly optional, so handle similarly to struct
-  // optional fields (except for the message).
-  if (is_union || field_qualifier == t_field_qualifier::optional) {
+  // Reminder: all union fields are implicitly optional
+  if (parent_node.is<t_union>()) {
+    // Allow if @thrift.AllowUnsafeUnionFieldCustomDefaultValue is specified.
+    if (field.has_structured_annotation(
+            kAllowUnsafeUnionFieldCustomDefaultValueUri)) {
+      return;
+    }
+
+    ctx.report(
+        field,
+        validation_to_diagnostic_level(
+            sema_parameters.union_field_custom_default),
+        "Union field is implicitly optional and should not have custom "
+        "default value: `{}` (in union `{}`).",
+        field.name(),
+        parent_node.name());
+    return;
+  }
+
+  // field is in a struct or exception (not a union).
+
+  const t_field_qualifier field_qualifier = field.qualifier();
+
+  // Optional fields should not have custom default values.
+  if (field_qualifier == t_field_qualifier::optional) {
     // Allow if @thrift.AllowUnsafeOptionalCustomDefaultValue is specified.
     if (field.has_structured_annotation(
             kAllowUnsafeOptionalCustomDefaultValueUri)) {
       return;
     }
 
-    if (is_union) {
-      ctx.report(
-          field,
-          validation_to_diagnostic_level(
-              sema_parameters.union_field_custom_default),
-          "Union field is implicitly optional and should not have custom "
-          "default value: `{}` (in union `{}`).",
-          field.name(),
-          parent_node.name());
-    } else { // struct or exception
-      ctx.report(
-          field,
-          validation_to_diagnostic_level(
-              sema_parameters.struct_optional_field_custom_default),
-          "Optional field should not have custom default value: "
-          "`{}` (in `{}`).",
-          field.name(),
-          parent_node.name());
-    }
+    ctx.report(
+        field,
+        validation_to_diagnostic_level(
+            sema_parameters.struct_optional_field_custom_default),
+        "Optional field should not have custom default value: "
+        "`{}` (in `{}`).",
+        field.name(),
+        parent_node.name());
 
     return;
   }
+
+  // struct/exception field is not optional, and has a custom default value.
 
   if (detail::is_initializer_default_value(
           field.type().deref(), *field.default_value())) {
@@ -1427,6 +1438,51 @@ void validate_cpp_type_annotation(sema_context& ctx, const Node& node) {
   }
 }
 
+/**
+ * Checks that any @thrift.AllowUnsafeOptionalCustomDefaultValue and
+ * @thrift.AllowUnsafeUnionFieldCustomDefaultValue annotation on the given
+ * `field` are used in a valid context. Reports an error if not.
+ */
+void validate_field_specific_annotation_scopes(
+    sema_context& ctx, const t_field& field) {
+  const bool hasDefaultValue = field.default_value() != nullptr;
+  const t_structured& parentNode =
+      dynamic_cast<const t_structured&>(*ctx.parent());
+
+  if (field.has_structured_annotation(
+          kAllowUnsafeOptionalCustomDefaultValueUri)) {
+    // @thrift.AllowUnsafeOptionalCustomDefaultValue MUST ONLY be on optional
+    // fields, in strucs or exceptions (NOT unions), that have a custom default
+    // value.
+    const bool fieldHasOptionalQualifier =
+        field.qualifier() == t_field_qualifier::optional;
+    if (!fieldHasOptionalQualifier || !hasDefaultValue ||
+        !(parentNode.is<t_struct>() || parentNode.is<t_exception>())) {
+      ctx.error(
+          field,
+          "Field annotated with @thrift.AllowUnsafeOptionalCustomDefaultValue "
+          "must be in a struct or exception, optional and have a custom "
+          "default value: `{}` (in `{}`)",
+          field.name(),
+          parentNode.name());
+    }
+  }
+
+  if (field.has_structured_annotation(
+          kAllowUnsafeUnionFieldCustomDefaultValueUri)) {
+    // @thrift.AllowUnsafeUnionFieldCustomDefaultValue/ MUST ONLY be on union
+    // fields (NOT structs or exceptions) that have a custom default value.
+    if (!hasDefaultValue || !parentNode.is<t_union>()) {
+      ctx.error(
+          field,
+          "Field annotated with @thrift.AllowUnsafeUnionFieldCustomDefaultValue"
+          "must be in a union and have a custom default value: `{}` (in `{}`)",
+          field.name(),
+          parentNode.name());
+    }
+  }
+}
+
 struct ValidateAnnotationPositions {
   void operator()(sema_context& ctx, const t_const& node) {
     if (owns_annotations(node.type())) {
@@ -1816,6 +1872,7 @@ ast_validator standard_validator() {
   validator.add_field_visitor(&validate_field_name);
   validator.add_field_visitor(ValidateAnnotationPositions{});
   validator.add_field_visitor(&detail::validate_annotation_scopes<>);
+  validator.add_field_visitor(&validate_field_specific_annotation_scopes);
 
   validator.add_enum_visitor(&validate_enum_value_name_uniqueness);
   validator.add_enum_visitor(&validate_enum_value_uniqueness);

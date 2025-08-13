@@ -93,10 +93,7 @@ fn example() {
             #[serde(deserialize_with = "arena_deserializer::arena")]
             right: &'a Num<'a, T>,
         },
-        #[serde(deserialize_with = "arena_deserializer::arena")]
-        RP(&'a oxidized_by_ref::relative_path::RelativePath<'a>),
-        //#[serde(deserialize_with = "arena_deserializer::arena")]
-        //Cell(std::cell::Cell<&'a Num<'a, T>>),
+        RP(relative_path::RelativePath),
     }
 
     impl_deserialize_in_arena!(Num<'arena, T>);
@@ -154,11 +151,11 @@ fn example() {
     let x: Num<'_, ()> = Num::BStr(s);
     round_trip(x, &arena);
 
-    let s = oxidized_by_ref::relative_path::RelativePath::new(
+    let s = relative_path::RelativePath::make(
         relative_path::Prefix::Dummy,
-        std::path::Path::new("/tmp/foo.php"),
+        std::path::Path::new("/tmp/foo.php").to_path_buf(),
     );
-    let x: Num<'_, ()> = Num::RP(&s);
+    let x: Num<'_, ()> = Num::RP(s);
     round_trip(x, &arena);
 }
 

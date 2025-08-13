@@ -18,7 +18,6 @@ package thrift
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
@@ -107,7 +106,7 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 			// whenever Read/Write functions are invoked on a connection for the first time.
 			// However, in our case, we require the handshake to be complete ahead of any
 			// Read/Write calls - so that we can access ALPN value and choose the transport.
-			tlsConn, isTLS := conn.(*tls.Conn)
+			tlsConn, isTLS := conn.(tlsConnectionStaterHandshaker)
 			if isTLS {
 				r.stats.ConnsTLS.RecordEvent()
 
@@ -115,7 +114,7 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 				if err != nil {
 					r.log("thrift: error performing TLS handshake with %s: %s\n", conn.RemoteAddr(), err)
 					// Handshake failed, we cannot proceed with this connection - close it and return.
-					tlsConn.Close()
+					conn.Close()
 					return
 				}
 			}

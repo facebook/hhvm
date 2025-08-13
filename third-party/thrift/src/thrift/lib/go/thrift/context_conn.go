@@ -43,6 +43,17 @@ type tlsConnectionStater interface {
 	ConnectionState() tls.ConnectionState
 }
 
+// tlsConnectionStaterHandshaker is an abstract interface that allows
+// custom "TLS-like" connections to be used with Thrift ALPN logic.
+type tlsConnectionStaterHandshaker interface {
+	tlsConnectionStater
+	HandshakeContext(context.Context) error
+}
+
+// Compile time interface enforcer
+var _ tlsConnectionStater = (*tls.Conn)(nil)
+var _ tlsConnectionStaterHandshaker = (*tls.Conn)(nil)
+
 // TLS returns the TLS connection state.
 func (c ConnInfo) TLS() *tls.ConnectionState {
 	if c.tlsState == nil {

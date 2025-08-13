@@ -6129,6 +6129,58 @@ end = struct
     can_index: can_index;
   }
 
+  (* We need to handle intersection type with special care.
+   * In particular, indexing an /\C... should return /\V... where V is the result of indexing C that succeed.
+   * Lets look at three examples:
+   * Indexing KeyedContainer<arraykey, nonnull> & Vector[?int] should return nonnull & ?int - the intersection of both type.
+   * Indexing dynamic & nonnull, should return the index type of dynamic only (which is a dynamic), because only dynamic is indexable.
+   * Indexing mixed & nonnull should be an error, because both type is not indexable.
+   *
+   * As you can see, we need to behave differently depending on whether a type is indexable or not.
+   * However, as we are in subtyping world, we cannot invoke Subtype_ask to determine indexability anymore.
+   * So, we make a guess with the below with_hint type.
+   *
+   * There are multiple cases:
+   * - If there are errors for whatever reason, it is likely unsolvable.
+   * - If it is a container/tuple/shape/etc, without any obvious error (arity missmatch, index out of bound), it is likely solvable
+   * - If the type is complex (union type/intersection type/type variable/etc), recurse to find out
+   * - If it is a unexpandable variable, it is likely unsolvable.
+   * -- The above rules could go both way.
+   *)
+  type with_hint = {
+    env: env;
+    prop: TL.subtype_prop;
+    (* A guess whether this simplification is good or not. we will be using this to guide the solving of intersection *)
+    likely: bool;
+  }
+
+  let with_hint (env, prop) likely = { env; prop; likely }
+
+  let likely_solvable (env, prop) = with_hint (env, prop) true
+
+  let likely_unsolvable (env, prop) = with_hint (env, prop) false
+
+  let un_with_hint { env; prop; _ } = (env, prop)
+
+  let with_hint_and { env; prop = p1; likely = l1 } f =
+    match TL.get_error_if_unsat p1 with
+    | Some ty_err_opt1 ->
+      let (env, p2) = f env |> un_with_hint in
+      begin
+        (match TL.get_error_if_unsat p2 with
+        | Some ty_err_opt2 ->
+          let ty_err_opt =
+            Typing_error.multiple_opt
+            @@ List.filter_opt [ty_err_opt1; ty_err_opt2]
+          in
+          (env, TL.Disj (ty_err_opt, []))
+        | None -> (env, p1))
+        |> likely_unsolvable
+      end
+    | None ->
+      let { env; prop = p2; likely = l2 } = f env in
+      with_hint (env, TL.conj p1 p2) (l1 && l2)
+
   (* Since array index constraint solving is under development,
    * it is an experimental feature and will only be turned on
    * if the flag constraint_array_index is set.
@@ -6151,9 +6203,9 @@ end = struct
         env
         ty_sub
         ty_super
-      @@ fun () -> simplify_ ~subtype_env ~this_ty ~lhs ~rhs env
+      @@ fun () -> simplify_ ~subtype_env ~this_ty ~lhs ~rhs env |> un_with_hint
     else
-      simplify_ ~subtype_env ~this_ty ~lhs ~rhs env
+      simplify_ ~subtype_env ~this_ty ~lhs ~rhs env |> un_with_hint
 
   and simplify_
       ~subtype_env
@@ -6175,6 +6227,9 @@ end = struct
         ~ty_super:
           (ConstraintType
              (mk_constraint_type (reason_super, Tcan_index can_index)))
+    in
+    let invalid ~fail env : with_hint =
+      invalid ~fail env |> likely_unsolvable
     in
     let arity_error r name env =
       invalid
@@ -6223,7 +6278,10 @@ end = struct
       in
       simplify_default ~subtype_env tv can_index.ci_val env
     in
-    let is_container tk tv env = simplify_key tk env &&& simplify_val tv in
+    let return_val tv env = simplify_val tv env |> likely_solvable in
+    let is_container tk tv env =
+      likely_solvable (simplify_key tk env &&& simplify_val tv)
+    in
     let is_vec_like tv env =
       let tk = MakeType.int (Reason.idx_vector can_index.ci_array_pos) in
       is_container tk tv env
@@ -6261,24 +6319,23 @@ end = struct
         | None -> tuple_oob env
         | Some i ->
           (match List.nth required i with
-          | Some ty -> simplify_val ty env
+          | Some ty -> return_val ty env
           | None ->
             let i = i - List.length required in
-            (match List.nth optional i with
-            | Some ty ->
-              if can_index.ci_lhs_of_null_coalesce then
-                simplify_val ty env
-              else
-                tuple_oob env
-            | None ->
-              let i = i - List.length optional in
-              (match variadic with
-              | Some ty ->
-                if can_index.ci_lhs_of_null_coalesce && i >= 0 then
-                  simplify_val ty env
-                else
-                  tuple_oob env
-              | None -> tuple_oob env))))
+            if can_index.ci_lhs_of_null_coalesce then
+              match List.nth optional i with
+              | Some ty -> return_val ty env
+              | None ->
+                let i = i - List.length optional in
+                (match variadic with
+                | Some ty ->
+                  if i >= 0 then
+                    return_val ty env
+                  else
+                    tuple_oob env
+                | None -> tuple_oob env)
+            else
+              tuple_oob env))
       | _ ->
         invalid
           ~fail:
@@ -6295,75 +6352,72 @@ end = struct
     let do_tuple_basic tup = do_tuple_optional tup [] None in
     let do_shape r { s_fields = fdm; s_origin; s_unknown_value = _ } =
       let (_, p, _) = can_index.ci_index_expr in
-      Typing_shapes.do_with_field_expr
-        env
-        can_index.ci_index_expr
-        ~with_error:
-          ((* there was already an error in shape_field name,
-              don't report another one for a missing field *)
-           valid
-             env)
-      @@ fun field ->
-      if can_index.ci_lhs_of_null_coalesce then
-        (* The expression $s['x'] ?? $y is semantically equivalent to
-           Shapes::idx ($s, 'x') ?? $y.  I.e., if $s['x'] occurs on
-           the left of a coalesce operator, then for type checking it
-           can be treated as if it evaluated to null instead of
-           throwing an exception if the field 'x' doesn't exist in $s.
-        *)
-        let (env, ty) =
-          Typing_shapes.idx_without_default
-            env
-            ty_sub
-            field
-            ~expr_pos:can_index.ci_expr_pos
-            ~shape_pos:can_index.ci_array_pos
-        in
-        simplify_val ty env
-      else
-        match TShapeMap.find_opt field fdm with
-        | None ->
-          let decl_pos =
-            match s_origin with
-            | From_alias (_, Some pos) -> pos
-            | _ -> Reason.to_pos r
+      match
+        Typing_shapes.tshape_field_name_with_ty_err env can_index.ci_index_expr
+      with
+      | Error ty_err -> invalid ~fail:(Some ty_err) env
+      | Ok field ->
+        if can_index.ci_lhs_of_null_coalesce then
+          (* The expression $s['x'] ?? $y is semantically equivalent to
+             Shapes::idx ($s, 'x') ?? $y.  I.e., if $s['x'] occurs on
+             the left of a coalesce operator, then for type checking it
+             can be treated as if it evaluated to null instead of
+             throwing an exception if the field 'x' doesn't exist in $s.
+          *)
+          let (env, ty) =
+            Typing_shapes.idx_without_default
+              env
+              ty_sub
+              field
+              ~expr_pos:can_index.ci_expr_pos
+              ~shape_pos:can_index.ci_array_pos
           in
-          invalid
-            ~fail:
-              (Some
-                 Typing_error.(
-                   primary
-                   @@ Primary.Undefined_field
-                        {
-                          pos = p;
-                          name = TUtils.get_printable_shape_field_name field;
-                          decl_pos;
-                        }))
-            env
-        | Some { sft_optional; sft_ty } ->
-          if sft_optional then
-            let declared_field =
-              List.find_exn
-                ~f:(fun x -> TShapeField.equal field x)
-                (TShapeMap.keys fdm)
+          return_val ty env
+        else (
+          match TShapeMap.find_opt field fdm with
+          | None ->
+            let decl_pos =
+              match s_origin with
+              | From_alias (_, Some pos) -> pos
+              | _ -> Reason.to_pos r
             in
             invalid
               ~fail:
                 (Some
                    Typing_error.(
                      primary
-                     @@ Primary.Array_get_with_optional_field
+                     @@ Primary.Undefined_field
                           {
-                            recv_pos = can_index.ci_array_pos;
-                            field_pos = p;
-                            field_name =
-                              TUtils.get_printable_shape_field_name field;
-                            decl_pos =
-                              Typing_defs.TShapeField.pos declared_field;
+                            pos = p;
+                            name = TUtils.get_printable_shape_field_name field;
+                            decl_pos;
                           }))
               env
-          else
-            simplify_val sft_ty env
+          | Some { sft_optional; sft_ty } ->
+            if sft_optional && not can_index.ci_lhs_of_null_coalesce then
+              let declared_field =
+                List.find_exn
+                  ~f:(fun x -> TShapeField.equal field x)
+                  (TShapeMap.keys fdm)
+              in
+              invalid
+                ~fail:
+                  (Some
+                     Typing_error.(
+                       primary
+                       @@ Primary.Array_get_with_optional_field
+                            {
+                              recv_pos = can_index.ci_array_pos;
+                              field_pos = p;
+                              field_name =
+                                TUtils.get_printable_shape_field_name field;
+                              decl_pos =
+                                Typing_defs.TShapeField.pos declared_field;
+                            }))
+                env
+            else
+              return_val sft_ty env
+        )
     in
     let got_dynamic env =
       simplify_default
@@ -6371,20 +6425,24 @@ end = struct
         (MakeType.dynamic reason_super)
         can_index.ci_val
         env
-      &&&
-      if
-        Typing_env_types.(
-          TypecheckerOptions.enable_sound_dynamic env.genv.tcopt)
-      then
-        let coerce_to_dynamic =
-          { subtype_env with coerce = Some Typing_logic.CoerceToDynamic }
-        in
-        simplify_default
-          ~subtype_env:coerce_to_dynamic
-          can_index.ci_key
-          (MakeType.dynamic (get_reason ty_sub))
-      else
-        valid
+      &&& (if
+           Typing_env_types.(
+             TypecheckerOptions.enable_sound_dynamic env.genv.tcopt)
+          then
+            let coerce_to_dynamic =
+              { subtype_env with coerce = Some Typing_logic.CoerceToDynamic }
+            in
+            simplify_default
+              ~subtype_env:coerce_to_dynamic
+              can_index.ci_key
+              (MakeType.dynamic (get_reason ty_sub))
+          else
+            valid)
+      |> likely_solvable
+    in
+    let is_nullable =
+      can_index.ci_lhs_of_null_coalesce
+      || Tast.is_under_dynamic_assumptions env.Typing_env_types.checked
     in
     match deref ty_sub with
     | (_, Tvar _) ->
@@ -6395,9 +6453,14 @@ end = struct
         (LoclType ty_sub)
         (ConstraintType
            (mk_constraint_type (reason_super, Tcan_index can_index)))
+      |> likely_unsolvable
     | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
-      valid env
+      valid env |> likely_solvable
     | (_, Tdynamic) -> got_dynamic env
+    | (_, Tclass ((_, cn), _, _))
+      when String.equal cn SN.Collections.cAnyArray
+           && Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->
+      got_dynamic env
     | _
       when Option.is_some sub_supportdyn
            && TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
@@ -6460,8 +6523,8 @@ end = struct
       is_container tk tv env
     | (r, Tprim Tnull) ->
       let pos = get_pos ty_sub in
-      if can_index.ci_lhs_of_null_coalesce then
-        simplify_val (MakeType.null (Reason.idx_string_from_decl pos)) env
+      if is_nullable then
+        return_val (MakeType.null (Reason.idx_string_from_decl pos)) env
       else
         invalid
           ~fail:
@@ -6479,11 +6542,8 @@ end = struct
                       }))
           env
     | (r, Toption t) ->
-      if
-        can_index.ci_lhs_of_null_coalesce
-        || Tast.is_under_dynamic_assumptions env.Typing_env_types.checked
-      then
-        simplify
+      if is_nullable then
+        simplify_
           ~subtype_env
           ~this_ty
           ~lhs:{ sub_supportdyn; ty_sub = t }
@@ -6506,10 +6566,35 @@ end = struct
                       }))
           env
     | (r_sub, Tunion ty_subs) ->
-      Common.simplify_union_l
+      let simplify_union_l
+          ~subtype_env ~this_ty ~update_reason (sub_supportdyn, ty_subs) rhs env
+          =
+        let f res ty_sub =
+          let ty_sub = update_reason env ty_sub in
+          with_hint_and
+            res
+            (simplify_
+               ~subtype_env
+               ~this_ty
+               ~lhs:{ sub_supportdyn; ty_sub }
+               ~rhs)
+        in
+        (* Prioritize types that aren't dynamic or intersections with dynamic
+           to get better error messages *)
+        let (last_tyl, first_tyl) =
+          Typing_dynamic_utils.partition_union
+            ~f:Common.contains_dynamic_through_intersection
+            env
+            ty_subs
+        in
+        let init =
+          List.fold_left first_tyl ~init:((env, TL.valid) |> likely_solvable) ~f
+        in
+        List.fold_left last_tyl ~init ~f
+      in
+      simplify_union_l
         ~subtype_env
         ~this_ty
-        ~mk_prop
         ~update_reason:
           (Typing_env.update_reason ~f:(fun r_sub_prj ->
                Typing_reason.prj_union_sub ~sub:r_sub ~sub_prj:r_sub_prj))
@@ -6538,12 +6623,13 @@ end = struct
           lhs
           rhs
           env
+        |> likely_solvable
       | _ ->
         let update_reason =
           Typing_env.update_reason ~f:(fun r_sub_prj ->
               Typing_reason.prj_inter_sub ~sub:r_sub ~sub_prj:r_sub_prj)
         in
-        let rec loop ty_subs tys errs env =
+        let rec loop ty_subs tys errs env : with_hint =
           match ty_subs with
           | [] ->
             (match tys with
@@ -6554,12 +6640,12 @@ end = struct
               let (env, ty) =
                 Typing_intersection.intersect_list env r_sub tys
               in
-              simplify_val ty env)
+              return_val ty env)
           | ty_sub :: ty_subs ->
             let ty_sub = update_reason env ty_sub in
             let (env, val_ty) = Env.fresh_type env can_index.ci_array_pos in
-            let (env, prop) =
-              simplify
+            let { env; prop; likely } =
+              simplify_
                 ~subtype_env
                 ~this_ty
                 ~lhs:{ sub_supportdyn; ty_sub }
@@ -6572,7 +6658,13 @@ end = struct
             in
             (match TL.get_error_if_unsat prop with
             | Some err -> loop ty_subs tys (err :: errs) env
-            | _ -> (env, prop) &&& loop ty_subs (val_ty :: tys) errs)
+            | _ ->
+              if likely then
+                with_hint_and { env; prop; likely } (fun env ->
+                    loop ty_subs (val_ty :: tys) errs env)
+              else
+                (*I sm dropping errors here. Is that ok?*)
+                loop ty_subs tys errs env)
         in
         loop ty_subs [] [] env)
     | (_, Tclass ((_, id), _, tup)) when String.equal id SN.Collections.cPair ->
@@ -6608,7 +6700,7 @@ end = struct
         invalid ~fail env
       else
         let (env, ty) = Typing_intersection.intersect_list env r_sub tyl in
-        simplify
+        simplify_
           ~subtype_env
           ~this_ty
           ~lhs:{ sub_supportdyn; ty_sub = ty }
@@ -6616,7 +6708,7 @@ end = struct
           env
     | (r_sub, Tnewtype (name_sub, [ty_sub], _))
       when String.equal name_sub SN.Classes.cSupportDyn ->
-      simplify
+      simplify_
         ~subtype_env
         ~this_ty
         ~lhs:{ sub_supportdyn = Some r_sub; ty_sub }
@@ -6646,7 +6738,7 @@ end = struct
                   s_fields = fields;
                 } )
         in
-        simplify
+        simplify_
           ~subtype_env
           ~this_ty
           ~lhs:{ sub_supportdyn; ty_sub = ty }
@@ -6656,7 +6748,7 @@ end = struct
         Common.simplify_newtype_l
           ~subtype_env
           ~this_ty
-          ~mk_prop
+          ~mk_prop:simplify_
           (sub_supportdyn, r_sub, name_sub, ty_newtype)
           rhs
           env)
@@ -6664,7 +6756,7 @@ end = struct
       Common.simplify_newtype_l
         ~subtype_env
         ~this_ty
-        ~mk_prop
+        ~mk_prop:simplify_
         (sub_supportdyn, r_sub, name_sub, ty_newtype)
         rhs
         env
@@ -6672,11 +6764,11 @@ end = struct
       Common.simplify_dependent_l
         ~subtype_env
         ~this_ty
-        ~mk_prop
+        ~mk_prop:simplify_
         (sub_supportdyn, r_sub, dep_ty, ty_inner)
         rhs
         env
-    | (_, Tany _) -> simplify_val ty_sub env
+    | (_, Tany _) -> return_val ty_sub env
     | _ -> invalid ~fail env
 end
 
@@ -7863,6 +7955,8 @@ end = struct
 end
 
 and Common : sig
+  val contains_dynamic_through_intersection : locl_ty -> bool
+
   val simplify_union_l :
     subtype_env:Subtype_env.t ->
     this_ty:locl_ty option ->
@@ -7922,11 +8016,11 @@ and Common : sig
       lhs:lhs ->
       rhs:'rhs ->
       env ->
-      env * TL.subtype_prop) ->
+      'res) ->
     Reason.t option * Reason.t * string * locl_phase ty ->
     'rhs ->
     env ->
-    env * TL.subtype_prop
+    'res
 
   val simplify_dependent_l :
     subtype_env:Subtype_env.t ->
@@ -7937,11 +8031,11 @@ and Common : sig
       lhs:lhs ->
       rhs:'rhs ->
       env ->
-      env * TL.subtype_prop) ->
+      'res) ->
     Reason.t option * Reason.t * dependent_type * locl_phase ty ->
     'rhs ->
     env ->
-    env * TL.subtype_prop
+    'res
 
   val simplify_disj_r :
     subtype_env:Subtype_env.t ->
@@ -8225,7 +8319,6 @@ end = struct
               (sub_supportdyn, ty)
               rhs
       in
-
       if_unsat (invalid ~fail) @@ prop env
     | (r_sub, Tintersection ty_subs) ->
       let mk_prop_intersection

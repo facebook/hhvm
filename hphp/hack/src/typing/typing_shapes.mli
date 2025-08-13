@@ -6,6 +6,11 @@
  *
  *)
 
+val tshape_field_name_with_ty_err :
+  Typing_env_types.env ->
+  ('a, 'b) Aast.expr ->
+  (Typing_defs_core.tshape_field_name, Typing_error.t) result
+
 (** Convert an field as Aast.expr into a tshape_field_name then pass the result to the provided function.
   Handle any conversion error as well. *)
 val do_with_field_expr :

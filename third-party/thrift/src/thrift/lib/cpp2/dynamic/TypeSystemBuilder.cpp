@@ -15,13 +15,14 @@
  */
 
 #include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
+
+#include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/dynamic/detail/TypeSystem.h>
 
 #include <folly/Overload.h>
 #include <folly/container/F14Set.h>
 #include <folly/container/MapUtil.h>
 #include <folly/container/span.h>
-#include <folly/lang/Assume.h>
 
 #include <functional>
 #include <utility>
@@ -381,7 +382,7 @@ void validateOpaqueAliasIsNotUserDefined(
 
 void TypeSystemBuilder::addType(
     Uri uri,
-    SerializableStructDefinition structDef,
+    const SerializableStructDefinition& structDef,
     std::optional<SerializableThriftSourceInfo> sourceInfo) {
   validateIdentitiesAreUnique(uri, *structDef.fields());
 
@@ -393,7 +394,7 @@ void TypeSystemBuilder::addType(
 
 void TypeSystemBuilder::addType(
     Uri uri,
-    SerializableUnionDefinition unionDef,
+    const SerializableUnionDefinition& unionDef,
     std::optional<SerializableThriftSourceInfo> sourceInfo) {
   validateIdentitiesAreUnique(uri, *unionDef.fields());
   validateFieldsAreOptional(uri, unionDef);
@@ -406,7 +407,7 @@ void TypeSystemBuilder::addType(
 
 void TypeSystemBuilder::addType(
     Uri uri,
-    SerializableEnumDefinition enumDef,
+    const SerializableEnumDefinition& enumDef,
     std::optional<SerializableThriftSourceInfo> sourceInfo) {
   validateEnumMappingsAreUnique(uri, enumDef);
 
@@ -418,7 +419,7 @@ void TypeSystemBuilder::addType(
 
 void TypeSystemBuilder::addType(
     Uri uri,
-    SerializableOpaqueAliasDefinition opaqueAliasDef,
+    const SerializableOpaqueAliasDefinition& opaqueAliasDef,
     std::optional<SerializableThriftSourceInfo> sourceInfo) {
   validateOpaqueAliasIsNotUserDefined(uri, opaqueAliasDef);
 
@@ -428,27 +429,34 @@ void TypeSystemBuilder::addType(
   tryEmplace(std::move(uri), std::move(entry));
 }
 
+void TypeSystemBuilder::addType(
+    Uri uri, const SerializableTypeDefinitionEntry& typeDefinitionEntry) {
+  const SerializableTypeDefinition& def = *typeDefinitionEntry.definition();
+  std::optional<SerializableThriftSourceInfo> sourceInfo =
+      typeDefinitionEntry.sourceInfo().to_optional();
+  switch (def.getType()) {
+    case SerializableTypeDefinition::Type::structDef:
+      addType(uri, *def.structDef(), std::move(sourceInfo));
+      break;
+    case SerializableTypeDefinition::Type::unionDef:
+      addType(uri, *def.unionDef(), std::move(sourceInfo));
+      break;
+    case SerializableTypeDefinition::Type::enumDef:
+      addType(uri, *def.enumDef(), std::move(sourceInfo));
+      break;
+    case SerializableTypeDefinition::Type::opaqueAliasDef:
+      addType(uri, *def.opaqueAliasDef(), std::move(sourceInfo));
+      break;
+    default:
+      throw InvalidTypeError(fmt::format(
+          "Invalid SerializableTypeDefinition::Type: {}",
+          apache::thrift::util::enumNameSafe(def.getType())));
+  }
+}
+
 void TypeSystemBuilder::addTypes(SerializableTypeSystem typeSystemDef) {
   for (auto& [uri, entry] : *typeSystemDef.types()) {
-    SerializableTypeDefinition& def = *entry.definition();
-    std::optional<SerializableThriftSourceInfo> sourceInfo =
-        entry.sourceInfo().to_optional();
-    switch (def.getType()) {
-      case SerializableTypeDefinition::Type::structDef:
-        addType(uri, std::move(*def.structDef()), std::move(sourceInfo));
-        break;
-      case SerializableTypeDefinition::Type::unionDef:
-        addType(uri, std::move(*def.unionDef()), std::move(sourceInfo));
-        break;
-      case SerializableTypeDefinition::Type::enumDef:
-        addType(uri, std::move(*def.enumDef()), std::move(sourceInfo));
-        break;
-      case SerializableTypeDefinition::Type::opaqueAliasDef:
-        addType(uri, std::move(*def.opaqueAliasDef()), std::move(sourceInfo));
-        break;
-      default:
-        folly::assume_unreachable();
-    }
+    addType(uri, entry);
   }
 }
 

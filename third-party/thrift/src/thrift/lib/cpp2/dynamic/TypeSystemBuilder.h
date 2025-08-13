@@ -80,7 +80,7 @@ class TypeSystemBuilder {
    */
   void addType(
       Uri,
-      SerializableStructDefinition,
+      const SerializableStructDefinition&,
       std::optional<SerializableThriftSourceInfo> = std::nullopt);
 
   /**
@@ -88,7 +88,7 @@ class TypeSystemBuilder {
    */
   void addType(
       Uri,
-      SerializableUnionDefinition,
+      const SerializableUnionDefinition&,
       std::optional<SerializableThriftSourceInfo> = std::nullopt);
 
   /**
@@ -96,7 +96,7 @@ class TypeSystemBuilder {
    */
   void addType(
       Uri,
-      SerializableEnumDefinition,
+      const SerializableEnumDefinition&,
       std::optional<SerializableThriftSourceInfo> = std::nullopt);
 
   /**
@@ -105,9 +105,10 @@ class TypeSystemBuilder {
    */
   void addType(
       Uri,
-      SerializableOpaqueAliasDefinition,
+      const SerializableOpaqueAliasDefinition&,
       std::optional<SerializableThriftSourceInfo> = std::nullopt);
 
+  void addType(Uri, const SerializableTypeDefinitionEntry&);
   void addTypes(SerializableTypeSystem);
 
   std::unique_ptr<TypeSystem> build() &&;

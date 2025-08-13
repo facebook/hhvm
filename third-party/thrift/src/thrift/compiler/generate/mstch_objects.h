@@ -444,55 +444,19 @@ class mstch_program : public mstch_base {
         this,
         {
             {"program:self", &mstch_program::self},
-            {"program:autogen_path", &mstch_program::autogen_path},
             {"program:structs", &mstch_program::structs},
             {"program:enums", &mstch_program::enums},
             {"program:services", &mstch_program::services},
             {"program:interactions", &mstch_program::interactions},
             {"program:typedefs", &mstch_program::typedefs},
             {"program:constants", &mstch_program::constants},
-            {"program:enums?", &mstch_program::has_enums},
-            {"program:structs?", &mstch_program::has_structs},
-            {"program:unions?", &mstch_program::has_unions},
-            {"program:services?", &mstch_program::has_services},
-            {"program:interactions?", &mstch_program::has_interactions},
-            {"program:typedefs?", &mstch_program::has_typedefs},
-            {"program:constants?", &mstch_program::has_constants},
-            {"program:thrift_uris?", &mstch_program::has_thrift_uris},
         });
-    register_has_option("program:frozen?", "frozen");
-    register_has_option("program:json?", "json");
-    register_has_option("program:any?", "any");
   }
 
   virtual std::string get_program_namespace(const t_program*) { return {}; }
 
   whisker::object self() { return make_self(*program_); }
-  mstch::node autogen_path() {
-    std::string path = program_->path();
-    // use posix path separators, even on windows, for autogen comment
-    // to avoid spurious fixture regen diffs
-    std::replace(path.begin(), path.end(), '\\', '/');
-    return path;
-  }
-  mstch::node has_enums() { return !program_->enums().empty(); }
-  mstch::node has_structs() {
-    return !program_->structs_and_unions().empty() ||
-        !program_->exceptions().empty();
-  }
-  mstch::node has_services() { return !program_->services().empty(); }
-  mstch::node has_interactions() { return !program_->interactions().empty(); }
-  mstch::node has_typedefs() { return !program_->typedefs().empty(); }
-  mstch::node has_constants() { return !program_->consts().empty(); }
-  mstch::node has_unions() {
-    auto& structs = program_->structs_and_unions();
-    return std::any_of(
-        structs.cbegin(),
-        structs.cend(),
-        std::mem_fn(&t_structured::is<t_union>));
-  }
 
-  mstch::node has_thrift_uris();
   mstch::node structs();
   mstch::node enums();
   mstch::node services();

@@ -632,15 +632,6 @@ mstch::node mstch_const::field() {
       field_, context_, pos_, nullptr);
 }
 
-mstch::node mstch_program::has_thrift_uris() {
-  for (const t_structured* strct : program_->structs_and_unions()) {
-    if (!strct->uri().empty()) {
-      return true;
-    }
-  }
-  return false;
-}
-
 mstch::node mstch_program::structs() {
   std::string id = program_->name() + get_program_namespace(program_);
   return make_mstch_array_cached(

@@ -49,6 +49,12 @@ using dsl::prototype_builder;
 
 namespace apache::thrift::compiler {
 
+auto t_whisker_generator::has_compiler_option_fn(std::string_view name) const {
+  return [this, name](const auto&) -> whisker::object {
+    return w::boolean(has_compiler_option(name));
+  };
+}
+
 prototype<t_node>::ptr t_whisker_generator::make_prototype_for_node(
     const prototype_database&) const {
   prototype_builder<h_node> def;
@@ -221,6 +227,14 @@ whisker::array::ptr build_user_type_footprint(
     ret.emplace_back(std::move(obj));
   }
   return whisker::array::of(std::move(ret));
+}
+
+// mem_fn wrapper checking whether a collection is non-empty
+template <typename Self>
+auto is_non_empty_collection(auto (Self::*function)() const) {
+  return [function](const Self& self) -> whisker::object {
+    return whisker::object(!(self.*function)().empty());
+  };
 }
 
 // mem_fn over a t_type, but after resolving any typedefs first
@@ -422,10 +436,21 @@ prototype<t_list>::ptr t_whisker_generator::make_prototype_for_list(
 prototype<t_program>::ptr t_whisker_generator::make_prototype_for_program(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_program>::extends(proto.of<t_named>());
+  def.property("any?", has_compiler_option_fn("any"));
+  def.property("frozen?", has_compiler_option_fn("frozen"));
+  def.property("json?", has_compiler_option_fn("json"));
+
   def.property("package", mem_fn(&t_program::package, proto.of<t_package>()));
   def.property("doc", mem_fn(&t_program::doc));
   def.property("include_prefix", mem_fn(&t_program::include_prefix));
   def.property("includes", mem_fn(&t_program::includes, proto.of<t_include>()));
+  def.property("autogen_path", [](const t_program& self) {
+    std::string path = self.path();
+    // use posix path separators, even on windows, for autogen comment
+    // to avoid spurious fixture regen diffs
+    std::replace(path.begin(), path.end(), '\\', '/');
+    return path;
+  });
   def.property("namespaces", [&](const t_program& self) -> map::ptr {
     map::raw result;
     for (const auto& [language, value] : self.namespaces()) {
@@ -480,6 +505,22 @@ prototype<t_program>::ptr t_whisker_generator::make_prototype_for_program(
     }
     return array::of(std::move(result));
   });
+
+  def.property("constants?", is_non_empty_collection(&t_program::consts));
+  def.property("enums?", is_non_empty_collection(&t_program::enums));
+  def.property(
+      "interactions?", is_non_empty_collection(&t_program::interactions));
+  def.property("services?", is_non_empty_collection(&t_program::services));
+  def.property(
+      "structs?", is_non_empty_collection(&t_program::structured_definitions));
+  def.property("typedefs?", is_non_empty_collection(&t_program::typedefs));
+  def.property("unions?", [](const t_program& self) {
+    return std::any_of(
+        self.structs_and_unions().begin(),
+        self.structs_and_unions().end(),
+        std::mem_fn(&t_structured::is<t_union>));
+  });
+
   return std::move(def).make();
 }
 

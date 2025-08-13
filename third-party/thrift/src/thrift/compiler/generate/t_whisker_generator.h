@@ -454,6 +454,9 @@ class t_whisker_generator : public t_generator {
     };
   }
 
+  // Wraps a compiler option in to a lambda that can be added to any prototype
+  auto has_compiler_option_fn(std::string_view name) const;
+
   bool has_compiler_option(std::string_view name) const {
     return compiler_options_.find(name) != compiler_options_.end();
   }

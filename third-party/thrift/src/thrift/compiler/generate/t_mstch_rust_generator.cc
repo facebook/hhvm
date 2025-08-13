@@ -714,6 +714,7 @@ class rust_mstch_program : public mstch_program {
              &rust_mstch_program::current_split_enums},
             {"program:split_mode_enabled?",
              &rust_mstch_program::split_mode_enabled},
+            {"program:type_splits", &rust_mstch_program::type_splits},
         });
     register_has_option(
         "program:deprecated_optional_with_default_is_some?",
@@ -722,6 +723,12 @@ class rust_mstch_program : public mstch_program {
         "program:deprecated_default_enum_min_i32?",
         "deprecated_default_enum_min_i32");
     register_has_option("program:types_split_count?", "types_split_count");
+
+    // Generate type split data if split count option is provided.
+    if (options_.types_split_count) {
+      initialize_type_split();
+      generate_split_data();
+    }
   }
 
   mstch::node rust_has_direct_dependencies() {
@@ -999,14 +1006,17 @@ class rust_mstch_program : public mstch_program {
         context_.enum_cache,
         id);
   }
-  mstch::node split_mode_enabled() {
-    if (options_.types_split_count) {
-      initialize_type_split();
-      generate_split_data();
-      return true;
-    } else {
-      return false;
+
+  mstch::node type_splits() {
+    mstch::array split_indices(options_.types_split_count + 1);
+    for (int i = 0; i < options_.types_split_count + 1; i++) {
+      split_indices[i] = i;
     }
+    return split_indices;
+  }
+
+  mstch::node split_mode_enabled() {
+    return static_cast<bool>(options_.types_split_count);
   }
 
  private:
@@ -2595,15 +2605,11 @@ void t_mstch_rust_generator::generate_program() {
 
   set_mstch_factories();
 
-  const auto& prog = cached_program(program_);
   if (options_.types_split_count > 0) {
-    // TODO: swap with function that splits types, until then this branch
-    // doesn't do anything different.
-    render_to_file(prog, "types.rs", "types.rs");
-  } else {
-    render_to_file(prog, "types.rs", "types.rs");
+    generate_split_types();
   }
-
+  const auto& prog = cached_program(program_);
+  render_to_file(prog, "types.rs", "types.rs");
   render_to_file(prog, "services.rs", "services.rs");
   render_to_file(prog, "errors.rs", "errors.rs");
   render_to_file(prog, "consts.rs", "consts.rs");
@@ -2627,13 +2633,9 @@ void t_mstch_rust_generator::generate_split_types() {
 
     render_to_file(
         std::shared_ptr<mstch_base>(split_program),
-        "types.rs",
+        "lib/types_split",
         fmt::format("types_{}.rs", split_id));
   }
-
-  // Generate main types.rs file
-  const auto& main_prog = cached_program(program_);
-  render_to_file(main_prog, "types.rs", "types.rs");
 }
 
 void t_mstch_rust_generator::set_mstch_factories() {

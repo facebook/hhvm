@@ -28,32 +28,12 @@ folly::exception_wrapper {{> service_common/client_class_name}}::recv_wrapped_{{
   }
 
   using result = ::{{service:qualified_namespace}}::{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult;
-  {{#function:sink?}}
-  {{^function:sink_exceptions?}}
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-  {{/function:sink_exceptions?}}
-  {{#function:sink_exceptions?}}
-  struct ExMapType {
-    bool operator()(typename result::SinkPResultType& res, folly::exception_wrapper ew) {
-      {{#function:sink_exceptions}}
-      if (ew.with_exception([&]({{#field:type}} ::{{type:qualified_namespace}}::{{type:name}}{{/field:type}}& e) {
-            res.get<{{field:index_plus_one}}>().ref() = e;
-            res.setIsSet({{field:index_plus_one}}, true);
-          })) {
-        return true;
-      }
-      {{/function:sink_exceptions}}
-      return false;
-    }
-  };
-  {{/function:sink_exceptions?}}
-  {{/function:sink?}}
   switch (state.protocolId()) {
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
       apache::thrift::BinaryProtocolReader reader;
       {{#function:sink?}}
-      return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::BinaryProtocolWriter>(
+      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::BinaryProtocolWriter>(
           &reader, state{{#function:cpp_recv_arg?}}, state.extractSink(), _return{{/function:cpp_recv_arg?}});
       {{/function:sink?}}
       {{^function:sink?}}
@@ -65,7 +45,7 @@ folly::exception_wrapper {{> service_common/client_class_name}}::recv_wrapped_{{
     {
       apache::thrift::CompactProtocolReader reader;
       {{#function:sink?}}
-      return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::CompactProtocolWriter>(
+      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::CompactProtocolWriter>(
           &reader, state{{#function:cpp_recv_arg?}}, state.extractSink(), _return{{/function:cpp_recv_arg?}});
       {{/function:sink?}}
       {{^function:sink?}}

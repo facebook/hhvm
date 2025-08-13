@@ -195,14 +195,10 @@ apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProces
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<::cpp2::StreamItem>&& _return) {
   ProtocolOut_ prot;
-  PubSubStreamingService_returnstream_presult::FieldsType result;
+  PubSubStreamingService_returnstream_presult::InitialResponsePResultType result;
   using StreamPResultType = PubSubStreamingService_returnstream_presult::StreamPResultType;
   auto& returnStream = _return;
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(
-      std::move(returnStream),
-      std::move(executor));
+  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
   return {serializeResponse("returnstream", &prot, ctx, result), std::move(encodedStream)};
 }
 
@@ -363,24 +359,10 @@ apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProces
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<::cpp2::StreamItem>&& _return) {
   ProtocolOut_ prot;
-  PubSubStreamingService_streamthrows_presult::FieldsType result;
+  PubSubStreamingService_streamthrows_presult::InitialResponsePResultType result;
   using StreamPResultType = PubSubStreamingService_streamthrows_presult::StreamPResultType;
   auto& returnStream = _return;
-
-  struct ExMapType {
-    bool operator()(StreamPResultType& res, folly::exception_wrapper ew) {
-      if (ew.with_exception([&](::cpp2::FooStreamEx& e) {
-            res.get<1>().ref() = e;
-            res.setIsSet(1, true);
-          })) {
-        return true;
-      }
-      return false;
-    }
-  };
-  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(
-      std::move(returnStream),
-      std::move(executor));
+  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
   return {serializeResponse("streamthrows", &prot, ctx, result), std::move(encodedStream)};
 }
 
@@ -541,14 +523,10 @@ apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProces
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<::cpp2::StreamItem>&& _return) {
   ProtocolOut_ prot;
-  PubSubStreamingService_servicethrows_presult::FieldsType result;
+  PubSubStreamingService_servicethrows_presult::InitialResponsePResultType result;
   using StreamPResultType = PubSubStreamingService_servicethrows_presult::StreamPResultType;
   auto& returnStream = _return;
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(
-      std::move(returnStream),
-      std::move(executor));
+  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
   return {serializeResponse("servicethrows", &prot, ctx, result), std::move(encodedStream)};
 }
 
@@ -562,24 +540,21 @@ void PubSubStreamingServiceAsyncProcessor::throw_wrapped_servicethrows(
   if (!ew) {
     return;
   }
-  ::cpp2::PubSubStreamingService_servicethrows_presult result;
-  if (ew.with_exception([&](::cpp2::FooEx& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::cpp2::FooEx>(ew, *reqCtx);
-        result.fields.get<0>().ref() = e;
-        result.fields.setIsSet(0, true);
-      })) {
-  } else
-  {
+  ::cpp2::PubSubStreamingService_servicethrows_presult::InitialResponsePResultType result;
+  constexpr bool kHasReturnType = false;
+  if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
+    if (ctx) {
+      ctx->userExceptionWrapped(true, ew);
+    }
+    ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader<Ex>(ew, *reqCtx);
+  })) {
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<
         ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "servicethrows");
     return;
   }
   ProtocolOut_ prot;
-  auto response = serializeResponse("servicethrows", &prot, ctx, result.fields);
+  auto response = serializeResponse("servicethrows", &prot, ctx, result);
   auto payload = std::move(response).extractPayload(
       req->includeEnvelope(),
       prot.protocolType(),
@@ -730,14 +705,10 @@ apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProces
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<::cpp2::StreamItem>&& _return) {
   ProtocolOut_ prot;
-  PubSubStreamingService_servicethrows2_presult::FieldsType result;
+  PubSubStreamingService_servicethrows2_presult::InitialResponsePResultType result;
   using StreamPResultType = PubSubStreamingService_servicethrows2_presult::StreamPResultType;
   auto& returnStream = _return;
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(
-      std::move(returnStream),
-      std::move(executor));
+  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
   return {serializeResponse("servicethrows2", &prot, ctx, result), std::move(encodedStream)};
 }
 
@@ -751,34 +722,21 @@ void PubSubStreamingServiceAsyncProcessor::throw_wrapped_servicethrows2(
   if (!ew) {
     return;
   }
-  ::cpp2::PubSubStreamingService_servicethrows2_presult result;
-  if (ew.with_exception([&](::cpp2::FooEx& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::cpp2::FooEx>(ew, *reqCtx);
-        result.fields.get<0>().ref() = e;
-        result.fields.setIsSet(0, true);
-      })) {
-  } else
-  if (ew.with_exception([&](::cpp2::FooEx2& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::cpp2::FooEx2>(ew, *reqCtx);
-        result.fields.get<1>().ref() = e;
-        result.fields.setIsSet(1, true);
-      })) {
-  } else
-  {
+  ::cpp2::PubSubStreamingService_servicethrows2_presult::InitialResponsePResultType result;
+  constexpr bool kHasReturnType = false;
+  if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
+    if (ctx) {
+      ctx->userExceptionWrapped(true, ew);
+    }
+    ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader<Ex>(ew, *reqCtx);
+  })) {
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<
         ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "servicethrows2");
     return;
   }
   ProtocolOut_ prot;
-  auto response = serializeResponse("servicethrows2", &prot, ctx, result.fields);
+  auto response = serializeResponse("servicethrows2", &prot, ctx, result);
   auto payload = std::move(response).extractPayload(
       req->includeEnvelope(),
       prot.protocolType(),
@@ -929,24 +887,10 @@ apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProces
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<::cpp2::StreamItem>&& _return) {
   ProtocolOut_ prot;
-  PubSubStreamingService_boththrows_presult::FieldsType result;
+  PubSubStreamingService_boththrows_presult::InitialResponsePResultType result;
   using StreamPResultType = PubSubStreamingService_boththrows_presult::StreamPResultType;
   auto& returnStream = _return;
-
-  struct ExMapType {
-    bool operator()(StreamPResultType& res, folly::exception_wrapper ew) {
-      if (ew.with_exception([&](::cpp2::FooStreamEx& e) {
-            res.get<1>().ref() = e;
-            res.setIsSet(1, true);
-          })) {
-        return true;
-      }
-      return false;
-    }
-  };
-  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(
-      std::move(returnStream),
-      std::move(executor));
+  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
   return {serializeResponse("boththrows", &prot, ctx, result), std::move(encodedStream)};
 }
 
@@ -960,24 +904,21 @@ void PubSubStreamingServiceAsyncProcessor::throw_wrapped_boththrows(
   if (!ew) {
     return;
   }
-  ::cpp2::PubSubStreamingService_boththrows_presult result;
-  if (ew.with_exception([&](::cpp2::FooEx& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::cpp2::FooEx>(ew, *reqCtx);
-        result.fields.get<0>().ref() = e;
-        result.fields.setIsSet(0, true);
-      })) {
-  } else
-  {
+  ::cpp2::PubSubStreamingService_boththrows_presult::InitialResponsePResultType result;
+  constexpr bool kHasReturnType = false;
+  if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
+    if (ctx) {
+      ctx->userExceptionWrapped(true, ew);
+    }
+    ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader<Ex>(ew, *reqCtx);
+  })) {
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<
         ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "boththrows");
     return;
   }
   ProtocolOut_ prot;
-  auto response = serializeResponse("boththrows", &prot, ctx, result.fields);
+  auto response = serializeResponse("boththrows", &prot, ctx, result);
   auto payload = std::move(response).extractPayload(
       req->includeEnvelope(),
       prot.protocolType(),
@@ -1128,26 +1069,12 @@ apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProces
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>&& _return) {
   ProtocolOut_ prot;
-  PubSubStreamingService_responseandstreamstreamthrows_presult::FieldsType result;
+  PubSubStreamingService_responseandstreamstreamthrows_presult::InitialResponsePResultType result;
   using StreamPResultType = PubSubStreamingService_responseandstreamstreamthrows_presult::StreamPResultType;
   result.get<0>().value = const_cast<::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>::ResponseType*>(&_return.response);
   result.setIsSet(0, true);
   auto& returnStream = _return.stream;
-
-  struct ExMapType {
-    bool operator()(StreamPResultType& res, folly::exception_wrapper ew) {
-      if (ew.with_exception([&](::cpp2::FooStreamEx& e) {
-            res.get<1>().ref() = e;
-            res.setIsSet(1, true);
-          })) {
-        return true;
-      }
-      return false;
-    }
-  };
-  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(
-      std::move(returnStream),
-      std::move(executor));
+  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
   return {serializeResponse("responseandstreamstreamthrows", &prot, ctx, result), std::move(encodedStream)};
 }
 
@@ -1308,16 +1235,12 @@ apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProces
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>&& _return) {
   ProtocolOut_ prot;
-  PubSubStreamingService_responseandstreamservicethrows_presult::FieldsType result;
+  PubSubStreamingService_responseandstreamservicethrows_presult::InitialResponsePResultType result;
   using StreamPResultType = PubSubStreamingService_responseandstreamservicethrows_presult::StreamPResultType;
   result.get<0>().value = const_cast<::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>::ResponseType*>(&_return.response);
   result.setIsSet(0, true);
   auto& returnStream = _return.stream;
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(
-      std::move(returnStream),
-      std::move(executor));
+  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
   return {serializeResponse("responseandstreamservicethrows", &prot, ctx, result), std::move(encodedStream)};
 }
 
@@ -1331,24 +1254,21 @@ void PubSubStreamingServiceAsyncProcessor::throw_wrapped_responseandstreamservic
   if (!ew) {
     return;
   }
-  ::cpp2::PubSubStreamingService_responseandstreamservicethrows_presult result;
-  if (ew.with_exception([&](::cpp2::FooEx& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::cpp2::FooEx>(ew, *reqCtx);
-        result.fields.get<1>().ref() = e;
-        result.fields.setIsSet(1, true);
-      })) {
-  } else
-  {
+  ::cpp2::PubSubStreamingService_responseandstreamservicethrows_presult::InitialResponsePResultType result;
+  constexpr bool kHasReturnType = true;
+  if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
+    if (ctx) {
+      ctx->userExceptionWrapped(true, ew);
+    }
+    ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader<Ex>(ew, *reqCtx);
+  })) {
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<
         ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "responseandstreamservicethrows");
     return;
   }
   ProtocolOut_ prot;
-  auto response = serializeResponse("responseandstreamservicethrows", &prot, ctx, result.fields);
+  auto response = serializeResponse("responseandstreamservicethrows", &prot, ctx, result);
   auto payload = std::move(response).extractPayload(
       req->includeEnvelope(),
       prot.protocolType(),
@@ -1499,26 +1419,12 @@ apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProces
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>&& _return) {
   ProtocolOut_ prot;
-  PubSubStreamingService_responseandstreamboththrows_presult::FieldsType result;
+  PubSubStreamingService_responseandstreamboththrows_presult::InitialResponsePResultType result;
   using StreamPResultType = PubSubStreamingService_responseandstreamboththrows_presult::StreamPResultType;
   result.get<0>().value = const_cast<::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>::ResponseType*>(&_return.response);
   result.setIsSet(0, true);
   auto& returnStream = _return.stream;
-
-  struct ExMapType {
-    bool operator()(StreamPResultType& res, folly::exception_wrapper ew) {
-      if (ew.with_exception([&](::cpp2::FooStreamEx& e) {
-            res.get<1>().ref() = e;
-            res.setIsSet(1, true);
-          })) {
-        return true;
-      }
-      return false;
-    }
-  };
-  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(
-      std::move(returnStream),
-      std::move(executor));
+  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
   return {serializeResponse("responseandstreamboththrows", &prot, ctx, result), std::move(encodedStream)};
 }
 
@@ -1532,24 +1438,21 @@ void PubSubStreamingServiceAsyncProcessor::throw_wrapped_responseandstreambothth
   if (!ew) {
     return;
   }
-  ::cpp2::PubSubStreamingService_responseandstreamboththrows_presult result;
-  if (ew.with_exception([&](::cpp2::FooEx& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::cpp2::FooEx>(ew, *reqCtx);
-        result.fields.get<1>().ref() = e;
-        result.fields.setIsSet(1, true);
-      })) {
-  } else
-  {
+  ::cpp2::PubSubStreamingService_responseandstreamboththrows_presult::InitialResponsePResultType result;
+  constexpr bool kHasReturnType = true;
+  if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
+    if (ctx) {
+      ctx->userExceptionWrapped(true, ew);
+    }
+    ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader<Ex>(ew, *reqCtx);
+  })) {
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<
         ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "responseandstreamboththrows");
     return;
   }
   ProtocolOut_ prot;
-  auto response = serializeResponse("responseandstreamboththrows", &prot, ctx, result.fields);
+  auto response = serializeResponse("responseandstreamboththrows", &prot, ctx, result);
   auto payload = std::move(response).extractPayload(
       req->includeEnvelope(),
       prot.protocolType(),

@@ -616,6 +616,8 @@ class mstch_function : public mstch_base {
             {"function:in_or_creates_interaction?",
              &mstch_function::in_or_creates_interaction},
             {"function:void?", &mstch_function::is_void},
+            {"function:initial_response?",
+             &mstch_function::has_initial_response},
 
             // Sink methods:
             {"function:sink?", &mstch_function::has_sink},
@@ -705,6 +707,9 @@ class mstch_function : public mstch_base {
   mstch::node is_void() {
     return function_->return_type()->is_void() && !function_->interaction() &&
         !function_->sink_or_stream();
+  }
+  mstch::node has_initial_response() {
+    return !function_->return_type()->is_void();
   }
 
   mstch::node has_sink() { return function_->sink() != nullptr; }

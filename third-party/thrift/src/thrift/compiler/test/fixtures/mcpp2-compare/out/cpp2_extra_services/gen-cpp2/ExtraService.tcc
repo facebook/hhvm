@@ -336,27 +336,14 @@ void ExtraServiceAsyncProcessor::throw_wrapped_throws_function(
     return;
   }
   ::extra::svc::ExtraService_throws_function_presult result;
-  if (ew.with_exception([&](::some::valid::ns::AnException& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::some::valid::ns::AnException>(ew, *reqCtx);
-        result.get<0>().ref() = e;
-        result.setIsSet(0, true);
-      })) {
-  } else
-  if (ew.with_exception([&](::some::valid::ns::AnotherException& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::some::valid::ns::AnotherException>(ew, *reqCtx);
-        result.get<1>().ref() = e;
-        result.setIsSet(1, true);
-      })) {
-  } else
-  {
+  constexpr bool kHasReturnType = false;
+  if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
+    if (ctx) {
+      ctx->userExceptionWrapped(true, ew);
+    }
+    ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader<Ex>(ew, *reqCtx);
+  })) {
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<
         ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "throws_function");
     return;
@@ -529,27 +516,14 @@ void ExtraServiceAsyncProcessor::throw_wrapped_throws_function2(
     return;
   }
   ::extra::svc::ExtraService_throws_function2_presult result;
-  if (ew.with_exception([&](::some::valid::ns::AnException& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::some::valid::ns::AnException>(ew, *reqCtx);
-        result.get<1>().ref() = e;
-        result.setIsSet(1, true);
-      })) {
-  } else
-  if (ew.with_exception([&](::some::valid::ns::AnotherException& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::some::valid::ns::AnotherException>(ew, *reqCtx);
-        result.get<2>().ref() = e;
-        result.setIsSet(2, true);
-      })) {
-  } else
-  {
+  constexpr bool kHasReturnType = true;
+  if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
+    if (ctx) {
+      ctx->userExceptionWrapped(true, ew);
+    }
+    ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader<Ex>(ew, *reqCtx);
+  })) {
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<
         ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "throws_function2");
     return;
@@ -725,27 +699,14 @@ void ExtraServiceAsyncProcessor::throw_wrapped_throws_function3(
     return;
   }
   ::extra::svc::ExtraService_throws_function3_presult result;
-  if (ew.with_exception([&](::some::valid::ns::AnException& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::some::valid::ns::AnException>(ew, *reqCtx);
-        result.get<1>().ref() = e;
-        result.setIsSet(1, true);
-      })) {
-  } else
-  if (ew.with_exception([&](::some::valid::ns::AnotherException& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::some::valid::ns::AnotherException>(ew, *reqCtx);
-        result.get<2>().ref() = e;
-        result.setIsSet(2, true);
-      })) {
-  } else
-  {
+  constexpr bool kHasReturnType = true;
+  if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
+    if (ctx) {
+      ctx->userExceptionWrapped(true, ew);
+    }
+    ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader<Ex>(ew, *reqCtx);
+  })) {
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<
         ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "throws_function3");
     return;

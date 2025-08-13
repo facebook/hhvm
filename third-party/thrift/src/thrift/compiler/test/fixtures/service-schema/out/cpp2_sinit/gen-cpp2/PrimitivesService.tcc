@@ -336,17 +336,14 @@ void PrimitivesServiceAsyncProcessor::throw_wrapped_method_that_throws(
     return;
   }
   ::facebook::thrift::test::PrimitivesService_method_that_throws_presult result;
-  if (ew.with_exception([&](::facebook::thrift::test::CustomException& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::facebook::thrift::test::CustomException>(ew, *reqCtx);
-        result.get<1>().ref() = e;
-        result.setIsSet(1, true);
-      })) {
-  } else
-  {
+  constexpr bool kHasReturnType = true;
+  if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
+    if (ctx) {
+      ctx->userExceptionWrapped(true, ew);
+    }
+    ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader<Ex>(ew, *reqCtx);
+  })) {
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<
         ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "method_that_throws");
     return;

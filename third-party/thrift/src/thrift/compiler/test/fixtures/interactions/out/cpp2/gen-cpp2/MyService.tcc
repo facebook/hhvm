@@ -640,16 +640,12 @@ apache::thrift::ResponseAndServerStreamFactory MyServiceAsyncProcessor::return_s
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>&& _return) {
   ProtocolOut_ prot;
-  MyService_serialize_presult::FieldsType result;
+  MyService_serialize_presult::InitialResponsePResultType result;
   using StreamPResultType = MyService_serialize_presult::StreamPResultType;
   result.get<0>().value = const_cast<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>::ResponseType*>(&_return.response);
   result.setIsSet(0, true);
   auto& returnStream = _return.stream;
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(
-      std::move(returnStream),
-      std::move(executor));
+  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
   return {serializeResponse("serialize", &prot, ctx, result), std::move(encodedStream)};
 }
 
@@ -848,17 +844,14 @@ void MyServiceAsyncProcessor::throw_wrapped_MyInteraction_frobnicate(
     return;
   }
   ::cpp2::MyService_MyInteraction_frobnicate_presult result;
-  if (ew.with_exception([&](::cpp2::CustomException& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::cpp2::CustomException>(ew, *reqCtx);
-        result.get<1>().ref() = e;
-        result.setIsSet(1, true);
-      })) {
-  } else
-  {
+  constexpr bool kHasReturnType = true;
+  if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
+    if (ctx) {
+      ctx->userExceptionWrapped(true, ew);
+    }
+    ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader<Ex>(ew, *reqCtx);
+  })) {
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<
         ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "MyInteraction.frobnicate");
     return;
@@ -1139,14 +1132,10 @@ apache::thrift::ResponseAndServerStreamFactory MyServiceAsyncProcessor::return_M
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<bool>&& _return) {
   ProtocolOut_ prot;
-  MyService_MyInteraction_truthify_presult::FieldsType result;
+  MyService_MyInteraction_truthify_presult::InitialResponsePResultType result;
   using StreamPResultType = MyService_MyInteraction_truthify_presult::StreamPResultType;
   auto& returnStream = _return;
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(
-      std::move(returnStream),
-      std::move(executor));
+  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
   return {serializeResponse("MyInteraction.truthify", &prot, ctx, result), std::move(encodedStream)};
 }
 
@@ -1310,21 +1299,17 @@ MyServiceAsyncProcessor::return_MyInteraction_encode(
     ::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>&& _return,
     folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  MyService_MyInteraction_encode_presult::FieldsType result;
+  MyService_MyInteraction_encode_presult::InitialResponsePResultType result;
   using SinkPResultType = MyService_MyInteraction_encode_presult::SinkPResultType;
   using FinalResponsePResultType =
       MyService_MyInteraction_encode_presult::FinalResponsePResultType;
   result.get<0>().value = &_return.response;
   result.setIsSet(0, true);
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-
   auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
-      FinalResponsePResultType,
-      ExMapType>(std::move(_return.sinkConsumer),std::move(executor));
+      FinalResponsePResultType>(std::move(_return.sinkConsumer),std::move(executor));
 
   return {serializeResponse("MyInteraction.encode", &prot, ctx, result), std::move(sinkConsumerImpl)};
 }
@@ -1784,14 +1769,10 @@ apache::thrift::ResponseAndServerStreamFactory MyServiceAsyncProcessor::return_M
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<bool>&& _return) {
   ProtocolOut_ prot;
-  MyService_MyInteractionFast_truthify_presult::FieldsType result;
+  MyService_MyInteractionFast_truthify_presult::InitialResponsePResultType result;
   using StreamPResultType = MyService_MyInteractionFast_truthify_presult::StreamPResultType;
   auto& returnStream = _return;
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(
-      std::move(returnStream),
-      std::move(executor));
+  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
   return {serializeResponse("MyInteractionFast.truthify", &prot, ctx, result), std::move(encodedStream)};
 }
 
@@ -1952,21 +1933,17 @@ MyServiceAsyncProcessor::return_MyInteractionFast_encode(
     ::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>&& _return,
     folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  MyService_MyInteractionFast_encode_presult::FieldsType result;
+  MyService_MyInteractionFast_encode_presult::InitialResponsePResultType result;
   using SinkPResultType = MyService_MyInteractionFast_encode_presult::SinkPResultType;
   using FinalResponsePResultType =
       MyService_MyInteractionFast_encode_presult::FinalResponsePResultType;
   result.get<0>().value = &_return.response;
   result.setIsSet(0, true);
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-
   auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
-      FinalResponsePResultType,
-      ExMapType>(std::move(_return.sinkConsumer),std::move(executor));
+      FinalResponsePResultType>(std::move(_return.sinkConsumer),std::move(executor));
 
   return {serializeResponse("MyInteractionFast.encode", &prot, ctx, result), std::move(sinkConsumerImpl)};
 }

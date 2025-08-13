@@ -1860,17 +1860,14 @@ void SimpleServiceAsyncProcessor::throw_wrapped_expected_exception(
     return;
   }
   ::py3::simple::SimpleService_expected_exception_presult result;
-  if (ew.with_exception([&](::py3::simple::SimpleException& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::py3::simple::SimpleException>(ew, *reqCtx);
-        result.get<0>().ref() = e;
-        result.setIsSet(0, true);
-      })) {
-  } else
-  {
+  constexpr bool kHasReturnType = false;
+  if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
+    if (ctx) {
+      ctx->userExceptionWrapped(true, ew);
+    }
+    ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader<Ex>(ew, *reqCtx);
+  })) {
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<
         ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "expected_exception");
     return;

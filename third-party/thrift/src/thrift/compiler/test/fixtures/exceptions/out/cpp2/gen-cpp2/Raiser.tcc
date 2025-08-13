@@ -326,37 +326,14 @@ void RaiserAsyncProcessor::throw_wrapped_doRaise(
     return;
   }
   ::cpp2::Raiser_doRaise_presult result;
-  if (ew.with_exception([&](::cpp2::Banal& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::cpp2::Banal>(ew, *reqCtx);
-        result.get<0>().ref() = e;
-        result.setIsSet(0, true);
-      })) {
-  } else
-  if (ew.with_exception([&](::cpp2::Fiery& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::cpp2::Fiery>(ew, *reqCtx);
-        result.get<1>().ref() = e;
-        result.setIsSet(1, true);
-      })) {
-  } else
-  if (ew.with_exception([&](::cpp2::Serious& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::cpp2::Serious>(ew, *reqCtx);
-        result.get<2>().ref() = e;
-        result.setIsSet(2, true);
-      })) {
-  } else
-  {
+  constexpr bool kHasReturnType = false;
+  if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
+    if (ctx) {
+      ctx->userExceptionWrapped(true, ew);
+    }
+    ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader<Ex>(ew, *reqCtx);
+  })) {
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<
         ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "doRaise");
     return;
@@ -685,37 +662,14 @@ void RaiserAsyncProcessor::throw_wrapped_get500(
     return;
   }
   ::cpp2::Raiser_get500_presult result;
-  if (ew.with_exception([&](::cpp2::Fiery& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::cpp2::Fiery>(ew, *reqCtx);
-        result.get<1>().ref() = e;
-        result.setIsSet(1, true);
-      })) {
-  } else
-  if (ew.with_exception([&](::cpp2::Banal& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::cpp2::Banal>(ew, *reqCtx);
-        result.get<2>().ref() = e;
-        result.setIsSet(2, true);
-      })) {
-  } else
-  if (ew.with_exception([&](::cpp2::Serious& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::cpp2::Serious>(ew, *reqCtx);
-        result.get<3>().ref() = e;
-        result.setIsSet(3, true);
-      })) {
-  } else
-  {
+  constexpr bool kHasReturnType = true;
+  if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
+    if (ctx) {
+      ctx->userExceptionWrapped(true, ew);
+    }
+    ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader<Ex>(ew, *reqCtx);
+  })) {
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<
         ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "get500");
     return;

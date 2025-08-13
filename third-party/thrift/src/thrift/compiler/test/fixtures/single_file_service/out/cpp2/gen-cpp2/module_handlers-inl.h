@@ -661,14 +661,10 @@ apache::thrift::ResponseAndServerStreamFactory BAsyncProcessor::return_stream_st
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<::std::int32_t>&& _return) {
   ProtocolOut_ prot;
-  B_stream_stuff_presult::FieldsType result;
+  B_stream_stuff_presult::InitialResponsePResultType result;
   using StreamPResultType = B_stream_stuff_presult::StreamPResultType;
   auto& returnStream = _return;
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(
-      std::move(returnStream),
-      std::move(executor));
+  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
   return {serializeResponse("stream_stuff", &prot, ctx, result), std::move(encodedStream)};
 }
 
@@ -829,19 +825,15 @@ BAsyncProcessor::return_sink_stuff(
     ::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t>&& _return,
     folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  B_sink_stuff_presult::FieldsType result;
+  B_sink_stuff_presult::InitialResponsePResultType result;
   using SinkPResultType = B_sink_stuff_presult::SinkPResultType;
   using FinalResponsePResultType =
       B_sink_stuff_presult::FinalResponsePResultType;
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-
   auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
-      FinalResponsePResultType,
-      ExMapType>(std::move(_return), std::move(executor));
+      FinalResponsePResultType>(std::move(_return), std::move(executor));
 
   return {serializeResponse("sink_stuff", &prot, ctx, result), std::move(sinkConsumerImpl)};
 }

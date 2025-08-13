@@ -303,25 +303,25 @@ class ThriftPresult
   }
 };
 
-template <typename PResults, typename StreamPresult>
+template <typename InitialResponsePresult, typename StreamPresult>
 struct ThriftPResultStream {
+  using InitialResponsePResultType = InitialResponsePresult;
   using StreamPResultType = StreamPresult;
-  using FieldsType = PResults;
 
-  PResults fields;
+  InitialResponsePresult initialResponse;
   StreamPresult stream;
 };
 
 template <
-    typename PResults,
+    typename InitialResponsePresult,
     typename SinkPresult,
     typename FinalResponsePresult>
 struct ThriftPResultSink {
+  using InitialResponsePResultType = InitialResponsePresult;
   using SinkPResultType = SinkPresult;
-  using FieldsType = PResults;
   using FinalResponsePResultType = FinalResponsePresult;
 
-  PResults fields;
+  InitialResponsePresult initialResponse;
   SinkPresult stream;
   FinalResponsePresult finalResponse;
 };
@@ -353,12 +353,7 @@ class Cpp2Ops<ThriftPresult<hasIsSet, Args...>> {
 
 namespace detail::ap {
 
-template <
-    ErrorBlame Blame,
-    typename Protocol,
-    typename PResult,
-    typename T,
-    typename ErrorMapFunc>
+template <ErrorBlame Blame, typename Protocol, typename PResult, typename T>
 class StreamElementEncoderImpl;
 
 template <typename Protocol, typename PResult, typename T>
@@ -376,7 +371,7 @@ std::unique_ptr<folly::IOBuf> encode_stream_payload(T&& _item);
 template <typename Protocol, typename PResult>
 std::unique_ptr<folly::IOBuf> encode_stream_payload(folly::IOBuf&& _item);
 
-template <typename Protocol, typename PResult, typename ErrorMapFunc>
+template <typename Protocol, typename PResult>
 EncodedStreamError encode_stream_exception(folly::exception_wrapper ew);
 
 template <typename Protocol, typename PResult, typename T>
@@ -392,13 +387,6 @@ T decode_stream_payload(folly::IOBuf& payload);
 template <typename Protocol, typename PResult, typename T>
 folly::exception_wrapper decode_stream_exception(folly::exception_wrapper ew);
 
-struct EmptyExMapType {
-  template <typename PResult>
-  bool operator()(PResult&, folly::exception_wrapper) {
-    return false;
-  }
-};
-
 } // namespace detail::ap
 
 //  AsyncClient helpers
@@ -407,14 +395,14 @@ namespace detail::ac {
 
 template <bool HasReturnType, typename PResult>
 folly::exception_wrapper extract_exn(PResult& result) {
-  using base = std::integral_constant<std::size_t, HasReturnType ? 1 : 0>;
+  constexpr std::size_t base = HasReturnType;
   auto ew = folly::exception_wrapper();
   if (HasReturnType && result.getIsSet(0)) {
     return ew;
   }
-  foreach_index<PResult::size::value - base::value>([&](auto index) {
-    if (!ew && result.getIsSet(index.value + base::value)) {
-      auto& fdata = result.template get<index.value + base::value>();
+  foreach_index<PResult::size::value - base>([&](auto index) {
+    if (!ew && result.getIsSet(index.value + base)) {
+      auto& fdata = result.template get<index.value + base>();
       ew = folly::exception_wrapper(std::move(fdata.ref()));
     }
   });
@@ -513,7 +501,7 @@ folly::exception_wrapper recv_wrapped(
   auto guard = folly::makeGuard([&] { prot->setInput(nullptr); });
   apache::thrift::ContextStack* ctx = state.ctx();
 
-  typename PResult::FieldsType result;
+  typename PResult::InitialResponsePResultType result;
   result.template get<0>().value = &_return.response;
 
   auto ew = recv_wrapped_helper(prot, state, result);
@@ -542,7 +530,7 @@ folly::exception_wrapper recv_wrapped(
   auto guard = folly::makeGuard([&] { prot->setInput(nullptr); });
   apache::thrift::ContextStack* ctx = state.ctx();
 
-  typename PResult::FieldsType result;
+  typename PResult::InitialResponsePResultType result;
 
   auto ew = recv_wrapped_helper(prot, state, result);
   if (!ew) {
@@ -569,16 +557,14 @@ template <
     typename SinkPResult,
     typename SinkType,
     typename FinalResponsePResult,
-    typename FinalResponseType,
-    typename ErrorMapFunc>
+    typename FinalResponseType>
 ClientSink<SinkType, FinalResponseType> createSink(
     apache::thrift::detail::ClientSinkBridge::ClientPtr impl) {
   static apache::thrift::detail::ap::StreamElementEncoderImpl<
       ErrorBlame::CLIENT,
       ProtocolWriter,
       SinkPResult,
-      SinkType,
-      std::decay_t<ErrorMapFunc>>
+      SinkType>
       encode;
   return ClientSink<SinkType, FinalResponseType>(
       std::move(impl),
@@ -592,7 +578,6 @@ ClientSink<SinkType, FinalResponseType> createSink(
 
 template <
     typename PResult,
-    typename ErrorMapFunc,
     typename ProtocolWriter,
     typename ProtocolReader,
     typename Response,
@@ -609,7 +594,7 @@ folly::exception_wrapper recv_wrapped(
   auto guard = folly::makeGuard([&] { prot->setInput(nullptr); });
   apache::thrift::ContextStack* ctx = state.ctx();
 
-  typename PResult::FieldsType result;
+  typename PResult::InitialResponsePResultType result;
   result.template get<0>().value = &_return.response;
 
   auto ew = recv_wrapped_helper(prot, state, result);
@@ -627,8 +612,7 @@ folly::exception_wrapper recv_wrapped(
         typename PResult::SinkPResultType,
         Item,
         typename PResult::FinalResponsePResultType,
-        FinalResponse,
-        std::decay_t<ErrorMapFunc>>(std::move(impl));
+        FinalResponse>(std::move(impl));
   }
   return ew;
 #else
@@ -642,7 +626,6 @@ folly::exception_wrapper recv_wrapped(
 
 template <
     typename PResult,
-    typename ErrorMapFunc,
     typename ProtocolWriter,
     typename ProtocolReader,
     typename Item,
@@ -657,7 +640,7 @@ folly::exception_wrapper recv_wrapped(
   auto guard = folly::makeGuard([&] { prot->setInput(nullptr); });
   apache::thrift::ContextStack* ctx = state.ctx();
 
-  typename PResult::FieldsType result;
+  typename PResult::InitialResponsePResultType result;
 
   auto ew = recv_wrapped_helper(prot, state, result);
   if (!ew) {
@@ -674,8 +657,7 @@ folly::exception_wrapper recv_wrapped(
         typename PResult::SinkPResultType,
         Item,
         typename PResult::FinalResponsePResultType,
-        FinalResponse,
-        std::decay_t<ErrorMapFunc>>(std::move(impl));
+        FinalResponse>(std::move(impl));
   }
   return ew;
 #else
@@ -1326,20 +1308,38 @@ std::unique_ptr<folly::IOBuf> encode_stream_payload(folly::IOBuf&& _item) {
   return std::make_unique<folly::IOBuf>(std::move(_item));
 }
 
-template <
-    ErrorBlame Blame,
-    typename Protocol,
-    typename PResult,
-    typename ErrorMapFunc>
+struct NoOp {
+  template <typename T>
+  void operator()(T&) {}
+};
+
+template <bool HasReturnType = true, typename PResult, typename F = NoOp>
+bool insert_exn(PResult& result, folly::exception_wrapper& ew, F&& f = NoOp{}) {
+  constexpr std::size_t base = HasReturnType;
+  DCHECK(ew);
+  bool handled = false;
+  foreach_index<PResult::size::value - base>([&](auto index) {
+    auto& fdata = result.template get<index.value + base>();
+    using Exn = typename std::remove_reference_t<decltype(fdata.ref())>;
+    handled = handled || ew.with_exception<Exn>([&](Exn& ex) {
+      assert(!handled); // only enter this lambda once
+      f(ex);
+      fdata.ref() = ex;
+      result.setIsSet(index.value + base);
+    });
+  });
+  return handled;
+}
+
+template <ErrorBlame Blame, typename Protocol, typename PResult>
 EncodedStreamError encode_stream_exception(folly::exception_wrapper ew) {
-  ErrorMapFunc mapException;
   Protocol prot;
   folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
   PResult res;
 
   PayloadExceptionMetadata exceptionMetadata;
   PayloadExceptionMetadataBase exceptionMetadataBase;
-  if (mapException(res, ew)) {
+  if (insert_exn(res, ew)) {
     prot.setOutput(&queue, res.serializedSizeZC(&prot));
     res.write(&prot);
     exceptionMetadata.declaredException() = PayloadDeclaredExceptionMetadata();
@@ -1364,12 +1364,7 @@ EncodedStreamError encode_stream_exception(folly::exception_wrapper ew) {
       StreamPayload(std::move(queue).move(), std::move(streamPayloadMetadata)));
 }
 
-template <
-    ErrorBlame Blame,
-    typename Protocol,
-    typename PResult,
-    typename T,
-    typename ErrorMapFunc>
+template <ErrorBlame Blame, typename Protocol, typename PResult, typename T>
 class StreamElementEncoderImpl final
     : public apache::thrift::detail::StreamElementEncoder<T> {
   folly::Try<StreamPayload> operator()(T&& val) override {
@@ -1384,7 +1379,7 @@ class StreamElementEncoderImpl final
 
   folly::Try<StreamPayload> operator()(folly::exception_wrapper&& e) override {
     return folly::Try<StreamPayload>(folly::exception_wrapper(
-        encode_stream_exception<Blame, Protocol, PResult, ErrorMapFunc>(e)));
+        encode_stream_exception<Blame, Protocol, PResult>(e)));
   }
 };
 
@@ -1507,20 +1502,11 @@ folly::exception_wrapper decode_stream_exception(folly::exception_wrapper ew) {
   return ew;
 }
 
-template <
-    typename Protocol,
-    typename PResult,
-    typename ErrorMapFunc,
-    typename T>
+template <typename Protocol, typename PResult, typename T>
 ServerStreamFactory encode_server_stream(
     apache::thrift::ServerStream<T>&& stream,
     folly::Executor::KeepAlive<> serverExecutor) {
-  static StreamElementEncoderImpl<
-      ErrorBlame::SERVER,
-      Protocol,
-      PResult,
-      T,
-      ErrorMapFunc>
+  static StreamElementEncoderImpl<ErrorBlame::SERVER, Protocol, PResult, T>
       encode;
   return stream(std::move(serverExecutor), &encode);
 }
@@ -1554,7 +1540,6 @@ template <
     typename ProtocolWriter,
     typename SinkPResult,
     typename FinalResponsePResult,
-    typename ErrorMapFunc,
     typename SinkType,
     typename FinalResponseType>
 apache::thrift::detail::SinkConsumerImpl toSinkConsumerImpl(
@@ -1588,8 +1573,7 @@ apache::thrift::detail::SinkConsumerImpl toSinkConsumerImpl(
     co_return folly::Try<StreamPayload>(ap::encode_stream_exception<
                                         ErrorBlame::SERVER,
                                         ProtocolWriter,
-                                        FinalResponsePResult,
-                                        ErrorMapFunc>(std::move(ew)));
+                                        FinalResponsePResult>(std::move(ew)));
   };
   return apache::thrift::detail::SinkConsumerImpl{
       std::move(consumer),

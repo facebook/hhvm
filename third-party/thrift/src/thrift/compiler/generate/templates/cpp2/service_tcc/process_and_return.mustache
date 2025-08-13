@@ -298,7 +298,7 @@ std::pair<
 {{/function:cpp_recv_arg?}}
   ProtocolOut_ prot;
 {{#function:stream?}}
-  {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::FieldsType result;
+  {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::InitialResponsePResultType result;
   using StreamPResultType = {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::StreamPResultType;
 {{#function:stream_has_first_response?}}
   result.get<0>().value = const_cast<{{function:cpp_return_type}}::ResponseType*>(&_return.response);
@@ -308,32 +308,11 @@ std::pair<
 {{^function:stream_has_first_response?}}
   auto& returnStream = _return;
 {{/function:stream_has_first_response?}}
-
-{{^function:stream_exceptions?}}
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-{{/function:stream_exceptions?}}
-{{#function:stream_exceptions?}}
-  struct ExMapType {
-    bool operator()(StreamPResultType& res, folly::exception_wrapper ew) {
-{{#function:stream_exceptions}}
-      if (ew.with_exception([&]({{#field:type}}::{{type:qualified_namespace}}::{{type:name}}{{/field:type}}& e) {
-            res.get<{{field:index_plus_one}}>().ref() = e;
-            res.setIsSet({{field:index_plus_one}}, true);
-          })) {
-        return true;
-      }
-{{/function:stream_exceptions}}
-      return false;
-    }
-  };
-{{/function:stream_exceptions?}}
-  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(
-      std::move(returnStream),
-      std::move(executor));
+  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
   return {serializeResponse("{{> common/function_name}}", &prot, ctx, result), std::move(encodedStream)};
 {{/function:stream?}}
 {{#function:sink?}}
-  {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::FieldsType result;
+  {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::InitialResponsePResultType result;
   using SinkPResultType = {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::SinkPResultType;
   using FinalResponsePResultType =
       {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::FinalResponsePResultType;
@@ -341,32 +320,11 @@ std::pair<
   result.get<0>().value = &_return.response;
   result.setIsSet(0, true);
 {{/function:sink_has_first_response?}}
-
-{{^function:sink_final_response_exceptions?}}
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-{{/function:sink_final_response_exceptions?}}
-{{#function:sink_final_response_exceptions?}}
-  struct ExMapType {
-    bool operator()(FinalResponsePResultType& res, folly::exception_wrapper ew) {
-{{#function:sink_final_response_exceptions}}
-      if (ew.with_exception([&]({{#field:type}}::{{type:qualified_namespace}}::{{type:name}}{{/field:type}}& e) {
-            res.get<{{field:index_plus_one}}>().ref() = e;
-            res.setIsSet({{field:index_plus_one}}, true);
-          })) {
-        return true;
-      }
-{{/function:sink_final_response_exceptions}}
-      return false;
-    }
-  };
-{{/function:sink_final_response_exceptions?}}
-
   auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
-      FinalResponsePResultType,
-      ExMapType>({{#function:sink_has_first_response?}}std::move(_return.sinkConsumer),{{/function:sink_has_first_response?}}{{^function:sink_has_first_response?}}std::move(_return), {{/function:sink_has_first_response?}}std::move(executor));
+      FinalResponsePResultType>({{#function:sink_has_first_response?}}std::move(_return.sinkConsumer),{{/function:sink_has_first_response?}}{{^function:sink_has_first_response?}}std::move(_return), {{/function:sink_has_first_response?}}std::move(executor));
 
   return {serializeResponse("{{> common/function_name}}", &prot, ctx, result), std::move(sinkConsumerImpl)};
 {{/function:sink?}}
@@ -390,57 +348,25 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::throw_wrapped_{{function
   if (!ew) {
     return;
   }
-{{#function:exceptions?}}
-  ::{{service:qualified_namespace}}::{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult result;
-{{/function:exceptions?}}
-{{#function:exceptions}}
-  if (ew.with_exception([&]({{#field:type}}::{{type:qualified_namespace}}::{{type:name}}{{/field:type}}& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<{{#field:type}}::{{type:qualified_namespace}}::{{type:name}}{{/field:type}}>(ew, *reqCtx);
-{{^function:cpp_recv_arg?}}
-        result.get<{{field:index}}>().ref() = e;
-        result.setIsSet({{field:index}}, true);
-{{/function:cpp_recv_arg?}}
-{{#function:cpp_recv_arg?}}
-{{^function:stream?}}{{^function:sink?}}
-        result.get<{{field:index_plus_one}}>().ref() = e;
-        result.setIsSet({{field:index_plus_one}}, true);
-{{/function:sink?}}{{/function:stream?}}
-{{#function:stream?}}
-{{#function:stream_has_first_response?}}
-        result.fields.get<{{field:index_plus_one}}>().ref() = e;
-        result.fields.setIsSet({{field:index_plus_one}}, true);
-{{/function:stream_has_first_response?}}
-{{^function:stream_has_first_response?}}
-        result.fields.get<{{field:index}}>().ref() = e;
-        result.fields.setIsSet({{field:index}}, true);
-{{/function:stream_has_first_response?}}
-{{/function:stream?}}
-{{#function:sink?}}
-{{#function:sink_has_first_response?}}
-        result.fields.get<{{field:index_plus_one}}>().ref() = e;
-        result.fields.setIsSet({{field:index_plus_one}}, true);
-{{/function:sink_has_first_response?}}
-{{^function:sink_has_first_response?}}
-        result.fields.get<{{field:index}}>().ref() = e;
-        result.fields.setIsSet({{field:index}}, true);
-{{/function:sink_has_first_response?}}
-{{/function:sink?}}
-{{/function:cpp_recv_arg?}}
-      })) {
-  } else
-{{/function:exceptions}}
+{{#if function:exceptions?}}
+  ::{{service:qualified_namespace}}::{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult{{#if (or function:sink? function:stream?)}}::InitialResponsePResultType{{/if}} result;
+  constexpr bool kHasReturnType = {{#if function:initial_response?}}true{{#else}}false{{/if}};
+  if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
+    if (ctx) {
+      ctx->userExceptionWrapped(true, ew);
+    }
+    ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader<Ex>(ew, *reqCtx);
+  })) {
+{{#else}}
   {
+{{/if function:exceptions?}}
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<
         ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "{{> common/function_name}}");
     return;
   }
 {{#function:exceptions?}}
   ProtocolOut_ prot;
-{{^function:stream?}}{{^function:sink?}}
   auto response = serializeResponse("{{> common/function_name}}", &prot, ctx, result);
   auto payload = std::move(response).extractPayload(
       req->includeEnvelope(),
@@ -449,30 +375,13 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::throw_wrapped_{{function
       apache::thrift::MessageType::T_REPLY,
       "{{> common/function_name}}");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  {{#if (not (or function:sink? function:stream?))}}
   return req->sendReply(std::move(payload));
-{{/function:sink?}}{{/function:stream?}}
-{{#function:stream?}}
-  auto response = serializeResponse("{{> common/function_name}}", &prot, ctx, result.fields);
-  auto payload = std::move(response).extractPayload(
-      req->includeEnvelope(),
-      prot.protocolType(),
-      protoSeqId,
-      apache::thrift::MessageType::T_REPLY,
-      "{{> common/function_name}}");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  {{#else if function:stream?}}
   req->sendStreamReply(std::move(payload), apache::thrift::detail::ServerStreamFactory{nullptr});
-{{/function:stream?}}
-{{#function:sink?}}
-  auto response = serializeResponse("{{> common/function_name}}", &prot, ctx, result.fields);
-  auto payload = std::move(response).extractPayload(
-      req->includeEnvelope(),
-      prot.protocolType(),
-      protoSeqId,
-      apache::thrift::MessageType::T_REPLY,
-      "{{> common/function_name}}");
-  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  {{#else}}
   req->sendSinkReply(std::move(payload), apache::thrift::detail::SinkConsumerImpl{});
-{{/function:sink?}}
+{{/if (not (or function:sink? function:stream?))}}
 {{/function:exceptions?}}
 }
 {{/function:oneway?}}

@@ -1779,14 +1779,10 @@ apache::thrift::ResponseAndServerStreamFactory FootprintTestServiceAsyncProcesso
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<::cpp2_struct_footprint::SimpleStruct>&& _return) {
   ProtocolOut_ prot;
-  FootprintTestService_streamStructs_presult::FieldsType result;
+  FootprintTestService_streamStructs_presult::InitialResponsePResultType result;
   using StreamPResultType = FootprintTestService_streamStructs_presult::StreamPResultType;
   auto& returnStream = _return;
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(
-      std::move(returnStream),
-      std::move(executor));
+  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
   return {serializeResponse("streamStructs", &prot, ctx, result), std::move(encodedStream)};
 }
 
@@ -1947,16 +1943,12 @@ apache::thrift::ResponseAndServerStreamFactory FootprintTestServiceAsyncProcesso
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ResponseAndServerStream<::cpp2_struct_footprint::Struct1, ::cpp2_struct_footprint::SimpleStruct>&& _return) {
   ProtocolOut_ prot;
-  FootprintTestService_streamWithSinkInitial_presult::FieldsType result;
+  FootprintTestService_streamWithSinkInitial_presult::InitialResponsePResultType result;
   using StreamPResultType = FootprintTestService_streamWithSinkInitial_presult::StreamPResultType;
   result.get<0>().value = const_cast<::apache::thrift::ResponseAndServerStream<::cpp2_struct_footprint::Struct1, ::cpp2_struct_footprint::SimpleStruct>::ResponseType*>(&_return.response);
   result.setIsSet(0, true);
   auto& returnStream = _return.stream;
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(
-      std::move(returnStream),
-      std::move(executor));
+  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
   return {serializeResponse("streamWithSinkInitial", &prot, ctx, result), std::move(encodedStream)};
 }
 
@@ -2117,16 +2109,12 @@ apache::thrift::ResponseAndServerStreamFactory FootprintTestServiceAsyncProcesso
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ResponseAndServerStream<::cpp2_struct_footprint::Struct1, ::cpp2_struct_footprint::SimpleStruct>&& _return) {
   ProtocolOut_ prot;
-  FootprintTestService_streamWithSinkException_presult::FieldsType result;
+  FootprintTestService_streamWithSinkException_presult::InitialResponsePResultType result;
   using StreamPResultType = FootprintTestService_streamWithSinkException_presult::StreamPResultType;
   result.get<0>().value = const_cast<::apache::thrift::ResponseAndServerStream<::cpp2_struct_footprint::Struct1, ::cpp2_struct_footprint::SimpleStruct>::ResponseType*>(&_return.response);
   result.setIsSet(0, true);
   auto& returnStream = _return.stream;
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(
-      std::move(returnStream),
-      std::move(executor));
+  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
   return {serializeResponse("streamWithSinkException", &prot, ctx, result), std::move(encodedStream)};
 }
 
@@ -2140,24 +2128,21 @@ void FootprintTestServiceAsyncProcessor::throw_wrapped_streamWithSinkException(
   if (!ew) {
     return;
   }
-  ::cpp2_struct_footprint::FootprintTestService_streamWithSinkException_presult result;
-  if (ew.with_exception([&](::cpp2_struct_footprint::ExStruct& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::cpp2_struct_footprint::ExStruct>(ew, *reqCtx);
-        result.fields.get<1>().ref() = e;
-        result.fields.setIsSet(1, true);
-      })) {
-  } else
-  {
+  ::cpp2_struct_footprint::FootprintTestService_streamWithSinkException_presult::InitialResponsePResultType result;
+  constexpr bool kHasReturnType = true;
+  if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
+    if (ctx) {
+      ctx->userExceptionWrapped(true, ew);
+    }
+    ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader<Ex>(ew, *reqCtx);
+  })) {
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<
         ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "streamWithSinkException");
     return;
   }
   ProtocolOut_ prot;
-  auto response = serializeResponse("streamWithSinkException", &prot, ctx, result.fields);
+  auto response = serializeResponse("streamWithSinkException", &prot, ctx, result);
   auto payload = std::move(response).extractPayload(
       req->includeEnvelope(),
       prot.protocolType(),

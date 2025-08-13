@@ -314,14 +314,10 @@ apache::thrift::ResponseAndServerStreamFactory CAsyncProcessor::return_numbers(
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<::cpp2::number>&& _return) {
   ProtocolOut_ prot;
-  C_numbers_presult::FieldsType result;
+  C_numbers_presult::InitialResponsePResultType result;
   using StreamPResultType = C_numbers_presult::StreamPResultType;
   auto& returnStream = _return;
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(
-      std::move(returnStream),
-      std::move(executor));
+  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
   return {serializeResponse("numbers", &prot, ctx, result), std::move(encodedStream)};
 }
 
@@ -504,17 +500,14 @@ void CAsyncProcessor::throw_wrapped_thing(
     return;
   }
   ::cpp2::C_thing_presult result;
-  if (ew.with_exception([&](::cpp2::Bang& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::cpp2::Bang>(ew, *reqCtx);
-        result.get<1>().ref() = e;
-        result.setIsSet(1, true);
-      })) {
-  } else
-  {
+  constexpr bool kHasReturnType = true;
+  if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
+    if (ctx) {
+      ctx->userExceptionWrapped(true, ew);
+    }
+    ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader<Ex>(ew, *reqCtx);
+  })) {
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<
         ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "thing");
     return;

@@ -158,19 +158,15 @@ SimpleSinkAsyncProcessor::return_simple(
     /* TODO (@sazonovk) */&& _return,
     folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  SimpleSink_simple_presult::FieldsType result;
+  SimpleSink_simple_presult::InitialResponsePResultType result;
   using SinkPResultType = SimpleSink_simple_presult::SinkPResultType;
   using FinalResponsePResultType =
       SimpleSink_simple_presult::FinalResponsePResultType;
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-
   auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
-      FinalResponsePResultType,
-      ExMapType>(std::move(_return), std::move(executor));
+      FinalResponsePResultType>(std::move(_return), std::move(executor));
 
   return {serializeResponse("simple", &prot, ctx, result), std::move(sinkConsumerImpl)};
 }

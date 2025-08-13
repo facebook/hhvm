@@ -234,18 +234,17 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::SinkService>::recv_wrapp
   }
 
   using result = ::cpp2::SinkService_method_presult;
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
   switch (state.protocolId()) {
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
       apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::BinaryProtocolWriter>(
+      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::BinaryProtocolWriter>(
           &reader, state, state.extractSink(), _return);
     }
     case apache::thrift::protocol::T_COMPACT_PROTOCOL:
     {
       apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::CompactProtocolWriter>(
+      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::CompactProtocolWriter>(
           &reader, state, state.extractSink(), _return);
     }
     default:
@@ -374,18 +373,17 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::SinkService>::recv_wrapp
   }
 
   using result = ::cpp2::SinkService_methodAndReponse_presult;
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
   switch (state.protocolId()) {
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
       apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::BinaryProtocolWriter>(
+      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::BinaryProtocolWriter>(
           &reader, state, state.extractSink(), _return);
     }
     case apache::thrift::protocol::T_COMPACT_PROTOCOL:
     {
       apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::CompactProtocolWriter>(
+      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::CompactProtocolWriter>(
           &reader, state, state.extractSink(), _return);
     }
     default:
@@ -514,18 +512,17 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::SinkService>::recv_wrapp
   }
 
   using result = ::cpp2::SinkService_methodThrow_presult;
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
   switch (state.protocolId()) {
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
       apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::BinaryProtocolWriter>(
+      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::BinaryProtocolWriter>(
           &reader, state, state.extractSink(), _return);
     }
     case apache::thrift::protocol::T_COMPACT_PROTOCOL:
     {
       apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::CompactProtocolWriter>(
+      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::CompactProtocolWriter>(
           &reader, state, state.extractSink(), _return);
     }
     default:
@@ -654,28 +651,17 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::SinkService>::recv_wrapp
   }
 
   using result = ::cpp2::SinkService_methodSinkThrow_presult;
-  struct ExMapType {
-    bool operator()(typename result::SinkPResultType& res, folly::exception_wrapper ew) {
-      if (ew.with_exception([&]( ::cpp2::SinkException1& e) {
-            res.get<1>().ref() = e;
-            res.setIsSet(1, true);
-          })) {
-        return true;
-      }
-      return false;
-    }
-  };
   switch (state.protocolId()) {
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
       apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::BinaryProtocolWriter>(
+      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::BinaryProtocolWriter>(
           &reader, state, state.extractSink(), _return);
     }
     case apache::thrift::protocol::T_COMPACT_PROTOCOL:
     {
       apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::CompactProtocolWriter>(
+      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::CompactProtocolWriter>(
           &reader, state, state.extractSink(), _return);
     }
     default:
@@ -804,18 +790,17 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::SinkService>::recv_wrapp
   }
 
   using result = ::cpp2::SinkService_methodFinalThrow_presult;
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
   switch (state.protocolId()) {
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
       apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::BinaryProtocolWriter>(
+      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::BinaryProtocolWriter>(
           &reader, state, state.extractSink(), _return);
     }
     case apache::thrift::protocol::T_COMPACT_PROTOCOL:
     {
       apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::CompactProtocolWriter>(
+      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::CompactProtocolWriter>(
           &reader, state, state.extractSink(), _return);
     }
     default:
@@ -944,28 +929,17 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::SinkService>::recv_wrapp
   }
 
   using result = ::cpp2::SinkService_methodBothThrow_presult;
-  struct ExMapType {
-    bool operator()(typename result::SinkPResultType& res, folly::exception_wrapper ew) {
-      if (ew.with_exception([&]( ::cpp2::SinkException1& e) {
-            res.get<1>().ref() = e;
-            res.setIsSet(1, true);
-          })) {
-        return true;
-      }
-      return false;
-    }
-  };
   switch (state.protocolId()) {
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
       apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::BinaryProtocolWriter>(
+      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::BinaryProtocolWriter>(
           &reader, state, state.extractSink(), _return);
     }
     case apache::thrift::protocol::T_COMPACT_PROTOCOL:
     {
       apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::CompactProtocolWriter>(
+      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::CompactProtocolWriter>(
           &reader, state, state.extractSink(), _return);
     }
     default:
@@ -1094,18 +1068,17 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::SinkService>::recv_wrapp
   }
 
   using result = ::cpp2::SinkService_methodFast_presult;
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
   switch (state.protocolId()) {
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
       apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::BinaryProtocolWriter>(
+      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::BinaryProtocolWriter>(
           &reader, state, state.extractSink(), _return);
     }
     case apache::thrift::protocol::T_COMPACT_PROTOCOL:
     {
       apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::CompactProtocolWriter>(
+      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::CompactProtocolWriter>(
           &reader, state, state.extractSink(), _return);
     }
     default:

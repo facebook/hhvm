@@ -194,19 +194,15 @@ SinkServiceAsyncProcessor::return_method(
     ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
     folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  SinkService_method_presult::FieldsType result;
+  SinkService_method_presult::InitialResponsePResultType result;
   using SinkPResultType = SinkService_method_presult::SinkPResultType;
   using FinalResponsePResultType =
       SinkService_method_presult::FinalResponsePResultType;
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-
   auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
-      FinalResponsePResultType,
-      ExMapType>(std::move(_return), std::move(executor));
+      FinalResponsePResultType>(std::move(_return), std::move(executor));
 
   return {serializeResponse("method", &prot, ctx, result), std::move(sinkConsumerImpl)};
 }
@@ -368,21 +364,17 @@ SinkServiceAsyncProcessor::return_methodAndReponse(
     ::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
     folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  SinkService_methodAndReponse_presult::FieldsType result;
+  SinkService_methodAndReponse_presult::InitialResponsePResultType result;
   using SinkPResultType = SinkService_methodAndReponse_presult::SinkPResultType;
   using FinalResponsePResultType =
       SinkService_methodAndReponse_presult::FinalResponsePResultType;
   result.get<0>().value = &_return.response;
   result.setIsSet(0, true);
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-
   auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
-      FinalResponsePResultType,
-      ExMapType>(std::move(_return.sinkConsumer),std::move(executor));
+      FinalResponsePResultType>(std::move(_return.sinkConsumer),std::move(executor));
 
   return {serializeResponse("methodAndReponse", &prot, ctx, result), std::move(sinkConsumerImpl)};
 }
@@ -544,19 +536,15 @@ SinkServiceAsyncProcessor::return_methodThrow(
     ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
     folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  SinkService_methodThrow_presult::FieldsType result;
+  SinkService_methodThrow_presult::InitialResponsePResultType result;
   using SinkPResultType = SinkService_methodThrow_presult::SinkPResultType;
   using FinalResponsePResultType =
       SinkService_methodThrow_presult::FinalResponsePResultType;
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-
   auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
-      FinalResponsePResultType,
-      ExMapType>(std::move(_return), std::move(executor));
+      FinalResponsePResultType>(std::move(_return), std::move(executor));
 
   return {serializeResponse("methodThrow", &prot, ctx, result), std::move(sinkConsumerImpl)};
 }
@@ -571,24 +559,21 @@ void SinkServiceAsyncProcessor::throw_wrapped_methodThrow(
   if (!ew) {
     return;
   }
-  ::cpp2::SinkService_methodThrow_presult result;
-  if (ew.with_exception([&](::cpp2::InitialException& e) {
-        if (ctx) {
-          ctx->userExceptionWrapped(true, ew);
-        }
-        ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-        ::apache::thrift::util::appendErrorClassificationToHeader<::cpp2::InitialException>(ew, *reqCtx);
-        result.fields.get<0>().ref() = e;
-        result.fields.setIsSet(0, true);
-      })) {
-  } else
-  {
+  ::cpp2::SinkService_methodThrow_presult::InitialResponsePResultType result;
+  constexpr bool kHasReturnType = false;
+  if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
+    if (ctx) {
+      ctx->userExceptionWrapped(true, ew);
+    }
+    ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader<Ex>(ew, *reqCtx);
+  })) {
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<
         ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "methodThrow");
     return;
   }
   ProtocolOut_ prot;
-  auto response = serializeResponse("methodThrow", &prot, ctx, result.fields);
+  auto response = serializeResponse("methodThrow", &prot, ctx, result);
   auto payload = std::move(response).extractPayload(
       req->includeEnvelope(),
       prot.protocolType(),
@@ -739,19 +724,15 @@ SinkServiceAsyncProcessor::return_methodSinkThrow(
     ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
     folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  SinkService_methodSinkThrow_presult::FieldsType result;
+  SinkService_methodSinkThrow_presult::InitialResponsePResultType result;
   using SinkPResultType = SinkService_methodSinkThrow_presult::SinkPResultType;
   using FinalResponsePResultType =
       SinkService_methodSinkThrow_presult::FinalResponsePResultType;
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-
   auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
-      FinalResponsePResultType,
-      ExMapType>(std::move(_return), std::move(executor));
+      FinalResponsePResultType>(std::move(_return), std::move(executor));
 
   return {serializeResponse("methodSinkThrow", &prot, ctx, result), std::move(sinkConsumerImpl)};
 }
@@ -913,29 +894,15 @@ SinkServiceAsyncProcessor::return_methodFinalThrow(
     ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
     folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  SinkService_methodFinalThrow_presult::FieldsType result;
+  SinkService_methodFinalThrow_presult::InitialResponsePResultType result;
   using SinkPResultType = SinkService_methodFinalThrow_presult::SinkPResultType;
   using FinalResponsePResultType =
       SinkService_methodFinalThrow_presult::FinalResponsePResultType;
-
-  struct ExMapType {
-    bool operator()(FinalResponsePResultType& res, folly::exception_wrapper ew) {
-      if (ew.with_exception([&](::cpp2::SinkException2& e) {
-            res.get<1>().ref() = e;
-            res.setIsSet(1, true);
-          })) {
-        return true;
-      }
-      return false;
-    }
-  };
-
   auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
-      FinalResponsePResultType,
-      ExMapType>(std::move(_return), std::move(executor));
+      FinalResponsePResultType>(std::move(_return), std::move(executor));
 
   return {serializeResponse("methodFinalThrow", &prot, ctx, result), std::move(sinkConsumerImpl)};
 }
@@ -1097,29 +1064,15 @@ SinkServiceAsyncProcessor::return_methodBothThrow(
     ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
     folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  SinkService_methodBothThrow_presult::FieldsType result;
+  SinkService_methodBothThrow_presult::InitialResponsePResultType result;
   using SinkPResultType = SinkService_methodBothThrow_presult::SinkPResultType;
   using FinalResponsePResultType =
       SinkService_methodBothThrow_presult::FinalResponsePResultType;
-
-  struct ExMapType {
-    bool operator()(FinalResponsePResultType& res, folly::exception_wrapper ew) {
-      if (ew.with_exception([&](::cpp2::SinkException2& e) {
-            res.get<1>().ref() = e;
-            res.setIsSet(1, true);
-          })) {
-        return true;
-      }
-      return false;
-    }
-  };
-
   auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
-      FinalResponsePResultType,
-      ExMapType>(std::move(_return), std::move(executor));
+      FinalResponsePResultType>(std::move(_return), std::move(executor));
 
   return {serializeResponse("methodBothThrow", &prot, ctx, result), std::move(sinkConsumerImpl)};
 }
@@ -1283,19 +1236,15 @@ SinkServiceAsyncProcessor::return_methodFast(
     ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>&& _return,
     folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
-  SinkService_methodFast_presult::FieldsType result;
+  SinkService_methodFast_presult::InitialResponsePResultType result;
   using SinkPResultType = SinkService_methodFast_presult::SinkPResultType;
   using FinalResponsePResultType =
       SinkService_methodFast_presult::FinalResponsePResultType;
-
-  using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
-
   auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
       ProtocolIn_,
       ProtocolOut_,
       SinkPResultType,
-      FinalResponsePResultType,
-      ExMapType>(std::move(_return), std::move(executor));
+      FinalResponsePResultType>(std::move(_return), std::move(executor));
 
   return {serializeResponse("methodFast", &prot, ctx, result), std::move(sinkConsumerImpl)};
 }

@@ -977,7 +977,7 @@ end = struct
       (SSet.empty, Typing_set.empty)
 
   (** If it's clear from the syntax of the type that null isn't in ty, return true. *)
-  let rec null_not_subtype ty =
+  let rec null_not_subtype env ty =
     match get_node ty with
     | Tprim (Aast_defs.Tnull | Aast_defs.Tvoid)
     | Tgeneric _
@@ -989,7 +989,7 @@ end = struct
     | Tneg _
     | Tintersection _ ->
       false
-    | Tunion tys -> List.for_all tys ~f:null_not_subtype
+    | Tunion tys -> List.for_all tys ~f:(null_not_subtype env)
     | Tclass _
     | Tprim _
     | Tnonnull
@@ -1000,9 +1000,12 @@ end = struct
     | Tvec_or_dict _
     | Tclass_ptr _ ->
       true
-    | Tdependent (_, bound)
-    | Tnewtype (_, _, bound) ->
-      null_not_subtype bound
+    | Tnewtype (id, tyargs, _) ->
+      let (env, bound) =
+        Typing_utils.get_newtype_super env (get_reason ty) id tyargs
+      in
+      null_not_subtype env bound
+    | Tdependent (_, bound) -> null_not_subtype env bound
 
   let simplify_subtype_by_physical_equality env ty_sub ty_super simplify =
     if
@@ -1238,7 +1241,7 @@ end = struct
     | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
       valid env
     | (_, Taccess _) -> invalid ~fail env
-    | (r, Tnewtype (n, _, ty)) ->
+    | (r, Tnewtype (n, _tyl, ty)) ->
       let mk_prop ~subtype_env ~this_ty ~lhs ~rhs env =
         simplify ~subtype_env ~this_ty ~lhs ~rhs env
       in
@@ -1248,7 +1251,7 @@ end = struct
         ~mk_prop
         (sub_supportdyn, r, n, ty)
         rhs
-        env
+        env (*  *)
     | (r, Tdependent (dep_ty, ty)) ->
       let mk_prop ~subtype_env ~this_ty ~lhs ~rhs env =
         simplify ~subtype_env ~this_ty ~lhs ~rhs env
@@ -3464,11 +3467,11 @@ end = struct
         (sub_supportdyn, tyl)
         rhs
         env
-    | ((r, Tnewtype (n, _, ty)), (_, Tunion [])) ->
+    | ((r, Tnewtype (n, tyl, _)), (_, Tunion [])) ->
+      let (env, ty) = Typing_utils.get_newtype_super env r n tyl in
       let mk_prop ~subtype_env ~this_ty ~lhs ~rhs env =
         simplify ~subtype_env ~this_ty ~lhs ~rhs env
       in
-
       Common.simplify_newtype_l
         ~subtype_env
         ~this_ty
@@ -3852,7 +3855,7 @@ end = struct
               ~super_prj:r_super_prj)
       in
       (* TODO(T69551141) handle type arguments? *)
-      if null_not_subtype ty_sub then
+      if null_not_subtype env ty_sub then
         simplify
           ~subtype_env
           ~this_ty
@@ -4846,7 +4849,10 @@ end = struct
         ~rhs:{ super_supportdyn; super_like; ty_super }
         env
     (* -- C-Shape-R --------------------------------------------------------- *)
-    | ((r_sub, Tnewtype (name_sub, _, ty_bound_sub)), (_r_super, Tshape _)) ->
+    | ((r_sub, Tnewtype (name_sub, tyl, _)), (_r_super, Tshape _)) ->
+      let (env, ty_bound_sub) =
+        Typing_utils.get_newtype_super env r_sub name_sub tyl
+      in
       Common.simplify_newtype_l
         ~subtype_env
         ~this_ty
@@ -5185,9 +5191,12 @@ end = struct
                 | Tnoreturn ))
           | Tvar _ | Tlabel _ | Tclass_ptr _ ) ) -> begin
         match
-          Subtype_env.check_infinite_recursion
-            subtype_env
-            { Subtype_recursion_tracker.Subtype_op.ty_sub; ty_super }
+          match get_node ty_sub with
+          | Tnewtype _ -> Ok subtype_env
+          | _ ->
+            Subtype_env.check_infinite_recursion
+              subtype_env
+              { Subtype_recursion_tracker.Subtype_op.ty_sub; ty_super }
         with
         | Error _ ->
           (* We've essentially proven by recursion that this subypting relationship holds.
@@ -6074,7 +6083,10 @@ end = struct
                    ty_super = traversable;
                  })
         &&& destructure_array ~subtype_env ~this_ty (None, ty_inner) rhs
-      | ((r_newtype, Tnewtype (nm, _, ty_newtype)), ListDestructure) ->
+      | ((r_newtype, Tnewtype (nm, tyl, _)), ListDestructure) ->
+        let (env, ty_newtype) =
+          Typing_utils.get_newtype_super env r_newtype nm tyl
+        in
         Common.simplify_newtype_l
           ~subtype_env
           ~this_ty
@@ -6722,8 +6734,11 @@ end = struct
         ~lhs:{ sub_supportdyn = Some r_sub; ty_sub }
         ~rhs
         env
-    | (r_sub, Tnewtype (name_sub, [ty], ty_newtype))
+    | (r_sub, Tnewtype (name_sub, [ty], _))
       when String.equal name_sub SN.FB.cTypeStructure ->
+      let (env, ty_newtype) =
+        Typing_utils.get_newtype_super env r_sub name_sub [ty]
+      in
       (match deref ty_newtype with
       | ( r,
           Tshape
@@ -6760,7 +6775,10 @@ end = struct
           (sub_supportdyn, r_sub, name_sub, ty_newtype)
           rhs
           env)
-    | (r_sub, Tnewtype (name_sub, _, ty_newtype)) ->
+    | (r_sub, Tnewtype (name_sub, tyl, _)) ->
+      let (env, ty_newtype) =
+        Typing_utils.get_newtype_super env r_sub name_sub tyl
+      in
       Common.simplify_newtype_l
         ~subtype_env
         ~this_ty
@@ -7055,7 +7073,10 @@ end = struct
           rhs
           rhs
           env
-      | (r_sub, Tnewtype (alias_name, _, ty_newtype)) ->
+      | (r_sub, Tnewtype (alias_name, tyl, _)) ->
+        let (env, ty_newtype) =
+          Typing_utils.get_newtype_super env r_sub alias_name tyl
+        in
         Common.simplify_newtype_l
           ~subtype_env
           ~this_ty
@@ -7582,7 +7603,8 @@ end = struct
           ~member_ty
           ty_sub
           env)
-    | (r1, Tnewtype (n, _, newtype_ty)) ->
+    | (r1, Tnewtype (n, tyargs, _)) ->
+      let (env, newtype_ty) = Typing_utils.get_newtype_super env r1 n tyargs in
       let sub_supportdyn =
         match sub_supportdyn with
         | None ->
@@ -7835,7 +7857,10 @@ end = struct
         rhs
         rhs
         env
-    | (r_newtype, Tnewtype (nm, _, ty_newtype)) ->
+    | (r_newtype, Tnewtype (nm, tyl, _)) ->
+      let (env, ty_newtype) =
+        Typing_utils.get_newtype_super env r_newtype nm tyl
+      in
       Common.simplify_newtype_l
         ~subtype_env
         ~this_ty:(Some this_ty)
@@ -8463,7 +8488,10 @@ end = struct
         (sub_supportdyn, r_dep, dep_ty, ty_sub_inner)
         rhs
         env
-    | (r_newtype, Tnewtype (nm, _, ty_newtype)) ->
+    | (r_newtype, Tnewtype (nm, tyl, _)) ->
+      let (env, ty_newtype) =
+        Typing_utils.get_newtype_super env r_newtype nm tyl
+      in
       let mk_prop_newtype
           ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs env =
         simplify_disj_r

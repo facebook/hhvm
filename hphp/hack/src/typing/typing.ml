@@ -5943,6 +5943,56 @@ end = struct
       let result = make_call env te tal tel typed_unpack_element ty in
       (result, should_forget_fakes)
     in
+    let type_structure_impl pos e1 e2 =
+      let should_forget_fakes = false in
+      match Aast_utils.arg_to_expr e2 with
+      | (_, p, String cst) ->
+        (* find the class constant implicitly defined by the typeconst *)
+        let e1 = Aast_utils.arg_to_expr e1 in
+        let cid =
+          match e1 with
+          | (_, _, Class_const (cid, (_, x)))
+          | (_, _, Class_get (cid, CGstring (_, x), _))
+            when String.equal x SN.Members.mClass ->
+            cid
+          | _ ->
+            let ((_, p1, _) as e1_) = e1 in
+            ((), p1, CIexpr e1_)
+        in
+        let result =
+          class_const
+            ~incl_tc:true
+            ~require_class_ptr:
+              (Class_id.classname_error
+                 env
+                 TypecheckerOptions.class_pointer_ban_classname_type_structure)
+            env
+            p
+            (cid, (p, cst))
+        in
+        let () =
+          match result with
+          | (_, (ty, _, _), _)
+            when TUtils.is_tyvar_error env ty || is_dynamic ty ->
+            Typing_error_utils.add_typing_error
+              ~env
+              Typing_error.(
+                primary
+                @@ Primary.Illegal_type_structure
+                     { pos; msg = "Could not resolve the type constant" })
+          | _ -> ()
+        in
+        (result, should_forget_fakes)
+      | _ ->
+        Typing_error_utils.add_typing_error
+          ~env
+          Typing_error.(
+            primary
+            @@ Primary.Illegal_type_structure
+                 { pos; msg = "Second argument is not a string" });
+        let result = expr_error env pos e in
+        (result, should_forget_fakes)
+    in
     match fun_expr with
     (* Special top-level function *)
     | Id ((pos, x) as id) when SN.StdlibFunctions.needs_special_dispatch x ->
@@ -6106,57 +6156,8 @@ end = struct
         when String.equal type_structure SN.StdlibFunctions.type_structure
              && Int.equal (List.length el) 2
              && Option.is_none unpacked_element ->
-        let should_forget_fakes = false in
         (match el with
-        | [e1; e2] ->
-          (match Aast_utils.arg_to_expr e2 with
-          | (_, p, String cst) ->
-            (* find the class constant implicitly defined by the typeconst *)
-            let e1 = Aast_utils.arg_to_expr e1 in
-            let cid =
-              match e1 with
-              | (_, _, Class_const (cid, (_, x)))
-              | (_, _, Class_get (cid, CGstring (_, x), _))
-                when String.equal x SN.Members.mClass ->
-                cid
-              | _ ->
-                let ((_, p1, _) as e1_) = e1 in
-                ((), p1, CIexpr e1_)
-            in
-            let result =
-              class_const
-                ~incl_tc:true
-                ~require_class_ptr:
-                  (Class_id.classname_error
-                     env
-                     TypecheckerOptions
-                     .class_pointer_ban_classname_type_structure)
-                env
-                p
-                (cid, (p, cst))
-            in
-            let () =
-              match result with
-              | (_, (ty, _, _), _)
-                when TUtils.is_tyvar_error env ty || is_dynamic ty ->
-                Typing_error_utils.add_typing_error
-                  ~env
-                  Typing_error.(
-                    primary
-                    @@ Primary.Illegal_type_structure
-                         { pos; msg = "Could not resolve the type constant" })
-              | _ -> ()
-            in
-            (result, should_forget_fakes)
-          | _ ->
-            Typing_error_utils.add_typing_error
-              ~env
-              Typing_error.(
-                primary
-                @@ Primary.Illegal_type_structure
-                     { pos; msg = "Second argument is not a string" });
-            let result = expr_error env pos e in
-            (result, should_forget_fakes))
+        | [e1; e2] -> type_structure_impl pos e1 e2
         | _ -> assert false)
       | _ -> dispatch_id env id
     end

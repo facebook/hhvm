@@ -121,6 +121,41 @@ PythonAsyncProcessor::handlePythonServerCallbackStreaming(
 }
 
 folly::SemiFuture<folly::Unit>
+PythonAsyncProcessor::handlePythonServerCallbackSink(
+    apache::thrift::ProtocolType protocol,
+    apache::thrift::Cpp2RequestContext* context,
+    apache::thrift::SerializedRequest serializedRequest,
+    apache::thrift::RpcKind kind,
+    ::apache::thrift::HandlerCallback<::apache::thrift::ResponseAndSinkConsumer<
+        std::unique_ptr<::folly::IOBuf>,
+        std::unique_ptr<::folly::IOBuf>,
+        std::unique_ptr<::folly::IOBuf>>>::Ptr callback) {
+  [[maybe_unused]] static bool done = (do_import(), false);
+  auto [promise, future] =
+      folly::makePromiseContract<::apache::thrift::ResponseAndSinkConsumer<
+          std::unique_ptr<::folly::IOBuf>,
+          std::unique_ptr<::folly::IOBuf>,
+          std::unique_ptr<::folly::IOBuf>>>();
+  const int retcode = handleServerSinkCallback(
+      functions_.at(context->getMethodName()).second,
+      serviceName_ + "." + context->getMethodName(),
+      context,
+      std::move(promise),
+      std::move(serializedRequest),
+      protocol,
+      kind);
+  if (retcode != 0) {
+    DCHECK(PyErr_Occurred());
+    // converts python error to thrown std::runtime_error
+    folly::python::handlePythonError(
+        "PythonAsyncProcessor::handlePythonServerCallbackSink: ");
+  }
+  return std::move(future).defer([callback = std::move(callback)](auto&& t) {
+    callback->complete(std::move(t));
+  });
+}
+
+folly::SemiFuture<folly::Unit>
 PythonAsyncProcessor::handlePythonServerCallbackOneway(
     apache::thrift::ProtocolType protocol,
     apache::thrift::Cpp2RequestContext* context,
@@ -308,6 +343,34 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestStreaming(
       });
 }
 
+folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestSink(
+    apache::thrift::protocol::PROTOCOL_TYPES protocol,
+    apache::thrift::Cpp2RequestContext* ctx,
+    apache::thrift::SerializedRequest serializedRequest,
+    apache::thrift::RpcKind kind,
+    ::apache::thrift::HandlerCallback<::apache::thrift::ResponseAndSinkConsumer<
+        std::unique_ptr<::folly::IOBuf>,
+        std::unique_ptr<::folly::IOBuf>,
+        std::unique_ptr<::folly::IOBuf>>>::Ptr callback) {
+  if (!shouldProcessServiceInterceptorsOnRequest(*callback)) {
+    return handlePythonServerCallbackSink(
+        protocol, ctx, std::move(serializedRequest), kind, std::move(callback));
+  }
+  return processServiceInterceptorsOnRequest(
+             *callback, emptyInterceptorsArguments())
+      .semi()
+      // see discussion below about why we don't use `defer`
+      .deferValue([this,
+                   protocol,
+                   ctx,
+                   request = std::move(serializedRequest),
+                   kind,
+                   callback](auto&&) mutable {
+        return handlePythonServerCallbackSink(
+            protocol, ctx, std::move(request), kind, std::move(callback));
+      });
+}
+
 folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestResponse(
     apache::thrift::protocol::PROTOCOL_TYPES protocol,
     apache::thrift::Cpp2RequestContext* ctx,
@@ -419,6 +482,45 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
               nullptr,
               requestData);
       return dispatchRequestStreaming(
+          protocol,
+          ctx,
+          std::move(serializedRequest),
+          kind,
+          std::move(callback));
+    }
+    case apache::thrift::RpcKind::SINK: {
+      auto return_sink = protocol ==
+              apache::thrift::protocol::PROTOCOL_TYPES::T_BINARY_PROTOCOL
+          ? &detail::return_sink<
+                apache::thrift::BinaryProtocolReader,
+                apache::thrift::BinaryProtocolWriter>
+          : &detail::return_sink<
+                apache::thrift::CompactProtocolReader,
+                apache::thrift::CompactProtocolWriter>;
+      auto callback = apache::thrift::HandlerCallback<
+          ::apache::thrift::ResponseAndSinkConsumer<
+              std::unique_ptr<::folly::IOBuf>,
+              std::unique_ptr<::folly::IOBuf>,
+              std::unique_ptr<::folly::IOBuf>>>::Ptr::
+          make(
+              std::move(req),
+              std::move(ctxStack),
+              apache::thrift::HandlerCallbackBase::MethodNameInfo{
+                  .serviceName = serviceName,
+                  .definingServiceName = serviceName,
+                  .methodName = methodName,
+                  .qualifiedMethodName =
+                      fmt::format("{}.{}", serviceName, methodName)},
+              return_sink,
+              get_throw_wrapped(protocol),
+              ctx->getProtoSeqId(),
+              eb,
+              executor,
+              ctx,
+              nullptr,
+              nullptr,
+              requestData);
+      return dispatchRequestSink(
           protocol,
           ctx,
           std::move(serializedRequest),

@@ -27,6 +27,14 @@ cdef extern from "thrift/lib/cpp2/async/Sink.h" namespace "::apache::thrift":
         TInitResponse response
         cIOBufClientSink sink
 
+    cdef cppclass cResponseAndSinkConsumer "::apache::thrift::ResponseAndSinkConsumer"[TInitResponse, TChunk, TFinalResponse]:
+        TInitResponse response
+        cSinkConsumer[TChunk, TFinalResponse] sinkConsumer
+
+    cdef cppclass cSinkConsumer "::apache::thrift::SinkConsumer"[TChunk, TFinalResponse]:
+        pass
+
+
 cdef extern from "thrift/lib/python/streaming/Sink.h" namespace "::apache::thrift::python":
     cdef cppclass cIOBufClientSink "::apache::thrift::python::IOBufClientSink":
         cClientSink()
@@ -37,6 +45,22 @@ cdef extern from "thrift/lib/python/streaming/Sink.h" namespace "::apache::thrif
       cFollyExecutor*,
       void(*)(object, cFollyPromise[optional[TChunk]])
     )
+
+    cResponseAndSinkConsumer[InitResponse, TChunk, FinalResponse] \
+    createResponseAndSinkConsumer[InitResponse, TChunk, FinalResponse](
+        InitResponse response,
+        cSinkConsumer[TChunk, FinalResponse] sink
+    ) noexcept
+
+
+
+    unique_ptr[cSinkConsumer[unique_ptr[cIOBuf], unique_ptr[cIOBuf]]] \
+    makeIOBufSinkConsumer(
+        object sink_callback,
+        cFollyExecutor* executor,
+    ) noexcept
+
+
 
 cdef class ClientSink:
     cdef unique_ptr[cIOBufClientSink] _cpp_obj

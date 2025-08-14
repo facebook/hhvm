@@ -26,7 +26,7 @@
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
-#include <thrift/lib/python/server/util.h>
+#include <thrift/lib/python/server/response_helpers.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
@@ -142,6 +142,17 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
               std::unique_ptr<::folly::IOBuf>,
               std::unique_ptr<::folly::IOBuf>>>::Ptr callback);
 
+  folly::SemiFuture<folly::Unit> handlePythonServerCallbackSink(
+      apache::thrift::ProtocolType protocol,
+      apache::thrift::Cpp2RequestContext* context,
+      apache::thrift::SerializedRequest serializedRequest,
+      apache::thrift::RpcKind kind,
+      ::apache::thrift::HandlerCallback<
+          ::apache::thrift::ResponseAndSinkConsumer<
+              std::unique_ptr<::folly::IOBuf>,
+              std::unique_ptr<::folly::IOBuf>,
+              std::unique_ptr<::folly::IOBuf>>>::Ptr callback);
+
   folly::SemiFuture<folly::Unit> handlePythonServerCallbackOneway(
       apache::thrift::ProtocolType protocol,
       apache::thrift::Cpp2RequestContext* context,
@@ -175,6 +186,17 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
       apache::thrift::RpcKind kind,
       ::apache::thrift::HandlerCallback<
           ::apache::thrift::ResponseAndServerStream<
+              std::unique_ptr<::folly::IOBuf>,
+              std::unique_ptr<::folly::IOBuf>>>::Ptr callback);
+
+  folly::SemiFuture<folly::Unit> dispatchRequestSink(
+      apache::thrift::protocol::PROTOCOL_TYPES protocol,
+      apache::thrift::Cpp2RequestContext* ctx,
+      apache::thrift::SerializedRequest serializedRequest,
+      apache::thrift::RpcKind kind,
+      ::apache::thrift::HandlerCallback<
+          ::apache::thrift::ResponseAndSinkConsumer<
+              std::unique_ptr<::folly::IOBuf>,
               std::unique_ptr<::folly::IOBuf>,
               std::unique_ptr<::folly::IOBuf>>>::Ptr callback);
 

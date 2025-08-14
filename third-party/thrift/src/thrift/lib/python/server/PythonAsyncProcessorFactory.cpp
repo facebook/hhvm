@@ -51,7 +51,6 @@ std::string getLifecycleFuncName(LifecycleFunc func) {
 
 std::shared_ptr<const PythonAsyncProcessor::PythonMetadata> makeMetadata(
     apache::thrift::RpcKind rpcKind) {
-  DCHECK(rpcKind != apache::thrift::RpcKind::SINK) << "Not implemented yet";
   return std::make_shared<PythonAsyncProcessor::PythonMetadata>(
       PythonAsyncProcessor::PythonMetadata::ExecutorType::ANY,
       PythonAsyncProcessor::PythonMetadata::InteractionType::NONE,
@@ -94,11 +93,8 @@ PythonAsyncProcessorFactory::createMethodMetadata() {
       case apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE:
       case apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE:
       case apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE:
-        result.emplace(methodName, makeMetadata(rpcKind));
-        break;
       case apache::thrift::RpcKind::SINK:
-        // Python doesn't support sink yet. Explictly
-        // add this case for visibility when it does support it.
+        result.emplace(methodName, makeMetadata(rpcKind));
         break;
     }
   }

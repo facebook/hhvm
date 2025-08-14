@@ -77,11 +77,11 @@ static apache::thrift::ResponseAndServerStreamFactory return_streaming(
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ResponseAndServerStream<
         std::unique_ptr<::folly::IOBuf>,
-        std::unique_ptr<::folly::IOBuf>>&& _return) {
+        std::unique_ptr<::folly::IOBuf>>&& response) {
   static PythonStreamElementEncoder<ProtocolOut_> encode;
   return {
-      return_serialized<ProtocolIn_, ProtocolOut_>(ctx, *(_return.response)),
-      std::move(_return.stream)(std::move(executor), &encode),
+      return_serialized<ProtocolIn_, ProtocolOut_>(ctx, *(response.response)),
+      std::move(response.stream)(std::move(executor), &encode),
   };
 }
 
@@ -106,11 +106,11 @@ static void throw_wrapped(
           // by python, add kHeaderExMeta header support when it is
           header->setHeader(
               std::string(apache::thrift::detail::kHeaderUex), e.type());
-          const std::string reason = e.reason();
           header->setHeader(
               std::string(apache::thrift::detail::kHeaderUexw),
-              reason.size() > kMaxUexwSize ? reason.substr(0, kMaxUexwSize)
-                                           : reason);
+              e.reason().size() > kMaxUexwSize
+                  ? e.reason().substr(0, kMaxUexwSize)
+                  : e.reason());
 
           ProtocolOut_ prot;
           auto response =
@@ -130,6 +130,60 @@ static void throw_wrapped(
           ew, std::move(req), reqCtx, ctx, reqCtx->getMethodName().c_str());
     }
   }
+}
+
+template <typename ProtocolWriter>
+apache::thrift::detail::SinkConsumerImpl toSinkConsumerImpl(
+    SinkConsumer<std::unique_ptr<folly::IOBuf>, std::unique_ptr<folly::IOBuf>>&&
+        sinkConsumer,
+    folly::Executor::KeepAlive<> executor) {
+#if FOLLY_HAS_COROUTINES
+  auto consumer =
+      [innerConsumer = std::move(sinkConsumer.consumer)](
+          folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&> gen) mutable
+      -> folly::coro::Task<folly::Try<StreamPayload>> {
+    folly::exception_wrapper ew;
+    PythonStreamElementEncoder<ProtocolWriter> encoder;
+    try {
+      std::unique_ptr<folly::IOBuf> finalResponse = co_await innerConsumer(
+          [](folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&> gen_)
+              -> folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&> {
+            while (auto item = co_await gen_.next()) {
+              co_yield folly::coro::co_result(
+                  decode_sink_element(std::move(*item)));
+            }
+          }(std::move(gen)));
+      co_return encoder(std::move(finalResponse));
+    } catch (...) {
+      ew = folly::exception_wrapper(folly::current_exception());
+    }
+    co_return encoder(std::move(ew));
+  };
+  return apache::thrift::detail::SinkConsumerImpl{
+      std::move(consumer),
+      sinkConsumer.bufferSize,
+      sinkConsumer.sinkOptions.chunkTimeout,
+      std::move(executor)};
+#else
+  std::terminate();
+#endif
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+static std::pair<
+    apache::thrift::SerializedResponse,
+    apache::thrift::detail::SinkConsumerImpl>
+return_sink(
+    apache::thrift::ContextStack* ctx,
+    ::apache::thrift::ResponseAndSinkConsumer<
+        std::unique_ptr<::folly::IOBuf>,
+        std::unique_ptr<::folly::IOBuf>,
+        std::unique_ptr<::folly::IOBuf>>&& response,
+    folly::Executor::KeepAlive<> executor) {
+  return {
+      return_serialized<ProtocolIn_, ProtocolOut_>(ctx, *(response.response)),
+      toSinkConsumerImpl<ProtocolOut_>(
+          std::move(response.sinkConsumer), std::move(executor))};
 }
 
 } // namespace detail

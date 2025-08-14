@@ -29,6 +29,25 @@ folly::Try<folly::IOBuf> decode_stream_element(
   }
 }
 
+folly::Try<std::unique_ptr<folly::IOBuf>> decode_sink_element(
+    folly::Try<apache::thrift::StreamPayload>&& payload) {
+  folly::Try<std::unique_ptr<folly::IOBuf>> ret;
+  if (payload.hasValue()) {
+    ret = folly::Try<std::unique_ptr<folly::IOBuf>>(
+        std::make_unique<folly::IOBuf>(std::move(*payload->payload)));
+  } else if (payload.hasException()) {
+    auto ex_try = decode_stream_exception(std::move(payload).exception());
+    if (ex_try.hasValue()) {
+      ret = folly::Try<std::unique_ptr<folly::IOBuf>>(
+          std::make_unique<folly::IOBuf>(std::move(*ex_try)));
+    } else if (ex_try.hasException()) {
+      ret = folly::Try<std::unique_ptr<folly::IOBuf>>(
+          std::move(ex_try).exception());
+    }
+  }
+  return ret;
+}
+
 folly::Try<folly::IOBuf> decode_stream_exception(folly::exception_wrapper ew) {
   using IOBufTry = folly::Try<folly::IOBuf>;
   IOBufTry ret;

@@ -37,12 +37,16 @@ folly::Try<folly::IOBuf> decode_stream_element(
     folly::Try<apache::thrift::StreamPayload>&& payload);
 folly::Try<folly::IOBuf> decode_stream_exception(folly::exception_wrapper ew);
 
+folly::Try<std::unique_ptr<folly::IOBuf>> decode_sink_element(
+    folly::Try<apache::thrift::StreamPayload>&& payload);
+
 template <
     class Protocol,
     apache::thrift::ErrorBlame Blame = apache::thrift::ErrorBlame::SERVER>
 class PythonStreamElementEncoder final
     : public apache::thrift::detail::StreamElementEncoder<
           std::unique_ptr<::folly::IOBuf>> {
+ public:
   folly::Try<apache::thrift::StreamPayload> operator()(
       std::unique_ptr<::folly::IOBuf>&& val) override {
     apache::thrift::StreamPayloadMetadata streamPayloadMetadata;

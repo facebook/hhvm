@@ -19,6 +19,7 @@ import traceback
 from thrift.python.serializer import serialize_iobuf
 from thrift.python.types import ServiceInterface
 
+cimport cython
 from cpython.ref cimport PyObject
 from cython.operator cimport dereference
 from libcpp.map cimport map as cmap
@@ -65,10 +66,70 @@ from thrift.python.streaming.python_user_exception cimport (
     cPythonUserException,
     PythonUserException,
 )
+from thrift.python.streaming.sink cimport (
+    createResponseAndSinkConsumer,
+    cResponseAndSinkConsumer,
+    cSinkConsumer,
+    makeIOBufSinkConsumer,
+)
 
 
 ctypedef unique_ptr[cIOBuf] UniqueIOBuf
 ctypedef cResponseAndServerStream[UniqueIOBuf, UniqueIOBuf] StreamResponse
+ctypedef cResponseAndSinkConsumer[UniqueIOBuf, UniqueIOBuf, UniqueIOBuf] SinkResponse
+
+@cython.final
+cdef class ServerSink_IOBuf:
+    cdef unique_ptr[cSinkConsumer[UniqueIOBuf, UniqueIOBuf]] _cSink
+
+    @staticmethod
+    cdef _fbthrift_create(object sink_callback):
+        cdef ServerSink_IOBuf inst = ServerSink_IOBuf.__new__(ServerSink_IOBuf)
+        # currently uses a dummy no-op callback that accumulates IOBuf sink elements
+        # then returns them as a single IOBuf
+        inst._cSink = makeIOBufSinkConsumer(sink_callback, get_executor())
+        return inst
+
+cdef class ResponseAndSinkConsumer:
+    cdef unique_ptr[SinkResponse] _cResponseSink
+
+    @staticmethod
+    cdef _fbthrift_create(object val, object sink):
+        cdef ResponseAndSinkConsumer inst = ResponseAndSinkConsumer.__new__(ResponseAndSinkConsumer)
+        inst._cResponseSink = make_unique[SinkResponse](
+            createResponseAndSinkConsumer[UniqueIOBuf, UniqueIOBuf, UniqueIOBuf](
+                cmove((<IOBuf>val)._ours),
+                cmove(dereference((<ServerSink_IOBuf>sink)._cSink))
+            )
+        )
+        return inst
+
+
+cdef class Promise_Sink(Promise_Py):
+    cdef cFollyPromise[SinkResponse]* _cPromise
+
+    def __cinit__(self):
+        self._cPromise = new cFollyPromise[SinkResponse](cFollyPromise[SinkResponse].makeEmpty())
+
+    def __dealloc__(self):
+        del self._cPromise
+
+    cdef error_ta(Promise_Sink self, cTApplicationException err):
+        self._cPromise.setException(err)
+
+    cdef error_py(Promise_Sink self, cPythonUserException err):
+        self._cPromise.setException(cmove(err))
+
+    cdef complete(Promise_Sink self, object pyobj):
+        self._cPromise.setValue(
+            cmove(dereference(cmove((<ResponseAndSinkConsumer>pyobj)._cResponseSink)))
+        )
+
+    @staticmethod
+    cdef create(cFollyPromise[SinkResponse] promise):
+        cdef Promise_Sink inst = Promise_Sink.__new__(Promise_Sink)
+        inst._cPromise[0] = cmove(promise)
+        return inst
 
 cdef class Promise_Stream(Promise_Py):
     cdef cFollyPromise[StreamResponse]* cPromise
@@ -93,6 +154,7 @@ cdef class Promise_Stream(Promise_Py):
         cdef Promise_Stream inst = Promise_Stream.__new__(Promise_Stream)
         inst.cPromise[0] = cmove(cPromise)
         return inst
+
 
 cdef class Promise_IOBuf(Promise_Py):
     cdef cFollyPromise[unique_ptr[cIOBuf]]* cPromise
@@ -177,6 +239,10 @@ async def serverCallback_coro(object callFunc, str funcName, Promise_Py promise,
             val, stream = await callFunc(buf, prot)
             stream = ServerStream_IOBuf._fbthrift_create(stream)
             val = ResponseAndServerStream._fbthrift_create(val, stream)
+        elif kind is RpcKind.SINK:
+            val, sink = await callFunc(buf, prot)
+            sink = ServerSink_IOBuf._fbthrift_create(sink)
+            val = ResponseAndSinkConsumer._fbthrift_create(val, sink)
         else:
             val = await callFunc(buf, prot)
     except PythonUserException as pyex:
@@ -281,13 +347,24 @@ cdef api int handleServerStreamCallback(
     object func,
     string funcName,
     Cpp2RequestContext* ctx,
-    cFollyPromise[cResponseAndServerStream[unique_ptr[cIOBuf],
-    unique_ptr[cIOBuf]]] cPromise,
+    cFollyPromise[cResponseAndServerStream[unique_ptr[cIOBuf], unique_ptr[cIOBuf]]] cPromise,
     SerializedRequest serializedRequest,
     Protocol prot,
     RpcKind kind,
 ) except -1:
     cdef Promise_Stream __promise = Promise_Stream.create(cmove(cPromise))
+    return combinedHandler(func, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
+
+cdef api int handleServerSinkCallback(
+    object func,
+    string funcName,
+    Cpp2RequestContext* ctx,
+    cFollyPromise[cResponseAndSinkConsumer[unique_ptr[cIOBuf], unique_ptr[cIOBuf], unique_ptr[cIOBuf]]] cPromise,
+    SerializedRequest serializedRequest,
+    Protocol prot,
+    RpcKind kind,
+) except -1:
+    cdef Promise_Sink __promise = Promise_Sink.create(cmove(cPromise))
     return combinedHandler(func, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
 
 cdef api int handleServerCallbackOneway(

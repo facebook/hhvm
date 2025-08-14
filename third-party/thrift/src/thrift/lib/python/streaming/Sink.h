@@ -78,6 +78,46 @@ folly::coro::AsyncGenerator<TChunk&&> toAsyncGenerator(
         }
       });
 }
+
+#if FOLLY_HAS_COROUTINES
+template <typename InitResponse, typename TChunk, typename FinalResponse>
+apache::thrift::ResponseAndSinkConsumer<InitResponse, TChunk, FinalResponse>
+createResponseAndSinkConsumer(
+    InitResponse response,
+    apache::thrift::SinkConsumer<TChunk, FinalResponse> sink) {
+  return {std::move(response), std::move(sink)};
+}
+
+template <typename TChunk, typename FinalResponse>
+folly::coro::Task<FinalResponse> sinkDummyCallback(
+    folly::coro::AsyncGenerator<TChunk&&>);
+
+template <>
+inline folly::coro::Task<std::unique_ptr<folly::IOBuf>> sinkDummyCallback(
+    folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&> agen) {
+  std::string buf;
+  while (auto chunk = co_await agen.next()) {
+    (*chunk)->appendTo(buf);
+  }
+  co_return folly::IOBuf::fromString(std::move(buf));
+}
+#endif
+
+using IOBufSinkConsumer =
+    SinkConsumer<std::unique_ptr<folly::IOBuf>, std::unique_ptr<folly::IOBuf>>;
+
+inline std::unique_ptr<IOBufSinkConsumer> makeIOBufSinkConsumer(
+    PyObject* /*sink*/, folly::Executor*) {
+#if FOLLY_HAS_COROUTINES
+  return std::make_unique<IOBufSinkConsumer>(IOBufSinkConsumer{
+      .consumer = sinkDummyCallback<
+          std::unique_ptr<folly::IOBuf>,
+          std::unique_ptr<folly::IOBuf>>});
+#else
+  std::terminate();
+#endif
+}
+
 } // namespace apache::thrift::python
 
 #else /* !FOLLY_HAS_COROUTINES */

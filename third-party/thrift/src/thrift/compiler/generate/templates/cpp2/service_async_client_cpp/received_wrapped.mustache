@@ -32,26 +32,14 @@ folly::exception_wrapper {{> service_common/client_class_name}}::recv_wrapped_{{
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
       apache::thrift::BinaryProtocolReader reader;
-      {{#function:sink?}}
-      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::BinaryProtocolWriter>(
-          &reader, state{{#function:cpp_recv_arg?}}, state.extractSink(), _return{{/function:cpp_recv_arg?}});
-      {{/function:sink?}}
-      {{^function:sink?}}
       return apache::thrift::detail::ac::recv_wrapped<result>(
           &reader, state{{#function:cpp_recv_arg?}}, _return{{/function:cpp_recv_arg?}});
-      {{/function:sink?}}
     }
     case apache::thrift::protocol::T_COMPACT_PROTOCOL:
     {
       apache::thrift::CompactProtocolReader reader;
-      {{#function:sink?}}
-      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::CompactProtocolWriter>(
-          &reader, state{{#function:cpp_recv_arg?}}, state.extractSink(), _return{{/function:cpp_recv_arg?}});
-      {{/function:sink?}}
-      {{^function:sink?}}
       return apache::thrift::detail::ac::recv_wrapped<result>(
           &reader, state{{#function:cpp_recv_arg?}}, _return{{/function:cpp_recv_arg?}});
-      {{/function:sink?}}
     }
     default:
     {

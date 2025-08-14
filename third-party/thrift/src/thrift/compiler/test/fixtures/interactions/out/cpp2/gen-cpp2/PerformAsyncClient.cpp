@@ -900,14 +900,14 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::Perform>::MyInteraction:
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
       apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::BinaryProtocolWriter>(
-          &reader, state, state.extractSink(), _return);
+      return apache::thrift::detail::ac::recv_wrapped<result>(
+          &reader, state, _return);
     }
     case apache::thrift::protocol::T_COMPACT_PROTOCOL:
     {
       apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::CompactProtocolWriter>(
-          &reader, state, state.extractSink(), _return);
+      return apache::thrift::detail::ac::recv_wrapped<result>(
+          &reader, state, _return);
     }
     default:
     {
@@ -1586,14 +1586,14 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::Perform>::MyInteractionF
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
       apache::thrift::BinaryProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::BinaryProtocolWriter>(
-          &reader, state, state.extractSink(), _return);
+      return apache::thrift::detail::ac::recv_wrapped<result>(
+          &reader, state, _return);
     }
     case apache::thrift::protocol::T_COMPACT_PROTOCOL:
     {
       apache::thrift::CompactProtocolReader reader;
-      return apache::thrift::detail::ac::recv_wrapped<result, apache::thrift::CompactProtocolWriter>(
-          &reader, state, state.extractSink(), _return);
+      return apache::thrift::detail::ac::recv_wrapped<result>(
+          &reader, state, _return);
     }
     default:
     {

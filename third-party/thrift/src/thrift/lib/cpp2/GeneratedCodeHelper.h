@@ -578,7 +578,6 @@ ClientSink<SinkType, FinalResponseType> createSink(
 
 template <
     typename PResult,
-    typename ProtocolWriter,
     typename ProtocolReader,
     typename Response,
     typename Item,
@@ -586,7 +585,6 @@ template <
 folly::exception_wrapper recv_wrapped(
     ProtocolReader* prot,
     ClientReceiveState& state,
-    apache::thrift::detail::ClientSinkBridge::ClientPtr impl,
     apache::thrift::ResponseAndClientSink<Response, Item, FinalResponse>&
         _return) {
 #if FOLLY_HAS_COROUTINES
@@ -608,11 +606,11 @@ folly::exception_wrapper recv_wrapped(
   if (!ew) {
     _return.sink = createSink<
         ProtocolReader,
-        ProtocolWriter,
+        typename ProtocolReader::ProtocolWriter,
         typename PResult::SinkPResultType,
         Item,
         typename PResult::FinalResponsePResultType,
-        FinalResponse>(std::move(impl));
+        FinalResponse>(state.extractSink());
   }
   return ew;
 #else
@@ -626,14 +624,12 @@ folly::exception_wrapper recv_wrapped(
 
 template <
     typename PResult,
-    typename ProtocolWriter,
     typename ProtocolReader,
     typename Item,
     typename FinalResponse>
 folly::exception_wrapper recv_wrapped(
     ProtocolReader* prot,
     ClientReceiveState& state,
-    apache::thrift::detail::ClientSinkBridge::ClientPtr impl,
     apache::thrift::ClientSink<Item, FinalResponse>& _return) {
 #if FOLLY_HAS_COROUTINES
   prot->setInput(state.serializedResponse().buffer.get());
@@ -653,11 +649,11 @@ folly::exception_wrapper recv_wrapped(
   if (!ew) {
     _return = createSink<
         ProtocolReader,
-        ProtocolWriter,
+        typename ProtocolReader::ProtocolWriter,
         typename PResult::SinkPResultType,
         Item,
         typename PResult::FinalResponsePResultType,
-        FinalResponse>(std::move(impl));
+        FinalResponse>(state.extractSink());
   }
   return ew;
 #else

@@ -12,7 +12,7 @@
 
 namespace cpp2_struct_footprint {
 typedef apache::thrift::ThriftPresult<false> ExtendedFootprintService_getComplexMap_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::map<::apache::thrift::type_class::variant, ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>, ::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>*>> ExtendedFootprintService_getComplexMap_presult;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>, ::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>*>> ExtendedFootprintService_getComplexMap_presult;
 //
 // Service Methods
 //
@@ -101,7 +101,7 @@ void ExtendedFootprintServiceAsyncProcessor::executeRequest_getComplexMap(
       /* .methodName =*/ "getComplexMap",
       /* .qualifiedMethodName =*/ "ExtendedFootprintService.getComplexMap"};
   auto callback =
-      apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>>::make(
+      apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
           std::move(ctxStack),
@@ -148,10 +148,10 @@ void ExtendedFootprintServiceAsyncProcessor::executeRequest_getComplexMap(
 template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse ExtendedFootprintServiceAsyncProcessor::return_getComplexMap(
     apache::thrift::ContextStack* ctx,
-    ::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>> const& _return) {
+    ::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>> const& _return) {
   ProtocolOut_ prot;
   ::cpp2_struct_footprint::ExtendedFootprintService_getComplexMap_presult result;
-  result.get<0>().value = const_cast<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>*>(&_return);
+  result.get<0>().value = const_cast<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>*>(&_return);
   result.setIsSet(0, true);
   return serializeResponse("getComplexMap", &prot, ctx, result);
 }

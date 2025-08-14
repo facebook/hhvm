@@ -11,7 +11,7 @@
 
 namespace cpp2_struct_footprint {
 typedef apache::thrift::ThriftPresult<false> ExtendedFootprintService_getComplexMap_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::map<::apache::thrift::type_class::variant, ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>, ::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>*>> ExtendedFootprintService_getComplexMap_presult;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>, ::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>*>> ExtendedFootprintService_getComplexMap_presult;
 } // namespace cpp2_struct_footprint
 template <typename RpcOptions>
 void apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::fbthrift_send_getComplexMap(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata) {
@@ -90,12 +90,12 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   return {std::move(ctx), std::move(header)};
 }
 
-void apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::sync_getComplexMap(::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& _return) {
+void apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::sync_getComplexMap(::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& _return) {
   ::apache::thrift::RpcOptions rpcOptions;
   sync_getComplexMap(rpcOptions, _return);
 }
 
-void apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::sync_getComplexMap(apache::thrift::RpcOptions& rpcOptions, ::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& _return) {
+void apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::sync_getComplexMap(apache::thrift::RpcOptions& rpcOptions, ::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
   auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
@@ -132,8 +132,8 @@ void apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::
 
 
 template <typename CallbackType>
-folly::SemiFuture<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>> apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::fbthrift_semifuture_getComplexMap(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>;
+folly::SemiFuture<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>> apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::fbthrift_semifuture_getComplexMap(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>;
   folly::Promise<CallbackHelper::PromiseResult> promise;
   auto semifuture = promise.getSemiFuture();
   auto ctxAndHeader = getComplexMapCtx(&rpcOptions);
@@ -148,7 +148,7 @@ folly::SemiFuture<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<:
     auto argsAsRefs = std::tie();
     if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions);
         exTry.hasException()) {
-      return folly::makeSemiFuture<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>(std::move(exTry).exception());
+      return folly::makeSemiFuture<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>(std::move(exTry).exception());
     }
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
   }
@@ -157,23 +157,23 @@ folly::SemiFuture<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<:
   return std::move(semifuture).deferValue(CallbackHelper::processClientInterceptorsAndExtractResult);
 }
 
-folly::Future<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>> apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::future_getComplexMap() {
+folly::Future<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>> apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::future_getComplexMap() {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_getComplexMap(rpcOptions);
 }
 
-folly::SemiFuture<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>> apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::semifuture_getComplexMap() {
+folly::SemiFuture<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>> apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::semifuture_getComplexMap() {
   ::apache::thrift::RpcOptions rpcOptions;
   return semifuture_getComplexMap(rpcOptions);
 }
 
-folly::Future<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>> apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::future_getComplexMap(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackType = apache::thrift::FutureCallback<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>;
+folly::Future<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>> apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::future_getComplexMap(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackType = apache::thrift::FutureCallback<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>;
   return fbthrift_semifuture_getComplexMap<CallbackType>(rpcOptions).toUnsafeFuture();
 }
 
-folly::SemiFuture<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>> apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::semifuture_getComplexMap(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackType = apache::thrift::SemiFutureCallback<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>;
+folly::SemiFuture<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>> apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::semifuture_getComplexMap(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackType = apache::thrift::SemiFutureCallback<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>;
   return fbthrift_semifuture_getComplexMap<CallbackType>(rpcOptions);
 }
 
@@ -184,7 +184,7 @@ void apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::
 
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
-folly::exception_wrapper apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::recv_wrapped_getComplexMap(::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& _return, ::apache::thrift::ClientReceiveState& state) {
+folly::exception_wrapper apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::recv_wrapped_getComplexMap(::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
   }
@@ -213,18 +213,18 @@ folly::exception_wrapper apache::thrift::Client<::cpp2_struct_footprint::Extende
   return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
 }
 
-void apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::recv_getComplexMap(::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& _return, ::apache::thrift::ClientReceiveState& state) {
+void apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::recv_getComplexMap(::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& _return, ::apache::thrift::ClientReceiveState& state) {
   auto ew = recv_wrapped_getComplexMap(_return, state);
   if (ew) {
     ew.throw_exception();
   }
 }
 
-void apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::recv_instance_getComplexMap(::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& _return, ::apache::thrift::ClientReceiveState& state) {
+void apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::recv_instance_getComplexMap(::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& _return, ::apache::thrift::ClientReceiveState& state) {
   return recv_getComplexMap(_return, state);
 }
 
-folly::exception_wrapper apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::recv_instance_wrapped_getComplexMap(::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& _return, ::apache::thrift::ClientReceiveState& state) {
+folly::exception_wrapper apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::recv_instance_wrapped_getComplexMap(::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& _return, ::apache::thrift::ClientReceiveState& state) {
   return recv_wrapped_getComplexMap(_return, state);
 }
 

@@ -33,27 +33,27 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 // Method 'getComplexMap'
 //
 
-void apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService>::getComplexMap(::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& /*_return*/) {
+void apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService>::getComplexMap(::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("getComplexMap");
 }
 
-void apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService>::sync_getComplexMap(::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& _return) {
+void apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService>::sync_getComplexMap(::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& _return) {
   return getComplexMap(_return);
 }
 
-folly::SemiFuture<std::unique_ptr<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>>
+folly::SemiFuture<std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>>
 apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService>::semifuture_getComplexMap() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_getComplexMap.compare_exchange_strong(
       expected,
       apache::thrift::detail::si::InvocationType::Sync,
       std::memory_order_relaxed);
-  auto ret = std::make_unique<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>();
+  auto ret = std::make_unique<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>();
   sync_getComplexMap(*ret);
   return folly::makeSemiFuture(std::move(ret));
 }
 
-folly::Future<std::unique_ptr<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>>
+folly::Future<std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>>
 apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService>::future_getComplexMap() {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
   __fbthrift_invocation_getComplexMap.compare_exchange_strong(
@@ -66,7 +66,7 @@ apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService
 }
 
 #if FOLLY_HAS_COROUTINES
-folly::coro::Task<std::unique_ptr<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>>
+folly::coro::Task<std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>>
 apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService>::co_getComplexMap() {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
   __fbthrift_invocation_getComplexMap.compare_exchange_strong(
@@ -77,7 +77,7 @@ apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService
                              withCapturedArgs<>());
 }
 
-folly::coro::Task<std::unique_ptr<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>> apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService>::co_getComplexMap(
+folly::coro::Task<std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>> apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService>::co_getComplexMap(
     apache::thrift::RequestParams /* params */) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
   __fbthrift_invocation_getComplexMap.compare_exchange_strong(
@@ -89,7 +89,7 @@ folly::coro::Task<std::unique_ptr<::std::map<::cpp2_struct_footprint::TestUnion,
 #endif // FOLLY_HAS_COROUTINES
 
 void apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService>::async_tm_getComplexMap(
-    apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>> callback) {
+    apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -157,7 +157,7 @@ determineInvocationType:
       }
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync: {
-        ::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>> _return;
+        ::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>> _return;
         sync_getComplexMap(_return);
         callback->result(std::move(_return));
         return;
@@ -186,7 +186,7 @@ determineInvocationType:
 
 namespace cpp2_struct_footprint {
 
-void ExtendedFootprintServiceSvNull::getComplexMap(::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& /*_return*/) {  }
+void ExtendedFootprintServiceSvNull::getComplexMap(::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& /*_return*/) {  }
 
 
 std::string_view ExtendedFootprintServiceAsyncProcessor::getServiceName() {

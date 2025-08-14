@@ -400,7 +400,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService>>::gen_getComplexMap([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "getComplexMap";
-  auto func_ret_type = std::make_unique<Map>(std::make_unique<Union<::cpp2_struct_footprint::TestUnion>>("module.TestUnion"), std::make_unique<List>(std::make_unique<Struct<::cpp2_struct_footprint::ComplexStruct>>("module.ComplexStruct")));
+  auto func_ret_type = std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<Struct<::cpp2_struct_footprint::ComplexStruct>>("module.ComplexStruct")));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));

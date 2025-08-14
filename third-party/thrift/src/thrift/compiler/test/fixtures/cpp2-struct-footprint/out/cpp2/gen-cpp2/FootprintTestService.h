@@ -216,8 +216,8 @@ class CalculatorIf : public apache::thrift::Tile, public apache::thrift::ServerI
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2_struct_footprint::FootprintTestService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -8308740160129079542;
-  static constexpr ::std::string_view definitionKey = {"\x3a\xf6\xfd\xea\x8a\x88\x64\x59\xb0\x66\x00\xa6\x82\xc6\x9b\xd3", 16};
+  static constexpr int64_t programId = -2016535262471784061;
+  static constexpr ::std::string_view definitionKey = {"\xc5\x02\x98\x08\x5e\x2a\xc5\x07\xd6\x51\xe6\xd7\x0b\x48\x29\x80", 16};
 };
 }
 } // namespace apache::thrift

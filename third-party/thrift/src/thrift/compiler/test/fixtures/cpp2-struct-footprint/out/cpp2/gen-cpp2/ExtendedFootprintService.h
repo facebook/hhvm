@@ -53,15 +53,15 @@ class ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService> : virtua
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:
 
-  virtual void sync_getComplexMap(::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& /*_return*/);
-  [[deprecated("Use sync_getComplexMap instead")]] virtual void getComplexMap(::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& /*_return*/);
-  virtual folly::Future<std::unique_ptr<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>> future_getComplexMap();
-  virtual folly::SemiFuture<std::unique_ptr<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>> semifuture_getComplexMap();
+  virtual void sync_getComplexMap(::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& /*_return*/);
+  [[deprecated("Use sync_getComplexMap instead")]] virtual void getComplexMap(::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& /*_return*/);
+  virtual folly::Future<std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>> future_getComplexMap();
+  virtual folly::SemiFuture<std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>> semifuture_getComplexMap();
 #if FOLLY_HAS_COROUTINES
-  virtual folly::coro::Task<std::unique_ptr<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>> co_getComplexMap();
-  virtual folly::coro::Task<std::unique_ptr<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>> co_getComplexMap(apache::thrift::RequestParams params);
+  virtual folly::coro::Task<std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>> co_getComplexMap();
+  virtual folly::coro::Task<std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>> co_getComplexMap(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_getComplexMap(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>> callback);
+  virtual void async_tm_getComplexMap(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>> callback);
  private:
   static ::cpp2_struct_footprint::ExtendedFootprintServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_getComplexMap{apache::thrift::detail::si::InvocationType::AsyncTm};
@@ -70,8 +70,8 @@ class ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService> : virtua
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2_struct_footprint::ExtendedFootprintService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -8308740160129079542;
-  static constexpr ::std::string_view definitionKey = {"\xc8\xa9\xfc\x03\x5c\x94\xd5\x0c\xa7\x57\xc5\xf6\xc7\xeb\x2d\xf3", 16};
+  static constexpr int64_t programId = -2016535262471784061;
+  static constexpr ::std::string_view definitionKey = {"\x87\x7f\xce\xad\xc6\x08\x35\xe8\xc9\x7d\xe6\x96\xad\x65\xa6\xf4", 16};
 };
 }
 } // namespace apache::thrift
@@ -83,7 +83,7 @@ using ExtendedFootprintServiceSvIf [[deprecated("Use apache::thrift::ServiceHand
 namespace cpp2_struct_footprint {
 class ExtendedFootprintServiceSvNull : public ::apache::thrift::ServiceHandler<ExtendedFootprintService>, virtual public ::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService> {
  public:
-  void getComplexMap(::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& /*_return*/) override;
+  void getComplexMap(::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& /*_return*/) override;
 };
 
 class ExtendedFootprintServiceAsyncProcessor : public ::cpp2_struct_footprint::FootprintTestServiceAsyncProcessor {
@@ -124,7 +124,7 @@ class ExtendedFootprintServiceAsyncProcessor : public ::cpp2_struct_footprint::F
   template <class ProtocolIn_, class ProtocolOut_>
   static apache::thrift::SerializedResponse return_getComplexMap(
       apache::thrift::ContextStack* ctx,
-      ::std::map<::cpp2_struct_footprint::TestUnion, ::std::vector<::cpp2_struct_footprint::ComplexStruct>> const& _return);
+      ::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>> const& _return);
 
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_getComplexMap(

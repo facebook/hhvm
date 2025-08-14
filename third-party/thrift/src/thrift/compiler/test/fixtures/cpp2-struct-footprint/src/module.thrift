@@ -108,5 +108,5 @@ service FootprintTestService {
 // Extended service to test inheritance
 service ExtendedFootprintService extends FootprintTestService {
   // Additional method with complex types
-  map<TestUnion, list<ComplexStruct>> getComplexMap();
+  map<i32, list<ComplexStruct>> getComplexMap();
 }

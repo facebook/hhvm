@@ -641,3 +641,20 @@ struct fmt::formatter<apache::thrift::type_system::detail::TypeId>
       const apache::thrift::type_system::detail::TypeId& typeId,
       format_context& ctx) const;
 };
+
+namespace std {
+// Partial specialization for all Primitive TypeId variants
+template <typename PrimitiveTagStruct>
+class hash<apache::thrift::type_system::detail::PrimitiveTypeIdWrapper<
+    PrimitiveTagStruct>> {
+  using Self = apache::thrift::type_system::detail::PrimitiveTypeIdWrapper<
+      PrimitiveTagStruct>;
+
+ public:
+  size_t operator()(const Self&) const noexcept {
+    return ::apache::thrift::op::hash<
+        apache::thrift::type::struct_t<PrimitiveTagStruct>>(
+        PrimitiveTagStruct{});
+  }
+};
+} // namespace std

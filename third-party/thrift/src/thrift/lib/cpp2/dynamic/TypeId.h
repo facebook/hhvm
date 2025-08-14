@@ -152,6 +152,9 @@ TypeId tagToTypeId(Tag) {
 
 } // namespace apache::thrift::type_system
 
-// Make TypeId hashable
+// Make TypeId (and subtypes) hashable
 // DISCLAIMER: THIS IS NOT A DETERMINISTIC HASH! DO NOT PERSIST HASH VALUES!
+FBTHRIFT_STD_HASH_WRAP_DATA(apache::thrift::type_system::ListTypeId)
+FBTHRIFT_STD_HASH_WRAP_DATA(apache::thrift::type_system::SetTypeId)
+FBTHRIFT_STD_HASH_WRAP_DATA(apache::thrift::type_system::MapTypeId)
 FBTHRIFT_STD_HASH_WRAP_DATA(apache::thrift::type_system::TypeId)

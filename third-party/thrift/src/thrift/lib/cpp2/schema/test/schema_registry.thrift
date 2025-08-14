@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/scope.thrift"
+
 package "facebook.com/thrift/test"
 
 struct A {
@@ -24,8 +26,14 @@ struct B {
   1: optional C field;
 }
 
+@TestAnnot{loc = "struct"}
 struct C {
   1: i32 field;
 }
 
 struct NotIncluded {}
+
+@scope.Struct
+struct TestAnnot {
+  1: string loc;
+}

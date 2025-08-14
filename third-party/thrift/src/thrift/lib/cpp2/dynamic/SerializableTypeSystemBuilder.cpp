@@ -141,6 +141,11 @@ void SerializableTypeSystemBuilder::addDefinition(DefinitionRef ref) {
 void SerializableTypeSystemBuilder::addAnnotations(
     const detail::RawAnnotations& annotations) {
   for (const auto& [uri, _] : annotations) {
+    // Standard annotations are not currently bundled due to circular dependency concerns.
+    // Skip it for now.
+    if (uri.starts_with("facebook.com/thrift/annotation/")) {
+      continue;
+    }
     addDefinition(uri);
   }
 }

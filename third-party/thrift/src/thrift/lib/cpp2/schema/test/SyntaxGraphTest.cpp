@@ -1006,6 +1006,14 @@ TEST(SyntaxGraphTest, SerializableTypeSystemBuilder) {
                         ->structDef_ref()
                         .value();
     EXPECT_EQ(structA.fields()->size(), 1);
+    EXPECT_EQ(
+        structA.annotations()
+            ->at("facebook.com/thrift/test/TestAnnot")
+            .fieldSetDatum()
+            ->at(FieldId{1})
+            .textDatum()
+            .value(),
+        "struct");
     auto& field1 = structA.fields()[0];
     EXPECT_EQ(field1.identity()->id(), FieldId{1});
     EXPECT_EQ(field1.identity()->name(), "field");
@@ -1018,7 +1026,7 @@ TEST(SyntaxGraphTest, SerializableTypeSystemBuilder) {
         type_system::SerializableTypeSystemBuilder::withoutSourceInfo(registry);
     builder.addDefinition("facebook.com/thrift/test/A");
     auto sts = *std::move(builder).build();
-    EXPECT_EQ(sts.types()->size(), 3);
+    EXPECT_EQ(sts.types()->size(), 4);
     testA(sts);
     testB(sts);
     testC(sts);
@@ -1028,7 +1036,7 @@ TEST(SyntaxGraphTest, SerializableTypeSystemBuilder) {
         type_system::SerializableTypeSystemBuilder::withoutSourceInfo(registry);
     builder.addDefinition("facebook.com/thrift/test/B");
     auto sts = *std::move(builder).build();
-    EXPECT_EQ(sts.types()->size(), 2);
+    EXPECT_EQ(sts.types()->size(), 3);
     testB(sts);
     testC(sts);
   }
@@ -1037,7 +1045,7 @@ TEST(SyntaxGraphTest, SerializableTypeSystemBuilder) {
         type_system::SerializableTypeSystemBuilder::withoutSourceInfo(registry);
     builder.addDefinition("facebook.com/thrift/test/C");
     auto sts = *std::move(builder).build();
-    EXPECT_EQ(sts.types()->size(), 1);
+    EXPECT_EQ(sts.types()->size(), 2);
     testC(sts);
   }
 }

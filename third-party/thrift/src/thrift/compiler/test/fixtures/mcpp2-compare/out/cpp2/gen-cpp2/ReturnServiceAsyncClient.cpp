@@ -372,12 +372,6 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_noReturn(apa
     [&] {
       fbthrift_serialize_and_send_noReturn(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -386,7 +380,13 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_noReturn(apa
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_noReturn(returnState);
+    folly::exception_wrapper ew = recv_wrapped_noReturn(returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 
@@ -574,12 +574,6 @@ bool apache::thrift::Client<::some::valid::ns::ReturnService>::sync_boolReturn(a
     [&] {
       fbthrift_serialize_and_send_boolReturn(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -588,7 +582,15 @@ bool apache::thrift::Client<::some::valid::ns::ReturnService>::sync_boolReturn(a
     }
   };
   return folly::fibers::runInMainContext([&] {
-      return recv_boolReturn(returnState);
+    bool _return;
+    folly::exception_wrapper ew = recv_wrapped_boolReturn(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
+    return _return;
   });
 }
 
@@ -778,12 +780,6 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
     [&] {
       fbthrift_serialize_and_send_i16Return(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -792,7 +788,15 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
     }
   };
   return folly::fibers::runInMainContext([&] {
-      return recv_i16Return(returnState);
+    ::std::int16_t _return;
+    folly::exception_wrapper ew = recv_wrapped_i16Return(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
+    return _return;
   });
 }
 
@@ -982,12 +986,6 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
     [&] {
       fbthrift_serialize_and_send_i32Return(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -996,7 +994,15 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
     }
   };
   return folly::fibers::runInMainContext([&] {
-      return recv_i32Return(returnState);
+    ::std::int32_t _return;
+    folly::exception_wrapper ew = recv_wrapped_i32Return(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
+    return _return;
   });
 }
 
@@ -1186,12 +1192,6 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
     [&] {
       fbthrift_serialize_and_send_i64Return(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -1200,7 +1200,15 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
     }
   };
   return folly::fibers::runInMainContext([&] {
-      return recv_i64Return(returnState);
+    ::std::int64_t _return;
+    folly::exception_wrapper ew = recv_wrapped_i64Return(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
+    return _return;
   });
 }
 
@@ -1390,12 +1398,6 @@ float apache::thrift::Client<::some::valid::ns::ReturnService>::sync_floatReturn
     [&] {
       fbthrift_serialize_and_send_floatReturn(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -1404,7 +1406,15 @@ float apache::thrift::Client<::some::valid::ns::ReturnService>::sync_floatReturn
     }
   };
   return folly::fibers::runInMainContext([&] {
-      return recv_floatReturn(returnState);
+    float _return;
+    folly::exception_wrapper ew = recv_wrapped_floatReturn(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
+    return _return;
   });
 }
 
@@ -1594,12 +1604,6 @@ double apache::thrift::Client<::some::valid::ns::ReturnService>::sync_doubleRetu
     [&] {
       fbthrift_serialize_and_send_doubleReturn(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -1608,7 +1612,15 @@ double apache::thrift::Client<::some::valid::ns::ReturnService>::sync_doubleRetu
     }
   };
   return folly::fibers::runInMainContext([&] {
-      return recv_doubleReturn(returnState);
+    double _return;
+    folly::exception_wrapper ew = recv_wrapped_doubleReturn(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
+    return _return;
   });
 }
 
@@ -1798,12 +1810,6 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_stringReturn
     [&] {
       fbthrift_serialize_and_send_stringReturn(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -1812,7 +1818,13 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_stringReturn
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_stringReturn(_return, returnState);
+    auto ew = recv_wrapped_stringReturn(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 
@@ -2000,12 +2012,6 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_binaryReturn
     [&] {
       fbthrift_serialize_and_send_binaryReturn(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -2014,7 +2020,13 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_binaryReturn
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_binaryReturn(_return, returnState);
+    auto ew = recv_wrapped_binaryReturn(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 
@@ -2202,12 +2214,6 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_mapReturn(ap
     [&] {
       fbthrift_serialize_and_send_mapReturn(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -2216,7 +2222,13 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_mapReturn(ap
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_mapReturn(_return, returnState);
+    auto ew = recv_wrapped_mapReturn(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 
@@ -2404,12 +2416,6 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
     [&] {
       fbthrift_serialize_and_send_simpleTypedefReturn(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -2418,7 +2424,15 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
     }
   };
   return folly::fibers::runInMainContext([&] {
-      return recv_simpleTypedefReturn(returnState);
+    ::some::valid::ns::simpleTypeDef _return;
+    folly::exception_wrapper ew = recv_wrapped_simpleTypedefReturn(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
+    return _return;
   });
 }
 
@@ -2608,12 +2622,6 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_complexTyped
     [&] {
       fbthrift_serialize_and_send_complexTypedefReturn(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -2622,7 +2630,13 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_complexTyped
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_complexTypedefReturn(_return, returnState);
+    auto ew = recv_wrapped_complexTypedefReturn(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 
@@ -2810,12 +2824,6 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_list_mostCom
     [&] {
       fbthrift_serialize_and_send_list_mostComplexTypedefReturn(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -2824,7 +2832,13 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_list_mostCom
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_list_mostComplexTypedefReturn(_return, returnState);
+    auto ew = recv_wrapped_list_mostComplexTypedefReturn(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 
@@ -3012,12 +3026,6 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
     [&] {
       fbthrift_serialize_and_send_enumReturn(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -3026,7 +3034,15 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
     }
   };
   return folly::fibers::runInMainContext([&] {
-      return recv_enumReturn(returnState);
+    ::some::valid::ns::MyEnumA _return;
+    folly::exception_wrapper ew = recv_wrapped_enumReturn(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
+    return _return;
   });
 }
 
@@ -3216,12 +3232,6 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_list_EnumRet
     [&] {
       fbthrift_serialize_and_send_list_EnumReturn(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -3230,7 +3240,13 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_list_EnumRet
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_list_EnumReturn(_return, returnState);
+    auto ew = recv_wrapped_list_EnumReturn(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 
@@ -3418,12 +3434,6 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_structReturn
     [&] {
       fbthrift_serialize_and_send_structReturn(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -3432,7 +3442,13 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_structReturn
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_structReturn(_return, returnState);
+    auto ew = recv_wrapped_structReturn(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 
@@ -3620,12 +3636,6 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_set_StructRe
     [&] {
       fbthrift_serialize_and_send_set_StructReturn(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -3634,7 +3644,13 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_set_StructRe
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_set_StructReturn(_return, returnState);
+    auto ew = recv_wrapped_set_StructReturn(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 
@@ -3822,12 +3838,6 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_unionReturn(
     [&] {
       fbthrift_serialize_and_send_unionReturn(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -3836,7 +3846,13 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_unionReturn(
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_unionReturn(_return, returnState);
+    auto ew = recv_wrapped_unionReturn(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 
@@ -4024,12 +4040,6 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_list_UnionRe
     [&] {
       fbthrift_serialize_and_send_list_UnionReturn(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -4038,7 +4048,13 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_list_UnionRe
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_list_UnionReturn(_return, returnState);
+    auto ew = recv_wrapped_list_UnionReturn(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 
@@ -4227,12 +4243,6 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_readDataEb(a
     [&] {
       fbthrift_serialize_and_send_readDataEb(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback), p_size);
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -4241,7 +4251,13 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_readDataEb(a
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_readDataEb(_return, returnState);
+    auto ew = recv_wrapped_readDataEb(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 
@@ -4430,12 +4446,6 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_readData(apa
     [&] {
       fbthrift_serialize_and_send_readData(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback), p_size);
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -4444,7 +4454,13 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_readData(apa
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_readData(_return, returnState);
+    auto ew = recv_wrapped_readData(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 

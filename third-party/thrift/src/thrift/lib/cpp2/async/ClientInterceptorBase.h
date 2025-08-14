@@ -30,6 +30,9 @@ namespace transport {
 class THeader;
 }
 
+using ClientInterceptorOnResponseResult =
+    folly::Try<apache::thrift::util::TypeErasedRef>;
+
 class ClientInterceptorBase {
  public:
   virtual ~ClientInterceptorBase() = default;
@@ -76,6 +79,8 @@ class ClientInterceptorBase {
      * in the format `{interaction_name}.{method_name}`.
      */
     std::string_view methodName = "";
+
+    ClientInterceptorOnResponseResult result;
   };
   virtual void internal_onResponse(ResponseInfo) = 0;
 

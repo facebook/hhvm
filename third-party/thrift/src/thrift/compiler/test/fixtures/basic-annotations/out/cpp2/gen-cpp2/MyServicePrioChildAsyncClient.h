@@ -98,7 +98,10 @@ class Client<::cpp2::MyServicePrioChild> : public ::cpp2::MyServicePrioParentAsy
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie();
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_pang(*rpcOptions, header, ctx.get(), std::move(wrappedCallback));
@@ -110,9 +113,6 @@ class Client<::cpp2::MyServicePrioChild> : public ::cpp2::MyServicePrioParentAsy
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
-    }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -128,7 +128,14 @@ class Client<::cpp2::MyServicePrioChild> : public ::cpp2::MyServicePrioParentAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    if (auto ew = recv_wrapped_pang(returnState)) {
+    auto ew = recv_wrapped_pang(returnState);
+    if (returnState.ctx()) {
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      if (tryObj.hasException()) {
+        ew = std::move(tryObj.exception());
+      }
+    }
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
   }

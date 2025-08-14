@@ -125,12 +125,6 @@ void apache::thrift::Client<::cpp2::MyServicePrioParent>::sync_ping(apache::thri
     [&] {
       fbthrift_serialize_and_send_ping(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -139,7 +133,13 @@ void apache::thrift::Client<::cpp2::MyServicePrioParent>::sync_ping(apache::thri
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_ping(returnState);
+    folly::exception_wrapper ew = recv_wrapped_ping(returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 
@@ -327,12 +327,6 @@ void apache::thrift::Client<::cpp2::MyServicePrioParent>::sync_pong(apache::thri
     [&] {
       fbthrift_serialize_and_send_pong(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -341,7 +335,13 @@ void apache::thrift::Client<::cpp2::MyServicePrioParent>::sync_pong(apache::thri
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_pong(returnState);
+    folly::exception_wrapper ew = recv_wrapped_pong(returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 

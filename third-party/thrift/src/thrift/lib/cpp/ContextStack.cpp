@@ -624,18 +624,33 @@ folly::Try<void> ContextStack::processClientInterceptorsOnRequest(
 }
 
 folly::Try<void> ContextStack::processClientInterceptorsOnResponse(
-    const apache::thrift::transport::THeader* headers) noexcept {
+    const apache::thrift::transport::THeader* headers,
+    folly::exception_wrapper exceptionWrapper,
+    apache::thrift::util::TypeErasedRef resultRaw) noexcept {
   if (clientInterceptors_ == nullptr) {
+    if (exceptionWrapper.has_exception_ptr()) {
+      return folly::Try<void>(std::move(exceptionWrapper));
+    }
     return {};
   }
+
+  ClientInterceptorOnResponseResult result;
+  if (exceptionWrapper) {
+    result.emplaceException(exceptionWrapper);
+  } else {
+    result.emplace(resultRaw);
+  }
   std::vector<ClientInterceptorException::SingleExceptionInfo> exceptions;
+
   for (auto i = std::ptrdiff_t(clientInterceptors_->size()) - 1; i >= 0; --i) {
     const auto& clientInterceptor = (*clientInterceptors_)[i];
     ClientInterceptorBase::ResponseInfo responseInfo{
         getStorageForClientInterceptorOnRequestByIndex(i),
         headers,
         serviceName_,
-        methodNameUnprefixed_};
+        methodNameUnprefixed_,
+        result,
+    };
     try {
       clientInterceptor->internal_onResponse(std::move(responseInfo));
     } catch (...) {

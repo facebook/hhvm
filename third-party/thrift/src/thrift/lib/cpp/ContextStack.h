@@ -18,7 +18,6 @@
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/Try.h>
-
 #include <thrift/lib/cpp/SerializedMessage.h>
 #include <thrift/lib/cpp/TProcessorEventHandler.h>
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
@@ -137,8 +136,52 @@ class ContextStack {
       ClientInterceptorOnRequestArguments arguments,
       apache::thrift::transport::THeader* headers,
       RpcOptions& options) noexcept;
+
+  // RPC responses may be exceptions or values. If exception_wrapper has
+  // a valid exception "result" is ignored. If exception_wrapper is empty
+  // "result" is used as the response.
+  // This formulation, requiring this method to resolve this, simplifies client
+  // stub code generation.
   [[nodiscard]] folly::Try<void> processClientInterceptorsOnResponse(
-      const apache::thrift::transport::THeader* headers) noexcept;
+      const apache::thrift::transport::THeader* headers,
+      folly::exception_wrapper exceptionWrapper,
+      apache::thrift::util::TypeErasedRef result =
+          apache::thrift::util::TypeErasedRef::of<folly::Unit>(
+              folly::unit)) noexcept;
+
+  template <typename T>
+  [[nodiscard]] folly::Try<void> processClientInterceptorsOnResponse(
+      const apache::thrift::transport::THeader* headers,
+      folly::exception_wrapper exceptionWrapper,
+      T& result) noexcept {
+    return processClientInterceptorsOnResponse(
+        headers,
+        exceptionWrapper,
+        apache::thrift::util::TypeErasedRef::of<T>(result));
+  }
+
+  template <typename T>
+  [[nodiscard]] folly::Try<T> processClientInterceptorsOnResponse(
+      const apache::thrift::transport::THeader* headers,
+      folly::Try<T>&& result) noexcept {
+    folly::exception_wrapper exceptionWrapper;
+    if (result.hasException()) {
+      exceptionWrapper = result.exception();
+    }
+    apache::thrift::util::TypeErasedRef resultRef = [&]() {
+      if (!result.hasValue()) {
+        return apache::thrift::util::TypeErasedRef::of<folly::Unit>(
+            folly::unit);
+      }
+      return apache::thrift::util::TypeErasedRef::of<T>(result.value());
+    }();
+    auto interceptorTry = processClientInterceptorsOnResponse(
+        headers, exceptionWrapper, resultRef);
+    if (interceptorTry.hasException()) {
+      return folly::Try<T>(interceptorTry.exception());
+    }
+    return std::move(result);
+  }
 
  private:
   std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>
@@ -152,11 +195,11 @@ class ContextStack {
   const std::string_view methodNameUnprefixed_;
   void** serviceContexts_;
   InterceptorFrameworkMetadataStorage clientInterceptorFrameworkMetadata_;
-  // While the server-side has a Cpp2RequestContext, the client-side "fakes" it
-  // with an embedded version. We can't make it nullptr because this is the API
-  // used to read/write headers. The root cause of this limitation is that the
-  // TProcessorEventHandler API is shared between the client and the server, but
-  // is primarily designed for the server-side use case.
+  // While the server-side has a Cpp2RequestContext, the client-side "fakes"
+  // it with an embedded version. We can't make it nullptr because this is
+  // the API used to read/write headers. The root cause of this limitation
+  // is that the TProcessorEventHandler API is shared between the client and
+  // the server, but is primarily designed for the server-side use case.
   class EmbeddedClientRequestContext;
   using EmbeddedClientContextPtr =
       apache::thrift::util::AllocationColocator<>::Ptr<

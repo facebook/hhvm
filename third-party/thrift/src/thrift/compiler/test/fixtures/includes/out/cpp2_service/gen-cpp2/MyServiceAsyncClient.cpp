@@ -127,12 +127,6 @@ void apache::thrift::Client<::cpp2::MyService>::sync_query(apache::thrift::RpcOp
     [&] {
       fbthrift_serialize_and_send_query(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback), p_s, p_i);
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -141,7 +135,13 @@ void apache::thrift::Client<::cpp2::MyService>::sync_query(apache::thrift::RpcOp
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_query(returnState);
+    folly::exception_wrapper ew = recv_wrapped_query(returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 
@@ -331,12 +331,6 @@ void apache::thrift::Client<::cpp2::MyService>::sync_has_arg_docs(apache::thrift
     [&] {
       fbthrift_serialize_and_send_has_arg_docs(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback), p_s, p_i);
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -345,7 +339,13 @@ void apache::thrift::Client<::cpp2::MyService>::sync_has_arg_docs(apache::thrift
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_has_arg_docs(returnState);
+    folly::exception_wrapper ew = recv_wrapped_has_arg_docs(returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 

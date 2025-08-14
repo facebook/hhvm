@@ -104,7 +104,10 @@ class Client<::facebook::thrift::test::ExtendedService> : public ::facebook::thr
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_param0, p_param1);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_init(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_param0, p_param1);
@@ -117,14 +120,12 @@ class Client<::facebook::thrift::test::ExtendedService> : public ::facebook::thr
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-    }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
     }
     returnState.resetProtocolId(protocolId);
     returnState.resetCtx(std::move(ctx));
+    ::std::int64_t _return;
     SCOPE_EXIT {
       if (hasRpcOptions && returnState.header()) {
         auto* rheader = returnState.header();
@@ -134,8 +135,11 @@ class Client<::facebook::thrift::test::ExtendedService> : public ::facebook::thr
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    ::std::int64_t _return;
-    if (auto ew = recv_wrapped_init(_return, returnState)) {
+    auto ew = recv_wrapped_init(_return, returnState);
+    if (returnState.ctx()) {
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
     co_return _return;

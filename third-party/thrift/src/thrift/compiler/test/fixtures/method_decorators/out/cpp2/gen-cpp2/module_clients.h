@@ -102,7 +102,10 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie();
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_noop(*rpcOptions, header, ctx.get(), std::move(wrappedCallback));
@@ -114,9 +117,6 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
-    }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -132,7 +132,14 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    if (auto ew = recv_wrapped_noop(returnState)) {
+    auto ew = recv_wrapped_noop(returnState);
+    if (returnState.ctx()) {
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      if (tryObj.hasException()) {
+        ew = std::move(tryObj.exception());
+      }
+    }
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
   }
@@ -209,7 +216,10 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_text);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_echo(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_text);
@@ -222,14 +232,12 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-    }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
     }
     returnState.resetProtocolId(protocolId);
     returnState.resetCtx(std::move(ctx));
+    ::std::string _return;
     SCOPE_EXIT {
       if (hasRpcOptions && returnState.header()) {
         auto* rheader = returnState.header();
@@ -239,8 +247,11 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    ::std::string _return;
-    if (auto ew = recv_wrapped_echo(_return, returnState)) {
+    auto ew = recv_wrapped_echo(_return, returnState);
+    if (returnState.ctx()) {
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
     co_return _return;
@@ -318,7 +329,10 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_num);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_increment(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_num);
@@ -331,14 +345,12 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-    }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
     }
     returnState.resetProtocolId(protocolId);
     returnState.resetCtx(std::move(ctx));
+    ::std::int64_t _return;
     SCOPE_EXIT {
       if (hasRpcOptions && returnState.header()) {
         auto* rheader = returnState.header();
@@ -348,8 +360,11 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    ::std::int64_t _return;
-    if (auto ew = recv_wrapped_increment(_return, returnState)) {
+    auto ew = recv_wrapped_increment(_return, returnState);
+    if (returnState.ctx()) {
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
     co_return _return;
@@ -427,7 +442,10 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_nums);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_sum(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_nums);
@@ -440,14 +458,12 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-    }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
     }
     returnState.resetProtocolId(protocolId);
     returnState.resetCtx(std::move(ctx));
+    ::std::int64_t _return;
     SCOPE_EXIT {
       if (hasRpcOptions && returnState.header()) {
         auto* rheader = returnState.header();
@@ -457,8 +473,11 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    ::std::int64_t _return;
-    if (auto ew = recv_wrapped_sum(_return, returnState)) {
+    auto ew = recv_wrapped_sum(_return, returnState);
+    if (returnState.ctx()) {
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
     co_return _return;
@@ -536,7 +555,10 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_request);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_withStruct(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_request);
@@ -549,14 +571,12 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-    }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
     }
     returnState.resetProtocolId(protocolId);
     returnState.resetCtx(std::move(ctx));
+    ::cpp2::Response _return;
     SCOPE_EXIT {
       if (hasRpcOptions && returnState.header()) {
         auto* rheader = returnState.header();
@@ -566,8 +586,11 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    ::cpp2::Response _return;
-    if (auto ew = recv_wrapped_withStruct(_return, returnState)) {
+    auto ew = recv_wrapped_withStruct(_return, returnState);
+    if (returnState.ctx()) {
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
     co_return _return;
@@ -645,7 +668,10 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_text, p_num, p_request);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_multiParam(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_text, p_num, p_request);
@@ -658,14 +684,12 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-    }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
     }
     returnState.resetProtocolId(protocolId);
     returnState.resetCtx(std::move(ctx));
+    ::cpp2::Response _return;
     SCOPE_EXIT {
       if (hasRpcOptions && returnState.header()) {
         auto* rheader = returnState.header();
@@ -675,8 +699,11 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    ::cpp2::Response _return;
-    if (auto ew = recv_wrapped_multiParam(_return, returnState)) {
+    auto ew = recv_wrapped_multiParam(_return, returnState);
+    if (returnState.ctx()) {
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
     co_return _return;
@@ -795,7 +822,10 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie();
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_noop(*rpcOptions, header, ctx.get(), std::move(wrappedCallback));
@@ -807,9 +837,6 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
-    }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -825,7 +852,14 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    if (auto ew = recv_wrapped_noop(returnState)) {
+    auto ew = recv_wrapped_noop(returnState);
+    if (returnState.ctx()) {
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      if (tryObj.hasException()) {
+        ew = std::move(tryObj.exception());
+      }
+    }
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
   }
@@ -902,7 +936,10 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_text);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_echo(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_text);
@@ -915,14 +952,12 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-    }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
     }
     returnState.resetProtocolId(protocolId);
     returnState.resetCtx(std::move(ctx));
+    ::std::string _return;
     SCOPE_EXIT {
       if (hasRpcOptions && returnState.header()) {
         auto* rheader = returnState.header();
@@ -932,8 +967,11 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    ::std::string _return;
-    if (auto ew = recv_wrapped_echo(_return, returnState)) {
+    auto ew = recv_wrapped_echo(_return, returnState);
+    if (returnState.ctx()) {
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
     co_return _return;
@@ -1011,7 +1049,10 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_num);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_increment(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_num);
@@ -1024,14 +1065,12 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-    }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
     }
     returnState.resetProtocolId(protocolId);
     returnState.resetCtx(std::move(ctx));
+    ::std::int64_t _return;
     SCOPE_EXIT {
       if (hasRpcOptions && returnState.header()) {
         auto* rheader = returnState.header();
@@ -1041,8 +1080,11 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    ::std::int64_t _return;
-    if (auto ew = recv_wrapped_increment(_return, returnState)) {
+    auto ew = recv_wrapped_increment(_return, returnState);
+    if (returnState.ctx()) {
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
     co_return _return;
@@ -1120,7 +1162,10 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_nums);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_sum(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_nums);
@@ -1133,14 +1178,12 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-    }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
     }
     returnState.resetProtocolId(protocolId);
     returnState.resetCtx(std::move(ctx));
+    ::std::int64_t _return;
     SCOPE_EXIT {
       if (hasRpcOptions && returnState.header()) {
         auto* rheader = returnState.header();
@@ -1150,8 +1193,11 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    ::std::int64_t _return;
-    if (auto ew = recv_wrapped_sum(_return, returnState)) {
+    auto ew = recv_wrapped_sum(_return, returnState);
+    if (returnState.ctx()) {
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
     co_return _return;
@@ -1229,7 +1275,10 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_request);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_withStruct(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_request);
@@ -1242,14 +1291,12 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-    }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
     }
     returnState.resetProtocolId(protocolId);
     returnState.resetCtx(std::move(ctx));
+    ::cpp2::Response _return;
     SCOPE_EXIT {
       if (hasRpcOptions && returnState.header()) {
         auto* rheader = returnState.header();
@@ -1259,8 +1306,11 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    ::cpp2::Response _return;
-    if (auto ew = recv_wrapped_withStruct(_return, returnState)) {
+    auto ew = recv_wrapped_withStruct(_return, returnState);
+    if (returnState.ctx()) {
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
     co_return _return;
@@ -1338,7 +1388,10 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_text, p_num, p_request);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_multiParam(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_text, p_num, p_request);
@@ -1351,14 +1404,12 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-    }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
     }
     returnState.resetProtocolId(protocolId);
     returnState.resetCtx(std::move(ctx));
+    ::cpp2::Response _return;
     SCOPE_EXIT {
       if (hasRpcOptions && returnState.header()) {
         auto* rheader = returnState.header();
@@ -1368,8 +1419,11 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    ::cpp2::Response _return;
-    if (auto ew = recv_wrapped_multiParam(_return, returnState)) {
+    auto ew = recv_wrapped_multiParam(_return, returnState);
+    if (returnState.ctx()) {
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
     co_return _return;
@@ -1483,7 +1537,10 @@ class Client<::cpp2::DecoratedService_ExtendsUndecoratedService> : public ::cpp2
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie();
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_extension(*rpcOptions, header, ctx.get(), std::move(wrappedCallback));
@@ -1495,9 +1552,6 @@ class Client<::cpp2::DecoratedService_ExtendsUndecoratedService> : public ::cpp2
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
-    }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -1513,7 +1567,14 @@ class Client<::cpp2::DecoratedService_ExtendsUndecoratedService> : public ::cpp2
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    if (auto ew = recv_wrapped_extension(returnState)) {
+    auto ew = recv_wrapped_extension(returnState);
+    if (returnState.ctx()) {
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      if (tryObj.hasException()) {
+        ew = std::move(tryObj.exception());
+      }
+    }
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
   }
@@ -1626,7 +1687,10 @@ class Client<::cpp2::DecoratedService_ExtendsDecoratedService> : public ::cpp2::
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie();
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_extension(*rpcOptions, header, ctx.get(), std::move(wrappedCallback));
@@ -1638,9 +1702,6 @@ class Client<::cpp2::DecoratedService_ExtendsDecoratedService> : public ::cpp2::
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
-    }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -1656,7 +1717,14 @@ class Client<::cpp2::DecoratedService_ExtendsDecoratedService> : public ::cpp2::
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    if (auto ew = recv_wrapped_extension(returnState)) {
+    auto ew = recv_wrapped_extension(returnState);
+    if (returnState.ctx()) {
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      if (tryObj.hasException()) {
+        ew = std::move(tryObj.exception());
+      }
+    }
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
   }
@@ -1769,7 +1837,10 @@ class Client<::cpp2::UndecoratedService_ExtendsDecoratedService> : public ::cpp2
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie();
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_extension(*rpcOptions, header, ctx.get(), std::move(wrappedCallback));
@@ -1781,9 +1852,6 @@ class Client<::cpp2::UndecoratedService_ExtendsDecoratedService> : public ::cpp2
       co_await callback.co_waitUntilDone();
     } else {
       co_await callback.co_waitUntilDone();
-    }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
     }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -1799,7 +1867,14 @@ class Client<::cpp2::UndecoratedService_ExtendsDecoratedService> : public ::cpp2
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    if (auto ew = recv_wrapped_extension(returnState)) {
+    auto ew = recv_wrapped_extension(returnState);
+    if (returnState.ctx()) {
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      if (tryObj.hasException()) {
+        ew = std::move(tryObj.exception());
+      }
+    }
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
   }
@@ -1912,7 +1987,10 @@ class Client<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecorated
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_input);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_secondExtension(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_input);
@@ -1925,14 +2003,12 @@ class Client<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecorated
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-    }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
     }
     returnState.resetProtocolId(protocolId);
     returnState.resetCtx(std::move(ctx));
+    ::std::string _return;
     SCOPE_EXIT {
       if (hasRpcOptions && returnState.header()) {
         auto* rheader = returnState.header();
@@ -1942,8 +2018,11 @@ class Client<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecorated
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    ::std::string _return;
-    if (auto ew = recv_wrapped_secondExtension(_return, returnState)) {
+    auto ew = recv_wrapped_secondExtension(_return, returnState);
+    if (returnState.ctx()) {
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
     co_return _return;

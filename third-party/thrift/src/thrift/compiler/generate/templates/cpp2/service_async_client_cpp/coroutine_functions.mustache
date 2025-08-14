@@ -52,7 +52,7 @@ folly::coro::Task<{{> types/return_type_client}}> {{> service_common/client_clas
   }
 
   if (ctx != nullptr) {
-    ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
+    ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception()).throwUnlessValue();
   }
   if (returnState.isException()) {
     co_yield folly::coro::co_error(std::move(returnState.exception()));

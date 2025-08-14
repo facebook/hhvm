@@ -128,7 +128,7 @@ folly::coro::Task<apache::thrift::ClientBufferedStream<::std::int16_t>> apache::
   }
 
   if (ctx != nullptr) {
-    ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
+    ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception()).throwUnlessValue();
   }
   if (returnState.isException()) {
     co_yield folly::coro::co_error(std::move(returnState.exception()));
@@ -267,7 +267,7 @@ folly::coro::Task<apache::thrift::ResponseAndClientBufferedStream<::std::string,
   }
 
   if (ctx != nullptr) {
-    ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
+    ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception()).throwUnlessValue();
   }
   if (returnState.isException()) {
     co_yield folly::coro::co_error(std::move(returnState.exception()));

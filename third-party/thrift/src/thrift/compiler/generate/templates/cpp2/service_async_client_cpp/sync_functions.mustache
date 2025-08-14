@@ -63,14 +63,6 @@ void {{> service_common/client_class_name}}::sync_{{function:cpp_name}}(apache::
       fbthrift_serialize_and_send_{{function:cpp_name}}(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function:comma}}{{> service_common/param_list}});
     });
 {{#if (not function:oneway?)}}
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-{{/if (not function:oneway?)}}
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
-{{#if (not function:oneway?)}}
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -80,34 +72,62 @@ void {{> service_common/client_class_name}}::sync_{{function:cpp_name}}(apache::
   };
   return folly::fibers::runInMainContext([&] {
   {{#if (not function:sync_returns_by_outparam?)}}
-    {{#if function:void?}}
-      recv_{{function:cpp_name}}(returnState);
+    {{! Case 1: Stream functions }}
+    {{#if function:stream?}}
+auto tryObj = folly::makeTryWith([&]() {
+      return recv_{{function:self.cpp_name}}(returnState);
+    });
+    if (contextStack != nullptr) {
+      tryObj = contextStack->processClientInterceptorsOnResponse(returnState.header(), std::move(tryObj));
+    }
+    tryObj.throwUnlessValue();
+    {{#if function:creates_interaction?}}
+    return std::make_pair(std::move(interactionHandle), std::move(tryObj.value()));
     {{#else}}
-      {{#if (not function:creates_interaction?)}}
-      return recv_{{function:cpp_name}}(returnState);
-      {{#else}}
-        {{#if function:stream?}}
-      return std::make_pair(
-        std::move(interactionHandle),
-        recv_{{function:cpp_name}}(returnState)
-      );
-        {{#else}}
-          {{#if (not type:void?)}}
-      return std::make_pair(
-        std::move(interactionHandle),
-        recv_{{function:cpp_name}}(returnState)
-      );
-          {{#else}}
-      recv_{{function:cpp_name}}(returnState);
-      return std::move(interactionHandle);
-          {{/if (not type:void?)}}
-        {{/if function:stream?}}
-      {{/if (not function:creates_interaction?)}}
-    {{/if function:void?}}
+    return std::move(tryObj.value());
+    {{/if function:creates_interaction?}}
+    {{! Case 2: Non-stream void functions }}
+    {{#else if type:void?}}
+    folly::exception_wrapper ew = recv_wrapped_{{function:self.cpp_name}}(returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
+    {{#if function:creates_interaction?}}
+    return std::move(interactionHandle);
+    {{/if function:creates_interaction?}}
+    {{! Case 3: Non-stream non-void functions }}
+    {{#else}}
+    {{function:self.cpp_return_type}} _return;
+    folly::exception_wrapper ew = recv_wrapped_{{function:self.cpp_name}}(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
+    {{#if function:creates_interaction?}}
+    return std::make_pair(std::move(interactionHandle), std::move(_return));
+    {{#else}}
+    return _return;
+    {{/if function:creates_interaction?}}
+    {{/if function:stream?}}
   {{#else}}
-      recv_{{function:cpp_name}}(_return, returnState);
+    auto ew = recv_wrapped_{{function:cpp_name}}(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   {{/if (not function:sync_returns_by_outparam?)}}
   });
+{{#else}}
+  if (returnState.isException()) {
+    returnState.exception().throw_exception();
+  }
 {{/if (not function:oneway?)}}
 }
 

@@ -114,12 +114,6 @@ std::pair<apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction, ::cpp2::
     [&] {
       fbthrift_serialize_and_send_getABoxSession(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback), interactionHandle, p_req);
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -128,10 +122,15 @@ std::pair<apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction, ::cpp2::
     }
   };
   return folly::fibers::runInMainContext([&] {
-      return std::make_pair(
-        std::move(interactionHandle),
-        recv_getABoxSession(returnState)
-      );
+    ::cpp2::ShouldBeBoxed _return;
+    folly::exception_wrapper ew = recv_wrapped_getABoxSession(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
+    return std::make_pair(std::move(interactionHandle), std::move(_return));
   });
 }
 
@@ -336,12 +335,6 @@ void apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction::sync_getABox(
     [&] {
       fbthrift_serialize_and_send_getABox(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -350,7 +343,13 @@ void apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction::sync_getABox(
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_getABox(_return, returnState);
+    auto ew = recv_wrapped_getABox(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 

@@ -164,10 +164,10 @@ struct TestHandler : public ServiceHandler<ClientInterceptorTest> {
   explicit TestHandler(folly::coro::Baton& fireAndForgetBaton)
       : fireAndForgetBaton_{fireAndForgetBaton} {}
 
-  folly::coro::Task<void> co_noop() override { co_return; }
+  folly::coro::Task<void> co_noop(bool) override { co_return; }
 
   folly::coro::Task<ServerStream<std::int32_t>> co_iota(
-      std::int32_t start) override {
+      std::int32_t start, bool) override {
     co_return folly::coro::co_invoke(
         [current =
              start]() mutable -> folly::coro::AsyncGenerator<std::int32_t&&> {
@@ -243,7 +243,7 @@ class InterceptorFrameworkMetadataTest : public Test {
 } // namespace
 
 CO_TEST_F(InterceptorFrameworkMetadataTest, RocketChannelRequestResponse) {
-  co_await client()->co_noop();
+  co_await client()->co_noop(false);
   const FrameworkMetadata* interceptedMetadata =
       getMetadataReadByServiceInterceptor();
   EXPECT_NE(interceptedMetadata, nullptr);
@@ -254,7 +254,7 @@ CO_TEST_F(InterceptorFrameworkMetadataTest, RocketChannelRequestResponse) {
 CO_TEST_F(InterceptorFrameworkMetadataTest, RocketChannelStream) {
   {
     auto testClient = client();
-    auto stream = (co_await testClient->co_iota(1)).toAsyncGenerator();
+    auto stream = (co_await testClient->co_iota(1, false)).toAsyncGenerator();
     EXPECT_EQ((co_await stream.next()).value(), 1);
     // close stream
   }

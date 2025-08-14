@@ -125,12 +125,6 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::sync_coun
     [&] {
       fbthrift_serialize_and_send_count(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -139,7 +133,13 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::sync_coun
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_count(_return, returnState);
+    auto ew = recv_wrapped_count(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 
@@ -328,12 +328,6 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::sync_adap
     [&] {
       fbthrift_serialize_and_send_adaptedTypes(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback), p_arg);
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -342,7 +336,13 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::sync_adap
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_adaptedTypes(_return, returnState);
+    auto ew = recv_wrapped_adaptedTypes(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 

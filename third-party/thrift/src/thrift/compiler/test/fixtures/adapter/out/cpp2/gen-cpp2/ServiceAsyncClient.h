@@ -100,7 +100,10 @@ class Client<::facebook::thrift::test::Service> : public apache::thrift::Generat
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_arg1, p_arg2, p_arg3);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_func(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_arg1, p_arg2, p_arg3);
@@ -113,14 +116,12 @@ class Client<::facebook::thrift::test::Service> : public apache::thrift::Generat
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-    }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
     }
     returnState.resetProtocolId(protocolId);
     returnState.resetCtx(std::move(ctx));
+    ::facebook::thrift::test::MyI32_4873 _return;
     SCOPE_EXIT {
       if (hasRpcOptions && returnState.header()) {
         auto* rheader = returnState.header();
@@ -130,8 +131,11 @@ class Client<::facebook::thrift::test::Service> : public apache::thrift::Generat
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    ::facebook::thrift::test::MyI32_4873 _return;
-    if (auto ew = recv_wrapped_func(_return, returnState)) {
+    auto ew = recv_wrapped_func(_return, returnState);
+    if (returnState.ctx()) {
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
     co_return _return;

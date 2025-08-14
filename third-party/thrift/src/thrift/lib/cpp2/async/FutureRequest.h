@@ -23,6 +23,7 @@
 #include <folly/Expected.h>
 #include <folly/futures/Future.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
+#include <thrift/lib/cpp2/util/TypeErasedRef.h>
 
 namespace apache::thrift {
 
@@ -42,8 +43,23 @@ class FutureCallbackHelper {
     std::move(result).error().first.throw_exception();
   }
 
+  static std::pair<folly::Try<Result>, ClientReceiveState> extractResultWrapped(
+      PromiseResult&& result) {
+    if (result.hasValue()) {
+      auto valueAndState = std::move(result).value();
+      return std::make_pair(
+          folly::Try<Result>(std::move(valueAndState.first)),
+          std::move(valueAndState.second));
+    } else {
+      auto errorAndState = std::move(result).error();
+      return std::make_pair(
+          folly::Try<Result>(std::move(errorAndState.first)),
+          std::move(errorAndState.second));
+    }
+  }
+
   static ClientReceiveState&& extractClientReceiveState(
-      PromiseResult& result) noexcept {
+      PromiseResult&& result) noexcept {
     if (result.hasValue()) {
       return std::move(std::move(result).value().second);
     }
@@ -64,6 +80,8 @@ class FutureCallbackHelper {
       ew = processor(state);
     } else {
       ew = processor(result, state);
+      state.setResult(
+          folly::Try(apache::thrift::util::TypeErasedRef::of<Result>(result)));
     }
   }
 
@@ -78,27 +96,26 @@ class FutureCallbackHelper {
 
   static folly::Try<Result> processClientInterceptorsAndExtractResult(
       PromiseResult&& result) noexcept {
-    apache::thrift::ClientReceiveState clientReceiveState =
-        extractClientReceiveState(result);
+    auto [rpcTryResult, clientReceiveState] =
+        extractResultWrapped(std::move(result));
     auto* contextStack = clientReceiveState.ctx();
     auto* header = clientReceiveState.header();
     if (contextStack != nullptr) {
-      if (auto exTry =
-              contextStack->processClientInterceptorsOnResponse(header);
-          exTry.hasException()) {
-        return folly::Try<Result>(std::move(exTry).exception());
-      }
+      return contextStack->processClientInterceptorsOnResponse(
+          header, std::move(rpcTryResult));
     }
-    return folly::makeTryWith([&] { return extractResult(std::move(result)); });
+    return std::move(rpcTryResult);
   }
 };
 
+template <class Result>
 inline void runClientInterceptorsInHeaderSemiFutureCallback(
-    const ClientReceiveState& state) {
+    Result& result, const ClientReceiveState& state) {
   auto* contextStack = state.ctx();
   auto* header = state.header();
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(header)
+    contextStack
+        ->processClientInterceptorsOnResponse(header, state.exception(), result)
         .throwUnlessValue();
   }
 }
@@ -369,7 +386,7 @@ makeHeaderSemiFutureCallback(
           ew.throw_exception();
         }
 
-        detail::runClientInterceptorsInHeaderSemiFutureCallback(state);
+        detail::runClientInterceptorsInHeaderSemiFutureCallback(result, state);
 
         return std::make_pair(std::move(result), state.extractHeader());
       })};
@@ -399,7 +416,8 @@ makeHeaderSemiFutureCallback(
           ew.throw_exception();
         }
 
-        detail::runClientInterceptorsInHeaderSemiFutureCallback(state);
+        detail::runClientInterceptorsInHeaderSemiFutureCallback(
+            folly::unit, state);
 
         return std::make_pair(folly::unit, state.extractHeader());
       })};

@@ -124,7 +124,10 @@
   {{/function:creates_interaction?}}
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie({{> service_common/param_list}});
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_{{function:cpp_name}}(*rpcOptions, header, ctx.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function:comma}}{{> service_common/param_list}});
@@ -137,17 +140,15 @@
     } else {
       co_await callback.co_waitUntilDone();
     }
-  {{^function:oneway?}}
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-    }
-  {{/function:oneway?}}
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
     }
   {{^function:oneway?}}
     returnState.resetProtocolId(protocolId);
     returnState.resetCtx(std::move(ctx));
+    {{#if (or function:stream? (not type:void?))}}
+    {{> types/return_type_client_no_handle}} _return;
+    {{/if (or function:stream? (not type:void?))}}
     SCOPE_EXIT {
       if (hasRpcOptions && returnState.header()) {
         auto* rheader = returnState.header();
@@ -157,23 +158,23 @@
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
-    {{#if function:stream?}}
-    {{> types/return_type_client_no_handle}} _return;
-    if (auto ew = recv_wrapped_{{function:cpp_name}}(_return, returnState)) {
-      co_yield folly::coro::co_error(std::move(ew));
+    {{#if (or function:stream? (not type:void?))}}
+    auto ew = recv_wrapped_{{function:cpp_name}}(_return, returnState);
+    if (returnState.ctx()) {
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
     }
     {{#else}}
-      {{#if type:void?}}
-    if (auto ew = recv_wrapped_{{function:cpp_name}}(returnState)) {
+    auto ew = recv_wrapped_{{function:cpp_name}}(returnState);
+    if (returnState.ctx()) {
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      if (tryObj.hasException()) {
+        ew = std::move(tryObj.exception());
+      }
+    }
+    {{/if (or function:stream? (not type:void?))}}
+    if (ew) {
       co_yield folly::coro::co_error(std::move(ew));
     }
-      {{#else}}
-    {{> types/return_type_client_no_handle}} _return;
-    if (auto ew = recv_wrapped_{{function:cpp_name}}(_return, returnState)) {
-      co_yield folly::coro::co_error(std::move(ew));
-    }
-      {{/if type:void?}}
-    {{/if function:stream?}}
   {{#if (not function:creates_interaction?)}}
     {{#if function:stream?}}
     co_return _return;

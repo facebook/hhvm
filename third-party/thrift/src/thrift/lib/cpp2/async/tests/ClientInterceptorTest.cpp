@@ -16,6 +16,8 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <folly/Demangle.h>
+
 #include <folly/coro/GtestHelpers.h>
 
 #include <fmt/core.h>
@@ -53,29 +55,49 @@ enum class ClientCallbackKind { CORO, SYNC, SEMIFUTURE, FUTURE };
 
 struct TestHandler
     : apache::thrift::ServiceHandler<test::ClientInterceptorTest> {
-  folly::coro::Task<void> co_noop(RequestParams requestParams) override {
+  folly::coro::Task<void> co_noop(
+      RequestParams requestParams, bool shouldThrow) override {
     auto* header = requestParams.getRequestContext()->getHeader();
     auto& readHeaders = header->getHeaders();
     if (auto dummyHeader = readHeaders.find(kDummyHeader);
         dummyHeader != readHeaders.end()) {
       header->setHeader(kDummyHeader, dummyHeader->second);
     }
+
+    if (shouldThrow) {
+      apache::thrift::test::TestException ex;
+      ex.message() = "Exception from noop";
+      throw ex;
+    }
     co_return;
   }
 
   folly::coro::Task<std::unique_ptr<std::string>> co_echo(
       std::unique_ptr<std::string> str) override {
-    if (*str == "throw") {
-      throw std::runtime_error("You asked for it!");
+    if (*str == "exception") {
+      apache::thrift::test::TestException ex;
+      ex.message() = "Test exception from server";
+      throw ex;
     }
     co_return std::move(str);
   }
 
   folly::coro::Task<apache::thrift::TileAndResponse<SampleInteractionIf, void>>
-  co_createInteraction() override {
+  co_createInteraction(bool shouldThrow) override {
+    if (shouldThrow) {
+      apache::thrift::test::TestException ex;
+      ex.message() = "Exception creating interaction";
+      throw ex;
+    }
+
     class SampleInteractionImpl : public SampleInteractionIf {
       folly::coro::Task<std::unique_ptr<std::string>> co_echo(
           std::unique_ptr<std::string> str) override {
+        if (*str == "exception") {
+          apache::thrift::test::TestException ex;
+          ex.message() = "Exception from interaction";
+          throw ex;
+        }
         co_return std::move(str);
       }
     };
@@ -85,10 +107,22 @@ struct TestHandler
   folly::coro::Task<apache::thrift::TileAndResponse<
       SampleInteractionIf,
       std::unique_ptr<std::string>>>
-  co_createInteractionAndEcho(std::unique_ptr<::std::string> str) override {
+  co_createInteractionAndEcho(
+      std::unique_ptr<::std::string> str, bool shouldThrow) override {
+    if (shouldThrow) {
+      apache::thrift::test::TestException ex;
+      ex.message() = "Exception creating interaction with echo";
+      throw ex;
+    }
+
     class SampleInteractionImpl : public SampleInteractionIf {
       folly::coro::Task<std::unique_ptr<std::string>> co_echo(
           std::unique_ptr<std::string> str) override {
+        if (*str == "exception") {
+          apache::thrift::test::TestException ex;
+          ex.message() = "Exception from interaction";
+          throw ex;
+        }
         co_return std::move(str);
       }
     };
@@ -103,7 +137,12 @@ struct TestHandler
   }
 
   apache::thrift::ServerStream<std::int32_t> sync_iota(
-      std::int32_t start) override {
+      std::int32_t start, bool shouldThrow) override {
+    if (shouldThrow) {
+      apache::thrift::test::TestException ex;
+      ex.message() = "Exception from iota";
+      throw ex;
+    }
     return folly::coro::co_invoke(
         [current =
              start]() mutable -> folly::coro::AsyncGenerator<std::int32_t&&> {
@@ -111,6 +150,23 @@ struct TestHandler
             co_yield current++;
           }
         });
+  }
+
+  apache::thrift::ResponseAndServerStream<std::int32_t, std::int32_t>
+  sync_iotaWithResponse(std::int32_t start, bool shouldThrow) override {
+    if (shouldThrow) {
+      apache::thrift::test::TestException ex;
+      ex.message() = "Exception from iotaWithResponse";
+      throw ex;
+    }
+    auto stream = folly::coro::co_invoke(
+        [current =
+             start]() mutable -> folly::coro::AsyncGenerator<std::int32_t&&> {
+          while (true) {
+            co_yield current++;
+          }
+        });
+    return {start, std::move(stream)};
   }
 
   apache::thrift::SinkConsumer<std::int32_t, std::int32_t> dump() override {
@@ -141,21 +197,25 @@ class ClientInterface {
   virtual ~ClientInterface() = default;
 
   virtual folly::coro::Task<std::string> echo(std::string str) = 0;
-  virtual folly::coro::Task<void> noop() = 0;
-  virtual folly::coro::Task<void> noop(RpcOptions&) = 0;
+  virtual folly::coro::Task<void> noop(bool shouldThrow = false) = 0;
+  virtual folly::coro::Task<void> noop(
+      RpcOptions&, bool shouldThrow = false) = 0;
   virtual folly::coro::Task<
       apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction>
-  createInteraction() = 0;
+  createInteraction(bool shouldThrow = false) = 0;
   virtual folly::coro::Task<std::pair<
       apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction,
       std::string>>
-  createInteractionAndEcho(std::string str) = 0;
+  createInteractionAndEcho(std::string str, bool shouldThrow = false) = 0;
 
   virtual folly::coro::Task<std::string> requestArgs(
       std::int32_t arg1, std::string arg2, test::RequestArgsStruct arg3) = 0;
 
   virtual folly::coro::Task<folly::coro::AsyncGenerator<std::int32_t&&>> iota(
-      std::int32_t start) = 0;
+      std::int32_t start, bool shouldThrow = false) = 0;
+  virtual folly::coro::Task<
+      std::pair<std::int32_t, folly::coro::AsyncGenerator<std::int32_t&&>>>
+  iotaWithResponse(std::int32_t start, bool shouldThrow = false) = 0;
 
   virtual folly::coro::Task<
       apache::thrift::ClientSink<std::int32_t, std::int32_t>>
@@ -179,24 +239,25 @@ class CoroClientInterface : public ClientInterface {
   folly::coro::Task<std::string> echo(std::string str) override {
     co_return co_await client_->co_echo(std::move(str));
   }
-  folly::coro::Task<void> noop() override {
-    co_await client_->co_noop();
+  folly::coro::Task<void> noop(bool shouldThrow = false) override {
+    co_await client_->co_noop(shouldThrow);
     co_return;
   }
-  folly::coro::Task<void> noop(RpcOptions& rpcOptions) override {
-    co_await client_->co_noop(rpcOptions);
+  folly::coro::Task<void> noop(
+      RpcOptions& rpcOptions, bool shouldThrow = false) override {
+    co_await client_->co_noop(rpcOptions, shouldThrow);
     co_return;
   }
   folly::coro::Task<
       apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction>
-  createInteraction() override {
-    co_return co_await client_->co_createInteraction();
+  createInteraction(bool shouldThrow = false) override {
+    co_return co_await client_->co_createInteraction(shouldThrow);
   }
   folly::coro::Task<std::pair<
       apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction,
       std::string>>
-  createInteractionAndEcho(std::string str) override {
-    co_return co_await client_->co_createInteractionAndEcho(std::move(str));
+  createInteractionAndEcho(std::string str, bool shouldThrow = false) override {
+    co_return co_await client_->co_createInteractionAndEcho(str, shouldThrow);
   }
 
   folly::coro::Task<std::string> requestArgs(
@@ -208,8 +269,17 @@ class CoroClientInterface : public ClientInterface {
   }
 
   folly::coro::Task<folly::coro::AsyncGenerator<std::int32_t&&>> iota(
-      std::int32_t start) override {
-    co_return (co_await client_->co_iota(start)).toAsyncGenerator();
+      std::int32_t start, bool shouldThrow = false) override {
+    co_return (co_await client_->co_iota(start, shouldThrow))
+        .toAsyncGenerator();
+  }
+  folly::coro::Task<
+      std::pair<std::int32_t, folly::coro::AsyncGenerator<std::int32_t&&>>>
+  iotaWithResponse(std::int32_t start, bool shouldThrow = false) override {
+    auto [initialResponse, stream] =
+        co_await client_->co_iotaWithResponse(start, shouldThrow);
+    co_return std::make_pair(
+        initialResponse, std::move(stream).toAsyncGenerator());
   }
 
   folly::coro::Task<apache::thrift::ClientSink<std::int32_t, std::int32_t>>
@@ -238,24 +308,25 @@ class SyncClientInterface : public ClientInterface {
     client_->sync_echo(ret, std::move(str));
     co_return ret;
   }
-  folly::coro::Task<void> noop() override {
-    client_->sync_noop();
+  folly::coro::Task<void> noop(bool shouldThrow = false) override {
+    client_->sync_noop(shouldThrow);
     co_return;
   }
-  folly::coro::Task<void> noop(RpcOptions& rpcOptions) override {
-    client_->sync_noop(rpcOptions);
+  folly::coro::Task<void> noop(
+      RpcOptions& rpcOptions, bool shouldThrow = false) override {
+    client_->sync_noop(rpcOptions, shouldThrow);
     co_return;
   }
   folly::coro::Task<
       apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction>
-  createInteraction() override {
-    co_return client_->sync_createInteraction();
+  createInteraction(bool shouldThrow = false) override {
+    co_return client_->sync_createInteraction(shouldThrow);
   }
   folly::coro::Task<std::pair<
       apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction,
       std::string>>
-  createInteractionAndEcho(std::string str) override {
-    co_return client_->sync_createInteractionAndEcho(std::move(str));
+  createInteractionAndEcho(std::string str, bool shouldThrow = false) override {
+    co_return client_->sync_createInteractionAndEcho(str, shouldThrow);
   }
 
   folly::coro::Task<std::string> requestArgs(
@@ -268,8 +339,16 @@ class SyncClientInterface : public ClientInterface {
   }
 
   folly::coro::Task<folly::coro::AsyncGenerator<std::int32_t&&>> iota(
-      std::int32_t start) override {
-    co_return client_->sync_iota(start).toAsyncGenerator();
+      std::int32_t start, bool shouldThrow = false) override {
+    co_return client_->sync_iota(start, shouldThrow).toAsyncGenerator();
+  }
+  folly::coro::Task<
+      std::pair<std::int32_t, folly::coro::AsyncGenerator<std::int32_t&&>>>
+  iotaWithResponse(std::int32_t start, bool shouldThrow = false) override {
+    auto [initialResponse, stream] =
+        client_->sync_iotaWithResponse(start, shouldThrow);
+    co_return std::make_pair(
+        initialResponse, std::move(stream).toAsyncGenerator());
   }
 
   folly::coro::Task<apache::thrift::ClientSink<std::int32_t, std::int32_t>>
@@ -297,23 +376,24 @@ class SemiFutureClientInterface : public ClientInterface {
   folly::coro::Task<std::string> echo(std::string str) override {
     co_return co_await client_->semifuture_echo(str);
   }
-  folly::coro::Task<void> noop() override {
-    co_await client_->semifuture_noop();
+  folly::coro::Task<void> noop(bool shouldThrow = false) override {
+    co_await client_->semifuture_noop(shouldThrow);
   }
-  folly::coro::Task<void> noop(RpcOptions& rpcOptions) override {
-    co_await client_->semifuture_noop(rpcOptions);
+  folly::coro::Task<void> noop(
+      RpcOptions& rpcOptions, bool shouldThrow = false) override {
+    co_await client_->semifuture_noop(rpcOptions, shouldThrow);
   }
   folly::coro::Task<
       apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction>
-  createInteraction() override {
-    co_return co_await client_->semifuture_createInteraction();
+  createInteraction(bool shouldThrow = false) override {
+    co_return co_await client_->semifuture_createInteraction(shouldThrow);
   }
   folly::coro::Task<std::pair<
       apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction,
       std::string>>
-  createInteractionAndEcho(std::string str) override {
+  createInteractionAndEcho(std::string str, bool shouldThrow = false) override {
     co_return co_await client_->semifuture_createInteractionAndEcho(
-        std::move(str));
+        str, shouldThrow);
   }
 
   folly::coro::Task<std::string> requestArgs(
@@ -325,8 +405,17 @@ class SemiFutureClientInterface : public ClientInterface {
   }
 
   folly::coro::Task<folly::coro::AsyncGenerator<std::int32_t&&>> iota(
-      std::int32_t start) override {
-    co_return (co_await client_->semifuture_iota(start)).toAsyncGenerator();
+      std::int32_t start, bool shouldThrow = false) override {
+    co_return (co_await client_->semifuture_iota(start, shouldThrow))
+        .toAsyncGenerator();
+  }
+  folly::coro::Task<
+      std::pair<std::int32_t, folly::coro::AsyncGenerator<std::int32_t&&>>>
+  iotaWithResponse(std::int32_t start, bool shouldThrow = false) override {
+    auto [initialResponse, stream] =
+        co_await client_->semifuture_iotaWithResponse(start, shouldThrow);
+    co_return std::make_pair(
+        initialResponse, std::move(stream).toAsyncGenerator());
   }
 
   folly::coro::Task<apache::thrift::ClientSink<std::int32_t, std::int32_t>>
@@ -355,19 +444,22 @@ class FutureClientInterface : public ClientInterface {
   folly::coro::Task<std::string> echo(std::string str) override {
     co_return co_await client_->future_echo(str);
   }
-  folly::coro::Task<void> noop() override { co_await client_->future_noop(); }
-  folly::coro::Task<void> noop(RpcOptions& rpcOptions) override {
-    co_await client_->future_noop(rpcOptions);
+  folly::coro::Task<void> noop(bool shouldThrow = false) override {
+    co_await client_->future_noop(shouldThrow);
+  }
+  folly::coro::Task<void> noop(
+      RpcOptions& rpcOptions, bool shouldThrow = false) override {
+    co_await client_->future_noop(rpcOptions, shouldThrow);
   }
   folly::coro::Task<
       apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction>
-  createInteraction() override {
+  createInteraction(bool = false) override {
     throw std::logic_error("future_* functions do not support interactions");
   }
   folly::coro::Task<std::pair<
       apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction,
       std::string>>
-  createInteractionAndEcho(std::string) override {
+  createInteractionAndEcho(std::string = "", bool = false) override {
     throw std::logic_error("future_* functions do not support interactions");
   }
 
@@ -380,7 +472,12 @@ class FutureClientInterface : public ClientInterface {
   }
 
   folly::coro::Task<folly::coro::AsyncGenerator<std::int32_t&&>> iota(
-      std::int32_t) override {
+      std::int32_t, bool = false) override {
+    throw std::logic_error("future_* functions do not support streaming");
+  }
+  folly::coro::Task<
+      std::pair<int32_t, folly::coro::AsyncGenerator<std::int32_t&&>>>
+  iotaWithResponse(std::int32_t, bool = false) override {
     throw std::logic_error("future_* functions do not support streaming");
   }
 
@@ -443,6 +540,7 @@ class ClientInterceptorTestP
     };
   }
 
+ public:
   std::shared_ptr<RequestChannel> makeChannel() {
     return runner
         ->newClient<apache::thrift::Client<test::ClientInterceptorTest>>(
@@ -564,21 +662,239 @@ class TracingClientInterceptor : public NamedClientInterceptor<folly::Unit> {
   std::vector<Trace> responses_;
 };
 
+/**
+ * A client interceptor that captures onResponse calls and makes a copy of the
+ * data from responseInfo.result.
+ *
+ * This interceptor can be used to verify that the result field in responseInfo
+ * contains the correct type and value for both successful calls and RPC
+ * exceptions.
+ */
+class ClientInterceptorWithResponseValue
+    : public NamedClientInterceptor<folly::Unit> {
+ public:
+  using RequestState = folly::Unit;
+  using ResultVariant =
+      std::variant<std::monostate, std::string, int32_t, int64_t>;
+
+  explicit ClientInterceptorWithResponseValue(std::string name)
+      : NamedClientInterceptor(std::move(name)) {}
+
+  std::optional<RequestState> onRequest(RequestInfo) override {
+    return folly::unit;
+  }
+
+  void onResponse(RequestState*, ResponseInfo responseInfo) override {
+    // Store the method name
+    methodName = responseInfo.methodName;
+
+    // Store whether there was an exception
+    hadException = responseInfo.result.hasException();
+
+    // Store the result if available
+    if (hadException) {
+      // Get the exception type
+      auto* typeInfo = responseInfo.result.exception().type();
+
+      // Store the type name
+      resultType = folly::demangle(*typeInfo);
+
+      // Store the exception value
+      exceptionMessageSeen =
+          responseInfo.result.exception().what().toStdString();
+    } else if (responseInfo.result.hasValue()) {
+      // Get the type info from TypeErasedRef
+      const std::type_info& typeInfo = responseInfo.result->type();
+
+      // Store the type name
+      resultType = folly::demangle(typeInfo);
+
+      // Check the type and extract the value accordingly
+      if (std::holds_alternative<std::string>(resultValue)) {
+        resultValue = responseInfo.result->value<std::string>();
+        hadResult = true;
+      } else if (std::holds_alternative<int32_t>(resultValue)) {
+        resultValue = responseInfo.result->value<int32_t>();
+        hadResult = true;
+      } else if (std::holds_alternative<int64_t>(resultValue)) {
+        resultValue = responseInfo.result->value<int64_t>();
+        hadResult = true;
+      } else {
+        // If the type is not one of the supported types, ignore it
+        resultValue = std::monostate{};
+        hadResult = false;
+      }
+    } else {
+      // No result
+      resultValue = std::monostate{};
+      resultType = "none";
+      hadResult = false;
+    }
+  }
+
+  // Get the result value as a string (for compatibility with existing tests)
+  std::string getResultValueAsString() const {
+    if (std::holds_alternative<std::monostate>(resultValue)) {
+      return "";
+    } else if (std::holds_alternative<std::string>(resultValue)) {
+      return std::get<std::string>(resultValue);
+    } else if (std::holds_alternative<int32_t>(resultValue)) {
+      return std::to_string(std::get<int32_t>(resultValue));
+    } else if (std::holds_alternative<int64_t>(resultValue)) {
+      return std::to_string(std::get<int64_t>(resultValue));
+    }
+    return "";
+  }
+
+  // Stored information about the response
+  std::string methodName;
+  bool hadException = false;
+  bool hadResult = false;
+  std::string resultType;
+  std::string exceptionMessageSeen;
+  ResultVariant resultValue = std::monostate{};
+};
+
+/**
+ * A client interceptor that calls a provided callback function when onResponse
+ * is invoked.
+ *
+ * This allows tests to implement custom onResponse behavior inline using
+ * lambdas without having to create a new interceptor class for each test case.
+ */
+class ClientInterceptorOnResponse : public NamedClientInterceptor<folly::Unit> {
+ public:
+  using RequestState = folly::Unit;
+  using OnResponseCallback = std::function<void(ResponseInfo)>;
+
+  /**
+   * Create a new ClientInterceptorOnResponse with the given name and callback.
+   *
+   * @param name The name of the interceptor
+   * @param callback The function to call when onResponse is invoked
+   */
+  ClientInterceptorOnResponse(std::string name, OnResponseCallback callback)
+      : NamedClientInterceptor(std::move(name)),
+        callback_(std::move(callback)) {}
+
+  std::optional<RequestState> onRequest(RequestInfo) override {
+    return folly::unit;
+  }
+
+  void onResponse(RequestState*, ResponseInfo responseInfo) override {
+    // Call the provided callback with the response info
+    if (callback_) {
+      callback_(std::move(responseInfo));
+    }
+  }
+
+ private:
+  OnResponseCallback callback_;
+};
+
+using ResponseInfo = apache::thrift::ClientInterceptorBase::ResponseInfo;
+auto makeExceptionCaptureInterceptor(std::string& message) {
+  return std::make_shared<ClientInterceptorOnResponse>(
+      "ExceptionCaptureInterceptor", [&message](ResponseInfo responseInfo) {
+        if (responseInfo.result.hasException()) {
+          const auto& ex = responseInfo.result.exception();
+          if (ex.is_compatible_with<apache::thrift::test::TestException>()) {
+            message = *ex.get_exception<apache::thrift::test::TestException>()
+                           ->message();
+          } else {
+            ADD_FAILURE() << "Unexpected exception type: " << ex.class_name();
+          }
+        } else {
+          ADD_FAILURE() << "Expected exception, but got none";
+        }
+      });
+}
+
+/**
+ * Creates an interceptor that throws an exception in its onResponse method.
+ * This is useful for testing that interceptor exceptions override RPC results.
+ *
+ * @param name The name of the interceptor (used in exception messages)
+ * @return A shared pointer to a ClientInterceptorOnResponse that throws an
+ * exception
+ */
+auto makeExceptionGeneratorInterceptor(
+    const std::string& name = "ExceptionGeneratorInterceptor") {
+  static const std::string kStandardExceptionMessage =
+      "Interceptor exception from onResponse";
+  return std::make_shared<ClientInterceptorOnResponse>(
+      name, [name](const ResponseInfo&) {
+        throw std::runtime_error(
+            fmt::format("{}: {}", name, kStandardExceptionMessage));
+      });
+}
+
+/**
+ * Creates an interceptor that captures the result of a response.
+ * This is useful for verifying that the result field in responseInfo contains
+ * the correct type and value for successful calls.
+ *
+ * @param value A reference to store the captured result value
+ * @return A shared pointer to a ClientInterceptorOnResponse that captures the
+ * result value
+ */
+template <typename T>
+auto makeResultCaptureInterceptor(T& value) {
+  return std::make_shared<ClientInterceptorOnResponse>(
+      "ResultCaptureInterceptor", [&value](ResponseInfo responseInfo) {
+        if (responseInfo.result.hasValue()) {
+          const auto& result = responseInfo.result.value();
+          if (result.type() == typeid(T)) {
+            value = result.value<T>();
+          } else {
+            ADD_FAILURE() << "Unexpected result type: "
+                          << folly::demangle(result.type());
+          }
+        } else {
+          ADD_FAILURE() << "Expected result, but got none";
+        }
+      });
+}
+
+/**
+ * Creates an interceptor that captures the result type of a response and
+ * applies a provided function to it.
+ * This allows tests to implement custom behavior inline using lambdas.
+ *
+ * @param func The function to apply to the captured result value
+ * @return A shared pointer to a ClientInterceptorOnResponse that captures the
+ * result type and applies the function
+ */
+template <typename T, typename F>
+auto makeResultTypeCaptureInterceptor(F&& func) {
+  return std::make_shared<ClientInterceptorOnResponse>(
+      "ResultCaptureInterceptor",
+      [func = std::forward<F>(func)](ResponseInfo responseInfo) {
+        if (responseInfo.result.hasValue()) {
+          const auto& result = responseInfo.result.value();
+          if (result.type() == typeid(T)) {
+            func(result.value<T>());
+          } else {
+            ADD_FAILURE() << "Unexpected result type: "
+                          << folly::demangle(result.type());
+          }
+        } else {
+          ADD_FAILURE() << "Expected result, but got none";
+        }
+      });
+}
 } // namespace
 
 CO_TEST_P(ClientInterceptorTestP, Basic) {
-  auto interceptor =
-      std::make_shared<ClientInterceptorCountWithRequestState>("Interceptor1");
+  int onResponseCount = 0;
+  auto interceptor = std::make_shared<ClientInterceptorOnResponse>(
+      "Interceptor1", [&](const ResponseInfo&) { onResponseCount++; });
   auto tracer = std::make_shared<TracingClientInterceptor>("Tracer");
   auto client = makeClient(makeInterceptorsList(interceptor, tracer));
 
   co_await client->echo("foo");
-  EXPECT_EQ(interceptor->onRequestCount, 1);
-  EXPECT_EQ(interceptor->onResponseCount, 1);
 
   co_await client->noop();
-  EXPECT_EQ(interceptor->onRequestCount, 2);
-  EXPECT_EQ(interceptor->onResponseCount, 2);
 
   using Trace = TracingClientInterceptor::Trace;
   const std::vector<Trace> expectedTrace{
@@ -734,17 +1050,23 @@ CO_TEST_P(
   auto client = makeClient(makeInterceptorsList(interceptor));
 
   EXPECT_THROW(
-      {
-        try {
-          co_await client->echo("throw");
-        } catch (const apache::thrift::ClientInterceptorException& ex) {
-          EXPECT_THAT(std::string(ex.what()), HasSubstr("[Interceptor1]"));
-          throw;
-        }
-      },
+      co_await client->echo("throw"),
       apache::thrift::ClientInterceptorException);
-  EXPECT_EQ(interceptor->onRequestCount, 1);
   EXPECT_EQ(interceptor->onResponseCount, 1);
+}
+
+// Test that the result field in responseInfo contains the correct type for
+// successful calls
+CO_TEST_P(ClientInterceptorTestP, ResponseInfoResultTypeWithSuccess) {
+  std::string testValue = "test_value";
+  std::string capturedResult;
+  auto interceptor = makeResultCaptureInterceptor(capturedResult);
+  auto client = makeClient(makeInterceptorsList(interceptor));
+
+  auto result = co_await client->echo(testValue);
+
+  EXPECT_EQ(result, testValue);
+  EXPECT_EQ(capturedResult, testValue);
 }
 
 CO_TEST_P(ClientInterceptorTestP, NonTrivialRequestState) {
@@ -822,7 +1144,7 @@ CO_TEST_P(ClientInterceptorTestP, BasicInteraction) {
         makeClient(makeInterceptorsList(interceptor1, interceptor2, tracer));
 
     {
-      auto interaction = co_await client->createInteraction();
+      auto interaction = co_await client->createInteraction(false);
       for (auto& interceptor : {interceptor1, interceptor2}) {
         EXPECT_EQ(interceptor->onRequestCount, 1);
         EXPECT_EQ(interceptor->onResponseCount, 1);
@@ -856,7 +1178,7 @@ CO_TEST_P(ClientInterceptorTestP, BasicInteraction) {
     EXPECT_THAT(tracer->responses(), ElementsAreArray(expectedTrace));
   }
 
-  // With initial response
+  // Test interaction creation with initial response
   {
     auto interceptor1 =
         std::make_shared<ClientInterceptorCountWithRequestState>(
@@ -869,7 +1191,7 @@ CO_TEST_P(ClientInterceptorTestP, BasicInteraction) {
         makeClient(makeInterceptorsList(interceptor1, interceptor2, tracer));
     {
       auto [interaction, response] =
-          co_await client->createInteractionAndEcho("hello");
+          co_await client->createInteractionAndEcho("hello", false);
       for (auto& interceptor : {interceptor1, interceptor2}) {
         EXPECT_EQ(interceptor->onRequestCount, 1);
         EXPECT_EQ(interceptor->onResponseCount, 1);
@@ -1092,6 +1414,422 @@ CO_TEST_P(ClientInterceptorTestP, DepreceatedHeaderClientMethods) {
   co_await client->headerClientMethod("foo");
   EXPECT_EQ(interceptor->onRequestCount, 1);
   EXPECT_EQ(interceptor->onResponseCount, 1);
+}
+
+CO_TEST_P(ClientInterceptorTestP, ResponseValueSeen) {
+  std::string expectedResponse = "response value";
+  std::string actualResponse;
+  auto interceptor = makeResultCaptureInterceptor(actualResponse);
+  auto client = makeClient(makeInterceptorsList(interceptor));
+
+  auto response = co_await client->echo(expectedResponse);
+  EXPECT_EQ(actualResponse, expectedResponse);
+  EXPECT_EQ(response, expectedResponse);
+}
+
+// Test that the result field in responseInfo contains the correct type for
+// the noop RPC in both success and exception cases
+CO_TEST_P(ClientInterceptorTestP, NoopWithResponseInfoResult) {
+  // Test success case
+  {
+    auto interceptor = std::make_shared<ClientInterceptorWithResponseValue>(
+        "NoopSuccessInterceptor");
+    auto client = makeClient(makeInterceptorsList(interceptor));
+
+    co_await client->noop(false);
+
+    // Verify the interceptor received the correct response info
+    EXPECT_EQ(interceptor->methodName, "noop");
+    EXPECT_FALSE(interceptor->hadException);
+    EXPECT_FALSE(interceptor->hadResult);
+    EXPECT_EQ(interceptor->resultType, "folly::Unit");
+  }
+
+  // Test exception case
+  {
+    std::string capturedExceptionMessage;
+    auto interceptor =
+        makeExceptionCaptureInterceptor(capturedExceptionMessage);
+    auto client = makeClient(makeInterceptorsList(interceptor));
+
+    EXPECT_THROW(
+        co_await client->noop(true), apache::thrift::test::TestException);
+
+    // Verify the interceptor received the correct response info
+    EXPECT_EQ(capturedExceptionMessage, "Exception from noop");
+  }
+}
+
+// Test that the result field in responseInfo contains the correct type for
+// RPC exceptions
+CO_TEST_P(ClientInterceptorTestP, ResponseInfoResultTypeWithRpcException) {
+  std::string capturedExceptionMessage;
+  auto interceptor = makeExceptionCaptureInterceptor(capturedExceptionMessage);
+  auto client = makeClient(makeInterceptorsList(interceptor));
+
+  EXPECT_THROW(
+      auto _ = co_await client->echo("exception"),
+      apache::thrift::test::TestException);
+
+  EXPECT_EQ(capturedExceptionMessage, "Test exception from server");
+}
+
+// An exception thrown in the interceptor should take priority over the
+// exception thrown by the server in being presented to the client first.
+CO_TEST_P(ClientInterceptorTestP, InterceptorExceptionPriority) {
+  auto interceptor = makeExceptionGeneratorInterceptor("PriorityInterceptor");
+
+  auto client = makeClient(makeInterceptorsList(interceptor));
+
+  EXPECT_THROW(
+      auto _ = co_await client->echo("throw"),
+      apache::thrift::ClientInterceptorException);
+}
+// Test for interactions with exceptions
+CO_TEST_P(ClientInterceptorTestP, Interaction) {
+  if (transportType() != TransportType::ROCKET) {
+    // only rocket supports interactions
+    co_return;
+  }
+  if (clientCallbackType() == ClientCallbackKind::FUTURE) {
+    // future_* functions do not support interactions
+    co_return;
+  }
+
+  std::string capturedExceptionMessage;
+  auto interceptor = makeExceptionCaptureInterceptor(capturedExceptionMessage);
+  auto client = makeClient(makeInterceptorsList(interceptor));
+
+  // Test interaction without initial response
+  // Test for interaction methods with exceptions
+  EXPECT_THROW(
+      {
+        try {
+          co_await client->createInteraction(true);
+        } catch (const apache::thrift::test::TestException& ex) {
+          EXPECT_EQ(*ex.message(), "Exception creating interaction");
+          throw;
+        }
+      },
+      apache::thrift::test::TestException);
+
+  EXPECT_EQ(capturedExceptionMessage, "Exception creating interaction");
+
+  // Test interaction with initial response
+  capturedExceptionMessage.clear();
+  EXPECT_THROW(
+      {
+        try {
+          co_await client->createInteractionAndEcho("exception", true);
+        } catch (const apache::thrift::test::TestException& ex) {
+          EXPECT_EQ(ex.message(), "Exception creating interaction with echo");
+          throw;
+        }
+      },
+      apache::thrift::test::TestException);
+
+  EXPECT_EQ(
+      capturedExceptionMessage, "Exception creating interaction with echo");
+}
+
+// Test for streams with exceptions
+CO_TEST_P(ClientInterceptorTestP, Stream) {
+  if (transportType() != TransportType::ROCKET) {
+    // only rocket supports streaming
+    co_return;
+  }
+  if (clientCallbackType() == ClientCallbackKind::FUTURE) {
+    // future_* functions do not support streaming
+    co_return;
+  }
+
+  std::string capturedExceptionMessage;
+  auto interceptor = makeExceptionCaptureInterceptor(capturedExceptionMessage);
+  auto client = makeClient(makeInterceptorsList(interceptor));
+
+  // Test stream without initial response
+  EXPECT_THROW(
+      {
+        try {
+          auto stream = co_await client->iota(1, true);
+          // Trying to get a value from the stream should throw
+          co_await stream.next();
+        } catch (const apache::thrift::test::TestException& ex) {
+          EXPECT_EQ(ex.message(), "Exception from iota");
+          throw;
+        }
+      },
+      apache::thrift::test::TestException);
+
+  EXPECT_EQ(capturedExceptionMessage, "Exception from iota");
+
+  // Test stream with initial response
+  EXPECT_THROW(
+      auto _ = co_await client->iotaWithResponse(1, true),
+      apache::thrift::test::TestException);
+
+  EXPECT_EQ(capturedExceptionMessage, "Exception from iotaWithResponse");
+}
+
+// Test for streams with successful return values
+CO_TEST_P(ClientInterceptorTestP, StreamWithReturnValue) {
+  if (transportType() != TransportType::ROCKET) {
+    // only rocket supports streaming
+    co_return;
+  }
+  if (clientCallbackType() == ClientCallbackKind::FUTURE) {
+    // future_* functions do not support streaming
+    co_return;
+  }
+
+  // Test stream without initial response
+  {
+    int count = 0;
+    auto interceptor = makeResultTypeCaptureInterceptor<
+        apache::thrift::ClientBufferedStream<int>>(
+        [&count](const auto&) { ++count; });
+    auto client = makeClient(makeInterceptorsList(interceptor));
+
+    auto stream = co_await client->iota(1);
+
+    // Verify the stream works correctly
+    EXPECT_EQ((co_await stream.next()).value(), 1);
+    EXPECT_EQ((co_await stream.next()).value(), 2);
+
+    // Verify the interceptor received the correct response type
+    EXPECT_EQ(count, 1);
+
+    // Verify the stream can still be consumed after the interceptor has seen it
+    EXPECT_EQ((co_await stream.next()).value(), 3);
+  }
+
+  // Test stream with initial response
+  {
+    int initialValue = 0;
+    int count = 0;
+    auto interceptor = makeResultTypeCaptureInterceptor<
+        apache::thrift::ResponseAndClientBufferedStream<int, int>>(
+        [&](const auto& responseAndStream) {
+          ++count;
+          initialValue = responseAndStream.response;
+        });
+
+    auto client = makeClient(makeInterceptorsList(interceptor));
+
+    auto [initialResponse, stream] = co_await client->iotaWithResponse(5);
+
+    // Verify the initial response is correct
+    EXPECT_EQ(initialResponse, 5);
+
+    // Verify the stream works correctly
+    EXPECT_EQ((co_await stream.next()).value(), 5);
+    EXPECT_EQ((co_await stream.next()).value(), 6);
+
+    // Verify the interceptor received the correct response type
+    EXPECT_EQ(initialValue, 5);
+    EXPECT_EQ(count, 1);
+
+    // Verify the stream can still be consumed after the interceptor has seen it
+    EXPECT_EQ((co_await stream.next()).value(), 7);
+  }
+}
+
+// Test that interceptor exceptions override noop method results
+CO_TEST_P(ClientInterceptorTestP, NoopWithInterceptorException) {
+  auto interceptor =
+      makeExceptionGeneratorInterceptor("NoopExceptionInterceptor");
+  auto client = makeClient(makeInterceptorsList(interceptor));
+
+  // Test that interceptor exception takes precedence over normal result
+  EXPECT_THROW(
+      {
+        try {
+          co_await client->noop(false);
+        } catch (const apache::thrift::ClientInterceptorException& ex) {
+          EXPECT_THAT(
+              ex.what(), HasSubstr("Interceptor exception from onResponse"));
+          EXPECT_THAT(ex.what(), HasSubstr("NoopExceptionInterceptor"));
+          throw;
+        }
+      },
+      apache::thrift::ClientInterceptorException);
+
+  // Test that interceptor exception takes precedence over server exception
+  EXPECT_THROW(
+      {
+        try {
+          co_await client->noop(
+              true); // This would normally throw TestException
+        } catch (const apache::thrift::ClientInterceptorException& ex) {
+          EXPECT_THAT(
+              ex.what(), HasSubstr("Interceptor exception from onResponse"));
+          EXPECT_THAT(ex.what(), HasSubstr("NoopExceptionInterceptor"));
+          throw;
+        }
+      },
+      apache::thrift::ClientInterceptorException);
+}
+
+// Test that interceptor exceptions override header client method results
+CO_TEST_P(ClientInterceptorTestP, HeaderClientMethodWithInterceptorException) {
+  if (clientCallbackType() != ClientCallbackKind::SEMIFUTURE &&
+      clientCallbackType() != ClientCallbackKind::FUTURE) {
+    // This test case only tests deprecated header client methods, which are
+    // future / semifuture
+    co_return;
+  }
+
+  auto interceptor =
+      makeExceptionGeneratorInterceptor("HeaderClientMethodInterceptor");
+  auto client = makeClient(makeInterceptorsList(interceptor));
+
+  EXPECT_THROW(
+      ({
+        try {
+          auto [response, header] = co_await client->headerClientMethod("test");
+        } catch (const apache::thrift::ClientInterceptorException& ex) {
+          EXPECT_THAT(
+              ex.what(), HasSubstr("Interceptor exception from onResponse"));
+          EXPECT_THAT(ex.what(), HasSubstr("HeaderClientMethodInterceptor"));
+          throw;
+        }
+      }),
+      apache::thrift::ClientInterceptorException);
+}
+
+// Test that interceptor exceptions override stream results
+CO_TEST_P(ClientInterceptorTestP, StreamWithInterceptorException) {
+  if (transportType() != TransportType::ROCKET) {
+    // only rocket supports streaming
+    co_return;
+  }
+  if (clientCallbackType() == ClientCallbackKind::FUTURE) {
+    // future_* functions do not support streaming
+    co_return;
+  }
+
+  // Test stream without initial response
+  {
+    auto interceptor =
+        makeExceptionGeneratorInterceptor("StreamExceptionInterceptor");
+    auto client = makeClient(makeInterceptorsList(interceptor));
+
+    EXPECT_THROW(
+        {
+          try {
+            auto stream = co_await client->iota(1);
+          } catch (const apache::thrift::ClientInterceptorException& ex) {
+            EXPECT_THAT(
+                ex.what(), HasSubstr("Interceptor exception from onResponse"));
+            EXPECT_THAT(ex.what(), HasSubstr("StreamExceptionInterceptor"));
+            throw;
+          }
+        },
+        apache::thrift::ClientInterceptorException);
+  }
+
+  // Test stream with initial response
+  {
+    auto interceptor = makeExceptionGeneratorInterceptor(
+        "StreamWithResponseExceptionInterceptor");
+    auto client = makeClient(makeInterceptorsList(interceptor));
+    EXPECT_THROW(
+        {
+          try {
+            auto _ = co_await client->iotaWithResponse(5);
+          } catch (const apache::thrift::ClientInterceptorException& ex) {
+            EXPECT_THAT(
+                ex.what(), HasSubstr("Interceptor exception from onResponse"));
+            EXPECT_THAT(
+                ex.what(), HasSubstr("StreamWithResponseExceptionInterceptor"));
+            throw;
+          }
+        },
+        apache::thrift::ClientInterceptorException);
+  }
+
+  // Test that interceptor exception overrides server exception
+  {
+    auto interceptor =
+        makeExceptionGeneratorInterceptor("StreamExceptionOverrideInterceptor");
+    auto client = makeClient(makeInterceptorsList(interceptor));
+
+    EXPECT_THROW(
+        {
+          try {
+            auto stream = co_await client->iota(1, true);
+          } catch (const apache::thrift::ClientInterceptorException& ex) {
+            // The interceptor exception should override the server exception
+            EXPECT_THAT(
+                ex.what(), HasSubstr("Interceptor exception from onResponse"));
+            EXPECT_THAT(
+                ex.what(), HasSubstr("StreamExceptionOverrideInterceptor"));
+            throw;
+          }
+        },
+        apache::thrift::ClientInterceptorException);
+  }
+}
+
+// Test that interceptor exceptions override interaction results
+CO_TEST_P(ClientInterceptorTestP, InteractionWithInterceptorException) {
+  if (transportType() != TransportType::ROCKET) {
+    // only rocket supports interactions
+    co_return;
+  }
+  if (clientCallbackType() == ClientCallbackKind::FUTURE) {
+    // future_* functions do not support interactions
+    co_return;
+  }
+
+  // Test interaction creation: exception thrown from
+  // interceptor takes precedence over exception thrown from server.
+  // Test interaction creation
+  {
+    auto interceptor = makeExceptionGeneratorInterceptor(
+        "InteractionCreationExceptionInterceptor");
+    auto client = makeClient(makeInterceptorsList(interceptor));
+
+    EXPECT_THROW(
+        {
+          try {
+            auto interaction = co_await client->createInteraction(true);
+          } catch (const apache::thrift::ClientInterceptorException& ex) {
+            EXPECT_THAT(
+                ex.what(), HasSubstr("Interceptor exception from onResponse"));
+            EXPECT_THAT(
+                ex.what(),
+                HasSubstr("InteractionCreationExceptionInterceptor"));
+            throw;
+          }
+        },
+        apache::thrift::ClientInterceptorException);
+  }
+
+  // Test interaction creation with initial response: exception thrown from
+  // interceptor takes precedence over exception thrown from server.
+  // Test interaction with initial response
+  {
+    auto interceptor = makeExceptionGeneratorInterceptor(
+        "InteractionWithResponseExceptionInterceptor");
+    auto client = makeClient(makeInterceptorsList(interceptor));
+
+    EXPECT_THROW(
+        ({
+          try {
+            auto [interaction, response] =
+                co_await client->createInteractionAndEcho("test", false);
+          } catch (const apache::thrift::ClientInterceptorException& ex) {
+            EXPECT_THAT(
+                ex.what(), HasSubstr("Interceptor exception from onResponse"));
+            EXPECT_THAT(
+                ex.what(),
+                HasSubstr("InteractionWithResponseExceptionInterceptor"));
+            throw;
+          }
+        }),
+        apache::thrift::ClientInterceptorException);
+  }
 }
 
 INSTANTIATE_TEST_SUITE_P(

@@ -211,12 +211,6 @@ bool apache::thrift::Client<::extra::svc::ExtraService>::sync_simple_function(ap
     [&] {
       fbthrift_serialize_and_send_simple_function(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -225,7 +219,15 @@ bool apache::thrift::Client<::extra::svc::ExtraService>::sync_simple_function(ap
     }
   };
   return folly::fibers::runInMainContext([&] {
-      return recv_simple_function(returnState);
+    bool _return;
+    folly::exception_wrapper ew = recv_wrapped_simple_function(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
+    return _return;
   });
 }
 
@@ -415,12 +417,6 @@ void apache::thrift::Client<::extra::svc::ExtraService>::sync_throws_function(ap
     [&] {
       fbthrift_serialize_and_send_throws_function(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -429,7 +425,13 @@ void apache::thrift::Client<::extra::svc::ExtraService>::sync_throws_function(ap
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_throws_function(returnState);
+    folly::exception_wrapper ew = recv_wrapped_throws_function(returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 
@@ -618,12 +620,6 @@ bool apache::thrift::Client<::extra::svc::ExtraService>::sync_throws_function2(a
     [&] {
       fbthrift_serialize_and_send_throws_function2(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback), p_param1);
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -632,7 +628,15 @@ bool apache::thrift::Client<::extra::svc::ExtraService>::sync_throws_function2(a
     }
   };
   return folly::fibers::runInMainContext([&] {
-      return recv_throws_function2(returnState);
+    bool _return;
+    folly::exception_wrapper ew = recv_wrapped_throws_function2(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
+    return _return;
   });
 }
 
@@ -824,12 +828,6 @@ void apache::thrift::Client<::extra::svc::ExtraService>::sync_throws_function3(a
     [&] {
       fbthrift_serialize_and_send_throws_function3(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback), p_param1, p_param2);
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -838,7 +836,13 @@ void apache::thrift::Client<::extra::svc::ExtraService>::sync_throws_function3(a
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_throws_function3(_return, returnState);
+    auto ew = recv_wrapped_throws_function3(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 

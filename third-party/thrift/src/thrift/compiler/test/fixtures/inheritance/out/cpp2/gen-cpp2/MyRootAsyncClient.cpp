@@ -112,12 +112,6 @@ void apache::thrift::Client<::cpp2::MyRoot>::sync_do_root(apache::thrift::RpcOpt
     [&] {
       fbthrift_serialize_and_send_do_root(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -126,7 +120,13 @@ void apache::thrift::Client<::cpp2::MyRoot>::sync_do_root(apache::thrift::RpcOpt
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_do_root(returnState);
+    folly::exception_wrapper ew = recv_wrapped_do_root(returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 

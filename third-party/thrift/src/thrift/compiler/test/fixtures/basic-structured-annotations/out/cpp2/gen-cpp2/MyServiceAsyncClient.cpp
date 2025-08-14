@@ -125,12 +125,6 @@ void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MySe
     [&] {
       fbthrift_serialize_and_send_first(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -139,7 +133,13 @@ void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MySe
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_first(_return, returnState);
+    auto ew = recv_wrapped_first(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 
@@ -328,12 +328,6 @@ bool apache::thrift::Client<::test::fixtures::basic-structured-annotations::MySe
     [&] {
       fbthrift_serialize_and_send_second(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback), p_count);
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -342,7 +336,15 @@ bool apache::thrift::Client<::test::fixtures::basic-structured-annotations::MySe
     }
   };
   return folly::fibers::runInMainContext([&] {
-      return recv_second(returnState);
+    bool _return;
+    folly::exception_wrapper ew = recv_wrapped_second(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
+    return _return;
   });
 }
 

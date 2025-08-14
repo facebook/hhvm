@@ -19,11 +19,11 @@ include "thrift/annotation/cpp.thrift"
 namespace cpp2 apache.thrift.test
 
 interaction SampleInteraction {
-  string echo(1: string str);
+  string echo(1: string str) throws (1: TestException ex);
 }
 
 interaction SampleInteraction2 {
-  string echo(1: string str);
+  string echo(1: string str) throws (1: TestException ex);
 }
 
 struct RequestArgsStruct {
@@ -41,13 +41,24 @@ struct FrameworkMetadata {
   2: string postProcessing;
 }
 
+exception TestException {
+  1: string message;
+}
+
 service ClientInterceptorTest {
-  void noop();
+  void noop(1: bool shouldThrow = false) throws (1: TestException ex);
 
-  string echo(1: string str);
+  // Method that throws an exception to be observed by interceptors
+  string echo(1: string str) throws (1: TestException ex);
 
-  SampleInteraction createInteraction();
-  SampleInteraction, string createInteractionAndEcho(1: string str);
+  // Interaction with optional exception
+  SampleInteraction createInteraction(1: bool shouldThrow = false) throws (
+    1: TestException ex,
+  );
+  SampleInteraction, string createInteractionAndEcho(
+    1: string str,
+    2: bool shouldThrow = false,
+  ) throws (1: TestException ex);
 
   string requestArgs(
     1: i32 primitive,
@@ -55,7 +66,16 @@ service ClientInterceptorTest {
     3: RequestArgsStruct request,
   );
 
-  stream<i32> iota(1: i32 start);
+  // Stream without initial response, with optional exception
+  stream<i32> iota(1: i32 start, 2: bool shouldThrow = false) throws (
+    1: TestException ex,
+  );
+
+  // Stream with initial response, with optional exception
+  i32, stream<i32> iotaWithResponse(
+    1: i32 start,
+    2: bool shouldThrow = false,
+  ) throws (1: TestException ex);
 
   sink<i32, i32> dump();
 

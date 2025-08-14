@@ -113,12 +113,6 @@ void apache::thrift::Client<::test::fixtures::basic::FB303Service>::sync_simple_
     [&] {
       fbthrift_serialize_and_send_simple_rpc(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback), p_int_parameter);
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -127,7 +121,13 @@ void apache::thrift::Client<::test::fixtures::basic::FB303Service>::sync_simple_
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_simple_rpc(_return, returnState);
+    auto ew = recv_wrapped_simple_rpc(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 

@@ -61,7 +61,7 @@ std::shared_ptr<GlobalTracingClientInterceptor> globalTracingInterceptor =
 
 struct TestHandler : apache::thrift::ServiceHandler<
                          apache::thrift::test::ClientInterceptorTest> {
-  folly::coro::Task<void> co_noop() override { co_return; }
+  folly::coro::Task<void> co_noop(bool) override { co_return; }
 };
 
 } // namespace
@@ -74,7 +74,7 @@ CO_TEST(GlobalClientInterceptorTest, GlobalClientInterceptor) {
   EXPECT_THAT(globalTracingInterceptor->requests(), IsEmpty());
 
   using Trace = GlobalTracingClientInterceptor::Trace;
-  co_await client->co_noop();
+  co_await client->co_noop(false);
   const std::vector<Trace> expectedTrace{
       Trace{"ClientInterceptorTest", "noop"},
   };

@@ -126,12 +126,6 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::syn
     [&] {
       fbthrift_serialize_and_send_bounce_map(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback), p_m);
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -140,7 +134,13 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::syn
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_bounce_map(_return, returnState);
+    auto ew = recv_wrapped_bounce_map(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 
@@ -329,12 +329,6 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::syn
     [&] {
       fbthrift_serialize_and_send_binary_keyed_map(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback), p_r);
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -343,7 +337,13 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::syn
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_binary_keyed_map(_return, returnState);
+    auto ew = recv_wrapped_binary_keyed_map(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 

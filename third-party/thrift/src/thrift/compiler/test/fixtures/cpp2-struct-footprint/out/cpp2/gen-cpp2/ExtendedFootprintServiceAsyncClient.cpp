@@ -112,12 +112,6 @@ void apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::
     [&] {
       fbthrift_serialize_and_send_getComplexMap(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
-  if (returnState.isException()) {
-    returnState.exception().throw_exception();
-  }
   returnState.resetProtocolId(protocolId);
   returnState.resetCtx(std::move(ctxAndHeader.first));
   SCOPE_EXIT {
@@ -126,7 +120,13 @@ void apache::thrift::Client<::cpp2_struct_footprint::ExtendedFootprintService>::
     }
   };
   return folly::fibers::runInMainContext([&] {
-      recv_getComplexMap(_return, returnState);
+    auto ew = recv_wrapped_getComplexMap(_return, returnState);
+    if (contextStack != nullptr) {
+      contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      ew.throw_exception();
+    }
   });
 }
 

@@ -144,7 +144,13 @@ class ClientReceiveState {
   SerializedResponse extractSerializedResponse() {
     return std::move(response_);
   }
+  apache::thrift::ClientInterceptorOnResponseResult& extractResult() {
+    return result_;
+  }
 
+  void setResult(apache::thrift::ClientInterceptorOnResponseResult&& result) {
+    result_ = std::move(result);
+  }
   apache::thrift::detail::ClientStreamBridge::ClientPtr extractStreamBridge() {
     return std::move(streamBridge_);
   }
@@ -217,7 +223,7 @@ class ClientReceiveState {
   apache::thrift::detail::ClientSinkBridge::ClientPtr sink_;
   BufferOptions bufferOptions_;
   RpcTransportStats rpcTransportStats_;
-
+  apache::thrift::ClientInterceptorOnResponseResult result_;
   void initFromLegacyFormat(std::unique_ptr<folly::IOBuf> buffer);
 };
 

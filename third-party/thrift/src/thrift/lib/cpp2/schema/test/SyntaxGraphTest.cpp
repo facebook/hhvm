@@ -19,12 +19,14 @@
 
 #include <folly/Utility.h>
 
+#include <thrift/lib/cpp2/dynamic/SerializableTypeSystemBuilder.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 
 #include <thrift/annotation/gen-cpp2/thrift_types.h>
+#include <thrift/lib/cpp2/schema/test/gen-cpp2/schema_registry_types.h>
 #include <thrift/lib/cpp2/schema/test/gen-cpp2/syntax_graph_2_handlers.h>
 #include <thrift/lib/cpp2/schema/test/gen-cpp2/syntax_graph_3_types.h>
 #include <thrift/lib/cpp2/schema/test/gen-cpp2/syntax_graph_handlers.h>
@@ -970,6 +972,74 @@ TEST(SyntaxGraphTest, StructWithCustomDefault) {
           .at(type_system::SerializableRecord::Int32(1)),
       testUnionRecord);
   EXPECT_EQ(*tsStructNode.at(FieldId{8}).customDefault(), testUnionRecord);
+}
+
+TEST(SyntaxGraphTest, SerializableTypeSystemBuilder) {
+  auto testA = [](const type_system::SerializableTypeSystem& sts) {
+    auto& structA = sts.types()
+                        ->at("facebook.com/thrift/test/A")
+                        .definition()
+                        ->structDef_ref()
+                        .value();
+    EXPECT_EQ(structA.fields()->size(), 1);
+    auto& field1 = structA.fields()[0];
+    EXPECT_EQ(field1.identity()->id(), FieldId{1});
+    EXPECT_EQ(field1.identity()->name(), "field");
+    EXPECT_EQ(field1.type()->asUri(), "facebook.com/thrift/test/B");
+  };
+  auto testB = [](const type_system::SerializableTypeSystem& sts) {
+    auto& structA = sts.types()
+                        ->at("facebook.com/thrift/test/B")
+                        .definition()
+                        ->structDef_ref()
+                        .value();
+    EXPECT_EQ(structA.fields()->size(), 1);
+    auto& field1 = structA.fields()[0];
+    EXPECT_EQ(field1.identity()->id(), FieldId{1});
+    EXPECT_EQ(field1.identity()->name(), "field");
+    EXPECT_EQ(field1.type()->asUri(), "facebook.com/thrift/test/C");
+  };
+  auto testC = [](const type_system::SerializableTypeSystem& sts) {
+    auto& structA = sts.types()
+                        ->at("facebook.com/thrift/test/C")
+                        .definition()
+                        ->structDef_ref()
+                        .value();
+    EXPECT_EQ(structA.fields()->size(), 1);
+    auto& field1 = structA.fields()[0];
+    EXPECT_EQ(field1.identity()->id(), FieldId{1});
+    EXPECT_EQ(field1.identity()->name(), "field");
+    EXPECT_TRUE(field1.type()->isI32());
+  };
+
+  auto& registry = SchemaRegistry::get();
+  {
+    auto builder =
+        type_system::SerializableTypeSystemBuilder::withoutSourceInfo(registry);
+    builder.addDefinition("facebook.com/thrift/test/A");
+    auto sts = *std::move(builder).build();
+    EXPECT_EQ(sts.types()->size(), 3);
+    testA(sts);
+    testB(sts);
+    testC(sts);
+  }
+  {
+    auto builder =
+        type_system::SerializableTypeSystemBuilder::withoutSourceInfo(registry);
+    builder.addDefinition("facebook.com/thrift/test/B");
+    auto sts = *std::move(builder).build();
+    EXPECT_EQ(sts.types()->size(), 2);
+    testB(sts);
+    testC(sts);
+  }
+  {
+    auto builder =
+        type_system::SerializableTypeSystemBuilder::withoutSourceInfo(registry);
+    builder.addDefinition("facebook.com/thrift/test/C");
+    auto sts = *std::move(builder).build();
+    EXPECT_EQ(sts.types()->size(), 1);
+    testC(sts);
+  }
 }
 
 } // namespace apache::thrift::syntax_graph

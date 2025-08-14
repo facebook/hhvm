@@ -17,6 +17,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <thrift/lib/cpp2/dynamic/SerializableTypeSystemBuilder.h>
 #include <thrift/lib/cpp2/dynamic/TypeId.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
@@ -75,7 +76,10 @@ TEST(TypeSystemTest, EmptyStruct) {
 
   expectKnownUris(*typeSystem, {def.uri()});
 
-  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  auto stsBuilder =
+      SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
+  stsBuilder.addDefinition("meta.com/thrift/test/EmptyStruct");
+  auto sts = *std::move(stsBuilder).build();
   EXPECT_EQ(sts.types()->size(), 1);
   auto& emptyStructDef =
       *sts.types()["meta.com/thrift/test/EmptyStruct"].definition();
@@ -98,7 +102,10 @@ TEST(TypeSystemTest, EmptyUnion) {
 
   expectKnownUris(*typeSystem, {def.uri()});
 
-  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  auto stsBuilder =
+      SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
+  stsBuilder.addDefinition("meta.com/thrift/test/EmptyUnion");
+  auto sts = *std::move(stsBuilder).build();
   EXPECT_EQ(sts.types()->size(), 1);
   auto& emptyUnionDef =
       *sts.types()["meta.com/thrift/test/EmptyUnion"].definition();
@@ -145,7 +152,10 @@ TEST(TypeSystemTest, NestedStructs) {
 
   expectKnownUris(*typeSystem, {innerStructUri, outerStructUri});
 
-  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  auto stsBuilder =
+      SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
+  stsBuilder.addDefinition(outerStructUri);
+  auto sts = *std::move(stsBuilder).build();
   EXPECT_EQ(sts.types()->size(), 2);
   auto& innerStructDef = *sts.types()->at(innerStructUri).definition();
   EXPECT_EQ(innerStructDef.structDef()->fields()->size(), 1);
@@ -226,7 +236,11 @@ TEST(TypeSystemTest, RecursiveStructAndUnion) {
 
   expectKnownUris(*typeSystem, {structDef.uri(), unionDef.uri()});
 
-  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  auto stsBuilder =
+      SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
+  stsBuilder.addDefinition(recursiveStructUri);
+  stsBuilder.addDefinition(recursiveUnionUri);
+  auto sts = *std::move(stsBuilder).build();
   EXPECT_EQ(sts.types()->size(), 2);
   auto& recursiveStructDef = *sts.types()->at(recursiveStructUri).definition();
   EXPECT_EQ(recursiveStructDef.structDef()->fields()->size(), 1);
@@ -332,7 +346,11 @@ TEST(TypeSystemTest, MutuallyRecursiveStructuredTypes) {
       *typeSystem,
       {"meta.com/thrift/test/MyStruct", "meta.com/thrift/test/MyUnion"});
 
-  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  auto stsBuilder =
+      SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
+  stsBuilder.addDefinition("meta.com/thrift/test/MyStruct");
+  stsBuilder.addDefinition("meta.com/thrift/test/MyUnion");
+  auto sts = *std::move(stsBuilder).build();
   EXPECT_EQ(sts.types()->size(), 2);
   auto& myStructDef =
       *sts.types()->at("meta.com/thrift/test/MyStruct").definition();
@@ -411,7 +429,10 @@ TEST(TypeSystemTest, CustomDefaultFieldValues) {
   EXPECT_EQ(fieldWithoutDefault.type().id(), TypeIds::I64);
   EXPECT_EQ(fieldWithoutDefault.customDefault(), nullptr);
 
-  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  auto stsBuilder =
+      SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
+  stsBuilder.addDefinition("meta.com/thrift/test/StructWithDefaults");
+  auto sts = *std::move(stsBuilder).build();
   EXPECT_EQ(sts.types()->size(), 1);
   auto& structWithDefaultsDef =
       *sts.types()->at("meta.com/thrift/test/StructWithDefaults").definition();
@@ -541,38 +562,65 @@ TEST(TypeSystemTest, Annotations) {
       typeSystem->getUserDefinedTypeOrThrow(Uri("meta.com/thrift/test/MyEnum"))
           .asEnum()
           .values()[0]);
-
-  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
-  EXPECT_EQ(sts.types()->size(), 5);
-  checkAnnotSerializabe(*sts.types()
-                             ->at("meta.com/thrift/test/MyStruct")
-                             .definition()
-                             ->structDef());
-  checkAnnotSerializabe(sts.types()
-                            ->at("meta.com/thrift/test/MyStruct")
-                            .definition()
-                            ->structDef()
-                            ->fields()[0]);
-  checkAnnotSerializabe(*sts.types()
-                             ->at("meta.com/thrift/test/MyUnion")
-                             .definition()
-                             ->unionDef());
-  checkAnnotSerializabe(sts.types()
-                            ->at("meta.com/thrift/test/MyUnion")
-                            .definition()
-                            ->unionDef()
-                            ->fields()[0]);
-  checkAnnotSerializabe(*sts.types()
-                             ->at("meta.com/thrift/test/MyI32")
-                             .definition()
-                             ->opaqueAliasDef());
-  checkAnnotSerializabe(
-      *sts.types()->at("meta.com/thrift/test/MyEnum").definition()->enumDef());
-  checkAnnotSerializabe(sts.types()
-                            ->at("meta.com/thrift/test/MyEnum")
-                            .definition()
-                            ->enumDef()
-                            ->values()[0]);
+  {
+    auto stsBuilder =
+        SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
+    stsBuilder.addDefinition("meta.com/thrift/test/MyStruct");
+    auto sts = *std::move(stsBuilder).build();
+    EXPECT_EQ(sts.types()->size(), 2);
+    checkAnnotSerializabe(*sts.types()
+                               ->at("meta.com/thrift/test/MyStruct")
+                               .definition()
+                               ->structDef());
+    checkAnnotSerializabe(sts.types()
+                              ->at("meta.com/thrift/test/MyStruct")
+                              .definition()
+                              ->structDef()
+                              ->fields()[0]);
+  }
+  {
+    auto stsBuilder =
+        SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
+    stsBuilder.addDefinition("meta.com/thrift/test/MyUnion");
+    auto sts = *std::move(stsBuilder).build();
+    EXPECT_EQ(sts.types()->size(), 2);
+    checkAnnotSerializabe(*sts.types()
+                               ->at("meta.com/thrift/test/MyUnion")
+                               .definition()
+                               ->unionDef());
+    checkAnnotSerializabe(sts.types()
+                              ->at("meta.com/thrift/test/MyUnion")
+                              .definition()
+                              ->unionDef()
+                              ->fields()[0]);
+  }
+  {
+    auto stsBuilder =
+        SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
+    stsBuilder.addDefinition("meta.com/thrift/test/MyI32");
+    auto sts = *std::move(stsBuilder).build();
+    EXPECT_EQ(sts.types()->size(), 2);
+    checkAnnotSerializabe(*sts.types()
+                               ->at("meta.com/thrift/test/MyI32")
+                               .definition()
+                               ->opaqueAliasDef());
+  }
+  {
+    auto stsBuilder =
+        SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
+    stsBuilder.addDefinition("meta.com/thrift/test/MyEnum");
+    auto sts = *std::move(stsBuilder).build();
+    EXPECT_EQ(sts.types()->size(), 2);
+    checkAnnotSerializabe(*sts.types()
+                               ->at("meta.com/thrift/test/MyEnum")
+                               .definition()
+                               ->enumDef());
+    checkAnnotSerializabe(sts.types()
+                              ->at("meta.com/thrift/test/MyEnum")
+                              .definition()
+                              ->enumDef()
+                              ->values()[0]);
+  }
 }
 
 TEST(TypeSystemTest, WrongAnnotationTypeUri) {
@@ -763,7 +811,10 @@ TEST(TypeSystemTest, ListTypeRef) {
   EXPECT_EQ(listField.type().asList().id(), TypeIds::list(TypeIds::I32));
   EXPECT_EQ(listField.type().id(), TypeRef::List::of(TypeRef::I32()).id());
 
-  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  auto stsBuilder =
+      SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
+  stsBuilder.addDefinition("meta.com/thrift/test/ListStruct");
+  auto sts = *std::move(stsBuilder).build();
   EXPECT_EQ(sts.types()->size(), 1);
   auto& listStructDef = *sts.types()
                              ->at("meta.com/thrift/test/ListStruct")
@@ -803,7 +854,10 @@ TEST(TypeSystemTest, SetTypeRef) {
   EXPECT_EQ(setField.type().asSet().id(), TypeIds::set(TypeIds::I32));
   EXPECT_EQ(setField.type().id(), TypeRef::Set::of(TypeRef::I32()).id());
 
-  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  auto stsBuilder =
+      SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
+  stsBuilder.addDefinition("meta.com/thrift/test/SetStruct");
+  auto sts = *std::move(stsBuilder).build();
   EXPECT_EQ(sts.types()->size(), 1);
   auto& setStructDef = *sts.types()
                             ->at("meta.com/thrift/test/SetStruct")
@@ -847,7 +901,11 @@ TEST(TypeSystemTest, MapTypeRef) {
       mapField.type().id(),
       TypeRef::Map::of(TypeRef::I32(), TypeRef::String()).id());
 
-  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  auto stsBuilder =
+      SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
+  stsBuilder.addDefinition("meta.com/thrift/test/MapStruct");
+  auto sts = *std::move(stsBuilder).build();
+
   EXPECT_EQ(sts.types()->size(), 1);
   auto& mapStructDef = *sts.types()
                             ->at("meta.com/thrift/test/MapStruct")
@@ -878,7 +936,10 @@ TEST(TypeSystemTest, OpaqueAliasTypeRef) {
   EXPECT_TRUE(def.isOpaqueAlias());
   EXPECT_EQ(def.asOpaqueAlias().targetType().id(), TypeIds::I32);
 
-  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  auto stsBuilder =
+      SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
+  stsBuilder.addDefinition("meta.com/thrift/test/OpaqueAlias");
+  auto sts = *std::move(stsBuilder).build();
   EXPECT_EQ(sts.types()->size(), 1);
   auto& opaqueAliasDef = *sts.types()
                               ->at("meta.com/thrift/test/OpaqueAlias")
@@ -908,7 +969,10 @@ TEST(TypeSystemTest, EnumTypeRef) {
   EXPECT_EQ(def.asEnum().values()[1].name, "VALUE2");
   EXPECT_EQ(def.asEnum().values()[1].i32, 2);
 
-  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  auto stsBuilder =
+      SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
+  stsBuilder.addDefinition("meta.com/thrift/test/SimpleEnum");
+  auto sts = *std::move(stsBuilder).build();
   EXPECT_EQ(sts.types()->size(), 1);
   auto& enumDef = *sts.types()
                        ->at("meta.com/thrift/test/SimpleEnum")
@@ -972,7 +1036,10 @@ TEST(TypeSystemTest, ComplexTypeReferences) {
   EXPECT_EQ(mapField.type().asMap().keyType().id(), TypeIds::String);
   EXPECT_EQ(mapField.type().asMap().valueType().asUnion().fields().size(), 1);
 
-  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  auto stsBuilder =
+      SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
+  stsBuilder.addDefinition("meta.com/thrift/test/ComplexStruct");
+  auto sts = *std::move(stsBuilder).build();
   EXPECT_EQ(sts.types()->size(), 3);
   auto& complexStructDef = *sts.types()
                                 ->at("meta.com/thrift/test/ComplexStruct")
@@ -1042,7 +1109,10 @@ TEST(TypeSystemTest, NestedContainers) {
       setOfListsField.type().asSet().elementType().asList().elementType().id(),
       TypeIds::I64);
 
-  auto sts = typeSystem->toSerializableTypeSystem(*typeSystem->getKnownUris());
+  auto stsBuilder =
+      SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
+  stsBuilder.addDefinition("meta.com/thrift/test/NestedContainerStruct");
+  auto sts = *std::move(stsBuilder).build();
   EXPECT_EQ(sts.types()->size(), 1);
   auto& nestedContainerStructDef =
       *sts.types()
@@ -1276,7 +1346,6 @@ TEST(TypeSystemTest, TagResolution) {
       TypeRef::Map::of(TypeRef::I32{}, TypeRef::String{}),
       type::map<type::i32_t, type::string_t>{});
 }
-
 TEST(TypeSystemTest, SourceIndexedTypeSystem) {
   TypeSystemBuilder builder;
 
@@ -1350,7 +1419,12 @@ TEST(TypeSystemTest, SourceIndexedTypeSystem) {
              ->asOpaqueAlias());
   }
 
-  auto sts = sym.toSerializableTypeSystem(*sym.getKnownUris());
+  auto stsBuilder = SerializableTypeSystemBuilder::withSourceInfo(sym);
+  stsBuilder.addDefinition("meta.com/thrift/test/StructWithI32Field");
+  stsBuilder.addDefinition("meta.com/thrift/test/UnionWithI32Field");
+  stsBuilder.addDefinition("meta.com/thrift/test/OpaqueAlias");
+  stsBuilder.addDefinition("meta.com/thrift/test/Enum");
+  auto sts = *std::move(stsBuilder).build();
   EXPECT_EQ(sts.types()->size(), 4);
   auto& structWithI32FieldEntry =
       sts.types()->at("meta.com/thrift/test/StructWithI32Field");

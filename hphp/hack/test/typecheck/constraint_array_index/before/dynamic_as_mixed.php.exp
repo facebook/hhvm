@@ -1,11 +1,3 @@
-ERROR: File "dynamic_as_mixed.php", line 5, characters 10-28:
-Function  `expect` is not dynamically callable. (Typing[4110])
-  File "dynamic_as_mixed.php", line 5, characters 10-28:
-  Invalid return type
-  File "dynamic_as_mixed.php", line 4, characters 31-42:
-  Expected `dynamic` because method or function was called on dynamic or like-type
-  File "dynamic_as_mixed.php", line 5, characters 14-22:
-  Type `ExpectObj<_>` is not a subtype of `dynamic` under dynamic-aware subtyping
 ERROR: File "dynamic_as_mixed.php", line 18, characters 7-18:
 A `where` type constraint is violated here (Typing[4323])
   File "dynamic_as_mixed.php", line 9, characters 25-36:

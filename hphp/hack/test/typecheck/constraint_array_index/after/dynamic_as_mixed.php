@@ -1,6 +1,6 @@
 <?hh
 
-<<__DynamicallyCallable, __NoAutoLikes>>
+<<__NoAutoLikes>>
 function expect<T>(T $obj)[]: ExpectObj<T> {
   return new ExpectObj($obj);
 }

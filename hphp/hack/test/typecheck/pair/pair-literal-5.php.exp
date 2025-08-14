@@ -2,5 +2,7 @@ ERROR: File "pair-literal-5.php", line 13, characters 10-14:
 Invalid return type (Typing[4110])
   File "pair-literal-5.php", line 11, characters 15-17:
   Expected `int`
-  File "pair-literal-5.php", line 12, characters 18-22:
+  File "pair-literal-5.php", line 13, characters 10-14:
   But got `string`
+  File "pair-literal-5.php", line 12, characters 18-22:
+    from this definition

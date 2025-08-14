@@ -3985,6 +3985,9 @@ end = struct
       let (_, p2, _) = e2 in
       if TypecheckerOptions.constraint_array_index env.genv.tcopt then (
         let (env, key_ty) = Env.fresh_type_invariant env p2 in
+        let key_ty =
+          Typing_env.update_reason env key_ty ~f:(fun _ -> get_reason ty2)
+        in
         let (env, ty_err_opt) =
           SubType.sub_type_i
             env
@@ -3993,7 +3996,7 @@ end = struct
             (Some (Typing_error.Reasons_callback.unify_error_at p))
         in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-        let (env, val_ty) = Env.fresh_type env p1 in
+        let (env, val_ty) = Env.fresh_type env p in
         let (env, ty_err_opt) =
           SubType.sub_type_i
             env
@@ -4014,6 +4017,12 @@ end = struct
             (Some (Typing_error.Reasons_callback.unify_error_at p))
         in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+        let val_ty =
+          Typing_env.update_reason env val_ty ~f:(fun def ->
+              Typing_reason.flow_array_get
+                ~def
+                ~access:(Typing_reason.witness p))
+        in
         make_result env p (Aast.Array_get (te1, Some te2)) val_ty
       ) else
         let (env, (ty, arr_ty_mismatch_opt, key_ty_mismatch_opt)) =

@@ -2,7 +2,5 @@ ERROR: File "lambda_called_on_shape_wrong_type.php", line 4, characters 6-25:
 Invalid argument (Typing[4110])
   File "lambda_called_on_shape_wrong_type.php", line 3, characters 16-22:
   Expected `int` because this is used in an arithmetic operation
-  File "lambda_called_on_shape_wrong_type.php", line 3, characters 16-22:
-  But got `string`
   File "lambda_called_on_shape_wrong_type.php", line 4, characters 19-24:
-    from this definition
+  But got `string`

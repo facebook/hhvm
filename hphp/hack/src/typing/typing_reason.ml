@@ -2335,14 +2335,18 @@ let rec to_string_help :
       @ to_string_help "  from this definition" solutions from
     | _ -> to_string_help prefix solutions from)
   (* otherwise, follow the flow until we reach the type variable *)
-  | Flow { from; into; _ } ->
+  | Flow { from; into; kind } ->
     (match from with
     | From_witness_locl
         (Type_variable_generics (_, _, _, tvid) | Type_variable (_, tvid))
       when Tvid.Map.mem tvid solutions ->
       let r = Tvid.Map.find tvid solutions in
       let solutions = Tvid.Map.remove tvid solutions in
-      to_string_help prefix solutions r
+      (match kind with
+      | Flow_array_get ->
+        to_string_help prefix solutions into
+        @ to_string_help "  from this definition" solutions r
+      | _ -> to_string_help prefix solutions r)
     | _ -> to_string_help prefix solutions into)
   | Solved { solution; of_; in_ = r } ->
     let solutions = Tvid.Map.add of_ solution solutions in

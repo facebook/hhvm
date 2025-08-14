@@ -6269,13 +6269,6 @@ end = struct
       simplify_default ~subtype_env can_index.ci_key tk env
     in
     let simplify_val tv env =
-      let tv =
-        Typing_env.(
-          update_reason env tv ~f:(fun def ->
-              Typing_reason.flow_array_get
-                ~def
-                ~access:(Typing_reason.witness can_index.ci_expr_pos)))
-      in
       simplify_default ~subtype_env tv can_index.ci_val env
     in
     let return_val tv env = simplify_val tv env |> likely_solvable in
@@ -6350,7 +6343,7 @@ end = struct
           env
     in
     let do_tuple_basic tup = do_tuple_optional tup [] None in
-    let do_shape r { s_fields = fdm; s_origin; s_unknown_value = _ } =
+    let do_shape r_sub { s_fields = fdm; s_origin; s_unknown_value = _ } =
       let (_, p, _) = can_index.ci_index_expr in
       match
         Typing_shapes.tshape_field_name_with_ty_err env can_index.ci_index_expr
@@ -6379,7 +6372,7 @@ end = struct
             let decl_pos =
               match s_origin with
               | From_alias (_, Some pos) -> pos
-              | _ -> Reason.to_pos r
+              | _ -> Reason.to_pos r_sub
             in
             invalid
               ~fail:
@@ -6456,12 +6449,12 @@ end = struct
       |> likely_unsolvable
     | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
       valid env |> likely_solvable
-    | (_, Tdynamic) -> got_dynamic env
-    | (_, Tclass ((_, cn), _, _))
+    | (_r_sub, Tdynamic) -> got_dynamic env
+    | (_r_sub, Tclass ((_, cn), _, _))
       when String.equal cn SN.Collections.cAnyArray
            && Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->
       got_dynamic env
-    | _
+    | (_r_sub, _)
       when Option.is_some sub_supportdyn
            && TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
            && Tast.is_under_dynamic_assumptions env.checked ->
@@ -6512,16 +6505,16 @@ end = struct
       (match targs with
       | [tkv] -> is_dict_like tkv env
       | _ -> arity_error r_sub n env)
-    | (_, Tvec_or_dict (_, tv)) ->
+    | (_r_sub, Tvec_or_dict (_, tv)) ->
       let (env, tv) = maybe_pessimise_type env tv in
       is_dict_like tv env
-    | (_, Tprim Tstring) ->
+    | (_r_sub, Tprim Tstring) ->
       let pos = get_pos ty_sub in
       let tk = MakeType.int (Reason.idx_string_from_decl pos) in
       let tv = MakeType.string reason_super in
       let (env, tv) = maybe_pessimise_type env tv in
       is_container tk tv env
-    | (r, Tprim Tnull) ->
+    | (r_sub, Tprim Tnull) ->
       let pos = get_pos ty_sub in
       if is_nullable then
         return_val (MakeType.null (Reason.idx_string_from_decl pos)) env
@@ -6538,10 +6531,10 @@ end = struct
                           lazy
                             (Reason.to_string
                                "This is what makes me believe it can be `null`"
-                               r);
+                               r_sub);
                       }))
           env
-    | (r, Toption t) ->
+    | (r_sub, Toption t) ->
       if is_nullable then
         simplify_
           ~subtype_env
@@ -6562,7 +6555,7 @@ end = struct
                           lazy
                             (Reason.to_string
                                "This is what makes me believe it can be `null`"
-                               r);
+                               r_sub);
                       }))
           env
     | (r_sub, Tunion ty_subs) ->
@@ -6667,11 +6660,13 @@ end = struct
                 loop ty_subs tys errs env)
         in
         loop ty_subs [] [] env)
-    | (_, Tclass ((_, id), _, tup)) when String.equal id SN.Collections.cPair ->
+    | (_r_sub, Tclass ((_, id), _, tup))
+      when String.equal id SN.Collections.cPair ->
       do_tuple_basic tup
-    | (_, Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } }) ->
+    | ( _r_sub,
+        Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } } ) ->
       do_tuple_optional t_required t_optional (Some t_variadic)
-    | (_, Ttuple { t_required; _ }) -> do_tuple_basic t_required
+    | (_r_sub, Ttuple { t_required; _ }) -> do_tuple_basic t_required
     | (r_sub, Tshape ts) -> do_shape r_sub ts
     | (r_sub, Tgeneric _generic_nm) ->
       let get_transitive_upper_bounds env ty =
@@ -6768,7 +6763,7 @@ end = struct
         (sub_supportdyn, r_sub, dep_ty, ty_inner)
         rhs
         env
-    | (_, Tany _) -> return_val ty_sub env
+    | (_r_sub, Tany _) -> return_val ty_sub env
     | _ -> invalid ~fail env
 end
 

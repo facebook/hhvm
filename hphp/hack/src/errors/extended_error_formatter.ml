@@ -290,7 +290,7 @@ let to_string
     (* Just render the json, no other info *)
     json
   | Explanation.Empty ->
-    (* If the explanation is empty then ust render the claim and reasons;
+    (* If the explanation is empty then just render the claim and reasons;
        only subtyping errors will have explanations at the moment *)
     let file_checked = relative_path @@ Pos.filename pos in
     let init = SMap.singleton file_checked [Pos.to_relative pos] in

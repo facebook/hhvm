@@ -360,6 +360,7 @@
  (modules
   subtype_recursion_tracker
   typing_algebra
+  typing_array_access_util
   typing_case_types
   typing_class_pointers
   typing_coeffects

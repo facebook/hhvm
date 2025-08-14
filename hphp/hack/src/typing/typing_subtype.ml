@@ -6213,7 +6213,21 @@ end = struct
       ~lhs:{ sub_supportdyn; ty_sub }
       ~rhs:({ reason_super; can_index } as rhs)
       env =
-    let (env, ty_sub) = Env.expand_type env ty_sub in
+    (* This call to expand_type_and_narrow is not needed for correctness reasons.
+     * However, without it, the typechecker will be significantly slower,
+     * And cannot complete typechecking in expected time.
+     * It will be good to investigate the root cause and remove this code.
+     *)
+    let ((env, ty_err), ty_sub) =
+      Typing_solver.expand_type_and_narrow
+        env
+        ~description_of_expected:"an array or collection"
+        ~force_solve:false
+        (Typing_array_access_util.widen_for_array_get_ci can_index)
+        can_index.ci_array_pos
+        ty_sub
+    in
+    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err;
     let subtype_env =
       Subtype_env.possibly_add_violated_constraint
         subtype_env

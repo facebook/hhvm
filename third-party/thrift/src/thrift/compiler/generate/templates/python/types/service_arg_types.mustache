@@ -124,8 +124,8 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{
         _fbthrift_python_types.FieldInfo(
             {{field:key}},  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "{{field:name}}",  # name
-            "{{field:py_name}}",  # python name (from @python.Name annotation)
+            "_ex{{field:index}}__{{field:name}}",  # name
+            "{{> fields/exception_field_name}}",  # python name (from @python.Name annotation)
             {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
             {{> fields/adapter_info }},  # adapter info
@@ -150,7 +150,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{
         {{#function:sink_exceptions}}{{#field:type}}
         except {{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
                 }}{{#type:structured}}{{> structs/unadapted_name}}{{/type:structured}} as e:
-            return_struct = cls({{field:py_name}}=e)
+            return_struct = cls({{> fields/exception_field_name}}=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = _fbthrift__PythonUserException("{{type:module_name}}.{{type:name}}", str(e), buf)
             raise exp
@@ -181,8 +181,8 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_final(metaclass={
         _fbthrift_python_types.FieldInfo(
             {{field:key}},  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "{{field:name}}",  # name
-            "{{field:py_name}}",  # python name (from @python.Name annotation)
+            "_ex{{field:index}}__{{field:name}}",  # name
+            "{{> fields/exception_field_name}}",  # python name (from @python.Name annotation)
             {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
             {{> fields/adapter_info }},  # adapter info

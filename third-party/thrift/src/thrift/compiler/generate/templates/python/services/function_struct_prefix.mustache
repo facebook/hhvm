@@ -15,14 +15,8 @@
   limitations under the License.
 
 }}{{!
-The internal return type of a service handler
-}}{{#function:oneway?}}None{{/function:oneway?}}{{!
-}}{{^function:oneway?}}{{!
-  }}{{#function:stream?}}_typing.Tuple[_fbthrift_iobuf.IOBuf, {{!
-      }}_typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]{{!
-  }}{{/function:stream?}}{{!
-  }}{{#function:sink?}}_typing.Tuple[_fbthrift_iobuf.IOBuf, {{!
-      }}_typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]]{{!
-  }}{{/function:sink?}}{{!
-  }}{{^function:sink_or_stream?}}_fbthrift_iobuf.IOBuf{{/function:sink_or_stream?}}{{!
-}}{{/function:oneway?}}
+
+This is short-hand for the function struct prefix,
+for use in non-types files where the types import path is necessary.
+
+}}{{program:module_mangle}}__{{> types/types_import_path}}._fbthrift_{{service:name}}_{{function:name}}

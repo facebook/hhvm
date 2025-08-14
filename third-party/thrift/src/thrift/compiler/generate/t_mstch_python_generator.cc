@@ -691,7 +691,7 @@ class python_mstch_service : public mstch_service {
   mstch::node supported_service_functions() {
     return make_mstch_functions(
         get_supported_functions([](const t_function* func) -> bool {
-          return !func->sink() && !func->is_interaction_constructor();
+          return !func->is_interaction_constructor();
         }),
         service_);
   }

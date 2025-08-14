@@ -27,6 +27,12 @@ thrift-py3 specific container types.
 }}_typing.AsyncIterator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}]{{!
 }}{{#function:stream_has_first_response?}}]{{/function:stream_has_first_response?}}{{!
 }}{{/function:stream?}}{{!
-}}{{^function:stream?}}{{!
+}}{{#function:sink?}}{{!
+}}{{#function:sink_has_first_response?}}_typing.Tuple[{{#function:sink_first_response_type}}{{!
+}}{{> types/pep484_type}}, {{/function:sink_first_response_type}}{{/function:sink_has_first_response?}}{{!
+}}{{> services/sink_callback}}{{!
+}}{{#function:sink_has_first_response?}}]{{/function:sink_has_first_response?}}{{!
+}}{{/function:sink?}}{{!
+}}{{^function:sink_or_stream?}}{{!
   }}{{> types/pep484_type}}{{!
-}}{{/function:stream?}}
+}}{{/function:sink_or_stream?}}

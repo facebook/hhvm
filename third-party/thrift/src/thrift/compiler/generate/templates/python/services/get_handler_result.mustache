@@ -25,6 +25,14 @@ stream = value
 if not isinstance(stream, _typing.AsyncIterator):
     stream = await stream
 {{/function:stream?}}
+{{#function:sink?}}
+{{#function:sink_has_first_response?}}
+value, sink_callback = value
+{{/function:sink_has_first_response?}}
+{{^function:sink_has_first_response?}}
+sink_callback = value
+{{/function:sink_has_first_response?}}
+{{/function:sink?}}
 {{^function:oneway?}}
 return_struct = {{> types/function_return_type}}({{!
 }}{{#function:with_regular_response?}}success=value{{/function:with_regular_response?}})
@@ -32,3 +40,6 @@ return_struct = {{> types/function_return_type}}({{!
 {{#function:stream?}}
 return_stream = self._fbthrift__stream_wrapper_{{function:name}}(stream, protocol)
 {{/function:stream?}}
+{{#function:sink?}}
+return_sink_callback = self._fbthrift__sink_wrapper_{{function:name}}(sink_callback, protocol)
+{{/function:sink?}}

@@ -682,8 +682,8 @@ class _fbthrift_SinkService_methodSinkThrow_result_sink_elem(metaclass=_fbthrift
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "ex",  # name
-            "ex",  # python name (from @python.Name annotation)
+            "_ex0__ex",  # name
+            "_ex0__ex",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(SinkException1),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -702,7 +702,7 @@ class _fbthrift_SinkService_methodSinkThrow_result_sink_elem(metaclass=_fbthrift
             async for item in sink_agen:
                 yield serialize_iobuf(cls(success=item), protocol)
         except SinkException1 as e:
-            return_struct = cls(ex=e)
+            return_struct = cls(_ex0__ex=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = _fbthrift__PythonUserException("module.thrift_types.SinkException1", str(e), buf)
             raise exp
@@ -773,8 +773,8 @@ class _fbthrift_SinkService_methodFinalThrow_result_sink_final(metaclass=_fbthri
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "ex",  # name
-            "ex",  # python name (from @python.Name annotation)
+            "_ex0__ex",  # name
+            "_ex0__ex",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(SinkException2),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -810,8 +810,8 @@ class _fbthrift_SinkService_methodBothThrow_result_sink_elem(metaclass=_fbthrift
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "ex",  # name
-            "ex",  # python name (from @python.Name annotation)
+            "_ex0__ex",  # name
+            "_ex0__ex",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(SinkException1),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -830,7 +830,7 @@ class _fbthrift_SinkService_methodBothThrow_result_sink_elem(metaclass=_fbthrift
             async for item in sink_agen:
                 yield serialize_iobuf(cls(success=item), protocol)
         except SinkException1 as e:
-            return_struct = cls(ex=e)
+            return_struct = cls(_ex0__ex=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = _fbthrift__PythonUserException("module.thrift_types.SinkException1", str(e), buf)
             raise exp
@@ -851,8 +851,8 @@ class _fbthrift_SinkService_methodBothThrow_result_sink_final(metaclass=_fbthrif
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "ex",  # name
-            "ex",  # python name (from @python.Name annotation)
+            "_ex0__ex",  # name
+            "_ex0__ex",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(SinkException2),  # typeinfo
             None,  # default value
             None,  # adapter info

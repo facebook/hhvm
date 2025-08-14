@@ -40,8 +40,10 @@ struct Simple {
   1: i32 intField;
   2: string strField;
   3: list<i32> intList;
+  10: list<string> strList;
   4: set<string> strSet;
   5: map<string, i64> strToIntMap;
+  9: map<string, string> strToStrMap;
   6: Color color;
   @python.Name{name = "name_"}
   7: string name;

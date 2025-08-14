@@ -88,13 +88,32 @@ class CppConverterEcho(unittest.TestCase):
 
     def test_constructor_error(self) -> None:
         bad_unicode = b"\xc3\x28"
-        s = converter.echo_simple_corrupted(self.make_simple(), bad_unicode)
+        s = converter.make_simple_corrupted(self.make_simple(), bad_unicode)
+        # this shows that the unicode passes through extractor without raising error
+        rt = converter.echo_simple(s)
         # it is not possible to create a thrift object in either thrift-python
         # or C++ that fails conversion due to a bad primitive field.
         # It is possible to set a non-primitive field in C++ that is invalid
         # in thrift-python, but there is no error until field is first accessed
         with self.assertRaises(UnicodeDecodeError):
             s.strField
+        with self.assertRaises(UnicodeDecodeError):
+            rt.strField
+
+        with self.assertRaises(UnicodeDecodeError):
+            s.strList
+        with self.assertRaises(UnicodeDecodeError):
+            rt.strList
+
+        # Currently the conversion from internal data to python value happens
+        # for all key-value pairs in a map at access time.
+        # If we make this lazy, this step will pass, and the UnicodeDecodeError
+        # will be deferred until the corrupted fields are accessed, while the
+        # valid unicode fields will become accessible.
+        with self.assertRaises(UnicodeDecodeError):
+            s.strToStrMap
+        with self.assertRaises(UnicodeDecodeError):
+            rt.strToStrMap
 
     def test_type_error(self) -> None:
         with self.assertRaises(TypeError):

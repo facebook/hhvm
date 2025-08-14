@@ -53,7 +53,13 @@ from apache.thrift.test.terse_write.terse_write.thrift_types import (
 from folly.iobuf import IOBuf
 
 from parameterized import parameterized_class
-from python_test.containers.thrift_types import Foo, Lists, Maps, Sets
+from python_test.containers.thrift_types import (
+    Foo,
+    Lists,
+    Maps,
+    Sets,
+    UnicodeContainers,
+)
 from testing.thrift_mutable_types import (
     SortedMaps as MutableSortedMaps,
     SortedSets as MutableSortedSets,
@@ -162,6 +168,9 @@ class SerializerTests(unittest.TestCase):
         self.Sets: Type[Sets] = self.container_types.Sets
         self.Lists: Type[Lists] = self.container_types.Lists
         self.Maps: Type[Maps] = self.container_types.Maps
+        self.UnicodeContainers: Type[UnicodeContainers] = (
+            self.container_types.UnicodeContainers
+        )
         self.Foo: Type[Foo] = self.container_types.Foo
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
@@ -486,6 +495,82 @@ class SerializerTests(unittest.TestCase):
         # data loss on serialization roundtrip
         reserialized = self.serializer.serialize(sb, protocol=Protocol.BINARY)
         self.assertEqual(encoded, reserialized)
+
+    def test_non_utf8_container_list(self) -> None:
+        json_bytes = b'{"stringList":["good","\xc3\x28"],"stringSet":[],"stringMap":{}}'
+        s = self.serializer.deserialize(
+            self.UnicodeContainers, json_bytes, Protocol.JSON
+        )
+        if self.is_mutable_run:
+            # mutable thrift-python lazily converts elements when accessed
+            self.assertEqual(s.stringList[0], "good")
+            with self.assertRaises(UnicodeDecodeError):
+                s.stringList[1]
+        else:
+            # immutable thrift-python eagerly converts all elements on field access
+            with self.assertRaises(UnicodeDecodeError):
+                s.stringList
+
+        round_trip_bytes = self.serializer.serialize(s, Protocol.JSON)
+        self.assertEqual(json_bytes, round_trip_bytes)
+
+    def test_non_utf8_container_set(self) -> None:
+        json_bytes = b'{"stringList":[],"stringSet":["good","\xc3\x28"],"stringMap":{}}'
+        s = self.serializer.deserialize(
+            self.UnicodeContainers, json_bytes, Protocol.JSON
+        )
+        if self.is_mutable_run:
+            # mutable thrift-python lazily converts elements when accessed
+            self.assertIn("good", s.stringSet)
+            with self.assertRaises(UnicodeDecodeError):
+                list(s.stringSet)
+
+        else:
+            # immutable thrift-python eagerly converts all elements on field access
+            with self.assertRaises(UnicodeDecodeError):
+                s.stringSet
+
+        # can't compare round-trip serialized set because ordering is random
+
+    def test_non_utf8_container_map_bad_key(self) -> None:
+        json_bytes = b'{"stringList":[],"stringSet":[],"stringMap":{"key":"val","\xc3\x28":"good"}}'
+        s = self.serializer.deserialize(
+            self.UnicodeContainers, json_bytes, Protocol.JSON
+        )
+        if self.is_mutable_run:
+            # mutable thrift-python lazily converts elements when accessed
+            self.assertEqual(s.stringMap["key"], "val")
+            with self.assertRaises(UnicodeDecodeError):
+                # note items() returns a view, need to do something with it
+                list(s.stringMap.items())
+        else:
+            # immutable thrift-python eagerly converts all elements on field access
+            # when we implement lazy behavior, it will match mutable python behavior
+            with self.assertRaises(UnicodeDecodeError):
+                s.stringMap
+
+        round_trip_bytes = self.serializer.serialize(s, Protocol.JSON)
+        self.assertEqual(json_bytes, round_trip_bytes)
+
+    def test_non_utf8_container_map_bad_val(self) -> None:
+        json_bytes = b'{"stringList":[],"stringSet":[],"stringMap":{"key":"val","good":"\xc3\x28"}}'
+        s = self.serializer.deserialize(
+            self.UnicodeContainers, json_bytes, Protocol.JSON
+        )
+        if self.is_mutable_run:
+            # mutable thrift-python lazily converts elements when accessed
+            self.assertEqual(s.stringMap["key"], "val")
+            with self.assertRaises(UnicodeDecodeError):
+                # note items() returns a view, need to do something with it
+                s.stringMap["good"]
+        else:
+            # immutable thrift-python eagerly converts all elements on field access
+            # when we implement lazy behavior, it will match mutable python behavior
+            with self.assertRaises(UnicodeDecodeError):
+                s.stringMap
+
+        round_trip_bytes = self.serializer.serialize(s, Protocol.JSON)
+        self.assertEqual(json_bytes, round_trip_bytes)
 
     # Test binary field is b64encoded in SimpleJSON protocol.
     def test_binary_serialization_simplejson(self) -> None:

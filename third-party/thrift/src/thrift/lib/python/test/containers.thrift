@@ -99,3 +99,9 @@ struct Maps {
   2: map<Foo, Foo> structMap;
   47: map<Color, Color> colorMap;
 }
+
+struct UnicodeContainers {
+  1: list<string> stringList;
+  2: set<string> stringSet;
+  3: map<string, string> stringMap;
+}

@@ -24,13 +24,17 @@ cdef extern from *:
     """
     template <typename T>
     T echo_thrift(T hrift) noexcept {
-        return hrift;
+      return hrift;
     }
 
-    template <typename T>
-    T corrupt_simple(T hrift, const std::string& bad) noexcept {
-        *hrift.strField_ref() = bad;
-        return hrift;
+    ::convertible::Simple corrupt_simple(
+        ::convertible::Simple hrift, const std::string& bad) noexcept {
+      hrift.strField() = bad;
+      hrift.strList() = std::vector<std::string>({"good", bad});
+      hrift.strToStrMap()->emplace("good_key", "good_value");
+      hrift.strToStrMap()->emplace(bad + "_key",  "bad_value");
+      hrift.strToStrMap()->emplace("bad_key",  bad + "_value");
+      return hrift;
     }
 
     """
@@ -50,11 +54,10 @@ def echo_union(strucc):
     return converter.Union_from_cpp(echo_thrift(c_strucc))
 
 # This tests constructor error (i.e., invalid C++ -> python)
-def echo_simple_corrupted(strucc, bad):
+def make_simple_corrupted(strucc, bad):
     cdef cSimple c_strucc = converter.Simple_convert_to_cpp(strucc)
     return converter.Simple_from_cpp(corrupt_simple(c_strucc, bad))
 
 def echo_RenamedEmpty(strucc):
     cdef cRenamedEmpty c_strucc = renamed_converter.RenamedEmpty_convert_to_cpp(strucc)
     return renamed_converter.RenamedEmpty_from_cpp(echo_thrift(c_strucc))
-

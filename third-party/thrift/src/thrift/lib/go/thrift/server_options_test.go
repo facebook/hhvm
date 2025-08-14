@@ -20,7 +20,6 @@ import (
 	"context"
 	"crypto/tls"
 	"net"
-	"runtime"
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
@@ -57,7 +56,7 @@ func TestWithoutPipelining(t *testing.T) {
 
 func TestWithNumWorkers(t *testing.T) {
 	defaultOptions := newServerOptions()
-	require.Equal(t, runtime.NumCPU(), defaultOptions.numWorkers)
+	require.Equal(t, GoroutinePerRequest, defaultOptions.numWorkers)
 
 	customOptions := newServerOptions(WithNumWorkers(12345))
 	require.Equal(t, 12345, customOptions.numWorkers)

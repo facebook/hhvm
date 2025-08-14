@@ -22,7 +22,6 @@ import (
 	"log"
 	"net"
 	"os"
-	"runtime"
 	"time"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
@@ -55,7 +54,7 @@ func defaultServerOptions() *serverOptions {
 	logger := log.New(os.Stderr, "", log.LstdFlags)
 	return &serverOptions{
 		pipeliningEnabled: true,
-		numWorkers:        runtime.NumCPU(),
+		numWorkers:        GoroutinePerRequest,
 		log:               logger.Printf,
 		connContext:       WithConnInfo,
 		processorStats:    make(map[string]*stats.TimingSeries),

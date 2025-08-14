@@ -63,17 +63,17 @@ int main(int argc, char* argv[]) {
     FLAGS_seed = folly::Random::rand64();
     std::cout << "Seed: " << FLAGS_seed << std::endl;
   }
-  SimParams p{t,
-              FLAGS_seed,
-              std::chrono::milliseconds(FLAGS_rtt),
-              FLAGS_lossp,
-              FLAGS_delayp,
-              std::chrono::milliseconds(FLAGS_delay),
-              uint16_t(FLAGS_ooo_thresh),
-              FLAGS_blend,
-              FLAGS_same_packet_compression,
-              uint32_t(FLAGS_table_size),
-              uint32_t(FLAGS_max_blocking)};
+  SimParams p{.type = t,
+              .seed = FLAGS_seed,
+              .rtt = std::chrono::milliseconds(FLAGS_rtt),
+              .lossProbability = FLAGS_lossp,
+              .delayProbability = FLAGS_delayp,
+              .maxDelay = std::chrono::milliseconds(FLAGS_delay),
+              .minOOOThresh = uint16_t(FLAGS_ooo_thresh),
+              .blend = FLAGS_blend,
+              .samePacketCompression = FLAGS_same_packet_compression,
+              .tableSize = uint32_t(FLAGS_table_size),
+              .maxBlocking = uint32_t(FLAGS_max_blocking)};
   CompressionSimulator sim(p);
   if (sim.readInputFromFileAndSchedule(FLAGS_input)) {
     sim.run();

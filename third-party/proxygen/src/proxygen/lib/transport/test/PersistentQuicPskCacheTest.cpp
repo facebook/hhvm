@@ -233,8 +233,9 @@ TEST_F(PersistentQuicPskCacheTest, TestEntryCorruptedCache) {
           .setCapacity(20)
           .setSyncInterval(std::chrono::seconds(1))
           .build());
-  otherCache->put("facebook.com",
-                  PersistentQuicCachedPsk{"I'm a PSK?", "params"});
+  otherCache->put(
+      "facebook.com",
+      PersistentQuicCachedPsk{.fizzPsk = "I'm a PSK?", .quicParams = "params"});
   otherCache.reset();
 
   createCache();

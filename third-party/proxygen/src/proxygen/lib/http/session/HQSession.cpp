@@ -161,7 +161,8 @@ const std::string kHQ("hq-interop");
 const std::string kH3CurrentDraft("h3-29");
 const std::string kHQCurrentDraft("hq-29");
 
-const http2::PriorityUpdate hqDefaultPriority{kSessionStreamId, false, 15};
+const http2::PriorityUpdate hqDefaultPriority{
+    .streamDependency = kSessionStreamId, .exclusive = false, .weight = 15};
 
 HQSession::~HQSession() {
   VLOG(3) << *this << " closing";

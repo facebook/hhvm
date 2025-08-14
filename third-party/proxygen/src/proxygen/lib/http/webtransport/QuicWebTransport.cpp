@@ -24,8 +24,8 @@ void QuicWebTransport::onNewBidirectionalStream(quic::StreamId id) noexcept {
     return;
   }
   auto handle = WebTransportImpl::onWebTransportBidiStream(id);
-  handler_->onNewBidiStream(
-      WebTransport::BidiStreamHandle({handle.readHandle, handle.writeHandle}));
+  handler_->onNewBidiStream(WebTransport::BidiStreamHandle(
+      {.readHandle = handle.readHandle, .writeHandle = handle.writeHandle}));
   quicSocket_->setReadCallback(id, handle.readHandle);
 }
 

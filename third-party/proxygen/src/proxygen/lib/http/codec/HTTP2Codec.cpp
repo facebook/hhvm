@@ -1122,11 +1122,12 @@ bool HTTP2Codec::onIngressUpgradeMessage(const HTTPMessage& msg) {
   Cursor c(settingsQueue.front());
   std::deque<SettingPair> settings;
   // downcast is ok because of above length check
-  http2::FrameHeader frameHeader{(uint32_t)settingsQueue.chainLength(),
-                                 0,
-                                 http2::FrameType::SETTINGS,
-                                 0,
-                                 0};
+  http2::FrameHeader frameHeader{.length =
+                                     (uint32_t)settingsQueue.chainLength(),
+                                 .stream = 0,
+                                 .type = http2::FrameType::SETTINGS,
+                                 .flags = 0,
+                                 .unused = 0};
   auto err = http2::parseSettings(c, frameHeader, settings);
   if (err != ErrorCode::NO_ERROR) {
     VLOG(4) << __func__ << " bad settings frame";
@@ -1430,7 +1431,7 @@ size_t HTTP2Codec::generateTrailers(folly::IOBufQueue& writeBuf,
     return generateEOM(writeBuf, stream);
   }
 
-  HTTPHeaderSize size{0, 0, 0};
+  HTTPHeaderSize size{.compressed = 0, .uncompressed = 0, .compressedBlock = 0};
   uint8_t headerSize = http2::kFrameHeaderSize;
   auto remainingFrameSize = maxSendFrameSize();
   auto frameHeader = writeBuf.preallocate(headerSize, kDefaultGrowth);

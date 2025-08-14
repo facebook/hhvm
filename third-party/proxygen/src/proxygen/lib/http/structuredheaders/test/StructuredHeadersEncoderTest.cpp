@@ -392,7 +392,7 @@ TEST_F(StructuredHeadersEncoderTest, TestParamListOneElt) {
   item.value = val1;
   m["abc"] = item;
 
-  ParameterisedIdentifier pident = {"foo", m};
+  ParameterisedIdentifier pident = {.identifier = "foo", .parameterMap = m};
 
   pl.emplace_back(pident);
 
@@ -414,7 +414,7 @@ TEST_F(StructuredHeadersEncoderTest, TestParamListSuccessiveNulls) {
   m["a"] = item;
   m["b"] = item;
 
-  ParameterisedIdentifier pident = {"foo", m};
+  ParameterisedIdentifier pident = {.identifier = "foo", .parameterMap = m};
 
   pl.emplace_back(pident);
 
@@ -442,7 +442,7 @@ TEST_F(StructuredHeadersEncoderTest, TestParamListManyElts) {
   item.value = val2;
   m1["goo"] = item;
 
-  ParameterisedIdentifier pident1 = {"bar", m1};
+  ParameterisedIdentifier pident1 = {.identifier = "bar", .parameterMap = m1};
 
   pl.emplace_back(pident1);
 
@@ -456,7 +456,7 @@ TEST_F(StructuredHeadersEncoderTest, TestParamListManyElts) {
   item.value = val4;
   m2["goo"] = item;
 
-  ParameterisedIdentifier pident2 = {"far", m2};
+  ParameterisedIdentifier pident2 = {.identifier = "far", .parameterMap = m2};
 
   pl.emplace_back(pident2);
 
@@ -498,7 +498,7 @@ TEST_F(StructuredHeadersEncoderTest, TestParamListBadSecondaryIdentifier) {
   item.value = val1;
   m["\nbbb"] = item;
 
-  ParameterisedIdentifier pident = {"foo", m};
+  ParameterisedIdentifier pident = {.identifier = "foo", .parameterMap = m};
 
   pl.emplace_back(pident);
 
@@ -519,7 +519,7 @@ TEST_F(StructuredHeadersEncoderTest, TestParamListBadPrimaryIdentifier) {
   item.value = val1;
   m["abc"] = item;
 
-  ParameterisedIdentifier pident = {"a+++", m};
+  ParameterisedIdentifier pident = {.identifier = "a+++", .parameterMap = m};
 
   pl.emplace_back(pident);
 
@@ -540,7 +540,7 @@ TEST_F(StructuredHeadersEncoderTest, TestParamListBadItems) {
   item.value = val1;
   m["bbb"] = item;
 
-  ParameterisedIdentifier pident = {"foo", m};
+  ParameterisedIdentifier pident = {.identifier = "foo", .parameterMap = m};
 
   pl.emplace_back(pident);
 

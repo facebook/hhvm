@@ -82,7 +82,8 @@ WebTransportImpl::newWebTransportBidiStream() {
   auto egressRes = wtEgressStreams_.emplace(std::piecewise_construct,
                                             std::forward_as_tuple(*id),
                                             std::forward_as_tuple(*this, *id));
-  return WebTransport::BidiStreamHandle({readHandle, &egressRes.first->second});
+  return WebTransport::BidiStreamHandle(
+      {.readHandle = readHandle, .writeHandle = &egressRes.first->second});
 }
 
 WebTransportImpl::BidiStreamHandle WebTransportImpl::onWebTransportBidiStream(
@@ -95,7 +96,8 @@ WebTransportImpl::BidiStreamHandle WebTransportImpl::onWebTransportBidiStream(
                                         std::forward_as_tuple(id),
                                         std::forward_as_tuple(*this, id));
   return WebTransportImpl::BidiStreamHandle(
-      {&ingRes.first->second, &egRes.first->second});
+      {.readHandle = &ingRes.first->second,
+       .writeHandle = &egRes.first->second});
 }
 
 WebTransportImpl::StreamReadHandle* WebTransportImpl::onWebTransportUniStream(
@@ -233,7 +235,7 @@ WebTransportImpl::StreamReadHandle::readStreamData() {
   } else {
     VLOG(4) << __func__ << " returning data len=" << buf_.chainLength();
     auto bufLen = buf_.chainLength();
-    WebTransport::StreamData streamData({buf_.move(), eof_});
+    WebTransport::StreamData streamData({.data = buf_.move(), .fin = eof_});
     if (eof_) {
       // unregister the read callback, but don't send STOP_SENDING
       impl_.stopReadingWebTransportIngress(id_, folly::none);
@@ -273,7 +275,8 @@ WebTransport::FCState WebTransportImpl::StreamReadHandle::dataAvailable(
       << "dataAvailable buflen=" << (data ? data->computeChainDataLength() : 0)
       << " eof=" << uint64_t(eof);
   if (readPromise_) {
-    readPromise_->setValue(WebTransport::StreamData({std::move(data), eof}));
+    readPromise_->setValue(
+        WebTransport::StreamData({.data = std::move(data), .fin = eof}));
     readPromise_.reset();
     if (eof) {
       // unregister the read callback, but don't send STOP_SENDING

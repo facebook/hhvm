@@ -37,7 +37,7 @@ struct HuffNode {
     uint8_t bits : 4; // how many bits are used for representing ch, range is
                       // 0-8
     bool isSuperNode : 1;
-  } metadata{0, false};
+  } metadata{.bits = 0, .isSuperNode = false};
 
   bool isLeaf() const {
     return !metadata.isSuperNode;

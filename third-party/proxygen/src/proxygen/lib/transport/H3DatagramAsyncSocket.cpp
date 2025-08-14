@@ -224,7 +224,7 @@ void H3DatagramAsyncSocket::onBody(
                  << " length=" << capLength;
       return;
     }
-    H3Capsule ret{type, capLength, nullptr};
+    H3Capsule ret{.type = type, .length = capLength, .data = nullptr};
     cursor.cloneAtMost(ret.data, capLength);
     options_.capsuleCallback_(std::move(ret));
   }

@@ -50,13 +50,15 @@ class MockResources : public proxygen::Resources {
   static proxygen::ResourceData getTestResourceData(
       const GetTestResourceDataParams& params) {
     proxygen::ResourceData data;
-    auto cpuStats = proxygen::CpuStats{
-        params.cpuUtilRatio,
-        std::vector<double>(params.numCpuCores, params.cpuUtilRatio),
-        80,
-        params.cpuUtilRatio,
-        params.cpuSoftIrqUtilRatio,
-        std::vector<double>(params.numCpuCores, params.cpuSoftIrqUtilRatio)};
+    auto cpuStats =
+        proxygen::CpuStats{.cpuUsageRatio = params.cpuUtilRatio,
+                           .cpuCoreUsageRatios = std::vector<double>(
+                               params.numCpuCores, params.cpuUtilRatio),
+                           .cpuUtilPercentileConfigured = 80,
+                           .cpuRatioUtilPercentile = params.cpuUtilRatio,
+                           .cpuSoftIrqUsageRatio = params.cpuSoftIrqUtilRatio,
+                           .softIrqCpuCoreRatioUtils = std::vector<double>(
+                               params.numCpuCores, params.cpuSoftIrqUtilRatio)};
     data.setCpuStats(std::move(cpuStats));
     uint64_t totalMemBytes = 100;
     data.setMemStats(

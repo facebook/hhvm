@@ -49,8 +49,8 @@ folly::Expected<DecodeResult, HPACK::DecodeError> decode(
     LOG(ERROR) << "decoder state: " << codec;
     return folly::makeUnexpected(cb.error);
   }
-  return DecodeResult{std::move(cb.getResult()->headers),
-                      cb.getResult()->bytesConsumed};
+  return DecodeResult{.headers = std::move(cb.getResult()->headers),
+                      .bytesConsumed = cb.getResult()->bytesConsumed};
 }
 
 folly::Expected<DecodeResult, HPACK::DecodeError> encodeDecode(

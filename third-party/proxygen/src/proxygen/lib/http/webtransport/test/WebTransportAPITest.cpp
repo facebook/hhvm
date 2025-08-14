@@ -32,7 +32,8 @@ TEST(WebTransportTest, AwaitNextRead) {
   folly::EventBase evb;
   MockStreamReadHandle readHandle(0);
   EXPECT_CALL(readHandle, readStreamData()).WillOnce(testing::Invoke([] {
-    return folly::makeFuture(WebTransport::StreamData({nullptr, true}));
+    return folly::makeFuture(
+        WebTransport::StreamData({.data = nullptr, .fin = true}));
   }));
 
   readHandle.awaitNextRead(

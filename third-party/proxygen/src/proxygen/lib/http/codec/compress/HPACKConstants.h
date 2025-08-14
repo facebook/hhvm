@@ -18,22 +18,22 @@ struct Instruction {
   uint8_t prefixLength;
 };
 
-const Instruction INDEX_REF{0x80, 7};
-const Instruction LITERAL_INC_INDEX{0x40, 6};
-const Instruction LITERAL{0x00, 4};
-const Instruction LITERAL_NEV_INDEX{0x10, 4};
-const Instruction TABLE_SIZE_UPDATE{0x20, 5};
+const Instruction INDEX_REF{.code = 0x80, .prefixLength = 7};
+const Instruction LITERAL_INC_INDEX{.code = 0x40, .prefixLength = 6};
+const Instruction LITERAL{.code = 0x00, .prefixLength = 4};
+const Instruction LITERAL_NEV_INDEX{.code = 0x10, .prefixLength = 4};
+const Instruction TABLE_SIZE_UPDATE{.code = 0x20, .prefixLength = 5};
 
 // Encoder Stream
-const Instruction Q_INSERT_NAME_REF{0x80, 6};
-const Instruction Q_INSERT_NO_NAME_REF{0x40, 5};
-const Instruction Q_TABLE_SIZE_UPDATE{0x20, 5};
-const Instruction Q_DUPLICATE{0x00, 5};
+const Instruction Q_INSERT_NAME_REF{.code = 0x80, .prefixLength = 6};
+const Instruction Q_INSERT_NO_NAME_REF{.code = 0x40, .prefixLength = 5};
+const Instruction Q_TABLE_SIZE_UPDATE{.code = 0x20, .prefixLength = 5};
+const Instruction Q_DUPLICATE{.code = 0x00, .prefixLength = 5};
 
 // Decoder Stream
-const Instruction Q_HEADER_ACK{0x80, 7};
-const Instruction Q_CANCEL_STREAM{0x40, 6};
-const Instruction Q_INSERT_COUNT_INC{0x00, 6};
+const Instruction Q_HEADER_ACK{.code = 0x80, .prefixLength = 7};
+const Instruction Q_CANCEL_STREAM{.code = 0x40, .prefixLength = 6};
+const Instruction Q_INSERT_COUNT_INC{.code = 0x00, .prefixLength = 6};
 
 // Request/Push Streams
 
@@ -41,14 +41,14 @@ const Instruction Q_INSERT_COUNT_INC{0x00, 6};
 const uint8_t Q_DELTA_BASE_NEG = 0x80;
 const uint8_t Q_DELTA_BASE_POS = 0x00;
 
-const Instruction Q_DELTA_BASE{0x00, 7};
+const Instruction Q_DELTA_BASE{.code = 0x00, .prefixLength = 7};
 
 // Instructions
-const Instruction Q_INDEXED{0x80, 6};
-const Instruction Q_INDEXED_POST{0x10, 4};
-const Instruction Q_LITERAL_NAME_REF{0x40, 4};
-const Instruction Q_LITERAL_NAME_REF_POST{0x00, 3};
-const Instruction Q_LITERAL{0x20, 3};
+const Instruction Q_INDEXED{.code = 0x80, .prefixLength = 6};
+const Instruction Q_INDEXED_POST{.code = 0x10, .prefixLength = 4};
+const Instruction Q_LITERAL_NAME_REF{.code = 0x40, .prefixLength = 4};
+const Instruction Q_LITERAL_NAME_REF_POST{.code = 0x00, .prefixLength = 3};
+const Instruction Q_LITERAL{.code = 0x20, .prefixLength = 3};
 
 const uint8_t Q_INDEXED_STATIC = 0x40;
 const uint8_t Q_INSERT_NAME_REF_STATIC = 0x40;

@@ -487,14 +487,14 @@ HTTP2PriorityQueue::Handle HTTP2PriorityQueue::addTransaction(
       if (numVirtualNodes_ < maxVirtualNodes_) {
         // The parent node hasn't arrived yet. For now setting
         // its priority fields to default.
-        parent =
-            nodeFromBaseNode(addTransaction(pri.streamDependency,
-                                            {rootNodeId_,
-                                             http2::DefaultPriority.exclusive,
-                                             http2::DefaultPriority.weight},
-                                            nullptr,
-                                            permanent,
-                                            depth));
+        parent = nodeFromBaseNode(
+            addTransaction(pri.streamDependency,
+                           {.streamDependency = rootNodeId_,
+                            .exclusive = http2::DefaultPriority.exclusive,
+                            .weight = http2::DefaultPriority.weight},
+                           nullptr,
+                           permanent,
+                           depth));
         if (depth) {
           *depth += 1;
         }
@@ -550,13 +550,13 @@ HTTP2PriorityQueue::Handle HTTP2PriorityQueue::updatePriority(
     } else {
       // allocate a virtual node for non-existing parent in my depenency tree
       // then do normal priority processing
-      newParent =
-          nodeFromBaseNode(addTransaction(pri.streamDependency,
-                                          {rootNodeId_,
-                                           http2::DefaultPriority.exclusive,
-                                           http2::DefaultPriority.weight},
-                                          nullptr,
-                                          false));
+      newParent = nodeFromBaseNode(
+          addTransaction(pri.streamDependency,
+                         {.streamDependency = rootNodeId_,
+                          .exclusive = http2::DefaultPriority.exclusive,
+                          .weight = http2::DefaultPriority.weight},
+                         nullptr,
+                         false));
 
       VLOG(4) << "updatePriority missing parent, creating virtual parent="
               << newParent->getID() << " for txn=" << node->getID();

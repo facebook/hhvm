@@ -572,7 +572,8 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                 VLOG(4) << "onByteEventRegistered id=" << id
                         << " offset=" << finOffset
                         << " type=" << uint64_t(type);
-                cb->onByteEventRegistered({id, finOffset, type});
+                cb->onByteEventRegistered(
+                    {.id = id, .offset = finOffset, .type = type});
                 stream.deliveryCallbacks.push_back({finOffset, cb});
               }
               eventBase_->runInLoop([this, deleted = deleted_] {
@@ -656,7 +657,8 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                 VLOG(4) << "onByteEventRegistered id=" << id
                         << " offset=" << finOffset
                         << " type=" << uint64_t(type);
-                cb->onByteEventRegistered({id, finOffset, type});
+                cb->onByteEventRegistered(
+                    {.id = id, .offset = finOffset, .type = type});
                 stream.deliveryCallbacks.push_back({finOffset, cb});
               }
               eventBase_->runInLoop([this, deleted = deleted_] {
@@ -860,14 +862,16 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                       LocalErrorCode::STREAM_NOT_EXISTS));
               VLOG(4) << "onByteEventRegistered id=" << id
                       << " offset=" << offset << " type=" << uint64_t(type);
-              cb->onByteEventRegistered({id, offset, type});
+              cb->onByteEventRegistered(
+                  {.id = id, .offset = offset, .type = type});
               if (it->second.fireByteEventAt(offset)) {
                 // already available, fire the cb from the loop
                 eventBase_->runInLoop(
                     [id, offset, type, cb] {
                       VLOG(4) << "onByteEvent id=" << id << " offset=" << offset
                               << " type=" << uint64_t(type);
-                      cb->onByteEvent({id, offset, type});
+                      cb->onByteEvent(
+                          {.id = id, .offset = offset, .type = type});
                     },
                     /*thisIteration=*/true);
                 return {};
@@ -1213,7 +1217,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
       }
       VLOG(4) << "onByteEvent id=" << id << " offset=" << cb.first
               << " type=" << uint64_t(type);
-      cb.second->onByteEvent({id, cb.first, type});
+      cb.second->onByteEvent({.id = id, .offset = cb.first, .type = type});
       callbacks.pop_front();
     }
   }

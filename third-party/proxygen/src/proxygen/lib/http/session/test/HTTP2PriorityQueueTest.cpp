@@ -92,11 +92,12 @@ class QueueTest : public testing::Test {
   }
 
   void buildSimpleTree() {
-    addTransaction(0, {kRootNodeId, false, 15});
-    addTransaction(3, {0, false, 3});
-    addTransaction(5, {0, false, 3});
-    addTransaction(7, {0, false, 7});
-    addTransaction(9, {5, false, 7});
+    addTransaction(
+        0, {.streamDependency = kRootNodeId, .exclusive = false, .weight = 15});
+    addTransaction(3, {.streamDependency = 0, .exclusive = false, .weight = 3});
+    addTransaction(5, {.streamDependency = 0, .exclusive = false, .weight = 3});
+    addTransaction(7, {.streamDependency = 0, .exclusive = false, .weight = 7});
+    addTransaction(9, {.streamDependency = 5, .exclusive = false, .weight = 7});
   }
 
   bool visitNode(HTTP2PriorityQueue&,
@@ -142,7 +143,10 @@ TEST_F(QueueTest, Basic) {
 
   // Add another node, make sure we get the correct depth.
   uint64_t depth;
-  addTransaction(11, {7, false, 15}, false, &depth);
+  addTransaction(11,
+                 {.streamDependency = 7, .exclusive = false, .weight = 15},
+                 false,
+                 &depth);
   EXPECT_EQ(depth, 3);
 }
 
@@ -166,9 +170,10 @@ TEST_F(QueueTest, RemoveParent) {
 
 TEST_F(QueueTest, RemoveParentWeights) {
   // weight_ / totalChildWeight_ < 1
-  addTransaction(0, {kRootNodeId, false, 0});
-  addTransaction(3, {0, false, 255});
-  addTransaction(5, {0, false, 255});
+  addTransaction(
+      0, {.streamDependency = kRootNodeId, .exclusive = false, .weight = 0});
+  addTransaction(3, {.streamDependency = 0, .exclusive = false, .weight = 255});
+  addTransaction(5, {.streamDependency = 0, .exclusive = false, .weight = 255});
 
   removeTransaction(0);
   dump();
@@ -178,38 +183,65 @@ TEST_F(QueueTest, RemoveParentWeights) {
 
 TEST_F(QueueTest, NodeDepth) {
   uint64_t depth{33}; // initialize to some wrong value
-  addTransaction(0, {kRootNodeId, false, 15}, false, &depth);
+  addTransaction(
+      0,
+      {.streamDependency = kRootNodeId, .exclusive = false, .weight = 15},
+      false,
+      &depth);
   EXPECT_EQ(depth, 1);
 
-  addTransaction(3, {0, false, 3}, false, &depth);
+  addTransaction(3,
+                 {.streamDependency = 0, .exclusive = false, .weight = 3},
+                 false,
+                 &depth);
   EXPECT_EQ(depth, 2);
 
-  addTransaction(5, {3, true, 7}, false, &depth);
+  addTransaction(5,
+                 {.streamDependency = 3, .exclusive = true, .weight = 7},
+                 false,
+                 &depth);
   EXPECT_EQ(depth, 3);
 
-  addTransaction(9, {0, false, 3}, true, &depth);
+  addTransaction(9,
+                 {.streamDependency = 0, .exclusive = false, .weight = 3},
+                 true,
+                 &depth);
   EXPECT_EQ(depth, 2);
   EXPECT_EQ(q_.numPendingEgress(), 3);
   EXPECT_EQ(q_.numVirtualNodes(), 1);
 
   depth = 55; // some unlikely depth
-  addTransaction(9, {0, false, 31}, false, &depth);
+  addTransaction(9,
+                 {.streamDependency = 0, .exclusive = false, .weight = 31},
+                 false,
+                 &depth);
   EXPECT_EQ(depth, 2);
   EXPECT_EQ(q_.numPendingEgress(), 4);
   EXPECT_EQ(q_.numVirtualNodes(), 0);
 
-  addTransaction(11, {0, true, 7}, false, &depth);
+  addTransaction(11,
+                 {.streamDependency = 0, .exclusive = true, .weight = 7},
+                 false,
+                 &depth);
   EXPECT_EQ(depth, 2);
   EXPECT_EQ(q_.numPendingEgress(), 5);
   EXPECT_EQ(q_.numVirtualNodes(), 0);
 
-  addTransaction(13, {kRootNodeId, true, 23}, true, &depth);
+  addTransaction(
+      13,
+      {.streamDependency = kRootNodeId, .exclusive = true, .weight = 23},
+      true,
+      &depth);
   EXPECT_EQ(depth, 1);
   EXPECT_EQ(q_.numPendingEgress(), 5);
   EXPECT_EQ(q_.numVirtualNodes(), 1);
 
   depth = 77; // some unlikely depth
-  addTransaction(13, {kRootNodeId, true, 33}, false, &depth);
+  addTransaction(
+      13,
+      {.streamDependency = kRootNodeId, .exclusive = true, .weight = 33},
+      false,
+      &depth);
   EXPECT_EQ(depth, 1);
   EXPECT_EQ(q_.numPendingEgress(), 6);
   EXPECT_EQ(q_.numVirtualNodes(), 0);
@@ -219,7 +251,8 @@ TEST_F(QueueTest, UpdateWeight) {
   buildSimpleTree();
 
   uint64_t depth = 0;
-  updatePriority(5, {0, false, 7}, &depth);
+  updatePriority(
+      5, {.streamDependency = 0, .exclusive = false, .weight = 7}, &depth);
   dump();
 
   EXPECT_EQ(nodes_, IDList({{0, 100}, {3, 20}, {5, 40}, {9, 100}, {7, 40}}));
@@ -229,11 +262,14 @@ TEST_F(QueueTest, UpdateWeight) {
 // Previously the code would allow duplicate entries in the priority tree under
 // certain circumstances.
 TEST_F(QueueTest, DuplicateID) {
-  q_.addOrUpdatePriorityNode(0, {kRootNodeId, false, 15});
-  addTransaction(0, {kRootNodeId, true, 15});
-  q_.addOrUpdatePriorityNode(3, {0, false, 15});
-  addTransaction(5, {3, false, 15});
-  addTransaction(3, {5, false, 15});
+  q_.addOrUpdatePriorityNode(
+      0, {.streamDependency = kRootNodeId, .exclusive = false, .weight = 15});
+  addTransaction(
+      0, {.streamDependency = kRootNodeId, .exclusive = true, .weight = 15});
+  q_.addOrUpdatePriorityNode(
+      3, {.streamDependency = 0, .exclusive = false, .weight = 15});
+  addTransaction(5, {.streamDependency = 3, .exclusive = false, .weight = 15});
+  addTransaction(3, {.streamDependency = 5, .exclusive = false, .weight = 15});
   removeTransaction(5);
   auto stopFn = [] { return false; };
 
@@ -242,13 +278,15 @@ TEST_F(QueueTest, DuplicateID) {
 }
 
 TEST_F(QueueTest, UpdateWeightNotEnqueued) {
-  addTransaction(0, {kRootNodeId, false, 7});
-  addTransaction(3, {0, false, 7});
+  addTransaction(
+      0, {.streamDependency = kRootNodeId, .exclusive = false, .weight = 7});
+  addTransaction(3, {.streamDependency = 0, .exclusive = false, .weight = 7});
 
   signalEgress(0, false);
   signalEgress(3, false);
   uint64_t depth = 0;
-  updatePriority(0, {3, false, 7}, &depth);
+  updatePriority(
+      0, {.streamDependency = 3, .exclusive = false, .weight = 7}, &depth);
   dump();
 
   EXPECT_EQ(nodes_, IDList({{3, 100}, {0, 100}}));
@@ -258,7 +296,7 @@ TEST_F(QueueTest, UpdateWeightNotEnqueued) {
 TEST_F(QueueTest, UpdateWeightExcl) {
   buildSimpleTree();
 
-  updatePriority(5, {0, true, 7});
+  updatePriority(5, {.streamDependency = 0, .exclusive = true, .weight = 7});
   dump();
 
   EXPECT_EQ(nodes_, IDList({{0, 100}, {5, 100}, {9, 40}, {3, 20}, {7, 40}}));
@@ -271,7 +309,7 @@ TEST_F(QueueTest, UpdateWeightExclDequeued) {
   buildSimpleTree();
 
   signalEgress(5, false);
-  updatePriority(5, {0, true, 7});
+  updatePriority(5, {.streamDependency = 0, .exclusive = true, .weight = 7});
   signalEgress(0, false);
   nextEgress();
 
@@ -282,7 +320,8 @@ TEST_F(QueueTest, UpdateWeightUnknownParent) {
   buildSimpleTree();
 
   uint64_t depth = 0;
-  updatePriority(5, {97, false, 15}, &depth);
+  updatePriority(
+      5, {.streamDependency = 97, .exclusive = false, .weight = 15}, &depth);
   dump();
 
   EXPECT_EQ(nodes_,
@@ -290,7 +329,8 @@ TEST_F(QueueTest, UpdateWeightUnknownParent) {
   EXPECT_EQ(depth, 2);
 
   depth = 0;
-  updatePriority(9, {99, false, 15}, &depth);
+  updatePriority(
+      9, {.streamDependency = 99, .exclusive = false, .weight = 15}, &depth);
   dump();
 
   EXPECT_EQ(
@@ -303,7 +343,7 @@ TEST_F(QueueTest, UpdateWeightUnknownParent) {
 TEST_F(QueueTest, UpdateParentSibling) {
   buildSimpleTree();
 
-  updatePriority(5, {3, false, 3});
+  updatePriority(5, {.streamDependency = 3, .exclusive = false, .weight = 3});
   dump();
 
   EXPECT_EQ(nodes_, IDList({{0, 100}, {3, 33}, {5, 100}, {9, 100}, {7, 66}}));
@@ -314,7 +354,7 @@ TEST_F(QueueTest, UpdateParentSibling) {
   // Clear 5's egress (so it is only in the tree because 9 has egress) and move
   // it back.  Hit's a slightly different code path in reparent
   signalEgress(5, false);
-  updatePriority(5, {0, false, 3});
+  updatePriority(5, {.streamDependency = 0, .exclusive = false, .weight = 3});
   dump();
 
   EXPECT_EQ(nodes_, IDList({{0, 100}, {3, 25}, {7, 50}, {5, 25}, {9, 100}}));
@@ -326,7 +366,7 @@ TEST_F(QueueTest, UpdateParentSibling) {
 TEST_F(QueueTest, UpdateParentSiblingExcl) {
   buildSimpleTree();
 
-  updatePriority(7, {5, true, 3});
+  updatePriority(7, {.streamDependency = 5, .exclusive = true, .weight = 3});
   dump();
 
   EXPECT_EQ(nodes_, IDList({{0, 100}, {3, 50}, {5, 50}, {7, 100}, {9, 100}}));
@@ -340,7 +380,8 @@ TEST_F(QueueTest, UpdateParentSiblingExcl) {
 TEST_F(QueueTest, UpdateParentAncestor) {
   buildSimpleTree();
 
-  updatePriority(9, {kRootNodeId, false, 15});
+  updatePriority(
+      9, {.streamDependency = kRootNodeId, .exclusive = false, .weight = 15});
   dump();
 
   EXPECT_EQ(nodes_, IDList({{0, 50}, {3, 25}, {5, 25}, {7, 50}, {9, 50}}));
@@ -351,7 +392,8 @@ TEST_F(QueueTest, UpdateParentAncestor) {
 TEST_F(QueueTest, UpdateParentAncestorExcl) {
   buildSimpleTree();
 
-  updatePriority(9, {kRootNodeId, true, 15});
+  updatePriority(
+      9, {.streamDependency = kRootNodeId, .exclusive = true, .weight = 15});
   dump();
 
   EXPECT_EQ(nodes_, IDList({{9, 100}, {0, 100}, {3, 25}, {5, 25}, {7, 50}}));
@@ -362,7 +404,7 @@ TEST_F(QueueTest, UpdateParentAncestorExcl) {
 TEST_F(QueueTest, UpdateParentDescendant) {
   buildSimpleTree();
 
-  updatePriority(0, {5, false, 7});
+  updatePriority(0, {.streamDependency = 5, .exclusive = false, .weight = 7});
   dump();
 
   EXPECT_EQ(nodes_, IDList({{5, 100}, {9, 50}, {0, 50}, {3, 33}, {7, 66}}));
@@ -376,7 +418,7 @@ TEST_F(QueueTest, UpdateParentDescendant) {
 TEST_F(QueueTest, UpdateParentDescendantExcl) {
   buildSimpleTree();
 
-  updatePriority(0, {5, true, 7});
+  updatePriority(0, {.streamDependency = 5, .exclusive = true, .weight = 7});
   dump();
 
   EXPECT_EQ(nodes_, IDList({{5, 100}, {0, 100}, {3, 20}, {7, 40}, {9, 40}}));
@@ -391,7 +433,7 @@ TEST_F(QueueTest, UpdateParentDescendantExcl) {
 TEST_F(QueueTest, ExclusiveAdd) {
   buildSimpleTree();
 
-  addTransaction(11, {0, true, 100});
+  addTransaction(11, {.streamDependency = 0, .exclusive = true, .weight = 100});
 
   dump();
   EXPECT_EQ(nodes_,
@@ -401,7 +443,8 @@ TEST_F(QueueTest, ExclusiveAdd) {
 TEST_F(QueueTest, AddUnknown) {
   buildSimpleTree();
 
-  addTransaction(11, {75, false, 15});
+  addTransaction(11,
+                 {.streamDependency = 75, .exclusive = false, .weight = 15});
 
   dump();
   EXPECT_EQ(
@@ -411,7 +454,7 @@ TEST_F(QueueTest, AddUnknown) {
 
   // Now let's add the missing parent node and check if it was
   // relocated properly
-  addTransaction(75, {0, false, 7});
+  addTransaction(75, {.streamDependency = 0, .exclusive = false, .weight = 7});
 
   dump();
   EXPECT_EQ(nodes_,
@@ -425,7 +468,8 @@ TEST_F(QueueTest, AddUnknown) {
 }
 
 TEST_F(QueueTest, AddMax) {
-  addTransaction(0, {kRootNodeId, false, 255});
+  addTransaction(
+      0, {.streamDependency = kRootNodeId, .exclusive = false, .weight = 255});
 
   nextEgress();
   EXPECT_EQ(nodes_, IDList({{0, 100}}));
@@ -460,7 +504,7 @@ TEST_F(QueueTest, NextEgress) {
   nextEgress();
   EXPECT_EQ(nodes_, IDList({{0, 100}}));
 
-  addTransaction(11, {7, false, 15});
+  addTransaction(11, {.streamDependency = 7, .exclusive = false, .weight = 15});
   signalEgress(0, false);
 
   nextEgress();
@@ -505,7 +549,7 @@ TEST_F(QueueTest, NextEgressExclusiveAdd) {
   signalEgress(9, false);
 
   // Add a transaction with exclusive dependency, clear its egress
-  addTransaction(11, {0, true, 100});
+  addTransaction(11, {.streamDependency = 0, .exclusive = true, .weight = 100});
   signalEgress(11, false);
 
   // signal egress for a child that got moved via exclusive dep
@@ -525,7 +569,7 @@ TEST_F(QueueTest, NextEgressExclusiveAddWithEgress) {
   signalEgress(9, false);
 
   // Add a transaction with exclusive dependency, clear its egress
-  addTransaction(11, {0, true, 100});
+  addTransaction(11, {.streamDependency = 0, .exclusive = true, .weight = 100});
   signalEgress(11, false);
   nextEgress();
   EXPECT_EQ(nodes_, IDList({{3, 100}}));
@@ -542,10 +586,12 @@ TEST_F(QueueTest, UpdatePriorityReparentSubtree) {
   signalEgress(7, false);
 
   // Update priority of non-enqueued but in egress tree node
-  updatePriority(5, {0, false, 14}, nullptr);
+  updatePriority(
+      5, {.streamDependency = 0, .exclusive = false, .weight = 14}, nullptr);
 
   // update 9's weight and reparent
-  updatePriority(9, {3, false, 14}, nullptr);
+  updatePriority(
+      9, {.streamDependency = 3, .exclusive = false, .weight = 14}, nullptr);
 
   nextEgress();
   EXPECT_EQ(nodes_, IDList({{9, 100}}));
@@ -574,22 +620,24 @@ TEST_F(QueueTest, NextEgressRemoveParent) {
 }
 
 TEST_F(QueueTest, AddExclusiveDescendantEnqueued) {
-  addTransaction(0, {kRootNodeId, false, 100});
-  addTransaction(3, {0, false, 100});
-  addTransaction(5, {3, false, 100});
+  addTransaction(
+      0, {.streamDependency = kRootNodeId, .exclusive = false, .weight = 100});
+  addTransaction(3, {.streamDependency = 0, .exclusive = false, .weight = 100});
+  addTransaction(5, {.streamDependency = 3, .exclusive = false, .weight = 100});
   signalEgress(0, false);
   signalEgress(3, false);
   // add a new exclusive child of 1.  1's child 3 is not enqueued but is in the
   // the egress tree.
-  addTransaction(7, {0, true, 100});
+  addTransaction(7, {.streamDependency = 0, .exclusive = true, .weight = 100});
   nextEgress();
   EXPECT_EQ(nodes_, IDList({{7, 100}}));
 }
 
 TEST_F(QueueTest, NextEgressRemoveParentEnqueued) {
-  addTransaction(0, {kRootNodeId, false, 100});
-  addTransaction(3, {0, false, 100});
-  addTransaction(5, {3, false, 100});
+  addTransaction(
+      0, {.streamDependency = kRootNodeId, .exclusive = false, .weight = 100});
+  addTransaction(3, {.streamDependency = 0, .exclusive = false, .weight = 100});
+  addTransaction(5, {.streamDependency = 3, .exclusive = false, .weight = 100});
   signalEgress(3, false);
   // When 3's children (5) are added to 1, both are already in the egress tree
   // and the signal does not need to propagate
@@ -600,10 +648,11 @@ TEST_F(QueueTest, NextEgressRemoveParentEnqueued) {
 }
 
 TEST_F(QueueTest, NextEgressRemoveParentEnqueuedIndirect) {
-  addTransaction(0, {kRootNodeId, false, 100});
-  addTransaction(3, {0, false, 100});
-  addTransaction(5, {3, false, 100});
-  addTransaction(7, {0, false, 100});
+  addTransaction(
+      0, {.streamDependency = kRootNodeId, .exclusive = false, .weight = 100});
+  addTransaction(3, {.streamDependency = 0, .exclusive = false, .weight = 100});
+  addTransaction(5, {.streamDependency = 3, .exclusive = false, .weight = 100});
+  addTransaction(7, {.streamDependency = 0, .exclusive = false, .weight = 100});
   signalEgress(3, false);
   signalEgress(0, false);
   // When 3's children (5) are added to 1, both are already in the egress tree
@@ -619,11 +668,12 @@ TEST_F(QueueTest, ChromeTest) {
   // (hi,mid,low).  Note the test uses rand32() with a particular seed so the
   // output is predictable.
   std::array<HTTPCodec::StreamID, 3> pris = {0, 3, 5};
-  addTransaction(0, {kRootNodeId, true, 99});
+  addTransaction(
+      0, {.streamDependency = kRootNodeId, .exclusive = true, .weight = 99});
   signalEgress(0, false);
-  addTransaction(3, {0, true, 99});
+  addTransaction(3, {.streamDependency = 0, .exclusive = true, .weight = 99});
   signalEgress(3, false);
-  addTransaction(5, {3, true, 99});
+  addTransaction(5, {.streamDependency = 3, .exclusive = true, .weight = 99});
   signalEgress(5, false);
 
   std::vector<HTTPCodec::StreamID> txns;
@@ -643,7 +693,9 @@ TEST_F(QueueTest, ChromeTest) {
       txn = nextId;
       nextId += 2;
       VLOG(2) << "Adding txn=" << txn << " with dep=" << dep;
-      addTransaction(txn, {(uint32_t)dep, true, 99});
+      addTransaction(
+          txn,
+          {.streamDependency = (uint32_t)dep, .exclusive = true, .weight = 99});
       txns.push_back(txn);
       active.push_back(txn);
     } else if (action == 1 && !inactive.empty()) {
@@ -687,11 +739,14 @@ TEST_F(QueueTest, ChromeTest) {
 }
 
 TEST_F(QueueTest, AddOrUpdate) {
-  q_.addOrUpdatePriorityNode(0, {kRootNodeId, false, 15});
-  q_.addOrUpdatePriorityNode(3, {kRootNodeId, false, 15});
+  q_.addOrUpdatePriorityNode(
+      0, {.streamDependency = kRootNodeId, .exclusive = false, .weight = 15});
+  q_.addOrUpdatePriorityNode(
+      3, {.streamDependency = kRootNodeId, .exclusive = false, .weight = 15});
   dump();
   EXPECT_EQ(nodes_, IDList({{0, 50}, {3, 50}}));
-  q_.addOrUpdatePriorityNode(0, {kRootNodeId, false, 3});
+  q_.addOrUpdatePriorityNode(
+      0, {.streamDependency = kRootNodeId, .exclusive = false, .weight = 3});
   dump();
   EXPECT_EQ(nodes_, IDList({{0, 20}, {3, 80}}));
 }
@@ -744,7 +799,8 @@ class DanglingQueueTest
 };
 
 TEST_F(DanglingQueueTest, Basic) {
-  addTransaction(0, {kRootNodeId, false, 15});
+  addTransaction(
+      0, {.streamDependency = kRootNodeId, .exclusive = false, .weight = 15});
   removeTransaction(0);
   dump();
   EXPECT_EQ(nodes_, IDList({{0, 100}}));
@@ -754,9 +810,14 @@ TEST_F(DanglingQueueTest, Basic) {
 }
 
 TEST_F(DanglingQueueTest, Chain) {
-  addTransaction(0, {kRootNodeId, false, 15}, true);
-  addTransaction(3, {0, false, 15}, true);
-  addTransaction(5, {3, false, 15}, true);
+  addTransaction(
+      0,
+      {.streamDependency = kRootNodeId, .exclusive = false, .weight = 15},
+      true);
+  addTransaction(
+      3, {.streamDependency = 0, .exclusive = false, .weight = 15}, true);
+  addTransaction(
+      5, {.streamDependency = 3, .exclusive = false, .weight = 15}, true);
   dump();
   EXPECT_EQ(nodes_, IDList({{0, 100}, {3, 100}, {5, 100}}));
   expireNodes();
@@ -771,9 +832,14 @@ TEST_F(DanglingQueueTest, Chain) {
 }
 
 TEST_F(DanglingQueueTest, Drop) {
-  addTransaction(0, {kRootNodeId, false, 15}, true);
-  addTransaction(3, {0, false, 15}, true);
-  addTransaction(5, {0, false, 15}, true);
+  addTransaction(
+      0,
+      {.streamDependency = kRootNodeId, .exclusive = false, .weight = 15},
+      true);
+  addTransaction(
+      3, {.streamDependency = 0, .exclusive = false, .weight = 15}, true);
+  addTransaction(
+      5, {.streamDependency = 0, .exclusive = false, .weight = 15}, true);
   dump();
   q_.dropPriorityNodes();
   dump();
@@ -781,9 +847,14 @@ TEST_F(DanglingQueueTest, Drop) {
 }
 
 TEST_F(DanglingQueueTest, ExpireParentOfMismatchedTwins) {
-  addTransaction(0, {kRootNodeId, true, 219}, false);
-  addTransaction(3, {0, false, 146}, false);
-  addTransaction(5, {0, false, 146}, false);
+  addTransaction(
+      0,
+      {.streamDependency = kRootNodeId, .exclusive = true, .weight = 219},
+      false);
+  addTransaction(
+      3, {.streamDependency = 0, .exclusive = false, .weight = 146}, false);
+  addTransaction(
+      5, {.streamDependency = 0, .exclusive = false, .weight = 146}, false);
   signalEgress(3, false);
   signalEgress(5, true);
   removeTransaction(0);
@@ -796,13 +867,19 @@ TEST_F(DanglingQueueTest, ExpireParentOfMismatchedTwins) {
 
 TEST_F(DanglingQueueTest, AddExpireAdd) {
   // Add a virtual node
-  addTransaction(0, {kRootNodeId, true, 219}, true);
+  addTransaction(
+      0,
+      {.streamDependency = kRootNodeId, .exclusive = true, .weight = 219},
+      true);
   // expire it
   expireNodes();
   dump();
   EXPECT_TRUE(q_.empty());
   // Add a real node with the same id
-  addTransaction(0, {kRootNodeId, true, 219}, false);
+  addTransaction(
+      0,
+      {.streamDependency = kRootNodeId, .exclusive = true, .weight = 219},
+      false);
   dump();
   EXPECT_EQ(nodes_, IDList({{0, 100}}));
 }
@@ -817,15 +894,18 @@ TEST_F(DanglingQueueTest, Refresh) {
   // from checking the real time
   DummyTimeout t;
   timer_.scheduleTimeout(&t, std::chrono::seconds(300));
-  addTransaction(0, {kRootNodeId, false, 15});
-  addTransaction(3, {kRootNodeId, false, 15});
+  addTransaction(
+      0, {.streamDependency = kRootNodeId, .exclusive = false, .weight = 15});
+  addTransaction(
+      3, {.streamDependency = kRootNodeId, .exclusive = false, .weight = 15});
   // 0 is now virtual
   removeTransaction(0);
   dump();
   EXPECT_EQ(nodes_, IDList({{0, 50}, {3, 50}}));
   tick();
   // before 0 times out, change it's priority, should still be there
-  updatePriority(0, {kRootNodeId, false, 3});
+  updatePriority(
+      0, {.streamDependency = kRootNodeId, .exclusive = false, .weight = 3});
   dump();
   EXPECT_EQ(nodes_, IDList({{0, 20}, {3, 80}}));
 

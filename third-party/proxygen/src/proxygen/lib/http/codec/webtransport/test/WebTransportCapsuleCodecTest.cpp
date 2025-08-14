@@ -99,7 +99,8 @@ TEST_F(WebTransportCapsuleCodecTest, OnPaddingCapsule) {
 }
 
 TEST_F(WebTransportCapsuleCodecTest, OnWTResetStreamCapsule) {
-  WTResetStreamCapsule capsule{1, 2, 3};
+  WTResetStreamCapsule capsule{
+      .streamId = 1, .appProtocolErrorCode = 2, .reliableSize = 3};
   writeWTResetStream(queue_, capsule);
 
   auto buf = queue_.move();
@@ -114,16 +115,17 @@ TEST_F(WebTransportCapsuleCodecTest, OnWTResetStreamCapsule) {
 }
 
 TEST_F(WebTransportCapsuleCodecTest, OnWTResetStreamCapsuleError) {
-  WTResetStreamCapsule capsule{1,
-                               std::numeric_limits<uint32_t>::max(),
-                               std::numeric_limits<uint32_t>::max()};
+  WTResetStreamCapsule capsule{
+      .streamId = 1,
+      .appProtocolErrorCode = std::numeric_limits<uint32_t>::max(),
+      .reliableSize = std::numeric_limits<uint32_t>::max()};
   writeWTResetStream(queue_, capsule);
   testParseUnderflow(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW,
                      CodecVersion::H2);
 }
 
 TEST_F(WebTransportCapsuleCodecTest, OnWTStopSendingCapsule) {
-  WTStopSendingCapsule capsule{1, 2};
+  WTStopSendingCapsule capsule{.streamId = 1, .appProtocolErrorCode = 2};
   writeWTStopSending(queue_, capsule);
 
   auto buf = queue_.move();
@@ -137,14 +139,18 @@ TEST_F(WebTransportCapsuleCodecTest, OnWTStopSendingCapsule) {
 }
 
 TEST_F(WebTransportCapsuleCodecTest, OnWTStopSendingCapsuleError) {
-  WTStopSendingCapsule capsule{1, std::numeric_limits<uint32_t>::max()};
+  WTStopSendingCapsule capsule{.streamId = 1,
+                               .appProtocolErrorCode =
+                                   std::numeric_limits<uint32_t>::max()};
   writeWTStopSending(queue_, capsule);
   testParseUnderflow(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW,
                      CodecVersion::H2);
 }
 
 TEST_F(WebTransportCapsuleCodecTest, OnWTStreamCapsule) {
-  WTStreamCapsule capsule{1, folly::IOBuf::copyBuffer("roast beef"), true};
+  WTStreamCapsule capsule{.streamId = 1,
+                          .streamData = folly::IOBuf::copyBuffer("roast beef"),
+                          .fin = true};
   writeWTStream(queue_, capsule);
 
   auto buf = queue_.move();
@@ -160,7 +166,9 @@ TEST_F(WebTransportCapsuleCodecTest, OnWTStreamCapsule) {
 }
 
 TEST_F(WebTransportCapsuleCodecTest, OnWTStreamCapsuleError) {
-  WTStreamCapsule capsule{1, folly::IOBuf::copyBuffer("roast"), true};
+  WTStreamCapsule capsule{.streamId = 1,
+                          .streamData = folly::IOBuf::copyBuffer("roast"),
+                          .fin = true};
   writeWTStream(queue_, capsule);
   testParseUnderflow(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW,
                      CodecVersion::H2);
@@ -207,7 +215,7 @@ TEST_F(WebTransportCapsuleCodecTest, H3OnWTMaxDataCapsuleError) {
 }
 
 TEST_F(WebTransportCapsuleCodecTest, OnWTMaxStreamDataCapsule) {
-  WTMaxStreamDataCapsule capsule{1, 100};
+  WTMaxStreamDataCapsule capsule{.streamId = 1, .maximumStreamData = 100};
   writeWTMaxStreamData(queue_, capsule);
 
   auto buf = queue_.move();
@@ -221,7 +229,8 @@ TEST_F(WebTransportCapsuleCodecTest, OnWTMaxStreamDataCapsule) {
 }
 
 TEST_F(WebTransportCapsuleCodecTest, OnWTMaxStreamDataCapsuleError) {
-  WTMaxStreamDataCapsule capsule{1, std::numeric_limits<uint32_t>::max()};
+  WTMaxStreamDataCapsule capsule{
+      .streamId = 1, .maximumStreamData = std::numeric_limits<uint32_t>::max()};
   writeWTMaxStreamData(queue_, capsule);
   testParseUnderflow(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW,
                      CodecVersion::H2);
@@ -348,7 +357,7 @@ TEST_F(WebTransportCapsuleCodecTest, H3OnWTStreamsBlockedCapsuleError) {
 }
 
 TEST_F(WebTransportCapsuleCodecTest, OnWTStreamDataBlockedCapsule) {
-  WTStreamDataBlockedCapsule capsule{1, 100};
+  WTStreamDataBlockedCapsule capsule{.streamId = 1, .maximumStreamData = 100};
   writeWTStreamDataBlocked(queue_, capsule);
 
   auto buf = queue_.move();
@@ -362,7 +371,8 @@ TEST_F(WebTransportCapsuleCodecTest, OnWTStreamDataBlockedCapsule) {
 }
 
 TEST_F(WebTransportCapsuleCodecTest, OnWTStreamDataBlockedCapsuleError) {
-  WTStreamDataBlockedCapsule capsule{1, std::numeric_limits<uint32_t>::max()};
+  WTStreamDataBlockedCapsule capsule{
+      .streamId = 1, .maximumStreamData = std::numeric_limits<uint32_t>::max()};
   writeWTStreamDataBlocked(queue_, capsule);
   testParseUnderflow(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW,
                      CodecVersion::H2);
@@ -383,7 +393,8 @@ TEST_F(WebTransportCapsuleCodecTest, OnDatagramCapsule) {
 }
 
 TEST_F(WebTransportCapsuleCodecTest, H2OnCloseWebTransportSessionCapsule) {
-  CloseWebTransportSessionCapsule capsule{500, "BAD!"};
+  CloseWebTransportSessionCapsule capsule{.applicationErrorCode = 500,
+                                          .applicationErrorMessage = "BAD!"};
   writeCloseWebTransportSession(queue_, capsule);
 
   auto buf = queue_.move();
@@ -397,7 +408,8 @@ TEST_F(WebTransportCapsuleCodecTest, H2OnCloseWebTransportSessionCapsule) {
 }
 
 TEST_F(WebTransportCapsuleCodecTest, H3OnCloseWebTransportSessionCapsule) {
-  CloseWebTransportSessionCapsule capsule{500, "BAD!"};
+  CloseWebTransportSessionCapsule capsule{.applicationErrorCode = 500,
+                                          .applicationErrorMessage = "BAD!"};
   writeCloseWebTransportSession(queue_, capsule);
 
   auto buf = queue_.move();
@@ -411,14 +423,16 @@ TEST_F(WebTransportCapsuleCodecTest, H3OnCloseWebTransportSessionCapsule) {
 }
 
 TEST_F(WebTransportCapsuleCodecTest, H2OnCloseWebTransportSessionCapsuleError) {
-  CloseWebTransportSessionCapsule capsule{500, "BAD!"};
+  CloseWebTransportSessionCapsule capsule{.applicationErrorCode = 500,
+                                          .applicationErrorMessage = "BAD!"};
   writeCloseWebTransportSession(queue_, capsule);
   testParseUnderflow(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW,
                      CodecVersion::H2);
 }
 
 TEST_F(WebTransportCapsuleCodecTest, H3OnCloseWebTransportSessionCapsuleError) {
-  CloseWebTransportSessionCapsule capsule{500, "BAD!"};
+  CloseWebTransportSessionCapsule capsule{.applicationErrorCode = 500,
+                                          .applicationErrorMessage = "BAD!"};
   writeCloseWebTransportSession(queue_, capsule);
   testParseUnderflow(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW,
                      CodecVersion::H3);

@@ -180,7 +180,8 @@ TEST_F(PersistentFizzPskCacheTest, TestEntryCorruptedCache) {
   auto otherCache = std::make_unique<
       wangle::FilePersistentCache<std::string, PersistentCachedPsk>>(
       file_, std::move(config));
-  otherCache->put("facebook.com", PersistentCachedPsk{"I'm a PSK?", 2});
+  otherCache->put("facebook.com",
+                  PersistentCachedPsk{.serialized = "I'm a PSK?", .uses = 2});
   otherCache.reset();
 
   createCache();
@@ -200,8 +201,9 @@ TEST_F(PersistentFizzPskCacheTest, TestTruncatedEntry) {
       serializePsk(fizz::openssl::certificateSerializer(), psk1_);
   // Store PSK with last 12 characters (64 bits + 32 bits) truncated
   otherCache->put("facebook.com",
-                  PersistentCachedPsk{
-                      psk1Serialized.substr(0, psk1Serialized.size() - 12), 2});
+                  PersistentCachedPsk{.serialized = psk1Serialized.substr(
+                                          0, psk1Serialized.size() - 12),
+                                      .uses = 2});
   otherCache.reset();
 
   createCache();
@@ -221,8 +223,9 @@ TEST_F(PersistentFizzPskCacheTest, TestTruncatedHandshakeTime) {
       serializePsk(fizz::openssl::certificateSerializer(), psk1_);
   // Store PSK with last 12 characters (64 bits) truncated
   otherCache->put("facebook.com",
-                  PersistentCachedPsk{
-                      psk1Serialized.substr(0, psk1Serialized.size() - 8), 2});
+                  PersistentCachedPsk{.serialized = psk1Serialized.substr(
+                                          0, psk1Serialized.size() - 8),
+                                      .uses = 2});
   otherCache.reset();
 
   createCache();

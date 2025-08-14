@@ -42,7 +42,7 @@ class TestStreamingCallback : public HPACK::StreamingCallback {
 
   folly::Expected<HeaderDecodeResult, HPACK::DecodeError> getResult() {
     if (error == HPACK::DecodeError::NONE) {
-      return HeaderDecodeResult{headers, 0};
+      return HeaderDecodeResult{.headers = headers, .bytesConsumed = 0};
     } else {
       return folly::makeUnexpected(error);
     }

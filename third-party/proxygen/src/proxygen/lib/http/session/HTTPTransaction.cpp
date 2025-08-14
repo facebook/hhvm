@@ -2083,12 +2083,12 @@ WebTransportImpl::BidiStreamHandle HTTPTransaction::onWebTransportBidiStream(
                                                   WebTransport::kInternalError);
     wtTransportProvider_->stopReadingWebTransportIngress(
         id, WebTransport::kInternalError);
-    return {nullptr, nullptr};
+    return {.readHandle = nullptr, .writeHandle = nullptr};
   }
   refreshTimeout();
   auto handle = webTransportImpl_->onWebTransportBidiStream(id);
-  handler_->onWebTransportBidiStream(id,
-                                     {handle.readHandle, handle.writeHandle});
+  handler_->onWebTransportBidiStream(
+      id, {.readHandle = handle.readHandle, .writeHandle = handle.writeHandle});
   // what if the handler killed handle (stop sending/fin/rst)?
   return handle;
 }

@@ -44,24 +44,25 @@ class CompressionFilterUtils {
     switch (
         determineCompressionType(msg, options.enableZstd, options.enableGzip)) {
       case CodecType::ZLIB:
-        return FilterParams{options.minimumCompressionSize,
-                            [level = options.zlibCompressionLevel]()
-                                -> std::unique_ptr<StreamCompressor> {
-                              return std::make_unique<ZlibStreamCompressor>(
-                                  proxygen::CompressionType::GZIP, level);
-                            },
-                            "gzip",
-                            options.compressibleContentTypes};
+        return FilterParams{
+            .minimumCompressionSize = options.minimumCompressionSize,
+            .compressorFactory = [level = options.zlibCompressionLevel]()
+                -> std::unique_ptr<StreamCompressor> {
+              return std::make_unique<ZlibStreamCompressor>(
+                  proxygen::CompressionType::GZIP, level);
+            },
+            .headerEncoding = "gzip",
+            .compressibleContentTypes = options.compressibleContentTypes};
       case CodecType::ZSTD:
-        return FilterParams{options.minimumCompressionSize,
-                            [level = options.zstdCompressionLevel,
-                             independent = options.independentChunks]()
-                                -> std::unique_ptr<StreamCompressor> {
-                              return std::make_unique<ZstdStreamCompressor>(
-                                  level, independent);
-                            },
-                            "zstd",
-                            options.compressibleContentTypes};
+        return FilterParams{
+            .minimumCompressionSize = options.minimumCompressionSize,
+            .compressorFactory = [level = options.zstdCompressionLevel,
+                                  independent = options.independentChunks]()
+                -> std::unique_ptr<StreamCompressor> {
+              return std::make_unique<ZstdStreamCompressor>(level, independent);
+            },
+            .headerEncoding = "zstd",
+            .compressibleContentTypes = options.compressibleContentTypes};
       case CodecType::NO_COMPRESSION:
         return folly::none;
     }

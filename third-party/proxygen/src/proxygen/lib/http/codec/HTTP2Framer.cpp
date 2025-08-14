@@ -18,7 +18,8 @@ namespace proxygen::http2 {
 
 const uint8_t kMinExperimentalFrameType = 0xf0;
 const Padding kNoPadding = folly::none;
-const PriorityUpdate DefaultPriority{0, false, 15};
+const PriorityUpdate DefaultPriority{
+    .streamDependency = 0, .exclusive = false, .weight = 15};
 
 namespace {
 

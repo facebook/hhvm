@@ -35,8 +35,26 @@ constexpr std::string_view kAnnotation =
     "@thrift.AllowUnsafeOptionalCustomDefaultValue";
 constexpr const char* const kAnnotationUri =
     kAllowUnsafeOptionalCustomDefaultValueUri;
+constexpr std::string_view kUnionAnnotation =
+    "@thrift.AllowUnsafeUnionFieldCustomDefaultValue";
+constexpr const char* const kUnionAnnotationUri =
+    kAllowUnsafeUnionFieldCustomDefaultValueUri;
 
-bool should_annotate_field(const t_field& field) {
+bool should_annotate_field(const t_field& field, const t_structured& parent) {
+  if (field.default_value() == nullptr) {
+    // No custom default value => nothing to do
+    return false;
+  }
+
+  if (parent.is<t_union>()) {
+    // Union field with custom default value => annotate if not already
+    // annotated.
+    return !field.has_structured_annotation(kUnionAnnotationUri);
+  }
+
+  // Not a union (i.e., struct or exception) => annotate if optional and not
+  // already annotated.
+
   if (field.qualifier() != t_field_qualifier::optional) {
     return false;
   }
@@ -45,7 +63,7 @@ bool should_annotate_field(const t_field& field) {
     return false;
   }
 
-  return field.default_value() != nullptr;
+  return true;
 }
 
 class AnnotateCustomDefaultOptionalFields final {
@@ -61,11 +79,8 @@ class AnnotateCustomDefaultOptionalFields final {
 
     const_ast_visitor visitor;
     visitor.add_structured_definition_visitor([&](const t_structured& strct) {
-      if (strct.is<t_union>()) {
-        return;
-      }
       for (const t_field& field : strct.fields()) {
-        any_annotated |= maybe_annotate_field(field);
+        any_annotated |= maybe_annotate_field(field, strct);
       }
     });
     visitor(program_);
@@ -80,8 +95,8 @@ class AnnotateCustomDefaultOptionalFields final {
   t_program& program_;
   codemod::file_manager file_manager_;
 
-  bool maybe_annotate_field(const t_field& field) {
-    if (!should_annotate_field(field)) {
+  bool maybe_annotate_field(const t_field& field, const t_structured& parent) {
+    if (!should_annotate_field(field, parent)) {
       return false;
     }
     file_manager_.add_include("thrift/annotation/thrift.thrift");
@@ -98,7 +113,7 @@ class AnnotateCustomDefaultOptionalFields final {
          .new_content = fmt::format(
              "{}{}\n",
              source_manager_.get_text_range(line_leading_whitespace),
-             kAnnotation)});
+             parent.is<t_union>() ? kUnionAnnotation : kAnnotation)});
     return true;
   }
 };

@@ -86,3 +86,37 @@ class AnnotateCustomDefaultOptionalFieldsTest(unittest.TestCase):
                 """
             ),
         )
+
+    def test_union_replace(self):
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """\
+                union TestUnion {
+                    1: bool a;
+                    2: bool b = true;
+                    3: bool c = false;
+                }
+                """
+            ),
+        )
+
+        binary = pkg_resources.resource_filename(__name__, "codemod")
+        run_binary(binary, "foo.thrift")
+
+        self.assertEqual(
+            read_file("foo.thrift"),
+            textwrap.dedent(
+                """\
+                include "thrift/annotation/thrift.thrift"
+
+                union TestUnion {
+                    1: bool a;
+                    @thrift.AllowUnsafeUnionFieldCustomDefaultValue
+                    2: bool b = true;
+                    @thrift.AllowUnsafeUnionFieldCustomDefaultValue
+                    3: bool c = false;
+                }
+                """
+            ),
+        )

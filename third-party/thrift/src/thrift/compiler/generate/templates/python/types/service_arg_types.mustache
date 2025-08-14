@@ -91,8 +91,8 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem(metaclass=
         _fbthrift_python_types.FieldInfo(
             {{field:key}},  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "{{field:name}}",  # name
-            "{{field:py_name}}",  # python name (from @python.Name annotation)
+            "_ex{{field:index}}__{{field:name}}",  # name
+            "{{> fields/exception_field_name}}",  # python name (from @python.Name annotation)
             {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
             {{> fields/adapter_info }},  # adapter info

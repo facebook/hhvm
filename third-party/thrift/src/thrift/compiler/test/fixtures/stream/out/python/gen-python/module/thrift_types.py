@@ -277,8 +277,8 @@ class _fbthrift_PubSubStreamingService_streamthrows_result_stream_elem(metaclass
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "e",  # name
-            "e",  # python name (from @python.Name annotation)
+            "_ex0__e",  # name
+            "_ex0__e",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooStreamEx),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -443,8 +443,8 @@ class _fbthrift_PubSubStreamingService_boththrows_result_stream_elem(metaclass=_
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "e",  # name
-            "e",  # python name (from @python.Name annotation)
+            "_ex0__e",  # name
+            "_ex0__e",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooStreamEx),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -501,8 +501,8 @@ class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stre
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "e",  # name
-            "e",  # python name (from @python.Name annotation)
+            "_ex0__e",  # name
+            "_ex0__e",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooStreamEx),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -628,8 +628,8 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream
         _fbthrift_python_types.FieldInfo(
             1,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "e",  # name
-            "e",  # python name (from @python.Name annotation)
+            "_ex0__e",  # name
+            "_ex0__e",  # python name (from @python.Name annotation)
             lambda: _fbthrift_python_types.StructTypeInfo(FooStreamEx),  # typeinfo
             None,  # default value
             None,  # adapter info

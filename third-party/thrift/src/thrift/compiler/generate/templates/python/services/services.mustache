@@ -106,7 +106,7 @@ class {{service:name}}Interface(
                 yield serialize_iobuf({{> types/function_second_return_type}}(success=item), protocol)
         {{#function:stream_exceptions}}{{#field:type}}
         except {{type:module_mangle}}.{{#type:structured}}{{> structs/unadapted_name}}{{/type:structured}} as e:
-            return_struct = {{> types/function_second_return_type}}({{field:py_name}}=e)
+            return_struct = {{> types/function_second_return_type}}({{> fields/exception_field_name }}=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('{{type:py3_namespace}}{{#type:structured}}{{> structs/unadapted_name}}{{/type:structured}}', str(e), buf)
             raise exp

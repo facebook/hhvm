@@ -403,6 +403,7 @@ void retranslateAll(bool skipSerialize) {
   // 1) Obtain function ordering in code.hot.
 
   if (FuncOrder::get().empty()) {
+    BootStats::Block timer("RTA_compute_func_order", Cfg::Server::Mode, true);
     auto const avgProfCount = FuncOrder::compute();
     ProfData::Session pds;
     profData()->setBaseProfCount(avgProfCount);
@@ -416,13 +417,19 @@ void retranslateAll(bool skipSerialize) {
   // 2) Perform bespoke coloring and finalize the layout hierarchy.
   //    Jumpstart consumers use the coloring computed by the seeder.
 
-  if (allowBespokeArrayLikes()) bespoke::selectBespokeLayouts();
-
+  if (allowBespokeArrayLikes()) {
+    BootStats::Block timer("RTA_select_bespoke_layouts", Cfg::Server::Mode, true);
+    bespoke::selectBespokeLayouts();
+  }
   // 3) Stop adding new classes to the "lazy APC classes" list. After we
   //    finalize this list, we can skip lazy deserialization checks for any
   //    classes that are NOT on the list when JIT-ing access to them.
 
-  Class::finalizeLazyAPCClasses();
+  {
+    BootStats::Block timer("RTA_finalize_lazy_apc_classes", Cfg::Server::Mode,
+                           true);
+    Class::finalizeLazyAPCClasses();
+  }
 
   // 4) Check if we should dump profile data. We may exit here in
   //    SerializeAndExit mode, without really doing the JIT, unless

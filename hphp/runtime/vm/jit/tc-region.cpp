@@ -214,6 +214,8 @@ void publishOptFuncCode(FuncMetaInfo& info,
 void relocateSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
                             PrologueTCAMap& prologueTCAs,
                             SrcKeyTransMap& srcKeyTrans) {
+  BootStats::Block timer("RTA_relocate_sorted_opt_funcs", Cfg::Server::Mode,
+                         true);
   size_t failedBytes = 0;
 
   bool shouldLog = Cfg::Server::Mode;

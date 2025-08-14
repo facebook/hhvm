@@ -130,16 +130,16 @@ let has_needs_concrete_attribute : Syn.t -> bool = function
   | _ -> false
 
 let rewrite_syntax
-    (errors : Codemod_sa_error.t list) (path : Relative_path.t) (node : Syn.t) :
-    Syn.t Rewriter.t =
-  let error_in_containing_pos containing_pos =
+    (warnings : Codemod_sa_warning.t list)
+    (path : Relative_path.t)
+    (node : Syn.t) : Syn.t Rewriter.t =
+  let warning_in_containing_pos containing_pos =
     (* suboptimal O(n) search but probably doesn't matter *)
-    List.find errors ~f:(fun { pos; error_code } ->
-        match error_code with
-        | NeedsConcreteOverride
-        | CallNeedsConcrete
-        | AbstractAccessViaStatic
-        | UninstantiableClassViaStatic ->
+    List.find warnings ~f:(fun { pos; warning_code } ->
+        match warning_code with
+        | Error_codes.Warning.CallNeedsConcrete
+        | Error_codes.Warning.AbstractAccessViaStatic
+        | Error_codes.Warning.UninstantiableClassViaStatic ->
           Pos.contains containing_pos pos
         | _ -> false)
   in
@@ -147,7 +147,7 @@ let rewrite_syntax
   | MethodishDeclaration ({ methodish_attribute; _ } as decl) -> begin
     match Syn.position path node with
     | Some containing_pos -> begin
-      match error_in_containing_pos containing_pos with
+      match warning_in_containing_pos containing_pos with
       (* apparently isn't reached? *)
       | Some error when has_needs_concrete_attribute methodish_attribute ->
         let () =
@@ -177,9 +177,10 @@ let rewrite_syntax
   | _ -> Rewriter.Keep
 
 let rewrite
-    (path : Relative_path.t) (errors : Codemod_sa_error.t list) (code : string)
-    : string =
+    (path : Relative_path.t)
+    (warnings : Codemod_sa_warning.t list)
+    (code : string) : string =
   let node = parse path code in
-  Rewriter.rewrite_post (rewrite_syntax errors path) node
+  Rewriter.rewrite_post (rewrite_syntax warnings path) node
   |> Syn.text
   |> hackfmt path

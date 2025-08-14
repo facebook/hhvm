@@ -779,9 +779,6 @@ module Typing = struct
     | NeedsConcreteOverride [@value 4487]
     | StringToClassPointer [@value 4488]
     | SwitchNeedsDefault [@value 4489]
-    | CallNeedsConcrete [@value 4490]
-    | AbstractAccessViaStatic [@value 4491]
-    | UninstantiableClassViaStatic [@value 4492]
     | SimpliHackRunPrompt [@value 4493]
     | InvalidReifiedArgumentFIXMEable [@value 4494]
     | SimpliHackEvalError [@value 4495]
@@ -817,6 +814,9 @@ module Warning = struct
     | StaticPropertyOverride [@value 12021]
     | StringToClassPointer [@value 12022]
     | NullCoalesceAlways [@value 12023]
+    | CallNeedsConcrete [@value 12024]
+    | AbstractAccessViaStatic [@value 12025]
+    | UninstantiableClassViaStatic [@value 12026]
   [@@deriving enum, ord, show { with_path = false }]
 end
 

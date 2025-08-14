@@ -173,6 +173,33 @@ module String_to_class_pointer = struct
   }
 end
 
+module Call_needs_concrete = struct
+  type t = {
+    call_pos: Pos.t;
+    class_name: string;
+    meth_name: string;
+    decl_pos: Pos_or_decl.t;
+    via: [ `Id | `Self | `Parent | `Static ];
+  }
+end
+
+module Abstract_access_via_static = struct
+  type t = {
+    access_pos: Pos.t;
+    class_name: string;
+    member_name: string;
+    decl_pos: Pos_or_decl.t;
+  }
+end
+
+module Uninstantiable_class_via_static = struct
+  type t = {
+    usage_pos: Pos.t;
+    class_name: string;
+    decl_pos: Pos_or_decl.t;
+  }
+end
+
 type (_, _) kind =
   | Sketchy_equality : (Sketchy_equality.t, warn) kind
   | Is_as_always : (Is_as_always.t, migrated) kind
@@ -189,5 +216,9 @@ type (_, _) kind =
   | Static_property_override : (Static_property_override.t, warn) kind
   | String_to_class_pointer : (String_to_class_pointer.t, warn) kind
   | Null_coalesce_always : (Null_coalesce_always.t, warn) kind
+  | Call_needs_concrete : (Call_needs_concrete.t, warn) kind
+  | Abstract_access_via_static : (Abstract_access_via_static.t, warn) kind
+  | Uninstantiable_class_via_static
+      : (Uninstantiable_class_via_static.t, warn) kind
 
 type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

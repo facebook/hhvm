@@ -6,11 +6,11 @@
  *
  *)
 
-(** Data we get from running `hh --re --json --config needs_concrete=true`,
- * munged to be conducive to codemodding-away errors.
+(** Data we get from running `hh --json --config needs_concrete=true`,
+ * munged to be conducive to codemodding-away warnings.
  *)
 type t = {
-  error_code: Error_codes.Typing.t;
+  warning_code: Error_codes.Warning.t;
   pos: Pos.t;
       (* The position corresponding to the code that
          needs to change.
@@ -31,5 +31,5 @@ type t = {
       *)
 }
 
-val parse_errors_json_exn :
+val parse_warnings_json_exn :
   Yojson.Safe.t -> error_message:string -> t list Relative_path.Map.t

@@ -614,6 +614,89 @@ module String_to_class_pointer = struct
   let quickfixes _ = []
 end
 
+module Call_needs_concrete = struct
+  open Typing_warning.Call_needs_concrete
+
+  type t = Typing_warning.Call_needs_concrete.t
+
+  let code = Codes.CallNeedsConcrete
+
+  let codes = [code]
+
+  let code _ = code
+
+  let claim { class_name; meth_name; via; _ } =
+    let strip_ns_class_name = Utils.strip_ns class_name in
+    let member =
+      Markdown_lite.md_codify (strip_ns_class_name ^ "::" ^ meth_name)
+    in
+    match via with
+    | `Id ->
+      Printf.sprintf
+        "Dangerous call to %s (a `<<__NeedsConcrete>>` method). It is expecting a concrete receiver but %s is not concrete."
+        member
+        (Markdown_lite.md_codify strip_ns_class_name)
+    | `Static ->
+      Printf.sprintf
+        "Dangerous call to %s (a `<<__NeedsConcrete>>` method) via `static`. It requires `static` to refer to a concrete class but `static` may not be concrete."
+        member
+    | (`Self | `Parent) as via ->
+      let via_str =
+        match via with
+        | `Self -> "`self`"
+        | `Parent -> "`parent`"
+      in
+      Printf.sprintf
+        "Dangerous call to %s (a `<<__NeedsConcrete>>` method) via %s. It requires `static` to refer to a concrete class, but %s sets `static` to a class that may not be concrete."
+        member
+        via_str
+        via_str
+
+  let reasons { decl_pos; _ } = [(decl_pos, "Declaration is here")]
+
+  let quickfixes _ = []
+end
+
+module Abstract_access_via_static = struct
+  open Typing_warning.Abstract_access_via_static
+
+  type t = Typing_warning.Abstract_access_via_static.t
+
+  let code = Codes.AbstractAccessViaStatic
+
+  let codes = [code]
+
+  let code _ = code
+
+  let claim { class_name; member_name; _ } =
+    "Dangerous access of abstract member "
+    ^ Markdown_lite.md_codify (Utils.strip_ns class_name ^ "::" ^ member_name)
+    ^ "; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method."
+
+  let reasons { decl_pos; _ } = [(decl_pos, "Declaration is here")]
+
+  let quickfixes _ = []
+end
+
+module Uninstantiable_class_via_static = struct
+  open Typing_warning.Uninstantiable_class_via_static
+
+  type t = Typing_warning.Uninstantiable_class_via_static.t
+
+  let code = Codes.UninstantiableClassViaStatic
+
+  let codes = [code]
+
+  let code _ = code
+
+  let claim _ =
+    "Dangerous instantiation via `static`: `static` might refer to a non-concrete class here."
+
+  let reasons { decl_pos; _ } = [(decl_pos, "Declaration is here")]
+
+  let quickfixes _ = []
+end
+
 let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
@@ -632,6 +715,11 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
   | Typing_warning.Static_property_override -> (module Static_property_override)
   | Typing_warning.String_to_class_pointer -> (module String_to_class_pointer)
   | Typing_warning.Null_coalesce_always -> (module Null_coalesce_always)
+  | Typing_warning.Call_needs_concrete -> (module Call_needs_concrete)
+  | Typing_warning.Abstract_access_via_static ->
+    (module Abstract_access_via_static)
+  | Typing_warning.Uninstantiable_class_via_static ->
+    (module Uninstantiable_class_via_static)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :

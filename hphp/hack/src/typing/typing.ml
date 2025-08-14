@@ -1151,17 +1151,17 @@ let check_class_get
       && callee_is_needs_concrete_method
       && not (Env.static_points_to_concrete_class env)
     then
-      Typing_error_utils.add_typing_error
-        ~env
-        (Typing_error.primary
-        @@ Call_needs_concrete
-             {
-               call_pos = p;
-               class_name = cid;
-               meth_name = mid;
-               decl_pos = def_pos;
-               via = (via :> [ `Id | `Static | `Self | `Parent ]);
-             })
+      Typing_warning_utils.add
+        env
+        ( p,
+          Typing_warning.Call_needs_concrete,
+          {
+            Typing_warning.Call_needs_concrete.call_pos = p;
+            class_name = cid;
+            meth_name = mid;
+            decl_pos = def_pos;
+            via = (via :> [ `Id | `Static | `Self | `Parent ]);
+          } )
   in
   match e with
   | CIself when get_ce_abstract ce -> begin
@@ -1254,18 +1254,17 @@ let check_class_get
              is_non_abstract || is_final_non_consistent_construct
            in
            if not is_concrete then
-             Typing_error_utils.add_typing_error
-               ~env
-               Typing_error.(
-                 primary
-                 @@ Primary.Call_needs_concrete
-                      {
-                        call_pos = p;
-                        class_name = cid;
-                        meth_name = mid;
-                        decl_pos = def_pos;
-                        via = `Id;
-                      }))
+             Typing_warning_utils.add
+               env
+               ( p,
+                 Typing_warning.Call_needs_concrete,
+                 {
+                   Typing_warning.Call_needs_concrete.call_pos = p;
+                   class_name = cid;
+                   meth_name = mid;
+                   decl_pos = def_pos;
+                   via = `Id;
+                 } ))
   | CI (_, class_name) ->
     (match Env.get_class env class_name with
     | Decl_entry.NotYetAvailable
@@ -1349,17 +1348,16 @@ let check_class_get
        * `self`/`parent`/classname, etc. is already covered by other type
        * errors such as Primary.Self_abstract_call, Primary.Parent_abstract_call, etc.
        *)
-      Typing_error_utils.add_typing_error
-        ~env
-        Typing_error.(
-          primary
-          @@ Primary.Abstract_access_via_static
-               {
-                 access_pos = p;
-                 class_name = cid;
-                 member_name = mid;
-                 decl_pos = def_pos;
-               })
+      Typing_warning_utils.add
+        env
+        ( p,
+          Typing_warning.Abstract_access_via_static,
+          {
+            Typing_warning.Abstract_access_via_static.access_pos = p;
+            class_name = cid;
+            member_name = mid;
+            decl_pos = def_pos;
+          } )
   | CIexpr _ -> ()
 
 module Fun_id : sig
@@ -11701,17 +11699,16 @@ end = struct
         Env.get_self_class env
         |> Decl_entry.to_option
         |> Option.iter ~f:(fun class_ ->
-               let err =
-                 Typing_error.(
-                   primary
-                   @@ Primary.Uninstantiable_class_via_static
-                        {
-                          usage_pos = p;
-                          class_name = Cls.name class_;
-                          decl_pos = Cls.pos class_;
-                        })
-               in
-               Typing_error_utils.add_typing_error ~env err)
+               Typing_warning_utils.add
+                 env
+                 ( p,
+                   Typing_warning.Uninstantiable_class_via_static,
+                   {
+                     Typing_warning.Uninstantiable_class_via_static.usage_pos =
+                       p;
+                     class_name = Cls.name class_;
+                     decl_pos = Cls.pos class_;
+                   } ))
       | _ ->
         List.iter classes ~f:(function
             | `Dynamic -> ()

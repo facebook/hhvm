@@ -63,35 +63,37 @@ let () =
     Printf.sprintf "unexpected json found in %s:\n%s\n" errors_file json_string
   in
   let () = Printf.printf "Parsing to error information %!\n" in
-  let errors = Codemod_sa_error.parse_errors_json_exn json ~error_message in
+  let warnings =
+    Codemod_sa_warning.parse_warnings_json_exn json ~error_message
+  in
   (* According to a comment in ServerMain.ml, the hardware we are running on has only 1/2
      actual CPUs, the rest are hyperthreads. We use `3` as the denominator because
      if we only divide by 2 then the devvm gets super jammed up and hard to use iirc
   *)
   let proc_count = max 0 (Sys_utils.nbr_procs / 3) in
-  let work_count = Relative_path.Map.cardinal errors in
+  let work_count = Relative_path.Map.cardinal warnings in
   let bucket_size =
     (work_count / proc_count) + 1 (* TODO: make fairly distributed *)
   in
-  let on_path path errors_for_path =
+  let on_path path warnings_for_path =
     let file = Relative_path.to_absolute path in
     let code = Disk.cat file in
-    let contents = Codemod_sa_rewrite.rewrite path errors_for_path code in
+    let contents = Codemod_sa_rewrite.rewrite path warnings_for_path code in
     Disk.write_file ~file ~contents
   in
 
   let acc =
     Relative_path.Map.fold
       ~init:Multi.empty
-      errors
-      ~f:(fun path errors_for_path { work_index; pid_index; state } ->
+      warnings
+      ~f:(fun path warnings_for_path { work_index; pid_index; state } ->
         let start = pid_index * bucket_size in
         let end_ = min work_count ((pid_index + 1) * bucket_size) in
         let should_handle =
           pid_index >= 0 && work_index >= start && work_index < end_
         in
         let continue_as_child () : Multi.t =
-          let () = on_path path errors_for_path in
+          let () = on_path path warnings_for_path in
           { work_index = work_index + 1; pid_index; state = Child }
         in
 

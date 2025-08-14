@@ -3720,69 +3720,6 @@ end = struct
     in
     create ~code:Error_code.OptionalParameterNotSupported ~claim ()
 
-  let call_needs_concrete
-      call_pos
-      class_name
-      meth_name
-      decl_pos
-      (via : [ `Id | `Self | `Parent | `Static ]) =
-    let claim =
-      lazy
-        begin
-          let strip_ns_class_name = Render.strip_ns class_name in
-          let member =
-            Markdown_lite.md_codify (strip_ns_class_name ^ "::" ^ meth_name)
-          in
-          let message =
-            match via with
-            | `Id ->
-              Printf.sprintf
-                "Cannot call %s (a `<<__NeedsConcrete>>` method). It is expecting a concrete receiver but %s is not concrete."
-                member
-                (Markdown_lite.md_codify strip_ns_class_name)
-            | `Static ->
-              Printf.sprintf
-                "Cannot call %s (a `<<__NeedsConcrete>>` method) via `static`. It requires `static` to refer to a concrete class but `static` may not be concrete."
-                member
-            | (`Self | `Parent) as via ->
-              let via =
-                match via with
-                | `Self -> "`self`"
-                | `Parent -> "`parent`"
-              in
-              Printf.sprintf
-                "Cannot call %s (a `<<__NeedsConcrete>>` method) via %s. It requires `static` to refer to a concrete class, but %s sets `static` to a class that may not be concrete."
-                member
-                via
-                via
-          in
-          (call_pos, message)
-        end
-    and reasons = lazy [(decl_pos, "Declaration is here")] in
-    create ~code:Error_code.CallNeedsConcrete ~claim ~reasons ()
-
-  let abstract_access_via_static access_pos class_name member_name decl_pos =
-    let claim =
-      lazy
-        ( access_pos,
-          "Cannot access abstract member "
-          ^ Markdown_lite.md_codify
-              (Render.strip_ns class_name ^ "::" ^ member_name)
-          ^ "; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method."
-        )
-    and reasons = lazy [(decl_pos, "Declaration is here")] in
-    create ~code:Error_code.AbstractAccessViaStatic ~claim ~reasons ()
-
-  let uninstantiable_class_via_static usage_pos class_name decl_pos =
-    let claim =
-      lazy
-        ( usage_pos,
-          Printf.sprintf
-            "Cannot instantiate via `static`: `static` might refer to a non-concrete class here."
-          ^ Markdown_lite.md_codify (Render.strip_ns class_name) )
-    and reasons = lazy [(decl_pos, "Declaration is here")] in
-    create ~code:Error_code.UninstantiableClassViaStatic ~claim ~reasons ()
-
   let optional_parameter_not_abstract p =
     let claim =
       lazy
@@ -5339,13 +5276,6 @@ end = struct
     | Optional_parameter_not_supported pos ->
       optional_parameter_not_supported pos
     | Optional_parameter_not_abstract pos -> optional_parameter_not_abstract pos
-    | Call_needs_concrete { call_pos; class_name; meth_name; decl_pos; via } ->
-      call_needs_concrete call_pos class_name meth_name decl_pos via
-    | Abstract_access_via_static
-        { access_pos; class_name; member_name; decl_pos } ->
-      abstract_access_via_static access_pos class_name member_name decl_pos
-    | Uninstantiable_class_via_static { usage_pos; class_name; decl_pos } ->
-      uninstantiable_class_via_static usage_pos class_name decl_pos
 end
 
 module rec Eval_error : sig

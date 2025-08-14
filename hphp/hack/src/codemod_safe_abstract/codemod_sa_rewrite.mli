@@ -5,5 +5,5 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-(** Update the file on disk to patch Safe Abstract errors *)
-val rewrite : Relative_path.t -> Codemod_sa_error.t list -> string -> string
+(** Update the file on disk to patch Safe Abstract warnings *)
+val rewrite : Relative_path.t -> Codemod_sa_warning.t list -> string -> string

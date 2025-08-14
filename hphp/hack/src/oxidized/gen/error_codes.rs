@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e1451a3a3261fdcb7da3a7604575dafc>>
+// @generated SignedSource<<28d873566b8b25a2bc76cc07f69cbf30>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -601,9 +601,6 @@ pub enum Typing {
     NeedsConcreteOverride = 4487,
     StringToClassPointer = 4488,
     SwitchNeedsDefault = 4489,
-    CallNeedsConcrete = 4490,
-    AbstractAccessViaStatic = 4491,
-    UninstantiableClassViaStatic = 4492,
     SimpliHackRunPrompt = 4493,
     InvalidReifiedArgumentFIXMEable = 4494,
     SimpliHackEvalError = 4495,
@@ -655,6 +652,9 @@ pub enum Warning {
     StaticPropertyOverride = 12021,
     StringToClassPointer = 12022,
     NullCoalesceAlways = 12023,
+    CallNeedsConcrete = 12024,
+    AbstractAccessViaStatic = 12025,
+    UninstantiableClassViaStatic = 12026,
 }
 impl TrivialDrop for Warning {}
 arena_deserializer::impl_deserialize_in_arena!(Warning);

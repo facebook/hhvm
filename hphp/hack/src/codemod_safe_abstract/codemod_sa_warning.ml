@@ -8,7 +8,7 @@
 open Hh_prelude
 
 type t = {
-  error_code: Error_codes.Typing.t;
+  warning_code: Error_codes.Warning.t;
   pos: Pos.t;
 }
 
@@ -41,8 +41,8 @@ let get_source_text : Relative_path.t -> Full_fidelity_source_text.t =
       let () = add_to_cache path source_text in
       source_text
 
-(** parse the format returned from `hh --json` into our error representation *)
-let parse_errors_json_exn (errors_json : Yojson.Safe.t) ~error_message :
+(** parse the format returned from `hh --json` into our warning representation *)
+let parse_warnings_json_exn (warnings_json : Yojson.Safe.t) ~error_message :
     t list Relative_path.Map.t =
   let extract_key_exn key = function
     | `Assoc assoc ->
@@ -62,13 +62,13 @@ let parse_errors_json_exn (errors_json : Yojson.Safe.t) ~error_message :
     | `List l -> l
     | _ -> failwith error_message
   in
-  errors_json
+  warnings_json
   |> extract_key_exn "errors"
   |> extract_list_exn
-  |> List.filter_map ~f:(fun (error_json : Yojson.Safe.t) : t option ->
+  |> List.filter_map ~f:(fun (warning_json : Yojson.Safe.t) : t option ->
          let open Option.Let_syntax in
          let messages =
-           extract_key_exn "message" error_json |> extract_list_exn
+           extract_key_exn "message" warning_json |> extract_list_exn
          in
          let first_message =
            messages |> List.hd |> Option.value_exn ~message:error_message
@@ -80,11 +80,11 @@ let parse_errors_json_exn (errors_json : Yojson.Safe.t) ~error_message :
            extract_key_exn "descr" first_message |> extract_string_exn
          in
          (* TODO better handling of unexpected cases *)
-         let* error_code = Error_codes.Typing.of_enum raw_error_code in
+         let* warning_code = Error_codes.Warning.of_enum raw_error_code in
          (* TODO better handling of unexpected cases *)
          let+ message =
-           match error_code with
-           | CallNeedsConcrete
+           match warning_code with
+           | Error_codes.Warning.CallNeedsConcrete
              when not (String.is_substring descr ~substring:"via") ->
              (* This means the call is via class ID. The remediation is *not* to
               * add __NeedsConcrete in such cases. Instead, there is no straightforward
@@ -92,17 +92,10 @@ let parse_errors_json_exn (errors_json : Yojson.Safe.t) ~error_message :
               * For other calls we say "via `parent`", "via `self`", or "via `static`"
               *)
              None
-           | CallNeedsConcrete
-           | AbstractAccessViaStatic
-           | UninstantiableClassViaStatic ->
+           | Error_codes.Warning.CallNeedsConcrete
+           | Error_codes.Warning.AbstractAccessViaStatic
+           | Error_codes.Warning.UninstantiableClassViaStatic ->
              Some first_message
-           | NeedsConcreteOverride ->
-             (* For NeedsConcreteOverride, we want the location of the *overridden* method *)
-             List.find messages ~f:(fun message ->
-                 let descr =
-                   extract_key_exn "descr" message |> extract_string_exn
-                 in
-                 String.equal descr "Previously defined here")
            | _ -> None
          in
          let pos =
@@ -125,12 +118,12 @@ let parse_errors_json_exn (errors_json : Yojson.Safe.t) ~error_message :
              ~pos_start:(line, beginning_of_line, beginning_of_line + start)
              ~pos_end:(line, beginning_of_line, beginning_of_line + end_)
          in
-         { pos; error_code })
-  |> List.fold ~init:Relative_path.Map.empty ~f:(fun acc (error : t) ->
-         let path = Pos.filename error.pos in
+         { pos; warning_code })
+  |> List.fold ~init:Relative_path.Map.empty ~f:(fun acc (warning : t) ->
+         let path = Pos.filename warning.pos in
          Relative_path.Map.update
            path
-           (fun errors ->
-             let errors = Option.value errors ~default:[] in
-             Some (error :: errors))
+           (fun warnings ->
+             let warnings = Option.value warnings ~default:[] in
+             Some (warning :: warnings))
            acc)

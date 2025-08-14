@@ -1,4 +1,4 @@
-ERROR: File "needs_concrete_9.php", line 7, characters 11-12:
-Cannot call `C::m2` (a `<<__NeedsConcrete>>` method) via `self`. It requires `static` to refer to a concrete class, but `self` sets `static` to a class that may not be concrete. (Typing[4490])
+WARN: File "needs_concrete_9.php", line 7, characters 11-12:
+Dangerous call to `C::m2` (a `<<__NeedsConcrete>>` method) via `self`. It requires `static` to refer to a concrete class, but `self` sets `static` to a class that may not be concrete. (Warn[12024])
   File "needs_concrete_9.php", line 11, characters 26-27:
   Declaration is here

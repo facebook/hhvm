@@ -23,7 +23,6 @@
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketStreamServerCallback.h>
-#include <thrift/lib/cpp2/transport/rocket/client/StreamChannelStatusResponse.h>
 
 namespace apache::thrift::rocket {
 class RocketClient;
@@ -45,7 +44,7 @@ class RocketStreamServerCallbackWithChunkTimeout
 
   bool onInitialPayload(FirstResponsePayload&&, folly::EventBase*);
 
-  StreamChannelStatusResponse onStreamPayload(StreamPayload&&);
+  FOLLY_NODISCARD bool onStreamPayload(StreamPayload&&);
 
   void timeoutExpired() noexcept;
 

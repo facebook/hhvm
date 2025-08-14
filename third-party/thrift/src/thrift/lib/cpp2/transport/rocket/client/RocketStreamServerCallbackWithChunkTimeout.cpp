@@ -51,8 +51,7 @@ bool RocketStreamServerCallbackWithChunkTimeout::onInitialPayload(
   return RocketStreamServerCallback::onInitialPayload(std::move(payload), evb);
 }
 
-StreamChannelStatusResponse
-RocketStreamServerCallbackWithChunkTimeout::onStreamPayload(
+bool RocketStreamServerCallbackWithChunkTimeout::onStreamPayload(
     StreamPayload&& payload) {
   DCHECK(credits_ != 0);
   if (--credits_ != 0) {

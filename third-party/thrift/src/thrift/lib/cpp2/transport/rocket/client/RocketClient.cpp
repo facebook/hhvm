@@ -431,7 +431,7 @@ void RocketClient::handleStreamChannelFrame(
     notifyIfDetachable();
     return;
   }
-  StreamChannelStatusResponse status = it->match([&](auto* serverCallbackPtr) {
+  it->match([&](auto* serverCallbackPtr) {
     auto& serverCallback = *serverCallbackPtr;
     switch (frameType) {
       case FrameType::PAYLOAD:
@@ -451,27 +451,12 @@ void RocketClient::handleStreamChannelFrame(
             folly::to<std::string>(
                 "Client attempting to handle unhandleable frame type: ",
                 static_cast<uint8_t>(frameType))));
-        return StreamChannelStatusResponse{StreamChannelStatus::Alive};
     }
   });
-
-  switch (status.getStatus()) {
-    case StreamChannelStatus::Alive:
-      break;
-    case StreamChannelStatus::Complete:
-      freeStream(streamId);
-      break;
-    case StreamChannelStatus::ContractViolation:
-      freeStream(streamId);
-      close(makeContractViolation(fmt::format(
-          "Streaming contract violation: {}. Closing the connection.",
-          std::move(status).getErrorMsg())));
-      break;
-  }
 }
 
 template <typename CallbackType>
-StreamChannelStatusResponse RocketClient::handlePayloadFrame(
+void RocketClient::handlePayloadFrame(
     CallbackType& serverCallback, std::unique_ptr<folly::IOBuf> frame) {
   PayloadFrame payloadFrame{std::move(frame)};
   const auto streamId = payloadFrame.streamId();
@@ -481,38 +466,42 @@ StreamChannelStatusResponse RocketClient::handlePayloadFrame(
   const bool complete = payloadFrame.hasComplete();
   if (auto fullPayload = bufferOrGetFullPayload(std::move(payloadFrame))) {
     if (isFirstResponse(streamId)) {
-      return handleFirstResponse(
+      handleFirstResponse(
           serverCallback, std::move(*fullPayload), next, complete);
-    }
-    if constexpr (std::is_same_v<CallbackType, RocketSinkServerCallback>) {
-      return handleSinkResponse(
-          serverCallback, std::move(*fullPayload), next, complete);
+    } else if constexpr (std::is_same_v<
+                             CallbackType,
+                             RocketSinkServerCallback>) {
+      handleSinkResponse(
+          streamId, serverCallback, std::move(*fullPayload), next, complete);
     } else {
-      return handleStreamResponse(
-          serverCallback, std::move(*fullPayload), next, complete);
+      handleStreamResponse(
+          streamId, serverCallback, std::move(*fullPayload), next, complete);
     }
   }
-  return StreamChannelStatus::Alive;
 }
 
 template <typename CallbackType>
-StreamChannelStatusResponse RocketClient::handleFirstResponse(
+void RocketClient::handleFirstResponse(
     CallbackType& serverCallback,
     Payload&& fullPayload,
     bool next,
     bool complete) {
-  acknowledgeFirstResponse(serverCallback.streamId());
+  auto streamId = serverCallback.streamId();
+  acknowledgeFirstResponse(streamId);
   if (!next) {
     constexpr auto kErrorMsg =
         "Received payload frame but missing initial response";
     serverCallback.onInitialError(makeContractViolation(kErrorMsg));
-    return {StreamChannelStatus::ContractViolation, kErrorMsg};
+    freeStream(streamId);
+    contractViolation(kErrorMsg);
+    return;
   }
   auto firstResponse = getPayloadSerializer()->unpack<FirstResponsePayload>(
       std::move(fullPayload), encodeMetadataUsingBinary_);
   if (firstResponse.hasException()) {
     serverCallback.onInitialError(std::move(firstResponse.exception()));
-    return StreamChannelStatus::Complete;
+    freeStream(streamId);
+    return;
   }
 
   // Populate `firstResponse->fds`.  Then,
@@ -537,27 +526,29 @@ StreamChannelStatusResponse RocketClient::handleFirstResponse(
     if (tryFds.hasException()) {
       auto errMsg = tryFds.exception().what().toStdString();
       serverCallback.onInitialError(std::move(tryFds.exception()));
-      return {StreamChannelStatus::ContractViolation, std::move(errMsg)};
+      freeStream(streamId);
+      contractViolation(errMsg);
+      return;
     }
     firstResponse->fds = std::move(tryFds->dcheckReceivedOrEmpty());
   }
 
   if (!serverCallback.onInitialPayload(std::move(*firstResponse), evb_)) {
-    // we return Alive so RocketClient doesn't call freeStream() twice
-    return StreamChannelStatus::Alive;
+    return;
   }
   if (complete) {
     if constexpr (std::is_same_v<CallbackType, RocketSinkServerCallback>) {
-      return serverCallback.onFinalResponse(StreamPayload({}, {}));
+      serverCallback.onFinalResponse(StreamPayload({}, {}));
     } else {
-      return serverCallback.onStreamComplete();
+      serverCallback.onStreamComplete();
     }
+    freeStream(streamId);
   }
-  return StreamChannelStatus::Alive;
 }
 
 template <typename CallbackType>
-StreamChannelStatusResponse RocketClient::handleStreamResponse(
+void RocketClient::handleStreamResponse(
+    StreamId streamId,
     CallbackType& serverCallback,
     Payload&& fullPayload,
     bool next,
@@ -566,7 +557,9 @@ StreamChannelStatusResponse RocketClient::handleStreamResponse(
     auto streamPayload = getPayloadSerializer()->unpack<StreamPayload>(
         std::move(fullPayload), encodeMetadataUsingBinary_);
     if (streamPayload.hasException()) {
-      return serverCallback.onStreamError(std::move(streamPayload.exception()));
+      serverCallback.onStreamError(std::move(streamPayload.exception()));
+      freeStream(streamId);
+      return;
     }
 
     // Populates `streamPayload->fds`.  Then, if the user calls
@@ -592,7 +585,9 @@ StreamChannelStatusResponse RocketClient::handleStreamResponse(
       if (tryFds.hasException()) {
         auto errMsg = tryFds.exception().what().toStdString();
         serverCallback.onStreamError(std::move(tryFds.exception()));
-        return {StreamChannelStatus::ContractViolation, std::move(errMsg)};
+        freeStream(streamId);
+        contractViolation(errMsg);
+        return;
       }
       streamPayload->fds = std::move(tryFds->dcheckReceivedOrEmpty());
     }
@@ -602,40 +597,49 @@ StreamChannelStatusResponse RocketClient::handleStreamResponse(
     if (payloadMetadataRef &&
         payloadMetadataRef->getType() ==
             PayloadMetadata::Type::exceptionMetadata) {
-      return serverCallback.onStreamError(
-          apache::thrift::detail::EncodedStreamError(
-              std::move(streamPayload.value())));
+      serverCallback.onStreamError(apache::thrift::detail::EncodedStreamError(
+          std::move(streamPayload.value())));
+      freeStream(streamId);
+      return;
     }
     if (complete) {
-      return serverCallback.onStreamFinalPayload(std::move(*streamPayload));
+      serverCallback.onStreamFinalPayload(std::move(*streamPayload));
+      freeStream(streamId);
+      return;
     }
-    return serverCallback.onStreamPayload(std::move(*streamPayload));
+    std::ignore = serverCallback.onStreamPayload(std::move(*streamPayload));
+    return;
   }
   if (complete) {
-    return serverCallback.onStreamComplete();
+    serverCallback.onStreamComplete();
+    freeStream(streamId);
+    return;
   }
   constexpr auto kErrorMsg =
       "Received stream payload frame with both next and complete flags not set";
   serverCallback.onStreamError(makeContractViolation(kErrorMsg));
-  return {StreamChannelStatus::ContractViolation, kErrorMsg};
+  freeStream(streamId);
+  contractViolation(kErrorMsg);
 }
 
-StreamChannelStatusResponse RocketClient::handleSinkResponse(
+void RocketClient::handleSinkResponse(
+    StreamId streamId,
     RocketSinkServerCallback& serverCallback,
     Payload&& fullPayload,
     bool next,
     bool complete) {
-  auto sendContractViolation =
-      [&serverCallback](std::string msg) -> StreamChannelStatusResponse {
+  auto sendContractViolation = [&](std::string msg) {
     serverCallback.onFinalResponseError(makeContractViolation(msg));
-    return {StreamChannelStatus::ContractViolation, std::move(msg)};
+    freeStream(streamId);
+    contractViolation(msg);
   };
   if (next) {
     auto streamPayload = getPayloadSerializer()->unpack<StreamPayload>(
         std::move(fullPayload), encodeMetadataUsingBinary_);
     if (streamPayload.hasException()) {
-      return serverCallback.onFinalResponseError(
-          std::move(streamPayload.exception()));
+      serverCallback.onFinalResponseError(std::move(streamPayload.exception()));
+      freeStream(streamId);
+      return;
     }
 
     // FIXME: Don't bother populating `streamPayload.fds`.  Unfortunately,
@@ -650,12 +654,16 @@ StreamChannelStatusResponse RocketClient::handleSinkResponse(
     if (payloadMetadataRef &&
         payloadMetadataRef->getType() ==
             PayloadMetadata::Type::exceptionMetadata) {
-      return serverCallback.onFinalResponseError(
+      serverCallback.onFinalResponseError(
           apache::thrift::detail::EncodedStreamError(
               std::move(streamPayload.value())));
+      freeStream(streamId);
+      return;
     }
     if (complete) {
-      return serverCallback.onFinalResponse(std::move(*streamPayload));
+      serverCallback.onFinalResponse(std::move(*streamPayload));
+      freeStream(streamId);
+      return;
     }
     return sendContractViolation(
         "Received sink payload frame with next flag set but complete flag not set");
@@ -669,7 +677,7 @@ StreamChannelStatusResponse RocketClient::handleSinkResponse(
 }
 
 template <typename CallbackType>
-StreamChannelStatusResponse RocketClient::handleErrorFrame(
+void RocketClient::handleErrorFrame(
     CallbackType& serverCallback, std::unique_ptr<folly::IOBuf> frame) {
   ErrorFrame errorFrame{std::move(frame)};
   const auto streamId = errorFrame.streamId();
@@ -678,43 +686,47 @@ StreamChannelStatusResponse RocketClient::handleErrorFrame(
   if (isFirstResponse(streamId)) {
     acknowledgeFirstResponse(streamId);
     serverCallback.onInitialError(std::move(ew));
-    return StreamChannelStatus::Complete;
-  }
-  if constexpr (std::is_same_v<CallbackType, RocketSinkServerCallback>) {
-    return serverCallback.onFinalResponseError(std::move(ew));
+  } else if constexpr (std::is_same_v<CallbackType, RocketSinkServerCallback>) {
+    serverCallback.onFinalResponseError(std::move(ew));
   } else {
-    return serverCallback.onStreamError(std::move(ew));
+    serverCallback.onStreamError(std::move(ew));
   }
+  freeStream(streamId);
 }
 
 template <typename CallbackType>
-StreamChannelStatusResponse RocketClient::handleRequestNFrame(
+void RocketClient::handleRequestNFrame(
     CallbackType& serverCallback, std::unique_ptr<folly::IOBuf> frame) {
   RequestNFrame requestNFrame{std::move(frame)};
-  if (isFirstResponse(requestNFrame.streamId())) {
+  auto streamId = requestNFrame.streamId();
+  if (isFirstResponse(streamId)) {
     constexpr auto kErrorMsg =
         "Received RequestN frame but missing initial response";
     serverCallback.onInitialError(makeContractViolation(kErrorMsg));
-    return {StreamChannelStatus::ContractViolation, kErrorMsg};
-  }
-  if constexpr (std::is_same_v<CallbackType, RocketSinkServerCallback>) {
-    return serverCallback.onSinkRequestN(std::move(requestNFrame).requestN());
+    freeStream(streamId);
+    contractViolation(kErrorMsg);
+  } else if constexpr (std::is_same_v<CallbackType, RocketSinkServerCallback>) {
+    serverCallback.onSinkRequestN(std::move(requestNFrame).requestN());
   } else {
     constexpr auto kErrorMsg = "Received RequestN frame for stream";
     serverCallback.onStreamError(makeContractViolation(kErrorMsg));
-    return {StreamChannelStatus::ContractViolation, kErrorMsg};
+    freeStream(streamId);
+    contractViolation(kErrorMsg);
   }
 }
 
 template <typename CallbackType>
-StreamChannelStatusResponse RocketClient::handleCancelFrame(
+void RocketClient::handleCancelFrame(
     CallbackType& serverCallback, std::unique_ptr<folly::IOBuf> frame) {
   CancelFrame cancelFrame{std::move(frame)};
-  if (isFirstResponse(cancelFrame.streamId())) {
+  auto streamId = cancelFrame.streamId();
+  if (isFirstResponse(streamId)) {
     constexpr auto kErrorMsg =
         "Received Cancel frame but missing initial response";
     serverCallback.onInitialError(makeContractViolation(kErrorMsg));
-    return {StreamChannelStatus::ContractViolation, kErrorMsg};
+    freeStream(streamId);
+    contractViolation(kErrorMsg);
+    return;
   }
   constexpr auto kErrorMsg = "Received Cancel frame";
   if constexpr (std::is_same_v<CallbackType, RocketSinkServerCallback>) {
@@ -722,22 +734,26 @@ StreamChannelStatusResponse RocketClient::handleCancelFrame(
   } else {
     serverCallback.onStreamError(makeContractViolation(kErrorMsg));
   }
-  return {StreamChannelStatus::ContractViolation, kErrorMsg};
+  freeStream(streamId);
+  contractViolation(kErrorMsg);
 }
 
 template <typename CallbackType>
-StreamChannelStatusResponse RocketClient::handleExtFrame(
+void RocketClient::handleExtFrame(
     CallbackType& serverCallback, std::unique_ptr<folly::IOBuf> frame) {
   ExtFrame extFrame{std::move(frame)};
-  if (isFirstResponse(extFrame.streamId())) {
+  auto streamId = extFrame.streamId();
+  if (isFirstResponse(streamId)) {
     constexpr auto kErrorMsg =
         "Received Ext frame but missing initial response";
     serverCallback.onInitialError(makeContractViolation(kErrorMsg));
-    return {StreamChannelStatus::ContractViolation, kErrorMsg};
+    freeStream(streamId);
+    contractViolation(kErrorMsg);
+    return;
   }
 
   if (extFrame.hasIgnore()) {
-    return StreamChannelStatus::Alive;
+    return;
   }
 
   auto errorMsg = fmt::format(
@@ -746,7 +762,6 @@ StreamChannelStatusResponse RocketClient::handleExtFrame(
   close(transport::TTransportException(
       transport::TTransportException::TTransportExceptionType::NOT_SUPPORTED,
       errorMsg));
-  return {StreamChannelStatus::ContractViolation, std::move(errorMsg)};
 }
 
 void RocketClient::handleError(RocketException&& rex) {
@@ -1209,9 +1224,9 @@ bool RocketClient::sendPayload(
       });
 }
 
-void RocketClient::sendError(StreamId streamId, RocketException&& rex) {
+bool RocketClient::sendError(StreamId streamId, RocketException&& rex) {
   freeStream(streamId);
-  std::ignore = sendFrame(
+  return sendFrame(
       ErrorFrame(streamId, std::move(rex)),
       [this,
        dg = DestructorGuard(this),
@@ -1222,12 +1237,12 @@ void RocketClient::sendError(StreamId streamId, RocketException&& rex) {
       });
 }
 
-void RocketClient::sendComplete(StreamId streamId, bool closeStream) {
+bool RocketClient::sendComplete(StreamId streamId, bool closeStream) {
   auto g = makeRequestCountGuard(RequestType::INTERNAL);
   if (closeStream) {
     freeStream(streamId);
   }
-  std::ignore = sendPayload(
+  return sendPayload(
       streamId,
       StreamPayload(std::unique_ptr<folly::IOBuf>{}, {}),
       rocket::Flags().complete(true));
@@ -1491,6 +1506,11 @@ void RocketClient::freeStream(StreamId streamId) {
   bufferedFragments_.erase(streamId);
   firstResponseTimeouts_.erase(streamId);
   notifyIfDetachable();
+}
+
+void RocketClient::contractViolation(std::string_view msg) {
+  close(makeContractViolation(fmt::format(
+      "Streaming contract violation: {}. Closing the connection.", msg)));
 }
 
 folly::Optional<Payload> RocketClient::bufferOrGetFullPayload(

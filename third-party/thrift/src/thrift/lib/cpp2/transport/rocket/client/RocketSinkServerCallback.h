@@ -27,7 +27,6 @@
 #include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
-#include <thrift/lib/cpp2/transport/rocket/client/StreamChannelStatusResponse.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::rocket {
@@ -53,13 +52,14 @@ class RocketSinkServerCallback : public SinkServerCallback {
     clientCallback_ = &clientCallback;
   }
 
-  bool onInitialPayload(FirstResponsePayload&&, folly::EventBase*);
+  FOLLY_NODISCARD bool onInitialPayload(
+      FirstResponsePayload&&, folly::EventBase*);
   void onInitialError(folly::exception_wrapper);
 
-  StreamChannelStatusResponse onFinalResponse(StreamPayload&&);
-  StreamChannelStatusResponse onFinalResponseError(folly::exception_wrapper);
+  void onFinalResponse(StreamPayload&&);
+  void onFinalResponseError(folly::exception_wrapper);
 
-  StreamChannelStatusResponse onSinkRequestN(uint64_t tokens);
+  void onSinkRequestN(uint64_t tokens);
 
   StreamId streamId() const noexcept { return streamId_; }
 

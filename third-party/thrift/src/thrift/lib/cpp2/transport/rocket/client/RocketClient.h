@@ -133,8 +133,8 @@ class RocketClient : public virtual folly::DelayedDestruction,
   void cancelStream(StreamId streamId);
   FOLLY_NODISCARD bool sendPayload(
       StreamId streamId, StreamPayload&& payload, Flags flags);
-  void sendError(StreamId streamId, RocketException&& rex);
-  void sendComplete(StreamId streamId, bool closeStream);
+  FOLLY_NODISCARD bool sendError(StreamId streamId, RocketException&& rex);
+  FOLLY_NODISCARD bool sendComplete(StreamId streamId, bool closeStream);
   FOLLY_NODISCARD bool sendHeadersPush(
       StreamId streamId, HeadersPayload&& payload);
   FOLLY_NODISCARD bool sendSinkError(
@@ -480,6 +480,7 @@ class RocketClient : public virtual folly::DelayedDestruction,
       std::unique_ptr<ServerCallback> serverCallback);
 
   void freeStream(StreamId streamId);
+  void contractViolation(std::string_view msg);
 
   void handleRequestResponseFrame(
       RequestContext& ctx,
@@ -491,43 +492,45 @@ class RocketClient : public virtual folly::DelayedDestruction,
       std::unique_ptr<folly::IOBuf> frame);
 
   template <typename CallbackType>
-  StreamChannelStatusResponse handlePayloadFrame(
+  void handlePayloadFrame(
       CallbackType& serverCallback, std::unique_ptr<folly::IOBuf> frame);
 
   template <typename CallbackType>
-  StreamChannelStatusResponse handleFirstResponse(
+  void handleFirstResponse(
       CallbackType& serverCallback,
       Payload&& fullPayload,
       bool next,
       bool complete);
 
   template <typename CallbackType>
-  StreamChannelStatusResponse handleStreamResponse(
+  void handleStreamResponse(
+      StreamId streamId,
       CallbackType& serverCallback,
       Payload&& fullPayload,
       bool next,
       bool complete);
 
-  StreamChannelStatusResponse handleSinkResponse(
+  void handleSinkResponse(
+      StreamId streamId,
       RocketSinkServerCallback& serverCallback,
       Payload&& fullPayload,
       bool next,
       bool complete);
 
   template <typename CallbackType>
-  StreamChannelStatusResponse handleErrorFrame(
+  void handleErrorFrame(
       CallbackType& serverCallback, std::unique_ptr<folly::IOBuf> frame);
 
   template <typename CallbackType>
-  StreamChannelStatusResponse handleRequestNFrame(
+  void handleRequestNFrame(
       CallbackType& serverCallback, std::unique_ptr<folly::IOBuf> frame);
 
   template <typename CallbackType>
-  StreamChannelStatusResponse handleCancelFrame(
+  void handleCancelFrame(
       CallbackType& serverCallback, std::unique_ptr<folly::IOBuf> frame);
 
   template <typename CallbackType>
-  StreamChannelStatusResponse handleExtFrame(
+  void handleExtFrame(
       CallbackType& serverCallback, std::unique_ptr<folly::IOBuf> frame);
 
   void handleError(RocketException&& rex);

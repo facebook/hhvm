@@ -40,7 +40,7 @@ void RocketSinkServerCallback::onSinkError(folly::exception_wrapper ew) {
   DCHECK(state_ == State::BothOpen);
   ew.handle(
       [&](RocketException& rex) {
-        client_.sendError(streamId_, std::move(rex));
+        std::ignore = client_.sendError(streamId_, std::move(rex));
       },
       [this](::apache::thrift::detail::EncodedStreamError& err) {
         if (compressionConfig_) {
@@ -52,7 +52,7 @@ void RocketSinkServerCallback::onSinkError(folly::exception_wrapper ew) {
         std::ignore = client_.sendSinkError(streamId_, std::move(err.encoded));
       },
       [&](...) {
-        client_.sendError(
+        std::ignore = client_.sendError(
             streamId_,
             RocketException(ErrorCode::APPLICATION_ERROR, ew.what()));
       });
@@ -61,7 +61,7 @@ void RocketSinkServerCallback::onSinkError(folly::exception_wrapper ew) {
 bool RocketSinkServerCallback::onSinkComplete() {
   DCHECK(state_ == State::BothOpen);
   state_ = State::StreamOpen;
-  client_.sendComplete(streamId_, false);
+  std::ignore = client_.sendComplete(streamId_, false);
   return true;
 }
 
@@ -72,16 +72,15 @@ bool RocketSinkServerCallback::onInitialPayload(
 
 void RocketSinkServerCallback::onInitialError(folly::exception_wrapper ew) {
   clientCallback_->onFirstResponseError(std::move(ew));
-  client_.sendError(streamId_, RocketException(ErrorCode::CANCELED));
+  std::ignore =
+      client_.sendError(streamId_, RocketException(ErrorCode::CANCELED));
 }
 
-StreamChannelStatusResponse RocketSinkServerCallback::onFinalResponse(
-    StreamPayload&& payload) {
+void RocketSinkServerCallback::onFinalResponse(StreamPayload&& payload) {
   clientCallback_->onFinalResponse(std::move(payload));
-  return StreamChannelStatus::Complete;
 }
 
-StreamChannelStatusResponse RocketSinkServerCallback::onFinalResponseError(
+void RocketSinkServerCallback::onFinalResponseError(
     folly::exception_wrapper ew) {
   ew.handle(
       [&](RocketException& ex) {
@@ -93,17 +92,15 @@ StreamChannelStatusResponse RocketSinkServerCallback::onFinalResponseError(
         }
       },
       [&](...) { clientCallback_->onFinalResponseError(std::move(ew)); });
-  return StreamChannelStatus::Complete;
 }
 
-StreamChannelStatusResponse RocketSinkServerCallback::onSinkRequestN(
-    uint64_t tokens) {
+void RocketSinkServerCallback::onSinkRequestN(uint64_t tokens) {
   switch (state_) {
     case State::BothOpen:
       std::ignore = clientCallback_->onSinkRequestN(tokens);
-      return StreamChannelStatus::Alive;
+      return;
     case State::StreamOpen:
-      return StreamChannelStatus::Alive;
+      return;
     default:
       folly::assume_unreachable();
   }

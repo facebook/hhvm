@@ -43,32 +43,21 @@ void RocketStreamServerCallback::onInitialError(folly::exception_wrapper ew) {
   client_.cancelStream(streamId_);
 }
 
-StreamChannelStatusResponse RocketStreamServerCallback::onStreamPayload(
-    StreamPayload&& payload) {
-  std::ignore = clientCallback_->onStreamNext(std::move(payload));
-  return StreamChannelStatus::Alive;
+bool RocketStreamServerCallback::onStreamPayload(StreamPayload&& payload) {
+  return clientCallback_->onStreamNext(std::move(payload));
 }
 
-StreamChannelStatusResponse RocketStreamServerCallback::onStreamFinalPayload(
-    StreamPayload&& payload) {
-  auto& client = client_;
-  auto streamId = streamId_;
-  onStreamPayload(std::move(payload));
-  // It's possible that stream was canceled from the client callback. This
-  // object may be already destroyed.
-  if (client.streamExists(streamId)) {
-    return onStreamComplete();
+void RocketStreamServerCallback::onStreamFinalPayload(StreamPayload&& payload) {
+  if (onStreamPayload(std::move(payload))) {
+    onStreamComplete();
   }
-  return StreamChannelStatus::Alive;
 }
 
-StreamChannelStatusResponse RocketStreamServerCallback::onStreamComplete() {
+void RocketStreamServerCallback::onStreamComplete() {
   clientCallback_->onStreamComplete();
-  return StreamChannelStatus::Complete;
 }
 
-StreamChannelStatusResponse RocketStreamServerCallback::onStreamError(
-    folly::exception_wrapper ew) {
+void RocketStreamServerCallback::onStreamError(folly::exception_wrapper ew) {
   ew.handle(
       [&](RocketException& ex) {
         if (ex.hasErrorData()) {
@@ -82,7 +71,6 @@ StreamChannelStatusResponse RocketStreamServerCallback::onStreamError(
         clientCallback_->onStreamError(std::move(ew));
         return false;
       });
-  return StreamChannelStatus::Complete;
 }
 
 void RocketStreamServerCallback::onStreamHeaders(HeadersPayload&& payload) {

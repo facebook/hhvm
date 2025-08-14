@@ -9,7 +9,6 @@
 
 open Aast
 open Hh_prelude
-module Env = Tast_env
 module Cls = Folded_class
 module SN = Naming_special_names
 
@@ -19,14 +18,18 @@ let check_expr env (_, pos, e) =
     when String.equal construct SN.Members.__construct ->
     (match Tast_env.get_parent_class env with
     | Decl_entry.Found parent_class
-      when Ast_defs.is_c_abstract (Cls.kind parent_class)
-           && Option.is_none (fst (Cls.construct parent_class)) ->
-      Typing_error_utils.add_typing_error
-        ~env:(Env.tast_env_as_typing_env env)
-        Typing_error.(
-          primary
-          @@ Primary.Parent_abstract_call
-               { meth_name = construct; pos; decl_pos = Cls.pos parent_class })
+      when Ast_defs.is_c_abstract (Cls.kind parent_class) ->
+      let Equal = Tast_env.eq_typing_env in
+      let (parent_construct, _) = Typing_env.get_construct env parent_class in
+      (match parent_construct with
+      | None ->
+        Typing_error_utils.add_typing_error
+          ~env
+          Typing_error.(
+            primary
+            @@ Primary.Parent_abstract_call
+                 { meth_name = construct; pos; decl_pos = Cls.pos parent_class })
+      | Some _ -> ())
     | _ -> ())
   | _ -> ()
 

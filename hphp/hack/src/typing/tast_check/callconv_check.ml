@@ -50,8 +50,9 @@ let check_types env (_, p, te) =
           Lazy.map ty_str ~f:(fun ty_str ->
               Reason.to_string ("This is " ^ ty_str) (get_reason ty1))
         in
+        let Equal = Tast_env.eq_typing_env in
         Typing_error_utils.add_typing_error
-          ~env:(Env.tast_env_as_typing_env env)
+          ~env
           Typing_error.(
             primary @@ Primary.Inout_argument_bad_type { pos = p; reasons })
     (* Other invalid expressions are caught in Nast_check. *)

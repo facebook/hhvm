@@ -55,9 +55,10 @@ let check pos env tparams targs =
                   |> List.dedup_and_sort ~compare:(fun (p, _) (p', _) ->
                          Pos_or_decl.compare p p'))
               in
+              let Equal = Tast_env.eq_typing_env in
               let tparam_pos = fst tparam.Typing_defs.tp_name in
               Typing_warning_utils.add
-                (Tast_env.tast_env_as_typing_env env)
+                env
                 ( pos,
                   Typing_warning.No_disjoint_union_check,
                   Typing_warning.No_disjoint_union_check.

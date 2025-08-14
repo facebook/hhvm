@@ -101,8 +101,9 @@ let validate_state fun_span fun_kind env s =
       in
       ( false,
         lazy
-          (Typing_error_utils.add_typing_error
-             ~env:(Tast_env.tast_env_as_typing_env env)
+          (let Equal = Tast_env.eq_typing_env in
+           Typing_error_utils.add_typing_error
+             ~env
              Typing_error.(
                wellformedness
                @@ Primary.Wellformedness
@@ -146,8 +147,9 @@ let validate_state fun_span fun_kind env s =
       let fun_pos = s.fun_def_pos in
       ( false,
         lazy
-          (Typing_error_utils.add_typing_error
-             ~env:(Tast_env.tast_env_as_typing_env env)
+          (let Equal = Tast_env.eq_typing_env in
+           Typing_error_utils.add_typing_error
+             ~env
              Typing_error.(
                wellformedness
                @@ Primary.Wellformedness.Returns_with_and_without_value
@@ -225,9 +227,9 @@ let visitor =
       if
         not
           (FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi)
-          || Typing_native.is_native_fun
-               ~env:(Tast_env.tast_env_as_typing_env env)
-               fun_)
+          ||
+          let Equal = Tast_env.eq_typing_env in
+          Typing_native.is_native_fun ~env fun_)
       then
         this#traverse_fun_body
           fun_.f_span
@@ -245,9 +247,9 @@ let visitor =
         not
           (method_.m_abstract
           || FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi)
-          || Typing_native.is_native_meth
-               ~env:(Tast_env.tast_env_as_typing_env env)
-               method_)
+          ||
+          let Equal = Tast_env.eq_typing_env in
+          Typing_native.is_native_meth ~env method_)
       then
         this#traverse_fun_body
           method_.m_span
@@ -268,8 +270,9 @@ let visitor =
           match !state.return_type with
           | Some (pos2, Hprim Tvoid) ->
             (* Property 1 *)
+            let Equal = Tast_env.eq_typing_env in
             Typing_error_utils.add_typing_error
-              ~env:(Tast_env.tast_env_as_typing_env env)
+              ~env
               Typing_error.(
                 primary
                 @@ Primary.Return_in_void { pos = return_pos; decl_pos = pos2 })

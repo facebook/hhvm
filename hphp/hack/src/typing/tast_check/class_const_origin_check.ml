@@ -114,8 +114,9 @@ let handler =
                 (Tast_env.fill_in_pos_filename_if_in_current_decl env cc.cc_pos)
                 ~f:(fun cc_pos ->
                   if find_cycle env c_name cc_name then
+                    let Equal = Tast_env.eq_typing_env in
                     Typing_error_utils.add_typing_error
-                      ~env:(Env.tast_env_as_typing_env env)
+                      ~env
                       Typing_error.(
                         primary
                         @@ Primary.Cyclic_class_constant

@@ -104,9 +104,6 @@ let handler =
         let all_methods = methods @ smethods in
         (* All methods are treated the same when it comes to inheritance *)
         (* Member type may be useful for properties, constants, etc later *)
-        check_inheritance_cases
-          (Env.tast_env_as_typing_env env)
-          "method"
-          c.c_name
-          all_methods
+        let Equal = Tast_env.eq_typing_env in
+        check_inheritance_cases env "method" c.c_name all_methods
   end

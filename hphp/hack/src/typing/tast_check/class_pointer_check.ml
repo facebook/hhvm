@@ -25,15 +25,16 @@ let handler =
         when String.(name = SN.Members.mClass) ->
         (match Env.get_self_id env with
         | Some e when Env.is_enum env e ->
+          let Equal = Tast_env.eq_typing_env in
           ClassPointer.error_at_cls_const_expr
-            (Env.tast_env_as_typing_env env)
+            env
             pos
             (ClassPointer.string_of_class_id_ cid_)
         | _ -> ())
       | _ -> ()
 
     method! at_expr env e =
-      let env = Env.tast_env_as_typing_env env in
+      let Equal = Tast_env.eq_typing_env in
       let error = function
         | (_ty, pos, Class_const ((_cty, _cpos, cid_), (_, name)))
           when String.(name = SN.Members.mClass) ->

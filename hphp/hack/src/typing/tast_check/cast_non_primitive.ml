@@ -69,10 +69,10 @@ let handler ~as_lint =
     inherit Tast_visitor.handler_base
 
     method! at_expr env =
-      let typing_env = Env.tast_env_as_typing_env env in
+      let Equal = Tast_env.eq_typing_env in
       function
       | (_, pos, Aast.Cast (hint, (ty, _, _)))
-        when (not (TUtils.is_nothing typing_env ty))
+        when (not (TUtils.is_nothing env ty))
              && (not (is_always_castable env ty))
              && (not
                    (is_bool_castable env ty

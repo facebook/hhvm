@@ -35,7 +35,6 @@ let collect_attrs_from_ty_sid ?(include_optional = false) env add bag sid =
 
 let rec collect_attrs_from_ty env set ty =
   let (_, ty) = Env.expand_type env ty in
-  let tenv = Tast_env.tast_env_as_typing_env env in
   let ty = Tast_env.strip_dynamic env ty in
   match get_node ty with
   (* Collect attrs from each conjunct *)
@@ -44,7 +43,8 @@ let rec collect_attrs_from_ty env set ty =
     (* Filter out dynamic, as we conservatively assume that anything dynamic
      * has the appropriate required attrs *)
     let tys =
-      List.filter tys ~f:(fun ty -> not (Typing_utils.is_dynamic tenv ty))
+      let Equal = Tast_env.eq_typing_env in
+      List.filter tys ~f:(fun ty -> not (Typing_utils.is_dynamic env ty))
     in
     begin
       match tys with
@@ -99,8 +99,9 @@ let check_attrs pos env sid attrs =
                 ("The attribute `" ^ attr_name ^ "` is declared here.")
                 (Reason.witness_from_decl pos))
         in
+        let Equal = Tast_env.eq_typing_env in
         Typing_error_utils.add_typing_error
-          ~env:(Tast_env.tast_env_as_typing_env env)
+          ~env
           Typing_error.(
             xhp
             @@ Primary.Xhp.Missing_xhp_required_attr

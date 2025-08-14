@@ -363,11 +363,11 @@ module Type_string = struct
      handle that much text. *)
   let lots_of_typing_print_fuel = 2048
 
-  let of_locl_ty tast_env locl_ty =
+  let of_locl_ty (tast_env : Tast_env.t) (locl_ty : Typing_defs.locl_ty) : t =
     lazy
-      (let typing_env =
+      (let Equal = Tast_env.eq_typing_env in
+       let typing_env =
          tast_env
-         |> Tast_env.tast_env_as_typing_env
          |> Typing_env.map_tcopt ~f:(fun tcopt ->
                 {
                   tcopt with

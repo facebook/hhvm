@@ -25,7 +25,8 @@ let do_
     (options : options)
     (ctx : Provider_context.t)
     (tast : T.program) =
-  let empty_typing_env = Tast_env.tast_env_as_typing_env (Tast_env.empty ctx) in
+  let Equal = Tast_env.eq_typing_env in
+  let empty_tast_env = Tast_env.empty ctx in
   let upcasted_id = add_ns upcasted_id in
   let upcasted_info = { element_name = upcasted_id } in
   match options.analysis_mode with
@@ -35,7 +36,7 @@ let do_
         (id : string) (constraints : constraint_ list) : unit =
       Format.printf "Constraints for %s:\n" id;
       constraints
-      |> List.map ~f:(show_constraint_ empty_typing_env)
+      |> List.map ~f:(show_constraint_ empty_tast_env)
       |> List.sort ~compare:String.compare
       |> List.iter ~f:(Format.printf "%s\n");
       Format.printf "\n"
@@ -47,10 +48,10 @@ let do_
         : unit =
       Format.printf "Summary for %s:\n" id;
       List.iter results ~f:(fun result ->
-          Format.printf "%s\n" (show_refactor_sd_result empty_typing_env result))
+          Format.printf "%s\n" (show_refactor_sd_result empty_tast_env result))
     in
     let process_callable id constraints =
-      Solver.simplify empty_typing_env constraints |> print_callable_summary id
+      Solver.simplify empty_tast_env constraints |> print_callable_summary id
     in
     Walker.program upcasted_info ctx tast |> SMap.iter process_callable
   | SolveConstraints -> ()

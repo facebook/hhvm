@@ -34,13 +34,8 @@ let rec type_non_nullable env ty =
     true
   | Tdependent (_, ty) when type_non_nullable env ty -> true
   | Tnewtype (name, tyl, _) ->
-    let (_, ty) =
-      Typing_utils.get_newtype_super
-        (Tast_env.tast_env_as_typing_env env)
-        (get_reason ty)
-        name
-        tyl
-    in
+    let Equal = Tast_env.eq_typing_env in
+    let (_, ty) = Typing_utils.get_newtype_super env (get_reason ty) name tyl in
     type_non_nullable env ty
   | Tunion tyl when not (List.is_empty tyl) ->
     List.for_all tyl ~f:(type_non_nullable env)

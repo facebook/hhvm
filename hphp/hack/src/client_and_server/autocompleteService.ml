@@ -91,7 +91,8 @@ let expand_and_strip_dynamic env ty =
 let expand_and_strip_supportdyn env ty =
   let (env, ty) = expand_and_strip_dynamic env ty in
   let (_, _, ty) =
-    Typing_utils.strip_supportdyn (Tast_env.tast_env_as_typing_env env) ty
+    let Equal = Tast_env.eq_typing_env in
+    Typing_utils.strip_supportdyn env ty
   in
   ty
 
@@ -429,6 +430,7 @@ let autocomplete_member
     in
 
     let check_where_constraints ft : bool =
+      let Equal = Tast_env.eq_typing_env in
       let ((env, tparam_err_opt), _, explicit_targs) =
         Phase.localize_targs_and_check_constraints
           ~exact:nonexact
@@ -436,7 +438,7 @@ let autocomplete_member
           ~use_pos:Pos.none
           ~def_pos:Pos_or_decl.none
           ~check_explicit_targs:false
-          (Tast_env.tast_env_as_typing_env env)
+          env
           (Pos.none, "autocomplete")
           Reason.none
           ft.ft_tparams
@@ -1018,12 +1020,12 @@ let compatible_enum_class_consts env cls pos (expected_ty : locl_ty option) =
         match expected_ty with
         | Some expected_ty ->
           let cc_other = Typing_make_type.locl_like Reason.none expected_ty in
-          let tenv = Tast_env.tast_env_as_typing_env env in
+          let Equal = Tast_env.eq_typing_env in
           (* The exact callback does not matter provided that `sub_type`
              does not discard errors *)
           let callback = Typing_error.Reasons_callback.unify_error_at pos in
           let (_tenv, errs) =
-            Typing_subtype.sub_type tenv cc_ty cc_other (Some callback)
+            Typing_subtype.sub_type env cc_ty cc_other (Some callback)
           in
           Option.is_none errs
         | None -> true)

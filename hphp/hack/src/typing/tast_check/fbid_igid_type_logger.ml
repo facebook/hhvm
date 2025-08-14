@@ -91,14 +91,14 @@ let log_json env kind message arg_ty param_ty param_name pos =
   in
   Hh_logger.log "[FBID_IGID_type_logger] %s" (Hh_json.json_to_string json)
 
-let check_args env params args pos =
-  let tenv = Tast_env.tast_env_as_typing_env env in
+let check_args (env : Tast_env.env) params args pos =
+  let Equal = Tast_env.eq_typing_env in
   let rec loop p a =
     match (p, a) with
     | ([], _) -> ()
     | (_, []) -> ()
     | (_ :: param_tail, arg_ty :: arg_tail)
-      when Typing_utils.is_dynamic tenv arg_ty ->
+      when Typing_utils.is_dynamic env arg_ty ->
       (* Skip dynamic types as they're likely false positives *)
       loop param_tail arg_tail
     | ((param_name, param_ty) :: param_tail, arg_ty :: arg_tail)

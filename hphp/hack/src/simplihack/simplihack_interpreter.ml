@@ -250,8 +250,8 @@ module Context = struct
 
     let constructor (ctx, cls) =
       add_dep ctx Typing_deps.Dep.(Constructor (Folded_class.name cls));
-      let tenv = Tast_env.tast_env_as_typing_env ctx.env in
-      let (constructor, _) = Typing_env.get_construct tenv cls in
+      let Equal = Tast_env.eq_typing_env in
+      let (constructor, _) = Typing_env.get_construct ctx.env cls in
       constructor
 
     let methods (ctx, cls) =

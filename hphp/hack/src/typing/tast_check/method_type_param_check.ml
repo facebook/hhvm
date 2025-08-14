@@ -16,7 +16,7 @@ let check_tparams env tps =
     | Ast_defs.Invariant -> ()
     | _ ->
       Typing_error_utils.add_typing_error
-        ~env:(Tast_env.tast_env_as_typing_env env)
+        ~env
         Typing_error.(primary @@ Primary.Method_variance (fst tp.tp_name))
   in
   List.iter tps ~f:check_tparam
@@ -25,7 +25,11 @@ let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_method_ env m = check_tparams env m.m_tparams
+    method! at_method_ env m =
+      let Equal = Tast_env.eq_typing_env in
+      check_tparams env m.m_tparams
 
-    method! at_fun_def env fd = check_tparams env fd.fd_tparams
+    method! at_fun_def env f =
+      let Equal = Tast_env.eq_typing_env in
+      check_tparams env f.fd_tparams
   end

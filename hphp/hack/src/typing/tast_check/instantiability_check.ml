@@ -41,6 +41,7 @@ let rec validate_classname env (pos, hint) =
   | Aast.Hshape _
   | Aast.Hfun_context _
   | Aast.Hvar _ ->
+    let Equal = Tast_env.eq_typing_env in
     Typing_error_utils.add_typing_error
       ~env
       Typing_error.(primary @@ Primary.Invalid_classname pos)
@@ -60,6 +61,7 @@ let rec check_hint env (pos, hint) =
              && String.( <> ) tc_name SN.Collections.cVec ->
         let tc_pos = Cls.pos cls in
         let tc_name = Cls.name cls in
+        let Equal = Tast_env.eq_typing_env in
         let err =
           Typing_error.(
             primary
@@ -71,15 +73,12 @@ let rec check_hint env (pos, hint) =
                    reason_ty_opt = None;
                  })
         in
-        Typing_error_utils.add_typing_error
-          ~env:(Tast_env.tast_env_as_typing_env env)
-          err
+        Typing_error_utils.add_typing_error ~env err
       | _ -> ()
     end;
     if String.equal class_id SN.Classes.cClassname then
-      Option.iter
-        (List.hd tal)
-        ~f:(validate_classname (Tast_env.tast_env_as_typing_env env))
+      let Equal = Tast_env.eq_typing_env in
+      Option.iter (List.hd tal) ~f:(validate_classname env)
     else
       List.iter tal ~f:(check_hint env)
   | Aast.Hrefinement (h, members) ->
@@ -107,7 +106,8 @@ let rec check_hint env (pos, hint) =
     Option.iter hopt1 ~f:(check_hint env);
     check_hint env h2
   | Aast.Hclass_ptr (_, h) ->
-    validate_classname (Tast_env.tast_env_as_typing_env env) h
+    let Equal = Tast_env.eq_typing_env in
+    validate_classname env h
   | Aast.Hoption h
   | Aast.Hlike h
   | Aast.Hsoft h ->

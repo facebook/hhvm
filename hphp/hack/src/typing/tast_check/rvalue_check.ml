@@ -21,8 +21,9 @@ let check_valid_rvalue pos env ty =
       let (env, ety) = Env.expand_type env ty in
       (match deref ety with
       | (r, Tprim Tnoreturn) ->
+        let Equal = Tast_env.eq_typing_env in
         Typing_error_utils.add_typing_error
-          ~env:(Tast_env.tast_env_as_typing_env env)
+          ~env
           Typing_error.(
             wellformedness
             @@ Primary.Wellformedness.Noreturn_usage
@@ -36,8 +37,9 @@ let check_valid_rvalue pos env ty =
                  });
         env
       | (r, Tprim Tvoid) ->
+        let Equal = Tast_env.eq_typing_env in
         Typing_error_utils.add_typing_error
-          ~env:(Tast_env.tast_env_as_typing_env env)
+          ~env
           Typing_error.(
             wellformedness
             @@ Primary.Wellformedness.Void_usage

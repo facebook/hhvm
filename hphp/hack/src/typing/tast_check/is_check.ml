@@ -79,9 +79,9 @@ let trivial_check pos env lhs_ty rhs_ty ~always ~never =
       Tast_env.strip_dynamic env lhs_ty
   in
   let (env, rhs_ty) = Env.expand_type env rhs_ty in
-  let tenv = Env.tast_env_as_typing_env env in
-  let tenv = Typing_env.open_tyvars tenv Pos.none in
-  let (tenv, rhs_ty) = replace_placeholders_with_tvars tenv rhs_ty in
+  let Equal = Tast_env.eq_typing_env in
+  let env = Typing_env.open_tyvars env Pos.none in
+  let (env, rhs_ty) = replace_placeholders_with_tvars env rhs_ty in
   if Env.is_sub_type env lhs_ty nothing_ty then
     (* If we have a nothing in our hands, there was a bigger problem
        originating from earlier in the program. Don't flag it here, as it is
@@ -93,15 +93,14 @@ let trivial_check pos env lhs_ty rhs_ty ~always ~never =
        which feedback the propositions against unconstrained type variables as
        assumptions. *)
     let callback = Typing_error.Reasons_callback.unify_error_at Pos.none in
-    let (tenv, err_opt1) = TUtils.sub_type tenv lhs_ty rhs_ty (Some callback) in
-    let (tenv, err_opt2) = Typing_solver.close_tyvars_and_solve tenv in
+    let (env, err_opt1) = TUtils.sub_type env lhs_ty rhs_ty (Some callback) in
+    let (env, err_opt2) = Typing_solver.close_tyvars_and_solve env in
     let err_opt = Option.merge err_opt1 err_opt2 ~f:Typing_error.both in
-    let env = Env.typing_env_as_tast_env tenv in
     let (env, lhs_ty) = Env.expand_type env lhs_ty in
     let (env, rhs_ty) = Env.expand_type env rhs_ty in
     if Option.is_none err_opt then
       always pos lhs_ty rhs_ty env
-    else if TUtils.is_type_disjoint tenv lhs_ty rhs_ty then
+    else if TUtils.is_type_disjoint env lhs_ty rhs_ty then
       never pos lhs_ty rhs_ty env
     else
       ()

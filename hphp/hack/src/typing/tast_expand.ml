@@ -59,13 +59,14 @@ let expand_ty ?var_hook ?pos env ty =
         (match pos with
         | None -> mk (p, Tvar v)
         | Some pos ->
-          if
-            TypecheckerOptions.disallow_unresolved_type_variables
-              (Tast_env.get_tcopt env)
+          (if
+           TypecheckerOptions.disallow_unresolved_type_variables
+             (Tast_env.get_tcopt env)
           then
+            let Equal = Tast_env.eq_typing_env in
             Typing_error_utils.add_typing_error
-              ~env:(Tast_env.tast_env_as_typing_env env)
-              Typing_error.(primary @@ Primary.Unresolved_tyvar pos);
+              ~env
+              Typing_error.(primary @@ Primary.Unresolved_tyvar pos));
           mk (p, Tvar v))
       (* TODO(T36532263) see if that needs updating *)
       | (_, Taccess _) -> ety

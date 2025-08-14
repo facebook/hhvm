@@ -178,10 +178,12 @@ module AlternativeSet = struct
     let (bound_is_nothing, bound) =
       match bound with
       | Some bound ->
+        let is_bound_nothing = is_nothing env bound in
         let like_bound =
-          Typing_utils.make_like (Tast_env.tast_env_as_typing_env env) bound
+          let Equal = Tast_env.eq_typing_env in
+          Typing_utils.make_like env bound
         in
-        (is_nothing env bound, Some like_bound)
+        (is_bound_nothing, Some like_bound)
       | None -> (false, None)
     in
     if bound_is_nothing then

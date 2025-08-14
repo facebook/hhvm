@@ -74,8 +74,9 @@ let handler =
       | Cast ((_, Hprim Tstring), te) ->
         let (ty, _, _) = te in
         if not (is_stringish env ty) then
+          let Equal = Tast_env.eq_typing_env in
           Typing_error_utils.add_typing_error
-            ~env:(Tast_env.tast_env_as_typing_env env)
+            ~env
             Typing_error.(
               primary
               @@ Primary.String_cast

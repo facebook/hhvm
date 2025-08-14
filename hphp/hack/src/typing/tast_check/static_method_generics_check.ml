@@ -18,8 +18,9 @@ let static_method_check env reified_params m =
         match h with
         | Aast.Habstr t ->
           if SSet.mem t reified_params then
+            let Equal = Tast_env.eq_typing_env in
             Typing_error_utils.add_typing_error
-              ~env:(Tast_env.tast_env_as_typing_env env)
+              ~env
               Typing_error.(
                 primary
                 @@ Primary.Static_meth_with_class_reified_generic
@@ -48,5 +49,6 @@ let handler =
                 None)
           |> SSet.of_list
         in
+        let Equal = Tast_env.eq_typing_env in
         List.iter static_methods ~f:(static_method_check env reified_params)
   end

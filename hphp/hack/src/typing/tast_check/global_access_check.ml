@@ -526,9 +526,9 @@ let check_func_is_memoized func_expr env =
   | _ -> None
 
 (* Check if type is a collection. *)
-let is_value_collection_ty env ty =
+let is_value_collection_ty (env : Tast_env.env) ty =
   let mixed = MakeType.mixed Reason.none in
-  let env = Tast_env.tast_env_as_typing_env env in
+  let Equal = Tast_env.eq_typing_env in
   let hackarray = MakeType.any_array Reason.none mixed mixed in
   (* Subtype against an empty open shape (shape(...)) *)
   let shape =
@@ -589,7 +589,7 @@ let rec has_no_object_ref_ty env (seen : SSet.t) ty =
         upper_bounds
   | _ ->
     (* Otherwise, check if there's any primitive type it could be *)
-    let env = Tast_env.tast_env_as_typing_env env in
+    let Equal = Tast_env.eq_typing_env in
     let primitive_types =
       [
         MakeType.bool Reason.none;

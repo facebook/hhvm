@@ -15,11 +15,11 @@ let create_handler _ctx =
 
     method! at_class_ env A.{ c_vars; _ } =
       let print_if_nothing_hint A.{ cv_span; cv_type = (locl_ty, _); _ } =
-        let tenv = Tast_env.tast_env_as_typing_env env in
+        let Equal = Tast_env.eq_typing_env in
         let (_, locl_ty, _) =
           Typing_tdef.force_expand_typedef
             ~ety_env:Typing_defs.empty_expand_env
-            tenv
+            env
             locl_ty
         in
         if

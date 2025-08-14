@@ -29,7 +29,7 @@ let patch_location_collection_handler =
     inherit Tast_visitor.handler_base
 
     method! at_expr env expr =
-      let typing_env = Tast_env.tast_env_as_typing_env env in
+      let Equal = Tast_env.eq_typing_env in
       match expr with
       | ( _,
           hole_pos,
@@ -40,7 +40,7 @@ let patch_location_collection_handler =
               (Aast.UnsafeCast _ | Aast.UnsafeNonnullCast) ) )
         when (not @@ Typing_defs.is_any expr_ty)
              && Typing_subtype.is_sub_type
-                  typing_env
+                  env
                   expr_ty
                   (Typing_make_type.locl_like Typing_reason.none dest_ty) ->
         let path = Tast_env.get_file env in

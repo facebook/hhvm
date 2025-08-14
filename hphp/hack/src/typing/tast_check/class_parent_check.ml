@@ -144,7 +144,8 @@ let handler =
         split_reqs c.c_reqs
       in
       List.iter c.c_uses ~f:(check_is_trait env);
-      duplicated_used_traits (Env.tast_env_as_typing_env env) c;
+      let Equal = Tast_env.eq_typing_env in
+      duplicated_used_traits env c;
       List.iter
         req_extends
         ~f:(check_is_class env ~require_constraint_check:None);

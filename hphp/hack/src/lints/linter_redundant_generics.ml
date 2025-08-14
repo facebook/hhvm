@@ -18,7 +18,7 @@ module SN = Naming_special_names
  * to use non-dep-aware functions here
  *)
 
-let ft_redundant_tparams env overlapping tparams ty =
+let ft_redundant_tparams (env : Tast_env.env) overlapping tparams ty =
   let tracked =
     List.fold_left
       tparams
@@ -26,10 +26,11 @@ let ft_redundant_tparams env overlapping tparams ty =
       ~init:SSet.empty
   in
   let (positive, negative) =
+    let Equal = Tast_env.eq_typing_env in
     Typing_variance.get_positive_negative_generics
       ~is_mutable:false
       ~tracked
-      (Tast_env.tast_env_as_typing_env env)
+      env
       (SMap.empty, SMap.empty)
       ty
   in
@@ -134,7 +135,7 @@ let check_redundant_generics_class_method env (_method_name, method_) =
     | _ -> assert false
   end
 
-let check_redundant_generics_fun env ft =
+let check_redundant_generics_fun (env : Tast_env.env) ft =
   ft_redundant_tparams env None ft.ft_tparams (mk (Reason.none, Tfun ft))
 
 let check_redundant_generics_class env class_name class_type =

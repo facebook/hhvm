@@ -14,7 +14,7 @@ let handler =
     inherit Tast_visitor.handler_base
 
     method! at_expr env =
-      let env = Tast_env.tast_env_as_typing_env env in
+      let Equal = Tast_env.eq_typing_env in
       let is_mixed = Typing_utils.is_mixed env in
       let is_nothing = Typing_utils.is_nothing env in
       let pos_of_ty ~hole_pos ty =

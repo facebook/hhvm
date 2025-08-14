@@ -62,23 +62,25 @@ let replace_placeholders_with_tvars env ty =
   | _ -> (env, ty)
 
 let always_false level pos kind env lhs_ty rhs_ty =
+  let Equal = Tast_env.eq_typing_env in
   let (env, lhs_ty) = Tast_env.expand_type env lhs_ty in
   let (env, rhs_ty) = Tast_env.expand_type env rhs_ty in
-  let tenv = Tast_env.tast_env_as_typing_env env in
   let lhs_ty = Tast_env.strip_dynamic env lhs_ty in
   let rhs_ty = Tast_env.strip_dynamic env rhs_ty in
-  let tenv = Typing_env.open_tyvars tenv Pos.none in
-  let (tenv, rhs_ty) = replace_placeholders_with_tvars tenv rhs_ty in
+  let env_with_tyvars = Typing_env.open_tyvars env Pos.none in
+  let (env_with_tyvars, rhs_ty) =
+    replace_placeholders_with_tvars env_with_tyvars rhs_ty
+  in
   if Tast_env.is_sub_type env lhs_ty nothing_ty then
     (* If we have a nothing in our hands, there was a bigger problem
        originating from earlier in the program. Don't flag it here, as it is
        merely a symptom. *)
     ()
   else
-    let env = Tast_env.typing_env_as_tast_env tenv in
     let (env, lhs_ty) = Tast_env.expand_type env lhs_ty in
     let (_env, rhs_ty) = Tast_env.expand_type env rhs_ty in
-    if Typing_utils.is_type_disjoint tenv lhs_ty rhs_ty then log level pos kind
+    if Typing_utils.is_type_disjoint env_with_tyvars lhs_ty rhs_ty then
+      log level pos kind
 
 let is_toplevelish_dynamic env (ty, hint_opt) =
   match hint_opt with

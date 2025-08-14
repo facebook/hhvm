@@ -26,8 +26,9 @@ let check_parameters env pos (_, ftype) =
       | FPinout -> "`inout`"
       | FPnormal -> "normal"
     in
+    let Equal = Tast_env.eq_typing_env in
     Typing_error_utils.add_typing_error
-      ~env:(Tast_env.tast_env_as_typing_env env)
+      ~env
       Typing_error.(
         primary
         @@ Primary.Invalid_meth_caller_calling_convention
@@ -35,10 +36,11 @@ let check_parameters env pos (_, ftype) =
   | None -> ()
 
 let check_readonly_return env pos (r, ftype) =
+  let Equal = Tast_env.eq_typing_env in
   if Flags.get_ft_returns_readonly ftype then
     let rpos = Typing_reason.to_pos r in
     Typing_error_utils.add_typing_error
-      ~env:(Tast_env.tast_env_as_typing_env env)
+      ~env
       Typing_error.(
         primary
         @@ Primary.Invalid_meth_caller_readonly_return { pos; decl_pos = rpos })
@@ -53,6 +55,7 @@ let handler =
         match Tast_env.get_underlying_function_type env ty with
         | None -> ()
         | Some ft ->
+          let Equal = Tast_env.eq_typing_env in
           check_parameters env pos ft;
           check_readonly_return env pos ft
       end

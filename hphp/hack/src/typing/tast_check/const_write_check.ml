@@ -46,9 +46,11 @@ let check_prop env c pid cty_opt =
     | Decl_entry.Found class_ ->
       (match cty_opt with
       | Some cty ->
-        check_const_prop env (Env.tast_env_as_typing_env env) class_ pid cty
+        let Equal = Tast_env.eq_typing_env in
+        check_const_prop env env class_ pid cty
       | None ->
-        check_static_const_prop (Env.tast_env_as_typing_env env) class_ pid)
+        let Equal = Tast_env.eq_typing_env in
+        check_static_const_prop env class_ pid)
     | Decl_entry.DoesNotExist
     | Decl_entry.NotYetAvailable ->
       ()
@@ -93,11 +95,8 @@ let rec check_expr env ((_, _, e) : Tast.expr) =
           seen
         | Tnewtype (name, tyl, _) ->
           let (_, bound) =
-            Typing_utils.get_newtype_super
-              (Tast_env.tast_env_as_typing_env env)
-              (get_reason cty)
-              name
-              tyl
+            let Equal = Tast_env.eq_typing_env in
+            Typing_utils.get_newtype_super env (get_reason cty) name tyl
           in
           check_const_cty seen bound
         | Tdependent (_, bound) -> check_const_cty seen bound

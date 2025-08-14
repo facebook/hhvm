@@ -314,8 +314,10 @@ val typing_env_as_tast_env : Typing_env_types.env -> env
    * - to pass an env into typing or error reporting:
    *    - sigh and do the conversion. It's probabaly safe, but nothing
    *      guarantees it. One day there may be a better API.
+   * To use it, just unwrap and OCaml will know that Tast_env.env = Typing_env_types.env:
+   * `let Eq = Typing_env_types.Eq in fn_expecting_typing_env tast_env`
  *)
-val tast_env_as_typing_env : env -> Typing_env_types.env
+val eq_typing_env : (env, Typing_env_types.env) Type.eq
 
 (** Verify that an XHP body expression is legal. *)
 val is_xhp_child : env -> Pos.t -> Tast.ty -> bool * Typing_error.t option

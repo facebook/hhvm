@@ -18,14 +18,16 @@ let handler =
     method! at_expr env =
       function
       | (_, _, Obj_get (_, (_, p, This), _, _)) ->
+        let Equal = Tast_env.eq_typing_env in
         Typing_error_utils.add_typing_error
-          ~env:(Tast_env.tast_env_as_typing_env env)
+          ~env
           Typing_error.(
             primary
             @@ Primary.Nonsense_member_selection { pos = p; kind = "$this" })
       | (_, _, Obj_get (_, (_, p, Lplaceholder _), _, _)) ->
+        let Equal = Tast_env.eq_typing_env in
         Typing_error_utils.add_typing_error
-          ~env:(Tast_env.tast_env_as_typing_env env)
+          ~env
           Typing_error.(
             primary
             @@ Primary.Nonsense_member_selection { pos = p; kind = "$_" })

@@ -195,9 +195,9 @@ let rec ty_expr env ((_, _, expr_) : Tast.expr) : rty =
   | _ -> Mut
 
 let is_value_collection_ty env ty =
+  let Equal = Tast_env.eq_typing_env in
   let mixed = MakeType.mixed Reason.none in
   let ty = Tast_env.strip_dynamic env ty in
-  let env = Tast_env.tast_env_as_typing_env env in
   let hackarray = MakeType.any_array Reason.none mixed mixed in
   (* Subtype against an empty open shape (shape(...)) *)
   let shape =
@@ -249,7 +249,7 @@ let rec is_safe_mut_ty env (seen : SSet.t) ty =
       Typing_set.exists (fun l -> is_safe_mut_ty env new_seen l) upper_bounds
   | _ ->
     (* Otherwise, check if there's any primitive type it could be *)
-    let env = Tast_env.tast_env_as_typing_env env in
+    let Equal = Tast_env.eq_typing_env in
     let primitive_types =
       [
         MakeType.bool Reason.none;
@@ -273,6 +273,7 @@ let rec check_readonly_return_call env pos caller_ty is_readonly =
   if is_readonly then
     ()
   else
+    let Equal = Tast_env.eq_typing_env in
     let open Typing_defs in
     match get_node caller_ty with
     | Tunion tyl ->
@@ -282,7 +283,7 @@ let rec check_readonly_return_call env pos caller_ty is_readonly =
       (match get_fty env caller_ty with
       | Some fty when get_ft_returns_readonly fty ->
         Typing_error_utils.add_typing_error
-          ~env:(Tast_env.tast_env_as_typing_env env)
+          ~env
           Typing_error.(
             readonly
             @@ Primary.Readonly.Explicit_readonly_cast
@@ -294,6 +295,7 @@ let rec check_readonly_return_call env pos caller_ty is_readonly =
       | _ -> ())
 
 let check_readonly_property env obj get obj_ro =
+  let Equal = Tast_env.eq_typing_env in
   let open Typing_defs in
   let prop_elts = get_prop_elts env obj get in
   (* If there's any property in the list of possible properties that could be readonly,
@@ -304,7 +306,7 @@ let check_readonly_property env obj get obj_ro =
   match (readonly_prop, obj_ro) with
   | (Some elt, Mut) ->
     Typing_error_utils.add_typing_error
-      ~env:(Tast_env.tast_env_as_typing_env env)
+      ~env
       Typing_error.(
         readonly
         @@ Primary.Readonly.Explicit_readonly_cast
@@ -316,6 +318,7 @@ let check_readonly_property env obj get obj_ro =
   | _ -> ()
 
 let check_static_readonly_property pos env (class_ : Tast.class_id) get obj_ro =
+  let Equal = Tast_env.eq_typing_env in
   let prop_elts = get_static_prop_elts env class_ get in
   (* If there's any property in the list of possible properties that could be readonly,
       it must be explicitly cast to readonly *)
@@ -326,7 +329,7 @@ let check_static_readonly_property pos env (class_ : Tast.class_id) get obj_ro =
   | (Some elt, Mut) when Typing_defs.get_ce_readonly_prop_or_needs_concrete elt
     ->
     Typing_error_utils.add_typing_error
-      ~env:(Tast_env.tast_env_as_typing_env env)
+      ~env
       Typing_error.(
         readonly
         @@ Primary.Readonly.Explicit_readonly_cast
@@ -355,7 +358,8 @@ let is_special_builtin = function
     true
   | _ -> false
 
-let rec assign env lval rval =
+let rec assign (env : Tast_env.env) lval rval =
+  let Equal = Tast_env.eq_typing_env in
   (* Check that we're assigning a readonly value to a readonly property *)
   let check_ro_prop_assignment prop_elts =
     let mutable_prop =
@@ -367,7 +371,7 @@ let rec assign env lval rval =
     | Some elt when not (Typing_defs.get_ce_readonly_prop_or_needs_concrete elt)
       ->
       Typing_error_utils.add_typing_error
-        ~env:(Tast_env.tast_env_as_typing_env env)
+        ~env
         Typing_error.(
           readonly
           @@ Primary.Readonly.Readonly_mismatch
@@ -394,7 +398,7 @@ let rec assign env lval rval =
       | _ -> ())
     | (Mut, Readonly) ->
       Typing_error_utils.add_typing_error
-        ~env:(Tast_env.tast_env_as_typing_env env)
+        ~env
         Typing_error.(
           readonly
           @@ Primary.Readonly.Readonly_mismatch
@@ -406,7 +410,7 @@ let rec assign env lval rval =
                })
     | (Readonly, _) ->
       Typing_error_utils.add_typing_error
-        ~env:(Tast_env.tast_env_as_typing_env env)
+        ~env
         Typing_error.(
           readonly
           @@ Primary.Readonly.Readonly_modified
@@ -425,7 +429,7 @@ let rec assign env lval rval =
       match ty_expr env obj with
       | Readonly ->
         Typing_error_utils.add_typing_error
-          ~env:(Tast_env.tast_env_as_typing_env env)
+          ~env
           Typing_error.(
             readonly
             @@ Primary.Readonly.Readonly_modified
@@ -443,6 +447,7 @@ let rec assign env lval rval =
 
 (* Method call invocation *)
 let method_call env caller =
+  let Equal = Tast_env.eq_typing_env in
   let open Typing_defs in
   match caller with
   (* Readonly call checks *)
@@ -450,7 +455,7 @@ let method_call env caller =
     (match get_fty env ty with
     | Some fty when not (get_ft_readonly_this fty) ->
       Typing_error_utils.add_typing_error
-        ~env:(Tast_env.tast_env_as_typing_env env)
+        ~env
         Typing_error.(
           readonly
           @@ Primary.Readonly.Readonly_method_call
@@ -459,6 +464,7 @@ let method_call env caller =
   | _ -> ()
 
 let check_special_function env caller args =
+  let Equal = Tast_env.eq_typing_env in
   match (caller, args) with
   | ((_, _, Id (pos, x)), [arg])
     when String.equal (Utils.strip_ns x) (Utils.strip_ns SN.Readonly.as_mut) ->
@@ -466,7 +472,7 @@ let check_special_function env caller args =
     let arg_ty = Tast.get_type arg in
     if not (is_safe_mut_ty env SSet.empty arg_ty) then
       Typing_error_utils.add_typing_error
-        ~env:(Tast_env.tast_env_as_typing_env env)
+        ~env
         Typing_error.(readonly @@ Primary.Readonly.Readonly_invalid_as_mut pos)
     else
       ()
@@ -504,8 +510,9 @@ let call
         else
           "declare this as a `readonly` function"
       in
+      let Equal = Tast_env.eq_typing_env in
       Typing_error_utils.add_typing_error
-        ~env:(Tast_env.tast_env_as_typing_env env)
+        ~env
         Typing_error.(
           readonly
           @@ Primary.Readonly.Readonly_closure_call
@@ -518,8 +525,9 @@ let call
     let param_rty = param_to_rty param in
     let arg_rty = ty_expr env arg in
     if not (subtype_rty arg_rty param_rty) then
+      let Equal = Tast_env.eq_typing_env in
       Typing_error_utils.add_typing_error
-        ~env:(Tast_env.tast_env_as_typing_env env)
+        ~env
         Typing_error.(
           readonly
           @@ Primary.Readonly.Readonly_mismatch

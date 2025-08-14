@@ -35,18 +35,18 @@ let equiv_ak_inter_dyn env ty_expect =
  *)
 let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
   let type_index ?(is_covariant_index = false) env ty_have ty_expect reason =
-    let t_env = Env.tast_env_as_typing_env env in
+    let Equal = Tast_env.eq_typing_env in
     let got_error =
       if
         Typing_env_types.(
-          TypecheckerOptions.enable_sound_dynamic t_env.genv.tcopt)
+          TypecheckerOptions.enable_sound_dynamic env.genv.tcopt)
       then
         let (_env, ty_err_opt) =
           Typing_coercion.coerce_type
             ~coerce_for_op:true
             index_pos
             reason
-            t_env
+            env
             ty_have
             ty_expect
             Enforced
@@ -55,7 +55,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
         Option.is_some ty_err_opt
       else
         Option.is_none
-          (Typing_coercion.try_coerce ~coerce:None t_env ty_have ty_expect)
+          (Typing_coercion.try_coerce ~coerce:None env ty_have ty_expect)
     in
     if not got_error then
       Ok ()
@@ -89,8 +89,9 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
                  ("It is incompatible with " ^ ty_have_str)
                  (get_reason ty_have)))
       in
+      let Equal = Tast_env.eq_typing_env in
       Typing_error_utils.add_typing_error
-        ~env:(Tast_env.tast_env_as_typing_env env)
+        ~env
         Typing_error.(
           primary
           @@ Primary.Index_type_mismatch
@@ -108,6 +109,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
     List.iter tyl ~f:(fun ty ->
         array_get ~array_pos ~expr_pos ~index_pos env ty index_ty)
   | Tclass ((pos, cn), _, _) when cn = SN.Collections.cVec ->
+    let Equal = Tast_env.eq_typing_env in
     let (_ : (unit, unit) result) =
       type_index
         ~is_covariant_index:true
@@ -130,6 +132,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
     *)
     let arraykey_ty = MakeType.arraykey (Reason.idx_dict array_pos) in
     let array_key_res =
+      let Equal = Tast_env.eq_typing_env in
       type_index env index_ty arraykey_ty (Reason.index_class cn)
     in
     (match array_key_res with
@@ -140,6 +143,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
       (* The index expression _is_ a subtype of arraykey, now check it is a subtype
          of the given key_ty *)
       let (_ : (unit, unit) result) =
+        let Equal = Tast_env.eq_typing_env in
         type_index
           ~is_covariant_index:true
           env
@@ -155,6 +159,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
          || cn = SN.Collections.cKeyedContainer
          || cn = SN.Collections.cAnyArray ->
     let (_ : (unit, unit) result) =
+      let Equal = Tast_env.eq_typing_env in
       type_index env index_ty key_ty (Reason.index_class cn)
     in
     ()

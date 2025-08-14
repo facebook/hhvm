@@ -39,13 +39,15 @@ let handler =
                 Option.value_exn (Cls.get_typeconst_enforceability cls name)
               in
               if enforceable then
+                let Equal = Tast_env.eq_typing_env in
                 Typing_enforceable_hint.validate_type
-                  (Tast_env.tast_env_as_typing_env env)
+                  env
                   (fst tc.ttc_name |> Pos_or_decl.unsafe_to_raw_pos)
                   ty
                   (fun pos ty_info ->
+                    let Equal = Tast_env.eq_typing_env in
                     Typing_error_utils.add_typing_error
-                      ~env:(Tast_env.tast_env_as_typing_env env)
+                      ~env
                       Typing_error.(
                         primary
                         @@ Primary.Invalid_enforceable_type
@@ -59,8 +61,7 @@ let handler =
             | _ -> ()
           end;
           if String.equal tc.ttc_origin (Cls.name cls) then
-            Option.iter
-              tc.ttc_reifiable
-              ~f:(check_reifiable (Tast_env.tast_env_as_typing_env env) tc)
+            let Equal = Tast_env.eq_typing_env in
+            Option.iter tc.ttc_reifiable ~f:(check_reifiable env tc)
       end
   end

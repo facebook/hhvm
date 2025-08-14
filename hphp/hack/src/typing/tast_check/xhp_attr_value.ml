@@ -49,8 +49,9 @@ let int_of_hack_literal (literal : string) : int option =
   int_of_string_opt clean_literal
 
 let add_error env pos attr_name attr_values =
+  let Equal = Tast_env.eq_typing_env in
   Typing_error_utils.add_typing_error
-    ~env:(Tast_env.tast_env_as_typing_env env)
+    ~env
     Typing_error.(
       xhp
       @@ Primary.Xhp.Attribute_value
@@ -71,10 +72,12 @@ let check_attr_value env (cls : Cls.t) (attr : ('a, 'b) xhp_attribute) : unit =
         (match int_of_hack_literal i with
         | Some i ->
           if not (List.mem int_values i ~equal:Int.equal) then
+            let Equal = Tast_env.eq_typing_env in
             add_error env attr_val_pos attr_name attr_values
         | None -> ())
       | String s ->
         if not (List.mem string_values s ~equal:String.equal) then
+          let Equal = Tast_env.eq_typing_env in
           add_error env attr_val_pos attr_name attr_values
       | _ -> ())
     | None -> ())

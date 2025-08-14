@@ -13,18 +13,19 @@ open Typing_defs
 module Cls = Folded_class
 module SN = Naming_special_names
 
-let ft_redundant_generics env tparams ty =
+let ft_redundant_generics (env : Tast_env.env) tparams ty =
   let tracked =
     List.fold_left
       tparams
       ~f:(fun tracked t -> SSet.add (snd t.tp_name) tracked)
       ~init:SSet.empty
   in
+  let Equal = Tast_env.eq_typing_env in
   let (positive, negative) =
     Typing_variance.get_positive_negative_generics
       ~tracked
       ~is_mutable:false
-      (Tast_env.tast_env_as_typing_env env)
+      env
       (SMap.empty, SMap.empty)
       ty
   in
@@ -88,7 +89,7 @@ let ft_redundant_generics env tparams ty =
             match super_bounds with
             | [] ->
               Typing_error_utils.add_typing_error
-                ~env:(Tast_env.tast_env_as_typing_env env)
+                ~env
                 Typing_error.(
                   primary
                   @@ Primary.Redundant_generic
@@ -100,7 +101,7 @@ let ft_redundant_generics env tparams ty =
                        })
             | [(_, t)] ->
               Typing_error_utils.add_typing_error
-                ~env:(Tast_env.tast_env_as_typing_env env)
+                ~env
                 Typing_error.(
                   primary
                   @@ Primary.Redundant_generic
@@ -126,7 +127,7 @@ let ft_redundant_generics env tparams ty =
           | None -> ()
           | Some locl_ty ->
             Typing_error_utils.add_typing_error
-              ~env:(Tast_env.tast_env_as_typing_env env)
+              ~env
               Typing_error.(
                 primary
                 @@ Primary.Redundant_generic
@@ -139,7 +140,8 @@ let ft_redundant_generics env tparams ty =
         | (None, Some _positions) -> ()
         | (None, None) -> ())
 
-let check_redundant_generics_class_method env (_method_name, method_) =
+let check_redundant_generics_class_method
+    (env : Tast_env.env) (_method_name, method_) =
   match method_.ce_type with
   | (lazy (ty as ft)) -> begin
     match get_node ty with
@@ -150,7 +152,7 @@ let check_redundant_generics_class_method env (_method_name, method_) =
 let check_redundant_generics_fun env ft =
   ft_redundant_generics env ft.ft_tparams (mk (Reason.none, Tfun ft))
 
-let check_redundant_generics_class env class_name class_type =
+let check_redundant_generics_class (env : Tast_env.env) class_name class_type =
   Cls.methods class_type
   |> ListLabels.filter ~f:(fun (_, meth) ->
          String.equal meth.ce_origin class_name)
@@ -180,7 +182,9 @@ let create_handler ctx =
           with
           | Decl_entry.Found { fe_type; _ } -> begin
             match get_node fe_type with
-            | Tfun ft -> check_redundant_generics_fun env ft
+            | Tfun ft ->
+              let Equal = Tast_env.eq_typing_env in
+              check_redundant_generics_fun env ft
             | _ -> ()
           end
           | _ -> ()

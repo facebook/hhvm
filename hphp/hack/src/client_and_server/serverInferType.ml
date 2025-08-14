@@ -139,8 +139,8 @@ let base_visitor
 
     method private correct_assumptions env =
       let is_under_dynamic_assumptions =
-        (Tast_env.tast_env_as_typing_env env).Typing_env_types.checked
-        |> Tast.is_under_dynamic_assumptions
+        let Equal = Tast_env.eq_typing_env in
+        env.Typing_env_types.checked |> Tast.is_under_dynamic_assumptions
       in
       Bool.equal is_under_dynamic_assumptions under_dynamic
 

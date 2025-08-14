@@ -1383,6 +1383,12 @@ namespace HH {
                                     ?string $cns_name = null)[]: string;
 
   /**
+   * Retrieves the class pointed by a type constant.
+   */
+  <<__Native("NoRecording"),NoDoc>>
+  function type_structure_class(mixed $cls_or_obj,
+                                string $cns_name)[]: class<mixed>;
+  /**
    * Retrieves the TypeStructure for a type alias.
    *
    * @cls_or_obj    mixed    the name of a type alias.

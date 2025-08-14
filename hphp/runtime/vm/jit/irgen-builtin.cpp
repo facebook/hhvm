@@ -807,6 +807,11 @@ SSATmp* opt_type_structure_no_throw(IRGS& env, const ParamPrep& params) {
 SSATmp* opt_type_structure_classname(IRGS& env, const ParamPrep& params) {
   return impl_opt_type_structure(env, params, true, false);
 }
+SSATmp* opt_type_structure_class(IRGS& env, const ParamPrep& params) {
+  auto const name = opt_type_structure_classname(env, params);
+  if (!name) return nullptr;
+  return ldCls(env, name);
+}
 
 SSATmp* opt_is_list_like(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
@@ -1348,6 +1353,7 @@ const hphp_fast_string_fmap<OptEmitFn> s_opt_emit_fns{
   {"HH\\type_structure", opt_type_structure},
   {"HH\\type_structure_no_throw", opt_type_structure_no_throw},
   {"HH\\type_structure_classname", opt_type_structure_classname},
+  {"HH\\type_structure_class", opt_type_structure_class},
   {"HH\\is_list_like", opt_is_list_like},
   {"HH\\is_dict_or_darray", opt_is_dict_or_darray},
   {"HH\\is_vec_or_varray", opt_is_vec_or_varray},

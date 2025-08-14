@@ -596,8 +596,8 @@ TypeOrReduced builtin_type_structure_no_throw(ISS& env, const php::Func* func,
 
 const StaticString s_classname("classname");
 
-TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
-                                               const FCallArgs& fca) {
+TypeOrReduced impl_type_structure_classname(ISS& env, const php::Func* func,
+                                            const FCallArgs& fca, bool load) {
   auto const r = impl_builtin_type_structure(env, func, fca, false);
   if (!r) return NoReduced{};
   if (r->second == TriBool::Yes) {
@@ -618,7 +618,30 @@ TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
     effect_free(env);
     constprop(env);
   }
-  return intersection_of(classname, TSStr);
+
+  if (load) {
+    if (is_specialized_string(classname)) {
+      auto const n = sval_of(classname);
+      if (auto const rcls = env.index.resolve_class(n)) {
+        return clsExact(*rcls, true);
+      } else {
+        return TBottom;
+      }
+    }
+    return TCls;
+  } else {
+    return intersection_of(classname, TSStr);
+  }
+}
+
+TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
+                                               const FCallArgs& fca) {
+  return impl_type_structure_classname(env, func, fca, false);
+}
+
+TypeOrReduced builtin_type_structure_class(ISS& env, const php::Func* func,
+                                           const FCallArgs& fca) {
+  return impl_type_structure_classname(env, func, fca, true);
 }
 
 #define SPECIAL_BUILTINS                                                \
@@ -647,6 +670,7 @@ TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
   X(type_structure, HH\\type_structure)                                 \
   X(type_structure_no_throw, HH\\type_structure_no_throw)               \
   X(type_structure_classname, HH\\type_structure_classname)             \
+  X(type_structure_class, HH\\type_structure_class)                     \
 
 #define X(x, y)    const StaticString s_##x(#y);
   SPECIAL_BUILTINS

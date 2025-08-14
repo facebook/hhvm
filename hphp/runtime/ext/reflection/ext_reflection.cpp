@@ -667,13 +667,26 @@ Array HHVM_FUNCTION(type_structure_no_throw,
   return implTypeStructure(cls_or_obj, cns_name, true);
 }
 
-String HHVM_FUNCTION(type_structure_classname,
-                     TypedValue cls_or_obj, const Variant& cns_name) {
+StringData* type_structure_classname_impl(TypedValue cls_or_obj,
+                                          const Variant& cns_name) {
   auto const ts = implTypeStructure(cls_or_obj, cns_name, false);
   auto const classname = ts->get(s_classname.get(), true);
   assertx(isStringType(type(classname)));
   assertx(val(classname).pstr->isStatic());
-  return String::attach(val(classname).pstr);
+  return val(classname).pstr;
+}
+
+String HHVM_FUNCTION(type_structure_classname,
+                     TypedValue cls_or_obj, const Variant& cns_name) {
+  return String::attach(type_structure_classname_impl(cls_or_obj, cns_name));
+}
+
+TypedValue HHVM_FUNCTION(type_structure_class,
+                         TypedValue cls_or_obj, const String& cns_name) {
+  auto const cn = type_structure_classname_impl(cls_or_obj, cns_name);
+  auto const cls = Class::load(cn);
+  assertx(cls != nullptr);
+  return make_tv<KindOfClass>(cls);
 }
 
 [[noreturn]]
@@ -2392,6 +2405,7 @@ struct ReflectionExtension final : Extension {
     HHVM_FALIAS(HH\\type_structure, type_structure);
     HHVM_FALIAS(HH\\type_structure_no_throw, type_structure_no_throw);
     HHVM_FALIAS(HH\\type_structure_classname, type_structure_classname);
+    HHVM_FALIAS(HH\\type_structure_class, type_structure_class);
 
     HHVM_ME(ReflectionFunctionAbstract, getName);
     HHVM_ME(ReflectionFunctionAbstract, isHack);

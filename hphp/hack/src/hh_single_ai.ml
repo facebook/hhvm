@@ -295,7 +295,6 @@ let main_hack ({ tcopt; _ } as opts) (sharedmem_config : SharedMem.config) :
   Sys_utils.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init_fake ();
 
-  let () = FlashSharedMem.pre_init None in
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 sharedmem_config
   in

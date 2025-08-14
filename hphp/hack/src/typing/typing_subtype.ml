@@ -6266,8 +6266,7 @@ end = struct
       Subtype.simplify
         ~subtype_env
         ~this_ty
-          (* sub_supportdyn is not plumbed along because simplify_default is used in different context. *)
-        ~lhs:{ sub_supportdyn = None; ty_sub = lhs }
+        ~lhs:{ sub_supportdyn; ty_sub = lhs }
         ~rhs:{ super_like = false; super_supportdyn = false; ty_super = rhs }
         env
     in

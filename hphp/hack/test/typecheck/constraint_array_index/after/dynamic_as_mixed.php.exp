@@ -6,5 +6,5 @@ A `where` type constraint is violated here (Typing[4323])
   Expected `Container<mixed>`
   File "dynamic_as_mixed.php", line 16, characters 8-12:
   But got `dynamic`
-  File "dynamic_as_mixed.php", line 16, characters 8-12:
-    from this definition
+  File "dynamic_as_mixed.php", line 15, characters 8-9:
+    from this definition from this "as" assertion

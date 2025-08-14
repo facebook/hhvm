@@ -498,6 +498,13 @@ let to_collection env pos shape_ty res return_type =
         Typing_intersection.intersect_list env r tyl
 
       method! on_type env ty =
+        let ((env, _e1), ty) =
+          Typing_solver.expand_type_and_solve
+            ~description_of_expected:"a shape"
+            env
+            pos
+            ty
+        in
         match get_node ty with
         | Tdynamic ->
           (* This makes it so that to_collection on a dynamic value returns a dynamic
@@ -511,7 +518,11 @@ let to_collection env pos shape_ty res return_type =
           super#on_type env ty
           (* Look through bound on newtype, including supportdyn. We assume that
            * supportdyn has already been pushed into the type of unknown fields *)
-        | Tnewtype (_, _, ty) -> super#on_type env ty
+        | Tnewtype (c, tyl, _) ->
+          let (env, ty) =
+            Typing_utils.get_newtype_super env (get_reason ty) c tyl
+          in
+          super#on_type env ty
         | _ -> (env, res)
     end
   in

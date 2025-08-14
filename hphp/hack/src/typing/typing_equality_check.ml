@@ -93,15 +93,19 @@ let rec assert_nontrivial p bop env ty1 ty2 ~as_warning =
   match (get_node ty1, get_node ty2) with
   (* Disallow `===` on distinct abstract enum types. *)
   (* Future: consider putting this in typed lint not type checking *)
-  | (Tnewtype (e1, _, bound1), Tnewtype (e2, _, bound2))
-    when Env.is_enum env e1
-         && Env.is_enum env e2
-         && is_arraykey bound1
-         && is_arraykey bound2 ->
-    if String.equal e1 e2 then
-      ()
-    else
-      eq_incompatible_types env p ety1 ety2
+  | (Tnewtype (e1, tyargs1, _), Tnewtype (e2, tyargs2, _))
+    when Env.is_enum env e1 && Env.is_enum env e2 ->
+    let (env, bound1) =
+      Typing_utils.get_newtype_super env (get_reason ty1) e1 tyargs1
+    in
+    let (env, bound2) =
+      Typing_utils.get_newtype_super env (get_reason ty2) e2 tyargs2
+    in
+    if is_arraykey bound1 && is_arraykey bound2 && not (String.equal e1 e2) then
+      if String.equal e1 e2 then
+        ()
+      else
+        eq_incompatible_types env p ety1 ety2
   | _ ->
     (match (deref ety1, deref ety2) with
     | ((_, Tprim N.Tnum), (_, Tprim N.Tarraykey))

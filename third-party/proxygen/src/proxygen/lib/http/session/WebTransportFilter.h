@@ -10,6 +10,7 @@
 
 #include <folly/logging/xlog.h>
 #include <proxygen/lib/http/HTTPMessageFilters.h>
+#include <proxygen/lib/http/codec/HQUtils.h>
 #include <proxygen/lib/http/codec/webtransport/WebTransportCapsuleCodec.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <proxygen/lib/http/webtransport/WebTransport.h>
@@ -48,12 +49,34 @@ class WebTransportFilter
     txn_ = nullptr;
   }
 
+  void setHandler(WebTransportHandler* handler) {
+    handler_ = handler;
+  }
+
   void onBody(std::unique_ptr<folly::IOBuf> chain) noexcept override {
+    if (sessionClosed_) {
+      XLOG(ERR) << "Received additional data after WT_CLOSE_SESSION capsule, "
+                << "resetting CONNECT stream with H3_MESSAGE_ERROR";
+      if (txn_) {
+        auto errorCode =
+            hq::hqToHttpErrorCode(HTTP3::ErrorCode::HTTP_MESSAGE_ERROR);
+        txn_->sendAbort(errorCode);
+      }
+      return;
+    }
     codec_->onIngress(std::move(chain), false);
   }
 
   void onEOM() noexcept override {
     codec_->onIngress(nullptr, true);
+  }
+
+  std::unique_ptr<HTTPMessageFilter> clone() noexcept override {
+    return nullptr;
+  }
+
+  [[nodiscard]] bool allowDSR() const noexcept override {
+    return false;
   }
 
   void trackedByteEventTX(const ByteEvent& event) noexcept override {
@@ -143,6 +166,30 @@ class WebTransportFilter
     return folly::unit;
   }
 
+  folly::SemiFuture<folly::Unit> awaitUniStreamCredit() override {
+    return folly::makeFuture(folly::unit);
+  }
+
+  folly::SemiFuture<folly::Unit> awaitBidiStreamCredit() override {
+    return folly::makeFuture(folly::unit);
+  }
+
+  folly::Expected<folly::Unit, WebTransport::ErrorCode>
+  notifyPendingWriteOnStream(HTTPCodec::StreamID /*id*/,
+                             quic::StreamWriteCallback* /*wcb*/) override {
+    return folly::unit;
+  }
+
+  bool usesEncodedApplicationErrorCodes() override {
+    return false;
+  }
+
+  void onConnectionError(CapsuleCodec::ErrorCode error) override {
+    XLOG(DBG1) << __func__ << " error=" << static_cast<int>(error);
+  }
+  void onPaddingCapsule(PaddingCapsule capsule) override {
+    XLOG(DBG1) << __func__;
+  }
   void onWTResetStreamCapsule(WTResetStreamCapsule capsule) override {
     XLOG(DBG1) << __func__;
   }
@@ -176,7 +223,24 @@ class WebTransportFilter
   }
   void onCloseWebTransportSessionCapsule(
       CloseWebTransportSessionCapsule capsule) override {
-    XLOG(DBG1) << __func__;
+    XLOG(DBG1) << __func__ << " errorCode=" << capsule.applicationErrorCode
+               << " message=" << capsule.applicationErrorMessage;
+
+    if (txn_) {
+      auto* wt = txn_->getWebTransport();
+      if (wt) {
+        auto* wtImpl = static_cast<WebTransportImpl*>(wt);
+        wtImpl->terminateSession(capsule.applicationErrorCode);
+      }
+
+      sessionClosed_ = true;
+      closeErrorCode_ = capsule.applicationErrorCode;
+      closeErrorMessage_ = capsule.applicationErrorMessage;
+    }
+
+    if (handler_) {
+      handler_->onSessionEnd(capsule.applicationErrorCode);
+    }
   }
   void onDrainWebTransportSessionCapsule(
       DrainWebTransportSessionCapsule capsule) override {
@@ -188,7 +252,6 @@ class WebTransportFilter
   std::unique_ptr<CapsuleCodec> codec_;
   uint64_t nextNewWTBidiStream_{0};
   uint64_t nextNewWTUniStream_{2};
-  uint64_t bodyOffset_{0};
   folly::F14FastMap<HTTPCodec::StreamID, WebTransportImpl::StreamReadHandle*>
       readCallbacks_;
   struct WriteCallback {
@@ -197,6 +260,11 @@ class WebTransportFilter
     quic::StreamWriteCallback* wcb;
   };
   std::list<WriteCallback> writeCallbacks_;
+  WebTransportHandler* handler_{nullptr};
+
+  bool sessionClosed_{false};
+  uint32_t closeErrorCode_{0};
+  std::string closeErrorMessage_;
 };
 
 } // namespace proxygen

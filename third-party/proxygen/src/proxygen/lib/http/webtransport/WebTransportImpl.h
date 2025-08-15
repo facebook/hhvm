@@ -166,6 +166,9 @@ class WebTransportImpl : public WebTransport {
   }
   folly::Expected<folly::Unit, WebTransport::ErrorCode> sendDatagram(
       std::unique_ptr<folly::IOBuf> datagram) override {
+    if (sessionCloseError_.has_value()) {
+      return folly::makeUnexpected(WebTransport::ErrorCode::SESSION_TERMINATED);
+    }
     // This can bypass the size and state machine checks in
     // HTTPTransaction::sendDatagram
     if (!tp_.sendDatagram(std::move(datagram))) {
@@ -314,6 +317,25 @@ class WebTransportImpl : public WebTransport {
   using WTIngressStreamMap = std::map<HTTPCodec::StreamID, StreamReadHandle>;
   WTEgressStreamMap wtEgressStreams_;
   WTIngressStreamMap wtIngressStreams_;
+  folly::Optional<uint32_t> sessionCloseError_;
+
+ public:
+  [[nodiscard]] bool isSessionTerminated() const {
+    return sessionCloseError_.has_value();
+  }
+
+  [[nodiscard]] folly::Optional<uint32_t> getSessionCloseError() const {
+    return sessionCloseError_;
+  }
+
+  void terminateSession(const folly::Optional<uint32_t>& error = folly::none) {
+    sessionCloseError_ =
+        error.has_value() ? error : folly::Optional<uint32_t>(0);
+    terminateSessionStreams(WebTransport::kSessionGone, "session terminated");
+  }
+
+ private:
+  void terminateSessionStreams(uint32_t errorCode, const std::string& reason);
 
  public:
   // Calls from Transport

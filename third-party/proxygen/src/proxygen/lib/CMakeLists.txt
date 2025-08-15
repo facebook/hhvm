@@ -130,6 +130,7 @@ add_library(
     http/codec/compress/QPACKHeaderTable.cpp
     http/codec/compress/QPACKStaticHeaderTable.cpp
     http/codec/compress/StaticHeaderTable.cpp
+    http/codec/CapsuleCodec.cpp
     http/codec/DefaultHTTPCodecFactory.cpp
     http/codec/ErrorCode.cpp
     http/codec/FlowControlFilter.cpp
@@ -146,6 +147,7 @@ add_library(
     http/codec/HTTPSettings.cpp
     http/codec/TransportDirection.cpp
     http/codec/RateLimitFilter.cpp
+    http/codec/webtransport/WebTransportFramer.cpp
     http/connpool/ServerIdleSessionController.cpp
     http/connpool/SessionHolder.cpp
     http/connpool/SessionPool.cpp

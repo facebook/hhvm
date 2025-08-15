@@ -44,7 +44,8 @@ class WebTransport {
     INVALID_STREAM_ID,
     STREAM_CREATION_ERROR,
     SEND_ERROR,
-    STOP_SENDING
+    STOP_SENDING,
+    SESSION_TERMINATED
   };
 
   static constexpr uint64_t kFirstErrorCode = 0x52e4a40fa8db;
@@ -73,6 +74,8 @@ class WebTransport {
 
   static constexpr uint32_t kInternalError =
       std::numeric_limits<uint32_t>::max();
+
+  static constexpr uint32_t kSessionGone = 0x170d7b68;
 
   class Exception : public std::runtime_error {
    public:

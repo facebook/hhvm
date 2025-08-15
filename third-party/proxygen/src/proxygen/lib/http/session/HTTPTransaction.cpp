@@ -15,6 +15,7 @@
 #include <glog/logging.h>
 #include <proxygen/lib/http/HTTPHeaderSize.h>
 #include <proxygen/lib/http/RFC2616.h>
+#include <proxygen/lib/http/codec/webtransport/WebTransportFramer.h>
 #include <proxygen/lib/http/session/HTTPSessionStats.h>
 #include <proxygen/lib/http/webtransport/HTTPWebTransport.h>
 #include <sstream>
@@ -2113,6 +2114,26 @@ bool HTTPTransaction::onWebTransportStopSending(HTTPCodec::StreamID id,
                                                 uint32_t errorCode) {
   webTransportImpl_->onWebTransportStopSending(id, errorCode);
   return true;
+}
+
+void HTTPTransaction::sendCloseWebTransportSessionCapsule(
+    uint32_t errorCode, const std::string& errorMessage) {
+  CloseWebTransportSessionCapsule capsule{.applicationErrorCode = errorCode,
+                                          .applicationErrorMessage =
+                                              errorMessage};
+
+  folly::IOBufQueue queue;
+  auto writeResult = writeCloseWebTransportSession(queue, capsule);
+  if (writeResult.hasError()) {
+    VLOG(4) << "Failed to write CLOSE_WEBTRANSPORT_SESSION capsule: "
+            << static_cast<int>(writeResult.error());
+    return;
+  }
+
+  auto capsuleData = queue.move();
+  if (capsuleData && capsuleData->computeChainDataLength() > 0) {
+    sendBody(std::move(capsuleData));
+  }
 }
 
 } // namespace proxygen

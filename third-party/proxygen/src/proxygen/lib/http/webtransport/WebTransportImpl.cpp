@@ -15,6 +15,11 @@ constexpr uint64_t kMaxWTIngressBuf = 65535;
 namespace proxygen {
 
 void WebTransportImpl::destroy() {
+  terminateSessionStreams(WebTransport::kInternalError, "");
+}
+
+void WebTransportImpl::terminateSessionStreams(uint32_t errorCode,
+                                               const std::string& reason) {
   // These loops are dicey for possible erasure from callbacks
   for (auto ingressStreamIt = wtIngressStreams_.begin();
        ingressStreamIt != wtIngressStreams_.end();) {
@@ -23,12 +28,9 @@ void WebTransportImpl::destroy() {
     ingressStreamIt++;
     // Deliver an error to the application if needed
     if (stream.open()) {
-      VLOG(4) << "aborting WT ingress id=" << id;
-      stream.deliverReadError(WebTransport::Exception(
-          WebTransport::kInternalError, "shutting down"));
-      stopReadingWebTransportIngress(id, WebTransport::kInternalError);
-      // TODO: does the spec say how to handle this at the transport?  Eg: the
-      // peer must RESET any open write streams.
+      VLOG(4) << "aborting WT ingress id=" << id << " with error=" << errorCode;
+      stream.deliverReadError(WebTransport::Exception(errorCode, reason));
+      stopReadingWebTransportIngress(id, errorCode);
     } else {
       VLOG(4) << "WT ingress already complete for id=" << id;
     }
@@ -40,12 +42,11 @@ void WebTransportImpl::destroy() {
     auto& stream = egressStreamIt->second;
     egressStreamIt++;
     // Deliver an error to the application
-    stream.onStopSending(WebTransport::kInternalError);
+    stream.onStopSending(errorCode);
     // The handler may have run and reset this stream, removing it from
     // wtEgressStreams_, otherwise we have to reset it.
     if (wtEgressStreams_.find(id) != wtEgressStreams_.end()) {
-      resetWebTransportEgress(id,
-                              /*TODO: errorCode=*/WebTransport::kInternalError);
+      resetWebTransportEgress(id, errorCode);
     }
   }
   wtEgressStreams_.clear();
@@ -53,6 +54,9 @@ void WebTransportImpl::destroy() {
 
 folly::Expected<WebTransport::StreamWriteHandle*, WebTransport::ErrorCode>
 WebTransportImpl::newWebTransportUniStream() {
+  if (sessionCloseError_.has_value()) {
+    return folly::makeUnexpected(WebTransport::ErrorCode::SESSION_TERMINATED);
+  }
   auto id = tp_.newWebTransportUniStream();
   if (!id) {
     return folly::makeUnexpected(
@@ -67,6 +71,9 @@ WebTransportImpl::newWebTransportUniStream() {
 
 folly::Expected<WebTransport::BidiStreamHandle, WebTransport::ErrorCode>
 WebTransportImpl::newWebTransportBidiStream() {
+  if (sessionCloseError_.has_value()) {
+    return folly::makeUnexpected(WebTransport::ErrorCode::SESSION_TERMINATED);
+  }
   auto id = tp_.newWebTransportBidiStream();
   if (!id) {
     return folly::makeUnexpected(

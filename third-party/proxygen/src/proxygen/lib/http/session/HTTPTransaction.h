@@ -2138,13 +2138,21 @@ class HTTPTransaction
   bool setIngressTimeoutAfterEom_{false};
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode> closeSession(
-      folly::Optional<uint32_t> /*error*/) override {
-    // TODO: serialize error in a CLOSE_WEBTRANSPORT_SESSION capsule
+      folly::Optional<uint32_t> error) override {
+    if (error.has_value()) {
+      sendCloseWebTransportSessionCapsule(error.value(), "");
+    }
+    webTransportImpl_->terminateSession(error);
+
     if (!isEgressEOMSeen()) {
       sendEOM();
     }
+
     return folly::unit;
   }
+
+  void sendCloseWebTransportSessionCapsule(uint32_t errorCode,
+                                           const std::string& errorMessage);
 
   std::unique_ptr<WebTransportImpl> webTransportImpl_;
 

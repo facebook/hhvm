@@ -565,7 +565,7 @@ TEST_F(HTTPTransactionWebTransportTest, RefreshTimeout) {
       [this] {
         EXPECT_CALL(transport_,
                     stopReadingWebTransportIngress(
-                        0, makeOpt(std::numeric_limits<uint32_t>::max())))
+                        0, makeOpt(WebTransport::kSessionGone)))
             .WillOnce(Return(folly::unit));
         handler_.expectEOM();
         txn_->onIngressEOM();

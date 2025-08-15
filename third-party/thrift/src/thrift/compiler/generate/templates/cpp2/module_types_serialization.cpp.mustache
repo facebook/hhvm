@@ -35,12 +35,12 @@ namespace {{program:qualified_namespace}} {
 namespace {{struct:extra_namespace}} {
 {{/struct:extra_namespace}}
 
-{{#program:json?}}
+{{#if (has_compiler_option? "json")}}
 template void {{struct:cpp_underlying_name}}::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
 template uint32_t {{struct:cpp_underlying_name}}::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
 template uint32_t {{struct:cpp_underlying_name}}::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
 template uint32_t {{struct:cpp_underlying_name}}::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
-{{/program:json?}}
+{{/if (has_compiler_option? "json")}}
 
 {{> module_types_cpp/lazy_deserialization}}
 {{#struct:extra_namespace}}

@@ -49,12 +49,6 @@ using dsl::prototype_builder;
 
 namespace apache::thrift::compiler {
 
-auto t_whisker_generator::has_compiler_option_fn(std::string_view name) const {
-  return [this, name](const auto&) -> whisker::object {
-    return w::boolean(has_compiler_option(name));
-  };
-}
-
 prototype<t_node>::ptr t_whisker_generator::make_prototype_for_node(
     const prototype_database&) const {
   prototype_builder<h_node> def;
@@ -436,10 +430,6 @@ prototype<t_list>::ptr t_whisker_generator::make_prototype_for_list(
 prototype<t_program>::ptr t_whisker_generator::make_prototype_for_program(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_program>::extends(proto.of<t_named>());
-  def.property("any?", has_compiler_option_fn("any"));
-  def.property("frozen?", has_compiler_option_fn("frozen"));
-  def.property("json?", has_compiler_option_fn("json"));
-
   def.property("package", mem_fn(&t_program::package, proto.of<t_package>()));
   def.property("doc", mem_fn(&t_program::doc));
   def.property("include_prefix", mem_fn(&t_program::include_prefix));

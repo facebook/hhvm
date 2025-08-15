@@ -78,7 +78,19 @@ class t_whisker_generator : public t_generator {
    * The global context used for whisker rendering. This function can be used,
    * for example, to add globally available helper functions.
    */
-  virtual whisker::map::raw globals() const { return {}; }
+  virtual whisker::map::raw globals() const {
+    whisker::map::raw globals;
+    globals["has_compiler_option?"] = whisker::dsl::make_function(
+        "has_compiler_option?",
+        [this](whisker::dsl::function::context ctx) -> whisker::object {
+          ctx.declare_named_arguments({});
+          ctx.declare_arity(1);
+          return whisker::make::boolean(
+              has_compiler_option(ctx.argument<whisker::string>(0)));
+        });
+
+    return globals;
+  }
 
   // See whisker::render_options
   struct strictness_options {
@@ -453,9 +465,6 @@ class t_whisker_generator : public t_generator {
       return whisker::make::array(std::move(refs));
     };
   }
-
-  // Wraps a compiler option in to a lambda that can be added to any prototype
-  auto has_compiler_option_fn(std::string_view name) const;
 
   bool has_compiler_option(std::string_view name) const {
     return compiler_options_.find(name) != compiler_options_.end();

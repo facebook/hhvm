@@ -29,13 +29,13 @@ namespace {{program:qualified_namespace}} {
 // If this file is always linked (e.g. link_whole), it will force
 // static linking to include the intialization logic.
 
-{{#program:any?}}
+{{#if (has_compiler_option? "any")}}
 {{#program:structs}}
 {{#struct:any?}}
 void __fbthrift_static_init_{{struct:cpp_underlying_name}}();
 {{/struct:any?}}
 {{/program:structs}}
-{{/program:any?}}
+{{/if (has_compiler_option? "any")}}
 
 {{#program:has_schema?}}
 namespace {{program:name}}_constants {
@@ -48,13 +48,13 @@ namespace {
 
 struct StaticInit {
   StaticInit() {
-    {{#program:any?}}
+    {{#if (has_compiler_option? "any")}}
     {{#program:structs}}
     {{#struct:any?}}
     __fbthrift_static_init_{{struct:cpp_underlying_name}}();
     {{/struct:any?}}
     {{/program:structs}}
-    {{/program:any?}}
+    {{/if (has_compiler_option? "any")}}
 
     {{#program:has_schema?}}
     ::apache::thrift::BaseSchemaRegistry::get().registerSchema(

@@ -147,11 +147,11 @@ pub mod __dependencies {
 }
 {{/program:direct_dependencies?}}
 
-{{#program:any?}}
+{{#if (has_compiler_option? "any")}}
 pub fn init_registry(registry: &mut ::fbthrift_conformance::AnyRegistry) -> ::anyhow::Result<bool> {
 {{#program:structs}}
     registry.register_type::<{{struct:rust_name}}>()?;
 {{/program:structs}}
     ::std::result::Result::Ok(true)
 }
-{{/program:any?}}
+{{/if (has_compiler_option? "any")}}

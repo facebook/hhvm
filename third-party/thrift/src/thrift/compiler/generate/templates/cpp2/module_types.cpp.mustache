@@ -19,14 +19,14 @@
 #include "{{program:include_prefix}}{{program:name}}_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
-{{#program:any?}}
+{{#if (has_compiler_option? "any")}}
 #include <thrift/conformance/cpp2/AnyRegistry.h>
-{{/program:any?}}
+{{/if (has_compiler_option? "any")}}
 
 #include "{{program:include_prefix}}{{program:name}}_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "{{program:name}}";
 
-{{#program:any?}}
+{{#if (has_compiler_option? "any")}}
 namespace {{program:qualified_namespace}} {
 // Static-init time registration for dynamically-linked libraries.
 //
@@ -38,9 +38,9 @@ void __fbthrift_static_init_{{struct:cpp_underlying_name}}() {
   [[maybe_unused]] static bool init = (
     apache::thrift::conformance::detail::registerGeneratedStruct<
         {{struct:cpp_underlying_name}},
-{{#program:json?}}
+{{#if (has_compiler_option? "json")}}
         apache::thrift::conformance::StandardProtocol::SimpleJson,
-{{/program:json?}}
+{{/if (has_compiler_option? "json")}}
         apache::thrift::conformance::StandardProtocol::Compact,
         apache::thrift::conformance::StandardProtocol::Binary>(),
     false);
@@ -48,7 +48,7 @@ void __fbthrift_static_init_{{struct:cpp_underlying_name}}() {
 {{/struct:any?}}
 {{/program:split_structs}}
 } // namespace {{program:qualified_namespace}}
-{{/program:any?}}
+{{/if (has_compiler_option? "any")}}
 {{> module_types_cpp/declare_enums}}
 {{#program:tablebased?}}
 namespace apache {

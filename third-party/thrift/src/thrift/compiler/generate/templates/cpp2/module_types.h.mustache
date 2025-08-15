@@ -21,9 +21,9 @@
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
-{{#program:frozen?}}
+{{#if (has_compiler_option? "frozen")}}
 #include <thrift/lib/cpp/Frozen.h>
-{{/program:frozen?}}
+{{/if (has_compiler_option? "frozen")}}
 {{#program:thrift_includes}}
 #include "{{program:include_prefix}}{{program:name}}_types.h"
 {{/program:thrift_includes}}
@@ -119,7 +119,7 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
   template<class> friend struct ::apache::thrift::detail::invoke_reffer;
 
   //  used by a static_assert in the corresponding source
-  static constexpr bool __fbthrift_cpp2_gen_json = {{program:json?}};
+  static constexpr bool __fbthrift_cpp2_gen_json = {{(has_compiler_option? "json")}};
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = {{struct:cpp_runtime_annotation?}};
   {{#struct:uri}}
   static std::string_view __fbthrift_thrift_uri();
@@ -377,10 +377,10 @@ using {{struct:cpp_name}} = {{struct:cpp_underlying_type}};
 {{/program:structs_and_typedefs}}
 
 } // namespace {{program:qualified_namespace}}
-{{#program:frozen?}}{{#program:structs}}
+{{#if (has_compiler_option? "frozen")}}{{#program:structs}}
 {{> module_types_h/frozen}}
 
-{{/program:structs}}{{/program:frozen?}}
+{{/program:structs}}{{/if (has_compiler_option? "frozen")}}
 {{> module_types_h/declare_union_types}}
 
 namespace apache::thrift::detail {

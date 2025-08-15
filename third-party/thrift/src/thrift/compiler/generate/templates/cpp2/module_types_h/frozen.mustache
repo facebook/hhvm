@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#program:frozen?}}
+}}{{#if (has_compiler_option? "frozen")}}
 
 namespace apache { namespace thrift {
 
@@ -44,4 +44,4 @@ struct Frozen<{{struct:cpp_fullname}}, void> {
 {{#program:frozen_packed?}}#pragma pack(pop){{/program:frozen_packed?}}
 
 }} // apache::thrift
-{{/program:frozen?}}
+{{/if (has_compiler_option? "frozen")}}

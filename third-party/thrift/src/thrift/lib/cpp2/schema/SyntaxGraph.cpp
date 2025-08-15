@@ -271,6 +271,9 @@ const ProgramNode& DefinitionNode::program() const {
 /* static */ TypeRef TypeRef::of(const EnumNode& e) {
   return TypeRef(detail::Lazy<EnumNode>::Resolved(e));
 }
+/* static */ TypeRef TypeRef::of(const TypedefNode& td) {
+  return TypeRef(detail::Lazy<TypedefNode>::Resolved(td));
+}
 /* static */ TypeRef TypeRef::of(const List& list) {
   return TypeRef(list);
 }

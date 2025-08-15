@@ -1157,6 +1157,7 @@ class TypeRef final : public detail::WithDebugPrinting<TypeRef> {
   static TypeRef of(const UnionNode&);
   static TypeRef of(const ExceptionNode&);
   static TypeRef of(const EnumNode&);
+  static TypeRef of(const TypedefNode&);
   static TypeRef of(const List&);
   static TypeRef of(const Set&);
   static TypeRef of(const Map&);

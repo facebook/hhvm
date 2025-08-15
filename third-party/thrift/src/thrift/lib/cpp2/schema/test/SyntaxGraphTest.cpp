@@ -313,6 +313,9 @@ TEST_F(ServiceSchemaTest, Typedefs) {
       typedefToListOfTestStructTypedef->name(), "TypedefToListOfTestStruct");
   const TypedefNode& t2 = typedefToListOfTestStructTypedef->asTypedef();
   EXPECT_EQ(t2.targetType().kind(), TypeRef::Kind::TYPEDEF);
+  TypeRef t2TypeRef = TypeRef::of(t2);
+  EXPECT_EQ(t2TypeRef.kind(), TypeRef::Kind::TYPEDEF);
+  EXPECT_EQ(*typedefToListOfTestStructTypedef, t2TypeRef);
 
   EXPECT_EQ(t2.targetType(), *listOfTestStructTypedef);
   EXPECT_EQ(t2.targetType().trueType(), t.targetType());

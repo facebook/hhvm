@@ -89,8 +89,8 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
       "{{function:javaName}}",
       new Class[]{ {{#function:exceptions?}}{{#function:exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}.class{{^last?}},{{/last?}}{{/function:exceptions}}{{/function:exceptions?}} },
       new Integer[]{ {{#function:exceptions?}}{{#function:exceptions}}{{field:key}}{{^last?}},{{/last?}}{{/function:exceptions}}{{/function:exceptions?}} },
-      new Class[]{ {{#function:stream_exceptions?}}{{#function:stream_exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}.class{{^last?}},{{/last?}}{{/function:stream_exceptions}}{{/function:stream_exceptions?}} },
-      new Integer[]{ {{#function:stream_exceptions?}}{{#function:stream_exceptions}}{{field:key}}{{^last?}},{{/last?}}{{/function:stream_exceptions}}{{/function:stream_exceptions?}} }
+      new Class[]{ {{#if (not (array.empty? function:stream.exceptions))}}{{#function:stream_exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}.class{{^last?}},{{/last?}}{{/function:stream_exceptions}}{{/if}} },
+      new Integer[]{ {{#if (not (array.empty? function:stream.exceptions))}}{{#function:stream_exceptions}}{{field:key}}{{^last?}},{{/last?}}{{/function:stream_exceptions}}{{/if}} }
     );
     {{/function:stream_has_first_response?}}
     {{#function:stream_has_first_response?}}
@@ -102,8 +102,8 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
       "{{function:javaName}}",
       new Class[]{ {{#function:exceptions?}}{{#function:exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}.class{{^last?}},{{/last?}}{{/function:exceptions}}{{/function:exceptions?}} },
       new Integer[]{ {{#function:exceptions?}}{{#function:exceptions}}{{field:key}}{{^last?}},{{/last?}}{{/function:exceptions}}{{/function:exceptions?}} },
-      new Class[]{ {{#function:stream_exceptions?}}{{#function:stream_exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}.class{{^last?}},{{/last?}}{{/function:stream_exceptions}}{{/function:stream_exceptions?}} },
-      new Integer[]{ {{#function:stream_exceptions?}}{{#function:stream_exceptions}}{{field:key}}{{^last?}},{{/last?}}{{/function:stream_exceptions}}{{/function:stream_exceptions?}} }
+      new Class[]{ {{#if (not (array.empty? function:stream.exceptions))}}{{#function:stream_exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}.class{{^last?}},{{/last?}}{{/function:stream_exceptions}}{{/if}} },
+      new Integer[]{ {{#if (not (array.empty? function:stream.exceptions))}}{{#function:stream_exceptions}}{{field:key}}{{^last?}},{{/last?}}{{/function:stream_exceptions}}{{/if}} }
     );
     {{/function:stream_has_first_response?}}
 

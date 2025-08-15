@@ -100,7 +100,10 @@ class {{service:name}}Interface(
 
     {{#function:stream?}}
     async def _fbthrift__stream_wrapper_{{function:name}}(self, stream_generator: _typing.AsyncIterator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
-        {{#function:stream_exceptions?}}
+        {{#if (array.empty? function:stream.exceptions)}}
+        async for item in stream_generator:
+            yield serialize_iobuf({{> types/function_second_return_type}}(success=item), protocol)
+        {{#else}}
         try:
             async for item in stream_generator:
                 yield serialize_iobuf({{> types/function_second_return_type}}(success=item), protocol)
@@ -112,11 +115,7 @@ class {{service:name}}Interface(
             raise exp
         {{/field:type}}
         {{/function:stream_exceptions}}
-        {{/function:stream_exceptions?}}
-        {{^function:stream_exceptions?}}
-        async for item in stream_generator:
-            yield serialize_iobuf({{> types/function_second_return_type}}(success=item), protocol)
-        {{/function:stream_exceptions?}}
+        {{/if (array.empty? function:stream.exceptions)}}
 
     {{/function:stream?}}
     {{#function:sink?}}
@@ -135,11 +134,10 @@ class {{service:name}}Interface(
                         iobuf_item,
                         protocol
                     )
-                    {{^function:sink_exceptions?}}
+                    {{#if (array.empty? function:sink.exceptions)}}
                     assert sink_elem.success is not None, "unexpected empty sink element"
                     yield sink_elem.success
-                    {{/function:sink_exceptions?}}
-                    {{#function:sink_exceptions?}}
+                    {{#else}}
                     if sink_elem.success is not None:
                         yield sink_elem.success
                         continue
@@ -147,13 +145,12 @@ class {{service:name}}Interface(
                         if ex is not None:
                             raise ex
                     assert sink_elem.success is not None, "unexpected empty sink element"
-                    {{/function:sink_exceptions?}}
+                    {{/if (array.empty? function:sink.exceptions)}}
 
-            {{^function:sink_final_response_exceptions?}}
+            {{#if (array.empty? function:sink.final_response_exceptions)}}
             final_resp = await handler_sink_callback(_handler_agen())
             return_struct = {{> services/function_struct_prefix}}_result_sink_final(success=final_resp)
-            {{/function:sink_final_response_exceptions?}}
-            {{#function:sink_final_response_exceptions?}}
+            {{#else}}
             try:
                 final_resp = await handler_sink_callback(_handler_agen())
                 return_struct = {{> services/function_struct_prefix}}_result_sink_final(success=final_resp)
@@ -161,7 +158,7 @@ class {{service:name}}Interface(
             except {{type:module_mangle}}.{{#type:structured}}{{> structs/unadapted_name}}{{/type:structured}} as ex:
                 return_struct = {{> services/function_struct_prefix}}_result_sink_final({{> fields/exception_field_name }}=ex)
             {{/field:type}}{{/function:sink_final_response_exceptions}}
-            {{/function:sink_final_response_exceptions?}}
+            {{/if (array.empty? function:sink.final_response_exceptions)}}
             return serialize_iobuf(return_struct, protocol)
 
         return _fbthrift_iobuf_sink_callback

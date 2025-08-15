@@ -58,7 +58,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
   private static final TField _{{function:javaName}}_{{field:javaTFieldName}} = new TField("{{field:name}}", TType.{{#field:type}}{{> TType}}{{/field:type}}, (short){{field:key}});
   {{/function:args}}
   private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _{{function:javaName}}_EXCEPTION_READERS = {{#function:exceptions?}}new HashMap<>();{{/function:exceptions?}}{{^function:exceptions?}}java.util.Collections.emptyMap();{{/function:exceptions?}}
-  private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _{{function:javaName}}_STREAM_EXCEPTION_READERS = {{#function:stream_exceptions?}}new HashMap<>();{{/function:stream_exceptions?}}{{^function:stream_exceptions?}}java.util.Collections.emptyMap();{{/function:stream_exceptions?}}
+  private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _{{function:javaName}}_STREAM_EXCEPTION_READERS = {{#if (array.empty? function:stream.exceptions)}}java.util.Collections.emptyMap();{{#else}}new HashMap<>();{{/if}}
   {{#function:exceptions}}
   private static final com.facebook.thrift.payload.Reader _{{function:javaName}}_EXCEPTION_READER{{field:index}} = Readers.wrap({{#field:type}}{{> BoxedType}}.asReader());{{/field:type}}
   {{/function:exceptions}}
@@ -74,7 +74,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
   private static final TField _{{function:javaName}}_SINK_TFIELD = new TField("payload", TType.{{> TType}}, (short)0);
   {{/function:sink_elem_type}}{{/function:return_type}}
   private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _{{function:javaName}}_EXCEPTION_READERS = {{#function:exceptions?}}new HashMap<>();{{/function:exceptions?}}{{^function:exceptions?}}java.util.Collections.emptyMap();{{/function:exceptions?}}
-  private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _{{function:javaName}}_STREAM_EXCEPTION_READERS = {{#function:sink_final_response_exceptions?}}new HashMap<>();{{/function:sink_final_response_exceptions?}}{{^function:sink_final_response_exceptions?}}java.util.Collections.emptyMap();{{/function:sink_final_response_exceptions?}}
+  private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _{{function:javaName}}_STREAM_EXCEPTION_READERS = {{#if (array.empty? function:sink.final_response_exceptions)}}java.util.Collections.emptyMap();{{#else}}new HashMap<>();{{/if}}
   {{#function:exceptions}}
   private static final com.facebook.thrift.payload.Reader _{{function:javaName}}_EXCEPTION_READER{{field:index}} = Readers.wrap({{#field:type}}{{> BoxedType}}.asReader());{{/field:type}}
   {{/function:exceptions}}
@@ -97,7 +97,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
   private static final TField _{{function:javaName}}_{{field:javaTFieldName}}_INT = new TField("{{field:name}}", TType.{{#field:type}}{{> TType}}{{/field:type}}, (short){{field:key}});
   {{/function:args}}
   private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _{{function:javaName}}_EXCEPTION_READERS_INT = {{#function:exceptions?}}new HashMap<>();{{/function:exceptions?}}{{^function:exceptions?}}java.util.Collections.emptyMap();{{/function:exceptions?}}
-  private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _{{function:javaName}}_STREAM_EXCEPTION_READERS_INT = {{#function:stream_exceptions?}}new HashMap<>();{{/function:stream_exceptions?}}{{^function:stream_exceptions?}}java.util.Collections.emptyMap();{{/function:stream_exceptions?}}
+  private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _{{function:javaName}}_STREAM_EXCEPTION_READERS_INT = {{#if (array.empty? function:stream.exceptions)}}java.util.Collections.emptyMap();{{#else}}new HashMap<>();{{/if}}
   {{#function:exceptions}}
   private static final com.facebook.thrift.payload.Reader _{{function:javaName}}_EXCEPTION_READER_INT{{field:index}} = Readers.wrap({{#field:type}}{{> BoxedType}}.asReader());{{/field:type}}
   {{/function:exceptions}}

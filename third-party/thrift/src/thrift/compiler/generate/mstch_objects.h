@@ -612,12 +612,9 @@ class mstch_function : public mstch_base {
             {"function:sink_first_response_type",
              &mstch_function::sink_first_response_type},
             {"function:sink_elem_type", &mstch_function::sink_elem_type},
-            {"function:sink_exceptions?", &mstch_function::has_sink_exceptions},
             {"function:sink_exceptions", &mstch_function::sink_exceptions},
             {"function:sink_final_response_type",
              &mstch_function::sink_final_reponse_type},
-            {"function:sink_final_response_exceptions?",
-             &mstch_function::has_sink_final_response_exceptions},
             {"function:sink_final_response_exceptions",
              &mstch_function::sink_final_response_exceptions},
 
@@ -625,8 +622,6 @@ class mstch_function : public mstch_base {
             {"function:stream_first_response_type",
              &mstch_function::stream_first_response_type},
             {"function:stream_elem_type", &mstch_function::stream_elem_type},
-            {"function:stream_exceptions?",
-             &mstch_function::has_stream_exceptions},
             {"function:stream_exceptions", &mstch_function::stream_exceptions},
         });
   }
@@ -651,28 +646,12 @@ class mstch_function : public mstch_base {
   }
   mstch::node sink_first_response_type();
   mstch::node sink_elem_type();
-  mstch::node has_sink_exceptions() {
-    const t_sink* sink = function_->sink();
-    const t_throws* exceptions = sink ? sink->sink_exceptions() : nullptr;
-    return exceptions && exceptions->has_fields();
-  }
   mstch::node sink_exceptions();
   mstch::node sink_final_reponse_type();
-  mstch::node has_sink_final_response_exceptions() {
-    const t_sink* sink = function_->sink();
-    const t_throws* exceptions =
-        sink ? sink->final_response_exceptions() : nullptr;
-    return exceptions && exceptions->has_fields();
-  }
   mstch::node sink_final_response_exceptions();
 
   mstch::node stream_elem_type();
   mstch::node stream_first_response_type();
-  mstch::node has_stream_exceptions() {
-    const t_stream* stream = function_->stream();
-    const t_throws* exceptions = stream ? stream->exceptions() : nullptr;
-    return exceptions && exceptions->has_fields();
-  }
   mstch::node stream_exceptions();
 
  protected:

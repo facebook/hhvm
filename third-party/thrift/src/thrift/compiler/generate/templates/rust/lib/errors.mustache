@@ -675,7 +675,10 @@ pub mod {{service:snake}} {
         }
     }
     {{/function:sink?}}{{#function:stream?}}
-    {{#function:stream_exceptions?}}
+    {{#if (array.empty? function:stream.exceptions)}}
+    pub type {{function:upcamel}}StreamError = ::fbthrift::NonthrowingFunctionError;
+
+    {{#else}}
     #[derive(Debug)]
     pub enum {{function:upcamel}}StreamError {
         {{#function:stream_exceptions}}
@@ -773,11 +776,7 @@ pub mod {{service:snake}} {
         }
     }
 
-    {{/function:stream_exceptions?}}
-    {{^function:stream_exceptions?}}
-    pub type {{function:upcamel}}StreamError = ::fbthrift::NonthrowingFunctionError;
-
-    {{/function:stream_exceptions?}}
+    {{/if (array.empty? function:stream.exceptions)}}
     pub(crate) enum {{function:upcamel}}StreamReader {}
 
     impl ::fbthrift::help::DeserializeExn for {{function:upcamel}}StreamReader {

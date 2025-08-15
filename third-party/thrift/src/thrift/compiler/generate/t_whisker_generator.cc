@@ -535,12 +535,22 @@ prototype<t_include>::ptr t_whisker_generator::make_prototype_for_include(
 prototype<t_sink>::ptr t_whisker_generator::make_prototype_for_sink(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_sink>::extends(proto.of<t_node>());
+  def.property("exceptions", [proto](const t_sink& self) {
+    return to_array(get_elems(self.sink_exceptions()), proto.of<t_field>());
+  });
+  def.property("final_response_exceptions", [proto](const t_sink& self) {
+    return to_array(
+        get_elems(self.final_response_exceptions()), proto.of<t_field>());
+  });
   return std::move(def).make();
 }
 
 prototype<t_stream>::ptr t_whisker_generator::make_prototype_for_stream(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_stream>::extends(proto.of<t_node>());
+  def.property("exceptions", [proto](const t_stream& self) {
+    return to_array(get_elems(self.exceptions()), proto.of<t_field>());
+  });
   return std::move(def).make();
 }
 
@@ -549,6 +559,8 @@ prototype<t_function>::ptr t_whisker_generator::make_prototype_for_function(
   auto def = prototype_builder<h_function>::extends(proto.of<t_named>());
 
   def.property("params", mem_fn(&t_function::params, proto.of<t_paramlist>()));
+  def.property("sink", mem_fn(&t_function::sink, proto.of<t_sink>()));
+  def.property("stream", mem_fn(&t_function::stream, proto.of<t_stream>()));
 
   def.property("return_type", [&](const t_function& function) {
     const t_type* type = function.return_type().get_type();

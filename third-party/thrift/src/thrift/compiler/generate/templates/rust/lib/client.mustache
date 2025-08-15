@@ -247,12 +247,12 @@ where
                             let enc = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>(::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError::ThriftError(err)), "{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}");
                             ::fbthrift::ClientStreamElement::ApplicationEx(enc)
                         }
-                        {{#function:sink_exceptions?}}
+                        {{#if (not (array.empty? function:sink.exceptions))}}
                         ::std::result::Result::Err(other_err) => {
                             let enc = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>(::std::result::Result::Err(other_err), "{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}");
                             ::fbthrift::ClientStreamElement::DeclaredEx(enc)
                         }
-                        {{/function:sink_exceptions?}}
+                        {{/if (not (array.empty? function:sink.exceptions))}}
                     }
                 }).boxed();
                 let sinker = sink_processor;

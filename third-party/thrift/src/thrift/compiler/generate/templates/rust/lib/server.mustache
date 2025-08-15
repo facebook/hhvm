@@ -257,13 +257,13 @@ where
                 tracing::info!(?aexn, method="{{service:name}}.{{function:name}}", "Sink Final ApplicationException");
                 ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
             }
-            {{#function:sink_final_response_exceptions?}}::std::result::Result::Err(exn) => {
+            {{#if (not (array.empty? function:sink.final_response_exceptions))}}::std::result::Result::Err(exn) => {
                 let payload = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}SinkFinalExn>(
                     ::std::result::Result::Err(exn),
                     "{{function:name}}",
                 );
                 ::fbthrift::SerializedStreamElement::DeclaredException(payload)
-            }{{/function:sink_final_response_exceptions?}}
+            }{{/if (not (array.empty? function:sink.final_response_exceptions))}}
         };
         final_result_callback(enc_final_result);
         ::std::result::Result::Ok(())
@@ -299,7 +299,7 @@ where
                                 tracing::info!(?aexn, method="{{service:name}}.{{function:name}}", "Streaming ApplicationException");
                                 ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
                             }
-                            {{#function:stream_exceptions?}}
+                            {{#if (not (array.empty? function:stream.exceptions))}}
                             ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                                 tracing::debug!(?exn, method="{{service:name}}.{{function:name}}", "Streaming declared exception");
                                 let payload = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn>(
@@ -308,7 +308,7 @@ where
                                 );
                                 ::fbthrift::SerializedStreamElement::DeclaredException(payload)
                             }
-                            {{/function:stream_exceptions?}}
+                            {{/if (not (array.empty? function:stream.exceptions))}}
                             ::std::result::Result::Err(exn) => {
                                 tracing::error!(?exn, method="{{service:name}}.{{function:name}}", "Streaming unwind");
                                 let aexn = ::fbthrift::ApplicationException::handler_panic("{{service:name}}.{{function:name}}", exn);

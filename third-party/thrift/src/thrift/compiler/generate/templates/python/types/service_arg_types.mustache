@@ -143,7 +143,10 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{
             }}{{/function:sink_elem_type}}, None],
         protocol: _fbthrift__Protocol,
     ) -> _typing_AsyncGenerator[_fbthrift_iobuf, None]:
-        {{#function:sink_exceptions?}}
+        {{#if (array.empty? function:sink.exceptions)}}
+        async for item in sink_agen:
+            yield serialize_iobuf(cls(success=item), protocol)
+        {{#else}}
         try:
             async for item in sink_agen:
                 yield serialize_iobuf(cls(success=item), protocol)
@@ -156,11 +159,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{
             raise exp
         {{/field:type}}
         {{/function:sink_exceptions}}
-        {{/function:sink_exceptions?}}
-        {{^function:sink_exceptions?}}
-        async for item in sink_agen:
-            yield serialize_iobuf(cls(success=item), protocol)
-        {{/function:sink_exceptions?}}
+        {{/if (array.empty? function:sink.exceptions)}}
 
 
 class _fbthrift_{{service:name}}_{{function:name}}_result_sink_final(metaclass={{> types/struct_metaclass}}):

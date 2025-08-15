@@ -420,6 +420,20 @@ class t_whisker_generator : public t_generator {
   }
 
   /**
+   * Marshals a node_list_view<T> to a whisker::array of a specified prototype.
+   */
+  template <typename T>
+  static auto to_array(node_list_view<const T> nodes, prototype_ptr<T> proto) {
+    whisker::array::raw refs;
+    refs.reserve(nodes.size());
+    for (const T& ref : nodes) {
+      refs.emplace_back(
+          whisker::make::native_handle(whisker::manage_as_static(ref), proto));
+    }
+    return whisker::make::array(refs);
+  }
+
+  /**
    * Marshals a member function returning node_list_view<T> to a property that
    * produces whisker::array.
    *
@@ -430,14 +444,7 @@ class t_whisker_generator : public t_generator {
       node_list_view<const T> (Self::*function)() const,
       prototype_ptr<T> prototype) {
     return [function, proto = std::move(prototype)](const Self& self) {
-      node_list_view<const T> nodes = (self.*function)();
-      whisker::array::raw refs;
-      refs.reserve(nodes.size());
-      for (const T& ref : nodes) {
-        refs.emplace_back(whisker::make::native_handle(
-            whisker::manage_as_static(ref), proto));
-      }
-      return whisker::make::array(refs);
+      return to_array((self.*function)(), proto);
     };
   }
 

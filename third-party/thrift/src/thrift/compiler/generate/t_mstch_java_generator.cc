@@ -153,6 +153,16 @@ std::vector<type_mapping> type_list;
 set<std::string> adapterDefinitionSet;
 std::string prevTypeName;
 
+bool is_annotation_map_field_equal(
+    const t_const* annotation, const char* field, const int value) {
+  for (const auto& item : annotation->value()->get_map()) {
+    if (item.first->get_string() == field) {
+      return item.second->get_integer() == value;
+    }
+  }
+  return annotation->value()->get_map().empty();
+}
+
 } // namespace
 
 class t_mstch_java_generator : public t_mstch_generator {
@@ -176,6 +186,30 @@ class t_mstch_java_generator : public t_mstch_generator {
 
  private:
   void set_mstch_factories();
+
+  prototype<t_enum>::ptr make_prototype_for_enum(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_enum(proto);
+    auto def = whisker::dsl::prototype_builder<h_enum>::extends(base);
+    def.property("enums_compat?", [](const t_enum& self) {
+      return self.has_structured_annotation(kEnumsUri) ||
+          self.program()->has_structured_annotation(kEnumsUri);
+    });
+    def.property("enum_type_open?", [&](const t_enum& self) {
+      constexpr auto kEnumType = "type";
+      constexpr int kOpenEnum = 1;
+      if (const t_const* annotation =
+              self.find_structured_annotation_or_null(kEnumsUri)) {
+        return is_annotation_map_field_equal(annotation, kEnumType, kOpenEnum);
+      }
+      if (const t_const* annotation =
+              self.program()->find_structured_annotation_or_null(kEnumsUri)) {
+        return is_annotation_map_field_equal(annotation, kEnumType, kOpenEnum);
+      }
+      return false;
+    });
+    return std::move(def).make();
+  }
 
   /*
    * Generate multiple Java items according to the given template. Writes

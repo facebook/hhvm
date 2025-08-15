@@ -361,6 +361,7 @@ prototype<t_enum>::ptr t_whisker_generator::make_prototype_for_enum(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_enum>::extends(proto.of<t_type>());
   def.property("values", mem_fn(&t_enum::values, proto.of<t_enum_value>()));
+  def.property("unused", [](const t_enum& self) { return i64(self.unused()); });
   return std::move(def).make();
 }
 

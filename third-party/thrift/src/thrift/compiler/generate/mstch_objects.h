@@ -36,7 +36,6 @@ class mstch_base;
 struct mstch_context;
 
 constexpr auto kOnInvalidUtf8 = "onInvalidUtf8";
-constexpr auto kEnumType = "type";
 
 struct mstch_element_position {
   mstch_element_position() = default;
@@ -58,11 +57,6 @@ struct field_generator_context {
 enum CodingErrorAction {
   Legacy = 0,
   Report = 1,
-};
-
-enum EnumType {
-  LegacyEnum = 0,
-  Open = 1,
 };
 
 // A factory creating mstch objects wrapping Thrift AST nodes.
@@ -991,60 +985,13 @@ class mstch_enum : public mstch_base {
             {"enum:values", &mstch_enum::values},
             {"enum:structured_annotations",
              &mstch_enum::structured_annotations},
-            {"enum:enums_compat?", &mstch_enum::is_enums_compat},
-            {"enum:enum_type_legacy?", &mstch_enum::is_enum_type_legacy},
-            {"enum:enum_type_open?", &mstch_enum::is_enum_type_open},
-            {"enum:unused", &mstch_enum::unused_value},
         });
   }
 
   whisker::object self() { return make_self(*enum_); }
   mstch::node values();
-  mstch::node unused_value() { return enum_->unused(); }
   mstch::node structured_annotations() {
     return mstch_base::structured_annotations(enum_);
-  }
-  mstch::node is_enums_compat() { return has_compat_annotation(kEnumsUri); }
-  bool has_compat_annotation(const char* uri) {
-    if (enum_->has_structured_annotation(uri)) {
-      return true;
-    }
-    if (enum_->program()->has_structured_annotation(uri)) {
-      return true;
-    }
-
-    return false;
-  }
-  mstch::node is_enum_type_legacy() {
-    return has_compat_annotation(
-        kEnumsUri, kEnumType, EnumType::LegacyEnum, EnumType::Open);
-  }
-  mstch::node is_enum_type_open() {
-    return has_compat_annotation(
-        kEnumsUri, kEnumType, EnumType::Open, EnumType::Open);
-  }
-  bool has_compat_annotation(
-      const char* uri, const char* field, EnumType action, EnumType def) {
-    if (auto annotation = enum_->find_structured_annotation_or_null(uri)) {
-      return has_compat_action(annotation, field, action, def);
-    }
-    if (auto annotation =
-            enum_->program()->find_structured_annotation_or_null(uri)) {
-      return has_compat_action(annotation, field, action, def);
-    }
-    return false;
-  }
-  bool has_compat_action(
-      const t_const* annotation,
-      const char* field,
-      EnumType action,
-      EnumType def) {
-    for (const auto& item : annotation->value()->get_map()) {
-      if (item.first->get_string() == field) {
-        return item.second->get_integer() == action;
-      }
-    }
-    return action == def && annotation->value()->get_map().empty();
   }
 
  protected:

@@ -189,7 +189,6 @@ void publishOptFuncMeta(FuncMetaInfo& info) {
 
 void publishOptFuncCode(FuncMetaInfo& info,
                         jit::hash_set<TCA>* publishedSet = nullptr) {
-  auto const func = info.func;
 
   // Publish all prologues and translations for func in order.
   for (auto const& translator : info.translators) {
@@ -197,11 +196,6 @@ void publishOptFuncCode(FuncMetaInfo& info,
       translator->publishCodeInternal();
       auto const tca = translator->entry();
       if (publishedSet) publishedSet->insert(tca);
-      auto const numParams = func->numNonVariadicParams();
-      if (translator->sk == SrcKey{func, numParams, SrcKey::FuncEntryTag{}} &&
-          func->numRequiredParams() == numParams) {
-        func->setFuncEntry(tca);
-      }
     } else {
       // If we failed to emit the prologue (e.g. the TC filled up), redirect
       // all the callers to the fcallHelperThunk so that they stop calling

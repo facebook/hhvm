@@ -337,7 +337,7 @@ class mstch_go_field : public mstch_field {
     //  * Optional fields can be set to 'nil' (see 'is_pointer' above)
     auto real_type = field_->type()->get_true_type();
     return go::is_type_go_nilable(real_type) || is_inside_union_() ||
-        is_optional_();
+        field_->qualifier() == t_field_qualifier::optional;
   }
   mstch::node must_be_set_to_serialize() {
     // Whether the field must be set (non-nil) in order to serialize:
@@ -347,7 +347,7 @@ class mstch_go_field : public mstch_field {
     //  serailized as per Thrift-spec)
     auto real_type = field_->type()->get_true_type();
     return go::is_type_go_struct(real_type) || is_inside_union_() ||
-        is_optional_();
+        field_->qualifier() == t_field_qualifier::optional;
   }
   mstch::node is_non_struct_pointer() {
     // Whether this field is a non-struct pointer.
@@ -378,7 +378,8 @@ class mstch_go_field : public mstch_field {
   mstch::node is_json_omitempty() {
     // Whether this field should be tagged with 'json:"omitempty"'.
     // Optional and union fields should be tagged as such.
-    return is_optional_() || is_inside_union_();
+    return field_->qualifier() == t_field_qualifier::optional ||
+        is_inside_union_();
   }
 
  private:
@@ -394,7 +395,8 @@ class mstch_go_field : public mstch_field {
     //     * Except (!!!) when the underlying type itself is nilable (map/slice)
     auto real_type = field_->type()->get_true_type();
     return go::is_type_go_struct(real_type) ||
-        ((is_inside_union_() || is_optional_()) &&
+        ((is_inside_union_() ||
+          field_->qualifier() == t_field_qualifier::optional) &&
          !go::is_type_go_nilable(real_type));
   }
 

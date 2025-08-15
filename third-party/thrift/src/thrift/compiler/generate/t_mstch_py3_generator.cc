@@ -1095,11 +1095,14 @@ class py3_mstch_field : public mstch_field {
   mstch::node hasPyName() { return pyName_ != field_->name(); }
 
   bool has_default_value() {
-    return !is_ref() && (field_->get_value() != nullptr || !is_optional_());
+    return !is_ref() &&
+        (field_->get_value() != nullptr ||
+         field_->qualifier() != t_field_qualifier::optional);
   }
 
   bool has_optional_default_value() {
-    return is_optional_() && field_->get_value() != nullptr;
+    return field_->qualifier() == t_field_qualifier::optional &&
+        field_->get_value() != nullptr;
   }
 
   mstch::node user_default_value() {

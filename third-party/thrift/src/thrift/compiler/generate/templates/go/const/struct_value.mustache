@@ -21,12 +21,11 @@
     Set{{constant:go_name}}{{#program:compat_setters?}}NonCompat{{/program:compat_setters?}}({{!
     }}{{#constant:type}}{{!
     }}{{#constant:value}}{{!
-    }}{{^value:base?}}
+    }}{{#if value:container?}}
         {{> const/value}},
-    {{/value:base?}}{{!
-    }}{{#value:base?}}{{!
+    {{#else}}{{!
         }}{{> const/value}}{{!
-    }}{{/value:base?}}{{!
+    }}{{/if value:container?}}{{!
     }}{{/constant:value}}{{!
     }}{{/constant:type}}{{!
     }}){{!

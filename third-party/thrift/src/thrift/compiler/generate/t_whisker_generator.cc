@@ -18,6 +18,7 @@
 
 #include <thrift/compiler/ast/type_visitor.h>
 #include <thrift/compiler/detail/system.h>
+#include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/cpp/util.h>
 #include <thrift/compiler/generate/templates.h>
 #include <thrift/compiler/sema/schematizer.h>
@@ -376,6 +377,7 @@ prototype<t_enum_value>::ptr t_whisker_generator::make_prototype_for_enum_value(
 prototype<t_const>::ptr t_whisker_generator::make_prototype_for_const(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_const>::extends(proto.of<t_named>());
+  def.property("generated?", mem_fn(&t_const::generated));
   def.property("type", [&](const t_const& self) {
     return resolve_derived_t_type(proto, self.type_ref().deref());
   });
@@ -389,6 +391,83 @@ prototype<t_const_value>::ptr
 t_whisker_generator::make_prototype_for_const_value(
     const prototype_database&) const {
   prototype_builder<h_const_value> def;
+  using cv = t_const_value::t_const_value_kind;
+  def.property("bool?", [](const t_const_value& self) {
+    return self.kind() == cv::CV_BOOL;
+  });
+  def.property("double?", [](const t_const_value& self) {
+    return self.kind() == cv::CV_DOUBLE;
+  });
+  def.property("integer?", [](const t_const_value& self) {
+    return self.kind() == cv::CV_INTEGER && !self.is_enum();
+  });
+  def.property("enum?", [](const t_const_value& self) {
+    return self.kind() == cv::CV_INTEGER && self.is_enum();
+  });
+  def.property("enum_value?", [](const t_const_value& self) {
+    return self.get_enum_value() != nullptr;
+  });
+  def.property("string?", [](const t_const_value& self) {
+    return self.kind() == cv::CV_STRING;
+  });
+  def.property("map?", [](const t_const_value& self) {
+    return self.kind() == cv::CV_MAP;
+  });
+  def.property("list?", [](const t_const_value& self) {
+    return self.kind() == cv::CV_LIST;
+  });
+  def.property("container?", [](const t_const_value& self) {
+    return self.kind() == cv::CV_MAP || self.kind() == cv::CV_LIST;
+  });
+
+  def.property("empty_container?", [](const t_const_value& self) {
+    return (self.kind() == cv::CV_MAP && self.get_map().empty()) ||
+        (self.kind() == cv::CV_LIST && self.get_list().empty());
+  });
+  def.property("const_struct?", [](const t_const_value& self) {
+    return w::boolean(
+        !self.ttype().empty() &&
+        self.ttype()->get_true_type()->is<t_structured>());
+  });
+  def.property("nonzero?", [](const t_const_value& self) {
+    switch (self.kind()) {
+      case cv::CV_DOUBLE:
+        return w::boolean(self.get_double() != 0.0);
+      case cv::CV_BOOL:
+        return w::boolean(self.get_bool());
+      case cv::CV_INTEGER:
+        return w::boolean(self.get_integer() != 0);
+      default:
+        return w::null;
+    }
+  });
+
+  def.property("integer_value", [](const t_const_value& self) {
+    return self.kind() == cv::CV_INTEGER ? w::i64(self.get_integer()) : w::null;
+  });
+  def.property("double_value", [](const t_const_value& self) {
+    return self.kind() == cv::CV_DOUBLE ? w::f64(self.get_double()) : w::null;
+  });
+  def.property("bool_value", [](const t_const_value& self) {
+    return self.kind() == cv::CV_BOOL ? w::boolean(self.get_bool()) : w::null;
+  });
+  def.property("string_value", [](const t_const_value& self) {
+    return self.kind() == cv::CV_STRING
+        ? w::string(get_escaped_string(self.get_string()))
+        : w::null;
+  });
+  def.property("string_length", [](const t_const_value& self) {
+    return self.kind() == cv::CV_STRING
+        ? w::i64((long)self.get_string().length())
+        : w::null;
+  });
+
+  def.property("enum_name", [](const t_const_value& self) {
+    return self.kind() == cv::CV_INTEGER && self.is_enum()
+        ? w::string(self.get_enum()->name())
+        : w::null;
+  });
+
   return std::move(def).make();
 }
 

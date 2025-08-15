@@ -1042,7 +1042,6 @@ class mstch_const : public mstch_base {
             {"constant:value", &mstch_const::value},
             {"constant:program", &mstch_const::program},
             {"constant:field", &mstch_const::field},
-            {"constant:generated?", &mstch_const::generated},
         });
   }
 
@@ -1052,7 +1051,6 @@ class mstch_const : public mstch_base {
   mstch::node value();
   mstch::node program();
   mstch::node field();
-  mstch::node generated() { return const_->generated(); }
 
  protected:
   const t_const* const_;
@@ -1081,29 +1079,10 @@ class mstch_const_value : public mstch_base {
         this,
         {
             {"value:self", &mstch_const_value::self},
-            {"value:bool?", &mstch_const_value::is_bool},
-            {"value:double?", &mstch_const_value::is_double},
-            {"value:integer?", &mstch_const_value::is_integer},
-            {"value:enum?", &mstch_const_value::is_enum},
-            {"value:enum_value?", &mstch_const_value::has_enum_value},
-            {"value:string?", &mstch_const_value::is_string},
-            {"value:base?", &mstch_const_value::is_base},
-            {"value:map?", &mstch_const_value::is_map},
-            {"value:list?", &mstch_const_value::is_list},
-            {"value:container?", &mstch_const_value::is_container},
-            {"value:empty_container?", &mstch_const_value::is_empty_container},
-            {"value:integer_value", &mstch_const_value::integer_value},
-            {"value:double_value", &mstch_const_value::double_value},
-            {"value:bool_value", &mstch_const_value::bool_value},
             {"value:enum_value", &mstch_const_value::enum_value},
-            {"value:nonzero?", &mstch_const_value::is_non_zero},
-            {"value:enum_name", &mstch_const_value::enum_name},
-            {"value:string_value", &mstch_const_value::string_value},
-            {"value:string_length", &mstch_const_value::string_length},
             {"value:list_elements", &mstch_const_value::list_elems},
             {"value:map_elements", &mstch_const_value::map_elems},
             {"value:const_struct", &mstch_const_value::const_struct},
-            {"value:const_struct?", &mstch_const_value::is_const_struct},
             {"value:const_struct_type", &mstch_const_value::const_struct_type},
             {"value:referenceable?", &mstch_const_value::referenceable},
             {"value:owning_const", &mstch_const_value::owning_const},
@@ -1113,39 +1092,7 @@ class mstch_const_value : public mstch_base {
   }
 
   whisker::object self() { return make_self(*const_value_); }
-  mstch::node is_bool() { return type_ == cv::CV_BOOL; }
-  mstch::node is_double() { return type_ == cv::CV_DOUBLE; }
-  mstch::node is_integer() {
-    return type_ == cv::CV_INTEGER && !const_value_->is_enum();
-  }
-  mstch::node is_enum() {
-    return type_ == cv::CV_INTEGER && const_value_->is_enum();
-  }
-  mstch::node has_enum_value() {
-    return const_value_->get_enum_value() != nullptr;
-  }
-  mstch::node is_string() { return type_ == cv::CV_STRING; }
-  mstch::node is_base() {
-    return type_ == cv::CV_BOOL || type_ == cv::CV_DOUBLE ||
-        type_ == cv::CV_INTEGER || type_ == cv::CV_STRING;
-  }
-  mstch::node is_map() { return type_ == cv::CV_MAP; }
-  mstch::node is_list() { return type_ == cv::CV_LIST; }
-  mstch::node is_container() {
-    return type_ == cv::CV_MAP || type_ == cv::CV_LIST;
-  }
-  mstch::node is_empty_container() {
-    return (type_ == cv::CV_MAP && const_value_->get_map().empty()) ||
-        (type_ == cv::CV_LIST && const_value_->get_list().empty());
-  }
-  mstch::node integer_value();
-  mstch::node double_value();
-  mstch::node bool_value();
   mstch::node enum_value();
-  mstch::node is_non_zero();
-  mstch::node enum_name();
-  mstch::node string_value();
-  mstch::node string_length();
   mstch::node list_elems();
   mstch::node map_elems();
   mstch::node const_struct();
@@ -1157,7 +1104,6 @@ class mstch_const_value : public mstch_base {
   mstch::node enable_referencing() {
     return mstch::map{{"value:enable_referencing?", true}};
   }
-  mstch::node is_const_struct();
   mstch::node const_struct_type();
 
  protected:
@@ -1167,6 +1113,13 @@ class mstch_const_value : public mstch_base {
   const cv type_;
 
   virtual bool same_type_as_expected() const { return false; }
+
+  bool is_empty_container() const {
+    return (const_value_->kind() == cv::CV_MAP &&
+            const_value_->get_map().empty()) ||
+        (const_value_->kind() == cv::CV_LIST &&
+         const_value_->get_list().empty());
+  }
 };
 
 class mstch_const_map_element : public mstch_base {

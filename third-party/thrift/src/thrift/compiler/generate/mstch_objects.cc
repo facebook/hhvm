@@ -193,60 +193,12 @@ mstch::node mstch_const_map_element::element_value() {
       element_.second, context_, pos_, current_const_, expected_types_.second);
 }
 
-mstch::node mstch_const_value::integer_value() {
-  return type_ == cv::CV_INTEGER ? std::to_string(const_value_->get_integer())
-                                 : mstch::node();
-}
-
-mstch::node mstch_const_value::double_value() {
-  return type_ == cv::CV_DOUBLE ? const_value_->get_double() : mstch::node();
-}
-
-mstch::node mstch_const_value::bool_value() {
-  return type_ == cv::CV_BOOL ? const_value_->get_bool() : mstch::node();
-}
-
 mstch::node mstch_const_value::enum_value() {
   if (const_value_->get_enum_value() != nullptr) {
     return context_.enum_value_factory->make_mstch_object(
         const_value_->get_enum_value(), context_, pos_);
   }
   return mstch::node();
-}
-
-mstch::node mstch_const_value::is_non_zero() {
-  switch (type_) {
-    case cv::CV_DOUBLE:
-      return const_value_->get_double() != 0.0;
-    case cv::CV_BOOL:
-      return const_value_->get_bool();
-    case cv::CV_INTEGER:
-      return const_value_->get_integer() != 0;
-    default:
-      return mstch::node();
-  }
-}
-
-mstch::node mstch_const_value::enum_name() {
-  if (type_ == cv::CV_INTEGER && const_value_->is_enum()) {
-    return const_value_->get_enum()->name();
-  }
-  return mstch::node();
-}
-
-mstch::node mstch_const_value::string_value() {
-  if (type_ != cv::CV_STRING) {
-    return {};
-  }
-  return get_escaped_string(const_value_->get_string());
-}
-
-mstch::node mstch_const_value::string_length() {
-  if (type_ != cv::CV_STRING) {
-    return {};
-  }
-
-  return const_value_->get_string().length();
 }
 
 mstch::node mstch_const_value::list_elems() {
@@ -281,14 +233,6 @@ mstch::node mstch_const_value::map_elems() {
       *context_.const_map_element_factory,
       current_const_,
       expected_types);
-}
-
-mstch::node mstch_const_value::is_const_struct() {
-  if (!const_value_->ttype()) {
-    return false;
-  }
-  const auto* type = const_value_->ttype()->get_true_type();
-  return type->is<t_structured>();
 }
 
 mstch::node mstch_const_value::const_struct_type() {

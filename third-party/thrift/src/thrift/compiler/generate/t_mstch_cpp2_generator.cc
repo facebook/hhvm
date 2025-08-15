@@ -2453,7 +2453,7 @@ class cpp_mstch_const_value : public mstch_const_value {
 
  private:
   mstch::node default_construct() {
-    return std::get<bool>(is_empty_container()) &&
+    return is_empty_container() &&
         !cpp_name_resolver::find_first_adapter(
                *const_value_->get_owner()->type());
   }

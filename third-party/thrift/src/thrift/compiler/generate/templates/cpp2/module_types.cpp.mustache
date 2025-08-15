@@ -199,7 +199,7 @@ constexpr ::apache::thrift::detail::StructInfoN<{{struct:num_fields}}> __fbthrif
   /* .fieldInfos */ {
 {{#struct:fields_in_key_order}}
   {
-    /* .id */ {{field:key}},
+    /* .id */ {{field:id}},
     /* .qualifier */ {{field:tablebased_qualifier}},
     /* .name */ "{{field:name}}",
     /* .memberOffset */ {{!
@@ -245,7 +245,7 @@ namespace {{program:qualified_namespace}} { namespace {
 {{#program:split_structs}}{{#struct:fields}}
 {{#field:cpp_first_adapter}}{{#field:type}}
   ::apache::thrift::adapt_detail::validateFieldAdapter<{{!
-      }}{{field:cpp_first_adapter}}, {{field:key}}, {{field:cpp_standard_type}}, {{struct:cpp_fullname}}>();
+      }}{{field:cpp_first_adapter}}, {{field:id}}, {{field:cpp_standard_type}}, {{struct:cpp_fullname}}>();
 {{/field:type}}{{/field:cpp_first_adapter}}
 {{/struct:fields}}{{/program:split_structs}}
 {{#program:typedefs}}{{#typedef:type}}
@@ -288,7 +288,7 @@ namespace apache::thrift::detail::annotation {
 template<> const std::vector<std::any>& field_annotation_values<{{struct:cpp_fullname}}>(FieldId id) {
   switch (static_cast<int16_t>(id)) {
 {{#struct:fields}}
-  case {{field:key}}: {
+  case {{field:id}}: {
     static const folly::Indestructible<std::vector<std::any>> ret = [] {
       std::vector<std::any> values;
 {{#field:structured_annotations}}

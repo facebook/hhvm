@@ -399,7 +399,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
     {{#struct:py3_fields}}
     @property
     def {{field:py_name}}({{struct:name}} self not None):
-        if self.type_int != {{field:key}}:
+        if self.type_int != {{field:id}}:
             {{! TODO: python 3.10 adds some more fields to AttributeError, those should be added here at some point }}
             raise AttributeError(f'Union contains a value of type {self.type.name}, not {{field:py_name}}')
         return self.value
@@ -420,7 +420,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         if self.py_value is not None or self.type_int == 0:
             return self.py_value
         {{#struct:py3_fields}}
-        elif self.type_int == {{field:key}}:
+        elif self.type_int == {{field:id}}:
             {{#field:type}}
             {{> types/cython_union_getter}}
 

@@ -88,9 +88,9 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
       _{{function:javaName}}Readers,
       "{{function:javaName}}",
       new Class[]{ {{#function:exceptions?}}{{#function:exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}.class{{^last?}},{{/last?}}{{/function:exceptions}}{{/function:exceptions?}} },
-      new Integer[]{ {{#function:exceptions?}}{{#function:exceptions}}{{field:key}}{{^last?}},{{/last?}}{{/function:exceptions}}{{/function:exceptions?}} },
+      new Integer[]{ {{#function:exceptions?}}{{#function:exceptions}}{{field:id}}{{^last?}},{{/last?}}{{/function:exceptions}}{{/function:exceptions?}} },
       new Class[]{ {{#if (not (array.empty? function:stream.exceptions))}}{{#function:stream_exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}.class{{^last?}},{{/last?}}{{/function:stream_exceptions}}{{/if}} },
-      new Integer[]{ {{#if (not (array.empty? function:stream.exceptions))}}{{#function:stream_exceptions}}{{field:key}}{{^last?}},{{/last?}}{{/function:stream_exceptions}}{{/if}} }
+      new Integer[]{ {{#if (not (array.empty? function:stream.exceptions))}}{{#function:stream_exceptions}}{{field:id}}{{^last?}},{{/last?}}{{/function:stream_exceptions}}{{/if}} }
     );
     {{/function:stream_has_first_response?}}
     {{#function:stream_has_first_response?}}
@@ -101,9 +101,9 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
       _{{function:javaName}}Readers,
       "{{function:javaName}}",
       new Class[]{ {{#function:exceptions?}}{{#function:exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}.class{{^last?}},{{/last?}}{{/function:exceptions}}{{/function:exceptions?}} },
-      new Integer[]{ {{#function:exceptions?}}{{#function:exceptions}}{{field:key}}{{^last?}},{{/last?}}{{/function:exceptions}}{{/function:exceptions?}} },
+      new Integer[]{ {{#function:exceptions?}}{{#function:exceptions}}{{field:id}}{{^last?}},{{/last?}}{{/function:exceptions}}{{/function:exceptions?}} },
       new Class[]{ {{#if (not (array.empty? function:stream.exceptions))}}{{#function:stream_exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}.class{{^last?}},{{/last?}}{{/function:stream_exceptions}}{{/if}} },
-      new Integer[]{ {{#if (not (array.empty? function:stream.exceptions))}}{{#function:stream_exceptions}}{{field:key}}{{^last?}},{{/last?}}{{/function:stream_exceptions}}{{/if}} }
+      new Integer[]{ {{#if (not (array.empty? function:stream.exceptions))}}{{#function:stream_exceptions}}{{field:id}}{{^last?}},{{/last?}}{{/function:stream_exceptions}}{{/if}} }
     );
     {{/function:stream_has_first_response?}}
 
@@ -303,7 +303,7 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
                 _chain.preWriteException(_t);
                 {{#function:exceptions}}
                 if (_t instanceof {{#field:type}}{{> Type}}{{/field:type}}) {
-                    com.facebook.thrift.payload.Writer _exceptionWriter = _create_{{function:javaName}}_exception_writer(_t, _chain, _payload.getMessageSeqId(), (short) {{field:key}});
+                    com.facebook.thrift.payload.Writer _exceptionWriter = _create_{{function:javaName}}_exception_writer(_t, _chain, _payload.getMessageSeqId(), (short) {{field:id}});
                     com.facebook.thrift.payload.ServerResponsePayload _serverResponsePayload =
                       com.facebook.thrift.util.RpcPayloadUtil.createServerResponsePayload(
                           _payload,

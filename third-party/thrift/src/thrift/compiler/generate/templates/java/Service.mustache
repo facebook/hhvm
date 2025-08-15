@@ -81,19 +81,19 @@ public interface {{service:javaCapitalName}} extends java.io.Closeable, com.face
         @ThriftMethod(value = "{{function:name}}"{{#function:oneway?}},
                       oneway = true{{/function:oneway?}}{{#function:exceptions}}{{#first?}},
                       exception = { {{/first?}}
-                          @ThriftException(type={{#field:type}}{{> Type}}{{/field:type}}.class, id={{field:key}}){{^last?}},{{/last?}}{{#last?}}
+                          @ThriftException(type={{#field:type}}{{> Type}}{{/field:type}}.class, id={{field:id}}){{^last?}},{{/last?}}{{#last?}}
                       }{{/last?}}{{/function:exceptions}})
         ListenableFuture<{{#function:return_type}}{{> BoxedType}}{{/function:return_type}}> {{function:javaName}}({{#function:args}}
-            @com.facebook.swift.codec.ThriftField(value={{field:key}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}{{^last?}},{{/last?}}{{/function:args}});
+            @com.facebook.swift.codec.ThriftField(value={{field:id}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}{{^last?}},{{/last?}}{{/function:args}});
 
         default ListenableFuture<{{#function:return_type}}{{> BoxedType}}{{/function:return_type}}> {{function:javaName}}({{#function:args}}
-            @com.facebook.swift.codec.ThriftField(value={{field:key}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}},{{/function:args}}
+            @com.facebook.swift.codec.ThriftField(value={{field:id}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}},{{/function:args}}
             RpcOptions rpcOptions) {
             throw new UnsupportedOperationException();
         }
 
         default ListenableFuture<ResponseWrapper<{{#function:return_type}}{{> BoxedType}}{{/function:return_type}}>> {{function:javaName}}Wrapper({{#function:args}}
-            @com.facebook.swift.codec.ThriftField(value={{field:key}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}},{{/function:args}}
+            @com.facebook.swift.codec.ThriftField(value={{field:id}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}},{{/function:args}}
             RpcOptions rpcOptions) {
             throw new UnsupportedOperationException();
         }
@@ -108,16 +108,16 @@ public interface {{service:javaCapitalName}} extends java.io.Closeable, com.face
             @ThriftMethod(value = "{{function:name}}"{{#function:oneway?}},
                 oneway = true{{/function:oneway?}}{{#function:exceptions}}{{#first?}},
                 exception = { {{/first?}}
-                    @ThriftException(type={{#field:type}}{{> Type}}{{/field:type}}.class, id={{field:key}}){{^last?}},{{/last?}}{{#last?}}
+                    @ThriftException(type={{#field:type}}{{> Type}}{{/field:type}}.class, id={{field:id}}){{^last?}},{{/last?}}{{#last?}}
                 }{{/last?}}{{/function:exceptions}})
             ListenableFuture<{{#function:return_type}}{{> BoxedType}}{{/function:return_type}}> {{function:javaName}}({{#function:args}} {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}{{^last?}},{{/last?}}{{/function:args}});
 
             ListenableFuture<{{#function:return_type}}{{> BoxedType}}{{/function:return_type}}> {{function:javaName}}({{#function:args}}
-                @com.facebook.swift.codec.ThriftField(value={{field:key}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}},{{/function:args}}
+                @com.facebook.swift.codec.ThriftField(value={{field:id}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}},{{/function:args}}
                 RpcOptions rpcOptions);
 
             ListenableFuture<ResponseWrapper<{{#function:return_type}}{{> BoxedType}}{{/function:return_type}}>> {{function:javaName}}Wrapper({{#function:args}}
-                @com.facebook.swift.codec.ThriftField(value={{field:key}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}},{{/function:args}}
+                @com.facebook.swift.codec.ThriftField(value={{field:id}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}},{{/function:args}}
                 RpcOptions rpcOptions);
             {{/service:singleRequestFunctions}}
 
@@ -137,15 +137,15 @@ public interface {{service:javaCapitalName}} extends java.io.Closeable, com.face
     @ThriftMethod(value = "{{function:name}}"{{#function:oneway?}},
                   oneway = true{{/function:oneway?}}{{#function:exceptions}}{{#first?}},
                   exception = { {{/first?}}
-                      @ThriftException(type={{#field:type}}{{> Type}}{{/field:type}}.class, id={{field:key}}){{^last?}},{{/last?}}{{#last?}}
+                      @ThriftException(type={{#field:type}}{{> Type}}{{/field:type}}.class, id={{field:id}}){{^last?}},{{/last?}}{{#last?}}
                   }{{/last?}}{{/function:exceptions}})
     {{#function:return_type}}{{> Type}}{{/function:return_type}} {{function:javaName}}({{#function:args}}
-        @com.facebook.swift.codec.ThriftField(value={{field:key}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}{{^last?}},{{/last?}}{{/function:args}}){{!
+        @com.facebook.swift.codec.ThriftField(value={{field:id}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}{{^last?}},{{/last?}}{{/function:args}}){{!
           Exceptions
         }} throws {{#function:exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}, {{/function:exceptions}}org.apache.thrift.TException;
 
     default {{#function:return_type}}{{> Type}}{{/function:return_type}} {{function:javaName}}({{#function:args}}
-        @com.facebook.swift.codec.ThriftField(value={{field:key}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}},{{/function:args}}
+        @com.facebook.swift.codec.ThriftField(value={{field:id}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}},{{/function:args}}
         RpcOptions rpcOptions){{!
           Exceptions
         }} throws {{#function:exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}, {{/function:exceptions}}org.apache.thrift.TException {
@@ -153,7 +153,7 @@ public interface {{service:javaCapitalName}} extends java.io.Closeable, com.face
     }
 
     default ResponseWrapper<{{#function:return_type}}{{> BoxedType}}{{/function:return_type}}> {{function:javaName}}Wrapper({{#function:args}}
-        @com.facebook.swift.codec.ThriftField(value={{field:key}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}},{{/function:args}}
+        @com.facebook.swift.codec.ThriftField(value={{field:id}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}},{{/function:args}}
         RpcOptions rpcOptions){{!
           Exceptions
         }} throws {{#function:exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}, {{/function:exceptions}}org.apache.thrift.TException {
@@ -185,7 +185,7 @@ public interface {{service:javaCapitalName}} extends java.io.Closeable, com.face
         @ThriftMethod(value = "{{function:name}}"{{#function:oneway?}},
                   oneway = true{{/function:oneway?}}{{#function:exceptions}}{{#first?}},
                   exception = { {{/first?}}
-                      @ThriftException(type={{#field:type}}{{> Type}}{{/field:type}}.class, id={{field:key}}){{^last?}},{{/last?}}{{#last?}}
+                      @ThriftException(type={{#field:type}}{{> Type}}{{/field:type}}.class, id={{field:id}}){{^last?}},{{/last?}}{{#last?}}
                   }{{/last?}}{{/function:exceptions}})
         reactor.core.publisher.Mono<{{#function:return_type}}{{> BoxedType}}{{/function:return_type}}> {{function:javaName}}({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}{{^last?}}, {{/last?}}{{/function:args}});
 
@@ -229,7 +229,7 @@ public interface {{service:javaCapitalName}} extends java.io.Closeable, com.face
             @ThriftMethod(value = "{{function:name}}"{{#function:oneway?}},
                 oneway = true{{/function:oneway?}}{{#function:exceptions}}{{#first?}},
                 exception = { {{/first?}}
-                    @ThriftException(type={{#field:type}}{{> Type}}{{/field:type}}.class, id={{field:key}}){{^last?}},{{/last?}}{{#last?}}
+                    @ThriftException(type={{#field:type}}{{> Type}}{{/field:type}}.class, id={{field:id}}){{^last?}},{{/last?}}{{#last?}}
                 }{{/last?}}{{/function:exceptions}})
             reactor.core.publisher.Mono<{{#function:return_type}}{{> BoxedType}}{{/function:return_type}}> {{function:javaName}}({{#function:args}} final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}{{^last?}},{{/last?}}{{/function:args}});
 
@@ -267,19 +267,19 @@ public interface {{service:javaCapitalName}} extends java.io.Closeable, com.face
         @ThriftMethod(value = "{{function:name}}"{{#function:oneway?}},
                       oneway = true{{/function:oneway?}}{{#function:exceptions}}{{#first?}},
                       exception = { {{/first?}}
-                          @ThriftException(type={{#field:type}}{{> Type}}{{/field:type}}.class, id={{field:key}}){{^last?}},{{/last?}}{{#last?}}
+                          @ThriftException(type={{#field:type}}{{> Type}}{{/field:type}}.class, id={{field:id}}){{^last?}},{{/last?}}{{#last?}}
                       }{{/last?}}{{/function:exceptions}})
         {{#function:return_type}}{{> Type}}{{/function:return_type}} {{function:javaName}}({{#function:args}}
-        @com.facebook.swift.codec.ThriftField(value={{field:key}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}{{^last?}},{{/last?}}{{/function:args}}) throws {{#function:exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}, {{/function:exceptions}}org.apache.thrift.TException;
+        @com.facebook.swift.codec.ThriftField(value={{field:id}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}{{^last?}},{{/last?}}{{/function:args}}) throws {{#function:exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}, {{/function:exceptions}}org.apache.thrift.TException;
 
         {{#function:return_type}}{{> Type}}{{/function:return_type}} {{function:javaName}}({{#function:args}}
-            @com.facebook.swift.codec.ThriftField(value={{field:key}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}},{{/function:args}}
+            @com.facebook.swift.codec.ThriftField(value={{field:id}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}},{{/function:args}}
             RpcOptions rpcOptions){{!
             Exceptions
             }} throws {{#function:exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}, {{/function:exceptions}}org.apache.thrift.TException;
 
         ResponseWrapper<{{#function:return_type}}{{> BoxedType}}{{/function:return_type}}> {{function:javaName}}Wrapper({{#function:args}}
-            @com.facebook.swift.codec.ThriftField(value={{field:key}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}},{{/function:args}}
+            @com.facebook.swift.codec.ThriftField(value={{field:id}}, {{#field:negativeId?}}isLegacyId=true, {{/field:negativeId?}}name="{{field:name}}", requiredness={{> Requiredness}}) final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}},{{/function:args}}
             RpcOptions rpcOptions){{!
             Exceptions
             }} throws {{#function:exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}, {{/function:exceptions}}org.apache.thrift.TException;

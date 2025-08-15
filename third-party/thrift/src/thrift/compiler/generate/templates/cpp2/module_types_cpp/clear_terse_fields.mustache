@@ -30,7 +30,7 @@ are cleared to their instrinic default values.
 {{#type:non_empty_struct?}}
 {{^field:cpp_ref?}}
 {{#field:cpp_first_adapter}}
-  ::apache::thrift::adapt_detail::clear<{{field:cpp_first_adapter}}, {{field:key}}>({{field:cpp_storage_name}}, *this);
+  ::apache::thrift::adapt_detail::clear<{{field:cpp_first_adapter}}, {{field:id}}>({{field:cpp_storage_name}}, *this);
 {{/field:cpp_first_adapter}}
 {{^field:cpp_first_adapter}}
 {{#type:union?}}

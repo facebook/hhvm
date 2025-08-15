@@ -65,8 +65,8 @@ public final class {{struct:javaCapitalName}} implements com.facebook.thrift.pay
     @org.apache.thrift.annotations.Sensitive
     {{/field:isSensitive?}}
     private {{> FieldType}} {{field:javaName}};
-    public static final int _{{field:javaAllCapsName}} = {{field:key}};
-    private static final TField {{field:javaTFieldName}} = new TField("{{field:name}}", TType.{{#field:type}}{{> TType}}{{/field:type}}, (short){{field:key}});
+    public static final int _{{field:javaAllCapsName}} = {{field:id}};
+    private static final TField {{field:javaTFieldName}} = new TField("{{field:name}}", TType.{{#field:type}}{{> TType}}{{/field:type}}, (short){{field:id}});
     {{/struct:asBean?}}{{!
 
     }}{{^struct:asBean?}}
@@ -74,16 +74,16 @@ public final class {{struct:javaCapitalName}} implements com.facebook.thrift.pay
     @org.apache.thrift.annotations.Sensitive
     {{/field:isSensitive?}}
     {{#field:javaAnnotations?}}{{field:javaAnnotations}} {{/field:javaAnnotations?}}private {{^struct:isBigStruct?}}{{^struct:hasWrapper?}}final {{/struct:hasWrapper?}}{{/struct:isBigStruct?}}{{> FieldType}} {{field:javaName}};
-    public static final int _{{field:javaAllCapsName}} = {{field:key}};
-    private static final TField {{field:javaTFieldName}} = new TField("{{field:name}}", TType.{{#field:type}}{{> TType}}{{/field:type}}, (short){{field:key}});
+    public static final int _{{field:javaAllCapsName}} = {{field:id}};
+    private static final TField {{field:javaTFieldName}} = new TField("{{field:name}}", TType.{{#field:type}}{{> TType}}{{/field:type}}, (short){{field:id}});
     {{/struct:asBean?}}
     {{/struct:fields}}{{!
 
     }}static {
       {{#struct:fields}}
-      NAMES_TO_IDS.put("{{field:javaName}}", {{field:key}});
-      THRIFT_NAMES_TO_IDS.put("{{field:name}}", {{field:key}});
-      FIELD_METADATA.put({{field:key}}, {{field:javaTFieldName}});
+      NAMES_TO_IDS.put("{{field:javaName}}", {{field:id}});
+      THRIFT_NAMES_TO_IDS.put("{{field:name}}", {{field:id}});
+      FIELD_METADATA.put({{field:id}}, {{field:javaTFieldName}});
       {{/struct:fields}}
       {{#struct:uri}}
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(

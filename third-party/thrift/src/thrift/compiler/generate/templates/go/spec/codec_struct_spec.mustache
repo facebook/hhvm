@@ -34,7 +34,7 @@
     FieldSpecIDToIndex:   map[int16]int{
         {{#each (array.enumerate struct:fields_sorted) as |index field|}}
         {{#with field}}
-        {{field:key}}: {{index}},
+        {{field:id}}: {{index}},
         {{/with}}
         {{/each}}
     },

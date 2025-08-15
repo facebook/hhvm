@@ -117,7 +117,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     case 0:
       break; // union is unset
   {{#struct:fields}}
-    case {{field:key}}:
+    case {{field:id}}:
       Extractor<{{> common/union_marshal_type}}>{}.extractInto(
           cpp.{{field:cpp_name}}_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
@@ -246,7 +246,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       py_val = StrongRef(Py_None);
       break;
   {{#struct:fields}}
-    case {{field:key}}:
+    case {{field:id}}:
       py_val = StrongRef(
           Constructor<{{> common/union_marshal_type}}>{}
           .constructFrom(val.{{field:cpp_name}}_ref()));

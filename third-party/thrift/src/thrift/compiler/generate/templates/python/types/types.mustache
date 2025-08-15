@@ -81,7 +81,7 @@ class {{> structs/unadapted_name}}{{!
     _fbthrift_SPEC = (
         {{#struct:fields_ordered_by_id}}
         _fbthrift_python_types.FieldInfo(
-            {{field:key}},  # id
+            {{field:id}},  # id
             _fbthrift_python_types.{{field:tablebased_qualifier}}, # qualifier
             "{{field:name}}",  # name
             "{{field:py_name}}",  # python name (from @python.Name annotation)

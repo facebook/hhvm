@@ -17,5 +17,5 @@
 }}{{#field:cpp_field_interceptor}}
     {{field:cpp_field_interceptor}}::interceptThriftFieldAccess({{!
   }}this->{{> common/field_value}}, {{!
-  }}::apache::thrift::FieldContext<std::remove_reference<decltype(*this)>::type, {{field:key}}>{*this});
+  }}::apache::thrift::FieldContext<std::remove_reference<decltype(*this)>::type, {{field:id}}>{*this});
 {{/field:cpp_field_interceptor}}

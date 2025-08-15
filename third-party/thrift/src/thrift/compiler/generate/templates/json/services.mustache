@@ -47,7 +47,7 @@
             {{#field:docs?}}
             "docstring" : {{field:docstring}},
             {{/field:docs?}}
-            "key" : {{field:key}},
+            "key" : {{field:id}},
             "lineno" : {{field:lineno}},
             {{#field:required?}}
             "required" : "required",
@@ -55,9 +55,9 @@
             {{#field:optional?}}
             "required" : "optional",
             {{/field:optional?}}
-            {{#field:opt_in_req_out?}}
+            {{#field:unqualified?}}
             "required" : "opt-in-req-out"
-            {{/field:opt_in_req_out?}}
+            {{/field:unqualified?}}
             {{#if (not (array.empty? field:structured_annotations))}},
             "structured_annotations": {
             {{#field:structured_annotations}}
@@ -75,7 +75,7 @@
           "{{field:name}}" : {
             "name": "{{field:name}}",
             "type" : {{#field:type}}{{> type}}{{/field:type}},
-            "id" : {{field:key}}{{!
+            "id" : {{field:id}}{{!
             }}{{#if (not (array.empty? field:structured_annotations))}},
             "structured_annotations": {
             {{#field:structured_annotations}}

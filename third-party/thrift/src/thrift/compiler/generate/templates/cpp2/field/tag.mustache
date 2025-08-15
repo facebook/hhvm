@@ -16,4 +16,4 @@
 
   // Note: All adapted fields need to use field tag.
 }}{{^field:cpp_adapter}}{{field:type_tag}}{{/field:cpp_adapter}}{{!
-}}{{#field:cpp_adapter}}::apache::thrift::op::get_field_tag<{{struct:cpp_underlying_name}}, ::apache::thrift::field_id<{{field:key}}>>{{/field:cpp_adapter}}
+}}{{#field:cpp_adapter}}::apache::thrift::op::get_field_tag<{{struct:cpp_underlying_name}}, ::apache::thrift::field_id<{{field:id}}>>{{/field:cpp_adapter}}

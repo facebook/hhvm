@@ -30,7 +30,7 @@ public {{struct:javaCapitalName}}(final {{> FieldType}} {{field:javaName}}) {
     }
     {{/field:isNumericOrVoid?}}{{/field:required?}}{{/field:optional?}}
     this.value = {{field:javaName}};
-    this.id = {{field:key}};
+    this.id = {{field:id}};
 }
 {{/struct:fields}}
 {{/struct:unionFieldTypeUnique?}}
@@ -44,7 +44,7 @@ public static {{struct:javaCapitalName}} from{{field:javaCapitalName}}(final {{>
     }
     {{/field:isNumericOrVoid?}}{{/field:required?}}{{/field:optional?}}
     res.value = {{field:javaName}};
-    res.id = {{field:key}};
+    res.id = {{field:id}};
     return res;
 }
 {{/struct:fields}}

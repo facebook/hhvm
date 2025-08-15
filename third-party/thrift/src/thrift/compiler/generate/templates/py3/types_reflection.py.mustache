@@ -80,7 +80,7 @@ def get_reflection__{{struct:name}}() -> __StructSpec:
 {{/struct:has_defaulted_field?}}
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id={{field:key}},
+            id={{field:id}},
             name="{{field:name}}",
             py_name="{{field:py_name}}",
             type={{#field:type}}{{> types/python_type}}{{/field:type}},

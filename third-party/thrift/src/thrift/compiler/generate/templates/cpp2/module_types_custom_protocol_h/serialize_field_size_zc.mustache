@@ -17,7 +17,7 @@
 }}
 {{#field:type}}
 {{> module_types_custom_protocol_h/if_should_write}}
-    xfer += prot_->serializedFieldSize("{{field:name}}", apache::thrift::protocol::{{> common/struct_type}}, {{field:key}});
+    xfer += prot_->serializedFieldSize("{{field:name}}", apache::thrift::protocol::{{> common/struct_type}}, {{field:id}});
 {{#field:lazy?}}
     if constexpr (Protocol_::kHasIndexSupport()) {
       if (prot_->protocolType() == __fbthrift_protocol_) {

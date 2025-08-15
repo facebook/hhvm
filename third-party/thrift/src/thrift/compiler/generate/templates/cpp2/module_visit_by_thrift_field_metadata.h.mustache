@@ -32,7 +32,7 @@ struct VisitByFieldId<{{struct:cpp_fullname}}> {
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     {{#struct:fields}}
-    case {{field:key}}:
+    case {{field:id}}:
       return f({{field:index}}, static_cast<T&&>(t).{{field:cpp_name}}_ref());
     {{/struct:fields}}
     default:

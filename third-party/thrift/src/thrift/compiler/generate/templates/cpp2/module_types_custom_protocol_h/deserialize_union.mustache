@@ -31,7 +31,7 @@ void {{struct:cpp_underlying_name}}::readNoXfer(Protocol_* iprot) {
     }
     switch (_readState.fieldId) {
   {{#struct:fields}}{{#field:type}}
-      case {{field:key}}:
+      case {{field:id}}:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::{{> common/struct_type}})) {
           this->{{field:cpp_name}}_ref().emplace();

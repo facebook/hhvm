@@ -241,7 +241,7 @@ pub mod {{service:snake}} {
                         }};
                     }{{!
                     }}{{#function:exceptions}}
-                    (({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
+                    (({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:id}}), false) => {
                         once = true;
                         alt = {{!
                             }}{{^function:void_or_void_stream?}}::std::option::Option::Some({{/function:void_or_void_stream?}}{{!
@@ -463,7 +463,7 @@ pub mod {{service:snake}} {
                     p.write_field_begin(
                         "{{field:name}}",
                         {{#field:type}}{{> lib/ttype}}{{/field:type}},
-                        {{field:key}},
+                        {{field:id}},
                     );
                     ::fbthrift::Serialize::rs_thrift_write(inner, p);
                     p.write_field_end();
@@ -644,7 +644,7 @@ pub mod {{service:snake}} {
                         alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::rs_thrift_read(p)?));
                     }{{!
                     }}{{#function:sink_final_response_exceptions}}
-                    (({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
+                    (({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:id}}), false) => {
                         once = true;
                         alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::{{field:rust_name}}(::fbthrift::Deserialize::rs_thrift_read(p)?)));
                     }{{!
@@ -807,7 +807,7 @@ pub mod {{service:snake}} {
                         alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::rs_thrift_read(p)?));
                     }{{!
                     }}{{#function:stream_exceptions}}
-                    (({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
+                    (({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:id}}), false) => {
                         once = true;
                         alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::{{field:rust_name}}(::fbthrift::Deserialize::rs_thrift_read(p)?)));
                     }{{!

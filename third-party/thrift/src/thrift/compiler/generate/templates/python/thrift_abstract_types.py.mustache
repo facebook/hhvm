@@ -80,7 +80,7 @@ class {{> structs/unadapted_name}}({{!
     class FbThriftUnionFieldEnum(_enum.Enum):
         EMPTY = 0
     {{#struct:fields_ordered_by_id}}
-        {{field:py_name}} = {{field:key}}
+        {{field:py_name}} = {{field:id}}
     {{/struct:fields_ordered_by_id}}
 
     {{! For backwards compatibility, set the name to the name

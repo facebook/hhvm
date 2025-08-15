@@ -65,7 +65,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for {{struct:rust_name}} {
         #[allow(clippy::match_single_binding)]
         match field_id {
             {{#struct:fields}}
-            {{field:key}} => {
+            {{field:id}} => {
                 {{#field:rust_structured_annotations}}
                 {{#structured_annotation:direct}}
 

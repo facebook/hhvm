@@ -25,7 +25,7 @@ namespace apache { namespace thrift { namespace frozen {
 {{^struct:union?}}
 FROZEN_CTOR({{struct:cpp_fullname}},{{!
 }}{{#struct:fields}}
-  FROZEN_CTOR_FIELD{{> common/field_suffix}}({{field:cpp_name}}, {{field:key}}){{!
+  FROZEN_CTOR_FIELD{{> common/field_suffix}}({{field:cpp_name}}, {{field:id}}){{!
 }}{{/struct:fields}})
 FROZEN_MAXIMIZE({{struct:cpp_fullname}},{{!
 }}{{#struct:fields}}
@@ -58,7 +58,7 @@ FROZEN_CTOR({{struct:cpp_fullname}},{{!
 }}
   FROZEN_CTOR_FIELD(fbthrift_type_, 0){{!
 }}{{#struct:fields}}
-  FROZEN_CTOR_FIELD{{> common/frozen2_union_field_suffix}}({{field:cpp_name}}, {{field:key}}){{!
+  FROZEN_CTOR_FIELD{{> common/frozen2_union_field_suffix}}({{field:cpp_name}}, {{field:id}}){{!
 }}{{/struct:fields}})
 
 FROZEN_MAXIMIZE({{struct:cpp_fullname}},{{!

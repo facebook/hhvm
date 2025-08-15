@@ -129,7 +129,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
                     p.write_field_begin(
                         "{{field:name}}",
                         {{#field:type}}{{> lib/ttype}}{{/field:type}},
-                        {{field:key}},
+                        {{field:id}},
                     );
                     ::fbthrift::Serialize::rs_thrift_write(inner, p);
                     p.write_field_end();
@@ -294,7 +294,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
                     p.write_field_begin(
                         "{{field:name}}",
                         {{#field:type}}{{> lib/ttype}}{{/field:type}},
-                        {{field:key}},
+                        {{field:id}},
                     );
                     ::fbthrift::Serialize::rs_thrift_write(inner, p);
                     p.write_field_end();
@@ -337,7 +337,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
                         alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::rs_thrift_read(p)?));
                     }{{!
                     }}{{#function:sink_exceptions}}
-                    (({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
+                    (({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:id}}), false) => {
                         once = true;
                         alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::{{field:rust_name}}(::fbthrift::Deserialize::rs_thrift_read(p)?)));
                     }{{!
@@ -474,7 +474,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
                     p.write_field_begin(
                         "{{field:name}}",
                         {{#field:type}}{{> lib/ttype}}{{/field:type}},
-                        {{field:key}},
+                        {{field:id}},
                     );
                     ::fbthrift::Serialize::rs_thrift_write(inner, p);
                     p.write_field_end();
@@ -655,7 +655,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
                     p.write_field_begin(
                         "{{field:name}}",
                         {{#field:type}}{{> lib/ttype}}{{/field:type}},
-                        {{field:key}},
+                        {{field:id}},
                     );
                     ::fbthrift::Serialize::rs_thrift_write(inner, p);
                     p.write_field_end();

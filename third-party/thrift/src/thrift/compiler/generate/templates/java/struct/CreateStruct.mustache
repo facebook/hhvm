@@ -19,7 +19,7 @@
 }}{{struct:javaCapitalName}} result = new {{struct:javaCapitalName}}();
 {{#struct:fields}}
 {{#field:hasWrapper?}}
-    result.{{field:javaName}} = this.{{field:javaName}} == null ? _{{field:javaName}}_Wrapper.fromThrift(_{{field:javaName}}, new com.facebook.thrift.adapter.FieldContext({{field:key}}, result)) : this.{{field:javaName}};
+    result.{{field:javaName}} = this.{{field:javaName}} == null ? _{{field:javaName}}_Wrapper.fromThrift(_{{field:javaName}}, new com.facebook.thrift.adapter.FieldContext({{field:id}}, result)) : this.{{field:javaName}};
 {{/field:hasWrapper?}}
 {{^field:hasWrapper?}}
     result.{{field:javaName}} = this.{{field:javaName}};

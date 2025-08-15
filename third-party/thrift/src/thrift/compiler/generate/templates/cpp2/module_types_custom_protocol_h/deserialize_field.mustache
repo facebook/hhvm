@@ -28,7 +28,7 @@ auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<{{field:cpp_storage_
 {{#field:cpp_exactly_one_adapter?}}
 if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<{{field:cpp_first_adapter}}, {{field:cpp_type}}>::value) {
   {{^field:cpp_ref?}}{{#type:resolves_to_container?}}
-  ::apache::thrift::adapt_detail::clear<{{field:cpp_first_adapter}}, {{field:key}}>({{> module_types_custom_protocol_h/member_or_ptr}}, *this);
+  ::apache::thrift::adapt_detail::clear<{{field:cpp_first_adapter}}, {{field:id}}>({{> module_types_custom_protocol_h/member_or_ptr}}, *this);
   {{/type:resolves_to_container?}}{{/field:cpp_ref?}}
   {{> module_types_custom_protocol_h/pm}}::readWithContext(*iprot, {{field:cpp_first_adapter}}::toThrift({{> module_types_custom_protocol_h/member_or_ptr}}), _readState);
 } else {
@@ -36,11 +36,11 @@ if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<{{field:cpp_fi
 {{#field:cpp_exactly_one_adapter?}}  {{/field:cpp_exactly_one_adapter?}}{{field:cpp_standard_type}} tvalue{{#type:resolves_to_container?}}{{#type:cpp_use_allocator?}}(this->get_allocator()){{/type:cpp_use_allocator?}}{{/type:resolves_to_container?}};
 {{#field:cpp_exactly_one_adapter?}}  {{/field:cpp_exactly_one_adapter?}}{{> module_types_custom_protocol_h/pm}}::readWithContext(*iprot, tvalue, _readState);
 {{#field:cpp_exactly_one_adapter?}}
-  {{> module_types_custom_protocol_h/member_or_ptr}} = ::apache::thrift::adapt_detail::fromThriftField<{{field:cpp_first_adapter}}, {{field:key}}>(::std::move(tvalue), *this);
+  {{> module_types_custom_protocol_h/member_or_ptr}} = ::apache::thrift::adapt_detail::fromThriftField<{{field:cpp_first_adapter}}, {{field:id}}>(::std::move(tvalue), *this);
 }
 {{/field:cpp_exactly_one_adapter?}}
 {{^field:cpp_exactly_one_adapter?}}
-{{> module_types_custom_protocol_h/member_or_ptr}} = ::apache::thrift::adapt_detail::fromThriftField<{{field:cpp_first_adapter}}, {{field:key}}>({{> types/adapter_pre}}::std::move(tvalue){{> types/adapter_post}}, *this);
+{{> module_types_custom_protocol_h/member_or_ptr}} = ::apache::thrift::adapt_detail::fromThriftField<{{field:cpp_first_adapter}}, {{field:id}}>({{> types/adapter_pre}}::std::move(tvalue){{> types/adapter_post}}, *this);
 {{/field:cpp_exactly_one_adapter?}}
 {{/field:cpp_first_adapter}}
 {{^field:cpp_first_adapter}}

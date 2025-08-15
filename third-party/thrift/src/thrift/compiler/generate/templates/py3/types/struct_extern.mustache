@@ -66,10 +66,10 @@ cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:n
         __required_field_ref[{{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}] {{!
             }}{{field:py_name}}_ref "{{> types/field_cppname}}" ()
         {{/field:required?}}
-        {{#field:opt_in_req_out?}}
+        {{#field:unqualified?}}
         __field_ref[{{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}] {{!
             }}{{field:py_name}}_ref "{{> types/field_cppname}}" ()
-        {{/field:opt_in_req_out?}}
+        {{/field:unqualified?}}
         {{#field:terse?}}
         __terse_field_ref[{{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}] {{!
             }}{{field:py_name}}_ref "{{> types/field_cppname}}" ()

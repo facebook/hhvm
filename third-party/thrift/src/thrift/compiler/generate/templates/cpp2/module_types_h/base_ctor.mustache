@@ -27,6 +27,6 @@
 }}{{/struct:cpp_allocator_via}}{{!
 }} {
   {{#struct:fields}}{{#field:cpp_first_adapter}}{{^field:opt_cpp_ref?}}{{^field:intern_boxed_ref?}}
-  ::apache::thrift::adapt_detail::construct<{{field:cpp_first_adapter}}, {{field:key}}>({{#field:cpp_ref?}}*{{/field:cpp_ref?}}{{field:cpp_storage_name}}, *this);
+  ::apache::thrift::adapt_detail::construct<{{field:cpp_first_adapter}}, {{field:id}}>({{#field:cpp_ref?}}*{{/field:cpp_ref?}}{{field:cpp_storage_name}}, *this);
   {{/field:intern_boxed_ref?}}{{/field:opt_cpp_ref?}}{{/field:cpp_first_adapter}}{{/struct:fields}}
 }

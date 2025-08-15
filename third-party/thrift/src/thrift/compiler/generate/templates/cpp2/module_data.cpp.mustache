@@ -34,7 +34,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, {{struct:num_fields}}> TSt
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, {{struct:num_fields}}> TStructDataStorage<{{struct:cpp_fullname}}>::fields_ids = { {
   {{#struct:fields}}
-  {{field:key}},
+  {{field:id}},
   {{/struct:fields}}
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, {{struct:num_fields}}> TStructDataStorage<{{struct:cpp_fullname}}>::fields_types = { {

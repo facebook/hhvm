@@ -18,7 +18,7 @@
 {{#field:type}}
 {{> module_types_custom_protocol_h/if_should_write}}
     constexpr int16_t kPrevFieldId = {{#first?}}{{#struct:indexing?}}::apache::thrift::detail::kSizeField.id{{/struct:indexing?}}{{^struct:indexing?}}0{{/struct:indexing?}}{{/first?}}{{^first?}}{{field:serialization_prev_field_key}}{{/first?}};
-    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::{{> common/struct_type}}, {{field:key}}, kPrevFieldId>(*prot_, "{{field:name}}", {{^struct:union?}}previousFieldHasValue{{/struct:union?}}{{#struct:union?}}false{{/struct:union?}});
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::{{> common/struct_type}}, {{field:id}}, kPrevFieldId>(*prot_, "{{field:name}}", {{^struct:union?}}previousFieldHasValue{{/struct:union?}}{{#struct:union?}}false{{/struct:union?}});
 {{^struct:union?}}
     previousFieldHasValue = true;
 {{/struct:union?}}
@@ -68,7 +68,7 @@
 {{/field:non_opt_cpp_ref?}}
 {{#field:lazy?}}
     written_lazy_field_{{field:cpp_name}}:
-    indexWriter.template recordFieldEnd<decltype({{> module_types_custom_protocol_h/pm_value}})>({{type:type_class}}{}, {{field:key}});
+    indexWriter.template recordFieldEnd<decltype({{> module_types_custom_protocol_h/pm_value}})>({{type:type_class}}{}, {{field:id}});
 {{/field:lazy?}}
     xfer += prot_->writeFieldEnd();
 {{#struct:union?}}

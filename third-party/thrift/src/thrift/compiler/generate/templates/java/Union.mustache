@@ -44,15 +44,15 @@ public final class {{struct:javaCapitalName}} implements com.facebook.thrift.pay
     private static final {{struct:javaCapitalName}} _DEFAULT = new {{struct:javaCapitalName}}();
 
     {{#struct:fields}}
-    public static final int _{{field:javaAllCapsName}} = {{field:key}};
-    private static final TField {{field:javaTFieldName}} = new TField("{{#field:FieldNameUnmangled?}}{{field:name}}{{/field:FieldNameUnmangled?}}{{^field:FieldNameUnmangled?}}{{field:javaName}}{{/field:FieldNameUnmangled?}}", TType.{{#field:type}}{{> TType}}{{/field:type}}, (short){{field:key}});
+    public static final int _{{field:javaAllCapsName}} = {{field:id}};
+    private static final TField {{field:javaTFieldName}} = new TField("{{#field:FieldNameUnmangled?}}{{field:name}}{{/field:FieldNameUnmangled?}}{{^field:FieldNameUnmangled?}}{{field:javaName}}{{/field:FieldNameUnmangled?}}", TType.{{#field:type}}{{> TType}}{{/field:type}}, (short){{field:id}});
     {{/struct:fields}}
 
     static {
       {{#struct:fields}}
-      NAMES_TO_IDS.put("{{field:javaName}}", {{field:key}});
-      THRIFT_NAMES_TO_IDS.put("{{field:name}}", {{field:key}});
-      FIELD_METADATA.put({{field:key}}, {{field:javaTFieldName}});
+      NAMES_TO_IDS.put("{{field:javaName}}", {{field:id}});
+      THRIFT_NAMES_TO_IDS.put("{{field:name}}", {{field:id}});
+      FIELD_METADATA.put({{field:id}}, {{field:javaTFieldName}});
       {{/struct:fields}}
       {{#struct:uri}}
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
@@ -86,7 +86,7 @@ public final class {{struct:javaCapitalName}} implements com.facebook.thrift.pay
         try {
             switch(_id) {
                 {{#struct:fields}}
-                case {{field:key}}:
+                case {{field:id}}:
                     _u.id = _id;
                     _u.value = ({{> FieldType}}) _field;
                     return _u;
@@ -112,14 +112,14 @@ public final class {{struct:javaCapitalName}} implements com.facebook.thrift.pay
     {{> ThriftFieldAnnotation}}
 
     public {{> FieldType}} {{> GetterName}}() {
-        if (this.id != {{field:key}}) {
+        if (this.id != {{field:id}}) {
             throw new IllegalStateException("Not a {{field:name}} element!");
         }
         return ({{> FieldType}}) value;
     }
 
     public boolean isSet{{field:javaCapitalName}}() {
-        return this.id == {{field:key}};
+        return this.id == {{field:id}};
     }
     {{/struct:fields}}
 
@@ -133,7 +133,7 @@ public final class {{struct:javaCapitalName}} implements com.facebook.thrift.pay
         case 0:
           return TypeEnum.__FBTHRIFT_EMPTY_UNION__;
         {{#struct:fields}}
-        case {{field:key}}:
+        case {{field:id}}:
           return TypeEnum.{{field:javaConstantName}};
         {{/struct:fields}}
         default:

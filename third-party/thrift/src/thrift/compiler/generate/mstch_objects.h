@@ -860,12 +860,10 @@ class mstch_field : public mstch_base {
         this,
         {
             {"field:self", &mstch_field::self},
-            {"field:key", &mstch_field::key},
             {"field:value", &mstch_field::value},
             {"field:type", &mstch_field::type},
             {"field:idl_type", &mstch_field::idl_type},
             {"field:index", &mstch_field::index},
-            {"field:opt_in_req_out?", &mstch_field::is_optInReqOut},
             {"field:annotations", &mstch_field::annotations},
             {"field:structured_annotations",
              &mstch_field::structured_annotations},
@@ -878,7 +876,6 @@ class mstch_field : public mstch_base {
   }
 
   whisker::object self() { return make_self(*field_); }
-  mstch::node key() { return field_->get_key(); }
   mstch::node value();
   mstch::node type();
   /**
@@ -891,9 +888,6 @@ class mstch_field : public mstch_base {
    */
   mstch::node idl_type();
   mstch::node index() { return pos_.index; }
-  mstch::node is_optInReqOut() {
-    return field_->get_req() == t_field::e_req::opt_in_req_out;
-  }
   mstch::node annotations() { return mstch_base::annotations(field_); }
   mstch::node structured_annotations() {
     return mstch_base::structured_annotations(field_);

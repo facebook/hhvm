@@ -49,7 +49,7 @@ void {{struct:cpp_underlying_name}}::readNoXfer(Protocol_* iprot) {
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           0,
-          {{field:key}},
+          {{field:id}},
           apache::thrift::protocol::{{> common/struct_type}}))) {
     goto _advance_failure;
   }
@@ -61,7 +61,7 @@ _readField_{{field:cpp_name}}:
           {{type:type_class}},
           {{type:cpp_type}}
       >(iprot,
-        {{field:key}},
+        {{field:id}},
         apache::thrift::protocol::{{> common/struct_type}})) {
     const auto isDeserialized = __fbthrift_isDeserialized_.{{field:cpp_name}}.load();
     __fbthrift_serializedData_.{{field:cpp_name}} = {{!
@@ -86,7 +86,7 @@ _readField_{{field:cpp_name}}:
 {{#field:serialization_next_field_type}}
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
-          {{field:key}},
+          {{field:id}},
           {{field:serialization_next_field_key}},
           apache::thrift::protocol::{{> common/struct_type}}))) {
     goto _advance_failure;
@@ -96,7 +96,7 @@ _readField_{{field:cpp_name}}:
 {{#last?}}
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
-          {{field:key}},
+          {{field:id}},
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _advance_failure;
@@ -138,7 +138,7 @@ _loop:
 
   switch (_readState.fieldId) {
 {{#struct:fields_in_serialization_order}}{{#field:type}}
-    case {{field:key}}:
+    case {{field:id}}:
     {
       if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::{{> common/struct_type}}))) {
         goto _readField_{{field:cpp_name}};

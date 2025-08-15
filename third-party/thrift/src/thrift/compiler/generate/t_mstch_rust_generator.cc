@@ -2099,9 +2099,8 @@ class mstch_rust_struct_field : public mstch_base {
     register_methods(
         this,
         {
-            {"field:key", &mstch_rust_struct_field::key},
+            {"field:self", &mstch_rust_struct_field::self},
             {"field:rust_name", &mstch_rust_struct_field::rust_name},
-            {"field:optional?", &mstch_rust_struct_field::is_optional},
             {"field:explicit_value", &mstch_rust_struct_field::explicit_value},
             {"field:default", &mstch_rust_struct_field::rust_default},
             {"field:type", &mstch_rust_struct_field::type},
@@ -2112,11 +2111,8 @@ class mstch_rust_struct_field : public mstch_base {
             {"field:has_adapter?", &mstch_rust_struct_field::has_adapter},
         });
   }
-  mstch::node key() { return field_->get_key(); }
+  whisker::object self() { return make_self(*field_); }
   mstch::node rust_name() { return named_rust_name(field_); }
-  mstch::node is_optional() {
-    return field_->get_req() == t_field::e_req::optional;
-  }
   mstch::node explicit_value() {
     if (explicit_value_) {
       auto type = field_->get_type();

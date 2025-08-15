@@ -17,7 +17,7 @@
 }}
   static constexpr std::size_t __fbthrift_num_fields = {{struct:num_fields}};
 
-  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0{{#struct:fields}},{{field:key}}{{/struct:fields}}};
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0{{#struct:fields}},{{field:id}}{{/struct:fields}}};
 
   using __fbthrift_reflection_idents = folly::tag_t<{{#struct:fields}}
     ::apache::thrift::ident::{{field:cpp_name}}{{^last?}},{{/last?}}{{/struct:fields}}

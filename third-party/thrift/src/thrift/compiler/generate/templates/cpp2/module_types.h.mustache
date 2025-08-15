@@ -71,15 +71,15 @@ namespace apache::thrift::detail::qualifier {
 {{#struct:fields}}
 {{#field:opt_cpp_ref?}}
 template<>
-struct is_cpp_ref_field_optional<{{struct:cpp_fullname}},::apache::thrift::type::field_id<{{field:key}}>> : std::true_type{};
+struct is_cpp_ref_field_optional<{{struct:cpp_fullname}},::apache::thrift::type::field_id<{{field:id}}>> : std::true_type{};
 {{/field:opt_cpp_ref?}}
 {{#field:terse_cpp_ref?}}
 template<>
-struct is_cpp_ref_field_terse<{{struct:cpp_fullname}},::apache::thrift::type::field_id<{{field:key}}>> : std::true_type{};
+struct is_cpp_ref_field_terse<{{struct:cpp_fullname}},::apache::thrift::type::field_id<{{field:id}}>> : std::true_type{};
 {{/field:terse_cpp_ref?}}
 {{#if field:deprecated_terse_writes_with_non_redundant_custom_default?}}
 template<>
-struct is_deprecated_terse_writes_with_custom_default_field<{{struct:cpp_fullname}},::apache::thrift::type::field_id<{{field:key}}>> : std::true_type{};
+struct is_deprecated_terse_writes_with_custom_default_field<{{struct:cpp_fullname}},::apache::thrift::type::field_id<{{field:id}}>> : std::true_type{};
 {{/if field:deprecated_terse_writes_with_non_redundant_custom_default?}}
 {{/struct:fields}}
 {{/program:structs}}

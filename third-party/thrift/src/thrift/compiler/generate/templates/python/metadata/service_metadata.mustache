@@ -24,7 +24,7 @@ functions = [
     {{#service:functions}}{{^function:starts_interaction?}}
     _fbthrift_metadata.ThriftFunction(name="{{function:name}}", return_type={{> metadata/return_type }}, arguments=[
         {{#function:args}}
-        _fbthrift_metadata.ThriftField(id={{field:key}}, type={{#field:type}}{{> metadata/thrift_type }}{{/field:type}}, name="{{field:name}}", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id={{field:id}}, type={{#field:type}}{{> metadata/thrift_type }}{{/field:type}}, name="{{field:name}}", is_optional=False, structured_annotations=[
             {{#field:structured_annotations}}
             {{#structured_annotation:const_struct?}}{{#structured_annotation:const}}{{#constant:value}}
             {{> metadata/const_struct }},
@@ -34,7 +34,7 @@ functions = [
         {{/function:args}}
     ], exceptions = [
         {{#function:exceptions}}
-        _fbthrift_metadata.ThriftField(id={{field:key}}, type={{#field:type}}{{> metadata/thrift_type }}{{/field:type}}, name="{{field:name}}", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id={{field:id}}, type={{#field:type}}{{> metadata/thrift_type }}{{/field:type}}, name="{{field:name}}", is_optional=False, structured_annotations=[
             {{#field:structured_annotations}}
             {{#structured_annotation:const_struct?}}{{#structured_annotation:const}}{{#constant:value}}
             {{> metadata/const_struct }},

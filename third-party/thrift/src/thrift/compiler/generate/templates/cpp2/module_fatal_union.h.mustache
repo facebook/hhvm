@@ -113,7 +113,7 @@ class {{struct:cpp_name}}_variant_traits {
   struct __fbthrift_member_{{field:cpp_name}} {
     using name = __fbthrift_strings_{{program:name}}::{{field:name_hash}};
     using tag = ::apache::thrift::ident::{{field:cpp_name}};
-    static constexpr ::apache::thrift::field_id_t id = {{field:key}};
+    static constexpr ::apache::thrift::field_id_t id = {{field:id}};
     using type_class = {{#field:type}}{{type:type_class}}{{/field:type}};
     struct setter {
       template <typename... Args>

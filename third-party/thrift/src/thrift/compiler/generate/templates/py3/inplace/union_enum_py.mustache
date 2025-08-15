@@ -21,7 +21,7 @@ This is a template for creating compiled Enum and Flag pyx information
 }}
 class __{{struct:name}}Type(enum.Enum):
     {{#struct:fields}}
-    {{field:py_name}} = {{field:key}}
+    {{field:py_name}} = {{field:id}}
     {{/struct:fields}}
     {{! put EMPTY = 0 arm last to overwrite any other arms}}
     EMPTY = 0

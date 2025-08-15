@@ -36,7 +36,7 @@ FROZEN_EXCLUDE_TYPE({{struct:cpp_fullname}})
 {{^struct:union?}}
 FROZEN_TYPE({{struct:cpp_fullname}},{{!
 }}{{#struct:fields}}
-  FROZEN_FIELD{{> common/field_suffix}}({{field:cpp_name}}, {{field:key}}, {{#field:type}}{{field:cpp_storage_type}}{{/field:type}}){{!
+  FROZEN_FIELD{{> common/field_suffix}}({{field:cpp_name}}, {{field:id}}, {{#field:type}}{{field:cpp_storage_type}}{{/field:type}}){{!
 }}{{/struct:fields}}
   FROZEN_VIEW({{!
 }}{{#struct:fields}}
@@ -48,7 +48,7 @@ FROZEN_TYPE({{struct:cpp_fullname}},{{!
 }}{{/struct:fields}})
   FROZEN_LOAD_INLINE({{!
 }}{{#struct:fields}}
-    FROZEN_LOAD_FIELD({{field:cpp_name}}, {{field:key}}){{!
+    FROZEN_LOAD_FIELD({{field:cpp_name}}, {{field:id}}){{!
 }}{{/struct:fields}}));
 {{/struct:union?}}
 {{#struct:union?}}
@@ -56,7 +56,7 @@ FROZEN_TYPE({{struct:cpp_fullname}},{{!
 }}
   FROZEN_FIELD(fbthrift_type_, 0, {{struct:cpp_fullname}}::Type){{!
 }}{{#struct:fields}}
-  FROZEN_FIELD{{> common/frozen2_union_field_suffix}}({{field:cpp_name}}, {{field:key}}, {{#field:type}}{{field:cpp_storage_type}}{{/field:type}}){{!
+  FROZEN_FIELD{{> common/frozen2_union_field_suffix}}({{field:cpp_name}}, {{field:id}}, {{#field:type}}{{field:cpp_storage_type}}{{/field:type}}){{!
 }}{{/struct:fields}}
 {{> module_layouts_h/frozen_view_union}}
   FROZEN_SAVE_INLINE({{!
@@ -69,7 +69,7 @@ FROZEN_TYPE({{struct:cpp_fullname}},{{!
 }}
     FROZEN_LOAD_FIELD(fbthrift_type_, 0){{!
 }}{{#struct:fields}}
-    FROZEN_LOAD_FIELD({{field:cpp_name}}, {{field:key}}){{!
+    FROZEN_LOAD_FIELD({{field:cpp_name}}, {{field:id}}){{!
 }}{{/struct:fields}}));
 {{/struct:union?}}
 

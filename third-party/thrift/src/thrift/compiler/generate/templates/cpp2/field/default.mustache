@@ -17,7 +17,7 @@
   // The default value for a field.
   // TODO(afuller): Merge with other impls and move to a shared location.
 }}{{#field:cpp_first_adapter}}{{!
-  }}::apache::thrift::adapt_detail::fromThriftField<{{field:cpp_first_adapter}}, {{field:key}}>({{!
+  }}::apache::thrift::adapt_detail::fromThriftField<{{field:cpp_first_adapter}}, {{field:id}}>({{!
 }}{{^field:cpp_exactly_one_adapter?}}{{> types/adapter_pre}}{{/field:cpp_exactly_one_adapter?}}{{!
 }}{{#field:cpp_exactly_one_adapter?}}{{field:cpp_standard_type}}({{/field:cpp_exactly_one_adapter?}}{{!
 }}{{/field:cpp_first_adapter}}{{!

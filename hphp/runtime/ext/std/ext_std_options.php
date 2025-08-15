@@ -425,6 +425,14 @@ function tc_usage(): dict<string, shape(
   "global" => bool
 )>;
 
+<<__Native>>
+function get_active_worker_counts(): shape(
+  "pagelet_workers" => int,
+  "xbox_workers" => int,
+  "http_workers" => int,
+  "cli_workers" => int,
+);
+
 
 } // root namespace
 

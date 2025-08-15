@@ -48,6 +48,9 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/server/cli-server.h"
+#include "hphp/runtime/server/pagelet-server.h"
+#include "hphp/runtime/server/xbox-server.h"
+#include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/util/rds-local.h"
@@ -66,6 +69,10 @@ const StaticString s_used_persistent_bytes("used_persistent_bytes");
 const StaticString s_used("used");
 const StaticString s_capacity("capacity");
 const StaticString s_global("global");
+const StaticString s_pagelet_workers("pagelet_workers");
+const StaticString s_xbox_workers("xbox_workers");
+const StaticString s_http_workers("http_workers");
+const StaticString s_cli_workers("cli_workers");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1091,6 +1098,24 @@ Array HHVM_FUNCTION(tc_usage) {
   return dict;
 }
 
+Array HHVM_FUNCTION(get_active_worker_counts) {
+  DictInit result(4);
+  
+  result.set(s_pagelet_workers, PageletServer::GetActiveWorker());
+  result.set(s_xbox_workers, XboxServer::GetActiveWorkers());
+  
+  auto httpServer = HttpServer::Server;
+  if (httpServer && httpServer->getPageServer()) {
+    result.set(s_http_workers, httpServer->getPageServer()->getActiveWorker());
+  } else {
+    result.set(s_http_workers, 0);
+  }
+  
+  result.set(s_cli_workers, cli_server_active_workers());
+  
+  return result.toArray();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void StandardExtension::registerNativeOptions() {
@@ -1144,6 +1169,7 @@ void StandardExtension::registerNativeOptions() {
   HHVM_FE(sys_get_temp_dir);
   HHVM_FE(version_compare);
   HHVM_FE(tc_usage);
+  HHVM_FE(get_active_worker_counts);
   HHVM_NAMED_FE_STR("rds_bytes", HHVM_FN(rds_bytes), nativeFuncs());
 
 #ifdef CLOCK_REALTIME

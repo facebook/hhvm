@@ -632,6 +632,16 @@ class virtual_machine {
                 }
                 return whisker::make::false_;
               },
+              [&](function_call::builtin_ternary) -> object {
+                // enforced by the parser
+                assert(func.positional_arguments.size() == 3);
+                assert(func.named_arguments.empty());
+                const ast::expression& result =
+                    evaluate_as_bool(func.positional_arguments[0])
+                    ? func.positional_arguments[1]
+                    : func.positional_arguments[2];
+                return evaluate(result);
+              },
               [&](const function_call::user_defined& user_defined) -> object {
                 const ast::variable_lookup& name = user_defined.name;
                 lookup_result lookup = lookup_variable(name);

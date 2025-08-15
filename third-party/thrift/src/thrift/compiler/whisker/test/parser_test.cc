@@ -1063,6 +1063,16 @@ TEST_F(ParserTest, function_call_named_args_for_builtins) {
             path_to_file(3),
             1)));
   }
+  {
+    parse_ast_should_fail("{{ (if foo bar baz ignore=1234) }}");
+    EXPECT_THAT(
+        diagnostics,
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "named arguments not allowed for function 'if'",
+            path_to_file(4),
+            1)));
+  }
 }
 
 TEST_F(ParserTest, partial_block_basic) {
@@ -1544,6 +1554,16 @@ TEST_F(ParserTest, let_statement) {
       "╰─ let-statement <line:1:1, col:32>\n"
       "   ├─ identifier 'foo'\n"
       "   ╰─ expression <line:1:14, col:30> '(not true_value)'\n");
+}
+
+TEST_F(ParserTest, let_statement_builtin_ternary) {
+  auto ast = parse_ast("{{#let foo = (if cond true_value false_value)}}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "╰─ let-statement <line:1:1, col:48>\n"
+      "   ├─ identifier 'foo'\n"
+      "   ╰─ expression <line:1:14, col:46> '(if cond true_value false_value)'\n");
 }
 
 TEST_F(ParserTest, let_statement_export) {

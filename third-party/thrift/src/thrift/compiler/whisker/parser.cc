@@ -1253,6 +1253,8 @@ class parser {
       func.which = function_call::builtin_and{};
     } else if (try_consume_token(&scan, tok::kw_or)) {
       func.which = function_call::builtin_or{};
+    } else if (try_consume_token(&scan, tok::kw_if)) {
+      func.which = function_call::builtin_ternary{};
     } else if (parse_result lookup = parse_variable_lookup(scan)) {
       func.which = function_call::user_defined{
           std::move(lookup).consume_and_advance(&scan)};
@@ -1339,6 +1341,14 @@ class parser {
             report_fatal_error(
                 scan,
                 "expected 1 argument for function 'not' but found {}",
+                func.positional_arguments.size());
+          }
+        },
+        [&](const function_call::builtin_ternary&) {
+          if (func.positional_arguments.size() != 3) {
+            report_fatal_error(
+                scan,
+                "expected 3 argument for function 'if' but found {}",
                 func.positional_arguments.size());
           }
         },

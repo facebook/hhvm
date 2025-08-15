@@ -122,6 +122,7 @@ std::string expression::function_call::name() const {
       [](function_call::builtin_not) -> std::string { return "not"; },
       [](function_call::builtin_and) -> std::string { return "and"; },
       [](function_call::builtin_or) -> std::string { return "or"; },
+      [](function_call::builtin_ternary) -> std::string { return "if"; },
       [](const function_call::user_defined& f) -> std::string {
         return f.name.chain_string();
       });

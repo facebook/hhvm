@@ -296,6 +296,17 @@ struct expression {
     };
 
     /**
+     * The `(if cond true_val false_val)` ternary function.
+     */
+    struct builtin_ternary : builtin {
+      // Remove in C++20 which introduces comparison operator synthesis
+      friend bool operator==(const builtin_ternary&, const builtin_ternary&) {
+        return true;
+      }
+      WHISKER_DEFINE_OPERATOR_INEQUALITY(builtin_ternary)
+    };
+
+    /**
      * A user-defined function call whose name is variable (chain of
      * identifiers).
      *
@@ -312,7 +323,13 @@ struct expression {
       WHISKER_DEFINE_OPERATOR_INEQUALITY(user_defined)
     };
 
-    std::variant<builtin_not, builtin_and, builtin_or, user_defined> which;
+    std::variant<
+        builtin_not,
+        builtin_and,
+        builtin_or,
+        builtin_ternary,
+        user_defined>
+        which;
 
     /**
      * Unnamed arguments that are identified by their ordering in the function

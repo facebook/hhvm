@@ -657,6 +657,38 @@ TEST_F(RenderTest, and_or_short_circuit) {
   }
 }
 
+TEST_F(RenderTest, builtin_ternary) {
+  {
+    auto result =
+        render("{{(if cond? \"Yes\" \"No\")}}", w::map({{"cond?", w::true_}}));
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(*result, "Yes");
+  }
+  {
+    auto result =
+        render("{{(if cond? \"Yes\" \"No\")}}", w::map({{"cond?", w::false_}}));
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(*result, "No");
+  }
+}
+
+TEST_F(RenderTest, builtin_ternary_short_circuit) {
+  {
+    auto result = render(
+        "{{(if cond? \"Yes\" intentionally_undefined)}}",
+        w::map({{"cond?", w::true_}}));
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(*result, "Yes");
+  }
+  {
+    auto result = render(
+        "{{(if cond? intentionally_undefined \"No\")}}",
+        w::map({{"cond?", w::false_}}));
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(*result, "No");
+  }
+}
+
 namespace {
 namespace functions {
 

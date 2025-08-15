@@ -110,7 +110,7 @@
                          { Typing_defs_flags.FunParam.accept_disposable =
                            false; inout = false; is_optional = false;
                            readonly = true; ignore_readonly_error = false;
-                           splat = false };
+                           splat = false; named = false };
                          fp_def_value = None }
                         ];
                       ft_implicit_params =
@@ -161,7 +161,8 @@
                     fp_flags =
                     { Typing_defs_flags.FunParam.accept_disposable = false;
                       inout = false; is_optional = false; readonly = false;
-                      ignore_readonly_error = false; splat = false };
+                      ignore_readonly_error = false; splat = false;
+                      named = false };
                     fp_def_value = None }
                    ];
                  ft_implicit_params =

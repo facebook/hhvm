@@ -12,7 +12,7 @@
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([4:21-24], (Hprim Tint)))); 
             param_pos = [4:25-27]; param_name = "$i"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 

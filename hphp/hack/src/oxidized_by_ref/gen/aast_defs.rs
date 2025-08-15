@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9abd3e55465a7a73c595609d3f5149a5>>
+// @generated SignedSource<<05c47d7547be05de70f889a00bf7273f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1829,6 +1829,8 @@ pub struct FunParam<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub callconv: ast_defs::ParamKind<'a>,
+    #[rust_to_ocaml(attr = "transform.opaque")]
+    pub named: Option<oxidized::ast_defs::ParamNamed>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub user_attributes: &'a UserAttributes<'a, Ex, En>,
     #[rust_to_ocaml(attr = "transform.opaque")]
@@ -3195,6 +3197,7 @@ pub struct HfParamInfo<'a> {
     pub optional: Option<oxidized::ast_defs::OptionalKind>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub splat: Option<&'a oxidized::ast_defs::SplatKind>,
+    pub named: Option<oxidized::ast_defs::ParamNamed>,
 }
 impl<'a> TrivialDrop for HfParamInfo<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(HfParamInfo<'arena>);

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7d5efd324483d5bc1630380a7d1ec7c2>>
+// @generated SignedSource<<c911c5d1bf51113584ee18d3c8cafb49>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1276,6 +1276,7 @@ impl<P: Params> Node<P> for FunParam<P::Ex, P::En> {
         self.readonly.accept(c, v)?;
         self.splat.accept(c, v)?;
         self.callconv.accept(c, v)?;
+        self.named.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
         self.visibility.accept(c, v)
     }
@@ -1407,7 +1408,8 @@ impl<P: Params> Node<P> for HfParamInfo {
         self.kind.accept(c, v)?;
         self.readonlyness.accept(c, v)?;
         self.optional.accept(c, v)?;
-        self.splat.accept(c, v)
+        self.splat.accept(c, v)?;
+        self.named.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for Hint {
@@ -1790,6 +1792,24 @@ impl<P: Params> Node<P> for ParamKind {
         match self {
             ParamKind::Pinout(a0) => a0.accept(c, v),
             ParamKind::Pnormal => Ok(()),
+        }
+    }
+}
+impl<P: Params> Node<P> for ParamNamed {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_param_named(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            ParamNamed::ParamNamed => Ok(()),
         }
     }
 }

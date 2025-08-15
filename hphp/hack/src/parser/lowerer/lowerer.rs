@@ -753,6 +753,7 @@ fn p_closure_parameter<'a>(
                 readonlyness,
                 optional,
                 splat,
+                named: None, // todo(named_parameters)
             });
             let hint = p_hint(&c.type_, env)?;
             Ok((hint, info))
@@ -1908,6 +1909,7 @@ fn p_lambda_expression<'a>(
                     callconv: ast::ParamKind::Pnormal,
                     readonly: None,
                     splat: None,
+                    named: None,
                     user_attributes: Default::default(),
                     visibility: None,
                 }],
@@ -4104,6 +4106,13 @@ fn p_readonly<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ReadonlyKind> {
     }
 }
 
+fn p_named<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ParamNamed> {
+    match token_kind(node) {
+        Some(TK::Named) => Ok(ast::ParamNamed::ParamNamed),
+        _ => missing_syntax("named", node, env),
+    }
+}
+
 fn p_splat<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::SplatKind> {
     match token_kind(node) {
         Some(TK::DotDotDot) => Ok(ast::SplatKind::Splat),
@@ -4129,6 +4138,7 @@ fn param_template<'a>(node: S<'a>, env: &Env<'_>) -> ast::FunParam {
         callconv: ast::ParamKind::Pnormal,
         readonly: None,
         splat: None,
+        named: None,
         user_attributes: Default::default(),
         visibility: None,
     }
@@ -4141,7 +4151,7 @@ fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam> {
             visibility,
             optional,
             call_convention,
-            named: _, // TODO(named_parameters): use
+            named,
             readonly,
             pre_ellipsis,
             type_,
@@ -4202,6 +4212,7 @@ fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam> {
                 callconv,
                 readonly: map_optional(readonly, env, p_readonly)?,
                 splat,
+                named: map_optional(named, env, p_named)?,
                 /* implicit field via constructor parameter.
                  * This is always None except for constructors and the modifier
                  * can be only Public or Protected or Private.

@@ -12,7 +12,7 @@
            param_type_hint = ((Pair<string, int>), (Some ([3:30-46], (Happly (([3:30-34], "\\HH\\Pair"), [([3:35-41], (Hprim Tstring)); ([3:42-45], (Hprim Tint))]))))); 
            param_pos = [3:47-49]; param_name = "$x"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None }
+           param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
@@ -45,7 +45,7 @@
             param_type_hint = ((KeyedContainer<string, int>), (Some ([8:40-66], (Happly (([8:40-54], "\\HH\\KeyedContainer"), [([8:55-61], (Hprim Tstring)); ([8:62-65], (Hprim Tint))])))));
             param_pos = [8:67-69]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
@@ -79,7 +79,7 @@
             param_type_hint = ((AnyArray<string, int>), (Some ([13:34-54], (Happly (([13:34-42], "\\HH\\AnyArray"), [([13:43-49], (Hprim Tstring)); ([13:50-53], (Hprim Tint))])))));
             param_pos = [13:55-57]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =

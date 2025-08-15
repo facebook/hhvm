@@ -718,6 +718,8 @@ pub struct FunParamDecl {
     kind: ParamMode,
     optional: bool,
     readonly: bool,
+    #[allow(dead_code)] // TODO(named_parameters): use
+    named: bool,
     hint: Node,
     pos: Pos,
     name: Option<String>,
@@ -1963,6 +1965,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                             kind,
                             optional,
                             readonly,
+                            named,
                             hint,
                             pos,
                             name,
@@ -2051,6 +2054,9 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                             }
                             if splat {
                                 flags |= FunParamFlags::SPLAT
+                            }
+                            if named {
+                                flags |= FunParamFlags::NAMED
                             }
                             match kind {
                                 ParamMode::FPinout => {
@@ -3871,7 +3877,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         visibility: Self::Output,
         optional: Self::Output,
         inout: Self::Output,
-        _named: Self::Output, // TODO(named_parameters): use
+        named: Self::Output,
         readonly: Self::Output,
         pre_ellipsis: Self::Output,
         hint: Self::Output,
@@ -3896,6 +3902,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             ParamMode::FPnormal
         };
         let is_readonly = readonly.is_token(TokenKind::Readonly);
+        let is_named = named.is_token(TokenKind::Named);
         let hint = if self.opts.interpret_soft_types_as_like_types {
             let attributes = self.to_attributes(&attributes);
             if attributes.soft {
@@ -3916,6 +3923,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             kind,
             optional: optional.is_present() || initializer.is_present(),
             readonly: is_readonly,
+            named: is_named,
             hint,
             pos,
             name,
@@ -6074,6 +6082,8 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             hint,
             optional: optional.is_token(TokenKind::Optional),
             readonly: readonly.is_token(TokenKind::Readonly),
+            // TODO(named_parameters): Support named parameters in closure type signatures
+            named: false,
             pos,
             name: Some("".into()),
             variadic: ellipsis.is_token(TokenKind::DotDotDot),

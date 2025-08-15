@@ -14,7 +14,7 @@
             param_type_hint = ((KeyedTraversable<int, int>), (Some ([4:21-47], (Happly (([4:21-37], "\\HH\\KeyedTraversable"), [([4:38-41], (Hprim Tint)); ([4:43-46], (Hprim Tint))])))));
             param_pos = [4:48-50]; param_name = "$o"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -43,7 +43,7 @@
             param_type_hint = ((KeyedTraversable<int, int>), (Some ([7:12-38], (Happly (([7:12-28], "\\HH\\KeyedTraversable"), [([7:29-32], (Hprim Tint)); ([7:34-37], (Hprim Tint))])))));
             param_pos = [7:39-41]; param_name = "$o"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-11], "__SupportDynamicType"); ua_params = [] }]; 
@@ -64,12 +64,12 @@
             param_type_hint = ((KeyedTraversable<string, int>), (Some ([10:3-32], (Happly (([10:3-19], "\\HH\\KeyedTraversable"), [([10:20-26], (Hprim Tstring)); ([10:28-31], (Hprim Tint))])))));
             param_pos = [10:33-36]; param_name = "$o1"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None };
+            param_named = None; param_user_attributes = []; param_visibility = None };
            { param_annotation = (KeyedTraversable<int, string>);
              param_type_hint = ((KeyedTraversable<int, string>), (Some ([11:3-32], (Happly (([11:3-19], "\\HH\\KeyedTraversable"), [([11:20-23], (Hprim Tint)); ([11:25-31], (Hprim Tstring))])))));
              param_pos = [11:33-36]; param_name = "$o2"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-             param_user_attributes = []; param_visibility = None }
+             param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
@@ -153,12 +153,12 @@
             param_type_hint = ((KeyedTraversable<string, int>), (Some ([27:3-32], (Happly (([27:3-19], "\\HH\\KeyedTraversable"), [([27:20-26], (Hprim Tstring)); ([27:28-31], (Hprim Tint))])))));
             param_pos = [27:33-36]; param_name = "$o1"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None };
+            param_named = None; param_user_attributes = []; param_visibility = None };
            { param_annotation = (KeyedTraversable<int, string>);
              param_type_hint = ((KeyedTraversable<int, string>), (Some ([28:3-32], (Happly (([28:3-19], "\\HH\\KeyedTraversable"), [([28:20-23], (Hprim Tint)); ([28:25-31], (Hprim Tstring))])))));
              param_pos = [28:33-36]; param_name = "$o2"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-             param_user_attributes = []; param_visibility = None }
+             param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
@@ -259,7 +259,7 @@
           [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([4:21-47], (Happly (([4:21-37], "\\HH\\KeyedTraversable"), [([4:38-41], (Hprim Tint)); ([4:43-46], (Hprim Tint))])))));
              param_pos = [4:48-50]; param_name = "$o"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-             param_user_attributes = []; param_visibility = None }
+             param_named = None; param_user_attributes = []; param_visibility = None }
             ];
           m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -287,7 +287,7 @@
          [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([7:12-38], (Happly (([7:12-28], "\\HH\\KeyedTraversable"), [([7:29-32], (Hprim Tint)); ([7:34-37], (Hprim Tint))])))));
             param_pos = [7:39-41]; param_name = "$o"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-11], "__SupportDynamicType"); ua_params = [] }]; 
@@ -308,12 +308,12 @@
             param_type_hint = ((dynamic), (Some ([27:3-32], (Happly (([27:3-19], "\\HH\\KeyedTraversable"), [([27:20-26], (Hprim Tstring)); ([27:28-31], (Hprim Tint))]))))); 
             param_pos = [27:33-36]; param_name = "$o1"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None };
+            param_named = None; param_user_attributes = []; param_visibility = None };
            { param_annotation = (dynamic);
              param_type_hint = ((dynamic), (Some ([28:3-32], (Happly (([28:3-19], "\\HH\\KeyedTraversable"), [([28:20-23], (Hprim Tint)); ([28:25-31], (Hprim Tstring))]))))); 
              param_pos = [28:33-36]; param_name = "$o2"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-             param_user_attributes = []; param_visibility = None }
+             param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =

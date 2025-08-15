@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c8dd49cadfe65563c7c5e296accfbd53>>
+// @generated SignedSource<<c933a36bb30288e0763b9fcdd34dbcaa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -130,6 +130,7 @@ arena_deserializer::impl_deserialize_in_arena!(ParamKind<'arena>);
 pub use oxidized::ast_defs::FunKind;
 pub use oxidized::ast_defs::OgNullFlavor;
 pub use oxidized::ast_defs::OptionalKind;
+pub use oxidized::ast_defs::ParamNamed;
 pub use oxidized::ast_defs::PropOrMethod;
 pub use oxidized::ast_defs::ReadonlyKind;
 pub use oxidized::ast_defs::SplatKind;

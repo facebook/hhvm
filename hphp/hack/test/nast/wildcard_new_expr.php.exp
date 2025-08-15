@@ -11,7 +11,7 @@
         [{ param_annotation = (); param_type_hint = ((), (Some ([3:26-42], (Happly (([3:26-37], "\\HH\\Traversable"), [([3:38-41], (Hprim Tint))]))))); 
            param_pos = [3:43-46]; param_name = "$xs"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None }
+           param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
@@ -40,7 +40,7 @@
          [{ param_annotation = (); param_type_hint = ((), (Some ([7:23-50], (Happly (([7:23-39], "\\HH\\KeyedTraversable"), [([7:40-43], (Hprim Tint)); ([7:45-49], (Hprim Tbool))])))));
             param_pos = [7:51-54]; param_name = "$xs"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =

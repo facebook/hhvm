@@ -11,6 +11,7 @@ aast_defs::NsKind
 aast_defs::OgNullFlavor
 aast_defs::OptionalKind
 aast_defs::ParamMutability
+aast_defs::ParamNamed
 aast_defs::PropOrMethod
 aast_defs::ReadonlyKind
 aast_defs::ReifyKind
@@ -36,6 +37,7 @@ aast::NsKind
 aast::OgNullFlavor
 aast::OptionalKind
 aast::ParamMutability
+aast::ParamNamed
 aast::PropOrMethod
 aast::ReadonlyKind
 aast::ReifyKind
@@ -55,6 +57,7 @@ ast_defs::ConstraintKind
 ast_defs::FunKind
 ast_defs::OgNullFlavor
 ast_defs::OptionalKind
+ast_defs::ParamNamed
 ast_defs::PropOrMethod
 ast_defs::ReadonlyKind
 ast_defs::ReifyKind

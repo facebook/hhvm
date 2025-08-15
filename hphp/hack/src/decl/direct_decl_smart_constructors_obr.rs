@@ -787,6 +787,8 @@ pub struct FunParamDecl<'a> {
     kind: ParamMode,
     optional: bool,
     readonly: bool,
+    #[allow(dead_code)] // TODO(named_parameters): use
+    named: bool,
     hint: Node<'a>,
     pos: &'a Pos<'a>,
     name: Option<&'a str>,
@@ -2104,6 +2106,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                             kind,
                             optional,
                             readonly,
+                            named,
                             hint,
                             pos,
                             name,
@@ -2183,6 +2186,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                             }
                             if splat {
                                 flags |= FunParamFlags::SPLAT
+                            }
+                            if named {
+                                flags |= FunParamFlags::NAMED
                             }
                             match kind {
                                 ParamMode::FPinout => {
@@ -4073,7 +4079,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         visibility: Self::Output,
         optional: Self::Output,
         inout: Self::Output,
-        _named: Self::Output,
+        named: Self::Output,
         readonly: Self::Output,
         pre_ellipsis: Self::Output,
         hint: Self::Output,
@@ -4098,6 +4104,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             ParamMode::FPnormal
         };
         let is_readonly = readonly.is_token(TokenKind::Readonly);
+        let is_named = named.is_token(TokenKind::Named);
         let hint = if self.opts.interpret_soft_types_as_like_types {
             let attributes = self.to_attributes(attributes);
             if attributes.soft {
@@ -4117,6 +4124,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             kind,
             optional: optional.is_present() || initializer.is_present(),
             readonly: is_readonly,
+            named: is_named,
             hint,
             pos,
             name,
@@ -6271,6 +6279,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             hint,
             optional: optional.is_token(TokenKind::Optional),
             readonly: readonly.is_token(TokenKind::Readonly),
+            // TODO(named_parameters): Support named parameters in closure type signatures
+            named: false,
             pos: self.get_pos(hint),
             name: Some(""),
             variadic: ellipsis.is_token(TokenKind::DotDotDot),

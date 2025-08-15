@@ -735,6 +735,7 @@ pub fn make_fn_param(pos: Pos, lid: &LocalId, is_variadic: bool, is_inout: bool)
         },
         readonly: None, // TODO
         splat: None,    // TODO
+        named: None,    // TODO(named_params): implement named parameter support
         user_attributes: Default::default(),
         visibility: None,
     }

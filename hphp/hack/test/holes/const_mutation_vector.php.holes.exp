@@ -11,7 +11,7 @@
         [{ param_annotation = (ImmVector<int>); param_type_hint = ((ImmVector<int>), (Some ([3:35-49], (Happly (([3:35-44], "\\HH\\ImmVector"), [([3:45-48], (Hprim Tint))])))));
            param_pos = [3:50-52]; param_name = "$x"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None }
+           param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
@@ -42,7 +42,7 @@
          [{ param_annotation = (ConstVector<int>); param_type_hint = ((ConstVector<int>), (Some ([8:37-53], (Happly (([8:37-48], "\\ConstVector"), [([8:49-52], (Hprim Tint))])))));
             param_pos = [8:54-56]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =

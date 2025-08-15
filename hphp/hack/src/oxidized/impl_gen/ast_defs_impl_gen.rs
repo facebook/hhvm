@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5053e3699ef9d9bb0b338511fa773c37>>
+// @generated SignedSource<<808b76f1cdd7a4a4f73b31ba06758db5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -297,6 +297,14 @@ impl ReadonlyKind {
         ReadonlyKind::Readonly
     }
     pub fn is_readonly(&self) -> bool {
+        true
+    }
+}
+impl ParamNamed {
+    pub fn mk_param_named() -> Self {
+        ParamNamed::ParamNamed
+    }
+    pub fn is_param_named(&self) -> bool {
         true
     }
 }

@@ -13,7 +13,7 @@
            (((bool | Vector<string>)), (Some ([3:42-65], (Hunion [([3:43-47], (Hprim Tbool)); ([3:50-64], (Happly (([3:50-56], "\\HH\\Vector"), [([3:57-63], (Hprim Tstring))])))]))));
            param_pos = [3:66-69]; param_name = "$xs"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None }
+           param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
@@ -46,7 +46,7 @@
             param_type_hint = (((bool | vec<string>)), (Some ([9:39-59], (Hunion [([9:40-44], (Hprim Tbool)); ([9:47-58], (Happly (([9:47-50], "\\HH\\vec"), [([9:51-57], (Hprim Tstring))])))]))));
             param_pos = [9:60-63]; param_name = "$xs"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =

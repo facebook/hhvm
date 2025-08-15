@@ -39,6 +39,7 @@ bitflags! {
         const READONLY               = 1 << 8;
         const IGNORE_READONLY_ERROR  = 1 << 3;
         const SPLAT                  = 1 << 9;
+        const NAMED                  = 1 << 4;
     }
 }
 
@@ -373,6 +374,9 @@ impl FunParamFlags {
     }
     pub fn is_splat(&self) -> bool {
         self.contains(Self::SPLAT)
+    }
+    pub fn is_named(&self) -> bool {
+        self.contains(Self::NAMED)
     }
 }
 

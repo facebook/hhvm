@@ -386,6 +386,7 @@ module Full = struct
       readonly;
       ignore_readonly_error = _;
       splat;
+      named;
     } =
       Typing_defs_flags.FunParam.as_record fp_flags
     in
@@ -406,6 +407,10 @@ module Full = struct
         [
           (if verbose && accept_disposable then
             text "<<__AcceptDisposable>>" ^^ Space
+          else
+            Nothing);
+          (if named then
+            text "named" ^^ Space
           else
             Nothing);
           (if is_optional then

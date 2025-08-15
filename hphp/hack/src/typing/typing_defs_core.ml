@@ -552,7 +552,8 @@ module Flags = struct
       ~is_optional
       ~readonly
       ~ignore_readonly_error
-      ~splat =
+      ~splat
+      ~named =
     let inout =
       match mode with
       | FPinout -> true
@@ -565,6 +566,7 @@ module Flags = struct
       ~readonly
       ~ignore_readonly_error
       ~splat
+      ~named
 
   let get_fp_accept_disposable fp = FunParam.accept_disposable fp.fp_flags
 

@@ -35,14 +35,16 @@
                    fp_flags =
                    { Typing_defs_flags.FunParam.accept_disposable = false;
                      inout = false; is_optional = false; readonly = false;
-                     ignore_readonly_error = false; splat = false };
+                     ignore_readonly_error = false; splat = false;
+                     named = false };
                    fp_def_value = None };
                   { fp_pos = [4:35-37]; fp_name = (Some "$c");
                     fp_type = (Rhint ([4:32-34]), (Tgeneric "Tc"));
                     fp_flags =
                     { Typing_defs_flags.FunParam.accept_disposable = false;
                       inout = false; is_optional = false; readonly = false;
-                      ignore_readonly_error = false; splat = false };
+                      ignore_readonly_error = false; splat = false;
+                      named = false };
                     fp_def_value = None }
                   ];
                 ft_implicit_params = { capability = (CapDefaults [4:19-20]) };
@@ -84,14 +86,16 @@
                     fp_flags =
                     { Typing_defs_flags.FunParam.accept_disposable = false;
                       inout = false; is_optional = false; readonly = false;
-                      ignore_readonly_error = false; splat = false };
+                      ignore_readonly_error = false; splat = false;
+                      named = false };
                     fp_def_value = None };
                    { fp_pos = [8:35-37]; fp_name = (Some "$d");
                      fp_type = (Rhint ([8:32-34]), (Tgeneric "Td"));
                      fp_flags =
                      { Typing_defs_flags.FunParam.accept_disposable = false;
                        inout = false; is_optional = false; readonly = false;
-                       ignore_readonly_error = false; splat = false };
+                       ignore_readonly_error = false; splat = false;
+                       named = false };
                      fp_def_value = None }
                    ];
                  ft_implicit_params =

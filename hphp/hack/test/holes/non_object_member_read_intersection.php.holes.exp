@@ -11,7 +11,7 @@
         [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:53-69], (Hintersection [([3:54-57], (Hprim Tint)); ([3:60-68], (Hprim Tarraykey))])))); 
            param_pos = [3:70-73]; param_name = "$xs"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None }
+           param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =

@@ -1,7 +1,7 @@
 oxidized direct decl parser does not match oxidized_by_ref DDP:
 --- oxidized
 +++ oxidized_by_ref
-@@ -1,21 +1,50 @@
+@@ -1,21 +1,51 @@
 -[("\\f",
 +[("\\g",
    (Shallow_decl_defs.Fun
@@ -21,7 +21,8 @@ oxidized direct decl parser does not match oxidized_by_ref DDP:
 +                fp_flags =
 +                { Typing_defs_flags.FunParam.accept_disposable = false;
 +                  inout = false; is_optional = false; readonly = false;
-+                  ignore_readonly_error = false; splat = false };
++                  ignore_readonly_error = false; splat = false; named = false
++                  };
 +                fp_def_value = None }
 +               ];
 +             ft_implicit_params = { capability = (CapDefaults [13:12-13]) };

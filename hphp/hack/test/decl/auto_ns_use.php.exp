@@ -50,14 +50,16 @@
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; is_optional = false; readonly = false;
-                   ignore_readonly_error = false; splat = false };
+                   ignore_readonly_error = false; splat = false;
+                   named = false };
                  fp_def_value = None };
                 { fp_pos = [12:50-52]; fp_name = (Some "$k");
                   fp_type = (Rhint ([12:41-49]), (Tprim Tarraykey));
                   fp_flags =
                   { Typing_defs_flags.FunParam.accept_disposable = false;
                     inout = false; is_optional = false; readonly = false;
-                    ignore_readonly_error = false; splat = false };
+                    ignore_readonly_error = false; splat = false;
+                    named = false };
                   fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [12:12-21]) };

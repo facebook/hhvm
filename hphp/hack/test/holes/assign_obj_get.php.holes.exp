@@ -32,7 +32,7 @@
          [{ param_annotation = (C); param_type_hint = ((C), (Some ([7:28-29], (Happly (([7:28-29], "\\C"), []))))); 
             param_pos = [7:30-32]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =

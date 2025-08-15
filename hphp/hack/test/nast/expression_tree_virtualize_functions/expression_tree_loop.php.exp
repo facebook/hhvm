@@ -179,6 +179,7 @@
                                                                    param_readonly = None; 
                                                                    param_splat = None; 
                                                                    param_callconv = Pnormal; 
+                                                                   param_named = None; 
                                                                    param_user_attributes = []; 
                                                                    param_visibility = None }
                                                                   ];

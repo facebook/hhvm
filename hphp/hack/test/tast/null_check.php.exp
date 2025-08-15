@@ -14,7 +14,7 @@ A value of type `null` can never be equal to a value of type `int`
         [{ param_annotation = (?int); param_type_hint = ((?int), (Some ([3:12-16], (Hoption ([3:13-16], (Hprim Tint)))))); 
            param_pos = [3:17-19]; param_name = "$x"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None }
+           param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =

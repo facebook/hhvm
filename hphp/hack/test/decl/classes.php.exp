@@ -153,14 +153,16 @@
                     fp_flags =
                     { Typing_defs_flags.FunParam.accept_disposable = false;
                       inout = false; is_optional = false; readonly = false;
-                      ignore_readonly_error = false; splat = false };
+                      ignore_readonly_error = false; splat = false;
+                      named = false };
                     fp_def_value = None };
                    { fp_pos = [16:9-14]; fp_name = (Some "$arg2");
                      fp_type = (Rhint ([16:5-8]), (Tprim Tint));
                      fp_flags =
                      { Typing_defs_flags.FunParam.accept_disposable = false;
                        inout = false; is_optional = false; readonly = false;
-                       ignore_readonly_error = false; splat = false };
+                       ignore_readonly_error = false; splat = false;
+                       named = false };
                      fp_def_value = None }
                    ];
                  ft_implicit_params =
@@ -300,7 +302,7 @@
                          { Typing_defs_flags.FunParam.accept_disposable =
                            false; inout = false; is_optional = false;
                            readonly = false; ignore_readonly_error = false;
-                           splat = false };
+                           splat = false; named = false };
                          fp_def_value = None };
                         { fp_pos = [30:22-32]; fp_name = (Some "$protected");
                           fp_type = (Rhint ([30:15-21]), (Tprim Tstring));
@@ -308,7 +310,7 @@
                           { Typing_defs_flags.FunParam.accept_disposable =
                             false; inout = false; is_optional = false;
                             readonly = false; ignore_readonly_error = false;
-                            splat = false };
+                            splat = false; named = false };
                           fp_def_value = None };
                         { fp_pos = [31:19-26]; fp_name = (Some "$public");
                           fp_type = (Rhint ([31:12-18]), (Tprim Tstring));
@@ -316,7 +318,7 @@
                           { Typing_defs_flags.FunParam.accept_disposable =
                             false; inout = false; is_optional = false;
                             readonly = false; ignore_readonly_error = false;
-                            splat = false };
+                            splat = false; named = false };
                           fp_def_value = None };
                         { fp_pos = [32:19-30];
                           fp_name = (Some "$hasDefault");
@@ -325,7 +327,7 @@
                           { Typing_defs_flags.FunParam.accept_disposable =
                             false; inout = false; is_optional = true;
                             readonly = false; ignore_readonly_error = false;
-                            splat = false };
+                            splat = false; named = false };
                           fp_def_value = None }
                         ];
                       ft_implicit_params =

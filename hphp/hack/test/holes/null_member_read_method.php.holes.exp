@@ -11,7 +11,7 @@
         [{ param_annotation = (null); param_type_hint = ((null), (Some ([3:39-43], (Hprim Tnull)))); 
            param_pos = [3:44-47]; param_name = "$xs"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None }
+           param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
@@ -43,7 +43,7 @@
          [{ param_annotation = (?string); param_type_hint = ((?string), (Some ([8:43-50], (Hoption ([8:44-50], (Hprim Tstring)))))); 
             param_pos = [8:51-54]; param_name = "$xs"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
@@ -76,7 +76,7 @@
          [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([13:40-45], (Happly (([13:40-45], "\\HH\\supportdyn"), [([13:40-45], Hmixed)]))))); 
             param_pos = [13:46-49]; param_name = "$xs"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =

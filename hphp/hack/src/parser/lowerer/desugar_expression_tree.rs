@@ -220,6 +220,7 @@ pub fn desugar(
         callconv: ParamKind::Pnormal,
         readonly: None,
         splat: None,
+        named: None,
         user_attributes: Default::default(),
         visibility: None,
     };
@@ -2067,6 +2068,7 @@ fn immediately_invoked_lambda(
                 callconv: ParamKind::Pnormal,
                 readonly: None,
                 splat: None,
+                named: None,
                 user_attributes: Default::default(),
                 visibility: None,
             }

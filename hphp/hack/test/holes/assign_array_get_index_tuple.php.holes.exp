@@ -13,11 +13,11 @@
            (((string, int)), (Some ([3:39-52], (Htuple { tup_required = [([3:40-46], (Hprim Tstring)); ([3:48-51], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
            param_pos = [3:53-56]; param_name = "$xs"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None };
+           param_named = None; param_user_attributes = []; param_visibility = None };
           { param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:58-63], (Happly (([3:58-63], "\\HH\\supportdyn"), [([3:58-63], Hmixed)]))))); 
             param_pos = [3:64-68]; param_name = "$idx"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =

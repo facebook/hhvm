@@ -99,6 +99,7 @@ module FunParam : sig
     readonly: bool;  (** Parameter is marked readonly in function type *)
     ignore_readonly_error: bool;
     splat: bool;
+    named: bool;  (** Parameter is marked named in function type *)
   }
 
   val accept_disposable : t -> bool
@@ -113,6 +114,8 @@ module FunParam : sig
 
   val splat : t -> bool
 
+  val named : t -> bool
+
   val set_accept_disposable : bool -> t -> t
 
   val set_inout : bool -> t -> t
@@ -125,6 +128,8 @@ module FunParam : sig
 
   val set_splat : bool -> t -> t
 
+  val set_named : bool -> t -> t
+
   val make :
     inout:bool ->
     accept_disposable:bool ->
@@ -132,6 +137,7 @@ module FunParam : sig
     readonly:bool ->
     ignore_readonly_error:bool ->
     splat:bool ->
+    named:bool ->
     t
 
   val as_record : t -> record

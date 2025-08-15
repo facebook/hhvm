@@ -11,7 +11,7 @@
         [{ param_annotation = (?vec<int>); param_type_hint = ((?vec<int>), (Some ([4:27-36], (Hoption ([4:28-36], (Happly (([4:28-31], "\\HH\\vec"), [([4:32-35], (Hprim Tint))])))))));
            param_pos = [4:37-40]; param_name = "$xs"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None }
+           param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =

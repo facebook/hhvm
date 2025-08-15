@@ -31,7 +31,7 @@
          [{ param_annotation = (); param_type_hint = ((), (Some ([8:36-46], (Happly (([8:36-46], "\\StayClassy"), []))))); 
             param_pos = [8:47-49]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-35], "__SupportDynamicType"); ua_params = [] }]; 
@@ -51,7 +51,7 @@
          [{ param_annotation = (); param_type_hint = ((), (Some ([10:36-51], (Happly (([10:36-46], "\\StayClassy"), [([10:47-50], (Hprim Tint))]))))); 
             param_pos = [10:52-54]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([10:10-35], "__SupportDynamicType"); ua_params = [] }]; 
@@ -71,7 +71,7 @@
          [{ param_annotation = (); param_type_hint = ((), (Some ([12:36-56], (Happly (([12:36-46], "\\StayClassy"), [([12:47-50], (Hprim Tint)); ([12:51-55], (Hprim Tbool))])))));
             param_pos = [12:57-59]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([12:10-35], "__SupportDynamicType"); ua_params = [] }]; 
@@ -92,7 +92,7 @@
             param_type_hint = ((), (Some ([14:36-63], (Happly (([14:36-46], "\\StayClassy"), [([14:47-50], (Hprim Tint)); ([14:51-55], (Hprim Tbool)); ([14:56-62], (Hprim Tstring))])))));
             param_pos = [14:64-66]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([14:10-35], "__SupportDynamicType"); ua_params = [] }]; 

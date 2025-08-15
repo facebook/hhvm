@@ -526,6 +526,7 @@ module Flags : sig
     readonly:bool ->
     ignore_readonly_error:bool ->
     splat:bool ->
+    named:bool ->
     Typing_defs_flags.FunParam.t
 
   val get_fp_accept_disposable : 'a fun_param -> bool

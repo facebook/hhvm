@@ -75,6 +75,8 @@ and param_kind =
 
 and readonly_kind = Readonly [@@transform.opaque]
 
+and param_named = Param_named [@@transform.opaque]
+
 and optional_kind = Optional [@@transform.opaque]
 
 and splat_kind = Splat [@@transform.opaque]

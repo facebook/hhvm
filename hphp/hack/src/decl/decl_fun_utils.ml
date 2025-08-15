@@ -70,7 +70,8 @@ let make_param_ty env param =
         ~readonly:(Option.is_some param.param_readonly)
         ~ignore_readonly_error:
           (has_ignore_readonly_error_attribute param.param_user_attributes)
-        ~splat:(Option.is_some param.param_splat);
+        ~splat:(Option.is_some param.param_splat)
+        ~named:(Option.is_some param.param_named);
     fp_def_value = None;
   }
 

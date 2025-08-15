@@ -158,6 +158,7 @@ module FunParam = struct
     readonly: bool;
     ignore_readonly_error: bool;
     splat: bool;
+    named: bool;
   }
   [@@deriving show]
 
@@ -173,6 +174,8 @@ module FunParam = struct
 
   let splat_mask = 1 lsl 9
 
+  let named_mask = 1 lsl 4
+
   let accept_disposable = is_set accept_disposable_mask
 
   let inout = is_set inout_mask
@@ -184,6 +187,8 @@ module FunParam = struct
   let ignore_readonly_error = is_set ignore_readonly_error_mask
 
   let splat = is_set splat_mask
+
+  let named = is_set named_mask
 
   let set_accept_disposable = set_bit accept_disposable_mask
 
@@ -197,13 +202,16 @@ module FunParam = struct
 
   let set_splat = set_bit splat_mask
 
+  let set_named = set_bit named_mask
+
   let make
       ~inout
       ~accept_disposable
       ~is_optional
       ~readonly
       ~ignore_readonly_error
-      ~splat =
+      ~splat
+      ~named =
     0x0
     |> set_inout inout
     |> set_accept_disposable accept_disposable
@@ -211,6 +219,7 @@ module FunParam = struct
     |> set_readonly readonly
     |> set_ignore_readonly_error ignore_readonly_error
     |> set_splat splat
+    |> set_named named
 
   let as_record t =
     {
@@ -220,6 +229,7 @@ module FunParam = struct
       readonly = readonly t;
       ignore_readonly_error = ignore_readonly_error t;
       splat = splat t;
+      named = named t;
     }
 
   let default = 0
@@ -250,7 +260,7 @@ module ClassElt = struct
       | XaTagRequired
       | XaTagLateinit
       | ReadonlyPropOrNeedsConcrete
-          (** 
+          (**
        * for properties: indicates readonly-ness
        * for methods: indicates presence of <<__NeedsConcrete>> attribute
       *)

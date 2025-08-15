@@ -27,7 +27,8 @@ Errors:
                              param_pos = [15:8-10]; param_name = "$z"; 
                              param_info = Param_required; param_readonly = None; 
                              param_splat = None; param_callconv = Pnormal; 
-                             param_user_attributes = []; param_visibility = None }
+                             param_named = None; param_user_attributes = []; 
+                             param_visibility = None }
                             ];
                           f_ctxs = None; f_unsafe_ctxs = None;
                           f_body =
@@ -61,7 +62,8 @@ Errors:
                                param_pos = [18:17-19]; param_name = "$z"; 
                                param_info = Param_required; param_readonly = None; 
                                param_splat = None; param_callconv = Pnormal; 
-                               param_user_attributes = []; param_visibility = None }
+                               param_named = None; param_user_attributes = []; 
+                               param_visibility = None }
                               ];
                             f_ctxs = None; f_unsafe_ctxs = None;
                             f_body =
@@ -95,12 +97,14 @@ Errors:
                              param_pos = [23:9-11]; param_name = "$a"; 
                              param_info = Param_required; param_readonly = None; 
                              param_splat = None; param_callconv = Pnormal; 
-                             param_user_attributes = []; param_visibility = None };
+                             param_named = None; param_user_attributes = []; 
+                             param_visibility = None };
                             { param_annotation = (int); param_type_hint = ((int), None); 
                               param_pos = [23:13-15]; param_name = "$b"; 
                               param_info = Param_required; param_readonly = None; 
                               param_splat = None; param_callconv = Pnormal; 
-                              param_user_attributes = []; param_visibility = None }
+                              param_named = None; param_user_attributes = []; 
+                              param_visibility = None }
                             ];
                           f_ctxs = None; f_unsafe_ctxs = None;
                           f_body =

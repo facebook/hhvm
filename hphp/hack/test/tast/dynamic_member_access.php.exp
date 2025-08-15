@@ -25,7 +25,7 @@
          [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([5:15-22], Hdynamic))); 
             param_pos = [5:23-25]; param_name = "$c"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =

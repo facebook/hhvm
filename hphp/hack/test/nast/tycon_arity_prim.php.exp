@@ -23,7 +23,7 @@ Errors:
         [{ param_annotation = (); param_type_hint = ((), (Some ([3:27-37], (Hprim Tbool)))); 
            param_pos = [3:38-40]; param_name = "$x"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None }
+           param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-26], "__SupportDynamicType"); ua_params = [] }]; 
@@ -43,7 +43,7 @@ Errors:
          [{ param_annotation = (); param_type_hint = ((), (Some ([5:26-34], (Hprim Tint)))); 
             param_pos = [5:35-37]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:10-25], "__SupportDynamicType"); ua_params = [] }]; 
@@ -63,7 +63,7 @@ Errors:
          [{ param_annotation = (); param_type_hint = ((), (Some ([7:28-40], (Hprim Tfloat)))); 
             param_pos = [7:41-43]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-27], "__SupportDynamicType"); ua_params = [] }]; 
@@ -83,7 +83,7 @@ Errors:
          [{ param_annotation = (); param_type_hint = ((), (Some ([9:26-34], (Hprim Tnum)))); 
             param_pos = [9:35-37]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-25], "__SupportDynamicType"); ua_params = [] }]; 
@@ -103,7 +103,7 @@ Errors:
          [{ param_annotation = (); param_type_hint = ((), (Some ([11:29-43], (Hprim Tstring)))); 
             param_pos = [11:44-46]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([11:10-28], "__SupportDynamicType"); ua_params = [] }]; 
@@ -123,7 +123,7 @@ Errors:
          [{ param_annotation = (); param_type_hint = ((), (Some ([13:31-49], (Hprim Tarraykey)))); 
             param_pos = [13:50-52]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([13:10-30], "__SupportDynamicType"); ua_params = [] }]; 
@@ -143,7 +143,7 @@ Errors:
          [{ param_annotation = (); param_type_hint = ((), (Some ([15:31-49], (Hprim Tresource)))); 
             param_pos = [15:50-52]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([15:10-30], "__SupportDynamicType"); ua_params = [] }]; 
@@ -163,7 +163,7 @@ Errors:
          [{ param_annotation = (); param_type_hint = ((), (Some ([17:28-40], (Happly (([17:28-40], "\\HH\\supportdyn"), [([17:28-40], Hmixed)]))))); 
             param_pos = [17:41-43]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([17:10-27], "__SupportDynamicType"); ua_params = [] }]; 
@@ -183,7 +183,7 @@ Errors:
          [{ param_annotation = (); param_type_hint = ((), (Some ([19:30-44], (Happly (([19:30-44], "\\HH\\supportdyn"), [([19:30-44], Hnonnull)]))))); 
             param_pos = [19:45-47]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([19:10-29], "__SupportDynamicType"); ua_params = [] }]; 
@@ -203,7 +203,7 @@ Errors:
          [{ param_annotation = (); param_type_hint = ((), (Some ([21:30-44], Hnothing))); 
             param_pos = [21:45-47]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([21:10-29], "__SupportDynamicType"); ua_params = [] }]; 

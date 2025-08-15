@@ -93,6 +93,7 @@ oxidized::aast::NsKind
 oxidized::aast::OgNullFlavor
 oxidized::aast::OptionalKind
 oxidized::aast::ParamMutability
+oxidized::aast::ParamNamed
 oxidized::aast::PropOrMethod
 oxidized::aast::ReadonlyKind
 oxidized::aast::ReifyKind
@@ -111,6 +112,7 @@ oxidized::ast_defs::ConstraintKind
 oxidized::ast_defs::FunKind
 oxidized::ast_defs::OgNullFlavor
 oxidized::ast_defs::OptionalKind
+oxidized::ast_defs::ParamNamed
 oxidized::ast_defs::PropOrMethod
 oxidized::ast_defs::ReadonlyKind
 oxidized::ast_defs::ReifyKind

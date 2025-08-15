@@ -11,11 +11,11 @@
         [{ param_annotation = (nonnull); param_type_hint = ((nonnull), (Some ([4:3-10], (Happly (([4:3-10], "\\HH\\supportdyn"), [([4:3-10], Hnonnull)]))))); 
            param_pos = [4:11-13]; param_name = "$n"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None };
+           param_named = None; param_user_attributes = []; param_visibility = None };
           { param_annotation = (mixed); param_type_hint = ((mixed), (Some ([5:3-8], (Happly (([5:3-8], "\\HH\\supportdyn"), [([5:3-8], Hmixed)]))))); 
             param_pos = [5:9-11]; param_name = "$m"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-11], "__SupportDynamicType"); ua_params = [] }]; 

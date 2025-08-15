@@ -139,6 +139,9 @@ impl<R: Reason, TY: Display> Display for Tparam<R, TY> {
 
 impl<R: Reason, TY: Display> Display for FunParam<R, TY> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        if self.flags.contains(FunParamFlags::NAMED) {
+            write!(f, "named ")?;
+        }
         if self.flags.contains(FunParamFlags::IS_OPTIONAL) {
             write!(f, "optional ")?;
         }

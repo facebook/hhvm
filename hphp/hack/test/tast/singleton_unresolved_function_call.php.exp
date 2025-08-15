@@ -11,7 +11,7 @@
         [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([3:15-19], (Hprim Tbool)))); 
            param_pos = [3:20-22]; param_name = "$b"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None };
+           param_named = None; param_user_attributes = []; param_visibility = None };
           { param_annotation = ((function(int): ~int));
             param_type_hint =
             (((function(int): ~int)),
@@ -21,7 +21,7 @@
                          (Hfun
                             { hf_is_readonly = None; hf_tparams = []; 
                               hf_param_tys = [([3:35-38], (Hprim Tint))];
-                              hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None })]; 
+                              hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None })];
                               hf_variadic_ty = None; hf_ctxs = None; 
                               hf_return_ty = ([3:41-44], (Hlike ([3:41-44], (Hprim Tint)))); 
                               hf_is_readonly_return = None }))
@@ -29,7 +29,7 @@
                        )))));
             param_pos = [3:46-48]; param_name = "$f"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
@@ -58,7 +58,7 @@
          [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([3:15-19], (Hprim Tbool)))); 
             param_pos = [3:20-22]; param_name = "$b"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None };
+            param_named = None; param_user_attributes = []; param_visibility = None };
            { param_annotation = (dynamic);
              param_type_hint =
              ((dynamic),
@@ -68,7 +68,7 @@
                           (Hfun
                              { hf_is_readonly = None; hf_tparams = []; 
                                hf_param_tys = [([3:35-38], (Hprim Tint))];
-                               hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None })]; 
+                               hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None })];
                                hf_variadic_ty = None; hf_ctxs = None; 
                                hf_return_ty = ([3:41-44], (Hlike ([3:41-44], (Hprim Tint)))); 
                                hf_is_readonly_return = None }))
@@ -76,7 +76,7 @@
                         )))));
              param_pos = [3:46-48]; param_name = "$f"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-             param_user_attributes = []; param_visibility = None }
+             param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =

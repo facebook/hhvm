@@ -10104,6 +10104,7 @@ end = struct
         Aast.param_callconv = param.param_callconv;
         Aast.param_readonly = param.param_readonly;
         Aast.param_splat = param.param_splat;
+        Aast.param_named = param.param_named;
         Aast.param_user_attributes = user_attributes;
         Aast.param_visibility = param.param_visibility;
       }

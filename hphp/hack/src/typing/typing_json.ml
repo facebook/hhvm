@@ -689,7 +689,8 @@ let to_locl_ty ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json)
                       ~is_optional:optional
                       ~readonly:false
                       ~ignore_readonly_error:false
-                      ~splat:false;
+                      ~splat:false
+                      ~named:false;
                   (* Dummy values: these aren't currently serialized. *)
                   fp_pos = Pos_or_decl.none;
                   fp_name = None;

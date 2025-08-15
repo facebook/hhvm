@@ -25,7 +25,7 @@ Errors:
         [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:14-17], (Hprim Tint)))); 
            param_pos = [3:18-20]; param_name = "$_"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None }
+           param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-14], (Return (Some ((string), [4:10-13], (String "A")))))] }; 
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-13], "__SupportDynamicType"); ua_params = [] }]; 
@@ -51,7 +51,7 @@ Errors:
                          (Hfun
                             { hf_is_readonly = None; hf_tparams = []; 
                               hf_param_tys = [([7:30-33], (Hprim Tint))];
-                              hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None })]; 
+                              hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None })];
                               hf_variadic_ty = None; hf_ctxs = None; 
                               hf_return_ty = ([7:35-41], (Hlike ([7:35-41], (Hprim Tstring)))); 
                               hf_is_readonly_return = None }))
@@ -59,7 +59,7 @@ Errors:
                        )))));
             param_pos = [7:43-45]; param_name = "$_"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-19], "__SupportDynamicType"); ua_params = [] }]; 
@@ -79,7 +79,7 @@ Errors:
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([8:20-23], (Hprim Tint)))); 
             param_pos = [8:24-26]; param_name = "$_"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-19], "__SupportDynamicType"); ua_params = [] }]; 
@@ -112,7 +112,7 @@ Errors:
                        )))));
             param_pos = [9:37-39]; param_name = "$f"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None };
+            param_named = None; param_user_attributes = []; param_visibility = None };
            { param_annotation = ((function(int, bool): ~string));
              param_type_hint =
              (((function(int, bool): ~string)),
@@ -123,8 +123,8 @@ Errors:
                              { hf_is_readonly = None; hf_tparams = []; 
                                hf_param_tys = [([9:51-54], (Hprim Tint)); ([9:55-59], (Hprim Tbool))];
                                hf_param_info =
-                               [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None });
-                                 (Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None })];
+                               [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None });
+                                 (Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None })];
                                hf_variadic_ty = None; hf_ctxs = None; 
                                hf_return_ty = ([9:61-67], (Hlike ([9:61-67], (Hprim Tstring)))); 
                                hf_is_readonly_return = None }))
@@ -132,7 +132,7 @@ Errors:
                         )))));
              param_pos = [9:69-71]; param_name = "$g"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-             param_user_attributes = []; param_visibility = None }
+             param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
@@ -207,7 +207,7 @@ Errors:
                                             param_info = Param_required; 
                                             param_readonly = None; param_splat = None; 
                                             param_callconv = Pnormal; 
-                                            param_user_attributes = []; 
+                                            param_named = None; param_user_attributes = []; 
                                             param_visibility = None };
                                            { param_annotation = (bool); 
                                              param_type_hint = ((bool), (Some ([13:18-22], (Hprim Tbool)))); 
@@ -215,7 +215,7 @@ Errors:
                                              param_name = "$b"; param_info = Param_required; 
                                              param_readonly = None; param_splat = None; 
                                              param_callconv = Pnormal; 
-                                             param_user_attributes = []; 
+                                             param_named = None; param_user_attributes = []; 
                                              param_visibility = None }
                                            ];
                                          f_ctxs = None; f_unsafe_ctxs = None;
@@ -262,7 +262,7 @@ Errors:
                          (Hfun
                             { hf_is_readonly = None; hf_tparams = []; 
                               hf_param_tys = [([7:30-33], (Hprim Tint))];
-                              hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None })]; 
+                              hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None })];
                               hf_variadic_ty = None; hf_ctxs = None; 
                               hf_return_ty = ([7:35-41], (Hlike ([7:35-41], (Hprim Tstring)))); 
                               hf_is_readonly_return = None }))
@@ -270,7 +270,7 @@ Errors:
                        )))));
             param_pos = [7:43-45]; param_name = "$_"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-19], "__SupportDynamicType"); ua_params = [] }]; 

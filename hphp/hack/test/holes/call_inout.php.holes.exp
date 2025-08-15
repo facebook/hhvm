@@ -11,7 +11,7 @@
         [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:27-30], (Hprim Tint)))); 
            param_pos = [3:31-33]; param_name = "$i"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = (Pinout [3:21-26]); 
-           param_user_attributes = []; param_visibility = None }
+           param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-20], "__SupportDynamicType"); ua_params = [] }]; 
@@ -31,7 +31,7 @@
          [{ param_annotation = (float); param_type_hint = ((float), (Some ([5:21-26], (Hprim Tfloat)))); 
             param_pos = [5:27-29]; param_name = "$f"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =

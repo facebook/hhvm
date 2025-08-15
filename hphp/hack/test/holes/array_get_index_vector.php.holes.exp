@@ -11,11 +11,11 @@
         [{ param_annotation = (Vector<int>); param_type_hint = ((Vector<int>), (Some ([3:33-44], (Happly (([3:33-39], "\\HH\\Vector"), [([3:40-43], (Hprim Tint))]))))); 
            param_pos = [3:45-48]; param_name = "$xs"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None };
+           param_named = None; param_user_attributes = []; param_visibility = None };
           { param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:50-55], (Happly (([3:50-55], "\\HH\\supportdyn"), [([3:50-55], Hmixed)]))))); 
             param_pos = [3:56-60]; param_name = "$idx"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =

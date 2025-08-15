@@ -11,7 +11,7 @@
         [{ param_annotation = (?vec<int>); param_type_hint = ((?vec<int>), (Some ([3:35-44], (Hoption ([3:36-44], (Happly (([3:36-39], "\\HH\\vec"), [([3:40-43], (Hprim Tint))])))))));
            param_pos = [3:45-48]; param_name = "$xs"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None }
+           param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body = { fb_ast = [([5:3-10], (Expr ((int), [5:3-9], (Array_get (((?vec<int>), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((int), [5:7-8], (Int "0"))))))))] }; 

@@ -12,11 +12,11 @@
          [{ param_annotation = (vec<int>); param_type_hint = ((vec<int>), (Some ([4:22-30], (Happly (([4:22-25], "\\HH\\vec"), [([4:26-29], (Hprim Tint))]))))); 
             param_pos = [4:31-33]; param_name = "$v"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None };
+            param_named = None; param_user_attributes = []; param_visibility = None };
            { param_annotation = (string); param_type_hint = ((string), (Some ([4:35-41], (Hprim Tstring)))); 
              param_pos = [4:42-44]; param_name = "$s"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-             param_user_attributes = []; param_visibility = None }
+             param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([5:5-15], (Return (Some ((vec<int>), [5:12-14], (Lvar ([5:12-14], $v))))))] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -29,11 +29,11 @@
           [{ param_annotation = (vec<int>); param_type_hint = ((vec<int>), (Some ([8:22-30], (Happly (([8:22-25], "\\HH\\vec"), [([8:26-29], (Hprim Tint))]))))); 
              param_pos = [8:31-33]; param_name = "$v"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-             param_user_attributes = []; param_visibility = None };
+             param_named = None; param_user_attributes = []; param_visibility = None };
             { param_annotation = (string); param_type_hint = ((string), (Some ([8:35-41], (Hprim Tstring)))); 
               param_pos = [8:42-44]; param_name = "$s"; param_info = Param_required; 
               param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-              param_user_attributes = []; param_visibility = None }
+              param_named = None; param_user_attributes = []; param_visibility = None }
             ];
           m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([9:5-15], (Return (Some ((string), [9:12-14], (Lvar ([9:12-14], $s))))))] }; 
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -62,11 +62,11 @@
           [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([4:22-30], (Happly (([4:22-25], "\\HH\\vec"), [([4:26-29], (Hprim Tint))]))))); 
              param_pos = [4:31-33]; param_name = "$v"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-             param_user_attributes = []; param_visibility = None };
+             param_named = None; param_user_attributes = []; param_visibility = None };
             { param_annotation = (string); param_type_hint = ((string), (Some ([4:35-41], (Hprim Tstring)))); 
               param_pos = [4:42-44]; param_name = "$s"; param_info = Param_required; 
               param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-              param_user_attributes = []; param_visibility = None }
+              param_named = None; param_user_attributes = []; param_visibility = None }
             ];
           m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([5:5-15], (Return (Some ((dynamic), [5:12-14], (Lvar ([5:12-14], $v))))))] }; 
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -79,11 +79,11 @@
            [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([8:22-30], (Happly (([8:22-25], "\\HH\\vec"), [([8:26-29], (Hprim Tint))]))))); 
               param_pos = [8:31-33]; param_name = "$v"; param_info = Param_required; 
               param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-              param_user_attributes = []; param_visibility = None };
+              param_named = None; param_user_attributes = []; param_visibility = None };
              { param_annotation = (string); param_type_hint = ((string), (Some ([8:35-41], (Hprim Tstring)))); 
                param_pos = [8:42-44]; param_name = "$s"; param_info = Param_required; 
                param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-               param_user_attributes = []; param_visibility = None }
+               param_named = None; param_user_attributes = []; param_visibility = None }
              ];
            m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([9:5-15], (Return (Some ((string), [9:12-14], (Lvar ([9:12-14], $s))))))] }; 
            m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 

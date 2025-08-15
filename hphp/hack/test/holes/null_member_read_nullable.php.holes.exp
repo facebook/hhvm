@@ -18,7 +18,7 @@
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([4:38-41], (Hprim Tint)))); 
             param_pos = [4:42-44]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = (Some Public) }
+            param_named = None; param_user_attributes = []; param_visibility = (Some Public) }
            ];
          m_ctxs = None; m_unsafe_ctxs = None;
          m_body =
@@ -62,7 +62,7 @@
          [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([8:36-40], (Hprim Tbool)))); 
             param_pos = [8:41-43]; param_name = "$a"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =

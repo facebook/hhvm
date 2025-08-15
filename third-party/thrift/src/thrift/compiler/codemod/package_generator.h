@@ -237,7 +237,9 @@ class package_name_generator_util {
     std::vector<package_name_generator> pkg_generators;
     pkg_generators.reserve(namespaces.size());
     for (const auto& [lang, ns] : namespaces) {
-      pkg_generators.emplace_back(lang, ns);
+      if (!ns.empty()) {
+        pkg_generators.emplace_back(lang, ns);
+      }
     }
     return package_name_generator_util(std::move(pkg_generators));
   }
@@ -402,4 +404,88 @@ class package_name_generator_util {
     return ordered_identifiers;
   }
 };
+
+inline std::string get_package(
+    const std::string& program_path,
+    const std::map<std::string, std::string>& namespaces) {
+  int non_empty_count = 0;
+  std::string non_empty_key;
+  for (const auto& [lang, ns] : namespaces) {
+    if (!ns.empty()) {
+      non_empty_count++;
+      non_empty_key = lang;
+    }
+  }
+
+  // If no namespaces exist, use the file path as the package.
+  if (non_empty_count == 0) {
+    return package_name_generator::from_file_path(program_path);
+  }
+
+  if (non_empty_count == 1) {
+    // If there is only a single namespace, use that to generate the package
+    // name.
+    assert(!non_empty_key.empty() && namespaces.contains(non_empty_key));
+    return package_name_generator(non_empty_key, namespaces.at(non_empty_key))
+        .generate();
+  }
+  auto gen = package_name_generator_util::from_namespaces(namespaces);
+
+  // If there are multiple namespaces, then find the one that works with
+  // most namespaces.
+  auto pkg = gen.find_common_package();
+  if (!pkg.empty()) {
+    return pkg;
+  }
+  pkg = gen.get_package_from_common_identifiers();
+
+  if (!pkg.empty()) {
+    return pkg;
+  }
+
+  // If there are no common identifiers,
+  // then prioritize the longest package as it is more likely to be
+  // unique
+  return gen.get_longest_package();
+}
+
+inline std::string get_replacement_content(
+    bool program_has_definitions,
+    const std::map<std::string, std::string>& namespaces,
+    const std::string& pkg) {
+  auto content = fmt::format("package \"{}\"\n\n", pkg);
+
+  /*
+   * Adding a package to a file without namespaces
+   * breaks the existing references to generated code.
+   *
+   * For certain languages, in absence of namespace a default one is used.
+   * Override the namespace from package by adding default namespaces.
+   * This ensures that the existing references don't break.
+   *
+   * This is only needed if there are some definitions in the thrift file.
+   * If there are no definitions, then this can be skipped.
+   */
+  if (program_has_definitions) {
+    if (!namespaces.contains("cpp2")) {
+      if (!namespaces.contains("cpp")) {
+        content += "namespace cpp2 \"cpp2\"\n";
+      } else {
+        content +=
+            fmt::format("namespace cpp2 \"{}.cpp2\"\n", namespaces.at("cpp"));
+      }
+    }
+    if (!namespaces.contains("hack") && !namespaces.contains("php")) {
+      content += "namespace hack \"\"\n";
+    }
+    if (!namespaces.contains("py3")) {
+      content += "namespace py3 \"\"\n";
+    }
+
+    if (namespaces.empty()) {
+      content += "\n";
+    }
+  }
+  return content;
+}
 } // namespace apache::thrift::compiler::codemod

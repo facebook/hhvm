@@ -743,6 +743,11 @@ class mstch_struct : public mstch_base {
         {
             {"struct:self", &mstch_struct::self},
             {"struct:fields?", &mstch_struct::has_fields},
+            // In mstch, exceptions are bound as "struct:*" and "struct:self"
+            // defaults to the t_structured prototype. This provides a way to
+            // access the exception Whisker prototype from mstch
+            {"exception:self", &mstch_struct::self_exception},
+
             {"struct:fields", &mstch_struct::fields},
             {"struct:fields_in_serialization_order",
              &mstch_struct::fields_in_serialization_order},
@@ -751,9 +756,6 @@ class mstch_struct : public mstch_base {
             {"struct:annotations", &mstch_struct::annotations},
             {"struct:structured_annotations",
              &mstch_struct::structured_annotations},
-            {"struct:exception_kind", &mstch_struct::exception_kind},
-            {"struct:exception_safety", &mstch_struct::exception_safety},
-            {"struct:exception_blame", &mstch_struct::exception_blame},
         });
 
     // Populate field_context_generator for each field.
@@ -778,6 +780,13 @@ class mstch_struct : public mstch_base {
 
   whisker::object self() { return make_self(*struct_); }
   mstch::node has_fields() { return struct_->has_fields(); }
+  whisker::object self_exception() {
+    if (const t_exception* ex = struct_->try_as<t_exception>()) {
+      return make_self<t_exception>(*ex);
+    }
+
+    throw whisker::eval_error("exception:self used on non-exception node");
+  }
   mstch::node fields();
   mstch::node is_exception() { return struct_->is<t_exception>(); }
   mstch::node is_plain() {
@@ -787,10 +796,6 @@ class mstch_struct : public mstch_base {
   mstch::node structured_annotations() {
     return mstch_base::structured_annotations(struct_);
   }
-
-  mstch::node exception_safety();
-  mstch::node exception_blame();
-  mstch::node exception_kind();
 
   mstch::array make_mstch_fields(const field_range& fields) override {
     mstch::array a;

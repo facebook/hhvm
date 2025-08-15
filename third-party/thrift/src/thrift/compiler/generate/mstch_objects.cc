@@ -382,60 +382,6 @@ mstch::node mstch_struct::fields() {
   return make_mstch_fields(struct_->get_members());
 }
 
-mstch::node mstch_struct::exception_safety() {
-  if (!struct_->is<t_exception>()) {
-    return std::string("");
-  }
-
-  const auto* t_ex_ptr = dynamic_cast<const t_exception*>(struct_);
-  auto s = t_ex_ptr->safety();
-
-  switch (s) {
-    case t_error_safety::safe:
-      return std::string("SAFE");
-    default:
-      return std::string("UNSPECIFIED");
-  }
-}
-
-mstch::node mstch_struct::exception_blame() {
-  if (!struct_->is<t_exception>()) {
-    return std::string("");
-  }
-
-  const auto* t_ex_ptr = dynamic_cast<const t_exception*>(struct_);
-  auto s = t_ex_ptr->blame();
-
-  switch (s) {
-    case t_error_blame::server:
-      return std::string("SERVER");
-    case t_error_blame::client:
-      return std::string("CLIENT");
-    default:
-      return std::string("UNSPECIFIED");
-  }
-}
-
-mstch::node mstch_struct::exception_kind() {
-  if (!struct_->is<t_exception>()) {
-    return std::string("");
-  }
-
-  const auto* t_ex_ptr = dynamic_cast<const t_exception*>(struct_);
-  auto s = t_ex_ptr->kind();
-
-  switch (s) {
-    case t_error_kind::transient:
-      return std::string("TRANSIENT");
-    case t_error_kind::stateful:
-      return std::string("STATEFUL");
-    case t_error_kind::permanent:
-      return std::string("PERMANENT");
-    default:
-      return std::string("UNSPECIFIED");
-  }
-}
-
 const std::vector<const t_field*>& mstch_struct::get_members_in_key_order() {
   if (struct_->fields().size() == fields_in_key_order_.size()) {
     // Already reordered.

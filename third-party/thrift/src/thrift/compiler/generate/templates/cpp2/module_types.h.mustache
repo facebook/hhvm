@@ -142,11 +142,11 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
   bool __fbthrift_is_empty() const;
   {{#struct:exception?}}
   static constexpr ::apache::thrift::ExceptionKind __fbthrift_cpp2_gen_exception_kind =
-         ::apache::thrift::ExceptionKind::{{struct:exception_kind}};
+         ::apache::thrift::ExceptionKind::{{exception:kind}};
   static constexpr ::apache::thrift::ExceptionSafety __fbthrift_cpp2_gen_exception_safety =
-         ::apache::thrift::ExceptionSafety::{{struct:exception_safety}};
+         ::apache::thrift::ExceptionSafety::{{exception:safety}};
   static constexpr ::apache::thrift::ExceptionBlame __fbthrift_cpp2_gen_exception_blame =
-         ::apache::thrift::ExceptionBlame::{{struct:exception_blame}};
+         ::apache::thrift::ExceptionBlame::{{exception:blame}};
   {{/struct:exception?}}
 
  public:

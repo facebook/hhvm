@@ -329,7 +329,7 @@ class t_whisker_generator : public t_generator {
   using h_field = make_handle<"field", t_field>;
   using h_primitive_type = make_handle<"", t_primitive_type>;
 
-  using h_exception = make_handle<"", t_exception>;
+  using h_exception = make_handle<"exception", t_exception>;
   using h_union = make_handle<"", t_union>;
   using h_throws = make_handle<"", t_throws>;
   using h_paramlist = make_handle<"", t_paramlist>;

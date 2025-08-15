@@ -323,6 +323,36 @@ prototype<t_union>::ptr t_whisker_generator::make_prototype_for_union(
 prototype<t_exception>::ptr t_whisker_generator::make_prototype_for_exception(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_exception>::extends(proto.of<t_structured>());
+  def.property("blame", [](const t_exception& self) -> whisker::string {
+    switch (self.blame()) {
+      case t_error_blame::server:
+        return "SERVER";
+      case t_error_blame::client:
+        return "CLIENT";
+      default:
+        return "UNSPECIFIED";
+    }
+  });
+  def.property("kind", [](const t_exception& self) -> whisker::string {
+    switch (self.kind()) {
+      case t_error_kind::transient:
+        return "TRANSIENT";
+      case t_error_kind::stateful:
+        return "STATEFUL";
+      case t_error_kind::permanent:
+        return "PERMANENT";
+      default:
+        return "UNSPECIFIED";
+    }
+  });
+  def.property("safety", [](const t_exception& self) -> whisker::string {
+    switch (self.safety()) {
+      case t_error_safety::safe:
+        return "SAFE";
+      default:
+        return "UNSPECIFIED";
+    }
+  });
   return std::move(def).make();
 }
 

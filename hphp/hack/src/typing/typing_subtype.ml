@@ -7737,7 +7737,7 @@ end = struct
               env)
         | None ->
           let consts =
-            Cls.consts cls
+            Typing_env.consts env cls
             |> List.filter ~f:(fun (name, _) ->
                    not
                      (String.equal name SN.Members.mClass

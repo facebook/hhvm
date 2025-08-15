@@ -102,10 +102,7 @@ let get_origin_info env class_id class_type class_tyargs origin =
   if String.equal origin class_id then
     Some (Cls.tparams class_type, class_tyargs)
   else
-    match
-      Decl_provider.get_class (Tast_env.get_ctx env) origin
-      |> Decl_entry.to_option
-    with
+    match Tast_env.get_class env origin |> Decl_entry.to_option with
     | None -> None
     | Some origin_class_type ->
       (match Cls.get_ancestor class_type origin with
@@ -132,13 +129,10 @@ let get_origin_info env class_id class_type class_tyargs origin =
 
 let member_hook
     ~is_dynamic_call ~as_lint env p class_id class_tyargs method_name tal =
-  match
-    Decl_provider.get_class (Tast_env.get_ctx env) class_id
-    |> Decl_entry.to_option
-  with
+  match Tast_env.get_class env class_id |> Decl_entry.to_option with
   | None -> ()
   | Some class_type ->
-    (match Cls.get_method class_type method_name with
+    (match Tast_env.get_method env class_type method_name with
     | None -> ()
     | Some { ce_type = (lazy fun_ty); ce_overlapping_tparams; ce_origin; _ } ->
       (match get_origin_info env class_id class_type class_tyargs ce_origin with
@@ -182,7 +176,7 @@ let check_instance_method_call
 let check_static_method_call env p ~as_lint class_result method_name tal =
   match class_result with
   | Decl_entry.Found cd -> begin
-    match Cls.get_smethod cd method_name with
+    match Tast_env.get_static_member true env cd method_name with
     | None -> ()
     | Some { ce_type = (lazy fun_ty); ce_overlapping_tparams; _ } ->
       check_function_type_args_non_disjoint
@@ -208,7 +202,7 @@ let handler ~as_lint =
       (* Function call *)
       | (_, p, Call { func = (_, _, Id (_, name)); targs = _ :: _ as tal; _ })
         -> begin
-        match Decl_provider.get_fun (Tast_env.get_ctx env) name with
+        match Tast_env.get_fun env name with
         | Decl_entry.Found { fe_type; _ } ->
           check_function_type_args_non_disjoint
             ~is_dynamic_call:false

@@ -1,6 +1,7 @@
 Const B::TInner -> Type B
 Const C::TInner -> Type C
-Constructor B -> Type C
+Constructor B -> Type B, Type C
+Constructor C -> Type C
 Extends B -> Type C
 Fun f1 -> Fun f2
 Method B::foo -> Type C

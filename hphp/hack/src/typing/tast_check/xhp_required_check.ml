@@ -91,7 +91,7 @@ let check_attrs pos env sid attrs =
               []
             | Decl_entry.Found ty ->
               let pos =
-                match Cls.get_prop ty attr with
+                match Tast_env.get_prop env ty attr with
                 | Some attr_decl -> Lazy.force attr_decl.ce_pos
                 | None -> Cls.pos ty
               in

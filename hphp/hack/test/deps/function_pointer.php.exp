@@ -4,6 +4,9 @@ Const B::TC2 -> Fun refBaz, Fun refBuz, Type B
 Const B::TInner -> Type B
 Const C::TC -> Fun refBaz, Fun refBuz, Type B, Type C
 Const C::TInner -> Type C
+Constructor A -> Type A
+Constructor B -> Type B
+Constructor C -> Type C
 Fun qux -> Fun refQux
 Method B::buz -> Fun refBuz
 Method C::bar -> Fun refBar

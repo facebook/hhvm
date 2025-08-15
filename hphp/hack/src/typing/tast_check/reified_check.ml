@@ -371,7 +371,7 @@ let handler =
       let Equal = Tast_env.eq_typing_env in
       match Env.get_class env name with
       | Decl_entry.Found cls -> begin
-        match Cls.construct cls with
+        match Tast_env.get_construct env cls with
         | (_, Typing_defs.ConsistentConstruct) ->
           if
             List.exists

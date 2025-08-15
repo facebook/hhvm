@@ -4,9 +4,12 @@ Const Foo::TInner -> Type Foo
 Const N\Bar::TInner -> Type N\Bar
 Const N\Foo::TInner -> Type N\Foo
 Const Qux::TInner -> Type Qux
-Constructor Bar -> Type Baz
-Constructor Foo -> Type Bar
-Constructor N\Foo -> Type N\Bar, Type Qux
+Constructor Bar -> Type Bar, Type Baz
+Constructor Baz -> Type Baz
+Constructor Foo -> Type Bar, Type Foo
+Constructor N\Bar -> Type N\Bar
+Constructor N\Foo -> Type N\Bar, Type N\Foo, Type Qux
+Constructor Qux -> Type Qux
 Extends Bar -> Type Baz
 Extends Foo -> Type Bar
 Extends N\Foo -> Type N\Bar, Type Qux

@@ -28,7 +28,7 @@ let handler =
       | Decl_entry.NotYetAvailable ->
         ()
       | Decl_entry.Found cls -> begin
-        match Cls.get_typeconst cls name with
+        match Tast_env.get_typeconst env cls name with
         | None -> ()
         | Some tc ->
           begin

@@ -20,7 +20,7 @@ let check_expr env (_, pos, e) =
     | Decl_entry.Found parent_class
       when Ast_defs.is_c_abstract (Cls.kind parent_class) ->
       let Equal = Tast_env.eq_typing_env in
-      let (parent_construct, _) = Typing_env.get_construct env parent_class in
+      let (parent_construct, _) = Tast_env.get_construct env parent_class in
       (match parent_construct with
       | None ->
         Typing_error_utils.add_typing_error

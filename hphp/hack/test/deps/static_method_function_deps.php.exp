@@ -1,7 +1,9 @@
 Const A::TInner -> Type A
 Const C::TInner -> Type C
 Const I::TInner -> Type I
+Constructor A -> Type A
 Constructor C -> Fun bar, Fun obj_only, Type C
+Constructor I -> Type I
 Extends I -> Type C
 Fun bar -> Type C
 Fun foo -> Fun bar, Type C

@@ -8,7 +8,6 @@
  *)
 open Hh_prelude
 open Aast
-module Cls = Folded_class
 module SN = Naming_special_names
 module MakeType = Typing_make_type
 module Reason = Typing_reason
@@ -100,15 +99,18 @@ let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
   in
   match get_node ty with
   | Tclass (id, _exact, _args) ->
-    let provider_ctx = Tast_env.get_ctx env in
-    let class_decl = Decl_provider.get_class provider_ctx (snd id) in
+    let class_decl = Tast_env.get_class env (snd id) in
     (match class_decl with
     | Decl_entry.Found class_decl ->
       let prop =
         if static then
-          Cls.get_sprop class_decl (snd prop_id)
+          Tast_env.get_static_member
+            (*is_method*) false
+            env
+            class_decl
+            (snd prop_id)
         else
-          Cls.get_prop class_decl (snd prop_id)
+          Tast_env.get_prop env class_decl (snd prop_id)
       in
       Option.to_list prop
     | Decl_entry.DoesNotExist

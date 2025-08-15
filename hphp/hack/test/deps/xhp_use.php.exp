@@ -1,4 +1,6 @@
 Const :bar::TInner -> Type :bar
 Const :foo::TInner -> Type :foo
+Constructor :bar -> Type :bar
+Constructor :foo -> Type :foo
 Extends :foo -> Type :bar
 Type :foo -> Type :bar

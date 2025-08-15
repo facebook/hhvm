@@ -3,8 +3,11 @@ Const Foo::TInner -> Type Foo
 Const FooParent::TInner -> Type FooParent
 Const G::TInner -> Type G
 Const IFoo::TInner -> Type IFoo
-Constructor Bar -> Type Foo
-Constructor FooParent -> Type Bar, Type Foo, Type IFoo
+Constructor Bar -> Type Bar, Type Foo
+Constructor Foo -> Type Foo
+Constructor FooParent -> Type Bar, Type Foo, Type FooParent, Type IFoo
+Constructor G -> Type G
+Constructor IFoo -> Type IFoo
 Extends Bar -> Type Foo
 Extends FooParent -> Type Bar, Type Foo, Type IFoo
 Extends IFoo -> Type Foo

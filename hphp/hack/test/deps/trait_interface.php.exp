@@ -1,5 +1,6 @@
 Const I::TInner -> Type I
 Const T::TInner -> Type T
-Constructor I -> Type T
+Constructor I -> Type I, Type T
+Constructor T -> Type T
 Extends I -> Type T
 Type I -> Type T

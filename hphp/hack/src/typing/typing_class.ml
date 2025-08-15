@@ -448,7 +448,7 @@ let check_parent env class_def class_type =
 (** If the class is sealed, check that the elements of the whitelist
     are descendants of the class. Error or lint depending on option
     enforce_sealed_subclasses. *)
-let sealed_subtype ctx (c : Nast.class_) ~is_enum ~hard_error ~env =
+let sealed_subtype (c : Nast.class_) ~is_enum ~hard_error ~env =
   let parent_name = snd c.c_name in
   let is_sealed (attr : Nast.user_attribute) =
     String.equal (snd attr.ua_name) SN.UserAttributes.uaSealed
@@ -460,7 +460,7 @@ let sealed_subtype ctx (c : Nast.class_) ~is_enum ~hard_error ~env =
       match expr_ with
       | Class_const ((_, _, cid), _) ->
         let klass_name = Nast.class_id_to_str cid in
-        let klass = Decl_provider.get_class ctx klass_name in
+        let klass = Typing_env.get_class env klass_name in
         (match klass with
         | Decl_entry.DoesNotExist
         | Decl_entry.NotYetAvailable ->
@@ -701,8 +701,8 @@ let check_consistent_enum_inclusion
              })
   | (_, _) -> ()
 
-let skip_check_multiple_instantiations ctx type_name =
-  match Decl_provider.get_class ctx type_name with
+let skip_check_multiple_instantiations (env : Typing_env_types.env) type_name =
+  match Typing_env.get_class env type_name with
   | Decl_entry.DoesNotExist
   | Decl_entry.NotYetAvailable ->
     true
@@ -724,7 +724,7 @@ let add_or_check_is_supertype
     ~(interface_name : string)
     (ty : decl_ty)
     ancestors =
-  if skip_check_multiple_instantiations (Env.get_ctx env) interface_name then
+  if skip_check_multiple_instantiations env interface_name then
     (env, ancestors)
   else
     match SMap.find_opt interface_name ancestors with
@@ -877,7 +877,9 @@ let check_enum_includes env cls =
         | Decl_entry.Found cls ->
           check_consistent_enum_inclusion ie_cls (ie_pos, cls) ~env);
         (* 2. Check for duplicates *)
-        List.iter (Cls.consts ie_cls) ~f:(fun (const_name, class_const) ->
+        List.iter
+          (Typing_env.consts env ie_cls)
+          ~f:(fun (const_name, class_const) ->
             (if String.equal const_name "class" then
               ()
             (* TODO: Check with @fzn *)
@@ -1629,7 +1631,7 @@ let check_override_keyword env c tc =
 let check_sealed env c =
   let hard_error = TCO.enforce_sealed_subclasses (Env.get_tcopt env) in
   let is_enum = is_enum_or_enum_class c.c_kind in
-  sealed_subtype (Env.get_ctx env) c ~is_enum ~hard_error ~env
+  sealed_subtype c ~is_enum ~hard_error ~env
 
 let check_class_require_non_strict_constraints env c tc =
   let req_non_strict_constraints =

@@ -161,12 +161,6 @@ let check_redundant_generics_class (env : Tast_env.env) class_name class_type =
   |> List.filter ~f:(fun (_, meth) -> String.equal meth.ce_origin class_name)
   |> List.iter ~f:(check_redundant_generics_class_method env)
 
-let get_tracing_info env =
-  {
-    Decl_counters.origin = Decl_counters.TastCheck;
-    file = Tast_env.get_file env;
-  }
-
 let create_handler ctx =
   let handler =
     object
@@ -174,12 +168,7 @@ let create_handler ctx =
 
       method! at_fun_def env fd =
         if not (Tast_env.is_hhi env) then
-          match
-            Decl_provider.get_fun
-              ~tracing_info:(get_tracing_info env)
-              ctx
-              (snd fd.fd_name)
-          with
+          match Tast_env.get_fun env (snd fd.fd_name) with
           | Decl_entry.Found { fe_type; _ } -> begin
             match get_node fe_type with
             | Tfun ft ->
@@ -192,9 +181,7 @@ let create_handler ctx =
       method! at_class_ env c =
         if not (Tast_env.is_hhi env) then
           let cid = snd c.c_name in
-          match
-            Decl_provider.get_class ~tracing_info:(get_tracing_info env) ctx cid
-          with
+          match Tast_env.get_class env cid with
           | Decl_entry.DoesNotExist
           | Decl_entry.NotYetAvailable ->
             ()

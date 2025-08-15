@@ -246,7 +246,7 @@ module AlternativeSet = struct
             | None -> Lazy.force value_of_const
           end
         in
-        let consts = Folded_class.consts decl in
+        let consts = Tast_env.consts env decl in
         let values = List.filter_map ~f:(of_const ~bound) consts in
         let values =
           (* If there are no values in the presence of a bound, it is possible

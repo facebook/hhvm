@@ -1,5 +1,6 @@
 Const A::B -> Type A, Type S
 Const A::C -> Type A, Type S
 Const A::TInner -> Type A
+Constructor A -> Type A
 Type A -> Type S
 Type HH\supportdyn -> Type S

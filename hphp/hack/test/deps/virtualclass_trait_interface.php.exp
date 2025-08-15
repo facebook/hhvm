@@ -2,8 +2,10 @@ Const A::TInner -> Type A
 Const B::TInner -> Type B
 Const I::TInner -> Type I
 Const T::TInner -> Type T
-Constructor A -> Type B
-Constructor T -> Type A
+Constructor A -> Type A, Type B
+Constructor B -> Type B
+Constructor I -> Type I
+Constructor T -> Type A, Type T
 Extends A -> Type B
 Extends I -> Type B
 Extends T -> Type A

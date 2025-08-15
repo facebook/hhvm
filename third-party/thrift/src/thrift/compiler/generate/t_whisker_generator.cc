@@ -572,6 +572,70 @@ prototype<t_function>::ptr t_whisker_generator::make_prototype_for_function(
     return resolve_derived_t_type(proto, *type);
   });
 
+  def.property("oneway?", [](const t_function& self) {
+    return self.qualifier() == t_function_qualifier::oneway;
+  });
+  def.property("void?", [](const t_function& self) {
+    return self.return_type()->is_void() && !self.interaction() &&
+        !self.sink_or_stream();
+  });
+  def.property("exceptions?", [](const t_function& self) {
+    return !get_elems(self.exceptions()).empty();
+  });
+  def.property("priority", [](const t_function& self) -> whisker::string {
+    if (const t_const* val =
+            self.find_structured_annotation_or_null(kPriorityUri)) {
+      return val->get_value_from_structured_annotation("level")
+          .get_enum_value()
+          ->name();
+    }
+    return self.get_unstructured_annotation("priority", "NORMAL");
+  });
+  def.property("qualifier", [](const t_function& self) -> whisker::string {
+    switch (self.qualifier()) {
+      case t_function_qualifier::oneway:
+        return "OneWay";
+      case t_function_qualifier::idempotent:
+        return "Idempotent";
+      case t_function_qualifier::readonly:
+        return "ReadOnly";
+      default:
+        return "Unspecified";
+    }
+  });
+
+  // Interaction methods
+  def.property("starts_interaction?", [](const t_function& self) {
+    return self.is_interaction_constructor();
+  });
+  def.property("creates_interaction?", [](const t_function& self) {
+    return !self.interaction().empty();
+  });
+
+  // Sink methods
+  def.property("sink_or_stream?", [](const t_function& self) {
+    return self.sink_or_stream() != nullptr;
+  });
+  def.property(
+      "sink?", [](const t_function& self) { return self.sink() != nullptr; });
+  def.property("sink_has_first_response?", [](const t_function& self) {
+    return self.has_return_type() && self.sink() != nullptr;
+  });
+
+  // Stream methods
+  def.property("stream?", [](const t_function& self) {
+    return self.stream() != nullptr;
+  });
+  def.property("bidirectional_stream?", [](const t_function& self) {
+    return self.sink() && self.stream();
+  });
+  def.property("stream_has_first_response?", [](const t_function& self) {
+    return self.has_return_type() && self.stream() != nullptr;
+  });
+  def.property("initial_response?", [](const t_function& self) {
+    return !self.return_type()->is_void();
+  });
+
   return std::move(def).make();
 }
 

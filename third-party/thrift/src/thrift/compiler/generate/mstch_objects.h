@@ -597,32 +597,18 @@ class mstch_function : public mstch_base {
         this,
         {
             {"function:self", &mstch_function::self},
-            {"function:oneway?", &mstch_function::oneway},
             {"function:return_type", &mstch_function::return_type},
             {"function:exceptions", &mstch_function::exceptions},
-            {"function:exceptions?", &mstch_function::has_exceptions},
             {"function:args", &mstch_function::arg_list},
             {"function:args?", &mstch_function::has_args},
             {"function:comma", &mstch_function::arg_comma},
-            {"function:priority", &mstch_function::priority},
             {"function:annotations", &mstch_function::annotations},
-            {"function:starts_interaction?",
-             &mstch_function::starts_interaction},
             {"function:structured_annotations",
              &mstch_function::structured_annotations},
-            {"function:qualifier", &mstch_function::qualifier},
-            {"function:creates_interaction?",
-             &mstch_function::creates_interaction},
             {"function:in_or_creates_interaction?",
              &mstch_function::in_or_creates_interaction},
-            {"function:void?", &mstch_function::is_void},
-            {"function:initial_response?",
-             &mstch_function::has_initial_response},
 
             // Sink methods:
-            {"function:sink?", &mstch_function::has_sink},
-            {"function:sink_has_first_response?",
-             &mstch_function::sink_has_first_response},
             {"function:sink_first_response_type",
              &mstch_function::sink_first_response_type},
             {"function:sink_elem_type", &mstch_function::sink_elem_type},
@@ -636,42 +622,19 @@ class mstch_function : public mstch_base {
              &mstch_function::sink_final_response_exceptions},
 
             // Stream methods:
-            {"function:stream?", &mstch_function::has_stream},
-            {"function:stream_has_first_response?",
-             &mstch_function::stream_has_first_response},
             {"function:stream_first_response_type",
              &mstch_function::stream_first_response_type},
             {"function:stream_elem_type", &mstch_function::stream_elem_type},
             {"function:stream_exceptions?",
              &mstch_function::has_stream_exceptions},
             {"function:stream_exceptions", &mstch_function::stream_exceptions},
-
-            // Shared Sink/Stream methods:
-            {"function:sink_or_stream?", &mstch_function::has_sink_or_stream},
-            {"function:bidirectional_stream?",
-             &mstch_function::is_bidirectional_stream},
         });
   }
 
   whisker::object self() { return make_self(*function_); }
-  mstch::node oneway() {
-    return function_->qualifier() == t_function_qualifier::oneway;
-  }
-  mstch::node has_exceptions() {
-    return !get_elems(function_->exceptions()).empty();
-  }
   mstch::node has_args() { return has_args_(); }
   mstch::node arg_comma() {
     return has_args_() ? std::string(", ") : std::string();
-  }
-  mstch::node priority() {
-    if (auto* val =
-            function_->find_structured_annotation_or_null(kPriorityUri)) {
-      return val->get_value_from_structured_annotation("level")
-          .get_enum_value()
-          ->name();
-    }
-    return function_->get_unstructured_annotation("priority", "NORMAL");
   }
   mstch::node annotations() { return mstch_base::annotations(function_); }
 
@@ -679,44 +642,12 @@ class mstch_function : public mstch_base {
   mstch::node exceptions();
 
   mstch::node arg_list();
-  mstch::node starts_interaction() {
-    return function_->is_interaction_constructor();
-  }
   mstch::node structured_annotations() {
     return mstch_base::structured_annotations(function_);
   }
 
-  mstch::node qualifier() {
-    auto q = function_->qualifier();
-    switch (q) {
-      case t_function_qualifier::oneway:
-        return std::string("OneWay");
-      case t_function_qualifier::idempotent:
-        return std::string("Idempotent");
-      case t_function_qualifier::readonly:
-        return std::string("ReadOnly");
-      default:
-        return std::string("Unspecified");
-    }
-  }
-
-  mstch::node creates_interaction() {
-    return !function_->interaction().empty();
-  }
   mstch::node in_or_creates_interaction() {
     return function_->interaction() || is_interaction_member();
-  }
-  mstch::node is_void() {
-    return function_->return_type()->is_void() && !function_->interaction() &&
-        !function_->sink_or_stream();
-  }
-  mstch::node has_initial_response() {
-    return !function_->return_type()->is_void();
-  }
-
-  mstch::node has_sink() { return function_->sink() != nullptr; }
-  mstch::node sink_has_first_response() {
-    return function_->has_return_type() && function_->sink();
   }
   mstch::node sink_first_response_type();
   mstch::node sink_elem_type();
@@ -735,11 +666,7 @@ class mstch_function : public mstch_base {
   }
   mstch::node sink_final_response_exceptions();
 
-  mstch::node has_stream() { return function_->stream() != nullptr; }
   mstch::node stream_elem_type();
-  mstch::node stream_has_first_response() {
-    return function_->has_return_type() && function_->stream();
-  }
   mstch::node stream_first_response_type();
   mstch::node has_stream_exceptions() {
     const t_stream* stream = function_->stream();
@@ -748,13 +675,6 @@ class mstch_function : public mstch_base {
   }
   mstch::node stream_exceptions();
 
-  mstch::node has_sink_or_stream() {
-    return function_->sink_or_stream() != nullptr;
-  }
-  mstch::node is_bidirectional_stream() {
-    return function_->sink() && function_->stream();
-  }
-
  protected:
   const t_function* function_;
   const t_interface* interface_;
@@ -762,6 +682,8 @@ class mstch_function : public mstch_base {
   bool has_args_() { return function_->params().has_fields(); }
 
   bool is_interaction_member() const {
+    // TODO(T230131540): Whisker migration requires back-reference from function
+    // to parent interface
     return dynamic_cast<const t_interaction*>(interface_) != nullptr;
   }
 

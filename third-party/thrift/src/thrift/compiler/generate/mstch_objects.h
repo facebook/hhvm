@@ -587,8 +587,6 @@ class mstch_function : public mstch_base {
             {"function:return_type", &mstch_function::return_type},
             {"function:exceptions", &mstch_function::exceptions},
             {"function:args", &mstch_function::arg_list},
-            {"function:args?", &mstch_function::has_args},
-            {"function:comma", &mstch_function::arg_comma},
             {"function:annotations", &mstch_function::annotations},
             {"function:structured_annotations",
              &mstch_function::structured_annotations},
@@ -614,10 +612,6 @@ class mstch_function : public mstch_base {
   }
 
   whisker::object self() { return make_self(*function_); }
-  mstch::node has_args() { return has_args_(); }
-  mstch::node arg_comma() {
-    return has_args_() ? std::string(", ") : std::string();
-  }
   mstch::node annotations() { return mstch_base::annotations(function_); }
 
   mstch::node return_type();
@@ -644,8 +638,6 @@ class mstch_function : public mstch_base {
  protected:
   const t_function* function_;
   const t_interface* interface_;
-
-  bool has_args_() { return function_->params().has_fields(); }
 
   bool is_interaction_member() const {
     // TODO(T230131540): Whisker migration requires back-reference from function
@@ -742,7 +734,6 @@ class mstch_struct : public mstch_base {
         this,
         {
             {"struct:self", &mstch_struct::self},
-            {"struct:fields?", &mstch_struct::has_fields},
             // In mstch, exceptions are bound as "struct:*" and "struct:self"
             // defaults to the t_structured prototype. This provides a way to
             // access the exception Whisker prototype from mstch

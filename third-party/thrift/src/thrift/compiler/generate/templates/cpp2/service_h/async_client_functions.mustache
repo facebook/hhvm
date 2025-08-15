@@ -15,7 +15,9 @@
   limitations under the License.
 
 }}
-{{#service:functions}}{{#function:return_type}}
+{{#service:functions}}{{!
+}}{{#let function_comma = (if function:params.fields? ", " null)}}{{!
+}}{{#function:return_type}}
 {{#function:starts_interaction?}}
 {{> common/fun_docblock}}
   {{type:name}} {{function:cpp_name}}();
@@ -23,13 +25,13 @@
 {{^function:sink?}}
 {{#function:legacy_client_methods?}}
 {{> common/fun_docblock}}
-  virtual void {{function:cpp_name}}(std::unique_ptr<apache::thrift::RequestCallback> callback{{function:comma}}{{> service_common/function_param_list_client}});
+  virtual void {{function:cpp_name}}(std::unique_ptr<apache::thrift::RequestCallback> callback{{function_comma}}{{> service_common/function_param_list_client}});
 {{/function:legacy_client_methods?}}
 {{> common/fun_docblock}}
-  {{#if function:virtual_client_methods?}}virtual {{/if}}void {{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function:comma}}{{> service_common/function_param_list_client}});
+  {{#if function:virtual_client_methods?}}virtual {{/if}}void {{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function_comma}}{{> service_common/function_param_list_client}});
 {{/function:sink?}}
  protected:
-  void fbthrift_serialize_and_send_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, {{> types/callback_type}} callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function:comma}}{{> service_common/function_param_list_client}}, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, {{> types/callback_type}} callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function_comma}}{{> service_common/function_param_list_client}}, bool stealRpcOptions = false);
  public:
 {{^function:sink?}}
 
@@ -37,13 +39,13 @@
 {{> common/fun_docblock}}
   {{#if function:virtual_client_methods?}}virtual {{/if}}{{> types/return_type_client}} sync_{{function:cpp_name}}({{> service_common/function_param_list_client}});
 {{> common/fun_docblock}}
-  {{#if function:virtual_client_methods?}}virtual {{/if}}{{> types/return_type_client}} sync_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}});
+  {{#if function:virtual_client_methods?}}virtual {{/if}}{{> types/return_type_client}} sync_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function_comma}}{{> service_common/function_param_list_client}});
 {{/function:sync_returns_by_outparam?}}
 {{#function:sync_returns_by_outparam?}}
 {{> common/fun_docblock}}
-  {{#if function:virtual_client_methods?}}virtual {{/if}}void sync_{{function:cpp_name}}({{function:cpp_return_type}}& _return{{function:comma}}{{> service_common/function_param_list_client}});
+  {{#if function:virtual_client_methods?}}virtual {{/if}}void sync_{{function:cpp_name}}({{function:cpp_return_type}}& _return{{function_comma}}{{> service_common/function_param_list_client}});
 {{> common/fun_docblock}}
-  {{#if function:virtual_client_methods?}}virtual {{/if}}void sync_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions, {{function:cpp_return_type}}& _return{{function:comma}}{{> service_common/function_param_list_client}});
+  {{#if function:virtual_client_methods?}}virtual {{/if}}void sync_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions, {{function:cpp_return_type}}& _return{{function_comma}}{{> service_common/function_param_list_client}});
 {{/function:sync_returns_by_outparam?}}
 
 {{#function:legacy_client_methods?}}{{^function:stream?}}
@@ -54,31 +56,31 @@
   {{#if function:virtual_client_methods?}}virtual {{/if}}folly::SemiFuture<{{> types/return_type_client_lift_unit}}> semifuture_{{function:cpp_name}}({{> service_common/function_param_list_client}});
 {{#function:legacy_client_methods?}}{{^function:stream?}}
 {{> common/fun_docblock}}
-  virtual folly::Future<{{> types/return_type_client_lift_unit}}> future_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}});
+  virtual folly::Future<{{> types/return_type_client_lift_unit}}> future_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function_comma}}{{> service_common/function_param_list_client}});
 {{/function:stream?}}{{/function:legacy_client_methods?}}
 {{> common/fun_docblock}}
-  {{#if function:virtual_client_methods?}}virtual {{/if}}folly::SemiFuture<{{> types/return_type_client_lift_unit}}> semifuture_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}});
+  {{#if function:virtual_client_methods?}}virtual {{/if}}folly::SemiFuture<{{> types/return_type_client_lift_unit}}> semifuture_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function_comma}}{{> service_common/function_param_list_client}});
 {{#function:creates_interaction?}}
 {{> common/fun_docblock}}
   std::pair<
     apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction}},
     folly::SemiFuture<{{> types/return_type_client_no_handle_lift_unit}}>
-  > eager_semifuture_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}});
+  > eager_semifuture_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function_comma}}{{> service_common/function_param_list_client}});
 {{/function:creates_interaction?}}
 {{^function:oneway?}}
 {{#function:legacy_client_methods?}}
 {{#function:has_deprecated_header_client_methods}}
 {{^function:stream?}}
 {{> common/fun_docblock}}
-  virtual folly::Future<std::pair<{{> types/return_type_client_lift_unit}}, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}});
+  virtual folly::Future<std::pair<{{> types/return_type_client_lift_unit}}, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function_comma}}{{> service_common/function_param_list_client}});
 {{/function:stream?}}
 {{> common/fun_docblock}}
-  virtual folly::SemiFuture<std::pair<{{> types/return_type_client_lift_unit}}, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}});
+  virtual folly::SemiFuture<std::pair<{{> types/return_type_client_lift_unit}}, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function_comma}}{{> service_common/function_param_list_client}});
 {{/function:has_deprecated_header_client_methods}}
 {{#type:sync_methods_return_try?}}
 {{> common/fun_docblock}}
   FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<{{> types/return_type_client}}>> sync_complete_{{function:cpp_name}}(
-      apache::thrift::RpcOptions&& rpcOptions{{function:comma}} {{> service_common/function_param_list_client}});
+      apache::thrift::RpcOptions&& rpcOptions{{function_comma}} {{> service_common/function_param_list_client}});
 {{/type:sync_methods_return_try?}}
 {{/function:legacy_client_methods?}}
 {{/function:oneway?}}
@@ -90,16 +92,16 @@
 {{> common/fun_docblock}}
   template <int = 0>
   folly::coro::Task<{{> types/return_type_client}}> co_{{function:cpp_name}}({{> service_common/function_param_list_client}}) {
-    return co_{{function:cpp_name}}<false>(nullptr{{function:comma}}{{> service_common/param_list}});
+    return co_{{function:cpp_name}}<false>(nullptr{{function_comma}}{{> service_common/param_list}});
   }
 {{> common/fun_docblock}}
   template <int = 0>
-  folly::coro::Task<{{> types/return_type_client}}> co_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}}) {
-    return co_{{function:cpp_name}}<true>(&rpcOptions{{function:comma}}{{> service_common/param_list}});
+  folly::coro::Task<{{> types/return_type_client}}> co_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function_comma}}{{> service_common/function_param_list_client}}) {
+    return co_{{function:cpp_name}}<true>(&rpcOptions{{function_comma}}{{> service_common/param_list}});
   }
  private:
   template <bool hasRpcOptions>
-  folly::coro::Task<{{> types/return_type_client}}> co_{{function:cpp_name}}(apache::thrift::RpcOptions* rpcOptions{{function:comma}}{{> service_common/function_param_list_client}}) {
+  folly::coro::Task<{{> types/return_type_client}}> co_{{function:cpp_name}}(apache::thrift::RpcOptions* rpcOptions{{function_comma}}{{> service_common/function_param_list_client}}) {
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     const bool cancellable = cancelToken.canBeCancelled();
@@ -130,9 +132,9 @@
       }
     }
     if constexpr (hasRpcOptions) {
-      fbthrift_serialize_and_send_{{function:cpp_name}}(*rpcOptions, header, ctx.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function:comma}}{{> service_common/param_list}});
+      fbthrift_serialize_and_send_{{function:cpp_name}}(*rpcOptions, header, ctx.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function_comma}}{{> service_common/param_list}});
     } else {
-      fbthrift_serialize_and_send_{{function:cpp_name}}(*defaultRpcOptions, header, ctx.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function:comma}}{{> service_common/param_list}});
+      fbthrift_serialize_and_send_{{function:cpp_name}}(*defaultRpcOptions, header, ctx.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function_comma}}{{> service_common/param_list}});
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -202,7 +204,7 @@
 {{#function:legacy_client_methods?}}
 {{^function:stream?}}
 {{> common/fun_docblock}}
-  virtual void {{function:cpp_name}}(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function:comma}}{{> service_common/function_param_list_client}});
+  virtual void {{function:cpp_name}}(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function_comma}}{{> service_common/function_param_list_client}});
 {{/function:stream?}}
 
 {{/function:legacy_client_methods?}}
@@ -211,7 +213,7 @@
 {{> common/fun_docblock}}
   folly::coro::Task<{{> types/return_type_client}}> co_{{function:cpp_name}}({{> service_common/function_param_list_client}});
 {{> common/fun_docblock}}
-  folly::coro::Task<{{> types/return_type_client}}> co_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}});
+  folly::coro::Task<{{> types/return_type_client}}> co_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function_comma}}{{> service_common/function_param_list_client}});
 #endif // FOLLY_HAS_COROUTINES
 {{/function:sink?}}
 
@@ -256,13 +258,13 @@
 {{/function:virtual_client_methods?}}
 {{/function:cpp_recv_arg?}}
  private:
-  apache::thrift::SerializedRequest fbthrift_serialize_{{function:cpp_name}}(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack{{function:comma}}{{> service_common/function_param_list_client}});
+  apache::thrift::SerializedRequest fbthrift_serialize_{{function:cpp_name}}(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack{{function_comma}}{{> service_common/function_param_list_client}});
   template <typename RpcOptions>
   void fbthrift_send_{{function:cpp_name}}(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, {{> types/callback_type}} callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}});
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> {{function:cpp_name}}Ctx(apache::thrift::RpcOptions* rpcOptions);
 {{^function:sink?}}
   template <typename CallbackType>
-  folly::SemiFuture<{{> types/return_type_client_lift_unit}}> fbthrift_semifuture_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}});
+  folly::SemiFuture<{{> types/return_type_client_lift_unit}}> fbthrift_semifuture_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function_comma}}{{> service_common/function_param_list_client}});
 {{/function:sink?}}
  public:
 {{/function:starts_interaction?}}{{/function:return_type}}{{/service:functions}}

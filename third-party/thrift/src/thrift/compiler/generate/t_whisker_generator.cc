@@ -293,6 +293,7 @@ prototype<t_structured>::ptr t_whisker_generator::make_prototype_for_structured(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_structured>::extends(proto.of<t_type>());
   def.property("fields", mem_fn(&t_structured::fields, proto.of<t_field>()));
+  def.property("fields?", mem_fn(&t_structured::has_fields));
   return std::move(def).make();
 }
 

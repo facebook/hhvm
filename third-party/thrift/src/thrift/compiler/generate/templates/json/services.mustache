@@ -35,7 +35,7 @@
         {{#function:docs?}}
         "docstring" : {{function:docstring}},
         {{/function:docs?}}
-        {{#function:args?}}
+        {{#function:params.fields?}}
         "args" : {
           {{#function:args}}
           "{{field:name}}": {
@@ -68,7 +68,7 @@
           }{{^last?}},{{/last?}}
           {{/function:args}}
         },
-        {{/function:args?}}
+        {{/function:params.fields?}}
         {{#function:exceptions?}}
         "exceptions" : {
           {{#function:exceptions}}

@@ -25,7 +25,7 @@ class {{> types/function_args_type}}({{> types/struct_base }}):
     {{/function:args}}
 
     def __init__(
-        self,{{#function:args?}} *{{/function:args?}}{{#function:args}}{{> types/init_and_call_arg_types}}{{/function:args}}
+        self,{{#function:params.fields?}} *{{/function:params.fields?}}{{#function:args}}{{> types/init_and_call_arg_types}}{{/function:args}}
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[

@@ -14,15 +14,16 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}
+}}{{!
+}}{{#let function_comma = (if function:params.fields? ", " null)}}
 {{^function:sink?}}{{#function:legacy_client_methods?}}
-void {{> service_common/client_class_name}}::{{function:cpp_name}}(std::unique_ptr<apache::thrift::RequestCallback> callback{{function:comma}}{{> service_common/function_param_list_client}}) {
+void {{> service_common/client_class_name}}::{{function:cpp_name}}(std::unique_ptr<apache::thrift::RequestCallback> callback{{function_comma}}{{> service_common/function_param_list_client}}) {
   ::apache::thrift::RpcOptions rpcOptions;
-  {{function:cpp_name}}(rpcOptions, std::move(callback){{function:comma}}{{> service_common/param_list}});
+  {{function:cpp_name}}(rpcOptions, std::move(callback){{function_comma}}{{> service_common/param_list}});
 }
 {{/function:legacy_client_methods?}}
 
-void {{> service_common/client_class_name}}::{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function:comma}}{{> service_common/function_param_list_client}}) {
+void {{> service_common/client_class_name}}::{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function_comma}}{{> service_common/function_param_list_client}}) {
   auto [ctx, header] = {{function:cpp_name}}Ctx(&rpcOptions);
   if (ctx != nullptr) {
     auto argsAsRefs = std::tie({{> service_common/param_list}});
@@ -32,11 +33,11 @@ void {{> service_common/client_class_name}}::{{function:cpp_name}}(apache::thrif
 {{#function:stream?}}
   auto streamCallback = apache::thrift::createStreamClientCallback(std::move(wrappedCallback), rpcOptions.getBufferOptions());
 {{/function:stream?}}
-  fbthrift_serialize_and_send_{{function:cpp_name}}(rpcOptions, std::move(header), contextStack, {{#function:stream?}}std::move(streamCallback){{/function:stream?}}{{^function:stream?}}std::move(wrappedCallback){{/function:stream?}}{{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function:comma}}{{> service_common/param_list}});
+  fbthrift_serialize_and_send_{{function:cpp_name}}(rpcOptions, std::move(header), contextStack, {{#function:stream?}}std::move(streamCallback){{/function:stream?}}{{^function:stream?}}std::move(wrappedCallback){{/function:stream?}}{{#function:creates_interaction?}}, handle{{/function:creates_interaction?}}{{function_comma}}{{> service_common/param_list}});
 }
 
 {{/function:sink?}}
-apache::thrift::SerializedRequest {{> service_common/client_class_name}}::fbthrift_serialize_{{function:cpp_name}}(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack{{function:comma}}{{> service_common/function_param_list_client}}) {
+apache::thrift::SerializedRequest {{> service_common/client_class_name}}::fbthrift_serialize_{{function:cpp_name}}(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack{{function_comma}}{{> service_common/function_param_list_client}}) {
   return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
     using ProtocolWriter = std::decay_t<decltype(prot)>;
     ::{{service:qualified_namespace}}::{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_pargs args;
@@ -63,8 +64,8 @@ apache::thrift::SerializedRequest {{> service_common/client_class_name}}::fbthri
   });
 }
 
-void {{> service_common/client_class_name}}::fbthrift_serialize_and_send_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, {{> types/callback_type}} callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function:comma}}{{> service_common/function_param_list_client}}, bool stealRpcOptions) {
-  apache::thrift::SerializedRequest request = fbthrift_serialize_{{function:cpp_name}}(rpcOptions, *header, contextStack{{function:comma}}{{> service_common/param_list}});
+void {{> service_common/client_class_name}}::fbthrift_serialize_and_send_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, {{> types/callback_type}} callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function_comma}}{{> service_common/function_param_list_client}}, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_{{function:cpp_name}}(rpcOptions, *header, contextStack{{function_comma}}{{> service_common/param_list}});
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);

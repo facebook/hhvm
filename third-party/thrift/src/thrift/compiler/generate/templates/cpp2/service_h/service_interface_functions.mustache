@@ -15,7 +15,9 @@
   limitations under the License.
 
 }}
-{{#service:functions}}{{#function:return_type}}{{^function:starts_interaction?}}
+{{#service:functions}}{{!
+}}{{#let function_comma = (if function:params.fields? ", " null)}}{{!
+}}{{#function:return_type}}{{^function:starts_interaction?}}
 {{^function:eb}}
   virtual {{> service_common/sync_function_return_type_server}} sync_{{function:cpp_name}}({{> service_common/sync_function_return_param_server}}{{> service_common/function_param_list_server_commented_out}});
   [[deprecated("Use sync_{{function:cpp_name}} instead")]] virtual {{> service_common/sync_function_return_type_server}} {{function:cpp_name}}({{> service_common/sync_function_return_param_server}}{{> service_common/function_param_list_server_commented_out}});
@@ -25,14 +27,14 @@
   virtual folly::SemiFuture<{{> types/return_type_server_lift_unit}}> semifuture_{{function:cpp_name}}({{> service_common/function_param_list_server}});
 #if FOLLY_HAS_COROUTINES
   virtual folly::coro::Task<{{> types/return_type_server}}> co_{{function:cpp_name}}({{> service_common/function_param_list_server}});
-  virtual folly::coro::Task<{{> types/return_type_server}}> co_{{function:cpp_name}}(apache::thrift::RequestParams params{{function:comma}}{{> service_common/function_param_list_server}});
+  virtual folly::coro::Task<{{> types/return_type_server}}> co_{{function:cpp_name}}(apache::thrift::RequestParams params{{function_comma}}{{> service_common/function_param_list_server}});
 #endif
 {{/function:eb}}
 {{#function:oneway?}}
-  virtual void async_{{#function:eb}}eb{{/function:eb}}{{^function:eb}}tm{{/function:eb}}_{{function:cpp_name}}(apache::thrift::HandlerCallbackOneWay::Ptr callback{{function:comma}}{{> service_common/function_param_list_server}});
+  virtual void async_{{#function:eb}}eb{{/function:eb}}{{^function:eb}}tm{{/function:eb}}_{{function:cpp_name}}(apache::thrift::HandlerCallbackOneWay::Ptr callback{{function_comma}}{{> service_common/function_param_list_server}});
 {{/function:oneway?}}
 {{^function:oneway?}}
-  virtual void async_{{#function:eb}}eb{{/function:eb}}{{^function:eb}}tm{{/function:eb}}_{{function:cpp_name}}(apache::thrift::HandlerCallbackPtr<{{> types/return_type_server}}> callback{{function:comma}}{{> service_common/function_param_list_server}});
+  virtual void async_{{#function:eb}}eb{{/function:eb}}{{^function:eb}}tm{{/function:eb}}_{{function:cpp_name}}(apache::thrift::HandlerCallbackPtr<{{> types/return_type_server}}> callback{{function_comma}}{{> service_common/function_param_list_server}});
 {{/function:oneway?}}
 {{/function:starts_interaction?}}{{#function:starts_interaction?}}
   virtual std::unique_ptr<{{type:name}}If> {{function:cpp_name}}();

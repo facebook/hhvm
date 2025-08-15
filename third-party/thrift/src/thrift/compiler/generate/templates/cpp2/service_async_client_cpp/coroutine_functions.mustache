@@ -14,14 +14,15 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}
+}}{{!
+}}{{#let function_comma = (if function:params.fields? ", " null)}}
 #if FOLLY_HAS_COROUTINES
 {{#function:sink?}}
 folly::coro::Task<{{> types/return_type_client}}> {{> service_common/client_class_name}}::co_{{function:cpp_name}}({{> service_common/function_param_list_client}}) {
   ::apache::thrift::RpcOptions rpcOptions;
-  co_return co_await co_{{function:cpp_name}}(rpcOptions{{function:comma}}{{> service_common/param_list}});
+  co_return co_await co_{{function:cpp_name}}(rpcOptions{{function_comma}}{{> service_common/param_list}});
 }
-folly::coro::Task<{{> types/return_type_client}}> {{> service_common/client_class_name}}::co_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{> service_common/function_param_list_client}}) {
+folly::coro::Task<{{> types/return_type_client}}> {{> service_common/client_class_name}}::co_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function_comma}}{{> service_common/function_param_list_client}}) {
   const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
   const bool cancellable = cancelToken.canBeCancelled();
@@ -42,7 +43,7 @@ folly::coro::Task<{{> types/return_type_client}}> {{> service_common/client_clas
     ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
   }
 
-  fbthrift_serialize_and_send_{{function:cpp_name}}(rpcOptions, std::move(header), ctx.get(), wrappedCallback{{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function:comma}}{{> service_common/param_list}});
+  fbthrift_serialize_and_send_{{function:cpp_name}}(rpcOptions, std::move(header), ctx.get(), wrappedCallback{{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function_comma}}{{> service_common/param_list}});
 
   if (cancellable) {
     folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

@@ -23,13 +23,13 @@
     Name:       "{{function:name}}",
     IsOneway:   {{function:oneway?}},
     ReturnType: {{#function:return_type}}{{type:metadata_thrift_type_getter}}{{/function:return_type}},
-    {{#function:args?}}
+    {{#function:params.fields?}}
     Arguments:  []*{{program:metadata_qualifier}}ThriftField{
         {{#function:args}}
         {{> metadata/thrift_metadata_field}}
         {{/function:args}}
     },
-    {{/function:args?}}
+    {{/function:params.fields?}}
     {{#function:exceptions?}}
     Exceptions: []*{{program:metadata_qualifier}}ThriftField{
         {{#function:exceptions}}

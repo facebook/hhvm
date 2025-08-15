@@ -697,41 +697,39 @@ namespace test::fixtures::tablebased { namespace {
 }
 }} // namespace test::fixtures::tablebased
 
-namespace apache {
-namespace thrift {
-namespace detail {
-const ::apache::thrift::detail::TypeInfo TypeToInfo<
-    apache::thrift::type_class::enumeration,
+namespace apache::thrift::detail {
+const TypeInfo TypeToInfo<
+    type_class::enumeration,
     ::test::fixtures::tablebased::ExampleEnum>::typeInfo = {
-  /* .type */ apache::thrift::protocol::TType::T_I32,
-  /* .get */ get<std::int32_t, ::test::fixtures::tablebased::ExampleEnum>,
-  /* .set */ reinterpret_cast<VoidPtrFuncPtr>(set<::test::fixtures::tablebased::ExampleEnum, std::int32_t>),
-  /* .typeExt */ nullptr,
+    /* .type */ protocol::TType::T_I32,
+    /* .get */ get<int32_t, ::test::fixtures::tablebased::ExampleEnum>,
+    /* .set */ reinterpret_cast<VoidPtrFuncPtr>(set<::test::fixtures::tablebased::ExampleEnum, int32_t>),
+    /* .typeExt */ nullptr,
 };
-const ::apache::thrift::detail::TypeInfo TypeToInfo<
-  ::apache::thrift::type_class::structure,
-  ::test::fixtures::tablebased::TrivialTypesStruct>::typeInfo = {
-  /* .type */ ::apache::thrift::protocol::TType::T_STRUCT,
-  /* .get */ nullptr,
-  /* .set */ nullptr,
-  /* .typeExt */ &::test::fixtures::tablebased::__fbthrift_struct_info_TrivialTypesStruct,
+const TypeInfo TypeToInfo<
+    type_class::structure,
+    ::test::fixtures::tablebased::TrivialTypesStruct>::typeInfo = {
+    /* .type */ protocol::TType::T_STRUCT,
+    /* .get */ nullptr,
+    /* .set */ nullptr,
+    /* .typeExt */ &::test::fixtures::tablebased::__fbthrift_struct_info_TrivialTypesStruct,
 };
-const ::apache::thrift::detail::TypeInfo TypeToInfo<
-  ::apache::thrift::type_class::structure,
-  ::test::fixtures::tablebased::ContainerStruct>::typeInfo = {
-  /* .type */ ::apache::thrift::protocol::TType::T_STRUCT,
-  /* .get */ nullptr,
-  /* .set */ nullptr,
-  /* .typeExt */ &::test::fixtures::tablebased::__fbthrift_struct_info_ContainerStruct,
+const TypeInfo TypeToInfo<
+    type_class::structure,
+    ::test::fixtures::tablebased::ContainerStruct>::typeInfo = {
+    /* .type */ protocol::TType::T_STRUCT,
+    /* .get */ nullptr,
+    /* .set */ nullptr,
+    /* .typeExt */ &::test::fixtures::tablebased::__fbthrift_struct_info_ContainerStruct,
 };
-const ::apache::thrift::detail::TypeInfo TypeToInfo<
-  ::apache::thrift::type_class::variant,
-  ::test::fixtures::tablebased::ExampleUnion>::typeInfo = {
-  /* .type */ ::apache::thrift::protocol::TType::T_STRUCT,
-  /* .get */ nullptr,
-  /* .set */ nullptr,
-  /* .typeExt */ &::test::fixtures::tablebased::__fbthrift_struct_info_ExampleUnion,
+const TypeInfo TypeToInfo<
+    type_class::variant,
+    ::test::fixtures::tablebased::ExampleUnion>::typeInfo = {
+    /* .type */ protocol::TType::T_STRUCT,
+    /* .get */ nullptr,
+    /* .set */ nullptr,
+    /* .typeExt */ &::test::fixtures::tablebased::__fbthrift_struct_info_ExampleUnion,
 };
-}}} // namespace apache::thrift::detail
+} // namespace apache::thrift::detail
 namespace apache::thrift::detail::annotation {
 }

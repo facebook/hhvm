@@ -231,30 +231,28 @@ namespace {{program:qualified_namespace}} { namespace {
 }} // namespace {{program:qualified_namespace}}
 {{#program:tablebased?}}
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 {{#program:split_enums}}
-const ::apache::thrift::detail::TypeInfo TypeToInfo<
-    apache::thrift::type_class::enumeration,
+const TypeInfo TypeToInfo<
+    type_class::enumeration,
     ::{{program:qualified_namespace}}::{{enum:cpp_name}}>::typeInfo = {
-  /* .type */ apache::thrift::protocol::TType::T_I32,
-  /* .get */ get<std::int32_t, ::{{program:qualified_namespace}}::{{enum:cpp_name}}>,
-  /* .set */ reinterpret_cast<VoidPtrFuncPtr>(set<::{{program:qualified_namespace}}::{{enum:cpp_name}}, std::int32_t>),
-  /* .typeExt */ nullptr,
+    /* .type */ protocol::TType::T_I32,
+    /* .get */ get<int32_t, ::{{program:qualified_namespace}}::{{enum:cpp_name}}>,
+    /* .set */ reinterpret_cast<VoidPtrFuncPtr>(set<::{{program:qualified_namespace}}::{{enum:cpp_name}}, int32_t>),
+    /* .typeExt */ nullptr,
 };
 {{/program:split_enums}}
 {{#program:split_structs}}
-const ::apache::thrift::detail::TypeInfo TypeToInfo<
-  ::apache::thrift::type_class::{{#struct:union?}}variant{{/struct:union?}}{{^struct:union?}}structure{{/struct:union?}},
-  {{struct:cpp_fullname}}>::typeInfo = {
-  /* .type */ ::apache::thrift::protocol::TType::T_STRUCT,
-  /* .get */ nullptr,
-  /* .set */ nullptr,
-  /* .typeExt */ &::{{program:qualified_namespace}}::__fbthrift_struct_info_{{struct:cpp_underlying_name}},
+const TypeInfo TypeToInfo<
+    type_class::{{#struct:union?}}variant{{/struct:union?}}{{^struct:union?}}structure{{/struct:union?}},
+    {{struct:cpp_fullname}}>::typeInfo = {
+    /* .type */ protocol::TType::T_STRUCT,
+    /* .get */ nullptr,
+    /* .set */ nullptr,
+    /* .typeExt */ &::{{program:qualified_namespace}}::__fbthrift_struct_info_{{struct:cpp_underlying_name}},
 };
 {{/program:split_structs}}
-}}} // namespace apache::thrift::detail
+} // namespace apache::thrift::detail
 {{/program:tablebased?}}
 namespace apache::thrift::detail::annotation {
 {{#program:split_structs}}

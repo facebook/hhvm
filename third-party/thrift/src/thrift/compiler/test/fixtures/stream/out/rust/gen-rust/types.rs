@@ -7,404 +7,397 @@
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 
-
 pub mod services;
 
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct FooStreamEx {
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
 
-
-    
-    #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    pub struct FooStreamEx {
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    impl ::fbthrift::ExceptionInfo for FooStreamEx {
-        fn exn_value(&self) -> String {
-            format!("{:?}", self)
-        }
-    
-        #[inline]
-        fn exn_is_declared(&self) -> bool { true }
-    }
-    
-    impl ::std::error::Error for FooStreamEx {}
-    
-    impl ::std::fmt::Display for FooStreamEx {
-        fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            write!(f, "{:?}", self)
-        }
-    }
-    
-    #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    pub struct FooEx {
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    impl ::fbthrift::ExceptionInfo for FooEx {
-        fn exn_value(&self) -> String {
-            format!("{:?}", self)
-        }
-    
-        #[inline]
-        fn exn_is_declared(&self) -> bool { true }
-    }
-    
-    impl ::std::error::Error for FooEx {}
-    
-    impl ::std::fmt::Display for FooEx {
-        fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            write!(f, "{:?}", self)
-        }
-    }
-    
-    #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    pub struct FooEx2 {
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    impl ::fbthrift::ExceptionInfo for FooEx2 {
-        fn exn_value(&self) -> String {
-            format!("{:?}", self)
-        }
-    
-        #[inline]
-        fn exn_is_declared(&self) -> bool { true }
-    }
-    
-    impl ::std::error::Error for FooEx2 {}
-    
-    impl ::std::fmt::Display for FooEx2 {
-        fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            write!(f, "{:?}", self)
-        }
+impl ::fbthrift::ExceptionInfo for FooStreamEx {
+    fn exn_value(&self) -> String {
+        format!("{:?}", self)
     }
 
+    #[inline]
+    fn exn_is_declared(&self) -> bool { true }
+}
 
+impl ::std::error::Error for FooStreamEx {}
 
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::FooStreamEx {
-        fn default() -> Self {
-            Self {
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-            }
+impl ::std::fmt::Display for FooStreamEx {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct FooEx {
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+impl ::fbthrift::ExceptionInfo for FooEx {
+    fn exn_value(&self) -> String {
+        format!("{:?}", self)
+    }
+
+    #[inline]
+    fn exn_is_declared(&self) -> bool { true }
+}
+
+impl ::std::error::Error for FooEx {}
+
+impl ::std::fmt::Display for FooEx {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct FooEx2 {
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+impl ::fbthrift::ExceptionInfo for FooEx2 {
+    fn exn_value(&self) -> String {
+        format!("{:?}", self)
+    }
+
+    #[inline]
+    fn exn_is_declared(&self) -> bool { true }
+}
+
+impl ::std::error::Error for FooEx2 {}
+
+impl ::std::fmt::Display for FooEx2 {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::FooStreamEx {
+    fn default() -> Self {
+        Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
-    
-    impl ::std::fmt::Debug for self::FooStreamEx {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("FooStreamEx")
-                .finish()
-        }
+}
+
+impl ::std::fmt::Debug for self::FooStreamEx {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("FooStreamEx")
+            .finish()
     }
-    
-    unsafe impl ::std::marker::Send for self::FooStreamEx {}
-    unsafe impl ::std::marker::Sync for self::FooStreamEx {}
-    impl ::std::marker::Unpin for self::FooStreamEx {}
-    impl ::std::panic::RefUnwindSafe for self::FooStreamEx {}
-    impl ::std::panic::UnwindSafe for self::FooStreamEx {}
-    
-    impl ::fbthrift::GetTType for self::FooStreamEx {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+unsafe impl ::std::marker::Send for self::FooStreamEx {}
+unsafe impl ::std::marker::Sync for self::FooStreamEx {}
+impl ::std::marker::Unpin for self::FooStreamEx {}
+impl ::std::panic::RefUnwindSafe for self::FooStreamEx {}
+impl ::std::panic::UnwindSafe for self::FooStreamEx {}
+
+impl ::fbthrift::GetTType for self::FooStreamEx {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::FooStreamEx {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
-    
-    impl ::fbthrift::GetTypeNameType for self::FooStreamEx {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::FooStreamEx
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("FooStreamEx");
+        p.write_field_stop();
+        p.write_struct_end();
     }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::FooStreamEx
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("FooStreamEx");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::FooStreamEx
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = FooStreamEx::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a FooStreamEx")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::FooStreamEx
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = FooStreamEx::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a FooStreamEx")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (fty, _) => p.skip(fty)?,
                 }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for FooStreamEx {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::FooEx {
-        fn default() -> Self {
-            Self {
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             }
         }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
     }
-    
-    impl ::std::fmt::Debug for self::FooEx {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("FooEx")
-                .finish()
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for FooStreamEx {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::FooEx {
+    fn default() -> Self {
+        Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
-    
-    unsafe impl ::std::marker::Send for self::FooEx {}
-    unsafe impl ::std::marker::Sync for self::FooEx {}
-    impl ::std::marker::Unpin for self::FooEx {}
-    impl ::std::panic::RefUnwindSafe for self::FooEx {}
-    impl ::std::panic::UnwindSafe for self::FooEx {}
-    
-    impl ::fbthrift::GetTType for self::FooEx {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::std::fmt::Debug for self::FooEx {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("FooEx")
+            .finish()
     }
-    
-    impl ::fbthrift::GetTypeNameType for self::FooEx {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
+}
+
+unsafe impl ::std::marker::Send for self::FooEx {}
+unsafe impl ::std::marker::Sync for self::FooEx {}
+impl ::std::marker::Unpin for self::FooEx {}
+impl ::std::panic::RefUnwindSafe for self::FooEx {}
+impl ::std::panic::UnwindSafe for self::FooEx {}
+
+impl ::fbthrift::GetTType for self::FooEx {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::FooEx {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::FooEx
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("FooEx");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::FooEx
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("FooEx");
+        p.write_field_stop();
+        p.write_struct_end();
     }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::FooEx
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = FooEx::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a FooEx")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::FooEx
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = FooEx::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a FooEx")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (fty, _) => p.skip(fty)?,
                 }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for FooEx {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::FooEx2 {
-        fn default() -> Self {
-            Self {
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             }
         }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
     }
-    
-    impl ::std::fmt::Debug for self::FooEx2 {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("FooEx2")
-                .finish()
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for FooEx {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::FooEx2 {
+    fn default() -> Self {
+        Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
-    
-    unsafe impl ::std::marker::Send for self::FooEx2 {}
-    unsafe impl ::std::marker::Sync for self::FooEx2 {}
-    impl ::std::marker::Unpin for self::FooEx2 {}
-    impl ::std::panic::RefUnwindSafe for self::FooEx2 {}
-    impl ::std::panic::UnwindSafe for self::FooEx2 {}
-    
-    impl ::fbthrift::GetTType for self::FooEx2 {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::std::fmt::Debug for self::FooEx2 {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("FooEx2")
+            .finish()
     }
-    
-    impl ::fbthrift::GetTypeNameType for self::FooEx2 {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
+}
+
+unsafe impl ::std::marker::Send for self::FooEx2 {}
+unsafe impl ::std::marker::Sync for self::FooEx2 {}
+impl ::std::marker::Unpin for self::FooEx2 {}
+impl ::std::panic::RefUnwindSafe for self::FooEx2 {}
+impl ::std::panic::UnwindSafe for self::FooEx2 {}
+
+impl ::fbthrift::GetTType for self::FooEx2 {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::FooEx2 {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::FooEx2
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("FooEx2");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::FooEx2
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("FooEx2");
+        p.write_field_stop();
+        p.write_struct_end();
     }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::FooEx2
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = FooEx2::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a FooEx2")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::FooEx2
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = FooEx2::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a FooEx2")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (fty, _) => p.skip(fty)?,
                 }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
         }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
     }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for FooEx2 {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for FooEx2 {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
     }
-    
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
 
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -443,13 +436,8 @@ pub(crate) mod r#impl {
     }
 }
 
-
 #[doc(hidden)]
 #[deprecated]
 #[allow(hidden_glob_reexports)]
 pub mod __constructors {
 }
-
-
-
-

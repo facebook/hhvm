@@ -7,15 +7,7 @@
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 
-
 pub mod services;
-
-
-
-
-
-
-
 
 
 pub(crate) mod r#impl {
@@ -45,13 +37,8 @@ pub(crate) mod r#impl {
     }
 }
 
-
 #[doc(hidden)]
 #[deprecated]
 #[allow(hidden_glob_reexports)]
 pub mod __constructors {
 }
-
-
-
-

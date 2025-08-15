@@ -33,70 +33,97 @@
 {{! Allows lib/type.mustache to use `crate::types::Type` regardless of which crate it's called from }}
 #[allow(unused_imports)]
 pub(crate) use {{program:crate}} as types;
-
+{{!
+================================================================================
+}}
 {{#program:split_mode_enabled?}}
+
 {{#program:type_splits}}
 #[allow(unused_imports)]
 pub use {{program:types}}_split{{.}}::*;
 {{/program:type_splits}}
 {{/program:split_mode_enabled?}}
-
+{{!
+================================================================================
+}}
 {{#program:serde?}}
+
 {{! Work around https://github.com/rust-lang/rust/issues/46991 }}
 extern crate serde;
-
-{{/program:serde?}}{{!
-
+{{/program:serde?}}
+{{!
+================================================================================
 }}
 {{#program:valuable?}}
+
 {{! Work around https://github.com/rust-lang/rust/issues/46991 }}
 extern crate valuable;
+{{/program:valuable?}}
+{{!
+================================================================================
+}}
+{{#program:types_include_srcs}}
 
-{{/program:valuable?}}{{!
-
-}}{{#program:types_include_srcs}}
 include!("{{.}}");
-{{/program:types_include_srcs}}{{!
-
+{{/program:types_include_srcs}}
+{{!
+================================================================================
 }}
 {{#program:constants?}}
+
 pub mod consts;
 #[doc(inline)]
 pub use self::consts::*;
-{{/program:constants?}}{{!
+{{/program:constants?}}
+{{!
+================================================================================
+}}
+{{#program:services?}}
 
-}}{{#program:services?}}
 pub mod services;
-
 {{/program:services?}}
-
-{{^program:split_mode_enabled?}}
+{{!
+================================================================================
+}}{{^program:split_mode_enabled?}}{{!
+--------------------------------------------------------------------------------
+}}
 {{#program:typedefs}}
-    {{> lib/typedef}}
+{{> lib/typedef}}
 {{/program:typedefs}}
-
+{{!
+--------------------------------------------------------------------------------
+}}
 {{#program:structs}}
-    {{^struct:has_adapter?}}
-    {{> lib/struct}}
-    {{/struct:has_adapter?}}
+{{^struct:has_adapter?}}
+{{> lib/struct}}
+{{/struct:has_adapter?}}
 {{/program:structs}}
-
+{{!
+--------------------------------------------------------------------------------
+}}
 {{#program:enums}}
 {{> lib/enum}}
 {{/program:enums}}
-
+{{!
+--------------------------------------------------------------------------------
+}}
 {{#program:typedefs}}
-    {{> lib/typedefimpl}}
+{{> lib/typedefimpl}}
 {{/program:typedefs}}
-
+{{!
+--------------------------------------------------------------------------------
+}}
 {{#program:structs}}
-    {{^struct:has_adapter?}}
-    {{> lib/structimpl}}
-    {{> lib/unionimpl}}
-    {{/struct:has_adapter?}}
+{{^struct:has_adapter?}}
+{{> lib/structimpl}}
+{{> lib/unionimpl}}
+{{/struct:has_adapter?}}
 {{/program:structs}}
-
+{{!
+--------------------------------------------------------------------------------
+}}
 {{#program:nonexhaustiveStructs?}}
+
 mod dot_dot {{> lib/block}}{{!
     NOTE: intentionally no Default impl}}
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash{{#program:valuable?}}, ::valuable::Valuable{{/program:valuable?}})]
@@ -106,12 +133,21 @@ mod dot_dot {{> lib/block}}{{!
     pub(super) fn default_for_serde_deserialize() -> OtherFields {
         OtherFields(())
     }
-}{{!
-}}{{/program:nonexhaustiveStructs?}}
+}{{/program:nonexhaustiveStructs?}}
+{{!
+--------------------------------------------------------------------------------
+}}
 
 pub(crate) mod r#impl {{> lib/block}}{{> lib/mod.impl}}}
 {{!
-}}{{#program:has_default_tests?}}{{> lib/adapter/default_test}}{{/program:has_default_tests?}}
+--------------------------------------------------------------------------------
+}}
+{{#program:has_default_tests?}}
+{{> lib/adapter/default_test}}
+{{/program:has_default_tests?}}
+{{!
+--------------------------------------------------------------------------------
+}}
 
 #[doc(hidden)]
 #[deprecated]
@@ -124,18 +160,26 @@ pub mod __constructors {
     pub use self::{{.}}::*;
     {{/program:types_with_constructors}}
 }
-{{/program:split_mode_enabled?}}
-
+{{!
+--------------------------------------------------------------------------------
+}}{{/program:split_mode_enabled?}}{{!
+================================================================================
+}}
 {{#program:has_adapted_structs?}}
-    {{> lib/mod.unadapted}}
-    {{> lib/mod.adapted_types}}
+{{> lib/mod.unadapted}}
+{{> lib/mod.adapted_types}}
 {{/program:has_adapted_structs?}}
-
+{{!
+================================================================================
+}}
 {{#program:has_adapters?}}
-    {{> lib/mod.adapters}}
+{{> lib/mod.adapters}}
 {{/program:has_adapters?}}
-
+{{!
+================================================================================
+}}
 {{#program:direct_dependencies?}}
+
 #[doc(hidden)]
 #[deprecated]
 pub mod __dependencies {
@@ -146,8 +190,11 @@ pub mod __dependencies {
     {{/program:direct_dependencies}}
 }
 {{/program:direct_dependencies?}}
-
+{{!
+================================================================================
+}}
 {{#if (has_compiler_option? "any")}}
+
 pub fn init_registry(registry: &mut ::fbthrift_conformance::AnyRegistry) -> ::anyhow::Result<bool> {
 {{#program:structs}}
     registry.register_type::<{{struct:rust_name}}>()?;
@@ -155,3 +202,6 @@ pub fn init_registry(registry: &mut ::fbthrift_conformance::AnyRegistry) -> ::an
     ::std::result::Result::Ok(true)
 }
 {{/if (has_compiler_option? "any")}}
+{{!
+================================================================================
+}}

@@ -7,291 +7,284 @@
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 
-
 pub mod services;
 
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct CustomException {
+    pub message: ::std::string::String,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
 
-
-    
-    #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    pub struct CustomException {
-        pub message: ::std::string::String,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+impl ::fbthrift::ExceptionInfo for CustomException {
+    fn exn_value(&self) -> String {
+        format!("{:?}", self)
     }
-    
-    impl ::fbthrift::ExceptionInfo for CustomException {
-        fn exn_value(&self) -> String {
-            format!("{:?}", self)
+
+    #[inline]
+    fn exn_is_declared(&self) -> bool { true }
+}
+
+impl ::std::error::Error for CustomException {}
+
+impl ::std::fmt::Display for CustomException {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct ShouldBeBoxed {
+    pub sessionId: ::std::string::String,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::CustomException {
+    fn default() -> Self {
+        Self {
+            message: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
-    
-        #[inline]
-        fn exn_is_declared(&self) -> bool { true }
     }
-    
-    impl ::std::error::Error for CustomException {}
-    
-    impl ::std::fmt::Display for CustomException {
-        fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            write!(f, "{:?}", self)
-        }
+}
+
+impl ::std::fmt::Debug for self::CustomException {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("CustomException")
+            .field("message", &self.message)
+            .finish()
     }
-    
-    #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    pub struct ShouldBeBoxed {
-        pub sessionId: ::std::string::String,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+unsafe impl ::std::marker::Send for self::CustomException {}
+unsafe impl ::std::marker::Sync for self::CustomException {}
+impl ::std::marker::Unpin for self::CustomException {}
+impl ::std::panic::RefUnwindSafe for self::CustomException {}
+impl ::std::panic::UnwindSafe for self::CustomException {}
+
+impl ::fbthrift::GetTType for self::CustomException {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::CustomException {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
+}
 
+impl<P> ::fbthrift::Serialize<P> for self::CustomException
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("CustomException");
+        p.write_field_begin("message", ::fbthrift::TType::String, 1);
+        ::fbthrift::Serialize::rs_thrift_write(&self.message, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
 
+impl<P> ::fbthrift::Deserialize<P> for self::CustomException
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("message", ::fbthrift::TType::String, 1),
+        ];
 
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::CustomException {
-        fn default() -> Self {
-            Self {
-                message: ::std::default::Default::default(),
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        #[allow(unused_mut)]
+        let mut output = CustomException::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a CustomException")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::String, 1) {
+                output.message = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "message", strct: "CustomException"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
             }
-        }
-    }
-    
-    impl ::std::fmt::Debug for self::CustomException {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("CustomException")
-                .field("message", &self.message)
-                .finish()
-        }
-    }
-    
-    unsafe impl ::std::marker::Send for self::CustomException {}
-    unsafe impl ::std::marker::Sync for self::CustomException {}
-    impl ::std::marker::Unpin for self::CustomException {}
-    impl ::std::panic::RefUnwindSafe for self::CustomException {}
-    impl ::std::panic::UnwindSafe for self::CustomException {}
-    
-    impl ::fbthrift::GetTType for self::CustomException {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::CustomException {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::CustomException
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("CustomException");
-            p.write_field_begin("message", ::fbthrift::TType::String, 1);
-            ::fbthrift::Serialize::rs_thrift_write(&self.message, p);
-            p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::CustomException
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("message", ::fbthrift::TType::String, 1),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = CustomException::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a CustomException")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::String, 1) {
-                    output.message = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "message", strct: "CustomException"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::String, 1) => output.message = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "message", strct: "CustomException"})?,
+                    (fty, _) => p.skip(fty)?,
                 }
+                p.read_field_end()?;
                 (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::String, 1) => output.message = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "message", strct: "CustomException"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for CustomException {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::ShouldBeBoxed {
+    fn default() -> Self {
+        Self {
+            sessionId: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::ShouldBeBoxed {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("ShouldBeBoxed")
+            .field("sessionId", &self.sessionId)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::ShouldBeBoxed {}
+unsafe impl ::std::marker::Sync for self::ShouldBeBoxed {}
+impl ::std::marker::Unpin for self::ShouldBeBoxed {}
+impl ::std::panic::RefUnwindSafe for self::ShouldBeBoxed {}
+impl ::std::panic::UnwindSafe for self::ShouldBeBoxed {}
+
+impl ::fbthrift::GetTType for self::ShouldBeBoxed {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::ShouldBeBoxed {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::ShouldBeBoxed
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("ShouldBeBoxed");
+        p.write_field_begin("sessionId", ::fbthrift::TType::String, 1);
+        ::fbthrift::Serialize::rs_thrift_write(&self.sessionId, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::ShouldBeBoxed
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("sessionId", ::fbthrift::TType::String, 1),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = ShouldBeBoxed::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ShouldBeBoxed")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::String, 1) {
+                output.sessionId = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "sessionId", strct: "ShouldBeBoxed"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::String, 1) => output.sessionId = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "sessionId", strct: "ShouldBeBoxed"})?,
+                    (fty, _) => p.skip(fty)?,
                 }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for CustomException {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::ShouldBeBoxed {
-        fn default() -> Self {
-            Self {
-                sessionId: ::std::default::Default::default(),
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-            }
-        }
-    }
-    
-    impl ::std::fmt::Debug for self::ShouldBeBoxed {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("ShouldBeBoxed")
-                .field("sessionId", &self.sessionId)
-                .finish()
-        }
-    }
-    
-    unsafe impl ::std::marker::Send for self::ShouldBeBoxed {}
-    unsafe impl ::std::marker::Sync for self::ShouldBeBoxed {}
-    impl ::std::marker::Unpin for self::ShouldBeBoxed {}
-    impl ::std::panic::RefUnwindSafe for self::ShouldBeBoxed {}
-    impl ::std::panic::UnwindSafe for self::ShouldBeBoxed {}
-    
-    impl ::fbthrift::GetTType for self::ShouldBeBoxed {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::ShouldBeBoxed {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::ShouldBeBoxed
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("ShouldBeBoxed");
-            p.write_field_begin("sessionId", ::fbthrift::TType::String, 1);
-            ::fbthrift::Serialize::rs_thrift_write(&self.sessionId, p);
-            p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::ShouldBeBoxed
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("sessionId", ::fbthrift::TType::String, 1),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = ShouldBeBoxed::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a ShouldBeBoxed")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::String, 1) {
-                    output.sessionId = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "sessionId", strct: "ShouldBeBoxed"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
+                p.read_field_end()?;
                 (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::String, 1) => output.sessionId = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "sessionId", strct: "ShouldBeBoxed"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                }
             }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
         }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
     }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for ShouldBeBoxed {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for ShouldBeBoxed {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
     }
-    
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
 
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -330,13 +323,8 @@ pub(crate) mod r#impl {
     }
 }
 
-
 #[doc(hidden)]
 #[deprecated]
 #[allow(hidden_glob_reexports)]
 pub mod __constructors {
 }
-
-
-
-

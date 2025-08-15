@@ -7,38 +7,33 @@
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 
+#[derive(Clone, PartialEq)]
+pub struct SomeStruct {
+    pub reasonable: crate::types::Metasyntactic,
+    pub fine: crate::types::Metasyntactic,
+    pub questionable: crate::types::Metasyntactic,
+    pub tags: ::std::collections::BTreeSet<::std::primitive::i32>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
 
-
-
-    
-    #[derive(Clone, PartialEq)]
-    pub struct SomeStruct {
-        pub reasonable: crate::types::Metasyntactic,
-        pub fine: crate::types::Metasyntactic,
-        pub questionable: crate::types::Metasyntactic,
-        pub tags: ::std::collections::BTreeSet<::std::primitive::i32>,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    pub struct MyStruct {
-        pub me2_3: crate::types::MyEnum2,
-        pub me3_n3: crate::types::MyEnum3,
-        pub me1_t1: crate::types::MyEnum1,
-        pub me1_t2: crate::types::MyEnum1,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct MyStruct {
+    pub me2_3: crate::types::MyEnum2,
+    pub me3_n3: crate::types::MyEnum3,
+    pub me1_t1: crate::types::MyEnum1,
+    pub me1_t2: crate::types::MyEnum1,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Metasyntactic(pub ::std::primitive::i32);
@@ -172,6 +167,7 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyEnum1(pub ::std::primitive::i32);
 
@@ -316,6 +312,7 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyEnum2(pub ::std::primitive::i32);
 
@@ -442,6 +439,7 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyEnum3(pub ::std::primitive::i32);
 
@@ -586,6 +584,7 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyEnum4(pub ::std::primitive::i32);
 
@@ -718,6 +717,7 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyBitmaskEnum1(pub ::std::primitive::i32);
 
@@ -844,6 +844,7 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyBitmaskEnum2(pub ::std::primitive::i32);
 
@@ -971,352 +972,351 @@ where
     }
 }
 
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::SomeStruct {
-        fn default() -> Self {
-            Self {
-                reasonable: crate::types::Metasyntactic::FOO,
-                fine: crate::types::Metasyntactic::BAR,
-                questionable: crate::types::Metasyntactic(-1),
-                tags: ::std::collections::BTreeSet::new(),
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::SomeStruct {
+    fn default() -> Self {
+        Self {
+            reasonable: crate::types::Metasyntactic::FOO,
+            fine: crate::types::Metasyntactic::BAR,
+            questionable: crate::types::Metasyntactic(-1),
+            tags: ::std::collections::BTreeSet::new(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::SomeStruct {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("SomeStruct")
+            .field("reasonable", &self.reasonable)
+            .field("fine", &self.fine)
+            .field("questionable", &self.questionable)
+            .field("tags", &self.tags)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::SomeStruct {}
+unsafe impl ::std::marker::Sync for self::SomeStruct {}
+impl ::std::marker::Unpin for self::SomeStruct {}
+impl ::std::panic::RefUnwindSafe for self::SomeStruct {}
+impl ::std::panic::UnwindSafe for self::SomeStruct {}
+
+impl ::fbthrift::GetTType for self::SomeStruct {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::SomeStruct {
+    fn uri() -> &'static ::std::primitive::str {
+        "test.dev/fixtures/enums/SomeStruct"
+    }
+}
+
+impl ::fbthrift::GetTypeNameType for self::SomeStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::SomeStruct
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("SomeStruct");
+        p.write_field_begin("reasonable", ::fbthrift::TType::I32, 1);
+        ::fbthrift::Serialize::rs_thrift_write(&self.reasonable, p);
+        p.write_field_end();
+        p.write_field_begin("fine", ::fbthrift::TType::I32, 2);
+        ::fbthrift::Serialize::rs_thrift_write(&self.fine, p);
+        p.write_field_end();
+        p.write_field_begin("questionable", ::fbthrift::TType::I32, 3);
+        ::fbthrift::Serialize::rs_thrift_write(&self.questionable, p);
+        p.write_field_end();
+        p.write_field_begin("tags", ::fbthrift::TType::Set, 4);
+        ::fbthrift::Serialize::rs_thrift_write(&self.tags, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::SomeStruct
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("fine", ::fbthrift::TType::I32, 2),
+            ::fbthrift::Field::new("questionable", ::fbthrift::TType::I32, 3),
+            ::fbthrift::Field::new("reasonable", ::fbthrift::TType::I32, 1),
+            ::fbthrift::Field::new("tags", ::fbthrift::TType::Set, 4),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = SomeStruct::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a SomeStruct")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::I32, 1) {
+                output.reasonable = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "reasonable", strct: "SomeStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I32, 2) {
+                output.fine = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fine", strct: "SomeStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I32, 3) {
+                output.questionable = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "questionable", strct: "SomeStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Set, 4) {
+                output.tags = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "tags", strct: "SomeStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::I32, 1) => output.reasonable = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "reasonable", strct: "SomeStruct"})?,
+                    (::fbthrift::TType::I32, 2) => output.fine = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fine", strct: "SomeStruct"})?,
+                    (::fbthrift::TType::I32, 3) => output.questionable = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "questionable", strct: "SomeStruct"})?,
+                    (::fbthrift::TType::Set, 4) => output.tags = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "tags", strct: "SomeStruct"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             }
         }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
     }
-    
-    impl ::std::fmt::Debug for self::SomeStruct {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("SomeStruct")
-                .field("reasonable", &self.reasonable)
-                .field("fine", &self.fine)
-                .field("questionable", &self.questionable)
-                .field("tags", &self.tags)
-                .finish()
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for SomeStruct {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+            },
+            2 => {
+            },
+            3 => {
+            },
+            4 => {
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::MyStruct {
+    fn default() -> Self {
+        Self {
+            me2_3: crate::types::MyEnum2(3),
+            me3_n3: crate::types::MyEnum3(-3),
+            me1_t1: crate::types::MyEnum1::ME1_1,
+            me1_t2: crate::types::MyEnum1::ME1_1,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
-    
-    unsafe impl ::std::marker::Send for self::SomeStruct {}
-    unsafe impl ::std::marker::Sync for self::SomeStruct {}
-    impl ::std::marker::Unpin for self::SomeStruct {}
-    impl ::std::panic::RefUnwindSafe for self::SomeStruct {}
-    impl ::std::panic::UnwindSafe for self::SomeStruct {}
-    
-    impl ::fbthrift::GetTType for self::SomeStruct {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::std::fmt::Debug for self::MyStruct {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("MyStruct")
+            .field("me2_3", &self.me2_3)
+            .field("me3_n3", &self.me3_n3)
+            .field("me1_t1", &self.me1_t1)
+            .field("me1_t2", &self.me1_t2)
+            .finish()
     }
-    
-    impl ::fbthrift::GetUri for self::SomeStruct {
-        fn uri() -> &'static ::std::primitive::str {
-            "test.dev/fixtures/enums/SomeStruct"
-        }
+}
+
+unsafe impl ::std::marker::Send for self::MyStruct {}
+unsafe impl ::std::marker::Sync for self::MyStruct {}
+impl ::std::marker::Unpin for self::MyStruct {}
+impl ::std::panic::RefUnwindSafe for self::MyStruct {}
+impl ::std::panic::UnwindSafe for self::MyStruct {}
+
+impl ::fbthrift::GetTType for self::MyStruct {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::MyStruct {
+    fn uri() -> &'static ::std::primitive::str {
+        "test.dev/fixtures/enums/MyStruct"
     }
-    
-    impl ::fbthrift::GetTypeNameType for self::SomeStruct {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::SomeStruct
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("SomeStruct");
-            p.write_field_begin("reasonable", ::fbthrift::TType::I32, 1);
-            ::fbthrift::Serialize::rs_thrift_write(&self.reasonable, p);
-            p.write_field_end();
-            p.write_field_begin("fine", ::fbthrift::TType::I32, 2);
-            ::fbthrift::Serialize::rs_thrift_write(&self.fine, p);
-            p.write_field_end();
-            p.write_field_begin("questionable", ::fbthrift::TType::I32, 3);
-            ::fbthrift::Serialize::rs_thrift_write(&self.questionable, p);
-            p.write_field_end();
-            p.write_field_begin("tags", ::fbthrift::TType::Set, 4);
-            ::fbthrift::Serialize::rs_thrift_write(&self.tags, p);
-            p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
-        }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::MyStruct
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("MyStruct");
+        p.write_field_begin("me2_3", ::fbthrift::TType::I32, 1);
+        ::fbthrift::Serialize::rs_thrift_write(&self.me2_3, p);
+        p.write_field_end();
+        p.write_field_begin("me3_n3", ::fbthrift::TType::I32, 2);
+        ::fbthrift::Serialize::rs_thrift_write(&self.me3_n3, p);
+        p.write_field_end();
+        p.write_field_begin("me1_t1", ::fbthrift::TType::I32, 4);
+        ::fbthrift::Serialize::rs_thrift_write(&self.me1_t1, p);
+        p.write_field_end();
+        p.write_field_begin("me1_t2", ::fbthrift::TType::I32, 6);
+        ::fbthrift::Serialize::rs_thrift_write(&self.me1_t2, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
     }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::SomeStruct
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("fine", ::fbthrift::TType::I32, 2),
-                ::fbthrift::Field::new("questionable", ::fbthrift::TType::I32, 3),
-                ::fbthrift::Field::new("reasonable", ::fbthrift::TType::I32, 1),
-                ::fbthrift::Field::new("tags", ::fbthrift::TType::Set, 4),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = SomeStruct::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a SomeStruct")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::I32, 1) {
-                    output.reasonable = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "reasonable", strct: "SomeStruct"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::I32, 2) {
-                    output.fine = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fine", strct: "SomeStruct"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::I32, 3) {
-                    output.questionable = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "questionable", strct: "SomeStruct"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Set, 4) {
-                    output.tags = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "tags", strct: "SomeStruct"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::I32, 1) => output.reasonable = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "reasonable", strct: "SomeStruct"})?,
-                        (::fbthrift::TType::I32, 2) => output.fine = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "fine", strct: "SomeStruct"})?,
-                        (::fbthrift::TType::I32, 3) => output.questionable = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "questionable", strct: "SomeStruct"})?,
-                        (::fbthrift::TType::Set, 4) => output.tags = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "tags", strct: "SomeStruct"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::MyStruct
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("me1_t1", ::fbthrift::TType::I32, 4),
+            ::fbthrift::Field::new("me1_t2", ::fbthrift::TType::I32, 6),
+            ::fbthrift::Field::new("me2_3", ::fbthrift::TType::I32, 1),
+            ::fbthrift::Field::new("me3_n3", ::fbthrift::TType::I32, 2),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = MyStruct::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::I32, 1) {
+                output.me2_3 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me2_3", strct: "MyStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
             }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for SomeStruct {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-                },
-                2 => {
-                },
-                3 => {
-                },
-                4 => {
-                },
-                _ => {}
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I32, 2) {
+                output.me3_n3 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me3_n3", strct: "MyStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
             }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::MyStruct {
-        fn default() -> Self {
-            Self {
-                me2_3: crate::types::MyEnum2(3),
-                me3_n3: crate::types::MyEnum3(-3),
-                me1_t1: crate::types::MyEnum1::ME1_1,
-                me1_t2: crate::types::MyEnum1::ME1_1,
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I32, 4) {
+                output.me1_t1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me1_t1", strct: "MyStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I32, 6) {
+                output.me1_t2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me1_t2", strct: "MyStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::I32, 1) => output.me2_3 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me2_3", strct: "MyStruct"})?,
+                    (::fbthrift::TType::I32, 2) => output.me3_n3 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me3_n3", strct: "MyStruct"})?,
+                    (::fbthrift::TType::I32, 4) => output.me1_t1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me1_t1", strct: "MyStruct"})?,
+                    (::fbthrift::TType::I32, 6) => output.me1_t2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me1_t2", strct: "MyStruct"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             }
         }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
     }
-    
-    impl ::std::fmt::Debug for self::MyStruct {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("MyStruct")
-                .field("me2_3", &self.me2_3)
-                .field("me3_n3", &self.me3_n3)
-                .field("me1_t1", &self.me1_t1)
-                .field("me1_t2", &self.me1_t2)
-                .finish()
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+            },
+            2 => {
+            },
+            4 => {
+            },
+            6 => {
+            },
+            _ => {}
         }
+
+        ::std::option::Option::None
     }
-    
-    unsafe impl ::std::marker::Send for self::MyStruct {}
-    unsafe impl ::std::marker::Sync for self::MyStruct {}
-    impl ::std::marker::Unpin for self::MyStruct {}
-    impl ::std::panic::RefUnwindSafe for self::MyStruct {}
-    impl ::std::panic::UnwindSafe for self::MyStruct {}
-    
-    impl ::fbthrift::GetTType for self::MyStruct {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetUri for self::MyStruct {
-        fn uri() -> &'static ::std::primitive::str {
-            "test.dev/fixtures/enums/MyStruct"
-        }
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::MyStruct {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::MyStruct
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("MyStruct");
-            p.write_field_begin("me2_3", ::fbthrift::TType::I32, 1);
-            ::fbthrift::Serialize::rs_thrift_write(&self.me2_3, p);
-            p.write_field_end();
-            p.write_field_begin("me3_n3", ::fbthrift::TType::I32, 2);
-            ::fbthrift::Serialize::rs_thrift_write(&self.me3_n3, p);
-            p.write_field_end();
-            p.write_field_begin("me1_t1", ::fbthrift::TType::I32, 4);
-            ::fbthrift::Serialize::rs_thrift_write(&self.me1_t1, p);
-            p.write_field_end();
-            p.write_field_begin("me1_t2", ::fbthrift::TType::I32, 6);
-            ::fbthrift::Serialize::rs_thrift_write(&self.me1_t2, p);
-            p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::MyStruct
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("me1_t1", ::fbthrift::TType::I32, 4),
-                ::fbthrift::Field::new("me1_t2", ::fbthrift::TType::I32, 6),
-                ::fbthrift::Field::new("me2_3", ::fbthrift::TType::I32, 1),
-                ::fbthrift::Field::new("me3_n3", ::fbthrift::TType::I32, 2),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = MyStruct::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::I32, 1) {
-                    output.me2_3 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me2_3", strct: "MyStruct"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::I32, 2) {
-                    output.me3_n3 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me3_n3", strct: "MyStruct"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::I32, 4) {
-                    output.me1_t1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me1_t1", strct: "MyStruct"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::I32, 6) {
-                    output.me1_t2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me1_t2", strct: "MyStruct"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::I32, 1) => output.me2_3 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me2_3", strct: "MyStruct"})?,
-                        (::fbthrift::TType::I32, 2) => output.me3_n3 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me3_n3", strct: "MyStruct"})?,
-                        (::fbthrift::TType::I32, 4) => output.me1_t1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me1_t1", strct: "MyStruct"})?,
-                        (::fbthrift::TType::I32, 6) => output.me1_t2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "me1_t2", strct: "MyStruct"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-                },
-                2 => {
-                },
-                4 => {
-                },
-                6 => {
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
+}
+
 
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -1355,7 +1355,6 @@ pub(crate) mod r#impl {
     }
 }
 
-
 #[doc(hidden)]
 #[deprecated]
 #[allow(hidden_glob_reexports)]
@@ -1389,7 +1388,3 @@ pub mod __constructors {
     }
     pub use self::MyEnum4::*;
 }
-
-
-
-

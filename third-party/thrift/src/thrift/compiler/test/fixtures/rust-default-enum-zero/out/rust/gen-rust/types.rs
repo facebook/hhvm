@@ -7,11 +7,6 @@
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 
-
-
-
-
-
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyEnum(pub ::std::primitive::i32);
 
@@ -134,8 +129,6 @@ where
 }
 
 
-
-
 pub(crate) mod r#impl {
     use ::ref_cast::RefCast;
 
@@ -163,7 +156,6 @@ pub(crate) mod r#impl {
     }
 }
 
-
 #[doc(hidden)]
 #[deprecated]
 #[allow(hidden_glob_reexports)]
@@ -173,7 +165,3 @@ pub mod __constructors {
     }
     pub use self::MyEnum::*;
 }
-
-
-
-

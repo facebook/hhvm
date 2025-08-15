@@ -7,264 +7,258 @@
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 
-
 pub mod consts;
 #[doc(inline)]
 pub use self::consts::*;
 
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Limits {
+    pub max_i64_field: ::std::primitive::i64,
+    pub min_i64_field: ::std::primitive::i64,
+    pub max_i32_field: ::std::primitive::i32,
+    pub min_i32_field: ::std::primitive::i32,
+    pub max_i16_field: ::std::primitive::i16,
+    pub min_i16_field: ::std::primitive::i16,
+    pub max_byte_field: ::std::primitive::i8,
+    pub min_byte_field: ::std::primitive::i8,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
 
-    
-    #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    pub struct Limits {
-        pub max_i64_field: ::std::primitive::i64,
-        pub min_i64_field: ::std::primitive::i64,
-        pub max_i32_field: ::std::primitive::i32,
-        pub min_i32_field: ::std::primitive::i32,
-        pub max_i16_field: ::std::primitive::i16,
-        pub min_i16_field: ::std::primitive::i16,
-        pub max_byte_field: ::std::primitive::i8,
-        pub min_byte_field: ::std::primitive::i8,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::Limits {
+    fn default() -> Self {
+        Self {
+            max_i64_field: 9223372036854775807,
+            min_i64_field: -9223372036854775808,
+            max_i32_field: 2147483647,
+            min_i32_field: -2147483648,
+            max_i16_field: 32767,
+            min_i16_field: -32768,
+            max_byte_field: 127,
+            min_byte_field: -128,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
     }
+}
 
+impl ::std::fmt::Debug for self::Limits {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("Limits")
+            .field("max_i64_field", &self.max_i64_field)
+            .field("min_i64_field", &self.min_i64_field)
+            .field("max_i32_field", &self.max_i32_field)
+            .field("min_i32_field", &self.min_i32_field)
+            .field("max_i16_field", &self.max_i16_field)
+            .field("min_i16_field", &self.min_i16_field)
+            .field("max_byte_field", &self.max_byte_field)
+            .field("min_byte_field", &self.min_byte_field)
+            .finish()
+    }
+}
 
+unsafe impl ::std::marker::Send for self::Limits {}
+unsafe impl ::std::marker::Sync for self::Limits {}
+impl ::std::marker::Unpin for self::Limits {}
+impl ::std::panic::RefUnwindSafe for self::Limits {}
+impl ::std::panic::UnwindSafe for self::Limits {}
 
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::Limits {
-        fn default() -> Self {
-            Self {
-                max_i64_field: 9223372036854775807,
-                min_i64_field: -9223372036854775808,
-                max_i32_field: 2147483647,
-                min_i32_field: -2147483648,
-                max_i16_field: 32767,
-                min_i16_field: -32768,
-                max_byte_field: 127,
-                min_byte_field: -128,
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+impl ::fbthrift::GetTType for self::Limits {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::Limits {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::Limits
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("Limits");
+        p.write_field_begin("max_i64_field", ::fbthrift::TType::I64, 1);
+        ::fbthrift::Serialize::rs_thrift_write(&self.max_i64_field, p);
+        p.write_field_end();
+        p.write_field_begin("min_i64_field", ::fbthrift::TType::I64, 2);
+        ::fbthrift::Serialize::rs_thrift_write(&self.min_i64_field, p);
+        p.write_field_end();
+        p.write_field_begin("max_i32_field", ::fbthrift::TType::I32, 3);
+        ::fbthrift::Serialize::rs_thrift_write(&self.max_i32_field, p);
+        p.write_field_end();
+        p.write_field_begin("min_i32_field", ::fbthrift::TType::I32, 4);
+        ::fbthrift::Serialize::rs_thrift_write(&self.min_i32_field, p);
+        p.write_field_end();
+        p.write_field_begin("max_i16_field", ::fbthrift::TType::I16, 5);
+        ::fbthrift::Serialize::rs_thrift_write(&self.max_i16_field, p);
+        p.write_field_end();
+        p.write_field_begin("min_i16_field", ::fbthrift::TType::I16, 6);
+        ::fbthrift::Serialize::rs_thrift_write(&self.min_i16_field, p);
+        p.write_field_end();
+        p.write_field_begin("max_byte_field", ::fbthrift::TType::Byte, 7);
+        ::fbthrift::Serialize::rs_thrift_write(&self.max_byte_field, p);
+        p.write_field_end();
+        p.write_field_begin("min_byte_field", ::fbthrift::TType::Byte, 8);
+        ::fbthrift::Serialize::rs_thrift_write(&self.min_byte_field, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::Limits
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("max_byte_field", ::fbthrift::TType::Byte, 7),
+            ::fbthrift::Field::new("max_i16_field", ::fbthrift::TType::I16, 5),
+            ::fbthrift::Field::new("max_i32_field", ::fbthrift::TType::I32, 3),
+            ::fbthrift::Field::new("max_i64_field", ::fbthrift::TType::I64, 1),
+            ::fbthrift::Field::new("min_byte_field", ::fbthrift::TType::Byte, 8),
+            ::fbthrift::Field::new("min_i16_field", ::fbthrift::TType::I16, 6),
+            ::fbthrift::Field::new("min_i32_field", ::fbthrift::TType::I32, 4),
+            ::fbthrift::Field::new("min_i64_field", ::fbthrift::TType::I64, 2),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = Limits::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Limits")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::I64, 1) {
+                output.max_i64_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i64_field", strct: "Limits"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I64, 2) {
+                output.min_i64_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i64_field", strct: "Limits"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I32, 3) {
+                output.max_i32_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i32_field", strct: "Limits"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I32, 4) {
+                output.min_i32_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i32_field", strct: "Limits"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I16, 5) {
+                output.max_i16_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i16_field", strct: "Limits"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I16, 6) {
+                output.min_i16_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i16_field", strct: "Limits"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Byte, 7) {
+                output.max_byte_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_byte_field", strct: "Limits"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Byte, 8) {
+                output.min_byte_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_byte_field", strct: "Limits"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::I64, 1) => output.max_i64_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i64_field", strct: "Limits"})?,
+                    (::fbthrift::TType::I64, 2) => output.min_i64_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i64_field", strct: "Limits"})?,
+                    (::fbthrift::TType::I32, 3) => output.max_i32_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i32_field", strct: "Limits"})?,
+                    (::fbthrift::TType::I32, 4) => output.min_i32_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i32_field", strct: "Limits"})?,
+                    (::fbthrift::TType::I16, 5) => output.max_i16_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i16_field", strct: "Limits"})?,
+                    (::fbthrift::TType::I16, 6) => output.min_i16_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i16_field", strct: "Limits"})?,
+                    (::fbthrift::TType::Byte, 7) => output.max_byte_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_byte_field", strct: "Limits"})?,
+                    (::fbthrift::TType::Byte, 8) => output.min_byte_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_byte_field", strct: "Limits"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             }
         }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
     }
-    
-    impl ::std::fmt::Debug for self::Limits {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("Limits")
-                .field("max_i64_field", &self.max_i64_field)
-                .field("min_i64_field", &self.min_i64_field)
-                .field("max_i32_field", &self.max_i32_field)
-                .field("min_i32_field", &self.min_i32_field)
-                .field("max_i16_field", &self.max_i16_field)
-                .field("min_i16_field", &self.min_i16_field)
-                .field("max_byte_field", &self.max_byte_field)
-                .field("min_byte_field", &self.min_byte_field)
-                .finish()
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for Limits {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+            },
+            2 => {
+            },
+            3 => {
+            },
+            4 => {
+            },
+            5 => {
+            },
+            6 => {
+            },
+            7 => {
+            },
+            8 => {
+            },
+            _ => {}
         }
+
+        ::std::option::Option::None
     }
-    
-    unsafe impl ::std::marker::Send for self::Limits {}
-    unsafe impl ::std::marker::Sync for self::Limits {}
-    impl ::std::marker::Unpin for self::Limits {}
-    impl ::std::panic::RefUnwindSafe for self::Limits {}
-    impl ::std::panic::UnwindSafe for self::Limits {}
-    
-    impl ::fbthrift::GetTType for self::Limits {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::Limits {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::Limits
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("Limits");
-            p.write_field_begin("max_i64_field", ::fbthrift::TType::I64, 1);
-            ::fbthrift::Serialize::rs_thrift_write(&self.max_i64_field, p);
-            p.write_field_end();
-            p.write_field_begin("min_i64_field", ::fbthrift::TType::I64, 2);
-            ::fbthrift::Serialize::rs_thrift_write(&self.min_i64_field, p);
-            p.write_field_end();
-            p.write_field_begin("max_i32_field", ::fbthrift::TType::I32, 3);
-            ::fbthrift::Serialize::rs_thrift_write(&self.max_i32_field, p);
-            p.write_field_end();
-            p.write_field_begin("min_i32_field", ::fbthrift::TType::I32, 4);
-            ::fbthrift::Serialize::rs_thrift_write(&self.min_i32_field, p);
-            p.write_field_end();
-            p.write_field_begin("max_i16_field", ::fbthrift::TType::I16, 5);
-            ::fbthrift::Serialize::rs_thrift_write(&self.max_i16_field, p);
-            p.write_field_end();
-            p.write_field_begin("min_i16_field", ::fbthrift::TType::I16, 6);
-            ::fbthrift::Serialize::rs_thrift_write(&self.min_i16_field, p);
-            p.write_field_end();
-            p.write_field_begin("max_byte_field", ::fbthrift::TType::Byte, 7);
-            ::fbthrift::Serialize::rs_thrift_write(&self.max_byte_field, p);
-            p.write_field_end();
-            p.write_field_begin("min_byte_field", ::fbthrift::TType::Byte, 8);
-            ::fbthrift::Serialize::rs_thrift_write(&self.min_byte_field, p);
-            p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::Limits
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("max_byte_field", ::fbthrift::TType::Byte, 7),
-                ::fbthrift::Field::new("max_i16_field", ::fbthrift::TType::I16, 5),
-                ::fbthrift::Field::new("max_i32_field", ::fbthrift::TType::I32, 3),
-                ::fbthrift::Field::new("max_i64_field", ::fbthrift::TType::I64, 1),
-                ::fbthrift::Field::new("min_byte_field", ::fbthrift::TType::Byte, 8),
-                ::fbthrift::Field::new("min_i16_field", ::fbthrift::TType::I16, 6),
-                ::fbthrift::Field::new("min_i32_field", ::fbthrift::TType::I32, 4),
-                ::fbthrift::Field::new("min_i64_field", ::fbthrift::TType::I64, 2),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = Limits::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Limits")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::I64, 1) {
-                    output.max_i64_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i64_field", strct: "Limits"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::I64, 2) {
-                    output.min_i64_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i64_field", strct: "Limits"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::I32, 3) {
-                    output.max_i32_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i32_field", strct: "Limits"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::I32, 4) {
-                    output.min_i32_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i32_field", strct: "Limits"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::I16, 5) {
-                    output.max_i16_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i16_field", strct: "Limits"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::I16, 6) {
-                    output.min_i16_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i16_field", strct: "Limits"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Byte, 7) {
-                    output.max_byte_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_byte_field", strct: "Limits"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Byte, 8) {
-                    output.min_byte_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_byte_field", strct: "Limits"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::I64, 1) => output.max_i64_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i64_field", strct: "Limits"})?,
-                        (::fbthrift::TType::I64, 2) => output.min_i64_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i64_field", strct: "Limits"})?,
-                        (::fbthrift::TType::I32, 3) => output.max_i32_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i32_field", strct: "Limits"})?,
-                        (::fbthrift::TType::I32, 4) => output.min_i32_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i32_field", strct: "Limits"})?,
-                        (::fbthrift::TType::I16, 5) => output.max_i16_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_i16_field", strct: "Limits"})?,
-                        (::fbthrift::TType::I16, 6) => output.min_i16_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_i16_field", strct: "Limits"})?,
-                        (::fbthrift::TType::Byte, 7) => output.max_byte_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "max_byte_field", strct: "Limits"})?,
-                        (::fbthrift::TType::Byte, 8) => output.min_byte_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "min_byte_field", strct: "Limits"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for Limits {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-                },
-                2 => {
-                },
-                3 => {
-                },
-                4 => {
-                },
-                5 => {
-                },
-                6 => {
-                },
-                7 => {
-                },
-                8 => {
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
+}
+
 
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -303,13 +297,8 @@ pub(crate) mod r#impl {
     }
 }
 
-
 #[doc(hidden)]
 #[deprecated]
 #[allow(hidden_glob_reexports)]
 pub mod __constructors {
 }
-
-
-
-

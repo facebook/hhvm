@@ -27,6 +27,7 @@ impl ::fbthrift::GetTType for {{typedef:rust_name}} {
       }};
 }
 {{#typedef:nonstandard?}}
+
 impl<P> ::fbthrift::Serialize<P> for {{typedef:rust_name}}
 where
     P: ::fbthrift::ProtocolWriter,

@@ -18,16 +18,16 @@
 
 /// Type aliases for the adapter used on an adapted typedef or struct.
 pub mod adapters {
-  {{#program:adapters}}
-  pub type {{type:rust_name}} = {{!
-      }}{{#type:typedef}}{{!
-        }}{{#typedef:has_adapter?}}{{> lib/adapter/name}}{{/typedef:has_adapter?}}{{!
-      }}{{/type:typedef}}{{!
-      }}{{^type:typedef}}{{!
-          }}{{#type:structured}}{{!
-              }}{{#struct:has_adapter?}}{{> lib/adapter/name}}{{/struct:has_adapter?}}{{!
-          }}{{/type:structured}}{{!
-      }}{{/type:typedef}}{{!
-  }};
-  {{/program:adapters}}
+    {{#program:adapters}}
+    pub type {{type:rust_name}} = {{!
+        }}{{#type:typedef}}{{!
+            }}{{#typedef:has_adapter?}}{{> lib/adapter/name}}{{/typedef:has_adapter?}}{{!
+        }}{{/type:typedef}}{{!
+        }}{{^type:typedef}}{{!
+            }}{{#type:structured}}{{!
+                }}{{#struct:has_adapter?}}{{> lib/adapter/name}}{{/struct:has_adapter?}}{{!
+            }}{{/type:structured}}{{!
+        }}{{/type:typedef}}{{!
+    }};
+    {{/program:adapters}}
 }

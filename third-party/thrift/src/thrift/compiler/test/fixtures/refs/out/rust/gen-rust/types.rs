@@ -7,260 +7,256 @@
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 
-
 pub mod consts;
 #[doc(inline)]
 pub use self::consts::*;
 
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+pub enum MyUnion {
+    anInteger(::std::primitive::i32),
+    aString(::std::string::String),
+    UnknownField(::std::primitive::i32),
+}
 
-    
-    #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
-    pub enum MyUnion {
-        anInteger(::std::primitive::i32),
-        aString(::std::string::String),
-        UnknownField(::std::primitive::i32),
-    }
-    
-    #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
-    pub enum NonTriviallyDestructibleUnion {
-        int_field(::std::primitive::i32),
-        UnknownField(::std::primitive::i32),
-    }
-    
-    #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    pub struct MyField {
-        pub opt_value: ::std::option::Option<::std::primitive::i64>,
-        pub value: ::std::primitive::i64,
-        pub req_value: ::std::primitive::i64,
-        pub opt_enum_value: ::std::option::Option<crate::types::MyEnum>,
-        pub enum_value: crate::types::MyEnum,
-        pub req_enum_value: crate::types::MyEnum,
-        pub opt_str_value: ::std::option::Option<::std::string::String>,
-        pub str_value: ::std::string::String,
-        pub req_str_value: ::std::string::String,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    #[derive(Clone, PartialEq)]
-    pub struct MyStruct {
-        pub opt_ref: ::std::option::Option<crate::types::MyField>,
-        pub r#ref: crate::types::MyField,
-        pub req_ref: crate::types::MyField,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    #[derive(Clone, PartialEq)]
-    pub struct StructWithUnion {
-        pub u: crate::types::MyUnion,
-        pub aDouble: ::std::primitive::f64,
-        pub f: crate::types::MyField,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    #[derive(Clone, PartialEq)]
-    pub struct RecursiveStruct {
-        pub mes: ::std::option::Option<::std::vec::Vec<crate::types::RecursiveStruct>>,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    #[derive(Clone, PartialEq)]
-    pub struct StructWithContainers {
-        pub list_ref: ::std::vec::Vec<::std::primitive::i32>,
-        pub set_ref: ::std::collections::BTreeSet<::std::primitive::i32>,
-        pub map_ref: ::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>,
-        pub list_ref_unique: ::std::vec::Vec<::std::primitive::i32>,
-        pub set_ref_shared: ::std::collections::BTreeSet<::std::primitive::i32>,
-        pub list_ref_shared_const: ::std::vec::Vec<::std::primitive::i32>,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    #[derive(Clone, PartialEq)]
-    pub struct StructWithSharedConst {
-        pub opt_shared_const: ::std::option::Option<crate::types::MyField>,
-        pub shared_const: crate::types::MyField,
-        pub req_shared_const: crate::types::MyField,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    pub struct Empty {
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    #[derive(Clone, PartialEq)]
-    pub struct StructWithRef {
-        pub def_field: crate::types::Empty,
-        pub opt_field: ::std::option::Option<crate::types::Empty>,
-        pub req_field: crate::types::Empty,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    #[derive(Clone, PartialEq)]
-    pub struct StructWithBox {
-        pub a: ::std::option::Option<::std::boxed::Box<::std::string::String>>,
-        pub b: ::std::option::Option<::std::boxed::Box<::std::vec::Vec<::std::primitive::i64>>>,
-        pub c: ::std::option::Option<::std::boxed::Box<crate::types::StructWithRef>>,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    #[derive(Clone, PartialEq)]
-    pub struct StructWithInternBox {
-        pub field1: crate::types::Empty,
-        pub field2: crate::types::MyField,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    #[derive(Clone, PartialEq)]
-    pub struct StructWithTerseInternBox {
-        pub field1: crate::types::Empty,
-        pub field2: crate::types::MyField,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    #[derive(Clone, PartialEq)]
-    pub struct AdaptedStructWithInternBox {
-        pub field1: crate::types::Empty,
-        pub field2: crate::types::MyField,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    #[derive(Clone, PartialEq)]
-    pub struct AdaptedStructWithTerseInternBox {
-        pub field1: crate::types::Empty,
-        pub field2: crate::types::MyField,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    #[derive(Clone, PartialEq)]
-    pub struct StructWithRefTypeUnique {
-        pub def_field: crate::types::Empty,
-        pub opt_field: ::std::option::Option<crate::types::Empty>,
-        pub req_field: crate::types::Empty,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    #[derive(Clone, PartialEq)]
-    pub struct StructWithRefTypeShared {
-        pub def_field: crate::types::Empty,
-        pub opt_field: ::std::option::Option<crate::types::Empty>,
-        pub req_field: crate::types::Empty,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    #[derive(Clone, PartialEq)]
-    pub struct StructWithRefTypeSharedConst {
-        pub def_field: crate::types::Empty,
-        pub opt_field: ::std::option::Option<crate::types::Empty>,
-        pub req_field: crate::types::Empty,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    #[derive(Clone, PartialEq)]
-    pub struct StructWithRefAndAnnotCppNoexceptMoveCtor {
-        pub def_field: crate::types::Empty,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
-    
-    #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    pub struct StructWithString {
-        pub def_unique_string_ref: ::std::string::String,
-        pub def_shared_string_ref: ::std::string::String,
-        pub def_shared_string_const_ref: ::std::string::String,
-        pub unique_string_ref: ::std::string::String,
-        pub shared_string_ref: ::std::string::String,
-        // This field forces `..Default::default()` when instantiating this
-        // struct, to make code future-proof against new fields added later to
-        // the definition in Thrift. If you don't want this, add the annotation
-        // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
-        #[doc(hidden)]
-        pub _dot_dot_Default_default: self::dot_dot::OtherFields,
-    }
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+pub enum NonTriviallyDestructibleUnion {
+    int_field(::std::primitive::i32),
+    UnknownField(::std::primitive::i32),
+}
 
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct MyField {
+    pub opt_value: ::std::option::Option<::std::primitive::i64>,
+    pub value: ::std::primitive::i64,
+    pub req_value: ::std::primitive::i64,
+    pub opt_enum_value: ::std::option::Option<crate::types::MyEnum>,
+    pub enum_value: crate::types::MyEnum,
+    pub req_enum_value: crate::types::MyEnum,
+    pub opt_str_value: ::std::option::Option<::std::string::String>,
+    pub str_value: ::std::string::String,
+    pub req_str_value: ::std::string::String,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct MyStruct {
+    pub opt_ref: ::std::option::Option<crate::types::MyField>,
+    pub r#ref: crate::types::MyField,
+    pub req_ref: crate::types::MyField,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct StructWithUnion {
+    pub u: crate::types::MyUnion,
+    pub aDouble: ::std::primitive::f64,
+    pub f: crate::types::MyField,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct RecursiveStruct {
+    pub mes: ::std::option::Option<::std::vec::Vec<crate::types::RecursiveStruct>>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct StructWithContainers {
+    pub list_ref: ::std::vec::Vec<::std::primitive::i32>,
+    pub set_ref: ::std::collections::BTreeSet<::std::primitive::i32>,
+    pub map_ref: ::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>,
+    pub list_ref_unique: ::std::vec::Vec<::std::primitive::i32>,
+    pub set_ref_shared: ::std::collections::BTreeSet<::std::primitive::i32>,
+    pub list_ref_shared_const: ::std::vec::Vec<::std::primitive::i32>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct StructWithSharedConst {
+    pub opt_shared_const: ::std::option::Option<crate::types::MyField>,
+    pub shared_const: crate::types::MyField,
+    pub req_shared_const: crate::types::MyField,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Empty {
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct StructWithRef {
+    pub def_field: crate::types::Empty,
+    pub opt_field: ::std::option::Option<crate::types::Empty>,
+    pub req_field: crate::types::Empty,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct StructWithBox {
+    pub a: ::std::option::Option<::std::boxed::Box<::std::string::String>>,
+    pub b: ::std::option::Option<::std::boxed::Box<::std::vec::Vec<::std::primitive::i64>>>,
+    pub c: ::std::option::Option<::std::boxed::Box<crate::types::StructWithRef>>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct StructWithInternBox {
+    pub field1: crate::types::Empty,
+    pub field2: crate::types::MyField,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct StructWithTerseInternBox {
+    pub field1: crate::types::Empty,
+    pub field2: crate::types::MyField,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct AdaptedStructWithInternBox {
+    pub field1: crate::types::Empty,
+    pub field2: crate::types::MyField,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct AdaptedStructWithTerseInternBox {
+    pub field1: crate::types::Empty,
+    pub field2: crate::types::MyField,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct StructWithRefTypeUnique {
+    pub def_field: crate::types::Empty,
+    pub opt_field: ::std::option::Option<crate::types::Empty>,
+    pub req_field: crate::types::Empty,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct StructWithRefTypeShared {
+    pub def_field: crate::types::Empty,
+    pub opt_field: ::std::option::Option<crate::types::Empty>,
+    pub req_field: crate::types::Empty,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct StructWithRefTypeSharedConst {
+    pub def_field: crate::types::Empty,
+    pub opt_field: ::std::option::Option<crate::types::Empty>,
+    pub req_field: crate::types::Empty,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct StructWithRefAndAnnotCppNoexceptMoveCtor {
+    pub def_field: crate::types::Empty,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct StructWithString {
+    pub def_unique_string_ref: ::std::string::String,
+    pub def_shared_string_ref: ::std::string::String,
+    pub def_shared_string_const_ref: ::std::string::String,
+    pub unique_string_ref: ::std::string::String,
+    pub shared_string_ref: ::std::string::String,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyEnum(pub ::std::primitive::i32);
@@ -376,6 +372,7 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct TypedEnum(pub ::std::primitive::i32);
 
@@ -491,3983 +488,3982 @@ where
     }
 }
 
-    
-    
-    impl ::std::default::Default for MyUnion {
-        fn default() -> Self {
-            Self::UnknownField(-1)
-        }
+
+impl ::std::default::Default for MyUnion {
+    fn default() -> Self {
+        Self::UnknownField(-1)
     }
-    
-    impl ::fbthrift::GetTType for MyUnion {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTType for MyUnion {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyUnion {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
     }
-    
-    impl ::fbthrift::GetTypeNameType for self::MyUnion {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::UnionType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for MyUnion
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("MyUnion");
-            match self {
-                Self::anInteger(inner) => {
-                    p.write_field_begin("anInteger", ::fbthrift::TType::I32, 1);
-                    ::fbthrift::Serialize::rs_thrift_write(inner, p);
-                    p.write_field_end();
-                }
-                Self::aString(inner) => {
-                    p.write_field_begin("aString", ::fbthrift::TType::String, 2);
-                    ::fbthrift::Serialize::rs_thrift_write(inner, p);
-                    p.write_field_end();
-                }
-                Self::UnknownField(_) => {}
+}
+
+impl<P> ::fbthrift::Serialize<P> for MyUnion
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("MyUnion");
+        match self {
+            Self::anInteger(inner) => {
+                p.write_field_begin("anInteger", ::fbthrift::TType::I32, 1);
+                ::fbthrift::Serialize::rs_thrift_write(inner, p);
+                p.write_field_end();
             }
-            p.write_field_stop();
-            p.write_struct_end();
+            Self::aString(inner) => {
+                p.write_field_begin("aString", ::fbthrift::TType::String, 2);
+                ::fbthrift::Serialize::rs_thrift_write(inner, p);
+                p.write_field_end();
+            }
+            Self::UnknownField(_) => {}
+        }
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for MyUnion
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("aString", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("anInteger", ::fbthrift::TType::I32, 1),
+        ];
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyUnion")?;
+        let mut once = false;
+        let mut alt = ::std::option::Option::None;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32, once) {
+                (::fbthrift::TType::Stop, _, _) => break,
+                (::fbthrift::TType::I32, 1, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::anInteger(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "anInteger", strct: "MyUnion"})?));
+                }
+                (::fbthrift::TType::String, 2, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::aString(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "aString", strct: "MyUnion"})?));
+                }
+                (fty, _, false) => p.skip(fty)?,
+                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
+                    "MyUnion".to_string(),
+                    badty,
+                    badid,
+                ))),
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(alt.unwrap_or_default())
+    }
+}
+
+impl MyUnion {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {
+        match self {
+            Self::anInteger(_) => ::std::option::Option::Some(("anInteger", "anInteger")),
+            Self::aString(_) => ::std::option::Option::Some(("aString", "aString")),
+            Self::UnknownField(_) => ::std::option::Option::None,
         }
     }
-    
-    impl<P> ::fbthrift::Deserialize<P> for MyUnion
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("aString", ::fbthrift::TType::String, 2),
-                ::fbthrift::Field::new("anInteger", ::fbthrift::TType::I32, 1),
-            ];
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyUnion")?;
-            let mut once = false;
-            let mut alt = ::std::option::Option::None;
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("anInteger", "anInteger"),
+            ("aString", "aString"),
+        ]
+    }
+}
+
+impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+impl ::std::default::Default for NonTriviallyDestructibleUnion {
+    fn default() -> Self {
+        Self::UnknownField(-1)
+    }
+}
+
+impl ::fbthrift::GetTType for NonTriviallyDestructibleUnion {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::NonTriviallyDestructibleUnion {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for NonTriviallyDestructibleUnion
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("NonTriviallyDestructibleUnion");
+        match self {
+            Self::int_field(inner) => {
+                p.write_field_begin("int_field", ::fbthrift::TType::I32, 1);
+                ::fbthrift::Serialize::rs_thrift_write(inner, p);
+                p.write_field_end();
+            }
+            Self::UnknownField(_) => {}
+        }
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for NonTriviallyDestructibleUnion
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("int_field", ::fbthrift::TType::I32, 1),
+        ];
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a NonTriviallyDestructibleUnion")?;
+        let mut once = false;
+        let mut alt = ::std::option::Option::None;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32, once) {
+                (::fbthrift::TType::Stop, _, _) => break,
+                (::fbthrift::TType::I32, 1, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::int_field(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "int_field", strct: "NonTriviallyDestructibleUnion"})?));
+                }
+                (fty, _, false) => p.skip(fty)?,
+                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
+                    "NonTriviallyDestructibleUnion".to_string(),
+                    badty,
+                    badid,
+                ))),
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(alt.unwrap_or_default())
+    }
+}
+
+impl NonTriviallyDestructibleUnion {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {
+        match self {
+            Self::int_field(_) => ::std::option::Option::Some(("int_field", "int_field")),
+            Self::UnknownField(_) => ::std::option::Option::None,
+        }
+    }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            ("int_field", "int_field"),
+        ]
+    }
+}
+
+impl ::fbthrift::metadata::ThriftAnnotations for NonTriviallyDestructibleUnion {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::SharedMutable,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::MyField {
+    fn default() -> Self {
+        Self {
+            opt_value: ::std::option::Option::None,
+            value: ::std::default::Default::default(),
+            req_value: ::std::default::Default::default(),
+            opt_enum_value: ::std::option::Option::None,
+            enum_value: ::std::default::Default::default(),
+            req_enum_value: ::std::default::Default::default(),
+            opt_str_value: ::std::option::Option::None,
+            str_value: ::std::default::Default::default(),
+            req_str_value: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::MyField {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("MyField")
+            .field("opt_value", &self.opt_value)
+            .field("value", &self.value)
+            .field("req_value", &self.req_value)
+            .field("opt_enum_value", &self.opt_enum_value)
+            .field("enum_value", &self.enum_value)
+            .field("req_enum_value", &self.req_enum_value)
+            .field("opt_str_value", &self.opt_str_value)
+            .field("str_value", &self.str_value)
+            .field("req_str_value", &self.req_str_value)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::MyField {}
+unsafe impl ::std::marker::Sync for self::MyField {}
+impl ::std::marker::Unpin for self::MyField {}
+impl ::std::panic::RefUnwindSafe for self::MyField {}
+impl ::std::panic::UnwindSafe for self::MyField {}
+
+impl ::fbthrift::GetTType for self::MyField {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyField {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::MyField
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("MyField");
+        if let ::std::option::Option::Some(some) = &self.opt_value {
+            p.write_field_begin("opt_value", ::fbthrift::TType::I64, 1);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
+            p.write_field_end();
+        }
+        p.write_field_begin("value", ::fbthrift::TType::I64, 2);
+        ::fbthrift::Serialize::rs_thrift_write(&self.value, p);
+        p.write_field_end();
+        p.write_field_begin("req_value", ::fbthrift::TType::I64, 3);
+        ::fbthrift::Serialize::rs_thrift_write(&self.req_value, p);
+        p.write_field_end();
+        if let ::std::option::Option::Some(some) = &self.opt_enum_value {
+            p.write_field_begin("opt_enum_value", ::fbthrift::TType::I32, 4);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
+            p.write_field_end();
+        }
+        p.write_field_begin("enum_value", ::fbthrift::TType::I32, 5);
+        ::fbthrift::Serialize::rs_thrift_write(&self.enum_value, p);
+        p.write_field_end();
+        p.write_field_begin("req_enum_value", ::fbthrift::TType::I32, 6);
+        ::fbthrift::Serialize::rs_thrift_write(&self.req_enum_value, p);
+        p.write_field_end();
+        if let ::std::option::Option::Some(some) = &self.opt_str_value {
+            p.write_field_begin("opt_str_value", ::fbthrift::TType::String, 7);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
+            p.write_field_end();
+        }
+        p.write_field_begin("str_value", ::fbthrift::TType::String, 8);
+        ::fbthrift::Serialize::rs_thrift_write(&self.str_value, p);
+        p.write_field_end();
+        p.write_field_begin("req_str_value", ::fbthrift::TType::String, 9);
+        ::fbthrift::Serialize::rs_thrift_write(&self.req_str_value, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::MyField
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("enum_value", ::fbthrift::TType::I32, 5),
+            ::fbthrift::Field::new("opt_enum_value", ::fbthrift::TType::I32, 4),
+            ::fbthrift::Field::new("opt_str_value", ::fbthrift::TType::String, 7),
+            ::fbthrift::Field::new("opt_value", ::fbthrift::TType::I64, 1),
+            ::fbthrift::Field::new("req_enum_value", ::fbthrift::TType::I32, 6),
+            ::fbthrift::Field::new("req_str_value", ::fbthrift::TType::String, 9),
+            ::fbthrift::Field::new("req_value", ::fbthrift::TType::I64, 3),
+            ::fbthrift::Field::new("str_value", ::fbthrift::TType::String, 8),
+            ::fbthrift::Field::new("value", ::fbthrift::TType::I64, 2),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = MyField::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyField")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::I64, 1) {
+                output.opt_value = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_value", strct: "MyField"})?);
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I64, 2) {
+                output.value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "value", strct: "MyField"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I64, 3) {
+                output.req_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_value", strct: "MyField"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I32, 4) {
+                output.opt_enum_value = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_enum_value", strct: "MyField"})?);
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I32, 5) {
+                output.enum_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "enum_value", strct: "MyField"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::I32, 6) {
+                output.req_enum_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_enum_value", strct: "MyField"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::String, 7) {
+                output.opt_str_value = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_str_value", strct: "MyField"})?);
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::String, 8) {
+                output.str_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "str_value", strct: "MyField"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::String, 9) {
+                output.req_str_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_str_value", strct: "MyField"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
             loop {
-                let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                match (fty, fid as ::std::primitive::i32, once) {
-                    (::fbthrift::TType::Stop, _, _) => break,
-                    (::fbthrift::TType::I32, 1, false) => {
-                        once = true;
-                        alt = ::std::option::Option::Some(Self::anInteger(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "anInteger", strct: "MyUnion"})?));
-                    }
-                    (::fbthrift::TType::String, 2, false) => {
-                        once = true;
-                        alt = ::std::option::Option::Some(Self::aString(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "aString", strct: "MyUnion"})?));
-                    }
-                    (fty, _, false) => p.skip(fty)?,
-                    (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
-                        "MyUnion".to_string(),
-                        badty,
-                        badid,
-                    ))),
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::I64, 1) => output.opt_value = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_value", strct: "MyField"})?),
+                    (::fbthrift::TType::I64, 2) => output.value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "value", strct: "MyField"})?,
+                    (::fbthrift::TType::I64, 3) => output.req_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_value", strct: "MyField"})?,
+                    (::fbthrift::TType::I32, 4) => output.opt_enum_value = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_enum_value", strct: "MyField"})?),
+                    (::fbthrift::TType::I32, 5) => output.enum_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "enum_value", strct: "MyField"})?,
+                    (::fbthrift::TType::I32, 6) => output.req_enum_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_enum_value", strct: "MyField"})?,
+                    (::fbthrift::TType::String, 7) => output.opt_str_value = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_str_value", strct: "MyField"})?),
+                    (::fbthrift::TType::String, 8) => output.str_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "str_value", strct: "MyField"})?,
+                    (::fbthrift::TType::String, 9) => output.req_str_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_str_value", strct: "MyField"})?,
+                    (fty, _) => p.skip(fty)?,
                 }
                 p.read_field_end()?;
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(alt.unwrap_or_default())
-        }
-    }
-    
-    impl MyUnion {
-        /// Return current union variant name as a tuple of (Rust name, original name).
-        pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {
-            match self {
-                Self::anInteger(_) => ::std::option::Option::Some(("anInteger", "anInteger")),
-                Self::aString(_) => ::std::option::Option::Some(("aString", "aString")),
-                Self::UnknownField(_) => ::std::option::Option::None,
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             }
         }
-    
-        /// Return all union variant names as a tuple of (Rust name, original name).
-        pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
-            &[
-                ("anInteger", "anInteger"),
-                ("aString", "aString"),
-            ]
-        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
     }
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                2 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for MyField {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
     }
-    
-    
-    impl ::std::default::Default for NonTriviallyDestructibleUnion {
-        fn default() -> Self {
-            Self::UnknownField(-1)
-        }
-    }
-    
-    impl ::fbthrift::GetTType for NonTriviallyDestructibleUnion {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::NonTriviallyDestructibleUnion {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::UnionType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for NonTriviallyDestructibleUnion
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("NonTriviallyDestructibleUnion");
-            match self {
-                Self::int_field(inner) => {
-                    p.write_field_begin("int_field", ::fbthrift::TType::I32, 1);
-                    ::fbthrift::Serialize::rs_thrift_write(inner, p);
-                    p.write_field_end();
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
                 }
-                Self::UnknownField(_) => {}
-            }
-            p.write_field_stop();
-            p.write_struct_end();
+            },
+            2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            3 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            4 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            5 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            6 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            7 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            8 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            9 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::MyStruct {
+    fn default() -> Self {
+        Self {
+            opt_ref: ::std::option::Option::None,
+            r#ref: ::std::default::Default::default(),
+            req_ref: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
-    
-    impl<P> ::fbthrift::Deserialize<P> for NonTriviallyDestructibleUnion
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("int_field", ::fbthrift::TType::I32, 1),
-            ];
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a NonTriviallyDestructibleUnion")?;
-            let mut once = false;
-            let mut alt = ::std::option::Option::None;
+}
+
+impl ::std::fmt::Debug for self::MyStruct {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("MyStruct")
+            .field("opt_ref", &self.opt_ref)
+            .field("r#ref", &self.r#ref)
+            .field("req_ref", &self.req_ref)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::MyStruct {}
+unsafe impl ::std::marker::Sync for self::MyStruct {}
+impl ::std::marker::Unpin for self::MyStruct {}
+impl ::std::panic::RefUnwindSafe for self::MyStruct {}
+impl ::std::panic::UnwindSafe for self::MyStruct {}
+
+impl ::fbthrift::GetTType for self::MyStruct {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::MyStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::MyStruct
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("MyStruct");
+        if let ::std::option::Option::Some(some) = &self.opt_ref {
+            p.write_field_begin("opt_ref", ::fbthrift::TType::Struct, 1);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
+            p.write_field_end();
+        }
+        p.write_field_begin("ref", ::fbthrift::TType::Struct, 2);
+        ::fbthrift::Serialize::rs_thrift_write(&self.r#ref, p);
+        p.write_field_end();
+        p.write_field_begin("req_ref", ::fbthrift::TType::Struct, 3);
+        ::fbthrift::Serialize::rs_thrift_write(&self.req_ref, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::MyStruct
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("opt_ref", ::fbthrift::TType::Struct, 1),
+            ::fbthrift::Field::new("ref", ::fbthrift::TType::Struct, 2),
+            ::fbthrift::Field::new("req_ref", ::fbthrift::TType::Struct, 3),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = MyStruct::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::Struct, 1) {
+                output.opt_ref = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_ref", strct: "MyStruct"})?);
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Struct, 2) {
+                output.r#ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "ref", strct: "MyStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Struct, 3) {
+                output.req_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_ref", strct: "MyStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
             loop {
-                let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                match (fty, fid as ::std::primitive::i32, once) {
-                    (::fbthrift::TType::Stop, _, _) => break,
-                    (::fbthrift::TType::I32, 1, false) => {
-                        once = true;
-                        alt = ::std::option::Option::Some(Self::int_field(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "int_field", strct: "NonTriviallyDestructibleUnion"})?));
-                    }
-                    (fty, _, false) => p.skip(fty)?,
-                    (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
-                        "NonTriviallyDestructibleUnion".to_string(),
-                        badty,
-                        badid,
-                    ))),
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::Struct, 1) => output.opt_ref = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_ref", strct: "MyStruct"})?),
+                    (::fbthrift::TType::Struct, 2) => output.r#ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "ref", strct: "MyStruct"})?,
+                    (::fbthrift::TType::Struct, 3) => output.req_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_ref", strct: "MyStruct"})?,
+                    (fty, _) => p.skip(fty)?,
                 }
                 p.read_field_end()?;
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(alt.unwrap_or_default())
-        }
-    }
-    
-    impl NonTriviallyDestructibleUnion {
-        /// Return current union variant name as a tuple of (Rust name, original name).
-        pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {
-            match self {
-                Self::int_field(_) => ::std::option::Option::Some(("int_field", "int_field")),
-                Self::UnknownField(_) => ::std::option::Option::None,
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             }
         }
-    
-        /// Return all union variant names as a tuple of (Rust name, original name).
-        pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
-            &[
-                ("int_field", "int_field"),
-            ]
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            3 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::StructWithUnion {
+    fn default() -> Self {
+        Self {
+            u: ::std::default::Default::default(),
+            aDouble: ::std::default::Default::default(),
+            f: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for NonTriviallyDestructibleUnion {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::SharedMutable,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                _ => {}
+}
+
+impl ::std::fmt::Debug for self::StructWithUnion {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("StructWithUnion")
+            .field("u", &self.u)
+            .field("aDouble", &self.aDouble)
+            .field("f", &self.f)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::StructWithUnion {}
+unsafe impl ::std::marker::Sync for self::StructWithUnion {}
+impl ::std::marker::Unpin for self::StructWithUnion {}
+impl ::std::panic::RefUnwindSafe for self::StructWithUnion {}
+impl ::std::panic::UnwindSafe for self::StructWithUnion {}
+
+impl ::fbthrift::GetTType for self::StructWithUnion {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::StructWithUnion {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::StructWithUnion
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("StructWithUnion");
+        p.write_field_begin("u", ::fbthrift::TType::Struct, 1);
+        ::fbthrift::Serialize::rs_thrift_write(&self.u, p);
+        p.write_field_end();
+        p.write_field_begin("aDouble", ::fbthrift::TType::Double, 2);
+        ::fbthrift::Serialize::rs_thrift_write(&self.aDouble, p);
+        p.write_field_end();
+        p.write_field_begin("f", ::fbthrift::TType::Struct, 3);
+        ::fbthrift::Serialize::rs_thrift_write(&self.f, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::StructWithUnion
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("aDouble", ::fbthrift::TType::Double, 2),
+            ::fbthrift::Field::new("f", ::fbthrift::TType::Struct, 3),
+            ::fbthrift::Field::new("u", ::fbthrift::TType::Struct, 1),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = StructWithUnion::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithUnion")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::Struct, 1) {
+                output.u = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "u", strct: "StructWithUnion"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
             }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::MyField {
-        fn default() -> Self {
-            Self {
-                opt_value: ::std::option::Option::None,
-                value: ::std::default::Default::default(),
-                req_value: ::std::default::Default::default(),
-                opt_enum_value: ::std::option::Option::None,
-                enum_value: ::std::default::Default::default(),
-                req_enum_value: ::std::default::Default::default(),
-                opt_str_value: ::std::option::Option::None,
-                str_value: ::std::default::Default::default(),
-                req_str_value: ::std::default::Default::default(),
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Double, 2) {
+                output.aDouble = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "aDouble", strct: "StructWithUnion"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Struct, 3) {
+                output.f = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "f", strct: "StructWithUnion"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::Struct, 1) => output.u = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "u", strct: "StructWithUnion"})?,
+                    (::fbthrift::TType::Double, 2) => output.aDouble = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "aDouble", strct: "StructWithUnion"})?,
+                    (::fbthrift::TType::Struct, 3) => output.f = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "f", strct: "StructWithUnion"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             }
         }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
     }
-    
-    impl ::std::fmt::Debug for self::MyField {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("MyField")
-                .field("opt_value", &self.opt_value)
-                .field("value", &self.value)
-                .field("req_value", &self.req_value)
-                .field("opt_enum_value", &self.opt_enum_value)
-                .field("enum_value", &self.enum_value)
-                .field("req_enum_value", &self.req_enum_value)
-                .field("opt_str_value", &self.opt_str_value)
-                .field("str_value", &self.str_value)
-                .field("req_str_value", &self.req_str_value)
-                .finish()
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for StructWithUnion {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            3 => {
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::RecursiveStruct {
+    fn default() -> Self {
+        Self {
+            mes: ::std::option::Option::None,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
-    
-    unsafe impl ::std::marker::Send for self::MyField {}
-    unsafe impl ::std::marker::Sync for self::MyField {}
-    impl ::std::marker::Unpin for self::MyField {}
-    impl ::std::panic::RefUnwindSafe for self::MyField {}
-    impl ::std::panic::UnwindSafe for self::MyField {}
-    
-    impl ::fbthrift::GetTType for self::MyField {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::std::fmt::Debug for self::RecursiveStruct {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("RecursiveStruct")
+            .field("mes", &self.mes)
+            .finish()
     }
-    
-    impl ::fbthrift::GetTypeNameType for self::MyField {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
+}
+
+unsafe impl ::std::marker::Send for self::RecursiveStruct {}
+unsafe impl ::std::marker::Sync for self::RecursiveStruct {}
+impl ::std::marker::Unpin for self::RecursiveStruct {}
+impl ::std::panic::RefUnwindSafe for self::RecursiveStruct {}
+impl ::std::panic::UnwindSafe for self::RecursiveStruct {}
+
+impl ::fbthrift::GetTType for self::RecursiveStruct {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::RecursiveStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::MyField
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("MyField");
-            if let ::std::option::Option::Some(some) = &self.opt_value {
-                p.write_field_begin("opt_value", ::fbthrift::TType::I64, 1);
-                ::fbthrift::Serialize::rs_thrift_write(some, p);
-                p.write_field_end();
-            }
-            p.write_field_begin("value", ::fbthrift::TType::I64, 2);
-            ::fbthrift::Serialize::rs_thrift_write(&self.value, p);
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::RecursiveStruct
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("RecursiveStruct");
+        if let ::std::option::Option::Some(some) = &self.mes {
+            p.write_field_begin("mes", ::fbthrift::TType::List, 1);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
-            p.write_field_begin("req_value", ::fbthrift::TType::I64, 3);
-            ::fbthrift::Serialize::rs_thrift_write(&self.req_value, p);
+        }
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::RecursiveStruct
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("mes", ::fbthrift::TType::List, 1),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = RecursiveStruct::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a RecursiveStruct")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::List, 1) {
+                output.mes = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "mes", strct: "RecursiveStruct"})?);
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::List, 1) => output.mes = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "mes", strct: "RecursiveStruct"})?),
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for RecursiveStruct {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<java__types::Recursive>() {
+                    let mut tmp = ::std::option::Option::Some(java__types::Recursive {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::StructWithContainers {
+    fn default() -> Self {
+        Self {
+            list_ref: ::std::default::Default::default(),
+            set_ref: ::std::default::Default::default(),
+            map_ref: ::std::default::Default::default(),
+            list_ref_unique: ::std::default::Default::default(),
+            set_ref_shared: ::std::default::Default::default(),
+            list_ref_shared_const: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::StructWithContainers {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("StructWithContainers")
+            .field("list_ref", &self.list_ref)
+            .field("set_ref", &self.set_ref)
+            .field("map_ref", &self.map_ref)
+            .field("list_ref_unique", &self.list_ref_unique)
+            .field("set_ref_shared", &self.set_ref_shared)
+            .field("list_ref_shared_const", &self.list_ref_shared_const)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::StructWithContainers {}
+unsafe impl ::std::marker::Sync for self::StructWithContainers {}
+impl ::std::marker::Unpin for self::StructWithContainers {}
+impl ::std::panic::RefUnwindSafe for self::StructWithContainers {}
+impl ::std::panic::UnwindSafe for self::StructWithContainers {}
+
+impl ::fbthrift::GetTType for self::StructWithContainers {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::StructWithContainers {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::StructWithContainers
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("StructWithContainers");
+        p.write_field_begin("list_ref", ::fbthrift::TType::List, 1);
+        ::fbthrift::Serialize::rs_thrift_write(&self.list_ref, p);
+        p.write_field_end();
+        p.write_field_begin("set_ref", ::fbthrift::TType::Set, 2);
+        ::fbthrift::Serialize::rs_thrift_write(&self.set_ref, p);
+        p.write_field_end();
+        p.write_field_begin("map_ref", ::fbthrift::TType::Map, 3);
+        ::fbthrift::Serialize::rs_thrift_write(&self.map_ref, p);
+        p.write_field_end();
+        p.write_field_begin("list_ref_unique", ::fbthrift::TType::List, 4);
+        ::fbthrift::Serialize::rs_thrift_write(&self.list_ref_unique, p);
+        p.write_field_end();
+        p.write_field_begin("set_ref_shared", ::fbthrift::TType::Set, 5);
+        ::fbthrift::Serialize::rs_thrift_write(&self.set_ref_shared, p);
+        p.write_field_end();
+        p.write_field_begin("list_ref_shared_const", ::fbthrift::TType::List, 6);
+        ::fbthrift::Serialize::rs_thrift_write(&self.list_ref_shared_const, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::StructWithContainers
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("list_ref", ::fbthrift::TType::List, 1),
+            ::fbthrift::Field::new("list_ref_shared_const", ::fbthrift::TType::List, 6),
+            ::fbthrift::Field::new("list_ref_unique", ::fbthrift::TType::List, 4),
+            ::fbthrift::Field::new("map_ref", ::fbthrift::TType::Map, 3),
+            ::fbthrift::Field::new("set_ref", ::fbthrift::TType::Set, 2),
+            ::fbthrift::Field::new("set_ref_shared", ::fbthrift::TType::Set, 5),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = StructWithContainers::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithContainers")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::List, 1) {
+                output.list_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_ref", strct: "StructWithContainers"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Set, 2) {
+                output.set_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "set_ref", strct: "StructWithContainers"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Map, 3) {
+                output.map_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "map_ref", strct: "StructWithContainers"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::List, 4) {
+                output.list_ref_unique = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_ref_unique", strct: "StructWithContainers"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Set, 5) {
+                output.set_ref_shared = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "set_ref_shared", strct: "StructWithContainers"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::List, 6) {
+                output.list_ref_shared_const = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_ref_shared_const", strct: "StructWithContainers"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::List, 1) => output.list_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_ref", strct: "StructWithContainers"})?,
+                    (::fbthrift::TType::Set, 2) => output.set_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "set_ref", strct: "StructWithContainers"})?,
+                    (::fbthrift::TType::Map, 3) => output.map_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "map_ref", strct: "StructWithContainers"})?,
+                    (::fbthrift::TType::List, 4) => output.list_ref_unique = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_ref_unique", strct: "StructWithContainers"})?,
+                    (::fbthrift::TType::Set, 5) => output.set_ref_shared = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "set_ref_shared", strct: "StructWithContainers"})?,
+                    (::fbthrift::TType::List, 6) => output.list_ref_shared_const = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_ref_shared_const", strct: "StructWithContainers"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for StructWithContainers {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            3 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            4 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            5 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::SharedMutable,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            6 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Shared,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::StructWithSharedConst {
+    fn default() -> Self {
+        Self {
+            opt_shared_const: ::std::option::Option::None,
+            shared_const: ::std::default::Default::default(),
+            req_shared_const: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::StructWithSharedConst {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("StructWithSharedConst")
+            .field("opt_shared_const", &self.opt_shared_const)
+            .field("shared_const", &self.shared_const)
+            .field("req_shared_const", &self.req_shared_const)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::StructWithSharedConst {}
+unsafe impl ::std::marker::Sync for self::StructWithSharedConst {}
+impl ::std::marker::Unpin for self::StructWithSharedConst {}
+impl ::std::panic::RefUnwindSafe for self::StructWithSharedConst {}
+impl ::std::panic::UnwindSafe for self::StructWithSharedConst {}
+
+impl ::fbthrift::GetTType for self::StructWithSharedConst {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::StructWithSharedConst {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::StructWithSharedConst
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("StructWithSharedConst");
+        if let ::std::option::Option::Some(some) = &self.opt_shared_const {
+            p.write_field_begin("opt_shared_const", ::fbthrift::TType::Struct, 1);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
-            if let ::std::option::Option::Some(some) = &self.opt_enum_value {
-                p.write_field_begin("opt_enum_value", ::fbthrift::TType::I32, 4);
-                ::fbthrift::Serialize::rs_thrift_write(some, p);
-                p.write_field_end();
+        }
+        p.write_field_begin("shared_const", ::fbthrift::TType::Struct, 2);
+        ::fbthrift::Serialize::rs_thrift_write(&self.shared_const, p);
+        p.write_field_end();
+        p.write_field_begin("req_shared_const", ::fbthrift::TType::Struct, 3);
+        ::fbthrift::Serialize::rs_thrift_write(&self.req_shared_const, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::StructWithSharedConst
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("opt_shared_const", ::fbthrift::TType::Struct, 1),
+            ::fbthrift::Field::new("req_shared_const", ::fbthrift::TType::Struct, 3),
+            ::fbthrift::Field::new("shared_const", ::fbthrift::TType::Struct, 2),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = StructWithSharedConst::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithSharedConst")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::Struct, 1) {
+                output.opt_shared_const = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_shared_const", strct: "StructWithSharedConst"})?);
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
             }
-            p.write_field_begin("enum_value", ::fbthrift::TType::I32, 5);
-            ::fbthrift::Serialize::rs_thrift_write(&self.enum_value, p);
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Struct, 2) {
+                output.shared_const = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "shared_const", strct: "StructWithSharedConst"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Struct, 3) {
+                output.req_shared_const = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_shared_const", strct: "StructWithSharedConst"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::Struct, 1) => output.opt_shared_const = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_shared_const", strct: "StructWithSharedConst"})?),
+                    (::fbthrift::TType::Struct, 2) => output.shared_const = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "shared_const", strct: "StructWithSharedConst"})?,
+                    (::fbthrift::TType::Struct, 3) => output.req_shared_const = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_shared_const", strct: "StructWithSharedConst"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for StructWithSharedConst {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Shared,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Shared,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            3 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Shared,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::Empty {
+    fn default() -> Self {
+        Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::Empty {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("Empty")
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::Empty {}
+unsafe impl ::std::marker::Sync for self::Empty {}
+impl ::std::marker::Unpin for self::Empty {}
+impl ::std::panic::RefUnwindSafe for self::Empty {}
+impl ::std::panic::UnwindSafe for self::Empty {}
+
+impl ::fbthrift::GetTType for self::Empty {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::Empty {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::Empty
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("Empty");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::Empty
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = Empty::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Empty")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for Empty {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::StructWithRef {
+    fn default() -> Self {
+        Self {
+            def_field: ::std::default::Default::default(),
+            opt_field: ::std::option::Option::None,
+            req_field: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::StructWithRef {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("StructWithRef")
+            .field("def_field", &self.def_field)
+            .field("opt_field", &self.opt_field)
+            .field("req_field", &self.req_field)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::StructWithRef {}
+unsafe impl ::std::marker::Sync for self::StructWithRef {}
+impl ::std::marker::Unpin for self::StructWithRef {}
+impl ::std::panic::RefUnwindSafe for self::StructWithRef {}
+impl ::std::panic::UnwindSafe for self::StructWithRef {}
+
+impl ::fbthrift::GetTType for self::StructWithRef {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::StructWithRef {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::StructWithRef
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("StructWithRef");
+        p.write_field_begin("def_field", ::fbthrift::TType::Struct, 1);
+        ::fbthrift::Serialize::rs_thrift_write(&self.def_field, p);
+        p.write_field_end();
+        if let ::std::option::Option::Some(some) = &self.opt_field {
+            p.write_field_begin("opt_field", ::fbthrift::TType::Struct, 2);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
-            p.write_field_begin("req_enum_value", ::fbthrift::TType::I32, 6);
-            ::fbthrift::Serialize::rs_thrift_write(&self.req_enum_value, p);
+        }
+        p.write_field_begin("req_field", ::fbthrift::TType::Struct, 3);
+        ::fbthrift::Serialize::rs_thrift_write(&self.req_field, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::StructWithRef
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("def_field", ::fbthrift::TType::Struct, 1),
+            ::fbthrift::Field::new("opt_field", ::fbthrift::TType::Struct, 2),
+            ::fbthrift::Field::new("req_field", ::fbthrift::TType::Struct, 3),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = StructWithRef::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithRef")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::Struct, 1) {
+                output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRef"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Struct, 2) {
+                output.opt_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_field", strct: "StructWithRef"})?);
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Struct, 3) {
+                output.req_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_field", strct: "StructWithRef"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::Struct, 1) => output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRef"})?,
+                    (::fbthrift::TType::Struct, 2) => output.opt_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_field", strct: "StructWithRef"})?),
+                    (::fbthrift::TType::Struct, 3) => output.req_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_field", strct: "StructWithRef"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for StructWithRef {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            3 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::StructWithBox {
+    fn default() -> Self {
+        Self {
+            a: ::std::option::Option::None,
+            b: ::std::option::Option::None,
+            c: ::std::option::Option::None,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::StructWithBox {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("StructWithBox")
+            .field("a", &self.a)
+            .field("b", &self.b)
+            .field("c", &self.c)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::StructWithBox {}
+unsafe impl ::std::marker::Sync for self::StructWithBox {}
+impl ::std::marker::Unpin for self::StructWithBox {}
+impl ::std::panic::RefUnwindSafe for self::StructWithBox {}
+impl ::std::panic::UnwindSafe for self::StructWithBox {}
+
+impl ::fbthrift::GetTType for self::StructWithBox {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::StructWithBox {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::StructWithBox
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("StructWithBox");
+        if let ::std::option::Option::Some(some) = &self.a {
+            p.write_field_begin("a", ::fbthrift::TType::String, 1);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
-            if let ::std::option::Option::Some(some) = &self.opt_str_value {
-                p.write_field_begin("opt_str_value", ::fbthrift::TType::String, 7);
-                ::fbthrift::Serialize::rs_thrift_write(some, p);
-                p.write_field_end();
-            }
-            p.write_field_begin("str_value", ::fbthrift::TType::String, 8);
-            ::fbthrift::Serialize::rs_thrift_write(&self.str_value, p);
+        }
+        if let ::std::option::Option::Some(some) = &self.b {
+            p.write_field_begin("b", ::fbthrift::TType::List, 2);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
-            p.write_field_begin("req_str_value", ::fbthrift::TType::String, 9);
-            ::fbthrift::Serialize::rs_thrift_write(&self.req_str_value, p);
+        }
+        if let ::std::option::Option::Some(some) = &self.c {
+            p.write_field_begin("c", ::fbthrift::TType::Struct, 3);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
         }
+        p.write_field_stop();
+        p.write_struct_end();
     }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::MyField
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("enum_value", ::fbthrift::TType::I32, 5),
-                ::fbthrift::Field::new("opt_enum_value", ::fbthrift::TType::I32, 4),
-                ::fbthrift::Field::new("opt_str_value", ::fbthrift::TType::String, 7),
-                ::fbthrift::Field::new("opt_value", ::fbthrift::TType::I64, 1),
-                ::fbthrift::Field::new("req_enum_value", ::fbthrift::TType::I32, 6),
-                ::fbthrift::Field::new("req_str_value", ::fbthrift::TType::String, 9),
-                ::fbthrift::Field::new("req_value", ::fbthrift::TType::I64, 3),
-                ::fbthrift::Field::new("str_value", ::fbthrift::TType::String, 8),
-                ::fbthrift::Field::new("value", ::fbthrift::TType::I64, 2),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = MyField::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyField")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::I64, 1) {
-                    output.opt_value = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_value", strct: "MyField"})?);
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::I64, 2) {
-                    output.value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "value", strct: "MyField"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::I64, 3) {
-                    output.req_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_value", strct: "MyField"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::I32, 4) {
-                    output.opt_enum_value = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_enum_value", strct: "MyField"})?);
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::I32, 5) {
-                    output.enum_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "enum_value", strct: "MyField"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::I32, 6) {
-                    output.req_enum_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_enum_value", strct: "MyField"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::String, 7) {
-                    output.opt_str_value = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_str_value", strct: "MyField"})?);
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::String, 8) {
-                    output.str_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "str_value", strct: "MyField"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::String, 9) {
-                    output.req_str_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_str_value", strct: "MyField"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::I64, 1) => output.opt_value = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_value", strct: "MyField"})?),
-                        (::fbthrift::TType::I64, 2) => output.value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "value", strct: "MyField"})?,
-                        (::fbthrift::TType::I64, 3) => output.req_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_value", strct: "MyField"})?,
-                        (::fbthrift::TType::I32, 4) => output.opt_enum_value = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_enum_value", strct: "MyField"})?),
-                        (::fbthrift::TType::I32, 5) => output.enum_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "enum_value", strct: "MyField"})?,
-                        (::fbthrift::TType::I32, 6) => output.req_enum_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_enum_value", strct: "MyField"})?,
-                        (::fbthrift::TType::String, 7) => output.opt_str_value = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_str_value", strct: "MyField"})?),
-                        (::fbthrift::TType::String, 8) => output.str_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "str_value", strct: "MyField"})?,
-                        (::fbthrift::TType::String, 9) => output.req_str_value = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_str_value", strct: "MyField"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::StructWithBox
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("a", ::fbthrift::TType::String, 1),
+            ::fbthrift::Field::new("b", ::fbthrift::TType::List, 2),
+            ::fbthrift::Field::new("c", ::fbthrift::TType::Struct, 3),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = StructWithBox::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithBox")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::String, 1) {
+                output.a = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "StructWithBox"})?);
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
             }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for MyField {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                2 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                3 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                4 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                5 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                6 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                7 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                8 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                9 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                _ => {}
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::List, 2) {
+                output.b = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "b", strct: "StructWithBox"})?);
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
             }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::MyStruct {
-        fn default() -> Self {
-            Self {
-                opt_ref: ::std::option::Option::None,
-                r#ref: ::std::default::Default::default(),
-                req_ref: ::std::default::Default::default(),
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Struct, 3) {
+                output.c = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "c", strct: "StructWithBox"})?);
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::String, 1) => output.a = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "StructWithBox"})?),
+                    (::fbthrift::TType::List, 2) => output.b = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "b", strct: "StructWithBox"})?),
+                    (::fbthrift::TType::Struct, 3) => output.c = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "c", strct: "StructWithBox"})?),
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             }
         }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
     }
-    
-    impl ::std::fmt::Debug for self::MyStruct {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("MyStruct")
-                .field("opt_ref", &self.opt_ref)
-                .field("r#ref", &self.r#ref)
-                .field("req_ref", &self.req_ref)
-                .finish()
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for StructWithBox {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::Box {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            2 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::Box {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            3 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::Box {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::StructWithInternBox {
+    fn default() -> Self {
+        Self {
+            field1: ::std::default::Default::default(),
+            field2: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
-    
-    unsafe impl ::std::marker::Send for self::MyStruct {}
-    unsafe impl ::std::marker::Sync for self::MyStruct {}
-    impl ::std::marker::Unpin for self::MyStruct {}
-    impl ::std::panic::RefUnwindSafe for self::MyStruct {}
-    impl ::std::panic::UnwindSafe for self::MyStruct {}
-    
-    impl ::fbthrift::GetTType for self::MyStruct {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::std::fmt::Debug for self::StructWithInternBox {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("StructWithInternBox")
+            .field("field1", &self.field1)
+            .field("field2", &self.field2)
+            .finish()
     }
-    
-    impl ::fbthrift::GetTypeNameType for self::MyStruct {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
+}
+
+unsafe impl ::std::marker::Send for self::StructWithInternBox {}
+unsafe impl ::std::marker::Sync for self::StructWithInternBox {}
+impl ::std::marker::Unpin for self::StructWithInternBox {}
+impl ::std::panic::RefUnwindSafe for self::StructWithInternBox {}
+impl ::std::panic::UnwindSafe for self::StructWithInternBox {}
+
+impl ::fbthrift::GetTType for self::StructWithInternBox {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::StructWithInternBox {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::MyStruct
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("MyStruct");
-            if let ::std::option::Option::Some(some) = &self.opt_ref {
-                p.write_field_begin("opt_ref", ::fbthrift::TType::Struct, 1);
-                ::fbthrift::Serialize::rs_thrift_write(some, p);
-                p.write_field_end();
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::StructWithInternBox
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("StructWithInternBox");
+        p.write_field_begin("field1", ::fbthrift::TType::Struct, 1);
+        ::fbthrift::Serialize::rs_thrift_write(&self.field1, p);
+        p.write_field_end();
+        p.write_field_begin("field2", ::fbthrift::TType::Struct, 2);
+        ::fbthrift::Serialize::rs_thrift_write(&self.field2, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::StructWithInternBox
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("field1", ::fbthrift::TType::Struct, 1),
+            ::fbthrift::Field::new("field2", ::fbthrift::TType::Struct, 2),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = StructWithInternBox::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithInternBox")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::Struct, 1) {
+                output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "StructWithInternBox"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
             }
-            p.write_field_begin("ref", ::fbthrift::TType::Struct, 2);
-            ::fbthrift::Serialize::rs_thrift_write(&self.r#ref, p);
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Struct, 2) {
+                output.field2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "StructWithInternBox"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::Struct, 1) => output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "StructWithInternBox"})?,
+                    (::fbthrift::TType::Struct, 2) => output.field2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "StructWithInternBox"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for StructWithInternBox {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            2 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::StructWithTerseInternBox {
+    fn default() -> Self {
+        Self {
+            field1: ::std::default::Default::default(),
+            field2: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::StructWithTerseInternBox {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("StructWithTerseInternBox")
+            .field("field1", &self.field1)
+            .field("field2", &self.field2)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::StructWithTerseInternBox {}
+unsafe impl ::std::marker::Sync for self::StructWithTerseInternBox {}
+impl ::std::marker::Unpin for self::StructWithTerseInternBox {}
+impl ::std::panic::RefUnwindSafe for self::StructWithTerseInternBox {}
+impl ::std::panic::UnwindSafe for self::StructWithTerseInternBox {}
+
+impl ::fbthrift::GetTType for self::StructWithTerseInternBox {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::StructWithTerseInternBox {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::StructWithTerseInternBox
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("StructWithTerseInternBox");
+        p.write_field_begin("field1", ::fbthrift::TType::Struct, 1);
+        ::fbthrift::Serialize::rs_thrift_write(&self.field1, p);
+        p.write_field_end();
+        p.write_field_begin("field2", ::fbthrift::TType::Struct, 2);
+        ::fbthrift::Serialize::rs_thrift_write(&self.field2, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::StructWithTerseInternBox
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("field1", ::fbthrift::TType::Struct, 1),
+            ::fbthrift::Field::new("field2", ::fbthrift::TType::Struct, 2),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = StructWithTerseInternBox::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithTerseInternBox")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::Struct, 1) {
+                output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "StructWithTerseInternBox"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Struct, 2) {
+                output.field2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "StructWithTerseInternBox"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::Struct, 1) => output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "StructWithTerseInternBox"})?,
+                    (::fbthrift::TType::Struct, 2) => output.field2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "StructWithTerseInternBox"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for StructWithTerseInternBox {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        if type_id == ::std::any::TypeId::of::<thrift__types::Experimental>() {
+            let mut tmp = ::std::option::Option::Some(thrift__types::Experimental {
+                ..::std::default::Default::default()
+            });
+            let r: &mut dyn ::std::any::Any = &mut tmp;
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+            return r.take();
+        }
+
+        if let ::std::option::Option::Some(r) = <thrift__types::Experimental as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
+        }
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            2 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::AdaptedStructWithInternBox {
+    fn default() -> Self {
+        Self {
+            field1: ::std::default::Default::default(),
+            field2: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::AdaptedStructWithInternBox {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("AdaptedStructWithInternBox")
+            .field("field1", &self.field1)
+            .field("field2", &self.field2)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::AdaptedStructWithInternBox {}
+unsafe impl ::std::marker::Sync for self::AdaptedStructWithInternBox {}
+impl ::std::marker::Unpin for self::AdaptedStructWithInternBox {}
+impl ::std::panic::RefUnwindSafe for self::AdaptedStructWithInternBox {}
+impl ::std::panic::UnwindSafe for self::AdaptedStructWithInternBox {}
+
+impl ::fbthrift::GetTType for self::AdaptedStructWithInternBox {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::AdaptedStructWithInternBox {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::AdaptedStructWithInternBox
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("AdaptedStructWithInternBox");
+        p.write_field_begin("field1", ::fbthrift::TType::Struct, 1);
+        ::fbthrift::Serialize::rs_thrift_write(&self.field1, p);
+        p.write_field_end();
+        p.write_field_begin("field2", ::fbthrift::TType::Struct, 2);
+        ::fbthrift::Serialize::rs_thrift_write(&self.field2, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::AdaptedStructWithInternBox
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("field1", ::fbthrift::TType::Struct, 1),
+            ::fbthrift::Field::new("field2", ::fbthrift::TType::Struct, 2),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = AdaptedStructWithInternBox::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a AdaptedStructWithInternBox")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::Struct, 1) {
+                output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "AdaptedStructWithInternBox"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Struct, 2) {
+                output.field2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "AdaptedStructWithInternBox"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::Struct, 1) => output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "AdaptedStructWithInternBox"})?,
+                    (::fbthrift::TType::Struct, 2) => output.field2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "AdaptedStructWithInternBox"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithInternBox {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
+                        name: "::my::Adapter1".to_owned(),
+                        adaptedType: ::std::default::Default::default(),
+                        underlyingName: ::std::default::Default::default(),
+                        extraNamespace: ::std::default::Default::default(),
+                        moveOnly: ::std::default::Default::default(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
+                }
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
+                        name: "::my::Adapter1".to_owned(),
+                        adaptedType: ::std::default::Default::default(),
+                        underlyingName: ::std::default::Default::default(),
+                        extraNamespace: ::std::default::Default::default(),
+                        moveOnly: ::std::default::Default::default(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
+                }
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::AdaptedStructWithTerseInternBox {
+    fn default() -> Self {
+        Self {
+            field1: ::std::default::Default::default(),
+            field2: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::AdaptedStructWithTerseInternBox {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("AdaptedStructWithTerseInternBox")
+            .field("field1", &self.field1)
+            .field("field2", &self.field2)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::AdaptedStructWithTerseInternBox {}
+unsafe impl ::std::marker::Sync for self::AdaptedStructWithTerseInternBox {}
+impl ::std::marker::Unpin for self::AdaptedStructWithTerseInternBox {}
+impl ::std::panic::RefUnwindSafe for self::AdaptedStructWithTerseInternBox {}
+impl ::std::panic::UnwindSafe for self::AdaptedStructWithTerseInternBox {}
+
+impl ::fbthrift::GetTType for self::AdaptedStructWithTerseInternBox {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::AdaptedStructWithTerseInternBox {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::AdaptedStructWithTerseInternBox
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("AdaptedStructWithTerseInternBox");
+        p.write_field_begin("field1", ::fbthrift::TType::Struct, 1);
+        ::fbthrift::Serialize::rs_thrift_write(&self.field1, p);
+        p.write_field_end();
+        p.write_field_begin("field2", ::fbthrift::TType::Struct, 2);
+        ::fbthrift::Serialize::rs_thrift_write(&self.field2, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::AdaptedStructWithTerseInternBox
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("field1", ::fbthrift::TType::Struct, 1),
+            ::fbthrift::Field::new("field2", ::fbthrift::TType::Struct, 2),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = AdaptedStructWithTerseInternBox::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a AdaptedStructWithTerseInternBox")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::Struct, 1) {
+                output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "AdaptedStructWithTerseInternBox"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Struct, 2) {
+                output.field2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "AdaptedStructWithTerseInternBox"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::Struct, 1) => output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "AdaptedStructWithTerseInternBox"})?,
+                    (::fbthrift::TType::Struct, 2) => output.field2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "AdaptedStructWithTerseInternBox"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithTerseInternBox {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        if type_id == ::std::any::TypeId::of::<thrift__types::Experimental>() {
+            let mut tmp = ::std::option::Option::Some(thrift__types::Experimental {
+                ..::std::default::Default::default()
+            });
+            let r: &mut dyn ::std::any::Any = &mut tmp;
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+            return r.take();
+        }
+
+        if let ::std::option::Option::Some(r) = <thrift__types::Experimental as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
+        }
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
+                        name: "::my::Adapter1".to_owned(),
+                        adaptedType: ::std::default::Default::default(),
+                        underlyingName: ::std::default::Default::default(),
+                        extraNamespace: ::std::default::Default::default(),
+                        moveOnly: ::std::default::Default::default(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
+                }
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
+                        name: "::my::Adapter1".to_owned(),
+                        adaptedType: ::std::default::Default::default(),
+                        underlyingName: ::std::default::Default::default(),
+                        extraNamespace: ::std::default::Default::default(),
+                        moveOnly: ::std::default::Default::default(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
+                }
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::StructWithRefTypeUnique {
+    fn default() -> Self {
+        Self {
+            def_field: ::std::default::Default::default(),
+            opt_field: ::std::option::Option::None,
+            req_field: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::StructWithRefTypeUnique {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("StructWithRefTypeUnique")
+            .field("def_field", &self.def_field)
+            .field("opt_field", &self.opt_field)
+            .field("req_field", &self.req_field)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::StructWithRefTypeUnique {}
+unsafe impl ::std::marker::Sync for self::StructWithRefTypeUnique {}
+impl ::std::marker::Unpin for self::StructWithRefTypeUnique {}
+impl ::std::panic::RefUnwindSafe for self::StructWithRefTypeUnique {}
+impl ::std::panic::UnwindSafe for self::StructWithRefTypeUnique {}
+
+impl ::fbthrift::GetTType for self::StructWithRefTypeUnique {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::StructWithRefTypeUnique {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::StructWithRefTypeUnique
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("StructWithRefTypeUnique");
+        p.write_field_begin("def_field", ::fbthrift::TType::Struct, 1);
+        ::fbthrift::Serialize::rs_thrift_write(&self.def_field, p);
+        p.write_field_end();
+        if let ::std::option::Option::Some(some) = &self.opt_field {
+            p.write_field_begin("opt_field", ::fbthrift::TType::Struct, 2);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
-            p.write_field_begin("req_ref", ::fbthrift::TType::Struct, 3);
-            ::fbthrift::Serialize::rs_thrift_write(&self.req_ref, p);
+        }
+        p.write_field_begin("req_field", ::fbthrift::TType::Struct, 3);
+        ::fbthrift::Serialize::rs_thrift_write(&self.req_field, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::StructWithRefTypeUnique
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("def_field", ::fbthrift::TType::Struct, 1),
+            ::fbthrift::Field::new("opt_field", ::fbthrift::TType::Struct, 2),
+            ::fbthrift::Field::new("req_field", ::fbthrift::TType::Struct, 3),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = StructWithRefTypeUnique::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithRefTypeUnique")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::Struct, 1) {
+                output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRefTypeUnique"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Struct, 2) {
+                output.opt_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_field", strct: "StructWithRefTypeUnique"})?);
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Struct, 3) {
+                output.req_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_field", strct: "StructWithRefTypeUnique"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::Struct, 1) => output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRefTypeUnique"})?,
+                    (::fbthrift::TType::Struct, 2) => output.opt_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_field", strct: "StructWithRefTypeUnique"})?),
+                    (::fbthrift::TType::Struct, 3) => output.req_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_field", strct: "StructWithRefTypeUnique"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeUnique {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            3 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::StructWithRefTypeShared {
+    fn default() -> Self {
+        Self {
+            def_field: ::std::default::Default::default(),
+            opt_field: ::std::option::Option::None,
+            req_field: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::StructWithRefTypeShared {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("StructWithRefTypeShared")
+            .field("def_field", &self.def_field)
+            .field("opt_field", &self.opt_field)
+            .field("req_field", &self.req_field)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::StructWithRefTypeShared {}
+unsafe impl ::std::marker::Sync for self::StructWithRefTypeShared {}
+impl ::std::marker::Unpin for self::StructWithRefTypeShared {}
+impl ::std::panic::RefUnwindSafe for self::StructWithRefTypeShared {}
+impl ::std::panic::UnwindSafe for self::StructWithRefTypeShared {}
+
+impl ::fbthrift::GetTType for self::StructWithRefTypeShared {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::StructWithRefTypeShared {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::StructWithRefTypeShared
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("StructWithRefTypeShared");
+        p.write_field_begin("def_field", ::fbthrift::TType::Struct, 1);
+        ::fbthrift::Serialize::rs_thrift_write(&self.def_field, p);
+        p.write_field_end();
+        if let ::std::option::Option::Some(some) = &self.opt_field {
+            p.write_field_begin("opt_field", ::fbthrift::TType::Struct, 2);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
         }
+        p.write_field_begin("req_field", ::fbthrift::TType::Struct, 3);
+        ::fbthrift::Serialize::rs_thrift_write(&self.req_field, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
     }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::MyStruct
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("opt_ref", ::fbthrift::TType::Struct, 1),
-                ::fbthrift::Field::new("ref", ::fbthrift::TType::Struct, 2),
-                ::fbthrift::Field::new("req_ref", ::fbthrift::TType::Struct, 3),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = MyStruct::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MyStruct")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::Struct, 1) {
-                    output.opt_ref = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_ref", strct: "MyStruct"})?);
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Struct, 2) {
-                    output.r#ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "ref", strct: "MyStruct"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Struct, 3) {
-                    output.req_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_ref", strct: "MyStruct"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::Struct, 1) => output.opt_ref = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_ref", strct: "MyStruct"})?),
-                        (::fbthrift::TType::Struct, 2) => output.r#ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "ref", strct: "MyStruct"})?,
-                        (::fbthrift::TType::Struct, 3) => output.req_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_ref", strct: "MyStruct"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::StructWithRefTypeShared
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("def_field", ::fbthrift::TType::Struct, 1),
+            ::fbthrift::Field::new("opt_field", ::fbthrift::TType::Struct, 2),
+            ::fbthrift::Field::new("req_field", ::fbthrift::TType::Struct, 3),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = StructWithRefTypeShared::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithRefTypeShared")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::Struct, 1) {
+                output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRefTypeShared"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
             }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                2 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                3 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                _ => {}
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Struct, 2) {
+                output.opt_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_field", strct: "StructWithRefTypeShared"})?);
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
             }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::StructWithUnion {
-        fn default() -> Self {
-            Self {
-                u: ::std::default::Default::default(),
-                aDouble: ::std::default::Default::default(),
-                f: ::std::default::Default::default(),
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Struct, 3) {
+                output.req_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_field", strct: "StructWithRefTypeShared"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::Struct, 1) => output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRefTypeShared"})?,
+                    (::fbthrift::TType::Struct, 2) => output.opt_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_field", strct: "StructWithRefTypeShared"})?),
+                    (::fbthrift::TType::Struct, 3) => output.req_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_field", strct: "StructWithRefTypeShared"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             }
         }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
     }
-    
-    impl ::std::fmt::Debug for self::StructWithUnion {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("StructWithUnion")
-                .field("u", &self.u)
-                .field("aDouble", &self.aDouble)
-                .field("f", &self.f)
-                .finish()
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeShared {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::SharedMutable,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::SharedMutable,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            3 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::SharedMutable,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::StructWithRefTypeSharedConst {
+    fn default() -> Self {
+        Self {
+            def_field: ::std::default::Default::default(),
+            opt_field: ::std::option::Option::None,
+            req_field: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
-    
-    unsafe impl ::std::marker::Send for self::StructWithUnion {}
-    unsafe impl ::std::marker::Sync for self::StructWithUnion {}
-    impl ::std::marker::Unpin for self::StructWithUnion {}
-    impl ::std::panic::RefUnwindSafe for self::StructWithUnion {}
-    impl ::std::panic::UnwindSafe for self::StructWithUnion {}
-    
-    impl ::fbthrift::GetTType for self::StructWithUnion {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::std::fmt::Debug for self::StructWithRefTypeSharedConst {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("StructWithRefTypeSharedConst")
+            .field("def_field", &self.def_field)
+            .field("opt_field", &self.opt_field)
+            .field("req_field", &self.req_field)
+            .finish()
     }
-    
-    impl ::fbthrift::GetTypeNameType for self::StructWithUnion {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
+}
+
+unsafe impl ::std::marker::Send for self::StructWithRefTypeSharedConst {}
+unsafe impl ::std::marker::Sync for self::StructWithRefTypeSharedConst {}
+impl ::std::marker::Unpin for self::StructWithRefTypeSharedConst {}
+impl ::std::panic::RefUnwindSafe for self::StructWithRefTypeSharedConst {}
+impl ::std::panic::UnwindSafe for self::StructWithRefTypeSharedConst {}
+
+impl ::fbthrift::GetTType for self::StructWithRefTypeSharedConst {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::StructWithRefTypeSharedConst {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
     }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::StructWithUnion
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("StructWithUnion");
-            p.write_field_begin("u", ::fbthrift::TType::Struct, 1);
-            ::fbthrift::Serialize::rs_thrift_write(&self.u, p);
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::StructWithRefTypeSharedConst
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("StructWithRefTypeSharedConst");
+        p.write_field_begin("def_field", ::fbthrift::TType::Struct, 1);
+        ::fbthrift::Serialize::rs_thrift_write(&self.def_field, p);
+        p.write_field_end();
+        if let ::std::option::Option::Some(some) = &self.opt_field {
+            p.write_field_begin("opt_field", ::fbthrift::TType::Struct, 2);
+            ::fbthrift::Serialize::rs_thrift_write(some, p);
             p.write_field_end();
-            p.write_field_begin("aDouble", ::fbthrift::TType::Double, 2);
-            ::fbthrift::Serialize::rs_thrift_write(&self.aDouble, p);
-            p.write_field_end();
-            p.write_field_begin("f", ::fbthrift::TType::Struct, 3);
-            ::fbthrift::Serialize::rs_thrift_write(&self.f, p);
-            p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
         }
+        p.write_field_begin("req_field", ::fbthrift::TType::Struct, 3);
+        ::fbthrift::Serialize::rs_thrift_write(&self.req_field, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
     }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::StructWithUnion
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("aDouble", ::fbthrift::TType::Double, 2),
-                ::fbthrift::Field::new("f", ::fbthrift::TType::Struct, 3),
-                ::fbthrift::Field::new("u", ::fbthrift::TType::Struct, 1),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = StructWithUnion::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithUnion")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::Struct, 1) {
-                    output.u = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "u", strct: "StructWithUnion"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::StructWithRefTypeSharedConst
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("def_field", ::fbthrift::TType::Struct, 1),
+            ::fbthrift::Field::new("opt_field", ::fbthrift::TType::Struct, 2),
+            ::fbthrift::Field::new("req_field", ::fbthrift::TType::Struct, 3),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = StructWithRefTypeSharedConst::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithRefTypeSharedConst")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::Struct, 1) {
+                output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRefTypeSharedConst"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Struct, 2) {
+                output.opt_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_field", strct: "StructWithRefTypeSharedConst"})?);
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Struct, 3) {
+                output.req_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_field", strct: "StructWithRefTypeSharedConst"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::Struct, 1) => output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRefTypeSharedConst"})?,
+                    (::fbthrift::TType::Struct, 2) => output.opt_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_field", strct: "StructWithRefTypeSharedConst"})?),
+                    (::fbthrift::TType::Struct, 3) => output.req_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_field", strct: "StructWithRefTypeSharedConst"})?,
+                    (fty, _) => p.skip(fty)?,
                 }
+                p.read_field_end()?;
                 (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Double, 2) {
-                    output.aDouble = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "aDouble", strct: "StructWithUnion"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
+            }
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeSharedConst {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Shared,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Shared,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            3 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Shared,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::StructWithRefAndAnnotCppNoexceptMoveCtor {
+    fn default() -> Self {
+        Self {
+            def_field: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::StructWithRefAndAnnotCppNoexceptMoveCtor {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("StructWithRefAndAnnotCppNoexceptMoveCtor")
+            .field("def_field", &self.def_field)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::StructWithRefAndAnnotCppNoexceptMoveCtor {}
+unsafe impl ::std::marker::Sync for self::StructWithRefAndAnnotCppNoexceptMoveCtor {}
+impl ::std::marker::Unpin for self::StructWithRefAndAnnotCppNoexceptMoveCtor {}
+impl ::std::panic::RefUnwindSafe for self::StructWithRefAndAnnotCppNoexceptMoveCtor {}
+impl ::std::panic::UnwindSafe for self::StructWithRefAndAnnotCppNoexceptMoveCtor {}
+
+impl ::fbthrift::GetTType for self::StructWithRefAndAnnotCppNoexceptMoveCtor {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::StructWithRefAndAnnotCppNoexceptMoveCtor {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::StructWithRefAndAnnotCppNoexceptMoveCtor
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("StructWithRefAndAnnotCppNoexceptMoveCtor");
+        p.write_field_begin("def_field", ::fbthrift::TType::Struct, 1);
+        ::fbthrift::Serialize::rs_thrift_write(&self.def_field, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::StructWithRefAndAnnotCppNoexceptMoveCtor
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("def_field", ::fbthrift::TType::Struct, 1),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = StructWithRefAndAnnotCppNoexceptMoveCtor::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithRefAndAnnotCppNoexceptMoveCtor")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::Struct, 1) {
+                output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRefAndAnnotCppNoexceptMoveCtor"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::Struct, 1) => output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRefAndAnnotCppNoexceptMoveCtor"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
                 (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Struct, 3) {
-                    output.f = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "f", strct: "StructWithUnion"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
+            }
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefAndAnnotCppNoexceptMoveCtor {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::StructWithString {
+    fn default() -> Self {
+        Self {
+            def_unique_string_ref: "...".to_owned(),
+            def_shared_string_ref: "...".to_owned(),
+            def_shared_string_const_ref: "...".to_owned(),
+            unique_string_ref: ::std::default::Default::default(),
+            shared_string_ref: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::StructWithString {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("StructWithString")
+            .field("def_unique_string_ref", &self.def_unique_string_ref)
+            .field("def_shared_string_ref", &self.def_shared_string_ref)
+            .field("def_shared_string_const_ref", &self.def_shared_string_const_ref)
+            .field("unique_string_ref", &self.unique_string_ref)
+            .field("shared_string_ref", &self.shared_string_ref)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::StructWithString {}
+unsafe impl ::std::marker::Sync for self::StructWithString {}
+impl ::std::marker::Unpin for self::StructWithString {}
+impl ::std::panic::RefUnwindSafe for self::StructWithString {}
+impl ::std::panic::UnwindSafe for self::StructWithString {}
+
+impl ::fbthrift::GetTType for self::StructWithString {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::StructWithString {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::StructWithString
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("StructWithString");
+        p.write_field_begin("def_unique_string_ref", ::fbthrift::TType::String, 1);
+        ::fbthrift::Serialize::rs_thrift_write(&self.def_unique_string_ref, p);
+        p.write_field_end();
+        p.write_field_begin("def_shared_string_ref", ::fbthrift::TType::String, 2);
+        ::fbthrift::Serialize::rs_thrift_write(&self.def_shared_string_ref, p);
+        p.write_field_end();
+        p.write_field_begin("def_shared_string_const_ref", ::fbthrift::TType::String, 3);
+        ::fbthrift::Serialize::rs_thrift_write(&self.def_shared_string_const_ref, p);
+        p.write_field_end();
+        p.write_field_begin("unique_string_ref", ::fbthrift::TType::String, 4);
+        ::fbthrift::Serialize::rs_thrift_write(&self.unique_string_ref, p);
+        p.write_field_end();
+        p.write_field_begin("shared_string_ref", ::fbthrift::TType::String, 5);
+        ::fbthrift::Serialize::rs_thrift_write(&self.shared_string_ref, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::StructWithString
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("def_shared_string_const_ref", ::fbthrift::TType::String, 3),
+            ::fbthrift::Field::new("def_shared_string_ref", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("def_unique_string_ref", ::fbthrift::TType::String, 1),
+            ::fbthrift::Field::new("shared_string_ref", ::fbthrift::TType::String, 5),
+            ::fbthrift::Field::new("unique_string_ref", ::fbthrift::TType::String, 4),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = StructWithString::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithString")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::String, 1) {
+                output.def_unique_string_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_unique_string_ref", strct: "StructWithString"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::String, 2) {
+                output.def_shared_string_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_shared_string_ref", strct: "StructWithString"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::String, 3) {
+                output.def_shared_string_const_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_shared_string_const_ref", strct: "StructWithString"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::String, 4) {
+                output.unique_string_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "unique_string_ref", strct: "StructWithString"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::String, 5) {
+                output.shared_string_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "shared_string_ref", strct: "StructWithString"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::String, 1) => output.def_unique_string_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_unique_string_ref", strct: "StructWithString"})?,
+                    (::fbthrift::TType::String, 2) => output.def_shared_string_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_shared_string_ref", strct: "StructWithString"})?,
+                    (::fbthrift::TType::String, 3) => output.def_shared_string_const_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_shared_string_const_ref", strct: "StructWithString"})?,
+                    (::fbthrift::TType::String, 4) => output.unique_string_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "unique_string_ref", strct: "StructWithString"})?,
+                    (::fbthrift::TType::String, 5) => output.shared_string_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "shared_string_ref", strct: "StructWithString"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
                 (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::Struct, 1) => output.u = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "u", strct: "StructWithUnion"})?,
-                        (::fbthrift::TType::Double, 2) => output.aDouble = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "aDouble", strct: "StructWithUnion"})?,
-                        (::fbthrift::TType::Struct, 3) => output.f = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "f", strct: "StructWithUnion"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for StructWithString {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
                 }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for StructWithUnion {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                2 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                3 => {
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::RecursiveStruct {
-        fn default() -> Self {
-            Self {
-                mes: ::std::option::Option::None,
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-            }
-        }
-    }
-    
-    impl ::std::fmt::Debug for self::RecursiveStruct {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("RecursiveStruct")
-                .field("mes", &self.mes)
-                .finish()
-        }
-    }
-    
-    unsafe impl ::std::marker::Send for self::RecursiveStruct {}
-    unsafe impl ::std::marker::Sync for self::RecursiveStruct {}
-    impl ::std::marker::Unpin for self::RecursiveStruct {}
-    impl ::std::panic::RefUnwindSafe for self::RecursiveStruct {}
-    impl ::std::panic::UnwindSafe for self::RecursiveStruct {}
-    
-    impl ::fbthrift::GetTType for self::RecursiveStruct {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::RecursiveStruct {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::RecursiveStruct
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("RecursiveStruct");
-            if let ::std::option::Option::Some(some) = &self.mes {
-                p.write_field_begin("mes", ::fbthrift::TType::List, 1);
-                ::fbthrift::Serialize::rs_thrift_write(some, p);
-                p.write_field_end();
-            }
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::RecursiveStruct
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("mes", ::fbthrift::TType::List, 1),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = RecursiveStruct::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a RecursiveStruct")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::List, 1) {
-                    output.mes = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "mes", strct: "RecursiveStruct"})?);
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
                 }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::List, 1) => output.mes = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "mes", strct: "RecursiveStruct"})?),
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            },
+            2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::SharedMutable,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
                 }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for RecursiveStruct {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-    
-                    if type_id == ::std::any::TypeId::of::<java__types::Recursive>() {
-                        let mut tmp = ::std::option::Option::Some(java__types::Recursive {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::StructWithContainers {
-        fn default() -> Self {
-            Self {
-                list_ref: ::std::default::Default::default(),
-                set_ref: ::std::default::Default::default(),
-                map_ref: ::std::default::Default::default(),
-                list_ref_unique: ::std::default::Default::default(),
-                set_ref_shared: ::std::default::Default::default(),
-                list_ref_shared_const: ::std::default::Default::default(),
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-            }
-        }
-    }
-    
-    impl ::std::fmt::Debug for self::StructWithContainers {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("StructWithContainers")
-                .field("list_ref", &self.list_ref)
-                .field("set_ref", &self.set_ref)
-                .field("map_ref", &self.map_ref)
-                .field("list_ref_unique", &self.list_ref_unique)
-                .field("set_ref_shared", &self.set_ref_shared)
-                .field("list_ref_shared_const", &self.list_ref_shared_const)
-                .finish()
-        }
-    }
-    
-    unsafe impl ::std::marker::Send for self::StructWithContainers {}
-    unsafe impl ::std::marker::Sync for self::StructWithContainers {}
-    impl ::std::marker::Unpin for self::StructWithContainers {}
-    impl ::std::panic::RefUnwindSafe for self::StructWithContainers {}
-    impl ::std::panic::UnwindSafe for self::StructWithContainers {}
-    
-    impl ::fbthrift::GetTType for self::StructWithContainers {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::StructWithContainers {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::StructWithContainers
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("StructWithContainers");
-            p.write_field_begin("list_ref", ::fbthrift::TType::List, 1);
-            ::fbthrift::Serialize::rs_thrift_write(&self.list_ref, p);
-            p.write_field_end();
-            p.write_field_begin("set_ref", ::fbthrift::TType::Set, 2);
-            ::fbthrift::Serialize::rs_thrift_write(&self.set_ref, p);
-            p.write_field_end();
-            p.write_field_begin("map_ref", ::fbthrift::TType::Map, 3);
-            ::fbthrift::Serialize::rs_thrift_write(&self.map_ref, p);
-            p.write_field_end();
-            p.write_field_begin("list_ref_unique", ::fbthrift::TType::List, 4);
-            ::fbthrift::Serialize::rs_thrift_write(&self.list_ref_unique, p);
-            p.write_field_end();
-            p.write_field_begin("set_ref_shared", ::fbthrift::TType::Set, 5);
-            ::fbthrift::Serialize::rs_thrift_write(&self.set_ref_shared, p);
-            p.write_field_end();
-            p.write_field_begin("list_ref_shared_const", ::fbthrift::TType::List, 6);
-            ::fbthrift::Serialize::rs_thrift_write(&self.list_ref_shared_const, p);
-            p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::StructWithContainers
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("list_ref", ::fbthrift::TType::List, 1),
-                ::fbthrift::Field::new("list_ref_shared_const", ::fbthrift::TType::List, 6),
-                ::fbthrift::Field::new("list_ref_unique", ::fbthrift::TType::List, 4),
-                ::fbthrift::Field::new("map_ref", ::fbthrift::TType::Map, 3),
-                ::fbthrift::Field::new("set_ref", ::fbthrift::TType::Set, 2),
-                ::fbthrift::Field::new("set_ref_shared", ::fbthrift::TType::Set, 5),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = StructWithContainers::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithContainers")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::List, 1) {
-                    output.list_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_ref", strct: "StructWithContainers"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
                 }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Set, 2) {
-                    output.set_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "set_ref", strct: "StructWithContainers"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
+            },
+            3 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Shared,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
                 }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Map, 3) {
-                    output.map_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "map_ref", strct: "StructWithContainers"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
                 }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::List, 4) {
-                    output.list_ref_unique = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_ref_unique", strct: "StructWithContainers"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
+            },
+            4 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
                 }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Set, 5) {
-                    output.set_ref_shared = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "set_ref_shared", strct: "StructWithContainers"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
                 }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::List, 6) {
-                    output.list_ref_shared_const = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_ref_shared_const", strct: "StructWithContainers"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
+            },
+            5 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
+                        r#type: cpp__types::RefType::SharedMutable,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
                 }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::List, 1) => output.list_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_ref", strct: "StructWithContainers"})?,
-                        (::fbthrift::TType::Set, 2) => output.set_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "set_ref", strct: "StructWithContainers"})?,
-                        (::fbthrift::TType::Map, 3) => output.map_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "map_ref", strct: "StructWithContainers"})?,
-                        (::fbthrift::TType::List, 4) => output.list_ref_unique = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_ref_unique", strct: "StructWithContainers"})?,
-                        (::fbthrift::TType::Set, 5) => output.set_ref_shared = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "set_ref_shared", strct: "StructWithContainers"})?,
-                        (::fbthrift::TType::List, 6) => output.list_ref_shared_const = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "list_ref_shared_const", strct: "StructWithContainers"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
                 }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
+            },
+            _ => {}
         }
+
+        ::std::option::Option::None
     }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for StructWithContainers {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                2 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                3 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                4 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                5 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::SharedMutable,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                6 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Shared,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::StructWithSharedConst {
-        fn default() -> Self {
-            Self {
-                opt_shared_const: ::std::option::Option::None,
-                shared_const: ::std::default::Default::default(),
-                req_shared_const: ::std::default::Default::default(),
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-            }
-        }
-    }
-    
-    impl ::std::fmt::Debug for self::StructWithSharedConst {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("StructWithSharedConst")
-                .field("opt_shared_const", &self.opt_shared_const)
-                .field("shared_const", &self.shared_const)
-                .field("req_shared_const", &self.req_shared_const)
-                .finish()
-        }
-    }
-    
-    unsafe impl ::std::marker::Send for self::StructWithSharedConst {}
-    unsafe impl ::std::marker::Sync for self::StructWithSharedConst {}
-    impl ::std::marker::Unpin for self::StructWithSharedConst {}
-    impl ::std::panic::RefUnwindSafe for self::StructWithSharedConst {}
-    impl ::std::panic::UnwindSafe for self::StructWithSharedConst {}
-    
-    impl ::fbthrift::GetTType for self::StructWithSharedConst {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::StructWithSharedConst {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::StructWithSharedConst
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("StructWithSharedConst");
-            if let ::std::option::Option::Some(some) = &self.opt_shared_const {
-                p.write_field_begin("opt_shared_const", ::fbthrift::TType::Struct, 1);
-                ::fbthrift::Serialize::rs_thrift_write(some, p);
-                p.write_field_end();
-            }
-            p.write_field_begin("shared_const", ::fbthrift::TType::Struct, 2);
-            ::fbthrift::Serialize::rs_thrift_write(&self.shared_const, p);
-            p.write_field_end();
-            p.write_field_begin("req_shared_const", ::fbthrift::TType::Struct, 3);
-            ::fbthrift::Serialize::rs_thrift_write(&self.req_shared_const, p);
-            p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::StructWithSharedConst
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("opt_shared_const", ::fbthrift::TType::Struct, 1),
-                ::fbthrift::Field::new("req_shared_const", ::fbthrift::TType::Struct, 3),
-                ::fbthrift::Field::new("shared_const", ::fbthrift::TType::Struct, 2),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = StructWithSharedConst::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithSharedConst")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::Struct, 1) {
-                    output.opt_shared_const = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_shared_const", strct: "StructWithSharedConst"})?);
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Struct, 2) {
-                    output.shared_const = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "shared_const", strct: "StructWithSharedConst"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Struct, 3) {
-                    output.req_shared_const = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_shared_const", strct: "StructWithSharedConst"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::Struct, 1) => output.opt_shared_const = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_shared_const", strct: "StructWithSharedConst"})?),
-                        (::fbthrift::TType::Struct, 2) => output.shared_const = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "shared_const", strct: "StructWithSharedConst"})?,
-                        (::fbthrift::TType::Struct, 3) => output.req_shared_const = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_shared_const", strct: "StructWithSharedConst"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for StructWithSharedConst {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Shared,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                2 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Shared,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                3 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Shared,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::Empty {
-        fn default() -> Self {
-            Self {
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-            }
-        }
-    }
-    
-    impl ::std::fmt::Debug for self::Empty {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("Empty")
-                .finish()
-        }
-    }
-    
-    unsafe impl ::std::marker::Send for self::Empty {}
-    unsafe impl ::std::marker::Sync for self::Empty {}
-    impl ::std::marker::Unpin for self::Empty {}
-    impl ::std::panic::RefUnwindSafe for self::Empty {}
-    impl ::std::panic::UnwindSafe for self::Empty {}
-    
-    impl ::fbthrift::GetTType for self::Empty {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::Empty {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::Empty
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("Empty");
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::Empty
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = Empty::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Empty")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for Empty {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::StructWithRef {
-        fn default() -> Self {
-            Self {
-                def_field: ::std::default::Default::default(),
-                opt_field: ::std::option::Option::None,
-                req_field: ::std::default::Default::default(),
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-            }
-        }
-    }
-    
-    impl ::std::fmt::Debug for self::StructWithRef {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("StructWithRef")
-                .field("def_field", &self.def_field)
-                .field("opt_field", &self.opt_field)
-                .field("req_field", &self.req_field)
-                .finish()
-        }
-    }
-    
-    unsafe impl ::std::marker::Send for self::StructWithRef {}
-    unsafe impl ::std::marker::Sync for self::StructWithRef {}
-    impl ::std::marker::Unpin for self::StructWithRef {}
-    impl ::std::panic::RefUnwindSafe for self::StructWithRef {}
-    impl ::std::panic::UnwindSafe for self::StructWithRef {}
-    
-    impl ::fbthrift::GetTType for self::StructWithRef {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::StructWithRef {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::StructWithRef
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("StructWithRef");
-            p.write_field_begin("def_field", ::fbthrift::TType::Struct, 1);
-            ::fbthrift::Serialize::rs_thrift_write(&self.def_field, p);
-            p.write_field_end();
-            if let ::std::option::Option::Some(some) = &self.opt_field {
-                p.write_field_begin("opt_field", ::fbthrift::TType::Struct, 2);
-                ::fbthrift::Serialize::rs_thrift_write(some, p);
-                p.write_field_end();
-            }
-            p.write_field_begin("req_field", ::fbthrift::TType::Struct, 3);
-            ::fbthrift::Serialize::rs_thrift_write(&self.req_field, p);
-            p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::StructWithRef
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("def_field", ::fbthrift::TType::Struct, 1),
-                ::fbthrift::Field::new("opt_field", ::fbthrift::TType::Struct, 2),
-                ::fbthrift::Field::new("req_field", ::fbthrift::TType::Struct, 3),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = StructWithRef::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithRef")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::Struct, 1) {
-                    output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRef"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Struct, 2) {
-                    output.opt_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_field", strct: "StructWithRef"})?);
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Struct, 3) {
-                    output.req_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_field", strct: "StructWithRef"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::Struct, 1) => output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRef"})?,
-                        (::fbthrift::TType::Struct, 2) => output.opt_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_field", strct: "StructWithRef"})?),
-                        (::fbthrift::TType::Struct, 3) => output.req_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_field", strct: "StructWithRef"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for StructWithRef {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                2 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                3 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::StructWithBox {
-        fn default() -> Self {
-            Self {
-                a: ::std::option::Option::None,
-                b: ::std::option::Option::None,
-                c: ::std::option::Option::None,
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-            }
-        }
-    }
-    
-    impl ::std::fmt::Debug for self::StructWithBox {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("StructWithBox")
-                .field("a", &self.a)
-                .field("b", &self.b)
-                .field("c", &self.c)
-                .finish()
-        }
-    }
-    
-    unsafe impl ::std::marker::Send for self::StructWithBox {}
-    unsafe impl ::std::marker::Sync for self::StructWithBox {}
-    impl ::std::marker::Unpin for self::StructWithBox {}
-    impl ::std::panic::RefUnwindSafe for self::StructWithBox {}
-    impl ::std::panic::UnwindSafe for self::StructWithBox {}
-    
-    impl ::fbthrift::GetTType for self::StructWithBox {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::StructWithBox {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::StructWithBox
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("StructWithBox");
-            if let ::std::option::Option::Some(some) = &self.a {
-                p.write_field_begin("a", ::fbthrift::TType::String, 1);
-                ::fbthrift::Serialize::rs_thrift_write(some, p);
-                p.write_field_end();
-            }
-            if let ::std::option::Option::Some(some) = &self.b {
-                p.write_field_begin("b", ::fbthrift::TType::List, 2);
-                ::fbthrift::Serialize::rs_thrift_write(some, p);
-                p.write_field_end();
-            }
-            if let ::std::option::Option::Some(some) = &self.c {
-                p.write_field_begin("c", ::fbthrift::TType::Struct, 3);
-                ::fbthrift::Serialize::rs_thrift_write(some, p);
-                p.write_field_end();
-            }
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::StructWithBox
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("a", ::fbthrift::TType::String, 1),
-                ::fbthrift::Field::new("b", ::fbthrift::TType::List, 2),
-                ::fbthrift::Field::new("c", ::fbthrift::TType::Struct, 3),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = StructWithBox::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithBox")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::String, 1) {
-                    output.a = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "StructWithBox"})?);
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::List, 2) {
-                    output.b = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "b", strct: "StructWithBox"})?);
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Struct, 3) {
-                    output.c = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "c", strct: "StructWithBox"})?);
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::String, 1) => output.a = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "a", strct: "StructWithBox"})?),
-                        (::fbthrift::TType::List, 2) => output.b = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "b", strct: "StructWithBox"})?),
-                        (::fbthrift::TType::Struct, 3) => output.c = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "c", strct: "StructWithBox"})?),
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for StructWithBox {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-    
-                    if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
-                        let mut tmp = ::std::option::Option::Some(thrift__types::Box {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                2 => {
-    
-                    if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
-                        let mut tmp = ::std::option::Option::Some(thrift__types::Box {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                3 => {
-    
-                    if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
-                        let mut tmp = ::std::option::Option::Some(thrift__types::Box {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::StructWithInternBox {
-        fn default() -> Self {
-            Self {
-                field1: ::std::default::Default::default(),
-                field2: ::std::default::Default::default(),
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-            }
-        }
-    }
-    
-    impl ::std::fmt::Debug for self::StructWithInternBox {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("StructWithInternBox")
-                .field("field1", &self.field1)
-                .field("field2", &self.field2)
-                .finish()
-        }
-    }
-    
-    unsafe impl ::std::marker::Send for self::StructWithInternBox {}
-    unsafe impl ::std::marker::Sync for self::StructWithInternBox {}
-    impl ::std::marker::Unpin for self::StructWithInternBox {}
-    impl ::std::panic::RefUnwindSafe for self::StructWithInternBox {}
-    impl ::std::panic::UnwindSafe for self::StructWithInternBox {}
-    
-    impl ::fbthrift::GetTType for self::StructWithInternBox {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::StructWithInternBox {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::StructWithInternBox
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("StructWithInternBox");
-            p.write_field_begin("field1", ::fbthrift::TType::Struct, 1);
-            ::fbthrift::Serialize::rs_thrift_write(&self.field1, p);
-            p.write_field_end();
-            p.write_field_begin("field2", ::fbthrift::TType::Struct, 2);
-            ::fbthrift::Serialize::rs_thrift_write(&self.field2, p);
-            p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::StructWithInternBox
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("field1", ::fbthrift::TType::Struct, 1),
-                ::fbthrift::Field::new("field2", ::fbthrift::TType::Struct, 2),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = StructWithInternBox::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithInternBox")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::Struct, 1) {
-                    output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "StructWithInternBox"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Struct, 2) {
-                    output.field2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "StructWithInternBox"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::Struct, 1) => output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "StructWithInternBox"})?,
-                        (::fbthrift::TType::Struct, 2) => output.field2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "StructWithInternBox"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for StructWithInternBox {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-    
-                    if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
-                        let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                2 => {
-    
-                    if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
-                        let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::StructWithTerseInternBox {
-        fn default() -> Self {
-            Self {
-                field1: ::std::default::Default::default(),
-                field2: ::std::default::Default::default(),
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-            }
-        }
-    }
-    
-    impl ::std::fmt::Debug for self::StructWithTerseInternBox {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("StructWithTerseInternBox")
-                .field("field1", &self.field1)
-                .field("field2", &self.field2)
-                .finish()
-        }
-    }
-    
-    unsafe impl ::std::marker::Send for self::StructWithTerseInternBox {}
-    unsafe impl ::std::marker::Sync for self::StructWithTerseInternBox {}
-    impl ::std::marker::Unpin for self::StructWithTerseInternBox {}
-    impl ::std::panic::RefUnwindSafe for self::StructWithTerseInternBox {}
-    impl ::std::panic::UnwindSafe for self::StructWithTerseInternBox {}
-    
-    impl ::fbthrift::GetTType for self::StructWithTerseInternBox {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::StructWithTerseInternBox {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::StructWithTerseInternBox
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("StructWithTerseInternBox");
-            p.write_field_begin("field1", ::fbthrift::TType::Struct, 1);
-            ::fbthrift::Serialize::rs_thrift_write(&self.field1, p);
-            p.write_field_end();
-            p.write_field_begin("field2", ::fbthrift::TType::Struct, 2);
-            ::fbthrift::Serialize::rs_thrift_write(&self.field2, p);
-            p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::StructWithTerseInternBox
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("field1", ::fbthrift::TType::Struct, 1),
-                ::fbthrift::Field::new("field2", ::fbthrift::TType::Struct, 2),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = StructWithTerseInternBox::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithTerseInternBox")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::Struct, 1) {
-                    output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "StructWithTerseInternBox"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Struct, 2) {
-                    output.field2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "StructWithTerseInternBox"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::Struct, 1) => output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "StructWithTerseInternBox"})?,
-                        (::fbthrift::TType::Struct, 2) => output.field2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "StructWithTerseInternBox"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for StructWithTerseInternBox {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            if type_id == ::std::any::TypeId::of::<thrift__types::Experimental>() {
-                let mut tmp = ::std::option::Option::Some(thrift__types::Experimental {
-                    ..::std::default::Default::default()
-                });
-                let r: &mut dyn ::std::any::Any = &mut tmp;
-                let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                return r.take();
-            }
-    
-            if let ::std::option::Option::Some(r) = <thrift__types::Experimental as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                return ::std::option::Option::Some(r);
-            }
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-    
-                    if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
-                        let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                        let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                2 => {
-    
-                    if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
-                        let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                        let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::AdaptedStructWithInternBox {
-        fn default() -> Self {
-            Self {
-                field1: ::std::default::Default::default(),
-                field2: ::std::default::Default::default(),
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-            }
-        }
-    }
-    
-    impl ::std::fmt::Debug for self::AdaptedStructWithInternBox {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("AdaptedStructWithInternBox")
-                .field("field1", &self.field1)
-                .field("field2", &self.field2)
-                .finish()
-        }
-    }
-    
-    unsafe impl ::std::marker::Send for self::AdaptedStructWithInternBox {}
-    unsafe impl ::std::marker::Sync for self::AdaptedStructWithInternBox {}
-    impl ::std::marker::Unpin for self::AdaptedStructWithInternBox {}
-    impl ::std::panic::RefUnwindSafe for self::AdaptedStructWithInternBox {}
-    impl ::std::panic::UnwindSafe for self::AdaptedStructWithInternBox {}
-    
-    impl ::fbthrift::GetTType for self::AdaptedStructWithInternBox {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::AdaptedStructWithInternBox {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::AdaptedStructWithInternBox
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("AdaptedStructWithInternBox");
-            p.write_field_begin("field1", ::fbthrift::TType::Struct, 1);
-            ::fbthrift::Serialize::rs_thrift_write(&self.field1, p);
-            p.write_field_end();
-            p.write_field_begin("field2", ::fbthrift::TType::Struct, 2);
-            ::fbthrift::Serialize::rs_thrift_write(&self.field2, p);
-            p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::AdaptedStructWithInternBox
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("field1", ::fbthrift::TType::Struct, 1),
-                ::fbthrift::Field::new("field2", ::fbthrift::TType::Struct, 2),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = AdaptedStructWithInternBox::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a AdaptedStructWithInternBox")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::Struct, 1) {
-                    output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "AdaptedStructWithInternBox"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Struct, 2) {
-                    output.field2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "AdaptedStructWithInternBox"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::Struct, 1) => output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "AdaptedStructWithInternBox"})?,
-                        (::fbthrift::TType::Struct, 2) => output.field2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "AdaptedStructWithInternBox"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithInternBox {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
-                            name: "::my::Adapter1".to_owned(),
-                            adaptedType: ::std::default::Default::default(),
-                            underlyingName: ::std::default::Default::default(),
-                            extraNamespace: ::std::default::Default::default(),
-                            moveOnly: ::std::default::Default::default(),
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                        return ::std::option::Option::Some(r);
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
-                        let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                2 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
-                            name: "::my::Adapter1".to_owned(),
-                            adaptedType: ::std::default::Default::default(),
-                            underlyingName: ::std::default::Default::default(),
-                            extraNamespace: ::std::default::Default::default(),
-                            moveOnly: ::std::default::Default::default(),
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                        return ::std::option::Option::Some(r);
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
-                        let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::AdaptedStructWithTerseInternBox {
-        fn default() -> Self {
-            Self {
-                field1: ::std::default::Default::default(),
-                field2: ::std::default::Default::default(),
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-            }
-        }
-    }
-    
-    impl ::std::fmt::Debug for self::AdaptedStructWithTerseInternBox {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("AdaptedStructWithTerseInternBox")
-                .field("field1", &self.field1)
-                .field("field2", &self.field2)
-                .finish()
-        }
-    }
-    
-    unsafe impl ::std::marker::Send for self::AdaptedStructWithTerseInternBox {}
-    unsafe impl ::std::marker::Sync for self::AdaptedStructWithTerseInternBox {}
-    impl ::std::marker::Unpin for self::AdaptedStructWithTerseInternBox {}
-    impl ::std::panic::RefUnwindSafe for self::AdaptedStructWithTerseInternBox {}
-    impl ::std::panic::UnwindSafe for self::AdaptedStructWithTerseInternBox {}
-    
-    impl ::fbthrift::GetTType for self::AdaptedStructWithTerseInternBox {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::AdaptedStructWithTerseInternBox {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::AdaptedStructWithTerseInternBox
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("AdaptedStructWithTerseInternBox");
-            p.write_field_begin("field1", ::fbthrift::TType::Struct, 1);
-            ::fbthrift::Serialize::rs_thrift_write(&self.field1, p);
-            p.write_field_end();
-            p.write_field_begin("field2", ::fbthrift::TType::Struct, 2);
-            ::fbthrift::Serialize::rs_thrift_write(&self.field2, p);
-            p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::AdaptedStructWithTerseInternBox
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("field1", ::fbthrift::TType::Struct, 1),
-                ::fbthrift::Field::new("field2", ::fbthrift::TType::Struct, 2),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = AdaptedStructWithTerseInternBox::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a AdaptedStructWithTerseInternBox")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::Struct, 1) {
-                    output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "AdaptedStructWithTerseInternBox"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Struct, 2) {
-                    output.field2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "AdaptedStructWithTerseInternBox"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::Struct, 1) => output.field1 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field1", strct: "AdaptedStructWithTerseInternBox"})?,
-                        (::fbthrift::TType::Struct, 2) => output.field2 = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "field2", strct: "AdaptedStructWithTerseInternBox"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithTerseInternBox {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            if type_id == ::std::any::TypeId::of::<thrift__types::Experimental>() {
-                let mut tmp = ::std::option::Option::Some(thrift__types::Experimental {
-                    ..::std::default::Default::default()
-                });
-                let r: &mut dyn ::std::any::Any = &mut tmp;
-                let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                return r.take();
-            }
-    
-            if let ::std::option::Option::Some(r) = <thrift__types::Experimental as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                return ::std::option::Option::Some(r);
-            }
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
-                            name: "::my::Adapter1".to_owned(),
-                            adaptedType: ::std::default::Default::default(),
-                            underlyingName: ::std::default::Default::default(),
-                            extraNamespace: ::std::default::Default::default(),
-                            moveOnly: ::std::default::Default::default(),
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                        return ::std::option::Option::Some(r);
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
-                        let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                        let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                2 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Adapter>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Adapter {
-                            name: "::my::Adapter1".to_owned(),
-                            adaptedType: ::std::default::Default::default(),
-                            underlyingName: ::std::default::Default::default(),
-                            extraNamespace: ::std::default::Default::default(),
-                            moveOnly: ::std::default::Default::default(),
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if let ::std::option::Option::Some(r) = <cpp__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                        return ::std::option::Option::Some(r);
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<thrift__types::InternBox>() {
-                        let mut tmp = ::std::option::Option::Some(thrift__types::InternBox {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<thrift__types::TerseWrite>() {
-                        let mut tmp = ::std::option::Option::Some(thrift__types::TerseWrite {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::StructWithRefTypeUnique {
-        fn default() -> Self {
-            Self {
-                def_field: ::std::default::Default::default(),
-                opt_field: ::std::option::Option::None,
-                req_field: ::std::default::Default::default(),
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-            }
-        }
-    }
-    
-    impl ::std::fmt::Debug for self::StructWithRefTypeUnique {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("StructWithRefTypeUnique")
-                .field("def_field", &self.def_field)
-                .field("opt_field", &self.opt_field)
-                .field("req_field", &self.req_field)
-                .finish()
-        }
-    }
-    
-    unsafe impl ::std::marker::Send for self::StructWithRefTypeUnique {}
-    unsafe impl ::std::marker::Sync for self::StructWithRefTypeUnique {}
-    impl ::std::marker::Unpin for self::StructWithRefTypeUnique {}
-    impl ::std::panic::RefUnwindSafe for self::StructWithRefTypeUnique {}
-    impl ::std::panic::UnwindSafe for self::StructWithRefTypeUnique {}
-    
-    impl ::fbthrift::GetTType for self::StructWithRefTypeUnique {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::StructWithRefTypeUnique {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::StructWithRefTypeUnique
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("StructWithRefTypeUnique");
-            p.write_field_begin("def_field", ::fbthrift::TType::Struct, 1);
-            ::fbthrift::Serialize::rs_thrift_write(&self.def_field, p);
-            p.write_field_end();
-            if let ::std::option::Option::Some(some) = &self.opt_field {
-                p.write_field_begin("opt_field", ::fbthrift::TType::Struct, 2);
-                ::fbthrift::Serialize::rs_thrift_write(some, p);
-                p.write_field_end();
-            }
-            p.write_field_begin("req_field", ::fbthrift::TType::Struct, 3);
-            ::fbthrift::Serialize::rs_thrift_write(&self.req_field, p);
-            p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::StructWithRefTypeUnique
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("def_field", ::fbthrift::TType::Struct, 1),
-                ::fbthrift::Field::new("opt_field", ::fbthrift::TType::Struct, 2),
-                ::fbthrift::Field::new("req_field", ::fbthrift::TType::Struct, 3),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = StructWithRefTypeUnique::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithRefTypeUnique")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::Struct, 1) {
-                    output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRefTypeUnique"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Struct, 2) {
-                    output.opt_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_field", strct: "StructWithRefTypeUnique"})?);
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Struct, 3) {
-                    output.req_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_field", strct: "StructWithRefTypeUnique"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::Struct, 1) => output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRefTypeUnique"})?,
-                        (::fbthrift::TType::Struct, 2) => output.opt_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_field", strct: "StructWithRefTypeUnique"})?),
-                        (::fbthrift::TType::Struct, 3) => output.req_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_field", strct: "StructWithRefTypeUnique"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeUnique {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                2 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                3 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::StructWithRefTypeShared {
-        fn default() -> Self {
-            Self {
-                def_field: ::std::default::Default::default(),
-                opt_field: ::std::option::Option::None,
-                req_field: ::std::default::Default::default(),
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-            }
-        }
-    }
-    
-    impl ::std::fmt::Debug for self::StructWithRefTypeShared {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("StructWithRefTypeShared")
-                .field("def_field", &self.def_field)
-                .field("opt_field", &self.opt_field)
-                .field("req_field", &self.req_field)
-                .finish()
-        }
-    }
-    
-    unsafe impl ::std::marker::Send for self::StructWithRefTypeShared {}
-    unsafe impl ::std::marker::Sync for self::StructWithRefTypeShared {}
-    impl ::std::marker::Unpin for self::StructWithRefTypeShared {}
-    impl ::std::panic::RefUnwindSafe for self::StructWithRefTypeShared {}
-    impl ::std::panic::UnwindSafe for self::StructWithRefTypeShared {}
-    
-    impl ::fbthrift::GetTType for self::StructWithRefTypeShared {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::StructWithRefTypeShared {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::StructWithRefTypeShared
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("StructWithRefTypeShared");
-            p.write_field_begin("def_field", ::fbthrift::TType::Struct, 1);
-            ::fbthrift::Serialize::rs_thrift_write(&self.def_field, p);
-            p.write_field_end();
-            if let ::std::option::Option::Some(some) = &self.opt_field {
-                p.write_field_begin("opt_field", ::fbthrift::TType::Struct, 2);
-                ::fbthrift::Serialize::rs_thrift_write(some, p);
-                p.write_field_end();
-            }
-            p.write_field_begin("req_field", ::fbthrift::TType::Struct, 3);
-            ::fbthrift::Serialize::rs_thrift_write(&self.req_field, p);
-            p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::StructWithRefTypeShared
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("def_field", ::fbthrift::TType::Struct, 1),
-                ::fbthrift::Field::new("opt_field", ::fbthrift::TType::Struct, 2),
-                ::fbthrift::Field::new("req_field", ::fbthrift::TType::Struct, 3),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = StructWithRefTypeShared::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithRefTypeShared")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::Struct, 1) {
-                    output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRefTypeShared"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Struct, 2) {
-                    output.opt_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_field", strct: "StructWithRefTypeShared"})?);
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Struct, 3) {
-                    output.req_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_field", strct: "StructWithRefTypeShared"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::Struct, 1) => output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRefTypeShared"})?,
-                        (::fbthrift::TType::Struct, 2) => output.opt_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_field", strct: "StructWithRefTypeShared"})?),
-                        (::fbthrift::TType::Struct, 3) => output.req_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_field", strct: "StructWithRefTypeShared"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeShared {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::SharedMutable,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                2 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::SharedMutable,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                3 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::SharedMutable,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::StructWithRefTypeSharedConst {
-        fn default() -> Self {
-            Self {
-                def_field: ::std::default::Default::default(),
-                opt_field: ::std::option::Option::None,
-                req_field: ::std::default::Default::default(),
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-            }
-        }
-    }
-    
-    impl ::std::fmt::Debug for self::StructWithRefTypeSharedConst {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("StructWithRefTypeSharedConst")
-                .field("def_field", &self.def_field)
-                .field("opt_field", &self.opt_field)
-                .field("req_field", &self.req_field)
-                .finish()
-        }
-    }
-    
-    unsafe impl ::std::marker::Send for self::StructWithRefTypeSharedConst {}
-    unsafe impl ::std::marker::Sync for self::StructWithRefTypeSharedConst {}
-    impl ::std::marker::Unpin for self::StructWithRefTypeSharedConst {}
-    impl ::std::panic::RefUnwindSafe for self::StructWithRefTypeSharedConst {}
-    impl ::std::panic::UnwindSafe for self::StructWithRefTypeSharedConst {}
-    
-    impl ::fbthrift::GetTType for self::StructWithRefTypeSharedConst {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::StructWithRefTypeSharedConst {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::StructWithRefTypeSharedConst
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("StructWithRefTypeSharedConst");
-            p.write_field_begin("def_field", ::fbthrift::TType::Struct, 1);
-            ::fbthrift::Serialize::rs_thrift_write(&self.def_field, p);
-            p.write_field_end();
-            if let ::std::option::Option::Some(some) = &self.opt_field {
-                p.write_field_begin("opt_field", ::fbthrift::TType::Struct, 2);
-                ::fbthrift::Serialize::rs_thrift_write(some, p);
-                p.write_field_end();
-            }
-            p.write_field_begin("req_field", ::fbthrift::TType::Struct, 3);
-            ::fbthrift::Serialize::rs_thrift_write(&self.req_field, p);
-            p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::StructWithRefTypeSharedConst
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("def_field", ::fbthrift::TType::Struct, 1),
-                ::fbthrift::Field::new("opt_field", ::fbthrift::TType::Struct, 2),
-                ::fbthrift::Field::new("req_field", ::fbthrift::TType::Struct, 3),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = StructWithRefTypeSharedConst::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithRefTypeSharedConst")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::Struct, 1) {
-                    output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRefTypeSharedConst"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Struct, 2) {
-                    output.opt_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_field", strct: "StructWithRefTypeSharedConst"})?);
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::Struct, 3) {
-                    output.req_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_field", strct: "StructWithRefTypeSharedConst"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::Struct, 1) => output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRefTypeSharedConst"})?,
-                        (::fbthrift::TType::Struct, 2) => output.opt_field = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "opt_field", strct: "StructWithRefTypeSharedConst"})?),
-                        (::fbthrift::TType::Struct, 3) => output.req_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "req_field", strct: "StructWithRefTypeSharedConst"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeSharedConst {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Shared,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                2 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Shared,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                3 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Shared,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::StructWithRefAndAnnotCppNoexceptMoveCtor {
-        fn default() -> Self {
-            Self {
-                def_field: ::std::default::Default::default(),
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-            }
-        }
-    }
-    
-    impl ::std::fmt::Debug for self::StructWithRefAndAnnotCppNoexceptMoveCtor {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("StructWithRefAndAnnotCppNoexceptMoveCtor")
-                .field("def_field", &self.def_field)
-                .finish()
-        }
-    }
-    
-    unsafe impl ::std::marker::Send for self::StructWithRefAndAnnotCppNoexceptMoveCtor {}
-    unsafe impl ::std::marker::Sync for self::StructWithRefAndAnnotCppNoexceptMoveCtor {}
-    impl ::std::marker::Unpin for self::StructWithRefAndAnnotCppNoexceptMoveCtor {}
-    impl ::std::panic::RefUnwindSafe for self::StructWithRefAndAnnotCppNoexceptMoveCtor {}
-    impl ::std::panic::UnwindSafe for self::StructWithRefAndAnnotCppNoexceptMoveCtor {}
-    
-    impl ::fbthrift::GetTType for self::StructWithRefAndAnnotCppNoexceptMoveCtor {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::StructWithRefAndAnnotCppNoexceptMoveCtor {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::StructWithRefAndAnnotCppNoexceptMoveCtor
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("StructWithRefAndAnnotCppNoexceptMoveCtor");
-            p.write_field_begin("def_field", ::fbthrift::TType::Struct, 1);
-            ::fbthrift::Serialize::rs_thrift_write(&self.def_field, p);
-            p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::StructWithRefAndAnnotCppNoexceptMoveCtor
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("def_field", ::fbthrift::TType::Struct, 1),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = StructWithRefAndAnnotCppNoexceptMoveCtor::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithRefAndAnnotCppNoexceptMoveCtor")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::Struct, 1) {
-                    output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRefAndAnnotCppNoexceptMoveCtor"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::Struct, 1) => output.def_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_field", strct: "StructWithRefAndAnnotCppNoexceptMoveCtor"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefAndAnnotCppNoexceptMoveCtor {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
-    
-    #[allow(clippy::derivable_impls)]
-    impl ::std::default::Default for self::StructWithString {
-        fn default() -> Self {
-            Self {
-                def_unique_string_ref: "...".to_owned(),
-                def_shared_string_ref: "...".to_owned(),
-                def_shared_string_const_ref: "...".to_owned(),
-                unique_string_ref: ::std::default::Default::default(),
-                shared_string_ref: ::std::default::Default::default(),
-                _dot_dot_Default_default: self::dot_dot::OtherFields(()),
-            }
-        }
-    }
-    
-    impl ::std::fmt::Debug for self::StructWithString {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-            formatter
-                .debug_struct("StructWithString")
-                .field("def_unique_string_ref", &self.def_unique_string_ref)
-                .field("def_shared_string_ref", &self.def_shared_string_ref)
-                .field("def_shared_string_const_ref", &self.def_shared_string_const_ref)
-                .field("unique_string_ref", &self.unique_string_ref)
-                .field("shared_string_ref", &self.shared_string_ref)
-                .finish()
-        }
-    }
-    
-    unsafe impl ::std::marker::Send for self::StructWithString {}
-    unsafe impl ::std::marker::Sync for self::StructWithString {}
-    impl ::std::marker::Unpin for self::StructWithString {}
-    impl ::std::panic::RefUnwindSafe for self::StructWithString {}
-    impl ::std::panic::UnwindSafe for self::StructWithString {}
-    
-    impl ::fbthrift::GetTType for self::StructWithString {
-        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-    }
-    
-    impl ::fbthrift::GetTypeNameType for self::StructWithString {
-        fn type_name_type() -> fbthrift::TypeNameType {
-            ::fbthrift::TypeNameType::StructType
-        }
-    }
-    
-    impl<P> ::fbthrift::Serialize<P> for self::StructWithString
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        #[inline]
-        fn rs_thrift_write(&self, p: &mut P) {
-            p.write_struct_begin("StructWithString");
-            p.write_field_begin("def_unique_string_ref", ::fbthrift::TType::String, 1);
-            ::fbthrift::Serialize::rs_thrift_write(&self.def_unique_string_ref, p);
-            p.write_field_end();
-            p.write_field_begin("def_shared_string_ref", ::fbthrift::TType::String, 2);
-            ::fbthrift::Serialize::rs_thrift_write(&self.def_shared_string_ref, p);
-            p.write_field_end();
-            p.write_field_begin("def_shared_string_const_ref", ::fbthrift::TType::String, 3);
-            ::fbthrift::Serialize::rs_thrift_write(&self.def_shared_string_const_ref, p);
-            p.write_field_end();
-            p.write_field_begin("unique_string_ref", ::fbthrift::TType::String, 4);
-            ::fbthrift::Serialize::rs_thrift_write(&self.unique_string_ref, p);
-            p.write_field_end();
-            p.write_field_begin("shared_string_ref", ::fbthrift::TType::String, 5);
-            ::fbthrift::Serialize::rs_thrift_write(&self.shared_string_ref, p);
-            p.write_field_end();
-            p.write_field_stop();
-            p.write_struct_end();
-        }
-    }
-    
-    impl<P> ::fbthrift::Deserialize<P> for self::StructWithString
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        #[inline]
-        fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            static FIELDS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("def_shared_string_const_ref", ::fbthrift::TType::String, 3),
-                ::fbthrift::Field::new("def_shared_string_ref", ::fbthrift::TType::String, 2),
-                ::fbthrift::Field::new("def_unique_string_ref", ::fbthrift::TType::String, 1),
-                ::fbthrift::Field::new("shared_string_ref", ::fbthrift::TType::String, 5),
-                ::fbthrift::Field::new("unique_string_ref", ::fbthrift::TType::String, 4),
-            ];
-    
-            #[allow(unused_mut)]
-            let mut output = StructWithString::default();
-            let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a StructWithString")?;
-            let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
-            #[allow(unused_labels)]
-            let fallback  = 'fastpath: {
-                if (fty, fid) == (::fbthrift::TType::String, 1) {
-                    output.def_unique_string_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_unique_string_ref", strct: "StructWithString"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::String, 2) {
-                    output.def_shared_string_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_shared_string_ref", strct: "StructWithString"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::String, 3) {
-                    output.def_shared_string_const_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_shared_string_const_ref", strct: "StructWithString"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::String, 4) {
-                    output.unique_string_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "unique_string_ref", strct: "StructWithString"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                if (fty, fid) == (::fbthrift::TType::String, 5) {
-                    output.shared_string_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "shared_string_ref", strct: "StructWithString"})?;
-                    p.read_field_end()?;
-                } else {
-                    break 'fastpath true;
-                }
-                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-    
-                fty != ::fbthrift::TType::Stop
-            };
-    
-            if fallback {
-                loop {
-                    match (fty, fid) {
-                        (::fbthrift::TType::Stop, _) => break,
-                        (::fbthrift::TType::String, 1) => output.def_unique_string_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_unique_string_ref", strct: "StructWithString"})?,
-                        (::fbthrift::TType::String, 2) => output.def_shared_string_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_shared_string_ref", strct: "StructWithString"})?,
-                        (::fbthrift::TType::String, 3) => output.def_shared_string_const_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "def_shared_string_const_ref", strct: "StructWithString"})?,
-                        (::fbthrift::TType::String, 4) => output.unique_string_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "unique_string_ref", strct: "StructWithString"})?,
-                        (::fbthrift::TType::String, 5) => output.shared_string_ref = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "shared_string_ref", strct: "StructWithString"})?,
-                        (fty, _) => p.skip(fty)?,
-                    }
-                    p.read_field_end()?;
-                    (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
-                }
-            }
-            p.read_struct_end()?;
-            ::std::result::Result::Ok(output)
-    
-        }
-    }
-    
-    
-    impl ::fbthrift::metadata::ThriftAnnotations for StructWithString {
-        fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            ::std::option::Option::None
-        }
-    
-        fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
-            #[allow(unused_variables)]
-            let type_id = ::std::any::TypeId::of::<T>();
-    
-            #[allow(clippy::match_single_binding)]
-            match field_id {
-                1 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                2 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::SharedMutable,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                3 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Shared,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                4 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::Unique,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                5 => {
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
-                            r#type: cpp__types::RefType::SharedMutable,
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-    
-                    if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
-                        let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
-                            ..::std::default::Default::default()
-                        });
-                        let r: &mut dyn ::std::any::Any = &mut tmp;
-                        let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
-                        return r.take();
-                    }
-                },
-                _ => {}
-            }
-    
-            ::std::option::Option::None
-        }
-    }
-    
+}
+
 
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -4506,7 +4502,6 @@ pub(crate) mod r#impl {
     }
 }
 
-
 #[doc(hidden)]
 #[deprecated]
 #[allow(hidden_glob_reexports)]
@@ -4520,7 +4515,3 @@ pub mod __constructors {
     }
     pub use self::TypedEnum::*;
 }
-
-
-
-

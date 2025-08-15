@@ -341,10 +341,6 @@ void schematize_recursively(
     const t_program* program,
     t_const_value* defns_schema,
     const t_type& type) {
-  auto schema = t_const_value::make_map();
-  auto type_name = t_const_value::make_map();
-  std::unique_ptr<t_const_value> params;
-
   auto* resolved_type = &type;
   while (auto* typedf = dynamic_cast<const t_typedef*>(resolved_type)) {
     if (typedf->typedef_kind() != t_typedef::kind::defined) {
@@ -354,47 +350,46 @@ void schematize_recursively(
     return;
   }
 
-  if (resolved_type->is<t_primitive_type>()) {
-    return;
-  } else if (resolved_type->is<t_list>()) {
-    schematize_recursively(
-        generator,
-        program,
-        defns_schema,
-        *static_cast<const t_list&>(*resolved_type).elem_type());
-  } else if (resolved_type->is<t_set>()) {
-    schematize_recursively(
-        generator,
-        program,
-        defns_schema,
-        *static_cast<const t_set&>(*resolved_type).elem_type());
-  } else if (resolved_type->is<t_map>()) {
-    const auto& map = static_cast<const t_map&>(*resolved_type);
-    schematize_recursively(generator, program, defns_schema, *map.key_type());
-    schematize_recursively(generator, program, defns_schema, *map.val_type());
-    return;
-  } else if (resolved_type->is<t_enum>()) {
-    auto enum_schema =
-        generator->gen_schema(static_cast<const t_enum&>(*resolved_type));
-    add_as_definition(*defns_schema, "enumDef", std::move(enum_schema));
-    return;
-  } else if (resolved_type->is<t_structured>()) {
-    auto new_schema_2 =
-        generator->gen_schema(static_cast<const t_structured&>(*resolved_type));
-    std::string def_type = [&] {
-      if (resolved_type->is<t_union>()) {
-        return "unionDef";
-      } else if (resolved_type->is<t_exception>()) {
-        return "exceptionDef";
-      } else {
-        return "structDef";
-      }
-    }();
-    add_as_definition(*defns_schema, def_type, std::move(new_schema_2));
-    return;
-  } else {
-    assert(false);
-  }
+  resolved_type->visit(
+      [&](const t_primitive_type&) {
+        // No action needed for primitive types
+      },
+      [&](const t_list& list) {
+        schematize_recursively(
+            generator, program, defns_schema, *list.elem_type());
+      },
+      [&](const t_set& set) {
+        schematize_recursively(
+            generator, program, defns_schema, *set.elem_type());
+      },
+      [&](const t_map& map) {
+        schematize_recursively(
+            generator, program, defns_schema, *map.key_type());
+        schematize_recursively(
+            generator, program, defns_schema, *map.val_type());
+      },
+      [&](const t_enum& enum_type) {
+        auto enum_schema = generator->gen_schema(enum_type);
+        add_as_definition(*defns_schema, "enumDef", std::move(enum_schema));
+      },
+      [&](const t_struct& struct_type) {
+        auto struct_schema = generator->gen_schema(struct_type);
+        add_as_definition(*defns_schema, "structDef", std::move(struct_schema));
+      },
+      [&](const t_union& union_type) {
+        auto union_schema = generator->gen_schema(union_type);
+        add_as_definition(*defns_schema, "unionDef", std::move(union_schema));
+      },
+      [&](const t_exception& exception_type) {
+        auto exception_schema = generator->gen_schema(exception_type);
+        add_as_definition(
+            *defns_schema, "exceptionDef", std::move(exception_schema));
+      },
+      [&](const t_service&) { assert(false); },
+      [&](const t_typedef&) {
+        // This should not happen since we resolve typedefs above
+        assert(false);
+      });
 }
 
 const t_enum* find_enum(const t_program* program, const std::string& enum_uri) {

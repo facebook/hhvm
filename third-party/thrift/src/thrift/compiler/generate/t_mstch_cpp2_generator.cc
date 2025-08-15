@@ -1771,7 +1771,7 @@ class cpp_mstch_struct : public mstch_struct {
 
  protected:
   // Computes the alignment of field on the target platform.
-  // Returns max alignment if cannot compute the alignment.
+  // Throws exception if cannot compute the alignment .
   static size_t compute_alignment(
       const t_field* field, std::unordered_map<const t_field*, size_t>& memo) {
     const size_t kMaxAlign = alignof(std::max_align_t);
@@ -1789,79 +1789,51 @@ class cpp_mstch_struct : public mstch_struct {
 
     const t_type* type = field->type()->get_true_type();
 
-    size_t result = kMaxAlign;
-    type->visit(
-        [&](const t_primitive_type& primitive) {
+    size_t result = type->visit(
+        [&](const t_primitive_type& primitive) -> size_t {
           switch (primitive.primitive_type()) {
             case t_primitive_type::type::t_bool:
             case t_primitive_type::type::t_byte:
-              result = 1;
-              break;
+              return 1;
             case t_primitive_type::type::t_i16:
-              result = 2;
-              break;
+              return 2;
             case t_primitive_type::type::t_i32:
             case t_primitive_type::type::t_float:
-              result = 4;
-              break;
+              return 4;
             case t_primitive_type::type::t_i64:
             case t_primitive_type::type::t_double:
             case t_primitive_type::type::t_string:
             case t_primitive_type::type::t_binary:
-              result = 8;
-              break;
-            case t_primitive_type::type::t_void:
-              result = kMaxAlign;
-              break;
+              return 8;
+            default:
+              throw std::logic_error(
+                  "Computing alignment of unknown primitive type");
           }
         },
-        [&](const t_enum& enm) { result = compute_alignment(enm); },
-        [&](const t_list&) { result = 8; },
-        [&](const t_set&) { result = 8; },
-        [&](const t_map&) { result = 8; },
-        [&](const t_struct& strct) {
-          size_t align = 1;
-          for (const auto& field_2 : strct.fields()) {
+        [&](const t_enum& enm) -> size_t { return compute_alignment(enm); },
+        [&](const t_container&) -> size_t { return 8; },
+        [&](const t_structured& structured) {
+          // The type member of a union is an int
+          // The __isset member generated in presence of non-required fields of
+          // structs/exns only has bool fields so its alignment is 1
+          size_t align = structured.is<t_union>() ? 4 : 1;
+          for (const auto& field_2 : structured.fields()) {
             size_t field_align = compute_alignment(&field_2, memo);
             align = std::max(align, field_align);
             if (align == kMaxAlign) {
-              // No need to continue because the struct already has the maximum
-              // alignment.
-              break;
-            }
-          }
-          // The __isset member that is generated in the presence of
-          // non-required fields doesn't affect the alignment, because, having
-          // only bool fields, it has the alignments of 1.
-          result = align;
-        },
-        [&](const t_union& union_) {
-          size_t align = 1;
-          for (const auto& field_2 : union_.fields()) {
-            size_t field_align = compute_alignment(&field_2, memo);
-            align = std::max(align, field_align);
-            if (align == kMaxAlign) {
-              // No need to continue because the union already has the maximum
-              // alignment.
-              break;
-            }
-          }
-          result = align;
-        },
-        [&](const t_exception& exception) {
-          size_t align = 1;
-          for (const auto& field_2 : exception.fields()) {
-            size_t field_align = compute_alignment(&field_2, memo);
-            align = std::max(align, field_align);
-            if (align == kMaxAlign) {
-              // No need to continue because the exception already has the
+              // No need to continue because the structured already has the
               // maximum alignment.
               break;
             }
           }
-          result = align;
+          return align;
         },
-        [&](const auto&) { result = kMaxAlign; });
+        [&](const t_service&) -> size_t {
+          throw std::logic_error("Computing alignment of service");
+        },
+        [&](const t_typedef&) -> size_t {
+          throw std::logic_error("Unreachable: typedefs resolved above");
+        });
 
     return ret = result;
   }

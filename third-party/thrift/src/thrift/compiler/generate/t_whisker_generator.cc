@@ -113,13 +113,10 @@ object t_type_as(const prototype_database& proto, const t_type& self) {
 // because this function will attach the prototype of t_struct.
 object resolve_derived_t_type(
     const prototype_database& proto, const t_type& self) {
-  if (const auto* td = self.try_as<t_typedef>()) {
-    // t_typedef::get_type_value() returns the underlying type value, which is
-    // not useful for detecting t_typedef. So we handle it separately.
-    return object(proto.create<t_typedef>(*td));
-  }
-
   return self.visit(
+      [&](const t_typedef& typedef_) -> object {
+        return object(proto.create<t_typedef>(typedef_));
+      },
       [&](const t_primitive_type&) -> object {
         return t_type_as<t_primitive_type>(proto, self);
       },
@@ -143,9 +140,6 @@ object resolve_derived_t_type(
         // t_type (for return types). This case should no longer happen in
         // practice.
         throw std::logic_error("t_type -> t_service is not supported");
-      },
-      [&](const auto&) -> object {
-        throw std::logic_error("Unknown t_type subtype");
       });
 }
 

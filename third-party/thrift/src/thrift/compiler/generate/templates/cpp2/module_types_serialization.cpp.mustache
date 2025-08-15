@@ -24,6 +24,33 @@
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
+{{! Any registration is here and not in module_types.cpp because it depends on
+    serialization. }}
+{{#if (has_compiler_option? "any")}}
+#include <thrift/conformance/cpp2/AnyRegistry.h>
+
+namespace {{program:qualified_namespace}} {
+// Static-init time registration for dynamically-linked libraries.
+//
+// To include in statically-linked libraries, link whole (e.g. --whole-archive)
+// `{{program:name}}_sinit.cpp`.
+{{#program:split_structs}}
+{{#struct:any?}}
+void __fbthrift_static_init_{{struct:cpp_underlying_name}}() {
+  [[maybe_unused]] static bool init = (
+    apache::thrift::conformance::detail::registerGeneratedStruct<
+        {{struct:cpp_underlying_name}},
+{{#if (has_compiler_option? "json")}}
+        apache::thrift::conformance::StandardProtocol::SimpleJson,
+{{/if (has_compiler_option? "json")}}
+        apache::thrift::conformance::StandardProtocol::Compact,
+        apache::thrift::conformance::StandardProtocol::Binary>(),
+    false);
+}
+{{/struct:any?}}
+{{/program:split_structs}}
+} // namespace {{program:qualified_namespace}}
+{{/if (has_compiler_option? "any")}}
 {{#program:split_structs}}{{^program:tablebased?}}
 {{> module_types_cpp/struct_traits}}
 {{/program:tablebased?}}{{/program:split_structs}}

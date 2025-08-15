@@ -9,6 +9,38 @@
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
+#include <thrift/conformance/cpp2/AnyRegistry.h>
+
+namespace facebook::thrift::compiler::test::fixtures::any {
+// Static-init time registration for dynamically-linked libraries.
+//
+// To include in statically-linked libraries, link whole (e.g. --whole-archive)
+// `module_sinit.cpp`.
+void __fbthrift_static_init_MyStruct() {
+  [[maybe_unused]] static bool init = (
+    apache::thrift::conformance::detail::registerGeneratedStruct<
+        MyStruct,
+        apache::thrift::conformance::StandardProtocol::Compact,
+        apache::thrift::conformance::StandardProtocol::Binary>(),
+    false);
+}
+void __fbthrift_static_init_MyUnion() {
+  [[maybe_unused]] static bool init = (
+    apache::thrift::conformance::detail::registerGeneratedStruct<
+        MyUnion,
+        apache::thrift::conformance::StandardProtocol::Compact,
+        apache::thrift::conformance::StandardProtocol::Binary>(),
+    false);
+}
+void __fbthrift_static_init_MyException() {
+  [[maybe_unused]] static bool init = (
+    apache::thrift::conformance::detail::registerGeneratedStruct<
+        MyException,
+        apache::thrift::conformance::StandardProtocol::Compact,
+        apache::thrift::conformance::StandardProtocol::Binary>(),
+    false);
+}
+} // namespace facebook::thrift::compiler::test::fixtures::any
 
 namespace apache {
 namespace thrift {

@@ -5,10 +5,10 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/enums_types.tcc"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/enums_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/enums_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "enums";
 
 

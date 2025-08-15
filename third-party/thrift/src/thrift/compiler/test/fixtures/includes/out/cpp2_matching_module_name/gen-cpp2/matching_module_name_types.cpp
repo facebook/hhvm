@@ -5,10 +5,10 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/matching_module_name_types.tcc"
+#include "thrift/compiler/test/fixtures/includes/gen-cpp2/matching_module_name_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
-#include "thrift/compiler/test/fixtures/includes/gen-cpp2/matching_module_name_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "matching_module_name";
 
 

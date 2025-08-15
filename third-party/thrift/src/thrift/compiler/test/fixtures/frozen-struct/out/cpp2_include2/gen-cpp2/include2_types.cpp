@@ -5,10 +5,10 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_types.tcc"
+#include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
-#include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_data.h"
 [[maybe_unused]] static constexpr std::string_view kModuleName = "include2";
 
 

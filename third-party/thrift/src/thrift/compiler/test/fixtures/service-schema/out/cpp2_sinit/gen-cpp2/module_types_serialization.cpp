@@ -9,6 +9,22 @@
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
+#include <thrift/conformance/cpp2/AnyRegistry.h>
+
+namespace facebook::thrift::test {
+// Static-init time registration for dynamically-linked libraries.
+//
+// To include in statically-linked libraries, link whole (e.g. --whole-archive)
+// `module_sinit.cpp`.
+void __fbthrift_static_init_CustomException() {
+  [[maybe_unused]] static bool init = (
+    apache::thrift::conformance::detail::registerGeneratedStruct<
+        CustomException,
+        apache::thrift::conformance::StandardProtocol::Compact,
+        apache::thrift::conformance::StandardProtocol::Binary>(),
+    false);
+}
+} // namespace facebook::thrift::test
 
 namespace apache {
 namespace thrift {

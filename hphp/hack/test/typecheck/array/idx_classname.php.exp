@@ -1,0 +1,24 @@
+WARN: File "idx_classname.php", line 11, characters 5-26:
+Invalid type argument due to disjoint types in a union (Warn[12017])
+  File "hackarray.hhi", line 22, characters 31-32:
+  `int` is one of the disjoint types
+  File "idx_classname.php", line 9, characters 31-45:
+  `classname<this>` is one of the disjoint types
+  File "idx.hhi", line 30, characters 38-39:
+  This type parameter is marked with `__NoDisjointUnion` to indicate that disjoint unions are errors
+ERROR: File "idx_classname.php", line 12, characters 5-21:
+Invalid index type for this vec (Typing[4449])
+  File "idx_classname.php", line 5, characters 42-44:
+  This is an int because only `int` can be used to index into a `Vector` or `vec`.
+  File "idx_classname.php", line 9, characters 31-45:
+  It is incompatible with a classname string for this
+ERROR: File "idx_classname.php", line 12, characters 5-21:
+Invalid index type for this vec (Typing[4324])
+  File "idx_classname.php", line 12, characters 15-20:
+  Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
+  File "idx_classname.php", line 9, characters 31-45:
+  But got `string`
+  File "classname.hhi", line 21, characters 28-38:
+    by the definition of `classname`
+  File "classname.hhi", line 14, characters 27-32:
+    by the definition of `typename`

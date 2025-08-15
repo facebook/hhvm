@@ -7,7 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
-
+<<file: __EnableUnstableFeatures('no_disjoint_union')>>
 namespace HH {
 
   // NB: the typechecker relies on the exact format of this signature and rewrites
@@ -27,13 +27,13 @@ namespace HH {
    * provided. If the key is `null`, the default value will be returned even if
    * `null` is a valid key in the container.
    */
-  function idx<Tk as arraykey, Tv>(
+  function idx<<<__NoDisjointUnion>> Tk as arraykey, Tv>(
     ?KeyedContainer<Tk, Tv> $collection,
     ?Tk $index,
     \HH\FIXME\MISSING_PARAM_TYPE $default = null,
   )[]: Tv {}
 
-  function idx_readonly<Tk as arraykey, Tv>(
+  function idx_readonly<<<__NoDisjointUnion>> Tk as arraykey, Tv>(
     readonly ?KeyedContainer<Tk, Tv> $collection,
     ?Tk $index,
     \HH\FIXME\MISSING_PARAM_TYPE $default = null,

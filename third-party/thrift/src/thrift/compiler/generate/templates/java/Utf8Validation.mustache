@@ -14,6 +14,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#field:strings_compat?}}{{!
-}}{{#field:coding_error_action_report?}}com.facebook.thrift.compatibility.Utf8CodingErrorAction.REPORT{{/field:coding_error_action_report?}}{{!
-}}{{/field:strings_compat?}}
+}}{{#if (and field:java_strings_compat? field:java_coding_error_action_report?)}}{{!
+}}com.facebook.thrift.compatibility.Utf8CodingErrorAction.REPORT{{!
+}}{{/if (and field:java_strings_compat? field:java_coding_error_action_report?)}}

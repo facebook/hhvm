@@ -191,11 +191,11 @@ class t_mstch_java_generator : public t_mstch_generator {
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_enum(proto);
     auto def = whisker::dsl::prototype_builder<h_enum>::extends(base);
-    def.property("enums_compat?", [](const t_enum& self) {
+    def.property("java_enums_compat?", [](const t_enum& self) {
       return self.has_structured_annotation(kEnumsUri) ||
           self.program()->has_structured_annotation(kEnumsUri);
     });
-    def.property("enum_type_open?", [&](const t_enum& self) {
+    def.property("java_enum_type_open?", [&](const t_enum& self) {
       constexpr auto kEnumType = "type";
       constexpr int kOpenEnum = 1;
       if (const t_const* annotation =
@@ -878,8 +878,9 @@ class mstch_java_field : public mstch_field {
             {"field:setIsNested",
              {with_no_caching, &mstch_java_field::set_nested_container_flag}},
 
-            {"field:strings_compat?", &mstch_java_field::is_strings_compat},
-            {"field:coding_error_action_report?",
+            {"field:java_strings_compat?",
+             &mstch_java_field::is_strings_compat},
+            {"field:java_coding_error_action_report?",
              &mstch_java_field::is_coding_error_action_report},
         });
   }

@@ -10,6 +10,9 @@
 open Hh_prelude
 module Cls = Folded_class
 
+[@@@alert "-dependencies"]
+(* No typing env here *)
+
 let get_all_ancestors ctx class_name =
   let get_cinfo cname =
     match Decl_provider.get_class ctx cname with

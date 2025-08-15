@@ -12,6 +12,9 @@ open ServerCommandTypes.Method_jumps
 open Typing_defs
 module Cls = Folded_class
 
+[@@@alert "-dependencies"]
+(* No typing env here *)
+
 let string_filter_to_method_jump_filter = function
   | "No_filter" -> Some No_filter
   | "Class" -> Some Class

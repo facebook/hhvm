@@ -182,7 +182,7 @@ let get_class_elt_types ~is_method env class_ cid elts =
   |> List.map ~f:(fun (id, { ce_type = (lazy ty); ce_sort_text; _ }) ->
          (id, ty, ce_sort_text))
 
-let get_class_req_attrs env pctx classname cid =
+let get_class_req_attrs (env : Tast_env.env) classname cid =
   let req_attrs cls =
     Cls.props cls
     |> List.filter ~f:(fun (_, ce) ->
@@ -196,12 +196,12 @@ let get_class_req_attrs env pctx classname cid =
            Xhp_attribute.opt_is_required (Typing_defs.get_ce_xhp_attr ce))
     |> List.map ~f:(fun (name, _) -> Utils.strip_xhp_ns name)
   in
-  Decl_provider.get_class pctx classname
+  Tast_env.get_class env classname
   |> Decl_entry.to_option
   |> Option.value_map ~default:[] ~f:req_attrs
 
-let get_class_is_child_empty pctx classname =
-  Decl_provider.get_class pctx classname
+let get_class_is_child_empty (env : Tast_env.env) classname =
+  Tast_env.get_class env classname
   |> Decl_entry.to_option
   |> Option.value_map ~default:false ~f:Cls.xhp_marked_empty
 
@@ -509,7 +509,7 @@ let autocomplete_member
            (Cls.sprops class_ |> sort))
         ~f:(add FileInfo.SI_Property);
       List.iter
-        (Cls.consts class_ |> sort)
+        (Tast_env.consts env class_ |> sort)
         ~f:(fun (name, cc) ->
           add FileInfo.SI_ClassConstant (name, cc.cc_type, None))
     );
@@ -541,7 +541,7 @@ let autocomplete_member
     (* Only complete __construct() when we see parent::, as we don't
        allow __construct to be called as e.g. $foo->__construct(). *)
     if parent_receiver then
-      let (constructor, _) = Cls.construct class_ in
+      let (constructor, _) = Tast_env.get_construct env class_ in
       let constructor =
         Option.map constructor ~f:(fun elt ->
             (Naming_special_names.Members.__construct, elt))
@@ -658,8 +658,7 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
       Cls.props cls
       |> List.find ~f:(fun (name, _) -> String.equal (":" ^ attr_name) name)
       |> Option.map ~f:(fun (_, { ce_origin = n; _ }) -> n)
-      |> Option.map ~f:(fun cls_name ->
-             Decl_provider.get_class (Tast_env.get_ctx env) cls_name)
+      |> Option.map ~f:(fun cls_name -> Tast_env.get_class env cls_name)
       |> Option.bind ~f:Decl_entry.to_option
     in
 
@@ -729,7 +728,7 @@ let autocomplete_xhp_enum_class_value attr_ty id_id env =
 
     let get_enum_constants (class_decl : Decl_provider.class_decl) :
         (string * Typing_defs.class_const) list =
-      let all_consts = Cls.consts class_decl in
+      let all_consts = Tast_env.consts env class_decl in
       let is_correct_class = function
         | Some name -> String.equal name (Cls.name class_decl)
         | None -> false
@@ -874,7 +873,7 @@ let compatible_fun_decls
     (env : Tast_env.env) (arg_ty : locl_ty) (fun_names : string list) :
     (string * fun_elt) list =
   List.filter_map fun_names ~f:(fun fun_name ->
-      match Decl_provider.get_fun (Tast_env.get_ctx env) fun_name with
+      match Tast_env.get_fun env fun_name with
       | Decl_entry.Found f when fun_accepts_first_arg env f arg_ty ->
         Some (fun_name, f)
       | _ -> None)
@@ -981,7 +980,7 @@ let autocomplete_typed_member
     ~is_static autocomplete_context env class_ty cid mid =
   Tast_env.get_class_ids env class_ty
   |> List.iter ~f:(fun cname ->
-         Decl_provider.get_class (Tast_env.get_ctx env) cname
+         Tast_env.get_class env cname
          |> Decl_entry.to_option
          |> Option.iter ~f:(fun class_ ->
                 let ety_env = reconstruct_tparam_subst env class_ty class_ in
@@ -1007,7 +1006,7 @@ let autocomplete_static_member autocomplete_context env (ty, _, cid) mid =
 let compatible_enum_class_consts env cls pos (expected_ty : locl_ty option) =
   (* Ignore ::class, as it's not a normal enum constant. *)
   let consts =
-    List.filter (Cls.consts cls) ~f:(fun (name, _) ->
+    List.filter (Tast_env.consts env cls) ~f:(fun (name, _) ->
         String.(name <> Naming_special_names.Members.mClass))
   in
 
@@ -1160,7 +1159,7 @@ let rec typeconst_decl env (ids : sid list) (cls_name : string) : Cls.t option =
     (match ids with
     | [] -> Some cls_decl
     | (_, id) :: ids ->
-      Cls.get_typeconst cls_decl id
+      Tast_env.get_typeconst env cls_decl id
       >>= typeconst_class_name
       >>= typeconst_decl env ids)
   | Decl_entry.DoesNotExist
@@ -1187,7 +1186,7 @@ let autocomplete_class_type_const env ((_, h) : Aast.hint) (ids : sid list) :
     in
     (match class_decl with
     | Some class_decl ->
-      let consts = Cls.consts class_decl in
+      let consts = Tast_env.consts env class_decl in
       List.iter consts ~f:(fun (name, cc) ->
           if String.is_prefix ~prefix name then
             let complete =
@@ -1402,13 +1401,13 @@ let autocomplete_builtin_attribute
       sorted_attrs
 
 (* If [name] is an enum, return the list of the constants it defines. *)
-let enum_consts env name : string list option =
-  match Decl_provider.get_class (Tast_env.get_ctx env) name with
+let enum_consts (env : Tast_env.env) name : string list option =
+  match Tast_env.get_class env name with
   | Decl_entry.Found cls ->
     (match Cls.kind cls with
     | Ast_defs.Cenum ->
       let consts =
-        Cls.consts cls
+        Tast_env.consts env cls
         |> List.map ~f:fst
         |> List.filter ~f:(fun name ->
                String.(name <> Naming_special_names.Members.mClass))
@@ -1758,9 +1757,11 @@ let complete_xhp_tag
           when does_autocomplete_snippet ->
           let classname = Utils.add_ns res_fullname in
           let attrs =
-            get_class_req_attrs tast_env pctx classname (Some (Aast.CI id))
+            get_class_req_attrs tast_env classname (Some (Aast.CI id))
           in
-          let has_children = not (get_class_is_child_empty pctx classname) in
+          let has_children =
+            not (get_class_is_child_empty tast_env classname)
+          in
           insert_text_for_xhp_req_attrs res_label attrs has_children
         | _ -> res_insert_text
       in
@@ -2045,7 +2046,7 @@ let visitor
           ~pctx:ctx;
 
       let cid = Aast.CI sid in
-      Decl_provider.get_class (Tast_env.get_ctx env) (snd sid)
+      Tast_env.get_class env (snd sid)
       |> Decl_entry.to_option
       |> Option.iter ~f:(fun (c : Cls.t) ->
              List.iter attrs ~f:(function

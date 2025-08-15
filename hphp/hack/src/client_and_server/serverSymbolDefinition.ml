@@ -17,6 +17,9 @@ module SyntaxTree = Provider_context.PositionedSyntaxTree
 module Cls = Folded_class
 open Aast
 
+[@@@alert "-dependencies"]
+(* No typing env here *)
+
 (* Element type, class name, element name. Class name refers to "origin" class,
  * we expect to find said element in AST/NAST of this class *)
 type class_element = class_element_ * string * string

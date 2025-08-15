@@ -11,15 +11,14 @@ open Aast
 module Cls = Folded_class
 
 (** If [attr_name] is an enum attribute on [cls], return the list of allowed values. *)
-let xhp_enum_attr_values env (cls : Cls.t) (attr_name : string) :
-    Ast_defs.xhp_enum_value list option =
+let xhp_enum_attr_values (env : Tast_env.env) (cls : Cls.t) (attr_name : string)
+    : Ast_defs.xhp_enum_value list option =
   let attr_name = ":" ^ attr_name in
   Cls.props cls
   |> List.find ~f:(fun (name, _) -> String.equal attr_name name)
   |> Option.map ~f:(fun (_, { Typing_defs.ce_origin = n; _ }) -> n)
   |> Option.bind ~f:(fun cls_name ->
-         Decl_entry.to_option
-         @@ Decl_provider.get_class (Tast_env.get_ctx env) cls_name)
+         Decl_entry.to_option @@ Tast_env.get_class env cls_name)
   |> Option.bind ~f:(fun cls ->
          SMap.find_opt attr_name (Cls.xhp_enum_values cls))
 

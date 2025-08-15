@@ -23,7 +23,7 @@ let error_codes = Typing_warning_utils.codes warning_kind
 (** Warns when comparing two expression whose types are disjoint *)
 
 let enum_base_type env cid =
-  match Decl_provider.get_class (Typing_env.get_ctx env) cid with
+  match Typing_env.get_class env cid with
   | Decl_entry.DoesNotExist
   | Decl_entry.NotYetAvailable ->
     (env, None)

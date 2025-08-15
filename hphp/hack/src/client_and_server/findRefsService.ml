@@ -14,6 +14,9 @@ open ServerCommandTypes.Find_refs
 open Typing_defs
 module Cls = Folded_class
 
+[@@@alert "-dependencies"]
+(* No typing env here *)
+
 type member_class =
   | Class_set of SSet.t
   | Subclasses_of of string

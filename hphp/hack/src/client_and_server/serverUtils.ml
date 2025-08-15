@@ -211,7 +211,8 @@ let make_next
  * If [cond] and [then_body] look like desugared syntax, return the
  * equivalent expression that calls invariant().
  *)
-let resugar_invariant_call env (cond : Tast.expr) (then_body : Tast.block) :
+let resugar_invariant_call
+    (env : Tast_env.env) (cond : Tast.expr) (then_body : Tast.block) :
     Tast.expr option =
   (* If a user has actually written
    *
@@ -243,11 +244,7 @@ let resugar_invariant_call env (cond : Tast.expr) (then_body : Tast.block) :
     when String.equal name SN.AutoimportedFunctions.invariant_violation
          && has_same_start stmt_pos call_pos ->
     let recv_ty_invariant =
-      match
-        Decl_provider.get_fun
-          (Tast_env.get_ctx env)
-          SN.AutoimportedFunctions.invariant
-      with
+      match Tast_env.get_fun env SN.AutoimportedFunctions.invariant with
       | Decl_entry.Found fun_decl ->
         let (_, f_locl_ty) =
           Tast_env.localize_no_subst

@@ -438,6 +438,8 @@ let process_one_workitem
     | Declare (_path, class_name) ->
       let (_ : Decl_provider.class_decl Decl_entry.t) =
         Decl_provider.get_class ctx class_name
+        (* I assume we don't have to add dependency edges for decling *)
+        [@@alert "-dependencies"]
       in
       ( None,
         Some class_name,

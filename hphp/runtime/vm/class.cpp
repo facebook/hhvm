@@ -524,9 +524,7 @@ void Class::atomicRelease() {
   assertx(!m_cachedClass.bound());
   assertx(!getCount());
   this->~Class();
-  if (!Cfg::Repo::Authoritative) {
-    lower_free(mallocPtr());
-  }
+  lower_free(mallocPtr());
 }
 
 Class::~Class() {
@@ -4942,12 +4940,26 @@ Class* newClassImpl(const PreClass* preClass,
 
     auto setClassInRDS = [&](Class* newClass) -> Class* {
       assertx(newClass);
-      if (top != nameList->clsList()) return nullptr;
 
-      Lock l(bucket.mutex);
       // If another thread beat us to creating a class for this name,
       // use it instead.
-      if (top != nameList->clsList()) return nullptr;
+      //
+      // And if someone beat us free the version we created. There is still a
+      // memory leak race condition here. When a class is created and is first
+      // it just reference the func in preClass. If we create the class a second time
+      // all funcs needs to be cloned. So the leak is if you didn't create class
+      // first but won the race. Then all your funcs would be clones.
+
+      if (top != nameList->clsList()) {
+        newClass->atomicRelease();
+        return nullptr;
+      }
+
+      Lock l(bucket.mutex);
+      if (top != nameList->clsList()) {
+        newClass->atomicRelease();
+        return nullptr;
+      }
       setupClass(newClass, nameList);
 
       /*

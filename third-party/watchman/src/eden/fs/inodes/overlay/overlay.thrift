@@ -5,6 +5,7 @@
  * GNU General Public License version 2.
  */
 
+namespace py3 facebook.eden
 namespace cpp2 facebook.eden.overlay
 namespace py facebook.eden.overlay
 

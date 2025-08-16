@@ -23,8 +23,8 @@
 #
 
 from __future__ import annotations
-{{#program:import_static?}}
+{{#if (has_compiler_option? "import_static")}}
 
 import __static__
-{{/program:import_static?}}
+{{/if (has_compiler_option? "import_static")}}
 {{! terminate with newline }}

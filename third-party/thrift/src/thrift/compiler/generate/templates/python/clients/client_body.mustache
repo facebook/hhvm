@@ -157,12 +157,12 @@ class Async({{#service:extends}}{{!
 # pyre-ignore[4]: Missing annotation.{{! Adding an annotation here would require way too much duplication }}
 {{function:name}} = Async.{{function:name}}
 {{/service:supported_functions}}
-{{#program:py3_auto_migrate?}}
+{{#if (has_compiler_option? "auto_migrate")}}
 async def __aenter__(self) -> "{{service:name}}.Async":
     raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
 async def __aexit__(self) -> None:
     raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")
-{{/program:py3_auto_migrate?}}
+{{/if (has_compiler_option? "auto_migrate")}}
 
 class Sync({{#service:extends}}{{!
     }}{{> services/client_module_path}}.Sync{{!

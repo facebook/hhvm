@@ -298,15 +298,12 @@ class python_mstch_program : public mstch_program {
             {"program:adapter_modules", &python_mstch_program::adapter_modules},
             {"program:adapter_type_hint_modules",
              &python_mstch_program::adapter_type_hint_modules},
-            {"program:py3_auto_migrate?",
-             &python_mstch_program::py3_auto_migrate},
 
             {"program:has_streaming_types?",
              &python_mstch_program::has_streaming_types},
             {"program:has_sink_functions?",
              &python_mstch_program::has_sink_types},
         });
-    register_has_option("program:import_static?", "import_static");
     gather_included_program_namespaces();
     visit_types_for_services_and_interactions();
     visit_types_for_objects();
@@ -314,8 +311,6 @@ class python_mstch_program : public mstch_program {
     visit_types_for_typedefs();
     visit_types_for_adapters();
   }
-
-  mstch::node py3_auto_migrate() { return has_option("auto_migrate"); }
 
   mstch::node include_namespaces() {
     std::vector<const Namespace*> namespaces;

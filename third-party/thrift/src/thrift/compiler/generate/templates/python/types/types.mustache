@@ -68,11 +68,11 @@ class {{> structs/unadapted_name}}{{!
         }}{{^struct:exception?}}{{> types/struct_metaclass}}{{/struct:exception?}}{{!
         }}{{/struct:union?}}{{!
         }}):
-    {{#program:py3_auto_migrate?}}
+    {{#if (has_compiler_option? "auto_migrate")}}
     {{#struct:allow_inheritance?}}
     _fbthrift_allow_inheritance_DO_NOT_USE = True
     {{/struct:allow_inheritance?}}
-    {{/program:py3_auto_migrate?}}
+    {{/if (has_compiler_option? "auto_migrate")}}
     {{#struct:disable_field_caching?}}
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     {{/struct:disable_field_caching?}}
@@ -114,21 +114,21 @@ class {{> structs/unadapted_name}}{{!
 {{#python.generate_immutable_types?}}
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
-        return {{#program:py3_auto_migrate?}}True{{/program:py3_auto_migrate?}}{{^program:py3_auto_migrate?}}False{{/program:py3_auto_migrate?}}
+        return {{#if (has_compiler_option? "auto_migrate")}}True{{#else}}False{{/if}}
 
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}()
     {{!
       makes reflection work in auto-migrated thrift-py3
-    }}{{#program:py3_auto_migrate?}}
+    }}{{#if (has_compiler_option? "auto_migrate")}}
 
     @staticmethod
     def __get_reflection__():
         import importlib
         types_reflection = importlib.import_module("{{program:module_path}}.types_reflection")
         return types_reflection.get_reflection__{{struct:py_name}}()
-    {{/program:py3_auto_migrate?}}
+    {{/if (has_compiler_option? "auto_migrate")}}
 {{/python.generate_immutable_types?}}
 {{#python.generate_mutable_types?}}
     @staticmethod
@@ -172,15 +172,14 @@ class {{> structs/unadapted_name}}{{!
 {{/python.generate_immutable_types?}}
 
     def _to_py3(self):
-    {{^program:py3_auto_migrate?}}
+    {{#if (not (has_compiler_option? "auto_migrate"))}}
         import importlib
         py3_types = importlib.import_module("{{program:module_path}}.types")
         from thrift.py3 import converter
         return converter.to_py3_struct(py3_types.{{> structs/unadapted_name}}, self)
-    {{/program:py3_auto_migrate?}}
-    {{#program:py3_auto_migrate?}}
+    {{#else}}
         return self
-    {{/program:py3_auto_migrate?}}
+    {{/if (not (has_compiler_option? "auto_migrate"))}}
 
     def _to_py_deprecated(self):
         import importlib

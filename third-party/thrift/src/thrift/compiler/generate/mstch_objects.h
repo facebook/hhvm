@@ -412,9 +412,6 @@ class mstch_base : public mstch::object {
   bool has_option(const std::string& option) const;
   std::string get_option(const std::string& option) const;
 
-  // Registers has_option(option) under the given name.
-  void register_has_option(std::string key, std::string option);
-
  protected:
   mstch_context& context_;
   const mstch_element_position pos_;

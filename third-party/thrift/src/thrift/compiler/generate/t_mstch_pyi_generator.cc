@@ -220,8 +220,6 @@ class pyi_mstch_program : public mstch_program {
              &pyi_mstch_program::get_move_containers},
             {"program:enablePosArgs?", &pyi_mstch_program::get_enable_pos_args},
         });
-    register_has_option("program:asyncio?", "asyncio");
-    register_has_option("program:cpp_transport?", "cpp_transport");
 
     this->visit_import_modules();
     this->visit_return_types();
@@ -489,7 +487,6 @@ class pyi_mstch_service : public mstch_service {
             {"program:importModules",
              &pyi_mstch_service::get_program_import_modules},
         });
-    register_has_option("program:asyncio?", "asyncio");
 
     this->visit_program_import_modules();
   }

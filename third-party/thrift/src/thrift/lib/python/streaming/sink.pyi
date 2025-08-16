@@ -19,8 +19,8 @@ from typing import AsyncGenerator, Generic, TypeVar
 TChunk = TypeVar("TChunk")
 TFinalResponse = TypeVar("TFinalResponse")
 
-class ClientSink(Generic[TFinalResponse]):
+class ClientSink(Generic[TChunk, TFinalResponse]):
     def __init__(self) -> None: ...
     async def sink(
-        self, iterator: AsyncGenerator[TChunk, None]
+        self, gen: AsyncGenerator[TChunk, None]
     ) -> Generic[TFinalResponse]: ...

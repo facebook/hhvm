@@ -17,11 +17,21 @@
 #pragma once
 
 #include <thrift/lib/cpp2/server/DecoratorData.h>
-#include <thrift/lib/cpp2/server/ServiceMethodDecoratorBase.h>
+#include <thrift/lib/cpp2/server/DecoratorDataRuntime.h>
 
 namespace apache::thrift {
 
-template <typename ServiceTag>
-class ServiceMethodDecorator;
+class ServiceMethodDecoratorBase {
+ public:
+  struct BeforeParams {
+    server::DecoratorData decoratorData;
+  };
+  struct AfterParams {
+    server::DecoratorData decoratorData;
+  };
+  virtual ~ServiceMethodDecoratorBase() = default;
+  virtual std::string_view getName() const = 0;
+  virtual void useDecoratorData(server::DecoratorDataHandleFactory) {}
+};
 
 } // namespace apache::thrift

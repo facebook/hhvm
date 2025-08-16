@@ -40,23 +40,23 @@ class DecoratedServiceServiceInfoHolder : public apache::thrift::ServiceInfoHold
 
 namespace apache::thrift {
 
-// ServiceMethodDecorator is only supported for coroutines
-#if FOLLY_HAS_COROUTINES
-
 template <>
-class ServiceMethodDecorator<::cpp2::DecoratedService> {
+class ServiceMethodDecorator<::cpp2::DecoratedService> : public ServiceMethodDecoratorBase {
  public:
   virtual ~ServiceMethodDecorator() = default;
-  virtual std::string getName() const = 0;
-  virtual folly::coro::Task<DecoratorData> before_noop() { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_echo( const ::std::string& /*p_text*/) { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_increment( ::std::int64_t /*p_num*/) { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_sum( const ::std::vector<::std::int64_t>& /*p_nums*/) { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_withStruct( const ::cpp2::Request& /*p_request*/) { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_multiParam( const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) { co_return {}; }
+  virtual void before_noop(BeforeParams /*beforeParams*/) {}
+  virtual void after_noop(AfterParams /*afterParams*/) {}
+  virtual void before_echo(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/) {}
+  virtual void after_echo(AfterParams /*afterParams*/, const ::std::string& /*result*/) {}
+  virtual void before_increment(BeforeParams /*beforeParams*/, ::std::int64_t /*p_num*/) {}
+  virtual void after_increment(AfterParams /*afterParams*/, ::std::int64_t /*result*/) {}
+  virtual void before_sum(BeforeParams /*beforeParams*/, const ::std::vector<::std::int64_t>& /*p_nums*/) {}
+  virtual void after_sum(AfterParams /*afterParams*/, ::std::int64_t /*result*/) {}
+  virtual void before_withStruct(BeforeParams /*beforeParams*/, const ::cpp2::Request& /*p_request*/) {}
+  virtual void after_withStruct(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
+  virtual void before_multiParam(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) {}
+  virtual void after_multiParam(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
 };
-
-#endif // FOLLY_HAS_COROUTINES
 
 template <>
 class ServiceHandler<::cpp2::DecoratedService> : public apache::thrift::ServerInterface {
@@ -781,26 +781,27 @@ class DecoratedService_ExtendsUndecoratedServiceServiceInfoHolder : public apach
 
 namespace apache::thrift {
 
-// ServiceMethodDecorator is only supported for coroutines
-#if FOLLY_HAS_COROUTINES
-
 template <>
-class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsUndecoratedService> {
+class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsUndecoratedService> : public ServiceMethodDecoratorBase {
  public:
   virtual ~ServiceMethodDecorator() = default;
-  virtual std::string getName() const = 0;
   // BEGIN inherited methods from ::cpp2::DecoratedService_ExtendsUndecoratedService
-  virtual folly::coro::Task<DecoratorData> before_noop() { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_echo( const ::std::string& /*p_text*/) { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_increment( ::std::int64_t /*p_num*/) { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_sum( const ::std::vector<::std::int64_t>& /*p_nums*/) { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_withStruct( const ::cpp2::Request& /*p_request*/) { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_multiParam( const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) { co_return {}; }
+  virtual void before_noop(BeforeParams /*beforeParams*/) {}
+  virtual void after_noop(AfterParams /*afterParams*/) {}
+  virtual void before_echo(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/) {}
+  virtual void after_echo(AfterParams /*afterParams*/, const ::std::string& /*result*/) {}
+  virtual void before_increment(BeforeParams /*beforeParams*/, ::std::int64_t /*p_num*/) {}
+  virtual void after_increment(AfterParams /*afterParams*/, ::std::int64_t /*result*/) {}
+  virtual void before_sum(BeforeParams /*beforeParams*/, const ::std::vector<::std::int64_t>& /*p_nums*/) {}
+  virtual void after_sum(AfterParams /*afterParams*/, ::std::int64_t /*result*/) {}
+  virtual void before_withStruct(BeforeParams /*beforeParams*/, const ::cpp2::Request& /*p_request*/) {}
+  virtual void after_withStruct(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
+  virtual void before_multiParam(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) {}
+  virtual void after_multiParam(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
   // END inherited methods from ::cpp2::DecoratedService_ExtendsUndecoratedService
-  virtual folly::coro::Task<DecoratorData> before_extension() { co_return {}; }
+  virtual void before_extension(BeforeParams /*beforeParams*/) {}
+  virtual void after_extension(AfterParams /*afterParams*/) {}
 };
-
-#endif // FOLLY_HAS_COROUTINES
 
 template <>
 class ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService> : virtual public ::cpp2::UndecoratedServiceSvIf {
@@ -924,26 +925,27 @@ class DecoratedService_ExtendsDecoratedServiceServiceInfoHolder : public apache:
 
 namespace apache::thrift {
 
-// ServiceMethodDecorator is only supported for coroutines
-#if FOLLY_HAS_COROUTINES
-
 template <>
-class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsDecoratedService> {
+class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsDecoratedService> : public ServiceMethodDecoratorBase {
  public:
   virtual ~ServiceMethodDecorator() = default;
-  virtual std::string getName() const = 0;
   // BEGIN inherited methods from ::cpp2::DecoratedService_ExtendsDecoratedService
-  virtual folly::coro::Task<DecoratorData> before_noop() { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_echo( const ::std::string& /*p_text*/) { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_increment( ::std::int64_t /*p_num*/) { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_sum( const ::std::vector<::std::int64_t>& /*p_nums*/) { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_withStruct( const ::cpp2::Request& /*p_request*/) { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_multiParam( const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) { co_return {}; }
+  virtual void before_noop(BeforeParams /*beforeParams*/) {}
+  virtual void after_noop(AfterParams /*afterParams*/) {}
+  virtual void before_echo(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/) {}
+  virtual void after_echo(AfterParams /*afterParams*/, const ::std::string& /*result*/) {}
+  virtual void before_increment(BeforeParams /*beforeParams*/, ::std::int64_t /*p_num*/) {}
+  virtual void after_increment(AfterParams /*afterParams*/, ::std::int64_t /*result*/) {}
+  virtual void before_sum(BeforeParams /*beforeParams*/, const ::std::vector<::std::int64_t>& /*p_nums*/) {}
+  virtual void after_sum(AfterParams /*afterParams*/, ::std::int64_t /*result*/) {}
+  virtual void before_withStruct(BeforeParams /*beforeParams*/, const ::cpp2::Request& /*p_request*/) {}
+  virtual void after_withStruct(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
+  virtual void before_multiParam(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) {}
+  virtual void after_multiParam(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
   // END inherited methods from ::cpp2::DecoratedService_ExtendsDecoratedService
-  virtual folly::coro::Task<DecoratorData> before_extension() { co_return {}; }
+  virtual void before_extension(BeforeParams /*beforeParams*/) {}
+  virtual void after_extension(AfterParams /*afterParams*/) {}
 };
-
-#endif // FOLLY_HAS_COROUTINES
 
 template <>
 class ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService> : virtual public ::cpp2::DecoratedServiceSvIf {
@@ -1188,29 +1190,31 @@ class DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceServiceI
 
 namespace apache::thrift {
 
-// ServiceMethodDecorator is only supported for coroutines
-#if FOLLY_HAS_COROUTINES
-
 template <>
-class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService> {
+class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService> : public ServiceMethodDecoratorBase {
  public:
   virtual ~ServiceMethodDecorator() = default;
-  virtual std::string getName() const = 0;
   // BEGIN inherited methods from ::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService
   // BEGIN inherited methods from ::cpp2::UndecoratedService_ExtendsDecoratedService
-  virtual folly::coro::Task<DecoratorData> before_noop() { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_echo( const ::std::string& /*p_text*/) { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_increment( ::std::int64_t /*p_num*/) { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_sum( const ::std::vector<::std::int64_t>& /*p_nums*/) { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_withStruct( const ::cpp2::Request& /*p_request*/) { co_return {}; }
-  virtual folly::coro::Task<DecoratorData> before_multiParam( const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) { co_return {}; }
+  virtual void before_noop(BeforeParams /*beforeParams*/) {}
+  virtual void after_noop(AfterParams /*afterParams*/) {}
+  virtual void before_echo(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/) {}
+  virtual void after_echo(AfterParams /*afterParams*/, const ::std::string& /*result*/) {}
+  virtual void before_increment(BeforeParams /*beforeParams*/, ::std::int64_t /*p_num*/) {}
+  virtual void after_increment(AfterParams /*afterParams*/, ::std::int64_t /*result*/) {}
+  virtual void before_sum(BeforeParams /*beforeParams*/, const ::std::vector<::std::int64_t>& /*p_nums*/) {}
+  virtual void after_sum(AfterParams /*afterParams*/, ::std::int64_t /*result*/) {}
+  virtual void before_withStruct(BeforeParams /*beforeParams*/, const ::cpp2::Request& /*p_request*/) {}
+  virtual void after_withStruct(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
+  virtual void before_multiParam(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) {}
+  virtual void after_multiParam(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
   // END inherited methods from ::cpp2::UndecoratedService_ExtendsDecoratedService
-  virtual folly::coro::Task<DecoratorData> before_extension() { co_return {}; }
+  virtual void before_extension(BeforeParams /*beforeParams*/) {}
+  virtual void after_extension(AfterParams /*afterParams*/) {}
   // END inherited methods from ::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService
-  virtual folly::coro::Task<DecoratorData> before_secondExtension( const ::std::string& /*p_input*/) { co_return {}; }
+  virtual void before_secondExtension(BeforeParams /*beforeParams*/, const ::std::string& /*p_input*/) {}
+  virtual void after_secondExtension(AfterParams /*afterParams*/, const ::std::string& /*result*/) {}
 };
-
-#endif // FOLLY_HAS_COROUTINES
 
 template <>
 class ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService> : virtual public ::cpp2::UndecoratedService_ExtendsDecoratedServiceSvIf {

@@ -27,7 +27,7 @@ namespace {
 class MockMethodDecorator
     : public ServiceMethodDecorator<ServiceMethodDecoratorTest> {
  public:
-  MOCK_METHOD(std::string, getName, (), (const, override));
+  MOCK_METHOD(std::string_view, getName, (), (const, override));
 };
 
 } // namespace

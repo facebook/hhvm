@@ -16,7 +16,7 @@
 
 }}
 {{#import "types/schema_association" as schema_association}}
-{{#import "method_decorators/decorator" as method_decorator}}
+{{#import "method_decorators/decorator_h" as method_decorator_h}}
 namespace {{service:qualified_namespace}} {
 class {{service:cpp_name}};
 class {{service:cpp_name}}AsyncProcessor;
@@ -28,12 +28,7 @@ class {{service:cpp_name}}AsyncProcessor;
 namespace apache::thrift {
 {{#if service:cpp_requires_method_decorator?}}
 
-// ServiceMethodDecorator is only supported for coroutines
-#if FOLLY_HAS_COROUTINES
-
-{{#partial method_decorator.declaration service=service:self}}
-
-#endif // FOLLY_HAS_COROUTINES
+{{#partial method_decorator_h.decorator_interface_declaration service=service:self}}
 
 {{/if service:cpp_requires_method_decorator?}}
 template <>

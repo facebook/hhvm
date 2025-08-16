@@ -1,0 +1,50 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "method_decorators/params" as params}}
+
+{{!
+  decorator_interface_functions - Function declarations for method
+  decorator functions for a given t_service, e.g the before_* and after_*
+  methods for each interface method.
+}}
+{{#let partial decorator_interface_functions |service| captures |params|}}
+{{#if (object.eq? service.extends null)}}
+{{#else}}
+{{! We recursively include the declarations for functions in parent services}}
+  // BEGIN inherited methods from {{service.qualified_name}}
+{{#partial decorator_interface_functions service=service.extends}}
+  // END inherited methods from {{service.qualified_name}}
+{{/if (object.eq? service.extends null)}}
+{{#each service.functions as |function|}}
+  virtual void before_{{function.cpp_name}}(BeforeParams /*beforeParams*/{{#each function.params.fields as |param|}}, {{#partial params.param_type param=param}} /*{{#partial params.param_name param=param}}*/{{/each}}) {}
+  virtual void after_{{function.cpp_name}}(AfterParams /*afterParams*/{{#if function.return_type.void?}}{{#else}}, {{#partial params.return_param_type function=function}} /*result*/{{/if function.return_type.void?}}) {}
+{{/each}}
+{{/let partial}}
+
+{{!
+  declaration - The full method decorator declaration for a given t_service, e.g
+  ServiceMethodDecorator<MyService>.
+}}
+{{#let export partial decorator_interface_declaration |service| captures |decorator_interface_functions|}}
+template <>
+class ServiceMethodDecorator<{{service.qualified_name}}> : public ServiceMethodDecoratorBase {
+ public:
+  virtual ~ServiceMethodDecorator() = default;
+{{#partial decorator_interface_functions service=service}}
+};
+{{/let partial}}

@@ -21,7 +21,7 @@
   const ref, Otherwise for trivially copyable params like int64_t we pass them
   by value.
 }}
-{{#let partial param_type |param|}}
+{{#let export partial param_type |param|}}
 {{#pragma ignore-newlines}}
 {{#if param.type.resolves_to_complex_return?}}{{!
 }}const {{param.type.cpp_type}}&
@@ -31,22 +31,33 @@
 {{/let partial}}
 
 {{!
-  param_name_declaration - For declarations, the variable name is unused /
-  commented to stay consistent with the rest of the declarations.
+  param_name_unused - Commented out param name.
 }}
-{{#let partial param_name_declaration |param|}}
+{{#let partial param_name_unused |param|}}
 {{#pragma ignore-newlines}}
 /*p_{{param.cpp_name}}*/
 {{/let partial}}
 
 {{!
-  before_declaration_params - A param list for method decorator before_*
-  function declaration. Decorator before_* accepts the same arguments as the
-  method, except they only have const ref access to them.
+  param_name - this one is used when the param name is actually used
 }}
-{{#let export partial before_declaration_params |function| captures |param_type param_name_declaration|}}
+{{#let export partial param_name |param|}}
 {{#pragma ignore-newlines}}
-{{#each (array.enumerate function.params.fields with_first=true) as |index param first?|}}
-{{#if (not first?)}},{{/if}} {{#partial param_type param=param}} {{#partial param_name_declaration param=param}}
-{{/each}}
+p_{{param.cpp_name}}
+{{/let partial}}
+
+{{!
+  return_param_type - Decorators after_* methods have const-ref access to the method
+  return type.
+}}
+{{#let export partial return_param_type |function|}}
+{{#pragma ignore-newlines}}
+{{#if function.return_type.void?}}
+{{#else}}
+{{#if function.return_type.resolves_to_complex_return?}}
+const {{function.return_type.cpp_type}}&
+{{#else}}
+{{function.return_type.cpp_type}}
+{{/if function.return_type.resolves_to_complex_return?}}
+{{/if function.return_type.void?}}
 {{/let partial}}

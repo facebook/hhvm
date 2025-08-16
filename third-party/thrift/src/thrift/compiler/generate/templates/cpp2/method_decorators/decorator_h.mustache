@@ -64,3 +64,12 @@ class ServiceMethodDecorator<{{service.qualified_name}}> : public ServiceMethodD
 {{#partial decorator_interaction_functions service=service}}
 };
 {{/let partial}}
+
+{{#let export partial decorate_function_friend_declaration |service|}}
+  friend void decorate(ServiceHandler<{{service.qualified_name}}>& handler, ServiceMethodDecoratorList<{{service.qualified_name}}> decorators);
+{{/let partial}}
+
+
+{{#let export partial decorate_function_declaration |service|}}
+void decorate(ServiceHandler<{{service.qualified_name}}>& handler, ServiceMethodDecoratorList<{{service.qualified_name}}> decorators);
+{{/let partial}}

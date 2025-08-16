@@ -16,6 +16,7 @@
 
 }}
 {{#import "types/schema_association" as schema_association}}
+{{#import "method_decorators/decorator_cpp" as decorator_cpp}}
 std::unique_ptr<apache::thrift::AsyncProcessor> {{> service_common/service_class_name}}::getProcessor() {
   return std::make_unique<{{service:qualified_name}}AsyncProcessor>(this);
 }
@@ -45,6 +46,9 @@ std::vector<folly::not_null<const apache::thrift::syntax_graph::ServiceNode*>> {
 }
 #endif
 {{/service:has_service_schema}}
+{{#if service:self.cpp_requires_method_decorator?}}
+{{#partial decorator_cpp.decorate_function service=service:self}}
+{{/if service:self.cpp_requires_method_decorator?}}
 
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> {{> service_common/service_class_name}}::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();

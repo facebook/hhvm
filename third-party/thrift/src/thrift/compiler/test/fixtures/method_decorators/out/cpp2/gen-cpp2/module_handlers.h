@@ -218,7 +218,11 @@ class EchoInteractionIf : public apache::thrift::Tile, public apache::thrift::Se
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_withStruct{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_multiParam{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_echoInteraction{apache::thrift::detail::si::InvocationType::AsyncTm};
+ protected:
+  ServiceMethodDecoratorList<::cpp2::DecoratedService> __fbthrift_methodDecorators;
+  friend void decorate(ServiceHandler<::cpp2::DecoratedService>& handler, ServiceMethodDecoratorList<::cpp2::DecoratedService> decorators);
 };
+void decorate(ServiceHandler<::cpp2::DecoratedService>& handler, ServiceMethodDecoratorList<::cpp2::DecoratedService> decorators);
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::DecoratedService, false> {
@@ -1036,7 +1040,11 @@ class ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService> : virtu
  private:
   static ::cpp2::DecoratedService_ExtendsUndecoratedServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_extension{apache::thrift::detail::si::InvocationType::AsyncTm};
+ protected:
+  ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService> __fbthrift_methodDecorators;
+  friend void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>& handler, ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService> decorators);
 };
+void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>& handler, ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService> decorators);
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::DecoratedService_ExtendsUndecoratedService, false> {
@@ -1184,7 +1192,11 @@ class ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService> : virtual
  private:
   static ::cpp2::DecoratedService_ExtendsDecoratedServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_extension{apache::thrift::detail::si::InvocationType::AsyncTm};
+ protected:
+  ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsDecoratedService> __fbthrift_methodDecorators;
+  friend void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>& handler, ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsDecoratedService> decorators);
 };
+void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>& handler, ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsDecoratedService> decorators);
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::DecoratedService_ExtendsDecoratedService, false> {
@@ -1457,7 +1469,11 @@ class ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsD
  private:
   static ::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_secondExtension{apache::thrift::detail::si::InvocationType::AsyncTm};
+ protected:
+  ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService> __fbthrift_methodDecorators;
+  friend void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>& handler, ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService> decorators);
 };
+void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>& handler, ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService> decorators);
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService, false> {

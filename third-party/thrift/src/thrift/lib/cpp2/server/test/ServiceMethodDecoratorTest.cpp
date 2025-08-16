@@ -30,12 +30,23 @@ class MockMethodDecorator
   MOCK_METHOD(std::string_view, getName, (), (const, override));
 };
 
+class Handler : public ServiceHandler<ServiceMethodDecoratorTest> {
+ public:
+  folly::coro::Task<void> co_noop() override { co_return; }
+};
+
 } // namespace
 
 TEST(ServiceMethodDecoratorTest, MethodDecoratorsCompile) {
   MockMethodDecorator decorator;
   EXPECT_CALL(decorator, getName()).WillOnce(Return("MockMethodDecorator"));
   EXPECT_EQ("MockMethodDecorator", decorator.getName());
+
+  ServiceMethodDecoratorList<ServiceMethodDecoratorTest> decorators;
+  decorators.push_back(std::make_shared<MockMethodDecorator>());
+
+  auto handler = std::make_shared<Handler>();
+  apache::thrift::decorate(*handler, std::move(decorators));
 }
 
 // TODO

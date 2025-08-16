@@ -19,6 +19,9 @@ apache::thrift::ServiceHandler<::cpp2::DecoratedService>::CreateMethodMetadataRe
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::cpp2::DecoratedServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+void apache::thrift::decorate(apache::thrift::ServiceHandler<::cpp2::DecoratedService>& handler, apache::thrift::ServiceMethodDecoratorList<::cpp2::DecoratedService> decorators) {
+  handler.__fbthrift_methodDecorators = std::move(decorators);
+}
 
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::cpp2::DecoratedService>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
@@ -2590,6 +2593,9 @@ apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedServic
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::cpp2::DecoratedService_ExtendsUndecoratedServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+void apache::thrift::decorate(apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>& handler, apache::thrift::ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService> decorators) {
+  handler.__fbthrift_methodDecorators = std::move(decorators);
+}
 
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
@@ -2823,6 +2829,9 @@ apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::cpp2::DecoratedService_ExtendsDecoratedServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+void apache::thrift::decorate(apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>& handler, apache::thrift::ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsDecoratedService> decorators) {
+  handler.__fbthrift_methodDecorators = std::move(decorators);
+}
 
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
@@ -3289,6 +3298,9 @@ apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedServic
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+void apache::thrift::decorate(apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>& handler, apache::thrift::ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService> decorators) {
+  handler.__fbthrift_methodDecorators = std::move(decorators);
+}
 
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();

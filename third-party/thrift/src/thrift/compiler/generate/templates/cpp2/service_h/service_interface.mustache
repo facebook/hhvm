@@ -64,7 +64,15 @@ class ServiceHandler<{{service:qualified_name}}> : {{#service:extends}}virtual p
 {{/service:interactions}}
 
 {{> service_h/service_interface_functions}}
+{{#if service:self.cpp_requires_method_decorator?}}
+ protected:
+  ServiceMethodDecoratorList<{{service:self.qualified_name}}> __fbthrift_methodDecorators;
+{{#partial method_decorator_h.decorate_function_friend_declaration service=service:self}}
+{{/if service:self.cpp_requires_method_decorator?}}
 };
+{{#if service:self.cpp_requires_method_decorator?}}
+{{#partial method_decorator_h.decorate_function_declaration service=service:self}}
+{{/if service:self.cpp_requires_method_decorator?}}
 
 namespace detail {
 {{#partial schema_association.declaration node=service:self}}

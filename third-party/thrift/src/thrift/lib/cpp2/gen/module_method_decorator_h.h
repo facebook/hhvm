@@ -24,4 +24,8 @@ namespace apache::thrift {
 template <typename ServiceTag>
 class ServiceMethodDecorator;
 
+template <typename ServiceTag>
+using ServiceMethodDecoratorList =
+    std::vector<std::shared_ptr<ServiceMethodDecorator<ServiceTag>>>;
+
 } // namespace apache::thrift

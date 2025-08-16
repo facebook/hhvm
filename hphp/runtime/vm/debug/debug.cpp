@@ -20,6 +20,7 @@
 
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/current-executable.h"
+#include "hphp/util/roar.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -64,7 +65,12 @@ DebugInfo* DebugInfo::Get() {
 DebugInfo::DebugInfo() {
   m_perfMapName = folly::sformat("/tmp/perf-{}.map", getpid());
   if (Cfg::Eval::PerfPidMap) {
-    m_perfMap = fopen(m_perfMapName.c_str(), "w");
+    m_perfMapEnabled = true;
+    // When running with ROAR, ROAR owns the pid-map file, and HHVM writes to it
+    // indirectly through ROAR.
+    if (!use_roar) {
+      m_perfMap = fopen(m_perfMapName.c_str(), "w");
+    }
   }
   if (Cfg::Eval::PerfJitDump) {
     initPerfJitDump();
@@ -100,7 +106,7 @@ DebugInfo::~DebugInfo() {
 }
 
 void DebugInfo::generatePidMapOverlay() {
-  if (!m_perfMap || !pidMapOverlayStart) return;
+  if (!m_perfMapEnabled || !pidMapOverlayStart) return;
 
   struct SymInfo {
     const char* name;
@@ -202,8 +208,7 @@ void DebugInfo::generatePidMapOverlay() {
       size = uintptr_t(pidMapOverlayEnd) - sym.addr;
     }
     if (!size) continue;
-    fprintf(m_perfMap, "%lx %x %s\n",
-            long(sym.addr), size, demangled.c_str());
+    writeToPidMap(uint64_t(sym.addr), size, demangled.c_str());
   }
 
   return;
@@ -217,18 +222,27 @@ void DebugInfo::recordStub(TCRange range, const std::string& name) {
   }
 }
 
+extern "C" __attribute__((weak))
+int __roar_api_write_pid_map(uint64_t address, uint64_t size, const char* name);
+
+void DebugInfo::writeToPidMap(uint64_t start, uint64_t size, const char* name) {
+  if (use_roar) {
+    __roar_api_write_pid_map(start, size, name);
+  } else {
+    fprintf(m_perfMap, "%lx %lx %s\n", start, size, name);
+    fflush(m_perfMap);
+  }
+}
+
 void DebugInfo::recordPerfMap(TCRange range, SrcKey sk, std::string name) {
-  if (!m_perfMap) return;
+  if (!m_perfMapEnabled) return;
   if (Cfg::Eval::ProfileBC) return;
   if (name.empty()) {
     name = lookupFunction(sk.func(), sk.prologue(),
                           Cfg::Eval::PerfPidMapIncludeFilePath);
   }
-  fprintf(m_perfMap, "%lx %x %s\n",
-    reinterpret_cast<uintptr_t>(range.begin()),
-    range.size(),
-    name.c_str());
-  fflush(m_perfMap);
+  auto const start = reinterpret_cast<uintptr_t>(range.begin());
+  writeToPidMap(start, range.size(), name.c_str());
 
   //Dump the object code into the specified file
   if (m_perfJitDump) {
@@ -254,16 +268,15 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
 
 
   if (Cfg::Eval::ProfileBC) {
-    if (!m_perfMap) return;
+    if (!m_perfMapEnabled) return;
     const char* name;
     if (op < Op_count) {
       name = opcodeName[op];
     } else {
       name = highOpcodeName[op - OpHighStart];
     }
-    fprintf(m_perfMap, "%lx %x %s\n",
-            uintptr_t(range.begin()), range.size(), name);
-    fflush(m_perfMap);
+    auto const start = reinterpret_cast<uintptr_t>(range.begin());
+    writeToPidMap(start, range.size(), name);
   }
 }
 

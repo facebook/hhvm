@@ -669,13 +669,6 @@ prototype<t_function>::ptr t_whisker_generator::make_prototype_for_function(
 
   def.property("return_type", [&](const t_function& function) {
     const t_type* type = function.return_type().get_type();
-    // Override the return type for compatibility with old codegen.
-    if (function.is_interaction_constructor()) {
-      // The old syntax (performs) treats an interaction as a response.
-      type = function.interaction().get_type();
-    } else if (function.sink_or_stream()) {
-      type = &t_primitive_type::t_void();
-    }
     return resolve_derived_t_type(proto, *type);
   });
 
@@ -758,9 +751,32 @@ prototype<t_interface>::ptr t_whisker_generator::make_prototype_for_interface(
 prototype<t_service>::ptr t_whisker_generator::make_prototype_for_service(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_service>::extends(proto.of<t_interface>());
+
   def.property("extends", mem_fn(&t_service::extends, proto.of<t_service>()));
+
   def.property("user_type_footprint", [&](const t_service& service) {
     return build_user_type_footprint(service, proto);
+  });
+
+  def.property("interactions", [&proto](const t_interface& interface) {
+    // Probably a short list in most cases, so vec should be fine
+    std::vector<const t_interaction*> interactions;
+    for (const auto& function : interface.functions()) {
+      if (const auto& interaction = function.interaction()) {
+        auto* ptr = &interaction->as<t_interaction>();
+        if (std::find(interactions.begin(), interactions.end(), ptr) !=
+            interactions.end()) {
+          continue; // Already seen this interaction.
+        }
+        interactions.push_back(ptr);
+      }
+    }
+    whisker::array::raw refs;
+    refs.reserve(interactions.size());
+    for (const auto* interaction : interactions) {
+      refs.emplace_back(proto.create<t_interaction>(*interaction));
+    }
+    return whisker::array::of(std::move(refs));
   });
   return std::move(def).make();
 }

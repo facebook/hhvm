@@ -24,17 +24,27 @@ struct Response {
   1: string text;
 }
 
+interaction LegacyPerforms {
+  void perform();
+}
+
+interaction EchoInteraction {
+  string interactionEcho(1: string text);
+}
+
 /**
  * This service just tests basic decorator generation
  */
 @cpp.GenerateServiceMethodDecorator
 service DecoratedService {
+  performs LegacyPerforms;
   void noop();
   string echo(1: string text);
   i64 increment(1: i64 num);
   i64 sum(1: list<i64> nums);
   Response withStruct(1: Request request);
   Response multiParam(1: string text, 2: i64 num, 3: Request request);
+  EchoInteraction echoInteraction();
 }
 
 /**

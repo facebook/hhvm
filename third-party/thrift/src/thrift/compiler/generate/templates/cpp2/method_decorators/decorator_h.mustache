@@ -37,14 +37,30 @@
 {{/let partial}}
 
 {{!
+  decorator_interaction_functions - These are the before_ and after_ methods
+  for interactions that are associated with a given t_service.
+}}
+{{#let partial decorator_interaction_functions |service| captures |params|}}
+{{#each service.interactions as |interaction|}}
+  // BEGIN interaction {{interaction.name}} methods
+{{#each interaction.functions as |function|}}
+  virtual void before_{{interaction.name}}_{{function.cpp_name}}(BeforeParams /*beforeParams*/{{#each function.params.fields as |param|}}, {{#partial params.param_type param=param}} /*{{#partial params.param_name param=param}}*/{{/each}}) {}
+  virtual void after_{{interaction.name}}_{{function.cpp_name}}(AfterParams /*afterParams*/{{#if function.return_type.void?}}{{#else}}, {{#partial params.return_param_type function=function}} /*result*/{{/if function.return_type.void?}}) {}
+{{/each}}
+  // END interaction {{interaction.name}} methods
+{{/each}}
+{{/let partial}}
+
+{{!
   declaration - The full method decorator declaration for a given t_service, e.g
   ServiceMethodDecorator<MyService>.
 }}
-{{#let export partial decorator_interface_declaration |service| captures |decorator_interface_functions|}}
+{{#let export partial decorator_interface_declaration |service| captures |decorator_interface_functions decorator_interaction_functions|}}
 template <>
 class ServiceMethodDecorator<{{service.qualified_name}}> : public ServiceMethodDecoratorBase {
  public:
   virtual ~ServiceMethodDecorator() = default;
 {{#partial decorator_interface_functions service=service}}
+{{#partial decorator_interaction_functions service=service}}
 };
 {{/let partial}}

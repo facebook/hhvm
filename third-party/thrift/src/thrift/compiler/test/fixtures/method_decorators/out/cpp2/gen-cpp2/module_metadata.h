@@ -61,6 +61,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>
   static void gen_sum(ThriftMetadata& metadata, ThriftService& context);
   static void gen_withStruct(ThriftMetadata& metadata, ThriftService& context);
   static void gen_multiParam(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_echoInteraction(ThriftMetadata& metadata, ThriftService& context);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>> {

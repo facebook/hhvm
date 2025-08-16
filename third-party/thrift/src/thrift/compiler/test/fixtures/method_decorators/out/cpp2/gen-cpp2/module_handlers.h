@@ -15,6 +15,9 @@
 // For method decorators
 #include <thrift/lib/cpp2/gen/module_method_decorator_h.h>
 
+// for interactions
+#include <thrift/lib/cpp2/async/ServerStream.h>
+#include <thrift/lib/cpp2/async/Sink.h>
 
 namespace folly {
   class IOBuf;
@@ -44,6 +47,8 @@ template <>
 class ServiceMethodDecorator<::cpp2::DecoratedService> : public ServiceMethodDecoratorBase {
  public:
   virtual ~ServiceMethodDecorator() = default;
+  virtual void before_createLegacyPerforms(BeforeParams /*beforeParams*/) {}
+  virtual void after_createLegacyPerforms(AfterParams /*afterParams*/) {}
   virtual void before_noop(BeforeParams /*beforeParams*/) {}
   virtual void after_noop(AfterParams /*afterParams*/) {}
   virtual void before_echo(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/) {}
@@ -56,6 +61,16 @@ class ServiceMethodDecorator<::cpp2::DecoratedService> : public ServiceMethodDec
   virtual void after_withStruct(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
   virtual void before_multiParam(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) {}
   virtual void after_multiParam(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
+  virtual void before_echoInteraction(BeforeParams /*beforeParams*/) {}
+  virtual void after_echoInteraction(AfterParams /*afterParams*/) {}
+  // BEGIN interaction LegacyPerforms methods
+  virtual void before_LegacyPerforms_perform(BeforeParams /*beforeParams*/) {}
+  virtual void after_LegacyPerforms_perform(AfterParams /*afterParams*/) {}
+  // END interaction LegacyPerforms methods
+  // BEGIN interaction EchoInteraction methods
+  virtual void before_EchoInteraction_interactionEcho(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/) {}
+  virtual void after_EchoInteraction_interactionEcho(AfterParams /*afterParams*/, const ::std::string& /*result*/) {}
+  // END interaction EchoInteraction methods
 };
 
 template <>
@@ -72,7 +87,64 @@ class ServiceHandler<::cpp2::DecoratedService> : public apache::thrift::ServerIn
  private:
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:
+class LegacyPerformsServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
+  public:
+   apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
+   static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
+};
 
+
+class LegacyPerformsIf : public apache::thrift::Tile, public apache::thrift::ServerInterface {
+ public:
+  std::string_view getGeneratedName() const override { return "LegacyPerforms"; }
+
+  typedef ::cpp2::DecoratedServiceAsyncProcessor ProcessorType;
+  std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
+    std::terminate();
+  }
+  CreateMethodMetadataResult createMethodMetadata() override {
+    std::terminate();
+  }
+  virtual void sync_perform();
+  [[deprecated("Use sync_perform instead")]] virtual void perform();
+  virtual folly::SemiFuture<folly::Unit> semifuture_perform();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<void> co_perform();
+  virtual folly::coro::Task<void> co_perform(apache::thrift::RequestParams params);
+#endif
+  virtual void async_tm_perform(apache::thrift::HandlerCallbackPtr<void> callback);
+ private:
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_perform{apache::thrift::detail::si::InvocationType::AsyncTm};
+};class EchoInteractionServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
+  public:
+   apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
+   static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
+};
+
+
+class EchoInteractionIf : public apache::thrift::Tile, public apache::thrift::ServerInterface {
+ public:
+  std::string_view getGeneratedName() const override { return "EchoInteraction"; }
+
+  typedef ::cpp2::DecoratedServiceAsyncProcessor ProcessorType;
+  std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
+    std::terminate();
+  }
+  CreateMethodMetadataResult createMethodMetadata() override {
+    std::terminate();
+  }
+  virtual void sync_interactionEcho(::std::string& /*_return*/, std::unique_ptr<::std::string> /*text*/);
+  [[deprecated("Use sync_interactionEcho instead")]] virtual void interactionEcho(::std::string& /*_return*/, std::unique_ptr<::std::string> /*text*/);
+  virtual folly::SemiFuture<std::unique_ptr<::std::string>> semifuture_interactionEcho(std::unique_ptr<::std::string> p_text);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::std::string>> co_interactionEcho(std::unique_ptr<::std::string> p_text);
+  virtual folly::coro::Task<std::unique_ptr<::std::string>> co_interactionEcho(apache::thrift::RequestParams params, std::unique_ptr<::std::string> p_text);
+#endif
+  virtual void async_tm_interactionEcho(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>> callback, std::unique_ptr<::std::string> p_text);
+ private:
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_interactionEcho{apache::thrift::detail::si::InvocationType::AsyncTm};
+};
+  virtual std::unique_ptr<LegacyPerformsIf> createLegacyPerforms();
   virtual void sync_noop();
   [[deprecated("Use sync_noop instead")]] virtual void noop();
   virtual folly::Future<folly::Unit> future_noop();
@@ -127,21 +199,32 @@ class ServiceHandler<::cpp2::DecoratedService> : public apache::thrift::ServerIn
   virtual folly::coro::Task<std::unique_ptr<::cpp2::Response>> co_multiParam(apache::thrift::RequestParams params, std::unique_ptr<::std::string> p_text, ::std::int64_t p_num, std::unique_ptr<::cpp2::Request> p_request);
 #endif
   virtual void async_tm_multiParam(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::Response>> callback, std::unique_ptr<::std::string> p_text, ::std::int64_t p_num, std::unique_ptr<::cpp2::Request> p_request);
+  virtual apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::DecoratedService>::EchoInteractionIf, void> sync_echoInteraction();
+  [[deprecated("Use sync_echoInteraction instead")]] virtual apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::DecoratedService>::EchoInteractionIf, void> echoInteraction();
+  virtual folly::Future<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::DecoratedService>::EchoInteractionIf, void>> future_echoInteraction();
+  virtual folly::SemiFuture<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::DecoratedService>::EchoInteractionIf, void>> semifuture_echoInteraction();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::DecoratedService>::EchoInteractionIf, void>> co_echoInteraction();
+  virtual folly::coro::Task<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::DecoratedService>::EchoInteractionIf, void>> co_echoInteraction(apache::thrift::RequestParams params);
+#endif
+  virtual void async_tm_echoInteraction(apache::thrift::HandlerCallbackPtr<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::DecoratedService>::EchoInteractionIf, void>> callback);
  private:
   static ::cpp2::DecoratedServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_createLegacyPerforms{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_noop{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_echo{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_increment{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_sum{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_withStruct{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_multiParam{apache::thrift::detail::si::InvocationType::AsyncTm};
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_echoInteraction{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::DecoratedService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -1820116457509237888;
-  static constexpr ::std::string_view definitionKey = {"\xad\xe2\xe9\x37\xab\x52\x37\x46\x63\x5e\x9a\x4c\xb5\x4f\xc3\xf2", 16};
+  static constexpr int64_t programId = -556896798547907895;
+  static constexpr ::std::string_view definitionKey = {"\xcd\x80\x50\x15\x03\x1a\xba\xbd\xd9\x95\x13\x71\xfb\x86\xc1\x90", 16};
 };
 }
 } // namespace apache::thrift
@@ -174,10 +257,25 @@ class DecoratedServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncPr
  public:
   using ProcessFuncs = GeneratedAsyncProcessorBase::ProcessFuncs<DecoratedServiceAsyncProcessor>;
   using ProcessMap = GeneratedAsyncProcessorBase::ProcessMap<ProcessFuncs>;
+  using InteractionConstructor = GeneratedAsyncProcessorBase::InteractionConstructor<DecoratedServiceAsyncProcessor>;
+  using InteractionConstructorMap = GeneratedAsyncProcessorBase::InteractionConstructorMap<InteractionConstructor>;
   static const DecoratedServiceAsyncProcessor::ProcessMap& getOwnProcessMap();
+  static const DecoratedServiceAsyncProcessor::InteractionConstructorMap& getInteractionConstructorMap();
+  std::unique_ptr<apache::thrift::Tile> createInteractionImpl(const std::string& name, int16_t) override;
  private:
   static const DecoratedServiceAsyncProcessor::ProcessMap kOwnProcessMap_;
+  static const DecoratedServiceAsyncProcessor::InteractionConstructorMap interactionConstructorMap_;
  private:
+  //
+  // Service Methods
+  //
+
+ std::unique_ptr<apache::thrift::Tile> createLegacyPerforms() {
+   return iface_->createLegacyPerforms();
+ }
+  //
+  // End of Service Methods
+  //
   //
   // Service Methods
   //
@@ -399,6 +497,115 @@ class DecoratedServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncPr
   //
   // End of Service Methods
   //
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'echoInteraction'
+  //
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_echoInteraction(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_echoInteraction(apache::thrift::ServerRequest&& serverRequest);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static apache::thrift::SerializedResponse return_echoInteraction(
+      apache::thrift::ContextStack* ctx);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_echoInteraction(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'echoInteraction'
+  //
+
+  //
+  // End of Service Methods
+  //
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'perform'
+  //
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_LegacyPerforms_perform(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_LegacyPerforms_perform(apache::thrift::ServerRequest&& serverRequest);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static apache::thrift::SerializedResponse return_LegacyPerforms_perform(
+      apache::thrift::ContextStack* ctx);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_LegacyPerforms_perform(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'perform'
+  //
+
+  //
+  // End of Service Methods
+  //
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'interactionEcho'
+  //
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_EchoInteraction_interactionEcho(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_EchoInteraction_interactionEcho(apache::thrift::ServerRequest&& serverRequest);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static apache::thrift::SerializedResponse return_EchoInteraction_interactionEcho(
+      apache::thrift::ContextStack* ctx,
+      ::std::string const& _return);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_EchoInteraction_interactionEcho(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'interactionEcho'
+  //
+
+  //
+  // End of Service Methods
+  //
  public:
   DecoratedServiceAsyncProcessor(::apache::thrift::ServiceHandler<::cpp2::DecoratedService>* iface) :
       iface_(iface) {}
@@ -501,8 +708,8 @@ class ServiceHandler<::cpp2::UndecoratedService> : public apache::thrift::Server
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::UndecoratedService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -1820116457509237888;
-  static constexpr ::std::string_view definitionKey = {"\x5a\xfd\x47\xb5\x43\xbd\x46\xcf\x62\x07\x1b\x11\xe9\x72\x86\x5b", 16};
+  static constexpr int64_t programId = -556896798547907895;
+  static constexpr ::std::string_view definitionKey = {"\x2f\xe7\xa7\xac\xb0\x12\xa4\x07\x04\x3e\xa3\xc0\x68\xbb\xe6\x72", 16};
 };
 }
 } // namespace apache::thrift
@@ -834,8 +1041,8 @@ class ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService> : virtu
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::DecoratedService_ExtendsUndecoratedService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -1820116457509237888;
-  static constexpr ::std::string_view definitionKey = {"\x87\x6f\x27\x54\x43\x5f\xe2\xde\xaf\x33\xbc\x79\xe3\x21\x59\xe0", 16};
+  static constexpr int64_t programId = -556896798547907895;
+  static constexpr ::std::string_view definitionKey = {"\x3d\x0e\xbf\x65\x19\x77\x41\x0e\x05\xeb\x3b\xb6\xe5\xfc\xb8\xba", 16};
 };
 }
 } // namespace apache::thrift
@@ -930,6 +1137,8 @@ class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsDecoratedService> :
  public:
   virtual ~ServiceMethodDecorator() = default;
   // BEGIN inherited methods from ::cpp2::DecoratedService_ExtendsDecoratedService
+  virtual void before_createLegacyPerforms(BeforeParams /*beforeParams*/) {}
+  virtual void after_createLegacyPerforms(AfterParams /*afterParams*/) {}
   virtual void before_noop(BeforeParams /*beforeParams*/) {}
   virtual void after_noop(AfterParams /*afterParams*/) {}
   virtual void before_echo(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/) {}
@@ -942,6 +1151,8 @@ class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsDecoratedService> :
   virtual void after_withStruct(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
   virtual void before_multiParam(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) {}
   virtual void after_multiParam(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
+  virtual void before_echoInteraction(BeforeParams /*beforeParams*/) {}
+  virtual void after_echoInteraction(AfterParams /*afterParams*/) {}
   // END inherited methods from ::cpp2::DecoratedService_ExtendsDecoratedService
   virtual void before_extension(BeforeParams /*beforeParams*/) {}
   virtual void after_extension(AfterParams /*afterParams*/) {}
@@ -978,8 +1189,8 @@ class ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService> : virtual
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::DecoratedService_ExtendsDecoratedService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -1820116457509237888;
-  static constexpr ::std::string_view definitionKey = {"\xf2\x54\x4e\x82\x47\xca\x03\xea\xcc\x89\xad\x66\xee\x51\xd1\x84", 16};
+  static constexpr int64_t programId = -556896798547907895;
+  static constexpr ::std::string_view definitionKey = {"\x0c\x9f\x1e\x0b\x2c\x40\x73\xf0\x82\x1a\xe9\x5e\x0c\x14\x90\x9c", 16};
 };
 }
 } // namespace apache::thrift
@@ -1099,8 +1310,8 @@ class ServiceHandler<::cpp2::UndecoratedService_ExtendsDecoratedService> : virtu
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::UndecoratedService_ExtendsDecoratedService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -1820116457509237888;
-  static constexpr ::std::string_view definitionKey = {"\x51\x75\x7d\x96\xf5\x1a\xb0\x9b\xad\x1b\x6f\xa7\x5f\xce\x98\x3d", 16};
+  static constexpr int64_t programId = -556896798547907895;
+  static constexpr ::std::string_view definitionKey = {"\x00\x32\xa3\xdf\x6e\x11\x1d\x33\x62\x35\xa1\x4e\xad\x33\xd2\x92", 16};
 };
 }
 } // namespace apache::thrift
@@ -1196,6 +1407,8 @@ class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsUndecoratedService_
   virtual ~ServiceMethodDecorator() = default;
   // BEGIN inherited methods from ::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService
   // BEGIN inherited methods from ::cpp2::UndecoratedService_ExtendsDecoratedService
+  virtual void before_createLegacyPerforms(BeforeParams /*beforeParams*/) {}
+  virtual void after_createLegacyPerforms(AfterParams /*afterParams*/) {}
   virtual void before_noop(BeforeParams /*beforeParams*/) {}
   virtual void after_noop(AfterParams /*afterParams*/) {}
   virtual void before_echo(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/) {}
@@ -1208,6 +1421,8 @@ class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsUndecoratedService_
   virtual void after_withStruct(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
   virtual void before_multiParam(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) {}
   virtual void after_multiParam(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
+  virtual void before_echoInteraction(BeforeParams /*beforeParams*/) {}
+  virtual void after_echoInteraction(AfterParams /*afterParams*/) {}
   // END inherited methods from ::cpp2::UndecoratedService_ExtendsDecoratedService
   virtual void before_extension(BeforeParams /*beforeParams*/) {}
   virtual void after_extension(AfterParams /*afterParams*/) {}
@@ -1247,8 +1462,8 @@ class ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsD
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -1820116457509237888;
-  static constexpr ::std::string_view definitionKey = {"\x42\xf1\x80\xf5\x23\xa5\xa5\xfe\xcd\x59\xf4\x25\x71\x82\x50\x34", 16};
+  static constexpr int64_t programId = -556896798547907895;
+  static constexpr ::std::string_view definitionKey = {"\x6d\x32\x44\x53\x26\x6b\x69\x9a\x87\x87\xd3\x5e\x0d\xb5\xda\xb4", 16};
 };
 }
 } // namespace apache::thrift

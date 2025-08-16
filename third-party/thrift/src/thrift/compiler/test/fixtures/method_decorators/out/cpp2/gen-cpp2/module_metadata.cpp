@@ -170,6 +170,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));
 }
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::gen_echoInteraction([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  func.name() = "echoInteraction";
+  auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
+  func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  func.is_oneway() = false;
+  service.functions()->push_back(std::move(func));
+}
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
@@ -191,6 +199,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::gen_sum,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::gen_withStruct,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::gen_multiParam,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::gen_echoInteraction,
   };
   for (auto& function_gen : functions) {
     function_gen(metadata, module_DecoratedService);

@@ -13,6 +13,10 @@
 
 
 
+// for interactions
+#include <thrift/lib/cpp2/async/ClientBufferedStream.h>
+#include <thrift/lib/cpp2/async/ClientSinkBridge.h>
+#include <thrift/lib/cpp2/async/Sink.h>
 
 namespace apache { namespace thrift {
   class Cpp2RequestContext;
@@ -52,7 +56,230 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
     return "DecoratedService";
   }
 
+class LegacyPerforms final : public apache::thrift::InteractionHandle {
+  using apache::thrift::InteractionHandle::InteractionHandle;
+  friend class ::apache::thrift::Client<::cpp2::DecoratedService>;
+ public:
 
+
+  std::string_view getServiceName() const noexcept override {
+    return "DecoratedService";
+  }
+
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "LegacyPerforms", "function": "perform"} */
+  void perform(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
+ protected:
+  void fbthrift_serialize_and_send_perform(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions = false);
+ public:
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "LegacyPerforms", "function": "perform"} */
+  void sync_perform();
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "LegacyPerforms", "function": "perform"} */
+  void sync_perform(apache::thrift::RpcOptions& rpcOptions);
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "LegacyPerforms", "function": "perform"} */
+  folly::SemiFuture<folly::Unit> semifuture_perform();
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "LegacyPerforms", "function": "perform"} */
+  folly::SemiFuture<folly::Unit> semifuture_perform(apache::thrift::RpcOptions& rpcOptions);
+
+#if FOLLY_HAS_COROUTINES
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "LegacyPerforms", "function": "perform"} */
+  template <int = 0>
+  folly::coro::Task<void> co_perform() {
+    return co_perform<false>(nullptr);
+  }
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "LegacyPerforms", "function": "perform"} */
+  template <int = 0>
+  folly::coro::Task<void> co_perform(apache::thrift::RpcOptions& rpcOptions) {
+    return co_perform<true>(&rpcOptions);
+  }
+ private:
+  template <bool hasRpcOptions>
+  folly::coro::Task<void> co_perform(apache::thrift::RpcOptions* rpcOptions) {
+    const folly::CancellationToken& cancelToken =
+        co_await folly::coro::co_current_cancellation_token;
+    const bool cancellable = cancelToken.canBeCancelled();
+    apache::thrift::ClientReceiveState returnState;
+    apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
+    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto [ctx, header] = performCtx(rpcOptions);
+    using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
+    auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
+    auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    if (ctx != nullptr) {
+      auto argsAsRefs = std::tie();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
+    }
+    if constexpr (hasRpcOptions) {
+      fbthrift_serialize_and_send_perform(*rpcOptions, header, ctx.get(), std::move(wrappedCallback));
+    } else {
+      fbthrift_serialize_and_send_perform(*defaultRpcOptions, header, ctx.get(), std::move(wrappedCallback));
+    }
+    if (cancellable) {
+      folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
+      co_await callback.co_waitUntilDone();
+    } else {
+      co_await callback.co_waitUntilDone();
+    }
+    if (returnState.isException()) {
+      co_yield folly::coro::co_error(std::move(returnState.exception()));
+    }
+    returnState.resetProtocolId(protocolId);
+    returnState.resetCtx(std::move(ctx));
+    SCOPE_EXIT {
+      if (hasRpcOptions && returnState.header()) {
+        auto* rheader = returnState.header();
+        if (!rheader->getHeaders().empty()) {
+          rpcOptions->setReadHeaders(rheader->releaseHeaders());
+        }
+        rpcOptions->setRoutingData(rheader->releaseRoutingData());
+      }
+    };
+    auto ew = recv_wrapped_perform(returnState);
+    if (returnState.ctx()) {
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      if (tryObj.hasException()) {
+        ew = std::move(tryObj.exception());
+      }
+    }
+    if (ew) {
+      co_yield folly::coro::co_error(std::move(ew));
+    }
+  }
+ public:
+#endif // FOLLY_HAS_COROUTINES
+
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "LegacyPerforms", "function": "perform"} */
+  static folly::exception_wrapper recv_wrapped_perform(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "LegacyPerforms", "function": "perform"} */
+  static void recv_perform(::apache::thrift::ClientReceiveState& state);
+ private:
+  apache::thrift::SerializedRequest fbthrift_serialize_perform(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
+  template <typename RpcOptions>
+  void fbthrift_send_perform(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> performCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<folly::Unit> fbthrift_semifuture_perform(apache::thrift::RpcOptions& rpcOptions);
+ public:
+};class EchoInteraction final : public apache::thrift::InteractionHandle {
+  using apache::thrift::InteractionHandle::InteractionHandle;
+  friend class ::apache::thrift::Client<::cpp2::DecoratedService>;
+ public:
+
+
+  std::string_view getServiceName() const noexcept override {
+    return "DecoratedService";
+  }
+
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "EchoInteraction", "function": "interactionEcho"} */
+  void interactionEcho(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_text);
+ protected:
+  void fbthrift_serialize_and_send_interactionEcho(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_text, bool stealRpcOptions = false);
+ public:
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "EchoInteraction", "function": "interactionEcho"} */
+  void sync_interactionEcho(::std::string& _return, const ::std::string& p_text);
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "EchoInteraction", "function": "interactionEcho"} */
+  void sync_interactionEcho(apache::thrift::RpcOptions& rpcOptions, ::std::string& _return, const ::std::string& p_text);
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "EchoInteraction", "function": "interactionEcho"} */
+  folly::SemiFuture<::std::string> semifuture_interactionEcho(const ::std::string& p_text);
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "EchoInteraction", "function": "interactionEcho"} */
+  folly::SemiFuture<::std::string> semifuture_interactionEcho(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_text);
+
+#if FOLLY_HAS_COROUTINES
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "EchoInteraction", "function": "interactionEcho"} */
+  template <int = 0>
+  folly::coro::Task<::std::string> co_interactionEcho(const ::std::string& p_text) {
+    return co_interactionEcho<false>(nullptr, p_text);
+  }
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "EchoInteraction", "function": "interactionEcho"} */
+  template <int = 0>
+  folly::coro::Task<::std::string> co_interactionEcho(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_text) {
+    return co_interactionEcho<true>(&rpcOptions, p_text);
+  }
+ private:
+  template <bool hasRpcOptions>
+  folly::coro::Task<::std::string> co_interactionEcho(apache::thrift::RpcOptions* rpcOptions, const ::std::string& p_text) {
+    const folly::CancellationToken& cancelToken =
+        co_await folly::coro::co_current_cancellation_token;
+    const bool cancellable = cancelToken.canBeCancelled();
+    apache::thrift::ClientReceiveState returnState;
+    apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
+    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto [ctx, header] = interactionEchoCtx(rpcOptions);
+    using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
+    auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
+    auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    if (ctx != nullptr) {
+      auto argsAsRefs = std::tie(p_text);
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
+    }
+    if constexpr (hasRpcOptions) {
+      fbthrift_serialize_and_send_interactionEcho(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_text);
+    } else {
+      fbthrift_serialize_and_send_interactionEcho(*defaultRpcOptions, header, ctx.get(), std::move(wrappedCallback), p_text);
+    }
+    if (cancellable) {
+      folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
+      co_await callback.co_waitUntilDone();
+    } else {
+      co_await callback.co_waitUntilDone();
+    }
+    if (returnState.isException()) {
+      co_yield folly::coro::co_error(std::move(returnState.exception()));
+    }
+    returnState.resetProtocolId(protocolId);
+    returnState.resetCtx(std::move(ctx));
+    ::std::string _return;
+    SCOPE_EXIT {
+      if (hasRpcOptions && returnState.header()) {
+        auto* rheader = returnState.header();
+        if (!rheader->getHeaders().empty()) {
+          rpcOptions->setReadHeaders(rheader->releaseHeaders());
+        }
+        rpcOptions->setRoutingData(rheader->releaseRoutingData());
+      }
+    };
+    auto ew = recv_wrapped_interactionEcho(_return, returnState);
+    if (returnState.ctx()) {
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      co_yield folly::coro::co_error(std::move(ew));
+    }
+    co_return _return;
+  }
+ public:
+#endif // FOLLY_HAS_COROUTINES
+
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "EchoInteraction", "function": "interactionEcho"} */
+  static folly::exception_wrapper recv_wrapped_interactionEcho(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "EchoInteraction", "function": "interactionEcho"} */
+  static void recv_interactionEcho(::std::string& _return, ::apache::thrift::ClientReceiveState& state);
+ private:
+  apache::thrift::SerializedRequest fbthrift_serialize_interactionEcho(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::std::string& p_text);
+  template <typename RpcOptions>
+  void fbthrift_send_interactionEcho(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> interactionEchoCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::std::string> fbthrift_semifuture_interactionEcho(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_text);
+ public:
+};
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "DecoratedService", "function": "createLegacyPerforms"} */
+  LegacyPerforms createLegacyPerforms();
   /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "DecoratedService", "function": "noop"} */
   virtual void noop(std::unique_ptr<apache::thrift::RequestCallback> callback);
   /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "DecoratedService", "function": "noop"} */
@@ -731,6 +958,113 @@ class Client<::cpp2::DecoratedService> : public apache::thrift::GeneratedAsyncCl
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> multiParamCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<::cpp2::Response> fbthrift_semifuture_multiParam(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_text, ::std::int64_t p_num, const ::cpp2::Request& p_request);
+ public:
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "DecoratedService", "function": "echoInteraction"} */
+  void echoInteraction(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const apache::thrift::InteractionHandle& handle);
+ protected:
+  void fbthrift_serialize_and_send_echoInteraction(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const apache::thrift::InteractionHandle& handle, bool stealRpcOptions = false);
+ public:
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "DecoratedService", "function": "echoInteraction"} */
+  apache::thrift::Client<::cpp2::DecoratedService>::EchoInteraction sync_echoInteraction();
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "DecoratedService", "function": "echoInteraction"} */
+  apache::thrift::Client<::cpp2::DecoratedService>::EchoInteraction sync_echoInteraction(apache::thrift::RpcOptions& rpcOptions);
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "DecoratedService", "function": "echoInteraction"} */
+  folly::SemiFuture<apache::thrift::Client<::cpp2::DecoratedService>::EchoInteraction> semifuture_echoInteraction();
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "DecoratedService", "function": "echoInteraction"} */
+  folly::SemiFuture<apache::thrift::Client<::cpp2::DecoratedService>::EchoInteraction> semifuture_echoInteraction(apache::thrift::RpcOptions& rpcOptions);
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "DecoratedService", "function": "echoInteraction"} */
+  std::pair<
+    apache::thrift::Client<::cpp2::DecoratedService>::EchoInteraction,
+    folly::SemiFuture<folly::Unit>
+  > eager_semifuture_echoInteraction(apache::thrift::RpcOptions& rpcOptions);
+
+#if FOLLY_HAS_COROUTINES
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "DecoratedService", "function": "echoInteraction"} */
+  template <int = 0>
+  folly::coro::Task<apache::thrift::Client<::cpp2::DecoratedService>::EchoInteraction> co_echoInteraction() {
+    return co_echoInteraction<false>(nullptr);
+  }
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "DecoratedService", "function": "echoInteraction"} */
+  template <int = 0>
+  folly::coro::Task<apache::thrift::Client<::cpp2::DecoratedService>::EchoInteraction> co_echoInteraction(apache::thrift::RpcOptions& rpcOptions) {
+    return co_echoInteraction<true>(&rpcOptions);
+  }
+ private:
+  template <bool hasRpcOptions>
+  folly::coro::Task<apache::thrift::Client<::cpp2::DecoratedService>::EchoInteraction> co_echoInteraction(apache::thrift::RpcOptions* rpcOptions) {
+    const folly::CancellationToken& cancelToken =
+        co_await folly::coro::co_current_cancellation_token;
+    const bool cancellable = cancelToken.canBeCancelled();
+    apache::thrift::ClientReceiveState returnState;
+    apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
+    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto [ctx, header] = echoInteractionCtx(rpcOptions);
+    using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
+    auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
+    auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    EchoInteraction interactionHandle(channel_, "EchoInteraction", ctx ? ctx->getClientInterceptors() : nullptr);
+    if (ctx != nullptr) {
+      auto argsAsRefs = std::tie();
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
+    }
+    if constexpr (hasRpcOptions) {
+      fbthrift_serialize_and_send_echoInteraction(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), interactionHandle);
+    } else {
+      fbthrift_serialize_and_send_echoInteraction(*defaultRpcOptions, header, ctx.get(), std::move(wrappedCallback), interactionHandle);
+    }
+    if (cancellable) {
+      folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
+      co_await callback.co_waitUntilDone();
+    } else {
+      co_await callback.co_waitUntilDone();
+    }
+    if (returnState.isException()) {
+      co_yield folly::coro::co_error(std::move(returnState.exception()));
+    }
+    returnState.resetProtocolId(protocolId);
+    returnState.resetCtx(std::move(ctx));
+    SCOPE_EXIT {
+      if (hasRpcOptions && returnState.header()) {
+        auto* rheader = returnState.header();
+        if (!rheader->getHeaders().empty()) {
+          rpcOptions->setReadHeaders(rheader->releaseHeaders());
+        }
+        rpcOptions->setRoutingData(rheader->releaseRoutingData());
+      }
+    };
+    auto ew = recv_wrapped_echoInteraction(returnState);
+    if (returnState.ctx()) {
+      auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
+      if (tryObj.hasException()) {
+        ew = std::move(tryObj.exception());
+      }
+    }
+    if (ew) {
+      co_yield folly::coro::co_error(std::move(ew));
+    }
+    co_return interactionHandle;
+  }
+ public:
+#endif // FOLLY_HAS_COROUTINES
+
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "DecoratedService", "function": "echoInteraction"} */
+  static folly::exception_wrapper recv_wrapped_echoInteraction(::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "DecoratedService", "function": "echoInteraction"} */
+  static void recv_echoInteraction(::apache::thrift::ClientReceiveState& state);
+ private:
+  apache::thrift::SerializedRequest fbthrift_serialize_echoInteraction(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
+  template <typename RpcOptions>
+  void fbthrift_send_echoInteraction(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata, const apache::thrift::InteractionHandle& handle);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> echoInteractionCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<apache::thrift::Client<::cpp2::DecoratedService>::EchoInteraction> fbthrift_semifuture_echoInteraction(apache::thrift::RpcOptions& rpcOptions);
  public:
 };
 

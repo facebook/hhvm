@@ -31,18 +31,14 @@ struct ServerStreamFactory {
   }
 
   void setContextStack(ContextStack::UniquePtr contextStack) {
-    contextStack_ = std::move(contextStack);
+    contextStack_ = std::shared_ptr<ContextStack>(std::move(contextStack));
   }
 
   void operator()(
       FirstResponsePayload&& payload,
       StreamClientCallback* cb,
       folly::EventBase* eb) {
-    fn_(std::move(payload),
-        cb,
-        eb,
-        std::move(interaction_),
-        std::move(contextStack_));
+    fn_(std::move(payload), cb, eb, std::move(interaction_), contextStack_);
   }
 
   explicit operator bool() { return !!fn_; }
@@ -53,10 +49,10 @@ struct ServerStreamFactory {
       StreamClientCallback*,
       folly::EventBase*,
       TilePtr&&,
-      ContextStack::UniquePtr)>
+      std::shared_ptr<ContextStack>)>
       fn_;
   TilePtr interaction_;
-  ContextStack::UniquePtr contextStack_;
+  std::shared_ptr<ContextStack> contextStack_;
 };
 
 template <typename T>

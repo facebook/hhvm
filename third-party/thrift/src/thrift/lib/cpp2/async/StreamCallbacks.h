@@ -33,6 +33,7 @@
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift {
+class ContextStack;
 
 struct FirstResponsePayload {
   FirstResponsePayload(
@@ -323,6 +324,13 @@ class StreamClientCallback {
 
   // not terminating
   virtual void resetServerCallback(StreamServerCallback&) = 0;
+
+  virtual void setContextStack(std::shared_ptr<ContextStack> contextStack) {
+    contextStack_ = std::move(contextStack);
+  }
+
+ protected:
+  std::shared_ptr<ContextStack> contextStack_;
 };
 
 struct StreamServerCallbackCancel {

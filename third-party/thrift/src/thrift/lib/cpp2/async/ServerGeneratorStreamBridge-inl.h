@@ -26,7 +26,7 @@ folly::coro::Task<> ServerGeneratorStreamBridge::fromAsyncGeneratorImpl(
     folly::coro::AsyncGenerator<
         std::conditional_t<WithHeader, MessageVariant<T>, T>&&> gen,
     TileStreamGuard interaction,
-    ContextStack::UniquePtr contextStack) {
+    std::shared_ptr<ContextStack> contextStack) {
   class ReadyCallback final : public QueueConsumer {
    public:
     void consume() override { baton.post(); }
@@ -162,9 +162,15 @@ ServerStreamFn<T> ServerGeneratorStreamBridge::fromAsyncGenerator(
                                    StreamClientCallback* callback,
                                    folly::EventBase* clientEb,
                                    TilePtr&& interaction,
-                                   ContextStack::UniquePtr
+                                   std::shared_ptr<ContextStack>
                                        contextStack) mutable {
       DCHECK(clientEb->isInEventBaseThread());
+
+      // For Stream, ContextStack is co-owned by Several Steam components
+      if (contextStack && callback) {
+        callback->setContextStack(contextStack);
+      }
+
       auto stream = new ServerGeneratorStreamBridge(callback, clientEb);
       auto streamPtr = stream->copy();
       fromAsyncGeneratorImpl<WithHeader>(

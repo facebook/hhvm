@@ -78,7 +78,7 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
       folly::coro::AsyncGenerator<
           std::conditional_t<WithHeader, MessageVariant<T>, T>&&> gen,
       TileStreamGuard,
-      ContextStack::UniquePtr contextStack);
+      std::shared_ptr<ContextStack> contextStack);
 
  public:
   template <bool WithHeader, typename T>

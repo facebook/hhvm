@@ -39,7 +39,7 @@ ServerGeneratorStreamBridge::fromProducerCallback(ProducerCallback* cb) {
                                  StreamClientCallback* callback,
                                  folly::EventBase* clientEb,
                                  TilePtr&&,
-                                 ContextStack::UniquePtr) mutable {
+                                 std::shared_ptr<ContextStack>) mutable {
     DCHECK(clientEb->isInEventBaseThread());
     auto stream = new ServerGeneratorStreamBridge(callback, clientEb);
     std::ignore =

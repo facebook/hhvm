@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{^program:tablebased?}}
+}}{{#if (not (has_compiler_option? "tablebased"))}}
 template <class Protocol_>
 void {{struct:cpp_underlying_name}}::readNoXfer(Protocol_* iprot) {
   apache::thrift::detail::ProtocolReaderStructReadState<Protocol_> _readState;
@@ -57,8 +57,7 @@ void {{struct:cpp_underlying_name}}::readNoXfer(Protocol_* iprot) {
   }
   _readState.readStructEnd(iprot);
 }{{!
-}}{{/program:tablebased?}}{{!
-}}{{#program:tablebased?}}
+}}{{#else}}
 template <class Protocol_>
 void {{struct:cpp_underlying_name}}::readNoXfer(Protocol_* iprot) {
   ::apache::thrift::detail::read(
@@ -68,4 +67,4 @@ void {{struct:cpp_underlying_name}}::readNoXfer(Protocol_* iprot) {
     ),
     this);
 }{{!
-}}{{/program:tablebased?}}
+}}{{/if (not (has_compiler_option? "tablebased"))}}

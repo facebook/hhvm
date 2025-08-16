@@ -24,7 +24,7 @@
 [[maybe_unused]] static constexpr std::string_view kModuleName = "{{program:name}}";
 
 {{> module_types_cpp/declare_enums}}
-{{#program:tablebased?}}
+{{#if (has_compiler_option? "tablebased")}}
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -63,7 +63,7 @@ constexpr ptrdiff_t unionTypeOffset<{{struct:cpp_fullname}}>() {
 {{/program:split_structs}}
 FOLLY_POP_WARNING
 }}} // apache::thrift::detail
-{{/program:tablebased?}}
+{{/if (has_compiler_option? "tablebased")}}
 {{#program:split_structs}}{{!
 }}
 
@@ -145,7 +145,7 @@ std::string_view {{struct:cpp_underlying_name}}::__fbthrift_get_class_name() {
 {{> module_types_cpp/union_swap}}
 {{/struct:union?}}
 
-{{#program:tablebased?}}
+{{#if (has_compiler_option? "tablebased")}}
 {{#struct:union?}}
 constexpr ::apache::thrift::detail::UnionExtN<{{struct:num_fields}}> {{struct:cpp_underlying_name}}_unionExt = {
   /* .clear */ ::apache::thrift::detail::clearUnion<{{struct:cpp_fullname}}>,
@@ -190,7 +190,7 @@ constexpr ::apache::thrift::detail::StructInfoN<{{struct:num_fields}}> __fbthrif
   }{{> common/comma_newline}}{{!
   }}{{/struct:fields_in_key_order}}}
 };
-{{/program:tablebased?}}
+{{/if (has_compiler_option? "tablebased")}}
 {{! Enforce that if this thrift file is generated with extern template instances
     for simple-json protocol then all its dependencies are too. }}
 {{#struct:fields}}
@@ -229,7 +229,7 @@ namespace {{program:qualified_namespace}} { namespace {
 {{/typedef:type}}{{/program:typedefs}}
 }
 }} // namespace {{program:qualified_namespace}}
-{{#program:tablebased?}}
+{{#if (has_compiler_option? "tablebased")}}
 
 namespace apache::thrift::detail {
 {{#program:split_enums}}
@@ -253,7 +253,7 @@ const TypeInfo TypeToInfo<
 };
 {{/program:split_structs}}
 } // namespace apache::thrift::detail
-{{/program:tablebased?}}
+{{/if (has_compiler_option? "tablebased")}}
 namespace apache::thrift::detail::annotation {
 {{#program:split_structs}}
 {{#struct:has_field_with_runtime_annotation?}}

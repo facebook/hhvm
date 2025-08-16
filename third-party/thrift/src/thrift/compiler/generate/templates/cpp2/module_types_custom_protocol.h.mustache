@@ -32,9 +32,9 @@
 #include "{{program:include_prefix}}{{program:name}}_types_custom_protocol.h"
 {{/program:thrift_includes}}
 
-{{^program:tablebased?}}
+{{#if (not (has_compiler_option? "tablebased"))}}
 {{> module_types_custom_protocol_h/struct_traits}}
-{{/program:tablebased?}}
+{{/if (not (has_compiler_option? "tablebased"))}}
 
 namespace {{program:qualified_namespace}} {
 {{#program:structs}}

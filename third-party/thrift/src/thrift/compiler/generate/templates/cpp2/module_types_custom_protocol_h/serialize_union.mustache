@@ -48,7 +48,7 @@ uint32_t {{struct:cpp_underlying_name}}::serializedSizeZC(Protocol_ const* prot_
   return xfer;
 }
 
-{{^program:tablebased?}}
+{{#if (not (has_compiler_option? "tablebased"))}}
 template <class Protocol_>
 uint32_t {{struct:cpp_underlying_name}}::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
@@ -66,8 +66,7 @@ uint32_t {{struct:cpp_underlying_name}}::write(Protocol_* prot_) const {
   xfer += prot_->writeStructEnd();
   return xfer;
 }
-{{/program:tablebased?}}
-{{#program:tablebased?}}
+{{#else}}
 template <class Protocol_>
 uint32_t {{struct:cpp_underlying_name}}::write(Protocol_* iprot) const {
   return ::apache::thrift::detail::write(
@@ -77,6 +76,6 @@ uint32_t {{struct:cpp_underlying_name}}::write(Protocol_* iprot) const {
     ),
     this);
 }
-{{/program:tablebased?}}
+{{/if (not (has_compiler_option? "tablebased"))}}
 {{!
 }}

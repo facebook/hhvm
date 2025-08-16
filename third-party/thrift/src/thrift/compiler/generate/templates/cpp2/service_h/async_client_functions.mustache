@@ -77,11 +77,11 @@
 {{> common/fun_docblock}}
   virtual folly::SemiFuture<std::pair<{{> types/return_type_client_lift_unit}}, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function_comma}}{{> service_common/function_param_list_client}});
 {{/function:has_deprecated_header_client_methods}}
-{{#type:sync_methods_return_try?}}
+{{#if (has_compiler_option? "sync_methods_return_try")}}
 {{> common/fun_docblock}}
   FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<{{> types/return_type_client}}>> sync_complete_{{function:cpp_name}}(
       apache::thrift::RpcOptions&& rpcOptions{{function_comma}} {{> service_common/function_param_list_client}});
-{{/type:sync_methods_return_try?}}
+{{/if (has_compiler_option? "sync_methods_return_try")}}
 {{/function:legacy_client_methods?}}
 {{/function:oneway?}}
 

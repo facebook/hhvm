@@ -21,7 +21,7 @@
 #include "{{program:include_prefix}}{{program:name}}_types.h"
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
-{{#program:tablebased?}}
+{{#if (has_compiler_option? "tablebased")}}
 
 namespace {{program:qualified_namespace}} {
 {{#program:structs}}
@@ -34,4 +34,4 @@ extern const ::apache::thrift::detail::StructInfoN<{{struct:num_fields}}> __fbth
 {{/struct:extra_namespace}}
 {{/program:structs}}
 } // namespace {{program:qualified_namespace}}
-{{/program:tablebased?}}
+{{/if (has_compiler_option? "tablebased")}}

@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{^program:tablebased?}}
+}}{{#if (not (has_compiler_option? "tablebased"))}}
 template <class Protocol_>
 void {{struct:cpp_underlying_name}}::readNoXfer(Protocol_* iprot) {
   {{!
@@ -29,9 +29,9 @@ void {{struct:cpp_underlying_name}}::readNoXfer(Protocol_* iprot) {
 
   using apache::thrift::TProtocolException;
 
-{{#program:enforce_required?}}{{#struct:fields_in_serialization_order}}{{#field:required?}}
+{{#if (has_compiler_option? "deprecated_enforce_required")}}{{#struct:fields_in_serialization_order}}{{#field:required?}}
   bool isset_{{field:cpp_name}} = false;
-{{/field:required?}}{{/struct:fields_in_serialization_order}}{{/program:enforce_required?}}
+{{/field:required?}}{{/struct:fields_in_serialization_order}}{{/if (has_compiler_option? "deprecated_enforce_required")}}
 {{#struct:lazy_fields?}}
   if (__fbthrift_protocol_ != iprot->protocolType()) {
 {{! Deserialize all lazy fields if new protocol is different that last deserialization protocol }}
@@ -75,9 +75,9 @@ _readField_{{field:cpp_name}}:
 {{/field:lazy?}}
     {{> module_types_custom_protocol_h/deserialize_field}}
   }
-{{#program:enforce_required?}}{{#field:required?}}
+{{#if (has_compiler_option? "deprecated_enforce_required")}}{{#field:required?}}
   isset_{{field:cpp_name}} = true;
-{{/field:required?}}{{/program:enforce_required?}}
+{{/field:required?}}{{/if (has_compiler_option? "deprecated_enforce_required")}}
 {{#field:has_isset?}}
  this->__isset.set({{field:isset_index}}, true);
 {{/field:has_isset?}}
@@ -118,11 +118,11 @@ _readField_{{field:cpp_name}}:
 _end:
   _readState.readStructEnd(iprot);
 
-  {{#program:enforce_required?}}{{#struct:fields_in_serialization_order}}{{#field:required?}}
+  {{#if (has_compiler_option? "deprecated_enforce_required")}}{{#struct:fields_in_serialization_order}}{{#field:required?}}
   if (!isset_{{field:cpp_name}}) {
     TProtocolException::throwMissingRequiredField("{{field:name}}", "{{struct:name}}");
   }
-  {{/field:required?}}{{/struct:fields_in_serialization_order}}{{/program:enforce_required?}}
+  {{/field:required?}}{{/struct:fields_in_serialization_order}}{{/if (has_compiler_option? "deprecated_enforce_required")}}
   return;
 
   goto _advance_failure; // Avoid compiler warnings about unused labels.
@@ -173,8 +173,7 @@ void {{struct:cpp_underlying_name}}::__fbthrift_read_field_{{field:cpp_name}}_im
 {{/field:lazy?}}
 {{/field:type}}
 {{/struct:fields_in_serialization_order}}
-{{/program:tablebased?}}
-{{#program:tablebased?}}
+{{#else}}
 template <class Protocol_>
 void {{struct:cpp_underlying_name}}::readNoXfer(Protocol_* iprot) {
   ::apache::thrift::detail::read(
@@ -184,6 +183,6 @@ void {{struct:cpp_underlying_name}}::readNoXfer(Protocol_* iprot) {
     ),
     this);
 }
-{{/program:tablebased?}}
+{{/if (not (has_compiler_option? "tablebased"))}}
 {{!
 }}

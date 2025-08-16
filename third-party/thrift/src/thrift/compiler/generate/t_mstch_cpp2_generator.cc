@@ -534,13 +534,8 @@ class cpp_mstch_program : public mstch_program {
          {"program:schema_name", &cpp_mstch_program::schema_name},
          {"program:schema_includes_const?",
           &cpp_mstch_program::schema_includes_const},
-         {"program:needs_sinit?", &cpp_mstch_program::needs_sinit},
          {"program:structs_and_typedefs",
           &cpp_mstch_program::structs_and_typedefs}});
-    register_has_option("program:tablebased?", "tablebased");
-    register_has_option("program:no_metadata?", "no_metadata");
-    register_has_option(
-        "program:enforce_required?", "deprecated_enforce_required");
   }
   std::string get_program_namespace(const t_program* program) override {
     return t_mstch_cpp2_generator::get_cpp2_namespace(program);
@@ -930,8 +925,6 @@ class cpp_mstch_program : public mstch_program {
     return supports_schema_includes(program_);
   }
 
-  mstch::node needs_sinit() { return has_option("any"); }
-
  private:
   bool supports_schema_includes(const t_program* program) {
     enum class strong_bool {};
@@ -1239,8 +1232,6 @@ class cpp_mstch_type : public mstch_type {
             {"type:cpp_use_allocator?", &cpp_mstch_type::cpp_use_allocator},
             {"type:use_op_encode?", &cpp_mstch_type::use_op_encode},
         });
-    register_has_option(
-        "type:sync_methods_return_try?", "sync_methods_return_try");
   }
   std::string get_type_namespace(const t_program* program) override {
     return cpp2::get_gen_namespace(*program);
@@ -2024,7 +2015,6 @@ class cpp_mstch_field : public mstch_field {
             {"field:use_op_encode?", &cpp_mstch_field::use_op_encode},
             {"field:fill?", &cpp_mstch_field::fill},
         });
-    register_has_option("field:deprecated_clear?", "deprecated_clear");
   }
   mstch::node name_hash() {
     return "__fbthrift_hash_" + cpp2::sha256_hex(field_->name());

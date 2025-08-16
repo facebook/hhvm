@@ -133,7 +133,7 @@ auto tryObj = folly::makeTryWith([&]() {
 {{/if (not function:oneway?)}}
 }
 
-{{#if type:sync_methods_return_try?}}
+{{#if (has_compiler_option? "sync_methods_return_try")}}
 {{#if (not function:oneway?)}}
 {{#if (not function:sink?)}}
 folly::Try<apache::thrift::RpcResponseComplete<{{> types/return_type_client}}>>
@@ -197,4 +197,4 @@ folly::Try<apache::thrift::RpcResponseComplete<{{> types/return_type_client}}>>
 }
 {{/if (not function:sink?)}}
 {{/if (not function:oneway?)}}
-{{/if type:sync_methods_return_try?}}
+{{/if (has_compiler_option? "sync_methods_return_try")}}

@@ -17,7 +17,7 @@
 }}
 {{> Autogen}}
 
-{{#program:needs_sinit?}}
+{{#if (has_compiler_option? "any")}}
 
 {{#program:has_schema?}}{{! avoids circular dependency }}
 #include <thrift/lib/cpp2/gen/module_sinit_cpp.h>
@@ -72,4 +72,4 @@ StaticInit staticInit;
 
 }
 } // namespace {{program:qualified_namespace}}
-{{/program:needs_sinit?}}
+{{/if (has_compiler_option? "any")}}

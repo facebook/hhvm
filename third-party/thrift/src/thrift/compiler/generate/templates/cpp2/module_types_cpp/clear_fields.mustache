@@ -21,8 +21,7 @@
     }}{{/field:cpp_first_adapter}}{{!
     }}{{^field:cpp_first_adapter}}{{!
       }}  {{> field/member}} = {{!
-      }}{{#field:deprecated_clear?}}{{> field/default}};{{/field:deprecated_clear?}}{{!
-      }}{{^field:deprecated_clear?}}{{> field/intrinsic_default}};{{/field:deprecated_clear?}}{{!
+      }}{{#if (has_compiler_option? "deprecated_clear")}}{{> field/default}};{{#else}}{{> field/intrinsic_default}};{{/if}}{{!
     }}{{/field:cpp_first_adapter}}{{!
   }}{{/field:cpp_ref?}}{{!
   }}{{#field:cpp_ref?}}{{!

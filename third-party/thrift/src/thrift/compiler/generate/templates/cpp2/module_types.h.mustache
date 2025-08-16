@@ -346,7 +346,7 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
 
   friend class ::apache::thrift::Cpp2Ops<{{struct:cpp_underlying_name}}>;
   friend void swap({{struct:cpp_underlying_name}}& a, {{struct:cpp_underlying_name}}& b);
-  {{#program:tablebased?}}
+  {{#if (has_compiler_option? "tablebased")}}
   {{^struct:union?}}
   friend constexpr ptrdiff_t (::apache::thrift::detail::fieldOffset<{{struct:cpp_underlying_name}}>)(std::int16_t fieldIndex);
   friend constexpr ptrdiff_t (::apache::thrift::detail::issetOffset<{{struct:cpp_underlying_name}}>)(std::int16_t fieldIndex);
@@ -354,7 +354,7 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
   {{#struct:union?}}
   friend constexpr ptrdiff_t (::apache::thrift::detail::unionTypeOffset<{{struct:cpp_underlying_name}}>)();
   {{/struct:union?}}
-  {{/program:tablebased?}}
+  {{/if (has_compiler_option? "tablebased")}}
 };
 
 template <class Protocol_>
@@ -391,7 +391,7 @@ namespace apache::thrift::detail {
 {{#partial schema_association.declaration node=enum:self}}
 {{/program:enums}}
 } // namespace apache::thrift::detail
-{{#program:tablebased?}}
+{{#if (has_compiler_option? "tablebased")}}
 
 namespace apache::thrift::detail {
 {{#program:structs}}
@@ -411,4 +411,4 @@ struct TypeToInfo<
   };
 {{/program:enums}}
 } // namespace apache::thrift::detail
-{{/program:tablebased?}}
+{{/if (has_compiler_option? "tablebased")}}

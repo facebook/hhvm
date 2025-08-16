@@ -51,9 +51,9 @@ void __fbthrift_static_init_{{struct:cpp_underlying_name}}() {
 {{/program:split_structs}}
 } // namespace {{program:qualified_namespace}}
 {{/if (has_compiler_option? "any")}}
-{{#program:split_structs}}{{^program:tablebased?}}
+{{#program:split_structs}}{{#if (not (has_compiler_option? "tablebased"))}}
 {{> module_types_cpp/struct_traits}}
-{{/program:tablebased?}}{{/program:split_structs}}
+{{/if (not (has_compiler_option? "tablebased"))}}{{/program:split_structs}}
 
 namespace {{program:qualified_namespace}} {
 {{#program:split_structs}}

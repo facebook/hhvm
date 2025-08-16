@@ -38,60 +38,57 @@ namespace detail {
 namespace md {
 
 {{#program:enums}}
-{{^program:no_metadata?}}
+{{#if (not (has_compiler_option? "no_metadata"))}}
 template <>
 class EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}> {
  public:
   static void gen(ThriftMetadata& metadata);
 };
-{{/program:no_metadata?}}
-{{#program:no_metadata?}}
+{{#else}}
 template <>
 class EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>
     : private EmptyMetadata {
  public:
   using EmptyMetadata::gen;
 };
-{{/program:no_metadata?}}
+{{/if (not (has_compiler_option? "no_metadata"))}}
 {{/program:enums}}
 {{#program:structs}}
-{{^program:no_metadata?}}
+{{#if (not (has_compiler_option? "no_metadata"))}}
 template <>
 class StructMetadata<{{struct:cpp_fullname}}> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
-{{/program:no_metadata?}}
-{{#program:no_metadata?}}
+{{#else}}
 template <>
 class StructMetadata<{{struct:cpp_fullname}}>
     : private EmptyMetadata {
  public:
   using EmptyMetadata::gen;
 };
-{{/program:no_metadata?}}
+{{/if (not (has_compiler_option? "no_metadata"))}}
 {{/program:structs}}
 {{#program:structs}}
 {{#struct:exception?}}
-{{^program:no_metadata?}}
+{{#if (not (has_compiler_option? "no_metadata"))}}
 template <>
 class ExceptionMetadata<{{struct:cpp_fullname}}> {
  public:
   static void gen(ThriftMetadata& metadata);
 };
-{{/program:no_metadata?}}
-{{#program:no_metadata?}}
+{{#else}}
 template <>
 class ExceptionMetadata<{{struct:cpp_fullname}}>
     : private EmptyMetadata {
  public:
   using EmptyMetadata::gen;
 };
-{{/program:no_metadata?}}
+{{/if (not (has_compiler_option? "no_metadata"))}}
 {{/struct:exception?}}
 {{/program:structs}}
 {{#program:services}}
-{{^program:no_metadata?}}
+{{#if (not (has_compiler_option? "no_metadata"))}}
 template <>
 class ServiceMetadata<::{{> service_common/service_class_name}}> {
  public:
@@ -106,8 +103,7 @@ class ServiceMetadata<::{{> service_common/service_class_name}}> {
   static void gen_{{function:cpp_name}}(ThriftMetadata& metadata, ThriftService& context);
 {{/function:starts_interaction?}}{{/service:functions}}
 };
-{{/program:no_metadata?}}
-{{#program:no_metadata?}}
+{{#else}}
 template <>
 class ServiceMetadata<::{{> service_common/service_class_name}}>
     : private EmptyServiceMetadata {
@@ -120,7 +116,7 @@ class ServiceMetadata<::{{> service_common/service_class_name}}>
   template <typename T>
   friend class ServiceMetadata;
 };
-{{/program:no_metadata?}}
+{{/if (not (has_compiler_option? "no_metadata"))}}
 {{/program:services}}
 } // namespace md
 } // namespace detail

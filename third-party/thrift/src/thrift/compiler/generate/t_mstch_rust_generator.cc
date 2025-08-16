@@ -716,13 +716,6 @@ class rust_mstch_program : public mstch_program {
              &rust_mstch_program::split_mode_enabled},
             {"program:type_splits", &rust_mstch_program::type_splits},
         });
-    register_has_option(
-        "program:deprecated_optional_with_default_is_some?",
-        "deprecated_optional_with_default_is_some");
-    register_has_option(
-        "program:deprecated_default_enum_min_i32?",
-        "deprecated_default_enum_min_i32");
-    register_has_option("program:types_split_count?", "types_split_count");
 
     // Generate type split data if split count option is provided.
     if (options_.types_split_count) {

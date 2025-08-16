@@ -25,14 +25,13 @@ impl ::std::default::Default for self::{{struct:rust_name}} {
             {{field:rust_name}}: {{!
                 }}{{#field:default}}{{!
                     }}{{#field:optional?}}{{!
-                        }}{{#program:deprecated_optional_with_default_is_some?}}{{!
+                        }}{{#if (has_compiler_option? "deprecated_optional_with_default_is_some")}}{{!
                             }}{{#field:has_adapter?}}{{> lib/adapter/struct}}::from_thrift_default::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
                             }}{{> lib/fieldvalue}}{{!
                             }}{{#field:has_adapter?}}, {{field:id}}){{/field:has_adapter?}}{{!
-                        }}{{/program:deprecated_optional_with_default_is_some?}}{{!
-                        }}{{^program:deprecated_optional_with_default_is_some?}}{{!
+                        }}{{#else}}{{!
                             }}::std::option::Option::None{{!
-                        }}{{/program:deprecated_optional_with_default_is_some?}}{{!
+                        }}{{/if (has_compiler_option? "deprecated_optional_with_default_is_some")}}{{!
                     }}{{/field:optional?}}{{!
                     }}{{^field:optional?}}{{!
                         }}{{#field:has_adapter?}}{{> lib/adapter/struct}}::from_thrift_default::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
@@ -151,7 +150,7 @@ where
             {{/struct:fields_by_name}}
         ];
 
-        {{^program:deprecated_optional_with_default_is_some?}}
+        {{#if (not (has_compiler_option? "deprecated_optional_with_default_is_some"))}}
         #[allow(unused_mut)]
         let mut output = {{struct:rust_name}}::default();
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a {{struct:name}}")?;
@@ -207,10 +206,10 @@ where
         }
         p.read_struct_end()?;
         ::std::result::Result::Ok(output)
-        {{/program:deprecated_optional_with_default_is_some?}}
 
         {{!TODO: Remove this when we remove the legacy option}}
-        {{#program:deprecated_optional_with_default_is_some?}}
+        {{#else}}
+
         {{#struct:all_optional?}}
         #[allow(unused_mut)]
         let mut output = Self {{> lib/block}}{{!
@@ -279,7 +278,7 @@ where
             {{> lib/structvalue_epilogue}}
         })
         {{/struct:all_optional?}}
-        {{/program:deprecated_optional_with_default_is_some?}}
+        {{/if (not (has_compiler_option? "deprecated_optional_with_default_is_some"))}}
     }
 }
 

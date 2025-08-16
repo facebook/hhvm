@@ -301,21 +301,6 @@ class python_mstch_program : public mstch_program {
             {"program:py3_auto_migrate?",
              &python_mstch_program::py3_auto_migrate},
 
-            {"program:is_types_file?",
-             {with_no_caching, &python_mstch_program::is_types_file}},
-            {"program:is_source_file?",
-             {with_no_caching, &python_mstch_program::is_source_file}},
-            {"program:is_type_stub?",
-             {with_no_caching, &python_mstch_program::is_type_stub}},
-            {"program:generate_abstract_types",
-             {with_no_caching, &python_mstch_program::generate_abstract_types}},
-            {"program:generate_mutable_types",
-             {with_no_caching, &python_mstch_program::generate_mutable_types}},
-            {"program:generate_immutable_types",
-             {with_no_caching,
-              &python_mstch_program::generate_immutable_types}},
-            {"program:enable_abstract_types?",
-             {with_no_caching, &python_mstch_program::enable_abstract_types}},
             {"program:has_streaming_types?",
              &python_mstch_program::has_streaming_types},
             {"program:has_sink_functions?",
@@ -331,10 +316,6 @@ class python_mstch_program : public mstch_program {
   }
 
   mstch::node py3_auto_migrate() { return has_option("auto_migrate"); }
-
-  mstch::node is_types_file() { return python_context_->is_types_file(); }
-  mstch::node is_source_file() { return python_context_->is_source_file(); }
-  mstch::node is_type_stub() { return python_context_->is_type_stub(); }
 
   mstch::node include_namespaces() {
     std::vector<const Namespace*> namespaces;
@@ -407,22 +388,6 @@ class python_mstch_program : public mstch_program {
 
   mstch::node adapter_type_hint_modules() {
     return module_path_array(adapter_type_hint_modules_);
-  }
-
-  mstch::node generate_abstract_types() {
-    return python_context_->generate_abstract_types();
-  }
-
-  mstch::node generate_mutable_types() {
-    return python_context_->generate_mutable_types();
-  }
-
-  mstch::node generate_immutable_types() {
-    return python_context_->generate_immutable_types();
-  }
-
-  mstch::node enable_abstract_types() {
-    return python_context_->enable_abstract_types();
   }
 
   mstch::node has_streaming_types() {
@@ -1268,9 +1233,12 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
 
   void process_options(
       const std::map<std::string, std::string>& options) override {
-    t_mstch_generator::process_options(options);
+    // Initialize context as early as possible; ideally we'd do it in a
+    // constructor but we need to ensure that the constructor signature of all
+    // generators is kept synced
     python_context_ =
         std::make_shared<python_generator_context>(initialize_context());
+    t_mstch_generator::process_options(options);
   }
 
  protected:
@@ -1278,6 +1246,15 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
 
   // Set up context for the active generator
   virtual python_generator_context initialize_context() = 0;
+
+  whisker::map::raw globals() const override {
+    assert(python_context_ != nullptr);
+    whisker::map::raw globals = t_mstch_generator::globals();
+    globals["python"] =
+        whisker::object(whisker::native_handle<python_generator_context>(
+            python_context_, make_prototype_for_context()));
+    return globals;
+  }
 
   prototype<t_named>::ptr make_prototype_for_named(
       const prototype_database& proto) const override {
@@ -1327,6 +1304,33 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     });
 
     return std::move(def).make();
+  }
+
+ private:
+  prototype<python_generator_context>::ptr make_prototype_for_context() const {
+    whisker::dsl::prototype_builder<
+        whisker::native_handle<python_generator_context>>
+        ctx;
+    ctx.property(
+        "is_types_file?", mem_fn(&python_generator_context::is_types_file));
+    ctx.property(
+        "is_source_file?", mem_fn(&python_generator_context::is_source_file));
+    ctx.property(
+        "is_type_stub?", mem_fn(&python_generator_context::is_type_stub));
+    ctx.property(
+        "generate_abstract_types?",
+        mem_fn(&python_generator_context::generate_abstract_types));
+    ctx.property(
+        "generate_mutable_types?",
+        mem_fn(&python_generator_context::generate_mutable_types));
+    ctx.property(
+        "generate_immutable_types?",
+        mem_fn(&python_generator_context::generate_immutable_types));
+    ctx.property(
+        "enable_abstract_types?",
+        mem_fn(&python_generator_context::enable_abstract_types));
+
+    return std::move(ctx).make();
   }
 };
 

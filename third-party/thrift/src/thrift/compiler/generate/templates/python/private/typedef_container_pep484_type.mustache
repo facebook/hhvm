@@ -18,13 +18,12 @@
 This is import module for abstract, mutable, and immutable sets
 }}
 {{#pragma ignore-newlines}}
-{{#program:generate_immutable_types}}
+{{#if python.generate_immutable_types?}}
 {{#type:list?}}_typing.List{{/type:list?}}
 {{#type:set?}}_typing.Set{{/type:set?}}
 {{#type:map?}}_typing.Dict{{/type:map?}}
-{{/program:generate_immutable_types}}
-{{^program:generate_immutable_types}}
+{{#else}}
 {{#type:list?}}{{> types/sequence}}{{/type:list?}}
 {{#type:set?}}{{> types/set}}{{/type:set?}}
 {{#type:map?}}{{> types/mapping}}{{/type:map?}}
-{{/program:generate_immutable_types}}
+{{/if python.generate_immutable_types?}}

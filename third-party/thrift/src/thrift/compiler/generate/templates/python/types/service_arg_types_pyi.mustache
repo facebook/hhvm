@@ -64,8 +64,8 @@ class _fbthrift_{{service:name}}_{{function:name}}_result({{> types/struct_base 
 
 
 class _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem({{!
-}}{{#program:generate_mutable_types}}_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult{{/program:generate_mutable_types}}{{!
-}}{{#program:generate_immutable_types}}_fbthrift_python_types._fbthrift_ResponseStreamResult{{/program:generate_immutable_types}}{{!
+}}{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult{{/if}}{{!
+}}{{#if python.generate_immutable_types?}}_fbthrift_python_types._fbthrift_ResponseStreamResult{{/if}}{{!
 }}[{{#function:stream_elem_type}}{{> types/pep484_type }}{{/function:stream_elem_type}}]):
     {{#function:stream_exceptions}}
     {{field:py_name}}: _typing.Final[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]

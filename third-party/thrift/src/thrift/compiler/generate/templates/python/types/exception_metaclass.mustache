@@ -18,9 +18,9 @@
 This is the metaclass for Thrift exception
 }}
 {{#pragma ignore-newlines}}
-{{#program:generate_mutable_types}}
+{{#python.generate_mutable_types?}}
 _fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta
-{{/program:generate_mutable_types}}
-{{#program:generate_immutable_types}}
+{{/python.generate_mutable_types?}}
+{{#python.generate_immutable_types?}}
 _fbthrift_python_exceptions.GeneratedErrorMeta
-{{/program:generate_immutable_types}}
+{{/python.generate_immutable_types?}}

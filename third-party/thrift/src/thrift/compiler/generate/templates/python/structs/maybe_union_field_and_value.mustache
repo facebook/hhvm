@@ -26,14 +26,13 @@ abstract enabled OR mutable enabled
 For Mutable:
 always
 }}
-{{#program:generate_immutable_types}}
-{{#program:enable_abstract_types?}}
+{{#python.generate_immutable_types?}}
+{{#if python.enable_abstract_types?}}
 {{> structs/union_field_and_value}}
-{{/program:enable_abstract_types?}}
-{{^program:enable_abstract_types?}}
+{{#else}}
 {{> structs/union_field_and_value}}
-{{/program:enable_abstract_types?}}
-{{/program:generate_immutable_types}}
-{{#program:generate_mutable_types}}
+{{/if python.enable_abstract_types?}}
+{{/python.generate_immutable_types?}}
+{{#python.generate_mutable_types?}}
 {{> structs/union_field_and_value}}
-{{/program:generate_mutable_types}}
+{{/python.generate_mutable_types?}}

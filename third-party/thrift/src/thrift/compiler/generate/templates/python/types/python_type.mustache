@@ -31,32 +31,32 @@ in a different thrift file, or defined in the same thrift file.
   }}{{^type:need_module_path?}}{{> private/alias_prefix}}{{/type:need_module_path?}}{{struct:py_name}}{{!
 }}{{/type:structured}}{{!
 }}{{#type:list?}}{{!
-}}{{#program:generate_immutable_types}}{{!
+}}{{#python.generate_immutable_types?}}{{!
   }}_fbthrift_python_types.ListTypeFactory({{!
-}}{{/program:generate_immutable_types}}{{!
-}}{{#program:generate_mutable_types}}{{!
+}}{{/python.generate_immutable_types?}}{{!
+}}{{#python.generate_mutable_types?}}{{!
   }}_fbthrift_python_mutable_containers.MutableListTypeFactory({{!
-}}{{/program:generate_mutable_types}}{{!
+}}{{/python.generate_mutable_types?}}{{!
     }}{{#type:list_elem_type}}{{> types/typeinfo }}{{/type:list_elem_type}}{{!
   }}){{!
 }}{{/type:list?}}{{!
 }}{{#type:set?}}{{!
-}}{{#program:generate_immutable_types}}{{!
+}}{{#python.generate_immutable_types?}}{{!
   }}_fbthrift_python_types.SetTypeFactory({{!
-}}{{/program:generate_immutable_types}}{{!
-}}{{#program:generate_mutable_types}}{{!
+}}{{/python.generate_immutable_types?}}{{!
+}}{{#python.generate_mutable_types?}}{{!
   }}_fbthrift_python_mutable_containers.MutableSetTypeFactory({{!
-}}{{/program:generate_mutable_types}}{{!
+}}{{/python.generate_mutable_types?}}{{!
     }}{{#type:set_elem_type}}{{> types/typeinfo }}{{/type:set_elem_type}}{{!
   }}){{!
 }}{{/type:set?}}{{!
 }}{{#type:map?}}{{!
-}}{{#program:generate_immutable_types}}{{!
+}}{{#python.generate_immutable_types?}}{{!
   }}_fbthrift_python_types.MapTypeFactory({{!
-}}{{/program:generate_immutable_types}}{{!
-}}{{#program:generate_mutable_types}}{{!
+}}{{/python.generate_immutable_types?}}{{!
+}}{{#python.generate_mutable_types?}}{{!
   }}_fbthrift_python_mutable_containers.MutableMapTypeFactory({{!
-}}{{/program:generate_mutable_types}}{{!
+}}{{/python.generate_mutable_types?}}{{!
     }}{{#type:key_type}}{{> types/typeinfo }}{{/type:key_type}}, {{!
     }}{{#type:value_type}}{{> types/typeinfo }}{{/type:value_type}}){{!
 }}{{/type:map?}}{{!

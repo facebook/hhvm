@@ -74,7 +74,7 @@ class Async({{#service:extends}}{{!
 
     async def {{function:name}}(
         self{{#function:args}},
-        {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{#program:generate_mutable_types}}{{> types/add_wrapper_if_container}}{{/program:generate_mutable_types}}{{/field:type}}{{/function:args}},
+        {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{#if python.generate_mutable_types?}}{{> types/add_wrapper_if_container}}{{/if}}{{/field:type}}{{/function:args}},
         *,
         rpc_options: _typing.Optional[RpcOptions] = None,
     ) -> {{#function:return_type}}{{!
@@ -107,9 +107,9 @@ class Async({{#service:extends}}{{!
             uri_or_name={{#service:uri}}"{{service:uri}}"{{/service:uri}}{{!
                 }}{{^service:uri}}"{{service:name}}"{{/service:uri}},
             rpc_options=rpc_options,{{!
-}}{{#program:generate_mutable_types}}
+}}{{#python.generate_mutable_types?}}
             is_mutable_types=True,{{!
-}}{{/program:generate_mutable_types}}
+}}{{/python.generate_mutable_types?}}
         )
         {{#function:sink_or_stream?}}
         _fbthrift_resp, _fbthrift_sink_or_stream = _fbthrift_resp
@@ -193,7 +193,7 @@ class Sync({{#service:extends}}{{!
 
     def {{function:name}}(
         self{{#function:args}},
-        {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{#program:generate_mutable_types}}{{> types/add_wrapper_if_container}}{{/program:generate_mutable_types}}{{/field:type}}{{/function:args}},
+        {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{#if python.generate_mutable_types?}}{{> types/add_wrapper_if_container}}{{/if}}{{/field:type}}{{/function:args}},
         *,
         rpc_options: _typing.Optional[RpcOptions] = None,
     ) -> {{#function:return_type}}{{> types/pep484_return_type}}{{/function:return_type}}:
@@ -206,9 +206,9 @@ class Sync({{#service:extends}}{{!
             uri_or_name={{#service:uri}}"{{service:uri}}"{{/service:uri}}{{!
                 }}{{^service:uri}}"{{service:name}}"{{/service:uri}},
             rpc_options=rpc_options,{{!
-}}{{#program:generate_mutable_types}}
+}}{{#python.generate_mutable_types?}}
             is_mutable_types=True,{{!
-}}{{/program:generate_mutable_types}}
+}}{{/python.generate_mutable_types?}}
         )
         {{#function:return_type}}{{^type:void?}}
         # shortcut to success path for non-void returns

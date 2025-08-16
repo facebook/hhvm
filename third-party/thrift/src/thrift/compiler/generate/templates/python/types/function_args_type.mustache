@@ -16,4 +16,4 @@
 
 }}{{!
 This is the struct that wraps function args
-}}{{^program:is_types_file?}}{{program:module_mangle}}__{{> types/types_import_path}}.{{/program:is_types_file?}}_fbthrift_{{service:name}}_{{function:name}}_args
+}}{{^python.is_types_file?}}{{program:module_mangle}}__{{> types/types_import_path}}.{{/python.is_types_file?}}_fbthrift_{{service:name}}_{{function:name}}_args

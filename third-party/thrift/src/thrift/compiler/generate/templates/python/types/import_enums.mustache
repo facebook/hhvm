@@ -28,9 +28,9 @@ need to be imported through the types modules.
 
 from {{program:module_path}}.thrift_enums import (
 {{/first?}}
-{{#program:is_source_file?}}
+{{#python.is_source_file?}}
     {{enum:name}},
-{{/program:is_source_file?}}
+{{/python.is_source_file?}}
     {{enum:name}} as {{> private/alias_prefix}}{{enum:name}},
 {{#last?}}
 )
@@ -47,8 +47,8 @@ from {{program:module_path}}.thrift_enums import (
 
     With the assignment below, teach the type-checker what EnumName is.
 }}
-{{#program:is_type_stub?}}
+{{#python.is_type_stub?}}
 {{#program:enums}}
 {{enum:name}} = {{> private/alias_prefix}}{{enum:name}}
 {{/program:enums}}
-{{/program:is_type_stub?}}
+{{/python.is_type_stub?}}

@@ -18,12 +18,12 @@
 This is import module for abstract, mutable, and immutable sequences
 }}
 {{#pragma ignore-newlines}}
-{{#program:generate_abstract_types}}
+{{#python.generate_abstract_types?}}
 _typing.Sequence
-{{/program:generate_abstract_types}}
-{{#program:generate_mutable_types}}
+{{/python.generate_abstract_types?}}
+{{#python.generate_mutable_types?}}
 _fbthrift_python_mutable_containers.MutableList
-{{/program:generate_mutable_types}}
-{{#program:generate_immutable_types}}
+{{/python.generate_mutable_types?}}
+{{#python.generate_immutable_types?}}
 _typing.Sequence
-{{/program:generate_immutable_types}}
+{{/python.generate_immutable_types?}}

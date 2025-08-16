@@ -28,13 +28,13 @@ import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
-{{#program:generate_immutable_types}}
+{{#python.generate_immutable_types?}}
 from {{program:base_library_package}}.serializer import serialize_iobuf, deserialize, Protocol
-{{/program:generate_immutable_types}}
-{{#program:generate_mutable_types}}
+{{/python.generate_immutable_types?}}
+{{#python.generate_mutable_types?}}
 import {{program:base_library_package}}.mutable_containers as _fbthrift_python_mutable_containers
 from {{program:base_library_package}}.mutable_serializer import serialize_iobuf, deserialize, Protocol
-{{/program:generate_mutable_types}}
+{{/python.generate_mutable_types?}}
 from {{program:base_library_package}}.server import ServiceInterface, RpcKind, PythonUserException
 
 import {{program:module_path}}.{{> types/types_import_path}} as {{program:module_mangle}}__{{> types/types_import_path}}

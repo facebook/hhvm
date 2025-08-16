@@ -18,12 +18,12 @@
 This is import module for abstract, mutable, and immutable sets
 }}
 {{#pragma ignore-newlines}}
-{{#program:generate_abstract_types}}
+{{#python.generate_abstract_types?}}
 _typing.AbstractSet
-{{/program:generate_abstract_types}}
-{{#program:generate_mutable_types}}
+{{/python.generate_abstract_types?}}
+{{#python.generate_mutable_types?}}
 _fbthrift_python_mutable_containers.MutableSet
-{{/program:generate_mutable_types}}
-{{#program:generate_immutable_types}}
+{{/python.generate_mutable_types?}}
+{{#python.generate_immutable_types?}}
 _typing.AbstractSet
-{{/program:generate_immutable_types}}
+{{/python.generate_immutable_types?}}

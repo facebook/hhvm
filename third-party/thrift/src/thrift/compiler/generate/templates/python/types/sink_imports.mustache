@@ -20,9 +20,9 @@
 from thrift.python.protocol import Protocol as _fbthrift__Protocol
 from thrift.python.streaming.python_user_exception import PythonUserException as _fbthrift__PythonUserException
 from typing import AsyncGenerator as _typing_AsyncGenerator
-{{#program:generate_immutable_types}}
+{{#python.generate_immutable_types?}}
 from {{program:base_library_package}}.serializer import serialize_iobuf, deserialize
-{{/program:generate_immutable_types}}
-{{#program:generate_mutable_types}}
+{{/python.generate_immutable_types?}}
+{{#python.generate_mutable_types?}}
 from {{program:base_library_package}}.mutable_serializer import serialize_iobuf, deserialize
-{{/program:generate_mutable_types}}
+{{/python.generate_mutable_types?}}

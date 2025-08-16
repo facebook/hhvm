@@ -61,6 +61,8 @@ class t_mstch_generator : public t_whisker_generator {
    */
   virtual whisker_options render_options() const { return {}; }
 
+  whisker::map::raw globals() const override;
+
   /**
    * If true, typedefs will be automatically resolved to their underlying type.
    */
@@ -213,7 +215,6 @@ class t_mstch_generator : public t_whisker_generator {
   const compiler_options_map& options() const { return compiler_options(); }
 
  private:
-  whisker::map::raw globals() const final;
   strictness_options strictness() const final;
 
   /**

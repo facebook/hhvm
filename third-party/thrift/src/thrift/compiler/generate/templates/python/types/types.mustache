@@ -19,18 +19,16 @@ Generated Python classes for Thrift types
 }}
 {{> common/auto_generated_py}}
 
-{{^program:generate_immutable_types}}
-{{^program:generate_mutable_types}}
+{{#if (not (or python.generate_immutable_types? python.generate_mutable_types?))}}
 import builtins
 
-{{/program:generate_mutable_types}}
-{{/program:generate_immutable_types}}
+{{/if (not (or python.generate_immutable_types? python.generate_mutable_types?))}}
 import folly.iobuf as _fbthrift_iobuf
 
-{{#program:enable_abstract_types?}}
+{{#python.enable_abstract_types?}}
 from abc import ABCMeta as _fbthrift_ABCMeta
 import {{program:module_path}}.thrift_abstract_types as _fbthrift_abstract_types
-{{/program:enable_abstract_types?}}
+{{/python.enable_abstract_types?}}
 {{#program:has_streaming_types?}}
 from thrift.python.protocol import RpcKind as _fbthrift__RpcKind
 {{/program:has_streaming_types?}}
@@ -38,15 +36,15 @@ from thrift.python.protocol import RpcKind as _fbthrift__RpcKind
 {{> types/sink_imports }}
 {{/program:has_sink_functions?}}
 import {{program:base_library_package}}.types as _fbthrift_python_types
-{{#program:generate_immutable_types}}
+{{#python.generate_immutable_types?}}
 import {{program:base_library_package}}.exceptions as _fbthrift_python_exceptions
-{{/program:generate_immutable_types}}
-{{#program:generate_mutable_types}}
+{{/python.generate_immutable_types?}}
+{{#python.generate_mutable_types?}}
 import {{program:base_library_package}}.mutable_types as _fbthrift_python_mutable_types
 import {{program:base_library_package}}.mutable_containers as _fbthrift_python_mutable_containers
 import {{program:base_library_package}}.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import {{program:base_library_package}}.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
-{{/program:generate_mutable_types}}
+{{/python.generate_mutable_types?}}
 
 {{#program:include_namespaces}}
 {{#has_types?}}
@@ -94,14 +92,14 @@ class {{> structs/unadapted_name}}{{!
         ),
         {{/struct:fields_ordered_by_id}}
     ){{!
-    }}{{#program:enable_abstract_types?}}{{!
+    }}{{#python.enable_abstract_types?}}{{!
     }}{{^struct:plain?}}{{!
     }}
 
     _fbthrift_abstract_base_class = _fbthrift_abstract_types.{{struct:py_name}}
     {{!
     }}{{/struct:plain?}}{{!
-    }}{{/program:enable_abstract_types?}}
+    }}{{/python.enable_abstract_types?}}
 
 
     @staticmethod
@@ -113,7 +111,7 @@ class {{> structs/unadapted_name}}{{!
         return {{#struct:uri}}"{{struct:uri}}"{{/struct:uri}}{{!
             }}{{^struct:uri}}None{{/struct:uri}}
 
-{{#program:generate_immutable_types}}
+{{#python.generate_immutable_types?}}
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return {{#program:py3_auto_migrate?}}True{{/program:py3_auto_migrate?}}{{^program:py3_auto_migrate?}}False{{/program:py3_auto_migrate?}}
@@ -131,12 +129,12 @@ class {{> structs/unadapted_name}}{{!
         types_reflection = importlib.import_module("{{program:module_path}}.types_reflection")
         return types_reflection.get_reflection__{{struct:py_name}}()
     {{/program:py3_auto_migrate?}}
-{{/program:generate_immutable_types}}
-{{#program:generate_mutable_types}}
+{{/python.generate_immutable_types?}}
+{{#python.generate_mutable_types?}}
     @staticmethod
     def __get_metadata__():
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
-{{/program:generate_mutable_types}}
+{{/python.generate_mutable_types?}}
 
     {{#struct:exception?}}
     {{#struct:exception_message?}}
@@ -151,7 +149,7 @@ class {{> structs/unadapted_name}}{{!
     {{/struct:exception_message?}}
     {{/struct:exception?}}
     {{#struct:legacy_api?}}
-{{#program:generate_mutable_types}}
+{{#python.generate_mutable_types?}}
 
     def _to_python(self):
         from thrift.python import converter
@@ -161,8 +159,8 @@ class {{> structs/unadapted_name}}{{!
 
     def _to_mutable_python(self):
         return self
-{{/program:generate_mutable_types}}
-{{#program:generate_immutable_types}}
+{{/python.generate_mutable_types?}}
+{{#python.generate_immutable_types?}}
     def _to_python(self):
         return self
 
@@ -171,7 +169,7 @@ class {{> structs/unadapted_name}}{{!
         import importlib
         mutable_types = importlib.import_module("{{program:module_path}}.thrift_mutable_types")
         return mutable_converter.to_mutable_python_struct_or_union(mutable_types.{{> structs/unadapted_name}}, self)
-{{/program:generate_immutable_types}}
+{{/python.generate_immutable_types?}}
 
     def _to_py3(self):
     {{^program:py3_auto_migrate?}}
@@ -194,7 +192,7 @@ class {{> structs/unadapted_name}}{{!
             py_asyncio_types = importlib.import_module("{{program:py_asyncio_module_path}}.ttypes")
             return converter.to_py_struct(py_asyncio_types.{{> structs/unadapted_name}}, self)
     {{/struct:legacy_api?}}
-{{#program:enable_abstract_types?}}{{!
+{{#python.enable_abstract_types?}}{{!
 TODO(T208096866)
 If the class uses the abstract class as a direct baseclass, it results in the error below.
        TypeError: metaclass conflict: the metaclass of a derived class must be a (non-strict)
@@ -208,7 +206,7 @@ use abc.ABCMeta.register(cls, subclass) to register.
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.{{> structs/unadapted_name}}, {{> structs/unadapted_name}})
 {{/struct:exception?}}
-{{/program:enable_abstract_types?}}
+{{/python.enable_abstract_types?}}
 {{#struct:has_adapter?}}
 
 
@@ -217,10 +215,10 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.{{> structs/unadapted_name}}
 {{> private/alias_prefix}}{{struct:py_name}} = {{struct:py_name}}{{!
 }}{{/program:structs}}
 
-{{#program:generate_immutable_types}}
+{{#python.generate_immutable_types?}}
 # This unfortunately has to be down here to prevent circular imports
 import {{program:module_path}}.thrift_metadata as {{program:module_mangle}}__thrift_metadata
-{{/program:generate_immutable_types}}
+{{/python.generate_immutable_types?}}
 
 {{!
     The symbol below is only required for AnyRegistry.register_module.
@@ -234,14 +232,14 @@ _fbthrift_all_enums = [
     {{enum:name}},
     {{/program:enums}}
 ]
-{{#program:generate_immutable_types}}{{!
+{{#python.generate_immutable_types?}}{{!
 }}{{#program:structs}}
 
 
 def _fbthrift_metadata__{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}():
     return {{program:module_mangle}}__thrift_metadata.gen_metadata_{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}()
 {{/program:structs}}{{!
-}}{{/program:generate_immutable_types}}
+}}{{/python.generate_immutable_types?}}
 
 
 _fbthrift_all_structs = [
@@ -250,12 +248,12 @@ _fbthrift_all_structs = [
     {{/program:structs}}
 ]
 {{#program:structs?}}
-{{#program:generate_mutable_types}}
+{{#python.generate_mutable_types?}}
 _fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
-{{/program:generate_mutable_types}}
-{{#program:generate_immutable_types}}
+{{/python.generate_mutable_types?}}
+{{#python.generate_immutable_types?}}
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
-{{/program:generate_immutable_types}}
+{{/python.generate_immutable_types?}}
 {{/program:structs?}}
 {{> common/constants }}
 {{> common/typedef }}
@@ -272,12 +270,12 @@ _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 {{/program:services}}
 
 
-{{#program:generate_mutable_types}}
+{{#python.generate_mutable_types?}}
 _fbthrift_python_mutable_types.fill_specs(
-{{/program:generate_mutable_types}}
-{{#program:generate_immutable_types}}
+{{/python.generate_mutable_types?}}
+{{#python.generate_immutable_types?}}
 _fbthrift_python_types.fill_specs(
-{{/program:generate_immutable_types}}
+{{/python.generate_immutable_types?}}
 {{#program:services}}
     {{> types/service_arg_type_list}}
 {{#service:interactions}}

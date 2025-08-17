@@ -300,8 +300,6 @@ val restore_method_env : env -> Tast.method_ -> env
     it appears in. *)
 val restore_fun_env : env -> Tast.fun_ -> env
 
-val typing_env_as_tast_env : Typing_env_types.env -> env
-
 (**
    * Evil, defeats the purpose of separating Tast_env and Typing_env.
    *

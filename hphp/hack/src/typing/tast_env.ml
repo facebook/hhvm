@@ -370,8 +370,6 @@ let def_env ctx d =
   | FileAttributes _ ->
     empty ctx
 
-let typing_env_as_tast_env env = env
-
 let eq_typing_env : (env, Typing_env_types.env) Type.eq = Equal
 
 let is_xhp_child = Typing_xhp.is_xhp_child

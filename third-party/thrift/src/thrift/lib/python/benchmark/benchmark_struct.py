@@ -227,6 +227,7 @@ inst = MyStruct(
     val_set=to_thrift_set(set(range(30))),
     val_map=to_thrift_map(val_map),
     val_map_structs=to_thrift_map(val_map_structs),
+    str_map=to_thrift_map({f"k_{i}": f"v_{i}" for i in range(30, 60)}),
 )
 """
 
@@ -250,6 +251,7 @@ inst = MyStruct(
         "set field iter": "_ = [item for item in inst.val_set]",
         "set field lookup": "_ = 10 in inst.val_set",
         "map field lookup one": "_ = inst.val_map[10]",
+        "map str field lookup one": "_ = inst.str_map['k_50']",
         "map field lookup all": "_ = [inst.val_map[k] for k in range(30)]",
         "map struct list field": "_ = [string for incl in inst.val_map_structs.values() for string in incl.vals]",
     }

@@ -88,41 +88,39 @@ createResponseAndSinkConsumer(
   return {std::move(response), std::move(sink)};
 }
 
-template <typename TChunk, typename FinalResponse>
-folly::coro::Task<FinalResponse> sinkDummyCallback(
-    folly::coro::AsyncGenerator<TChunk&&>);
+class IOBufSinkGenerator {
+ public:
+  IOBufSinkGenerator() = default;
+  ~IOBufSinkGenerator();
+  IOBufSinkGenerator(IOBufSinkGenerator&&) noexcept;
+  IOBufSinkGenerator& operator=(IOBufSinkGenerator&&) noexcept;
+  IOBufSinkGenerator(const IOBufSinkGenerator&) = delete;
+  IOBufSinkGenerator& operator=(const IOBufSinkGenerator&) = delete;
 
-template <>
-inline folly::coro::Task<std::unique_ptr<folly::IOBuf>> sinkDummyCallback(
-    folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&> agen) {
-  std::string buf;
-  while (auto chunk = co_await agen.next()) {
-    (*chunk)->appendTo(buf);
-  }
-  co_return folly::IOBuf::fromString(std::move(buf));
-}
+  IOBufSinkGenerator(folly::Executor* exec, PyObject* sink_callback);
+
+  void attach(folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&>
+                  gen) noexcept;
+
+  folly::coro::Task<std::unique_ptr<folly::IOBuf>> getNext();
+
+ private:
+  folly::Executor::KeepAlive<> executor_;
+  PyObject* sink_callback_ = nullptr;
+  folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&> gen_;
+};
+
 #endif
 
 using IOBufSinkConsumer =
     SinkConsumer<std::unique_ptr<folly::IOBuf>, std::unique_ptr<folly::IOBuf>>;
 
-inline std::unique_ptr<IOBufSinkConsumer> makeIOBufSinkConsumer(
-    PyObject* /*sink*/, folly::Executor*) {
-#if FOLLY_HAS_COROUTINES
-  return std::make_unique<IOBufSinkConsumer>(IOBufSinkConsumer{
-      .consumer = sinkDummyCallback<
-          std::unique_ptr<folly::IOBuf>,
-          std::unique_ptr<folly::IOBuf>>});
-#else
-  std::terminate();
-#endif
-}
+std::unique_ptr<IOBufSinkConsumer> makeIOBufSinkConsumer(
+    PyObject* sink_callback, folly::Executor* exec);
 
 } // namespace apache::thrift::python
 
 #else /* !FOLLY_HAS_COROUTINES */
 #error  Thrift sink type support needs C++ coroutines, which are not currently available. \
-        Use a modern compiler and pass appropriate options to enable C++ coroutine support, \
-        or consider passing the Thrift compiler the mstch_python:no_sink (TODO: (pyamane) implement this) \
-        option in order to ignore sink type fields when generating code.
+        Use a modern compiler and pass appropriate options to enable C++ coroutine support.
 #endif

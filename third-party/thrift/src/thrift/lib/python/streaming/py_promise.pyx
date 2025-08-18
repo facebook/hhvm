@@ -38,7 +38,33 @@ cdef class Promise_Py:
     cdef complete(Promise_Py self, object pyobj):
         pass
 
+# A promise useful for returning a single std::unique_ptr<folly::IOBuf>
+# such as standard request response, or a sink final response.
+cdef class Promise_IOBuf(Promise_Py):
+    def __cinit__(self):
+        self.cPromise = new cFollyPromise[unique_ptr[cIOBuf]](cFollyPromise[unique_ptr[cIOBuf]].makeEmpty())
 
+    def __dealloc__(self):
+        del self.cPromise
+
+    cdef error_ta(Promise_IOBuf self, cTApplicationException err):
+        self.cPromise.setException(err)
+
+    cdef error_py(Promise_IOBuf self, cPythonUserException err):
+        self.cPromise.setException(cmove(err))
+
+    cdef complete(Promise_IOBuf self, object pyobj):
+        self.cPromise.setValue(cmove((<IOBuf>pyobj)._ours))
+
+    @staticmethod
+    cdef create(cFollyPromise[unique_ptr[cIOBuf]] cPromise):
+        cdef Promise_IOBuf inst = Promise_IOBuf.__new__(Promise_IOBuf)
+        inst.cPromise[0] = cmove(cPromise)
+        return inst
+
+# A promise useful for returning std::optional<std::unique_ptr<folly::IOBuf>>,
+# such as an element in an python async generator used as input to client sink
+# or a server stream, where std::nullopt represents the end of the generator.
 cdef class Promise_Optional_IOBuf(Promise_Py):
     def __cinit__(self):
         self.cPromise = new cFollyPromise[optional[unique_ptr[cIOBuf]]](
@@ -62,6 +88,7 @@ cdef class Promise_Optional_IOBuf(Promise_Py):
         cdef Promise_Optional_IOBuf inst = Promise_Optional_IOBuf.__new__(Promise_Optional_IOBuf)
         inst.cPromise[0] = cmove(promise)
         return inst
+
 
 cdef str SERVER_ERR_MSG = "server stream handler"
 cdef str SINK_ERR_MSG = "client sink generator"

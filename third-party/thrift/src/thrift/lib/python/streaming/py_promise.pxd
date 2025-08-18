@@ -16,7 +16,7 @@ from libcpp.memory cimport unique_ptr
 from libcpp.optional cimport optional
 
 from folly cimport cFollyPromise
-from folly.iobuf cimport cIOBuf
+from folly.iobuf cimport cIOBuf, IOBuf
 from thrift.python.exceptions cimport cTApplicationException
 from thrift.python.streaming.python_user_exception cimport cPythonUserException
 
@@ -34,6 +34,16 @@ cdef class Promise_Optional_IOBuf(Promise_Py):
 
     @staticmethod
     cdef create(cFollyPromise[optional[unique_ptr[cIOBuf]]] promise)
+
+cdef class Promise_IOBuf(Promise_Py):
+    cdef cFollyPromise[unique_ptr[cIOBuf]]* cPromise
+
+    cdef error_ta(Promise_IOBuf self, cTApplicationException err)
+    cdef error_py(Promise_IOBuf self, cPythonUserException err)
+    cdef complete(Promise_IOBuf self, object pyobj)
+
+    @staticmethod
+    cdef create(cFollyPromise[unique_ptr[cIOBuf]] cPromise)
 
 
 cdef void genNextStreamValue(object generator, cFollyPromise[optional[unique_ptr[cIOBuf]]] promise) noexcept

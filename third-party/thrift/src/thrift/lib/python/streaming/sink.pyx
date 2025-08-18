@@ -13,9 +13,16 @@
 # limitations under the License.
 
 import asyncio
+import sys
+import traceback
 
 from folly cimport cFollyPromise, cFollyTry
-from folly.coro cimport cFollyCoroTask, bridgeCoroTaskWithCancellation, cFollyCancellationSource
+from folly.coro cimport (
+    bridgeCoroTaskWith,
+    bridgeCoroTaskWithCancellation,
+    cFollyCancellationSource,
+    cFollyCoroTask,
+)
 from folly.executor cimport get_executor
 
 from cython.operator import dereference
@@ -26,11 +33,21 @@ from thrift.python.serializer import deserialize
 from thrift.python.mutable_serializer import (
     deserialize as deserialize_mutable,
 )
-from folly.iobuf cimport from_unique_ptr as iobuf_from_unique_ptr
+from folly.iobuf cimport IOBuf, from_unique_ptr as iobuf_from_unique_ptr
+from thrift.python.exceptions cimport (
+    ApplicationError,
+    cTApplicationException,
+    cTApplicationExceptionType__UNKNOWN,
+    create_py_exception,
+)
 from thrift.python.types import Struct
 from thrift.python.mutable_types import MutableStruct
 
-from thrift.python.streaming.py_promise cimport genNextSinkValue
+from thrift.python.streaming.py_promise cimport (
+    genNextSinkValue,
+    Promise_IOBuf,
+)
+from thrift.python.streaming.python_user_exception cimport PythonUserException
 
 
 cdef class ClientSink:
@@ -48,9 +65,8 @@ cdef class ClientSink:
         inst._protocol = protocol
         return inst
 
-  # for testing only, will remove
     def __init__(self):
-        self._cpp_obj = make_unique[cIOBufClientSink]()
+        raise RuntimeError("Do not instantiate ClientSink from Python")
 
     async def sink(self, agen):
         cancellation_source = cFollyCancellationSource()
@@ -89,6 +105,10 @@ cdef void sink_final_resp_callback(
     future, final_resp_cls, protocol = <object> user_data
     try:
         if res.hasException():
+            if res.exception().get_exception[cTApplicationException]():
+                raise create_py_exception(res.exception(), None)
+            # in this case, it's probably a PythonUserException, denoting
+            # a named expected exception
             res.exception().throw_exception()
 
         res_buf = iobuf_from_unique_ptr(
@@ -118,7 +138,114 @@ cdef void sink_final_resp_callback(
     except Exception as ex:
         future.set_exception(ex)
 
+
 cdef public api void cancelAsyncGenerator(object generator):
     asyncio.get_event_loop().create_task(
         generator.aclose()
     )
+
+
+async def invokeCallbackWithGenerator(
+    sink_callback,
+    ServerSinkGenerator sink_elem_gen,
+    Promise_IOBuf promise,
+):
+    async def invoke_cpp_iobuf_gen():
+        async for elem in sink_elem_gen:
+            yield elem
+
+    try:
+        gen = invoke_cpp_iobuf_gen()
+        final_resp_iobuf = await sink_callback(gen) 
+        assert isinstance(final_resp_iobuf, IOBuf), f"Expected IOBuf, got {type(final_resp_iobuf)}"
+        promise.complete(final_resp_iobuf)
+    except PythonUserException as pyex:
+        promise.error_py(cmove(dereference((<PythonUserException>pyex)._cpp_obj.release())))
+    except asyncio.CancelledError as ex:
+        print(f"Coroutine was cancelled in server sink handler:", file=sys.stderr)
+        traceback.print_exc()
+        msg = f"Application was cancelled on the server with message: {str(ex)}"
+        promise.error_ta(
+            cTApplicationException(
+                cTApplicationExceptionType__UNKNOWN, 
+                msg.encode('UTF-8'),
+            )
+        )
+    except Exception as ex:
+        print(
+            f"Unexpected error in server sink handler:",
+            file=sys.stderr
+        )
+        traceback.print_exc()
+        promise.error_ta(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
+        ))
+
+
+cdef class ServerSinkGenerator:
+    cdef cIOBufSinkGenerator _cpp_gen 
+    cdef cFollyExecutor* _executor
+
+    @staticmethod
+    cdef _fbthrift_create(
+        cIOBufSinkGenerator cpp_gen,
+        cFollyExecutor* executor,
+    ):
+        cdef ServerSinkGenerator inst = ServerSinkGenerator.__new__(ServerSinkGenerator)
+        inst._cpp_gen = cmove(cpp_gen)
+        inst._executor = executor
+        return inst
+
+
+    def __aiter__(self):
+        return self
+
+    def __anext__(self):
+        loop = asyncio.get_event_loop()
+        future = loop.create_future()
+        # in case of SIGINT, retrieve the exception
+        future.add_done_callback(lambda x: x.exception())
+        userdata = (self, future)
+        bridgeCoroTaskWith[unique_ptr[cIOBuf]](
+            self._executor,
+            self._cpp_gen.getNext(),
+            server_sink_elem_callback,
+            <PyObject*> userdata,
+        )
+        return asyncio.shield(future)
+
+
+cdef void server_sink_elem_callback(
+    cFollyTry[unique_ptr[cIOBuf]]&& result,
+    PyObject* userdata,
+) noexcept:
+    wrapped_sink, future = <object> userdata
+    if result.hasException():
+        future.set_exception(
+            # creates ApplicationException
+            create_py_exception(result.exception(), None)
+        )
+    elif result.value():
+        future.set_result(iobuf_from_unique_ptr(cmove(result.value())))
+    else: # nullptr indicates end of stream
+        future.set_exception(StopAsyncIteration())
+
+cdef api int invoke_server_sink_callback(
+    object sink_callback,
+    cFollyExecutor* executor,
+    cIOBufSinkGenerator cpp_gen,
+    cFollyPromise[unique_ptr[cIOBuf]] cpp_promise,
+) except -1:
+    sink_gen = ServerSinkGenerator._fbthrift_create(
+        cmove(cpp_gen),
+        executor,
+    )
+    cdef Promise_IOBuf promise = Promise_IOBuf.create(cmove(cpp_promise))
+    asyncio.get_event_loop().create_task(
+        invokeCallbackWithGenerator(
+            sink_callback,
+            sink_gen,
+            promise,
+        ),
+    )
+    return 0

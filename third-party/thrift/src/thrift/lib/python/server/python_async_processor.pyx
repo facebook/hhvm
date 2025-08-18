@@ -58,6 +58,7 @@ from thrift.py3.stream cimport (
 from thrift.python.types cimport ServiceInterface as cServiceInterface
 from thrift.python.protocol cimport Protocol
 from thrift.python.streaming.py_promise cimport (
+    Promise_IOBuf,
     Promise_Optional_IOBuf,
     Promise_Py,
     genNextStreamValue,
@@ -155,30 +156,6 @@ cdef class Promise_Stream(Promise_Py):
         inst.cPromise[0] = cmove(cPromise)
         return inst
 
-
-cdef class Promise_IOBuf(Promise_Py):
-    cdef cFollyPromise[unique_ptr[cIOBuf]]* cPromise
-
-    def __cinit__(self):
-        self.cPromise = new cFollyPromise[unique_ptr[cIOBuf]](cFollyPromise[unique_ptr[cIOBuf]].makeEmpty())
-
-    def __dealloc__(self):
-        del self.cPromise
-
-    cdef error_ta(Promise_IOBuf self, cTApplicationException err):
-        self.cPromise.setException(err)
-
-    cdef error_py(Promise_IOBuf self, cPythonUserException err):
-        self.cPromise.setException(cmove(err))
-
-    cdef complete(Promise_IOBuf self, object pyobj):
-        self.cPromise.setValue(cmove((<IOBuf>pyobj)._ours))
-
-    @staticmethod
-    cdef create(cFollyPromise[unique_ptr[cIOBuf]] cPromise):
-        cdef Promise_IOBuf inst = Promise_IOBuf.__new__(Promise_IOBuf)
-        inst.cPromise[0] = cmove(cPromise)
-        return inst
 
 cdef class Promise_cFollyUnit(Promise_Py):
     cdef cFollyPromise[cFollyUnit]* cPromise

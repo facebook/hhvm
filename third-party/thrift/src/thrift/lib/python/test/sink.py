@@ -24,19 +24,8 @@ from thrift.python.streaming.sink import ClientSink
 
 
 class SinkTests(IsolatedAsyncioTestCase):
-    def test_create_client_sink(self) -> None:
-        sink = ClientSink()
-        self.assertIsNotNone(sink)
-
-    async def test_create_async_generator(self) -> None:
-        async def iter_alphabet() -> AsyncGenerator[str, None]:
-            for c in "abcdefghijklmnopqrstuvwxyz":
-                yield c
-
-        sink = ClientSink()
-        # we can't test anything meaningful with the inner cpp ClientSink
-        # default initialized and disconnected from a RequestChannel.
+    def test_sink_init(self) -> None:
         with self.assertRaisesRegex(
-            AttributeError, "has no attribute '_fbthrift__sink_elem_handler'"
+            RuntimeError, "Do not instantiate ClientSink from Python"
         ):
-            await sink.sink(iter_alphabet())
+            ClientSink()

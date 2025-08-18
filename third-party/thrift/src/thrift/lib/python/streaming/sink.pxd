@@ -52,14 +52,15 @@ cdef extern from "thrift/lib/python/streaming/Sink.h" namespace "::apache::thrif
         cSinkConsumer[TChunk, FinalResponse] sink
     ) noexcept
 
-
-
     unique_ptr[cSinkConsumer[unique_ptr[cIOBuf], unique_ptr[cIOBuf]]] \
     makeIOBufSinkConsumer(
         object sink_callback,
         cFollyExecutor* executor,
     ) noexcept
 
+    cdef cppclass cIOBufSinkGenerator "::apache::thrift::python::IOBufSinkGenerator":
+        cIOBufSinkGenerator()
+        cFollyCoroTask[unique_ptr[cIOBuf]] getNext()
 
 
 cdef class ClientSink:
@@ -80,3 +81,10 @@ cdef class ResponseAndClientSink:
     pass
 
 cdef api void cancelAsyncGenerator(object generator)
+
+cdef api int invoke_server_sink_callback(
+    object sink_callback,
+    cFollyExecutor* executor,
+    cIOBufSinkGenerator cpp_gen,
+    cFollyPromise[unique_ptr[cIOBuf]] cpp_promise,
+) except -1

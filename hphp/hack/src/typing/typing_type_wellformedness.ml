@@ -473,10 +473,10 @@ let typeconsts env tcs cls_name =
 (* Treat private or internal class members as internal *)
 let at_least_internal = function
   | Internal
-  | Private ->
+  | Private
+  | ProtectedInternal ->
     true
   | Protected
-  | ProtectedInternal
   | Public ->
     false
 

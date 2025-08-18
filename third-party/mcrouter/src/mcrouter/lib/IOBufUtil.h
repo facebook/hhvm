@@ -14,13 +14,6 @@
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/FieldRef.h>
 
-namespace folly {
-class IOBuf;
-template <class T>
-class Range;
-using StringPiece = Range<const char*>;
-} // namespace folly
-
 namespace facebook {
 namespace memcache {
 

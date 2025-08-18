@@ -1,3 +1,4 @@
 --lint
 --error-format raw
 --extra-builtin ../hhi/XHPTest.hhi
+--config constraint_array_index=true

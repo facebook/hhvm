@@ -876,16 +876,20 @@ Array SimpleXMLElement_darrayCast(const ObjectData* obj) {
   return properties;
 }
 
+bool SimpleXMLElement_boolCast(SimpleXMLElement* sxe) {
+  xmlNodePtr node = php_sxe_get_first_node(sxe, nullptr);
+  if (node) return true;
+  Array properties = Array::CreateDict();
+  sxe_get_prop_hash(sxe, true, properties, true);
+  return properties.size() != 0;
+}
+
 Variant SimpleXMLElement_objectCast(const ObjectData* obj, DataType type) {
   assertx(!isArrayLikeType(type));
   assertx(obj->instanceof(SimpleXMLElementLoader::classof()));
   auto sxe = Native::data<SimpleXMLElement>(const_cast<ObjectData*>(obj));
   if (type == KindOfBoolean) {
-    xmlNodePtr node = php_sxe_get_first_node(sxe, nullptr);
-    if (node) return true;
-    Array properties = Array::CreateDict();
-    sxe_get_prop_hash(sxe, true, properties, true);
-    return properties.size() != 0;
+    return SimpleXMLElement_boolCast(sxe);
   }
 
   xmlChar* contents = nullptr;
@@ -1684,6 +1688,11 @@ static int64_t HHVM_METHOD(SimpleXMLElement, count) {
   return php_sxe_count_elements_helper(data);
 }
 
+static bool HHVM_METHOD(SimpleXMLElement, isTruthy) {
+  auto data = Native::data<SimpleXMLElement>(this_);
+  return SimpleXMLElement_boolCast(data);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // ArrayAccess
 
@@ -1832,6 +1841,7 @@ static struct SimpleXMLExtension : Extension {
     HHVM_ME(SimpleXMLElement, addAttribute);
     HHVM_ME(SimpleXMLElement, __toString);
     HHVM_ME(SimpleXMLElement, count);
+    HHVM_ME(SimpleXMLElement, isTruthy);
     HHVM_ME(SimpleXMLElement, offsetExists);
     HHVM_ME(SimpleXMLElement, offsetGet);
     HHVM_ME(SimpleXMLElement, offsetSet);

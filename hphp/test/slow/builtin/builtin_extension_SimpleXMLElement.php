@@ -18,7 +18,7 @@ function testIteration() :mixed{
   $i = 1;
   foreach ($s as $e) {
     echo 'Of basic XML structure the ';
-    echo ($i++) . "th nodes contents is: $e\n";
+    echo ($i++) . "th nodes contents is: '$e'\n";
   }
 }
 

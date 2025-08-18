@@ -55,6 +55,14 @@ class SimpleXMLElement implements ArrayAccess<mixed, mixed>, Traversable<mixed>,
   <<__Native>>
   public function count()[]: int;
 
+  /**
+   * Captures legacy behavior of boolean coercion of a SimpleXMLElement object
+   * "created from empty elements without attributes."
+   * @return bool
+   */
+  <<__Native>>
+  public function isTruthy()[]: bool;
+
   /** @param string $path - An XPath path
    * @return mixed - Returns an array of SimpleXMLElement objects or FALSE in
    * case of an error.

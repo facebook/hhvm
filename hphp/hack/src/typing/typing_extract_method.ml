@@ -1628,7 +1628,7 @@ let apply_subst_generic fun_ty subst =
   | _ -> failwith "Expected function type"
 
 (* -- API ------------------------------------------------------------------- *)
-let extract_static_method fun_ty ~class_name ~folded_class ~env =
+let extract_method fun_ty ~class_name ~folded_class ~env =
   (* We will need to handle substitution of [this] differently depending on
      the variance of its appearance in the function type:
      - If occurs co- or contravariantly we can substitute it with the the
@@ -1833,4 +1833,16 @@ let extract_instance_method fun_ty ~class_name ~folded_class ~env =
   let fun_ty =
     Typing_defs_core.{ fun_ty with ft_params = self_param :: fun_ty.ft_params }
   in
-  extract_static_method fun_ty ~class_name ~folded_class ~env
+  extract_method fun_ty ~class_name ~folded_class ~env
+
+let extract_static_method fun_ty ~class_name ~folded_class ~env =
+  let (env, fun_ty) =
+    extract_instance_method fun_ty ~class_name ~folded_class ~env
+  in
+  let Typing_defs_core.{ ft_params; _ } = fun_ty in
+  let ft_params =
+    match ft_params with
+    | _ :: ft_params -> ft_params
+    | _ -> failwith "Expected at least one parameter"
+  in
+  (env, Typing_defs_core.{ fun_ty with ft_params })

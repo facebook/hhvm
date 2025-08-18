@@ -10,9 +10,9 @@ class C {
 
   public static function refThem(): void {
     $fptr = C::getMe<>;
-    expecting<HH\FunctionRef<(readonly function(): C)>>($fptr);
+    expecting<HH\FunctionRef<(readonly function<Tthis as C>(): Tthis)>>($fptr);
 
     $gptr = static::getMe<>;
-    expecting<HH\FunctionRef<(readonly function(): C)>>($gptr);
+    expecting<HH\FunctionRef<(readonly function<Tthis as C>(): Tthis)>>($gptr);
   }
 }

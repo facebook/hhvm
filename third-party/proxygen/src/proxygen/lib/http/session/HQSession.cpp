@@ -2393,6 +2393,11 @@ void HQSession::startNow() {
   transportInfo_.secure = true;
   transportInfo_.validTcpinfo = true;
   transportStart_ = getCurrentTime();
+  // Initialize the local and peer address.
+  // These will be updated in onTransportReadyCommon() in case they change (e.g.
+  // happy eyeballs)
+  localAddr_ = sock_->getLocalAddress();
+  peerAddr_ = sock_->getPeerAddress();
   // TODO: invoke socket.start() here
   resetTimeout();
 }

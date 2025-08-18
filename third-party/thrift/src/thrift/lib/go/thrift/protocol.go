@@ -27,6 +27,4 @@ type Protocol interface {
 	setRequestHeader(key, value string)
 	// Deprecated
 	getResponseHeaders() map[string]string
-	// Deprecated
-	DO_NOT_USE_GetResponseHeaders() map[string]string
 }

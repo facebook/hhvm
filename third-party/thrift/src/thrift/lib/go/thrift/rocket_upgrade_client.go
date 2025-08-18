@@ -126,7 +126,3 @@ func (p *upgradeToRocketClient) Close() error {
 	}
 	return p.Protocol.Close()
 }
-
-func (p *upgradeToRocketClient) DO_NOT_USE_GetResponseHeaders() map[string]string {
-	return p.getResponseHeaders()
-}

@@ -328,7 +328,3 @@ func (p *rocketClient) Close() error {
 	p.clientCleanup.Stop()
 	return p.client.Close()
 }
-
-func (p *rocketClient) DO_NOT_USE_GetResponseHeaders() map[string]string {
-	return p.getResponseHeaders()
-}

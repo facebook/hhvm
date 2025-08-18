@@ -101,7 +101,3 @@ func (b *protocolBuffer) setRequestHeader(key, value string) {
 func (b *protocolBuffer) getRequestHeaders() map[string]string {
 	return b.reqHeaders
 }
-
-func (b *protocolBuffer) DO_NOT_USE_GetResponseHeaders() map[string]string {
-	return b.getResponseHeaders()
-}

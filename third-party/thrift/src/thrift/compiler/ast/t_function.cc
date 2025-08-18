@@ -36,7 +36,6 @@ t_function::t_function(
       interaction_(interaction) {
   if (return_type) {
     return_type_ = return_type;
-    has_return_type_ = true;
   } else {
     return_type_ = t_type_ref::from_ptr(&t_primitive_type::t_void());
   }

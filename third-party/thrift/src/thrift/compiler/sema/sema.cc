@@ -629,9 +629,6 @@ void lower_deprecated_annotations(
 
 void normalize_return_type(
     sema_context& ctx, mutator_context&, t_function& node) {
-  if (!node.has_return_type()) {
-    return;
-  }
   auto& type = node.return_type();
   if (!type.resolve()) {
     ctx.error(node, "Failed to resolve return type of `{}`.", node.name());

@@ -1431,11 +1431,7 @@ class rust_mstch_function : public mstch_function {
     return interaction ? interaction->name() : function_->return_type()->name();
   }
   mstch::node rust_void_or_void_stream() {
-    if (function_->sink_or_stream()) {
-      return !function_->has_return_type();
-    } else {
-      return function_->return_type()->is_void();
-    }
+    return function_->has_void_initial_response();
   }
   mstch::node rust_anyhow_to_application_exn() {
     // First look for annotation on the function.

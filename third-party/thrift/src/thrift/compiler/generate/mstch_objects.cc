@@ -414,7 +414,7 @@ mstch::node mstch_function::exceptions() {
 
 mstch::node mstch_function::sink_first_response_type() {
   const t_sink* sink = function_->sink();
-  if (!sink || !function_->has_return_type()) {
+  if (!sink || function_->has_void_initial_response()) {
     return {};
   }
   return context_.type_factory->make_mstch_object(
@@ -456,7 +456,7 @@ mstch::node mstch_function::stream_elem_type() {
 
 mstch::node mstch_function::stream_first_response_type() {
   const t_stream* stream = function_->stream();
-  if (!stream || !function_->has_return_type()) {
+  if (!stream || function_->has_void_initial_response()) {
     return {};
   }
   return context_.type_factory->make_mstch_object(

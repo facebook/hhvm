@@ -64,10 +64,13 @@ class t_function final : public t_named {
   // Returns the function's return type. The return type can be omitted if
   // there is a stream or interaction in the return clause of a function
   // definition. In this case return_type() returns the void type for
-  // convenience. Use has_return_type() to check if the type is present.
+  // convenience.
   const t_type_ref& return_type() const { return return_type_; }
   t_type_ref& return_type() { return return_type_; }
-  bool has_return_type() const { return has_return_type_; }
+
+  // Returns true if the function returns void, is oneway, or returns a
+  // stream/sink/interaction with no initial response type specified.
+  bool has_void_initial_response() const { return return_type_->is_void(); }
 
   t_node* sink_or_stream() {
     return sink_ ? static_cast<t_node*>(sink_.get())
@@ -106,7 +109,6 @@ class t_function final : public t_named {
   std::unique_ptr<t_sink> sink_;
   std::unique_ptr<t_stream> stream_;
   t_type_ref interaction_;
-  bool has_return_type_ = false;
   bool is_interaction_constructor_ = false;
 };
 

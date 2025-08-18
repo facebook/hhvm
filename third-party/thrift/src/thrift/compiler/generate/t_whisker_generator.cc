@@ -719,7 +719,7 @@ prototype<t_function>::ptr t_whisker_generator::make_prototype_for_function(
   def.property(
       "sink?", [](const t_function& self) { return self.sink() != nullptr; });
   def.property("sink_has_first_response?", [](const t_function& self) {
-    return self.has_return_type() && self.sink() != nullptr;
+    return !self.has_void_initial_response() && self.sink() != nullptr;
   });
 
   // Stream methods
@@ -730,7 +730,7 @@ prototype<t_function>::ptr t_whisker_generator::make_prototype_for_function(
     return self.sink() && self.stream();
   });
   def.property("stream_has_first_response?", [](const t_function& self) {
-    return self.has_return_type() && self.stream() != nullptr;
+    return !self.has_void_initial_response() && self.stream() != nullptr;
   });
   def.property("initial_response?", [](const t_function& self) {
     return !self.return_type()->is_void();

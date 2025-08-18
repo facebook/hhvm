@@ -2464,7 +2464,7 @@ std::unique_ptr<t_const_value> t_hack_generator::function_to_tmeta(
     sink_tmeta->add_map(
         std::make_unique<t_const_value>("finalResponseType"),
         type_to_tmeta(sink->get_final_response_type()));
-    if (function->has_return_type()) {
+    if (!function->has_void_initial_response()) {
       sink_tmeta->add_map(
           std::make_unique<t_const_value>("initialResponseType"),
           type_to_tmeta(function->return_type().get_type()));
@@ -2486,7 +2486,7 @@ std::unique_ptr<t_const_value> t_hack_generator::function_to_tmeta(
     stream_tmeta->add_map(
         std::make_unique<t_const_value>("elemType"),
         type_to_tmeta(stream->elem_type().get_type()));
-    if (function->has_return_type()) {
+    if (!function->has_void_initial_response()) {
       stream_tmeta->add_map(
           std::make_unique<t_const_value>("initialResponseType"),
           type_to_tmeta(function->return_type().get_type()));
@@ -6176,7 +6176,7 @@ void t_hack_generator::generate_php_stream_function_helpers(
       function->exceptions(),
       prefix,
       "_FirstResponse",
-      !function->has_return_type());
+      function->has_void_initial_response());
 }
 
 /**
@@ -6196,7 +6196,7 @@ void t_hack_generator::generate_php_sink_function_helpers(
       function->exceptions(),
       prefix,
       "_FirstResponse",
-      !function->has_return_type());
+      function->has_void_initial_response());
 
   generate_php_function_result_helpers(
       function,
@@ -6296,7 +6296,7 @@ void t_hack_generator::generate_php_docstring(
     out << "oneway ";
   }
   if (const t_stream* stream = tfunction->stream()) {
-    if (tfunction->has_return_type()) {
+    if (!tfunction->has_void_initial_response()) {
       out << thrift_type_name(tfunction->return_type().get_type()) << ", ";
     } else {
       out << "void, ";
@@ -6305,7 +6305,7 @@ void t_hack_generator::generate_php_docstring(
     generate_php_docstring_stream_exceptions(out, stream->exceptions());
     out << ">\n";
   } else if (const t_sink* sink = tfunction->sink()) {
-    if (tfunction->has_return_type()) {
+    if (!tfunction->has_void_initial_response()) {
       out << thrift_type_name(tfunction->return_type().get_type()) << ", ";
     } else {
       out << "void, ";
@@ -6712,7 +6712,7 @@ std::string t_hack_generator::get_stream_function_return_typehint(
   auto stream_response_type_hint =
       type_to_typehint(function->stream()->elem_type().get_type()) + ">";
 
-  if (function->has_return_type()) {
+  if (!function->has_void_initial_response()) {
     auto first_response_type_hint =
         type_to_typehint(function->return_type().get_type());
     return_typehint = "\\ResponseAndStream<" + first_response_type_hint + ", " +
@@ -6730,7 +6730,7 @@ std::string t_hack_generator::get_sink_function_return_typehint(
   std::string return_typehint = type_to_typehint(sink->get_elem_type()) + ", " +
       type_to_typehint(sink->get_final_response_type()) + ">";
 
-  if (!function->has_return_type()) {
+  if (function->has_void_initial_response()) {
     return "\\ResponseAndClientSink<null, " + return_typehint;
   }
   auto first_response_type_hint =
@@ -7333,7 +7333,7 @@ void t_hack_generator::_generate_service_client_stream_child_fn(
   out << indent() << "return await $this->genAwaitStreamResponse("
       << first_response_type << "::class, " << stream_response_type
       << "::class, " << "\"" << tfunction->name() << "\", "
-      << (!tfunction->has_return_type() ? "true" : "false")
+      << (tfunction->has_void_initial_response() ? "true" : "false")
       << ", $currentseqid, $rpc_options";
   if (legacy_arrays) {
     out << ", shape('read_options' => \\THRIFT_MARK_LEGACY_ARRAYS)";
@@ -7393,7 +7393,7 @@ void t_hack_generator::_generate_service_client_sink_child_fn(
   out << indent() << "return await $this->genAwaitSinkResponse("
       << first_response_type << "::class, " << sink_payload_type << "::class, "
       << final_response_type << "::class, " << "\"" << tfunction->name()
-      << "\", " << (!tfunction->has_return_type() ? "true" : "false")
+      << "\", " << (tfunction->has_void_initial_response() ? "true" : "false")
       << ", $currentseqid, $rpc_options";
   if (legacy_arrays) {
     out << ", shape('read_options' => \\THRIFT_MARK_LEGACY_ARRAYS)";

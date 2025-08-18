@@ -1487,7 +1487,7 @@ void py3_mstch_program::visit_type_single_service(const t_service* service) {
     if (stream && !function.is_interaction_constructor()) {
       return_type_name = "Stream__";
       const t_type* elem_type = stream->elem_type().get_type();
-      if (function.has_return_type()) {
+      if (!function.has_void_initial_response()) {
         return_type_name = "ResponseAndStream__" +
             visit_type(function.return_type().get_type()) + "_";
       }
@@ -1497,7 +1497,7 @@ void py3_mstch_program::visit_type_single_service(const t_service* service) {
           stream->elem_type().get_type(), context_);
       streamTypes_.emplace(elem_type_name, elem_type);
       bool inserted = seenTypeNames_.insert(return_type_name).second;
-      if (inserted && function.has_return_type()) {
+      if (inserted && !function.has_void_initial_response()) {
         response_and_stream_functions_.push_back(&function);
       }
     } else if (!function.sink()) {

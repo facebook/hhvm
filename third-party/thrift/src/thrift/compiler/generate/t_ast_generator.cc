@@ -439,9 +439,7 @@ type::Schema t_ast_generator::gen_schema(
     const_spans(node.default_value());
   });
   visitor.add_function_visitor([&](const t_function& node) {
-    if (node.has_return_type()) {
-      span(node.return_type());
-    }
+    span(node.return_type());
     if (auto stream_type = node.stream()) {
       span(stream_type->elem_type());
       for (const auto& exn : get_elems(stream_type->exceptions())) {

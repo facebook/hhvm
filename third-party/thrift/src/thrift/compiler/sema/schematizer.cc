@@ -550,24 +550,18 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
       ref->add_map(val("uri"), type_uri(*interaction));
       func_schema->add_map(val("interactionType"), std::move(ref));
     }
-    if (func.has_return_type()) {
+    if (!func.has_void_initial_response() ||
+        (!func.sink_or_stream() && !func.interaction())) {
       const t_type* type = func.return_type().get_type();
-      if (dynamic_cast<const t_stream*>(type)) {
-        assert(false); // handled below
-      } else if (dynamic_cast<const t_sink*>(type)) {
-        assert(false); // handled below
-      } else {
+      func_schema->add_map(val("returnType"), gen_type(*type, node.program()));
+      // Double write of return type for backwards compatibility (T161963504).
+      if (opts_.double_writes) {
+        auto return_types_schema = t_const_value::make_list();
+        auto schema = t_const_value::make_map();
+        schema->add_map(val("thriftType"), gen_type(*type, node.program()));
+        return_types_schema->add_list(std::move(schema));
         func_schema->add_map(
-            val("returnType"), gen_type(*type, node.program()));
-        // Double write of return type for backwards compatibility (T161963504).
-        if (opts_.double_writes) {
-          auto return_types_schema = t_const_value::make_list();
-          auto schema = t_const_value::make_map();
-          schema->add_map(val("thriftType"), gen_type(*type, node.program()));
-          return_types_schema->add_list(std::move(schema));
-          func_schema->add_map(
-              val("returnTypes"), std::move(return_types_schema));
-        }
+            val("returnTypes"), std::move(return_types_schema));
       }
     }
 

@@ -472,7 +472,7 @@ class python_mstch_program : public mstch_program {
             visit_type(field.get_type());
           }
         }
-        if (function.has_return_type()) {
+        if (!function.has_void_initial_response()) {
           visit_type(function.return_type().get_type());
         }
         visit_type(stream->elem_type().get_type());
@@ -740,8 +740,8 @@ class python_mstch_function : public mstch_function {
   }
 
   mstch::node returns_tuple() {
-    return (function_->sink_or_stream() && function_->has_return_type()) ||
-        (function_->interaction() && !function_->return_type()->is_void());
+    return !function_->has_void_initial_response() &&
+        (function_->sink_or_stream() || function_->interaction());
   }
 
   mstch::node early_client_return() {

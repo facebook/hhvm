@@ -1643,6 +1643,10 @@ String HHVM_FUNCTION(mangle_unit_sha1, const String& sha1, const String& ext,
   return mangleUnitSha1(sha1.slice(), ext.slice(), ro.flags());
 }
 
+bool HHVM_FUNCTION(legacy_is_truthy, const Variant& v) {
+  return v.toBoolean();
+}
+
 static struct HHExtension final : Extension {
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
   void moduleRegisterNative() override {
@@ -1693,6 +1697,7 @@ static struct HHExtension final : Extension {
     X(inactive_config_experiments);
     X(is_cli_server_mode);
     X(mangle_unit_sha1);
+    X(legacy_is_truthy);
 #undef X
 #define X(nm) HHVM_NAMED_FE(HH\\rqtrace\\nm, HHVM_FN(nm))
     X(is_enabled);

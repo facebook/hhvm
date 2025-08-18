@@ -1,0 +1,15 @@
+zero is not truthy
+one is truthy
+string zero is not truthy
+empty string is not truthy
+string zero dot is truthy
+float zero is not truthy
+float small is truthy
+empty vec is not truthy
+empty dict is not truthy
+empty keyset is not truthy
+non-empty vec is truthy
+zero vec is truthy
+resource is truthy
+null is not truthy
+object is truthy

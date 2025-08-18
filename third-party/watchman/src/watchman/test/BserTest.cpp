@@ -141,8 +141,11 @@ void check_roundtrip(
     uint32_t bser_capabilities,
     const char* input,
     const char* template_text) {
-  XLOG(ERR) << "testing BSER version " << bser_version << ", capabilities "
-            << bser_capabilities;
+  XLOGF(
+      ERR,
+      "testing BSER version {}, capabilities {}",
+      bser_version,
+      bser_capabilities);
   std::optional<json_ref> templ;
   json_error_t jerr;
 
@@ -171,8 +174,11 @@ void check_serialization(
     uint32_t bser_capabilities,
     const char* json_in,
     const std::string& bser_out) {
-  XLOG(ERR) << "testing BSER version " << bser_version << ", capabilities "
-            << bser_capabilities;
+  XLOGF(
+      ERR,
+      "testing BSER version {}, capabilities {}",
+      bser_version,
+      bser_capabilities);
 
   // Test JSON -> BSER serialization.
   json_error_t jerr;
@@ -254,8 +260,11 @@ void check_bser_typed_strings() {
     uint32_t bser_version = std::get<0>(t);
     uint32_t bser_capabilities = std::get<1>(t);
     const std::string& bser_out = std::get<2>(t);
-    XLOG(ERR) << "testing BSER version " << bser_version << ", capabilities "
-              << bser_capabilities;
+    XLOGF(
+        ERR,
+        "testing BSER version {}, capabilities {}",
+        bser_version,
+        bser_capabilities);
 
     auto bser_buf = bdumps(bser_version, bser_capabilities, str_array);
     EXPECT_EQ(*bser_buf, bser_out);

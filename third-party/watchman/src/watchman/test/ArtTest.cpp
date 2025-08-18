@@ -235,7 +235,7 @@ struct prefix_data {
 
   int operator()(const std::string& k, T&) {
     EXPECT_TRUE(count < max_count);
-    XLOG(ERR) << "Key: " << k << " Expect: " << expected[count];
+    XLOGF(ERR, "Key: {} Expect: {}", k, expected[count]);
     EXPECT_TRUE(memcmp(k.data(), expected[count], k.size()) == 0);
     count++;
     return 0;
@@ -265,7 +265,7 @@ TEST(Art, iter_prefix) {
         "api", "api.foe.fum", "api.foo", "api.foo.bar", "api.foo.baz"};
     prefix_data<void*> p = {0, 5, expected};
     EXPECT_TRUE(!t.iterPrefix((unsigned char*)"api", 3, p));
-    XLOG(ERR) << "Count: " << p.count << " Max: " << p.max_count;
+    XLOGF(ERR, "Count: {} Max: {}", p.count, p.max_count);
     EXPECT_TRUE(p.count == p.max_count);
   }
 
@@ -289,7 +289,7 @@ TEST(Art, iter_prefix) {
         "api.foe.fum", "api.foo", "api.foo.bar", "api.foo.baz"};
     prefix_data<void*> p4 = {0, 4, expected4};
     EXPECT_TRUE(!t.iterPrefix((unsigned char*)"api.", 4, p4));
-    XLOG(ERR) << "Count: " << p4.count << " Max: " << p4.max_count;
+    XLOGF(ERR, "Count: {} Max: {}", p4.count, p4.max_count);
     EXPECT_TRUE(p4.count == p4.max_count);
   }
 
@@ -298,7 +298,7 @@ TEST(Art, iter_prefix) {
     const char* expected5[] = {"api.foo.bar"};
     prefix_data<void*> p5 = {0, 1, expected5};
     EXPECT_TRUE(!t.iterPrefix((unsigned char*)"api.foo.bar", 11, p5));
-    XLOG(ERR) << "Count: " << p5.count << " Max: " << p5.max_count;
+    XLOGF(ERR, "Count: {} Max: {}", p5.count, p5.max_count);
     EXPECT_TRUE(p5.count == p5.max_count);
   }
 
@@ -337,7 +337,7 @@ TEST(Art, long_prefix) {
     };
     prefix_data<uintptr_t> p = {0, 3, expected};
     EXPECT_TRUE(!t.iterPrefix((unsigned char*)"this:key:has", 12, p));
-    XLOG(ERR) << "Count: " << p.count << " Max: " << p.max_count;
+    XLOGF(ERR, "Count: {} Max: {}", p.count, p.max_count);
     EXPECT_TRUE(p.count == p.max_count);
   }
 }
@@ -348,20 +348,19 @@ TEST(Art, prefix) {
 
   t.insert("food", (void*)"food");
   t.insert("foo", (void*)"foo");
-  XLOG(ERR) << "size is now " << t.size();
+  XLOGF(ERR, "size is now {}", t.size());
   EXPECT_TRUE(t.size() == 2);
   EXPECT_TRUE((v = *t.search("food")) != nullptr);
-  XLOG(ERR) << "food lookup yields " << v;
+  XLOGF(ERR, "food lookup yields {}", v);
   EXPECT_TRUE(v && strcmp((char*)v, "food") == 0);
 
   t.iter([](const std::string& key, void*& value) {
-    XLOG(ERR) << "iter leaf: key_len=" << key.size() << " " << key
-              << " value=" << value;
+    XLOGF(ERR, "iter leaf: key_len={} {} value={}", key.size(), key, value);
     return 0;
   });
 
   EXPECT_TRUE((v = *t.search("foo")) != nullptr);
-  XLOG(ERR) << "foo lookup yields " << v;
+  XLOGF(ERR, "foo lookup yields {}", v);
   EXPECT_TRUE(v && strcmp((char*)v, "foo") == 0);
 }
 
@@ -397,11 +396,11 @@ TEST(Art, insert_search_uuid) {
 
   // Check the minimum
   auto l = t.minimum();
-  XLOG(ERR) << "minimum is " << l->key;
+  XLOGF(ERR, "minimum is {}", l->key);
   EXPECT_TRUE(l && l->key == "00026bda-e0ea-4cda-8245-522764e9f325");
 
   // Check the maximum
   l = t.maximum();
-  XLOG(ERR) << "maximum is " << l->key;
+  XLOGF(ERR, "maximum is {}", l->key);
   EXPECT_TRUE(l && l->key == "ffffcb46-a92e-4822-82af-a7190f9c1ec5");
 }

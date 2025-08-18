@@ -174,7 +174,7 @@ void bench_list(const char* label, const char* prefix) {
   }
   gettimeofday(&end, nullptr);
 
-  XLOG(ERR) << label << ": took " << w_timeval_diff(start, end);
+  XLOGF(ERR, "{}: took {}", label, w_timeval_diff(start, end));
 }
 
 TEST(Ignore, bench_all_ignores) {

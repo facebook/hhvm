@@ -90,7 +90,7 @@ TEST(Pending, bench) {
       tree_depth,
       num_files_per_dir,
       num_dirs_per_dir);
-  XLOG(ERR) << "built list with " << list.size() << " items";
+  XLOGF(ERR, "built list with {} items", list.size());
 
   // Benchmark insertion in top-down order.
   {
@@ -105,8 +105,11 @@ TEST(Pending, bench) {
     drained = process_items(lock);
 
     auto end = std::chrono::steady_clock::now();
-    XLOG(ERR) << "took " << std::chrono::duration<double>(end - start).count()
-              << "s to insert " << drained << " items into pending coll";
+    XLOGF(
+        ERR,
+        "took {}s to insert {} items into pending coll",
+        std::chrono::duration<double>(end - start).count(),
+        drained);
   }
 
   // and now in reverse order; this is from the leaves of the filesystem
@@ -126,9 +129,11 @@ TEST(Pending, bench) {
     drained = process_items(lock);
 
     auto end = std::chrono::steady_clock::now();
-    XLOG(ERR) << "took " << std::chrono::duration<double>(end - start).count()
-              << "s to reverse insert " << drained
-              << " items into pending coll";
+    XLOGF(
+        ERR,
+        "took {}s to reverse insert {} items into pending coll",
+        std::chrono::duration<double>(end - start).count(),
+        drained);
   }
 }
 

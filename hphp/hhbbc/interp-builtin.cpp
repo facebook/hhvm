@@ -614,15 +614,15 @@ TypeOrReduced impl_type_structure_classname(ISS& env, const php::Func* func,
   }
   if (!classname.couldBe(BSStr)) return NoReduced{};
 
-  if (r->second == TriBool::No && present) {
-    effect_free(env);
-    constprop(env);
-  }
-
+  auto const classname_required = r->second == TriBool::No && present;
   if (load) {
     if (is_specialized_string(classname)) {
       auto const n = sval_of(classname);
       if (auto const rcls = env.index.resolve_class(n)) {
+        if (classname_required) {
+          effect_free(env);
+          constprop(env);
+        }
         return clsExact(*rcls, true);
       } else {
         return TBottom;
@@ -630,6 +630,10 @@ TypeOrReduced impl_type_structure_classname(ISS& env, const php::Func* func,
     }
     return TCls;
   } else {
+    if (classname_required) {
+      effect_free(env);
+      constprop(env);
+    }
     return intersection_of(classname, TSStr);
   }
 }

@@ -164,27 +164,46 @@ class RocketClientChannel final : public ClientChannel,
 
   ~RocketClientChannel() override;
 
+  template <typename Callback>
   void sendThriftRequest(
       const RpcOptions& rpcOptions,
       RpcKind kind,
       apache::thrift::MethodMetadata&& methodMetadata,
       SerializedRequest&& request,
       std::shared_ptr<apache::thrift::transport::THeader> header,
-      RequestClientCallback::Ptr cb,
+      Callback cb,
       std::unique_ptr<folly::IOBuf> frameworkMetadata);
 
   void sendSingleRequestNoResponse(
       const RpcOptions& rpcOptions,
       RequestRpcMetadata&& metadata,
-      std::unique_ptr<folly::IOBuf> buf,
+      rocket::Payload requestPayload,
       RequestClientCallback::Ptr cb);
 
   void sendSingleRequestSingleResponse(
       const RpcOptions& rpcOptions,
       RequestRpcMetadata&& metadata,
       std::chrono::milliseconds timeout,
-      std::unique_ptr<folly::IOBuf> buf,
+      size_t requestSerializedSize,
+      rocket::Payload requestPayload,
       RequestClientCallback::Ptr cb);
+
+  void sendStreamRequest(
+      const RpcOptions& rpcOptions,
+      RequestRpcMetadata&& metadata,
+      std::chrono::milliseconds firstResponseTimeout,
+      rocket::Payload requestPayload,
+      uint16_t protocolId,
+      StreamClientCallback* cb);
+
+  void sendSinkRequest(
+      const RpcOptions& rpcOptions,
+      RequestRpcMetadata&& metadata,
+      std::chrono::milliseconds firstResponseTimeout,
+      rocket::Payload requestPayload,
+      uint16_t protocolId,
+      folly::Optional<CompressionConfig> compressionConfig,
+      SinkClientCallback* cb);
 
   std::optional<std::chrono::milliseconds> getClientTimeout(
       const RpcOptions& rpcOptions) const;

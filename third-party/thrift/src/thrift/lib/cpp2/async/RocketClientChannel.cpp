@@ -836,43 +836,14 @@ void RocketClientChannel::sendRequestStream(
     std::shared_ptr<THeader> header,
     StreamClientCallback* clientCallback,
     std::unique_ptr<folly::IOBuf> frameworkMetadata) {
-  DestructorGuard dg(this);
-  if (!canHandleRequest(clientCallback)) {
-    return;
-  }
-  preprocessHeader(header.get());
-
-  auto firstResponseTimeout = getClientTimeout(rpcOptions);
-  auto buf = std::move(request.buffer);
-  auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
+  sendThriftRequest(
       rpcOptions,
       RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
       std::move(methodMetadata),
-      firstResponseTimeout,
-      getInteractionHandle(rpcOptions),
-      getServerZstdSupported(),
-      buf->computeChainDataLength(),
-      *header,
-      std::move(frameworkMetadata),
-      customCompressor_ != nullptr);
-
-  auto payload = getPayloadSerializer()->packWithFds(
-      &metadata,
-      std::move(buf),
-      rpcOptions.copySocketFdsToSend(),
-      encodeMetadataUsingBinary(),
-      getTransportWrapper());
-  return rocket::RocketClient::sendRequestStream(
-      std::move(payload),
-      firstResponseTimeout.value_or(std::chrono::milliseconds::zero()),
-      rpcOptions.getChunkTimeout(),
-      rpcOptions.getChunkBufferSize(),
-      new FirstRequestProcessorStream(
-          header->getProtocolId(),
-          std::move(*metadata.name()),
-          clientCallback,
-          evb_,
-          DestructionGuardedClient(this)));
+      std::move(request),
+      std::move(header),
+      clientCallback,
+      std::move(frameworkMetadata));
 }
 
 void RocketClientChannel::sendRequestSink(
@@ -882,51 +853,24 @@ void RocketClientChannel::sendRequestSink(
     std::shared_ptr<transport::THeader> header,
     SinkClientCallback* clientCallback,
     std::unique_ptr<folly::IOBuf> frameworkMetadata) {
-  DestructorGuard dg(this);
-  if (!canHandleRequest(clientCallback)) {
-    return;
-  }
-  preprocessHeader(header.get());
-
-  auto firstResponseTimeout = getClientTimeout(rpcOptions);
-  auto buf = std::move(request.buffer);
-  auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
+  sendThriftRequest(
       rpcOptions,
       RpcKind::SINK,
       std::move(methodMetadata),
-      firstResponseTimeout,
-      getInteractionHandle(rpcOptions),
-      getServerZstdSupported(),
-      buf->computeChainDataLength(),
-      *header,
-      std::move(frameworkMetadata),
-      customCompressor_ != nullptr);
-
-  auto payload = getPayloadSerializer()->packWithFds(
-      &metadata,
-      std::move(buf),
-      rpcOptions.copySocketFdsToSend(),
-      encodeMetadataUsingBinary(),
-      getTransportWrapper());
-  return rocket::RocketClient::sendRequestSink(
-      std::move(payload),
-      firstResponseTimeout.value_or(std::chrono::milliseconds(0)),
-      new FirstRequestProcessorSink(
-          header->getProtocolId(),
-          std::move(*metadata.name()),
-          clientCallback,
-          evb_,
-          DestructionGuardedClient(this)),
-      header->getDesiredCompressionConfig());
+      std::move(request),
+      std::move(header),
+      clientCallback,
+      std::move(frameworkMetadata));
 }
 
+template <typename Callback>
 void RocketClientChannel::sendThriftRequest(
     const RpcOptions& rpcOptions,
     RpcKind kind,
     apache::thrift::MethodMetadata&& methodMetadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    RequestClientCallback::Ptr clientCallback,
+    Callback clientCallback,
     std::unique_ptr<folly::IOBuf> frameworkMetadata) {
   DestructorGuard dg(this);
   if (!canHandleRequest(clientCallback)) {
@@ -946,42 +890,85 @@ void RocketClientChannel::sendThriftRequest(
       *header,
       std::move(frameworkMetadata),
       customCompressor_ != nullptr);
-  header.reset();
 
-  switch (kind) {
-    case RpcKind::SINGLE_REQUEST_NO_RESPONSE:
-      sendSingleRequestNoResponse(
-          rpcOptions,
-          std::move(metadata),
-          std::move(buf),
-          std::move(clientCallback));
-      break;
+  size_t requestSerializedSize;
+  // Avoid unnecessary computation for streaming methods.
+  if constexpr (std::is_same_v<Callback, RequestClientCallback::Ptr>) {
+    requestSerializedSize = buf->computeChainDataLength();
+  }
+  rocket::Payload requestPayload;
+  try {
+    requestPayload = getPayloadSerializer()->packWithFds(
+        &metadata,
+        std::move(buf),
+        rpcOptions.copySocketFdsToSend(),
+        encodeMetadataUsingBinary(),
+        getTransportWrapper());
+  } catch (std::exception const& ex) {
+    auto err = folly::make_exception_wrapper<transport::TTransportException>(
+        transport::TTransportException::TTransportExceptionType::UNKNOWN,
+        fmt::format("Failed to pack request payload: {}", ex.what()));
+    if constexpr (std::is_same_v<Callback, RequestClientCallback::Ptr>) {
+      clientCallback.release()->onResponseError(std::move(err));
+    } else {
+      clientCallback->onFirstResponseError(std::move(err));
+    }
+    return;
+  }
 
-    case RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE:
-      sendSingleRequestSingleResponse(
-          rpcOptions,
-          std::move(metadata),
-          timeout.value_or(std::chrono::milliseconds(0)),
-          std::move(buf),
-          std::move(clientCallback));
-      break;
+  if constexpr (std::is_same_v<Callback, RequestClientCallback::Ptr>) {
+    header.reset(); // avoid extending lifetime past fiber suspension in send*
+    switch (kind) {
+      case RpcKind::SINGLE_REQUEST_NO_RESPONSE:
+        sendSingleRequestNoResponse(
+            rpcOptions,
+            std::move(metadata),
+            std::move(requestPayload),
+            std::move(clientCallback));
+        break;
 
-    default:
-      folly::assume_unreachable();
+      case RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE:
+        sendSingleRequestSingleResponse(
+            rpcOptions,
+            std::move(metadata),
+            timeout.value_or(std::chrono::milliseconds(0)),
+            requestSerializedSize,
+            std::move(requestPayload),
+            std::move(clientCallback));
+        break;
+
+      default:
+        folly::assume_unreachable();
+    }
+  } else if constexpr (std::is_same_v<Callback, StreamClientCallback*>) {
+    DCHECK(kind == RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE);
+    sendStreamRequest(
+        rpcOptions,
+        std::move(metadata),
+        timeout.value_or(std::chrono::milliseconds(0)),
+        std::move(requestPayload),
+        header->getProtocolId(),
+        clientCallback);
+  } else if constexpr (std::is_same_v<Callback, SinkClientCallback*>) {
+    DCHECK(kind == RpcKind::SINK);
+    sendSinkRequest(
+        rpcOptions,
+        std::move(metadata),
+        timeout.value_or(std::chrono::milliseconds(0)),
+        std::move(requestPayload),
+        header->getProtocolId(),
+        header->getDesiredCompressionConfig(),
+        clientCallback);
+  } else {
+    static_assert(folly::always_false<Callback>, "Unsupported callback type");
   }
 }
 
 void RocketClientChannel::sendSingleRequestNoResponse(
     const RpcOptions& rpcOptions,
-    RequestRpcMetadata&& metadata,
-    std::unique_ptr<folly::IOBuf> buf,
+    RequestRpcMetadata&&,
+    rocket::Payload requestPayload,
     RequestClientCallback::Ptr cb) {
-  auto requestPayload = getPayloadSerializer()->packWithFds(
-      &metadata,
-      std::move(buf),
-      rpcOptions.copySocketFdsToSend(),
-      encodeMetadataUsingBinary(),
-      getTransportWrapper());
   const bool isSync = cb->isSync() || rpcOptions.getForceSyncOnFiber();
   SingleRequestNoResponseCallback callback(std::move(cb));
 
@@ -999,25 +986,9 @@ void RocketClientChannel::sendSingleRequestSingleResponse(
     const RpcOptions& rpcOptions,
     RequestRpcMetadata&& metadata,
     std::chrono::milliseconds timeout,
-    std::unique_ptr<folly::IOBuf> buf,
+    size_t requestSerializedSize,
+    rocket::Payload requestPayload,
     RequestClientCallback::Ptr cb) {
-  const auto requestSerializedSize = buf->computeChainDataLength();
-  rocket::Payload requestPayload;
-  try {
-    requestPayload = getPayloadSerializer()->packWithFds(
-        &metadata,
-        std::move(buf),
-        rpcOptions.copySocketFdsToSend(),
-        encodeMetadataUsingBinary(),
-        getTransportWrapper());
-  } catch (std::exception const& ex) {
-    cb.release()->onResponseError(
-        folly::make_exception_wrapper<transport::TTransportException>(
-            transport::TTransportException::TTransportExceptionType::UNKNOWN,
-            fmt::format("Failed to pack request payload: {}", ex.what())));
-    return;
-  }
-
   const auto requestWireSize = requestPayload.dataSize();
   const auto requestMetadataAndPayloadSize =
       requestPayload.metadataAndDataSize();
@@ -1043,6 +1014,48 @@ void RocketClientChannel::sendSingleRequestSingleResponse(
         timeout,
         folly::copy_to_unique_ptr(std::move(callback)));
   }
+}
+
+void RocketClientChannel::sendStreamRequest(
+    const RpcOptions& rpcOptions,
+    RequestRpcMetadata&& metadata,
+    std::chrono::milliseconds firstResponseTimeout,
+    rocket::Payload requestPayload,
+    uint16_t protocolId,
+    StreamClientCallback* clientCallback) {
+  assert(metadata.name());
+  rocket::RocketClient::sendRequestStream(
+      std::move(requestPayload),
+      firstResponseTimeout,
+      rpcOptions.getChunkTimeout(),
+      rpcOptions.getChunkBufferSize(),
+      new FirstRequestProcessorStream(
+          protocolId,
+          std::move(*metadata.name()),
+          clientCallback,
+          evb_,
+          DestructionGuardedClient(this)));
+}
+
+void RocketClientChannel::sendSinkRequest(
+    const RpcOptions&,
+    RequestRpcMetadata&& metadata,
+    std::chrono::milliseconds firstResponseTimeout,
+    rocket::Payload requestPayload,
+    uint16_t protocolId,
+    folly::Optional<CompressionConfig> compressionConfig,
+    SinkClientCallback* clientCallback) {
+  assert(metadata.name());
+  rocket::RocketClient::sendRequestSink(
+      std::move(requestPayload),
+      firstResponseTimeout,
+      new FirstRequestProcessorSink(
+          protocolId,
+          std::move(*metadata.name()),
+          clientCallback,
+          evb_,
+          DestructionGuardedClient(this)),
+      std::move(compressionConfig));
 }
 
 void onResponseError(

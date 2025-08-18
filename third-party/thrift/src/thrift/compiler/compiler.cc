@@ -664,32 +664,87 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
 }
 
 /**
- * Parses the "extra-validation" flag with the given name (`prefix`), if
- * applicable. If `validator` corresponds indeed to the given `prefix`, it must
- * also specify a validation level (`warn`, `error`, etc.), which will be
- * written to the memory pointed by `target`).
+ * Returns the value (i.e., text after `=`) of the given `flag`, if it starts
+ * with the given `prefix`.
  *
- * @return `true` if the given validator matched `prefix` and was successfully
- * parsed into the given `target`, or `false` if `validator` does not match the
- * given `prefix`.
+ * If `flag` does not start with `prefix`, returns an empty optional.
+ *
+ * @throws std::runtime_exception if `flag` starts with `prefix`, but does not
+ *     have the expected format.
+ */
+std::optional<std::string_view> get_flag_value_if_starts_with(
+    std::string_view flag, std::string_view prefix) {
+  if (flag.find(prefix) != 0) {
+    // `flag` does not start with `prefix` => nothing to return
+    return std::nullopt;
+  }
+
+  // suffix = part of `flag` that follows `prefix`. Expected to be `=<value>`.
+  std::string_view suffix = flag.substr(prefix.size());
+  if (suffix.find('=') != 0) {
+    throw std::runtime_error(fmt::format("Missing '=' after: {}", prefix));
+  }
+  return suffix.substr(1);
+}
+
+/**
+ * If the given `flag` starts with `prefix`, parses its boolean value and sets
+ * `*target` to it.
+ *
+ * If `flag` stats with `prefix`, it MUST be followed by `=true` or `=false`.
+ *
+ * @throws std::runtime_error if `flag` starts with `prefix` but does not have
+ *     the expected format.
+ *
+ * @return false if `flag` does not start with `prefix`, true otherwise (and
+ *     sets *target accordingly).
+ */
+bool maybe_parse_boolean_flag(
+    std::string_view prefix, std::string_view flag, bool* target) {
+  assert(target != nullptr);
+
+  if (auto maybe_flag_value = get_flag_value_if_starts_with(flag, prefix)) {
+    std::string_view flag_value = maybe_flag_value.value();
+    if (flag_value == "true") {
+      *target = true;
+    } else if (flag_value == "false") {
+      *target = false;
+    } else {
+      throw std::runtime_error(fmt::format(
+          "Invalid boolean value for \"{}\": expected \"true\" or \"false\", "
+          "got: {}",
+          prefix,
+          flag_value));
+    }
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Parses the "extra-validation" flag with the given name (`prefix`), if
+ * applicable. If `flag` corresponds indeed to the given `prefix`, it must also
+ * specify a validation level (`warn`, `error`, etc.), which will be written to
+ * the memory pointed by `target`).
+ *
+ * @return `true` if the given flag matched `prefix` and was successfully parsed
+ *     into the given `target`, or `false` if `flag` does not match the given
+ *     `prefix`.
  *
  * @throws std::runtime_error on invalid input.
  */
-bool parse_extra_validation_with_level(
+bool maybe_parse_extra_validation_with_level(
     std::string_view prefix,
-    const std::string& validator,
+    const std::string& flag,
     sema_params::validation_level* target) {
   assert(target != nullptr);
-  if (validator.find(prefix) != 0) {
-    return false;
-  };
 
-  const std::string suffix = validator.substr(prefix.size());
-  if (suffix.find('=') != 0) {
-    throw std::runtime_error("Missing '=' after validator name.");
+  if (auto maybe_flag_value = get_flag_value_if_starts_with(flag, prefix)) {
+    *target = sema_params::parse_validation_level(maybe_flag_value.value());
+    return true;
   }
-  *target = sema_params::parse_validation_level(suffix.substr(1));
-  return true;
+  return false;
 }
 
 } // namespace
@@ -753,10 +808,11 @@ std::string parse_args(
       // no-op
     } else if (flag == "allow-64bit-consts") {
       pparams.allow_64bit_consts = true;
-    } else if (flag == "typedef-uri-requires-annotation=true") {
-      pparams.typedef_uri_requires_annotation = true;
-    } else if (flag == "typedef-uri-requires-annotation=false") {
-      pparams.typedef_uri_requires_annotation = false;
+    } else if (maybe_parse_boolean_flag(
+                   /*prefix=*/"typedef-uri-requires-annotation",
+                   flag,
+                   &pparams.typedef_uri_requires_annotation)) {
+      continue;
     } else if (flag == "record-genfiles") {
       const std::string* arg = consume_arg("genfile file specification");
       if (arg == nullptr) {
@@ -833,49 +889,49 @@ std::string parse_args(
         }
 
         try {
-          if (parse_extra_validation_with_level(
+          if (maybe_parse_extra_validation_with_level(
                   "redundant_custom_default_values",
                   validator,
                   &sparams.redundant_custom_default_values)) {
             continue;
           }
 
-          if (parse_extra_validation_with_level(
+          if (maybe_parse_extra_validation_with_level(
                   "unnecessary_enable_custom_type_ordering",
                   validator,
                   &sparams.unnecessary_enable_custom_type_ordering)) {
             continue;
           }
 
-          if (parse_extra_validation_with_level(
+          if (maybe_parse_extra_validation_with_level(
                   "nonallowed_typedef_with_uri",
                   validator,
                   &sparams.nonallowed_typedef_with_uri)) {
             continue;
           }
 
-          if (parse_extra_validation_with_level(
+          if (maybe_parse_extra_validation_with_level(
                   "typedef_explicit_uri",
                   validator,
                   &sparams.typedef_explicit_uri)) {
             continue;
           }
 
-          if (parse_extra_validation_with_level(
+          if (maybe_parse_extra_validation_with_level(
                   "struct_optional_field_custom_default",
                   validator,
                   &sparams.struct_optional_field_custom_default)) {
             continue;
           }
 
-          if (parse_extra_validation_with_level(
+          if (maybe_parse_extra_validation_with_level(
                   "union_field_custom_default",
                   validator,
                   &sparams.union_field_custom_default)) {
             continue;
           }
 
-          if (parse_extra_validation_with_level(
+          if (maybe_parse_extra_validation_with_level(
                   "required_field_qualifier",
                   validator,
                   &sparams.required_field_qualifier)) {
@@ -1039,6 +1095,9 @@ void record_invocation_params(
   sema_params_metric.add(fmt::format(
       "union_field_custom_default={}",
       fmt::underlying(sparams.union_field_custom_default)));
+  sema_params_metric.add(fmt::format(
+      "required_field_qualifier={}",
+      fmt::underlying(sparams.required_field_qualifier)));
   sema_params_metric.add(
       "warn_on_redundant_custom_default_values=" +
       std::to_string(

@@ -109,7 +109,7 @@ struct sema_params {
    *
    * See also: `validation_level_to_string(...)`.
    */
-  static validation_level parse_validation_level(const std::string& name);
+  static validation_level parse_validation_level(std::string_view name);
 
   /**
    * Returns a (human-readable) representation of the given validation level.

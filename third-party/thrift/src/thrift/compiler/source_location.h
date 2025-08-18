@@ -252,11 +252,13 @@ class source_manager {
    * @param include_file_path The path to the included file, as specified in
    *        Thrift IDL source (i.e., the path that follows the `include`
    *        keyword).
-   * @param program_path The path to the file of the program currently being
-   *        compiled, which is trying to `include "include_file_path"`.
    * @param search_paths The ordered list of (directory) paths explicitly
    *        provided by the caller, relative to which to attempt resolving the
    *        given `include_file_path`.
+   * @param program_path If present, the path to the file of the program
+   *        currently being compiled, which is trying to `include
+   *        "include_file_path"`. The include path will be resolved against the
+   *        directory of the `program_path` before trying `search_paths`.
    *
    * If the file corresponding to `include_file_path` is successfully found, its
    * path is returned. The contents of that file are added to this
@@ -266,8 +268,8 @@ class source_manager {
   using path_or_error = std::variant<std::string, std::string>;
   path_or_error find_include_file(
       std::string_view include_file_path,
-      std::string_view program_path,
-      const std::vector<std::string>& search_paths);
+      const std::vector<std::string>& search_paths,
+      std::optional<std::string_view> program_path);
 
   // Queries for a file previously found by find_include_file.
   std::optional<std::string> found_include_file(

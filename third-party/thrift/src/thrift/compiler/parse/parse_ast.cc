@@ -1005,12 +1005,17 @@ std::unique_ptr<t_program_bundle> parse_ast(
     const parsing_params& params,
     const sema_params* sparams,
     t_program_bundle* already_parsed) {
+  const bool allow_self_relative_includes = params.allow_self_relative_includes;
+
   if constexpr (should_bundle_std_files()) {
+    const auto parent_path = allow_self_relative_includes
+        ? std::optional<std::string_view>(path)
+        : std::nullopt;
     for (const auto& annotation_files :
          {bundled_annotation_files(), bundled_lib_thrift_files()}) {
       for (const auto& [annot_path, content] : annotation_files) {
-        auto found_or_error =
-            sm.find_include_file(annot_path, path, params.incl_searchpath);
+        auto found_or_error = sm.find_include_file(
+            annot_path, params.incl_searchpath, parent_path);
         if (found_or_error.index() != 0) {
           // Fall back to the bundled annotation files.
           sm.add_virtual_file(annot_path, content);
@@ -1041,7 +1046,11 @@ std::unique_ptr<t_program_bundle> parse_ast(
           const std::optional<std::string_view>& include_alias,
           const t_program& parent) {
         auto path_or_error = sm.find_include_file(
-            include_path, parent.path(), params.incl_searchpath);
+            include_path,
+            params.incl_searchpath,
+            allow_self_relative_includes
+                ? std::optional<std::string_view>(parent.path())
+                : std::nullopt);
         if (path_or_error.index() == 1) {
           diags.report(
               range.begin,

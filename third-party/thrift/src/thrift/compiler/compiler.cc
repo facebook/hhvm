@@ -89,6 +89,12 @@ Options:
               Allow negative enum vals (DEPRECATED)
   --allow-64bit-consts
               Do not print warnings about using 64-bit constants
+  --allow-self-relative-includes=true|false
+              Whether (Thrift) `include` paths should be resolved against the
+              directory of the parent (i.e., current) file, prior to the
+              explicitly provided include paths (via `-I` and/or
+              `$THRIFT_INCLUDE_PATH`).
+              Default: true (but will soon change to false).
   --typedef-uri-requires-annotation=true|false
               Disable URI support for typedefs without the
               @thrift.AllowLegacyTypedefUri annotation.
@@ -617,8 +623,8 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
 
   // Load standard library if available.
   const std::string schema_path = "thrift/lib/thrift/schema.thrift";
-  auto found_or_error =
-      source_mgr.find_include_file(schema_path, "", pparams.incl_searchpath);
+  auto found_or_error = source_mgr.find_include_file(
+      schema_path, pparams.incl_searchpath, /*program_path=*/std::nullopt);
   if (found_or_error.index() == 0) {
     if (!program_bundle->find_program_by_full_path(
             std::get<0>(found_or_error))) {
@@ -808,6 +814,11 @@ std::string parse_args(
       // no-op
     } else if (flag == "allow-64bit-consts") {
       pparams.allow_64bit_consts = true;
+    } else if (maybe_parse_boolean_flag(
+                   flag,
+                   /*prefix=*/"allow-self-relative-includes",
+                   &pparams.allow_self_relative_includes)) {
+      continue;
     } else if (maybe_parse_boolean_flag(
                    flag,
                    /*prefix=*/"typedef-uri-requires-annotation",
@@ -1047,6 +1058,9 @@ void record_invocation_params(
   parse_params_metric.add(
       "allow_missing_includes=" +
       std::to_string(pparams.allow_missing_includes));
+  parse_params_metric.add(
+      "allow_self_relative_includes=" +
+      std::to_string(pparams.allow_self_relative_includes));
   parse_params_metric.add(
       "typedef_uri_requires_annotation=" +
       std::to_string(pparams.typedef_uri_requires_annotation));

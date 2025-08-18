@@ -282,8 +282,8 @@ bool source_manager::path_exists_in_backend(
 
 source_manager::path_or_error source_manager::find_include_file(
     std::string_view include_file_path,
-    std::string_view parent_path,
-    const std::vector<std::string>& search_paths) {
+    const std::vector<std::string>& search_paths,
+    std::optional<std::string_view> program_path) {
   // If the given `include_file_path` has already been resolved, return the
   // known path.
   if (auto itr = found_includes_.find(include_file_path);
@@ -321,15 +321,17 @@ source_manager::path_or_error source_manager::find_include_file(
     }
   }
 
-  // First, look for the given include path relative to parent directory
-  const std::filesystem::path parent_dir =
-      resolve_parent_directory(parent_path, found_includes_);
-  if (auto foundPathInParentDir =
-          try_search_path(include_file_path, parent_dir)) {
-    return new_found_include(foundPathInParentDir->string());
+  if (program_path.has_value()) {
+    // Look for the given include path relative to parent directory
+    const std::filesystem::path parent_dir =
+        resolve_parent_directory(program_path.value(), found_includes_);
+    if (auto foundPathInParentDir =
+            try_search_path(include_file_path, parent_dir)) {
+      return new_found_include(foundPathInParentDir->string());
+    }
   }
 
-  // Otherwise, iterate through `search_paths`.
+  // Iterate through `search_paths`.
   for (const std::string& search_path : search_paths) {
     if (auto foundPath = try_search_path(include_file_path, search_path)) {
       return new_found_include(foundPath->string());

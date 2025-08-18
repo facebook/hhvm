@@ -53,6 +53,13 @@ struct parsing_params {
    */
   bool allow_missing_includes = false;
 
+  /**
+   * Whether (Thrift) `include` paths should be resolved against the directory
+   * of the parent (i.e., current) file, prior to the explicitly provided
+   * include paths.
+   */
+  bool allow_self_relative_includes = true;
+
   // DO_BEFORE(hchok,20250901): Clean up typedef URI flag once rolled out
   /**
    * Determines whether implicit URIs are generated and explicit URIs are

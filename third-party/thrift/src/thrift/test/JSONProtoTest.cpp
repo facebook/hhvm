@@ -18,6 +18,7 @@
 #include <iostream>
 
 #include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/test/gen-cpp2/DebugProtoTest_types.h>
 #include <thrift/test/gen-cpp2/DebugProtoTest_types_custom_protocol.h>
 
 using namespace std;

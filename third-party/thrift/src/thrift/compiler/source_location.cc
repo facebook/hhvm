@@ -18,6 +18,7 @@
 #include <thrift/compiler/source_location.h>
 
 #include <fmt/core.h>
+#include <fmt/std.h>
 
 #include <algorithm>
 #include <array>
@@ -128,6 +129,25 @@ class default_source_manager_backend final : public source_manager_backend {
   }
 };
 
+/**
+ * Returns the parent directory of the given `target_path`.
+ *
+ * @param resolved_paths Cache of previously resolved paths.
+ */
+std::filesystem::path resolve_parent_directory(
+    std::string_view target_path,
+    const std::map<std::string, std::string, std::less<>>& resolved_paths) {
+  if (auto itr = resolved_paths.find(target_path);
+      itr != resolved_paths.end()) {
+    target_path = itr->second;
+  }
+
+  std::filesystem::path parent_dir =
+      std::filesystem::path(target_path).parent_path();
+
+  return parent_dir.empty() ? std::filesystem::path(".") : parent_dir;
+}
+
 } // namespace
 
 source_manager::source_manager()
@@ -208,7 +228,7 @@ std::string_view source_manager::get_text_range(
   assert(first != nullptr);
   const char* last = get_text(range.end);
   assert(last != nullptr);
-  return std::string_view(first, /* count= */ last - first);
+  return std::string_view(first, /* count */ last - first);
 }
 
 resolved_location::resolved_location(
@@ -230,77 +250,95 @@ resolved_location::resolved_location(
   column_ = loc.offset_ - line_offsets[line_ - 1] + 1;
 }
 
+std::optional<std::filesystem::path> source_manager::try_search_path(
+    const std::filesystem::path& include_path,
+    const std::filesystem::path& search_path) {
+  std::filesystem::path sfilename = include_path;
+  if (search_path != "." && search_path != "") {
+    sfilename = std::filesystem::path(search_path) / include_path;
+  }
+  if (path_exists_in_backend(sfilename) ||
+      file_source_map_.find(sfilename.string()) != file_source_map_.end()) {
+    return sfilename;
+  }
+#ifdef _WIN32
+  // On Windows, handle files found at potentially long paths.
+  sfilename = R"(\\?\)" +
+      std::filesystem::absolute(sfilename)
+          .make_preferred()
+          .lexically_normal()
+          .string();
+  if (path_exists_in_backend(sfilename)) {
+    return sfilename;
+  }
+#endif
+  return std::nullopt;
+}
+
+bool source_manager::path_exists_in_backend(
+    const std::filesystem::path& path) const {
+  return backend_ == nullptr ? false : backend_->exists(path);
+}
+
 source_manager::path_or_error source_manager::find_include_file(
-    std::string_view filename,
+    std::string_view include_file_path,
     std::string_view parent_path,
     const std::vector<std::string>& search_paths) {
-  if (auto itr = found_includes_.find(filename); itr != found_includes_.end()) {
+  // If the given `include_file_path` has already been resolved, return the
+  // known path.
+  if (auto itr = found_includes_.find(include_file_path);
+      itr != found_includes_.end()) {
     return source_manager::path_or_error{std::in_place_index<0>, itr->second};
   }
 
-  const auto exists = [&](const std::filesystem::path& path) -> bool {
-    return backend_ == nullptr ? false : backend_->exists(path);
-  };
-
-  auto found = [&](std::string path) {
-    found_includes_[std::string(filename)] = path;
+  // Convenience callback to use when the path the the include has been
+  // succcessfully resolved: updates the set of known paths and returns a
+  // successful resutl with the resolved path.
+  auto new_found_include = [&](std::string path) {
+    found_includes_[std::string(include_file_path)] = path;
     return source_manager::path_or_error{
         std::in_place_index<0>, std::move(path)};
   };
 
-  if (file_source_map_.find(filename) != file_source_map_.end()) {
-    return found(std::string(filename));
+  // The included_file_path is already known as a source file: return it
+  // directly.
+  if (file_source_map_.find(include_file_path) != file_source_map_.end()) {
+    return new_found_include(std::string(include_file_path));
   }
 
   // Absolute path? Just try that.
-  std::filesystem::path path(filename);
+  std::filesystem::path path(include_file_path);
   if (path.has_root_directory()) {
     try {
-      return found(std::filesystem::canonical(path).string());
+      return new_found_include(std::filesystem::canonical(path).string());
     } catch (const std::filesystem::filesystem_error& e) {
       return source_manager::path_or_error{
           std::in_place_index<1>,
           fmt::format(
-              "Could not find file: {}. Error: {}", filename, e.what())};
+              "Could not find file: {}. Error: {}",
+              include_file_path,
+              e.what())};
     }
   }
 
-  // Relative path, start searching
-  // new search path with current dir global
-  std::vector<std::string> sp = search_paths;
-  auto itr = found_includes_.find(parent_path);
-  std::string_view resolved_parent_path =
-      itr != found_includes_.end() ? itr->second : parent_path;
-  auto dir = std::filesystem::path(resolved_parent_path).parent_path().string();
-  dir = dir.empty() ? "." : dir;
-  sp.insert(sp.begin(), std::move(dir));
-  // Iterate through paths.
-  std::vector<std::string>::iterator it;
-  for (it = sp.begin(); it != sp.end(); it++) {
-    std::filesystem::path sfilename = filename;
-    if ((*it) != "." && (*it) != "") {
-      sfilename = std::filesystem::path(*(it)) / filename;
+  // First, look for the given include path relative to parent directory
+  const std::filesystem::path parent_dir =
+      resolve_parent_directory(parent_path, found_includes_);
+  if (auto foundPathInParentDir =
+          try_search_path(include_file_path, parent_dir)) {
+    return new_found_include(foundPathInParentDir->string());
+  }
+
+  // Otherwise, iterate through `search_paths`.
+  for (const std::string& search_path : search_paths) {
+    if (auto foundPath = try_search_path(include_file_path, search_path)) {
+      return new_found_include(foundPath->string());
     }
-    if (exists(sfilename) ||
-        file_source_map_.find(sfilename.string()) != file_source_map_.end()) {
-      return found(sfilename.string());
-    }
-#ifdef _WIN32
-    // On Windows, handle files found at potentially long paths.
-    sfilename = R"(\\?\)" +
-        std::filesystem::absolute(sfilename)
-            .make_preferred()
-            .lexically_normal()
-            .string();
-    if (exists(sfilename)) {
-      return found(sfilename.string());
-    }
-#endif
   }
   // File was not found.
   return source_manager::path_or_error{
       std::in_place_index<1>,
-      fmt::format("Could not find include file {}", filename)};
+      fmt::format("Could not find include file {}", include_file_path)};
 }
 
 std::optional<std::string> source_manager::found_include_file(

@@ -170,9 +170,22 @@ class source_manager {
    */
   source_view add_source(std::string_view file_name, std::vector<char> text);
 
+  /**
+   * Check if the given `include_path` exists relative to the given
+   * `search_path` (in this source_manager's backend filesystem.
+   *
+   * @return the resolved path, if it exists, or std::nullopt if not.
+   */
+  std::optional<std::filesystem::path> try_search_path(
+      const std::filesystem::path& include_path,
+      const std::filesystem::path& search_path);
+
+  bool path_exists_in_backend(const std::filesystem::path& path) const;
+
  public:
   // Creates a source_manager with the default (filesystem-based) backend.
   source_manager();
+
   // Creates a source_manager with the user-provided backend implementation.
   // If the backend is null, then only virtual files can be read.
   explicit source_manager(std::unique_ptr<source_manager_backend> backend)
@@ -233,13 +246,29 @@ class source_manager {
    */
   std::string_view get_text_range(const source_range& range) const;
 
-  // Locates a filename among the include paths.
-  // The resolved path is made available to get_file.
+  /**
+   * Attempts to locate an included file.
+   *
+   * @param include_file_path The path to the included file, as specified in
+   *        Thrift IDL source (i.e., the path that follows the `include`
+   *        keyword).
+   * @param program_path The path to the file of the program currently being
+   *        compiled, which is trying to `include "include_file_path"`.
+   * @param search_paths The ordered list of (directory) paths explicitly
+   *        provided by the caller, relative to which to attempt resolving the
+   *        given `include_file_path`.
+   *
+   * If the file corresponding to `include_file_path` is successfully found, its
+   * path is returned. The contents of that file are added to this
+   * `source_manager` instance, and are available through `get_file()` (using
+   * the returned path).
+   */
   using path_or_error = std::variant<std::string, std::string>;
   path_or_error find_include_file(
-      std::string_view filename,
+      std::string_view include_file_path,
       std::string_view program_path,
       const std::vector<std::string>& search_paths);
+
   // Queries for a file previously found by find_include_file.
   std::optional<std::string> found_include_file(
       std::string_view filename) const;

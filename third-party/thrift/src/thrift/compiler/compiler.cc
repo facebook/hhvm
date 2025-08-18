@@ -700,7 +700,7 @@ std::optional<std::string_view> get_flag_value_if_starts_with(
  *     sets *target accordingly).
  */
 bool maybe_parse_boolean_flag(
-    std::string_view prefix, std::string_view flag, bool* target) {
+    std::string_view flag, std::string_view prefix, bool* target) {
   assert(target != nullptr);
 
   if (auto maybe_flag_value = get_flag_value_if_starts_with(flag, prefix)) {
@@ -734,9 +734,9 @@ bool maybe_parse_boolean_flag(
  *
  * @throws std::runtime_error on invalid input.
  */
-bool maybe_parse_extra_validation_with_level(
-    std::string_view prefix,
+bool maybe_parse_validation_level_flag(
     const std::string& flag,
+    std::string_view prefix,
     sema_params::validation_level* target) {
   assert(target != nullptr);
 
@@ -809,8 +809,8 @@ std::string parse_args(
     } else if (flag == "allow-64bit-consts") {
       pparams.allow_64bit_consts = true;
     } else if (maybe_parse_boolean_flag(
-                   /*prefix=*/"typedef-uri-requires-annotation",
                    flag,
+                   /*prefix=*/"typedef-uri-requires-annotation",
                    &pparams.typedef_uri_requires_annotation)) {
       continue;
     } else if (flag == "record-genfiles") {
@@ -889,51 +889,51 @@ std::string parse_args(
         }
 
         try {
-          if (maybe_parse_extra_validation_with_level(
-                  "redundant_custom_default_values",
-                  validator,
+          if (maybe_parse_validation_level_flag(
+                  /*flag=*/validator,
+                  /*prefix=*/"redundant_custom_default_values",
                   &sparams.redundant_custom_default_values)) {
             continue;
           }
 
-          if (maybe_parse_extra_validation_with_level(
-                  "unnecessary_enable_custom_type_ordering",
-                  validator,
+          if (maybe_parse_validation_level_flag(
+                  /*flag=*/validator,
+                  /*prefix=*/"unnecessary_enable_custom_type_ordering",
                   &sparams.unnecessary_enable_custom_type_ordering)) {
             continue;
           }
 
-          if (maybe_parse_extra_validation_with_level(
-                  "nonallowed_typedef_with_uri",
-                  validator,
+          if (maybe_parse_validation_level_flag(
+                  /*flag=*/validator,
+                  /*prefix=*/"nonallowed_typedef_with_uri",
                   &sparams.nonallowed_typedef_with_uri)) {
             continue;
           }
 
-          if (maybe_parse_extra_validation_with_level(
-                  "typedef_explicit_uri",
-                  validator,
+          if (maybe_parse_validation_level_flag(
+                  /*flag=*/validator,
+                  /*prefix=*/"typedef_explicit_uri",
                   &sparams.typedef_explicit_uri)) {
             continue;
           }
 
-          if (maybe_parse_extra_validation_with_level(
-                  "struct_optional_field_custom_default",
-                  validator,
+          if (maybe_parse_validation_level_flag(
+                  /*flag=*/validator,
+                  /*prefix=*/"struct_optional_field_custom_default",
                   &sparams.struct_optional_field_custom_default)) {
             continue;
           }
 
-          if (maybe_parse_extra_validation_with_level(
-                  "union_field_custom_default",
-                  validator,
+          if (maybe_parse_validation_level_flag(
+                  /*flag=*/validator,
+                  /*prefix=*/"union_field_custom_default",
                   &sparams.union_field_custom_default)) {
             continue;
           }
 
-          if (maybe_parse_extra_validation_with_level(
-                  "required_field_qualifier",
-                  validator,
+          if (maybe_parse_validation_level_flag(
+                  /*flag=*/validator,
+                  /*prefix=*/"required_field_qualifier",
                   &sparams.required_field_qualifier)) {
             continue;
           }

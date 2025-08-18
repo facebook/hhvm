@@ -18,6 +18,7 @@
 
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/test/gen-cpp2/ThriftTest_types.h>
+#include <thrift/test/gen-cpp2/ThriftTest_types_custom_protocol.h>
 
 namespace thrift::test {
 

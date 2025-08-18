@@ -18,7 +18,6 @@
 
 #include <thrift/lib/cpp2/protocol/JSONProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
-#include <thrift/lib/cpp2/protocol/test/gen-cpp2/Module_types.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/Module_types_custom_protocol.h>
 
 using namespace std;

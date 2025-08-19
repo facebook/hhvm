@@ -185,7 +185,8 @@ There are three types of `expression`s in Whisker:
     * `124`
   * `boolean-literal` — either `true` or `false`.
   * `null-literal` — *exactly* `null`.
-* ***Variable*** — values interpolated from the *context*, like `{{ person.name }}`. Variables allow scoped access into the context using a series of *identifiers* separated by dots (`.`).
+* ***Variable*** — values interpolated from the *context*, like `{{ person.name }}`. Variables allow scoped access into the context using a series of *components* separated by dots (`.`).
+  * A *component* is consists of an optional *qualifier* (an *identifier*), followed by a required *identifier* (*property*).
   * Additionally, the special *implicit context* variable, `{{ . }}` or `{{ this }}`, refers to the *context* object itself.
 * ***Function call*** — [lisp-like](https://en.wikipedia.org/wiki/Lisp_(programming_language)#Syntax_and_semantics) syntax for invoking functions, often referred to as [S-expressions](https://en.wikipedia.org/wiki/S-expression). Functions are defined in the [*data model*](#data-model). Examples:
   * `{{ (uppercase "hello") }}`
@@ -231,7 +232,8 @@ interpolation → { "{{" ~ expression ~ "}}" }
 expression    → { literal | variable | function-call }
 
 literal             → { string-literal | i64-literal | boolean-literal | null-literal }
-variable            → { "." | "this" | (identifier ~ ("." ~ identifier)*) }
+variable-component  → { [identifier ~ ":"] ~ identifier }
+variable            → { "." | "this" | (variable-component ~ ("." ~ variable-component)*) }
 function-call       → { "(" ~ (builtin-call | user-defined-call) ~ ")" }
 
 string-literal  → { <see above> }
@@ -1158,22 +1160,11 @@ A Whisker `object` is one of the following types:
 * `boolean` — 1-bit `true` or `false`.
 * `null` — marker indicating ["no value"](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/null).
 * `array` — An ordered list of `object` (note the recursion). An `array` can be traversed using [`{{#each}}`](#each-blocks).
-* `map` — An unordered set of key-value pairs. Keys are valid *identifiers* represented as `string`s. Values are any `object` (note the recursion). A `map` can be *unpacked* using [`{{#with}}`](#with-blocks) or accessed through [variable interpolation](#expressions).
-* `native_object` — An implementation-defined type that can behave like an `array` or `map`. A value of this type can only be created by the native runtime (e.g. C++).
-* `native_function` — An implementation-defined type that can be invoked in [Whisker templates](#expressions). A value of this type can only be created by the native runtime (e.g. C++).
-* `native_handle` — An opaque reference to an implementation-defined type that Whisker cannot directly interact with. A value of this type is meaningful only to the native runtime (e.g. C++) in conjunction with `native_function`.
+* `map` — An unordered set of key-value pairs. Keys are valid *identifiers* represented as `string`s. Values are any `object` (note the recursion). A `map` can be *unpacked* using [`{{#with}}`](#with-blocks) or accessed through [variable interpolation](#interpolations--expressions).
+* `native_function` — An implementation-defined type that can be invoked in [Whisker templates](#interpolations--expressions). A value of this type can only be created by the native runtime (e.g. C++).
+* `native_handle` — An opaque reference to an implementation-defined type that Whisker can only interact with through a *prototype*. A value of this type without a *prototype* is meaningful only to the native runtime (e.g. C++) in conjunction with `native_function`.
 
 The following types are *printable*: `i64`, `string`.
-
-### Native Object
-
-:::note
-This section is incomplete.
-:::
-
-A `native_object` is transparent to Whisker templates. A `native_object` *may* allow property access via variable interpolation, or [`{{#with}}`](#with-blocks). A `native_object` *may* allow iteration via [`{{#each}}`](#each-blocks).
-
-`native_object` allows the native runtime (e.g. C++) to bridge types and data to Whisker templates.
 
 ### Native Function
 
@@ -1181,7 +1172,7 @@ A `native_object` is transparent to Whisker templates. A `native_object` *may* a
 This section is incomplete.
 :::
 
-A `native_function` represents a native runtime (e.g. C++) function implementation that is callable from Whisker templates via [function call expressions](#expressions).
+A `native_function` represents a native runtime (e.g. C++) function implementation that is callable from Whisker templates via [function call expressions](#interpolations--expressions).
 
 A `native_function` accepts arguments of type `object` with arbitrary arity, and produces exactly one value of type `object`.
 
@@ -1444,5 +1435,714 @@ hello world
 Handlebars does *not* consider multiple tags on the same line as standalone.
 Whisker supports such behavior to retain compatibility with [`mstch`](https://github.com/no1msd/mstch).
 :::
+
+</Example>
+
+## Built-in functions
+
+### Boolean logic
+
+#### `and`
+The logical and operation for 2 or more expressions. Returns `true` if all
+argument expressions evaluate to `true`, otherwise returns `false`.
+
+:::note
+This function is *short-circuiting* - if an argument is `false`, any following
+expressions are not evaluated.
+:::
+
+**Positional Arguments**:
+- `a` (expression) — the first operand
+- `b` (expression) — the second operand
+- `expression...` — additional operands
+
+<Example>
+
+```whisker title=example.whisker
+{{ (and var1 var2 var3) }}
+```
+
+```json title=Context
+{
+  "var1": true,
+  "var2": false,
+  "var3": true
+}
+```
+
+```text title=Output
+false
+```
+
+</Example>
+
+---
+
+#### `if`
+The ternary conditional operation. Evaluates the first argument expression. If it
+evaluates to `true`, then the second argument expression is evaluated and returned.
+If the first argument expression evaluates to `false`, then the third argument
+expression is evaluated and returned.
+
+:::note
+This function is *short-circuiting* - the branch not taken is not evaluated.
+:::
+
+**Positional Arguments**:
+- `condition` (expression) — the condition
+- `true_value` (expression) — the expression to evaluate and return if `condition` is `true`
+- `false_value` (expression) — the expression to evaluate and return if `condition` is `false`
+
+<Example>
+
+```whisker title=example.whisker
+{{ (if cond "Cond was true" false_var) }}
+```
+
+```json title=Context
+{ "cond": true }
+```
+
+```text title=Output
+Cond was true
+```
+
+Notice that it was valid to evaluate this template without `false_var` being
+defined, due to the short-circuiting behavior of `if`.
+
+</Example>
+
+---
+
+#### `not`
+The logical not operation. Returns `true` if the argument expression evaluates
+to `false`, otherwise returns `false`.
+
+**Positional Arguments**:
+- `expression` — the operand
+
+<Example>
+
+```whisker title=example.whisker
+{{ (not var) }}
+```
+
+```json title=Context
+{ "var": true }
+```
+
+```text title=Output
+false
+```
+
+</Example>
+
+---
+
+#### `or`
+The logical or operation for 2 or more expressions. Returns `true` if any of
+the arguments are `true`, otherwise returns `false`.
+
+:::note
+This function is *short-circuiting* - if an argument is `true`, any following
+expressions are not evaluated.
+:::
+
+**Positional Arguments**:
+- `expression` — the first operand
+- `expression` — the second operand
+- `expression...` — additional operands
+
+<Example>
+
+```whisker title=example.whisker
+{{ (or var1 var2 var3) }}
+```
+
+```json title=Context
+{
+  "var1": false,
+  "var2": true,
+  "var3": false
+}
+```
+
+```text title=Output
+true
+```
+
+</Example>
+
+### Array
+
+---
+
+#### `array.at`
+Gets the object from an array at a given index. If the index is negative, or
+larger than the size of the array, then an error is thrown.
+
+**Positional Arguments**:
+- `array` — the array
+- `index` (i64) — the index
+
+<Example>
+
+```whisker title=example.whisker
+{{ (array.at my_array 0) }}
+```
+
+```json title=Context
+{ "my_array": ["foo", "bar", "baz"] }
+```
+
+```text title=Output
+foo
+```
+
+</Example>
+
+---
+
+#### `array.empty?`
+Checks an array for emptiness. Returns `true` if the array is empty, otherwise
+returns `false`.
+
+**Positional Arguments**:
+- `array` — the array
+
+<Example>
+
+```whisker title=example.whisker
+{{ (array.empty? my_array) }}
+```
+
+```json title=Context
+{ "my_array": [] }
+```
+
+```text title=Output
+true
+```
+
+</Example>
+
+---
+
+#### `array.enumerate`
+Returns a view of the provided array's items paired with their index. The output
+is an array where each element is a tuple of `(index, item)`.
+
+The order of items produced in the output array matches the input array.
+
+:::note
+The enumerated tuple may have the following forms, based on the named arguments
+`with_first` and `with_last`:
+- `(index, item)` (with arguments `with_first=false`, `with_last=false`)
+- `(index, item, first?)` (with arguments `with_first=true`, `with_last=false`)
+- `(index, item, last?)` (with arguments `with_first=false`, `with_last=true`)
+- `(index, item, first?, last?)` (with arguments `with_first=true`, `with_last=true`)
+:::
+
+**Positional Arguments**:
+- `array` — the array to enumerate
+
+**Named Arguments**:
+- `with_first` (boolean) — if `true`, the 3rd element of each tuple is set to the
+  value of `index == 0`
+- `with_last` (boolean) — if `true`, the last element of each tuple is set to the
+  value of `index == <size of array> - 1`. If `with_first` is `true`, then this is
+  the 4th element. Otherwise, it is the 3rd element.
+
+<Example>
+
+```whisker title=example.whisker
+{{#each (array.enumerate my_array with_first=true) as |index item first?|}}
+  {{index}}: {{item}}{{#if first?}} (first){{/if}}
+{{/each}}
+```
+
+```json title=Context
+{
+  "my_array": ["foo", "bar", "baz"]
+}
+```
+
+```text title=Output
+0: foo (first)
+1: bar
+2: baz
+```
+
+</Example>
+
+---
+
+#### `array.len`
+Produces the length of an array.
+
+**Positional Arguments**:
+- `array` - The array to find length of.
+
+<Example>
+
+```whisker title=example.whisker
+{{ (array.len my_array) }}
+```
+
+```json title=Context
+{
+  "my_array": ["foo", "bar", "baz"]
+}
+```
+
+```text title=Output
+3
+```
+
+</Example>
+
+---
+
+#### `array.of`
+Creates an array with the provided arguments in order. This function can be used
+to form an "array literal".
+
+**Positional Arguments**:
+- `object...` — the items to include in the array, in the desired order.
+
+<Example>
+
+```whisker title=example.whisker
+{{# each (array.of 0 1 "foo" false) as |item| }}
+  {{item}}
+{{/ each }}
+```
+
+```text title=Output
+  0
+  1
+  foo
+  false
+```
+
+</Example>
+
+### Int
+
+#### `int.add`
+Returns the sum of the provided arguments.
+
+**Positional Arguments**:
+- `i64...` — the integers to add
+
+<Example>
+
+```whisker title=example.whisker
+{{ (int.add 1 2 3) }}
+```
+
+```text title=Output
+6
+```
+
+</Example>
+
+---
+
+#### `int.eq?`
+Checks two i64s for equality.
+
+**Positional Arguments**:
+- `a` (i64) — the left-hand side of the comparison
+- `b` (i64) — the right-hand side of the comparison
+
+<Example>
+
+```whisker title=example.whisker
+{{ (int.eq? 1 1) }}
+```
+
+```text title=Output
+true
+```
+
+</Example>
+
+---
+
+#### `int.ge?`
+Checks if one i64 is greater or equal to than another.
+
+**Positional Arguments**:
+- `a` (i64) — the left-hand side of the comparison
+- `b` (i64) — the right-hand side of the comparison
+
+<Example>
+
+```whisker title=example.whisker
+{{ (int.ge? my_int 42) }}
+```
+
+```json title=Context
+{ "my_int": 12 }
+```
+
+```text title=Output
+false
+```
+
+</Example>
+
+---
+
+#### `int.gt?`
+Checks if one i64 is greater than another.
+
+**Positional Arguments**:
+- `a` (i64) — the left-hand side of the comparison
+- `b` (i64) — the right-hand side of the comparison
+
+<Example>
+
+```whisker title=example.whisker
+{{ (int.gt? my_int 42) }}
+```
+
+```json title=Context
+{ "my_int": 12 }
+```
+
+```text title=Output
+false
+```
+
+</Example>
+
+---
+
+#### `int.le?`
+Checks if one i64 is less or equal to than another.
+
+**Positional Arguments**:
+- `a` (i64) — the left-hand side of the comparison
+- `b` (i64) — the right-hand side of the comparison
+
+<Example>
+
+```whisker title=example.whisker
+{{ (int.le? my_int 42) }}
+```
+
+```json title=Context
+{ "my_int": 12 }
+```
+
+```text title=Output
+true
+```
+
+</Example>
+
+---
+
+#### `int.lt?`
+Checks if one i64 is less than another.
+
+**Positional Arguments**:
+- `a` (i64) — the left-hand side of the comparison
+- `b` (i64) — the right-hand side of the comparison
+
+<Example>
+
+```whisker title=example.whisker
+{{ (int.lt? my_int 42) }}
+```
+
+```json title=Context
+{ "my_int": 12 }
+```
+
+```text title=Output
+true
+```
+
+</Example>
+
+---
+
+#### `int.ne?`
+Checks two i64s for inequality.
+
+**Positional Arguments**:
+- `a` (i64) — the left-hand side of the comparison
+- `b` (i64) — the right-hand side of the comparison
+
+<Example>
+
+```whisker title=example.whisker
+{{ (int.ne? my_int 42) }}
+```
+
+```json title=Context
+{ "my_int": 12 }
+```
+
+```text title=Output
+true
+```
+
+</Example>
+
+---
+
+#### `int.neg`
+Negates the provided i64.
+
+**Positional Arguments**:
+- `i64` — the integer to negate
+
+<Example>
+
+```whisker title=example.whisker
+{{ (int.neg -1) }}
+```
+
+```text title=Output
+1
+```
+
+</Example>
+
+---
+
+#### `int.sub`
+Subtracts one i64 from another.
+
+**Positional Arguments**:
+- `a` (i64) — the number to subtract from
+- `b` (i64) — the number to subtract
+
+<Example>
+
+```whisker title=example.whisker
+{{ (int.sub my_int 1) }}
+```
+
+```json title=Context
+{ "my_int": 12 }
+```
+
+```text title=Output
+11
+```
+
+</Example>
+
+### Map
+
+#### `map.items`
+Returns a view of the provided map's items. The output is an array where each
+element is a map with "key" and "value" properties.
+
+This function fails if the provided map is not enumerable.
+
+The order of items in the produced array matches the enumeration above. For
+whisker::map, properties are sorted lexicographically by name.
+
+**Positional Arguments**:
+- `map` — The map to enumerate
+
+<Example>
+
+```whisker title=example.whisker
+{{#each (map.items my_map) as |item|}}
+  {{item.key}}: {{item.value}}
+{{/each}}
+```
+
+```json title=Context
+{
+  "my_map": {
+    "key1": "value1",
+    "key2": "value2"
+  }
+}
+```
+
+```text title=Output
+  key1: value1
+  key2: value2
+```
+
+</Example>
+
+---
+
+#### `map.has_key?`
+Determines if the provided map contains a given key.
+
+**Positional Arguments**:
+- `map` — The map to check for key
+- `key` (string) — The key to check in the map
+
+<Example>
+
+```whisker title=example.whisker
+{{ (map.has_key? my_map "key") }}
+```
+
+```json title=Context
+{
+  "my_map": {
+    "key": "value"
+  }
+}
+```
+
+```text title=Output
+true
+```
+
+</Example>
+
+### Object
+
+#### `object.eq?`
+Checks two objects for equality. Returns `true` if the objects are equal, otherwise
+returns `false`.
+
+:::note
+Value equality between two (unordered) pair of objects is defined as follows:
+
+| Left Type | Right Type | Equality      |
+| --------- | ---------- | ------------- |
+| `null`    | `null`     | Equal         |
+| `i64`     | `i64`      | If same value |
+| `f64`     | `f64`      | If same value |
+| `string`  | `string`   | If same value |
+| `boolean` | `boolean`  | If same value |
+| `array`   | `array`    | If all corresponding elements are equal (recursive) |
+| `map`     | `map`      | If all both maps have enumerable property keys and
+                           each key-value pairs are equal between the two maps (recursive) |
+| `native_function` | `native_function` | If same pointer to function |
+| `native_handle` | `native_handle` | If same pointer to handle |
+
+For any pairing of objects not listed above, the objects are **NOT** equal.
+:::
+
+**Positional Arguments**:
+- `a` (object) — the left-hand side of the comparison
+- `b` (object) — the right-hand side of the comparison
+
+<Example>
+
+```whisker title=example.whisker
+{{ (object.eq? my_obj my_other_obj) }}
+```
+
+```json title=Context
+{
+  "my_obj": ["foo"],
+  "my_other_obj": ["foo"]
+}
+```
+
+```text title=Output
+true
+```
+
+</Example>
+
+---
+
+#### `object.notnull?`
+Checks if an object is not null. Returns `true` if the object is not null, otherwise
+returns `false`.
+
+**Positional Arguments**:
+- `object` — the object to check
+
+<Example>
+
+```whisker title=example.whisker
+{{ (object.notnull? my_obj) }}
+```
+
+```json title=Context
+{ "my_obj": null }
+```
+
+```text title=Output
+false
+```
+
+</Example>
+
+### String
+
+#### `string.concat`
+Concatenates the provided strings.
+
+**Positional Arguments**:
+- `string...` — the strings to concatenate
+
+<Example>
+
+```whisker title=example.whisker
+{{ (string.concat "foo" "bar" "baz") }}
+```
+
+```text title=Output
+foobarbaz
+```
+
+</Example>
+
+---
+
+#### `string.empty?`
+Checks a string for emptiness. Returns `true` if the string is empty, otherwise
+returns `false`.
+
+**Positional Arguments**:
+- `string` — the string to check
+
+<Example>
+
+```whisker title=example.whisker
+{{ (string.empty? my_string) }}
+```
+
+```json title=Context
+{ "my_string": "foo" }
+```
+
+```text title=Output
+false
+```
+
+</Example>
+
+---
+
+#### `string.len`
+Produces the length of a string.
+
+**Positional Arguments**:
+- `string` - The string to find length of.
+
+<Example>
+
+```whisker title=example.whisker
+{{ (string.len my_string) }}
+```
+
+```json title=Context
+{ "my_string": "foo" }
+```
+
+```text title=Output
+3
+```
 
 </Example>

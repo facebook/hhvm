@@ -632,4 +632,66 @@ TEST_F(StandardLibraryTest, object_eq) {
   }
 }
 
+TEST_F(StandardLibraryTest, object_notnull) {
+  strict_printable_types(diagnostic_level::info);
+
+  {
+    auto result = render(
+        "{{ (object.notnull? null) }}\n"
+        "{{ (object.notnull? 0) }}\n"
+        "{{ (object.notnull? false) }}\n"
+        "{{ (object.notnull? true) }}\n"
+        "{{ (object.notnull? \"foo\") }}\n",
+        w::null);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "false\n"
+        "true\n"
+        "true\n"
+        "true\n"
+        "true\n");
+  }
+
+  {
+    const whisker::object native = w::native_handle(
+        manage_owned<std::vector<int>>(), nullptr /* prototype */);
+    const array::raw a{w::i64(1), w::string("foo"), w::boolean(true)};
+    const map::raw m{
+        {"foo", w::string("bar")},
+        {"arr", w::array(a)},
+        {"null_val", w::null},
+        {"native", native}};
+    const auto context = w::map({
+        {"raw_array", w::array(a)},
+        {"wrapped_array", custom_array::make(a)},
+        {"raw_map", w::map(m)},
+        {"wrapped_map", custom_map::make(m)},
+    });
+
+    auto result = render(
+        "{{ (object.notnull? raw_array) }}\n"
+        "{{ (object.notnull? raw_map) }}\n"
+        "{{ (object.notnull? raw_map.null_val) }}\n"
+        "{{ (object.notnull? raw_map.native) }}\n"
+
+        "{{ (object.notnull? wrapped_array) }}\n"
+        "{{ (object.notnull? wrapped_map) }}\n"
+        "{{ (object.notnull? wrapped_map.null_val) }}\n"
+        "{{ (object.notnull? wrapped_map.native) }}\n",
+        context);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "true\n"
+        "true\n"
+        "false\n"
+        "true\n"
+        "true\n"
+        "true\n"
+        "false\n"
+        "true\n");
+  }
+}
+
 } // namespace whisker

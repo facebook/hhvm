@@ -567,6 +567,24 @@ map::raw::value_type create_object_functions() {
         return lhs == rhs;
       });
 
+  /**
+   * Returns true if an object is not null.
+   *
+   * Name: object.notnull?
+   *
+   * Arguments:
+   *   - [object] — The object to check for nullness.
+   *
+   * Returns:
+   *   [boolean] whether the object is not null.
+   */
+  object_functions["notnull?"] = dsl::make_function(
+      "object.notnull?", [](dsl::function::context ctx) -> boolean {
+        ctx.declare_named_arguments({});
+        ctx.declare_arity(1);
+        return !ctx.raw().positional_arguments()[0].is_null();
+      });
+
   return map::raw::value_type{"object", w::map(std::move(object_functions))};
 }
 

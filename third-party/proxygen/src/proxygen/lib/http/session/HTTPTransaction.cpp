@@ -2118,10 +2118,15 @@ bool HTTPTransaction::onWebTransportStopSending(HTTPCodec::StreamID id,
 
 void HTTPTransaction::sendCloseWebTransportSessionCapsule(
     uint32_t errorCode, const std::string& errorMessage) {
+  if (isEgressComplete()) {
+    VLOG(4) << "Ignoring sendCloseWebTransportSessionCapsule: egress already "
+               "complete for streamID="
+            << id_;
+    return;
+  }
   CloseWebTransportSessionCapsule capsule{.applicationErrorCode = errorCode,
                                           .applicationErrorMessage =
                                               errorMessage};
-
   folly::IOBufQueue queue;
   auto writeResult = writeCloseWebTransportSession(queue, capsule);
   if (writeResult.hasError()) {

@@ -136,18 +136,16 @@ class {{> structs/unadapted_name}}{{!
         raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
 {{/python.generate_mutable_types?}}
 
-    {{#struct:exception?}}
-    {{#struct:exception_message?}}
+    {{#if (and struct:exception? (not (object.eq? null exception:message_field)))}}
 
     def __str__(self):
-        field = self.{{struct:exception_message}}
+        field = self.{{exception:message_field.py_name}}
         if field is None:
             {{! optional field, stringify }}
             return str(field)
         return field
 
-    {{/struct:exception_message?}}
-    {{/struct:exception?}}
+    {{/if (and struct:exception? (not (object.eq? null exception:message_field)))}}
     {{#struct:legacy_api?}}
 {{#python.generate_mutable_types?}}
 

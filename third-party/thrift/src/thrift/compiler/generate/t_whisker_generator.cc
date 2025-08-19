@@ -348,6 +348,10 @@ prototype<t_exception>::ptr t_whisker_generator::make_prototype_for_exception(
         return "UNSPECIFIED";
     }
   });
+  def.property(
+      "message_field", [&proto](const t_exception& self) -> whisker::object {
+        return proto.create_nullable<t_field>(self.get_message_field());
+      });
   return std::move(def).make();
 }
 

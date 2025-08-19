@@ -710,19 +710,7 @@ class python_mstch_struct : public mstch_struct {
         {
             {"struct:fields_ordered_by_id",
              &python_mstch_struct::fields_ordered_by_id},
-            {"struct:exception_message?",
-             &python_mstch_struct::has_exception_message},
-            {"struct:exception_message",
-             &python_mstch_struct::exception_message},
             {"struct:has_adapter?", &python_mstch_struct::adapter},
-            {"struct:has_invariant_field?",
-             &python_mstch_struct::has_invariant_field},
-            {"struct:legacy_api?", &python_mstch_struct::legacy_api},
-            {"struct:num_fields", &python_mstch_struct::num_fields},
-            {"struct:allow_inheritance?",
-             &python_mstch_struct::allow_inheritance},
-            {"struct:disable_field_caching?",
-             &python_mstch_struct::disable_field_caching},
         });
   }
 
@@ -734,41 +722,8 @@ class python_mstch_struct : public mstch_struct {
     return make_mstch_fields(fields);
   }
 
-  mstch::node has_invariant_field() {
-    return std::any_of(
-        struct_->fields().begin(),
-        struct_->fields().end(),
-        [](const auto& field) { return field_has_invariant_type(&field); });
-  }
-
-  mstch::node has_exception_message() {
-    return !!dynamic_cast<const t_exception&>(*struct_).get_message_field();
-  }
-
-  mstch::node exception_message() {
-    const auto* message_field =
-        dynamic_cast<const t_exception&>(*struct_).get_message_field();
-    return message_field ? python::get_py3_name(*message_field) : "";
-  }
-
   mstch::node adapter() {
     return adapter_node(adapter_annotation_, nullptr, context_, pos_);
-  }
-
-  mstch::node legacy_api() { return true; }
-
-  mstch::node num_fields() { return struct_->fields().size(); }
-
-  // While inheritance is discouraged, there is limited support for py3
-  // auto-migraters
-  mstch::node allow_inheritance() {
-    return struct_->has_structured_annotation(
-        kPythonMigrationBlockingAllowInheritanceUri);
-  }
-
-  mstch::node disable_field_caching() {
-    return has_option("disable_field_cache") ||
-        struct_->has_structured_annotation(kPythonDisableFieldCacheUri);
   }
 
  private:
@@ -1162,6 +1117,35 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
 
     def.property("external_program?", [this](const t_service& self) {
       return python_context_->program() != self.program();
+    });
+
+    return std::move(def).make();
+  }
+
+  prototype<t_structured>::ptr make_prototype_for_structured(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_structured(proto);
+    auto def = whisker::dsl::prototype_builder<h_structured>::extends(base);
+
+    def.property("has_invariant_field?", [](const t_structured& self) {
+      return std::any_of(
+          self.fields().begin(), self.fields().end(), [](const auto& field) {
+            return field_has_invariant_type(&field);
+          });
+    });
+    def.property("legacy_api?", [](const t_structured&) { return true; });
+    def.property("num_fields", [](const t_structured& self) {
+      return whisker::i64(self.fields().size());
+    });
+    def.property("allow_inheritance?", [](const t_structured& self) {
+      // While inheritance is discouraged, there is limited support for py3
+      // auto-migraters
+      return self.has_structured_annotation(
+          kPythonMigrationBlockingAllowInheritanceUri);
+    });
+    def.property("disable_field_caching?", [this](const t_structured& self) {
+      return has_option("disable_field_cache") ||
+          self.has_structured_annotation(kPythonDisableFieldCacheUri);
     });
 
     return std::move(def).make();

@@ -51,6 +51,15 @@
 #include <thrift/compiler/sema/sema_context.h>
 #include <thrift/compiler/sema/standard_validator.h>
 
+// dependency on folly/Portability.h causes UB in some targets
+#if defined(_MSC_VER)
+#define FOLLY_CPLUSPLUS _MSVC_LANG
+#else
+#define FOLLY_CPLUSPLUS __cplusplus
+#endif
+static_assert(
+    FOLLY_CPLUSPLUS >= 202002L, "Thrift must be built with C++20 or later.");
+
 namespace apache::thrift::compiler {
 namespace {
 

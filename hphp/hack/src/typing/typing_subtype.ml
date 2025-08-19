@@ -6330,9 +6330,9 @@ end = struct
                     }))
         env
     in
-    let do_tuple_optional required optional variadic =
+    let do_tuple required rest_k =
       match can_index.ci_index_expr with
-      | (_, _, Int i) ->
+      | (a, b, Int i) ->
         (match int_of_string_opt i with
         | None -> tuple_oob env
         | Some i ->
@@ -6340,18 +6340,8 @@ end = struct
           | Some ty -> return_val ty env
           | None ->
             let i = i - List.length required in
-            if can_index.ci_lhs_of_null_coalesce then
-              match List.nth optional i with
-              | Some ty -> return_val ty env
-              | None ->
-                let i = i - List.length optional in
-                (match variadic with
-                | Some ty ->
-                  if i >= 0 then
-                    return_val ty env
-                  else
-                    tuple_oob env
-                | None -> tuple_oob env)
+            if i >= 0 then
+              rest_k i (fun c -> (a, b, c))
             else
               tuple_oob env))
       | _ ->
@@ -6367,7 +6357,41 @@ end = struct
                       }))
           env
     in
+    let do_tuple_optional required optional variadic =
+      do_tuple required (fun i _ ->
+          if can_index.ci_lhs_of_null_coalesce then
+            match List.nth optional i with
+            | Some ty -> return_val ty env
+            | None ->
+              let i = i - List.length optional in
+              (match variadic with
+              | Some ty ->
+                if i >= 0 then
+                  return_val ty env
+                else
+                  tuple_oob env
+              | None -> tuple_oob env)
+          else
+            tuple_oob env)
+    in
     let do_tuple_basic tup = do_tuple_optional tup [] None in
+    let do_tuple_splat t_required t_splat =
+      do_tuple t_required (fun i ie_ctx ->
+          simplify_
+            ~subtype_env
+            ~this_ty
+            ~lhs:{ sub_supportdyn; ty_sub = t_splat }
+            ~rhs:
+              {
+                reason_super;
+                can_index =
+                  {
+                    can_index with
+                    ci_index_expr = ie_ctx (Aast.Int (Int.to_string i));
+                  };
+              }
+            env)
+    in
     let do_shape r_sub { s_fields = fdm; s_origin; s_unknown_value = _ } =
       let (_, p, _) = can_index.ci_index_expr in
       match
@@ -6691,7 +6715,8 @@ end = struct
     | ( _r_sub,
         Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } } ) ->
       do_tuple_optional t_required t_optional (Some t_variadic)
-    | (_r_sub, Ttuple { t_required; _ }) -> do_tuple_basic t_required
+    | (_r_sub, Ttuple { t_required; t_extra = Tsplat t_splat }) ->
+      do_tuple_splat t_required t_splat
     | (r_sub, Tshape ts) -> do_shape r_sub ts
     | (r_sub, Tgeneric _generic_nm) ->
       let get_transitive_upper_bounds env ty =

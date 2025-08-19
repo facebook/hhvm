@@ -1,0 +1,4 @@
+ERROR: File "type_splat_tuple_proj.php", line 9, characters 13-13:
+Tuple accessed with an index out of bounds (Typing[4116])
+ERROR: File "type_splat_tuple_proj.php", line 19, characters 13-13:
+Tuple accessed with an index out of bounds (Typing[4116])

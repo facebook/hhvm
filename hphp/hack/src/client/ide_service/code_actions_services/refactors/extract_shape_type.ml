@@ -94,6 +94,7 @@ let find_candidate ~(selection : Pos.t) ~entry ctx : candidate option =
       method! on_expr env expr =
         let (ty, expr_pos, _) = expr in
         if Pos.contains selection expr_pos then
+          let (env, ty) = Tast_env.expand_type env ty in
           let ty_ = Typing_defs_core.get_node ty in
           match (ty_, !container_pos) with
           | (Typing_defs_core.Tshape _, Some expr_container_pos) ->

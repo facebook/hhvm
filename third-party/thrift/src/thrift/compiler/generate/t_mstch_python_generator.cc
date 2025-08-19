@@ -46,23 +46,11 @@ enum class type_kind { abstract, immutable, mutable_ };
 
 class python_generator_context {
  public:
-  python_generator_context(
-      const t_program* program, bool is_patch_file, type_kind type_kind)
-      : program_(program),
-        is_patch_file_(is_patch_file),
-        type_kind_(type_kind) {}
+  python_generator_context(bool is_patch_file, type_kind type_kind)
+      : is_patch_file_(is_patch_file), type_kind_(type_kind) {}
 
   python_generator_context(python_generator_context&&) = default;
   python_generator_context& operator=(python_generator_context&&) = default;
-
-  const t_program* program() const noexcept { return program_; }
-
-  const t_program* get_type_program(const t_type& type) const {
-    if (const t_program* p = type.program()) {
-      return p;
-    }
-    return program();
-  }
 
   void reset(
       const types_file_kind& types_file_kind,
@@ -110,7 +98,6 @@ class python_generator_context {
   }
 
  private:
-  const t_program* program_;
   bool enable_abstract_types_ = false;
   bool is_patch_file_ = false;
   types_file_kind types_file_kind_ = types_file_kind::not_a_types_file;
@@ -273,11 +260,8 @@ bool service_has_any_sink_types(const t_service* service) {
 class python_mstch_program : public mstch_program {
  public:
   python_mstch_program(
-      const t_program* p,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      std::shared_ptr<python_generator_context> python_ctx)
-      : mstch_program(p, ctx, pos), python_context_(std::move(python_ctx)) {
+      const t_program* p, mstch_context& ctx, mstch_element_position pos)
+      : mstch_program(p, ctx, pos) {
     register_methods(
         this,
         {
@@ -509,7 +493,6 @@ class python_mstch_program : public mstch_program {
     return a;
   }
 
-  std::shared_ptr<python_generator_context> python_context_;
   std::unordered_map<std::string, Namespace> include_namespaces_;
   std::unordered_set<const t_type*> seen_types_;
   std::unordered_set<std::string_view> adapter_modules_;
@@ -522,9 +505,8 @@ class python_mstch_service : public mstch_service {
       const t_service* s,
       mstch_context& ctx,
       mstch_element_position pos,
-      const t_program* prog,
       const t_service* containing_service = nullptr)
-      : mstch_service(s, ctx, pos, containing_service), prog_(prog) {
+      : mstch_service(s, ctx, pos, containing_service) {
     register_methods(
         this,
         {
@@ -561,9 +543,6 @@ class python_mstch_service : public mstch_service {
         }),
         service_);
   }
-
- protected:
-  const t_program* prog_;
 };
 
 class python_mstch_interaction : public python_mstch_service {
@@ -574,9 +553,8 @@ class python_mstch_interaction : public python_mstch_service {
       const t_interaction* interaction,
       mstch_context& ctx,
       mstch_element_position pos,
-      const t_service* containing_service,
-      const t_program* prog)
-      : python_mstch_service(interaction, ctx, pos, prog, containing_service) {}
+      const t_service* containing_service)
+      : python_mstch_service(interaction, ctx, pos, containing_service) {}
 };
 
 // Generator-specific validator that enforces that a reserved key is not used
@@ -651,12 +629,8 @@ class python_mstch_function : public mstch_function {
 class python_mstch_type : public mstch_type {
  public:
   python_mstch_type(
-      const t_type* type,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      std::shared_ptr<python_generator_context> python_ctx)
+      const t_type* type, mstch_context& ctx, mstch_element_position pos)
       : mstch_type(type->get_true_type(), ctx, pos),
-        python_context_(std::move(python_ctx)),
         adapter_annotation_(find_structured_adapter_annotation(*type)),
         transitive_adapter_annotation_(
             get_transitive_annotation_of_adapter_or_null(*type)) {
@@ -673,7 +647,6 @@ class python_mstch_type : public mstch_type {
   }
 
  protected:
-  std::shared_ptr<python_generator_context> python_context_;
   const t_const* adapter_annotation_;
   const t_const* transitive_adapter_annotation_;
 };
@@ -1116,7 +1089,7 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     auto def = whisker::dsl::prototype_builder<h_service>::extends(base);
 
     def.property("external_program?", [this](const t_service& self) {
-      return python_context_->program() != self.program();
+      return get_program() != self.program();
     });
 
     return std::move(def).make();
@@ -1160,23 +1133,22 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
       // Override default program getter for t_type with Python-specific
       // behaviour. t_primitive_type instances are singletons and their program
       // property is always nullptr.
-      return proto.create<t_program>(*python_context_->get_type_program(self));
+      return proto.create<t_program>(*get_type_program(self));
     });
     def.property("module_mangle", [this](const t_type& self) {
       return mangle_program_path(
-                 python_context_->get_type_program(self),
-                 get_option("root_module_prefix"))
+                 get_type_program(self), get_option("root_module_prefix"))
           .append(fmt::format("__{}", python_context_->types_import_path()));
     });
     def.property("module_name", [this](const t_type& self) {
       return get_py3_namespace_with_name_and_prefix(
-                 python_context_->get_type_program(self),
+                 get_type_program(self),
                  get_option("root_module_prefix").value_or(""))
           .append(fmt::format(".{}", python_context_->types_import_path()));
     });
     def.property("patch_module_path", [this](const t_type& self) {
       return get_py3_namespace_with_name_and_prefix(
-                 python_context_->get_type_program(self),
+                 get_type_program(self),
                  get_option("root_module_prefix").value_or(""))
           .append(".thrift_patch");
     });
@@ -1190,21 +1162,20 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     });
     def.property("metadata_path", [this](const t_type& self) {
       return get_py3_namespace_with_name_and_prefix(
-                 python_context_->get_type_program(self),
+                 get_type_program(self),
                  get_option("root_module_prefix").value_or("")) +
           ".thrift_metadata";
     });
     def.property("py3_namespace", [this](const t_type& self) {
       std::ostringstream ss;
-      for (const auto& path :
-           get_py3_namespace(python_context_->get_type_program(self))) {
+      for (const auto& path : get_py3_namespace(get_type_program(self))) {
         ss << path << ".";
       }
       return ss.str();
     });
     def.property("external_program?", [this](const t_type& self) {
-      auto p = python_context_->get_type_program(self);
-      return p && p != python_context_->program();
+      auto p = get_type_program(self);
+      return p && p != get_program();
     });
     def.property("integer?", [](const t_type& self) {
       return self.is_any_int() || self.is_byte();
@@ -1245,9 +1216,16 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     return std::move(ctx).make();
   }
 
+  const t_program* get_type_program(const t_type& type) const {
+    if (const t_program* p = type.program()) {
+      return p;
+    }
+    return get_program();
+  }
+
   bool is_type_defined_in_the_current_program(const t_type& type) const {
     if (const t_program* prog = type.program()) {
-      if (prog != python_context_->program()) {
+      if (prog != get_program()) {
         return true;
       }
     }
@@ -1321,7 +1299,7 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
   void generate_services();
 
   python_generator_context initialize_context() override {
-    return {program_, false, type_kind::abstract};
+    return {false, type_kind::abstract};
   }
 
   std::filesystem::path generate_root_path_;
@@ -1538,11 +1516,11 @@ class python_mstch_deprecated_annotation : public mstch_deprecated_annotation {
 };
 
 void t_mstch_python_generator::set_mstch_factories() {
-  mstch_context_.add<python_mstch_program>(python_context_);
-  mstch_context_.add<python_mstch_service>(program_);
-  mstch_context_.add<python_mstch_interaction>(program_);
+  mstch_context_.add<python_mstch_program>();
+  mstch_context_.add<python_mstch_service>();
+  mstch_context_.add<python_mstch_interaction>();
   mstch_context_.add<python_mstch_function>();
-  mstch_context_.add<python_mstch_type>(python_context_);
+  mstch_context_.add<python_mstch_type>();
   mstch_context_.add<python_mstch_typedef>();
   mstch_context_.add<python_mstch_struct>();
   mstch_context_.add<python_mstch_field>();
@@ -1692,15 +1670,15 @@ class t_python_patch_generator : public t_mstch_python_prototypes_generator {
 
  protected:
   python_generator_context initialize_context() override {
-    return {program_, true, type_kind::immutable};
+    return {true, type_kind::immutable};
   }
 
  private:
   void set_mstch_factories() {
-    mstch_context_.add<python_mstch_program>(python_context_);
+    mstch_context_.add<python_mstch_program>();
     mstch_context_.add<python_mstch_struct>();
     mstch_context_.add<python_mstch_field>();
-    mstch_context_.add<python_mstch_type>(python_context_);
+    mstch_context_.add<python_mstch_type>();
   }
 };
 

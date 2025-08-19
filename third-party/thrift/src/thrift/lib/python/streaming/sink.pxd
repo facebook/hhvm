@@ -21,6 +21,9 @@ from folly.coro cimport cFollyCoroTask
 from folly.iobuf cimport cIOBuf
 from thrift.python.protocol cimport Protocol
 
+cdef extern from "folly/OperationCancelled.h":
+    cdef cppclass cFollyOperationCancelled "folly::OperationCancelled"
+
 cdef extern from "thrift/lib/cpp2/async/Sink.h" namespace "::apache::thrift":
 
     cdef cppclass cResponseAndClientSink "::apache::thrift::ResponseAndClientSink"[TInitResponse, TChunk, TFinalResponse]:

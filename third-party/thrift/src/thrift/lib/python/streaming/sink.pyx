@@ -75,9 +75,9 @@ cdef class ClientSink:
     async def sink(self, agen):
         cancellation_source = cFollyCancellationSource()
         loop = asyncio.get_event_loop()
-        fut = loop.create_future()
+        future = loop.create_future()
         user_data = (
-            fut, self._sink_final_resp_cls, self._sink_elem_cls, self._protocol,
+            future, self._sink_final_resp_cls, self._sink_elem_cls, self._protocol,
         )
 
         handled_agen = self._sink_elem_cls._fbthrift__sink_elem_handler(
@@ -98,10 +98,10 @@ cdef class ClientSink:
             cancellation_source.getToken(),
         )
         try:
-            return await asyncio.shield(fut)
+            return await future
         except asyncio.CancelledError:
             cancellation_source.requestCancellation()
-            return await fut
+            return await future
 
 
 # a helper to deserialize a response struct when 
@@ -144,6 +144,9 @@ cdef void sink_final_resp_callback(
             # Catch-all unexpected exception from user code
             if res.exception().get_exception[cTApplicationException]():
                 raise create_py_exception(res.exception(), None)
+            # Translate C++ folly::OperationCancelled to Python
+            if res.exception().get_exception[cFollyOperationCancelled]():
+                raise asyncio.CancelledError()
             # Totally unexpected exception
             res.exception().throw_exception()
 
@@ -166,10 +169,21 @@ cdef void sink_final_resp_callback(
     except Exception as ex:
         future.set_exception(ex)
 
+async def fallibleClose(generator):
+    try:
+        await generator.aclose()
+    # The above will raise:
+    #   - if cancellation results from throw in generator, or
+    #   - if the generator has already completed but the callback hasn't
+    #     yet returned at time of cancellation, the above will raise.
+    # There's now need to propagate; just suppress it.
+    except Exception as ex:
+        pass
+
 
 cdef public api void cancelAsyncGenerator(object generator):
     asyncio.get_event_loop().create_task(
-        generator.aclose()
+        fallibleClose(generator)
     )
 
 
@@ -189,6 +203,10 @@ async def invokeCallbackWithGenerator(
         promise.complete(final_resp_iobuf)
     except PythonUserException as pyex:
         promise.error_py(cmove(dereference((<PythonUserException>pyex)._cpp_obj.release())))
+    except ApplicationError as ex:
+        promise.error_ta(
+            cTApplicationException(ex.type.value, ex.message.encode('UTF-8'))
+        )
     except asyncio.CancelledError as ex:
         print(f"Coroutine was cancelled in server sink handler:", file=sys.stderr)
         traceback.print_exc()
@@ -228,19 +246,25 @@ cdef class ServerSinkGenerator:
     def __aiter__(self):
         return self
 
-    def __anext__(self):
+    async def __anext__(self):
+        cancellation_source = cFollyCancellationSource()
         loop = asyncio.get_event_loop()
         future = loop.create_future()
         # in case of SIGINT, retrieve the exception
         future.add_done_callback(lambda x: x.exception())
         userdata = (self, future)
-        bridgeCoroTaskWith[unique_ptr[cIOBuf]](
+        bridgeCoroTaskWithCancellation[unique_ptr[cIOBuf]](
             self._executor,
             self._cpp_gen.getNext(),
             server_sink_elem_callback,
             <PyObject*> userdata,
+            cancellation_source.getToken(),
         )
-        return asyncio.shield(future)
+        try:
+            return await future
+        except asyncio.CancelledError:
+            cancellation_source.requestCancellation()
+            return await future
 
 
 cdef void server_sink_elem_callback(

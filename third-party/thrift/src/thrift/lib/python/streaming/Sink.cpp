@@ -112,17 +112,12 @@ IOBufSinkGenerator::IOBufSinkGenerator(IOBufSinkGenerator&& other) noexcept {
 }
 
 folly::coro::Task<std::unique_ptr<folly::IOBuf>> IOBufSinkGenerator::getNext() {
-  try {
-    auto res = co_await gen_.next();
-    if (res) {
-      co_return std::move(*res);
-    } else {
-      // nullptr signals generator is done
-      co_return nullptr;
-    }
-  } catch (...) {
-    folly::exception_wrapper ew(std::current_exception());
-    LOG(FATAL) << "Unexpected exception: " << ew.what();
+  auto res = co_await gen_.next();
+  if (res) {
+    co_return std::move(*res);
+  } else {
+    // nullptr signals generator is done
+    co_return nullptr;
   }
 }
 

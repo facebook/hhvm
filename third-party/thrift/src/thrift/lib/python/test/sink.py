@@ -17,6 +17,8 @@
 
 from __future__ import annotations
 
+import asyncio
+import time
 from typing import AsyncGenerator, Awaitable, Callable, Tuple
 from unittest import IsolatedAsyncioTestCase
 
@@ -43,8 +45,11 @@ def local_server() -> TestServer:
     return TestServer(handler=SinkHandler(), ip="::1")
 
 
-async def range_gen(begin: int, stop: int) -> AsyncGenerator[int, None]:
+async def range_gen(
+    begin: int, stop: int, delay: float = 0.0
+) -> AsyncGenerator[int, None]:
     for i in range(begin, stop):
+        await asyncio.sleep(delay)
         yield i
 
 
@@ -84,6 +89,25 @@ class SinkTests(IsolatedAsyncioTestCase):
                 self.assertIsInstance(sink, ClientSink)
                 final_resp = await sink.sink(range_gen(begin, stop))
                 self.assertEqual(sum(range(begin, stop)), final_resp)
+
+    async def test_sink_service_range_slow_cancel(self) -> None:
+        begin: int = 2
+        stop: int = 6
+
+        async with local_server() as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                TestSinkService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                sink = await client.range_(begin, stop)
+                with self.assertRaises(asyncio.TimeoutError):
+                    await asyncio.wait_for(sink.sink(range_gen(begin, stop, 0.1)), 0.2)
+                # ensure no weird segfault
+                await asyncio.sleep(1)
 
     async def test_sink_service_range_throw(self) -> None:
         async with local_server() as sa:
@@ -143,6 +167,58 @@ class SinkTests(IsolatedAsyncioTestCase):
                 self.assertIsInstance(sink, ClientSink)
                 final_resp = await sink.sink(range_gen(begin, stop))
                 self.assertEqual(early, final_resp)
+
+    async def test_sink_service_range_cancel_at(self) -> None:
+        begin: int = 5
+        stop: int = 11
+        cancelAt: int = 9
+
+        async with local_server() as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                TestSinkService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                sink = await client.rangeCancelAt(begin, stop, cancelAt)
+                with self.assertRaises(ApplicationError) as ex:
+                    await sink.sink(range_gen(begin, stop, 0.1))
+                self.assertEqual(
+                    ex.exception.message,
+                    "apache::thrift::TApplicationException: Application was cancelled on the server with message: wololo",
+                )
+                self.assertEqual(ex.exception.type, ApplicationErrorType.UNKNOWN)
+
+    async def test_sink_service_range_slow_final_resp(self) -> None:
+        begin: int = 5
+        stop: int = 11
+
+        async def cancel_gen() -> AsyncGenerator[int, None]:
+            async for item in range_gen(begin, stop, 0.1):
+                yield item
+            raise asyncio.CancelledError("wololo")
+
+        async with local_server() as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                TestSinkService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                sink = await client.rangeSlowFinalResponse(begin, stop)
+                with self.assertRaises(ApplicationError) as ex:
+                    await sink.sink(cancel_gen())
+                self.assertEqual(
+                    ex.exception.message,
+                    "apache::thrift::TApplicationException: Application was cancelled on the client with message: wololo",
+                )
+                self.assertEqual(ex.exception.type, ApplicationErrorType.UNKNOWN)
+
+                await asyncio.sleep(2)
 
     async def test_unimplemented(self) -> None:
         async with local_server() as sa:
@@ -251,13 +327,36 @@ class SinkHandler(TestSinkServiceInterface):
             expected = fr
             async for item in agen:
                 assert item == expected
-                if item == early:
-                    return early
+                if item == early or item == to:
+                    return item
                 expected += 1
 
             return -1
 
         return callback
+
+    async def rangeCancelAt(self, fr: int, to: int, cancelAt: int) -> BoolSinkCallback:
+        async def callback(agen: AsyncIntGenerator) -> bool:
+            expected = fr
+            async for item in agen:
+                assert item == expected
+                if item == cancelAt:
+                    raise asyncio.CancelledError("wololo")
+                expected += 1
+
+            return True
+
+        return callback
+
+    async def rangeSlowFinalResponse(self, fr: int, to: int) -> BoolSinkCallback:
+        callback: IntSinkCallback = await self.range_(fr, to)
+
+        async def slow_callback(agen: AsyncIntGenerator) -> bool:
+            total = await callback(agen)
+            time.sleep(2)
+            return total == sum(range(fr, to))
+
+        return slow_callback
 
     async def rangeFinalResponseThrow(self, fr: int, to: int) -> BoolSinkCallback:
         range_cb: IntSinkCallback = await self.range_(fr, to)

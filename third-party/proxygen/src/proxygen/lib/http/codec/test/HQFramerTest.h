@@ -12,6 +12,7 @@
 #include <proxygen/lib/http/codec/HQFramer.h>
 #include <proxygen/lib/http/codec/test/TestUtils.h>
 #include <quic/codec/QuicInteger.h>
+#include <quic/folly_utils/Utils.h>
 
 // Writes out the common frame header without checks
 size_t writeFrameHeaderManual(folly::IOBufQueue& queue,

@@ -13,7 +13,7 @@
 #include <proxygen/lib/http/codec/HQFramer.h>
 #include <proxygen/lib/http/codec/HQUtils.h>
 #include <proxygen/lib/http/codec/test/TestUtils.h>
-#include <quic/codec/QuicInteger.h>
+#include <quic/folly_utils/Utils.h>
 
 using namespace folly;
 using namespace folly::io;
@@ -70,10 +70,10 @@ class HQFramerTestFixture : public T {
     Cursor cursor(data);
     size_t prevLen = cursor.totalLength();
 
-    auto type = quic::decodeQuicInteger(cursor);
+    auto type = quic::follyutils::decodeQuicInteger(cursor);
     ASSERT_TRUE(type.has_value());
     outHeader.type = FrameType(type->first);
-    auto length = quic::decodeQuicInteger(cursor);
+    auto length = quic::follyutils::decodeQuicInteger(cursor);
     ASSERT_TRUE(length.has_value());
     outHeader.length = length->first;
 
@@ -137,11 +137,11 @@ TEST_F(HQFramerTest, TestWriteGreaseFrame) {
   EXPECT_FALSE(res.hasError());
 
   Cursor cursor(queue_.front());
-  auto type = quic::decodeQuicInteger(cursor);
+  auto type = quic::follyutils::decodeQuicInteger(cursor);
   EXPECT_TRUE(type.has_value());
   EXPECT_TRUE(hq::isGreaseId(type->first));
 
-  auto length = quic::decodeQuicInteger(cursor);
+  auto length = quic::follyutils::decodeQuicInteger(cursor);
   EXPECT_TRUE(length.has_value());
   EXPECT_EQ(length->first, 0);
 }
@@ -153,12 +153,12 @@ TEST_F(HQFramerTest, TestWriteWebTransportStreamPreface) {
   EXPECT_FALSE(res.hasError());
 
   Cursor cursor(queue_.front());
-  auto type = quic::decodeQuicInteger(cursor);
+  auto type = quic::follyutils::decodeQuicInteger(cursor);
   EXPECT_TRUE(type.has_value());
   EXPECT_EQ(type->first,
             folly::to_underlying(hq::UnidirectionalStreamType::WEBTRANSPORT));
 
-  auto sessionId = quic::decodeQuicInteger(cursor);
+  auto sessionId = quic::follyutils::decodeQuicInteger(cursor);
   EXPECT_TRUE(sessionId.has_value());
   EXPECT_EQ(sessionId->first, wtSessionId);
 }

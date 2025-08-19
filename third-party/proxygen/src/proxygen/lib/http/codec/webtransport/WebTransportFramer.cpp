@@ -25,20 +25,21 @@ folly::Expected<PaddingCapsule, CapsuleCodec::ErrorCode> parsePadding(
 folly::Expected<WTResetStreamCapsule, CapsuleCodec::ErrorCode>
 parseWTResetStream(folly::io::Cursor& cursor, size_t length) {
   WTResetStreamCapsule wtResetStreamCapsule{};
-  auto streamIdOpt = quic::decodeQuicInteger(cursor, length);
+  auto streamIdOpt = quic::follyutils::decodeQuicInteger(cursor, length);
   if (!streamIdOpt) {
     return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW);
   }
   length -= streamIdOpt->second;
   wtResetStreamCapsule.streamId = streamIdOpt->first;
-  auto appProtocolErrorCodeOpt = quic::decodeQuicInteger(cursor, length);
+  auto appProtocolErrorCodeOpt =
+      quic::follyutils::decodeQuicInteger(cursor, length);
   if (!appProtocolErrorCodeOpt) {
     return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW);
   }
   length -= appProtocolErrorCodeOpt->second;
   wtResetStreamCapsule.appProtocolErrorCode =
       static_cast<uint32_t>(appProtocolErrorCodeOpt->first);
-  auto reliableSizeOpt = quic::decodeQuicInteger(cursor, length);
+  auto reliableSizeOpt = quic::follyutils::decodeQuicInteger(cursor, length);
   if (!reliableSizeOpt) {
     return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW);
   }
@@ -53,13 +54,14 @@ parseWTResetStream(folly::io::Cursor& cursor, size_t length) {
 folly::Expected<WTStopSendingCapsule, CapsuleCodec::ErrorCode>
 parseWTStopSending(folly::io::Cursor& cursor, size_t length) {
   WTStopSendingCapsule wtStopSendingCapsule{};
-  auto streamIdOpt = quic::decodeQuicInteger(cursor, length);
+  auto streamIdOpt = quic::follyutils::decodeQuicInteger(cursor, length);
   if (!streamIdOpt) {
     return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW);
   }
   length -= streamIdOpt->second;
   wtStopSendingCapsule.streamId = streamIdOpt->first;
-  auto appProtocolErrorCodeOpt = quic::decodeQuicInteger(cursor, length);
+  auto appProtocolErrorCodeOpt =
+      quic::follyutils::decodeQuicInteger(cursor, length);
   if (!appProtocolErrorCodeOpt) {
     return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW);
   }
@@ -75,7 +77,7 @@ parseWTStopSending(folly::io::Cursor& cursor, size_t length) {
 folly::Expected<WTStreamCapsule, CapsuleCodec::ErrorCode> parseWTStream(
     folly::io::Cursor& cursor, size_t length, bool fin) {
   WTStreamCapsule wtStreamCapsule{};
-  auto streamIdOpt = quic::decodeQuicInteger(cursor, length);
+  auto streamIdOpt = quic::follyutils::decodeQuicInteger(cursor, length);
   if (!streamIdOpt) {
     return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW);
   }
@@ -92,7 +94,7 @@ folly::Expected<WTStreamCapsule, CapsuleCodec::ErrorCode> parseWTStream(
 folly::Expected<WTMaxDataCapsule, CapsuleCodec::ErrorCode> parseWTMaxData(
     folly::io::Cursor& cursor, size_t length) {
   WTMaxDataCapsule wtMaxDataCapsule{};
-  auto maximumDataOpt = quic::decodeQuicInteger(cursor, length);
+  auto maximumDataOpt = quic::follyutils::decodeQuicInteger(cursor, length);
   if (!maximumDataOpt) {
     return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW);
   }
@@ -107,13 +109,14 @@ folly::Expected<WTMaxDataCapsule, CapsuleCodec::ErrorCode> parseWTMaxData(
 folly::Expected<WTMaxStreamDataCapsule, CapsuleCodec::ErrorCode>
 parseWTMaxStreamData(folly::io::Cursor& cursor, size_t length) {
   WTMaxStreamDataCapsule wtMaxStreamDataCapsule{};
-  auto streamIdOpt = quic::decodeQuicInteger(cursor, length);
+  auto streamIdOpt = quic::follyutils::decodeQuicInteger(cursor, length);
   if (!streamIdOpt) {
     return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW);
   }
   length -= streamIdOpt->second;
   wtMaxStreamDataCapsule.streamId = streamIdOpt->first;
-  auto maximumStreamDataOpt = quic::decodeQuicInteger(cursor, length);
+  auto maximumStreamDataOpt =
+      quic::follyutils::decodeQuicInteger(cursor, length);
   if (!maximumStreamDataOpt) {
     return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW);
   }
@@ -128,7 +131,7 @@ parseWTMaxStreamData(folly::io::Cursor& cursor, size_t length) {
 folly::Expected<WTMaxStreamsCapsule, CapsuleCodec::ErrorCode> parseWTMaxStreams(
     folly::io::Cursor& cursor, size_t length) {
   WTMaxStreamsCapsule wtMaxStreamsCapsule{};
-  auto maximumStreamsOpt = quic::decodeQuicInteger(cursor, length);
+  auto maximumStreamsOpt = quic::follyutils::decodeQuicInteger(cursor, length);
   if (!maximumStreamsOpt) {
     return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW);
   }
@@ -143,7 +146,7 @@ folly::Expected<WTMaxStreamsCapsule, CapsuleCodec::ErrorCode> parseWTMaxStreams(
 folly::Expected<WTDataBlockedCapsule, CapsuleCodec::ErrorCode>
 parseWTDataBlocked(folly::io::Cursor& cursor, size_t length) {
   WTDataBlockedCapsule wtDataBlockedCapsule{};
-  auto maximumDataOpt = quic::decodeQuicInteger(cursor, length);
+  auto maximumDataOpt = quic::follyutils::decodeQuicInteger(cursor, length);
   if (!maximumDataOpt) {
     return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW);
   }
@@ -158,13 +161,14 @@ parseWTDataBlocked(folly::io::Cursor& cursor, size_t length) {
 folly::Expected<WTStreamDataBlockedCapsule, CapsuleCodec::ErrorCode>
 parseWTStreamDataBlocked(folly::io::Cursor& cursor, size_t length) {
   WTStreamDataBlockedCapsule wtStreamDataBlockedCapsule{};
-  auto streamIdOpt = quic::decodeQuicInteger(cursor, length);
+  auto streamIdOpt = quic::follyutils::decodeQuicInteger(cursor, length);
   if (!streamIdOpt) {
     return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW);
   }
   length -= streamIdOpt->second;
   wtStreamDataBlockedCapsule.streamId = streamIdOpt->first;
-  auto maximumStreamDataOpt = quic::decodeQuicInteger(cursor, length);
+  auto maximumStreamDataOpt =
+      quic::follyutils::decodeQuicInteger(cursor, length);
   if (!maximumStreamDataOpt) {
     return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW);
   }
@@ -179,7 +183,7 @@ parseWTStreamDataBlocked(folly::io::Cursor& cursor, size_t length) {
 folly::Expected<WTStreamsBlockedCapsule, CapsuleCodec::ErrorCode>
 parseWTStreamsBlocked(folly::io::Cursor& cursor, size_t length) {
   WTStreamsBlockedCapsule wtStreamsBlockedCapsule{};
-  auto maximumStreamsOpt = quic::decodeQuicInteger(cursor, length);
+  auto maximumStreamsOpt = quic::follyutils::decodeQuicInteger(cursor, length);
   if (!maximumStreamsOpt) {
     return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW);
   }
@@ -204,7 +208,7 @@ folly::Expected<DatagramCapsule, CapsuleCodec::ErrorCode> parseDatagram(
 folly::Expected<CloseWebTransportSessionCapsule, CapsuleCodec::ErrorCode>
 parseCloseWebTransportSession(folly::io::Cursor& cursor, size_t length) {
   CloseWebTransportSessionCapsule closeWebTransportSessionCapsule{};
-  auto errorCodeOpt = quic::decodeQuicInteger(cursor, length);
+  auto errorCodeOpt = quic::follyutils::decodeQuicInteger(cursor, length);
   if (!errorCodeOpt) {
     return folly::makeUnexpected(CapsuleCodec::ErrorCode::PARSE_UNDERFLOW);
   }

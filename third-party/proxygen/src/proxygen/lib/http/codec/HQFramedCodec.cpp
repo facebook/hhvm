@@ -71,7 +71,7 @@ size_t HQFramedCodec::onFramedIngress(const IOBuf& buf) {
   while (connError_ == folly::none && bufLen > 0 && !parserPaused_) {
     size_t parsed = 0;
     if (frameState_ == FrameState::FRAME_HEADER_TYPE) {
-      auto type = quic::decodeQuicInteger(cursor);
+      auto type = quic::follyutils::decodeQuicInteger(cursor);
       if (!type) {
         break;
       }
@@ -87,7 +87,7 @@ size_t HQFramedCodec::onFramedIngress(const IOBuf& buf) {
       }
       frameState_ = FrameState::FRAME_HEADER_LENGTH;
     } else if (frameState_ == FrameState::FRAME_HEADER_LENGTH) {
-      auto length = quic::decodeQuicInteger(cursor);
+      auto length = quic::follyutils::decodeQuicInteger(cursor);
       if (!length) {
         break;
       }

@@ -11,6 +11,7 @@
 #include <folly/portability/GTest.h>
 #include <proxygen/lib/http/codec/test/TestUtils.h>
 #include <quic/codec/QuicInteger.h>
+#include <quic/folly_utils/Utils.h>
 
 namespace proxygen::test {
 

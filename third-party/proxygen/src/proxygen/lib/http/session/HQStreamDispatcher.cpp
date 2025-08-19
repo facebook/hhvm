@@ -71,7 +71,7 @@ void HQStreamDispatcherBase::onDataAvailable(
   VLOG(4) << "Attempting peek dispatch stream=" << id
           << " len=" << dataBuf->computeChainDataLength();
   folly::io::Cursor cursor(dataBuf);
-  auto preface = quic::decodeQuicInteger(cursor);
+  auto preface = quic::follyutils::decodeQuicInteger(cursor);
   if (!preface) {
     return;
   }
@@ -113,7 +113,7 @@ HQStreamDispatcherBase::HandleStreamResult HQUniStreamDispatcher::handleStream(
         return HandleStreamResult::REJECT;
       }
       // Try to read the push id from the stream
-      auto pushId = quic::decodeQuicInteger(cursor);
+      auto pushId = quic::follyutils::decodeQuicInteger(cursor);
       // If successfully read the push id, call callback
       // which will reassign the peek callback
       // Otherwise, continue using this callback
@@ -128,7 +128,7 @@ HQStreamDispatcherBase::HandleStreamResult HQUniStreamDispatcher::handleStream(
     }
     case hq::UnidirectionalStreamType::WEBTRANSPORT: {
       // Try to read the session id from the stream
-      auto sessionID = quic::decodeQuicInteger(cursor);
+      auto sessionID = quic::follyutils::decodeQuicInteger(cursor);
       // If successfully read the session id, call sink
       // which will reassign the peek callback
       // Otherwise, continue using this callback
@@ -168,7 +168,7 @@ HQStreamDispatcherBase::HandleStreamResult HQBidiStreamDispatcher::handleStream(
       return HandleStreamResult::DISPATCHED;
     case hq::BidirectionalStreamType::WEBTRANSPORT: {
       // Try to read the session id from the stream
-      auto sessionID = quic::decodeQuicInteger(cursor);
+      auto sessionID = quic::follyutils::decodeQuicInteger(cursor);
       // If successfully read the session id, call sink
       // which will reassign the peek callback
       // Otherwise, continue using this callback

@@ -9,6 +9,7 @@
 #include "DeviousBaton.h"
 
 #include <quic/codec/QuicInteger.h>
+#include <quic/folly_utils/Utils.h>
 
 using namespace proxygen;
 
@@ -118,7 +119,7 @@ DeviousBaton::onBatonMessageData(BatonMessageState& state,
   bool underflow = false;
   switch (state.state) {
     case BatonMessageState::PAD_LEN: {
-      auto padLen = quic::decodeQuicInteger(cursor);
+      auto padLen = quic::follyutils::decodeQuicInteger(cursor);
       if (!padLen) {
         underflow = true;
         break;

@@ -7,7 +7,7 @@
  */
 
 #include <proxygen/lib/http/session/test/HQSessionTestCommon.h>
-#include <quic/codec/QuicInteger.h>
+#include <quic/folly_utils/Utils.h>
 
 #include <folly/Random.h>
 #include <folly/String.h>
@@ -91,7 +91,7 @@ std::string paramsToTestName(const testing::TestParamInfo<TestParams>& info) {
 
 folly::Optional<std::pair<UnidirectionalStreamType, size_t>> parseStreamPreface(
     folly::io::Cursor& cursor, std::string alpn) {
-  auto res = quic::decodeQuicInteger(cursor);
+  auto res = quic::follyutils::decodeQuicInteger(cursor);
   if (!res) {
     return folly::none;
   }

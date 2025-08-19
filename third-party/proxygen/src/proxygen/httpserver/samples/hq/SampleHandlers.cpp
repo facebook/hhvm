@@ -429,14 +429,15 @@ void DeviousBatonHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
   folly::io::Cursor cursor(body.get());
   auto leftToParse = body->computeChainDataLength();
   while (leftToParse > 0) {
-    auto typeRes = quic::decodeQuicInteger(cursor, leftToParse);
+    auto typeRes = quic::follyutils::decodeQuicInteger(cursor, leftToParse);
     if (!typeRes) {
       LOG(ERROR) << "Failed to decode capsule type.";
       return;
     }
     auto [type, typeLen] = typeRes.value();
     leftToParse -= typeLen;
-    auto capLengthRes = quic::decodeQuicInteger(cursor, leftToParse);
+    auto capLengthRes =
+        quic::follyutils::decodeQuicInteger(cursor, leftToParse);
     if (!capLengthRes) {
       LOG(ERROR) << "Failed to decode capsule length: type=" << type;
       return;

@@ -18,11 +18,11 @@ class WebTransportFramerTest : public Test {};
 
 uint64_t parseCapsuleHeader(folly::io::Cursor& cursor, uint64_t type) {
   // parse the type
-  auto typeOpt = quic::decodeQuicInteger(cursor);
+  auto typeOpt = quic::follyutils::decodeQuicInteger(cursor);
   EXPECT_EQ(typeOpt->first, type);
 
   // parse + return the length
-  auto length = quic::decodeQuicInteger(cursor);
+  auto length = quic::follyutils::decodeQuicInteger(cursor);
   return length->first;
 }
 

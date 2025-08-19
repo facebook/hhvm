@@ -265,7 +265,7 @@ class HQSessionTest
         case proxygen::hq::UnidirectionalStreamType::PUSH: {
           auto pushIt = pushes_.find(id);
           if (pushIt == pushes_.end()) {
-            auto pushId = quic::decodeQuicInteger(cursor);
+            auto pushId = quic::follyutils::decodeQuicInteger(cursor);
             if (pushId) {
               pushes_.emplace(id, pushId->first);
             }

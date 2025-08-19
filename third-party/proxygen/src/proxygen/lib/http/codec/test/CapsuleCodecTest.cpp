@@ -11,6 +11,7 @@
 #include <gmock/gmock.h>
 #include <proxygen/lib/http/codec/CapsuleCodec.h>
 #include <quic/codec/QuicInteger.h>
+#include <quic/common/BufUtil.h>
 
 using namespace proxygen;
 using namespace folly;

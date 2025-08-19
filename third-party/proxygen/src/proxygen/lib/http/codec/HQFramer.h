@@ -18,8 +18,8 @@
 #include <proxygen/lib/http/codec/CodecUtil.h>
 #include <proxygen/lib/http/codec/HTTPCodec.h>
 #include <proxygen/lib/http/codec/SettingsId.h>
-#include <quic/codec/QuicInteger.h>
 #include <quic/codec/Types.h>
+#include <quic/folly_utils/Utils.h>
 
 namespace proxygen::hq {
 

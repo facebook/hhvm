@@ -14,6 +14,7 @@
 #include <proxygen/lib/http/codec/ErrorCode.h>
 #include <proxygen/lib/http/codec/HQFramer.h>
 #include <proxygen/lib/http/codec/HTTPSettings.h>
+#include <quic/codec/QuicInteger.h>
 #include <quic/codec/Types.h>
 
 namespace proxygen::hq {

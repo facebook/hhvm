@@ -8,7 +8,7 @@
 
 #include <folly/logging/xlog.h>
 #include <proxygen/lib/http/codec/CapsuleCodec.h>
-#include <quic/codec/QuicInteger.h>
+#include <quic/folly_utils/Utils.h>
 
 namespace proxygen {
 
@@ -19,7 +19,7 @@ void CapsuleCodec::onIngress(std::unique_ptr<folly::IOBuf> data, bool eom) {
   while (!connError_ && remainingLength > 0) {
     switch (parseState_) {
       case ParseState::CAPSULE_HEADER_TYPE: {
-        auto type = quic::decodeQuicInteger(cursor);
+        auto type = quic::follyutils::decodeQuicInteger(cursor);
         if (!type) {
           connError_ = ErrorCode::PARSE_UNDERFLOW;
           break;
@@ -30,7 +30,7 @@ void CapsuleCodec::onIngress(std::unique_ptr<folly::IOBuf> data, bool eom) {
         [[fallthrough]];
       }
       case ParseState::CAPSULE_LENGTH: {
-        auto length = quic::decodeQuicInteger(cursor);
+        auto length = quic::follyutils::decodeQuicInteger(cursor);
         if (!length) {
           connError_ = ErrorCode::PARSE_UNDERFLOW;
           break;

@@ -10,6 +10,7 @@
 
 #include <proxygen/lib/http/codec/CodecUtil.h>
 #include <quic/codec/QuicInteger.h>
+#include <quic/folly_utils/Utils.h>
 
 #define HANDLE_ERROR_OR_WAITING_PARSE_RESULT(parseResult)           \
   if ((parseResult).parseResultState_ == ParseResultState::ERROR) { \
@@ -61,7 +62,7 @@ ParseResult HTTPBinaryCodec::parseFramingIndicator(folly::io::Cursor& cursor,
   size_t parsed = 0;
 
   // Parse the framingIndicator and advance the cursor
-  auto framingIndicator = quic::decodeQuicInteger(cursor);
+  auto framingIndicator = quic::follyutils::decodeQuicInteger(cursor);
   if (!framingIndicator) {
     return ParseResult(ParseResultState::WAITING_FOR_MORE_DATA);
   }
@@ -91,7 +92,7 @@ ParseResult HTTPBinaryCodec::parseKnownLengthString(
   size_t parsed = 0;
 
   // Parse the encodedStringLength and advance cursor
-  auto encodedStringLength = quic::decodeQuicInteger(cursor);
+  auto encodedStringLength = quic::follyutils::decodeQuicInteger(cursor);
   if (!encodedStringLength) {
     return ParseResult(ParseResultState::WAITING_FOR_MORE_DATA);
   }
@@ -187,7 +188,7 @@ ParseResult HTTPBinaryCodec::parseResponseControlData(folly::io::Cursor& cursor,
                                                       size_t remaining,
                                                       HTTPMessage& msg) {
   // Parse statusCode and advance cursor
-  auto statusCode = quic::decodeQuicInteger(cursor);
+  auto statusCode = quic::follyutils::decodeQuicInteger(cursor);
   if (!statusCode) {
     return ParseResult(ParseResultState::WAITING_FOR_MORE_DATA);
   }
@@ -246,7 +247,7 @@ ParseResult HTTPBinaryCodec::parseKnownLengthHeadersHelper(
   size_t parsed = 0;
 
   // Parse length of headers and advance cursor
-  auto lengthOfHeaders = quic::decodeQuicInteger(cursor);
+  auto lengthOfHeaders = quic::follyutils::decodeQuicInteger(cursor);
   if (!lengthOfHeaders) {
     return ParseResult(ParseResultState::WAITING_FOR_MORE_DATA);
   }
@@ -331,7 +332,7 @@ ParseResult HTTPBinaryCodec::parseSingleContentHelper(folly::io::Cursor& cursor,
   size_t parsed = 0;
 
   // Parse the contentLength and advance cursor
-  auto contentLength = quic::decodeQuicInteger(cursor);
+  auto contentLength = quic::follyutils::decodeQuicInteger(cursor);
   if (!contentLength) {
     return ParseResult(ParseResultState::WAITING_FOR_MORE_DATA);
   }

@@ -13,6 +13,7 @@
 #include <proxygen/lib/http/codec/HQFramer.h>
 #include <proxygen/lib/http/codec/HQUtils.h>
 #include <quic/codec/QuicInteger.h>
+#include <quic/folly_utils/Utils.h>
 
 using namespace folly::io;
 using namespace folly;
@@ -56,7 +57,7 @@ static ParseResult parseIdOnlyFrame(folly::io::Cursor& cursor,
   DCHECK_LE(header.length, cursor.totalLength());
   auto frameLength = header.length;
 
-  auto id = quic::decodeQuicInteger(cursor, frameLength);
+  auto id = quic::follyutils::decodeQuicInteger(cursor, frameLength);
   if (!id) {
     return HTTP3::ErrorCode::HTTP_FRAME_ERROR;
   }
@@ -81,7 +82,7 @@ decodeSettingValue(folly::io::Cursor& cursor,
                    SettingId settingId) {
 
   // read the setting value
-  auto settingValue = quic::decodeQuicInteger(cursor, frameLength);
+  auto settingValue = quic::follyutils::decodeQuicInteger(cursor, frameLength);
   if (!settingValue) {
     return folly::makeUnexpected(HTTP3::ErrorCode::HTTP_FRAME_ERROR);
   }
@@ -113,7 +114,8 @@ ParseResult parseSettings(folly::io::Cursor& cursor,
   auto frameLength = header.length;
 
   while (frameLength > 0) {
-    auto settingIdRes = quic::decodeQuicInteger(cursor, frameLength);
+    auto settingIdRes =
+        quic::follyutils::decodeQuicInteger(cursor, frameLength);
     if (!settingIdRes) {
       return HTTP3::ErrorCode::HTTP_FRAME_ERROR;
     }
@@ -141,7 +143,7 @@ ParseResult parsePushPromise(folly::io::Cursor& cursor,
   folly::IOBuf buf;
   auto frameLength = header.length;
 
-  auto pushId = quic::decodeQuicInteger(cursor, frameLength);
+  auto pushId = quic::follyutils::decodeQuicInteger(cursor, frameLength);
   if (!pushId) {
     return HTTP3::ErrorCode::HTTP_FRAME_ERROR;
   }
@@ -170,7 +172,7 @@ ParseResult parsePriorityUpdate(folly::io::Cursor& cursor,
                                 HTTPPriority& priorityUpdate) noexcept {
   DCHECK_LE(header.length, cursor.totalLength());
   auto length = header.length;
-  auto id = quic::decodeQuicInteger(cursor, length);
+  auto id = quic::follyutils::decodeQuicInteger(cursor, length);
   if (!id) {
     return HTTP3::ErrorCode::HTTP_ID_ERROR;
   }

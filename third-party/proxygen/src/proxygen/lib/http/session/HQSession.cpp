@@ -29,8 +29,8 @@
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/HHWheelTimer.h>
 #include <quic/QuicConstants.h>
-#include <quic/codec/QuicInteger.h>
 #include <quic/common/BufUtil.h>
+#include <quic/folly_utils/Utils.h>
 #include <quic/logging/QLoggerConstants.h>
 #include <sstream>
 #include <wangle/acceptor/ConnectionManager.h>
@@ -3769,7 +3769,7 @@ void HQSession::onDatagramsAvailable() noexcept {
           << " datagrams. sess=" << *this;
   for (auto& datagram : result.value()) {
     folly::io::Cursor cursor(datagram.get());
-    auto quarterStreamId = quic::decodeQuicInteger(cursor);
+    auto quarterStreamId = quic::follyutils::decodeQuicInteger(cursor);
     if (!quarterStreamId || quarterStreamId->first > kMaxQuarterStreamId) {
       dropConnectionAsync(
           quic::QuicError(HTTP3::ErrorCode::HTTP_GENERAL_PROTOCOL_ERROR,
@@ -3782,7 +3782,7 @@ void HQSession::onDatagramsAvailable() noexcept {
     quic::Optional<std::pair<uint64_t, size_t>> ctxId;
     if (!stream || !stream->txn_.isWebTransportConnectStream()) {
       // TODO: draft 8 and rfc don't include context ID
-      ctxId = quic::decodeQuicInteger(cursor);
+      ctxId = quic::follyutils::decodeQuicInteger(cursor);
       if (!ctxId) {
         dropConnectionAsync(
             quic::QuicError(HTTP3::ErrorCode::HTTP_GENERAL_PROTOCOL_ERROR,

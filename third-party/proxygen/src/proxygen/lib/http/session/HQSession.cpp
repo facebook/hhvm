@@ -520,12 +520,12 @@ void HQSession::onConnectionError(quic::QuicError code) noexcept {
   if (code.code.type() == quic::QuicErrorCode::Type::ApplicationErrorCode &&
       isQPACKError(
           static_cast<HTTP3::ErrorCode>(*code.code.asApplicationErrorCode()))) {
-    LOG(ERROR) << "Peer QPACK error err="
+    LOG(ERROR) << "Connection QPACK error err="
                << static_cast<uint32_t>(*code.code.asApplicationErrorCode())
                << " msg=" << code.message << " " << *this;
   } else if (!noError(code.code)) {
     std::stringstream msgStream;
-    msgStream << "Peer closed with error err=" << code.code
+    msgStream << "Connection closed with error err=" << code.code
               << " msg=" << code.message << " " << *this;
     if (isVlogLevel(code.code)) {
       VLOG(3) << msgStream.str();

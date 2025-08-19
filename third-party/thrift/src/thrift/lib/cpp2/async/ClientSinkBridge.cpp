@@ -231,6 +231,7 @@ void ClientSinkBridge::processServerMessages() {
       auto& payload = messages.front();
       if (payload.hasException()) {
         serverCallback_->onSinkError(std::move(payload).exception());
+        close();
         terminated = true;
       } else if (payload.hasValue()) {
         terminated = !serverCallback_->onSinkNext(std::move(payload).value());
@@ -239,7 +240,6 @@ void ClientSinkBridge::processServerMessages() {
       }
 
       if (terminated) {
-        close();
         return;
       }
     }

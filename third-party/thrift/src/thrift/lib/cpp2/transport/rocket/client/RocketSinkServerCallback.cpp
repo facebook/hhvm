@@ -31,9 +31,7 @@ bool RocketSinkServerCallback::onSinkNext(StreamPayload&& payload) {
         payload.metadata,
         payload.payload->computeChainDataLength());
   }
-  std::ignore =
-      client_.sendPayload(streamId_, std::move(payload), Flags().next(true));
-  return true;
+  return client_.sendPayload(streamId_, std::move(payload), Flags().next(true));
 }
 
 void RocketSinkServerCallback::onSinkError(folly::exception_wrapper ew) {
@@ -61,8 +59,7 @@ void RocketSinkServerCallback::onSinkError(folly::exception_wrapper ew) {
 bool RocketSinkServerCallback::onSinkComplete() {
   DCHECK(state_ == State::BothOpen);
   state_ = State::StreamOpen;
-  std::ignore = client_.sendComplete(streamId_, false);
-  return true;
+  return client_.sendComplete(streamId_, false);
 }
 
 bool RocketSinkServerCallback::onInitialPayload(

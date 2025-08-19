@@ -721,22 +721,10 @@ class python_mstch_field : public mstch_field {
             // TODO: Whisker migration of field:py_name requires support to get
             // a back-reference to the parent struct in Whisker
             {"field:py_name", &python_mstch_field::py_name},
-            {"field:tablebased_qualifier",
-             &python_mstch_field::tablebased_qualifier},
             {"field:user_default_value",
              &python_mstch_field::user_default_value},
             {"field:has_adapter?", &python_mstch_field::adapter},
-            {"field:is_container_type", &python_mstch_field::is_container_type},
-            {"field:is_invariant_type?",
-             &python_mstch_field::is_invariant_type},
-            {"field:sorted_key_serialize?",
-             &python_mstch_field::key_sorted_serialize},
         });
-  }
-
-  mstch::node key_sorted_serialize() {
-    return field_->has_structured_annotation(kPythonSortSetOnSerializeUri) ||
-        field_->has_structured_annotation(kPythonKeySortMapOnSerializeUri);
   }
 
   mstch::node py_name() {
@@ -752,20 +740,6 @@ class python_mstch_field : public mstch_field {
       return "_" + class_name + py_name_;
     }
     return py_name_;
-  }
-  mstch::node tablebased_qualifier() {
-    const std::string enum_type = "FieldQualifier.";
-    switch (field_->qualifier()) {
-      case t_field_qualifier::none:
-      case t_field_qualifier::required:
-        return enum_type + "Unqualified";
-      case t_field_qualifier::optional:
-        return enum_type + "Optional";
-      case t_field_qualifier::terse:
-        return enum_type + "Terse";
-      default:
-        throw std::runtime_error("unknown qualifier");
-    }
   }
   mstch::node user_default_value() {
     const t_const_value* value = field_->get_value();
@@ -789,15 +763,6 @@ class python_mstch_field : public mstch_field {
     return adapter_node(
         adapter_annotation_, transitive_adapter_annotation_, context_, pos_);
   }
-
-  mstch::node is_container_type() {
-    const auto* type = field_->get_type();
-    return type->get_true_type()->is<t_list>() ||
-        type->get_true_type()->is<t_map>() ||
-        type->get_true_type()->is<t_set>();
-  }
-
-  mstch::node is_invariant_type() { return field_has_invariant_type(field_); }
 
  private:
   const std::string py_name_;
@@ -966,6 +931,36 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     def.property("flags?", [](const t_enum& self) {
       return self.has_unstructured_annotation("py3.flags") ||
           self.has_structured_annotation(kPythonFlagsUri);
+    });
+
+    return std::move(def).make();
+  }
+
+  prototype<t_field>::ptr make_prototype_for_field(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_field(proto);
+    auto def = whisker::dsl::prototype_builder<h_field>::extends(base);
+
+    def.property(
+        "tablebased_qualifier", [](const t_field& self) -> whisker::string {
+          switch (self.qualifier()) {
+            case t_field_qualifier::none:
+            case t_field_qualifier::required:
+              return "FieldQualifier.Unqualified";
+            case t_field_qualifier::optional:
+              return "FieldQualifier.Optional";
+            case t_field_qualifier::terse:
+              return "FieldQualifier.Terse";
+            default:
+              throw std::runtime_error("unknown qualifier");
+          }
+        });
+    def.property("is_invariant_type?", [](const t_field& self) {
+      return field_has_invariant_type(&self);
+    });
+    def.property("sorted_key_serialize?", [](const t_field& self) {
+      return self.has_structured_annotation(kPythonSortSetOnSerializeUri) ||
+          self.has_structured_annotation(kPythonKeySortMapOnSerializeUri);
     });
 
     return std::move(def).make();

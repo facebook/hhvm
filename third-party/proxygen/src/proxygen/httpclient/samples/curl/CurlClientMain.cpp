@@ -106,7 +106,8 @@ int main(int argc, char* argv[]) {
   if (!FLAGS_plaintext_proto.empty()) {
     connector.setPlaintextProtocol(FLAGS_plaintext_proto);
   }
-  static const SocketOptionMap opts{{{SOL_SOCKET, SO_REUSEADDR}, 1}};
+  static const SocketOptionMap opts{
+      {{.level = SOL_SOCKET, .optname = SO_REUSEADDR}, 1}};
 
   if (url.isSecure()) {
     curlClient.initializeSsl(

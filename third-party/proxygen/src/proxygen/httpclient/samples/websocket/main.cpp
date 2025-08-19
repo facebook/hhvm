@@ -44,7 +44,8 @@ int main(int argc, char* argv[]) {
       AsyncTimeout::InternalEnum::NORMAL,
       std::chrono::milliseconds(5000))};
   HTTPConnector connector(&client, timer.get());
-  static const SocketOptionMap opts{{{SOL_SOCKET, SO_REUSEADDR}, 1}};
+  static const SocketOptionMap opts{
+      {{.level = SOL_SOCKET, .optname = SO_REUSEADDR}, 1}};
 
   connector.connect(
       &evb,

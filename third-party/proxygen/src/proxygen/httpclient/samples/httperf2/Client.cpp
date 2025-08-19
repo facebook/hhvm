@@ -227,7 +227,8 @@ void Client::connect() {
   connector_.reset();
   start_ = std::chrono::steady_clock::now();
 
-  static const SocketOptionMap opts{{{SOL_SOCKET, SO_REUSEADDR}, 1}};
+  static const SocketOptionMap opts{
+      {{.level = SOL_SOCKET, .optname = SO_REUSEADDR}, 1}};
 
   if (sslContext_) {
     connector_.connectSSL(eventBase_,
@@ -379,7 +380,7 @@ void Client::connectSuccess(HTTPUpstreamSession* session) {
   if (asyncSock) {
     if (asyncSock->getNetworkSocket().toFd() >= 0) {
       // Set linger timeout to 0 to avoid sockets in time wait state.
-      struct linger optLinger = {1, 0};
+      struct linger optLinger = {.l_onoff = 1, .l_linger = 0};
       asyncSock->setSockOpt(SOL_SOCKET, SO_LINGER, &optLinger);
     }
   }

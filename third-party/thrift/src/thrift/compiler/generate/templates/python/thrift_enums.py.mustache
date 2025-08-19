@@ -31,9 +31,7 @@ import typing as _std_python_typing
 
 
 class {{enum:name}}(_fbthrift_python_types.{{!
-        }}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
-        }}{{^enum:flags?}}Enum, int{{/enum:flags?}}{{!
-        }}):
+        }}{{#if enum:flags?}}Flag{{#else}}Enum, int{{/if}}):
     {{#enum:values}}
     {{enum_value:py_name}} = {{enum_value:value}}
     {{/enum:values}}

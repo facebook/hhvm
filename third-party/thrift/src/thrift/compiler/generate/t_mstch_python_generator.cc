@@ -805,24 +805,6 @@ class python_mstch_field : public mstch_field {
   const t_const* transitive_adapter_annotation_;
 };
 
-class python_mstch_enum : public mstch_enum {
- public:
-  python_mstch_enum(
-      const t_enum* e, mstch_context& ctx, mstch_element_position pos)
-      : mstch_enum(e, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"enum:flags?", &python_mstch_enum::has_flags},
-        });
-  }
-
-  mstch::node has_flags() {
-    return enum_->has_unstructured_annotation("py3.flags") ||
-        enum_->has_structured_annotation(kPythonFlagsUri);
-  }
-};
-
 // Generator-specific validator that enforces "name" and "value" are not used
 // as enum member or union field names (thrift-py3).
 namespace enum_member_union_field_names_validator {
@@ -980,6 +962,10 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
                  self.program(),
                  get_option("root_module_prefix").value_or("")) +
           ".thrift_enums";
+    });
+    def.property("flags?", [](const t_enum& self) {
+      return self.has_unstructured_annotation("py3.flags") ||
+          self.has_structured_annotation(kPythonFlagsUri);
     });
 
     return std::move(def).make();
@@ -1524,7 +1510,6 @@ void t_mstch_python_generator::set_mstch_factories() {
   mstch_context_.add<python_mstch_typedef>();
   mstch_context_.add<python_mstch_struct>();
   mstch_context_.add<python_mstch_field>();
-  mstch_context_.add<python_mstch_enum>();
   mstch_context_.add<python_mstch_const>();
   mstch_context_.add<python_mstch_const_value>();
   mstch_context_.add<python_mstch_deprecated_annotation>();

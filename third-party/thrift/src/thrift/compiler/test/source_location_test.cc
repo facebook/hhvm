@@ -33,7 +33,7 @@ TEST(SourceLocationTest, get_file) {
   const auto& file_name = file.string();
   std::ofstream(file_name) << text;
   auto source = sm.get_file(file_name);
-  auto loc = resolved_location(source->start, sm);
+  auto loc = sm.resolve_location(source->start);
   EXPECT_EQ(loc.file_name(), file_name);
   EXPECT_EQ(loc.line(), 1);
   EXPECT_EQ(loc.column(), 1);
@@ -49,7 +49,7 @@ TEST(SourceLocationTest, add_virtual_file) {
   auto sm = source_manager();
   auto text = std::string("test");
   auto source = sm.add_virtual_file("path/to/file", text);
-  auto loc = resolved_location(source.start, sm);
+  auto loc = sm.resolve_location(source.start);
   EXPECT_STREQ(loc.file_name(), "path/to/file");
   EXPECT_EQ(loc.line(), 1);
   EXPECT_EQ(loc.column(), 1);
@@ -85,10 +85,10 @@ Second    Line)");
 TEST(SourceLocationTest, stable_file_name) {
   auto sm = source_manager();
   auto source = sm.add_virtual_file("f1", "");
-  auto file_name = resolved_location(source.start, sm).file_name();
+  auto file_name = sm.resolve_location(source.start).file_name();
   sm.add_virtual_file("f2", "");
   // Check that the pointer to file name hasn't changed.
-  EXPECT_EQ(file_name, resolved_location(source.start, sm).file_name());
+  EXPECT_EQ(file_name, sm.resolve_location(source.start).file_name());
 }
 
 TEST(SourceLocationTest, compare) {
@@ -116,17 +116,17 @@ TEST(SourceLocationTest, multi_line) {
   auto sm = source_manager();
   auto source = sm.add_virtual_file("path/to/file", "line1\nline2");
 
-  auto loc = resolved_location(source.start, sm);
+  auto loc = sm.resolve_location(source.start);
   EXPECT_STREQ(loc.file_name(), "path/to/file");
   EXPECT_EQ(loc.line(), 1);
   EXPECT_EQ(loc.column(), 1);
 
-  loc = resolved_location(source.start + 4, sm);
+  loc = sm.resolve_location(source.start + 4);
   EXPECT_STREQ(loc.file_name(), "path/to/file");
   EXPECT_EQ(loc.line(), 1);
   EXPECT_EQ(loc.column(), 5);
 
-  loc = resolved_location(source.start + 6, sm);
+  loc = sm.resolve_location(source.start + 6);
   EXPECT_STREQ(loc.file_name(), "path/to/file");
   EXPECT_EQ(loc.line(), 2);
   EXPECT_EQ(loc.column(), 1);
@@ -138,7 +138,7 @@ TEST(SourceLocationTest, get_cached_virtual_file) {
   auto file_name = std::string("virtual_file");
   sm.add_virtual_file(file_name, text);
   auto source = sm.get_file(file_name);
-  auto loc = resolved_location(source->start, sm);
+  auto loc = sm.resolve_location(source->start);
   EXPECT_EQ(loc.file_name(), file_name);
   EXPECT_EQ(loc.line(), 1);
   EXPECT_EQ(loc.column(), 1);

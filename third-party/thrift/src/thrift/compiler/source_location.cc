@@ -231,23 +231,24 @@ std::string_view source_manager::get_text_range(
   return std::string_view(first, /* count */ last - first);
 }
 
-resolved_location::resolved_location(
-    source_location loc, const source_manager& sm) {
+resolved_location source_manager::resolve_location(
+    const source_location& loc) const {
   if (loc == source_location()) {
     throw std::invalid_argument("empty source location");
   }
-  const source_manager::source_info* source = sm.get_source(loc.source_id_);
-  if (!source) {
+  const source_info* source = get_source(loc.source_id_);
+  if (source == nullptr) {
     throw std::invalid_argument("invalid source location");
   }
 
-  file_name_ = source->file_name.c_str();
+  const char* file_name = source->file_name.c_str();
   const std::vector<uint_least32_t>& line_offsets = source->line_offsets;
   auto it =
       std::upper_bound(line_offsets.begin(), line_offsets.end(), loc.offset_);
-  line_ = it != line_offsets.end() ? it - line_offsets.begin()
-                                   : line_offsets.size();
-  column_ = loc.offset_ - line_offsets[line_ - 1] + 1;
+  unsigned line = it != line_offsets.end() ? it - line_offsets.begin()
+                                           : line_offsets.size();
+  unsigned column = loc.offset_ - line_offsets[line - 1] + 1;
+  return resolved_location(file_name, line, column);
 }
 
 std::optional<std::filesystem::path> source_manager::try_search_path(

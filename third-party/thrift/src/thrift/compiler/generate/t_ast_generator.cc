@@ -189,8 +189,8 @@ type::Schema t_ast_generator::gen_schema(
   };
 
   auto src_range = [&](source_range in, const t_program& program) {
-    resolved_location begin(in.begin, source_mgr);
-    resolved_location end(in.end, source_mgr);
+    resolved_location begin = source_mgr.resolve_location(in.begin);
+    resolved_location end = source_mgr.resolve_location(in.end);
     type::SourceRange range;
     range.programId() = program_index.at(&program);
     range.beginLine() = begin.line();

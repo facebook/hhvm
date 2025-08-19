@@ -21,6 +21,7 @@
 #include <functional>
 #include <iosfwd>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -71,15 +72,7 @@ class fixit {
   // Resolve the location of the fixit in the source code, or use the provided
   // diagonstic location
   void resolve_location(
-      source_manager& sm, source_location diagnostic_location) {
-    source_location fixit_location =
-        loc_ != source_location() ? loc_ : diagnostic_location;
-    if (fixit_location != source_location()) {
-      auto resolved_loc = resolved_location(fixit_location, sm);
-      this->line_ = resolved_loc.line();
-      this->column_ = resolved_loc.column();
-    }
-  }
+      source_manager& sm, source_location diagnostic_location);
 
  private:
   std::string original_;

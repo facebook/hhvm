@@ -336,14 +336,14 @@ class source_stack {
 
     std::vector<backtrace_frame> result;
     result.emplace_back(backtrace_frame{
-        resolved_location(current, diags_.source_mgr()),
+        diags_.source_mgr().resolve_location(current),
         frame->cause,
     });
     frame = frame->prev;
     for (; frame != nullptr; frame = frame->prev) {
       assert(frame->jumped_from != source_location());
       result.emplace_back(backtrace_frame{
-          resolved_location(frame->jumped_from, diags_.source_mgr()),
+          diags_.source_mgr().resolve_location(frame->jumped_from),
           frame->cause,
       });
     }

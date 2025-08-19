@@ -640,7 +640,7 @@ class parser {
   }
 
   unsigned line_number_of(source_location pos) const {
-    return resolved_location(pos, diags_.source_mgr()).line();
+    return diags_.source_mgr().resolve_location(pos).line();
   }
   /**
    * Gets the line number of start of a given token.

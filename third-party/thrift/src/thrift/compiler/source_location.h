@@ -39,7 +39,6 @@ class source_location {
   uint_least32_t source_id_ = 0;
   uint_least32_t offset_ = 0;
 
-  friend class resolved_location;
   friend class source_manager;
 
   source_location(uint_least32_t source_id, uint_least32_t offset)
@@ -79,14 +78,10 @@ struct source_range {
 };
 
 // A resolved (source) location that provides the file name, line and column.
-class resolved_location {
- private:
-  const char* file_name_;
-  unsigned line_;
-  unsigned column_;
-
+class resolved_location final {
  public:
-  resolved_location(source_location loc, const source_manager& sm);
+  resolved_location(const char* file_name, unsigned line, unsigned column)
+      : file_name_(file_name), line_(line), column_(column) {}
 
   // Returns the source file name. It can include directory components and/or be
   // a virtual file name that doesn't have a correspondent entry in the system's
@@ -94,7 +89,13 @@ class resolved_location {
   const char* file_name() const { return file_name_; }
 
   unsigned line() const { return line_; }
+
   unsigned column() const { return column_; }
+
+ private:
+  const char* file_name_;
+  unsigned line_;
+  unsigned column_;
 };
 
 // A view of a source owned by `source_manager`.
@@ -154,8 +155,6 @@ class source_manager {
         ? &sources_[source_id - 1]
         : nullptr;
   }
-
-  friend class resolved_location;
 
   /**
    * Adds the given contents of a source file (with the given name) to this
@@ -274,6 +273,8 @@ class source_manager {
   // Queries for a file previously found by find_include_file.
   std::optional<std::string> found_include_file(
       std::string_view filename) const;
+
+  resolved_location resolve_location(const source_location& loc) const;
 };
 
 /**

@@ -49,6 +49,17 @@ fmt::format_context::iterator fmt::formatter<diagnostic>::format(
 
 namespace apache::thrift::compiler {
 
+void fixit::resolve_location(
+    source_manager& sm, source_location diagnostic_location) {
+  source_location fixit_location =
+      loc_ != source_location() ? loc_ : diagnostic_location;
+  if (fixit_location != source_location()) {
+    resolved_location resolved_loc = sm.resolve_location(fixit_location);
+    line_ = resolved_loc.line();
+    column_ = resolved_loc.column();
+  }
+}
+
 const char* level_to_string(diagnostic_level level) {
   switch (level) {
     case diagnostic_level::error:
@@ -95,7 +106,7 @@ void diagnostics_engine::do_report(
   std::string file_name;
   unsigned line = 0;
   if (loc != source_location()) {
-    auto resolved_loc = resolved_location(loc, *source_mgr_);
+    resolved_location resolved_loc = source_mgr_->resolve_location(loc);
     file_name = resolved_loc.file_name();
     line = resolved_loc.line();
   }

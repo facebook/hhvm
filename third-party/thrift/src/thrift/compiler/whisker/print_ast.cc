@@ -30,8 +30,8 @@ using apache::thrift::detail::escape;
 
 std::string to_string(
     const source_range& loc, const source_manager& src_manager) {
-  resolved_location begin(loc.begin, src_manager);
-  resolved_location end(loc.end, src_manager);
+  resolved_location begin = src_manager.resolve_location(loc.begin);
+  resolved_location end = src_manager.resolve_location(loc.end);
   // Format of a source location is:
   //   line:<line>:<column>
   // If begin and end are on the same line, the the end source location is:
@@ -227,7 +227,7 @@ struct ast_visitor {
 
   void visit(const ast::root& root, tree_printer::scope& scope) const {
     scope.print(
-        "root [{}]", resolved_location(root.loc, src_manager).file_name());
+        "root [{}]", src_manager.resolve_location(root.loc).file_name());
     if (!root.header_elements.empty()) {
       visit(root.header_elements, scope.make_child());
     }

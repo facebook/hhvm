@@ -56,7 +56,7 @@ prototype<t_node>::ptr t_whisker_generator::make_prototype_for_node(
   def.property("lineno", [&](const t_node& self) {
     auto loc = self.src_range().begin;
     return loc != source_location()
-        ? i64(resolved_location(self.src_range().begin, source_mgr()).line())
+        ? i64(source_mgr().resolve_location(self.src_range().begin).line())
         : i64(0);
   });
   return std::move(def).make();
@@ -908,7 +908,7 @@ class t_whisker_generator::whisker_source_parser
       template_prefix = template_prefix_;
     } else if (*start != "..") {
       fs_path current_file_path =
-          resolved_location(include_from, src_manager_).file_name();
+          src_manager_.resolve_location(include_from).file_name();
       template_prefix = current_file_path.begin()->generic_string();
     } else {
       // If path starts with "..", the template_prefix will be the second

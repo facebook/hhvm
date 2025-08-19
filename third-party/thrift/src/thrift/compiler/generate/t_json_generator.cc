@@ -442,7 +442,7 @@ void t_json_generator::print_const_value(const t_const_value* tvalue) {
 void t_json_generator::print_lineno(const t_node& node) {
   auto loc = node.src_range().begin;
   unsigned line =
-      loc != source_location() ? resolved_location(loc, source_mgr_).line() : 0;
+      loc != source_location() ? source_mgr_.resolve_location(loc).line() : 0;
   indent(f_out_) << "\"lineno\" : " << line << ",\n";
 }
 
@@ -831,7 +831,7 @@ void t_json_generator::print_source_range(const source_range& range) {
 
     line_column(source_location loc, const source_manager& sm) {
       if (loc != source_location()) {
-        auto resolved_loc = resolved_location(loc, sm);
+        resolved_location resolved_loc = sm.resolve_location(loc);
         line = resolved_loc.line();
         column = resolved_loc.column();
       }

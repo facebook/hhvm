@@ -281,28 +281,11 @@ class python_mstch_program : public mstch_program {
     register_methods(
         this,
         {
-            {"program:module_path", &python_mstch_program::module_path},
-            {"program:safe_patch?", &python_mstch_program::safe_patch},
-            {"program:safe_patch_module_path",
-             &python_mstch_program::safe_patch_module_path},
-            {"program:py_deprecated_module_path",
-             &python_mstch_program::py_deprecated_module_path},
-            {"program:py_asyncio_module_path",
-             &python_mstch_program::py_asyncio_module_path},
             {"program:include_namespaces",
              &python_mstch_program::include_namespaces},
-            {"program:base_library_package",
-             &python_mstch_program::base_library_package},
-            {"program:root_module_prefix",
-             &python_mstch_program::root_module_prefix},
             {"program:adapter_modules", &python_mstch_program::adapter_modules},
             {"program:adapter_type_hint_modules",
              &python_mstch_program::adapter_type_hint_modules},
-
-            {"program:has_streaming_types?",
-             &python_mstch_program::has_streaming_types},
-            {"program:has_sink_functions?",
-             &python_mstch_program::has_sink_types},
         });
     gather_included_program_namespaces();
     visit_types_for_services_and_interactions();
@@ -335,76 +318,10 @@ class python_mstch_program : public mstch_program {
     return a;
   }
 
-  mstch::node module_path() {
-    return get_py3_namespace_with_name_and_prefix(
-        program_, get_option("root_module_prefix"));
-  }
-
-  mstch::node safe_patch() {
-    constexpr std::string_view prefix = "gen_safe_patch_";
-    return program_->name().substr(0, prefix.size()) == prefix;
-  }
-
-  mstch::node safe_patch_module_path() {
-    auto ns = std::get<std::string>(module_path());
-
-    // Change the namespace from "path.to.file" to "path.to.gen_safe_patch_file"
-    auto pos = ns.rfind('.');
-    return ns.substr(0, pos + 1) + "gen_safe_patch_" + ns.substr(pos + 1);
-  }
-
-  mstch::node py_deprecated_module_path() {
-    std::string module_path = program_->get_namespace("py");
-    if (module_path.empty()) {
-      return program_->name();
-    }
-    return module_path;
-  }
-
-  mstch::node py_asyncio_module_path() {
-    std::string module_path = program_->get_namespace("py.asyncio");
-    if (module_path.empty()) {
-      return program_->name();
-    }
-    return module_path;
-  }
-
-  mstch::node base_library_package() {
-    std::string option = get_option("base_library_package");
-    return option.empty() ? "thrift.python" : option;
-  }
-
-  mstch::node root_module_prefix() {
-    std::string prefix = get_option("root_module_prefix");
-    return prefix.empty() ? "" : prefix + ".";
-  }
-
   mstch::node adapter_modules() { return module_path_array(adapter_modules_); }
 
   mstch::node adapter_type_hint_modules() {
     return module_path_array(adapter_type_hint_modules_);
-  }
-
-  mstch::node has_streaming_types() {
-    return std::any_of(
-               program_->services().begin(),
-               program_->services().end(),
-               service_has_any_streaming_types) ||
-        std::any_of(
-               program_->interactions().begin(),
-               program_->interactions().end(),
-               service_has_any_streaming_types);
-  }
-
-  mstch::node has_sink_types() {
-    return std::any_of(
-               program_->services().begin(),
-               program_->services().end(),
-               service_has_any_sink_types) ||
-        std::any_of(
-               program_->interactions().begin(),
-               program_->interactions().end(),
-               service_has_any_sink_types);
   }
 
  protected:
@@ -1266,8 +1183,61 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_program(proto);
     auto def = whisker::dsl::prototype_builder<h_program>::extends(base);
 
-    def.property("module_mangle", [&](const t_program& self) {
+    def.property("module_mangle", [this](const t_program& self) {
       return mangle_program_path(&self, get_option("root_module_prefix"));
+    });
+    def.property("module_path", [this](const t_program& self) {
+      return get_py3_namespace_with_name_and_prefix(
+          &self, get_option("root_module_prefix").value_or(""));
+    });
+    def.property("safe_patch?", [](const t_program& self) {
+      return self.name().starts_with("gen_safe_patch_");
+    });
+    def.property("safe_patch_module_path", [this](const t_program& self) {
+      std::string ns = get_py3_namespace_with_name_and_prefix(
+          &self, get_option("root_module_prefix").value_or(""));
+      // Change the namespace from "path.to.file" to
+      // "path.to.gen_safe_patch_file"
+      auto pos = ns.rfind('.');
+      return fmt::format(
+          "{}.gen_safe_patch_{}", ns.substr(0, pos), ns.substr(pos + 1));
+    });
+    def.property("py_deprecated_module_path", [](const t_program& self) {
+      std::string module_path = self.get_namespace("py");
+      return module_path.empty() ? self.name() : module_path;
+    });
+    def.property("py_asyncio_module_path", [](const t_program& self) {
+      std::string module_path = self.get_namespace("py.asyncio");
+      return module_path.empty() ? self.name() : module_path;
+    });
+    def.property("base_library_package", [this](const t_program&) {
+      std::optional<std::string> option = get_option("base_library_package");
+      return !option.has_value() || option->empty() ? "thrift.python"
+                                                    : option.value();
+    });
+    def.property("root_module_prefix", [this](const t_program&) {
+      std::optional<std::string> prefix = get_option("root_module_prefix");
+      return !prefix.has_value() || prefix->empty() ? "" : prefix.value() + ".";
+    });
+    def.property("has_streaming_types?", [](const t_program& self) {
+      return std::any_of(
+                 self.services().begin(),
+                 self.services().end(),
+                 service_has_any_streaming_types) ||
+          std::any_of(
+                 self.interactions().begin(),
+                 self.interactions().end(),
+                 service_has_any_streaming_types);
+    });
+    def.property("has_sink_functions?", [](const t_program& self) {
+      return std::any_of(
+                 self.services().begin(),
+                 self.services().end(),
+                 service_has_any_sink_types) ||
+          std::any_of(
+                 self.interactions().begin(),
+                 self.interactions().end(),
+                 service_has_any_sink_types);
     });
 
     return std::move(def).make();
@@ -1278,7 +1248,7 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_service(proto);
     auto def = whisker::dsl::prototype_builder<h_service>::extends(base);
 
-    def.property("module_mangle", [&](const t_service& self) {
+    def.property("module_mangle", [this](const t_service& self) {
       return mangle_program_path(
           self.program(), get_option("root_module_prefix"));
     });
@@ -1291,7 +1261,7 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_type(proto);
     auto def = whisker::dsl::prototype_builder<h_type>::extends(base);
 
-    def.property("module_mangle", [&](const t_type& self) {
+    def.property("module_mangle", [this](const t_type& self) {
       return mangle_program_path(
                  python_context_->get_type_program(self),
                  get_option("root_module_prefix"))

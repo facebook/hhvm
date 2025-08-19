@@ -625,31 +625,10 @@ class python_mstch_function : public mstch_function {
     register_methods(
         this,
         {
-            {"function:created_interaction",
-             &python_mstch_function::created_interaction},
-            {"function:returns_tuple?", &python_mstch_function::returns_tuple},
-            {"function:early_client_return?",
-             &python_mstch_function::early_client_return},
             {"function:regular_response_type",
              &python_mstch_function::regular_response_type},
-            {"function:with_regular_response?",
-             &python_mstch_function::with_regular_response},
             {"function:async_only?", &python_mstch_function::async_only},
         });
-  }
-
-  mstch::node created_interaction() {
-    const auto& interaction = function_->interaction();
-    return interaction ? interaction->name() : "";
-  }
-
-  mstch::node returns_tuple() {
-    return !function_->has_void_initial_response() &&
-        (function_->sink_or_stream() || function_->interaction());
-  }
-
-  mstch::node early_client_return() {
-    return !function_->return_type()->is_void();
   }
 
   mstch::node regular_response_type() {
@@ -660,11 +639,9 @@ class python_mstch_function : public mstch_function {
     return context_.type_factory->make_mstch_object(rettype, context_, pos_);
   }
 
-  mstch::node with_regular_response() {
-    return !function_->return_type()->is_void();
-  }
-
   mstch::node async_only() {
+    // TODO(T230131540): Whisker migration requires back-reference for
+    // is_interaction_member
     return function_->sink_or_stream() ||
         function_->is_interaction_constructor() || is_interaction_member() ||
         function_->interaction();
@@ -1153,6 +1130,29 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
         whisker::object(whisker::native_handle<python_generator_context>(
             python_context_, make_prototype_for_context()));
     return globals;
+  }
+
+  prototype<t_function>::ptr make_prototype_for_function(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_function(proto);
+    auto def = whisker::dsl::prototype_builder<h_function>::extends(base);
+
+    def.property("created_interaction", [](const t_function& self) {
+      const t_type_ref& interaction = self.interaction();
+      return interaction ? interaction->name() : "";
+    });
+    def.property("returns_tuple?", [](const t_function& self) {
+      return !self.has_void_initial_response() &&
+          (self.sink_or_stream() || self.interaction());
+    });
+    def.property("early_client_return?", [](const t_function& self) {
+      return !self.return_type()->is_void();
+    });
+    def.property("with_regular_response?", [](const t_function& self) {
+      return !self.return_type()->is_void();
+    });
+
+    return std::move(def).make();
   }
 
   prototype<t_named>::ptr make_prototype_for_named(

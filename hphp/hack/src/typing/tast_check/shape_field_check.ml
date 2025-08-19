@@ -36,20 +36,20 @@ let shapes_key_exists env shape field_name =
         else
           `Unknown
   in
-  let shape = Tast_env.strip_dynamic env shape in
-  let (_, shape) = Tast_env.strip_supportdyn env shape in
-  let (env, shape) = Tast_env.expand_type env shape in
-  match get_node shape with
-  | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fields } ->
-    (check env (get_pos shape) shape_kind fields, false)
-  | Toption maybe_shape ->
-    let (env, shape) = Tast_env.expand_type env maybe_shape in
-    (match get_node shape with
+  let rec loop env shape =
+    let shape = Tast_env.strip_dynamic env shape in
+    let (_, shape) = Tast_env.strip_supportdyn env shape in
+    let (env, shape) = Tast_env.expand_type env shape in
+    match get_node shape with
     | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fields }
       ->
-      (check env (get_pos shape) shape_kind fields, true)
-    | _ -> (`Unknown, true))
-  | _ -> (`Unknown, false)
+      (check env (get_pos shape) shape_kind fields, false)
+    | Toption maybe_shape ->
+      let (env, shape) = Tast_env.expand_type env maybe_shape in
+      loop env shape
+    | _ -> (`Unknown, false)
+  in
+  loop env shape
 
 let trivial_shapes_key_exists_check pos1 env shape field_name =
   let (status, optional) =

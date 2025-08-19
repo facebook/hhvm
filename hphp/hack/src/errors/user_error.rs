@@ -43,21 +43,20 @@ struct LintMessage {
 
 pub fn to_json(e: &UserError<Pos, Pos>, ctx: &RelativePathCtx) -> serde_json::Value {
     let mut messages = Vec::new();
-    messages.push(msg_json(&e.claim, e.code, e.severity, ctx));
-    messages.extend(
-        e.reasons
-            .iter()
-            .map(|m| msg_json(m, e.code, e.severity, ctx)),
-    );
+    messages.push(msg_json(&e.claim, e.code, ctx));
+    messages.extend(e.reasons.iter().map(|m| msg_json(m, e.code, ctx)));
     json!({
         "message": messages,
+        "severity": match e.severity {
+            Severity::Err => "error",
+            Severity::Warning => "warning",
+        },
     })
 }
 
 fn msg_json(
     Message(pos, descr): &Message<Pos>,
     code: ErrorCode,
-    severity: Severity,
     ctx: &RelativePathCtx,
 ) -> serde_json::Value {
     let (line, scol, ecol) = pos.info_pos();
@@ -68,10 +67,6 @@ fn msg_json(
         "start": scol,
         "end": ecol,
         "code": code,
-        "severity": match severity {
-            Severity::Err => "error",
-            Severity::Warning => "warning",
-        }
     })
 }
 

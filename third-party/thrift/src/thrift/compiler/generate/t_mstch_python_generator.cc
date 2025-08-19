@@ -663,90 +663,9 @@ class python_mstch_type : public mstch_type {
     register_methods(
         this,
         {
-            {"type:program_name", &python_mstch_type::program_name},
-            {"type:metadata_path", &python_mstch_type::metadata_path},
-            {"type:py3_namespace", &python_mstch_type::py3_namespace},
-            {"type:external_program?", &python_mstch_type::is_external_program},
-            {"type:integer?", &python_mstch_type::is_integer},
-            {"type:iobuf?", &python_mstch_type::is_iobuf},
-            {"type:contains_patch?", &python_mstch_type::contains_patch},
             {"type:has_adapter?", &python_mstch_type::adapter},
-
-            {"type:module_name",
-             {with_no_caching, &python_mstch_type::module_name}},
-            {"type:patch_module_path",
-             {with_no_caching, &python_mstch_type::patch_module_path}},
-            {"type:need_module_path?",
-             {with_no_caching, &python_mstch_type::need_module_path}},
-            {"type:need_patch_module_path?",
-             {with_no_caching, &python_mstch_type::need_patch_module_path}},
         });
   }
-
-  mstch::node module_name() {
-    return get_py3_namespace_with_name_and_prefix(
-               python_context_->get_type_program(*type_),
-               get_option("root_module_prefix"))
-        .append(fmt::format(".{}", python_context_->types_import_path()));
-  }
-
-  mstch::node patch_module_path() {
-    return get_py3_namespace_with_name_and_prefix(
-               python_context_->get_type_program(*type_),
-               get_option("root_module_prefix"))
-        .append(".thrift_patch");
-  }
-
-  mstch::node program_name() {
-    return python_context_->get_type_program(*type_)->name();
-  }
-
-  mstch::node metadata_path() {
-    if (type_->is<t_enum>()) {
-      return get_py3_namespace_with_name_and_prefix(
-                 python_context_->get_type_program(*type_),
-                 get_option("root_module_prefix")) +
-          ".thrift_enums";
-    }
-    return get_py3_namespace_with_name_and_prefix(
-               python_context_->get_type_program(*type_),
-               get_option("root_module_prefix")) +
-        ".thrift_metadata";
-  }
-
-  mstch::node py3_namespace() {
-    std::ostringstream ss;
-    for (const auto& path :
-         get_py3_namespace(python_context_->get_type_program(*type_))) {
-      ss << path << ".";
-    }
-    return ss.str();
-  }
-
-  mstch::node need_module_path() {
-    if (!python_context_->is_types_file()) {
-      return true;
-    }
-    return is_type_defined_in_the_current_program();
-  }
-
-  mstch::node need_patch_module_path() {
-    if (!python_context_->is_patch_file()) {
-      return true;
-    }
-    return is_type_defined_in_the_current_program();
-  }
-
-  mstch::node is_external_program() {
-    auto p = type_->program();
-    return p && p != python_context_->program();
-  }
-
-  mstch::node is_integer() { return type_->is_any_int() || type_->is_byte(); }
-
-  mstch::node is_iobuf() { return is_type_iobuf(type_); }
-
-  mstch::node contains_patch() { return type_contains_patch(type_); }
 
   mstch::node adapter() {
     return adapter_node(
@@ -754,15 +673,6 @@ class python_mstch_type : public mstch_type {
   }
 
  protected:
-  bool is_type_defined_in_the_current_program() {
-    if (const t_program* prog = type_->program()) {
-      if (prog != python_context_->program()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   std::shared_ptr<python_generator_context> python_context_;
   const t_const* adapter_annotation_;
   const t_const* transitive_adapter_annotation_;
@@ -1132,6 +1042,21 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     return globals;
   }
 
+  prototype<t_enum>::ptr make_prototype_for_enum(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_enum(proto);
+    auto def = whisker::dsl::prototype_builder<h_enum>::extends(base);
+
+    def.property("metadata_path", [this](const t_enum& self) {
+      return get_py3_namespace_with_name_and_prefix(
+                 self.program(),
+                 get_option("root_module_prefix").value_or("")) +
+          ".thrift_enums";
+    });
+
+    return std::move(def).make();
+  }
+
   prototype<t_function>::ptr make_prototype_for_function(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_function(proto);
@@ -1247,11 +1172,63 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_type(proto);
     auto def = whisker::dsl::prototype_builder<h_type>::extends(base);
 
+    def.property("program", [this, &proto](const t_type& self) {
+      // Override default program getter for t_type with Python-specific
+      // behaviour. t_primitive_type instances are singletons and their program
+      // property is always nullptr.
+      return proto.create<t_program>(*python_context_->get_type_program(self));
+    });
     def.property("module_mangle", [this](const t_type& self) {
       return mangle_program_path(
                  python_context_->get_type_program(self),
                  get_option("root_module_prefix"))
           .append(fmt::format("__{}", python_context_->types_import_path()));
+    });
+    def.property("module_name", [this](const t_type& self) {
+      return get_py3_namespace_with_name_and_prefix(
+                 python_context_->get_type_program(self),
+                 get_option("root_module_prefix").value_or(""))
+          .append(fmt::format(".{}", python_context_->types_import_path()));
+    });
+    def.property("patch_module_path", [this](const t_type& self) {
+      return get_py3_namespace_with_name_and_prefix(
+                 python_context_->get_type_program(self),
+                 get_option("root_module_prefix").value_or(""))
+          .append(".thrift_patch");
+    });
+    def.property("need_module_path?", [this](const t_type& self) {
+      return !python_context_->is_types_file() ||
+          is_type_defined_in_the_current_program(self);
+    });
+    def.property("need_patch_module_path?", [this](const t_type& self) {
+      return !python_context_->is_patch_file() ||
+          is_type_defined_in_the_current_program(self);
+    });
+    def.property("metadata_path", [this](const t_type& self) {
+      return get_py3_namespace_with_name_and_prefix(
+                 python_context_->get_type_program(self),
+                 get_option("root_module_prefix").value_or("")) +
+          ".thrift_metadata";
+    });
+    def.property("py3_namespace", [this](const t_type& self) {
+      std::ostringstream ss;
+      for (const auto& path :
+           get_py3_namespace(python_context_->get_type_program(self))) {
+        ss << path << ".";
+      }
+      return ss.str();
+    });
+    def.property("external_program?", [this](const t_type& self) {
+      auto p = python_context_->get_type_program(self);
+      return p && p != python_context_->program();
+    });
+    def.property("integer?", [](const t_type& self) {
+      return self.is_any_int() || self.is_byte();
+    });
+    def.property(
+        "iobuf?", [](const t_type& self) { return is_type_iobuf(&self); });
+    def.property("contains_patch?", [](const t_type& self) {
+      return type_contains_patch(&self);
     });
 
     return std::move(def).make();
@@ -1282,6 +1259,15 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
         mem_fn(&python_generator_context::enable_abstract_types));
 
     return std::move(ctx).make();
+  }
+
+  bool is_type_defined_in_the_current_program(const t_type& type) const {
+    if (const t_program* prog = type.program()) {
+      if (prog != python_context_->program()) {
+        return true;
+      }
+    }
+    return false;
   }
 };
 

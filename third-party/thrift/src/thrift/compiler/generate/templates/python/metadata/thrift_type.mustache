@@ -19,7 +19,7 @@
 Used to turn a type into a thrift metadata ThriftType struct
 
 }}{{#type:typedef?}}_fbthrift_metadata.ThriftType(t_typedef={{! TODO this branch never gets hit
-    }}_fbthrift_metadata.ThriftTypedefType(name="{{type:program_name}}.{{type:name}}", {{!
+    }}_fbthrift_metadata.ThriftTypedefType(name="{{type:program.name}}.{{type:name}}", {{!
     }}underlyingType={{#type:typedef_type}}{{> metadata/thrift_type }}{{/type:typedef_type}}, {{!
     }}structured_annotations=[]){{/type:typedef?}}{{!
 }}{{^type:typedef?}}{{!
@@ -36,11 +36,11 @@ Used to turn a type into a thrift metadata ThriftType struct
     }}{{#type:structured}}{{!
         }}{{#struct:union?}}{{!
             }}_fbthrift_metadata.ThriftType(t_union=_fbthrift_metadata.ThriftUnionType({{!
-            }}name="{{type:program_name}}.{{> structs/unadapted_name}}")){{!
+            }}name="{{type:program.name}}.{{> structs/unadapted_name}}")){{!
         }}{{/struct:union?}}{{!
         }}{{^struct:union?}}{{!
             }}_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType({{!
-            }}name="{{type:program_name}}.{{> structs/unadapted_name}}")){{!
+            }}name="{{type:program.name}}.{{> structs/unadapted_name}}")){{!
         }}{{/struct:union?}}{{!
     }}{{/type:structured}}{{!
     }}{{#type:list?}}{{!
@@ -58,5 +58,5 @@ Used to turn a type into a thrift metadata ThriftType struct
     }}{{/type:map?}}{{!
     }}{{#type:enum}}{{!
     }}_fbthrift_metadata.ThriftType(t_enum=_fbthrift_metadata.ThriftEnumType({{!
-    }}name="{{type:program_name}}.{{enum:name}}")){{!
+    }}name="{{type:program.name}}.{{enum:name}}")){{!
 }}{{/type:enum}}{{/type:typedef?}}

@@ -66,6 +66,7 @@ class ClientSink {
     return *this;
   }
 
+  template <typename ExpectedException = folly::Unit>
   folly::coro::Task<R> sink(folly::coro::AsyncGenerator<T&&> generator) {
     folly::exception_wrapper sinkError;
     auto finalResponse = co_await folly::coro::co_nothrow(
@@ -95,7 +96,12 @@ class ClientSink {
           deserializer_(std::move(finalResponse)).exception());
     }
     if (sinkError) {
-      co_yield folly::coro::co_error(SinkThrew(sinkError.what().toStdString()));
+      if (sinkError.is_compatible_with<ExpectedException>()) {
+        co_yield folly::coro::co_error(sinkError);
+      } else {
+        co_yield folly::coro::co_error(
+            SinkThrew(sinkError.what().toStdString()));
+      }
     }
 
     co_return deserializer_(std::move(finalResponse)).value();

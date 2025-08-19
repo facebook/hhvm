@@ -47,7 +47,11 @@ from thrift.python.streaming.py_promise cimport (
     genNextSinkValue,
     Promise_IOBuf,
 )
-from thrift.python.streaming.python_user_exception cimport PythonUserException
+from thrift.python.streaming.python_user_exception cimport (
+    cPythonUserException,
+    extractPyUserExceptionIOBuf,
+    PythonUserException,
+)
 
 
 cdef class ClientSink:
@@ -72,7 +76,9 @@ cdef class ClientSink:
         cancellation_source = cFollyCancellationSource()
         loop = asyncio.get_event_loop()
         fut = loop.create_future()
-        user_data = (fut, self._sink_final_resp_cls, self._protocol)
+        user_data = (
+            fut, self._sink_final_resp_cls, self._sink_elem_cls, self._protocol,
+        )
 
         handled_agen = self._sink_elem_cls._fbthrift__sink_elem_handler(
             agen,
@@ -80,7 +86,7 @@ cdef class ClientSink:
         )
         bridgeCoroTaskWithCancellation[cIOBuf](
             get_executor(),
-            dereference(self._cpp_obj).sink(
+            dereference(self._cpp_obj).sink[cPythonUserException](
                 toAsyncGenerator[unique_ptr[cIOBuf]](
                     handled_agen,
                     get_executor(),
@@ -96,41 +102,63 @@ cdef class ClientSink:
         except asyncio.CancelledError:
             cancellation_source.requestCancellation()
             return await fut
+
+
+# a helper to deserialize a response struct when 
+# we don't know whether it's immutable or mutable
+cdef deserialize_buf(resp_class, buf, protocol):
+    if issubclass(resp_class, Struct):
+        return deserialize(resp_class, buf, protocol)
+    elif issubclass(resp_class, MutableStruct):
+        return deserialize_mutable(resp_class, buf, protocol)
+    else:
+        raise RuntimeError(
+            f"Invalid final response class: {resp_class.__name__}"
+        )
+
+# raises the first non-None exception in the response struct
+# assumes that the .success field is None
+cdef raise_first_exception_field(response_struct):
+    for ex_field_name, ex_val in response_struct:
+        if ex_val is not None:
+            assert ex_field_name != "success"
+            raise ex_val
+
+    # this is legitimate return for void function
+    return None
+
                 
 
 cdef void sink_final_resp_callback(
     cFollyTry[cIOBuf]&& res,
     PyObject* user_data,
 ):
-    future, final_resp_cls, protocol = <object> user_data
+    future, final_resp_cls, sink_elem_cls, protocol = <object> user_data
     try:
         if res.hasException():
+            # PythonUserException denotes an expected (IDL-declared) exception
+            user_ex_buf = extractPyUserExceptionIOBuf(res.exception())
+            if user_ex_buf is not None:
+                user_ex_struct = deserialize_buf(sink_elem_cls, user_ex_buf, protocol)
+                raise_first_exception_field(user_ex_struct)
+            # Catch-all unexpected exception from user code
             if res.exception().get_exception[cTApplicationException]():
                 raise create_py_exception(res.exception(), None)
-            # in this case, it's probably a PythonUserException, denoting
-            # a named expected exception
+            # Totally unexpected exception
             res.exception().throw_exception()
+
 
         res_buf = iobuf_from_unique_ptr(
             make_unique[cIOBuf](cmove(res.value()))
         )
-        
-        if issubclass(final_resp_cls, Struct):
-            final_resp = deserialize(final_resp_cls, res_buf, protocol)
-        elif issubclass(final_resp_cls, MutableStruct):
-            final_resp = deserialize_mutable(final_resp_cls, res_buf, protocol)
-        else:
-            raise RuntimeError(
-                f"Invalid final response class: {final_resp_cls.__name__}"
-            )
+
+        final_resp = deserialize_buf(final_resp_cls, res_buf, protocol)
         
         if final_resp.success is not None:
             future.set_result(final_resp.success)
             return
-        
-        for _ex_field_name, ex_val in final_resp:
-            if ex_val is not None:
-                raise ex_val
+
+        raise_first_exception_field(final_resp)
 
         # This is the expected result for void return
         future.set_result(None)

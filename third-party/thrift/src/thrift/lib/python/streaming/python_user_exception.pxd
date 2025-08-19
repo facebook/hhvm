@@ -15,14 +15,23 @@
 from libcpp.memory cimport unique_ptr
 from libcpp.string cimport string
 
-from folly.iobuf cimport cIOBuf
+from folly.iobuf cimport cIOBuf, IOBuf
+from folly cimport cFollyExceptionWrapper
 from thrift.python.exceptions cimport cException
 
 
-cdef extern from "thrift/lib/python/streaming/PythonUserException.h":
+cdef extern from "thrift/lib/python/streaming/PythonUserException.h" namespace "::apache::thrift::python":
     cdef cppclass cPythonUserException "::apache::thrift::python::PythonUserException"(cException):
         cPythonUserException(string, string, unique_ptr[cIOBuf] buf) except +
+
+    unique_ptr[cIOBuf] extractBufFromPythonUserException(cFollyExceptionWrapper& ew)
 
 
 cdef class PythonUserException(Exception):
     cdef unique_ptr[cPythonUserException] _cpp_obj
+
+
+# steals IOBuf from folly::exception_wrapper that contains PythonUserException,
+# meaning the PythonUserException no longer has a valid IOBuf after this call
+# may return None if the exception is not a PythonUserException
+cdef IOBuf extractPyUserExceptionIOBuf(cFollyExceptionWrapper& ew)

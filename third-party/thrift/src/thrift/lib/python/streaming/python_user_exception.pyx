@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from cython.operator cimport dereference as deref
 from libcpp.string cimport string
 from libcpp.utility cimport move as cmove
 from libcpp.memory cimport make_unique
 
-from folly.iobuf cimport IOBuf
+from folly.iobuf cimport from_unique_ptr
 
 
 cdef class PythonUserException(Exception):
@@ -26,3 +27,11 @@ cdef class PythonUserException(Exception):
             <string>reason.encode('UTF-8'),
             cmove(buf._ours)
         )
+
+cdef IOBuf extractPyUserExceptionIOBuf(cFollyExceptionWrapper& ew):
+    cdef unique_ptr[cIOBuf] buf = extractBufFromPythonUserException(ew)
+    if not buf:
+        return None
+
+    return from_unique_ptr(cmove(buf))
+    

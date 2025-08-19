@@ -35,4 +35,13 @@ PythonUserException& PythonUserException::operator=(
   return *this;
 }
 
+std::unique_ptr<folly::IOBuf> extractBufFromPythonUserException(
+    folly::exception_wrapper& ew) {
+  if (auto ex_ptr = ew.get_exception<PythonUserException>()) {
+    return std::move(*ex_ptr).extractBuf();
+  }
+
+  return nullptr;
+}
+
 } // namespace apache::thrift::python

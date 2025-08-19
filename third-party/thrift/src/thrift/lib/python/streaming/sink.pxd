@@ -38,7 +38,7 @@ cdef extern from "thrift/lib/cpp2/async/Sink.h" namespace "::apache::thrift":
 cdef extern from "thrift/lib/python/streaming/Sink.h" namespace "::apache::thrift::python":
     cdef cppclass cIOBufClientSink "::apache::thrift::python::IOBufClientSink":
         cClientSink()
-        cFollyCoroTask[cIOBuf] sink(cAsyncGenerator[unique_ptr[cIOBuf]])
+        cFollyCoroTask[cIOBuf] sink[ExpectedException](cAsyncGenerator[unique_ptr[cIOBuf]])
 
     cAsyncGenerator[TChunk] toAsyncGenerator[TChunk](
       object,

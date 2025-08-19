@@ -193,13 +193,12 @@ class SinkTests(IsolatedAsyncioTestCase):
             ) as client:
                 initial, sink = await client.sinkThrow()
                 self.assertIs(initial, True)
-                # BAD: in the reference implementation, SinkException
-                # is propagated in both client and server callback
-                with self.assertRaisesRegex(
-                    ApplicationError,
-                    "apache::thrift::python::PythonUserException: why not?",
-                ):
+                with self.assertRaises(SinkException) as e:
                     await sink.sink(raise_gen())
+                self.assertEqual(
+                    e.exception.reason,
+                    "why not?",
+                )
 
     async def test_sink_service_sink_final_throw(self) -> None:
         async def raise_gen() -> AsyncIntGenerator:

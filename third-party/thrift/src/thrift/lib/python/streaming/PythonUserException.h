@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 
+#include <folly/ExceptionWrapper.h>
 #include <folly/io/IOBuf.h>
 
 namespace apache::thrift::python {
@@ -36,10 +37,15 @@ class PythonUserException final : public std::exception {
   const folly::IOBuf* buf() const { return buf_.get(); }
   const char* what() const noexcept override { return reason_.c_str(); }
 
+  std::unique_ptr<folly::IOBuf> extractBuf() && { return std::move(buf_); }
+
  private:
   std::string type_;
   std::string reason_;
   std::unique_ptr<folly::IOBuf> buf_;
 };
+
+std::unique_ptr<folly::IOBuf> extractBufFromPythonUserException(
+    folly::exception_wrapper& ew);
 
 } // namespace apache::thrift::python

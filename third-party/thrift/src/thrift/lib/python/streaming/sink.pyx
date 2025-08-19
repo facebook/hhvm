@@ -246,7 +246,7 @@ cdef class ServerSinkGenerator:
     def __aiter__(self):
         return self
 
-    async def __anext__(self):
+    def __anext__(self):
         cancellation_source = cFollyCancellationSource()
         loop = asyncio.get_event_loop()
         future = loop.create_future()
@@ -261,10 +261,10 @@ cdef class ServerSinkGenerator:
             cancellation_source.getToken(),
         )
         try:
-            return await future
+            return future
         except asyncio.CancelledError:
             cancellation_source.requestCancellation()
-            return await future
+            return future
 
 
 cdef void server_sink_elem_callback(

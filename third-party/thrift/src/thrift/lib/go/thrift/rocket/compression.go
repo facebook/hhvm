@@ -40,7 +40,7 @@ func compressZstdMore(data []byte) ([]byte, error) {
 }
 
 func compressZstdWithLevel(data []byte, level zstd.EncoderLevel) ([]byte, error) {
-	z, err := zstd.NewWriter(nil, zstd.WithEncoderLevel(level))
+	z, err := zstd.NewWriter(nil, zstd.WithEncoderLevel(level), zstd.WithEncoderConcurrency(1))
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func compressZstdWithLevel(data []byte, level zstd.EncoderLevel) ([]byte, error)
 }
 
 func decompressZstd(data []byte) ([]byte, error) {
-	z, err := zstd.NewReader(nil)
+	z, err := zstd.NewReader(nil, zstd.WithDecoderConcurrency(1))
 	if err != nil {
 		return nil, err
 	}

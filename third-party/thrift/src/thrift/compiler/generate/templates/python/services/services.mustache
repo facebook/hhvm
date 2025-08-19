@@ -57,7 +57,7 @@ import {{module_path}}
 {{#program:services}}
 class {{service:name}}Interface(
   {{#service:extends}}{{#service:external_program?}}
-    {{service:module_path}}.thrift_services.{{/service:external_program?}}{{service:name}}Interface,
+    {{service:program.module_path}}.thrift_services.{{/service:external_program?}}{{service:name}}Interface,
     {{/service:extends}}
     {{^service:extends?}}
     ServiceInterface,

@@ -528,23 +528,12 @@ class python_mstch_service : public mstch_service {
     register_methods(
         this,
         {
-            {"service:module_path", &python_mstch_service::module_path},
-            {"service:program_name", &python_mstch_service::program_name},
             {"service:supported_functions",
              &python_mstch_service::supported_functions},
             {"service:supported_service_functions",
              &python_mstch_service::supported_service_functions},
-            {"service:external_program?",
-             &python_mstch_service::is_external_program},
         });
   }
-
-  mstch::node module_path() {
-    return get_py3_namespace_with_name_and_prefix(
-        service_->program(), get_option("root_module_prefix"));
-  }
-
-  mstch::node program_name() { return service_->program()->name(); }
 
   std::vector<t_function*> get_supported_functions(
       const std::function<bool(const t_function*)>& func_filter) {
@@ -572,8 +561,6 @@ class python_mstch_service : public mstch_service {
         }),
         service_);
   }
-
-  mstch::node is_external_program() { return prog_ != service_->program(); }
 
  protected:
   const t_program* prog_;
@@ -1248,9 +1235,8 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_service(proto);
     auto def = whisker::dsl::prototype_builder<h_service>::extends(base);
 
-    def.property("module_mangle", [this](const t_service& self) {
-      return mangle_program_path(
-          self.program(), get_option("root_module_prefix"));
+    def.property("external_program?", [this](const t_service& self) {
+      return python_context_->program() != self.program();
     });
 
     return std::move(def).make();

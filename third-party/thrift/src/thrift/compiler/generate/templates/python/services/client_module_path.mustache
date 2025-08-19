@@ -19,7 +19,7 @@ This generates module path to the client given a service
 }}
 {{#pragma ignore-newlines}}
 {{#service:external_program?}}
-{{service:module_path}}.
+{{service:program.module_path}}.
 {{#python.generate_immutable_types?}}
 thrift_clients
 {{/python.generate_immutable_types?}}

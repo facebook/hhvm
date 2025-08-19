@@ -20,7 +20,7 @@ enum ComplexUnionEnum: int {
  * Original thrift union:-
  * ComplexUnion
  */
-class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<ComplexUnionEnum> {
+class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftProtectedUnion<ComplexUnionEnum> {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -526,7 +526,7 @@ enum ListUnionEnum: int {
  * Original thrift union:-
  * ListUnion
  */
-class ListUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<ListUnionEnum> {
+class ListUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftProtectedUnion<ListUnionEnum> {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -764,7 +764,7 @@ enum DataUnionEnum: int {
  * Original thrift union:-
  * DataUnion
  */
-class DataUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<DataUnionEnum> {
+class DataUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftProtectedUnion<DataUnionEnum> {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -1154,7 +1154,7 @@ enum ValUnionEnum: int {
  * Original thrift union:-
  * ValUnion
  */
-class ValUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<ValUnionEnum> {
+class ValUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftProtectedUnion<ValUnionEnum> {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -1368,7 +1368,7 @@ enum VirtualComplexUnionEnum: int {
  * Original thrift union:-
  * VirtualComplexUnion
  */
-class VirtualComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<VirtualComplexUnionEnum> {
+class VirtualComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftProtectedUnion<VirtualComplexUnionEnum> {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -1659,7 +1659,7 @@ enum NonCopyableUnionEnum: int {
  * Original thrift union:-
  * NonCopyableUnion
  */
-class NonCopyableUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<NonCopyableUnionEnum> {
+class NonCopyableUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftProtectedUnion<NonCopyableUnionEnum> {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[

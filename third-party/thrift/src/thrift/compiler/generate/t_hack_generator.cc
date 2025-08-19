@@ -5264,6 +5264,8 @@ void t_hack_generator::_generate_php_struct_definition(
     std::string_view interface;
     if (strict_unions_) {
       interface = ", \\IThriftStrictUnion<";
+    } else if (protected_unions_) {
+      interface = ", \\IThriftProtectedUnion<";
     } else {
       interface = ", \\IThriftUnion<";
     }

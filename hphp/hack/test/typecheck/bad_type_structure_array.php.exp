@@ -9,15 +9,15 @@ File "bad_type_structure_array.php", line 7, characters 3-31:
 File "bad_type_structure_array.php", line 10, characters 3-27:
   nothing
 File "bad_type_structure_array.php", line 11, characters 3-26:
-  _
+  nothing
 File "bad_type_structure_array.php", line 12, characters 3-28:
-  _
+  nothing
 File "bad_type_structure_array.php", line 13, characters 3-24:
   nothing
 File "bad_type_structure_array.php", line 14, characters 3-29:
-  _
+  nothing
 File "bad_type_structure_array.php", line 15, characters 3-29:
-  _
+  nothing
 File "bad_type_structure_array.php", line 18, characters 3-22:
   TypeStructureKind
 File "bad_type_structure_array.php", line 22, characters 3-22:
@@ -31,15 +31,15 @@ File "bad_type_structure_array.php", line 25, characters 3-31:
 File "bad_type_structure_array.php", line 28, characters 3-27:
   nothing
 File "bad_type_structure_array.php", line 29, characters 3-26:
-  _
+  nothing
 File "bad_type_structure_array.php", line 30, characters 3-28:
-  _
+  nothing
 File "bad_type_structure_array.php", line 31, characters 3-24:
   nothing
 File "bad_type_structure_array.php", line 32, characters 3-29:
-  _
+  nothing
 File "bad_type_structure_array.php", line 33, characters 3-29:
-  _
+  nothing
 File "bad_type_structure_array.php", line 36, characters 3-22:
   TypeStructureKind
 ERROR: File "bad_type_structure_array.php", line 10, characters 15-25:

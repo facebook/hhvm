@@ -1,8 +1,6 @@
 ERROR: File "immvector_invalid_key.php", line 15, characters 8-22:
-Invalid index type for this ImmVector (Typing[4324])
-  File "immvector_invalid_key.php", line 15, characters 12-21:
-  Expected `int`
-  File "immvector_invalid_key.php", line 14, characters 20-31:
-  This can only be indexed with integers
+Typing error (Typing[4110])
+  File "immvector_invalid_key.php", line 15, characters 8-10:
+  Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
   File "immvector_invalid_key.php", line 15, characters 12-21:
   But got `string`

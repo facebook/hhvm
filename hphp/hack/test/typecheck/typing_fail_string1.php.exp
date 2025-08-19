@@ -1,10 +1,8 @@
 ERROR: File "typing_fail_string1.php", line 12, characters 10-13:
 Was expecting a return type hint (Typing[4030])
 ERROR: File "typing_fail_string1.php", line 14, characters 3-11:
-Invalid index type for this array (Typing[4324])
-  File "typing_fail_string1.php", line 14, characters 6-10:
-  Expected `int`
+Typing error (Typing[4110])
   File "typing_fail_string1.php", line 13, characters 8-13:
-  This can only be indexed with integers
+  Expected `int` because only `int` can be used to index into a `string`.
   File "typing_fail_string1.php", line 14, characters 6-10:
   But got `string`

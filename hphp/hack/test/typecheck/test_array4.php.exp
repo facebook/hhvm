@@ -9,16 +9,8 @@ Some type arguments violate their constraints (Typing[4323])
   File "test_array4.php", line 12, characters 22-25:
   But got `bool`
 ERROR: File "test_array4.php", line 13, characters 10-17:
-Invalid return type (Typing[4110])
-  File "test_array4.php", line 12, characters 38-41:
-  Expected `bool`
-  File "test_array4.php", line 13, characters 10-17:
-  But got `int`
-  File "test_array4.php", line 12, characters 28-30:
-    from this definition
-ERROR: File "test_array4.php", line 13, characters 10-17:
-This value is not a valid key type for this container (Typing[4324])
-  File "test_array4.php", line 12, characters 15-31:
-  This container is an object of type dict<bool, int>
+Typing error (Typing[4110])
+  File "test_array4.php", line 13, characters 10-11:
+  Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
   File "test_array4.php", line 13, characters 13-16:
-  A bool cannot be used as a key for an object of type dict<bool, int>
+  But got `bool`

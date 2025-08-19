@@ -139,6 +139,7 @@ private:
   const char* m_stopReason{nullptr};
 
   ServerPtr m_pageServer;
+  ServerPtr m_secondaryPageServer;
   ServerPtr m_adminServer;
   ServiceData::CounterCallback m_counterCallback;
 };

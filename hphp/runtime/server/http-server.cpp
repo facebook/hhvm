@@ -189,6 +189,39 @@ HttpServer::HttpServer() {
     m_pageServer->enableSSL(Cfg::Server::SSLPort);
   }
 
+  if (!Cfg::Server::SecondaryType.empty()) {
+    if (Cfg::Eval::AuthoritativeMode) {
+      startupFailure("Secondary server is not supported in RepoAuthoritative (production) mode");
+    } else {
+      auto secondaryServerFactory = ServerFactoryRegistry::getInstance()->getFactory
+        (Cfg::Server::SecondaryType);
+      ServerOptions secondaryServerOptions(Cfg::Server::IP, Cfg::Server::SecondaryPort,
+        Cfg::Server::ThreadCount, startingThreadCount,
+        Cfg::Server::QueueCount);
+      secondaryServerOptions.m_useFileSocket = false;
+      secondaryServerOptions.m_serverFD = Cfg::Server::PortFd;
+      secondaryServerOptions.m_sslFD = Cfg::Server::SSLPortFd;
+      secondaryServerOptions.m_hugeThreads = Cfg::Server::HugeThreadCount;
+      secondaryServerOptions.m_hugeStackKb = Cfg::Server::HugeStackSizeKb;
+      secondaryServerOptions.m_loop_sample_rate = Cfg::Server::LoopSampleRate;
+      m_secondaryPageServer = secondaryServerFactory->createServer(secondaryServerOptions);
+      m_secondaryPageServer->addServerEventListener(this);
+
+      if (startingThreadCount != Cfg::Server::ThreadCount) {
+        auto secondaryHandlerFactory = std::make_shared<WarmupRequestHandlerFactory>(
+          m_secondaryPageServer.get(),
+          Cfg::Server::WarmupThrottleRequestCount,
+          Cfg::Server::RequestTimeoutSeconds);
+        m_secondaryPageServer->setRequestHandlerFactory([secondaryHandlerFactory] {
+          return secondaryHandlerFactory->createHandler();
+        });
+      } else {
+        m_secondaryPageServer->setRequestHandlerFactory<HttpRequestHandler>(
+          Cfg::Server::RequestTimeoutSeconds);
+      }
+    }
+  }
+
   ServerOptions admin_options(Cfg::AdminServer::IP,
                               Cfg::AdminServer::Port,
                               Cfg::AdminServer::ThreadCount);
@@ -445,6 +478,10 @@ void HttpServer::runOrExitProcess() {
     Logger::Info("stopping page server");
     m_pageServer->stop();
   }
+  if (m_secondaryPageServer) {
+    Logger::Info("stopping secondary page server");
+    m_secondaryPageServer->stop();
+  }
   onServerShutdown();
 
   EvictFileCache();
@@ -463,6 +500,9 @@ void HttpServer::waitForServers() {
   }
   if (Cfg::AdminServer::Port) {
     m_adminServer->waitForEnd();
+  }
+  if (m_secondaryPageServer) {
+    m_secondaryPageServer->waitForEnd();
   }
   // all other servers invoke waitForEnd on stop
 }
@@ -797,6 +837,9 @@ bool HttpServer::startServer(bool pageServer) {
     try {
       if (pageServer) {
         m_pageServer->start();
+        if (m_secondaryPageServer) {
+          m_secondaryPageServer->start();
+        }
       } else {
         m_adminServer->start();
       }
@@ -837,6 +880,9 @@ bool HttpServer::startServer(bool pageServer) {
       try {
         if (pageServer) {
           m_pageServer->start();
+          if (m_secondaryPageServer) {
+            m_secondaryPageServer->start();
+          }
         } else {
           m_adminServer->start();
         }
@@ -857,6 +903,9 @@ bool HttpServer::startServer(bool pageServer) {
       try {
         if (pageServer) {
           m_pageServer->start();
+          if (m_secondaryPageServer) {
+            m_secondaryPageServer->start();
+          }
         } else {
           m_adminServer->start();
         }

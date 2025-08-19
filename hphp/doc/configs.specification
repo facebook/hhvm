@@ -72,6 +72,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - int Server.IOThreadCount = 1, UNKNOWN
 - int Server.HighQueueingThreshold = 60, UNKNOWN, nobind
 - int Server.HugeThreadCount = 0, UNKNOWN
+- std::string Server.SecondaryType = "", UNKNOWN
+- int Server.SecondaryPort = 0, UNKNOWN
 
   Number of worker threads with stack partially on huge pages
 

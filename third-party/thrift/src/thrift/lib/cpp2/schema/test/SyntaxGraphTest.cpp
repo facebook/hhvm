@@ -982,7 +982,7 @@ TEST(SyntaxGraphTest, SerializableTypeSystemBuilder) {
     auto& structA = sts.types()
                         ->at("facebook.com/thrift/test/A")
                         .definition()
-                        ->structDef_ref()
+                        ->structDef()
                         .value();
     EXPECT_EQ(structA.fields()->size(), 1);
     auto& field1 = structA.fields()[0];
@@ -994,7 +994,7 @@ TEST(SyntaxGraphTest, SerializableTypeSystemBuilder) {
     auto& structA = sts.types()
                         ->at("facebook.com/thrift/test/B")
                         .definition()
-                        ->structDef_ref()
+                        ->structDef()
                         .value();
     EXPECT_EQ(structA.fields()->size(), 1);
     auto& field1 = structA.fields()[0];
@@ -1006,7 +1006,7 @@ TEST(SyntaxGraphTest, SerializableTypeSystemBuilder) {
     auto& structA = sts.types()
                         ->at("facebook.com/thrift/test/C")
                         .definition()
-                        ->structDef_ref()
+                        ->structDef()
                         .value();
     EXPECT_EQ(structA.fields()->size(), 1);
     EXPECT_EQ(

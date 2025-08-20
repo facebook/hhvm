@@ -308,9 +308,8 @@ class ObjectWriter : public BaseObjectAdapter {
   }
 
   uint32_t writeBinary(const std::unique_ptr<folly::IOBuf>& str) {
-    assert(str != nullptr);
     if (!str) {
-      return 0;
+      return writeBinary(folly::ByteRange{});
     }
     return writeBinary(*str);
   }

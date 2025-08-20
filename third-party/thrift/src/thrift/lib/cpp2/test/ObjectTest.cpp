@@ -1754,5 +1754,13 @@ TEST(ObjectTest, MaybeAny) {
   EXPECT_FALSE(maybeAny(obj));
 }
 
+TEST(ObjectTest, EmptyIOBufPtr) {
+  auto obj = asValueStruct<type::struct_c>(
+                 facebook::thrift::lib::test::EmptyIOBufPtr{})
+                 .as_object();
+  EXPECT_EQ(obj.size(), 1);
+  EXPECT_EQ(obj[FieldId{1}].as_binary().to<std::string>(), "");
+}
+
 } // namespace
 } // namespace apache::thrift::protocol

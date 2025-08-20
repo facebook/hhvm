@@ -49,3 +49,8 @@ struct MyStruct {
   @cpp.Type{template = "std::unordered_map"}
   9: optional map<i32, Foo> foo_value_cpp_map;
 }
+
+struct EmptyIOBufPtr {
+  @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+  1: binary data;
+}

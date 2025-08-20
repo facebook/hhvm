@@ -23,7 +23,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct CoreExtension final : Extension {
-  CoreExtension() : Extension("core", "1.0", "hhvm") { }
+  CoreExtension() : Extension("core", "1.0", "hphp_hphpi") { }
   void moduleRegisterNative() override;
 
 private:

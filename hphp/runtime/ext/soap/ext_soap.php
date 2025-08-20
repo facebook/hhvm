@@ -226,6 +226,13 @@ class SoapClient {
  */
 class SoapVar {
 
+  public int $enc_type;
+  public mixed $enc_value;
+  public ?string $enc_stype;
+  public ?string $enc_ns;
+  public ?string $enc_name;
+  public ?string $enc_namens;
+
   <<__Native>>
   public function __construct(mixed $data,
                        mixed $type,
@@ -252,6 +259,11 @@ class SoapParam {
  */
 <<__NativeData>>
 class SoapHeader {
+
+  public string $namespace;
+  public string $name;
+  public mixed $data;
+  public bool $mustUnderstand;
 
   <<__Native>>
   public function __construct(string $ns,

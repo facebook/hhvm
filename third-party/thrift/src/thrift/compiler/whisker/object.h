@@ -17,6 +17,7 @@
 #pragma once
 
 #include <cassert>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -537,12 +538,6 @@ inline bool operator==(
     const native_handle<T>& lhs, const native_handle<U>& rhs) noexcept {
   return lhs.ptr() == rhs.ptr();
 }
-// Before C++20, operator!= is not synthesized from operator==.
-template <typename T, typename U>
-inline bool operator!=(
-    const native_handle<T>& lhs, const native_handle<U>& rhs) noexcept {
-  return !(lhs == rhs);
-}
 
 namespace detail {
 // This only exists to form a kind-of recursive std::variant with the help of
@@ -633,10 +628,7 @@ class object final : private detail::object_base {
   /**
    * Pointers have the nasty behavior of being implicitly convertible to bool.
    */
-  template <
-      typename U = boolean,
-      std::enable_if_t<std::is_same_v<U, boolean>>* = nullptr>
-  explicit object(U value) : base(value) {}
+  explicit object(std::same_as<boolean> auto value) : base(value) {}
 
   explicit object(i64 value) : base(value) {}
   explicit object(f64 value) : base(value) {}
@@ -756,16 +748,12 @@ class object final : private detail::object_base {
   std::string describe_type() const;
 
   // Prevent implicit conversion from const char* to bool
-  template <
-      typename T = boolean,
-      typename = std::enable_if_t<std::is_same_v<T, boolean>>>
-  friend bool operator==(const object& lhs, T rhs) noexcept {
+  friend bool operator==(
+      const object& lhs, std::same_as<boolean> auto rhs) noexcept {
     return lhs.is_boolean() && lhs.as_boolean() == rhs;
   }
-  template <
-      typename T = boolean,
-      typename = std::enable_if_t<std::is_same_v<T, boolean>>>
-  friend bool operator==(T lhs, const object& rhs) noexcept {
+  friend bool operator==(
+      std::same_as<boolean> auto lhs, const object& rhs) noexcept {
     return rhs == lhs;
   }
 
@@ -834,89 +822,6 @@ class object final : private detail::object_base {
 
   friend bool operator==(const object& lhs, const object& rhs) noexcept {
     return lhs.visit([&rhs](auto&& value) { return rhs == value; });
-  }
-
-  // Before C++20, operator!= is not synthesized from operator==.
-
-  friend bool operator!=(const object& lhs, null) noexcept {
-    return !lhs.is_null();
-  }
-  friend bool operator!=(null, const object& rhs) noexcept {
-    return !rhs.is_null();
-  }
-
-  // Prevent implicit conversion from const char* to bool
-  template <
-      typename T = boolean,
-      typename = std::enable_if_t<std::is_same_v<T, boolean>>>
-  friend bool operator!=(const object& lhs, T rhs) noexcept {
-    return !(lhs == rhs);
-  }
-  template <
-      typename T = boolean,
-      typename = std::enable_if_t<std::is_same_v<T, boolean>>>
-  friend bool operator!=(T lhs, const object& rhs) noexcept {
-    return !(lhs == rhs);
-  }
-
-  friend bool operator!=(const object& lhs, i64 rhs) noexcept {
-    return !(lhs == rhs);
-  }
-  friend bool operator!=(i64 lhs, const object& rhs) noexcept {
-    return !(lhs == rhs);
-  }
-
-  friend bool operator!=(const object& lhs, f64 rhs) noexcept {
-    return !(lhs == rhs);
-  }
-  friend bool operator!=(f64 lhs, const object& rhs) noexcept {
-    return !(lhs == rhs);
-  }
-
-  friend bool operator!=(const object& lhs, std::string_view rhs) noexcept {
-    return !(lhs == rhs);
-  }
-  friend bool operator!=(std::string_view lhs, const object& rhs) noexcept {
-    return !(lhs == rhs);
-  }
-
-  friend bool operator!=(const object&, std::nullptr_t) = delete;
-  friend bool operator!=(std::nullptr_t, const object&) = delete;
-
-  friend bool operator!=(
-      const object& lhs, const native_function::ptr& rhs) noexcept {
-    return !(lhs == rhs);
-  }
-  friend bool operator!=(
-      const native_function::ptr& lhs, const object& rhs) noexcept {
-    return !(lhs == rhs);
-  }
-
-  friend bool operator!=(
-      const object& lhs, const native_handle<>& rhs) noexcept {
-    return !(lhs == rhs);
-  }
-  friend bool operator!=(
-      const native_handle<>& lhs, const object& rhs) noexcept {
-    return !(lhs == rhs);
-  }
-
-  friend bool operator!=(const object& lhs, const array::ptr& rhs) noexcept {
-    return !(lhs == rhs);
-  }
-  friend bool operator!=(const array::ptr& lhs, const object& rhs) noexcept {
-    return !(lhs == rhs);
-  }
-
-  friend bool operator!=(const object& lhs, const map::ptr& rhs) noexcept {
-    return !(lhs == rhs);
-  }
-  friend bool operator!=(const map::ptr& lhs, const object& rhs) noexcept {
-    return !(lhs == rhs);
-  }
-
-  friend bool operator!=(const object& lhs, const object& rhs) noexcept {
-    return !(lhs == rhs);
   }
 };
 
@@ -1114,27 +1019,25 @@ template <typename T>
 
 namespace detail {
 template <typename T, typename... Alternatives>
-static constexpr bool is_any_of = (std::is_same_v<T, Alternatives> || ...);
+concept any_of = (std::same_as<T, Alternatives> || ...);
 }
 
 /**
- * A type trait which checks that the provided type T can be used to construct
+ * A concept which checks that the provided type T can be used to construct
  * whisker::object.
  */
 template <typename T>
-constexpr inline bool is_any_object_type =
-    detail::is_specialization_v<T, whisker::native_handle> ||
-    detail::is_any_of<
-        T,
-        i64,
-        f64,
-        string,
-        boolean,
-        null,
-        array::ptr,
-        map::ptr,
-        native_function::ptr,
-        native_handle<>>;
+concept any_object_type = detail::specialization<T, whisker::native_handle> ||
+    detail::any_of<T,
+                   i64,
+                   f64,
+                   string,
+                   boolean,
+                   null,
+                   array::ptr,
+                   map::ptr,
+                   native_function::ptr,
+                   native_handle<>>;
 
 /**
  * An alternative to to_string() that allows printing a whisker::object within
@@ -1159,8 +1062,8 @@ namespace detail {
  * therefore also implicitly convertible from).
  */
 template <typename T>
-static constexpr bool is_supported_integral_type =
-    whisker::detail::is_any_of<T, signed char, short, int, long, long long> &&
+concept supported_integral_type =
+    whisker::detail::any_of<T, signed char, short, int, long, long long> &&
     sizeof(T) <= sizeof(whisker::i64);
 
 /**
@@ -1168,8 +1071,8 @@ static constexpr bool is_supported_integral_type =
  * are therefore also implicitly convertible from).
  */
 template <typename T>
-static constexpr bool is_supported_floating_point_type =
-    whisker::detail::is_any_of<T, float, double>;
+concept supported_floating_point_type =
+    whisker::detail::any_of<T, float, double>;
 
 } // namespace detail
 
@@ -1207,9 +1110,7 @@ inline const object false_{whisker::boolean(false)};
  *   object::is_i64() == true
  *   object::as_i64() == value
  */
-template <
-    typename T = i64,
-    typename = std::enable_if_t<detail::is_supported_integral_type<T>>>
+template <detail::supported_integral_type T>
 object i64(T value) {
   // Smaller signed integrals types are implicitly converted to i64.
   return object(whisker::i64(value));
@@ -1222,9 +1123,7 @@ object i64(T value) {
  *   object::is_f64() == true
  *   object::as_f64() == value
  */
-template <
-    typename T = f64,
-    typename = std::enable_if_t<detail::is_supported_floating_point_type<T>>>
+template <detail::supported_floating_point_type T>
 object f64(T value) {
   return object(whisker::f64(value));
 }

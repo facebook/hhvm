@@ -615,7 +615,7 @@ function::ptr make_function(std::string name, F&& function) {
 template <
     typename F,
     std::enable_if_t<
-        whisker::is_any_object_type<detail::function_return_t<F>>,
+        whisker::any_object_type<detail::function_return_t<F>>,
         int> = 0>
 function::ptr make_function(std::string name, F&& function) {
   return make_function(

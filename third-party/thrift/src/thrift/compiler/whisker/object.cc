@@ -44,10 +44,8 @@ class to_string_visitor {
   // Prevent implicit conversion to whisker::object. Otherwise, we can silently
   // compile an infinitely recursive visit() chain if there is a missing
   // overload for one of the alternatives in the variant.
-  template <
-      typename T = object,
-      typename = std::enable_if_t<std::is_same_v<T, object>>>
-  void visit(const T& value, tree_printer::scope& scope) const {
+  void visit(const std::same_as<object> auto& value, tree_printer::scope& scope)
+      const {
     value.visit(
         [&](const array::ptr& a) { visit_maybe_truncate(a, scope); },
         [&](const map::ptr& m) { visit_maybe_truncate(m, scope); },

@@ -29,4 +29,7 @@ constexpr inline bool is_specialization_v = false;
 template <template <typename...> typename Template, typename... Types>
 constexpr inline bool is_specialization_v<Template<Types...>, Template> = true;
 
+template <typename T, template <typename...> typename Template>
+concept specialization = is_specialization_v<T, Template>;
+
 } // namespace whisker::detail

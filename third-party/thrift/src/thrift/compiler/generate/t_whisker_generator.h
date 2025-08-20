@@ -374,7 +374,7 @@ class t_whisker_generator : public t_generator {
   template <
       typename R,
       typename Self,
-      std::enable_if_t<whisker::is_any_object_type<std::decay_t<R>>>* = nullptr>
+      std::enable_if_t<whisker::any_object_type<std::decay_t<R>>>* = nullptr>
   static auto mem_fn(R (Self::*function)() const) {
     return [function](const Self& self) -> whisker::object {
       return whisker::object(std::decay_t<R>((self.*function)()));

@@ -178,6 +178,10 @@ static void debugger_signal_handler(int sig) {
 
 void DebuggerClient::onSignal(int /*sig*/) {
   TRACE(2, "DebuggerClient::onSignal\n");
+  if (m_inputState == TakingCode) {
+    m_inputState = TakingCommand;
+  }
+
   if (m_inputState == TakingInterrupt) {
     if (m_sigCount == 0) {
       usageLogEvent("signal start");
@@ -724,7 +728,7 @@ std::string DebuggerClient::getPrompt() {
     return "";
   }
   auto name = &m_machine->m_name;
-  if (m_inputState == TakingCode ) {
+  if (m_inputState == TakingCode) {
     if (m_options.isNotebook) {
       return "";
     }
@@ -1302,6 +1306,8 @@ void DebuggerClient::console() {
           return;
         }
       }
+    } else if (m_inputState == TakingCode) {
+      parse(line);
     } else if (m_inputState == TakingCommand) {
       switch (m_prevCmd[0]) {
         case 'l': // list
@@ -1894,6 +1900,8 @@ bool DebuggerClient::parse(const char *line) {
         m_code += m_line.substr(0, pos);
       }
       processEval();
+    } else if (m_line == "") {
+      m_code += "\n";
     } else {
       if (!strncasecmp(m_line.c_str(), "abort", m_line.size())) {
         m_code.clear();

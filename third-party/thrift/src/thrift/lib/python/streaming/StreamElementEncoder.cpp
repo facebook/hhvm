@@ -18,10 +18,11 @@
 
 namespace apache::thrift::python::detail {
 
-folly::Try<folly::IOBuf> decode_stream_element(
+folly::Try<std::unique_ptr<folly::IOBuf>> decode_stream_element(
     folly::Try<apache::thrift::StreamPayload>&& payload) {
   if (payload.hasValue()) {
-    return folly::Try<folly::IOBuf>(std::move(*payload->payload));
+    return folly::Try<std::unique_ptr<folly::IOBuf>>(
+        std::move(payload->payload));
   } else if (payload.hasException()) {
     return decode_stream_exception(std::move(payload).exception());
   } else {
@@ -29,31 +30,13 @@ folly::Try<folly::IOBuf> decode_stream_element(
   }
 }
 
-folly::Try<std::unique_ptr<folly::IOBuf>> decode_sink_element(
-    folly::Try<apache::thrift::StreamPayload>&& payload) {
-  folly::Try<std::unique_ptr<folly::IOBuf>> ret;
-  if (payload.hasValue()) {
-    ret = folly::Try<std::unique_ptr<folly::IOBuf>>(
-        std::make_unique<folly::IOBuf>(std::move(*payload->payload)));
-  } else if (payload.hasException()) {
-    auto ex_try = decode_stream_exception(std::move(payload).exception());
-    if (ex_try.hasValue()) {
-      ret = folly::Try<std::unique_ptr<folly::IOBuf>>(
-          std::make_unique<folly::IOBuf>(std::move(*ex_try)));
-    } else if (ex_try.hasException()) {
-      ret = folly::Try<std::unique_ptr<folly::IOBuf>>(
-          std::move(ex_try).exception());
-    }
-  }
-  return ret;
-}
-
-folly::Try<folly::IOBuf> decode_stream_exception(folly::exception_wrapper ew) {
-  using IOBufTry = folly::Try<folly::IOBuf>;
+folly::Try<std::unique_ptr<folly::IOBuf>> decode_stream_exception(
+    folly::exception_wrapper ew) {
+  using IOBufTry = folly::Try<std::unique_ptr<folly::IOBuf>>;
   IOBufTry ret;
-  ew.handle(
+  std::move(ew).handle(
       [&ret](apache::thrift::detail::EncodedError& err) {
-        ret = IOBufTry(std::move(*err.encoded));
+        ret = IOBufTry(std::move(err.encoded));
       },
       [&ret](apache::thrift::detail::EncodedStreamError& err) {
         auto& payload = err.encoded;
@@ -66,7 +49,7 @@ folly::Try<folly::IOBuf> decode_stream_exception(folly::exception_wrapper ew) {
         if (auto exceptionMetadataRef = exceptionMetadataBase.metadata()) {
           if (exceptionMetadataRef->getType() ==
               PayloadExceptionMetadata::Type::declaredException) {
-            ret = IOBufTry(std::move(*payload.payload));
+            ret = IOBufTry(std::move(payload.payload));
           } else {
             ret = IOBufTry(TApplicationException(
                 exceptionMetadataBase.what_utf8().value_or("")));

@@ -33,6 +33,53 @@ void do_import() {
 
 #if FOLLY_HAS_COROUTINES
 
+template <typename TChunk>
+folly::coro::AsyncGenerator<TChunk&&> toAsyncGeneratorImpl(
+    PyObject* iter,
+    folly::Executor* executor,
+    folly::Function<void(PyObject*, folly::Promise<std::optional<TChunk>>)>
+        genNext) {
+  Py_INCREF(iter);
+  auto guard =
+      folly::makeGuard([iter, executor = folly::getKeepAliveToken(executor)] {
+        // Ensure the Python async generator is destroyed on a Python thread
+        executor->add([iter] { Py_DECREF(iter); });
+      });
+
+  return folly::coro::co_invoke(
+      [iter,
+       executor = executor,
+       guard = std::move(guard),
+       genNext = std::move(
+           genNext)]() mutable -> folly::coro::AsyncGenerator<TChunk&&> {
+        Py_INCREF(iter);
+        auto innerGuard = folly::makeGuard([iter] { Py_DECREF(iter); });
+
+        folly::CancellationCallback cb{
+            co_await folly::coro::co_current_cancellation_token,
+            [iter, executor, guard = std::move(innerGuard)]() mutable {
+              folly::via(executor, [iter, guard = std::move(guard)] {
+                cancelPythonGenerator(iter);
+              });
+            }};
+
+        while (true) {
+          auto [promise, future] =
+              folly::makePromiseContract<std::optional<TChunk>>(executor);
+          folly::via(
+              executor,
+              [&genNext, iter, promise_ = std::move(promise)]() mutable {
+                genNext(iter, std::move(promise_));
+              });
+          auto val = co_await std::move(future);
+          if (!val) {
+            break;
+          }
+          co_yield std::move(val.value());
+        }
+      });
+}
+
 folly::Function<folly::coro::Task<std::unique_ptr<folly::IOBuf>>(
     folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&>)>
 makeSinkCallback(PyObject* sink_callback, folly::Executor* exec) {
@@ -70,6 +117,17 @@ void cancelPythonGenerator(PyObject* iter) {
 }
 
 #if FOLLY_HAS_COROUTINES
+
+folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&> toAsyncGenerator(
+    PyObject* iter,
+    folly::Executor* executor,
+    folly::Function<void(
+        PyObject*,
+        folly::Promise<std::optional<std::unique_ptr<folly::IOBuf>>>)>
+        genNext) {
+  return toAsyncGeneratorImpl<std::unique_ptr<folly::IOBuf>>(
+      iter, executor, std::move(genNext));
+}
 
 IOBufSinkGenerator::IOBufSinkGenerator(
     folly::Executor* executor, PyObject* sink_callback)

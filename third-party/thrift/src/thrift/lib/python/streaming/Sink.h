@@ -27,57 +27,17 @@
 
 namespace apache::thrift::python {
 
-using IOBufClientSink =
-    apache::thrift::ClientSink<std::unique_ptr<folly::IOBuf>, folly::IOBuf>;
+using IOBufClientSink = apache::thrift::
+    ClientSink<std::unique_ptr<folly::IOBuf>, std::unique_ptr<folly::IOBuf>>;
 
 void cancelPythonGenerator(PyObject*);
 
-template <typename TChunk>
-folly::coro::AsyncGenerator<TChunk&&> toAsyncGenerator(
+folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&> toAsyncGenerator(
     PyObject* iter,
     folly::Executor* executor,
-    folly::Function<void(PyObject*, folly::Promise<std::optional<TChunk>>)>
-        genNext) {
-  Py_INCREF(iter);
-  auto guard =
-      folly::makeGuard([iter, executor = folly::getKeepAliveToken(executor)] {
-        // Ensure the Python async generator is destroyed on a Python thread
-        executor->add([iter] { Py_DECREF(iter); });
-      });
-
-  return folly::coro::co_invoke(
-      [iter,
-       executor = std::move(executor),
-       guard = std::move(guard),
-       genNext = std::move(
-           genNext)]() mutable -> folly::coro::AsyncGenerator<TChunk&&> {
-        Py_INCREF(iter);
-        auto innerGuard = folly::makeGuard([iter] { Py_DECREF(iter); });
-
-        folly::CancellationCallback cb{
-            co_await folly::coro::co_current_cancellation_token,
-            [iter, executor, guard = std::move(innerGuard)]() mutable {
-              folly::via(executor, [iter, guard = std::move(guard)] {
-                cancelPythonGenerator(iter);
-              });
-            }};
-
-        while (true) {
-          auto [promise, future] =
-              folly::makePromiseContract<std::optional<TChunk>>(executor);
-          folly::via(
-              executor,
-              [&genNext, iter, promise_ = std::move(promise)]() mutable {
-                genNext(iter, std::move(promise_));
-              });
-          auto val = co_await std::move(future);
-          if (!val) {
-            break;
-          }
-          co_yield std::move(val.value());
-        }
-      });
-}
+    folly::Function<void(
+        PyObject*,
+        folly::Promise<std::optional<std::unique_ptr<folly::IOBuf>>>)> genNext);
 
 #if FOLLY_HAS_COROUTINES
 template <typename InitResponse, typename TChunk, typename FinalResponse>

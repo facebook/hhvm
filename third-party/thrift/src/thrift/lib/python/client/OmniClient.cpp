@@ -97,7 +97,7 @@ std::unique_ptr<IOBufClientBufferedStream> extractClientStream(
       state.bufferOptions());
 }
 
-folly::Try<folly::IOBuf> decode_final_response(
+folly::Try<std::unique_ptr<folly::IOBuf>> decode_final_response(
     folly::Try<apache::thrift::StreamPayload>&& payload) {
   return python::detail::decode_stream_element(std::move(payload));
 }

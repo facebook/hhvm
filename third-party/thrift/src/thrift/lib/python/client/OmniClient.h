@@ -39,10 +39,10 @@ using RequestChannelUnique = std::unique_ptr<
 using RequestChannelShared = std::shared_ptr<apache::thrift::RequestChannel>;
 
 using IOBufClientBufferedStream =
-    apache::thrift::ClientBufferedStream<folly::IOBuf>;
+    apache::thrift::ClientBufferedStream<std::unique_ptr<folly::IOBuf>>;
 
-using IOBufClientSink =
-    apache::thrift::ClientSink<std::unique_ptr<folly::IOBuf>, folly::IOBuf>;
+using IOBufClientSink = apache::thrift::
+    ClientSink<std::unique_ptr<folly::IOBuf>, std::unique_ptr<folly::IOBuf>>;
 
 struct OmniClientResponseWithHeaders {
   folly::Expected<std::unique_ptr<folly::IOBuf>, folly::exception_wrapper> buf;

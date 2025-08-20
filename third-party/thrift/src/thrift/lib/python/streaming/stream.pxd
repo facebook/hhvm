@@ -20,9 +20,9 @@ from thrift.py3.stream cimport cClientBufferedStreamWrapper, cClientBufferedStre
 from thrift.python.protocol cimport Protocol
 
 
-ctypedef cClientBufferedStream[cIOBuf] cIOBufClientBufferedStream
+ctypedef cClientBufferedStream[unique_ptr[cIOBuf]] cIOBufClientBufferedStream
 
-ctypedef cClientBufferedStreamWrapper[cIOBuf] cIOBufClientBufferedStreamWrapper
+ctypedef cClientBufferedStreamWrapper[unique_ptr[cIOBuf]] cIOBufClientBufferedStreamWrapper
 
 
 cdef class ClientBufferedStream:

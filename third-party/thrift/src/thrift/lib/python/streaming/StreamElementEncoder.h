@@ -16,9 +16,7 @@
 
 #pragma once
 
-#include <exception>
 #include <memory>
-#include <string>
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/Try.h>
@@ -33,12 +31,10 @@
 
 namespace apache::thrift::python::detail {
 
-folly::Try<folly::IOBuf> decode_stream_element(
+folly::Try<std::unique_ptr<folly::IOBuf>> decode_stream_element(
     folly::Try<apache::thrift::StreamPayload>&& payload);
-folly::Try<folly::IOBuf> decode_stream_exception(folly::exception_wrapper ew);
-
-folly::Try<std::unique_ptr<folly::IOBuf>> decode_sink_element(
-    folly::Try<apache::thrift::StreamPayload>&& payload);
+folly::Try<std::unique_ptr<folly::IOBuf>> decode_stream_exception(
+    folly::exception_wrapper ew);
 
 template <
     class Protocol,

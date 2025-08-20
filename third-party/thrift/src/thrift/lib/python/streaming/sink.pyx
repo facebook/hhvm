@@ -84,10 +84,10 @@ cdef class ClientSink:
             agen,
             self._protocol,
         )
-        bridgeCoroTaskWithCancellation[cIOBuf](
+        bridgeCoroTaskWithCancellation[unique_ptr[cIOBuf]](
             get_executor(),
             dereference(self._cpp_obj).sink[cPythonUserException](
-                toAsyncGenerator[unique_ptr[cIOBuf]](
+                toAsyncGenerator(
                     handled_agen,
                     get_executor(),
                     genNextSinkValue,
@@ -130,7 +130,7 @@ cdef raise_first_exception_field(response_struct):
                 
 
 cdef void sink_final_resp_callback(
-    cFollyTry[cIOBuf]&& res,
+    cFollyTry[unique_ptr[cIOBuf]]&& res,
     PyObject* user_data,
 ):
     future, final_resp_cls, sink_elem_cls, protocol = <object> user_data
@@ -151,9 +151,7 @@ cdef void sink_final_resp_callback(
             res.exception().throw_exception()
 
 
-        res_buf = iobuf_from_unique_ptr(
-            make_unique[cIOBuf](cmove(res.value()))
-        )
+        res_buf = iobuf_from_unique_ptr(cmove(res.value()))
 
         final_resp = deserialize_buf(final_resp_cls, res_buf, protocol)
         

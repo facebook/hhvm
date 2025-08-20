@@ -247,7 +247,7 @@ class OmniClientTest : public ::testing::Test {
           {},
           co_await folly::coro::co_current_executor,
           rpcKind);
-      testContains<S>(std::move(*resp.buf.value()), expected);
+      testContains<S>(std::move(resp.buf.value()), expected);
     });
   }
 
@@ -280,9 +280,9 @@ class OmniClientTest : public ::testing::Test {
   }
 
   template <class S, typename T>
-  void testContains(folly::IOBuf buf, const T& expected) {
+  void testContains(std::unique_ptr<folly::IOBuf> buf, const T& expected) {
     std::string expectedStr = S::template serialize<std::string>(expected);
-    std::string result = buf.to<std::string>();
+    std::string result = buf->to<std::string>();
     // Contains instead of equals because of the envelope around the response.
     EXPECT_THAT(result, testing::HasSubstr(expectedStr));
   }
@@ -317,7 +317,7 @@ class OmniClientTest : public ::testing::Test {
       const std::string& function,
       const Request& req,
       const std::string& expected,
-      folly::Function<folly::coro::Task<folly::IOBuf>(
+      folly::Function<folly::coro::Task<std::unique_ptr<folly::IOBuf>>(
           OmniClientResponseWithHeaders&&)> onResponse) {
     connectToServer<S>(
         [&](OmniClient& client) mutable -> folly::coro::Task<void> {
@@ -333,7 +333,7 @@ class OmniClientTest : public ::testing::Test {
               {},
               co_await folly::coro::co_current_executor,
               RpcKind::SINK));
-          EXPECT_EQ(resp.template to<std::string>(), expected);
+          EXPECT_EQ(resp->template to<std::string>(), expected);
         });
   }
 
@@ -464,7 +464,7 @@ TEST_F(OmniClientTest, StreamSumAndNumsTest) {
       request,
       [this](OmniClientResponseWithHeaders&& resp) -> folly::coro::Task<void> {
         testContains<CompactSerializer, int64_t>(
-            std::move(*resp.buf.value()), 9);
+            std::move(resp.buf.value()), 9);
         auto gen = std::move(*resp.stream).toAsyncGenerator();
         for (int i = 2; i <= 4; ++i) {
           auto val = co_await gen.next();
@@ -485,7 +485,7 @@ TEST_F(OmniClientTest, StreamSumAndNumsExceptionTest) {
       request,
       [this](OmniClientResponseWithHeaders&& resp) -> folly::coro::Task<void> {
         testContains<CompactSerializer>(
-            std::move(*resp.buf.value()),
+            std::move(resp.buf.value()),
             std::string{"my_magic_arithmetic_exception"});
         auto gen = std::move(*resp.stream).toAsyncGenerator();
         EXPECT_FALSE(co_await gen.next());
@@ -523,7 +523,7 @@ TEST_F(OmniClientTest, CountSinkTest) {
       request,
       expected_final,
       [request](OmniClientResponseWithHeaders&& resp)
-          -> folly::coro::Task<folly::IOBuf> {
+          -> folly::coro::Task<std::unique_ptr<folly::IOBuf>> {
         auto sink = std::move(*resp.sink);
         co_return co_await sink.sink(chunkBufGenerator(request));
       });

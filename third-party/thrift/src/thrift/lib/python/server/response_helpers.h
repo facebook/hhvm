@@ -150,7 +150,7 @@ apache::thrift::detail::SinkConsumerImpl toSinkConsumerImpl(
               -> folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&> {
             while (auto item = co_await gen_.next()) {
               co_yield folly::coro::co_result(
-                  decode_sink_element(std::move(*item)));
+                  decode_stream_element(std::move(*item)));
             }
           }(std::move(gen)));
       co_return encoder(std::move(finalResponse));

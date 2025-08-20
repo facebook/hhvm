@@ -30,10 +30,10 @@ from thrift.python.serializer import deserialize
 
 
 cdef void client_stream_callback(
-    cFollyTry[cOptional[cIOBuf]]&& result,
+    cFollyTry[cOptional[unique_ptr[cIOBuf]]]&& result,
     PyObject* userdata,
 ) noexcept:
-    cdef cOptional[cIOBuf] opt_val
+    cdef cOptional[unique_ptr[cIOBuf]] opt_val
     cdef ClientBufferedStream stream
     stream, pyfuture = <object> userdata
     if result.hasException():
@@ -42,10 +42,10 @@ cdef void client_stream_callback(
             create_py_exception(result.exception(), None)
         )
     else:
-        opt_val = result.value()
+        opt_val = cmove(result.value())
         if opt_val.has_value():
             try:
-                response_iobuf = from_unique_ptr(make_unique[cIOBuf](cmove(opt_val.value())))
+                response_iobuf = from_unique_ptr(cmove(opt_val.value()))
                 response = deserialize(stream._class, response_iobuf, protocol=stream._protocol)
                 if response.success is not None:
                     pyfuture.set_result(response.success)
@@ -79,7 +79,7 @@ cdef class ClientBufferedStream:
         # to avoid "Future exception was never retrieved" error at SIGINT
         future.add_done_callback(lambda x: x.exception())
         userdata = (self, future)
-        bridgeCoroTaskWith[cOptional[cIOBuf]](
+        bridgeCoroTaskWith[cOptional[unique_ptr[cIOBuf]]](
             self._executor,
             deref(self._gen).getNext(),
             client_stream_callback,

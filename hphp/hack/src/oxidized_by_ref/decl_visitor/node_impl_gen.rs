@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2fab9f87e48e154ab3531f0adbf9bd21>>
+// @generated SignedSource<<2043b8d40679572e7fdcf4823f9844b1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1334,7 +1334,19 @@ impl<'a> Node<'a> for T_<'a> {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             T_::FromWitnessDecl(ref __binding_0) => __binding_0.accept(v),
-            T_::Instantiate(ref __binding_0) => __binding_0.accept(v),
+            T_::Instantiate {
+                type__: ref __binding_0,
+                var_name: ref __binding_1,
+                var: ref __binding_2,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                { __binding_2.accept(v) }
+            }
             T_::NoReason => {}
             T_::FromWitnessLocl(ref __binding_0) => __binding_0.accept(v),
             T_::LowerBound {

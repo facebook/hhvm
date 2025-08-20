@@ -119,9 +119,11 @@ pub trait Reason:
                     RI::FromWitnessDecl(WitnessDecl::RetFunKindFromDecl(pos.into(), fun_kind))
                 }
 
-                OR::Instantiate(r1, sym, r2) => {
-                    RI::Instantiate((*r1).into(), TypeName(Symbol::new(sym)), (*r2).into())
-                }
+                OR::Instantiate {
+                    type__: r1,
+                    var_name: sym,
+                    var: r2,
+                } => RI::Instantiate((*r1).into(), TypeName(Symbol::new(sym)), (*r2).into()),
                 _ => {
                     panic!("Error occurred: {:#?}", reason)
                 }
@@ -165,9 +167,11 @@ pub trait Reason:
                     RI::FromWitnessDecl(WitnessDecl::RetFunKindFromDecl(pos.into(), fun_kind))
                 }
 
-                OR::Instantiate(&(r1, sym, r2)) => {
-                    RI::Instantiate(r1.into(), TypeName(Symbol::new(sym)), r2.into())
-                }
+                OR::Instantiate {
+                    type__: r1,
+                    var_name: sym,
+                    var: r2,
+                } => RI::Instantiate((*r1).into(), TypeName(Symbol::new(sym)), (*r2).into()),
                 _ => {
                     panic!("Error occurred: {:#?}", reason)
                 }

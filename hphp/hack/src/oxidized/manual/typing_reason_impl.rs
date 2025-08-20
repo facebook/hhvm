@@ -135,7 +135,7 @@ impl Reason {
             | DynamicCoercion(t)
             | ExprDepType(t, _, _)
             | Typeconst(t, _, _, _)
-            | Instantiate(_, _, t) => t.pos(),
+            | Instantiate { var: t, .. } => t.pos(),
             LowerBound { .. }
             | Flow { .. }
             | PrjBoth { .. }

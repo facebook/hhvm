@@ -1591,8 +1591,13 @@ type _ t_ =
   (* -- Superset of reasons used by decl provider -- *)
   | From_witness_decl : witness_decl -> 'phase t_
       (** Lift a decl-time witness into a reason   *)
-  | Instantiate : 'phase t_ * string * 'phase t_ -> 'phase t_
-  (* -- Used when generating substitutions in silent mode only -- *)
+  | Instantiate : {
+      type_: 'phase t_;
+      var_name: string;
+      var: 'phase t_;
+    }
+      -> 'phase t_
+  (* -- Used when applying substitutions { var -> type_ } -- *)
   | No_reason : 'phase t_
   (* -- Core flow constructors -- *)
   | From_witness_locl : witness_locl -> locl_phase t_
@@ -1728,7 +1733,7 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
     to_raw_pos t
   | Expr_dep_type (t, _, _) -> to_raw_pos t
   | Typeconst (t, _, _, _) -> to_raw_pos t
-  | Instantiate (_, _, t) -> to_raw_pos t
+  | Instantiate { var = t; _ } -> to_raw_pos t
 
 let get_pri : type ph. ph t_ -> int = function
   | No_reason -> 0
@@ -1759,8 +1764,13 @@ let rec map_pos :
   | Lost_info (s, r1, Blame (p2, l)) ->
     Lost_info (s, map_pos pos pos_or_decl r1, Blame (pos p2, l))
   | Format (p1, s, r) -> Format (pos p1, s, map_pos pos pos_or_decl r)
-  | Instantiate (r1, x, r2) ->
-    Instantiate (map_pos pos pos_or_decl r1, x, map_pos pos pos_or_decl r2)
+  | Instantiate { type_; var_name; var } ->
+    Instantiate
+      {
+        type_ = map_pos pos pos_or_decl type_;
+        var_name;
+        var = map_pos pos pos_or_decl var;
+      }
   | Typeconst (r1, (p, s1), s2, r2) ->
     Typeconst
       ( map_pos pos pos_or_decl r1,
@@ -1914,12 +1924,12 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
         fmt
         l;
       close_bracket ()
-    | Instantiate (r1, s, r2) ->
-      pp_t_ fmt r1;
+    | Instantiate { type_; var_name; var } ->
+      pp_t_ fmt type_;
       comma ();
-      Format.pp_print_string fmt s;
+      Format.pp_print_string fmt var_name;
       comma ();
-      pp_t_ fmt r2
+      pp_t_ fmt var
     | Expr_dep_type (r, p, edtr) ->
       pp_t_ fmt r;
       comma ();
@@ -2073,11 +2083,12 @@ let rec to_json_help : type a. a t_ -> int option -> Hh_json.json * int option =
           JSON_Object
             [("Format", JSON_Array [pos_to_json pos; JSON_String str; r])]),
         fuel_opt )
-    | Instantiate (r1, str, r2) ->
-      let (r1, fuel_opt) = to_json_help r1 fuel_opt in
-      let (r2, fuel_opt) = to_json_help r2 fuel_opt in
+    | Instantiate { type_; var_name; var } ->
+      let (type_, fuel_opt) = to_json_help type_ fuel_opt in
+      let (var, fuel_opt) = to_json_help var fuel_opt in
       ( Hh_json.(
-          JSON_Object [("Instantiate", JSON_Array [r1; JSON_String str; r2])]),
+          JSON_Object
+            [("Instantiate", JSON_Array [type_; JSON_String var_name; var])]),
         fuel_opt )
     | Typeconst (r1, (pos_or_decl, str), lazy_str, r2) ->
       let (r1, fuel_opt) = to_json_help r1 fuel_opt in
@@ -2471,12 +2482,12 @@ let rec to_string_help :
     (match to_string_help "" solutions t with
     | [(_, "")] -> [(p, s)]
     | el -> [(p, s)] @ el)
-  | Instantiate (r_orig, generic_name, r_inst) ->
-    to_string_help prefix solutions r_orig
+  | Instantiate { type_; var_name; var } ->
+    to_string_help prefix solutions type_
     @ to_string_help
-        ("  via this generic " ^ Markdown_lite.md_codify generic_name)
+        ("  via this generic " ^ Markdown_lite.md_codify var_name)
         solutions
-        r_inst
+        var
   | Typeconst (No_reason, (pos, tconst), (lazy ty_str), r_root) ->
     let prefix =
       if String.equal prefix "" then
@@ -2699,7 +2710,7 @@ module Constructors = struct
 
   let inout_param p = from_witness_decl @@ Inout_param p
 
-  let instantiate (r1, s, r2) = Instantiate (r1, s, r2)
+  let instantiate ~type_ var_name ~var = Instantiate { type_; var_name; var }
 
   let typeconst (r, p, s, r2) = Typeconst (r, p, s, r2)
 
@@ -3003,8 +3014,9 @@ module Visitor = struct
         | Arith_ret_num (x, r, z) -> Arith_ret_num (x, this#on_reason r, z)
         | Lost_info (x, r, z) -> Lost_info (x, this#on_reason r, z)
         | Format (x, y, r) -> Format (x, y, this#on_reason r)
-        | Instantiate (r1, x, r2) ->
-          Instantiate (this#on_reason r1, x, this#on_reason r2)
+        | Instantiate { type_; var_name; var } ->
+          Instantiate
+            { type_ = this#on_reason type_; var_name; var = this#on_reason var }
         | Expr_dep_type (r, y, z) -> Expr_dep_type (this#on_reason r, y, z)
         | Lambda_param (x, r) -> Lambda_param (x, this#on_reason r)
         | Dynamic_coercion r -> Dynamic_coercion (this#on_reason r)
@@ -3177,7 +3189,8 @@ let rec localize : decl_phase t_ -> locl_phase t_ = function
   | No_reason -> No_reason
   | Invalid -> Invalid
   | Typeconst (r1, p, q, r2) -> Typeconst (localize r1, p, q, localize r2)
-  | Instantiate (r1, s, r2) -> Instantiate (localize r1, s, localize r2)
+  | Instantiate { type_; var_name; var } ->
+    Instantiate { type_ = localize type_; var_name; var = localize var }
   | Expr_dep_type (r, s, t) -> Expr_dep_type (localize r, s, t)
   | From_witness_decl witness -> From_witness_decl witness
 
@@ -3669,8 +3682,13 @@ module Derivation = struct
           kind;
         }
     | Def (pos, of_) -> Def (pos, push_solutions of_ ~solutions)
-    | Instantiate (r1, s, r2) ->
-      Instantiate (push_solutions r1 ~solutions, s, push_solutions r2 ~solutions)
+    | Instantiate { type_; var_name; var } ->
+      Instantiate
+        {
+          type_ = push_solutions type_ ~solutions;
+          var_name;
+          var = push_solutions var ~solutions;
+        }
     | Typeconst (r1, p, q, r2) ->
       Typeconst
         (push_solutions r1 ~solutions, p, q, push_solutions r2 ~solutions)
@@ -3777,9 +3795,13 @@ module Derivation = struct
         Arith_ret_num (x, resolve r ~solutions ~depth, z)
       | Lost_info (x, r, z) -> Lost_info (x, resolve r ~solutions ~depth, z)
       | Format (x, y, r) -> Format (x, y, resolve r ~solutions ~depth)
-      | Instantiate (r1, x, r2) ->
+      | Instantiate { type_; var_name; var } ->
         Instantiate
-          (resolve r1 ~solutions ~depth, x, resolve r2 ~solutions ~depth)
+          {
+            type_ = resolve type_ ~solutions ~depth;
+            var_name;
+            var = resolve var ~solutions ~depth;
+          }
       | Expr_dep_type (r, y, z) ->
         Expr_dep_type (resolve r ~solutions ~depth, y, z)
       | Lambda_param (x, r) -> Lambda_param (x, resolve r ~solutions ~depth)
@@ -4332,8 +4354,8 @@ module Derivation = struct
       (* Special handling of legacy structured reasons
          TODO(mjt) translate to flow?
       *)
-      | Instantiate (r1, nm, r2) ->
-        explain_instantiate (r1, nm, r2) ~st ~cfg ~ctxt
+      | Instantiate { type_; var_name; var } ->
+        explain_instantiate ~type_ var_name ~var ~st ~cfg ~ctxt
       | Idx (pos, r) -> explain_idx (pos, r) ~st ~cfg ~ctxt
       | Arith_ret_float (pos, r, arg_pos) ->
         explain_arith_ret_float (pos, r, arg_pos) ~st ~cfg ~ctxt
@@ -4505,8 +4527,8 @@ module Derivation = struct
       let expl_into = prefix :: with_suffix expl_into ~suffix in
       (expl_from @ expl_into, st)
 
-    and explain_instantiate (r1, nm, r2) ~st ~cfg ~ctxt =
-      explain_flow (r1, r2, Flow_instantiate nm) ~st ~cfg ~ctxt
+    and explain_instantiate ~type_ var_name ~var ~st ~cfg ~ctxt =
+      explain_flow (type_, var, Flow_instantiate var_name) ~st ~cfg ~ctxt
 
     and explain_idx (pos, _r) ~st ~cfg:_ ~ctxt:_ =
       ( [Explanation.Witness (Pos_or_decl.of_raw_pos pos, "index expression")],

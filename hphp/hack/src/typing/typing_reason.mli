@@ -271,7 +271,7 @@ val unpack_param : Pos.t * Pos_or_decl.t * int -> t
 
 val inout_param : Pos_or_decl.t -> 'phase t_
 
-val instantiate : 'phase t_ * string * 'phase t_ -> 'phase t_
+val instantiate : type_:'phase t_ -> string -> var:'phase t_ -> 'phase t_
 
 val typeconst :
   'phase t_ * (Pos_or_decl.t * string) * string Lazy.t * 'phase t_ -> 'phase t_

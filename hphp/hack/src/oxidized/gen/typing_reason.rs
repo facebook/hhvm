@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<77df6f3e5eff4b2dd0c77f5681736536>>
+// @generated SignedSource<<07b112d5c657b051b47f03665d296798>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -657,7 +657,11 @@ pub enum T_ {
     /// Lift a decl-time witness into a reason
     #[rust_to_ocaml(name = "From_witness_decl")]
     FromWitnessDecl(WitnessDecl),
-    Instantiate(Box<T_>, String, Box<T_>),
+    Instantiate {
+        type__: Box<T_>,
+        var_name: String,
+        var: Box<T_>,
+    },
     #[rust_to_ocaml(name = "No_reason")]
     NoReason,
     /// Lift a typing-time witness into a reason

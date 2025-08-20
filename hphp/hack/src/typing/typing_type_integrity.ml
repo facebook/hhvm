@@ -30,7 +30,7 @@ module Locl_Inst = struct
           (* We could insist on args = [] here, everything else is a kinding error *)
           ty_
       in
-      mk (Reason.instantiate (r, orig_var, orig_r), res_ty_)
+      mk (Reason.instantiate ~type_:r orig_var ~var:orig_r, res_ty_)
     in
 
     (* PERF: If subst is empty then instantiation is a no-op. We can save a

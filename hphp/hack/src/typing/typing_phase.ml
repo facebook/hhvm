@@ -353,7 +353,7 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
           else (
             match Reason.Predicates.unpack_expr_dep_type_opt reason with
             | Some (_, pos, s) -> Reason.expr_dep_type (r, pos, s)
-            | None -> Reason.instantiate (reason, SN.Typehints.this, r)
+            | None -> Reason.instantiate ~type_:reason SN.Typehints.this ~var:r
           ))
     in
     (* When refining `as this`, insert a like type for generic or non-final
@@ -386,7 +386,7 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
       let (env, x_ty) = Env.expand_type env x_ty in
       let r_inst =
         let rp = get_reason x_ty in
-        Reason.instantiate (rp, x, r)
+        Reason.instantiate ~type_:rp x ~var:r
       in
       let ty_ = get_node x_ty in
       ((env, None, []), mk (r_inst, ty_))

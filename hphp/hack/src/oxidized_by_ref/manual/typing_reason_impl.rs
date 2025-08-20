@@ -118,7 +118,11 @@ impl<'a> Reason<'a> {
     }
 
     pub fn instantiate(args: &'a (Reason<'a>, &'a str, Reason<'a>)) -> Self {
-        Reason::Instantiate(args)
+        Reason::Instantiate {
+            type__: &args.0,
+            var_name: args.1,
+            var: &args.2,
+        }
     }
 
     pub fn pos(&self) -> Option<&'a Pos<'a>> {
@@ -143,7 +147,8 @@ impl<'a> Reason<'a> {
             LostInfo((_, r, _)) | TypeAccess((r, _)) => r.pos(),
 
             DynamicCoercion(r) => r.pos(),
-            ExprDepType((r, _, _)) | Typeconst((r, _, _, _)) | Instantiate((_, _, r)) => r.pos(),
+            ExprDepType((r, _, _)) | Typeconst((r, _, _, _)) => r.pos(),
+            Instantiate { var: r, .. } => r.pos(),
             _ => None,
         }
     }
@@ -172,7 +177,16 @@ impl<'a> std::fmt::Debug for T_<'a> {
                 .finish(),
             LostInfo(p) => f.debug_tuple("RlostInfo").field(p).finish(),
             Format(p) => f.debug_tuple("Rformat").field(p).finish(),
-            Instantiate(p) => f.debug_tuple("Rinstantiate").field(p).finish(),
+            Instantiate {
+                type__,
+                var_name,
+                var,
+            } => f
+                .debug_struct("Rinstantiate")
+                .field("type__", type__)
+                .field("var_name", var_name)
+                .field("var", var)
+                .finish(),
             Typeconst(p) => f.debug_tuple("Rtypeconst").field(p).finish(),
             TypeAccess(p) => f.debug_tuple("RtypeAccess").field(p).finish(),
             ExprDepType(p) => f.debug_tuple("RexprDepType").field(p).finish(),

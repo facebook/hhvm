@@ -43,7 +43,7 @@ let rec instantiate subst (ty : decl_ty) =
       (match SMap.find_opt x subst with
       | Some found_ty ->
         let (found_r, found_ty_) = deref found_ty in
-        let new_r = Reason.instantiate (found_r, x, r) in
+        let new_r = Reason.instantiate ~type_:found_r x ~var:r in
         mk (new_r, found_ty_)
       | None -> mk (r, Tgeneric x))
     | (r, ty) ->

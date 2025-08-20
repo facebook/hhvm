@@ -51,6 +51,7 @@
 #include <thrift/compiler/ast/t_union.h>
 #include <thrift/compiler/whisker/dsl.h>
 
+#include <concepts>
 #include <filesystem>
 #include <functional>
 #include <map>
@@ -371,13 +372,11 @@ class t_whisker_generator : public t_generator {
   /**
    * Marshals any whisker-compatible object directly.
    */
-  template <
-      typename R,
-      typename Self,
-      std::enable_if_t<whisker::any_object_type<std::decay_t<R>>>* = nullptr>
+  template <typename R, typename Self>
+    requires whisker::any_object_type<std::remove_cvref_t<R>>
   static auto mem_fn(R (Self::*function)() const) {
     return [function](const Self& self) -> whisker::object {
-      return whisker::object(std::decay_t<R>((self.*function)()));
+      return whisker::object(std::remove_cvref_t<R>((self.*function)()));
     };
   }
   // Special case for std::string_view, which is *not* a whisker-compatible
@@ -392,29 +391,25 @@ class t_whisker_generator : public t_generator {
   /**
    * Marshals any `t_*` AST node with the provided prototype.
    */
-  template <
-      typename R,
-      typename Self,
-      std::enable_if_t<std::is_base_of_v<t_node, R>>* = nullptr>
+  template <std::derived_from<t_node> R, typename Self>
   static auto mem_fn(
-      R* (Self::*function)() const, prototype_ptr<std::decay_t<R>> prototype) {
+      R* (Self::*function)() const,
+      prototype_ptr<std::remove_const_t<R>> prototype) {
     return [function,
             proto = std::move(prototype)](const Self& self) -> whisker::object {
-      const std::decay_t<R>* ptr = (self.*function)();
+      R* ptr = (self.*function)();
       return ptr == nullptr
           ? whisker::make::null
-          : whisker::object(whisker::native_handle<std::decay_t<R>>(
+          : whisker::object(whisker::native_handle<std::remove_const_t<R>>(
                 whisker::manage_as_static(*ptr), proto));
     };
   }
-  template <
-      typename R,
-      typename Self,
-      std::enable_if_t<std::is_base_of_v<t_node, R>>* = nullptr>
+  template <std::derived_from<t_node> R, typename Self>
   static auto mem_fn(
-      R& (Self::*function)() const, prototype_ptr<std::decay_t<R>> prototype) {
+      R& (Self::*function)() const,
+      prototype_ptr<std::remove_const_t<R>> prototype) {
     return [function, proto = std::move(prototype)](const Self& self) {
-      return whisker::native_handle<std::decay_t<R>>(
+      return whisker::native_handle<std::remove_const_t<R>>(
           whisker::manage_as_static((self.*function)()), proto);
     };
   }

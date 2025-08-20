@@ -16,13 +16,7 @@
 
 #pragma once
 
-#include <type_traits>
-
 namespace whisker::detail {
-
-// std::remove_cvref_t was added in C++20
-template <typename T>
-using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
 
 template <typename T, template <typename...> typename Template>
 constexpr inline bool is_specialization_v = false;

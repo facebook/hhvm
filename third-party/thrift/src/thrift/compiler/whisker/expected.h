@@ -141,8 +141,8 @@ class unexpected {
   template <
       typename Err = E,
       std::enable_if_t<
-          !std::is_same_v<detail::remove_cvref_t<Err>, unexpected> &&
-              !std::is_same_v<detail::remove_cvref_t<Err>, std::in_place_t> &&
+          !std::is_same_v<std::remove_cvref_t<Err>, unexpected> &&
+              !std::is_same_v<std::remove_cvref_t<Err>, std::in_place_t> &&
               std::is_constructible_v<E, Err>,
           int> = 0>
   explicit unexpected(Err&& e) noexcept(std::is_nothrow_constructible_v<E, Err>)
@@ -213,10 +213,10 @@ class expected {
   static constexpr inline bool is_forward_constructible_from =
       std::is_constructible_v<T, U> && !detail::is_disambiguator_type<T> &&
       // copy constructor has its own overload
-      !std::is_same_v<detail::remove_cvref_t<U>, expected> &&
+      !std::is_same_v<std::remove_cvref_t<U>, expected> &&
       // LWG-3836
-      (!std::is_same_v<detail::remove_cvref_t<T>, bool> ||
-       !detail::is_specialization_v<detail::remove_cvref_t<U>, expected>);
+      (!std::is_same_v<std::remove_cvref_t<T>, bool> ||
+       !detail::is_specialization_v<std::remove_cvref_t<U>, expected>);
 
   // Restrictions on constructors (4) and (5):
   template <
@@ -247,9 +247,9 @@ class expected {
   static constexpr inline bool is_forward_assignable_from =
       std::is_constructible_v<T, U> && std::is_assignable_v<T&, U> &&
       // operator=(const expected&) has own overload
-      !std::is_same_v<detail::remove_cvref_t<U>, expected> &&
+      !std::is_same_v<std::remove_cvref_t<U>, expected> &&
       // operator=(const unexpected<G>&) has own overload
-      !detail::is_specialization_v<detail::remove_cvref_t<U>, unexpected> &&
+      !detail::is_specialization_v<std::remove_cvref_t<U>, unexpected> &&
       std::is_constructible_v<T, U> && std::is_assignable_v<T&, U> &&
       // re-init rollback possible in case of exception
       (std::is_nothrow_constructible_v<T, U> ||

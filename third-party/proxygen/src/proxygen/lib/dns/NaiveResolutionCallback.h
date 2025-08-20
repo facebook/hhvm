@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include <algorithm>
 #include <functional>
 #include <vector>
 
@@ -23,9 +22,6 @@ class NaiveResolutionCallback : public DNSResolver::ResolutionCallback {
  public:
   using Handler = std::function<void(std::vector<DNSResolver::Answer> &&,
                                      const folly::exception_wrapper &&)>;
-
-  // Return a DNSResolver::Exception(DNSResolver::NODATA) wrapper
-  static folly::exception_wrapper makeNoNameException() noexcept;
 
   explicit NaiveResolutionCallback(Handler handler) : handler_(handler) {
   }

@@ -74,7 +74,7 @@ std::vector<folly::SocketAddress> SyncDNSResolver::resolveHostname(
             if (exptr) {
               ew = std::move(exptr);
             } else {
-              ew = NaiveResolutionCallback::makeNoNameException();
+              ew = DNSResolver::makeNoNameException();
             }
           }
           barrier->wait();

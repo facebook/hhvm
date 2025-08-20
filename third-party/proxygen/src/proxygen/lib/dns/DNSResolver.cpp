@@ -14,7 +14,17 @@
 using folly::SocketAddress;
 using proxygen::DNSResolver;
 
+namespace {
+constexpr std::string_view kNoAddr{"No valid address or name found"};
+};
+
 namespace proxygen {
+
+// public static
+folly::exception_wrapper DNSResolver::makeNoNameException() noexcept {
+  return folly::make_exception_wrapper<DNSResolver::Exception>(
+      DNSResolver::NODATA, std::string(kNoAddr));
+}
 
 const std::chrono::seconds DNSResolver::kInvalidDnsTtl =
     std::chrono::seconds(0);

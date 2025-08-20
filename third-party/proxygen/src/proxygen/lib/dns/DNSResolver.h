@@ -52,6 +52,9 @@ class DNSResolver : public folly::DelayedDestruction {
     DOH = 4,
   };
 
+  // Return a DNSResolver::Exception(DNSResolver::NODATA) wrapper
+  static folly::exception_wrapper makeNoNameException() noexcept;
+
   /*
    * This means that no ttl info is available from the resolver. User should
    * ignore this if the returned ttl is kInvalidDnsTtl.

@@ -262,6 +262,36 @@ void PooledRequestChannel::sendRequestSink(
       std::move(evb));
 }
 
+void PooledRequestChannel::sendRequestBiDi(
+    RpcOptions&& options,
+    apache::thrift::MethodMetadata&& methodMetadata,
+    SerializedRequest&& request,
+    std::shared_ptr<transport::THeader> header,
+    BiDiClientCallback* cob,
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
+  auto evb = getEvb(options);
+  auto guard = getInteractionGuard(options);
+  sendRequestImpl(
+      [options = std::move(options),
+       methodMetadata = std::move(methodMetadata),
+       request = std::move(request),
+       header = std::move(header),
+       guard = std::move(guard),
+       cob,
+       frameworkMetadata =
+           std::move(frameworkMetadata)](Impl& channel) mutable {
+        maybeCreateInteraction(options, channel);
+        channel.sendRequestBiDi(
+            std::move(options),
+            std::move(methodMetadata),
+            std::move(request),
+            std::move(header),
+            cob,
+            std::move(frameworkMetadata));
+      },
+      std::move(evb));
+}
+
 InteractionId PooledRequestChannel::createInteraction(
     ManagedStringView&& name) {
   CHECK(!name.view().empty());

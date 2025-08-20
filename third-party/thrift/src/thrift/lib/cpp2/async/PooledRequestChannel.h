@@ -139,6 +139,14 @@ class PooledRequestChannel : public RequestChannel {
       SinkClientCallback* cob,
       std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
+  void sendRequestBiDi(
+      RpcOptions&& options,
+      MethodMetadata&& methodMetadata,
+      SerializedRequest&&,
+      std::shared_ptr<transport::THeader> header,
+      BiDiClientCallback* cob,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
+
   using RequestChannel::sendRequestNoResponse;
   using RequestChannel::sendRequestResponse;
   using RequestChannel::sendRequestSink;

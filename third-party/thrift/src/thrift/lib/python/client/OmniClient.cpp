@@ -425,7 +425,7 @@ void OmniClient::sendImpl(
               std::move(callback), std::move(callbackContext)),
           nullptr);
       break;
-    case RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE:
+    case RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE: {
       BufferOptions bufferOptions = rpcOptions.getBufferOptions();
       channel_->sendRequestAsync<RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(
           std::move(rpcOptions),
@@ -437,6 +437,11 @@ void OmniClient::sendImpl(
                   std::move(callback), std::move(callbackContext)),
               bufferOptions),
           nullptr);
+      break;
+    }
+    case RpcKind::BIDIRECTIONAL_STREAM:
+      callback->onResponseError(std::runtime_error(
+          "Bi-directional streams are not supported in OmniClient yet"));
       break;
   }
 }

@@ -96,6 +96,9 @@ PythonAsyncProcessorFactory::createMethodMetadata() {
       case apache::thrift::RpcKind::SINK:
         result.emplace(methodName, makeMetadata(rpcKind));
         break;
+      case apache::thrift::RpcKind::BIDIRECTIONAL_STREAM:
+        // TODO(T235290769)
+        break;
     }
   }
 

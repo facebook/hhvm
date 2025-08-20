@@ -14,18 +14,28 @@ $l2 = () ==> $a;
 = function() use ($b) { return $b; }
 Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: b' in :1
 Stack trace:
-%A
+#0 (1): include()
+#1 (): include()
+#2 {main}
 = (function() use ($b) { return $b; })();
 Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: b' in :1
 Stack trace:
-%A
+#0 (1): include()
+#1 (): include()
+#2 {main}
 $l4 = () ==> $b;
 = $l4();
 Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: b' in :1
 Stack trace:
-%A
+#0 (1): Closure$include()
+#1 (1): include()
+#2 (): include()
+#3 {main}
 = (() ==> $b)();
 Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: b' in :1
 Stack trace:
-%A
+#0 (1): Closure$include()
+#1 (1): include()
+#2 (): include()
+#3 {main}
 quit

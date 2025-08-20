@@ -43,6 +43,7 @@ void CmdHelp::HelpAll(DebuggerClient &client) {
     "[c]onstant",   "lists all constants",
 
     "Evaluation Commands", "",
+    "[k]ode",       "Enter a multi-line code fragment for evaluation",
     "@",            "evaluates one line of PHP code",
     "=",            "prints right-hand-side's value, assigns to $_",
     "${name}=",     "assigns a value to left-hand-side",

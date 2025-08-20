@@ -32,9 +32,15 @@ HH\AsyncFunctionWaitHandle Object
 = await exn1_async()
 Hit a php exception : exception 'Exception' with message 'exn' in %s/async-1.php:14
 Stack trace:
-%A
+#0 (1): exn1_async()
+#1 (1): include()
+#2 (): include()
+#3 {main}
 = await exn2_async()
 Hit a php exception : exception 'Exception' with message 'exn' in %s/async-1.php:19
 Stack trace:
-%A
+#0 (1): exn2_async()
+#1 (1): include()
+#2 (): include()
+#3 {main}
 quit

@@ -14,6 +14,7 @@ print $eval1
 print class_exists('test2')
 false
 <?hh
+Enter code, end with a single dot '.' or '?>'. Use ctrl+c then enter to abort.
 class test2 {
   public $a = 0;
   private $b = 0;

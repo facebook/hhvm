@@ -1671,7 +1671,7 @@ const char **DebuggerClient::GetCommands() {
   static const char *cmds[] = {
     "abort",    "constant",
     "global",   "help",     "info",
-    "list",     "machine",
+    "kode",     "list",     "machine",
     "print",    "quit",     "run",        "thread",
     "variable", "where",    "x",          "y",
     "zend",     "!",        "&",
@@ -1756,6 +1756,7 @@ bool DebuggerClient::process() {
     }
     case '<': {
       if (match("<?hh")) {
+        output("Enter code, end with a single dot '.' or '?>'. Use ctrl+c then enter to abort.");
         processTakeCode();
         return true;
       }
@@ -1773,6 +1774,19 @@ bool DebuggerClient::process() {
       }
       break;
     }
+    case 'k':
+      if (match("k")) {
+        output("Enter code, end with a single dot '.' or '?>'. Use ctrl+c then enter to abort.");
+        processTakeCode();
+        return true;
+      }
+      [[fallthrough]];
+    case '.':
+      if (match(".")) {
+        processEval();
+        return true;
+      }
+      [[fallthrough]];
     default: {
       auto cmd = createCommand();
       if (cmd) {
@@ -1954,6 +1968,10 @@ int DebuggerClient::checkEvalEnd() {
   TRACE(2, "DebuggerClient::checkEvalEnd\n");
   size_t pos = m_line.rfind("?>");
   if (pos == std::string::npos) {
+    pos = m_line.rfind(".");
+  }
+
+  if (pos == std::string::npos) {
     return -1;
   }
 
@@ -1989,9 +2007,9 @@ void DebuggerClient::processTakeCode() {
     m_code = std::string("<?hh $_=(") + m_line.substr(1) + "); ";
     if (processEval()) CmdVariable::PrintVariable(*this, s_UNDERSCORE);
     return;
-  } else if (first != '<') {
+  } else if (first != '<' && m_line != "k" && m_line != "K") {
     usageLogCommand("eval", m_line);
-    // User entered something that did not start with @, =, or <
+    // User entered something that did not start with @, =, k, or <
     // and also was not a debugger command. Interpret it as PHP.
     m_code = "<?hh ";
     m_code += m_line + ";";

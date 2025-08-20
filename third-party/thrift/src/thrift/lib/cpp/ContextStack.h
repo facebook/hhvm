@@ -111,6 +111,7 @@ class ContextStack {
 
   void onStreamSubscribe(const StreamEventHandler::StreamContext&);
   void onStreamNext();
+  void onStreamNextSent();
   void onStreamCredit(uint32_t credits);
   void onStreamPause(details::STREAM_PAUSE_REASON reason);
   void onStreamResumeReceive();

@@ -51,6 +51,7 @@ class StreamEventHandler {
   virtual ~StreamEventHandler() {}
   virtual void onStreamSubscribe(void*, const StreamContext&) {}
   virtual void onStreamNext(void*) {}
+  virtual void onStreamNextSent(void*) {}
   virtual void onStreamCredit(void*, uint32_t) {}
   virtual void onStreamPause(void*, details::STREAM_PAUSE_REASON) {}
   virtual void onStreamResumeReceive(void*) {}

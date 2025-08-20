@@ -16,7 +16,6 @@
 
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
 
-#include <functional>
 #include <memory>
 #include <utility>
 
@@ -28,6 +27,8 @@
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/EventBase.h>
 
+#include <thrift/lib/cpp/ContextStack.h>
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
@@ -37,7 +38,36 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
 
+THRIFT_FLAG_DEFINE_bool(rocket_server_disable_send_callback, false);
+
 namespace apache::thrift::rocket {
+namespace {
+class StreamNextSentCallback
+    : public apache::thrift::MessageChannel::SendCallback {
+ public:
+  explicit StreamNextSentCallback(std::shared_ptr<ContextStack> contextStack)
+      : contextStack_(std::move(contextStack)) {}
+
+  void sendQueued() noexcept override {}
+
+  void messageSent() noexcept override {
+    if (contextStack_) {
+      contextStack_->onStreamNextSent();
+    }
+    delete this;
+  }
+
+  void messageSendError(folly::exception_wrapper&&) noexcept override {
+    if (contextStack_) {
+      contextStack_->onStreamNextSent();
+    }
+    delete this;
+  }
+
+ private:
+  std::shared_ptr<ContextStack> contextStack_;
+};
+} // namespace
 
 class TimeoutCallback : public folly::HHWheelTimer::Callback {
  public:
@@ -141,19 +171,28 @@ bool RocketStreamClientCallback::onStreamNext(StreamPayload&& payload) {
   }
 
   streamMetricCallback_.onStreamNext(rpcMethodName_);
+
+  apache::thrift::MessageChannel::SendCallbackPtr sendCallback = nullptr;
+  if (contextStack_ && !THRIFT_FLAG(rocket_server_disable_send_callback)) {
+    sendCallback = apache::thrift::MessageChannel::SendCallbackPtr(
+        new StreamNextSentCallback(contextStack_));
+  }
+
   connection_.sendPayload(
       streamId_,
       connection_.getPayloadSerializer()->pack(
           std::move(payload),
           connection_.isDecodingMetadataUsingBinaryProtocol(),
           connection_.getRawSocket()),
-      Flags().next(true));
+      Flags().next(true),
+      std::move(sendCallback));
 
   return true;
 }
 
 void RocketStreamClientCallback::onStreamComplete() {
   streamMetricCallback_.onStreamComplete(rpcMethodName_);
+
   connection_.sendPayload(
       streamId_,
       Payload::makeFromData(std::unique_ptr<folly::IOBuf>{}),
@@ -183,13 +222,22 @@ void RocketStreamClientCallback::onStreamError(folly::exception_wrapper ew) {
               err.encoded.metadata,
               err.encoded.payload->computeChainDataLength());
         }
+
+        apache::thrift::MessageChannel::SendCallbackPtr sendCallback = nullptr;
+        if (contextStack_ &&
+            !THRIFT_FLAG(rocket_server_disable_send_callback)) {
+          sendCallback = apache::thrift::MessageChannel::SendCallbackPtr(
+              new StreamNextSentCallback(contextStack_));
+        }
+
         connection_.sendPayload(
             streamId_,
             connection_.getPayloadSerializer()->pack(
                 std::move(err.encoded),
                 connection_.isDecodingMetadataUsingBinaryProtocol(),
                 connection_.getRawSocket()),
-            Flags().next(true).complete(true));
+            Flags().next(true).complete(true),
+            std::move(sendCallback));
       },
       [this, &ew](...) {
         connection_.sendError(

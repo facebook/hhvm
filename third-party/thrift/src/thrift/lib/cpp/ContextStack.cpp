@@ -405,6 +405,21 @@ void ContextStack::onStreamNext() {
   }
 }
 
+void ContextStack::onStreamNextSent() {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_stream_item_sent,
+      serviceName_,
+      methodNamePrefixed_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      if (auto* streamEventHandler = (*handlers_)[i]->getStreamEventHandler()) {
+        streamEventHandler->onStreamNextSent(contextAt(i));
+      }
+    }
+  }
+}
+
 void ContextStack::onStreamPause(details::STREAM_PAUSE_REASON reason) {
   FOLLY_SDT(
       thrift,

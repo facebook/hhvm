@@ -77,6 +77,10 @@ template <>
 struct RequestClientCallbackType<RpcKind::SINK> {
   using Ptr = SinkClientCallback*;
 };
+template <>
+struct RequestClientCallbackType<RpcKind::BIDIRECTIONAL_STREAM> {
+  using Ptr = BiDiClientCallback*;
+};
 template <typename T>
 struct const_if_lvalue_ref {
   using type = T;
@@ -146,6 +150,15 @@ class RequestChannel : virtual public folly::DelayedDestruction {
       SinkClientCallback* clientCallback,
       std::unique_ptr<folly::IOBuf> frameworkMetadata);
 
+  // TODO: replace with co-recursive virtual methods once more widely supported.
+  void sendRequestBiDi(
+      const RpcOptions& rpcOptions,
+      MethodMetadata&&,
+      SerializedRequest&&,
+      std::shared_ptr<transport::THeader> header,
+      BiDiClientCallback* clientCallback,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata);
+
   // Some channels can make use of rvalue RpcOptions as an optimization.
   virtual void sendRequestResponse(
       RpcOptions&&,
@@ -174,6 +187,13 @@ class RequestChannel : virtual public folly::DelayedDestruction {
       SerializedRequest&&,
       std::shared_ptr<transport::THeader>,
       SinkClientCallback*,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata);
+  virtual void sendRequestBiDi(
+      RpcOptions&&,
+      MethodMetadata&&,
+      SerializedRequest&&,
+      std::shared_ptr<transport::THeader> header,
+      BiDiClientCallback* clientCallback,
       std::unique_ptr<folly::IOBuf> frameworkMetadata);
 
   virtual void setCloseCallback(CloseCallback*) = 0;
@@ -280,6 +300,9 @@ StreamClientCallback* createStreamClientCallback(
 SinkClientCallback* createSinkClientCallback(
     RequestClientCallback::Ptr requestCallback);
 
+BiDiClientCallback* createBiDiClientCallback(
+    RequestClientCallback::Ptr requestCallback);
+
 template <class Protocol>
 SerializedRequest preprocessSendT(
     Protocol* prot,
@@ -343,6 +366,8 @@ constexpr ChannelSendFunc<Kind, RpcOptions> getChannelSendFunc() {
     return &RequestChannel::sendRequestNoResponse;
   } else if constexpr (Kind == RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE) {
     return &RequestChannel::sendRequestStream;
+  } else if constexpr (Kind == RpcKind::BIDIRECTIONAL_STREAM) {
+    return &RequestChannel::sendRequestBiDi;
   } else {
     static_assert(Kind == RpcKind::SINK);
     return &RequestChannel::sendRequestSink;

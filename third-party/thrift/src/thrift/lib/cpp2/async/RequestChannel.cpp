@@ -90,6 +90,22 @@ void RequestChannel::sendRequestSink(
       std::move(frameworkMetadata));
 }
 
+void RequestChannel::sendRequestBiDi(
+    const RpcOptions& rpcOptions,
+    MethodMetadata&& metadata,
+    SerializedRequest&& request,
+    std::shared_ptr<transport::THeader> header,
+    BiDiClientCallback* clientCallback,
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
+  sendRequestBiDi(
+      folly::copy(rpcOptions),
+      std::move(metadata),
+      std::move(request),
+      std::move(header),
+      clientCallback,
+      std::move(frameworkMetadata));
+}
+
 void RequestChannel::sendRequestResponse(
     RpcOptions&& rpcOptions,
     MethodMetadata&& metadata,
@@ -152,6 +168,17 @@ void RequestChannel::sendRequestSink(
       std::move(header),
       clientCallback,
       std::move(frameworkMetadata));
+}
+
+void RequestChannel::sendRequestBiDi(
+    RpcOptions&&,
+    MethodMetadata&&,
+    SerializedRequest&&,
+    std::shared_ptr<transport::THeader>,
+    BiDiClientCallback*,
+    std::unique_ptr<folly::IOBuf>) {
+  folly::terminate_with<std::runtime_error>(
+      "This channel doesn't support bidirectional streams");
 }
 
 void RequestChannel::terminateInteraction(InteractionId) {

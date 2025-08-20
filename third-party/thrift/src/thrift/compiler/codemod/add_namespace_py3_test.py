@@ -91,7 +91,7 @@ class TestAddNamespacePy3(unittest.TestCase):
                 """,
         )
 
-    def test_do_not_add_namespace_when_it_already_exists(self):
+    def test_do_not_add_namespace_when_it_already_exists_and_is_non_empty(self):
         self.write_and_test(
             "path/to/foo.thrift",
             "path.to",
@@ -103,6 +103,23 @@ class TestAddNamespacePy3(unittest.TestCase):
                 """,
             """\
                 namespace py3 path.to
+
+                struct Bar {}
+                """,
+        )
+
+    def test_overwrite_namespace_when_it_is_empty(self):
+        self.write_and_test(
+            "path/to/foo.thrift",
+            "different.on.purpose",
+            """\
+                namespace py3 ""
+
+                struct Bar {}
+
+                """,
+            """\
+                namespace py3 different.on.purpose
 
                 struct Bar {}
                 """,

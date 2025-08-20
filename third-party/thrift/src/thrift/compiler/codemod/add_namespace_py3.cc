@@ -32,15 +32,26 @@ class add_namespace {
       : fm_(sm, program), prog_(program), namespace_(the_namespace) {}
 
   void visit_program() {
+    // Pre-conditions: The replacement namespace can never be empty.
+    // The replacement algorithm:
+    //  - If there is a non-empty namespace py3, do nothing.
+    //  - If there a namespace py3 that is explicitly set to the empty string,
+    //    replace it.
+    //  - If there is no namespace py3, add a new one.
     auto namespaces = get_namespaces();
-    if (!namespaces.contains("py3")) {
-      auto offset = fm_.get_namespace_offset();
-      fm_.add(
-          {offset,
-           offset,
-           std::string("namespace py3 ") + namespace_ + "\n" +
-               (namespaces.empty() ? "\n" : "")});
+    if (namespaces.contains("py3")) {
+      auto current_namespace = namespaces.at("py3");
+      if (!current_namespace.empty()) {
+        return;
+      }
+      fm_.remove_namespace("py3");
     }
+    auto offset = fm_.get_namespace_offset();
+    fm_.add(
+        {offset,
+         offset,
+         std::string("namespace py3 ") + namespace_ + "\n" +
+             (namespaces.empty() ? "\n" : "")});
   }
 
   void run() {
@@ -56,9 +67,7 @@ class add_namespace {
   std::map<std::string, std::string> get_namespaces() const {
     std::map<std::string, std::string> namespaces;
     for (const auto& [lang, ns] : prog_.namespaces()) {
-      if (!ns.empty()) {
-        namespaces[lang] = ns;
-      }
+      namespaces[lang] = ns;
     }
     return namespaces;
   }
@@ -72,6 +81,8 @@ int main(int argc, char** argv) {
   }
   argc -= 1;
   std::string the_namespace = argv[argc];
+  // Always expect a non-empty namespace.
+  assert(!the_namespace.empty());
   return apache::thrift::compiler::run_codemod(
       argc, argv, [the_namespace](source_manager& sm, t_program_bundle& pb) {
         add_namespace(sm, *pb.root_program(), the_namespace).run();

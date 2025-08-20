@@ -4021,6 +4021,7 @@ end = struct
                 ~def
                 ~access:(Typing_reason.witness p))
         in
+        (* Note that we are no longer generating holes - it is unclear how to do so in subtyping. *)
         make_result env p (Aast.Array_get (te1, Some te2)) val_ty
       ) else
         let (env, (ty, arr_ty_mismatch_opt, key_ty_mismatch_opt)) =

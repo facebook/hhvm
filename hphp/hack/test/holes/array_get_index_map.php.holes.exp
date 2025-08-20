@@ -20,11 +20,7 @@
             (Expr
                ((Map<nothing, nothing>), [4:3-15],
                 (Assign (((Map<nothing, nothing>), [4:3-6], (Lvar ([4:3-6], $xs))), None, ((Map<nothing, nothing>), [4:9-15], (KeyValCollection (([4:9-12], Map), None, []))))))));
-            ([7:3-13],
-             (Expr
-                ((~nothing), [7:3-12],
-                 (Array_get (((Map<nothing, nothing>), [7:3-6], (Lvar ([7:3-6], $xs))), (Some ((mixed), [7:7-11], (Hole (((mixed), [7:7-11], (Lvar ([7:7-11], $idx))), (mixed), (dynamic), Typing)))))))))
-            ]
+            ([7:3-13], (Expr ((nothing), [7:3-12], (Array_get (((Map<nothing, nothing>), [7:3-6], (Lvar ([7:3-6], $xs))), (Some ((mixed), [7:7-11], (Lvar ([7:7-11], $idx)))))))))]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-37], "__SupportDynamicType"); ua_params = [] }]; 
         f_external = false; f_doc_comment = None };
@@ -52,13 +48,7 @@
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
-         { fb_ast =
-           [([13:3-13],
-             (Expr
-                ((~int), [13:3-12],
-                 (Array_get (((Map<string, int>), [13:3-6], (Lvar ([13:3-6], $xs))), (Some ((mixed), [13:7-11], (Hole (((mixed), [13:7-11], (Lvar ([13:7-11], $idx))), (mixed), (~string), Typing)))))))))
-             ]
-           };
+         { fb_ast = [([13:3-13], (Expr ((nothing), [13:3-12], (Array_get (((Map<string, int>), [13:3-6], (Lvar ([13:3-6], $xs))), (Some ((mixed), [13:7-11], (Lvar ([13:7-11], $idx)))))))))] };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([10:10-36], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 

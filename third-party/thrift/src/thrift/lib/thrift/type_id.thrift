@@ -24,6 +24,7 @@ include "thrift/annotation/cpp.thrift"
 cpp_include "thrift/lib/thrift/detail/TypeIdAdapter.h"
 
 namespace cpp2 apache.thrift.type_system
+namespace py3 apache.thrift.type_system
 
 @cpp.Adapter{
   underlyingName = "ListTypeIdStruct",

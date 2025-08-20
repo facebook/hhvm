@@ -23,6 +23,7 @@ include "thrift/lib/thrift/id.thrift"
 include "thrift/lib/thrift/standard.thrift"
 
 namespace cpp2 apache.thrift.type_system
+namespace py3 apache.thrift.type_system
 
 /**
  * A Thrift record is a concrete, machine-readable, description of every datum

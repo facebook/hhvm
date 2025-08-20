@@ -2444,10 +2444,10 @@ mstch::node rust_mstch_service::rust_all_exceptions() {
       return lhs->get_scoped_name() < rhs->get_scoped_name();
     }
   };
-  typedef std::vector<const t_field*> fields_t;
-  typedef std::vector<const t_function*> functions_t;
-  typedef std::map<const t_type*, fields_t> field_map_t;
-  typedef std::map<const t_type*, functions_t, name_less> function_map_t;
+  using fields_t = std::vector<const t_field*>;
+  using functions_t = std::vector<const t_function*>;
+  using field_map_t = std::map<const t_type*, fields_t>;
+  using function_map_t = std::map<const t_type*, functions_t, name_less>;
 
   field_map_t field_map;
   function_map_t function_map;

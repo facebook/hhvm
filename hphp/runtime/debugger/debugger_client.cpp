@@ -1669,11 +1669,11 @@ void DebuggerClient::setTutorial(int mode) {
 
 const char **DebuggerClient::GetCommands() {
   static const char *cmds[] = {
-    "abort",    "break",    "continue",   "down",    "exception",
-    "frame",    "global",   "help",       "info",
-    "konstant", "list",     "machine",    "next",    "out",
-    "print",    "quit",     "run",        "step",    "thread",
-    "up",       "variable", "where",      "x",       "y",
+    "abort",    "constant",
+    "global",   "help",     "info",
+    "list",     "machine",
+    "print",    "quit",     "run",        "thread",
+    "variable", "where",    "x",          "y",
     "zend",     "!",        "&",
     nullptr
   };
@@ -1716,12 +1716,10 @@ DebuggerCommandPtr DebuggerClient::createCommand() {
   switch (tolower(m_command[0])) {
     case 'a': return match_cmd<CmdAbort>("abort");
     case 'b': return match_cmd<CmdBreak>("break");
-    case 'c': return match_cmd<CmdContinue>("continue");
-    case 'e': return match_cmd<CmdException>("exception");
+    case 'c': return match_cmd<CmdConstant>("constant");
     case 'g': return match_cmd<CmdGlobal>("global");
     case 'h': return match_cmd<CmdHelp>("help");
     case 'i': return match_cmd<CmdInfo>("info");
-    case 'k': return match_cmd<CmdConstant>("konstant");
     case 'l': return match_cmd<CmdList>("list");
     case 'm': return match_cmd<CmdMachine>("machine");
     case 'p': return match_cmd<CmdPrint>("print");

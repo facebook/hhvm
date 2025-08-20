@@ -1,5 +1,5 @@
 b 12 if bad()
-continue
+run
 p DebuggerBreak5::$x
 s
 p DebuggerBreak5::$x

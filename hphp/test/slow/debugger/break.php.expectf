@@ -1,5 +1,5 @@
-Program %s/break.php loaded. Type '[r]un' or '[c]ontinue' to go.
-continue
+Program %s/break.php loaded. Type '[r]un' to go.
+run
 Program %s/break.php exited normally.
 n
 Notice: Attempted to interpret unknown debugger command as PHP!

@@ -6,11 +6,11 @@ break list
 run
 @ foo2('test_break6')
 break list
-continue
+run
 @ $break6=new cls2()
 @ $break6->pubObj('test_break6')
-continue
+run
 @ cls2::pubCls('test_break6')
 break clear all
-continue
+run
 quit

@@ -8,7 +8,7 @@ next
 next
 next
 break clear all
-continue
+run
 break flow.php:18
 @test(2)
 step
@@ -21,36 +21,36 @@ next
 next
 step
 break clear all
-continue
+run
 break flow.php:6
 @test(3)
-continue
+run
 break clear all
-continue
+run
 break flow.php:7
 @test(4)
 break clear all
 out
 out
 out
-continue
+run
 break flow.php:46
 test(5)
 break clear all
 next
 next
 out
-continue
+run
 break flow.php:46
 test(6)
 break clear all
 out
 next
 out
-continue
+run
 break flow.php:7
 @test(7)
 break clear all
 break flow.php:62
-continue
+run
 quit

@@ -32,17 +32,15 @@ void CmdHelp::HelpAll(DebuggerClient &client) {
     "[q]uit",       "quits debugger",
 
     "Program Flow Control", "",
-    "[e]xception",  "catches/clears exceptions",
     "[r]un",        "starts over a program",
     "<Ctrl-C>",     "breaks program execution",
-    "[c]ontinue *", "continues program execution",
 
     "Display Commands", "",
     "[p]rint",      "prints a variable's value",
     "[w]here",      "displays stacktrace",
     "[v]ariable",   "lists all local variables",
     "[g]lobal",     "lists all global variables",
-    "[k]onstant",   "lists all constants",
+    "[c]onstant",   "lists all constants",
 
     "Evaluation Commands", "",
     "@",            "evaluates one line of PHP code",

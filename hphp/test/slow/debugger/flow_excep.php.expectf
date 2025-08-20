@@ -1,4 +1,4 @@
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/flow_excep.php loaded. Type '[r]un' to go.
 break main()
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 run
@@ -34,8 +34,15 @@ Hit fatal : Undefined constant 'next'
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-continue
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+Caught Thrown from throwNoCatch 3 in throwFromCallee()
+int(3)
+Caught Thrown from throwAndCatch 4 in throwAndCatch()
+Caught Thrown from throwAndCatch 6 in throwAndCatch()
+Caught Thrown from foo 7 in foo()
+Caught Thrown from throwAndCatch 8 in throwAndCatch()
+int(10)
+Program %s/flow_excep.php exited normally.
 run
 Caught Thrown from throwNoCatch 3 in throwFromCallee()
 int(3)
@@ -109,8 +116,15 @@ Hit fatal : Undefined constant 'out'
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-continue
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+Caught Thrown from throwNoCatch 3 in throwFromCallee()
+int(3)
+Caught Thrown from throwAndCatch 4 in throwAndCatch()
+Caught Thrown from throwAndCatch 6 in throwAndCatch()
+Caught Thrown from foo 7 in foo()
+Caught Thrown from throwAndCatch 8 in throwAndCatch()
+int(10)
+Program %s/flow_excep.php exited normally.
 run
 Caught Thrown from throwNoCatch 3 in throwFromCallee()
 int(3)
@@ -160,8 +174,15 @@ Hit fatal : Undefined constant 'next'
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-continue
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+Caught Thrown from throwNoCatch 3 in throwFromCallee()
+int(3)
+Caught Thrown from throwAndCatch 4 in throwAndCatch()
+Caught Thrown from throwAndCatch 6 in throwAndCatch()
+Caught Thrown from foo 7 in foo()
+Caught Thrown from throwAndCatch 8 in throwAndCatch()
+int(10)
+Program %s/flow_excep.php exited normally.
 run
 Caught Thrown from throwNoCatch 3 in throwFromCallee()
 int(3)
@@ -219,8 +240,15 @@ Hit fatal : Undefined constant 'out'
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-continue
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+Caught Thrown from throwNoCatch 3 in throwFromCallee()
+int(3)
+Caught Thrown from throwAndCatch 4 in throwAndCatch()
+Caught Thrown from throwAndCatch 6 in throwAndCatch()
+Caught Thrown from foo 7 in foo()
+Caught Thrown from throwAndCatch 8 in throwAndCatch()
+int(10)
+Program %s/flow_excep.php exited normally.
 run
 Caught Thrown from throwNoCatch 3 in throwFromCallee()
 int(3)
@@ -286,8 +314,15 @@ Hit fatal : Undefined constant 'step'
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-continue
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+Caught Thrown from throwNoCatch 3 in throwFromCallee()
+int(3)
+Caught Thrown from throwAndCatch 4 in throwAndCatch()
+Caught Thrown from throwAndCatch 6 in throwAndCatch()
+Caught Thrown from foo 7 in foo()
+Caught Thrown from throwAndCatch 8 in throwAndCatch()
+int(10)
+Program %s/flow_excep.php exited normally.
 run
 Caught Thrown from throwNoCatch 3 in throwFromCallee()
 int(3)
@@ -393,8 +428,15 @@ Hit fatal : Undefined constant 'out'
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-continue
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+Caught Thrown from throwNoCatch 3 in throwFromCallee()
+int(3)
+Caught Thrown from throwAndCatch 4 in throwAndCatch()
+Caught Thrown from throwAndCatch 6 in throwAndCatch()
+Caught Thrown from foo 7 in foo()
+Caught Thrown from throwAndCatch 8 in throwAndCatch()
+int(10)
+Program %s/flow_excep.php exited normally.
 run
 Caught Thrown from throwNoCatch 3 in throwFromCallee()
 int(3)
@@ -436,8 +478,15 @@ Hit fatal : Undefined constant 'next'
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-continue
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+Caught Thrown from throwNoCatch 3 in throwFromCallee()
+int(3)
+Caught Thrown from throwAndCatch 4 in throwAndCatch()
+Caught Thrown from throwAndCatch 6 in throwAndCatch()
+Caught Thrown from foo 7 in foo()
+Caught Thrown from throwAndCatch 8 in throwAndCatch()
+int(10)
+Program %s/flow_excep.php exited normally.
 run
 Caught Thrown from throwNoCatch 3 in throwFromCallee()
 int(3)
@@ -503,8 +552,15 @@ Hit fatal : Undefined constant 'next'
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-continue
-Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+Caught Thrown from throwNoCatch 3 in throwFromCallee()
+int(3)
+Caught Thrown from throwAndCatch 4 in throwAndCatch()
+Caught Thrown from throwAndCatch 6 in throwAndCatch()
+Caught Thrown from foo 7 in foo()
+Caught Thrown from throwAndCatch 8 in throwAndCatch()
+int(10)
+Program %s/flow_excep.php exited normally.
 run
 Caught Thrown from throwNoCatch 3 in throwFromCallee()
 int(3)

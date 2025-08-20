@@ -1,5 +1,5 @@
-Program %s/hphpd_debugger_info.php loaded. Type '[r]un' or '[c]ontinue' to go.
-continue
+Program %s/hphpd_debugger_info.php loaded. Type '[r]un' to go.
+run
 bool(true)
 dict(2) {
   ["clientIP"]=>

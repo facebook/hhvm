@@ -40,5 +40,5 @@ next
 @ $this->pub = $x->seven()
 set bac on
 @ $this->pub = $x->seven()
-continue
+run
 quit

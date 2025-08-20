@@ -26,5 +26,5 @@ break \TestNs\Nested\cls::pubCls()
 @ \TestNs\Nested\cls::pubCls('test_break6')
 variable
 break clear all
-continue
+run
 quit

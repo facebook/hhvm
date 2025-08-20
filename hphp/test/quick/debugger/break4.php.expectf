@@ -1,14 +1,28 @@
-Program %s/break4.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/break4.php loaded. Type '[r]un' to go.
 break :fb:my:thing::doIt()
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 continue
-break4.php loaded
-Program %s/break4.php exited normally.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Cannot break/continue
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 @ :fb:my:thing::doIt()
-doing my thing
+Hit fatal : Class undefined: xhp_fb__my__thing
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 break clear all
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 continue
-Program %s/break4.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Cannot break/continue
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 quit

@@ -8,37 +8,37 @@ exception Exception
 break list
 @ throw_exception()
 break clear all
-continue
+run
 exception MyException
 @ throw_myexception()
 break clear all
-continue
+run
 exception error
 @ error_undefined_class()
 break clear all
-continue
+run
 exception Exception
 @ \Outer\throw_exception()
 break clear all
-continue
+run
 exception \Outer\MyException
 @ Outer\throw_myexception()
 break clear all
-continue
+run
 exception error
 @ \Outer\error_undefined_class()
 break clear all
-continue
+run
 exception Exception
 @ \Outer\Inner\throw_exception()
 break clear all
-continue
+run
 exception Outer\Inner\MyException
 @ Outer\Inner\throw_myexception()
 break clear all
-continue
+run
 exception error
 @ \Outer\Inner\error_undefined_class()
 break clear all
-continue
+run
 quit

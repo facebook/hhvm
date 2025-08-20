@@ -1,4 +1,4 @@
-Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/flow_multistep.php loaded. Type '[r]un' to go.
 break flow_multistep.php:58
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 run
@@ -19,8 +19,16 @@ Hit fatal : Encountered unexpected token `8`.
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-continue
-Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+C1 oh hai
+C2 oh hai
+C2 oh hai
+object(C1) (1) {
+  ["x":"C1":private]=>
+  int(0)
+}
+int(46)
+Program %s/flow_multistep.php exited normally.
 run
 C1 oh hai
 C2 oh hai
@@ -47,8 +55,16 @@ Hit fatal : Encountered unexpected token `4`.
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-continue
-Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+C1 oh hai
+C2 oh hai
+C2 oh hai
+object(C1) (1) {
+  ["x":"C1":private]=>
+  int(0)
+}
+int(46)
+Program %s/flow_multistep.php exited normally.
 run
 C1 oh hai
 C2 oh hai
@@ -75,8 +91,16 @@ Hit fatal : Encountered unexpected token `4`.
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-continue
-Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+C1 oh hai
+C2 oh hai
+C2 oh hai
+object(C1) (1) {
+  ["x":"C1":private]=>
+  int(0)
+}
+int(46)
+Program %s/flow_multistep.php exited normally.
 run
 C1 oh hai
 C2 oh hai
@@ -103,8 +127,16 @@ Hit fatal : Encountered unexpected token `4`.
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-continue
-Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+C1 oh hai
+C2 oh hai
+C2 oh hai
+object(C1) (1) {
+  ["x":"C1":private]=>
+  int(0)
+}
+int(46)
+Program %s/flow_multistep.php exited normally.
 break clear all
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 break flow_multistep.php:54
@@ -145,8 +177,16 @@ Hit fatal : Undefined constant 'out'
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-continue
-Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+C1 oh hai
+C2 oh hai
+C2 oh hai
+object(C1) (1) {
+  ["x":"C1":private]=>
+  int(0)
+}
+int(46)
+Program %s/flow_multistep.php exited normally.
 break flow_multistep.php:54
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 run
@@ -185,6 +225,14 @@ Hit fatal : Undefined constant 'next'
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-continue
-Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+C1 oh hai
+C2 oh hai
+C2 oh hai
+object(C1) (1) {
+  ["x":"C1":private]=>
+  int(0)
+}
+int(46)
+Program %s/flow_multistep.php exited normally.
 quit

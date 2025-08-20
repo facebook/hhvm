@@ -18,13 +18,13 @@ next
 next
 next
 break clear all
-continue
+run
 break flow2.php:10
 break flow2.php:12
 @test(2)
 out
-continue
+run
 out
 break clear all
-continue
+run
 quit

@@ -1,4 +1,4 @@
-Program %s/modules.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/modules.php loaded. Type '[r]un' to go.
 include "%s/modules.php.inc";
 
 Warning: include(%s/modules.php.inc): File not found

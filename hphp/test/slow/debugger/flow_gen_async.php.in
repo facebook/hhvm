@@ -9,18 +9,18 @@ next
 next
 next
 next
-continue
+run
 @test(2)
 out
 next
-continue
+run
 break clear all
 break flow_gen_async.php:10
 @test(3)
 out
 next
 next
-continue
+run
 break clear all
 break flow_gen_async.php:15
 @test(4)
@@ -34,10 +34,10 @@ next
 next
 next
 next
-continue
+run
 @test(5)
 out
 next
 break clear all
-continue
+run
 quit

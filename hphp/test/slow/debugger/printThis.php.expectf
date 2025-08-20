@@ -1,12 +1,12 @@
-Program %s/printThis.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/printThis.php loaded. Type '[r]un' to go.
 break printThis.php:5
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 run
 Program %s/printThis.php exited normally.
 print $this
 1
-continue
-Program %s/printThis.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+Program %s/printThis.php exited normally.
 print $this
 1
 quit

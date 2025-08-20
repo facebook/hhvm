@@ -1,4 +1,4 @@
-Program %s/break1.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/break1.php loaded. Type '[r]un' to go.
 break break1.php:6
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 @ foo('test_break1')

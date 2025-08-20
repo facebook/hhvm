@@ -38,8 +38,8 @@ void CmdConstant::recvImpl(DebuggerThriftBuffer &thrift) {
 void CmdConstant::help(DebuggerClient &client) {
   client.helpTitle("Constant Command");
   client.helpCmds(
-    "[k]onstant",           "lists all constants",
-    "[k]onstant {text}",    "full-text search constants",
+    "[c]onstant",           "lists all constants",
+    "[c]onstant {text}",    "full-text search constants",
     nullptr
   );
   client.helpBody(

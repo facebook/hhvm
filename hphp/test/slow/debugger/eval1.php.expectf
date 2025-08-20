@@ -1,4 +1,4 @@
-Program %s/eval1.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/eval1.php loaded. Type '[r]un' to go.
 run
 eval1.php loaded
 Program %s/eval1.php exited normally.
@@ -86,6 +86,7 @@ Stack trace:
 #0 (1): include()
 #1 (): include()
 #2 {main}
-continue
-Program %s/eval1.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+eval1.php loaded
+Program %s/eval1.php exited normally.
 quit

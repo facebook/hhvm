@@ -1,4 +1,4 @@
-Program %s/break3.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/break3.php loaded. Type '[r]un' to go.
 break \TestNs\foo()
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 @ \TestNs\foo('test_break1')
@@ -99,7 +99,7 @@ $__debugger_exn$output = 1
 $__debugger$return_val = 1
 break clear all
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
-continue
+run
 break3.php loaded
 Program %s/break3.php exited normally.
 quit

@@ -1,4 +1,4 @@
-Program %s/flow_gen_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/flow_gen_excep.php loaded. Type '[r]un' to go.
 run
 int(8)
 Caught Exception given to continuation 8 in genFoo()
@@ -153,6 +153,10 @@ Hit fatal : Undefined constant 'next'
 
 break clear all
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
-continue
-Program %s/flow_gen_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+int(8)
+Caught Exception given to continuation 8 in genFoo()
+int(4)
+Caught Exception given to continuation 4 in foo()
+Program %s/flow_gen_excep.php exited normally.
 quit

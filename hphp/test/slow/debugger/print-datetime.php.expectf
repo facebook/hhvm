@@ -1,4 +1,4 @@
-Program %s/print-datetime.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/print-datetime.php loaded. Type '[r]un' to go.
 =new DateTime('9/18/2014 11:00:00 America/Los_Angeles');
 DateTime Object
 (
@@ -17,6 +17,6 @@ DateTime Object
     [timezone] => "+00:00"
 )
 
-c
+r
 Program %s/print-datetime.php exited normally.
 quit

@@ -1,4 +1,4 @@
-Program %s/flow_gen.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/flow_gen.php loaded. Type '[r]un' to go.
 run
 flow_gen.php loaded
 Program %s/flow_gen.php exited normally.
@@ -12,7 +12,13 @@ int(10)
 int(2)
 
 cont
-Program %s/flow_gen.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'cont'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
 next
 Notice: Attempted to interpret unknown debugger command as PHP!
 
@@ -159,7 +165,7 @@ Hit fatal : Undefined constant 'next'
 
 break clear all
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
-continue
+run
 flow_gen.php loaded
 Program %s/flow_gen.php exited normally.
 quit

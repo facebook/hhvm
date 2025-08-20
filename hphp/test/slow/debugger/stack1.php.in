@@ -12,7 +12,7 @@ set sa off
 out
 where
 set sa on
-continue
+run
 break stack1.php:9
 @ test(2, 2)
 where
@@ -21,7 +21,7 @@ variable
 up
 down
 @ $x=3
-continue
+run
 where
 variable
 quit

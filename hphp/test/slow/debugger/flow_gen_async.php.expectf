@@ -1,4 +1,4 @@
-Program %s/flow_gen_async.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/flow_gen_async.php loaded. Type '[r]un' to go.
 run
 flow_gen_async.php loaded
 Program %s/flow_gen_async.php exited normally.
@@ -76,13 +76,16 @@ Hit fatal : Undefined constant 'next'
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-continue
-Program %s/flow_gen_async.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+flow_gen_async.php loaded
+Program %s/flow_gen_async.php exited normally.
 @test(2)
-Hit fatal : Call to undefined function test()
-    #0 at [:1]
-    #1 include(), called at [:1]
-    #2 include(), called at [:0]
+Finished in genBar
+Finished in genFoo
+int(2)
+int(3)
+int(5)
+int(5)
 
 out
 Notice: Attempted to interpret unknown debugger command as PHP!
@@ -100,7 +103,7 @@ Hit fatal : Undefined constant 'next'
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-continue
+run
 flow_gen_async.php loaded
 Program %s/flow_gen_async.php exited normally.
 break clear all
@@ -139,17 +142,20 @@ Hit fatal : Undefined constant 'next'
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-continue
-Program %s/flow_gen_async.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+flow_gen_async.php loaded
+Program %s/flow_gen_async.php exited normally.
 break clear all
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 break flow_gen_async.php:15
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 @test(4)
-Hit fatal : Call to undefined function test()
-    #0 at [:1]
-    #1 include(), called at [:1]
-    #2 include(), called at [:0]
+Finished in genBar
+Finished in genFoo
+int(4)
+int(5)
+int(7)
+int(7)
 
 next
 Notice: Attempted to interpret unknown debugger command as PHP!
@@ -231,7 +237,7 @@ Hit fatal : Undefined constant 'next'
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-continue
+run
 flow_gen_async.php loaded
 Program %s/flow_gen_async.php exited normally.
 @test(5)
@@ -260,6 +266,7 @@ Hit fatal : Undefined constant 'next'
 
 break clear all
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
-continue
-Program %s/flow_gen_async.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+flow_gen_async.php loaded
+Program %s/flow_gen_async.php exited normally.
 quit

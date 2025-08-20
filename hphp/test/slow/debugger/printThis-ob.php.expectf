@@ -1,4 +1,4 @@
-Program %s/printThis-ob.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/printThis-ob.php loaded. Type '[r]un' to go.
 break printThis-ob.php:7
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 run
@@ -7,11 +7,13 @@ ob: I sure hope it does; ob: otherwise we debug!
 ob: Program %s/printThis-ob.php exited normally.
 print $this
 1
-continue
-Program %s/printThis-ob.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+ob: I am going to see if this ob: chunking works well
+ob: I sure hope it does; ob: otherwise we debug!
+ob: Program %s/printThis-ob.php exited normally.
 print $this
 1
-continue
+run
 ob: I am going to see if this ob: chunking works well
 ob: I sure hope it does; ob: otherwise we debug!
 ob: Program %s/printThis-ob.php exited normally.

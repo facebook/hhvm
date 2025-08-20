@@ -1,4 +1,4 @@
-Program %s/error_short_cmd_receive.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/error_short_cmd_receive.php loaded. Type '[r]un' to go.
 break error_short_cmd_receive.php:5
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 run

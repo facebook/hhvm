@@ -1,4 +1,4 @@
-Program %s/flow2.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/flow2.php loaded. Type '[r]un' to go.
 run
 flow2.php done
 Program %s/flow2.php exited normally.
@@ -146,17 +146,24 @@ Hit fatal : Undefined constant 'next'
 
 break clear all
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
-continue
-Program %s/flow2.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+flow2.php done
+Program %s/flow2.php exited normally.
 break flow2.php:10
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 break flow2.php:12
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 @test(2)
-Hit fatal : Call to undefined function test()
-    #0 at [:1]
-    #1 include(), called at [:1]
-    #2 include(), called at [:0]
+Constructor
+Finished in genFoo
+Constructor
+Constructor
+int(9)
+int(1)
+object(C1) (1) {
+  ["x":"C1":private]=>
+  int(0)
+}
 
 out
 Notice: Attempted to interpret unknown debugger command as PHP!
@@ -166,7 +173,7 @@ Hit fatal : Undefined constant 'out'
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-continue
+run
 flow2.php done
 Program %s/flow2.php exited normally.
 out
@@ -179,6 +186,7 @@ Hit fatal : Undefined constant 'out'
 
 break clear all
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
-continue
-Program %s/flow2.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+flow2.php done
+Program %s/flow2.php exited normally.
 quit

@@ -1,4 +1,4 @@
-Program %s/flow_break_interference.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/flow_break_interference.php loaded. Type '[r]un' to go.
 b flow_break_interference.php:15
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 b flow_break_interference.php:27
@@ -13,7 +13,7 @@ Hit fatal : Undefined constant 'o'
     #1 include(), called at [:1]
     #2 include(), called at [:0]
 
-c
+r
 int(8)
 int(1)
 Finished in genFoo

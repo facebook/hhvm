@@ -1,4 +1,4 @@
-Program %s/lambda.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/lambda.php loaded. Type '[r]un' to go.
 =$a = 1;
 1
 $l = function() use ($a) { return $a; }

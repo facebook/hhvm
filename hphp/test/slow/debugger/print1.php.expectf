@@ -1,7 +1,7 @@
-Program %s/print1.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/print1.php loaded. Type '[r]un' to go.
 b print1.php:23
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
-c
+r
 Program %s/print1.php exited normally.
 = $a
 Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: a' in :1

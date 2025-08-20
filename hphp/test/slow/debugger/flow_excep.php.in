@@ -3,7 +3,7 @@ run
 next
 next
 next
-continue
+run
 run
 step
 out
@@ -13,14 +13,14 @@ next
 step
 out
 out
-continue
+run
 run
 step
 next
 next
 next
 next
-continue
+run
 run
 step
 next
@@ -28,7 +28,7 @@ step
 out
 next
 out
-continue
+run
 run
 step
 next
@@ -37,7 +37,7 @@ next
 next
 step
 step
-continue
+run
 run
 next 2
 step
@@ -51,21 +51,21 @@ next
 next
 next
 out
-continue
 run
-next 2
-step
-next 6
-next
-continue
 run
 next 2
 step
 next 6
+next
+run
+run
+next 2
+step
+next 6
 step
 next
 out
 next
-continue
+run
 run
 quit

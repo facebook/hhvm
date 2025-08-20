@@ -1,4 +1,4 @@
-Program %s/break2.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/break2.php loaded. Type '[r]un' to go.
 break %s/break2.php:7
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
 break foo2()
@@ -16,27 +16,20 @@ Program %s/break2.php exited normally.
 test_break6_suffix
 break list
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
-continue
-Program %s/break2.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+break2.php loaded
+Program %s/break2.php exited normally.
 @ $break6=new cls2()
-Hit fatal : Failure to resolve undefined class cls2
-    #0 at [:1]
-    #1 include(), called at [:1]
-    #2 include(), called at [:0]
-
 @ $break6->pubObj('test_break6')
-Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: break6' in :1
-Stack trace:
-#0 (1): include()
-#1 (): include()
-#2 {main}
-continue
+pubObj2:test_break6
+run
 break2.php loaded
 Program %s/break2.php exited normally.
 @ cls2::pubCls('test_break6')
 pubCls2:test_break6
 break clear all
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
-continue
-Program %s/break2.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+break2.php loaded
+Program %s/break2.php exited normally.
 quit

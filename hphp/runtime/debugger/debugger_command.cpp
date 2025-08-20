@@ -126,11 +126,9 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
   // Not all commands are here, as not all commands need to be sent over wire.
   switch (type) {
     case KindOfBreak      : cmd = std::make_shared<CmdBreak>(); break;
-    case KindOfContinue   : cmd = std::make_shared<CmdContinue>(); break;
-    case KindOfException  : cmd = std::make_shared<CmdException>(); break;
+    case KindOfConstant   : cmd = std::make_shared<CmdConstant>(); break;
     case KindOfGlobal     : cmd = std::make_shared<CmdGlobal>(); break;
     case KindOfInfo       : cmd = std::make_shared<CmdInfo>(); break;
-    case KindOfConstant   : cmd = std::make_shared<CmdConstant>(); break;
     case KindOfList       : cmd = std::make_shared<CmdList>(); break;
     case KindOfMachine    : cmd = std::make_shared<CmdMachine>(); break;
     case KindOfPrint      : cmd = std::make_shared<CmdPrint>(); break;

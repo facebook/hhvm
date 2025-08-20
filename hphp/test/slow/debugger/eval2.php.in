@@ -1,5 +1,5 @@
 b foo()
-c
+r
 @ foo(1)
 $_ = "don't want to see this"
 = throwSomething()

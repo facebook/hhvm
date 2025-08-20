@@ -1,4 +1,4 @@
 break A::current()
-continue
-continue
+run
+run
 quit

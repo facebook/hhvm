@@ -1,4 +1,4 @@
-Program %s/flow_gen_async_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/flow_gen_async_excep.php loaded. Type '[r]un' to go.
 run
 int(1)
 int(2)
@@ -105,6 +105,15 @@ Hit fatal : Undefined constant 'next'
 
 break clear all
 Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
-continue
-Program %s/flow_gen_async_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+int(1)
+int(2)
+Caught Thrown from genThrowAndCatch 2 in genThrowAndCatch()
+Finished in genThrowAndCatch
+int(4)
+int(4)
+Caught Thrown from genThrowAndCatch 4 in genFoo()
+Finished in genFoo
+int(4)
+Program %s/flow_gen_async_excep.php exited normally.
 quit

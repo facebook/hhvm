@@ -20,6 +20,7 @@
 #include <thrift/compiler/whisker/render.h>
 
 #include <cmath>
+#include <concepts>
 #include <exception>
 #include <functional>
 #include <iterator>
@@ -1036,11 +1037,8 @@ class render_engine {
   // Prevent implicit conversion to ast::header or ast::body. Otherwise, we can
   // silently compile an infinitely recursive visit() chain if there is a
   // missing overload for one of the alternatives in the variant.
-  template <
-      typename T,
-      std::enable_if_t<
-          std::is_same_v<T, ast::header> || std::is_same_v<T, ast::body>>* =
-          nullptr>
+  template <typename T>
+    requires std::same_as<T, ast::header> || std::same_as<T, ast::body>
   void visit(const T& elements) {
     detail::variant_match(elements, [&](const auto& node) { visit(node); });
   }

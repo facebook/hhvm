@@ -274,22 +274,7 @@ AsioBlockableChain::firstInContext(ContextStateIndex ctxStateIdx) {
   return result ? result : ctxResult;
 }
 
-void AsioBlockableChain::UnblockJitHelper(ActRec* ar,
-                                          TypedValue* sp,
-                                          AsioBlockableChain chain) {
-  assertx(regState() == VMRegState::DIRTY);
-  regState() = VMRegState::CLEAN;
-  SCOPE_EXIT { regState() = VMRegState::DIRTY; };
-
-  auto prevAr = g_context->getOuterVMFrame(ar);
-  const Func* prevF = prevAr->func();
-  auto& regs = vmRegs();
-  regs.stack.top() = sp;
-  assertx(vmStack().isValidAddress((uintptr_t)vmsp()));
-  regs.pc = prevF->at(ar->callOffset());
-  regs.fp = prevAr;
-  regs.jitReturnAddr = nullptr;
-
+void AsioBlockableChain::Unblock(AsioBlockableChain chain) {
   chain.unblock();
 }
 

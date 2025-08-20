@@ -62,6 +62,8 @@ std::string Fixup::show() const {
   if (isIndirect()) {
     return folly::sformat("indirect ripOff={} extraSpOff={}",
                           ripOffset(), spOffset().offset);
+  } else if (isAsioStub()) {
+    return folly::sformat("asio stub spOff={}", spOffset().offset);
   } else {
     return folly::sformat("direct pcOff={} spOff={}",
                           pcOffset(), spOffset().offset);
@@ -97,8 +99,15 @@ void regsFromActRec(TCA tca, const ActRec* ar, const Fixup& fixup,
   const Func* f = ar->func();
   assertx(f);
   TRACE(3, "regsFromActRec: tca %p -> %s\n", tca, fixup.show().c_str());
-  outRegs->pc = f->entry() + fixup.pcOffset();
-  outRegs->fp = ar;
+  if (fixup.isAsioStub()) {
+    auto const prevAR = g_context->getOuterVMFrame(ar);
+    auto const prevFunc = prevAR->func();
+    outRegs->pc = prevFunc->at(ar->callOffset());
+    outRegs->fp = prevAR;
+  } else {
+    outRegs->pc = f->entry() + fixup.pcOffset();
+    outRegs->fp = ar;
+  }
   outRegs->retAddr = tca;
 
   auto const stackBase = Stack::anyFrameStackBase(ar);

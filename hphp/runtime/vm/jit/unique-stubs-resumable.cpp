@@ -154,15 +154,15 @@ void storeAGWHResult(Vout& v, PhysReg data, PhysReg type, Vreg wh) {
  * Unblock the chain of blockables. Calls into native code if the pointer to
  * the first blockable is non-null.
  */
-void unblockParents(Vout& v, Vreg firstBl) {
+void unblockParents(Vout& v, Vreg firstBl, SBInvOffset spOff) {
   auto const sf = v.makeReg();
   v << testq{firstBl, firstBl, sf};
 
   ifThen(v, CC_NZ, sf, [&] (Vout& v) {
-    v << vcall{CallSpec::direct(AsioBlockableChain::UnblockJitHelper),
-               v.makeVcallArgs({{rvmfp(), rvmsp(), firstBl}}),
+    v << vcall{CallSpec::direct(AsioBlockableChain::Unblock),
+               v.makeVcallArgs({{firstBl}}),
                v.makeTuple({}),
-               Fixup::none()};
+               Fixup::asioStub(spOff)};
   });
 }
 
@@ -340,7 +340,7 @@ void asyncFuncMaybeRetToAsyncFunc(Vout& v, PhysReg rdata, PhysReg rtype,
       emitDecRef(v, wh, TRAP_REASON);
 
       // Unblock all remaining parents. This may free the wh.
-      unblockParents(v, nextBl);
+      unblockParents(v, nextBl, SBInvOffset{1});
     }
   );
 
@@ -378,7 +378,7 @@ void asyncFuncRetOnly(Vout& v, PhysReg data, PhysReg type, Vreg parentBl) {
   // Transfer the return value from return registers into the AFWH, mark
   // it as finished and unblock all parents.
   storeAFWHResult(v, data, type);
-  unblockParents(v, parentBl);
+  unblockParents(v, parentBl, SBInvOffset{0});
 
   // Get the pointer to the AFWH before losing FP.
   auto const wh = v.makeReg();
@@ -409,7 +409,7 @@ void asyncGenRetYieldOnly(Vout& v, PhysReg data, PhysReg type) {
   // Transfer the return value from return registers into the AGWH, mark
   // it as finished and unblock all parents.
   storeAGWHResult(v, data, type, wh);
-  unblockParents(v, parentBl);
+  unblockParents(v, parentBl, SBInvOffset{0});
 
   // Unlink the async generator from the async generator wait handle.
   v << storeqi{0, wh[AGWH::generatorOff()]};
@@ -431,7 +431,8 @@ void asyncGenRetYieldOnly(Vout& v, PhysReg data, PhysReg type) {
 TCA emitAsyncFuncRet(CodeBlock& cb, DataBlock& data, TCA switchCtrl, const char* name) {
   alignCacheLine(cb);
 
-  return vwrap(cb, data, [&] (Vout& v) {
+  CGMeta meta;
+  auto const start = vwrap(cb, data, meta, [&] (Vout& v) {
     auto const slowPath = Vlabel(v.makeBlock());
 
     // Load ptr to the first parent's blockable.
@@ -468,13 +469,17 @@ TCA emitAsyncFuncRet(CodeBlock& cb, DataBlock& data, TCA switchCtrl, const char*
     asyncFuncRetOnly(v, rarg(0), rarg(1), parentBl);
     v << jmpi{switchCtrl, vm_regs_with_sp()};
   }, name);
+
+  meta.process(nullptr);
+  return start;
 }
 
 TCA emitAsyncFuncRetSlow(CodeBlock& cb, DataBlock& data, TCA asyncFuncRet,
                          const UniqueStubs& us, const char* name) {
   alignJmpTarget(cb);
 
-  return vwrap(cb, data, [&] (Vout& v) {
+  CGMeta meta;
+  auto const start = vwrap(cb, data, meta, [&] (Vout& v) {
     auto const slowPath = Vlabel(v.makeBlock());
 
     // Check for surprise *after* the return event hook was called.
@@ -500,6 +505,9 @@ TCA emitAsyncFuncRetSlow(CodeBlock& cb, DataBlock& data, TCA asyncFuncRet,
     v << syncvmrettype{v.cns(KindOfNull)};
     v << leavetc{vm_regs_with_sp() | rret_type(), us.enterTCExit};
   }, name);
+
+  meta.process(nullptr);
+  return start;
 }
 
 TCA emitAsyncGenRetR(CodeBlock& cb, DataBlock& data, TCA switchCtrl,
@@ -513,7 +521,8 @@ TCA emitAsyncGenRetR(CodeBlock& cb, DataBlock& data, TCA switchCtrl,
     v << fallthru{vm_regs_with_sp() | rarg(1)};
   });
 
-  *asyncGenRetYieldR = vwrap(cb, data, [&] (Vout& v) {
+  CGMeta meta;
+  *asyncGenRetYieldR = vwrap(cb, data, meta, [&] (Vout& v) {
     auto const turtlePath = Vlabel(v.makeBlock());
 
     // Check for surprise.
@@ -533,6 +542,8 @@ TCA emitAsyncGenRetR(CodeBlock& cb, DataBlock& data, TCA switchCtrl,
     v << syncvmrettype{v.cns(KindOfNull)};
     v << leavetc{vm_regs_with_sp() | rret_type(), us.enterTCExit};
   });
+
+  meta.process(nullptr);
 
   return ret;
 }

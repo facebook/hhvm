@@ -111,6 +111,11 @@ ActRec* findVMFrameForDebug(uintptr_t start = 0);
  *     then look that IP up in the fixup map again to find a normal
  *     (non-indirect) Fixup record.
  *
+ *   - an asio stub Fixup:
+ *
+ *     This is used when invoking C++ helpers from asio stubs, where the current
+ *     resumable frame is being suspended or freed and the helper should operate
+ *     in the context of the scheduler frame (HH\Asio\join).
  */
 
 //////////////////////////////////////////////////////////////////////
@@ -130,13 +135,26 @@ struct Fixup {
     return Fixup{-safe_cast<int32_t>(ripOffset), extraSpOffset};
   }
 
+  static Fixup asioStub(SBInvOffset spOffset) {
+    assertx(spOffset.offset >= 0);
+    return Fixup{kAsioStub, spOffset};
+  }
+
   static Fixup none() {
     return Fixup{0, SBInvOffset::invalid()};
   }
 
   bool isValid() const { return m_spOffset.isValid(); }
   bool isIndirect() const { assertx(isValid()); return m_pcOrRipOffset < 0; }
-  uint32_t pcOffset() const { assertx(!isIndirect()); return m_pcOrRipOffset; }
+  bool isAsioStub() const {
+    assertx(isValid());
+    return m_pcOrRipOffset == kAsioStub;
+  }
+  uint32_t pcOffset() const {
+    assertx(!isIndirect());
+    assertx(!isAsioStub());
+    return m_pcOrRipOffset;
+  }
   uint32_t ripOffset() const { assertx(isIndirect()); return -m_pcOrRipOffset; }
   SBInvOffset spOffset() const { assertx(isValid()); return m_spOffset; }
   std::string show() const;
@@ -158,6 +176,8 @@ private:
     : m_pcOrRipOffset{pcOrRipOffset}
     , m_spOffset{spOffset}
   {}
+
+  static constexpr int32_t kAsioStub = std::numeric_limits<int32_t>::max();
 
   int32_t m_pcOrRipOffset;
   SBInvOffset m_spOffset;

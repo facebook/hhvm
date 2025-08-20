@@ -19,6 +19,7 @@
 #include <thrift/compiler/whisker/print_ast.h>
 #include <thrift/compiler/whisker/tree_printer.h>
 
+#include <concepts>
 #include <ostream>
 
 #include <fmt/core.h>
@@ -214,11 +215,8 @@ struct ast_visitor {
   // Prevent implicit conversion to ast::header or ast::body. Otherwise, we can
   // silently compile an infinitely recursive visit() chain if there is a
   // missing overload for one of the alternatives in the variant.
-  template <
-      class T,
-      std::enable_if_t<
-          std::is_same_v<T, ast::header> || std::is_same_v<T, ast::body>>* =
-          nullptr>
+  template <class T>
+    requires std::same_as<T, ast::header> || std::same_as<T, ast::body>
   void visit(const T& elements, tree_printer::scope& scope) const {
     // This node is transparent so it does not directly appear in the tree
     detail::variant_match(

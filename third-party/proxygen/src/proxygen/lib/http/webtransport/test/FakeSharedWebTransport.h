@@ -328,7 +328,9 @@ class FakeSharedWebTransport : public WebTransport {
       h.second->stopSending(std::numeric_limits<uint32_t>::max());
     }
     readHandles.clear();
-    peerHandler_->onSessionEnd(error);
+    if (peerHandler_) {
+      peerHandler_->onSessionEnd(error);
+    }
     sessionClosed_ = true;
     return folly::unit;
   }

@@ -1149,7 +1149,6 @@ size_t ValueHasher::operator()(const Bytes& s) const {
 size_t ValueHasher::operator()(const NativeObject& o) const {
   return folly::hash::commutative_hash_combine_range_generic(
       OBJECT_HASH_SEED, ValueHasher{}, o.begin(), o.end());
-  return 0;
 }
 size_t ValueHasher::operator()(const NativeList& l) const {
   return l.inner().index() + folly::variant_match(l.inner(), ValueHasher{});

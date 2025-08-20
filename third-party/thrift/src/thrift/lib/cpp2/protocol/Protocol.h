@@ -149,7 +149,6 @@ inline bool validate_bool(uint8_t value) {
   return value;
 invalid:
   LOG(FATAL) << kUndefinedBehaviorMsg;
-  return false;
 #else
   // Store in a volatile variable to prevent the compiler from optimizing the
   // check away.

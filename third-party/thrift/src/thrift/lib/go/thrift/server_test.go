@@ -250,3 +250,68 @@ func TestBasicServerFunctionalityTLS(t *testing.T) {
 		runBasicServerTestFunc(t, TransportIDRocket)
 	})
 }
+
+func TestALPN(t *testing.T) {
+	clientConfig, serverConfig, err := generateSelfSignedCerts()
+	require.NoError(t, err)
+
+	// Apply ALPN to server config:
+	WithALPNUpgradeToRocket()(serverConfig)
+	listener, err := tls.Listen("tcp", "[::]:0", serverConfig)
+	require.NoError(t, err)
+	addr := listener.Addr()
+	t.Logf("Server listening on %v", addr)
+
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+	server := NewServer(processor, listener, TransportIDUpgradeToRocket)
+
+	serverCtx, serverCancel := context.WithCancel(context.Background())
+	var serverEG errgroup.Group
+	serverEG.Go(func() error {
+		return server.ServeContext(serverCtx)
+	})
+
+	tlsDialerOption := WithTLS(
+		addr.String(), 1*time.Second, clientConfig,
+	)
+	plaintextDialerOption := WithDialer(func() (net.Conn, error) {
+		return net.Dial("tcp", addr.String())
+	})
+
+	createAlpnClient := func(opts ...ClientOption) (*dummyif.DummyClient, error) {
+		channel, err := NewClient(opts...)
+		if err != nil {
+			return nil, fmt.Errorf("could not create client: %w", err)
+		}
+		return dummyif.NewDummyChannelClient(channel), nil
+	}
+
+	// Rocket
+	client1, err := createAlpnClient(WithRocket(), tlsDialerOption)
+	require.NoError(t, err)
+	err = client1.Ping(context.TODO())
+	require.NoError(t, err)
+
+	// UpgradeToRocket
+	client2, err := createAlpnClient(WithUpgradeToRocket(), tlsDialerOption)
+	require.NoError(t, err)
+	err = client2.Ping(context.TODO())
+	require.NoError(t, err)
+
+	// Header
+	client3, err := createAlpnClient(WithHeader(), tlsDialerOption)
+	require.NoError(t, err)
+	err = client3.Ping(context.TODO())
+	require.NoError(t, err)
+
+	// Plaintext
+	client4, err := createAlpnClient(WithUpgradeToRocket(), plaintextDialerOption)
+	require.NoError(t, err)
+	err = client4.Ping(context.TODO())
+	// Server is configured in TLS-only mode. We expect an error when we try to speak plaintext.
+	require.Error(t, err, "read: connection reset by peer")
+
+	serverCancel()
+	err = serverEG.Wait()
+	require.ErrorIs(t, err, context.Canceled)
+}

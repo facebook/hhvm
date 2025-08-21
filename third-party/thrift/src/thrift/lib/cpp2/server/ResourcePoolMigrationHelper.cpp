@@ -15,6 +15,8 @@
  */
 
 #include <folly/logging/xlog.h>
+#include <thrift/lib/cpp2/server/ServerFlags.h>
+
 #include <thrift/lib/cpp2/server/ResourcePoolMigrationHelper.h>
 
 FOLLY_GFLAGS_DEFINE_bool(
@@ -26,18 +28,79 @@ THRIFT_FLAG_DEFINE_bool(enable_resource_pool_migration, false);
 namespace apache::thrift {
 
 bool ResourcePoolMigrationHelper::isMigrationEnabled() {
-  const auto migration_is_enabled =
-      !FLAGS_thrift_disable_resource_pool_migration &&
-      THRIFT_FLAG(enable_resource_pool_migration);
+  if (FLAGS_thrift_disable_resource_pool_migration ||
+      !THRIFT_FLAG(enable_resource_pool_migration)) {
+    XLOG(WARNING)
+        << "This service will soon be migrated onto resource pools. Migration can "
+           "be rolled back by setting the gflag killswitch "
+           "(`--thrift_disable_resource_pool_migration`) or unsetting thrift flag "
+           "(`enable_resource_pool_migration`). The process must be restarted for "
+           "either flag change to take effect.";
+    return false;
+  }
 
-  XLOG_IF(WARNING, migration_is_enabled)
+  // Override all the flags that normally disable resource pools.
+
+  const auto original_FLAGS_thrift_experimental_use_resource_pools =
+      FLAGS_thrift_experimental_use_resource_pools;
+  if (!FLAGS_thrift_experimental_use_resource_pools) {
+    XLOG(WARNING)
+        << "--thrift_experimental_use_resource_pools gflag is unset. This flag is "
+           "being set as this build rule is being migrated onto resource pools "
+           "and is no longer allowed to opt out.";
+    FLAGS_thrift_experimental_use_resource_pools = true;
+  }
+
+  const auto original_FLAGS_thrift_disable_resource_pools =
+      FLAGS_thrift_disable_resource_pools;
+  if (FLAGS_thrift_disable_resource_pools) {
+    XLOG(WARNING)
+        << "--thrift_disable_resource_pools gflag is set. This flag is being "
+           "unset as this build rule is being migrated onto resource pools "
+           "and is no longer allowed to opt out.";
+    FLAGS_thrift_disable_resource_pools = false;
+  }
+
+  const auto original_THRIFT_FLAG_experimental_use_resource_pools =
+      THRIFT_FLAG(experimental_use_resource_pools);
+  if (!THRIFT_FLAG(experimental_use_resource_pools)) {
+    XLOG(WARNING)
+        << "experimental_use_resource_pools thrift flag is unset. This flag is "
+           "being set as this build rule is being migrated onto resource pools "
+           "and is no longer allowed to opt out.";
+    THRIFT_FLAG_SET_MOCK(experimental_use_resource_pools, true);
+  }
+
+  // The `useResourcePoolFlagsSet()` function (wisely) checks the above flags
+  // just the first time its called and never changes its return value for the
+  // lifetime of the process even if the flags have changed. If this function
+  // was already called and returned false it's not safe for us to proceed with
+  // the migration since we may violate a server state invariant.
+  if (!useResourcePoolsFlagsSet()) {
+    FLAGS_thrift_experimental_use_resource_pools =
+        original_FLAGS_thrift_experimental_use_resource_pools;
+    FLAGS_thrift_disable_resource_pools =
+        original_FLAGS_thrift_disable_resource_pools;
+    THRIFT_FLAG_SET_MOCK(
+        experimental_use_resource_pools,
+        original_THRIFT_FLAG_experimental_use_resource_pools);
+    XLOG(ERR)
+        << "`useResourcePoolsFlagSet()` was called before we changed the above "
+           "flags and already claimed that resource pools are not enabled. It is "
+           "not safe to move forward with migration as it may violate a server "
+           "state invariant. These flag changes are now reverted. Fix this race "
+           "so that migration can proceed.";
+    return false;
+  }
+
+  XLOG(WARNING)
       << "This service was recently migrated onto resource pools. Migration can "
          "be rolled back by setting the gflag killswitch "
          "(`--thrift_disable_resource_pool_migration`) or unsetting thrift flag "
          "(`enable_resource_pool_migration`). The process must be restarted for "
          "either flag change to take effect.";
 
-  return migration_is_enabled;
+  return true;
 }
 
 } // namespace apache::thrift

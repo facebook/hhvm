@@ -15,6 +15,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <thrift/lib/cpp2/server/ServerFlags.h>
 
 #include <thrift/lib/cpp2/server/ResourcePoolMigrationHelper.h>
 
@@ -33,4 +34,50 @@ TEST(ResourcePoolMigrationHelperTest, TestAllGflagAndThriftFlagCombos) {
           ResourcePoolMigrationHelper::isMigrationEnabled());
     }
   }
+}
+
+TEST(ResourcePoolMigrationHelperTest, EnabledMigrationDisablesOptOutFlags) {
+  gflags::FlagSaver flagSaver;
+  FLAGS_thrift_disable_resource_pool_migration = false;
+  THRIFT_FLAG_SET_MOCK(enable_resource_pool_migration, true);
+
+  FLAGS_thrift_experimental_use_resource_pools = false;
+  FLAGS_thrift_disable_resource_pools = true;
+  THRIFT_FLAG_SET_MOCK(experimental_use_resource_pools, false);
+
+  // This call should set the opt-out flags to non-opt-out values.
+  EXPECT_EQ(true, ResourcePoolMigrationHelper::isMigrationEnabled());
+
+  EXPECT_EQ(true, FLAGS_thrift_experimental_use_resource_pools);
+  EXPECT_EQ(false, FLAGS_thrift_disable_resource_pools);
+  EXPECT_EQ(true, THRIFT_FLAG(experimental_use_resource_pools));
+
+  EXPECT_EQ(true, useResourcePoolsFlagsSet());
+}
+
+TEST(
+    ResourcePoolMigrationHelperTest,
+    MigrationIsDisabledAndOptOutFlagsUnchangedIfUseResoursePoolsFlagsSetIsFalse) {
+  gflags::FlagSaver flagSaver;
+
+  // Normally, these flag settings would enable the migration, but not if we
+  // lose the race to calling `useResourcePoolsFlagsSet()` and it returns
+  // `false`.
+  FLAGS_thrift_disable_resource_pool_migration = false;
+  THRIFT_FLAG_SET_MOCK(enable_resource_pool_migration, true);
+
+  FLAGS_thrift_experimental_use_resource_pools = false;
+  FLAGS_thrift_disable_resource_pools = true;
+  THRIFT_FLAG_SET_MOCK(experimental_use_resource_pools, false);
+
+  // Simulate another caller beating us in the race to calling
+  // `useResourcePoolsFlagsSet()` and it returned `false`.
+  EXPECT_EQ(false, useResourcePoolsFlagsSet());
+
+  // This call should not modify the opt-out flags.
+  EXPECT_EQ(false, ResourcePoolMigrationHelper::isMigrationEnabled());
+
+  EXPECT_EQ(false, FLAGS_thrift_experimental_use_resource_pools);
+  EXPECT_EQ(true, FLAGS_thrift_disable_resource_pools);
+  EXPECT_EQ(false, THRIFT_FLAG(experimental_use_resource_pools));
 }

@@ -18,7 +18,10 @@ package thrift
 
 import (
 	"context"
+	"crypto/rand"
+	"fmt"
 	"net"
+	"os"
 	"testing"
 	"time"
 
@@ -46,7 +49,7 @@ func TestServerCancellation(t *testing.T) {
 		})
 
 		// Let the server start up and get to the accept loop.
-		time.Sleep(time.Second)
+		time.Sleep(50 * time.Millisecond)
 
 		// Shut down server.
 		serverCancel()
@@ -62,5 +65,127 @@ func TestServerCancellation(t *testing.T) {
 	})
 	t.Run("NewServer/Rocket", func(t *testing.T) {
 		runCancellationTestFunc(t, TransportIDRocket)
+	})
+}
+
+func TestBasicServerFunctionalityTCP(t *testing.T) {
+	runBasicServerTestFunc := func(t *testing.T, serverTransport TransportID) {
+		var clientTransportOption ClientOption
+		switch serverTransport {
+		case TransportIDHeader:
+			clientTransportOption = WithHeader()
+		case TransportIDUpgradeToRocket:
+			clientTransportOption = WithUpgradeToRocket()
+		case TransportIDRocket:
+			clientTransportOption = WithRocket()
+		default:
+			panic("unsupported transport!")
+		}
+
+		listener, err := net.Listen("tcp", "[::]:0")
+		require.NoError(t, err)
+		addr := listener.Addr()
+		t.Logf("Server listening on %v", addr)
+
+		processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+		server := NewServer(processor, listener, serverTransport)
+
+		serverCtx, serverCancel := context.WithCancel(context.Background())
+		var serverEG errgroup.Group
+		serverEG.Go(func() error {
+			return server.ServeContext(serverCtx)
+		})
+
+		channel, err := NewClient(
+			clientTransportOption,
+			WithIoTimeout(5*time.Second),
+			WithDialer(func() (net.Conn, error) {
+				return net.DialTimeout(addr.Network(), addr.String(), 5*time.Second)
+			}),
+		)
+		require.NoError(t, err)
+		client := dummyif.NewDummyChannelClient(channel)
+		_, err = client.Echo(context.Background(), "hello")
+		require.NoError(t, err)
+		err = client.Close()
+		require.NoError(t, err)
+
+		// Shut down server.
+		serverCancel()
+		err = serverEG.Wait()
+		require.ErrorIs(t, err, context.Canceled)
+	}
+
+	t.Run("NewServer/Header", func(t *testing.T) {
+		runBasicServerTestFunc(t, TransportIDHeader)
+	})
+	t.Run("NewServer/UpgradeToRocket", func(t *testing.T) {
+		runBasicServerTestFunc(t, TransportIDUpgradeToRocket)
+	})
+	t.Run("NewServer/Rocket", func(t *testing.T) {
+		runBasicServerTestFunc(t, TransportIDRocket)
+	})
+}
+
+func TestBasicServerFunctionalityUDX(t *testing.T) {
+	runBasicServerTestFunc := func(t *testing.T, serverTransport TransportID) {
+		var clientTransportOption ClientOption
+		switch serverTransport {
+		case TransportIDHeader:
+			clientTransportOption = WithHeader()
+		case TransportIDUpgradeToRocket:
+			clientTransportOption = WithUpgradeToRocket()
+		case TransportIDRocket:
+			clientTransportOption = WithRocket()
+		default:
+			panic("unsupported transport!")
+		}
+
+		path := fmt.Sprintf("/tmp/test%s.sock", rand.Text())
+		defer os.Remove(path)
+		addr, err := net.ResolveUnixAddr("unix", path)
+		require.NoError(t, err)
+
+		listener, err := net.ListenUnix("unix", addr)
+		require.NoError(t, err)
+		t.Logf("Server listening on %v", addr)
+
+		processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+		server := NewServer(processor, listener, serverTransport)
+
+		serverCtx, serverCancel := context.WithCancel(context.Background())
+		var serverEG errgroup.Group
+		serverEG.Go(func() error {
+			return server.ServeContext(serverCtx)
+		})
+
+		channel, err := NewClient(
+			clientTransportOption,
+			WithIoTimeout(5*time.Second),
+			WithDialer(func() (net.Conn, error) {
+				return net.DialTimeout(addr.Network(), addr.String(), 5*time.Second)
+			}),
+		)
+		require.NoError(t, err)
+		client := dummyif.NewDummyChannelClient(channel)
+		_, err = client.Echo(context.Background(), "hello")
+		require.NoError(t, err)
+		err = client.Close()
+		require.NoError(t, err)
+
+		// Shut down server.
+		serverCancel()
+		err = serverEG.Wait()
+		require.ErrorIs(t, err, context.Canceled)
+	}
+
+	t.Run("NewServer/Header", func(t *testing.T) {
+		runBasicServerTestFunc(t, TransportIDHeader)
+	})
+	t.Run("NewServer/UpgradeToRocket", func(t *testing.T) {
+		runBasicServerTestFunc(t, TransportIDUpgradeToRocket)
+	})
+	t.Run("NewServer/Rocket", func(t *testing.T) {
+		runBasicServerTestFunc(t, TransportIDRocket)
 	})
 }

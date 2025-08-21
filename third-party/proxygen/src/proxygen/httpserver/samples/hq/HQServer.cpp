@@ -246,6 +246,7 @@ HQServer::HQServer(HQServerParams params,
                    std::unique_ptr<quic::QuicServerTransportFactory> factory)
     : params_(std::move(params)) {
   params_.transportSettings.datagramConfig.enabled = true;
+  params_.transportSettings.advertisedKnobFrameSupport = true;
   server_ = quic::QuicServer::createQuicServer(params_.transportSettings);
 
   server_->setBindV6Only(false);

@@ -31,18 +31,22 @@ type DummyHandler struct {
 // Compile time interface enforcer
 var _ dummy.Dummy = (*DummyHandler)(nil)
 
-func (h *DummyHandler) Echo(ctx context.Context, value string) (string, error) {
+func (h *DummyHandler) Ping(_ context.Context) error {
+	return nil
+}
+
+func (h *DummyHandler) Echo(_ context.Context, value string) (string, error) {
 	return value, nil
 }
 
-func (h *DummyHandler) OnewayRPC(ctx context.Context, value string) error {
+func (h *DummyHandler) OnewayRPC(_ context.Context, value string) error {
 	if h.OnewayRPCRequests != nil {
 		h.OnewayRPCRequests <- value
 	}
 	return nil
 }
 
-func (h *DummyHandler) Sleep(ctx context.Context, milliseconds int64) error {
+func (h *DummyHandler) Sleep(_ context.Context, milliseconds int64) error {
 	time.Sleep(time.Duration(milliseconds) * time.Millisecond)
 	return nil
 }

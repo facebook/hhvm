@@ -2262,18 +2262,11 @@ std::string serializeOptProfData(const std::string& filename) {
   }
 }
 
-namespace {
-std::atomic_flag s_sbSerDone = ATOMIC_FLAG_INIT;
-}
-
 std::string serializeSBProfData(const std::string& root,
                                 const std::string& filename) {
   if (!Cfg::Eval::EnableSBProfSerialize ||
       !Cfg::Eval::EnableAsyncJIT) {
     return "Serialization failed: options not enabled\n";
-  }
-  if (s_sbSerDone.test_and_set()) {
-    return "Serialization failed: already attempted serialization\n";
   }
 
   auto const profFileName = !filename.empty() ?

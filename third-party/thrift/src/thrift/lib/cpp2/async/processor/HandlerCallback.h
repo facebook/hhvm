@@ -18,7 +18,6 @@
 
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/async/processor/HandlerCallbackBase.h>
-#include <thrift/lib/cpp2/async/processor/RequestTask.h>
 #include <thrift/lib/cpp2/util/IntrusiveSharedPtr.h>
 
 namespace apache::thrift {
@@ -413,20 +412,5 @@ struct HandlerCallbackHelper<SinkConsumer<SinkElement, FinalResponse>>
           SinkConsumer<SinkElement, FinalResponse>> {};
 
 } // namespace detail
-
-template <typename ChildType>
-void RequestTask<ChildType>::run() {
-  // Since this request was queued, reset the processBegin
-  // time to the actual start time, and not the queue time.
-  req_.requestContext()->getTimestamps().processBegin =
-      std::chrono::steady_clock::now();
-  if (!oneway_ && !req_.request()->getShouldStartProcessing()) {
-    apache::thrift::HandlerCallbackBase::releaseRequest(
-        apache::thrift::detail::ServerRequestHelper::request(std::move(req_)),
-        apache::thrift::detail::ServerRequestHelper::eventBase(req_));
-    return;
-  }
-  (childClass_->*executeFunc_)(std::move(req_));
-}
 
 } // namespace apache::thrift

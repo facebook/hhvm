@@ -21,6 +21,7 @@
 #include <thrift/lib/cpp2/async/RpcTypes.h>
 #include <thrift/lib/cpp2/async/processor/AsyncProcessorFunc.h>
 #include <thrift/lib/cpp2/async/processor/EventTask.h>
+#include <thrift/lib/cpp2/async/processor/HandlerCallbackBase.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 
 namespace apache::thrift {
@@ -51,5 +52,20 @@ class RequestTask final : public EventTask {
   ChildType* childClass_;
   AsyncProcessorFunc::ExecuteFunc<ChildType> executeFunc_;
 };
+
+template <typename ChildType>
+void RequestTask<ChildType>::run() {
+  // Since this request was queued, reset the processBegin
+  // time to the actual start time, and not the queue time.
+  req_.requestContext()->getTimestamps().processBegin =
+      std::chrono::steady_clock::now();
+  if (!oneway_ && !req_.request()->getShouldStartProcessing()) {
+    apache::thrift::HandlerCallbackBase::releaseRequest(
+        apache::thrift::detail::ServerRequestHelper::request(std::move(req_)),
+        apache::thrift::detail::ServerRequestHelper::eventBase(req_));
+    return;
+  }
+  (childClass_->*executeFunc_)(std::move(req_));
+}
 
 } // namespace apache::thrift

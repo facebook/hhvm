@@ -46,6 +46,7 @@
 #include "hphp/util/configs/eval.h"
 #ifdef USE_JEMALLOC
 #include "hphp/util/configs/stats.h"
+#include "hphp/runtime/vm/native.h"
 #endif
 #include "hphp/util/mutex.h"
 #include "hphp/util/rank.h"
@@ -143,7 +144,9 @@ using RepoUnitCache = RankedCHM<
   RankUnitCache
 >;
 RepoUnitCache s_repoUnitCache;
-
+#ifdef USE_JEMALLOC
+std::atomic<uint64_t> s_unitLoadOrder = 0;
+#endif
 CachedUnit lookupUnitRepoAuth(const StringData* path,
                               const RepoUnitInfo* info) {
   assertx(!info || info->path == path);
@@ -176,16 +179,14 @@ CachedUnit lookupUnitRepoAuth(const StringData* path,
       auto result = ue->create();
       auto after = *alloc;
       auto deafter = *del;
-
-      auto outputPath = folly::sformat("/tmp/units-{}.map", getpid());
       auto change = (after - deafter) - (before - debefore);
-      auto str =
-        folly::sformat("{} {}\n", ue->m_filepath->toCppString(), change);
-      auto out = std::fopen(outputPath.c_str(), "a");
-      if (out) {
-        std::fwrite(str.data(), str.size(), 1, out);
-        std::fclose(out);
-      }
+
+      StructuredLogEntry ent;
+      ent.setStr("filepath", ue->m_filepath->toCppString());
+      ent.setInt("mem_change", change);
+      ent.setInt("order", ++s_unitLoadOrder);
+      StructuredLog::log("hhvm_unit_loads", ent);
+
       return result;
     }
 #endif

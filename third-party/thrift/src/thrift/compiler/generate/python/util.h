@@ -52,6 +52,10 @@ std::string get_py3_namespace_with_name_and_prefix(
 std::unordered_set<const t_program*> needed_includes_by_patch(
     const t_program* root);
 
+bool has_structured_with_generate_patch_new_annotation(const t_program*);
+bool has_generate_patch_new_annotation(const t_structured*);
+bool should_generate_patch(const t_structured*);
+
 inline const std::unordered_set<std::string>& get_python_reserved_names() {
   static const std::unordered_set<std::string> keywords = {
       "False",  "None",    "True",    "and",      "as",       "assert", "async",

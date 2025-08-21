@@ -684,6 +684,8 @@ class python_mstch_struct : public mstch_struct {
             {"struct:fields_ordered_by_id",
              &python_mstch_struct::fields_ordered_by_id},
             {"struct:has_adapter?", &python_mstch_struct::adapter},
+            {"struct:should_generate_patch?",
+             &python_mstch_struct::should_generate_patch},
         });
   }
 
@@ -697,6 +699,9 @@ class python_mstch_struct : public mstch_struct {
 
   mstch::node adapter() {
     return adapter_node(adapter_annotation_, nullptr, context_, pos_);
+  }
+  mstch::node should_generate_patch() {
+    return apache::thrift::compiler::should_generate_patch(struct_);
   }
 
  private:

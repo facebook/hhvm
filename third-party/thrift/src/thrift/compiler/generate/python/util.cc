@@ -19,6 +19,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <thrift/compiler/ast/ast_visitor.h>
+#include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/generate/cpp/util.h>
 
 namespace apache::thrift::compiler {
@@ -75,6 +76,9 @@ static void get_needed_includes_by_patch_impl(
         root, *asMap->get_val_type(), seen, result);
   }
   if (const t_structured* asStructured = type.try_as<t_structured>()) {
+    if (!should_generate_patch(asStructured)) {
+      return;
+    }
     for (auto& field : asStructured->fields()) {
       get_needed_includes_by_patch_impl(
           root, *field.type().get_type(), seen, result);
@@ -115,6 +119,24 @@ bool type_contains_patch(const t_type* type) {
   }
 
   return is_patch_program(type->program());
+}
+
+bool has_generate_patch_new_annotation(const t_structured* type) {
+  return type->find_structured_annotation_or_null(kGeneratePatchNewUri);
+}
+
+bool has_structured_with_generate_patch_new_annotation(const t_program* root) {
+  for (const auto* t : root->structured_definitions()) {
+    if (has_generate_patch_new_annotation(t)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool should_generate_patch(const t_structured* type) {
+  return !has_structured_with_generate_patch_new_annotation(type->program()) ||
+      has_generate_patch_new_annotation(type);
 }
 
 std::vector<std::string> get_py3_namespace(const t_program* prog) {

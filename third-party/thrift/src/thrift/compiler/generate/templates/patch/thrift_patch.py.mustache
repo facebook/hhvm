@@ -64,6 +64,7 @@ import {{included_module_path}}.thrift_patch
 {{/program:include_namespaces}}
 
 {{#program:structs}}
+{{#if struct:should_generate_patch?}}
 
 class {{struct:py_name}}Patch(
     Base{{#if struct:union?}}Union{{#else}}Struct{{/if struct:union?}}Patch[{{program:module_mangle}}__thrift_types.{{struct:py_name}}]
@@ -103,4 +104,5 @@ class {{struct:py_name}}Patch(
     def merge(self, other: {{struct:py_name}}Patch) -> None:
         self._patch.merge(other._patch)
 
+{{/if struct:should_generate_patch?}}
 {{/program:structs}}

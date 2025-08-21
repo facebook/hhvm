@@ -203,4 +203,8 @@ inline constexpr auto kGoMinimizePaddingUri =
 inline constexpr auto kGoUseReflectCodecUri =
     "facebook.com/thrift/annotation/go/UseReflectCodec";
 
+// Patch:
+inline constexpr auto kGeneratePatchNewUri =
+    "facebook.com/thrift/op/GeneratePatchNew";
+
 } // namespace apache::thrift::compiler

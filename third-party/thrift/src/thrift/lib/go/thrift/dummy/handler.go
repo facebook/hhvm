@@ -50,3 +50,8 @@ func (h *DummyHandler) Sleep(_ context.Context, milliseconds int64) error {
 	time.Sleep(time.Duration(milliseconds) * time.Millisecond)
 	return nil
 }
+
+func (h *DummyHandler) Panic(_ context.Context) error {
+	panic("panic!")
+	return nil //nolint:unreachable,govet
+}

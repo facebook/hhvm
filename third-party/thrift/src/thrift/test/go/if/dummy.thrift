@@ -39,4 +39,5 @@ service Dummy {
   string Echo(1: string value);
   oneway void OnewayRPC(1: string value);
   void Sleep(1: i64 milliseconds);
+  void Panic();
 }

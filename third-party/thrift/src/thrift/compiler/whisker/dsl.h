@@ -22,6 +22,8 @@
 
 #include <fmt/core.h>
 
+#include <algorithm>
+#include <concepts>
 #include <cstddef>
 #include <initializer_list>
 #include <optional>
@@ -521,16 +523,11 @@ template <typename F>
 using function_return_t = std::invoke_result_t<F, function::context>;
 
 template <typename F, typename T>
-constexpr inline bool is_function_returning =
-    std::is_same_v<function_return_t<F>, T>;
+concept function_returning = std::same_as<function_return_t<F>, T>;
 
 // This class could be moved to the body of make_function(...).
 // However, MSVC fails to compile that.
-template <
-    typename F,
-    std::enable_if_t< //
-        std::is_same_v<detail::function_return_t<F>, object>,
-        int> = 0>
+template <function_returning<object> F>
 class make_function_delegate final : public function {
  public:
   make_function_delegate(std::string name, F&& impl)
@@ -583,9 +580,7 @@ class make_function_delegate final : public function {
  * The name is used for debugging only. There is an overload that omits the name
  * which can be used in the common case.
  */
-template <
-    typename F,
-    std::enable_if_t<detail::is_function_returning<F, object>, int> = 0>
+template <detail::function_returning<object> F>
 function::ptr make_function(std::string name, F&& function) {
   return std::make_shared<detail::make_function_delegate<F>>(
       std::move(name), std::forward<F>(function));
@@ -612,20 +607,17 @@ function::ptr make_function(std::string name, F&& function) {
  *     {{ (i64_eq 42 42) }}
  *     {{! Produces true }}
  */
-template <
-    typename F,
-    std::enable_if_t<
-        whisker::any_object_type<detail::function_return_t<F>>,
-        int> = 0>
+template <typename F>
+  requires any_object_type<detail::function_return_t<F>>
 function::ptr make_function(std::string name, F&& function) {
   return make_function(
       std::move(name),
       [f = std::decay_t<F>(std::forward<F>(function))](
           function::context ctx) -> object {
-        if constexpr (detail::is_function_returning<F, boolean>) {
+        if constexpr (detail::function_returning<F, boolean>) {
           return f(std::move(ctx)) ? whisker::make::true_
                                    : whisker::make::false_;
-        } else if constexpr (detail::is_function_returning<F, null>) {
+        } else if constexpr (detail::function_returning<F, null>) {
           f(std::move(ctx));
           return whisker::make::null;
         } else {
@@ -693,9 +685,8 @@ class prototype_builder {
   using self_type = typename Handle::element_type;
   using result = typename prototype<self_type>::ptr;
 
-  template <
-      typename Parent,
-      std::enable_if_t<std::is_base_of_v<Parent, self_type>, int> = 0>
+  template <typename Parent>
+    requires std::derived_from<self_type, Parent>
   explicit prototype_builder(prototype_ptr<Parent> parent)
       : parent_(std::move(parent)) {
     assert(parent_ != nullptr);
@@ -756,9 +747,8 @@ class prototype_builder {
     }
   }
 
-  template <
-      typename Parent,
-      std::enable_if_t<std::is_base_of_v<Parent, self_type>, int> = 0>
+  template <typename Parent>
+    requires std::derived_from<self_type, Parent>
   static prototype_builder extends(prototype_ptr<Parent> parent) {
     return prototype_builder{std::move(parent)};
   }

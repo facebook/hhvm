@@ -113,8 +113,8 @@ TEST(EnumTestCpp2, test_enum_parse) {
 TEST(EnumTestCpp2, test_unordered_set) {
   std::unordered_set<MyEnum2> stuff;
   stuff.insert(MyEnum2::ME2_0);
-  EXPECT_TRUE(stuff.count(MyEnum2::ME2_0));
-  EXPECT_FALSE(stuff.count(MyEnum2::ME2_1));
+  EXPECT_TRUE(stuff.contains(MyEnum2::ME2_0));
+  EXPECT_FALSE(stuff.contains(MyEnum2::ME2_1));
 }
 
 TEST(EnumTestCpp2, test_hash_specialization) {

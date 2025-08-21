@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+namespace py3 thrift.server.test
 namespace py thrift.server.test.slots_throwing_service
 
 exception UserException1 {

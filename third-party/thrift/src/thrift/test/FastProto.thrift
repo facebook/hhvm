@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+namespace py3 thrift.test
+
 struct AStruct {
   1: required string aString;
   2: i32 anInteger;

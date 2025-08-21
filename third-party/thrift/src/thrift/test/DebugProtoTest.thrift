@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+namespace py3 thrift.test
 namespace cpp2 apache.thrift.test
 namespace java thrift.test.proto
 

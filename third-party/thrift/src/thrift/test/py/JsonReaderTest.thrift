@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+namespace py3 thrift.test.py
+
 struct StructContainingOptionalList {
   1: optional list<i32> data;
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+namespace py3 thrift.test
 namespace java thrift.test
 namespace cpp2 thrift.test
 namespace rb Thrift.Test

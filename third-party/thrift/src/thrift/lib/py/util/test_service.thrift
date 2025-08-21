@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+namespace py3 thrift.util
 namespace py thrift.util.test_service
 
 include "thrift/annotation/thrift.thrift"

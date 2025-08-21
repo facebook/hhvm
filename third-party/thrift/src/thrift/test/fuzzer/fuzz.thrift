@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+namespace py3 thrift.test.fuzzer
+
 enum Color {
   RED = 0xFF0000,
   ORANGE = 0xFF6600,

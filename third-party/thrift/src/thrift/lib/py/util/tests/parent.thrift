@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+namespace py3 thrift.test
 namespace py thrift.test.parent
 
 exception ParentError {

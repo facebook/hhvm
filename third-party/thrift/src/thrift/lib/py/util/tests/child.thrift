@@ -17,6 +17,7 @@
 include "thrift/lib/py/util/tests/parent.thrift"
 include "thrift/annotation/thrift.thrift"
 
+namespace py3 thrift.test
 namespace py thrift.test.child
 
 exception ChildError {

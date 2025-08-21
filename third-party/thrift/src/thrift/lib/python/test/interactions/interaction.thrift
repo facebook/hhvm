@@ -28,6 +28,8 @@ interaction Addition {
   Point getPoint();
   oneway void noop();
   list<string> func();
+  sink<i32, i32> sinkPrimitive();
+  sink<Point, double> sinkPoint();
 }
 
 service Calculator {

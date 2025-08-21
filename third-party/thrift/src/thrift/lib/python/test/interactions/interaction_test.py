@@ -14,7 +14,10 @@
 
 # pyre-strict
 
+import asyncio
+import math
 import unittest
+from typing import AsyncGenerator
 
 from interaction.thrift_clients import Calculator
 from interaction.thrift_types import Point
@@ -63,6 +66,47 @@ class InteractionTest(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(point.y, 3)
 
                 await add.noop()
+
+    async def test_sink(self) -> None:
+        async def num_gen(fr: int, to: int, stride: int) -> AsyncGenerator[int, None]:
+            for i in range(fr, to, stride):
+                await asyncio.sleep(0.1)
+                yield i
+
+        # let the Points represent velocity, then their
+        # vector sum represents displacement if we ignore calculus
+        async def point_gen(
+            ax: int, ay: int, steps: int
+        ) -> AsyncGenerator[Point, None]:
+            step, vx, vy = 0, 0, 0
+            while step < steps:
+                vx += ax
+                vy += ay
+                await asyncio.sleep(0.1 / math.hypot(vx, vy))
+                yield Point(x=vx, y=vy)
+
+                step += 1
+
+        async with self.init_client() as calc:
+            async with calc.createAddition() as add:
+                self.assertEqual(await add.getPrimitive(), 0)
+
+                sink = await add.sinkPrimitive()
+                fr, to, stride = 2, 9, 2
+                final_resp = await sink.sink(num_gen(fr, to, stride))
+                expected = sum(range(fr, to, stride))
+                self.assertEqual(final_resp, expected)
+
+                self.assertEqual(await add.getPrimitive(), expected)
+
+                initial = await add.getPoint()
+                self.assertEqual((0, 0), (initial.x, initial.y))
+                sink = await add.sinkPoint()
+                final_distance = await sink.sink(point_gen(1, 2, 5))
+
+                final_pos = await add.getPoint()
+                self.assertEqual((15, 30), (final_pos.x, final_pos.y))
+                self.assertEqual(final_distance, math.hypot(final_pos.x, final_pos.y))
 
     async def test_multiple_interactions(self) -> None:
         async with self.init_client() as calc:

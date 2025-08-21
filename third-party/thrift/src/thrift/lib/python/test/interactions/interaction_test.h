@@ -15,6 +15,7 @@
  */
 
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
+#include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/python/test/interactions/gen-cpp2/BlankService.h>
 #include <thrift/lib/python/test/interactions/gen-cpp2/Calculator.h>
 
@@ -45,6 +46,39 @@ struct SemiCalculatorHandler : apache::thrift::ServiceHandler<Calculator> {
     folly::SemiFuture<std::unique_ptr<::interactions::test::thrift::Point>>
     semifuture_getPoint() override {
       return folly::copy_to_unique_ptr(pacc_);
+    }
+    folly::coro::Task<apache::thrift::SinkConsumer<int32_t, int32_t>>
+    co_sinkPrimitive() override {
+      co_return apache::thrift::SinkConsumer<int32_t, int32_t>{
+          [this](folly::coro::AsyncGenerator<int32_t&&> gen)
+              -> folly::coro::Task<int32_t> {
+            while (auto item = co_await gen.next()) {
+              acc_ += *item;
+            }
+            co_return acc_;
+          },
+          10 /* buffer size */
+      };
+    }
+
+    folly::coro::Task<apache::thrift::SinkConsumer<
+        ::interactions::test::thrift::Point,
+        double>>
+    co_sinkPoint() override {
+      co_return apache::thrift::SinkConsumer<
+          ::interactions::test::thrift::Point,
+          double>{
+          [this](
+              folly::coro::AsyncGenerator<::interactions::test::thrift::Point&&>
+                  gen) -> folly::coro::Task<double> {
+            while (auto item = co_await gen.next()) {
+              *pacc_.x() += *item->x();
+              *pacc_.y() += *item->y();
+            }
+            co_return std::hypot(*pacc_.x(), *pacc_.y());
+          },
+          10 /* buffer size */
+      };
     }
   };
 

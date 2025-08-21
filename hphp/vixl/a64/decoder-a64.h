@@ -78,6 +78,8 @@
   V(FPDataProcessing3Source)        \
   V(FPIntegerConvert)               \
   V(FPFixedPointConvert)            \
+  V(SIMDScalarThreeSame)            \
+  V(SIMDScalarTwoMisc)              \
   V(Unallocated)                    \
   V(Unimplemented)
 

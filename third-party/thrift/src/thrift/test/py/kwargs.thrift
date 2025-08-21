@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+namespace py3 thrift.test.py
 namespace py thrift.test.py.kwargs
 
 struct Foo {

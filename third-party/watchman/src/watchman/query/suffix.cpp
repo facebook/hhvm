@@ -17,6 +17,8 @@
 
 using namespace watchman;
 
+namespace {
+
 class SuffixExpr : public QueryExpr {
   std::unordered_set<w_string> suffixSet_;
 
@@ -114,6 +116,9 @@ class SuffixExpr : public QueryExpr {
     return patterns;
   }
 };
+
+} // namespace
+
 W_TERM_PARSER(suffix, SuffixExpr::parse);
 W_CAP_REG("suffix-set")
 

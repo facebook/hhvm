@@ -16,12 +16,12 @@
 
 #pragma once
 
+#include <concepts>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
 
 #include <folly/FBString.h>
-#include <folly/Traits.h>
 #include <thrift/compiler/ast/t_const_value.h>
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_service.h>
@@ -37,14 +37,12 @@ inline void hydrate_const(bool& out, const t_const_value& val) {
   out =
       val.kind() == t_const_value::CV_BOOL ? val.get_bool() : val.get_integer();
 }
-template <typename T>
-std::enable_if_t<std::is_integral_v<T>> hydrate_const(
-    T& out, const t_const_value& val) {
+template <std::integral T>
+void hydrate_const(T& out, const t_const_value& val) {
   out = val.get_integer();
 }
-template <typename T>
-std::enable_if_t<std::is_floating_point_v<T>> hydrate_const(
-    T& out, const t_const_value& val) {
+template <std::floating_point T>
+void hydrate_const(T& out, const t_const_value& val) {
   out = val.kind() == t_const_value::t_const_value_kind::CV_DOUBLE
       ? val.get_double()
       : val.get_integer();
@@ -58,26 +56,29 @@ inline void hydrate_const(folly::fbstring& out, const t_const_value& val) {
 inline void hydrate_const(folly::IOBuf& out, const t_const_value& val) {
   out = folly::IOBuf(folly::IOBuf::CopyBufferOp{}, val.get_string());
 }
-template <typename T> // list
-folly::void_t<decltype(std::declval<T>().emplace_back())> hydrate_const(
-    T& out, const t_const_value& val) {
+template <typename T>
+  requires requires(T t) { t.emplace_back(); } // list
+void hydrate_const(T& out, const t_const_value& val) {
   for (auto* item : val.get_list()) {
     auto& entry = out.emplace_back();
     hydrate_const(entry, *item);
   }
 }
-template <typename T> // set
-std::enable_if_t<std::is_same_v<typename T::key_type, typename T::value_type>>
-hydrate_const(T& out, const t_const_value& val) {
+template <typename T>
+  requires requires {
+    typename T::key_type;
+    typename T::value_type;
+  } && std::same_as<typename T::key_type, typename T::value_type> // set
+void hydrate_const(T& out, const t_const_value& val) {
   for (auto* item : val.get_list_or_empty_map()) {
     typename T::key_type value;
     hydrate_const(value, *item);
     out.emplace(std::move(value));
   }
 }
-template <typename T> // map
-folly::void_t<typename T::mapped_type> hydrate_const(
-    T& out, const t_const_value& val) {
+template <typename T>
+  requires requires { typename T::mapped_type; } // map
+void hydrate_const(T& out, const t_const_value& val) {
   for (const auto& pair : val.get_map()) {
     typename T::key_type key;
     hydrate_const(key, *pair.first);
@@ -87,8 +88,8 @@ folly::void_t<typename T::mapped_type> hydrate_const(
   }
 }
 template <typename T>
-std::enable_if_t<std::is_enum_v<T>> hydrate_const(
-    T& out, const t_const_value& val) {
+  requires std::is_enum_v<T>
+void hydrate_const(T& out, const t_const_value& val) {
   out = static_cast<T>(val.get_integer());
 }
 template <typename T>
@@ -104,8 +105,8 @@ decltype(auto) ensure(T t) {
   return t.ensure(); // *field_ref
 }
 template <typename T>
-std::enable_if_t<is_thrift_class_v<T>> hydrate_const(
-    T& out, const t_const_value& val) {
+  requires is_thrift_class_v<T>
+void hydrate_const(T& out, const t_const_value& val) {
   assert(val.kind() == t_const_value::t_const_value_kind::CV_MAP);
   std::unordered_map<std::string_view, t_const_value*> map;
   for (const auto& pair : val.get_map()) {
@@ -123,8 +124,8 @@ std::enable_if_t<is_thrift_class_v<T>> hydrate_const(
 }
 
 template <typename T>
-folly::void_t<decltype(std::declval<T>().toThrift())> hydrate_const(
-    T& out, const t_const_value& val) {
+  requires requires(T t) { t.toThrift(); }
+void hydrate_const(T& out, const t_const_value& val) {
   hydrate_const(out.toThrift(), val);
 }
 inline void hydrate_const(protocol::Value& out, const t_const_value& val) {

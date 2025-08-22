@@ -319,7 +319,7 @@ class MyUnion final  {
   bool operator<(const MyUnion&) const;
 
   /** Glean { "field": "myString" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_myString(::std::string const &t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -330,7 +330,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "myString" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_myString(::std::string&& t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;

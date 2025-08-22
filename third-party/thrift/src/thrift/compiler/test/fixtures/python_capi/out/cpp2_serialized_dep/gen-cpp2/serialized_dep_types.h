@@ -571,7 +571,7 @@ class SerializedUnion final  {
   bool operator<(const SerializedUnion&) const;
 
   /** Glean { "field": "s" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_s(::std::string const &t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -582,7 +582,7 @@ class SerializedUnion final  {
   }
 
   /** Glean { "field": "s" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_s(::std::string&& t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -602,7 +602,7 @@ class SerializedUnion final  {
 
 
   /** Glean { "field": "i" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::int32_t& set_i(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
     using T = folly::type_t<T0, A...>;
@@ -1459,7 +1459,7 @@ class MarshalUnion final  {
   bool operator<(const MarshalUnion&) const;
 
   /** Glean { "field": "s" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_s(::std::string const &t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -1470,7 +1470,7 @@ class MarshalUnion final  {
   }
 
   /** Glean { "field": "s" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_s(::std::string&& t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -1490,7 +1490,7 @@ class MarshalUnion final  {
 
 
   /** Glean { "field": "i" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::int32_t& set_i(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
     using T = folly::type_t<T0, A...>;

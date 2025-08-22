@@ -1266,7 +1266,7 @@ class AdaptedUnion final  {
   bool operator<(const AdaptedUnion&) const;
 
   /** Glean { "field": "best" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::int16_t& set_best(::std::int16_t t = ::std::int16_t()) {
     using T0 = ::std::int16_t;
     using T = folly::type_t<T0, A...>;
@@ -2774,7 +2774,7 @@ class BinaryUnion final  {
   } ;
 
   /** Glean { "field": "iobuf_val" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::py3::simple::IOBuf& set_iobuf_val(::py3::simple::IOBuf const &t) {
     using T0 = ::py3::simple::IOBuf;
     using T = folly::type_t<T0, A...>;
@@ -2785,7 +2785,7 @@ class BinaryUnion final  {
   }
 
   /** Glean { "field": "iobuf_val" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::py3::simple::IOBuf& set_iobuf_val(::py3::simple::IOBuf&& t) {
     using T0 = ::py3::simple::IOBuf;
     using T = folly::type_t<T0, A...>;

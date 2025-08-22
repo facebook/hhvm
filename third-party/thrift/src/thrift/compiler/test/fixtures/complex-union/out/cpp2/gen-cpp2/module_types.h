@@ -321,7 +321,7 @@ class ComplexUnion final  {
   bool operator<(const ComplexUnion&) const;
 
   /** Glean { "field": "intValue" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::int64_t& set_intValue(::std::int64_t t = ::std::int64_t()) {
     using T0 = ::std::int64_t;
     using T = folly::type_t<T0, A...>;
@@ -333,7 +333,7 @@ class ComplexUnion final  {
 
 
   /** Glean { "field": "stringValue" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_stringValue(::std::string const &t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -344,7 +344,7 @@ class ComplexUnion final  {
   }
 
   /** Glean { "field": "stringValue" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_stringValue(::std::string&& t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -364,7 +364,7 @@ class ComplexUnion final  {
 
 
   /** Glean { "field": "intListValue" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::vector<::std::int64_t>& set_intListValue(::std::vector<::std::int64_t> const &t) {
     using T0 = ::std::vector<::std::int64_t>;
     using T = folly::type_t<T0, A...>;
@@ -375,7 +375,7 @@ class ComplexUnion final  {
   }
 
   /** Glean { "field": "intListValue" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::vector<::std::int64_t>& set_intListValue(::std::vector<::std::int64_t>&& t) {
     using T0 = ::std::vector<::std::int64_t>;
     using T = folly::type_t<T0, A...>;
@@ -394,7 +394,7 @@ class ComplexUnion final  {
   }
 
   /** Glean { "field": "stringListValue" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::vector<::std::string>& set_stringListValue(::std::vector<::std::string> const &t) {
     using T0 = ::std::vector<::std::string>;
     using T = folly::type_t<T0, A...>;
@@ -405,7 +405,7 @@ class ComplexUnion final  {
   }
 
   /** Glean { "field": "stringListValue" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::vector<::std::string>& set_stringListValue(::std::vector<::std::string>&& t) {
     using T0 = ::std::vector<::std::string>;
     using T = folly::type_t<T0, A...>;
@@ -424,7 +424,7 @@ class ComplexUnion final  {
   }
 
   /** Glean { "field": "typedefValue" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::containerTypedef& set_typedefValue(::cpp2::containerTypedef const &t) {
     using T0 = ::cpp2::containerTypedef;
     using T = folly::type_t<T0, A...>;
@@ -435,7 +435,7 @@ class ComplexUnion final  {
   }
 
   /** Glean { "field": "typedefValue" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::containerTypedef& set_typedefValue(::cpp2::containerTypedef&& t) {
     using T0 = ::cpp2::containerTypedef;
     using T = folly::type_t<T0, A...>;
@@ -454,7 +454,7 @@ class ComplexUnion final  {
   }
 
   /** Glean { "field": "stringRef" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::unique_ptr<::std::string>& set_stringRef(::std::string const &t) {
     using T0 = ::std::unique_ptr<::std::string>;
     using T = folly::type_t<T0, A...>;
@@ -465,7 +465,7 @@ class ComplexUnion final  {
   }
 
   /** Glean { "field": "stringRef" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::unique_ptr<::std::string>& set_stringRef(::std::string&& t) {
     using T0 = ::std::unique_ptr<::std::string>;
     using T = folly::type_t<T0, A...>;
@@ -950,7 +950,7 @@ class ListUnion final  {
   bool operator<(const ListUnion&) const;
 
   /** Glean { "field": "intListValue" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::vector<::std::int64_t>& set_intListValue(::std::vector<::std::int64_t> const &t) {
     using T0 = ::std::vector<::std::int64_t>;
     using T = folly::type_t<T0, A...>;
@@ -961,7 +961,7 @@ class ListUnion final  {
   }
 
   /** Glean { "field": "intListValue" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::vector<::std::int64_t>& set_intListValue(::std::vector<::std::int64_t>&& t) {
     using T0 = ::std::vector<::std::int64_t>;
     using T = folly::type_t<T0, A...>;
@@ -980,7 +980,7 @@ class ListUnion final  {
   }
 
   /** Glean { "field": "stringListValue" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::vector<::std::string>& set_stringListValue(::std::vector<::std::string> const &t) {
     using T0 = ::std::vector<::std::string>;
     using T = folly::type_t<T0, A...>;
@@ -991,7 +991,7 @@ class ListUnion final  {
   }
 
   /** Glean { "field": "stringListValue" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::vector<::std::string>& set_stringListValue(::std::vector<::std::string>&& t) {
     using T0 = ::std::vector<::std::string>;
     using T = folly::type_t<T0, A...>;
@@ -1264,7 +1264,7 @@ class DataUnion final  {
   bool operator<(const DataUnion&) const;
 
   /** Glean { "field": "binaryData" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_binaryData(::std::string const &t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -1275,7 +1275,7 @@ class DataUnion final  {
   }
 
   /** Glean { "field": "binaryData" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_binaryData(::std::string&& t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -1295,7 +1295,7 @@ class DataUnion final  {
 
 
   /** Glean { "field": "stringData" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_stringData(::std::string const &t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -1306,7 +1306,7 @@ class DataUnion final  {
   }
 
   /** Glean { "field": "stringData" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_stringData(::std::string&& t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -1831,7 +1831,7 @@ class ValUnion final  {
   bool operator<(const ValUnion&) const;
 
   /** Glean { "field": "v1" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::Val& set_v1(::cpp2::Val const &t) {
     using T0 = ::cpp2::Val;
     using T = folly::type_t<T0, A...>;
@@ -1842,7 +1842,7 @@ class ValUnion final  {
   }
 
   /** Glean { "field": "v1" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::Val& set_v1(::cpp2::Val&& t) {
     using T0 = ::cpp2::Val;
     using T = folly::type_t<T0, A...>;
@@ -1861,7 +1861,7 @@ class ValUnion final  {
   }
 
   /** Glean { "field": "v2" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::Val& set_v2(::cpp2::Val const &t) {
     using T0 = ::cpp2::Val;
     using T = folly::type_t<T0, A...>;
@@ -1872,7 +1872,7 @@ class ValUnion final  {
   }
 
   /** Glean { "field": "v2" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::Val& set_v2(::cpp2::Val&& t) {
     using T0 = ::cpp2::Val;
     using T = folly::type_t<T0, A...>;
@@ -2145,7 +2145,7 @@ class VirtualComplexUnion  {
   bool operator<(const VirtualComplexUnion&) const;
 
   /** Glean { "field": "thingOne" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_thingOne(::std::string const &t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -2156,7 +2156,7 @@ class VirtualComplexUnion  {
   }
 
   /** Glean { "field": "thingOne" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_thingOne(::std::string&& t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -2176,7 +2176,7 @@ class VirtualComplexUnion  {
 
 
   /** Glean { "field": "thingTwo" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_thingTwo(::std::string const &t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -2187,7 +2187,7 @@ class VirtualComplexUnion  {
   }
 
   /** Glean { "field": "thingTwo" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_thingTwo(::std::string&& t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -2574,7 +2574,7 @@ class NonCopyableUnion final  {
 
 
   /** Glean { "field": "s" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::NonCopyableStruct& set_s(::cpp2::NonCopyableStruct&& t) {
     using T0 = ::cpp2::NonCopyableStruct;
     using T = folly::type_t<T0, A...>;

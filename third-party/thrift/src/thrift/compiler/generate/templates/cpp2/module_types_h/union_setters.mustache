@@ -25,7 +25,7 @@
 
   {{^type:string_or_binary?}}
   {{> common/field_docblock}}
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   {{!deprecated}}{{field:cpp_storage_type}}& set_{{field:cpp_name}}({{field:cpp_type}} t = {{field:cpp_type}}()) {
     using T0 = {{field:cpp_storage_type}};
     using T = folly::type_t<T0, A...>;
@@ -42,7 +42,7 @@
   {{/type:string_or_binary?}}
   {{#type:string_or_binary?}}
   {{> common/field_docblock}}
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   {{!deprecated}}{{field:cpp_storage_type}}& set_{{field:cpp_name}}({{field:cpp_type}} const &t) {
     using T0 = {{field:cpp_storage_type}};
     using T = folly::type_t<T0, A...>;
@@ -58,7 +58,7 @@
   }
 
   {{> common/field_docblock}}
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   {{!deprecated}}{{field:cpp_storage_type}}& set_{{field:cpp_name}}({{field:cpp_type}}&& t) {
     using T0 = {{field:cpp_storage_type}};
     using T = folly::type_t<T0, A...>;
@@ -103,7 +103,7 @@
 
   {{^field:cpp_noncopyable?}}
   {{> common/field_docblock}}
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   {{!deprecated}}
   {{field:cpp_storage_type}}& set_{{field:cpp_name}}({{field:cpp_type}} const &t) {
     using T0 = {{field:cpp_storage_type}};
@@ -116,7 +116,7 @@
   {{/field:cpp_noncopyable?}}
 
   {{> common/field_docblock}}
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   {{!deprecated}}{{field:cpp_storage_type}}& set_{{field:cpp_name}}({{field:cpp_type}}&& t) {
     using T0 = {{field:cpp_storage_type}};
     using T = folly::type_t<T0, A...>;

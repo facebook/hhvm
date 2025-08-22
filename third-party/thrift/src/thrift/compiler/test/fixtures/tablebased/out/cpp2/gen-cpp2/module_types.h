@@ -1185,7 +1185,7 @@ class ExampleUnion final  {
   bool operator<(const ExampleUnion&) const;
 
   /** Glean { "field": "fieldA" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::test::fixtures::tablebased::ContainerStruct& set_fieldA(::test::fixtures::tablebased::ContainerStruct const &t) {
     using T0 = ::test::fixtures::tablebased::ContainerStruct;
     using T = folly::type_t<T0, A...>;
@@ -1196,7 +1196,7 @@ class ExampleUnion final  {
   }
 
   /** Glean { "field": "fieldA" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::test::fixtures::tablebased::ContainerStruct& set_fieldA(::test::fixtures::tablebased::ContainerStruct&& t) {
     using T0 = ::test::fixtures::tablebased::ContainerStruct;
     using T = folly::type_t<T0, A...>;
@@ -1215,7 +1215,7 @@ class ExampleUnion final  {
   }
 
   /** Glean { "field": "fieldB" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::test::fixtures::tablebased::TrivialTypesStruct& set_fieldB(::test::fixtures::tablebased::TrivialTypesStruct const &t) {
     using T0 = ::test::fixtures::tablebased::TrivialTypesStruct;
     using T = folly::type_t<T0, A...>;
@@ -1226,7 +1226,7 @@ class ExampleUnion final  {
   }
 
   /** Glean { "field": "fieldB" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::test::fixtures::tablebased::TrivialTypesStruct& set_fieldB(::test::fixtures::tablebased::TrivialTypesStruct&& t) {
     using T0 = ::test::fixtures::tablebased::TrivialTypesStruct;
     using T = folly::type_t<T0, A...>;

@@ -577,7 +577,7 @@ class MyUnion final  {
   bool operator<(const MyUnion&) const;
 
   /** Glean { "field": "anInteger" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::unique_ptr<::std::int32_t>& set_anInteger(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::unique_ptr<::std::int32_t>;
     using T = folly::type_t<T0, A...>;
@@ -596,7 +596,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "aString" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::unique_ptr<::std::string>& set_aString(::std::string const &t) {
     using T0 = ::std::unique_ptr<::std::string>;
     using T = folly::type_t<T0, A...>;
@@ -607,7 +607,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "aString" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::unique_ptr<::std::string>& set_aString(::std::string&& t) {
     using T0 = ::std::unique_ptr<::std::string>;
     using T = folly::type_t<T0, A...>;
@@ -874,7 +874,7 @@ class NonTriviallyDestructibleUnion final  {
   bool operator<(const NonTriviallyDestructibleUnion&) const;
 
   /** Glean { "field": "int_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::shared_ptr<::std::int32_t>& set_int_field(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::shared_ptr<::std::int32_t>;
     using T = folly::type_t<T0, A...>;

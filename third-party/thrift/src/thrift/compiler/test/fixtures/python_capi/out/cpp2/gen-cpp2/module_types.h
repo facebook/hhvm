@@ -5486,7 +5486,7 @@ class Shallot final  {
   bool operator<(const Shallot&) const;
 
   /** Glean { "field": "myEnum" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::test::fixtures::python_capi::MyEnum& set_myEnum(::test::fixtures::python_capi::MyEnum t = ::test::fixtures::python_capi::MyEnum()) {
     using T0 = ::test::fixtures::python_capi::MyEnum;
     using T = folly::type_t<T0, A...>;
@@ -5498,7 +5498,7 @@ class Shallot final  {
 
 
   /** Glean { "field": "myStruct" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::test::fixtures::python_capi::PrimitiveStruct& set_myStruct(::test::fixtures::python_capi::PrimitiveStruct const &t) {
     using T0 = ::test::fixtures::python_capi::PrimitiveStruct;
     using T = folly::type_t<T0, A...>;
@@ -5509,7 +5509,7 @@ class Shallot final  {
   }
 
   /** Glean { "field": "myStruct" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::test::fixtures::python_capi::PrimitiveStruct& set_myStruct(::test::fixtures::python_capi::PrimitiveStruct&& t) {
     using T0 = ::test::fixtures::python_capi::PrimitiveStruct;
     using T = folly::type_t<T0, A...>;
@@ -5542,7 +5542,7 @@ class Shallot final  {
  public:
 
   /** Glean { "field": "myString" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_myString(::std::string const &t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -5553,7 +5553,7 @@ class Shallot final  {
   }
 
   /** Glean { "field": "myString" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_myString(::std::string&& t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -5597,7 +5597,7 @@ class Shallot final  {
   }
 
   /** Glean { "field": "adapted_int" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::apache::thrift::type::ProtocolId& set_adapted_int(::apache::thrift::type::ProtocolId t = ::apache::thrift::type::ProtocolId()) {
     using T0 = ::apache::thrift::type::ProtocolId;
     using T = folly::type_t<T0, A...>;
@@ -6133,7 +6133,7 @@ class SomeBinary final  {
   bool operator<(const SomeBinary&) const;
 
   /** Glean { "field": "iobuf" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::test::fixtures::python_capi::IOBuf& set_iobuf(::test::fixtures::python_capi::IOBuf const &t) {
     using T0 = ::test::fixtures::python_capi::IOBuf;
     using T = folly::type_t<T0, A...>;
@@ -6144,7 +6144,7 @@ class SomeBinary final  {
   }
 
   /** Glean { "field": "iobuf" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::test::fixtures::python_capi::IOBuf& set_iobuf(::test::fixtures::python_capi::IOBuf&& t) {
     using T0 = ::test::fixtures::python_capi::IOBuf;
     using T = folly::type_t<T0, A...>;
@@ -6164,7 +6164,7 @@ class SomeBinary final  {
 
 
   /** Glean { "field": "iobuf_ptr" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::test::fixtures::python_capi::IOBufPtr& set_iobuf_ptr(::test::fixtures::python_capi::IOBufPtr const &t) {
     using T0 = ::test::fixtures::python_capi::IOBufPtr;
     using T = folly::type_t<T0, A...>;
@@ -6175,7 +6175,7 @@ class SomeBinary final  {
   }
 
   /** Glean { "field": "iobuf_ptr" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::test::fixtures::python_capi::IOBufPtr& set_iobuf_ptr(::test::fixtures::python_capi::IOBufPtr&& t) {
     using T0 = ::test::fixtures::python_capi::IOBufPtr;
     using T = folly::type_t<T0, A...>;
@@ -6195,7 +6195,7 @@ class SomeBinary final  {
 
 
   /** Glean { "field": "iobufRef" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::unique_ptr<::test::fixtures::python_capi::IOBuf>& set_iobufRef(::test::fixtures::python_capi::IOBuf const &t) {
     using T0 = ::std::unique_ptr<::test::fixtures::python_capi::IOBuf>;
     using T = folly::type_t<T0, A...>;
@@ -6206,7 +6206,7 @@ class SomeBinary final  {
   }
 
   /** Glean { "field": "iobufRef" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::unique_ptr<::test::fixtures::python_capi::IOBuf>& set_iobufRef(::test::fixtures::python_capi::IOBuf&& t) {
     using T0 = ::std::unique_ptr<::test::fixtures::python_capi::IOBuf>;
     using T = folly::type_t<T0, A...>;

@@ -1602,7 +1602,7 @@ class Baz final  {
   bool operator<(const Baz&) const;
 
   /** Glean { "field": "intField" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::facebook::thrift::test::i32_5137, Baz>& set_intField(::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::facebook::thrift::test::i32_5137, Baz> t = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::facebook::thrift::test::i32_5137, Baz>()) {
     using T0 = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::facebook::thrift::test::i32_5137, Baz>;
     using T = folly::type_t<T0, A...>;
@@ -1614,7 +1614,7 @@ class Baz final  {
 
 
   /** Glean { "field": "setField" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::facebook::thrift::test::SetWithAdapter& set_setField(::facebook::thrift::test::SetWithAdapter const &t) {
     using T0 = ::facebook::thrift::test::SetWithAdapter;
     using T = folly::type_t<T0, A...>;
@@ -1625,7 +1625,7 @@ class Baz final  {
   }
 
   /** Glean { "field": "setField" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::facebook::thrift::test::SetWithAdapter& set_setField(::facebook::thrift::test::SetWithAdapter&& t) {
     using T0 = ::facebook::thrift::test::SetWithAdapter;
     using T = folly::type_t<T0, A...>;
@@ -1644,7 +1644,7 @@ class Baz final  {
   }
 
   /** Glean { "field": "mapField" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Baz>& set_mapField(::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Baz> const &t) {
     using T0 = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Baz>;
     using T = folly::type_t<T0, A...>;
@@ -1655,7 +1655,7 @@ class Baz final  {
   }
 
   /** Glean { "field": "mapField" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Baz>& set_mapField(::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Baz>&& t) {
     using T0 = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Baz>;
     using T = folly::type_t<T0, A...>;
@@ -1674,7 +1674,7 @@ class Baz final  {
   }
 
   /** Glean { "field": "binaryField" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::facebook::thrift::test::binary_5673, Baz>& set_binaryField(::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::facebook::thrift::test::binary_5673, Baz> const &t) {
     using T0 = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::facebook::thrift::test::binary_5673, Baz>;
     using T = folly::type_t<T0, A...>;
@@ -1685,7 +1685,7 @@ class Baz final  {
   }
 
   /** Glean { "field": "binaryField" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::facebook::thrift::test::binary_5673, Baz>& set_binaryField(::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::facebook::thrift::test::binary_5673, Baz>&& t) {
     using T0 = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::facebook::thrift::test::binary_5673, Baz>;
     using T = folly::type_t<T0, A...>;
@@ -1705,7 +1705,7 @@ class Baz final  {
 
 
   /** Glean { "field": "longField" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::facebook::thrift::test::MyI64& set_longField(::facebook::thrift::test::MyI64 t = ::facebook::thrift::test::MyI64()) {
     using T0 = ::facebook::thrift::test::MyI64;
     using T = folly::type_t<T0, A...>;
@@ -5947,7 +5947,7 @@ class ThriftAdaptTestUnion final  {
   bool operator<(const ThriftAdaptTestUnion&) const;
 
   /** Glean { "field": "delay" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::facebook::thrift::test::DurationMs& set_delay(::facebook::thrift::test::DurationMs t = ::facebook::thrift::test::DurationMs()) {
     using T0 = ::facebook::thrift::test::DurationMs;
     using T = folly::type_t<T0, A...>;
@@ -5959,7 +5959,7 @@ class ThriftAdaptTestUnion final  {
 
 
   /** Glean { "field": "custom" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::facebook::thrift::test::CustomProtocolType& set_custom(::facebook::thrift::test::CustomProtocolType const &t) {
     using T0 = ::facebook::thrift::test::CustomProtocolType;
     using T = folly::type_t<T0, A...>;
@@ -5970,7 +5970,7 @@ class ThriftAdaptTestUnion final  {
   }
 
   /** Glean { "field": "custom" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::facebook::thrift::test::CustomProtocolType& set_custom(::facebook::thrift::test::CustomProtocolType&& t) {
     using T0 = ::facebook::thrift::test::CustomProtocolType;
     using T = folly::type_t<T0, A...>;

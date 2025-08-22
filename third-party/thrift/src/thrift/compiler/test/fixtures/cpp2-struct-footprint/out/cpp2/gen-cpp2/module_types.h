@@ -1057,7 +1057,7 @@ class TestUnion final  {
   bool operator<(const TestUnion&) const;
 
   /** Glean { "field": "int_value" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::int32_t& set_int_value(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
     using T = folly::type_t<T0, A...>;
@@ -1069,7 +1069,7 @@ class TestUnion final  {
 
 
   /** Glean { "field": "struct_value" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2_struct_footprint::SimpleStruct& set_struct_value(::cpp2_struct_footprint::SimpleStruct const &t) {
     using T0 = ::cpp2_struct_footprint::SimpleStruct;
     using T = folly::type_t<T0, A...>;
@@ -1080,7 +1080,7 @@ class TestUnion final  {
   }
 
   /** Glean { "field": "struct_value" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2_struct_footprint::SimpleStruct& set_struct_value(::cpp2_struct_footprint::SimpleStruct&& t) {
     using T0 = ::cpp2_struct_footprint::SimpleStruct;
     using T = folly::type_t<T0, A...>;

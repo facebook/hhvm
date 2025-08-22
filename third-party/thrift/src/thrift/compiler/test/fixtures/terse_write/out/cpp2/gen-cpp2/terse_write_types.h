@@ -790,7 +790,7 @@ class MyUnion final  {
   bool operator<(const MyUnion&) const;
 
   /** Glean { "field": "bool_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   bool& set_bool_field(bool t = bool()) {
     using T0 = bool;
     using T = folly::type_t<T0, A...>;
@@ -802,7 +802,7 @@ class MyUnion final  {
 
 
   /** Glean { "field": "byte_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::int8_t& set_byte_field(::std::int8_t t = ::std::int8_t()) {
     using T0 = ::std::int8_t;
     using T = folly::type_t<T0, A...>;
@@ -814,7 +814,7 @@ class MyUnion final  {
 
 
   /** Glean { "field": "short_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::int16_t& set_short_field(::std::int16_t t = ::std::int16_t()) {
     using T0 = ::std::int16_t;
     using T = folly::type_t<T0, A...>;
@@ -826,7 +826,7 @@ class MyUnion final  {
 
 
   /** Glean { "field": "int_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::int32_t& set_int_field(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
     using T = folly::type_t<T0, A...>;
@@ -838,7 +838,7 @@ class MyUnion final  {
 
 
   /** Glean { "field": "long_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::int64_t& set_long_field(::std::int64_t t = ::std::int64_t()) {
     using T0 = ::std::int64_t;
     using T = folly::type_t<T0, A...>;
@@ -850,7 +850,7 @@ class MyUnion final  {
 
 
   /** Glean { "field": "float_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   float& set_float_field(float t = float()) {
     using T0 = float;
     using T = folly::type_t<T0, A...>;
@@ -862,7 +862,7 @@ class MyUnion final  {
 
 
   /** Glean { "field": "double_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   double& set_double_field(double t = double()) {
     using T0 = double;
     using T = folly::type_t<T0, A...>;
@@ -874,7 +874,7 @@ class MyUnion final  {
 
 
   /** Glean { "field": "string_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_string_field(::std::string const &t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -885,7 +885,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "string_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_string_field(::std::string&& t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -905,7 +905,7 @@ class MyUnion final  {
 
 
   /** Glean { "field": "binary_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_binary_field(::std::string const &t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -916,7 +916,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "binary_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::string& set_binary_field(::std::string&& t) {
     using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
@@ -936,7 +936,7 @@ class MyUnion final  {
 
 
   /** Glean { "field": "enum_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::facebook::thrift::test::terse_write::MyEnum& set_enum_field(::facebook::thrift::test::terse_write::MyEnum t = ::facebook::thrift::test::terse_write::MyEnum()) {
     using T0 = ::facebook::thrift::test::terse_write::MyEnum;
     using T = folly::type_t<T0, A...>;
@@ -948,7 +948,7 @@ class MyUnion final  {
 
 
   /** Glean { "field": "list_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::vector<::std::int16_t>& set_list_field(::std::vector<::std::int16_t> const &t) {
     using T0 = ::std::vector<::std::int16_t>;
     using T = folly::type_t<T0, A...>;
@@ -959,7 +959,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "list_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::vector<::std::int16_t>& set_list_field(::std::vector<::std::int16_t>&& t) {
     using T0 = ::std::vector<::std::int16_t>;
     using T = folly::type_t<T0, A...>;
@@ -978,7 +978,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "set_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::set<::std::int16_t>& set_set_field(::std::set<::std::int16_t> const &t) {
     using T0 = ::std::set<::std::int16_t>;
     using T = folly::type_t<T0, A...>;
@@ -989,7 +989,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "set_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::set<::std::int16_t>& set_set_field(::std::set<::std::int16_t>&& t) {
     using T0 = ::std::set<::std::int16_t>;
     using T = folly::type_t<T0, A...>;
@@ -1008,7 +1008,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "map_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::map<::std::int16_t, ::std::int16_t>& set_map_field(::std::map<::std::int16_t, ::std::int16_t> const &t) {
     using T0 = ::std::map<::std::int16_t, ::std::int16_t>;
     using T = folly::type_t<T0, A...>;
@@ -1019,7 +1019,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "map_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::map<::std::int16_t, ::std::int16_t>& set_map_field(::std::map<::std::int16_t, ::std::int16_t>&& t) {
     using T0 = ::std::map<::std::int16_t, ::std::int16_t>;
     using T = folly::type_t<T0, A...>;
@@ -1038,7 +1038,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::facebook::thrift::test::terse_write::MyStruct& set_struct_field(::facebook::thrift::test::terse_write::MyStruct const &t) {
     using T0 = ::facebook::thrift::test::terse_write::MyStruct;
     using T = folly::type_t<T0, A...>;
@@ -1049,7 +1049,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "struct_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::facebook::thrift::test::terse_write::MyStruct& set_struct_field(::facebook::thrift::test::terse_write::MyStruct&& t) {
     using T0 = ::facebook::thrift::test::terse_write::MyStruct;
     using T = folly::type_t<T0, A...>;

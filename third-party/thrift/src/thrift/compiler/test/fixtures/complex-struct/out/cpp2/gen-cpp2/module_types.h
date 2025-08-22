@@ -4487,7 +4487,7 @@ class MyUnion final  {
   bool operator<(const MyUnion&) const;
 
   /** Glean { "field": "myEnum" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::MyEnum& set_myEnum(::cpp2::MyEnum t = ::cpp2::MyEnum()) {
     using T0 = ::cpp2::MyEnum;
     using T = folly::type_t<T0, A...>;
@@ -4499,7 +4499,7 @@ class MyUnion final  {
 
 
   /** Glean { "field": "myStruct" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::MyStruct& set_myStruct(::cpp2::MyStruct const &t) {
     using T0 = ::cpp2::MyStruct;
     using T = folly::type_t<T0, A...>;
@@ -4510,7 +4510,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "myStruct" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::MyStruct& set_myStruct(::cpp2::MyStruct&& t) {
     using T0 = ::cpp2::MyStruct;
     using T = folly::type_t<T0, A...>;
@@ -4529,7 +4529,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "myDataItem" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::MyDataItem& set_myDataItem(::cpp2::MyDataItem const &t) {
     using T0 = ::cpp2::MyDataItem;
     using T = folly::type_t<T0, A...>;
@@ -4540,7 +4540,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "myDataItem" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::MyDataItem& set_myDataItem(::cpp2::MyDataItem&& t) {
     using T0 = ::cpp2::MyDataItem;
     using T = folly::type_t<T0, A...>;
@@ -4559,7 +4559,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "complexNestedStruct" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::ComplexNestedStruct& set_complexNestedStruct(::cpp2::ComplexNestedStruct const &t) {
     using T0 = ::cpp2::ComplexNestedStruct;
     using T = folly::type_t<T0, A...>;
@@ -4570,7 +4570,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "complexNestedStruct" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::ComplexNestedStruct& set_complexNestedStruct(::cpp2::ComplexNestedStruct&& t) {
     using T0 = ::cpp2::ComplexNestedStruct;
     using T = folly::type_t<T0, A...>;
@@ -4589,7 +4589,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "longValue" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::int64_t& set_longValue(::std::int64_t t = ::std::int64_t()) {
     using T0 = ::std::int64_t;
     using T = folly::type_t<T0, A...>;
@@ -4601,7 +4601,7 @@ class MyUnion final  {
 
 
   /** Glean { "field": "intValue" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::int32_t& set_intValue(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
     using T = folly::type_t<T0, A...>;
@@ -6937,7 +6937,7 @@ class MyUnionFloatFieldThrowExp final  {
   bool operator<(const MyUnionFloatFieldThrowExp&) const;
 
   /** Glean { "field": "myEnum" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::MyEnum& set_myEnum(::cpp2::MyEnum t = ::cpp2::MyEnum()) {
     using T0 = ::cpp2::MyEnum;
     using T = folly::type_t<T0, A...>;
@@ -6949,7 +6949,7 @@ class MyUnionFloatFieldThrowExp final  {
 
 
   /** Glean { "field": "setFloat" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::vector<::std::vector<float>>& set_setFloat(::std::vector<::std::vector<float>> const &t) {
     using T0 = ::std::vector<::std::vector<float>>;
     using T = folly::type_t<T0, A...>;
@@ -6960,7 +6960,7 @@ class MyUnionFloatFieldThrowExp final  {
   }
 
   /** Glean { "field": "setFloat" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::vector<::std::vector<float>>& set_setFloat(::std::vector<::std::vector<float>>&& t) {
     using T0 = ::std::vector<::std::vector<float>>;
     using T = folly::type_t<T0, A...>;
@@ -6979,7 +6979,7 @@ class MyUnionFloatFieldThrowExp final  {
   }
 
   /** Glean { "field": "myDataItem" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::MyDataItem& set_myDataItem(::cpp2::MyDataItem const &t) {
     using T0 = ::cpp2::MyDataItem;
     using T = folly::type_t<T0, A...>;
@@ -6990,7 +6990,7 @@ class MyUnionFloatFieldThrowExp final  {
   }
 
   /** Glean { "field": "myDataItem" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::MyDataItem& set_myDataItem(::cpp2::MyDataItem&& t) {
     using T0 = ::cpp2::MyDataItem;
     using T = folly::type_t<T0, A...>;
@@ -7009,7 +7009,7 @@ class MyUnionFloatFieldThrowExp final  {
   }
 
   /** Glean { "field": "complexNestedStruct" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::ComplexNestedStruct& set_complexNestedStruct(::cpp2::ComplexNestedStruct const &t) {
     using T0 = ::cpp2::ComplexNestedStruct;
     using T = folly::type_t<T0, A...>;
@@ -7020,7 +7020,7 @@ class MyUnionFloatFieldThrowExp final  {
   }
 
   /** Glean { "field": "complexNestedStruct" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::ComplexNestedStruct& set_complexNestedStruct(::cpp2::ComplexNestedStruct&& t) {
     using T0 = ::cpp2::ComplexNestedStruct;
     using T = folly::type_t<T0, A...>;

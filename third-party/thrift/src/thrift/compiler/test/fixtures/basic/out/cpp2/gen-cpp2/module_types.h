@@ -1319,7 +1319,7 @@ class MyUnion final  {
   bool operator<(const MyUnion&) const;
 
   /** Glean { "field": "myEnum" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::test::fixtures::basic::MyEnumAlias& set_myEnum(::test::fixtures::basic::MyEnumAlias t = ::test::fixtures::basic::MyEnumAlias()) {
     using T0 = ::test::fixtures::basic::MyEnumAlias;
     using T = folly::type_t<T0, A...>;
@@ -1331,7 +1331,7 @@ class MyUnion final  {
 
 
   /** Glean { "field": "myStruct" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::test::fixtures::basic::MyStruct& set_myStruct(::test::fixtures::basic::MyStruct const &t) {
     using T0 = ::test::fixtures::basic::MyStruct;
     using T = folly::type_t<T0, A...>;
@@ -1342,7 +1342,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "myStruct" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::test::fixtures::basic::MyStruct& set_myStruct(::test::fixtures::basic::MyStruct&& t) {
     using T0 = ::test::fixtures::basic::MyStruct;
     using T = folly::type_t<T0, A...>;
@@ -1361,7 +1361,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "myDataItem" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::test::fixtures::basic::MyDataItem& set_myDataItem(::test::fixtures::basic::MyDataItem const &t) {
     using T0 = ::test::fixtures::basic::MyDataItem;
     using T = folly::type_t<T0, A...>;
@@ -1372,7 +1372,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "myDataItem" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::test::fixtures::basic::MyDataItem& set_myDataItem(::test::fixtures::basic::MyDataItem&& t) {
     using T0 = ::test::fixtures::basic::MyDataItem;
     using T = folly::type_t<T0, A...>;
@@ -1391,7 +1391,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "floatSet" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::set<float>& set_floatSet(::std::set<float> const &t) {
     using T0 = ::std::set<float>;
     using T = folly::type_t<T0, A...>;
@@ -1402,7 +1402,7 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "floatSet" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::set<float>& set_floatSet(::std::set<float>&& t) {
     using T0 = ::std::set<float>;
     using T = folly::type_t<T0, A...>;
@@ -2533,7 +2533,7 @@ class UnionToBeRenamed final  {
   bool operator<(const UnionToBeRenamed&) const;
 
   /** Glean { "field": "reserved_field" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::int32_t& set_reserved_field(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
     using T = folly::type_t<T0, A...>;

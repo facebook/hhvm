@@ -1953,7 +1953,7 @@ class union1 final  {
   bool operator<(const union1&) const;
 
   /** Glean { "field": "i" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::int32_t& set_i(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
     using T = folly::type_t<T0, A...>;
@@ -1965,7 +1965,7 @@ class union1 final  {
 
 
   /** Glean { "field": "d" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   double& set_d(double t = double()) {
     using T0 = double;
     using T = folly::type_t<T0, A...>;
@@ -2259,7 +2259,7 @@ class union2 final  {
   bool operator<(const union2&) const;
 
   /** Glean { "field": "i" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::std::int32_t& set_i(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
     using T = folly::type_t<T0, A...>;
@@ -2271,7 +2271,7 @@ class union2 final  {
 
 
   /** Glean { "field": "d" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   double& set_d(double t = double()) {
     using T0 = double;
     using T = folly::type_t<T0, A...>;
@@ -2283,7 +2283,7 @@ class union2 final  {
 
 
   /** Glean { "field": "s" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::struct1& set_s(::cpp2::struct1 const &t) {
     using T0 = ::cpp2::struct1;
     using T = folly::type_t<T0, A...>;
@@ -2294,7 +2294,7 @@ class union2 final  {
   }
 
   /** Glean { "field": "s" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::struct1& set_s(::cpp2::struct1&& t) {
     using T0 = ::cpp2::struct1;
     using T = folly::type_t<T0, A...>;
@@ -2313,7 +2313,7 @@ class union2 final  {
   }
 
   /** Glean { "field": "u" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::union1& set_u(::cpp2::union1 const &t) {
     using T0 = ::cpp2::union1;
     using T = folly::type_t<T0, A...>;
@@ -2324,7 +2324,7 @@ class union2 final  {
   }
 
   /** Glean { "field": "u" } */
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  template <typename... A> requires (sizeof...(A) == 0)
   ::cpp2::union1& set_u(::cpp2::union1&& t) {
     using T0 = ::cpp2::union1;
     using T = folly::type_t<T0, A...>;

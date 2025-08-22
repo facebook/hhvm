@@ -22,7 +22,7 @@ from thrift.python.protocol import Protocol, RpcKind
 from thrift.python.types import ServiceInterface
 from thrift.python.serializer import serialize_iobuf
 
-from thrift.py3.server import ThriftServer
+from thrift.py3.server import ThriftServer, SSLPolicy
 from thrift.py3.stream import ServerStream
 from thrift.python.server_impl.request_context cimport Cpp2RequestContext
 from thrift.python.server_impl.request_context import (

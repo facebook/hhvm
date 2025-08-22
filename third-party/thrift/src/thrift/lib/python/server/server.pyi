@@ -22,10 +22,11 @@ from types import TracebackType
 from typing import Any, Awaitable, Callable, Mapping, Optional, Type, TypeVar, Union
 
 from folly.iobuf import IOBuf
-from thrift.py3.server import ThriftServer as _ThriftServer
+from thrift.py3.server import SSLPolicy as _SSLPolicy, ThriftServer as _ThriftServer
 
 # they are now merged into one
 ThriftServer = _ThriftServer
+SSLPolicy = _SSLPolicy
 
 # This looks really dumb but otherwise this name doesn't get re-exported
 from thrift.python.types import ServiceInterface as ServiceInterface

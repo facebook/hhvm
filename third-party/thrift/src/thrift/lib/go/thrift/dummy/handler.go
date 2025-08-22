@@ -18,6 +18,7 @@ package dummy
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/facebook/fbthrift/thrift/test/go/if/dummy"
@@ -53,5 +54,12 @@ func (h *DummyHandler) Sleep(_ context.Context, milliseconds int64) error {
 
 func (h *DummyHandler) Panic(_ context.Context) error {
 	panic("panic!")
-	return nil //nolint:unreachable,govet
+}
+
+func (h *DummyHandler) GetDeclaredException(_ context.Context) error {
+	return dummy.NewDummyException().SetMessage("hello")
+}
+
+func (h *DummyHandler) GetUndeclaredException(_ context.Context) error {
+	return errors.New("undeclared exception")
 }

@@ -34,10 +34,16 @@ struct DummyStruct1 {
   9: string field9;
 }
 
+safe permanent server exception DummyException {
+  1: string message;
+}
+
 service Dummy {
   void Ping();
   string Echo(1: string value);
   oneway void OnewayRPC(1: string value);
   void Sleep(1: i64 milliseconds);
   void Panic();
+  void GetDeclaredException() throws (1: DummyException ex);
+  void GetUndeclaredException();
 }

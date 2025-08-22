@@ -315,3 +315,70 @@ func TestALPN(t *testing.T) {
 	err = serverEG.Wait()
 	require.ErrorIs(t, err, context.Canceled)
 }
+
+func TestUexHeaderFunctionality(t *testing.T) {
+	runUexTestFunc := func(t *testing.T, serverTransport TransportID) {
+		var clientTransportOption ClientOption
+		switch serverTransport {
+		case TransportIDHeader:
+			clientTransportOption = WithHeader()
+		case TransportIDUpgradeToRocket:
+			clientTransportOption = WithUpgradeToRocket()
+		case TransportIDRocket:
+			clientTransportOption = WithRocket()
+		default:
+			panic("unsupported transport!")
+		}
+
+		listener, err := net.Listen("tcp", "[::]:0")
+		require.NoError(t, err)
+		addr := listener.Addr()
+		t.Logf("Server listening on %v", addr)
+
+		processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+		server := NewServer(processor, listener, serverTransport)
+
+		serverCtx, serverCancel := context.WithCancel(context.Background())
+		var serverEG errgroup.Group
+		serverEG.Go(func() error {
+			return server.ServeContext(serverCtx)
+		})
+
+		channel, err := NewClient(
+			clientTransportOption,
+			WithIoTimeout(5*time.Second),
+			WithDialer(func() (net.Conn, error) {
+				return net.DialTimeout(addr.Network(), addr.String(), 5*time.Second)
+			}),
+		)
+		require.NoError(t, err)
+		client := dummyif.NewDummyChannelClient(channel)
+		ctx := NewResponseHeadersContext(context.Background())
+		err = client.GetDeclaredException(ctx)
+		require.Error(t, err)
+		err = client.Close()
+		require.NoError(t, err)
+
+		responseHeaders := ResponseHeadersFromContext(ctx)
+		// read uex header for the exception
+		require.Contains(t, responseHeaders, "uex")
+		require.Contains(t, responseHeaders, "uexw")
+		require.Equal(t, "DummyException", responseHeaders["uex"])
+		require.Equal(t, "DummyException({Message:hello})", responseHeaders["uexw"])
+
+		// Shut down server.
+		serverCancel()
+		err = serverEG.Wait()
+		require.ErrorIs(t, err, context.Canceled)
+	}
+
+	t.Run("NewServer/Header", func(t *testing.T) {
+		runUexTestFunc(t, TransportIDHeader)
+	})
+	t.Run("NewServer/UpgradeToRocket", func(t *testing.T) {
+		runUexTestFunc(t, TransportIDUpgradeToRocket)
+	})
+	t.Run("NewServer/Rocket", func(t *testing.T) {
+		runUexTestFunc(t, TransportIDRocket)
+	})
+}

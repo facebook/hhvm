@@ -24,39 +24,67 @@
 {{! Allows lib/type.mustache to use `crate::types::Type` regardless of which crate it's called from }}
 #[allow(unused_imports)]
 pub(crate) use {{program:crate}} as types;
-
+{{!
+================================================================================
+}}
 {{#program:serde?}}
+
 {{! Work around https://github.com/rust-lang/rust/issues/46991 }}
 extern crate serde;
 {{/program:serde?}}
-
+{{!
+================================================================================
+}}
 {{#program:valuable?}}
+
 {{! Work around https://github.com/rust-lang/rust/issues/46991 }}
 extern crate valuable;
-{{/program:valuable?}}{{!
+{{/program:valuable?}}
+{{!
+================================================================================
+}}
+{{#program:types_include_srcs}}
 
-}}{{#program:types_include_srcs}}
 include!("{{.}}");
 {{/program:types_include_srcs}}
-
+{{!
+================================================================================
+}}
 {{#program:current_split_typedefs}}
-    {{> lib/typedef}}
-    {{> lib/typedefimpl}}
+{{> lib/typedef}}
 {{/program:current_split_typedefs}}
-
+{{!
+================================================================================
+}}
 {{#program:current_split_structs}}
-    {{^struct:has_adapter?}}
-    {{> lib/struct}}
-
-    {{> lib/structimpl}}
-    {{> lib/unionimpl}}
-    {{/struct:has_adapter?}}
+{{^struct:has_adapter?}}
+{{> lib/struct}}
+{{/struct:has_adapter?}}
 {{/program:current_split_structs}}
-
+{{!
+================================================================================
+}}
 {{#program:current_split_enums}}
 {{> lib/enum}}
 {{/program:current_split_enums}}
-
+{{!
+================================================================================
+}}
+{{#program:current_split_typedefs}}
+{{> lib/typedefimpl}}
+{{/program:current_split_typedefs}}
+{{!
+================================================================================
+}}
+{{#program:current_split_structs}}
+{{^struct:has_adapter?}}
+{{> lib/structimpl}}
+{{> lib/unionimpl}}
+{{/struct:has_adapter?}}
+{{/program:current_split_structs}}
+{{!
+================================================================================
+}}
 {{#program:nonexhaustiveStructs?}}
 mod dot_dot {{> lib/block}}{{!
     NOTE: intentionally no Default impl}}

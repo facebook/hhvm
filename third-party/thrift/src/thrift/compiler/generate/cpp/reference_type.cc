@@ -100,4 +100,15 @@ reference_type find_ref_type(const t_field& node) {
   return reference_type::none;
 }
 
+bool is_field_accessor_template(const t_field&) {
+  // There are downstream plugin code generators which take the address of
+  // field accessor functions. They need to be able to accurately determine if
+  // an accessor is emitted as a template or regular function, because taking
+  // the address of a template function requires that their codegen emit
+  // "&f<>" and a non-template function requires them to emit "&f".
+
+  // Currently, we emit all field accessors as templates
+  return true;
+}
+
 } // namespace apache::thrift::compiler::gen::cpp

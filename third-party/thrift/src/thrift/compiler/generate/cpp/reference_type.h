@@ -34,4 +34,8 @@ enum class reference_type {
 
 reference_type find_ref_type(const t_field& node);
 
+// Returns whether the code-generation for a field's C++ accessor will be
+// emitted as a template (true) or a regular function (false).
+bool is_field_accessor_template(const t_field& node);
+
 } // namespace apache::thrift::compiler::gen::cpp

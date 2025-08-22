@@ -382,3 +382,66 @@ func TestUexHeaderFunctionality(t *testing.T) {
 		runUexTestFunc(t, TransportIDRocket)
 	})
 }
+
+func TestPanics(t *testing.T) {
+	runPanicTestFunc := func(t *testing.T, serverTransport TransportID) {
+		var clientTransportOption ClientOption
+		switch serverTransport {
+		case TransportIDHeader:
+			clientTransportOption = WithHeader()
+		case TransportIDUpgradeToRocket:
+			clientTransportOption = WithUpgradeToRocket()
+		case TransportIDRocket:
+			clientTransportOption = WithRocket()
+		default:
+			panic("unsupported transport!")
+		}
+
+		listener, err := net.Listen("tcp", "[::]:0")
+		require.NoError(t, err)
+		addr := listener.Addr()
+		t.Logf("Server listening on %v", addr)
+
+		processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+		server := NewServer(processor, listener, serverTransport)
+
+		serverCtx, serverCancel := context.WithCancel(context.Background())
+		var serverEG errgroup.Group
+		serverEG.Go(func() error {
+			return server.ServeContext(serverCtx)
+		})
+
+		channel, err := NewClient(
+			clientTransportOption,
+			WithIoTimeout(5*time.Second),
+			WithDialer(func() (net.Conn, error) {
+				return net.DialTimeout(addr.Network(), addr.String(), 5*time.Second)
+			}),
+		)
+		require.NoError(t, err)
+		client := dummyif.NewDummyChannelClient(channel)
+		// Should receive a graceful error upon panic
+		err = client.Panic(context.Background())
+		require.Error(t, err)
+		// Should be able to make another request after a panic
+		err = client.Ping(context.Background())
+		require.NoError(t, err)
+		err = client.Close()
+		require.NoError(t, err)
+
+		// Shut down server.
+		serverCancel()
+		err = serverEG.Wait()
+		require.ErrorIs(t, err, context.Canceled)
+	}
+
+	t.Run("NewServer/Header", func(t *testing.T) {
+		runPanicTestFunc(t, TransportIDHeader)
+	})
+	t.Run("NewServer/UpgradeToRocket", func(t *testing.T) {
+		runPanicTestFunc(t, TransportIDUpgradeToRocket)
+	})
+	t.Run("NewServer/Rocket", func(t *testing.T) {
+		runPanicTestFunc(t, TransportIDRocket)
+	})
+}

@@ -16,6 +16,7 @@
  */
 
 include "TypeAndStructWrapperTest.thrift"
+include "thrift/annotation/thrift.thrift"
 
 package "meta.com/thrift/wrapper_test"
 
@@ -30,6 +31,7 @@ enum Company {
   INSTAGRAM = 3,
 }
 
+@thrift.AllowLegacyTypedefUri
 typedef Company MyCompany
 const MyCompany my_company = FACEBOOK;
 

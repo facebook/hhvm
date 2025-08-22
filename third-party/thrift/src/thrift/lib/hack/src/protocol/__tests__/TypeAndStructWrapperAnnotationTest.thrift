@@ -16,6 +16,7 @@
  */
 
 include "thrift/annotation/hack.thrift"
+include "thrift/annotation/thrift.thrift"
 
 package "meta.com/thrift/wrapper_test"
 
@@ -26,6 +27,7 @@ struct StructWithWrapper_ {
   1: i64 int_field;
 }
 
+@thrift.AllowLegacyTypedefUri
 @hack.Wrapper{name = "\MyTypeIntWrapper"}
 typedef i64 i64WithWrapper_
 

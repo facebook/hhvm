@@ -19,16 +19,21 @@ package "meta.com/thrift/adapter_test"
 
 namespace hack AdapterTest
 include "thrift/annotation/hack.thrift"
+include "thrift/annotation/thrift.thrift"
 
+@thrift.AllowLegacyTypedefUri
 @hack.Adapter{name = '\AdapterTestReverseList'}
 typedef list<i32> ReversedList
 
+@thrift.AllowLegacyTypedefUri
 @hack.Adapter{name = '\AdapterTestJsonToShape'}
 typedef string StringWithAdapterTestJsonToShape
 
+@thrift.AllowLegacyTypedefUri
 @hack.Adapter{name = '\AdapterTestStructToShape'}
 typedef Bar BarWithAdapter
 
+@thrift.AllowLegacyTypedefUri
 @hack.Adapter{name = '\AdapterTestIntToString'}
 typedef i32 i32WithAdapter
 

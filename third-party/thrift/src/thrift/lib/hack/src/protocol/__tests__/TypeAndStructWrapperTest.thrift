@@ -17,6 +17,7 @@
 
 include "thrift/annotation/hack.thrift"
 include "thrift/annotation/scope.thrift"
+include "thrift/annotation/thrift.thrift"
 
 package "meta.com/thrift/wrapper_test"
 
@@ -30,8 +31,10 @@ struct TestMyStruct {
   1: MyNestedStruct nested_struct;
 }
 
+@thrift.AllowLegacyTypedefUri
 typedef i64 i64WithAdapter
 
+@thrift.AllowLegacyTypedefUri
 @hack.Wrapper{name = "\\MyTypeIntWrapper"}
 typedef i64 i64WithWrapper
 

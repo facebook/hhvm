@@ -17,12 +17,15 @@
 
 include "thrift/lib/thrift/any.thrift"
 include "thrift/annotation/hack.thrift"
+include "thrift/annotation/thrift.thrift"
 
 package "facebook.com/thrift/test"
 
+@thrift.AllowLegacyTypedefUri
 @hack.Adapter{name = "\ThriftLazyAnyAdapter"}
 typedef any.Any ThriftLazyAny
 
+@thrift.AllowLegacyTypedefUri
 @hack.Adapter{name = "\ThriftLazyAnySimpleJsonAdapter"}
 typedef any.Any ThriftLazyAnySimpleJson
 

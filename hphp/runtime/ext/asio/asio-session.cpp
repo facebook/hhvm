@@ -21,8 +21,6 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/recorder.h"
-#include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
@@ -389,14 +387,6 @@ bool AsioSession::processSleepEvents() {
 
   bool woken = false;
   auto now = TimePoint::clock::now();
-
-  if (UNLIKELY(Cfg::Eval::RecordReplay)) {
-    if (Cfg::Eval::RecordSampleRate) {
-      Recorder::onProcessSleepEvents(now.time_since_epoch().count());
-    } else if (Cfg::Eval::Replay) {
-      now = TimePoint{TimePoint::duration{Replayer::onProcessSleepEvents()}};
-    }
-  }
 
   while (!m_sleepEvents.empty()) {
     auto wh = m_sleepEvents.front();

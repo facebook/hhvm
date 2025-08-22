@@ -121,7 +121,7 @@ bool runRelative(std::string suffix, String cmd,
     cmd,
     currentDir,
     [] (const String& f, void*) {
-      if (!is_cli_server_mode() && !Cfg::Eval::RecordReplay) {
+      if (!is_cli_server_mode()) {
         return access(f.data(), R_OK) == 0;
       }
       auto const w = Stream::getWrapperFromURI(f, nullptr, false);

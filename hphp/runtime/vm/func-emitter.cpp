@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/base/record-replay.h"
 #include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/runtime/ext/extension.h"
@@ -473,9 +472,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     );
 
     if (ex->m_nativeFuncPtr) {
-      if (UNLIKELY(Cfg::Eval::RecordReplay)) {
-        rr::addNativeFuncAttrs(ex->m_nativeFuncPtr, attrs);
-      }
       if (info.sig.ret == Native::NativeSig::Type::MixedTV  ||
           info.sig.ret == Native::NativeSig::Type::StringNN ||
           info.sig.ret == Native::NativeSig::Type::ArrayNN  ||

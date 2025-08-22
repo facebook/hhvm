@@ -1391,19 +1391,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - hphp_fast_string_set Eval.StartOptionLogExcludeOptions = {}, UNKNOWN
 
-- bool Eval.RecordReplay = false, UNKNOWN
-
-- std::string Eval.RecordSampleFilter = "", UNKNOWN
-
-  Format: _SUPERGLOBAL.Key=Value[&_SUPERGLOBAL.Key=Value...]
-  Example: _SERVER.SCRIPT_URL=/foo&_POST.key=value
-
-- uint64_t Eval.RecordSampleRate = 0, UNKNOWN
-
-- std::string Eval.RecordDir = "", UNKNOWN
-
-- bool Eval.Replay = false, UNKNOWN
-
 - bool Eval.DumpStacktraceToErrorLogOnCrash = true, UNKNOWN
 
 - bool Eval.IncludeReopOptionsInFactsCacheBreaker = false, UNKNOWN

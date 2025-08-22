@@ -17,7 +17,6 @@
 #pragma once
 
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/record-replay.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-object.h"
@@ -37,9 +36,6 @@ struct NonNullReturnType {
     return NonNullReturnType(I::attach(data));
   }
 private:
-  // Add support for record-replay
-  friend struct Recorder;
-  friend String rr::serialize<NonNullReturnType>(const NonNullReturnType&);
   NonNullReturnType() = default;
   T* get() const { return m_data; }
 

@@ -34,8 +34,6 @@
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/plain-file.h"
-#include "hphp/runtime/base/recorder.h"
-#include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/base/req-heap-sanitizer.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -267,7 +265,7 @@ RepoOptionStats::RepoOptionStats(const std::string& configPath,
   auto const repo =
     configPath.empty() ? "" : std::filesystem::path(configPath).parent_path();
   auto const packagePath = repo / Cfg::Eval::PackagesTomlFileName;
-  if (std::filesystem::exists(packagePath) || Cfg::Eval::RecordReplay) {
+  if (std::filesystem::exists(packagePath)) {
     struct stat package;
     if (wrapped_stat(packagePath.string().data(), &package) == 0) {
       m_packageStat = package;
@@ -351,8 +349,8 @@ const RepoOptions& RepoOptions::forFile(const std::string& path) {
 
   // Wrap filesystem accesses if needed to proxy info from cli server client.
   Stream::Wrapper* wrapper = nullptr;
-  if (is_cli_server_mode() || Cfg::Eval::RecordReplay) {
-    wrapper = Stream::getWrapperFromURI(path, nullptr, !Cfg::Eval::RecordReplay);
+  if (is_cli_server_mode()) {
+    wrapper = Stream::getWrapperFromURI(path, nullptr);
     if (wrapper && !wrapper->isNormalFileStream()) wrapper = nullptr;
   }
   auto const wrapped_open = [&](const char* path) -> Optional<String> {
@@ -544,12 +542,7 @@ RepoOptions::RepoOptions(const char* str, const char* file) : m_path(file), m_in
 
   filterNamespaces();
   if (!m_path.empty()) {
-    if (UNLIKELY(Cfg::Eval::RecordReplay)) {
-      const String path{m_path.parent_path().c_str()};
-      m_repo = Stream::getWrapperFromURI(path)->realpath(path).toCppString();
-    } else {
       m_repo = std::filesystem::canonical(m_path.parent_path());
-    }
   }
   m_flags.m_packageInfo = PackageInfo::fromFile(m_repo / Cfg::Eval::PackagesTomlFileName);
   calcCacheKey();
@@ -796,9 +789,6 @@ std::map<std::string, std::string> RuntimeOption::CustomSettings;
 
 static void setResourceLimit(int resource, const IniSetting::Map& ini,
                              const Hdf& rlimit, const char* nodeName) {
-  if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::Replay)) {
-    return;
-  }
   if (!Config::GetString(ini, rlimit, nodeName).empty()) {
     struct rlimit rl;
     getrlimit(resource, &rl);
@@ -1427,10 +1417,6 @@ void RuntimeOption::Load(
     EVALFLAGS()
 #undef F
 
-    if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::Replay)) {
-      return Replayer::onRuntimeOptionLoad(ini, config, cmd);
-    }
-
     if (Cfg::Jit::SerdesModeForceOff) EvalJitSerdesMode = JitSerdesMode::Off;
 
     if (!Cfg::Server::ForkingEnabled && Cfg::Server::Mode) {
@@ -1767,9 +1753,6 @@ void RuntimeOption::Load(
   // Initialize defaults for repo-specific parser configuration options.
   RepoOptions::setDefaults(config, ini);
 
-  if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::RecordSampleRate)) {
-    Recorder::onRuntimeOptionLoad(ini, config, cmd);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

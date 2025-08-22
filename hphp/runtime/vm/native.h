@@ -15,9 +15,6 @@
 */
 #pragma once
 
-#include "hphp/runtime/base/record-replay.h"
-#include "hphp/runtime/base/recorder.h"
-#include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-nonnull-ret.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -90,17 +87,6 @@ struct Extension;
  */
 
 #define REGISTER_NATIVE_FUNC(functable, name, f) do { \
-  if (Cfg::Eval::RecordReplay) { \
-    if (Cfg::Eval::RecordSampleRate) { \
-      const auto wrapper{Recorder::wrapNativeFunc<f>(name)}; \
-      Native::registerNativeFunc(functable, name, wrapper); \
-      break; \
-    } else if (Cfg::Eval::Replay) { \
-      const auto wrapper{Replayer::wrapNativeFunc<f>(name)}; \
-      Native::registerNativeFunc(functable, name, wrapper); \
-      break; \
-    } \
-  } \
   Native::registerNativeFunc(functable, name, f); \
 } while(0)
 
@@ -277,10 +263,6 @@ private:
    */
   NativeArg(const NativeArg&) = default;
   T* m_px;
-
-  // These need to be friends so they can forward args to wrapped native funcs
-  friend Recorder;
-  friend Replayer;
 };
 }
 

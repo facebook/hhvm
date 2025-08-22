@@ -19,8 +19,6 @@
 
 #include <folly/Likely.h>
 
-#include "hphp/runtime/base/recorder.h"
-#include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 #include "hphp/util/configs/eval.h"
 
@@ -33,13 +31,6 @@ AsioExternalThreadEventQueue::AsioExternalThreadEventQueue()
 }
 
 bool AsioExternalThreadEventQueue::hasReceived() {
-  if (UNLIKELY(Cfg::Eval::RecordReplay)) {
-    if (Cfg::Eval::RecordSampleRate) {
-      Recorder::onHasReceived(m_received);
-    } else if (Cfg::Eval::Replay) {
-      return Replayer::onHasReceived();
-    }
-  }
   return m_received;
 }
 
@@ -81,26 +72,14 @@ bool AsioExternalThreadEventQueue::abandonAllReceived(c_ExternalThreadEventWaitH
  */
 bool AsioExternalThreadEventQueue::tryReceiveSome() {
   assertx(!m_received);
-  if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::Replay)) {
-    return (m_received = Replayer::onTryReceiveSome());
-  }
   m_received = m_queue.exchange(nullptr);
   assertx(m_received != K_CONSUMER_WAITING);
-  if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::RecordSampleRate)) {
-    Recorder::onTryReceiveSome(m_received);
-  }
   return m_received;
 }
 
 bool AsioExternalThreadEventQueue::receiveSomeUntil(
     std::chrono::time_point<std::chrono::steady_clock> waketime) {
-  if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::Replay)) {
-    return (m_received = Replayer::onReceiveSomeUntil());
-  }
   receiveSomeUntilImpl(waketime);
-  if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::RecordSampleRate)) {
-    Recorder::onReceiveSomeUntil(m_received);
-  }
   return m_received;
 }
 

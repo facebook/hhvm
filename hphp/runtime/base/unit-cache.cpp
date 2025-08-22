@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/record-replay.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/string-util.h"
@@ -384,7 +383,6 @@ Optional<String> loadFileContents(const char* path,
   if (wrapper) {
     // We only allow normal file streams, which cannot re-enter
     assertx(wrapper->isNormalFileStream());
-    rr::ErrorSuppressor __;
     if (auto const f = wrapper->open(String{path}, "r", 0, nullptr)) {
       return f->read();
     }
@@ -932,12 +930,12 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
 std::pair<NonRepoUnitCache*, Stream::Wrapper*>
 getNonRepoCacheWithWrapper(const StringData* rpath) {
   // If this isn't a CLI server request, this is a normal file access
-  if (!is_cli_server_mode() && !Cfg::Eval::RecordReplay) {
+  if (!is_cli_server_mode()) {
     return std::make_pair(&s_nonRepoUnitCache, nullptr);
   }
 
   // If the server cannot access rpath attempt to open the unit on the client
-  if (Cfg::Eval::RecordReplay || access(rpath->data(), R_OK) == -1) {
+  if (access(rpath->data(), R_OK) == -1) {
     auto wrapper = Stream::getWrapperFromURI(StrNR{rpath});
     if (!wrapper || !wrapper->isNormalFileStream()) {
       return std::make_pair(nullptr, nullptr);
@@ -957,12 +955,7 @@ FOLLY_NOINLINE const StringData* resolveRequestedPath(const StringData* requeste
       return makeStaticString(p);
     }
     std::string rp;
-    if (UNLIKELY(Cfg::Eval::RecordReplay)) {
-      const String path{requestedPath->data()};
-      rp = Stream::getWrapperFromURI(path)->realpath(path).toCppString();
-    } else {
-      rp = realpathLibc(p->data());
-    }
+    rp = realpathLibc(p->data());
     return (rp.size() != 0 &&
             (rp.size() != p->size() || memcmp(rp.data(), p->data(), rp.size())))
       ? makeStaticString(rp)
@@ -1395,13 +1388,13 @@ bool findFile(const StringData* path, struct stat* s, bool allow_dir,
     return lookupUnitRepoAuth(path, nullptr).unit != nullptr;
   }
 
-  if (!Cfg::Eval::RecordReplay && statSyscall(path->data(), s) == 0) {
+  if (statSyscall(path->data(), s) == 0) {
     // The call explicitly populates the struct for dirs, but returns
     // false for them because it is geared toward file includes.
     return allow_dir || !S_ISDIR(s->st_mode);
   }
 
-  if (w && (w != &s_file_stream_wrapper || Cfg::Eval::RecordReplay)) {
+  if (w && (w != &s_file_stream_wrapper)) {
     // We only allow normal file streams, which cannot re-enter.
     assertx(w->isNormalFileStream());
     if (w->stat(StrNR(path), s) == 0) return allow_dir || !S_ISDIR(s->st_mode);

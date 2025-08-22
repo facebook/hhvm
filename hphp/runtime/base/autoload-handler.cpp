@@ -15,8 +15,6 @@
 */
 #include "hphp/runtime/base/autoload-handler.h"
 
-#include "hphp/runtime/base/recorder.h"
-#include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/repo-autoload-map.h"
@@ -51,10 +49,6 @@ void FactsFactory::setInstance(FactsFactory* instance) {
 namespace {
 
 FactsStore* getFactsForRequest() {
-  if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::Replay)) {
-    return Replayer::onGetFactsForRequest();
-  }
-
   auto* factory = FactsFactory::getInstance();
   if (!factory) {
     return nullptr;
@@ -80,9 +74,6 @@ FactsStore* getFactsForRequest() {
     // because this call itself calls into PerfLogger under the hood,
     // where we do timing and exception logging.
     map->ensureUpdated();
-    if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::RecordSampleRate)) {
-      Recorder::onGetFactsForRequest(map);
-    }
     return map;
   } catch (const std::exception& e) {
     auto repoRoot = repoOptions->dir();

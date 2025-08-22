@@ -17,8 +17,6 @@
 #include "hphp/runtime/vm/runtime-compiler.h"
 
 #include "hphp/runtime/base/autoload-handler.h"
-#include "hphp/runtime/base/recorder.h"
-#include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/repo-autoload-map.h"
 #include "hphp/runtime/base/request-info.h"
@@ -150,12 +148,6 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
   assertx(ue);
   ue->logDeclInfo();
 
-  if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::Replay && ue->m_sn == -1)) {
-    if (codeSource != CodeSource::Eval) {
-      ue->m_sn = Replayer::onParse(filename);
-    }
-  }
-
   onLoadUE(ue);
   return ue;
 }
@@ -242,12 +234,7 @@ Unit* compile_string(const char* s,
 Unit* get_systemlib(const std::string& path, const Extension* extension) {
   assertx(path[0] == '/' && path[1] == ':');
 
-  if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::RecordSampleRate)) {
-    Recorder::onCompileSystemlibString(path.c_str());
-  }
-
-  if (Cfg::Repo::Authoritative &&
-      !(Cfg::Eval::RecordReplay && Cfg::Eval::Replay)) {
+  if (Cfg::Repo::Authoritative) { 
     if (auto u = lookupSyslibUnit(makeStaticString(path))) {
       return u;
     }

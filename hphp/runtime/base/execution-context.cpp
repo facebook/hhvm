@@ -40,7 +40,6 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
@@ -893,10 +892,6 @@ bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
       ErrorStateHelper esh(this, ErrorState::ExecutingUserHandler);
       m_deferredErrors = empty_vec_array();
       SCOPE_EXIT { m_deferredErrors = empty_vec_array(); };
-      if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::RecordSampleRate)) {
-        Recorder::onUserErrorHandlerEntry(
-          e.getMessage(), backtrace, errnum, swallowExceptions);
-      }
       if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
                  make_vec_array(errnum, String(e.getMessage()),
@@ -1408,14 +1403,6 @@ void ExecutionContext::requestInit() {
   vmStack().requestInit();
   ResourceHdr::resetMaxId();
   jit::tc::requestInit();
-  if (UNLIKELY(Cfg::Eval::RecordReplay)) {
-    if (Cfg::Eval::RecordSampleRate) {
-      m_recorder.emplace();
-      m_recorder->requestInit();
-    } else if (Cfg::Eval::Replay) {
-      Replayer::requestInit();
-    }
-  }
 
   *rl_num_coeffect_violations = 0;
 
@@ -1474,14 +1461,6 @@ void ExecutionContext::requestExit() {
   autoTypecheckRequestExit();
   HHProf::Request::FinishProfiling();
 
-  if (UNLIKELY(Cfg::Eval::RecordReplay)) {
-    if (Cfg::Eval::RecordSampleRate) {
-      m_recorder->requestExit();
-      m_recorder.reset();
-    } else if (Cfg::Eval::Replay) {
-      Replayer::requestExit();
-    }
-  }
   manageAPCHandle();
   syncGdbState();
   vmStack().requestExit();

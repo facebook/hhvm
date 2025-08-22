@@ -1107,8 +1107,9 @@ class rust_mstch_program : public mstch_program {
     } else if (const t_set* set_type = dynamic_cast<const t_set*>(type)) {
       dependent = generate_reference_set(set_type->get_elem_type());
     } else if (const t_map* map_type = dynamic_cast<const t_map*>(type)) {
-      dependent = generate_reference_set(map_type->get_key_type()) ||
-          generate_reference_set(map_type->get_val_type());
+      bool dependent_map_key = generate_reference_set(map_type->get_key_type());
+      bool dependent_map_val = generate_reference_set(map_type->get_val_type());
+      dependent = dependent_map_key || dependent_map_val;
     }
     return dependent;
   }

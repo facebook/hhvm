@@ -1275,12 +1275,20 @@ void write_sb_prof_data(ProfDataSerializer& ser,
   auto const relUnitPath = relativePath(root, pd->m_unitPath);
   if (relUnitPath.empty()) return; // this profile is from a different sandbox
   write_string(ser, relUnitPath);
+
   if (pd->m_bcUnitPath != pd->m_unitPath) {
-    write_raw(ser, 1);
     always_assert(pd->m_bcUnitPath);
     auto const relBcUnitPath = relativePath(root, pd->m_bcUnitPath);
-    always_assert_flog(!relBcUnitPath.empty(), "BC path {}", pd->m_bcUnitPath->data());
-    write_string(ser, relBcUnitPath);
+    if (relBcUnitPath.empty()) {
+      // if we can't get a relative bcUnitPath, don't write it into the profile at all.
+      // At this point, we still have the normal unitPath written, use that instead while deserializing.
+      ITRACE(2, "BcUnitPath is not relative to root, not writing it into the profile\n");
+      write_raw(ser, 0);
+    }
+    else {
+      write_raw(ser, 1);
+      write_string(ser, relBcUnitPath);
+    }
   } else {
     write_raw(ser, 0);
   }

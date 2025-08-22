@@ -64,9 +64,6 @@ constexpr bool is_thrift_type_tag_v = is_thrift_type_tag<Tag>::value;
 //     is_abstract_v<list<byte_t>> -> false
 //     is_abstract_v<list<struct_c>> -> true
 template <typename Tag>
-struct is_abstract : std::false_type {};
-
-template <typename Tag>
 constexpr bool is_abstract_v =
     is_thrift_type_tag<Tag>::value && !is_concrete<Tag>::value;
 
@@ -117,10 +114,6 @@ struct is_concrete {
 struct is_thrift_type_tag {
   template <typename Tag>
   using apply = type::is_thrift_type_tag<Tag>;
-};
-struct is_abstract {
-  template <typename Tag>
-  using apply = type::is_abstract<Tag>;
 };
 template <typename CTag>
 struct is_a {

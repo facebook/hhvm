@@ -289,8 +289,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   void process_options(
       const std::map<std::string, std::string>& options) override {
     t_mstch_generator::process_options(options);
-    cpp_context_ = std::make_shared<cpp2_generator_context>(
-        cpp2_generator_context::create());
     client_name_to_split_count_ = get_client_name_to_split_count();
     out_dir_base_ = get_out_dir_base(this->options());
   }
@@ -314,6 +312,11 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   void generate_out_of_line_service(const t_service* service);
   void generate_out_of_line_services(const std::vector<t_service*>& services);
   void generate_inline_services(const std::vector<t_service*>& services);
+
+  void initialize_context(context_visitor&) override {
+    cpp_context_ = std::make_shared<cpp2_generator_context>(
+        cpp2_generator_context::create());
+  }
 
   prototype<t_program>::ptr make_prototype_for_program(
       const prototype_database& proto) const override {

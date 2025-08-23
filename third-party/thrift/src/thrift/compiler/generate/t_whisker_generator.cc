@@ -16,6 +16,7 @@
 
 #include <thrift/compiler/generate/t_whisker_generator.h>
 
+#include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/ast/type_visitor.h>
 #include <thrift/compiler/detail/system.h>
 #include <thrift/compiler/generate/common.h>
@@ -950,8 +951,22 @@ t_whisker_generator::create_templates_by_path() {
   return result;
 }
 
+void t_whisker_generator::initialize_context() {
+  context_visitor visitor;
+  context_.register_visitors(visitor);
+  initialize_context(visitor);
+  for (const t_program& p : program_bundle_.programs()) {
+    visitor(p);
+  }
+}
+
 t_whisker_generator::cached_render_state& t_whisker_generator::render_state() {
   if (!cached_render_state_) {
+    // Ideally we'd call initialize_context in the constructor, but the derived
+    // initializer initialize_context(visitor) is virtual, and calling it from
+    // the constructor would not call the derived class's implementation
+    initialize_context();
+
     whisker::render_options options;
 
     auto source_resolver = std::make_shared<whisker_source_parser>(

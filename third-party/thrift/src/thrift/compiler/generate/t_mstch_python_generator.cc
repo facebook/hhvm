@@ -888,21 +888,8 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
 
-  void process_options(
-      const std::map<std::string, std::string>& options) override {
-    // Initialize context as early as possible; ideally we'd do it in a
-    // constructor but we need to ensure that the constructor signature of all
-    // generators is kept synced
-    python_context_ =
-        std::make_shared<python_generator_context>(initialize_context());
-    t_mstch_generator::process_options(options);
-  }
-
  protected:
   std::shared_ptr<python_generator_context> python_context_;
-
-  // Set up context for the active generator
-  virtual python_generator_context initialize_context() = 0;
 
   whisker::map::raw globals() const override {
     assert(python_context_ != nullptr);
@@ -1275,8 +1262,9 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
   void generate_clients();
   void generate_services();
 
-  python_generator_context initialize_context() override {
-    return {false, type_kind::abstract};
+  void initialize_context(context_visitor&) override {
+    python_context_ = std::make_shared<python_generator_context>(
+        /*is_patch_file=*/false, type_kind::abstract);
   }
 
   std::filesystem::path generate_root_path_;
@@ -1645,8 +1633,9 @@ class t_python_patch_generator : public t_mstch_python_prototypes_generator {
   }
 
  protected:
-  python_generator_context initialize_context() override {
-    return {true, type_kind::immutable};
+  void initialize_context(context_visitor&) override {
+    python_context_ = std::make_shared<python_generator_context>(
+        /*is_patch_file=*/true, type_kind::immutable);
   }
 
  private:

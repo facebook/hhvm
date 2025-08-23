@@ -57,8 +57,60 @@
 #include <map>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 
 namespace apache::thrift::compiler {
+
+// Generator context which maintains common rendering state/context required
+// across all generators.
+// Context required by only one language should be maintained in a language
+// specific generator context.
+class whisker_generator_context {
+ public:
+  whisker_generator_context() {}
+  whisker_generator_context(whisker_generator_context&&) = default;
+  whisker_generator_context& operator=(whisker_generator_context&&) = default;
+
+  // Register visitors for storing and allowing generators to resolve references
+  // to parent AST nodes.
+  // Thrift AST nodes' relation storage is uni-directional (e.g. a t_struct node
+  // contains references to its fields, but t_field does not contain a
+  // corresponding reverse reference to the t_struct).
+  void register_visitors(basic_ast_visitor<true>& visitor) {
+    visitor.add_interface_visitor([this](const t_interface& node) {
+      for (const t_function& function : node.functions()) {
+        function_parents_[&function] = &node;
+      }
+    });
+    visitor.add_structured_definition_visitor([this](const t_structured& node) {
+      for (const t_field& field : node.fields()) {
+        field_parents_[&field] = &node;
+      }
+    });
+  }
+
+  // Get the parent structured definition (back-reference) of a field.
+  // The result will always be nullptr for fields from param lists and throws
+  // declarations, as they are not visited by visit_structured_definition.
+  const t_structured* get_field_parent(const t_field* field) const {
+    auto it = field_parents_.find(field);
+    return it != field_parents_.end() ? it->second : nullptr;
+  }
+
+  const t_interface* get_function_parent(const t_function* function) const {
+    auto it = function_parents_.find(function);
+    return it != function_parents_.end() ? it->second : nullptr;
+  }
+
+ private:
+  // Field to parent back-references for fields in user-defined structured
+  // definitions (i.e. struct, union, exception)
+  std::unordered_map<const t_field*, const t_structured*> field_parents_;
+
+  // Function to parent back-references (i.e. to a function's containing service
+  // or interaction)
+  std::unordered_map<const t_function*, const t_interface*> function_parents_;
+};
 
 /**
  * A template-based code generator that uses Whisker as the templating engine.
@@ -66,6 +118,7 @@ namespace apache::thrift::compiler {
 class t_whisker_generator : public t_generator {
  public:
   using t_generator::t_generator;
+  using context_visitor = basic_ast_visitor<true>;
 
  protected:
   /**
@@ -501,6 +554,10 @@ class t_whisker_generator : public t_generator {
     out_dir_base_ = std::move(directory);
   }
 
+  // Initialize any context required for the generator.
+  virtual void initialize_context(context_visitor&) {}
+  const whisker_generator_context& context() const noexcept { return context_; }
+
   struct cached_render_state {
     whisker::diagnostics_engine diagnostic_engine;
     std::shared_ptr<whisker::source_resolver> source_resolver;
@@ -512,9 +569,14 @@ class t_whisker_generator : public t_generator {
  private:
   std::optional<cached_render_state> cached_render_state_;
   compiler_options_map compiler_options_;
+  whisker_generator_context context_;
 
   // whisker::source_resolver implementation
   class whisker_source_parser;
+
+  // Initialize the Whisker generator context, then call the derived type(s)'
+  // initialization
+  void initialize_context();
 };
 
 } // namespace apache::thrift::compiler

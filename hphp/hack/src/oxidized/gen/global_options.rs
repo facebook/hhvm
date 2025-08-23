@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<317e7b3323169a0307e23bbea11c56e8>>
+// @generated SignedSource<<356bcd404a5cdf887715f9de68e49325>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -413,4 +413,6 @@ pub struct GlobalOptions {
     /// Error on dict[$c => 1] when $c: class<T>
     pub class_pointer_ban_class_array_key: bool,
     pub tco_poly_function_pointers: bool,
+    /// enable static package enforcement
+    pub tco_check_packages: bool,
 }

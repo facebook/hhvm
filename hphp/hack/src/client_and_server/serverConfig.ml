@@ -517,6 +517,7 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?class_pointer_ban_class_array_key:
       (bool_opt "class_pointer_ban_class_array_key" config)
     ?tco_poly_function_pointers:(bool_opt "poly_function_pointers" config)
+    ?tco_check_packages:(bool_opt "check_packages" config)
     options
 
 (** Load local config from the following sources:

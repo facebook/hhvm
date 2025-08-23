@@ -601,6 +601,8 @@ impl HhConfig {
             )?,
             tco_poly_function_pointers: hhconfig
                 .get_bool_or("poly_function_pointers", default.tco_poly_function_pointers)?,
+            tco_check_packages: hhconfig
+                .get_bool_or("check_packages", default.tco_check_packages)?,
         };
         let mut c = Self {
             opts,

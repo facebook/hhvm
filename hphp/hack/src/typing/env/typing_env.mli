@@ -611,6 +611,8 @@ val with_packages : env -> SSet.t -> (env -> env * 'a) -> env * 'a
 
 val is_package_loaded : env -> string -> bool
 
+val check_packages : env -> bool
+
 val package_v2 : env -> bool
 
 val package_v2_allow_typedef_violations : env -> bool

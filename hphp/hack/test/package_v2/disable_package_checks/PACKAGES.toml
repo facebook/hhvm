@@ -1,0 +1,7 @@
+[packages]
+
+[packages.pkg1]
+include_paths=["//foo.php"]
+
+[packages.pkg2]
+include_paths=["//bar.php"]

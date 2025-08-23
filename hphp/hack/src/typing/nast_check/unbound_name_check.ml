@@ -99,7 +99,11 @@ let check_module_if_present env id_opt =
   Option.iter id_opt ~f:(check_module_name env)
 
 let check_package_name env (pos, name) =
-  if PackageInfo.package_exists (Provider_context.get_package_info env.ctx) name
+  if
+    PackageInfo.package_exists (Provider_context.get_package_info env.ctx) name
+    || not
+         (TypecheckerOptions.check_packages
+            (Provider_context.get_tcopt env.ctx))
   then
     ()
   else

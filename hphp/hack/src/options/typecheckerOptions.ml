@@ -295,6 +295,8 @@ let disable_physical_equality t = t.GlobalOptions.tco_disable_physical_equality
 
 let hack_warnings t = t.GlobalOptions.hack_warnings
 
+let check_packages t = t.GlobalOptions.tco_check_packages
+
 let package_v2 t = t.GlobalOptions.po.ParserOptions.package_v2
 
 let set_package_info t package_info =

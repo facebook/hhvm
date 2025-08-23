@@ -19,73 +19,6 @@
 Included on Cython unions to retrieve the current value of the union and stick
 it in the self.py_value variable.
 
-}}{{^field:has_ref_api?}}{{!
-}}{{#field:reference?}}{{!
-}}if not deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().has_value():
-    self.py_value = None
-else:
-{{#type:container?}}
-    self.py_value = {{> types/container_from_cpp }}({{!
-      }}deref(__get_union_field_value[{{> types/cython_cpp_type}}](deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref()))){{!
-}}{{/type:container?}}{{!
-}}{{^type:container?}}{{!
-  }}{{! Use an aliasing constructor since the object we're returning is still
-        managed by the top-level object, possible via a unique_ptr }}
-    self.py_value = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
-      }}deref(__get_union_field_value[{{> types/cython_cpp_type}}](deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref())), self.{{> types/cpp_obj}})){{!
-}}{{/type:container?}}{{!
-}}{{/field:reference?}}{{!
-}}{{^field:reference?}}{{!
-}}{{#type:bool?}}{{!
-  }}self.py_value = <bint>(deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value()){{!
-}}{{/type:bool?}}{{!
-}}{{#type:byte?}}{{!
-  }}self.py_value = deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value(){{!
-}}{{/type:byte?}}{{!
-}}{{#type:i16?}}{{!
-  }}self.py_value = deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value(){{!
-}}{{/type:i16?}}{{!
-}}{{#type:i32?}}{{!
-  }}self.py_value = deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value(){{!
-}}{{/type:i32?}}{{!
-}}{{#type:i64?}}{{!
-  }}self.py_value = deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value(){{!
-}}{{/type:i64?}}{{!
-}}{{#type:double?}}{{!
-  }}self.py_value = deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value(){{!
-}}{{/type:double?}}{{!
-}}{{#type:float?}}{{!
-  }}self.py_value = deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value(){{!
-}}{{/type:float?}}{{!
-}}{{#type:string?}}{{!
-  }}self.py_value = bytes(deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value()).decode('UTF-8'){{!
-}}{{/type:string?}}{{!
-}}{{#type:binary?}}{{!
-  }}{{#type:iobuf?}}{{!
-    }}self.py_value =  _fbthrift_iobuf.from_unique_ptr({{!
-      }}deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value().clone()){{!
-  }}{{/type:iobuf?}}{{!
-  }}{{^type:iobuf?}}{{!
-    }}self.py_value = deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value(){{!
-  }}{{/type:iobuf?}}{{!
-}}{{/type:binary?}}{{!
-}}{{#type:enum}}{{!
-  }}self.py_value = translate_cpp_enum_to_python({{!
-    }}{{> types/python_type}}, {{!
-    }}<int>deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value()){{!
-}}{{/type:enum}}{{!
-}}{{#type:structured?}}{{!
-}}self.py_value = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
-  }}make_shared[{{> types/cython_cpp_type}}]({{!
-  }}deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value())){{!
-}}{{/type:structured?}}{{!
-}}{{#type:container?}}{{!
-}}self.py_value = {{> types/container_from_cpp }}({{!
-  }}deref(self.{{> types/cpp_obj}}).{{field:py_name}}_ref().value()){{!
-}}{{/type:container?}}{{!
-}}{{/field:reference?}}{{!
-}}{{/field:has_ref_api?}}{{!
-}}{{#field:has_ref_api?}}{{!
 }}{{#field:reference?}}{{!
 }}if not deref(self.{{> types/cpp_obj}}).get_{{field:py_name}}():
     self.py_value = None
@@ -149,5 +82,4 @@ else:
 }}self.py_value = {{> types/container_from_cpp}}({{!
   }}deref(self.{{> types/cpp_obj}}).get_{{field:py_name}}()){{!
 }}{{/type:container?}}{{!
-}}{{/field:reference?}}{{!
-}}{{/field:has_ref_api?}}
+}}{{/field:reference?}}

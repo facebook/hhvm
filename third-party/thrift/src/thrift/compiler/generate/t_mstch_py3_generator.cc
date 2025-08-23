@@ -1058,7 +1058,6 @@ class py3_mstch_field : public mstch_field {
             {"field:hasModifiedName?", &py3_mstch_field::hasModifiedName},
             {"field:hasPyName?", &py3_mstch_field::hasPyName},
             {"field:boxed_ref?", &py3_mstch_field::boxed_ref},
-            {"field:has_ref_api?", &py3_mstch_field::hasRefApi},
         });
   }
 
@@ -1127,8 +1126,6 @@ class py3_mstch_field : public mstch_field {
   mstch::node boxed_ref() {
     return gen::cpp::find_ref_type(*field_) == gen::cpp::reference_type::boxed;
   }
-
-  mstch::node hasRefApi() { return true; }
 
  protected:
   RefType get_ref_type() {

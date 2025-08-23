@@ -60,24 +60,24 @@ cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:n
         {{#field:has_ref_accessor?}}
         {{#field:optional?}}
         __optional_field_ref[{{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}] {{!
-            }}{{field:py_name}}_ref "{{> types/field_cppname}}" ()
+            }}{{field:py_name}}_ref "{{field:cppName}}_ref" ()
         {{/field:optional?}}
         {{#field:required?}}
         __required_field_ref[{{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}] {{!
-            }}{{field:py_name}}_ref "{{> types/field_cppname}}" ()
+            }}{{field:py_name}}_ref "{{field:cppName}}_ref" ()
         {{/field:required?}}
         {{#field:unqualified?}}
         __field_ref[{{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}] {{!
-            }}{{field:py_name}}_ref "{{> types/field_cppname}}" ()
+            }}{{field:py_name}}_ref "{{field:cppName}}_ref" ()
         {{/field:unqualified?}}
         {{#field:terse?}}
         __terse_field_ref[{{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}] {{!
-            }}{{field:py_name}}_ref "{{> types/field_cppname}}" ()
+            }}{{field:py_name}}_ref "{{field:cppName}}_ref" ()
         {{/field:terse?}}
         {{/field:has_ref_accessor?}}
         {{^field:has_ref_accessor?}}
         {{#field:reference?}}
-        {{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}} {{field:py_name}}_ref "{{> types/field_cppname}}" ()
+        {{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}} {{field:py_name}}_ref "{{field:cppName}}_ref" ()
         {{/field:reference?}}
         {{/field:has_ref_accessor?}}
     {{/struct:py3_fields}}
@@ -85,16 +85,10 @@ cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:n
     {{#struct:union?}}
         {{> types/c_struct }}__type getType() const
     {{#struct:py3_fields}}
-        {{^field:has_ref_api?}}
-        __union_field_ref[{{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}] {{!
-            }}{{field:py_name}}_ref"{{> types/field_cppname}}_ref" ()
-        {{/field:has_ref_api?}}{{!
-        }}{{#field:has_ref_api?}}
         {{#field:type}}const {{> types/cython_cpp_struct_field_type}}& get_{{field:py_name}} "get_{{field:cppName}}" () const{{/field:type}}
         {{! Note that the set methods don't take in a shared/unique_ptr, they just take in an object ref,
             but they return the appropriate ptr }}
         {{#field:type}}{{> types/cython_cpp_struct_field_type}}& set_{{field:py_name}} "set_{{field:cppName}}" (const {{> types/cython_cpp_type}}&){{/field:type}}
-        {{/field:has_ref_api?}}
     {{/struct:py3_fields}}{{/struct:union?}}
 
 {{/program:filtered_structs}}

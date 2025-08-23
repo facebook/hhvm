@@ -19,64 +19,6 @@
 Called specifically from types.pyx when initializing the individual attributes
 on a union.
 
-}}{{^field:has_ref_api?}}{{!
-}}{{#field:reference?}}{{!
-}}{{#type:container?}}{{!
-  }}deref(c_inst).{{field:py_name}}_ref().assign({{!
-    }}{{> types/container_to_cpp }}({{field:py_name}})){{!
-}}{{/type:container?}}{{^type:container?}}{{!
-  }}deref(c_inst).{{field:py_name}}_ref().assign_ptr({{!
-    }}cmove(deref((<{{> types/cython_python_type }}?> {{field:py_name}}).{{> types/cpp_obj}}))){{!
-}}{{/type:container?}}{{!
-}}{{/field:reference?}}{{!
-}}{{^field:reference?}}{{!
-}}{{#type:bool?}}{{!
-  }}deref(c_inst).{{field:py_name}}_ref().assign({{field:py_name}}){{!
-}}{{/type:bool?}}{{!
-}}{{#type:byte?}}{{!
-  }}deref(c_inst).{{field:py_name}}_ref().assign({{field:py_name}}){{!
-}}{{/type:byte?}}{{!
-}}{{#type:i16?}}{{!
-  }}deref(c_inst).{{field:py_name}}_ref().assign({{field:py_name}}){{!
-}}{{/type:i16?}}{{!
-}}{{#type:i32?}}{{!
-  }}deref(c_inst).{{field:py_name}}_ref().assign({{field:py_name}}){{!
-}}{{/type:i32?}}{{!
-}}{{#type:i64?}}{{!
-  }}deref(c_inst).{{field:py_name}}_ref().assign({{field:py_name}}){{!
-}}{{/type:i64?}}{{!
-}}{{#type:double?}}{{!
-  }}deref(c_inst).{{field:py_name}}_ref().assign({{field:py_name}}){{!
-}}{{/type:double?}}{{!
-}}{{#type:float?}}{{!
-  }}deref(c_inst).{{field:py_name}}_ref().assign({{field:py_name}}){{!
-}}{{/type:float?}}{{!
-}}{{#type:string?}}{{!
-  }}deref(c_inst).{{field:py_name}}_ref().assign({{field:py_name}}.encode('UTF-8')){{!
-}}{{/type:string?}}{{!
-}}{{#type:binary?}}{{!
-  }}{{#type:iobuf?}}{{!
-    }}deref(c_inst).{{field:py_name}}_ref().assign(deref((<_fbthrift_iobuf.IOBuf?>{{field:py_name}})._this)) {{!
-  }}{{/type:iobuf?}}{{!
-  }}{{^type:iobuf?}}{{!
-    }}deref(c_inst).{{field:py_name}}_ref().assign({{field:py_name}}){{!
-  }}{{/type:iobuf?}}{{!
-}}{{/type:binary?}}{{!
-}}{{#type:enum?}}{{!
-  }}deref(c_inst).{{field:py_name}}_ref().assign({{!
-    }}<{{> types/cython_cpp_type}}><int>{{field:py_name}}){{!
-}}{{/type:enum?}}{{!
-}}{{#type:structured?}}{{!
-  }}deref(c_inst).{{field:py_name}}_ref().assign({{!
-    }}deref((<{{> types/cython_python_type }}?> {{field:py_name}}).{{> types/cpp_obj}})){{!
-}}{{/type:structured?}}{{!
-}}{{#type:container?}}{{!
-  }}deref(c_inst).{{field:py_name}}_ref().assign({{!
-    }}{{> types/container_to_cpp }}({{field:py_name}})){{!
-}}{{/type:container?}}{{!
-}}{{/field:reference?}}{{!
-}}{{/field:has_ref_api?}}{{!
-}}{{#field:has_ref_api?}}{{!
 }}{{#field:reference?}}{{!
 }}{{#type:container?}}{{!
     }}deref(c_inst).set_{{field:py_name}}({{!
@@ -142,5 +84,4 @@ on a union.
   }}deref(c_inst).set_{{field:py_name}}({{!
     }}{{> types/container_to_cpp }}({{field:py_name}})){{!
 }}{{/type:container?}}{{!
-}}{{/field:reference?}}{{!
-}}{{/field:has_ref_api?}}
+}}{{/field:reference?}}

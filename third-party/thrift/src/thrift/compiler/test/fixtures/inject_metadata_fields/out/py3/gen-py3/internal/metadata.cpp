@@ -12,7 +12,7 @@ namespace thrift {
 namespace annotation {
 ::apache::thrift::metadata::ThriftMetadata internal_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::StructMetadata<InjectMetadataFields>::gen(metadata);
   return metadata;
 }

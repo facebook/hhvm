@@ -748,7 +748,7 @@ cdef class EmptyService(thrift.py3.client.Client):
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
         ServiceMetadata[_fbthrift_services_interface.cEmptyServiceSvIf].gen(response)
-        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+        return __MetadataBox.box(cmove(deref(response.metadata())))
 
     @staticmethod
     def __get_thrift_name__():
@@ -1333,7 +1333,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
         ServiceMetadata[_fbthrift_services_interface.cReturnServiceSvIf].gen(response)
-        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+        return __MetadataBox.box(cmove(deref(response.metadata())))
 
     @staticmethod
     def __get_thrift_name__():
@@ -2378,7 +2378,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
         ServiceMetadata[_fbthrift_services_interface.cParamServiceSvIf].gen(response)
-        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+        return __MetadataBox.box(cmove(deref(response.metadata())))
 
     @staticmethod
     def __get_thrift_name__():

@@ -13,7 +13,7 @@ namespace fixtures {
 namespace types {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::EnumMetadata<has_bitwise_ops>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<is_unscoped>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<MyForwardRefEnum>::gen(metadata);

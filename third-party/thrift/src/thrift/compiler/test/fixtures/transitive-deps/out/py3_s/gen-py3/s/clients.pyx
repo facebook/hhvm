@@ -132,7 +132,7 @@ cdef class TestService(thrift.py3.client.Client):
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
         ServiceMetadata[_fbthrift_services_interface.cTestServiceSvIf].gen(response)
-        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+        return __MetadataBox.box(cmove(deref(response.metadata())))
 
     @staticmethod
     def __get_thrift_name__():

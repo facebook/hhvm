@@ -193,7 +193,7 @@ cdef class A(thrift.py3.client.Client):
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
         ServiceMetadata[_fbthrift_services_interface.cASvIf].gen(response)
-        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+        return __MetadataBox.box(cmove(deref(response.metadata())))
 
     @staticmethod
     def __get_thrift_name__():
@@ -298,7 +298,7 @@ cdef class B(A):
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
         ServiceMetadata[_fbthrift_services_interface.cBSvIf].gen(response)
-        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+        return __MetadataBox.box(cmove(deref(response.metadata())))
 
     @staticmethod
     def __get_thrift_name__():
@@ -342,7 +342,7 @@ cdef class C(thrift.py3.client.Client):
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
         ServiceMetadata[_fbthrift_services_interface.cCSvIf].gen(response)
-        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+        return __MetadataBox.box(cmove(deref(response.metadata())))
 
     @staticmethod
     def __get_thrift_name__():

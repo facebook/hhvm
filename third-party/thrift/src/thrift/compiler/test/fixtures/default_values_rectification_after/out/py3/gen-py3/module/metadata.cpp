@@ -15,7 +15,7 @@ namespace fixtures {
 namespace default_values_rectification {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::StructMetadata<EmptyStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<TestStruct>::gen(metadata);
   return metadata;

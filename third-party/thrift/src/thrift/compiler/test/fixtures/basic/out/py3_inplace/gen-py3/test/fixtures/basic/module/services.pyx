@@ -202,7 +202,7 @@ cdef class FooServiceInterface(
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
         ServiceMetadata[_fbthrift_services_interface.cFooServiceSvIf].gen(response)
-        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+        return __MetadataBox.box(cmove(deref(response.metadata())))
 
     @staticmethod
     def __get_thrift_name__():
@@ -238,7 +238,7 @@ cdef class FB303ServiceInterface(
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
         ServiceMetadata[_fbthrift_services_interface.cFB303ServiceSvIf].gen(response)
-        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+        return __MetadataBox.box(cmove(deref(response.metadata())))
 
     @staticmethod
     def __get_thrift_name__():
@@ -362,7 +362,7 @@ cdef class MyServiceInterface(
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
         ServiceMetadata[_fbthrift_services_interface.cMyServiceSvIf].gen(response)
-        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+        return __MetadataBox.box(cmove(deref(response.metadata())))
 
     @staticmethod
     def __get_thrift_name__():
@@ -408,7 +408,7 @@ cdef class DbMixedStackArgumentsInterface(
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
         ServiceMetadata[_fbthrift_services_interface.cDbMixedStackArgumentsSvIf].gen(response)
-        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+        return __MetadataBox.box(cmove(deref(response.metadata())))
 
     @staticmethod
     def __get_thrift_name__():

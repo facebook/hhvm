@@ -15,7 +15,7 @@ namespace fixtures {
 namespace default_values {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::StructMetadata<TrivialStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<StructWithNoCustomDefaultValues>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<StructWithCustomDefaultValues>::gen(metadata);

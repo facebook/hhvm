@@ -383,7 +383,7 @@ cdef class MyServiceInterface(
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
         ServiceMetadata[_fbthrift_services_interface.cMyServiceSvIf].gen(response)
-        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+        return __MetadataBox.box(cmove(deref(response.metadata())))
 
     @staticmethod
     def __get_thrift_name__():
@@ -452,7 +452,7 @@ cdef class FactoriesInterface(
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
         ServiceMetadata[_fbthrift_services_interface.cFactoriesSvIf].gen(response)
-        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+        return __MetadataBox.box(cmove(deref(response.metadata())))
 
     @staticmethod
     def __get_thrift_name__():
@@ -487,7 +487,7 @@ cdef class PerformInterface(
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
         ServiceMetadata[_fbthrift_services_interface.cPerformSvIf].gen(response)
-        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+        return __MetadataBox.box(cmove(deref(response.metadata())))
 
     @staticmethod
     def __get_thrift_name__():
@@ -522,7 +522,7 @@ cdef class InteractWithSharedInterface(
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
         ServiceMetadata[_fbthrift_services_interface.cInteractWithSharedSvIf].gen(response)
-        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+        return __MetadataBox.box(cmove(deref(response.metadata())))
 
     @staticmethod
     def __get_thrift_name__():
@@ -558,7 +558,7 @@ cdef class BoxServiceInterface(
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
         ServiceMetadata[_fbthrift_services_interface.cBoxServiceSvIf].gen(response)
-        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+        return __MetadataBox.box(cmove(deref(response.metadata())))
 
     @staticmethod
     def __get_thrift_name__():

@@ -13,7 +13,7 @@ namespace test {
 namespace terse_write {
 ::apache::thrift::metadata::ThriftMetadata terse_write_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::EnumMetadata<MyEnum>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyUnion>::gen(metadata);

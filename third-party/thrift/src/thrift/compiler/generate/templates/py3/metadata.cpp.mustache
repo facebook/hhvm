@@ -24,7 +24,7 @@
 {{/program:cppNamespaces}}
 ::apache::thrift::metadata::ThriftMetadata {{program:name}}_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
 {{#program:enums}}
   ::apache::thrift::detail::md::EnumMetadata<{{enum:cpp_name}}>::gen(metadata);
 {{/program:enums}}

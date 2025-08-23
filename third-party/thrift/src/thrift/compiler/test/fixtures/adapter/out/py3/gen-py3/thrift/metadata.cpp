@@ -12,7 +12,7 @@ namespace thrift {
 namespace annotation {
 ::apache::thrift::metadata::ThriftMetadata thrift_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::EnumMetadata<RpcPriority>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Experimental>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ReserveIds>::gen(metadata);

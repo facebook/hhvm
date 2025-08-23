@@ -12,7 +12,7 @@ namespace valid {
 namespace ns {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::EnumMetadata<MyEnumA>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<AnnotatedEnum>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<AnnotatedEnum2>::gen(metadata);

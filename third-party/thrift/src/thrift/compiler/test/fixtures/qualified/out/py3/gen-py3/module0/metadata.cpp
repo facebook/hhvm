@@ -10,7 +10,7 @@
 namespace module0 {
 ::apache::thrift::metadata::ThriftMetadata module0_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::EnumMetadata<Enum>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Struct>::gen(metadata);
   return metadata;

@@ -13,7 +13,7 @@ namespace annotation {
 namespace hack {
 ::apache::thrift::metadata::ThriftMetadata hack_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::StructMetadata<FieldWrapper>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Wrapper>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Adapter>::gen(metadata);

@@ -13,7 +13,7 @@ namespace annotation {
 namespace java {
 ::apache::thrift::metadata::ThriftMetadata java_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::StructMetadata<Mutable>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Annotation>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<BinaryString>::gen(metadata);

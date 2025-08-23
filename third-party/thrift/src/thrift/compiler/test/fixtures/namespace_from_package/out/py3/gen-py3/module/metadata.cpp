@@ -12,7 +12,7 @@ namespace namespace_from_package {
 namespace module {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::StructMetadata<Foo>::gen(metadata);
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_package::module::TestService>>::gen(response);
   return metadata;

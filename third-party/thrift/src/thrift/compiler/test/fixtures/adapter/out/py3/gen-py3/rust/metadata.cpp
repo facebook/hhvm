@@ -13,7 +13,7 @@ namespace annotation {
 namespace rust {
 ::apache::thrift::metadata::ThriftMetadata rust_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::StructMetadata<Name>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Copy>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<RequestContext>::gen(metadata);

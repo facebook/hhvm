@@ -13,7 +13,7 @@ namespace annotation {
 namespace cpp {
 ::apache::thrift::metadata::ThriftMetadata cpp_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::EnumMetadata<RefType>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<EnumUnderlyingType>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Name>::gen(metadata);

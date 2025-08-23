@@ -12,7 +12,7 @@ namespace different {
 namespace ns {
 ::apache::thrift::metadata::ThriftMetadata includes_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::EnumMetadata<AnEnum>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AStructB>::gen(metadata);

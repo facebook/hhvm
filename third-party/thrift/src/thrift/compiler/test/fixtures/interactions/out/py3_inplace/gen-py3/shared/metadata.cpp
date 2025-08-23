@@ -11,7 +11,7 @@ namespace thrift {
 namespace shared_interactions {
 ::apache::thrift::metadata::ThriftMetadata shared_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::StructMetadata<DoSomethingResult>::gen(metadata);
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::thrift::shared_interactions::InteractLocally>>::gen(response);
   return metadata;

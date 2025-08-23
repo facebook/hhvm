@@ -12,7 +12,7 @@ namespace thrift {
 namespace test {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::EnumMetadata<Color>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<ThriftAdaptedEnum>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyAnnotation>::gen(metadata);

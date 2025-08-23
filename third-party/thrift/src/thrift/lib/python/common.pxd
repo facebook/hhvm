@@ -87,8 +87,8 @@ cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "::apache::
         cThriftMetadata()
     cdef cppclass cThriftServiceMetadataResponse "::apache::thrift::metadata::ThriftServiceMetadataResponse":
         cThriftServiceMetadataResponse()
-        cFieldRef[cThriftServiceContextRef] services_ref()
-        cFieldRef[cThriftMetadata] metadata_ref()
+        cFieldRef[cThriftServiceContextRef] services()
+        cFieldRef[cThriftMetadata] metadata()
     cdef cppclass ServiceMetadata "::apache::thrift::detail::md::ServiceMetadata"[T]:
         @staticmethod
         const void gen(cThriftServiceMetadataResponse& context)

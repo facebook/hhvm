@@ -11,7 +11,7 @@ namespace py3 {
 namespace simple {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::EnumMetadata<AnEnum>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<AnEnumRenamed>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<Flags>::gen(metadata);

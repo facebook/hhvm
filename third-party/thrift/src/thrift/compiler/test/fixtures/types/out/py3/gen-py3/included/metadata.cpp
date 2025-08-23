@@ -13,7 +13,7 @@ namespace fixtures {
 namespace types {
 ::apache::thrift::metadata::ThriftMetadata included_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   return metadata;
 }
 } // namespace apache

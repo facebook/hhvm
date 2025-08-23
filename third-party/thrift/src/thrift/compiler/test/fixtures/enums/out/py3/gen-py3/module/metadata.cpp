@@ -12,7 +12,7 @@ namespace fixtures {
 namespace enums {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::EnumMetadata<Metasyntactic>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<MyEnum1>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<MyEnum2>::gen(metadata);

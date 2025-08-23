@@ -10,7 +10,7 @@
 namespace cpp2 {
 ::apache::thrift::metadata::ThriftMetadata matching_struct_names_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
-  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::StructMetadata<MyStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Combo>::gen(metadata);
   return metadata;

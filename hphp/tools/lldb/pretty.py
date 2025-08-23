@@ -1,6 +1,6 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
 
-# pyre-unsafe
+# pyre-strict
 
 """Pretty printers for HPHP types"""
 
@@ -26,16 +26,16 @@ except ModuleNotFoundError:
     import hphp.tools.lldb.utils as utils
 
 
-Formatters = []
+Formatters: typing.List[typing.Callable[[str], str]] = []
 
 
 def format(
     datatype: str,
     regex: bool = False,
-    skip_pointers=False,
-    skip_references=False,
+    skip_pointers: bool = False,
+    skip_references: bool = False,
     synthetic_children: bool = False,
-):
+) -> typing.Callable[[typing.Any], typing.Any]:
     """Wrapper for pretty printer functions.
 
     Add the command needed to register the pretty printer with the LLDB debugger
@@ -53,7 +53,7 @@ def format(
         The original function
     """
 
-    def inner(func_or_class):
+    def inner(func_or_class: typing.Any) -> typing.Any:
         extra_options = []
         if regex:
             extra_options.append("-x")
@@ -84,7 +84,9 @@ def format(
                 f'--python-function {top_module + "." if top_module else ""}pretty.{func_or_class.__name__} "{datatype}"'
             )
 
-            def wrapper(val_obj, internal_dict):
+            def wrapper(
+                val_obj: lldb.SBValue, internal_dict: typing.Dict[str, typing.Any]
+            ) -> typing.Any:
                 # When given a nullptr, just print the address, rather than try and probably fail
                 # to get its contents in whatever pretty printers would normally be called.
                 if utils.is_nullptr(val_obj):
@@ -233,16 +235,18 @@ class pp_ArrayData:
         # return f"ArrayData[{self.m_kind.value}]: {self.m_size} element(s) refcount={self.m_count}"
         return "${svar%#} element(s)"
 
-    def __init__(self, val_obj, _internal_dict) -> None:
+    def __init__(
+        self, val_obj: lldb.SBValue, _internal_dict: typing.Dict[str, typing.Any]
+    ) -> None:
         # We use this class for both the synthetic children and for the summary.
         # For the summary, we will be given the synthetic lldb.SBValue so we
         # must make sure to get the non-synthetic lldb.SBValue.
         utils.debug_print(
             f"pp_ArrayData::__init__ with val_obj (load_addr: 0x{val_obj.load_addr:x}, type: {val_obj.type.name})"
         )
-        self.val_obj = val_obj.GetNonSyntheticValue()
+        self.val_obj: lldb.SBValue = val_obj.GetNonSyntheticValue()
         self.size: int | None = None
-        self.func = None
+        self.func: None = None
         self.at_func: typing.Callable[[int], lldb.SBValue | None] | None = None
         self.update()
 
@@ -311,7 +315,9 @@ class pp_ArrayData:
 
 @format("^HPHP::Array$", regex=True, synthetic_children=True)
 class pp_Array(pp_ArrayData):
-    def __init__(self, val_obj, _internal_dict) -> None:
+    def __init__(
+        self, val_obj: lldb.SBValue, _internal_dict: typing.Dict[str, typing.Any]
+    ) -> None:
         if val_obj.GetError().Fail():
             utils.debug_print(
                 f"Invalid array. Error: {val_obj.GetError().GetCString()}"

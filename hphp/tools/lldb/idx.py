@@ -1,6 +1,6 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
 
-# pyre-unsafe
+# pyre-strict
 
 import argparse
 import shlex
@@ -264,7 +264,7 @@ def dict_at(base: lldb.SBValue, idx: int) -> (str, lldb.SBValue):
     return data
 
 
-def keyset_at(base, idx) -> typing.Optional[lldb.SBValue]:
+def keyset_at(base: lldb.SBValue, idx: int) -> typing.Optional[lldb.SBValue]:
     vde_type = utils.Type("HPHP::VanillaKeysetElm", base.target)
     utils.debug_print(f"Keyset base address (i.e. first element): 0x{base.load_addr:x}")
     offset = vde_type.size * idx

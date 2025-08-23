@@ -1,6 +1,6 @@
 # Copyright 2022-present Facebook. All Rights Reserved
 
-# pyre-unsafe
+# pyre-strict
 
 import abc
 import argparse
@@ -183,18 +183,20 @@ class LLVMVersionCommand(Command):
 # -------------------------------------------------------------------------------------
 # Memoization for functions that take in hashable arguments (i.e. not lldb.SB* values).
 
-_all_caches = []
+_all_caches: typing.List[typing.Dict[typing.Any, typing.Any]] = []
 
 
-def memoized(func):
+def memoized(
+    func: typing.Callable[..., typing.Any],
+) -> typing.Callable[..., typing.Any]:
     """Simple memoization decorator that ignores **kwargs."""
     global _all_caches
 
-    cache = {}
+    cache: typing.Dict[typing.Any, typing.Any] = {}
     _all_caches.append(cache)
 
     @functools.wraps(func)
-    def memoizer(*args):
+    def memoizer(*args: typing.Any) -> typing.Any:
         if not isinstance(args, collections.abc.Hashable):
             return func(*args)
         if args not in cache:
@@ -212,7 +214,7 @@ def memoized(func):
 # when within a script. I.e. the target object needs to come from the
 # execution context that is passed when starting a command's execution.
 
-_target_cache = {}
+_target_cache: typing.Dict[int, typing.Dict[str, typing.Any]] = {}
 
 
 def clear_caches(
@@ -468,7 +470,7 @@ def get(struct: lldb.SBValue, *field_names: str) -> lldb.SBValue:
 # Type manipulations
 
 
-def rawtype(t: lldb.SBType):
+def rawtype(t: lldb.SBType) -> lldb.SBType:
     """Remove const, volatile, and typedefs
 
     Arguments:
@@ -544,7 +546,7 @@ def unsigned_cast(v: lldb.SBValue, t: lldb.SBType) -> lldb.SBValue:
 # Pointer helpers
 
 
-def nullptr(target: lldb.SBTarget):
+def nullptr(target: lldb.SBTarget) -> lldb.SBValue:
     """Return an SBValue wrapping a pointer to 0"""
     return target.CreateValueFromExpression("nullptr", "(void *)0")
 
@@ -619,33 +621,33 @@ kShiftAmount: int = 64 - kMaxTagSize  # 64 = std::numeric_limits<uintptr_t>::dig
 
 class TokenOrPtr:
     @staticmethod
-    def get_compact(token_or_ptr) -> int:
+    def get_compact(token_or_ptr: lldb.SBValue) -> int:
         compact = get(token_or_ptr, "m_compact")  # HPHP::CompactTaggedPtr
         data = compact.unsigned >> 2
         return data
 
     @staticmethod
-    def get_tag(token_or_ptr) -> int:
+    def get_tag(token_or_ptr: lldb.SBValue) -> int:
         data = TokenOrPtr.get_compact(token_or_ptr)
         tag = data >> kShiftAmount
         return tag
 
     @staticmethod
-    def is_ptr(token_or_ptr) -> bool:
+    def is_ptr(token_or_ptr: lldb.SBValue) -> bool:
         return TokenOrPtr.get_tag(token_or_ptr) == 0
 
     @staticmethod
-    def is_token(token_or_ptr) -> bool:
+    def is_token(token_or_ptr: lldb.SBValue) -> bool:
         return TokenOrPtr.get_tag(token_or_ptr) == 1
 
     @staticmethod
-    def get_ptr(token_or_ptr) -> lldb.SBValue:
+    def get_ptr(token_or_ptr: lldb.SBValue) -> lldb.SBValue:
         data = TokenOrPtr.get_compact(token_or_ptr)
         ptr = data & (-1 >> kMaxTagSize)
         return token_or_ptr.CreateValueFromExpression("tmp", f"(uintptr_t *){ptr}")
 
     @staticmethod
-    def get_token(token_or_ptr) -> lldb.SBValue:
+    def get_token(token_or_ptr: lldb.SBValue) -> lldb.SBValue:
         ptr = TokenOrPtr.get_ptr(token_or_ptr)
         repo_token_type = Type("HPHP::RepoFile::Token", token_or_ptr.target)
         return unsigned_cast(ptr, repo_token_type)
@@ -670,7 +672,7 @@ def deref(val: lldb.SBValue) -> lldb.SBValue:
 
 
 def ptr_add(
-    ptr: lldb.SBValue, n: typing.Union[int, lldb.SBValue], sizeof=True
+    ptr: lldb.SBValue, n: typing.Union[int, lldb.SBValue], sizeof: bool = True
 ) -> lldb.SBValue:
     """Create new a new pointer, pointing to value of ptr+(n*sizeof(*ptr))
 
@@ -1038,10 +1040,10 @@ def pretty_tv(typ: lldb.SBValue, data: lldb.SBValue) -> str:
         A Python string representing the TypedValue
     """
 
-    target = typ.target
+    target: lldb.SBTarget = typ.target
     typ = typ.Cast(Type("HPHP::DataType", target))
 
-    def DT(elem):
+    def DT(elem: typing.Union[str, int]) -> int:
         return Enum("HPHP::DataType", elem, target).unsigned
 
     val = None
@@ -1264,7 +1266,7 @@ def reg(common_name: str, frame: lldb.SBFrame) -> lldb.SBValue:
 
 
 def parse_argv(
-    args: str, target: lldb.SBTarget, limit=None
+    args: str, target: lldb.SBTarget, limit: typing.Optional[int] = None
 ) -> typing.List[lldb.SBValue]:
     """Explode a LLDB argument string, then evaluate all args up to `limit`.
 
@@ -1324,14 +1326,14 @@ class DebugCommand(Command):
             result.SetError(f"Unexpected command {options.cmd}")
 
 
-def debug_print(message: str, file=sys.stderr) -> None:
+def debug_print(message: str, file: typing.TextIO = sys.stderr) -> None:
     if _Debug:
         print(message)
 
 
-def timer(func):
+def timer(func: typing.Callable[..., typing.Any]) -> typing.Callable[..., typing.Any]:
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
         tic = time.perf_counter()
         value = func(*args, **kwargs)
         toc = time.perf_counter()

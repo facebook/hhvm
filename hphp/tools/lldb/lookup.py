@@ -1,4 +1,4 @@
-# pyre-unsafe
+# pyre-strict
 import argparse
 import shlex
 import typing
@@ -84,7 +84,9 @@ def lookup_func_from_frame_pointer(fp: lldb.SBValue) -> typing.Optional[lldb.SBV
     return lookup_func(func_id)
 
 
-def load_litstr_from_repo(unit_sn, token) -> typing.Optional[lldb.SBValue]:
+def load_litstr_from_repo(
+    unit_sn: lldb.SBValue, token: lldb.SBValue
+) -> typing.Optional[lldb.SBValue]:
     raise NotImplementedError
 
 
@@ -223,7 +225,7 @@ class LookupCommand(utils.Command):
             return
 
     @classmethod
-    def _lookup_func_prep(cls, options) -> None:
+    def _lookup_func_prep(cls, options: argparse.Namespace) -> None:
         func_id_type = utils.Type("HPHP::FuncId", options.exe_ctx.target)
         func_id = options.exe_ctx.frame.EvaluateExpression(options.funcid).Cast(
             func_id_type
@@ -238,7 +240,7 @@ class LookupCommand(utils.Command):
         options.result.write(str(res))
 
     @classmethod
-    def _lookup_litstr_prep(cls, options) -> None:
+    def _lookup_litstr_prep(cls, options: argparse.Namespace) -> None:
         id_type = utils.Type("HPHP::Id", options.exe_ctx.target)
         id_val = options.exe_ctx.frame.EvaluateExpression(options.id).Cast(id_type)
 
@@ -263,7 +265,7 @@ class LookupCommand(utils.Command):
         options.result.write(str(res))
 
     @classmethod
-    def _lookup_array_prep(cls, options) -> None:
+    def _lookup_array_prep(cls, options: argparse.Namespace) -> None:
         id_type = utils.Type("HPHP::Id", options.exe_ctx.target)
         id_val = options.exe_ctx.frame.EvaluateExpression(options.id).Cast(id_type)
         res = lookup_array(id_val)

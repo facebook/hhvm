@@ -1,6 +1,6 @@
 # Copyright 2022-present Facebook. All Rights Reserved
 
-# pyre-unsafe
+# pyre-strict
 
 import argparse
 import enum
@@ -44,7 +44,7 @@ are found in:
 class InstrInfo(typing.NamedTuple):
     op: lldb.SBValue  # holding an HPHP::Op
     len: int
-    imms: typing.List[dict]
+    imms: typing.List[typing.Any]
 
 
 # ------------------------------------------------------------------------------
@@ -207,7 +207,7 @@ def uints_by_size() -> typing.Dict[int, str]:
     }
 
 
-def imm_to_str(imm) -> str:
+def imm_to_str(imm: typing.Union[str, lldb.SBValue]) -> str:
     if type(imm) is str:
         pass
     elif utils.rawtype(imm.type).name == "char *":
@@ -261,7 +261,9 @@ class HHBC:
         return (val, size)
 
     @staticmethod
-    def decode_iva(pc: lldb.SBValue):
+    def decode_iva(pc: lldb.SBValue) -> typing.Any:
+        # using typing.Dict[str, typing.Any] throws an error around line 540,
+        # as there is both dictionary access and direct attribute access in first
         """Decode the IVA immediate at `pc`, returning a dict with `value` and `size` keys"""
 
         info = {}
@@ -283,7 +285,7 @@ class HHBC:
         return info
 
     @staticmethod
-    def decode_named_local(pc: lldb.SBValue):
+    def decode_named_local(pc: lldb.SBValue) -> typing.Dict[str, typing.Any]:
         """Decode the NLA immediate at `pc`, returning a dict with `value` and `size` keys"""
 
         info = {}
@@ -305,7 +307,7 @@ class HHBC:
         return info
 
     @staticmethod
-    def decode_ba(pc: lldb.SBValue):
+    def decode_ba(pc: lldb.SBValue) -> typing.Dict[str, typing.Any]:
         """Decode the BA immediate at `pc`, returning a dict with `value` and `size` keys"""
 
         info = {}
@@ -338,7 +340,7 @@ class HHBC:
         return name
 
     @staticmethod
-    def try_lookup_litstr(imm) -> str:
+    def try_lookup_litstr(imm: lldb.SBValue) -> str:
         """Return the literal string corresponding to the litstr ID `imm`. If we can't resolve it, just return `imm`"""
 
         utils.debug_print(f"try_lookup_litstr(imm={imm})")
@@ -354,7 +356,7 @@ class HHBC:
             return str(imm.unsigned)
 
     @staticmethod
-    def try_lookup_array(imm) -> lldb.SBValue:
+    def try_lookup_array(imm: lldb.SBValue) -> lldb.SBValue:
         """Return the array corresponding to the litstr ID `imm`. If we can't resolve it, just return `imm`"""
 
         utils.debug_print(f"try_lookup_array(imm={imm})")
@@ -396,7 +398,9 @@ class HHBC:
         return immtype
 
     @staticmethod
-    def imm_info(ptr: lldb.SBValue, immtype: lldb.SBValue):
+    def imm_info(
+        ptr: lldb.SBValue, immtype: lldb.SBValue
+    ) -> typing.Dict[str, typing.Any]:
         """Return the size and value of the immediate at `ptr` with immediate type `immtype`"""
 
         utils.debug_print(f"imm_info(ptr=0x{ptr.unsigned:x}, immtype={immtype})")
@@ -795,7 +799,9 @@ the previous call left off.
     def get_long_help(self) -> str:
         return self.usage
 
-    def __init__(self, debugger: lldb.SBDebugger, internal_dict) -> None:
+    def __init__(
+        self, debugger: lldb.SBDebugger, internal_dict: typing.Dict[str, typing.Any]
+    ) -> None:
         self.bcpos: typing.Optional[lldb.SBValue] = None
         self.bcoff: int = 0
         self.count: int = 1

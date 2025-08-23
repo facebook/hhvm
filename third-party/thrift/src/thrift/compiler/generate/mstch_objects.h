@@ -27,6 +27,7 @@
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/generate/cpp/util.h>
+#include <thrift/compiler/generate/t_whisker_generator.h>
 #include <thrift/compiler/sema/sema_context.h>
 #include <thrift/compiler/whisker/mstch_compat.h>
 
@@ -47,9 +48,6 @@ struct mstch_element_position {
 
 struct field_generator_context {
   const t_structured* strct = nullptr;
-  const t_field* serialization_prev = nullptr;
-  const t_field* serialization_next = nullptr;
-  int isset_index = -1;
 };
 
 // A factory creating mstch objects wrapping Thrift AST nodes.
@@ -225,6 +223,7 @@ struct mstch_context : mstch_factories {
   node_metadata_cache metadata_cache;
 
   const whisker::prototype_database* prototypes = nullptr;
+  const whisker_generator_context* whisker_context = nullptr;
 
   /**
    * Sets or erases the option with the given `key` depending on the
@@ -739,19 +738,7 @@ class mstch_struct : public mstch_base {
     auto field_ctx = field_generator_context();
     field_ctx.strct = struct_;
     for (const t_field& field : s->fields()) {
-      if (cpp2::field_has_isset(&field)) {
-        field_ctx.isset_index++;
-      }
       context_map[&field] = field_ctx;
-    }
-
-    const t_field* prev = nullptr;
-    for (const t_field* curr : get_members_in_serialization_order()) {
-      if (prev) {
-        context_map[prev].serialization_next = curr;
-        context_map[curr].serialization_prev = prev;
-      }
-      prev = curr;
     }
   }
 
@@ -803,13 +790,6 @@ class mstch_struct : public mstch_base {
 
  protected:
   const t_structured* struct_;
-  // Although mstch_fields can be generated in a different order than the IDL
-  // order, field_generator_context should be always computed in the IDL order,
-  // as the context does not change by reordering. Without the map, each
-  // different reordering recomputes field_generator_context, and each
-  // field takes O(N) to loop through node_list_view<t_field> or
-  // std::vector<t_field*> to find the exact t_field to compute
-  // field_generator_context.
   std::unordered_map<const t_field*, field_generator_context> context_map;
 
   std::vector<const t_field*> fields_in_key_order_;

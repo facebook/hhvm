@@ -20,6 +20,7 @@
 #include <memory>
 #include <queue>
 #include <set>
+#include <unordered_map>
 #include <vector>
 
 #include <boost/algorithm/string/replace.hpp>
@@ -226,6 +227,12 @@ bool generate_reduced_client(const t_interface& i) {
   return i.is_interaction();
 }
 
+struct cpp2_field_generator_context {
+  const t_field* serialization_prev = nullptr;
+  const t_field* serialization_next = nullptr;
+  int isset_index = -1;
+};
+
 class cpp2_generator_context {
  public:
   static cpp2_generator_context create() { return cpp2_generator_context(); }
@@ -244,11 +251,54 @@ class cpp2_generator_context {
 
   cpp_name_resolver& resolver() { return resolver_; }
 
+  const cpp2_field_generator_context* get_field_context(
+      const t_field* field) const {
+    auto it = field_context_map_.find(field);
+    return it == field_context_map_.end() ? nullptr : &it->second;
+  }
+
+  void register_visitors(t_whisker_generator::context_visitor& visitor) {
+    // Compute field isset indexes and serialization order, which requires a
+    // back-reference to the parent structured definition
+    visitor.add_structured_definition_visitor([this](const t_structured& node) {
+      cpp2_field_generator_context field_ctx;
+      for (const t_field& field : node.fields()) {
+        if (cpp2::field_has_isset(&field)) {
+          field_ctx.isset_index++;
+        }
+        field_context_map_[&field] = field_ctx;
+      }
+
+      const std::vector<t_field*>& serialization_order =
+          node.has_structured_annotation(kSerializeInFieldIdOrderUri)
+          ? node.get_sorted_members()
+          : node.get_members();
+      const t_field* prev = nullptr;
+      for (const t_field* curr : serialization_order) {
+        if (prev) {
+          field_context_map_[prev].serialization_next = curr;
+          field_context_map_[curr].serialization_prev = prev;
+        }
+        prev = curr;
+      }
+    });
+  }
+
  private:
   cpp2_generator_context() = default;
 
   std::unordered_map<const t_type*, bool> is_orderable_memo_;
   cpp_name_resolver resolver_;
+
+  // Although generator fields can be in a different order than the IDL
+  // order, field_generator_context should be always computed in the IDL order,
+  // as the context does not change by reordering. Without the map, each
+  // different reordering recomputes field_generator_context, and each
+  // field takes O(N) to loop through node_list_view<t_field> or
+  // std::vector<t_field*> to find the exact t_field to compute
+  // field_generator_context.
+  std::unordered_map<const t_field*, cpp2_field_generator_context>
+      field_context_map_;
 };
 
 int checked_stoi(const std::string& s, std::string msg) {
@@ -313,9 +363,10 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   void generate_out_of_line_services(const std::vector<t_service*>& services);
   void generate_inline_services(const std::vector<t_service*>& services);
 
-  void initialize_context(context_visitor&) override {
+  void initialize_context(context_visitor& visitor) override {
     cpp_context_ = std::make_shared<cpp2_generator_context>(
         cpp2_generator_context::create());
+    cpp_context_->register_visitors(visitor);
   }
 
   prototype<t_program>::ptr make_prototype_for_program(
@@ -2025,13 +2076,16 @@ class cpp_mstch_field : public mstch_field {
   mstch::node index_plus_one() { return pos_.index + 1; }
   mstch::node ordinal() { return index_plus_one(); }
   mstch::node isset_index() {
-    assert(field_context_);
-    return field_context_->isset_index;
+    const cpp2_field_generator_context* field_context =
+        cpp_context_->get_field_context(field_);
+    assert(field_context);
+    return field_context->isset_index;
   }
   mstch::node cpp_type() {
-    assert(field_context_->strct);
-    return cpp_context_->resolver().get_native_type(
-        *field_, *field_context_->strct);
+    const t_structured* parent =
+        context_.whisker_context->get_field_parent(field_);
+    assert(parent != nullptr);
+    return cpp_context_->resolver().get_native_type(*field_, *parent);
   }
   mstch::node cpp_storage_name() {
     if (!is_eligible_for_storage_name_mangling()) {
@@ -2041,12 +2095,12 @@ class cpp_mstch_field : public mstch_field {
     return mangle_field_name(cpp2::get_name(field_));
   }
   mstch::node cpp_storage_type() {
-    assert(field_context_->strct);
-    return cpp_context_->resolver().get_storage_type(
-        *field_, *field_context_->strct);
+    const t_structured* parent =
+        context_.whisker_context->get_field_parent(field_);
+    assert(parent != nullptr);
+    return cpp_context_->resolver().get_storage_type(*field_, *parent);
   }
   mstch::node cpp_standard_type() {
-    assert(field_context_->strct);
     return cpp_context_->resolver().get_standard_type(*field_);
   }
   mstch::node eligible_for_storage_name_mangling() {
@@ -2185,18 +2239,24 @@ class cpp_mstch_field : public mstch_field {
     return mstch::node();
   }
   mstch::node serialization_prev_field_key() {
-    assert(field_context_ && field_context_->serialization_prev);
-    return field_context_->serialization_prev->get_key();
+    const cpp2_field_generator_context* field_context =
+        cpp_context_->get_field_context(field_);
+    assert(field_context && field_context->serialization_prev);
+    return field_context->serialization_prev->get_key();
   }
   mstch::node serialization_next_field_key() {
-    assert(field_context_ && field_context_->serialization_next);
-    return field_context_->serialization_next->get_key();
+    const cpp2_field_generator_context* field_context =
+        cpp_context_->get_field_context(field_);
+    assert(field_context && field_context->serialization_next);
+    return field_context->serialization_next->get_key();
   }
   mstch::node serialization_next_field_type() {
-    assert(field_context_ && field_context_->serialization_next);
-    return field_context_->serialization_next
+    const cpp2_field_generator_context* field_context =
+        cpp_context_->get_field_context(field_);
+    assert(field_context && field_context->serialization_next);
+    return field_context->serialization_next
         ? context_.type_factory->make_mstch_object(
-              field_context_->serialization_next->get_type(), context_, pos_)
+              field_context->serialization_next->get_type(), context_, pos_)
         : mstch::node("");
   }
   mstch::node deprecated_terse_writes() {
@@ -2244,8 +2304,10 @@ class cpp_mstch_field : public mstch_field {
   }
 
   mstch::node type_tag() {
-    return cpp_context_->resolver().get_type_tag(
-        *field_, *field_context_->strct);
+    const t_structured* parent =
+        context_.whisker_context->get_field_parent(field_);
+    assert(parent != nullptr);
+    return cpp_context_->resolver().get_type_tag(*field_, *parent);
   }
 
   mstch::node raw_binary() {
@@ -2263,8 +2325,10 @@ class cpp_mstch_field : public mstch_field {
   }
 
   mstch::node use_op_encode() {
-    assert(field_context_->strct);
-    return needs_op_encode(*field_, *field_context_->strct);
+    const t_structured* parent =
+        context_.whisker_context->get_field_parent(field_);
+    assert(parent != nullptr);
+    return needs_op_encode(*field_, *parent);
   }
 
   // Not optional, terse, or deprecated terse.
@@ -2305,7 +2369,9 @@ class cpp_mstch_field : public mstch_field {
   }
 
   bool is_eligible_for_storage_name_mangling() const {
-    const auto* strct = field_context_->strct;
+    const t_structured* strct =
+        context_.whisker_context->get_field_parent(field_);
+    assert(strct != nullptr);
 
     if (strct->is<t_union>()) {
       return false;

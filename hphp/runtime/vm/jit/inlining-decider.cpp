@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/irgen.h"
@@ -357,12 +358,36 @@ uint64_t adjustedMaxVasmCost(const irgen::IRGS& env,
   auto adjustedCost = baseVasmCost *
     std::pow((double)callerProfCount / baseProfCount,
              Cfg::HHIR::InliningVasmCallerExp);
-  auto const calleeProfCount = irgen::calleeProfCount(env, calleeRegion);
+  auto const passesConcreteCallable = [&] {
+    // If we pass a concrete callable to a callee and the callee calls this
+    // callable (likely), inlining the callee is beneficial, as it converts
+    // the runtime call to the callable to a known one and also makes it
+    // eligible for further inlining.
+    //
+    // Treat calls to callees that pass a concrete callables as unique callees
+    // to increase their chance of being inlined.
+    //
+    // This makes HHVM inline various HSL helpers such as Vec\map() more
+    // aggressively, which are often used with trivial lambdas.
+    for (auto const& ty : calleeRegion.inlineInputTypes()) {
+      if (ty.hasConstVal(TFunc)) return true;
+      if (ty.hasConstVal(TClsMeth)) return true;
+      if (ty <= TObj) {
+        auto const cls = ty.clsSpec().exactCls();
+        if (cls != nullptr && cls->classof(c_Closure::classof())) return true;
+      }
+    }
+    return false;
+  }();
+  auto const calleeProfCount = passesConcreteCallable
+    ? 0U : irgen::calleeProfCount(env, calleeRegion);
   if (calleeProfCount) {
     adjustedCost *= std::pow((double)callerProfCount / calleeProfCount,
                              Cfg::HHIR::InliningVasmCalleeExp);
   }
-  auto numCallsites = std::max(1U, s_funcTargetCounts[calleeRegion.entry()->func()->getFuncId()]);
+  auto const numCallsites = passesConcreteCallable
+    ? 1U
+    : std::max(1U, s_funcTargetCounts[calleeRegion.entry()->func()->getFuncId()]);
   adjustedCost *= std::max(Cfg::HHIR::InliningVasmMinCallsiteFactor,
                            std::pow(1.0 / numCallsites, Cfg::HHIR::InliningVasmCallsiteExp));
   adjustedCost *= std::pow(1.0 / (1 + depth),

@@ -587,8 +587,6 @@ class mstch_function : public mstch_base {
             {"function:annotations", &mstch_function::annotations},
             {"function:structured_annotations",
              &mstch_function::structured_annotations},
-            {"function:in_or_creates_interaction?",
-             &mstch_function::in_or_creates_interaction},
 
             // Sink methods:
             {"function:sink_first_response_type",
@@ -619,9 +617,6 @@ class mstch_function : public mstch_base {
     return mstch_base::structured_annotations(function_);
   }
 
-  mstch::node in_or_creates_interaction() {
-    return function_->interaction() || is_interaction_member();
-  }
   mstch::node sink_first_response_type();
   mstch::node sink_elem_type();
   mstch::node sink_exceptions();
@@ -635,12 +630,6 @@ class mstch_function : public mstch_base {
  protected:
   const t_function* function_;
   const t_interface* interface_;
-
-  bool is_interaction_member() const {
-    // TODO(T230131540): Whisker migration requires back-reference from function
-    // to parent interface
-    return dynamic_cast<const t_interaction*>(interface_) != nullptr;
-  }
 
   mstch::node make_exceptions(const t_throws* exceptions) {
     return exceptions ? make_mstch_fields(exceptions->get_members())

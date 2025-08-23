@@ -20,7 +20,10 @@
 //
 
 {{/service:functions?}}
-{{#service:functions}}{{#function:return_type}}{{^function:starts_interaction?}}
+{{#service:functions}}
+{{#let in_or_creates_interaction? = (or service:interaction? function:creates_interaction?)}}
+{{#function:return_type}}
+{{^function:starts_interaction?}}
 //
 // Method '{{function:name}}'
 //
@@ -50,7 +53,7 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::setUpAndProcess_{{functi
           executeRequest_{{function:prefixed_name}}<ProtocolIn_, ProtocolOut_>,
       this);
 {{/function:eb}}{{#function:eb}}
-  {{#function:in_or_creates_interaction?}}
+  {{#if in_or_creates_interaction?}}
   processInThread(
       std::move(req),
       std::move(serializedRequest),
@@ -61,17 +64,12 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::setUpAndProcess_{{functi
       &{{service:parent_service_cpp_name}}AsyncProcessor::
           executeRequest_{{function:prefixed_name}}<ProtocolIn_, ProtocolOut_>,
       this);
-  {{/function:in_or_creates_interaction?}}
-  {{^function:in_or_creates_interaction?}}
+  {{#else}}
   {{^function:oneway?}}
   if (!req->getShouldStartProcessing()) {
-    {{#function:in_or_creates_interaction?}}
-    auto tile = serverRequest.requestContext()->releaseTile();
-    {{/function:in_or_creates_interaction?}}
     apache::thrift::HandlerCallbackBase::releaseRequest(
         std::move(req),
-        eb{{#function:in_or_creates_interaction?}},
-        std::move(tile){{/function:in_or_creates_interaction?}});
+        eb);
     return;
   }
   {{/function:oneway?}}
@@ -84,16 +82,16 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::setUpAndProcess_{{functi
       {},
       {}};
   executeRequest_{{function:prefixed_name}}<ProtocolIn_, ProtocolOut_>(std::move(serverRequest));
-  {{/function:in_or_creates_interaction?}}
+  {{/if in_or_creates_interaction?}}
 {{/function:eb}}
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
 void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}(
     apache::thrift::ServerRequest&& serverRequest) {
-{{#function:in_or_creates_interaction?}}
+{{#if in_or_creates_interaction?}}
   auto tile = serverRequest.requestContext()->releaseTile();
-{{/function:in_or_creates_interaction?}}
+{{/if in_or_creates_interaction?}}
   // make sure getRequestContext is null
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
@@ -196,8 +194,8 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
       serverRequest.requestContext(),
       requestPileNotification,
       concurrencyControllerNotification,
-      std::move(serverRequest.requestData()){{#function:in_or_creates_interaction?}},
-      std::move(tile){{/function:in_or_creates_interaction?}});
+      std::move(serverRequest.requestData()){{#if in_or_creates_interaction?}},
+      std::move(tile){{/if in_or_creates_interaction?}});
 {{/function:oneway?}}
 {{^function:oneway?}}
     folly::exception_wrapper ew(std::current_exception());
@@ -235,8 +233,8 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()){{#function:in_or_creates_interaction?}},
-          std::move(tile){{/function:in_or_creates_interaction?}});
+          std::move(serverRequest.requestData()){{#if in_or_creates_interaction?}},
+          std::move(tile){{/if in_or_creates_interaction?}});
 {{/function:oneway?}}
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = {{^service:interaction?}}iface_{{/service:interaction?}}{{#service:interaction?}}&iface{{/service:interaction?}}](auto&& cb, ArgsState args) mutable {

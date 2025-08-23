@@ -189,7 +189,8 @@ class Sync({{#service:extends}}{{!
         return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{service:parent_service_name}}_{{service:name}}()
     {{/service:interaction?}}
     {{#service:supported_functions}}
-    {{^function:async_only?}}
+    {{#let async_only? = (or service:interaction? function:sink_or_stream? function:starts_interaction? function:creates_interaction?)}}
+    {{#if (not async_only?)}}
 
     def {{function:name}}(
         self{{#function:args}},
@@ -226,5 +227,5 @@ class Sync({{#service:extends}}{{!
             "Empty Response",
         )
         {{/type:void?}}{{/function:return_type}}
-    {{/function:async_only?}}
+    {{/if (not async_only?)}}
     {{/service:supported_functions}}

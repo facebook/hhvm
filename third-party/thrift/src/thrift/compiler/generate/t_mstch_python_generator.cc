@@ -605,7 +605,6 @@ class python_mstch_function : public mstch_function {
         {
             {"function:regular_response_type",
              &python_mstch_function::regular_response_type},
-            {"function:async_only?", &python_mstch_function::async_only},
         });
   }
 
@@ -615,14 +614,6 @@ class python_mstch_function : public mstch_function {
     }
     const t_type* rettype = function_->return_type()->get_true_type();
     return context_.type_factory->make_mstch_object(rettype, context_, pos_);
-  }
-
-  mstch::node async_only() {
-    // TODO(T230131540): Whisker migration requires back-reference for
-    // is_interaction_member
-    return function_->sink_or_stream() ||
-        function_->is_interaction_constructor() || is_interaction_member() ||
-        function_->interaction();
   }
 };
 

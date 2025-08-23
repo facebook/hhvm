@@ -14,13 +14,17 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#service:functions}}{{#function:return_type}}{{^function:starts_interaction?}}
+}}
+{{#service:functions}}
+{{#let in_or_creates_interaction? = (or service:interaction? function:creates_interaction?)}}
+{{#function:return_type}}
+{{^function:starts_interaction?}}
 template <typename RpcOptions>
 void {{> service_common/client_class_name}}::fbthrift_send_{{function:cpp_name}}(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, {{> types/callback_type}} callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}) {
-  {{#function:in_or_creates_interaction?}}
+  {{#if in_or_creates_interaction?}}
   apache::thrift::RpcOptions rpcOpts(std::forward<RpcOptions>(rpcOptions));
   setInteraction({{#function:creates_interaction?}}handle, {{/function:creates_interaction?}}rpcOpts);
-  {{/function:in_or_creates_interaction?}}
+  {{/if in_or_creates_interaction?}}
 
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
@@ -32,8 +36,7 @@ void {{> service_common/client_class_name}}::fbthrift_send_{{function:cpp_name}}
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "{{service:name}}"{{/service:interaction?}});
   apache::thrift::clientSendT<{{> types/function_kind}}>(std::move(request), {{!
-    }}{{#function:in_or_creates_interaction?}}std::move(rpcOpts){{/function:in_or_creates_interaction?}}{{!
-    }}{{^function:in_or_creates_interaction?}}std::forward<RpcOptions>(rpcOptions){{/function:in_or_creates_interaction?}}{{!
+    }}{{#if in_or_creates_interaction?}}std::move(rpcOpts){{#else}}std::forward<RpcOptions>(rpcOptions){{/if}}{{!
     }}, std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), std::move(interceptorFrameworkMetadata));
 }
 

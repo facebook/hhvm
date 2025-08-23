@@ -32,12 +32,12 @@ cdef extern from *:
     std::shared_ptr<T> corrupt_simple(
             std::shared_ptr<T> hrift,
             const std::string& bad) noexcept {
-        *hrift->strField_ref() = bad;
+        *hrift->strField() = bad;
         return hrift;
     }
 
     void mutate_simple(convertible::Simple& simple) noexcept {
-        simple.strField_ref() = "mutated";
+        simple.strField() = "mutated";
     }
 
     std::string get_strField(std::shared_ptr<convertible::Simple> simple) noexcept {

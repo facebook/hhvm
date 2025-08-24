@@ -5,6 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#if HAVE_FSEVENTS
+
 #include <folly/String.h>
 #include <folly/Synchronized.h>
 #include <condition_variable>
@@ -18,8 +20,6 @@
 #include "watchman/fs/Pipe.h"
 #include "watchman/watcher/WatcherRegistry.h"
 #include "watchman/watchman_cmd.h"
-
-#if HAVE_FSEVENTS
 
 #include "watchman/watcher/fsevents.h"
 

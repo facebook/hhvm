@@ -102,6 +102,54 @@ set(
   mvfst::mvfst_state_machine
 )
 
+# append proxygen::coro sources
+set(
+    PROXYGEN_CORO_SOURCES
+    dns/DNSModule.cpp
+    dns/DNSResolver.cpp
+    dns/Rfc6724.cpp
+    http/coro/HTTPBodyEventQueue.cpp
+    http/coro/HTTPFilterFactoryHandler.cpp
+    http/coro/HTTPEvents.cpp
+    http/coro/HTTPError.cpp
+    http/coro/HTTPCoroSession.cpp
+    http/coro/HTTPByteEventHelpers.cpp
+    http/coro/HTTPSourceReader.cpp
+    http/coro/HTTPSourceFilter.cpp
+    http/coro/HTTPHandlerChain.cpp
+    http/coro/HTTPStreamSourceSink.cpp
+    http/coro/HTTPStreamSource.cpp
+    http/coro/HTTPTransactionAdaptorSource.cpp
+    http/coro/util/Transport.cpp
+    http/coro/util/ExecutorSourceFilter.cpp
+    http/coro/util/DetachableExecutor.cpp
+    http/coro/util/CancellableBaton.cpp
+    http/coro/transport/HTTPConnectTransport.cpp
+    http/coro/transport/HTTPConnectStream.cpp
+    http/coro/transport/HTTPConnectAsyncTransport.cpp
+    http/coro/transport/CoroSSLTransport.cpp
+    http/coro/client/HTTPCoroSessionPool.cpp
+    http/coro/client/HTTPCoroConnector.cpp
+    http/coro/client/HTTPClientConnectionCache.cpp
+    http/coro/client/HTTPClient.cpp
+    http/coro/client/CoroDNSResolver.cpp
+    http/coro/server/HTTPCoroAcceptor.cpp
+    http/coro/server/HTTPServer.cpp
+    http/coro/server/handlers/ExpectContinueWrapperHandler.cpp
+    http/coro/filters/DecompressionFilter.cpp
+    http/coro/filters/CompressionFilter.cpp
+    http/coro/filters/HTTPRedirectHandler.cpp
+    http/coro/filters/DecompressionFilterFactory.cpp
+    http/coro/filters/MutateFilter.cpp
+    http/coro/filters/Logger.cpp
+    http/coro/filters/RateLimitFilter.cpp
+    http/coro/filters/RequestContextFilterFactory.cpp
+    http/coro/filters/Status1xxFilter.cpp
+    http/coro/filters/StatsFilterUtil.cpp
+    http/coro/filters/TransformFilter.cpp
+    http/coro/filters/VisitorFilter.cpp
+)
+
 add_library(
     proxygen
     healthcheck/ServerHealthCheckerCallback.cpp
@@ -219,6 +267,7 @@ add_library(
     utils/ZstdStreamCompressor.cpp
     utils/ZstdStreamDecompressor.cpp
     ${HTTP3_SOURCES}
+    ${PROXYGEN_CORO_SOURCES}
     ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/http/HTTPCommonHeaders.cpp
     ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceEventType.cpp
     ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceFieldType.cpp
@@ -234,6 +283,7 @@ target_include_directories(
     $<BUILD_INTERFACE:${PROXYGEN_FBCODE_ROOT}>
     $<BUILD_INTERFACE:${PROXYGEN_GENERATED_ROOT}>
     $<INSTALL_INTERFACE:include/>
+    ${CARES_INCLUDE_DIR}
 )
 target_compile_options(
     proxygen PRIVATE

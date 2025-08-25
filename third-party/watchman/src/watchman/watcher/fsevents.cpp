@@ -5,6 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include "watchman/watchman_cmd.h" // @donotremove
+
 #if HAVE_FSEVENTS
 
 #include <folly/String.h>
@@ -19,7 +21,6 @@
 #include "watchman/LogConfig.h"
 #include "watchman/fs/Pipe.h"
 #include "watchman/watcher/WatcherRegistry.h"
-#include "watchman/watchman_cmd.h"
 
 #include "watchman/watcher/fsevents.h"
 

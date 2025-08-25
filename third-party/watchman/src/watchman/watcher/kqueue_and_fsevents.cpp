@@ -5,6 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include "watchman/watchman_cmd.h" // @donotremove
+
 #if HAVE_FSEVENTS && defined(HAVE_KQUEUE)
 
 #include <folly/Synchronized.h>
@@ -16,7 +18,6 @@
 #include "watchman/watcher/WatcherRegistry.h"
 #include "watchman/watcher/fsevents.h"
 #include "watchman/watcher/kqueue.h"
-#include "watchman/watchman_cmd.h"
 #include "watchman/watchman_file.h"
 
 namespace watchman {

@@ -207,20 +207,10 @@ void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
 
-  // Initialize func entry registers.
-  if (func != nullptr) {
-    // Avoid the load if we statically know the func id.
-    v << copy{v.cns(func->getFuncId().toInt()), r_func_entry_callee_id()};
-  } else {
-    // We have to use an ifdef instead of `if (use_lowptr)` here due to
-    // funcIdOffset only being defined in non-lowptr mode.
-#ifdef USE_LOWPTR
-  // TFuncs are identified with their func ids in lowptr mode.
-  v << copy{callee, r_func_entry_callee_id()};
-#else
-  v << load{callee[Func::funcIdOffset()], r_func_entry_callee_id()};
-#endif
-  }
+  // Initialize func entry registers. `callee_id` is initialized later
+  // as it may be copied over from `callee` for virtual func call entries,
+  // and doing so after loading the func entry improves register allocator
+  // behavior.
   v << copy{v.cns(extra->arFlags), r_func_entry_ar_flags()};
   auto const withCtx =
     setCtxReg(v, calleePrototype, inst->src(3), ctx, r_func_entry_ctx());
@@ -236,6 +226,7 @@ void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
   auto const done = v.makeBlock();
   auto const numArgs = std::min(extra->numInitArgs, calleePrototype->numNonVariadicParams());
   if (func != nullptr) {
+    v << copy{v.cns(func->getFuncId().toInt()), r_func_entry_callee_id()};
     // When we statically know the callee, emit a smashable call that initially
     // calls a recyclable service request stub. The stub and the eventual targets
     // take rvmfp() as an argument, pointing to the callee ActRec.
@@ -256,6 +247,14 @@ void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
       dest,
       sizeof(LowPtr<uint8_t>)
     );
+    // We have to use an ifdef instead of `if (use_lowptr)` here due to
+    // funcIdOffset only being defined in non-lowptr mode.
+#ifdef USE_LOWPTR
+  // TFuncs are identified with their func ids in lowptr mode.
+  v << copy{callee, r_func_entry_callee_id()};
+#else
+  v << load{callee[Func::funcIdOffset()], r_func_entry_callee_id()};
+#endif
     v << callphpr{dest, func_entry_regs(withCtx)};
   }
 

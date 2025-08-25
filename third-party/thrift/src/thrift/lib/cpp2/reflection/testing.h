@@ -17,13 +17,19 @@
 #pragma once
 #include <gtest/gtest.h>
 
+#include <thrift/lib/cpp/util/EnumUtils.h>
+#include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/debug_thrift_data_difference/debug.h>
+#include <thrift/lib/cpp2/type/Tag.h>
 
 namespace apache::thrift {
 
 template <class T>
 ::testing::AssertionResult thriftEqualHelper(
     const char* left, const char* right, const T& a, const T& b) {
+  static_assert(
+      is_thrift_class_v<T> || util::is_thrift_enum_v<T>,
+      "Thrift equal helper only works for thrift structs, unions, exceptions, and enums.");
   ::testing::AssertionResult result(false);
   if (facebook::thrift::debug_thrift_data_difference(
           a,
@@ -43,6 +49,8 @@ template <class Tag, class T>
     const Tag&,
     const T& a,
     const T& b) {
+  static_assert(
+      type::is_thrift_type_tag_v<Tag>, "Tag must be a thrift type tag.");
   ::testing::AssertionResult result(false);
   if (facebook::thrift::debug_thrift_data_difference<Tag>(
           a,
@@ -56,6 +64,9 @@ template <class Tag, class T>
 
 } // namespace apache::thrift
 
+// Macros for testing Thrift definitions: structs, exceptions, unions, and
+// enums. Use `EXPECT_THRIFT_TAG_EQ` to directly compare two fields after
+// getting relevant type tag from `op::get_type_tag`.
 #define EXPECT_THRIFT_EQ(a, b) \
   EXPECT_PRED_FORMAT2(::apache::thrift::thriftEqualHelper, a, b)
 

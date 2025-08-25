@@ -31,4 +31,11 @@ TEST(ExpectThriftEqTest, enums) {
   EXPECT_THRIFT_EQ(e1, cpp2::MyEnum1::ME1_0);
 }
 
+TEST(ExpectThriftTagEqTest, fields) {
+  OptionalFieldsStruct s;
+  s.shared_fields() = std::make_shared<std::vector<HasInt>>();
+  using Tag = op::get_type_tag<OptionalFieldsStruct, ident::shared_fields>;
+  EXPECT_THRIFT_TAG_EQ(Tag{}, *s.shared_fields(), *s.shared_fields());
+}
+
 } // namespace apache::thrift::test

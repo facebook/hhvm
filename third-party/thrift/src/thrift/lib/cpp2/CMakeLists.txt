@@ -331,6 +331,7 @@ add_library(
   transport/rocket/client/RocketStreamServerCallback.cpp
   transport/rocket/client/RocketStreamServerCallbackWithChunkTimeout.cpp
   transport/rocket/client/RocketSinkServerCallback.cpp
+  transport/rocket/client/RocketBiDiServerCallback.cpp
   transport/rocket/flush/FlushManager.cpp
   transport/rocket/framing/parser/AllocatingParserStrategy.cpp
   transport/rocket/framing/ErrorCode.cpp

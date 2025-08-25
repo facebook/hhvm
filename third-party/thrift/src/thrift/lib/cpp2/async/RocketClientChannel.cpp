@@ -556,6 +556,100 @@ class FirstRequestProcessorSink : public SinkClientCallback,
   rocket::RocketClient::DestructionGuardedClient guardedClient_;
 };
 
+class FirstRequestProcessorBiDi : public BiDiClientCallback,
+                                  private BiDiServerCallback {
+ public:
+  FirstRequestProcessorBiDi(
+      uint16_t protocolId,
+      apache::thrift::ManagedStringView&& methodName,
+      BiDiClientCallback* clientCallback,
+      folly::EventBase* evb,
+      rocket::RocketClient::DestructionGuardedClient guardedClient)
+      : protocolId_(protocolId),
+        methodName_(std::move(methodName)),
+        clientCallback_(clientCallback),
+        evb_(evb),
+        guardedClient_(std::move(guardedClient)) {}
+
+  FOLLY_NODISCARD bool onFirstResponse(
+      FirstResponsePayload&& firstResponse,
+      folly::EventBase* evb,
+      BiDiServerCallback* serverCallback) override {
+    SCOPE_EXIT {
+      delete this;
+    };
+    LegacyResponseSerializationHandler handler(protocolId_, methodName_.view());
+    if (auto error = processFirstResponse(
+            protocolId_,
+            firstResponse.metadata,
+            firstResponse.payload,
+            handler)) {
+      clientCallback_->onFirstResponseError(std::move(error));
+      return serverCallback->onStreamCancel() &&
+          serverCallback->onSinkError(
+              folly::make_exception_wrapper<TApplicationException>(
+                  TApplicationException::INTERRUPTION,
+                  "process first response error"));
+    }
+    serverCallback->resetClientCallback(*clientCallback_);
+    return clientCallback_->onFirstResponse(
+        std::move(firstResponse), evb, serverCallback);
+  }
+  void onFirstResponseError(folly::exception_wrapper ew) override {
+    SCOPE_EXIT {
+      delete this;
+    };
+    ew.handle(
+        [&](rocket::RocketException& ex) {
+          LegacyResponseSerializationHandler handler(
+              protocolId_, methodName_.view());
+          auto response = decodeResponseError(
+              std::move(ex),
+              handler,
+              *guardedClient_.client->getPayloadSerializer());
+          if (response.hasException()) {
+            clientCallback_->onFirstResponseError(
+                std::move(response).exception());
+            return;
+          }
+
+          if (clientCallback_->onFirstResponse(
+                  std::move(*response), evb_, this)) {
+            DCHECK(clientCallback_);
+            if (clientCallback_->onSinkCancel()) {
+              std::ignore = clientCallback_->onStreamComplete();
+            }
+          }
+        },
+        [&](...) { clientCallback_->onFirstResponseError(std::move(ew)); });
+  }
+
+  bool onSinkRequestN(uint64_t) override { std::terminate(); }
+  void resetServerCallback(BiDiServerCallback&) override { std::terminate(); }
+
+  bool onSinkNext(StreamPayload&&) override { std::terminate(); }
+  bool onSinkError(folly::exception_wrapper) override { std::terminate(); }
+  bool onSinkComplete() override { std::terminate(); }
+  bool onSinkCancel() override { std::terminate(); }
+  void resetClientCallback(BiDiClientCallback& clientCallback) override {
+    clientCallback_ = &clientCallback;
+  }
+
+  bool onStreamNext(StreamPayload&&) override { std::terminate(); }
+  bool onStreamError(folly::exception_wrapper) override { std::terminate(); }
+  bool onStreamComplete() override { std::terminate(); }
+
+  bool onStreamCancel() override { std::terminate(); }
+  bool onStreamRequestN(uint64_t) override { std::terminate(); }
+
+ private:
+  const uint16_t protocolId_;
+  const ManagedStringView methodName_;
+  BiDiClientCallback* clientCallback_;
+  folly::EventBase* evb_;
+  rocket::RocketClient::DestructionGuardedClient guardedClient_;
+};
+
 int32_t getMetaKeepAliveTimeoutMs(RequestSetupMetadata& meta) {
   return meta.keepAliveTimeoutMs().value_or(0);
 }
@@ -863,6 +957,23 @@ void RocketClientChannel::sendRequestSink(
       std::move(frameworkMetadata));
 }
 
+void RocketClientChannel::sendRequestBiDi(
+    RpcOptions&& rpcOptions,
+    apache::thrift::MethodMetadata&& methodMetadata,
+    SerializedRequest&& request,
+    std::shared_ptr<transport::THeader> header,
+    BiDiClientCallback* clientCallback,
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
+  sendThriftRequest(
+      rpcOptions,
+      RpcKind::BIDIRECTIONAL_STREAM,
+      std::move(methodMetadata),
+      std::move(request),
+      std::move(header),
+      clientCallback,
+      std::move(frameworkMetadata));
+}
+
 template <typename Callback>
 void RocketClientChannel::sendThriftRequest(
     const RpcOptions& rpcOptions,
@@ -952,6 +1063,16 @@ void RocketClientChannel::sendThriftRequest(
   } else if constexpr (std::is_same_v<Callback, SinkClientCallback*>) {
     DCHECK(kind == RpcKind::SINK);
     sendSinkRequest(
+        rpcOptions,
+        std::move(metadata),
+        timeout.value_or(std::chrono::milliseconds(0)),
+        std::move(requestPayload),
+        header->getProtocolId(),
+        header->getDesiredCompressionConfig(),
+        clientCallback);
+  } else if constexpr (std::is_same_v<Callback, BiDiClientCallback*>) {
+    DCHECK(kind == RpcKind::BIDIRECTIONAL_STREAM);
+    sendBiDiRequest(
         rpcOptions,
         std::move(metadata),
         timeout.value_or(std::chrono::milliseconds(0)),
@@ -1058,6 +1179,28 @@ void RocketClientChannel::sendSinkRequest(
       std::move(compressionConfig));
 }
 
+void RocketClientChannel::sendBiDiRequest(
+    const RpcOptions& rpcOptions,
+    RequestRpcMetadata&& metadata,
+    std::chrono::milliseconds firstResponseTimeout,
+    rocket::Payload requestPayload,
+    uint16_t protocolId,
+    folly::Optional<CompressionConfig> compressionConfig,
+    BiDiClientCallback* clientCallback) {
+  assert(metadata.name());
+  rocket::RocketClient::sendRequestBiDi(
+      std::move(requestPayload),
+      firstResponseTimeout,
+      rpcOptions.getChunkBufferSize(),
+      new FirstRequestProcessorBiDi(
+          protocolId,
+          std::move(*metadata.name()),
+          clientCallback,
+          evb_,
+          DestructionGuardedClient(this)),
+      std::move(compressionConfig));
+}
+
 void onResponseError(
     RequestClientCallback::Ptr& cb, folly::exception_wrapper ew) {
   cb.release()->onResponseError(std::move(ew));
@@ -1068,6 +1211,10 @@ void onResponseError(StreamClientCallback* cb, folly::exception_wrapper ew) {
 }
 
 void onResponseError(SinkClientCallback* cb, folly::exception_wrapper ew) {
+  cb->onFirstResponseError(std::move(ew));
+}
+
+void onResponseError(BiDiClientCallback* cb, folly::exception_wrapper ew) {
   cb->onFirstResponseError(std::move(ew));
 }
 

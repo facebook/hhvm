@@ -47,7 +47,8 @@ void RocketSinkServerCallback::onSinkError(folly::exception_wrapper ew) {
               err.encoded.metadata,
               err.encoded.payload->computeChainDataLength());
         }
-        std::ignore = client_.sendSinkError(streamId_, std::move(err.encoded));
+        std::ignore =
+            client_.sendSinkError(streamId_, std::move(err.encoded), true);
       },
       [&](...) {
         std::ignore = client_.sendError(

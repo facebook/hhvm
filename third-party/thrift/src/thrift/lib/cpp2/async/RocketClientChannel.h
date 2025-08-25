@@ -100,6 +100,14 @@ class RocketClientChannel final : public ClientChannel,
       SinkClientCallback* clientCallback,
       std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
+  void sendRequestBiDi(
+      RpcOptions&& rpcOptions,
+      MethodMetadata&& metadata,
+      SerializedRequest&& request,
+      std::shared_ptr<transport::THeader> header,
+      BiDiClientCallback* clientCallback,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
+
   folly::EventBase* getEventBase() const override { return evb_; }
 
   uint16_t getProtocolId() override { return protocolId_; }
@@ -204,6 +212,15 @@ class RocketClientChannel final : public ClientChannel,
       uint16_t protocolId,
       folly::Optional<CompressionConfig> compressionConfig,
       SinkClientCallback* cb);
+
+  void sendBiDiRequest(
+      const RpcOptions& rpcOptions,
+      RequestRpcMetadata&& metadata,
+      std::chrono::milliseconds firstResponseTimeout,
+      rocket::Payload requestPayload,
+      uint16_t protocolId,
+      folly::Optional<CompressionConfig> compressionConfig,
+      BiDiClientCallback* clientCallback);
 
   std::optional<std::chrono::milliseconds> getClientTimeout(
       const RpcOptions& rpcOptions) const;

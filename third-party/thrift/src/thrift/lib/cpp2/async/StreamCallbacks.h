@@ -418,9 +418,11 @@ struct BiDiChannelState {
     OnlyStreamOpen,
     OnlySinkOpen,
     Closed
-  } state_;
+  } state_{State::AwaitingFirstResponse};
 
  public:
+  BiDiChannelState() = default;
+
   bool firstResponseSent() const {
     return state_ != State::AwaitingFirstResponse;
   }

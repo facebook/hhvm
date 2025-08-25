@@ -37,6 +37,7 @@
 #include <thrift/lib/cpp2/transport/rocket/client/KeepAliveWatcher.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContext.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContextQueue.h>
+#include <thrift/lib/cpp2/transport/rocket/client/RocketBiDiServerCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketSinkServerCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketStreamServerCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketStreamServerCallbackWithChunkTimeout.h>
@@ -129,16 +130,25 @@ class RocketClient : public virtual folly::DelayedDestruction,
       SinkClientCallback* clientCallback,
       folly::Optional<CompressionConfig> compressionConfig = folly::none);
 
+  void sendRequestBiDi(
+      Payload&& request,
+      std::chrono::milliseconds firstResponseTimeout,
+      int32_t initialRequestN,
+      BiDiClientCallback* clientCallback,
+      folly::Optional<CompressionConfig> compressionConfig = folly::none);
+
   FOLLY_NODISCARD bool sendRequestN(StreamId streamId, int32_t n);
-  void cancelStream(StreamId streamId);
+  void cancelStream(StreamId streamId, bool freeChannel = true);
   FOLLY_NODISCARD bool sendPayload(
       StreamId streamId, StreamPayload&& payload, Flags flags);
-  FOLLY_NODISCARD bool sendError(StreamId streamId, RocketException&& rex);
-  FOLLY_NODISCARD bool sendComplete(StreamId streamId, bool closeStream);
+  // TODO(T235448311): freeChannel should probably always be true
+  FOLLY_NODISCARD bool sendError(
+      StreamId streamId, RocketException&& rex, bool freeChannel = true);
+  FOLLY_NODISCARD bool sendComplete(StreamId streamId, bool freeChannel);
   FOLLY_NODISCARD bool sendHeadersPush(
       StreamId streamId, HeadersPayload&& payload);
   FOLLY_NODISCARD bool sendSinkError(
-      StreamId streamId, StreamPayload&& payload);
+      StreamId streamId, StreamPayload&& payload, bool freeChannel);
 
   bool streamExists(StreamId streamId) const;
 
@@ -292,6 +302,11 @@ class RocketClient : public virtual folly::DelayedDestruction,
         : storage_(
               reinterpret_cast<intptr_t>(ptr.release()) |
               static_cast<intptr_t>(CallbackType::SINK)) {}
+    explicit ServerCallbackUniquePtr(
+        std::unique_ptr<RocketBiDiServerCallback> ptr) noexcept
+        : storage_(
+              reinterpret_cast<intptr_t>(ptr.release()) |
+              static_cast<intptr_t>(CallbackType::BIDI)) {}
 
     ServerCallbackUniquePtr(ServerCallbackUniquePtr&& other) noexcept
         : storage_(std::exchange(other.storage_, 0)) {}
@@ -309,9 +324,11 @@ class RocketClient : public virtual folly::DelayedDestruction,
         case CallbackType::SINK:
           return f(reinterpret_cast<RocketSinkServerCallback*>(
               storage_ & kPointerMask));
-        default:
-          folly::assume_unreachable();
+        case CallbackType::BIDI:
+          return f(reinterpret_cast<RocketBiDiServerCallback*>(
+              storage_ & kPointerMask));
       }
+      folly::assume_unreachable();
     }
 
     ServerCallbackUniquePtr& operator=(
@@ -331,6 +348,7 @@ class RocketClient : public virtual folly::DelayedDestruction,
       STREAM,
       STREAM_WITH_CHUNK_TIMEOUT,
       SINK,
+      BIDI,
     };
 
     static constexpr intptr_t kTypeMask = 3;
@@ -513,6 +531,13 @@ class RocketClient : public virtual folly::DelayedDestruction,
   void handleSinkResponse(
       StreamId streamId,
       RocketSinkServerCallback& serverCallback,
+      Payload&& fullPayload,
+      bool next,
+      bool complete);
+
+  void handleBiDiResponse(
+      StreamId streamId,
+      RocketBiDiServerCallback& serverCallback,
       Payload&& fullPayload,
       bool next,
       bool complete);

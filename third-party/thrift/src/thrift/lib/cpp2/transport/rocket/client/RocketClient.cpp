@@ -266,9 +266,9 @@ void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
         if (it != streams_.end()) {
           it->match([&](auto* serverCallbackPtr) {
             // Sink currently ignores this frame
-            if constexpr (!std::is_same_v<
+            if constexpr (std::is_convertible_v<
                               decltype(serverCallbackPtr),
-                              RocketSinkServerCallback*>) {
+                              RocketStreamServerCallback*>) {
               serverCallbackPtr->onStreamHeaders(
                   HeadersPayload(serverMeta.streamHeadersPush_ref()
                                      ->headersPayloadContent()
@@ -473,6 +473,11 @@ void RocketClient::handlePayloadFrame(
                              RocketSinkServerCallback>) {
       handleSinkResponse(
           streamId, serverCallback, std::move(*fullPayload), next, complete);
+    } else if constexpr (std::is_same_v<
+                             CallbackType,
+                             RocketBiDiServerCallback>) {
+      handleBiDiResponse(
+          streamId, serverCallback, std::move(*fullPayload), next, complete);
     } else {
       handleStreamResponse(
           streamId, serverCallback, std::move(*fullPayload), next, complete);
@@ -539,6 +544,15 @@ void RocketClient::handleFirstResponse(
   if (complete) {
     if constexpr (std::is_same_v<CallbackType, RocketSinkServerCallback>) {
       serverCallback.onFinalResponse(StreamPayload({}, {}));
+    } else if constexpr (std::is_same_v<
+                             CallbackType,
+                             RocketBiDiServerCallback>) {
+      bool needsFree = !serverCallback.state().sinkAlive();
+      std::ignore = serverCallback.onStreamComplete();
+      if (needsFree) {
+        freeStream(streamId);
+      }
+      return;
     } else {
       serverCallback.onStreamComplete();
     }
@@ -643,12 +657,12 @@ void RocketClient::handleSinkResponse(
     }
 
     // FIXME: Don't bother populating `streamPayload.fds`.  Unfortunately,
-    // FDs currently have nowhere to go in the sink codegen'd code, since
-    // sinks don't seem to have the analog of `header_semifuture_METHOD`.
+    // FDs currently have nowhere to go in the bidi codegen'd code, since
+    // they don't seem to have the analog of `header_semifuture_METHOD`.
     DCHECK(
         !streamPayload->metadata.fdMetadata().has_value() ||
         streamPayload->metadata.fdMetadata()->numFds().value_or(0) == 0)
-        << "FD passing is not implemented for sinks";
+        << "FD passing is not implemented for bidirectional streams";
 
     auto payloadMetadataRef = streamPayload->metadata.payloadMetadata();
     if (payloadMetadataRef &&
@@ -676,6 +690,71 @@ void RocketClient::handleSinkResponse(
       "Received sink payload frame with both next and complete flags not set");
 }
 
+void RocketClient::handleBiDiResponse(
+    StreamId streamId,
+    RocketBiDiServerCallback& serverCallback,
+    Payload&& fullPayload,
+    bool next,
+    bool complete) {
+  if (next) {
+    auto streamPayload = getPayloadSerializer()->unpack<StreamPayload>(
+        std::move(fullPayload), encodeMetadataUsingBinary_);
+    if (streamPayload.hasException()) {
+      bool needsFree = !serverCallback.state().sinkAlive();
+      serverCallback.onStreamError(std::move(streamPayload.exception()));
+      if (needsFree) {
+        freeStream(streamId);
+      }
+      return;
+    }
+
+    // FIXME: Don't bother populating `streamPayload.fds`.  Unfortunately,
+    // FDs currently have nowhere to go in the bidi codegen'd code, since
+    // they don't seem to have the analog of `header_semifuture_METHOD`.
+    DCHECK(
+        !streamPayload->metadata.fdMetadata().has_value() ||
+        streamPayload->metadata.fdMetadata()->numFds().value_or(0) == 0)
+        << "FD passing is not implemented for bidirectional streams";
+    auto payloadMetadataRef = streamPayload->metadata.payloadMetadata();
+    if (payloadMetadataRef &&
+        payloadMetadataRef->getType() ==
+            PayloadMetadata::Type::exceptionMetadata) {
+      bool needsFree = !serverCallback.state().sinkAlive();
+      serverCallback.onStreamError(apache::thrift::detail::EncodedStreamError(
+          std::move(streamPayload.value())));
+      if (needsFree) {
+        freeStream(streamId);
+      }
+      return;
+    }
+    if (complete) {
+      bool needsFree = !serverCallback.state().sinkAlive();
+      std::ignore =
+          serverCallback.onStreamFinalPayload(std::move(*streamPayload));
+      if (needsFree) {
+        freeStream(streamId);
+      }
+      return;
+    }
+    std::ignore = serverCallback.onStreamPayload(std::move(*streamPayload));
+    return;
+  }
+
+  if (complete) {
+    bool needsFree = !serverCallback.state().sinkAlive();
+    std::ignore = serverCallback.onStreamComplete();
+    if (needsFree) {
+      freeStream(streamId);
+    }
+    return;
+  }
+  constexpr auto kErrorMsg =
+      "Received stream payload frame with both next and complete flags not set";
+  serverCallback.onStreamError(makeContractViolation(kErrorMsg));
+  freeStream(streamId);
+  contractViolation(kErrorMsg);
+}
+
 template <typename CallbackType>
 void RocketClient::handleErrorFrame(
     CallbackType& serverCallback, std::unique_ptr<folly::IOBuf> frame) {
@@ -688,6 +767,14 @@ void RocketClient::handleErrorFrame(
     serverCallback.onInitialError(std::move(ew));
   } else if constexpr (std::is_same_v<CallbackType, RocketSinkServerCallback>) {
     serverCallback.onFinalResponseError(std::move(ew));
+  } else if constexpr (std::is_same_v<CallbackType, RocketBiDiServerCallback>) {
+    // TODO(T235448311): this should probably close the sink too
+    bool needsFree = !serverCallback.state().sinkAlive();
+    serverCallback.onStreamError(std::move(ew));
+    if (needsFree) {
+      freeStream(streamId);
+    }
+    return;
   } else {
     serverCallback.onStreamError(std::move(ew));
   }
@@ -705,7 +792,9 @@ void RocketClient::handleRequestNFrame(
     serverCallback.onInitialError(makeContractViolation(kErrorMsg));
     freeStream(streamId);
     contractViolation(kErrorMsg);
-  } else if constexpr (std::is_same_v<CallbackType, RocketSinkServerCallback>) {
+  } else if constexpr (
+      std::is_same_v<CallbackType, RocketSinkServerCallback> ||
+      std::is_same_v<CallbackType, RocketBiDiServerCallback>) {
     serverCallback.onSinkRequestN(std::move(requestNFrame).requestN());
   } else {
     constexpr auto kErrorMsg = "Received RequestN frame for stream";
@@ -728,6 +817,19 @@ void RocketClient::handleCancelFrame(
     contractViolation(kErrorMsg);
     return;
   }
+
+  if constexpr (std::is_same_v<CallbackType, RocketBiDiServerCallback>) {
+    if (!serverCallback.state().sinkAlive()) {
+      return;
+    }
+    bool needsFree = !serverCallback.state().streamAlive();
+    serverCallback.onSinkCancel();
+    if (needsFree) {
+      freeStream(streamId);
+    }
+    return;
+  }
+
   constexpr auto kErrorMsg = "Received Cancel frame";
   if constexpr (std::is_same_v<CallbackType, RocketSinkServerCallback>) {
     serverCallback.onFinalResponseError(makeContractViolation(kErrorMsg));
@@ -1006,6 +1108,29 @@ void RocketClient::sendRequestSink(
       std::move(serverCallback));
 }
 
+void RocketClient::sendRequestBiDi(
+    Payload&& request,
+    std::chrono::milliseconds firstResponseTimeout,
+    int32_t initialRequestN,
+    BiDiClientCallback* clientCallback,
+    folly::Optional<CompressionConfig> compressionConfig) {
+  const auto streamId = makeStreamId();
+
+  std::unique_ptr<CompressionConfig> compressionConfigP;
+  if (compressionConfig.has_value()) {
+    compressionConfigP =
+        std::make_unique<CompressionConfig>(*compressionConfig);
+  }
+  auto serverCallback = std::make_unique<RocketBiDiServerCallback>(
+      streamId, *this, *clientCallback, std::move(compressionConfigP));
+  sendRequestStreamChannel(
+      streamId,
+      std::move(request),
+      firstResponseTimeout,
+      initialRequestN,
+      std::move(serverCallback));
+}
+
 template <typename ServerCallback>
 void RocketClient::sendRequestStreamChannel(
     const StreamId& streamId,
@@ -1014,10 +1139,10 @@ void RocketClient::sendRequestStreamChannel(
     int32_t initialRequestN,
     std::unique_ptr<ServerCallback> serverCallback) {
   using Frame = std::conditional_t<
-      std::is_same<RocketStreamServerCallback, ServerCallback>::value ||
-          std::is_same<
+      std::is_same_v<RocketStreamServerCallback, ServerCallback> ||
+          std::is_same_v<
               RocketStreamServerCallbackWithChunkTimeout,
-              ServerCallback>::value,
+              ServerCallback>,
       RequestStreamFrame,
       RequestChannelFrame>;
 
@@ -1193,9 +1318,11 @@ bool RocketClient::sendRequestN(StreamId streamId, int32_t n) {
       });
 }
 
-void RocketClient::cancelStream(StreamId streamId) {
+void RocketClient::cancelStream(StreamId streamId, bool freeChannel) {
   auto g = makeRequestCountGuard(RequestType::INTERNAL);
-  freeStream(streamId);
+  if (freeChannel) {
+    freeStream(streamId);
+  }
   std::ignore = sendFrame(
       CancelFrame(streamId),
       [dg = DestructorGuard(this), this, g = std::move(g)](
@@ -1224,8 +1351,11 @@ bool RocketClient::sendPayload(
       });
 }
 
-bool RocketClient::sendError(StreamId streamId, RocketException&& rex) {
-  freeStream(streamId);
+bool RocketClient::sendError(
+    StreamId streamId, RocketException&& rex, bool freeChannel) {
+  if (freeChannel) {
+    freeStream(streamId);
+  }
   return sendFrame(
       ErrorFrame(streamId, std::move(rex)),
       [this,
@@ -1237,9 +1367,9 @@ bool RocketClient::sendError(StreamId streamId, RocketException&& rex) {
       });
 }
 
-bool RocketClient::sendComplete(StreamId streamId, bool closeStream) {
+bool RocketClient::sendComplete(StreamId streamId, bool freeChannel) {
   auto g = makeRequestCountGuard(RequestType::INTERNAL);
-  if (closeStream) {
+  if (freeChannel) {
     freeStream(streamId);
   }
   return sendPayload(
@@ -1267,8 +1397,11 @@ bool RocketClient::sendHeadersPush(
       std::move(onError));
 }
 
-bool RocketClient::sendSinkError(StreamId streamId, StreamPayload&& payload) {
-  freeStream(streamId);
+bool RocketClient::sendSinkError(
+    StreamId streamId, StreamPayload&& payload, bool freeChannel) {
+  if (freeChannel) {
+    freeStream(streamId);
+  }
   return sendPayload(
       streamId, std::move(payload), Flags().next(true).complete(true));
 }

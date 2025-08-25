@@ -22,6 +22,7 @@ include "thrift/lib/thrift/any.thrift"
 cpp_include "thrift/test/AdapterTest.h"
 cpp_include "thrift/lib/cpp2/protocol/FieldMask.h"
 cpp_include "thrift/lib/cpp2/type/Any.h"
+cpp_include "<unordered_map>"
 
 package "apache.org/thrift/test"
 
@@ -30,6 +31,7 @@ struct Empty {}
 struct Foo {
   1: i32 field1;
   3: i32 field2;
+  @cpp.Type{template = "std::unordered_map"}
   11: map<string, Empty> field3;
 }
 

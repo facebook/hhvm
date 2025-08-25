@@ -146,6 +146,11 @@ bool is_compatible_with_impl(type::map<Key, Value>, const Mask& mask) {
   return true;
 }
 
+template <typename Tag, typename T>
+bool is_compatible_with_impl(type::cpp_type<T, Tag>, const Mask& mask) {
+  return is_compatible_with<Tag>(mask);
+}
+
 template <typename Tag>
 bool is_compatible_with(const Mask& mask) {
   if (isAllMask(mask) || isNoneMask(mask)) {

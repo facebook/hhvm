@@ -2177,7 +2177,7 @@ void in(ISS& env, const bc::Dim& op) {
         auto const base = *last;
         rewind(env, i + 1);
         // We'll need to push the constant onto the stack. If the
-        // sequence originally started with a BaseC (or BaseGC)
+        // sequence originally started with a BaseC
         // instruction, we can just pop off the original value and
         // replace it with the constant. This leaves all offsets the
         // same. If not, we push the constant and set extraPop, which

@@ -301,7 +301,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ArrayMarkLegacyShallow:
   case ArrayUnmarkLegacyRecursive:
   case ArrayUnmarkLegacyShallow:
-  case BaseG:
   case BespokeAppend:
   case BespokeElem:
   case BespokeGetThrow:

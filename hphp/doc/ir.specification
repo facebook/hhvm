@@ -2965,11 +2965,6 @@ SetProp will fail if the base is not a subtype of {Obj|Null}.
 Any instructions that take a pointer to an MInstrState struct use the various
 fields of that struct for holding intermediate values.
 
-| BaseG, D(LvalToGbl|LvalToConst), S(Str), NF
-
-  Get a base from global named S0. If it is not a defining BaseG it can also
-  return the init_null_variant
-
 | PropX, DPropLval, S(Cell) S(Cell) S(PtrToMISTemp|Nullptr), NF
 
   Lookup intermediate property in S0, with key S1. An exception is thrown if

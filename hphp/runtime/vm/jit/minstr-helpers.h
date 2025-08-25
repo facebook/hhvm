@@ -30,47 +30,6 @@ namespace HPHP::jit::MInstrHelpers {
 
 //////////////////////////////////////////////////////////////////////
 
-template<MOpMode mode>
-tv_lval baseGImpl(TypedValue key) {
-  auto const name = prepareKey(key);
-  SCOPE_EXIT { decRefStr(name); };
-
-  auto const env = g_context->m_globalNVTable;
-  assertx(env != nullptr);
-
-  auto base = env->lookup(name);
-  if (base == nullptr) {
-    if (mode == MOpMode::Warn) {
-      SystemLib::throwOutOfBoundsExceptionObject(
-        folly::sformat("Undefined index: {}", name)
-      );
-    }
-    if (mode == MOpMode::Define) {
-      auto tv = make_tv<KindOfNull>();
-      env->set(name, &tv);
-      base = env->lookup(name);
-    } else {
-      return const_cast<TypedValue*>(&immutable_null_base);
-    }
-  }
-  return base;
-}
-
-#define BASE_G_HELPER_TABLE(m)                  \
-  /* name    mode                  */           \
-  m(baseG,   MOpMode::None)                     \
-  m(baseGW,  MOpMode::Warn)                     \
-  m(baseGD,  MOpMode::Define)                   \
-
-#define X(nm, mode)                             \
-inline tv_lval nm(TypedValue key) {             \
-  return baseGImpl<mode>(key);                  \
-}
-BASE_G_HELPER_TABLE(X)
-#undef X
-
-//////////////////////////////////////////////////////////////////////
-
 #define PROP_HELPER_TABLE(m)                        \
   /* name      mode                  keyType     */ \
   m(propC,     MOpMode::None,       KeyType::Any)   \

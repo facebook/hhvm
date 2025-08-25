@@ -608,7 +608,6 @@ bool canDCE(const IRInstruction& inst) {
   case KillActRec:
   case KillIter:
   case KillLoc:
-  case BaseG:
   case PropX:
   case PropQ:
   case PropDX:

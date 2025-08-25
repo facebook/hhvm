@@ -52,16 +52,6 @@ TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgBaseG(IRLS& env, const IRInstruction* inst) {
-  auto const mode = inst->extra<MOpModeData>()->mode;
-  BUILD_OPTAB(BASE_G_HELPER_TABLE, mode);
-
-  auto const args = argGroup(env, inst).typedValue(0);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
-}
-
 void cgFinishMemberOp(IRLS&, const IRInstruction*) {}
 
 ///////////////////////////////////////////////////////////////////////////////

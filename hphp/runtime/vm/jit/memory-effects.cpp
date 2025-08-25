@@ -1863,7 +1863,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ProfileGlobal:
   case LdGblAddr:
   case LdGblAddrDef:
-  case BaseG:
     return may_load_store(AEmpty, AEmpty);
 
   case LdClsCtor:

@@ -3263,7 +3263,6 @@ X(LdRDSAddr,                    RDSHandleAndType);
 X(LdInitRDSAddr,                RDSHandleAndType);
 X(LdTVFromRDS,                  TVInRDSHandleData);
 X(StTVInRDS,                    TVInRDSHandleData);
-X(BaseG,                        MOpModeData);
 X(PropX,                        PropData);
 X(PropQ,                        PropData);
 X(PropDX,                       PropData);

@@ -1269,9 +1269,8 @@ class rust_mstch_function : public mstch_function {
       const t_function* function,
       mstch_context& ctx,
       mstch_element_position pos,
-      const t_interface* iface,
       const std::unordered_multiset<std::string>& function_upcamel_names)
-      : mstch_function(function, ctx, pos, iface),
+      : mstch_function(function, ctx, pos),
         function_upcamel_names_(function_upcamel_names) {
     register_methods(
         this,
@@ -1448,7 +1447,7 @@ class rust_mstch_function : public mstch_function {
 
     // If not present on function, look at service annotations.
     if (const t_const* annot =
-            find_structured_service_exn_annotation(*interface_)) {
+            find_structured_service_exn_annotation(interface())) {
       return get_annotation_property_bool(annot, "anyhow_to_application_exn");
     }
 
@@ -1465,11 +1464,10 @@ class rust_mstch_function_factory {
       const t_function* function,
       mstch_context& ctx,
       mstch_element_position pos,
-      const t_interface* service,
       const std::unordered_multiset<std::string>& function_upcamel_names)
       const {
     return std::make_shared<rust_mstch_function>(
-        function, ctx, pos, service, function_upcamel_names);
+        function, ctx, pos, function_upcamel_names);
   }
 };
 
@@ -2434,7 +2432,6 @@ mstch::node rust_mstch_service::rust_functions() {
   return make_mstch_array(
       service_->get_functions(),
       rust_mstch_function_factory(),
-      service_,
       function_upcamel_names_);
 }
 
@@ -2467,10 +2464,7 @@ mstch::node rust_mstch_service::rust_all_exceptions() {
         context_.type_factory->make_mstch_object(funcs.first, context_, {});
 
     auto functions = make_mstch_array(
-        funcs.second,
-        rust_mstch_function_factory(),
-        service_,
-        function_upcamel_names_);
+        funcs.second, rust_mstch_function_factory(), function_upcamel_names_);
     auto fields = make_mstch_fields(field_map[funcs.first]);
 
     mstch::array function_data;

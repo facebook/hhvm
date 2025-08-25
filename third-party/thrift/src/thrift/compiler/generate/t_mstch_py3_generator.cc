@@ -273,7 +273,7 @@ class py3_mstch_program : public mstch_program {
       }
     }
 
-    return make_mstch_functions(functions, nullptr);
+    return make_mstch_functions(functions);
   }
 
   mstch::node getCustomTemplates() {
@@ -283,7 +283,7 @@ class py3_mstch_program : public mstch_program {
   mstch::node getCustomTypes() { return make_mstch_types(customTypes_); }
 
   mstch::node response_and_stream_functions() {
-    return make_mstch_functions(response_and_stream_functions_, nullptr);
+    return make_mstch_functions(response_and_stream_functions_);
   }
 
   mstch::node getStreamExceptions() {
@@ -536,11 +536,11 @@ class py3_mstch_service : public mstch_service {
   }
 
   mstch::node get_lifecycle_functions() {
-    return make_mstch_functions(lifecycleFunctions(), service_);
+    return make_mstch_functions(lifecycleFunctions());
   }
 
   mstch::node get_supported_functions() {
-    return make_mstch_functions(supportedFunctions(), service_);
+    return make_mstch_functions(supportedFunctions());
   }
 
   mstch::node get_supported_functions_with_lifecycle() {
@@ -548,7 +548,7 @@ class py3_mstch_service : public mstch_service {
     for (auto* func : lifecycleFunctions()) {
       funcs.push_back(func);
     }
-    return make_mstch_functions(funcs, service_);
+    return make_mstch_functions(funcs);
   }
 
   mstch::node get_supported_interactions() {
@@ -585,11 +585,8 @@ class py3_mstch_interaction : public py3_mstch_service {
 class py3_mstch_function : public mstch_function {
  public:
   py3_mstch_function(
-      const t_function* f,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const t_interface* iface)
-      : mstch_function(f, ctx, pos, iface), cppName_(cpp2::get_name(f)) {
+      const t_function* f, mstch_context& ctx, mstch_element_position pos)
+      : mstch_function(f, ctx, pos), cppName_(cpp2::get_name(f)) {
     register_methods(
         this,
         {
@@ -605,8 +602,8 @@ class py3_mstch_function : public mstch_function {
   mstch::node event_based() {
     return function_->get_unstructured_annotation("thread") == "eb" ||
         function_->has_structured_annotation(kCppProcessInEbThreadUri) ||
-        interface_->has_unstructured_annotation("process_in_event_base") ||
-        interface_->has_structured_annotation(kCppProcessInEbThreadUri);
+        interface().has_unstructured_annotation("process_in_event_base") ||
+        interface().has_structured_annotation(kCppProcessInEbThreadUri);
   }
 
   mstch::node stack_arguments() {

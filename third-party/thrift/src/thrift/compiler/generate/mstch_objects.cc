@@ -469,7 +469,7 @@ mstch::node mstch_function::stream_exceptions() {
 }
 
 mstch::node mstch_service::functions() {
-  return make_mstch_functions(get_functions(), service_);
+  return make_mstch_functions(get_functions());
 }
 
 mstch::node mstch_service::extends() {

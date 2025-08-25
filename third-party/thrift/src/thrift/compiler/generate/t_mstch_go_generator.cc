@@ -590,9 +590,8 @@ class mstch_go_function : public mstch_function {
       const t_function* f,
       mstch_context& ctx,
       mstch_element_position pos,
-      const t_interface* iface,
       go::codegen_data* data)
-      : mstch_function(f, ctx, pos, iface), data_(*data) {
+      : mstch_function(f, ctx, pos), data_(*data) {
     (void)data_;
     register_methods(
         this,

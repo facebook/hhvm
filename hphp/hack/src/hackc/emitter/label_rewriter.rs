@@ -192,8 +192,6 @@ where
             | Opcode::AwaitLowPri
             | Opcode::BareThis(..)
             | Opcode::BaseC(..)
-            | Opcode::BaseGC(..)
-            | Opcode::BaseGL(..)
             | Opcode::BaseH
             | Opcode::BaseL(..)
             | Opcode::BaseSC(..)
@@ -201,7 +199,6 @@ where
             | Opcode::BitNot
             | Opcode::BitOr
             | Opcode::BitXor
-            | Opcode::BreakTraceHint
             | Opcode::CGetCUNop
             | Opcode::CGetG
             | Opcode::CGetL(..)
@@ -268,7 +265,6 @@ where
             | Opcode::Gt
             | Opcode::HasReifiedParent
             | Opcode::Idx
-            | Opcode::IncDecG(..)
             | Opcode::IncDecL(..)
             | Opcode::IncDecM(..)
             | Opcode::IncDecS(..)
@@ -355,7 +351,6 @@ where
             | Opcode::SetImplicitContextByValue
             | Opcode::SetL(..)
             | Opcode::SetM(..)
-            | Opcode::SetOpG(..)
             | Opcode::SetOpL(..)
             | Opcode::SetOpM(..)
             | Opcode::SetOpS(..)
@@ -372,7 +367,6 @@ where
             | Opcode::ThrowNonExhaustiveSwitch
             | Opcode::Throw
             | Opcode::True
-            | Opcode::UGetCUNop
             | Opcode::UnsetG
             | Opcode::UnsetL(..)
             | Opcode::UnsetM(..)

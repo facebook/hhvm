@@ -1152,17 +1152,6 @@ std::set<int> localIds(Op op, PC pc) {
 
 bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
   switch (op) {
-    case Op::BreakTraceHint:
-      if (cur->mbr_live) {
-        // Special case for unreachable code. hhbbc generates
-        // BreakTraceHint; String; Fatal
-        auto const str = pc + instrLen(pc);
-        if (peek_op(str) != Op::String) break;
-        auto const fatal = str + instrLen(str);
-        if (peek_op(fatal) != Op::Fatal) break;
-        cur->mbr_live = false;
-      }
-      break;
     case Op::InitProp:
     case Op::CheckProp: {
         auto fname = m_func->name->toCppString();
@@ -1311,7 +1300,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       if (op == Op::AssertRATL) break;
       [[fallthrough]];
     }
-    case Op::BaseGC:
     case Op::BaseC: {
       auto const stackIdx = getImm(pc, 0).u_IVA;
       if (stackIdx >= cur->stklen) {
@@ -1545,13 +1533,13 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
 
   if (isMemberBaseOp(op)) {
     cur->mbr_live = true;
-    if (op == Op::BaseGC || op == Op::BaseGL || op == Op::BaseL)  {
+    if (op == Op::BaseL)  {
       auto new_pc = pc;
       decode_op(new_pc);
       if (op == Op::BaseL) decode_iva(new_pc);
       decode_iva(new_pc);
       cur->mbr_mode = decode_oa<MOpMode>(new_pc);
-      if (op == Op::BaseL) decode_oa<ReadonlyOp>(new_pc);
+      decode_oa<ReadonlyOp>(new_pc);
     }
   } else if (isMemberFinalOp(op)) {
     cur->mbr_live = false;

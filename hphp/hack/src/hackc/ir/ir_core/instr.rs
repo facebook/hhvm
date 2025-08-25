@@ -552,7 +552,6 @@ pub enum Hhbc {
     SetImplicitContextByValue(ValueId, LocId),
     SetL(ValueId, LocalId, LocId),
     SetOpL(ValueId, LocalId, SetOpOp, LocId),
-    SetOpG([ValueId; 2], SetOpOp, LocId),
     SetOpS([ValueId; 3], SetOpOp, LocId),
     SetS([ValueId; 3], ReadonlyOp, LocId),
     Shl([ValueId; 2], LocId),
@@ -587,11 +586,6 @@ impl CanThrow for Hhbc {
 pub enum BaseOp {
     // Get base from value. Has output of base value.
     BaseC {
-        mode: MOpMode,
-        loc: LocId,
-    },
-    // Get base from global name. Mutates global.
-    BaseGC {
         mode: MOpMode,
         loc: LocId,
     },
@@ -719,8 +713,7 @@ impl MemberOp {
 
         let rets_from_base = match self.base_op {
             BaseOp::BaseC { .. } => (base_key_is_element_access && write_op) as usize,
-            BaseOp::BaseGC { .. }
-            | BaseOp::BaseH { .. }
+            BaseOp::BaseH { .. }
             | BaseOp::BaseL { .. }
             | BaseOp::BaseSC { .. }
             | BaseOp::BaseST { .. } => 0,

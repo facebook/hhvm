@@ -228,13 +228,9 @@ static const struct {
   { OpSetG,        {StackTop2,        Stack1,       OutSameAsInput1  }},
   { OpSetS,        {StackTop3,        Stack1,       OutSameAsInput1  }},
   { OpSetOpL,      {Stack1|Local,     Stack1|Local, OutSetOp        }},
-  { OpSetOpG,      {StackTop2|DontGuardAny,
-                                      Stack1,       OutUnknown      }},
   { OpSetOpS,      {StackTop3|DontGuardAny,
                                       Stack1,       OutUnknown      }},
   { OpIncDecL,     {Local,            Stack1|Local, OutIncDec       }},
-  { OpIncDecG,     {Stack1|DontGuardAny,
-                                      Stack1,       OutUnknown      }},
   { OpIncDecS,     {StackTop2|DontGuardAny,
                                       Stack1,       OutUnknown      }},
   { OpUnsetL,      {Local,            Local,        OutNone         }},
@@ -314,7 +310,7 @@ static const struct {
   { OpVerifyTypeTS,
                    {StackTop2,        Stack1,       OutSameAsInput2 }},
   { OpVerifyRetNonNullC,
-                   {Stack1,           Stack1,       OutSameAsInput1  }},
+                   {Stack1,           Stack1,       OutSameAsInput1 }},
   { OpVerifyOutType,
                    {Stack1,           Stack1,       OutUnknown      }},
   { OpOODeclExists,
@@ -350,7 +346,6 @@ static const struct {
                    {None,             None,         OutNone         }},
   { OpAssertRATL,  {None,             None,         OutNone         }},
   { OpAssertRATStk,{None,             None,         OutNone         }},
-  { OpBreakTraceHint,{None,           None,         OutNone         }},
   { OpGetMemoKeyL, {Local,            Stack1,       OutUnknown      }},
   { OpResolveRFunc,{Stack1,           Stack1,       OutFuncLike     }},
   { OpResolveFunc, {None,             Stack1,       OutFunc         }},
@@ -398,8 +393,6 @@ static const struct {
 
   /*** 16. Member instructions ***/
 
-  { OpBaseGC,      {StackI,           MBase,        OutNone         }},
-  { OpBaseGL,      {Local,            MBase,        OutNone         }},
   { OpBaseSC,      {StackI|StackI2,   MBase,        OutNone         }},
   { OpBaseL,       {Local,            MBase,        OutNone         }},
   { OpBaseC,       {StackI,           MBase,        OutNone         }},
@@ -427,8 +420,6 @@ static const struct {
                                       None,         OutNone         }},
   { OpCGetCUNop,   {Stack1|DontGuardAny,
                                       Stack1,       OutCInput       }},
-  { OpUGetCUNop,   {Stack1|DontGuardAny,
-                                      Stack1,       OutNullUninit   }},
 };
 
 namespace {
@@ -556,7 +547,6 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
   switch (ni.op()) {
   case Op::Nop:
   case Op::CGetCUNop:
-  case Op::UGetCUNop:
     return true;
   default:
     return false;

@@ -61,7 +61,6 @@ impl fmt::Display for Input<'_> {
 #[derive(Debug, Eq, PartialEq, Hash)]
 pub(crate) enum BaseOp {
     Base(MOpMode, ReadonlyOp, Rc<SrcLoc>),
-    BaseG(MOpMode, Rc<SrcLoc>),
     BaseH(Rc<SrcLoc>),
     BaseSC(MOpMode, ReadonlyOp, Rc<SrcLoc>),
 }

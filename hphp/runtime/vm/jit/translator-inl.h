@@ -44,7 +44,6 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {
     case Op::IterNext: // Ditto
     case Op::Throw:
     case Op::NativeImpl:
-    case Op::BreakTraceHint:
     case Op::MemoGet:
     case Op::MemoGetEager:
       return ControlFlowInfo::BreaksBB;

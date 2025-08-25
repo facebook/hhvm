@@ -796,11 +796,6 @@ CGetCUNop   [C|U:<T>]  ->  [C:<T>]
   Convert a cell or uninit value to a cell, no op. This is a flavor-safety only
   opcode and should only be used when $1 is statically known to be a cell.
 
-UGetCUNop   [C|U:<T>]  ->  [U:<T>]
-
- Convert a cell or uninit value to an uninit, no op. This is a flavor-safety
- only opcode and should only be used when $1 is statically known to be an
- uninit.
 
 2. Literal and constant instructions
 ------------------------------------
@@ -1500,18 +1495,6 @@ SetOpL <local variable id> <op>    [C]  ->  [C]
     Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd,
     BitOr, BitXor.
 
-SetOpG <op>    [C C]  ->  [C]
-
-  Set op global. This instruction first computes x = (string)$2. If the global
-  variable named n is not defined, this instruction marks it as defined, sets
-  it to null, and raises a warning.
-
-  Next, this instruction reads the global variable named x into y, executes z =
-  y <op> $1, assigns z into the global variable named x, and then pushes z onto
-  the stack as a cell. The immediate value must be one of the following
-  opcodes:
-    Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor.
-
 SetOpS <op>    [C C:Class C]  ->  [C]
 
   Set op static property. This instruction first computes x = (string)$3. Next
@@ -1540,27 +1523,6 @@ IncDecL <local variable id> <op>    []  ->  [C]
 
   If op is PostDec, this instruction pushes x onto the stack and then it
   executes --x.
-
-IncDecG <op>    [C]  ->  [C]
-
-  Increment/decrement. This instruction first computes x = (string)$1. Next, if
-  the global variable named x is not defined, this instruction first defines it,
-  sets it to null, and raises a warning.
-
-  Where v is the local variable or global variable named x, this instruction
-  performs the following:
-
-  If op is PreInc, this instruction executes ++v and then pushes v onto the
-  stack as a cell.
-
-  If op is PostInc, this instruction pushes v onto the stack and then it
-  executes ++v.
-
-  If op is PreDec, this instruction executes --v and then pushes v onto the
-  stack.
-
-  If op is PostDec, this instruction pushes v onto the stack and then it
-  executes --v.
 
 IncDecS <op>    [C C:Class]  ->  [C]
 
@@ -1854,28 +1816,6 @@ BaseLD <local variable id>    []  ->  [B]
 
   Get base from local. This operation outputs a base that points to the local
   given by %1, whether or not it is defined.
-
-BaseGC                        [C]  ->  [B]
-BaseGL <local variable id>    []  ->  [B]
-
-  Get base from global name. This operation outputs a base that points to the
-  global variable whose name is given by (string)%1 or (string)$1. If the
-  global is not defined, this operation produces a base that points to null.
-
-BaseGCW                        [C]  ->  [B]
-BaseGLW <local variable id>    []  ->  [B]
-
-  Get base from global name. This operation outputs a base that points to the
-  global variable whose name is given by (string)%1 or (string)$1. If the
-  global is not defined, this operation raises a warning and outputs a base
-  that points to null.
-
-BaseGCD                        [C]  ->  [B]
-BaseGLD <local variable id>    []  ->  [B]
-
-  Get base from global name. This operation outputs a base that points to the
-  global variable whose name is given by (string)%1 or (string)$1, defining it
-  first if necessary.
 
 BaseSC                         [C C:Class]  ->  [B]
 
@@ -2597,11 +2537,6 @@ described in the "Instruction set" introduction section.
 10.1 Base Operations
 ---------------------
 
-BaseGC <stack index> <member op mode>    []  ->  []
-BaseGL <local id>    <member op mode>    []  ->  []
-
-  BaseG{C,L}{,W,D} member operation.
-
 BaseSC <stack index> <stack index> <member op mode> <readonly op>    []  ->  []
 
   BaseSC member operation. %1 gives the location of the static property name,
@@ -3094,13 +3029,6 @@ AssertRATStk  <stack offset> <repo auth type>    []  ->  []
   one restriction: "specialized" array type information may not be asserted,
   because the global array type table may only be present in RepoAuthoritative
   mode.
-
-BreakTraceHint   []  ->  []
-
-  This opcode has no effects, but is a hint that code immediately following it
-  is probably not worth including in the same compilation unit as the code in
-  front of it. In HHVM, this is used to tell the JIT to break a Tracelet when
-  it sees this opcode.
 
 Silence  <local id> <Start|End>   []  ->  []
 

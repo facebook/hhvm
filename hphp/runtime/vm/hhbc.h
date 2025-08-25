@@ -663,8 +663,6 @@ constexpr bool isIteratorBaseAccess(Op op) {
 
 inline bool isMemberBaseOp(Op op) {
   switch (op) {
-    case Op::BaseGC:
-    case Op::BaseGL:
     case Op::BaseSC:
     case Op::BaseL:
     case Op::BaseC:

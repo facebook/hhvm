@@ -323,12 +323,7 @@ impl<'a> State<'a> {
             ) => self.step_constant(builder, opcode)?,
 
             Instruct::Opcode(
-                Opcode::BaseC(..)
-                | Opcode::BaseGC(..)
-                | Opcode::BaseH
-                | Opcode::BaseGL(..)
-                | Opcode::BaseL(..)
-                | Opcode::BaseSC(..),
+                Opcode::BaseC(..) | Opcode::BaseH | Opcode::BaseL(..) | Opcode::BaseSC(..),
             ) => self.step_member_op(builder)?,
 
             Instruct::Opcode(Opcode::CreateCl(num_params, classname)) => {
@@ -524,12 +519,6 @@ impl<'a> State<'a> {
                 let base = self.stack_get_n(idx as usize)?;
                 inputs.push(self.reffy(base));
                 node::BaseOp::Base(mode, ReadonlyOp::Any, src_loc)
-            }
-            Instruct::Opcode(Opcode::BaseGC(idx, mode)) => {
-                // Get base from global name.
-                let base = self.stack_get_n(idx as usize)?;
-                inputs.push(self.reffy(base));
-                node::BaseOp::BaseG(mode, src_loc)
             }
             Instruct::Opcode(Opcode::BaseL(local, mode, readonly)) => {
                 // Get base from local.
@@ -1325,8 +1314,6 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::AwaitLowPri
             | Opcode::BareThis(..)
             | Opcode::BaseC(..)
-            | Opcode::BaseGC(..)
-            | Opcode::BaseGL(..)
             | Opcode::BaseH
             | Opcode::BaseL(..)
             | Opcode::BaseSC(..)
@@ -1334,7 +1321,6 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::BitNot
             | Opcode::BitOr
             | Opcode::BitXor
-            | Opcode::BreakTraceHint
             | Opcode::CGetCUNop
             | Opcode::CGetG
             | Opcode::CGetQuietL(..)
@@ -1396,7 +1382,6 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::Gte
             | Opcode::HasReifiedParent
             | Opcode::Idx
-            | Opcode::IncDecG(..)
             | Opcode::IncDecL(..)
             | Opcode::IncDecM(..)
             | Opcode::IncDecS(..)
@@ -1460,7 +1445,6 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::SetG
             | Opcode::SetImplicitContextByValue
             | Opcode::SetM(..)
-            | Opcode::SetOpG(..)
             | Opcode::SetOpL(..)
             | Opcode::SetOpM(..)
             | Opcode::SetOpS(..)
@@ -1475,7 +1459,6 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::Throw
             | Opcode::ThrowAsTypeStructException(_)
             | Opcode::ThrowNonExhaustiveSwitch
-            | Opcode::UGetCUNop
             | Opcode::UnsetG
             | Opcode::UnsetM(..)
             | Opcode::WHResult
@@ -1539,7 +1522,6 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::BitNot
         | Opcode::BitOr
         | Opcode::BitXor
-        | Opcode::BreakTraceHint
         | Opcode::CGetCUNop
         | Opcode::CGetG
         | Opcode::CastBool
@@ -1635,7 +1617,6 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::Throw
         | Opcode::ThrowNonExhaustiveSwitch
         | Opcode::True
-        | Opcode::UGetCUNop
         | Opcode::UnsetG
         | Opcode::VerifyRetNonNullC
         | Opcode::VerifyRetTypeC
@@ -1680,7 +1661,6 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::EnumClassLabel(_)
         | Opcode::FCallFunc(_)
         | Opcode::Fatal(_)
-        | Opcode::IncDecG(_)
         | Opcode::IncDecS(_)
         | Opcode::InstanceOfD(_)
         | Opcode::Int(_)
@@ -1703,7 +1683,6 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::ResolveRClsMethod(_)
         | Opcode::ResolveRFunc(_)
         | Opcode::RetM(_)
-        | Opcode::SetOpG(_)
         | Opcode::SetOpS(_)
         | Opcode::SetS(_)
         | Opcode::String(_)
@@ -1721,11 +1700,6 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         Opcode::Silence(_, op) => Opcode::Silence(Local::INVALID, op),
 
         Opcode::BaseC(_, m_op_mode) => Opcode::BaseC(0, m_op_mode),
-        Opcode::BaseGC(_, m_op_mode) | Opcode::BaseGL(_, m_op_mode) => {
-            // BaseGC and BaseGL are equal if the base ends up with the same
-            // value.
-            Opcode::BaseGL(Local::INVALID, m_op_mode)
-        }
         Opcode::BaseL(_, m_op_mode, ro_op) => Opcode::BaseL(Local::INVALID, m_op_mode, ro_op),
         Opcode::BaseSC(_, _, m_op_mode, ro_op) => Opcode::BaseSC(0, 0, m_op_mode, ro_op),
 

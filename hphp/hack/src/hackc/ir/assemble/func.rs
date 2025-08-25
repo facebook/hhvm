@@ -906,12 +906,6 @@ impl FunctionParser<'_> {
                     tokenizer.read_token()?;
                     BaseOp::BaseH { loc }
                 }
-                b"global" => {
-                    tokenizer.read_token()?;
-                    let vid = self.vid(tokenizer)?;
-                    operands.push(vid);
-                    BaseOp::BaseGC { mode, loc }
-                }
                 s if is_vid(s) => {
                     let vid_cls = self.vid(tokenizer)?;
 
@@ -1456,7 +1450,6 @@ impl FunctionParser<'_> {
             "set_implicit_context_by_value" => I::Hhbc(H::SetImplicitContextByValue(self.vid(tok)?, loc)),
             "set_local" => parse_instr!(tok, I::Hhbc(H::SetL(p0, p1, loc)), <p1:self.lid> "," <p0:self.vid>),
             "set_op_local" => parse_instr!(tok, I::Hhbc(H::SetOpL(p0, p1, p2, loc)), <p1:self.lid> <p2:parse_set_op_op> <p0:self.vid>),
-            "set_op_global" => parse_instr!(tok, I::Hhbc(H::SetOpG([p0, p1], p2, loc)), <p0:self.vid> <p2:parse_set_op_op> <p1:self.vid>),
             "set_op_static_property" => parse_instr!(tok, I::Hhbc(H::SetOpS(p0, p1, loc)), <p0:self.vid3> "," <p1:parse_set_op_op>),
             "set_s" => parse_instr!(tok, I::Hhbc(H::SetS([p0, p1, p2], p3, loc)), <p1:self.vid> "->" <p0:self.vid> <p3:parse_readonly> "=" <p2:self.vid>),
             "setm" => self.parse_member_op(tok, mnemonic, loc)?,

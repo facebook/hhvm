@@ -25,14 +25,12 @@ namespace HPHP {
 //  name             immediates        inputs           outputs     flags
 #define OPCODES \
   O(Nop,             NA,               NOV,             NOV,        NF) \
-  O(BreakTraceHint,  NA,               NOV,             NOV,        NF) \
   O(PopC,            NA,               ONE(CV),         NOV,        NF) \
   O(PopU,            NA,               ONE(UV),         NOV,        NF) \
   O(PopU2,           NA,               TWO(CV,UV),      ONE(CV),    NF) \
   O(PopL,            ONE(LA),          ONE(CV),         NOV,        NF) \
   O(Dup,             NA,               ONE(CV),         TWO(CV,CV), NF) \
   O(CGetCUNop,       NA,               ONE(CUV),        ONE(CV),    NF) \
-  O(UGetCUNop,       NA,               ONE(CUV),        ONE(UV),    NF) \
   O(Null,            NA,               NOV,             ONE(CV),    NF) \
   O(NullUninit,      NA,               NOV,             ONE(UV),    NF) \
   O(True,            NA,               NOV,             ONE(CV),    NF) \
@@ -154,11 +152,9 @@ namespace HPHP {
                                        THREE(CV,CV,CV), ONE(CV),    NF) \
   O(SetOpL,          TWO(LA,                                            \
                        OA(SetOpOp)),   ONE(CV),         ONE(CV),    NF) \
-  O(SetOpG,          ONE(OA(SetOpOp)), TWO(CV,CV),      ONE(CV),    NF) \
   O(SetOpS,          ONE(OA(SetOpOp)), THREE(CV,CV,CV), ONE(CV),    NF) \
   O(IncDecL,         TWO(NLA, OA(IncDecOp)),                            \
                                        NOV,             ONE(CV),    NF) \
-  O(IncDecG,         ONE(OA(IncDecOp)),ONE(CV),         ONE(CV),    NF) \
   O(IncDecS,         ONE(OA(IncDecOp)),TWO(CV,CV),      ONE(CV),    NF) \
   O(UnsetL,          ONE(LA),          NOV,             NOV,        NF) \
   O(UnsetG,          NA,               ONE(CV),         NOV,        NF) \
@@ -272,10 +268,6 @@ namespace HPHP {
   O(ThrowNonExhaustiveSwitch, NA,      NOV,             NOV,        NF) \
   O(RaiseClassStringConversionNotice,                                   \
                               NA,      NOV,             NOV,        NF) \
-  O(BaseGC,          TWO(IVA, OA(MOpMode)),                             \
-                                       NOV,             NOV,        NF) \
-  O(BaseGL,          TWO(LA, OA(MOpMode)),                              \
-                                       NOV,             NOV,        NF) \
   O(BaseSC,          FOUR(IVA, IVA, OA(MOpMode), OA(ReadonlyOp)),       \
                                        NOV,             NOV,        NF) \
   O(BaseL,           THREE(NLA, OA(MOpMode), OA(ReadonlyOp)),           \

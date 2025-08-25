@@ -137,7 +137,6 @@ pub(crate) fn convert_sequence(ctx: &mut Context<'_>, addr: Addr) {
     assert_eq!(ctx.stack.len(), 0, "Sequence ended with a non-empty stack!");
 }
 
-#[allow(clippy::todo)]
 fn convert_base(ctx: &mut Context<'_>, base: &Opcode) {
     if let Some(mop) = ctx.member_op.as_ref() {
         panic!(
@@ -156,12 +155,6 @@ fn convert_base(ctx: &mut Context<'_>, base: &Opcode) {
             operands.push(vid);
             instr::BaseOp::BaseC { mode, loc }
         }
-        Opcode::BaseGC(idx, mode) => {
-            let vid = ctx.stack_get(idx as usize);
-            operands.push(vid);
-            instr::BaseOp::BaseGC { mode, loc }
-        }
-        Opcode::BaseGL(..) => todo!(),
         Opcode::BaseSC(idx0, idx1, mode, readonly) => {
             let vid0 = ctx.stack_get(idx0 as usize);
             operands.push(vid0);
@@ -414,8 +407,7 @@ fn member_op_mutates_stack_base(op: &instr::MemberOp) -> bool {
 
     match op.base_op {
         BaseOp::BaseC { .. } => base_key_is_element_access && write_op,
-        BaseOp::BaseGC { .. }
-        | BaseOp::BaseH { .. }
+        BaseOp::BaseH { .. }
         | BaseOp::BaseL { .. }
         | BaseOp::BaseSC { .. }
         | BaseOp::BaseST { .. } => false,
@@ -573,7 +565,6 @@ fn convert_final(ctx: &mut Context<'_>, fin: &Opcode) {
     let expected_stack = {
         let mut count = match member_op.base_op {
             instr::BaseOp::BaseC { .. } => 1,
-            instr::BaseOp::BaseGC { .. } => 1,
             instr::BaseOp::BaseH { .. } => 0,
             instr::BaseOp::BaseL { .. } => 0,
             instr::BaseOp::BaseSC { .. } => 2,
@@ -794,12 +785,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
     // hhbc opcode table to figure out how to convert standard opcodes.
     #[bc_to_ir]
     let action = match opcode.clone() {
-        Opcode::BaseC(..)
-        | Opcode::BaseGC(..)
-        | Opcode::BaseGL(..)
-        | Opcode::BaseSC(..)
-        | Opcode::BaseL(..)
-        | Opcode::BaseH => {
+        Opcode::BaseC(..) | Opcode::BaseSC(..) | Opcode::BaseL(..) | Opcode::BaseH => {
             convert_base(ctx, opcode);
             Action::None
         }
@@ -936,7 +922,6 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::BitNot => simple!(Hhbc::BitNot),
         Opcode::BitOr => simple!(Hhbc::BitOr),
         Opcode::BitXor => simple!(Hhbc::BitXor),
-        Opcode::BreakTraceHint => todo!(),
         Opcode::CGetCUNop => todo!(),
         Opcode::CGetG => simple!(Hhbc::CGetG),
         Opcode::CGetL => simple!(Hhbc::CGetL),
@@ -993,7 +978,6 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::Gte => simple!(Hhbc::CmpOp, CmpOp::Gte),
         Opcode::HasReifiedParent => simple!(Hhbc::HasReifiedParent),
         Opcode::Idx => simple!(Hhbc::Idx),
-        Opcode::IncDecG => todo!(),
         Opcode::IncDecL => simple!(Hhbc::IncDecL),
         Opcode::IncDecS => simple!(Hhbc::IncDecS),
         Opcode::InitProp => simple!(Hhbc::InitProp),
@@ -1074,7 +1058,6 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::SetG => simple!(Hhbc::SetG),
         Opcode::SetL => simple!(Hhbc::SetL),
         Opcode::SetImplicitContextByValue => simple!(Hhbc::SetImplicitContextByValue),
-        Opcode::SetOpG => simple!(Hhbc::SetOpG),
         Opcode::SetOpL => simple!(Hhbc::SetOpL),
         Opcode::SetOpS => simple!(Hhbc::SetOpS),
         Opcode::SetS => simple!(Hhbc::SetS),
@@ -1087,7 +1070,6 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::Throw => simple!(Terminator::Throw),
         Opcode::ThrowNonExhaustiveSwitch => simple!(Hhbc::ThrowNonExhaustiveSwitch),
         Opcode::True => simple!(Immediate::Bool, true),
-        Opcode::UGetCUNop => todo!(),
         Opcode::UnsetG => simple!(Hhbc::UnsetG),
         Opcode::UnsetL => simple!(Hhbc::UnsetL),
         Opcode::VerifyOutType => simple!(Hhbc::VerifyOutType),

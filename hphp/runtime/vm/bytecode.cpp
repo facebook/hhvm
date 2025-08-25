@@ -1079,9 +1079,6 @@ OPTBLD_INLINE void iopDup() {
 OPTBLD_INLINE void iopCGetCUNop() {
 }
 
-OPTBLD_INLINE void iopUGetCUNop() {
-}
-
 OPTBLD_INLINE void iopNull() {
   vmStack().pushNull();
 }
@@ -2510,39 +2507,6 @@ OPTBLD_INLINE void iopCGetS(ReadonlyOp op) {
   tvDup(*ss.val, *ss.output);
 }
 
-static inline void baseGImpl(tv_rval key, MOpMode mode) {
-  auto& mstate = vmMInstrState();
-  StringData* name;
-  mstate.roProp = false;
-
-  auto const baseVal = (mode == MOpMode::Define)
-    ? lookupd_gbl(vmfp(), name, key)
-    : lookup_gbl(vmfp(), name, key);
-  SCOPE_EXIT { decRefStr(name); };
-
-  if (!baseVal) {
-    assertx(mode != MOpMode::Define);
-    if (mode == MOpMode::Warn) {
-      SystemLib::throwOutOfBoundsExceptionObject(
-        folly::sformat("Undefined index: {}", name)
-      );
-    }
-    tvWriteNull(mstate.tvTempBase);
-    mstate.base = &mstate.tvTempBase;
-    return;
-  }
-
-  mstate.base = baseVal;
-}
-
-OPTBLD_INLINE void iopBaseGC(uint32_t idx, MOpMode mode) {
-  baseGImpl(vmStack().indTV(idx), mode);
-}
-
-OPTBLD_INLINE void iopBaseGL(tv_lval loc, MOpMode mode) {
-  baseGImpl(loc, mode);
-}
-
 OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
                              uint32_t clsIdx,
                              MOpMode mode,
@@ -3236,9 +3200,6 @@ OPTBLD_INLINE void iopAssertRATStk(uint32_t stkSlot, RepoAuthType rat) {
   }
 }
 
-OPTBLD_INLINE void iopBreakTraceHint() {
-}
-
 OPTBLD_INLINE void iopAKExists() {
   TypedValue* arr = vmStack().topTV();
   auto key = tvClassToString(*(arr + 1));
@@ -3423,21 +3384,6 @@ OPTBLD_INLINE void iopSetOpL(tv_lval to, SetOpOp op) {
   tvDup(*to, *fr);
 }
 
-OPTBLD_INLINE void iopSetOpG(SetOpOp op) {
-  StringData* name;
-  TypedValue* fr = vmStack().topC();
-  TypedValue* tv2 = vmStack().indTV(1);
-  // XXX We're probably not getting warnings totally correct here
-  auto const to = lookupd_gbl(vmfp(), name, tv2);
-  SCOPE_EXIT { decRefStr(name); };
-  assertx(to);
-  setopBody(to, op, fr);
-  tvDecRefGen(fr);
-  tvDecRefGen(tv2);
-  tvDup(*to, *tv2);
-  vmStack().discard();
-}
-
 OPTBLD_INLINE void iopSetOpS(SetOpOp op) {
   TypedValue* fr = vmStack().topC();
   TypedValue* clsCell = vmStack().indC(1);
@@ -3494,19 +3440,6 @@ OPTBLD_INLINE void iopIncDecL(named_local_var fr, IncDecOp op) {
     tvWriteNull(fr.lval);
   }
   tvCopy(IncDecBody(op, fr.lval), *to);
-}
-
-OPTBLD_INLINE void iopIncDecG(IncDecOp op) {
-  StringData* name;
-  TypedValue* nameCell = vmStack().topTV();
-  auto const gbl = lookupd_gbl(vmfp(), name, nameCell);
-  auto oldNameCell = *nameCell;
-  SCOPE_EXIT {
-    decRefStr(name);
-    tvDecRefGen(oldNameCell);
-  };
-  assertx(gbl);
-  tvCopy(IncDecBody(op, gbl), *nameCell);
 }
 
 OPTBLD_INLINE void iopIncDecS(IncDecOp op) {

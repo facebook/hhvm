@@ -124,7 +124,6 @@ enum class BaseLoc {
   Local,
   This,
   Stack,
-  Global,
 };
 
 /*

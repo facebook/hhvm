@@ -135,8 +135,7 @@ bool isInitialBaseLoc(BaseLoc loc) {
     loc == BaseLoc::Local ||
     loc == BaseLoc::Stack ||
     loc == BaseLoc::StaticProp ||
-    loc == BaseLoc::This ||
-    loc == BaseLoc::Global;
+    loc == BaseLoc::This;
 }
 
 // Base locations that only occur after the start of a minstr sequence.
@@ -1962,15 +1961,6 @@ namespace interp_step {
 //////////////////////////////////////////////////////////////////////
 // Base operations
 
-void in(ISS& env, const bc::BaseGC& op) {
-  startBase(env, Base{TInitCell, BaseLoc::Global});
-}
-
-void in(ISS& env, const bc::BaseGL& op) {
-  mayReadLocal(env, op.loc1);
-  startBase(env, Base{TInitCell, BaseLoc::Global});
-}
-
 void in(ISS& env, const bc::BaseSC& op) {
   auto tcls = topC(env, op.arg2);
   auto const tname = topC(env, op.arg1);
@@ -2196,7 +2186,6 @@ void in(ISS& env, const bc::Dim& op) {
         auto const reuseStack =
           [&] {
             switch (base.op) {
-              case Op::BaseGC: return base.BaseGC.arg1 == 0;
               case Op::BaseC:  return base.BaseC.arg1 == 0;
               default: return false;
             }

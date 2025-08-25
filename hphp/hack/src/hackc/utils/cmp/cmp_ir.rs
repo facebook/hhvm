@@ -742,9 +742,6 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
         (Hhbc::SetOpL(_, _, x0, _), Hhbc::SetOpL(_, _, x1, _)) => {
             cmp_eq(x0, x1).qualified("SetOpL param x")?;
         }
-        (Hhbc::SetOpG(_, x0, _), Hhbc::SetOpG(_, x1, _)) => {
-            cmp_eq(x0, x1).qualified("SetOpG param x")?;
-        }
         (Hhbc::SetOpS(_, x0, _), Hhbc::SetOpS(_, x1, _)) => {
             cmp_eq(x0, x1).qualified("SetOpS param x")?;
         }
@@ -897,7 +894,6 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
             | Hhbc::ResolveRFunc(..)
             | Hhbc::ResolveMethCaller(..)
             | Hhbc::SetOpL(..)
-            | Hhbc::SetOpG(..)
             | Hhbc::SetOpS(..)
             | Hhbc::SetS(..)
             | Hhbc::Silence(..),
@@ -943,9 +939,8 @@ fn cmp_instr_member_op_base(
     #[rustfmt::skip]
     match (a, b) {
         (BaseOp::BaseC { mode: a_mode, loc: a_loc },
-         BaseOp::BaseC { mode: b_mode, loc: b_loc }) |
-        (BaseOp::BaseGC { mode: a_mode, loc: a_loc },
-         BaseOp::BaseGC { mode: b_mode, loc: b_loc }) => {
+         BaseOp::BaseC { mode: b_mode, loc: b_loc }) 
+         => {
             cmp_eq(a_mode, b_mode).qualified("mode")?;
             cmp_loc_id((*a_loc, a_func), (*b_loc, b_func)).qualified("loc")?;
         }
@@ -972,7 +967,6 @@ fn cmp_instr_member_op_base(
         // these should never happen
         (
             BaseOp::BaseC { .. }
-            | BaseOp::BaseGC { .. }
             | BaseOp::BaseH { .. }
             | BaseOp::BaseL { .. }
             | BaseOp::BaseSC { .. }

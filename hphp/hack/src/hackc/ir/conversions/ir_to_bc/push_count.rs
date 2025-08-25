@@ -173,7 +173,6 @@ impl<'a> PushCount<'a> for instr::Hhbc {
             | Hhbc::SetG(..)
             | Hhbc::SetImplicitContextByValue(..)
             | Hhbc::SetL(..)
-            | Hhbc::SetOpG(..)
             | Hhbc::SetOpL(..)
             | Hhbc::SetOpS(..)
             | Hhbc::SetS(..)

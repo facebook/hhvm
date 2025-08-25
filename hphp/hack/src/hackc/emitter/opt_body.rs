@@ -173,7 +173,6 @@ fn instr_may_throw(inst: &Instruct) -> bool {
             | Opcode::PopU
             | Opcode::PopU2
             | Opcode::CGetCUNop
-            | Opcode::UGetCUNop
             | Opcode::Nop
             | Opcode::Dup
             | Opcode::Null
@@ -817,8 +816,6 @@ fn optimize_locals(
         Instruct::Opcode(
             Opcode::PushL(_)
             | Opcode::UnsetL(_)
-            | Opcode::BaseGC(..)
-            | Opcode::BaseGL(..)
             | Opcode::BaseSC(..)
             | Opcode::BaseC(..)
             | Opcode::BaseH

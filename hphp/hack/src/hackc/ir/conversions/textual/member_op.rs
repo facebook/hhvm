@@ -93,7 +93,6 @@ enum Base {
         op: PropOp,
     },
     Local(LocalId),
-    Superglobal(Expr),
     Value(Expr),
 }
 
@@ -136,9 +135,6 @@ impl Base {
                 )
             }
             Base::Local(lid) => state.load_mixed(Expr::deref(lid)),
-            Base::Superglobal(ref expr) => {
-                state.call_builtin(hack::Builtin::GetSuperglobal, [expr.clone()])
-            }
             Base::Value(ref expr) => state.fb.write_expr_stmt(expr.clone()),
         }
     }
@@ -181,9 +177,6 @@ impl Base {
                 )?;
             }
             Base::Local(lid) => state.store_mixed(Expr::deref(lid), value)?,
-            Base::Superglobal(ref expr) => {
-                state.call_builtin(hack::Builtin::SetSuperglobal, (expr.clone(), value))?;
-            }
             Base::Value(_) => {
                 // This is something like `foo()[2] = 3`.  We don't have
                 // something to write back into so just ignore it.
@@ -316,11 +309,6 @@ where
                 // Get base from value: foo()[k]
                 let base = self.next_operand();
                 self.pending = Pending::Base(Base::Value(base));
-            }
-            BaseOp::BaseGC { .. } => {
-                // Get base from global name: $_SERVER[k]
-                let src = self.next_operand();
-                self.pending = Pending::Base(Base::Superglobal(src));
             }
             BaseOp::BaseH { loc: _ } => {
                 // Get base from $this: $this[k]

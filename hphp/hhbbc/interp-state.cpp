@@ -700,8 +700,6 @@ std::string show(const php::Func& f, const Base& b) {
       return folly::to<std::string>(
         "stack{", show(b.type), ",", b.locSlot, "}"
       );
-    case BaseLoc::Global:
-      return folly::to<std::string>("global{", show(b.type), "}");
   }
   not_reached();
 }

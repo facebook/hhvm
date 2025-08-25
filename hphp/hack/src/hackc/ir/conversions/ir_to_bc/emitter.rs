@@ -582,7 +582,6 @@ impl<'b> InstrEmitter<'b> {
                 let local = self.lookup_local(lid);
                 Opcode::SetOpL(local, op)
             }
-            Hhbc::SetOpG(_, op, _) => Opcode::SetOpG(op),
             Hhbc::SetOpS(_, op, _) => Opcode::SetOpS(op),
             Hhbc::SetS(_, readonly, _) => Opcode::SetS(readonly),
             Hhbc::Shl(..) => Opcode::Shl,
@@ -684,10 +683,6 @@ impl<'b> InstrEmitter<'b> {
             BaseOp::BaseC { mode, .. } => {
                 stack_index -= 1;
                 self.push_opcode(Opcode::BaseC(stack_index, mode));
-            }
-            BaseOp::BaseGC { mode, .. } => {
-                stack_index -= 1;
-                self.push_opcode(Opcode::BaseGC(stack_index, mode));
             }
             BaseOp::BaseH { .. } => {
                 self.push_opcode(Opcode::BaseH);
@@ -1131,8 +1126,7 @@ fn member_op_may_mutate_stack_base(member_op: &instr::MemberOp) -> bool {
 
     match member_op.base_op {
         BaseOp::BaseC { .. } => base_key_is_element_access && write_op,
-        BaseOp::BaseGC { .. }
-        | BaseOp::BaseH { .. }
+        BaseOp::BaseH { .. }
         | BaseOp::BaseL { .. }
         | BaseOp::BaseSC { .. }
         | BaseOp::BaseST { .. } => false,

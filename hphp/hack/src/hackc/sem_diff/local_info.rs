@@ -37,7 +37,6 @@ impl LocalInfo {
             | Opcode::MemoSetEager(range) => LocalInfo::ReadRange(*range),
 
             Opcode::AssertRATL(local, _)
-            | Opcode::BaseGL(local, _)
             | Opcode::BaseL(local, _, _)
             | Opcode::CGetL(local)
             | Opcode::CGetL2(local)
@@ -79,14 +78,12 @@ impl LocalInfo {
             | Opcode::AwaitLowPri
             | Opcode::BareThis(..)
             | Opcode::BaseC(..)
-            | Opcode::BaseGC(..)
             | Opcode::BaseH
             | Opcode::BaseSC(..)
             | Opcode::BitAnd
             | Opcode::BitNot
             | Opcode::BitOr
             | Opcode::BitXor
-            | Opcode::BreakTraceHint
             | Opcode::CGetCUNop
             | Opcode::CGetG
             | Opcode::CGetS(..)
@@ -158,7 +155,6 @@ impl LocalInfo {
             | Opcode::Gte
             | Opcode::HasReifiedParent
             | Opcode::Idx
-            | Opcode::IncDecG(..)
             | Opcode::IncDecM(..)
             | Opcode::IncDecS(..)
             | Opcode::Incl
@@ -236,7 +232,6 @@ impl LocalInfo {
             | Opcode::SetG
             | Opcode::SetImplicitContextByValue
             | Opcode::SetM(..)
-            | Opcode::SetOpG(..)
             | Opcode::SetOpM(..)
             | Opcode::SetOpS(..)
             | Opcode::SetRangeM(..)
@@ -252,7 +247,6 @@ impl LocalInfo {
             | Opcode::ThrowAsTypeStructException(_)
             | Opcode::ThrowNonExhaustiveSwitch
             | Opcode::True
-            | Opcode::UGetCUNop
             | Opcode::UnsetG
             | Opcode::UnsetM(..)
             | Opcode::Vec(..)

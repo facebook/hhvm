@@ -229,9 +229,6 @@ mod fixups {
             "BaseC" => vec![
                 replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
             ],
-            "BaseGC" => vec![
-                replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex"))
-            ],
             "BaseSC" => vec![
                 replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
                 replace_imm("arg2", ImmType::IVA, ImmType::OA("StackIndex"))

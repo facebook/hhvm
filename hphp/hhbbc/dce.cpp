@@ -1588,9 +1588,7 @@ void dce(Env& env, const bc::AwaitAll& op) {
   no_dce(env, op);
 }
 void dce(Env& env, const bc::AwaitLowPri& op) { no_dce(env, op); }
-void dce(Env& env, const bc::BaseGL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::BaseH& op) { no_dce(env, op); }
-void dce(Env& env, const bc::BreakTraceHint& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CGetCUNop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CGetG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ChainFaults& op) { no_dce(env, op); }
@@ -1630,7 +1628,6 @@ void dce(Env& env, const bc::FCallObjMethod& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallObjMethodD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::GetMemoKeyL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::GetClsRGProp& op) { no_dce(env, op); }
-void dce(Env& env, const bc::IncDecG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IncDecS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Incl& op) { no_dce(env, op); }
 void dce(Env& env, const bc::InclOnce& op) { no_dce(env, op); }
@@ -1689,7 +1686,6 @@ void dce(Env& env, const bc::ResolveRFunc& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Select& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetImplicitContextByValue& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetG& op) { no_dce(env, op); }
-void dce(Env& env, const bc::SetOpG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetOpS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetRangeM& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetS& op) { no_dce(env, op); }
@@ -1708,7 +1704,6 @@ void dce(Env& env, const bc::ThrowNonExhaustiveSwitch& op) { no_dce(env, op); }
 void dce(Env& env, const bc::RaiseClassStringConversionNotice& op) {
   no_dce(env, op);
 }
-void dce(Env& env, const bc::UGetCUNop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::UnsetG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::VerifyOutType& op) { no_dce(env, op); }
 void dce(Env& env, const bc::VerifyParamType& op) { no_dce(env, op); }
@@ -1806,7 +1801,6 @@ void minstr_final(Env& env, const Op& op, int32_t ndiscard) {
 }
 
 void dce(Env& env, const bc::BaseC& op)       { minstr_base(env, op, op.arg1); }
-void dce(Env& env, const bc::BaseGC& op)      { minstr_base(env, op, op.arg1); }
 void dce(Env& env, const bc::BaseSC& op)      {
   minstr_base(env, op, op.arg1);
   minstr_base(env, op, op.arg2);
@@ -1895,7 +1889,6 @@ void adjustMinstr(Op& /*op*/, MaskType /*mask*/) {
 }
 
 void adjustMinstr(bc::BaseC& op, MaskType m)       { m_adj(op.arg1, m); }
-void adjustMinstr(bc::BaseGC& op, MaskType m)      { m_adj(op.arg1, m); }
 void adjustMinstr(bc::BaseSC& op, MaskType m)      {
   m_adj(op.arg1, m);
   m_adj(op.arg2, m);

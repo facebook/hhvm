@@ -647,18 +647,10 @@ void in(ISS& env, const bc::AssertRATStk&) {
   effect_free(env);
 }
 
-void in(ISS& env, const bc::BreakTraceHint&) { effect_free(env); }
-
 void in(ISS& env, const bc::CGetCUNop&) {
   effect_free(env);
   auto const t = popCU(env);
   push(env, remove_uninit(t));
-}
-
-void in(ISS& env, const bc::UGetCUNop&) {
-  effect_free(env);
-  popCU(env);
-  push(env, TUninit);
 }
 
 void in(ISS& env, const bc::Null&) {
@@ -3457,11 +3449,6 @@ void in(ISS& env, const bc::SetOpL& op) {
   push(env, std::move(resultTy));
 }
 
-void in(ISS& env, const bc::SetOpG&) {
-  popC(env); popC(env);
-  push(env, TInitCell);
-}
-
 void in(ISS& env, const bc::SetOpS& op) {
   auto const rhs   = popC(env);
   auto const tcls  = popC(env);
@@ -3514,8 +3501,6 @@ void in(ISS& env, const bc::IncDecL& op) {
   setLoc(env, op.nloc1.id, newT);
   if (pre)  push(env, std::move(newT));
 }
-
-void in(ISS& env, const bc::IncDecG&) { popC(env); push(env, TInitCell); }
 
 void in(ISS& env, const bc::IncDecS& op) {
   auto const tcls  = popC(env);

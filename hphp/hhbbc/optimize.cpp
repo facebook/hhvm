@@ -69,7 +69,6 @@ namespace {
  */
 bool ignoresStackInput(Op op) {
   switch (op) {
-  case Op::UGetCUNop:
   case Op::CGetCUNop:
   case Op::PopU:
     return true;
@@ -165,7 +164,6 @@ void insert_assertions_step(const php::Func& func,
   // the stack slots they'll read.
   switch (bcode.op) {
     case Op::BaseC:       assert_stack(bcode.BaseC.arg1);       break;
-    case Op::BaseGC:      assert_stack(bcode.BaseGC.arg1);      break;
     case Op::BaseSC:
       assert_stack(bcode.BaseSC.arg1);
       assert_stack(bcode.BaseSC.arg2);

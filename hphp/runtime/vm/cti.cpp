@@ -119,9 +119,7 @@ inline bool isNop(Op opcode) {
   if (!Cfg::Repo::Authoritative) return false;
   return opcode == OpNop ||
          opcode == OpCGetCUNop ||
-         opcode == OpUGetCUNop ||
-         (!debug && isTypeAssert(opcode)) ||
-         opcode == OpBreakTraceHint;
+         (!debug && isTypeAssert(opcode));
 }
 
 auto const pc_arg   = rdx;  // passed & returned by all opcodes

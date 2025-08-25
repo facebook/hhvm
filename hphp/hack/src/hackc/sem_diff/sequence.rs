@@ -309,7 +309,6 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::AwaitAll(..)
             | Opcode::AwaitLowPri
             | Opcode::BareThis(..)
-            | Opcode::BreakTraceHint
             | Opcode::CheckProp(..)
             | Opcode::CheckClsReifiedGenericMismatch
             | Opcode::CheckClsRGSoft
@@ -372,8 +371,6 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::ArrayMarkLegacy
             | Opcode::ArrayUnmarkLegacy
             | Opcode::BaseC(..)
-            | Opcode::BaseGC(..)
-            | Opcode::BaseGL(..)
             | Opcode::BaseH
             | Opcode::BaseL(..)
             | Opcode::BaseSC(..)
@@ -396,7 +393,6 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::FCallObjMethodD(..)
             | Opcode::Fatal(..)
             | Opcode::HasReifiedParent
-            | Opcode::IncDecG(..)
             | Opcode::IncDecL(..)
             | Opcode::IncDecM(..)
             | Opcode::IncDecS(..)
@@ -445,7 +441,6 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::SetG
             | Opcode::SetImplicitContextByValue
             | Opcode::SetM(..)
-            | Opcode::SetOpG(..)
             | Opcode::SetOpL(..)
             | Opcode::SetOpM(..)
             | Opcode::SetOpS(..)
@@ -453,7 +448,6 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::SetS(..)
             | Opcode::Silence(..)
             | Opcode::StaticAnalysisError
-            | Opcode::UGetCUNop
             | Opcode::UnsetG
             | Opcode::UnsetM(..)
             | Opcode::WHResult

@@ -605,11 +605,6 @@ void emitCGetCUNop(IRGS& env) {
   auto const knownType = env.irb->stack(offset, DataTypeSpecific).type;
   assertTypeStack(env, BCSPRelOffset{0}, knownType & TInitCell);
 }
-void emitUGetCUNop(IRGS& env) {
-  assertTypeStack(env, BCSPRelOffset{0}, TUninit);
-}
-void emitBreakTraceHint(IRGS&)     {}
-
 //////////////////////////////////////////////////////////////////////
 
 void emitResolveClass(IRGS& env, const StringData* name) {

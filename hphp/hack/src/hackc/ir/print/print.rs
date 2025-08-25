@@ -1223,15 +1223,6 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) ->
                 FmtVid(func, vid, verbose)
             )?;
         }
-        Hhbc::SetOpG([x, y], op, _) => {
-            write!(
-                w,
-                "set_op_global {} {} {}",
-                FmtVid(func, x, verbose),
-                FmtSetOpOp(op),
-                FmtVid(func, y, verbose)
-            )?;
-        }
         Hhbc::SetOpS(vids, op, _) => {
             write!(
                 w,
@@ -1546,13 +1537,6 @@ fn print_member_op(
             }
             let vid = operands.next().unwrap();
             write!(w, "{}", FmtVid(func, vid, true))?;
-        }
-        BaseOp::BaseGC { mode, .. } => {
-            if mode != MOpMode::None {
-                write!(w, "{} ", FmtMOpMode(mode))?;
-            }
-            let vid = operands.next().unwrap();
-            write!(w, "global {}", FmtVid(func, vid, verbose))?;
         }
         BaseOp::BaseH { .. } => {
             write!(w, "$this")?;

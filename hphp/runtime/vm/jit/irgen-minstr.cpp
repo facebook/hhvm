@@ -726,31 +726,6 @@ SimpleOp simpleCollectionOp(Type baseType, Type keyType, bool readInst,
   return SimpleOp::None;
 }
 
-void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
-  if (!name->isA(TStr)) PUNT(BaseG-non-string-name);
-  auto base_mode = mode != MOpMode::Unset ? mode : MOpMode::None;
-
-  profiledGlobalAccess(
-    env,
-    name,
-    [&] (Block*) { return gen(env, BaseG, MOpModeData{base_mode}, name); },
-    [&] (SSATmp* ptr, Type) {
-      stMBase(env, ptr);
-      return cns(env, TBottom);
-    },
-    [&] {
-      auto const ptr = [&] {
-        if (base_mode == MOpMode::None) return ptrToInitNull(env);
-        return gen(env, BaseG, MOpModeData{base_mode}, name);
-      }();
-      stMBase(env, ptr);
-      return cns(env, TBottom);
-    },
-    true
-  );
-  gen(env, StMROProp, cns(env, false));
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -1816,16 +1791,6 @@ bool propertyMayBeCountable(const Class::Prop& prop) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-void emitBaseGC(IRGS& env, uint32_t idx, MOpMode mode) {
-  auto name = top(env, BCSPRelOffset{safe_cast<int32_t>(idx)});
-  baseGImpl(env, name, mode);
-}
-
-void emitBaseGL(IRGS& env, int32_t locId, MOpMode mode) {
-  auto name = ldLoc(env, locId, DataTypeSpecific);
-  baseGImpl(env, name, mode);
-}
 
 void emitBaseSC(IRGS& env,
                 uint32_t propIdx,

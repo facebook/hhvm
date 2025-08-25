@@ -1203,12 +1203,15 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_recursiveUnion:
       // Not supported, will throw an error on these at the resolution phase
       return false;
+    case TypeStructure::Kind::T_resource: {
+      if (!t->type().maybe(TRes)) return fail();
+      return false;
+    }
     case TypeStructure::Kind::T_enum:
     case TypeStructure::Kind::T_tuple:
     case TypeStructure::Kind::T_shape:
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_unresolved:
-    case TypeStructure::Kind::T_resource:
     case TypeStructure::Kind::T_reifiedtype:
       // TODO(T28423611): Implement these
       return false;

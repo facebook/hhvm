@@ -3022,8 +3022,12 @@ void isTypeStructImpl(ISS& env, SArray inputTS) {
       }
       return reduce(env, bc::PopC {}, bc::InstanceOfD { rcls->name() });
     }
+    case TypeStructure::Kind::T_resource: {
+      if (!ts_type || is_type_might_raise(*ts_type, t)) return result(TBool);
+      if (!t.couldBe(*ts_type)) return result(TFalse);
+      return result(TBool);
+    }
     case TypeStructure::Kind::T_enum:
-    case TypeStructure::Kind::T_resource:
     case TypeStructure::Kind::T_vec_or_dict:
     case TypeStructure::Kind::T_any_array:
     case TypeStructure::Kind::T_union:

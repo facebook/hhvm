@@ -1992,10 +1992,8 @@ class cpp_mstch_field : public mstch_field {
       const t_field* f,
       mstch_context& ctx,
       mstch_element_position pos,
-      const field_generator_context* field_context,
       std::shared_ptr<cpp2_generator_context> cpp_ctx)
-      : mstch_field(f, ctx, pos, field_context),
-        cpp_context_(std::move(cpp_ctx)) {
+      : mstch_field(f, ctx, pos), cpp_context_(std::move(cpp_ctx)) {
     register_methods(
         this,
         {
@@ -2082,8 +2080,7 @@ class cpp_mstch_field : public mstch_field {
     return field_context->isset_index;
   }
   mstch::node cpp_type() {
-    const t_structured* parent =
-        context_.whisker_context->get_field_parent(field_);
+    const t_structured* parent = whisker_context().get_field_parent(field_);
     assert(parent != nullptr);
     return cpp_context_->resolver().get_native_type(*field_, *parent);
   }
@@ -2095,8 +2092,7 @@ class cpp_mstch_field : public mstch_field {
     return mangle_field_name(cpp2::get_name(field_));
   }
   mstch::node cpp_storage_type() {
-    const t_structured* parent =
-        context_.whisker_context->get_field_parent(field_);
+    const t_structured* parent = whisker_context().get_field_parent(field_);
     assert(parent != nullptr);
     return cpp_context_->resolver().get_storage_type(*field_, *parent);
   }
@@ -2309,8 +2305,7 @@ class cpp_mstch_field : public mstch_field {
   }
 
   mstch::node type_tag() {
-    const t_structured* parent =
-        context_.whisker_context->get_field_parent(field_);
+    const t_structured* parent = whisker_context().get_field_parent(field_);
     assert(parent != nullptr);
     return cpp_context_->resolver().get_type_tag(*field_, *parent);
   }
@@ -2330,8 +2325,7 @@ class cpp_mstch_field : public mstch_field {
   }
 
   mstch::node use_op_encode() {
-    const t_structured* parent =
-        context_.whisker_context->get_field_parent(field_);
+    const t_structured* parent = whisker_context().get_field_parent(field_);
     assert(parent != nullptr);
     return needs_op_encode(*field_, *parent);
   }
@@ -2374,8 +2368,7 @@ class cpp_mstch_field : public mstch_field {
   }
 
   bool is_eligible_for_storage_name_mangling() const {
-    const t_structured* strct =
-        context_.whisker_context->get_field_parent(field_);
+    const t_structured* strct = whisker_context().get_field_parent(field_);
     assert(strct != nullptr);
 
     if (strct->is<t_union>()) {

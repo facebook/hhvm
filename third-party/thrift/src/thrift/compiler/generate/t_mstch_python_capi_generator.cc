@@ -629,12 +629,8 @@ class python_capi_mstch_struct : public mstch_struct {
 class python_capi_mstch_field : public mstch_field {
  public:
   python_capi_mstch_field(
-      const t_field* field,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const field_generator_context* field_context)
-      : mstch_field(field, ctx, pos, field_context),
-        py_name_(python::get_py3_name(*field)) {
+      const t_field* field, mstch_context& ctx, mstch_element_position pos)
+      : mstch_field(field, ctx, pos), py_name_(python::get_py3_name(*field)) {
     register_methods(
         this,
         {

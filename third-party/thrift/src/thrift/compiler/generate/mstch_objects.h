@@ -46,10 +46,6 @@ struct mstch_element_position {
   bool last = false;
 };
 
-struct field_generator_context {
-  const t_structured* strct = nullptr;
-};
-
 // A factory creating mstch objects wrapping Thrift AST nodes.
 // Node: A Thrift AST node type to be wrapped.
 // Args: Additional arguments passed to an mstch object constructor.
@@ -86,8 +82,7 @@ using mstch_function_factory = mstch_factory<t_function, const t_interface*>;
 using mstch_type_factory = mstch_factory<t_type>;
 using mstch_typedef_factory = mstch_factory<t_typedef>;
 using mstch_struct_factory = mstch_factory<t_structured>;
-using mstch_field_factory =
-    mstch_factory<t_field, const field_generator_context*>;
+using mstch_field_factory = mstch_factory<t_field>;
 using mstch_enum_factory = mstch_factory<t_enum>;
 using mstch_enum_value_factory = mstch_factory<t_enum_value>;
 using mstch_const_factory =
@@ -357,8 +352,9 @@ class mstch_base : public mstch::object {
     return make_mstch_array(container, *context_.const_value_factory, args...);
   }
 
-  virtual mstch::array make_mstch_fields(const field_range& fields) {
-    return make_mstch_array(fields, *context_.field_factory, nullptr);
+  template <typename C, typename... Args>
+  mstch::array make_mstch_fields(const C& container, const Args&... args) {
+    return make_mstch_array(container, *context_.field_factory, args...);
   }
 
   template <typename C, typename... Args>
@@ -414,6 +410,10 @@ class mstch_base : public mstch::object {
  protected:
   mstch_context& context_;
   const mstch_element_position pos_;
+
+  const whisker_generator_context& whisker_context() const {
+    return *context_.whisker_context;
+  }
 };
 
 class mstch_program : public mstch_base {
@@ -733,13 +733,6 @@ class mstch_struct : public mstch_base {
             {"struct:structured_annotations",
              &mstch_struct::structured_annotations},
         });
-
-    // Populate field_context_generator for each field.
-    auto field_ctx = field_generator_context();
-    field_ctx.strct = struct_;
-    for (const t_field& field : s->fields()) {
-      context_map[&field] = field_ctx;
-    }
   }
 
   whisker::object self() { return make_self(*struct_); }
@@ -761,18 +754,6 @@ class mstch_struct : public mstch_base {
     return mstch_base::structured_annotations(struct_);
   }
 
-  mstch::array make_mstch_fields(const field_range& fields) override {
-    mstch::array a;
-    size_t i = 0;
-    for (const auto* field : fields) {
-      auto pos = mstch_element_position(i, fields.size());
-      a.push_back(context_.field_factory->make_mstch_object(
-          field, context_, pos, &context_map[field]));
-      ++i;
-    }
-    return a;
-  }
-
   // Returns the struct members ordered by the key.
   const std::vector<const t_field*>& get_members_in_key_order();
 
@@ -790,8 +771,6 @@ class mstch_struct : public mstch_base {
 
  protected:
   const t_structured* struct_;
-  std::unordered_map<const t_field*, field_generator_context> context_map;
-
   std::vector<const t_field*> fields_in_key_order_;
 };
 
@@ -799,12 +778,8 @@ class mstch_field : public mstch_base {
  public:
   using ast_type = t_field;
 
-  mstch_field(
-      const t_field* f,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const field_generator_context* field_context)
-      : mstch_base(ctx, pos), field_(f), field_context_(field_context) {
+  mstch_field(const t_field* f, mstch_context& ctx, mstch_element_position pos)
+      : mstch_base(ctx, pos), field_(f) {
     register_methods(
         this,
         {
@@ -839,7 +814,6 @@ class mstch_field : public mstch_base {
 
  protected:
   const t_field* field_;
-  const field_generator_context* field_context_;
 };
 
 class mstch_enum : public mstch_base {

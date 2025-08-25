@@ -277,9 +277,8 @@ class mstch_go_field : public mstch_field {
       const t_field* f,
       mstch_context& ctx,
       mstch_element_position pos,
-      const field_generator_context* field_context,
       go::codegen_data* data)
-      : mstch_field(f, ctx, pos, field_context), data_(*data) {
+      : mstch_field(f, ctx, pos), data_(*data) {
     (void)data_;
     register_methods(
         this,
@@ -306,9 +305,9 @@ class mstch_go_field : public mstch_field {
     auto setter_name = "Set" + go::get_go_field_name(field_);
     // Setters which collide with existing field names should be suffixed with
     // an underscore.
-    if (field_context_ != nullptr && field_context_->strct != nullptr) {
-      auto stfn_iter =
-          data_.struct_to_field_names.find(field_context_->strct->name());
+    const t_structured* parent = whisker_context().get_field_parent(field_);
+    if (parent != nullptr) {
+      auto stfn_iter = data_.struct_to_field_names.find(parent->name());
       if (stfn_iter != data_.struct_to_field_names.end()) {
         while (stfn_iter->second.count(setter_name) > 0) {
           setter_name += "_";
@@ -402,8 +401,8 @@ class mstch_go_field : public mstch_field {
 
   bool is_inside_union_() {
     // Whether field is part of a union
-    return field_context_ != nullptr && field_context_->strct != nullptr &&
-        field_context_->strct->is<t_union>();
+    const t_structured* parent = whisker_context().get_field_parent(field_);
+    return parent != nullptr && parent->is<t_union>();
   }
 };
 

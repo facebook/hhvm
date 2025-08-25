@@ -702,11 +702,8 @@ class python_mstch_struct : public mstch_struct {
 class python_mstch_field : public mstch_field {
  public:
   python_mstch_field(
-      const t_field* field,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const field_generator_context* field_context)
-      : mstch_field(field, ctx, pos, field_context),
+      const t_field* field, mstch_context& ctx, mstch_element_position pos)
+      : mstch_field(field, ctx, pos),
         py_name_(python::get_py3_name(*field)),
         adapter_annotation_(find_structured_adapter_annotation(*field)),
         transitive_adapter_annotation_(
@@ -726,9 +723,8 @@ class python_mstch_field : public mstch_field {
   mstch::node py_name() {
     if (boost::algorithm::starts_with(py_name_, "__") &&
         !boost::algorithm::ends_with(py_name_, "__")) {
-      // TODO: Whisker migration of field:py_name requires support to get a
-      // back-reference to the parent struct in Whisker
-      auto class_name = field_context_->strct->name();
+      const t_structured* parent = whisker_context().get_field_parent(field_);
+      std::string class_name = parent == nullptr ? "" : parent->name();
       boost::algorithm::trim_left_if(class_name, boost::is_any_of("_"));
       if (class_name.empty()) {
         return py_name_;

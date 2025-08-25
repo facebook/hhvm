@@ -1031,11 +1031,8 @@ class py3_mstch_field : public mstch_field {
     IOBuf,
   };
   py3_mstch_field(
-      const t_field* field,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const field_generator_context* field_context)
-      : mstch_field(field, ctx, pos, field_context),
+      const t_field* field, mstch_context& ctx, mstch_element_position pos)
+      : mstch_field(field, ctx, pos),
         pyName_(python::get_py3_name(*field)),
         cppName_(cpp2::get_name(field)) {
     register_methods(

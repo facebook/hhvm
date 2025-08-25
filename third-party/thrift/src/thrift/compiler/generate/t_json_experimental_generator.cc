@@ -270,9 +270,8 @@ class json_experimental_field : public mstch_field {
       const t_field* f,
       mstch_context& ctx,
       mstch_element_position pos,
-      const field_generator_context* field_context,
       source_manager* sm)
-      : mstch_field(f, ctx, pos, field_context), source_mgr_(*sm) {
+      : mstch_field(f, ctx, pos), source_mgr_(*sm) {
     register_methods(
         this,
         {

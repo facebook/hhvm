@@ -2244,9 +2244,8 @@ class rust_mstch_field : public mstch_field {
       const t_field* field,
       mstch_context& ctx,
       mstch_element_position pos,
-      const field_generator_context* field_context,
       const rust_codegen_options* options)
-      : mstch_field(field, ctx, pos, field_context),
+      : mstch_field(field, ctx, pos),
         options_(*options),
         adapter_annotation_(find_structured_adapter_annotation(*field)) {
     register_methods(

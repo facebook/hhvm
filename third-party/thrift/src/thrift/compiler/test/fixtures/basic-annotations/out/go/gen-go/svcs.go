@@ -838,7 +838,7 @@ type MyServicePrioChildClientInterface interface {
 
 type MyServicePrioChildClient struct {
     // Inherited/extended service
-    *MyServicePrioParentClient
+    MyServicePrioParentClientInterface
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
@@ -846,7 +846,7 @@ var _ MyServicePrioChildClientInterface = (*MyServicePrioChildClient)(nil)
 
 func NewMyServicePrioChildChannelClient(channel thrift.RequestChannel) *MyServicePrioChildClient {
     return &MyServicePrioChildClient{
-        MyServicePrioParentClient: NewMyServicePrioParentChannelClient(channel),
+        MyServicePrioParentClientInterface: NewMyServicePrioParentChannelClient(channel),
         ch: channel,
     }
 }

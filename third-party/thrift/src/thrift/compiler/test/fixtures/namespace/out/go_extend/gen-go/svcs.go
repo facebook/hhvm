@@ -45,7 +45,7 @@ type ExtendTestServiceClientInterface interface {
 
 type ExtendTestServiceClient struct {
     // Inherited/extended service
-    *test0.HsTestServiceClient
+    test0.HsTestServiceClientInterface
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
@@ -53,7 +53,7 @@ var _ ExtendTestServiceClientInterface = (*ExtendTestServiceClient)(nil)
 
 func NewExtendTestServiceChannelClient(channel thrift.RequestChannel) *ExtendTestServiceClient {
     return &ExtendTestServiceClient{
-        HsTestServiceClient: test0.NewHsTestServiceChannelClient(channel),
+        HsTestServiceClientInterface: test0.NewHsTestServiceChannelClient(channel),
         ch: channel,
     }
 }

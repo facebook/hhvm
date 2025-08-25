@@ -179,7 +179,7 @@ type MyNodeClientInterface interface {
 
 type MyNodeClient struct {
     // Inherited/extended service
-    *MyRootClient
+    MyRootClientInterface
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
@@ -187,7 +187,7 @@ var _ MyNodeClientInterface = (*MyNodeClient)(nil)
 
 func NewMyNodeChannelClient(channel thrift.RequestChannel) *MyNodeClient {
     return &MyNodeClient{
-        MyRootClient: NewMyRootChannelClient(channel),
+        MyRootClientInterface: NewMyRootChannelClient(channel),
         ch: channel,
     }
 }
@@ -297,7 +297,7 @@ type MyLeafClientInterface interface {
 
 type MyLeafClient struct {
     // Inherited/extended service
-    *MyNodeClient
+    MyNodeClientInterface
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
@@ -305,7 +305,7 @@ var _ MyLeafClientInterface = (*MyLeafClient)(nil)
 
 func NewMyLeafChannelClient(channel thrift.RequestChannel) *MyLeafClient {
     return &MyLeafClient{
-        MyNodeClient: NewMyNodeChannelClient(channel),
+        MyNodeClientInterface: NewMyNodeChannelClient(channel),
         ch: channel,
     }
 }

@@ -23,7 +23,7 @@ type {{service:go_name}}Client struct {
     {{#service:extends?}}
     {{#service:extends}}
     // Inherited/extended service
-    *{{service:go_qualified_name}}Client
+    {{service:go_qualified_name}}ClientInterface
     {{/service:extends}}
     {{/service:extends?}}
     ch thrift.RequestChannel
@@ -35,7 +35,7 @@ func New{{service:go_name}}ChannelClient(channel thrift.RequestChannel) *{{servi
     return &{{service:go_name}}Client{
         {{#service:extends?}}
         {{#service:extends}}
-        {{service:go_name}}Client: {{service:go_package_alias_prefix}}New{{service:go_name}}ChannelClient(channel),
+        {{service:go_name}}ClientInterface: {{service:go_package_alias_prefix}}New{{service:go_name}}ChannelClient(channel),
         {{/service:extends}}
         {{/service:extends?}}
         ch: channel,

@@ -31,6 +31,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestWithPersistentHeader(t *testing.T) {
+	opts := []ClientOption{WithRocket(), WithPersistentHeader("foo", "bar")}
+	clientOptions := newOptions(opts...)
+	require.Subset(t, clientOptions.persistentHeaders, map[string]string{"foo": "bar"})
+}
+
+func TestWithPersistentHeaders(t *testing.T) {
+	opts := []ClientOption{WithRocket(), WithPersistentHeaders(map[string]string{"foo": "123", "bar": "456"})}
+	clientOptions := newOptions(opts...)
+	require.Subset(t, clientOptions.persistentHeaders, map[string]string{"foo": "123", "bar": "456"})
+}
+
 func TestNewClientConnectionScenarios(t *testing.T) {
 	listener, err := net.Listen("tcp", ":0")
 	require.NoError(t, err)

@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"crypto/tls"
+	"maps"
 	"net"
 	"time"
 
@@ -69,10 +70,17 @@ func WithRocket() ClientOption {
 	}
 }
 
-// WithPersistentHeader sets a Header persistent info value
+// WithPersistentHeader adds a persistent header to the client.
 func WithPersistentHeader(name, value string) ClientOption {
 	return func(opts *clientOptions) {
 		opts.persistentHeaders[name] = value
+	}
+}
+
+// WithPersistentHeaders adds persistent headers to the client.
+func WithPersistentHeaders(headers map[string]string) ClientOption {
+	return func(opts *clientOptions) {
+		maps.Copy(opts.persistentHeaders, headers)
 	}
 }
 

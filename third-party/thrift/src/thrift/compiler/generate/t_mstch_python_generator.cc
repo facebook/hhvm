@@ -1032,12 +1032,12 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
-  prototype<t_service>::ptr make_prototype_for_service(
+  prototype<t_interface>::ptr make_prototype_for_interface(
       const prototype_database& proto) const override {
-    auto base = t_whisker_generator::make_prototype_for_service(proto);
-    auto def = whisker::dsl::prototype_builder<h_service>::extends(base);
+    auto base = t_whisker_generator::make_prototype_for_interface(proto);
+    auto def = whisker::dsl::prototype_builder<h_interface>::extends(base);
 
-    def.property("external_program?", [this](const t_service& self) {
+    def.property("external_program?", [this](const t_interface& self) {
       return get_program() != self.program();
     });
 

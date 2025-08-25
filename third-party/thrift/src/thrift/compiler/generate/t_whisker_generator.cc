@@ -96,12 +96,6 @@ prototype<t_named>::ptr t_whisker_generator::make_prototype_for_named(
 
 namespace {
 
-template <typename T>
-object t_type_as(const prototype_database& proto, const t_type& self) {
-  static_assert(std::is_base_of_v<t_type, T>);
-  return proto.create_nullable<T>(self.try_as<T>());
-}
-
 // When a t_type is bound to a native_handle for use within Whisker templates,
 // we want to make sure that we attach the prototype of the most-derived t_type
 // subclass. This allows the following usage pattern:
@@ -118,13 +112,21 @@ object resolve_derived_t_type(
       [&](const t_typedef& typedef_) -> object {
         return object(proto.create<t_typedef>(typedef_));
       },
-      [&](const t_primitive_type&) -> object {
-        return t_type_as<t_primitive_type>(proto, self);
+      [&](const t_primitive_type& primitive) -> object {
+        return object(proto.create<t_primitive_type>(primitive));
       },
-      [&](const t_list&) -> object { return t_type_as<t_list>(proto, self); },
-      [&](const t_set&) -> object { return t_type_as<t_set>(proto, self); },
-      [&](const t_map&) -> object { return t_type_as<t_map>(proto, self); },
-      [&](const t_enum&) -> object { return t_type_as<t_enum>(proto, self); },
+      [&](const t_list& list) -> object {
+        return object(proto.create<t_list>(list));
+      },
+      [&](const t_set& set) -> object {
+        return object(proto.create<t_set>(set));
+      },
+      [&](const t_map& map) -> object {
+        return object(proto.create<t_map>(map));
+      },
+      [&](const t_enum& enum_) -> object {
+        return object(proto.create<t_enum>(enum_));
+      },
       [&](const t_union& union_) -> object {
         return object(proto.create<t_union>(union_));
       },
@@ -710,9 +712,8 @@ prototype<t_function>::ptr t_whisker_generator::make_prototype_for_function(
   });
 
   // Interaction methods
-  def.property("starts_interaction?", [](const t_function& self) {
-    return self.is_interaction_constructor();
-  });
+  def.property(
+      "starts_interaction?", mem_fn(&t_function::is_interaction_constructor));
   def.property("creates_interaction?", [](const t_function& self) {
     return !self.interaction().empty();
   });

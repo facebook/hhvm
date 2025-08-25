@@ -93,17 +93,17 @@ HERE;
 		xml_set_object($parser, $this);
 
 		if ($this->chunk_size == 0) {
-			$success = @xml_parse($parser, $data, true);
+			$success = xml_parse($parser, $data, true);
 		} else {
 			for ($offset = 0; $offset < strlen($data);
 					$offset += $this->chunk_size) {
-				$success = @xml_parse($parser, substr($data, $offset, $this->chunk_size), false);
+				$success = xml_parse($parser, substr($data, $offset, $this->chunk_size), false);
 				if (!$success) {
 					break;
 				}
 			}
 			if ($success) {
-				$success = @xml_parse($parser, "", true);
+				$success = xml_parse($parser, "", true);
 			}
 		}
 

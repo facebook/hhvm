@@ -1,0 +1,13 @@
+Warning: Empty substring. in %s/test/zend/good/ext/mbstring/tests/mb_substr_count.php on line 5
+bool(false)
+
+Warning: Empty substring. in %s/test/zend/good/ext/mbstring/tests/mb_substr_count.php on line 6
+bool(false)
+int(0)
+int(0)
+int(0)
+int(100)
+int(100)
+int(100)
+int(100)
+int(200)

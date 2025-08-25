@@ -1,0 +1,42 @@
+*** Testing file() : variation ***
+
+Warning: unlink(%s): No such file or directory in %s/test/zend/good/ext/standard/tests/file/file_variation9.php on line 19
+vec(2) {
+  string(32) "File ends on a single character
+"
+  string(1) "a"
+}
+vec(1) {
+  string(24) "File ends on a new line
+"
+}
+vec(4) {
+  string(31) "File ends on multiple newlines
+"
+  string(1) "
+"
+  string(1) "
+"
+  string(1) "
+"
+}
+vec(4) {
+  string(9) "File has
+"
+  string(1) "
+"
+  string(28) "multiple lines and newlines
+"
+  string(1) "
+"
+}
+vec(3) {
+  string(10) "File has
+"
+  string(15) "multiple crlfs
+"
+  string(2) "
+"
+}
+
+*** Done ***

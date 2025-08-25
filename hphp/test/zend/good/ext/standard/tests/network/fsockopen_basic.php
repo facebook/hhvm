@@ -16,7 +16,7 @@ function entrypoint_fsockopen_basic(): void {
     /* Setup socket server */
     $errno = null;
     $errstr = null;
-    $server = @stream_socket_server(
+    $server = stream_socket_server(
       "tcp://127.0.0.1:$port",
       inout $errno,
       inout $errstr

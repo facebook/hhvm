@@ -1,0 +1,2 @@
+Warning: unlink(%s): No such file or directory in %s/test/zend/good/ext/gd/tests/bug24155.php on line 3
+16776960

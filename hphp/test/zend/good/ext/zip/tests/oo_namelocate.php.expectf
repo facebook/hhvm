@@ -1,0 +1,5 @@
+Warning: unlink(%s): No such file or directory in %s/test/zend/good/ext/zip/tests/oo_namelocate.php on line 8
+int(0)
+bool(false)
+int(1)
+int(2)

@@ -570,20 +570,4 @@ void raiseMissingDynamicallyReferenced(const Class* cls) {
 
 //////////////////////////////////////////////////////////////////////
 
-int64_t zero_error_level() {
-  auto& id = RequestInfo::s_requestInfo.getNoCheck()->m_reqInjectionData;
-  auto level = id.getErrorReportingLevel();
-  id.setErrorReportingLevel(0);
-  return level;
-}
-
-void restore_error_level(int64_t oldLevel) {
-  auto& id = RequestInfo::s_requestInfo.getNoCheck()->m_reqInjectionData;
-  if (id.getErrorReportingLevel() == 0) {
-    id.setErrorReportingLevel(oldLevel);
-  }
-}
-
-//////////////////////////////////////////////////////////////////////
-
 }

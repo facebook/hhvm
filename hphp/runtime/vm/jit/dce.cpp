@@ -598,8 +598,6 @@ bool canDCE(const IRInstruction& inst) {
   case DbgCheckLocalsDecRefd:
   case RBTraceEntry:
   case RBTraceMsg:
-  case ZeroErrorLevel:
-  case RestoreErrorLevel:
   case IterExtractBase:
   case IterInitArr:
   case IterInitObj:

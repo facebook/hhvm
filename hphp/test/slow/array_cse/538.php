@@ -22,7 +22,7 @@ function f3($x) :mixed{
 }
 
 function f4($x) :mixed{
-  $z = @id($x[0]);
+  $z = id($x[0]);
   var_dump($z);
   var_dump($x[0]);
 }

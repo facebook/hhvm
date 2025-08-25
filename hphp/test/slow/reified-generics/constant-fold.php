@@ -11,5 +11,5 @@ function main() :mixed{
   f<int>();
   f<C>();
   // make sure hhbbc does not crash here since D is undefined
-  @f<D>();
+  f<D>();
 }

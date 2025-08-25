@@ -7,9 +7,9 @@ var_dump(strrpos("test string", "g"));
 var_dump(strrpos("te".chr(0)."st", chr(0)));
 var_dump(strrpos("tEst", "test"));
 var_dump(strrpos("teSt", "test"));
-var_dump(@strrpos("foo", "f", 1));
-var_dump(@strrpos("", ""));
-var_dump(@strrpos("a", ""));
-var_dump(@strrpos("", "a"));
-var_dump(@strrpos("\\\\a", "\\a"));
+var_dump(strrpos("foo", "f", 1));
+var_dump(strrpos("", ""));
+var_dump(strrpos("a", ""));
+var_dump(strrpos("", "a"));
+var_dump(strrpos("\\\\a", "\\a"));
 }

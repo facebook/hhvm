@@ -210,16 +210,6 @@ enum class ObjMethodOp : uint8_t {
 #undef OBJMETHOD_OP
 };
 
-#define SILENCE_OPS \
-  SILENCE_OP(Start) \
-  SILENCE_OP(End)
-
-enum class SilenceOp : uint8_t {
-#define SILENCE_OP(x) x,
-  SILENCE_OPS
-#undef SILENCE_OP
-};
-
 
 #define BARETHIS_OPS    \
   BARETHIS_OP(Notice)   \

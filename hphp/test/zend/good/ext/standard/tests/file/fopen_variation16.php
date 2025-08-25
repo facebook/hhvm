@@ -19,7 +19,7 @@ function runtest() :mixed{
     fwrite($h, (string)"This is the test file");
     fclose($h);
 
-    $h = @fopen(ZendGoodExtStandardTestsFileFopenIncludePathInc::dir1().'/'.$tmpfile, "r");
+    $h = fopen(ZendGoodExtStandardTestsFileFopenIncludePathInc::dir1().'/'.$tmpfile, "r");
     if ($h === false) {
        echo "Not created in dir1\n";
     }

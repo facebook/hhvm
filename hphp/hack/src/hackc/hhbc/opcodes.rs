@@ -45,7 +45,6 @@ use crate::ReadonlyOp;
 use crate::RepoAuthType;
 use crate::SetOpOp;
 use crate::SetRangeOp;
-use crate::SilenceOp;
 use crate::SpecialClsRef;
 use crate::StackIndex;
 use crate::SwitchKind;

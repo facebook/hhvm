@@ -7,7 +7,7 @@ $uri = 'unix:///socket/not/found';
 
 $errno = null;
 $errstr = null;
-$resource = @stream_socket_client($uri, inout $errno, inout $errstr, 60.0, $flags);
+$resource = stream_socket_client($uri, inout $errno, inout $errstr, 60.0, $flags);
 
 if (!$resource) {
     echo "Error: $errstr ($errno)";

@@ -1,0 +1,20 @@
+dict(2) {
+  ["one"]=>
+  string(3) "ABC"
+  ["two"]=>
+  object(test) (2) {
+    ["a"]=>
+    int(7)
+    ["b"]=>
+    int(2)
+  }
+}
+
+Notice: serialize(): __sleep should return an array only containing the names of instance-variables to serialize in %s/test/zend/good/ext/standard/tests/serialize/bug21957.php on line 24
+D:2:{s:3:"one";s:3:"ABC";s:3:"two";N;}
+dict(2) {
+  ["one"]=>
+  string(3) "ABC"
+  ["two"]=>
+  NULL
+}

@@ -1,3 +1,4 @@
+Warning: symlink(): File exists in %s/test/slow/ext_std/lchown_wronguser.php on line 9
 
 Warning: lchown(): Unable to find uid for ihopenomachinehasthisuserthatwouldbebad in %s/lchown_wronguser.php on line 11
 bool(false)

@@ -22,11 +22,11 @@ function rpc_serde($x) :mixed{
 function test() :mixed{
   require 'thrift-defs.inc';
 
-  rpc_serde(@new TestStruct1());
-  rpc_serde(@new TestStruct2());
-  rpc_serde(@new TestStruct4());
-  rpc_serde(@new TestStruct5());
-  rpc_serde(@new TestStruct6());
-  rpc_serde(@new TestStruct7());
-  rpc_serde(@new TestStruct3());
+  rpc_serde(new TestStruct1());
+  rpc_serde(new TestStruct2());
+  rpc_serde(new TestStruct4());
+  rpc_serde(new TestStruct5());
+  rpc_serde(new TestStruct6());
+  rpc_serde(new TestStruct7());
+  rpc_serde(new TestStruct3());
 }

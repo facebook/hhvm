@@ -35,6 +35,8 @@ if ($ret !== FALSE && md5(__FILE__) == md5_file("TEST4")) {
 echo "\n";
 
 for ($i = 1; $i < 6; $i++) {
-    @unlink("./TEST{$i}");
+    error_reporting(0);
+    unlink("./TEST{$i}");
+    error_reporting(E_ALL);
 }
 }

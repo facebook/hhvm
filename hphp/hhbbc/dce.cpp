@@ -1689,10 +1689,6 @@ void dce(Env& env, const bc::SetG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetOpS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetRangeM& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetS& op) { no_dce(env, op); }
-void dce(Env& env, const bc::Silence& op) {
-  pinLocals(env, env.states.mayReadLocalSet());
-  no_dce(env, op);
-}
 void dce(Env& env, const bc::SSwitch& op) { no_dce(env, op); }
 void dce(Env& env, const bc::StaticAnalysisError& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Switch& op) { no_dce(env, op); }

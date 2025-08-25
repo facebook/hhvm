@@ -1,0 +1,8 @@
+Warning: No such file or directory in %s/test/zend/good/ext/standard/tests/file/fopen_variation16.php on line 22
+Not created in dir1
+found file - not in dir1
+
+Warning: No such file or directory in %s/test/zend/good/ext/standard/tests/file/fopen_variation16.php on line 22
+Not created in dir1
+found file - not in dir1
+===DONE===

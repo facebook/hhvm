@@ -90,7 +90,6 @@ pub use hhbc::ReadonlyOp;
 pub use hhbc::Requirement;
 pub use hhbc::SetOpOp;
 pub use hhbc::SetRangeOp;
-pub use hhbc::SilenceOp;
 pub use hhbc::Span;
 pub use hhbc::SpecialClsRef;
 pub use hhbc::SrcLoc;

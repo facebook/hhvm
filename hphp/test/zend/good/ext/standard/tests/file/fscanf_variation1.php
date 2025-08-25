@@ -15,8 +15,8 @@ $filename = sys_get_temp_dir().'/'.'fscanf_variation1.tmp';
 $file_handle = fopen($filename, "w");
 if($file_handle == false)
   exit("Error:failed to open file $filename");
-@fwrite($file_handle, "hello_world ");
-@fwrite($file_handle, '12345');
+fwrite($file_handle, "hello_world ");
+fwrite($file_handle, '12345');
 fclose($file_handle);
 
 // open file for reading

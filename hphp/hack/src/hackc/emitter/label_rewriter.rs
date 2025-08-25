@@ -358,7 +358,6 @@ where
             | Opcode::SetS(..)
             | Opcode::Shl
             | Opcode::Shr
-            | Opcode::Silence(..)
             | Opcode::StaticAnalysisError
             | Opcode::String(..)
             | Opcode::Sub

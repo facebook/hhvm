@@ -263,8 +263,6 @@ namespace HPHP {
   O(CheckProp,       ONE(SA),          NOV,             ONE(CV),    NF) \
   O(InitProp,        TWO(SA, OA(InitPropOp)),                           \
                                        ONE(CV),         NOV,        NF) \
-  O(Silence,         TWO(LA,OA(SilenceOp)),                             \
-                                       NOV,             NOV,        NF) \
   O(ThrowNonExhaustiveSwitch, NA,      NOV,             NOV,        NF) \
   O(RaiseClassStringConversionNotice,                                   \
                               NA,      NOV,             NOV,        NF) \

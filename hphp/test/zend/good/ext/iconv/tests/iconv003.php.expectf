@@ -1,0 +1,6 @@
+Notice: iconv(): Wrong charset, conversion from `blah' to `blah' is not allowed in %s/hphp/test/zend/good/ext/iconv/tests/iconv003.php on line 3
+
+Notice: iconv(): Wrong charset, conversion from `blah' to `blah' is not allowed in %s/hphp/test/zend/good/ext/iconv/tests/iconv003.php on line 3
+
+Notice: iconv(): Wrong charset, conversion from `blah' to `blah' is not allowed in %s/hphp/test/zend/good/ext/iconv/tests/iconv003.php on line 3
+success

@@ -1,5 +1,7 @@
 *** Testing fgetcsv() : with two chars as enclosure & delimiter ***
 
+Warning: unlink(%s): No such file or directory in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation24.php on line 30
+
 -- Testing fgetcsv() with file opened using w+ mode --
 
 Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation24.php on line 76

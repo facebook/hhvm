@@ -38,7 +38,6 @@ use crate::QueryMOp;
 use crate::ReadonlyOp;
 use crate::SetOpOp;
 use crate::SetRangeOp;
-use crate::SilenceOp;
 use crate::SpecialClsRef;
 use crate::StringId;
 use crate::SwitchKind;
@@ -556,8 +555,6 @@ pub enum Hhbc {
     SetS([ValueId; 3], ReadonlyOp, LocId),
     Shl([ValueId; 2], LocId),
     Shr([ValueId; 2], LocId),
-    #[has_operands(none)]
-    Silence(LocalId, SilenceOp, LocId),
     Sub([ValueId; 2], LocId),
     This(LocId),
     ThrowNonExhaustiveSwitch(LocId),

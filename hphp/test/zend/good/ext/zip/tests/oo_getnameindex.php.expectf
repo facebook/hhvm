@@ -1,0 +1,5 @@
+Warning: unlink(%s): No such file or directory in %s/test/zend/good/ext/zip/tests/oo_getnameindex.php on line 9
+string(10) "entry1.txt"
+string(10) "entry2.txt"
+string(15) "dir/entry2d.txt"
+bool(false)

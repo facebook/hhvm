@@ -16,7 +16,7 @@ $contents = vec[
    "File has\r\nmultiple crlfs\n\r\n"
    ];
 
-@unlink($testfile);
+unlink($testfile);
 foreach ($contents as $content) {
     $h = fopen($testfile, "w");
     fwrite($h, $content);

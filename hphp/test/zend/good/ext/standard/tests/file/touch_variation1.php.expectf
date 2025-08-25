@@ -1,0 +1,9 @@
+bool(true)
+int(101)
+int(101)
+
+Warning: unlink(%s): No such file or directory in %s/test/zend/good/ext/standard/tests/file/touch_variation1.php on line 12
+bool(true)
+int(100)
+int(102)
+Done

@@ -218,18 +218,11 @@ interpOutputLocals(IRGS& env,
     case OpUnsetM:
       smashesAllLocals = true;
       break;
-
-    case OpSilence:
-      if (static_cast<SilenceOp>(getImm(sk.pc(), 1).u_OA) == SilenceOp::Start) {
-        setImmLocType(0, TInt);
-      }
-      break;
-
     default:
       always_assert_flog(
         false, "Unknown local-modifying op {}", opcodeToName(sk.op())
       );
-  }
+  }  
 
   return locals;
 }

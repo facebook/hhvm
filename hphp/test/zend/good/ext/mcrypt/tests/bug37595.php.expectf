@@ -3,6 +3,8 @@ string(16) "123456789%h{00}%h{00}%h{00}%h{00}%h{00}%h{00}%h{00}"
 string(8) "%h{00}1234567"
 
 Warning: An empty string was passed in %s/bug37595.php on line 31
+
+Warning: An empty string was passed in %s/test/zend/good/ext/mcrypt/tests/bug37595.php on line 36
 bool(false)
 string(16) "1234567812345678"
 string(24) "12345678123456789%h{00}%h{00}%h{00}%h{00}%h{00}%h{00}%h{00}"

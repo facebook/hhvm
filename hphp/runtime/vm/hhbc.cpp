@@ -908,12 +908,6 @@ static const char* CollectionType_names[] = {
 #undef COL
 };
 
-static const char* SilenceOp_names[] = {
-#define SILENCE_OP(x) #x,
-  SILENCE_OPS
-#undef SILENCE_OP
-};
-
 static const char* OODeclExistsOp_names[] = {
 #define OO_DECL_EXISTS_OP(x) #x,
   OO_DECL_EXISTS_OPS
@@ -1056,7 +1050,6 @@ X(FatalOp,        static_cast<int>(FatalOp::Runtime))
 X(SetOpOp,        static_cast<int>(SetOpOp::PlusEqual))
 X(IncDecOp,       static_cast<int>(IncDecOp::PreInc))
 X(BareThisOp,     static_cast<int>(BareThisOp::Notice))
-X(SilenceOp,      static_cast<int>(SilenceOp::Start))
 X(CollectionType, static_cast<int>(HeaderKind::Vector))
 X(OODeclExistsOp, static_cast<int>(OODeclExistsOp::Class))
 X(ObjMethodOp,    static_cast<int>(ObjMethodOp::NullThrows))

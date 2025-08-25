@@ -3,7 +3,7 @@
   include('skipif.inc');
   skip_if_no_iconv();
 
-  if (@iconv("ascii","UCS-4LE", "abcd") == '') {
+  if (iconv("ascii","UCS-4LE", "abcd") == '') {
     exit("skip conversion to UCS-4LE not supported");
   }
 }

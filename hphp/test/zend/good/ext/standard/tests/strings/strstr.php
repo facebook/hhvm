@@ -32,9 +32,9 @@ function entrypoint_strstr(): void {
   var_dump( md5(strstr("te".chr(0)."st", chr(0))) );
   var_dump( strstr("tEst", "test") );
   var_dump( strstr("teSt", "test") );
-  var_dump( @strstr("", "") );
-  var_dump( @strstr("a", "") );
-  var_dump( @strstr("", "a") );
+  var_dump( strstr("", "") );
+  var_dump( strstr("a", "") );
+  var_dump( strstr("", "a") );
 
 
   echo "\n*** Testing strstr() with various needles ***";

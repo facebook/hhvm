@@ -3,7 +3,7 @@
   include('skipif.inc');
   skip_if_no_iconv();
 
-  $test = @iconv_strpos("abbttt","ttt",0,"UTF-8");
+  $test = iconv_strpos("abbttt","ttt",0,"UTF-8");
   if ($test === false) {
     exit("skip UTF-8 is not supported?");
   }

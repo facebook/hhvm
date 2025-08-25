@@ -1,0 +1,9 @@
+created in working dir
+
+Warning: No such file or directory in %s/test/zend/good/ext/standard/tests/file/fopen_variation9.php on line 25
+Not created in dir1
+created in working dir
+
+Warning: No such file or directory in %s/test/zend/good/ext/standard/tests/file/fopen_variation9.php on line 25
+Not created in dir1
+===DONE===

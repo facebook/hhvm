@@ -1,0 +1,10 @@
+*** Testing gzopen() : variation ***
+created in working dir
+
+Warning: No such file or directory in %s/test/zend/good/ext/zlib/tests/gzopen_variation5.php on line 20
+Not created in dir1
+created in working dir
+
+Warning: No such file or directory in %s/test/zend/good/ext/zlib/tests/gzopen_variation5.php on line 20
+Not created in dir1
+===DONE===

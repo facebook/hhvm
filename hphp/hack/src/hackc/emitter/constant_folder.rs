@@ -520,7 +520,6 @@ fn unop_on_value(unop: &ast_defs::Uop, v: TypedValue) -> Result<TypedValue, Erro
             _ => None,
         },
         ast_defs::Uop::Utild => fold_bitwise_not(v),
-        ast_defs::Uop::Usilence => Some(v.clone()),
         _ => None,
     }
     .ok_or(Error::NotLiteral)

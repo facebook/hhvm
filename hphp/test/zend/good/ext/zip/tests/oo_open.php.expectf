@@ -1,5 +1,7 @@
 ER_OPEN: ok
 create: ok
 
+Warning: unlink(%s): No such file or directory in %s/test/zend/good/ext/zip/tests/oo_open.php on line 18
+
 Warning: ZipArchive::open(): Empty string as source in %s/oo_open.php on line 21
 OK

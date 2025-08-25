@@ -18,7 +18,7 @@ function retry_bind_server() :mixed{
 
     $errno = null;
     $errstr = null;
-    $server = @stream_socket_server($address, inout $errno, inout $errstr);
+    $server = stream_socket_server($address, inout $errno, inout $errstr);
     if ($server !== false) {
       return vec[$port, $address, $server];
     }

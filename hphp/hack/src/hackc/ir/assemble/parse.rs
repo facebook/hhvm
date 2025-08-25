@@ -39,7 +39,6 @@ use ir_core::Param;
 use ir_core::PropName;
 use ir_core::ReadonlyOp;
 use ir_core::SetOpOp;
-use ir_core::SilenceOp;
 use ir_core::SpecialClsRef;
 use ir_core::SrcLoc;
 use ir_core::StringId;
@@ -645,16 +644,6 @@ pub(crate) fn parse_set_op_op(tokenizer: &mut Tokenizer<'_>) -> Result<SetOpOp> 
             "<<=" => SetOpOp::SlEqual,
             ">>=" => SetOpOp::SrEqual,
             "^=" => SetOpOp::XorEqual,
-            _ => return None,
-        })
-    })
-}
-
-pub(crate) fn parse_silence_op(tokenizer: &mut Tokenizer<'_>) -> Result<SilenceOp> {
-    parse_enum(tokenizer, "SilenceOp", |id| {
-        Some(match id {
-            "start" => SilenceOp::Start,
-            "end" => SilenceOp::End,
             _ => return None,
         })
     })

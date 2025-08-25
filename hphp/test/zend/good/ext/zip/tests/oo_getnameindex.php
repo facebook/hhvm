@@ -6,7 +6,7 @@ function main_entry(): void {
   include $dirname . 'utils.inc';
   $file = sys_get_temp_dir().'/'.'__tmp_oo_rename2.zip';
 
-  @unlink($file);
+  unlink($file);
 
   $zip = new ZipArchive;
   if (!$zip->open($file, ZipArchive::CREATE)) {
@@ -31,7 +31,7 @@ function main_entry(): void {
   var_dump($zip->getNameIndex(1));
   var_dump($zip->getNameIndex(2));
   var_dump($zip->getNameIndex(3));
-  @unlink($file);
+  unlink($file);
 
   $zip->close();
 }

@@ -1,10 +1,10 @@
 <?hh <<__EntryPoint>> function main(): void {
-@mkdir(sys_get_temp_dir().'/'.'realpath_basic4/home/test', 0777, true);
-@symlink(
+mkdir(sys_get_temp_dir().'/'.'realpath_basic4/home/test', 0777, true);
+symlink(
   sys_get_temp_dir().'/'.'realpath_basic4/home',
   sys_get_temp_dir().'/'.'realpath_basic4/link1'
 );
-@symlink(
+symlink(
   sys_get_temp_dir().'/'.'realpath_basic4/link1',
   sys_get_temp_dir().'/'.'realpath_basic4/link2'
 );

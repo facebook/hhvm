@@ -6,7 +6,7 @@ function main_entry(): void {
   include $dirname . 'utils.inc';
   $file = sys_get_temp_dir().'/'.'__tmp_oo_set_comment.zip';
 
-  @unlink($file);
+  unlink($file);
 
   $zip = new ZipArchive;
   if (!$zip->open($file, ZipArchive::CREATE)) {
@@ -35,7 +35,7 @@ function main_entry(): void {
   $zip->close();
 
   if (!$zip->open($file)) {
-  	@unlink($file);
+  	unlink($file);
   	exit('failed');
   }
 
@@ -47,5 +47,5 @@ function main_entry(): void {
   var_dump($zip->getArchiveComment());
 
   $zip->close();
-  @unlink($file);
+  unlink($file);
 }

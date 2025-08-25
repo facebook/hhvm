@@ -17,6 +17,6 @@ $streams = vec[
 
 foreach ($streams as $stream)
 {
-  var_dump(@file_get_contents($stream));
+  var_dump(file_get_contents($stream));
 }
 }

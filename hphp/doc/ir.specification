@@ -2777,14 +2777,6 @@ ReqBindJmp and CallFuncEntry.
 
   Ring buffer tracing.
 
-| ZeroErrorLevel, D(Int), NA, NF
-
-| RestoreErrorLevel, ND, S(Int), NF
-
-  Helper instructions for fast implementation of the PHP error silencing
-  operator (@foo()).
-
-
 16. Iterators
 
 | IterExtractBase, D(Dict|Vec|Obj), S(Obj) S(Cls|Nullptr), PRc

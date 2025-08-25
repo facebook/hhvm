@@ -32,10 +32,10 @@ foreach($modes as $mode) {
     exit("Error:failed to open file $filename");
  
   //writing data to the file
-  @fwrite($file_handle, "Sample text\n");
+  fwrite($file_handle, "Sample text\n");
   
   // writing a blank line
-  @fwrite($file_handle, "\n");
+  fwrite($file_handle, "\n");
 
   //closing the file
   fclose($file_handle);

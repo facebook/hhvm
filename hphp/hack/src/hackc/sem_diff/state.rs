@@ -1452,7 +1452,6 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::SetS(..)
             | Opcode::Shl
             | Opcode::Shr
-            | Opcode::Silence(..)
             | Opcode::StaticAnalysisError
             | Opcode::Sub
             | Opcode::Switch(..)
@@ -1697,8 +1696,6 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         Opcode::MemoGetEager(_, dummy, _) => {
             Opcode::MemoGetEager([Label::INVALID, Label::INVALID], dummy, LocalRange::EMPTY)
         }
-        Opcode::Silence(_, op) => Opcode::Silence(Local::INVALID, op),
-
         Opcode::BaseC(_, m_op_mode) => Opcode::BaseC(0, m_op_mode),
         Opcode::BaseL(_, m_op_mode, ro_op) => Opcode::BaseL(Local::INVALID, m_op_mode, ro_op),
         Opcode::BaseSC(_, _, m_op_mode, ro_op) => Opcode::BaseSC(0, 0, m_op_mode, ro_op),

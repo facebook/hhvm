@@ -29,7 +29,7 @@ function entrypoint_xml_parser_get_option_variation2(): void {
   // loop through each element of the array for option
 
   foreach($values as $value) {
-        echo @"\nArg value $value \n";
+        echo "\nArg value $value \n";
         try { var_dump( xml_parser_get_option($parser, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   }
 

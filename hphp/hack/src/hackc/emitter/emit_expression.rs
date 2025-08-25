@@ -4695,27 +4695,7 @@ fn emit_unop<'a, 'd>(
             None,
             false,
         ),
-        Uop::Usilence => e.local_scope(|e| {
-            let temp_local = e.local_gen_mut().get_unnamed();
-            Ok(InstrSeq::gather(vec![
-                emit_pos(pos),
-                instr::silence_start(temp_local),
-                {
-                    let try_instrs = emit_expr(e, env, expr)?;
-                    let catch_instrs =
-                        InstrSeq::gather(vec![emit_pos(pos), instr::silence_end(temp_local)]);
-                    scope::create_try_catch(
-                        e.label_gen_mut(),
-                        None,
-                        false, /* skip_throw */
-                        try_instrs,
-                        catch_instrs,
-                    )
-                },
-                emit_pos(pos),
-                instr::silence_end(temp_local),
-            ]))
-        }),
+        Uop::Usilence => Err(Error::unrecoverable("Unexpected Silence operator '@'")),
     }
 }
 

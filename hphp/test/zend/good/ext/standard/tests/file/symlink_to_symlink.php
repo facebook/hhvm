@@ -11,7 +11,7 @@ symlink(basename($prefix . "_file"), $prefix . "_link1");
 symlink(basename($prefix . "_link1"), $prefix . "_link2");
 
 // symlink to a non-existent path
-@unlink($prefix . "_nonexistent");
+unlink($prefix . "_nonexistent");
 symlink(basename($prefix . "_nonexistent"), $prefix . "_link3");
 
 // symlink to a regular file using an absolute path

@@ -5,7 +5,7 @@ function gen() :AsyncGenerator<mixed,mixed,void>{
     yield $a;
 }
 <<__EntryPoint>> function main(): void {
-@eval('abc');
+eval('abc');
 
 $values = gen();
 $values->next();

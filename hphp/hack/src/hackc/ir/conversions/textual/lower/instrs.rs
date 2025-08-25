@@ -750,10 +750,6 @@ impl TransformInstr for LowerInstrs<'_> {
                 let dst = builder.emit(op);
                 Instr::Hhbc(Hhbc::SetL(dst, lid, loc))
             }
-            Instr::Hhbc(Hhbc::Silence(..)) => {
-                // Silence sets hhvm error reporting level, no-op here
-                Instr::tombstone()
-            }
             Instr::Hhbc(Hhbc::VerifyOutType(vid, lid, loc)) => {
                 self.verify_out_type(builder, vid, lid, loc)
             }

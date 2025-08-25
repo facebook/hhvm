@@ -73,7 +73,7 @@ $sample_urls = vec[
 
     foreach ($sample_urls as $url) {
         echo "\n--> $url: ";
-        var_dump(@parse_url($url));
+        var_dump(parse_url($url));
     }
 
     $url = 'http://secret:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123';

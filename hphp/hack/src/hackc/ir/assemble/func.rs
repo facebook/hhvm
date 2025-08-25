@@ -96,7 +96,6 @@ use crate::parse::parse_param;
 use crate::parse::parse_prop_id;
 use crate::parse::parse_readonly;
 use crate::parse::parse_set_op_op;
-use crate::parse::parse_silence_op;
 use crate::parse::parse_special_cls_ref;
 use crate::parse::parse_special_cls_ref_opt;
 use crate::parse::parse_src_loc;
@@ -1457,7 +1456,6 @@ impl FunctionParser<'_> {
             "setrangem" => self.parse_member_op(tok, mnemonic, loc)?,
             "shl" => I::Hhbc(H::Shl(self.vid2(tok)?, loc)),
             "shr" => I::Hhbc(H::Shr(self.vid2(tok)?, loc)),
-            "silence" => parse_instr!(tok, I::Hhbc(Hhbc::Silence(p0, p1, loc)), <p0:self.lid> "," <p1:parse_silence_op>),
             "sswitch" => self.parse_sswitch(tok, loc)?,
             "switch" => self.parse_switch(tok, loc)?,
             "sub" => I::Hhbc(H::Sub(self.vid2(tok)?, loc)),

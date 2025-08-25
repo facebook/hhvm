@@ -6,11 +6,13 @@ for ($i=0; $i<100; $i++) {
   /* Setup socket server */
   $errno = null;
   $errstr = null;
-  $server = @stream_socket_server(
+  error_reporting(0);
+  $server = stream_socket_server(
     "tcp://127.0.0.1:$port",
     inout $errno,
     inout $errstr
   );
+  error_reporting(E_ALL);
   if ($server) {
     break;
   }

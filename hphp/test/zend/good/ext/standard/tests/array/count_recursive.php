@@ -75,7 +75,7 @@ print "COUNT_NORMAL: should be 1, is ".count(-23.45)."\n";
 print "\n-- Testing count() on NULL and Unset variables --\n";
 print "COUNT_NORMAL: should be 0, is ".count(NULL)."\n";
 print "COUNT_NORMAL: should be 1, is ".count("")."\n";
-try {print "COUNT_NORMAL: should be 0, is ".@count($a)."\n";} catch (UndefinedVariableException $e) {var_dump($e->getMessage());}
+try {print "COUNT_NORMAL: should be 0, is ".count($a)."\n";} catch (UndefinedVariableException $e) {var_dump($e->getMessage());}
 
 
 print "\n-- Testing count() on an empty sub-array --\n";

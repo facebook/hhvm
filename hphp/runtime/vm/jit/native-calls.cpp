@@ -447,10 +447,6 @@ static CallMap s_callMap {
     {ReturnHook, &EventHook::onFunctionReturnJit, DNone,
                             SSync, {{SSA, 0}, {TV, 1}}},
 
-    /* silence operator support */
-    {ZeroErrorLevel, &zero_error_level, DSSA, SNone, {}},
-    {RestoreErrorLevel, &restore_error_level, DNone, SNone, {{SSA, 0}}},
-
     /* count($mixed) */
     {Count, &countHelper, DSSA, SSync, {{TV, 0}}},
 

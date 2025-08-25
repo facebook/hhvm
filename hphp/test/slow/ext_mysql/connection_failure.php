@@ -5,7 +5,7 @@
 // which is what this test is trying to verify.
 <<__EntryPoint>>
 function main_connection_failure() :mixed{
-@mysql_pconnect('localhost', 'notreal', 'notreal');
+mysql_pconnect('localhost', 'notreal', 'notreal');
 mysql_set_charset('latin1');
 mysql_error();
 mysql_errno();

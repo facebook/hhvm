@@ -1,0 +1,15 @@
+*** Testing array_count_values() : parameter variations ***
+
+Warning: Can only count STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_count_values_variation.php on line 26
+
+Warning: Can only count STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_count_values_variation.php on line 26
+dict(3) {
+  ["bobv"]=>
+  int(1)
+  ["val"]=>
+  int(1)
+  ["val6"]=>
+  int(1)
+}
+
+Done

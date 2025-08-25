@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-@set_time_limit(5);
+set_time_limit(5);
 $delimiter = "|";
 
 echo "delimiter: $delimiter\n";

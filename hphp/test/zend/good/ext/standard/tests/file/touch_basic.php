@@ -10,7 +10,7 @@ echo "*** Testing touch() : basic functionality ***\n";
 $filename = sys_get_temp_dir().'/'.'touch_basic.dat';
 
 echo "\n--- testing touch creates a file ---\n";
-@unlink($filename);
+unlink($filename);
 if (file_exists($filename)) {
    exit("touch_basic failed");
 }

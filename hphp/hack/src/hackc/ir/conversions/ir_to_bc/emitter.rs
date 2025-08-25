@@ -586,10 +586,6 @@ impl<'b> InstrEmitter<'b> {
             Hhbc::SetS(_, readonly, _) => Opcode::SetS(readonly),
             Hhbc::Shl(..) => Opcode::Shl,
             Hhbc::Shr(..) => Opcode::Shr,
-            Hhbc::Silence(lid, op, _) => {
-                let local = self.lookup_local(lid);
-                Opcode::Silence(local, op)
-            }
             Hhbc::Sub(..) => Opcode::Sub,
             Hhbc::This(_) => Opcode::This,
             Hhbc::ThrowNonExhaustiveSwitch(_) => Opcode::ThrowNonExhaustiveSwitch,

@@ -1,0 +1,6 @@
+Warning: Unknown URI scheme "ftp" in %s/test/zend/good/ext/standard/tests/streams/bug49936.php on line 5
+bool(false)
+
+Warning: Unknown URI scheme "ftp" in %s/test/zend/good/ext/standard/tests/streams/bug49936.php on line 6
+bool(false)
+===DONE===

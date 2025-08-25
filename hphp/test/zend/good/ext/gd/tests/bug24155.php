@@ -1,6 +1,6 @@
 <?hh <<__EntryPoint>> function main(): void {
 $dest = sys_get_temp_dir().'/'.'bug24155.png';
-@unlink($dest);
+unlink($dest);
 
 $im = imagecreatetruecolor(30, 50);
 imagefill($im, 0, 0, (16777215 - 255));
@@ -14,5 +14,5 @@ $col = imagecolorat($im2, 20, 20);
 // 16777215 - 255 = 16776960
 echo "$col\n";
 
-@unlink($dest);
+unlink($dest);
 }

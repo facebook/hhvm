@@ -3,7 +3,7 @@
 if (defined('PHP_WINDOWS_VERSION_MAJOR')) {
   exit("skip. set TZ env is not supported at runtime.");
 }
-if (!@putenv("TZ=US/Eastern") || getenv("TZ") != 'US/Eastern') {
+if (!putenv("TZ=US/Eastern") || getenv("TZ") != 'US/Eastern') {
   exit("skip unable to change TZ enviroment variable\n");
 }
 }

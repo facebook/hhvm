@@ -56,7 +56,7 @@ function main_entry(): void {
   $iterator = 1;
   $regs = null;
   foreach ($character_classes as $pattern) {
-  	if (is_array(@$regs)) {
+  	if (is_array($regs)) {
   		$regs = null;
   	}
   	echo "\n-- Iteration $iterator --\n";

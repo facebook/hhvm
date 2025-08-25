@@ -1,0 +1,2 @@
+Fatal error: A semicolon `;` is expected here. in %s/test/zend/good/Zend/tests/generators/bug67497.php(8)(%s) : eval()'d code on line 1
+===DONE===

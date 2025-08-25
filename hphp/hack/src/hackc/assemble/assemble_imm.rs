@@ -163,8 +163,6 @@ assemble_imm_for_enum!(
 
 assemble_imm_for_enum!(hhbc::SetRangeOp, [SetRangeOp::Forward, SetRangeOp::Reverse]);
 
-assemble_imm_for_enum!(hhbc::SilenceOp, [SilenceOp::End, SilenceOp::Start]);
-
 assemble_imm_for_enum!(
     hhbc::SpecialClsRef,
     [

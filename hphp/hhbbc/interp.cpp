@@ -5904,18 +5904,6 @@ void in(ISS& env, const bc::InitProp& op) {
   popC(env);
 }
 
-void in(ISS& env, const bc::Silence& op) {
-  nothrow(env);
-  switch (op.subop2) {
-    case SilenceOp::Start:
-      setLoc(env, op.loc1, TInt);
-      break;
-    case SilenceOp::End:
-      locRaw(env, op.loc1);
-      break;
-  }
-}
-
 namespace {
 
 template <typename Op, typename Rebind>

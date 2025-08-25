@@ -1,0 +1,14 @@
+---- using DateTime::diff
+
+Warning: DateTime::diff() expects parameter 1 to be DateTimeInterface, stdClass given in %s/test/slow/variant_to_object_hack_arrays.php on line 18
+bool(false)
+
+Warning: DateTime::diff() expects parameter 1 to be DateTimeInterface, stdClass given in %s/test/slow/variant_to_object_hack_arrays.php on line 18
+bool(false)
+
+Warning: DateTime::diff() expects parameter 1 to be DateTimeInterface, stdClass given in %s/test/slow/variant_to_object_hack_arrays.php on line 18
+bool(false)
+---- using DOMXPath::__construct
+string(55) "DOMXPath::__construct expects parameter 1 to be DOMNode"
+string(55) "DOMXPath::__construct expects parameter 1 to be DOMNode"
+string(55) "DOMXPath::__construct expects parameter 1 to be DOMNode"

@@ -23,7 +23,7 @@ $list = vec[
 ];
 
 $file = sys_get_temp_dir().'/'.'fgetcsv.csv';
-@unlink($file);
+unlink($file);
 foreach ($list as $v) {
     $fp = fopen($file, "w");
     fwrite($fp, $v . "\n");
@@ -31,5 +31,5 @@ foreach ($list as $v) {
 
     var_dump(fgetcsv(fopen($file, "r"), 1024));
 }
-@unlink($file);
+unlink($file);
 }

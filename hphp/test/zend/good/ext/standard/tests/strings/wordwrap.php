@@ -20,5 +20,5 @@ quicktester(() ==> "123 ab12345 ab123", () ==> wordwrap("123  12345  123", 8, "a
 quicktester(() ==> "1ab2ab3ab4", () ==> wordwrap("1234", 1, "ab", true));
 quicktester(() ==> "12345|12345|67890", () ==> wordwrap("12345 1234567890", 5, "|", true));
 quicktester(() ==> "123|==1234567890|==123", () ==> wordwrap("123 1234567890 123", 10, "|==", true));
-quicktester(() ==> FALSE, () ==> @wordwrap(chr(0), 0, ""));
+quicktester(() ==> FALSE, () ==> wordwrap(chr(0), 0, ""));
 }

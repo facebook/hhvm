@@ -32,7 +32,7 @@ msg_receive($queue, 2, inout $type, 100, inout $msg, true, 0, inout $errcode);
 var_dump($msg);
 
 try {
-  $ret = @msg_send($queue, 0, 'msg', false, false, inout $s_error_code);
+  $ret = msg_send($queue, 0, 'msg', false, false, inout $s_error_code);
   var_dump($ret);
 } catch (UndefinedVariableException $e) {
   var_dump($e->getMessage());

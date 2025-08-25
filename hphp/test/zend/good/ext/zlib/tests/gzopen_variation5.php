@@ -7,7 +7,7 @@ function runtest() :mixed{
 	fclose($h);
 
 
-	$h = @gzopen($tmpfile, "r");
+	$h = gzopen($tmpfile, "r");
 	if ($h === false) {
 	   echo "Not created in working dir\n";
 	}
@@ -17,7 +17,7 @@ function runtest() :mixed{
 	   unlink($tmpfile);
 	}
 
-	$h = @gzopen('dir1/'.$tmpfile, "r");
+	$h = gzopen('dir1/'.$tmpfile, "r");
 	if ($h === false) {
 	   echo "Not created in dir1\n";
 	}

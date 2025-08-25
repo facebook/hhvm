@@ -2,7 +2,9 @@
 <<__EntryPoint>> function main(): void {
 $filename = sys_get_temp_dir().'/'.'concur_rw.txt';
 
-@unlink($filename);
+error_reporting(0);
+unlink($filename);
+error_reporting(E_ALL);
 $writer = fopen($filename, "wt");
 $reader = fopen($filename, "r");
 fread($reader, 1);
@@ -15,7 +17,7 @@ if (strlen(fread($reader, 10)) > 0) {
 fclose($writer);
 fclose($reader);
 
-@unlink($filename);
+unlink($filename);
 
 echo "Done\n";
 }

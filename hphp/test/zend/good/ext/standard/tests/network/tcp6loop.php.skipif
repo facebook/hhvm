@@ -8,6 +8,8 @@
  */
 $errno = 0;
 $errstr = "";
-@stream_socket_client('tcp://[::1]:0', inout $errno, inout $errstr);
+error_reporting(0);
+stream_socket_client('tcp://[::1]:0', inout $errno, inout $errstr);
+error_reporting(E_ALL);
 if ($errno != 111) exit('skip IPv6 not supported.');
 }

@@ -1,0 +1,12 @@
+string(12) "A brief note"
+string(40) "select_vcount,fcol_from_fieldtable/local"
+string(13) "foobar foobar"
+string(5) ";test"
+string(4) "test"
+string(4) "test"
+
+Warning: rfc2397: invalid meta data in %s/test/zend/good/ext/standard/tests/file/stream_rfc2397_005.php on line 17
+bool(false)
+string(5) "Hello"
+string(3) "a,b"
+===DONE===

@@ -338,8 +338,6 @@ static const struct {
   { OpArrayUnmarkLegacy, {StackTop2,  Stack1,       OutUnknown      }},
   { OpCheckProp,   {None,             Stack1,       OutBoolean      }},
   { OpInitProp,    {Stack1,           None,         OutNone         }},
-  { OpSilence,     {Local|DontGuardAny,
-                                      Local,        OutNone         }},
   { OpThrowNonExhaustiveSwitch,
                    {None,             None,         OutNone         }},
   { OpRaiseClassStringConversionNotice,

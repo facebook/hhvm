@@ -9,7 +9,7 @@ mkdir($dest_dir);
 echo "\n*** Testing rename() on soft links ***\n";
 // create the file
 $filename = sys_get_temp_dir().'/'.'rename_variation2.phpt2.tmp';
-@unlink($filename);
+unlink($filename);
 var_dump(touch($filename));
 
 // create the soft links to the file

@@ -1,5 +1,7 @@
 *** Testing fgetcsv() : with default enclosure, file pointer pointing at end of file ***
 
+Warning: unlink(%s): No such file or directory in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation22.php on line 26
+
 -- Testing fgetcsv() with file opened using r mode --
 int(0)
 bool(false)

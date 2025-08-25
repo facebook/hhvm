@@ -23,7 +23,7 @@ echo "*** Testing dir() : unexpected values for \$context argument ***\n";
 // create the temporary directory
 
 $directory = sys_get_temp_dir().'/'.'dir_variation2';
-@mkdir($directory);
+mkdir($directory);
 
 
 // heredoc string

@@ -21,7 +21,7 @@ $t['two'] = new test();
 
 var_dump($t);
 
-$s =  @serialize($t);
+$s =  serialize($t);
 echo $s . "\n";
 
 var_dump(unserialize($s));

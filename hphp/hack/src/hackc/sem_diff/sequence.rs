@@ -446,7 +446,6 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::SetOpS(..)
             | Opcode::SetRangeM(..)
             | Opcode::SetS(..)
-            | Opcode::Silence(..)
             | Opcode::StaticAnalysisError
             | Opcode::UnsetG
             | Opcode::UnsetM(..)

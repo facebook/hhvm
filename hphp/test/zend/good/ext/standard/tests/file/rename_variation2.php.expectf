@@ -1,0 +1,12 @@
+*** Testing rename() on soft links ***
+
+Warning: unlink(%s): No such file or directory in %s/test/zend/good/ext/standard/tests/file/rename_variation2.php on line 12
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+Done

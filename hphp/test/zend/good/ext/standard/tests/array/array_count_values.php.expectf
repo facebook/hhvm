@@ -1,0 +1,77 @@
+dict(0) {
+}
+
+dict(1) {
+  [0]=>
+  int(1)
+}
+
+dict(1) {
+  [1]=>
+  int(1)
+}
+
+dict(1) {
+  [-1]=>
+  int(1)
+}
+
+dict(1) {
+  [0]=>
+  int(2)
+}
+
+dict(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(1)
+}
+
+dict(1) {
+  [1]=>
+  int(2)
+}
+
+dict(3) {
+  [1]=>
+  int(2)
+  ["hello"]=>
+  int(2)
+  ["world"]=>
+  int(1)
+}
+
+dict(2) {
+  ["hello"]=>
+  int(2)
+  ["world"]=>
+  int(1)
+}
+
+dict(3) {
+  [""]=>
+  int(2)
+  ["world"]=>
+  int(3)
+  ["hello"]=>
+  int(4)
+}
+
+
+Warning: Can only count STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_count_values.php on line 18
+dict(1) {
+  [0]=>
+  int(1)
+}
+
+
+Warning: Can only count STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_count_values.php on line 18
+
+Warning: Can only count STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_count_values.php on line 18
+
+Warning: Can only count STRING and INTEGER values! in %s/test/zend/good/ext/standard/tests/array/array_count_values.php on line 18
+dict(1) {
+  [1]=>
+  int(1)
+}

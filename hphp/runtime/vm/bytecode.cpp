@@ -163,7 +163,6 @@ inline const char* prettytype(IncDecOp) { return "IncDecOp"; }
 inline const char* prettytype(ObjMethodOp) { return "ObjMethodOp"; }
 inline const char* prettytype(BareThisOp) { return "BareThisOp"; }
 inline const char* prettytype(InitPropOp) { return "InitPropOp"; }
-inline const char* prettytype(SilenceOp) { return "SilenceOp"; }
 inline const char* prettytype(SwitchKind) { return "SwitchKind"; }
 inline const char* prettytype(MOpMode) { return "MOpMode"; }
 inline const char* prettytype(QueryMOp) { return "QueryMOp"; }
@@ -5247,19 +5246,6 @@ OPTBLD_INLINE void iopOODeclExists(OODeclExistsOp subop) {
     case OODeclExistsOp::Interface : kind = ClassKind::Interface; break;
   }
   tvAsVariant(name) = Class::exists(name->m_data.pstr, autoload, kind);
-}
-
-OPTBLD_INLINE void iopSilence(tv_lval loc, SilenceOp subop) {
-  switch (subop) {
-    case SilenceOp::Start:
-      type(loc) = KindOfInt64;
-      val(loc).num = zero_error_level();
-      break;
-    case SilenceOp::End:
-      assertx(type(loc) == KindOfInt64);
-      restore_error_level(val(loc).num);
-      break;
-  }
 }
 
 std::string prettyStack(const std::string& prefix) {

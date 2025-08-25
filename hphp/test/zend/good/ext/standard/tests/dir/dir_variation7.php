@@ -20,17 +20,17 @@ echo "*** Testing dir() : remove execute permission from the parent dir ***\n";
 */
 
 $parent_dir_path = sys_get_temp_dir().'/'.'dir_variation7';
-@mkdir($parent_dir_path);
+mkdir($parent_dir_path);
 chmod($parent_dir_path, 0777);
 
 // create sub_dir
 $sub_dir_path = $parent_dir_path."/sub_dir";
-@mkdir($sub_dir_path);
+mkdir($sub_dir_path);
 chmod($sub_dir_path, 0777);
 
 //create sub_sub_dir
 $child_dir_path = $sub_dir_path."/child_dir";
-@mkdir($child_dir_path);
+mkdir($child_dir_path);
 
 // remove the write and execute permisson from sub parent
 chmod($sub_dir_path, 0444);

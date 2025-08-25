@@ -2455,24 +2455,6 @@ void emitMemoSetEager(IRGS& env, LocalRange keys) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitSilence(IRGS& env, Id localId, SilenceOp subop) {
-  switch (subop) {
-  case SilenceOp::Start:
-    // We assume that whatever is in the local is dead and doesn't need to be
-    // refcounted before being overwritten.
-    gen(env, AssertLoc, TUncounted, LocalId(localId), fp(env));
-    gen(env, StLoc, LocalId(localId), fp(env), gen(env, ZeroErrorLevel));
-    break;
-  case SilenceOp::End:
-    {
-      gen(env, AssertLoc, TInt, LocalId(localId), fp(env));
-      auto const level = ldLoc(env, localId, DataTypeGeneric);
-      gen(env, RestoreErrorLevel, level);
-    }
-    break;
-  }
-}
-
 void emitSetImplicitContextByValue(IRGS& env) {
   auto const ic = topC(env);
   if (!ic->isA(TObj)) return interpOne(env);

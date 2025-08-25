@@ -26,18 +26,23 @@ function get_random_port() :mixed{
 // fail to bind one of these random ports.  Retry a few times and hope
 // for the best.
 function retry_bind_server($udp = false) :mixed{
+  $seen_ports = keyset[];
   for ($i = 0; $i < 20; ++$i) {
     $port = get_random_port();
+    if (HH\Lib\C\contains($seen_ports, $port)) {
+      continue;
+    }
+    $seen_ports[] = $port;
     $scheme = $udp ? "udp://" : "tcp://";
     $address = $scheme."127.0.0.1:" . $port;
 
     $errno = null;
     $errstr = null;
     if ($udp) {
-      $server = @stream_socket_server($address, inout $errno, inout $errstr,
+      $server = stream_socket_server($address, inout $errno, inout $errstr,
                                      STREAM_SERVER_BIND);
     } else {
-      $server = @stream_socket_server($address, inout $errno, inout $errstr);
+      $server = stream_socket_server($address, inout $errno, inout $errstr);
     }
     if ($server !== false) {
       // assing $server into a static property to make sure, it stays alive
@@ -58,10 +63,10 @@ function retry_bind_server6($udp = false) :mixed{
     $errno = null;
     $errstr = null;
     if ($udp) {
-      $server = @stream_socket_server($address, inout $errno, inout $errstr,
+      $server = stream_socket_server($address, inout $errno, inout $errstr,
                                      STREAM_SERVER_BIND);
     } else {
-      $server = @stream_socket_server($address, inout $errno, inout $errstr);
+      $server = stream_socket_server($address, inout $errno, inout $errstr);
     }
     if ($server !== false) {
       // assing $server into a static property to make sure, it stays alive

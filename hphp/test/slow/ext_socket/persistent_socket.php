@@ -129,7 +129,7 @@ foreach ($schemes as $i => $scheme) {
     $port = rand(50000, 65535);
     $errno = null;
     $errstr = null;
-    $server = @stream_socket_server(
+    $server = stream_socket_server(
       "$scheme://127.0.0.1:$port",
       inout $errno,
       inout $errstr,

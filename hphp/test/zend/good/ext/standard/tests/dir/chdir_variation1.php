@@ -28,7 +28,7 @@ function main(): void {
   // create the temporary directory
 
   $dir_path = sys_get_temp_dir().'/'.'chdir_basic';
-  @mkdir($dir_path);
+  mkdir($dir_path);
 
 
   // heredoc string

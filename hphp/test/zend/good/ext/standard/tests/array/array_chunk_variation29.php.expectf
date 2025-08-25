@@ -1,0 +1,72 @@
+vec(2) {
+  int(0)
+  int(2)
+}
+[0]
+
+Warning: Invalid argument: size: 0 in %s/test/zend/good/ext/standard/tests/array/array_chunk_variation29.php on line 6
+NULL
+
+Warning: Invalid argument: size: 0 in %s/test/zend/good/ext/standard/tests/array/array_chunk_variation29.php on line 7
+NULL
+
+Warning: Invalid argument: size: 0 in %s/test/zend/good/ext/standard/tests/array/array_chunk_variation29.php on line 8
+NULL
+
+[1]
+vec(2) {
+  dict(1) {
+    [0]=>
+    int(0)
+  }
+  dict(1) {
+    [0]=>
+    int(2)
+  }
+}
+vec(2) {
+  dict(1) {
+    [0]=>
+    int(0)
+  }
+  dict(1) {
+    [1]=>
+    int(2)
+  }
+}
+vec(2) {
+  dict(1) {
+    [0]=>
+    int(0)
+  }
+  dict(1) {
+    [0]=>
+    int(2)
+  }
+}
+
+[2]
+vec(1) {
+  dict(2) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(2)
+  }
+}
+vec(1) {
+  dict(2) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(2)
+  }
+}
+vec(1) {
+  dict(2) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(2)
+  }
+}

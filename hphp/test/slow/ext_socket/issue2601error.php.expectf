@@ -1,1 +1,2 @@
+Warning: unable to connect to unix:///socket/not/found [2]: No such file or directory in %s/test/slow/ext_socket/issue2601error.php on line 10
 Error: %s (%s)

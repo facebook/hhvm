@@ -14,7 +14,7 @@ echo "*** Testing dir() : open a non-existent directory ***\n";
 // create the temporary directory
 
 $dir_path = sys_get_temp_dir().'/'.'dir_variation6';
-@mkdir($dir_path);
+mkdir($dir_path);
 
 // open existent directory
 $d = dir($dir_path);

@@ -457,7 +457,6 @@ const char* subopToName(CollectionType);
 const char* subopToName(SetOpOp);
 const char* subopToName(IncDecOp);
 const char* subopToName(BareThisOp);
-const char* subopToName(SilenceOp);
 const char* subopToName(OODeclExistsOp);
 const char* subopToName(ObjMethodOp);
 const char* subopToName(SwitchKind);

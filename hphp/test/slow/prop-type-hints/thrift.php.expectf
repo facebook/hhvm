@@ -2,6 +2,16 @@
 =============================================================
 ===================== compact deserializing ==================
 ==============================================================
+
+Warning: Property 'TestStruct2::p1' declared as type bool, int assigned in %s/test/slow/prop-type-hints/thrift.php on line 26
+
+Warning: Property 'TestStruct2::p2' declared as type int, string assigned in %s/test/slow/prop-type-hints/thrift.php on line 26
+
+Warning: Property 'TestStruct2::p3' declared as type string, bool assigned in %s/test/slow/prop-type-hints/thrift.php on line 26
+
+Warning: Property 'TestStruct2::p6' declared as type ?int, string assigned in %s/test/slow/prop-type-hints/thrift.php on line 26
+
+Warning: Property 'TestStruct2::p5' declared as type DummyStruct, DummyStruct2 assigned in %s/test/slow/prop-type-hints/thrift-defs.inc on line 109
 ===================== binary deserializing ==================
 
 Warning: Property 'TestStruct2::p5' declared as type DummyStruct, DummyStruct2 assigned in %s/thrift-defs.inc on line 109
@@ -34,6 +44,8 @@ Warning: Property 'TestStruct2::p6' declared as type ?int, string assigned in %s
 =============================================================
 ===================== compact deserializing ==================
 ==============================================================
+
+Warning: Property 'TestStruct5::_type' declared as type string, int assigned in %s/test/slow/prop-type-hints/thrift-defs.inc on line 199
 ===================== binary deserializing ==================
 
 Warning: Property 'TestStruct5::_type' declared as type string, int assigned in %s/thrift.php on line 8

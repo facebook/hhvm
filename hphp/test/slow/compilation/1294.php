@@ -13,6 +13,6 @@ function f() :mixed{
 <<__EntryPoint>>
 function main_1294() :mixed{
 ;
-@X::g();
-@g(f(),f());
+X::g();
+g(f(),f());
 }

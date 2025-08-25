@@ -33,7 +33,7 @@ foreach ($data as $val) {
 	mcrypt_generic_deinit($td);
 
 	mcrypt_generic_init($td, $key, $iv);
-	var_dump($dec = @mdecrypt_generic($td, (string)$enc));
+	var_dump($dec = mdecrypt_generic($td, (string)$enc));
 }
 
 mcrypt_module_close($td);

@@ -17,7 +17,7 @@ function get_random_port() :mixed{
 function bind_random_port($socket, $address) :mixed{
   for ($i = 0; $i < 100; $i++) {
     $port = get_random_port();
-    if (@socket_bind($socket, $address, $port)) return $port;
+    if (socket_bind($socket, $address, $port)) return $port;
   }
   return 0;
 }
@@ -25,7 +25,9 @@ function bind_random_port($socket, $address) :mixed{
 function create_listen_random_port(inout $sock) :mixed{
   for ($i = 0; $i < 100; $i++) {
     $port = get_random_port();
-    if ($sock = @socket_create_listen($port)) return $port;
+    error_reporting(0);
+    if ($sock = socket_create_listen($port)) return $port;
+    error_reporting(E_ALL);
   }
   return 0;
 }
@@ -36,7 +38,7 @@ function pfsockopen_random_port(inout $fsock, $address) :mixed{
     $port = get_random_port();
     $errno = null;
     $errstr = null;
-    $fsock = @pfsockopen($address, $port, inout $errno, inout $errstr);
+    $fsock = pfsockopen($address, $port, inout $errno, inout $errstr);
     if ($fsock !== false) return $port;
   }
   return 0;
@@ -122,7 +124,7 @@ var_dump(socket_listen($s));
 var_dump(socket_close($s));
 
 $s = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-@socket_bind($s, "127.0.0.1", 25);
+socket_bind($s, "127.0.0.1", 25);
 if (socket_last_error($s) == 13) {
   var_dump(socket_strerror(13) == "Permission denied");
   socket_clear_error($s);

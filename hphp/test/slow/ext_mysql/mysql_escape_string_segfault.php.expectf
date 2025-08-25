@@ -1,0 +1,2 @@
+Warning: supplied argument is not a valid MySQL-Link resource in %s/test/slow/ext_mysql/mysql_escape_string_segfault.php on line 7
+ok

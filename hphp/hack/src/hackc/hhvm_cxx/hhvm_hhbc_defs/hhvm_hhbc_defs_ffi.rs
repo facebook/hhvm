@@ -184,13 +184,6 @@ pub mod ffi {
 
     #[repr(u8)]
     #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
-    enum SilenceOp {
-        Start,
-        End,
-    }
-
-    #[repr(u8)]
-    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum BareThisOp {
         Notice,
         NoNotice,
@@ -263,7 +256,6 @@ pub mod ffi {
         type ReadonlyOp;
         type SetOpOp;
         type SetRangeOp;
-        type SilenceOp;
         type SpecialClsRef;
         type SwitchKind;
         type TypeStructResolveOp;

@@ -50,7 +50,6 @@ struct State {
   int stklen{0};       // length of evaluation stack.
   bool mbr_live{false};    // liveness of member base register
   Optional<MOpMode> mbr_mode; // mode of member base register
-  boost::dynamic_bitset<> silences; // set of silenced local variables
   bool guaranteedThis; // whether $this is guaranteed to be non-null
   // immediately following BaseL or BaseH in a minstr sequence, when the base
   // was known to be Rx mutable
@@ -249,7 +248,7 @@ bool isInitialized(const State& state) {
 // assumes that this edge may get taken.
 //
 // This list should include instructions that are emitted for gotos or for iter
-// or local scope cleanup blocks. "IterFree", "UnsetL", "Jmp", and "Silence"
+// or local scope cleanup blocks. "IterFree", "UnsetL", and "Jmp"
 // are all used in these blocks. The "Ret*" ops are used for returns inside
 // loop bodies, as well. If HHBBC determines that a block is unreachable,
 // it will replace its contents with "String ...; Fatal", which we also include.
@@ -275,7 +274,6 @@ bool mayTakeExnEdges(Op op) {
     case Op::RetC:
     case Op::RetCSuspended:
     case Op::RetM:
-    case Op::Silence:
     case Op::String:
     case Op::UnsetL:
     case Op::StaticAnalysisError:
@@ -1378,33 +1376,11 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       }
       break;
     }
-    case Op::Silence: {
-      auto new_pc = pc;
-      decode_op(new_pc);
-      auto const local = decode_iva(new_pc);
-      if (m_func->localNameMap()[local]) {
-        ferror("Cannot store error reporting value in named local\n");
-        return false;
-      }
-
-      auto const silence = decode_oa<SilenceOp>(new_pc);
-      if (local + 1 > cur->silences.size()) cur->silences.resize(local + 1);
-      if (silence == SilenceOp::End && !cur->silences[local]) {
-        ferror("Silence ended on local variable {} with no start\n", local);
-        return false;
-      }
-
-      cur->silences[local] = silence == SilenceOp::Start ? 1 : 0;
-      break;
-    }
     case Op::Fatal:
-      // fatals don't do exception handling, and the silence state is reset
-      // by the runtime.
-      cur->silences.clear();
+      // fatals don't do exception handling
       break;
 
     case Op::StaticAnalysisError:
-      cur->silences.clear();
       cur->mbr_live = false;
       break;
 
@@ -1475,17 +1451,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
     }
     default:
       break;
-  }
-
-  if (op != Op::Silence && !isTypeAssert(op)) {
-    for (auto const local : localIds(op, pc)) {
-      if (cur->silences.size() > local && cur->silences[local]) {
-        ferror("{} at PC {} affected a local variable ({}) which was reserved "
-               "for storing the error reporting level\n",
-               opcodeToName(op), offset(pc), local);
-        return false;
-      }
-    }
   }
 
   return true;
@@ -1682,7 +1647,6 @@ void FuncChecker::initState(State* s) {
   s->stklen = 0;
   s->mbr_live = false;
   s->mbr_mode.reset();
-  s->silences.clear();
   s->guaranteedThis = m_func->pce() && !(m_func->attrs & AttrStatic);
   s->mbrMustContainMutableLocalOrThis = false;
   s->afterDim = false;
@@ -1698,7 +1662,6 @@ void FuncChecker::copyState(State* to, const State* from) {
   to->stklen = from->stklen;
   to->mbr_live = from->mbr_live;
   to->mbr_mode = from->mbr_mode;
-  to->silences = from->silences;
   to->guaranteedThis = from->guaranteedThis;
   to->mbrMustContainMutableLocalOrThis = from->mbrMustContainMutableLocalOrThis;
   to->afterDim = from->afterDim;
@@ -1850,12 +1813,6 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     ok = false;
   }
 
-  if (b->succ_count == 0 && cur->silences.find_first() != cur->silences.npos &&
-      !b->exn) {
-    error("Error reporting was silenced at end of terminal block B%d\n", b->id);
-    return false;
-  }
-
   return ok;
 }
 
@@ -1887,21 +1844,6 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
   if (!isInitialized(state)) {
     copyState(&state, &cur);
     return b == nullptr || maybe_revisit();
-  }
-
-  // Check that silence states match. An empty bitset is equivalent to a bitset
-  // of 0s; since most funcs don't use Silence ops, we can avoid allocations.
-  if (cur.silences.size() != state.silences.size()) {
-    state.silences.resize(cur.silences.size());
-  }
-  if (cur.silences != state.silences) {
-    std::string current, target;
-    boost::to_string(cur.silences, current);
-    boost::to_string(state.silences, target);
-    error("Silencer state mismatch on edge B%d->B%d: B%d had state %s, "
-          "B%d had state %s\n", b->id, t->id, b->id, current.c_str(),
-          t->id, target.c_str());
-    return false;
   }
 
   // Check that the stacks agree on depth and flavor.

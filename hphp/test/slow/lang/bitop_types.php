@@ -85,5 +85,5 @@ function main_bitop_types() :mixed{
     }
   }
 
-  @test_uninit();
+  test_uninit();
 }

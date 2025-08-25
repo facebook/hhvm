@@ -1,3 +1,4 @@
+Warning: unlink(%s): No such file or directory in %s/test/zend/good/ext/standard/tests/file/symlink_to_symlink.php on line 14
 string(%d) "symlink_to_symlink.php_file"
 string(%d) "symlink_to_symlink.php_link1"
 string(%d) "symlink_to_symlink.php_nonexistent"

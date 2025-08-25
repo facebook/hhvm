@@ -17,13 +17,13 @@ error_reporting(E_ALL | E_STRICT);
 var_dump(error_reporting());
 
 try {
-    @make_exception();
+    make_exception();
 } catch (Exception $e) {}
 
 var_dump(error_reporting());
 
 try {
-    @make_exception_and_change_err_reporting();
+    make_exception_and_change_err_reporting();
 } catch (Exception $e) {}
 
 var_dump(error_reporting());

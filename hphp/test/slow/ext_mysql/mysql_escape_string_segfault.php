@@ -4,7 +4,7 @@
 
 <<__EntryPoint>>
 function main_mysql_escape_string_segfault() :mixed{
-@mysql_real_escape_string("");
+mysql_real_escape_string("");
 
 echo "ok";
 }

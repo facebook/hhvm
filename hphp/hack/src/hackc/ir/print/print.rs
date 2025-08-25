@@ -1243,15 +1243,6 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) ->
                 FmtVid(func, vids[2], verbose)
             )?;
         }
-        Hhbc::Silence(lid, op, _) => {
-            let lid = FmtLid(lid);
-            let op = match op {
-                SilenceOp::Start => "start",
-                SilenceOp::End => "end",
-                _ => unreachable!(),
-            };
-            write!(w, "silence {}, {}", lid, op)?;
-        }
         Hhbc::This(_) => {
             write!(w, "this")?;
         }

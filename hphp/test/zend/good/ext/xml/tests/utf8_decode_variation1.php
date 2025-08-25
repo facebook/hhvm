@@ -23,7 +23,7 @@ function entrypoint_utf8_decode_variation1(): void {
   // loop through each element of the array for data
 
   foreach($values as $value) {
-        echo @"\nArg value $value \n";
+        echo "\nArg value $value \n";
         try { var_dump( utf8_decode($value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   }
 

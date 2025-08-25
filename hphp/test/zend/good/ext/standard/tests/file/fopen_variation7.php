@@ -13,7 +13,7 @@ function runtest() :mixed{
     fclose($h);
 
 
-    $h = @fopen($tmpfile, "r");
+    $h = fopen($tmpfile, "r");
     if ($h === false) {
        echo "Not created in working dir\n";
     }
@@ -23,7 +23,7 @@ function runtest() :mixed{
        unlink($tmpfile);
     }
 
-    $h = @fopen(ZendGoodExtStandardTestsFileFopenIncludePathInc::dir1().'/'.$tmpfile, "r");
+    $h = fopen(ZendGoodExtStandardTestsFileFopenIncludePathInc::dir1().'/'.$tmpfile, "r");
     if ($h === false) {
        echo "Not created in dir1\n";
     }

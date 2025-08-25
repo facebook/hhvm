@@ -16,7 +16,7 @@ $file_handle = fopen($filename, "w");
 if($file_handle == false)
   exit("Error:failed to open file $filename");
 //writing data to the file
-@fwrite($file_handle,"sample text\n");
+fwrite($file_handle,"sample text\n");
 
 //closing the file
 fclose($file_handle);

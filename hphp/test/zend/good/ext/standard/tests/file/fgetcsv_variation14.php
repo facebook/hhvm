@@ -10,7 +10,7 @@ echo "*** Testing fgetcsv() : reading the blank line ***\n";
 
 
 $filename = sys_get_temp_dir().'/'.'fgetcsv_variation14.tmp';
-@unlink($filename);
+unlink($filename);
 
 $file_modes = vec["r","rb", "rt", "r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",

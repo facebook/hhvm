@@ -1,0 +1,15 @@
+***Testing basic operations ***
+
+Warning: Invalid argument: needle: (empty) in %s/test/zend/good/ext/standard/tests/strings/substr_count_basic.php on line 4
+bool(false)
+
+Warning: Invalid argument: needle: (empty) in %s/test/zend/good/ext/standard/tests/strings/substr_count_basic.php on line 5
+bool(false)
+int(0)
+int(0)
+int(0)
+int(100)
+int(200)
+int(160)
+int(10)
+Done

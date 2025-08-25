@@ -1,0 +1,7 @@
+Notice: Uninitialized string offset: 6 in %s/test/zend/good/Zend/tests/bug39018_2.php on line 6
+
+Notice: Uninitialized string offset: 100 in %s/test/zend/good/Zend/tests/bug39018_2.php on line 8
+
+Notice: Uninitialized string offset: 130 in %s/test/zend/good/Zend/tests/bug39018_2.php on line 8
+0
+Done

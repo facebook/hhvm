@@ -23,13 +23,13 @@
 */
 function stat_fn( $filename ) :mixed{
   echo "-- File access time is => ";
-  print( @date( 'Y:M:D:H:i:s', fileatime($filename) ) )."\n";
+  print( date( 'Y:M:D:H:i:s', fileatime($filename) ) )."\n";
   clearstatcache();
   echo "-- File modification time is => ";
-  print( @date( 'Y:M:D:H:i:s', filemtime($filename) ) )."\n";
+  print( date( 'Y:M:D:H:i:s', filemtime($filename) ) )."\n";
   clearstatcache();
   echo "-- inode change time is => ";
-  print( @date( 'Y:M:D:H:i:s', filectime($filename) ) )."\n";
+  print( date( 'Y:M:D:H:i:s', filectime($filename) ) )."\n";
   clearstatcache();
 
 }
@@ -122,12 +122,12 @@ stat_fn($file_name2);
 sleep(2);
 
 /* set to access(creation time of the file) time */
-var_dump( touch($file_name2, (int)@date((string)fileatime($file_name2))) );
+var_dump( touch($file_name2, (int)date((string)fileatime($file_name2))) );
 stat_fn($file_name2);
 sleep(2);
 
 /* set to access time of $file_name2 */
-var_dump(touch(sys_get_temp_dir().'/'.'005_variation_touch_fly.tmp', (int)@date((string)fileatime($file_name2)), time()));
+var_dump(touch(sys_get_temp_dir().'/'.'005_variation_touch_fly.tmp', (int)date((string)fileatime($file_name2)), time()));
 stat_fn($file_name2);
 sleep(2);
 

@@ -23,7 +23,7 @@ $fp = fopen("array_count_file", "w+");
 
 $arrays = dict["bobk" => "bobv", 0 => "val", 6 => "val6", 7 => $fp, 8 => $ob];
 
-var_dump (@array_count_values ($arrays));
+var_dump (array_count_values ($arrays));
 echo "\n";
 
 

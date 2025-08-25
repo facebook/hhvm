@@ -43,7 +43,7 @@ $inputs = vec[
 $iterator = 1;
 $regs = null;
 foreach($inputs as $input) {
-    if (@is_array($regs)){
+    if (is_array($regs)){
         $regs = null;
     }
     echo "\n-- Iteration $iterator --\n";

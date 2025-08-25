@@ -199,7 +199,4 @@ frame_free_args(TypedValue* args, int count) {
   for (auto i = count; i--; ) tvDecRefGen(*(args - i));
 }
 
-int64_t zero_error_level();
-void restore_error_level(int64_t oldLevel);
-
 }

@@ -15,7 +15,7 @@ $hackArrays = vec[
 
 echo "---- using DateTime::diff\n";
 foreach ($hackArrays as $hackArray) {
-  @var_dump((new DateTime())->diff($hackArray));
+  var_dump((new DateTime())->diff($hackArray));
 }
 
 echo "---- using DOMXPath::__construct\n";

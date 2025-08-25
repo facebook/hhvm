@@ -1,7 +1,6 @@
 use hhbc::Local;
 use hhbc::LocalRange;
 use hhbc::Opcode;
-use hhbc::SilenceOp;
 
 use crate::node::NodeInstr;
 
@@ -61,10 +60,6 @@ impl LocalInfo {
             | Opcode::IncDecL(local, _)
             | Opcode::PushL(local)
             | Opcode::IterSetValue(_, local) => LocalInfo::Mutate(*local),
-
-            Opcode::Silence(local, SilenceOp::Start) => LocalInfo::Write(*local),
-            Opcode::Silence(local, SilenceOp::End) => LocalInfo::Read(*local),
-            Opcode::Silence(_, _) => unreachable!(),
 
             Opcode::AKExists
             | Opcode::Add

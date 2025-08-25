@@ -199,7 +199,6 @@ pub mod instr {
     use hhbc::RepoAuthType;
     use hhbc::SetOpOp;
     use hhbc::SetRangeOp;
-    use hhbc::SilenceOp;
     use hhbc::SpecialClsRef;
     use hhbc::SrcLoc;
     use hhbc::StackIndex;
@@ -363,14 +362,6 @@ pub mod instr {
 
     pub fn set_m_pt(num_params: NumParams, key: PropName, readonly_op: ReadonlyOp) -> InstrSeq {
         set_m(num_params, MemberKey::PT(key, readonly_op))
-    }
-
-    pub fn silence_end(local: Local) -> InstrSeq {
-        silence(local, SilenceOp::End)
-    }
-
-    pub fn silence_start(local: Local) -> InstrSeq {
-        silence(local, SilenceOp::Start)
     }
 
     pub fn s_switch(cases: Vec<(BytesId, Label)>) -> InstrSeq {

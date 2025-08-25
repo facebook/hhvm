@@ -942,7 +942,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ReqRetranslate:
   case ReqRetranslateOpt:
   case ReserveVecNewElem:
-  case RestoreErrorLevel:
   case RetCtrl:
   case SameObj:
   case SameStr:
@@ -1001,7 +1000,6 @@ bool opcodeMayRaise(Opcode opc) {
   case VoidPtrAsDataType:
   case XorBool:
   case XorInt:
-  case ZeroErrorLevel:
     return false;
   }
   not_reached();

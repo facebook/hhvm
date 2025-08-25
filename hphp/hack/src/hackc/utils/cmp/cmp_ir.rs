@@ -748,9 +748,6 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
         (Hhbc::SetS(_, x0, _), Hhbc::SetS(_, x1, _)) => {
             cmp_eq(x0, x1).qualified("SetS param x")?;
         }
-        (Hhbc::Silence(_, x0, _), Hhbc::Silence(_, x1, _)) => {
-            cmp_eq(x0, x1).qualified("Silence param x")?;
-        }
         (Hhbc::ClassGetC(x0, _, _), Hhbc::ClassGetC(x1, _, _)) => {
             cmp_eq(x0, x1).qualified("ClassGetC param x")?;
         }
@@ -895,8 +892,7 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
             | Hhbc::ResolveMethCaller(..)
             | Hhbc::SetOpL(..)
             | Hhbc::SetOpS(..)
-            | Hhbc::SetS(..)
-            | Hhbc::Silence(..),
+            | Hhbc::SetS(..),
             _,
         ) => unreachable!(),
     }

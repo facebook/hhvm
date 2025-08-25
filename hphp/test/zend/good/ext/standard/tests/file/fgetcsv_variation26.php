@@ -24,7 +24,7 @@ $csv_lists = vec[
 ];
 
 $filename = sys_get_temp_dir().'/'.'fgetcsv_variation26.tmp';
-@unlink($filename);
+unlink($filename);
 
 $file_modes = vec["w", "wb", "wt",
                      "a", "ab", "at",

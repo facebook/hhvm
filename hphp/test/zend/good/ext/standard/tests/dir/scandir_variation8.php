@@ -48,7 +48,7 @@ $iterator = 1;
 foreach($inputs as $key => $input) {
     echo "\n-- Iteration $iterator --\n";
     $handle = "fp{$iterator}";
-    var_dump( $handle = fopen(@"$dir_path$input.tmp", 'w') );
+    var_dump( $handle = fopen("$dir_path$input.tmp", 'w') );
     fclose($handle);
     $iterator++;
 };
@@ -59,7 +59,9 @@ var_dump($content = scandir($dir_path));
 // remove all files in directory so can remove directory in CLEAN section
 foreach ($content as $file_name) {
     // suppress errors as won't be able to remove "." and ".." entries
-    @unlink($dir_path . $file_name);
+    error_reporting(0);
+    unlink($dir_path . $file_name);
+    error_reporting(E_ALL);
 }
 echo "===DONE===\n";
 

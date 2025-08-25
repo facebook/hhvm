@@ -2,7 +2,7 @@
 <<__EntryPoint>> function main(): void {
 /* $id$ */
 $dest = sys_get_temp_dir().'/'.'bug27582.png';
-@unlink($dest);
+unlink($dest);
 $im = imagecreatetruecolor(10, 10);
 imagealphablending($im, true);
 imagesavealpha($im, true);
@@ -15,5 +15,5 @@ $im2 = imagecreatefrompng($dest);
 $col = imagecolorat($im2, 5, 5);
 $color = imagecolorsforindex($im2, $col);
 echo $color['alpha'];
-@unlink($dest);
+unlink($dest);
 }

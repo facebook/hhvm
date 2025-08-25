@@ -142,6 +142,7 @@ void PrologueTranslator::gen() {
   tracing::Pause _p;
 
   unit = std::make_unique<IRUnit>(context, std::make_unique<AnnotationData>());
+  unit->initLogEntry(sk.func());
   irgen::IRGS env{*unit, nullptr, 0, nullptr};
 
   irgen::emitFuncPrologue(env, func, nPassed, transId);

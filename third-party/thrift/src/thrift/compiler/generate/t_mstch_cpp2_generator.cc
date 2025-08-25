@@ -2136,10 +2136,15 @@ class cpp_mstch_field : public mstch_field {
         gen::cpp::reference_type::boxed_intern;
   }
   mstch::node use_field_ref() {
-    auto ref_type = gen::cpp::find_ref_type(*field_);
-    return ref_type == gen::cpp::reference_type::none ||
-        ref_type == gen::cpp::reference_type::boxed ||
-        ref_type == gen::cpp::reference_type::boxed_intern;
+    // There are downstream plugin code generators which take the address of
+    // field accessor functions. They need to be able to accurately determine if
+    // an accessor is emitted as a template or regular function, because taking
+    // the address of a template function requires that their codegen emit
+    // "&f<>" and a non-template function requires them to emit "&f".
+
+    // If the code-generator or template implementation changes which accessors
+    // are emitted as templates, is_field_accessor_template must be kept in sync
+    return gen::cpp::is_field_accessor_template(*field_);
   }
   mstch::node field_ref_type() {
     return cpp_context_->resolver().get_reference_type(*field_);

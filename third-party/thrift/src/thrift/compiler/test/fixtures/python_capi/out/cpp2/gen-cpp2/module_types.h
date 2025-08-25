@@ -2170,98 +2170,82 @@ class PrimitiveStruct final  {
     return ::apache::thrift::optional_boxed_field_ref<fbthrift_T&&>{static_cast<fbthrift_T&&>(this->__fbthrift_field_dubby)};
   }
   /** Glean { "field": "stringy" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::string>>
-  FOLLY_ERASE fbthrift_T& stringy_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::std::string>& stringy_ref() & {
     return __fbthrift_field_stringy;
   }
 
   /** Glean { "field": "stringy" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::string>>
-  FOLLY_ERASE const fbthrift_T& stringy_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::std::string>& stringy_ref() const& {
     return __fbthrift_field_stringy;
   }
 
   /** Glean { "field": "stringy" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::string>>
-  FOLLY_ERASE fbthrift_T&& stringy_ref() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_stringy);
+  FOLLY_ERASE ::std::unique_ptr<::std::string>&& stringy_ref() && {
+    return static_cast<::std::unique_ptr<::std::string>&&>(__fbthrift_field_stringy);
   }
 
   /** Glean { "field": "stringy" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::string>>
-  FOLLY_ERASE const fbthrift_T&& stringy_ref() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_stringy);
+  FOLLY_ERASE const ::std::unique_ptr<::std::string>&& stringy_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::std::string>&&>(__fbthrift_field_stringy);
   }
 
   /** Glean { "field": "stringy" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::string>>
-  FOLLY_ERASE fbthrift_T& stringy() & {
+  FOLLY_ERASE ::std::unique_ptr<::std::string>& stringy() & {
     return __fbthrift_field_stringy;
   }
 
   /** Glean { "field": "stringy" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::string>>
-  FOLLY_ERASE const fbthrift_T& stringy() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::std::string>& stringy() const& {
     return __fbthrift_field_stringy;
   }
 
   /** Glean { "field": "stringy" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::string>>
-  FOLLY_ERASE fbthrift_T&& stringy() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_stringy);
+  FOLLY_ERASE ::std::unique_ptr<::std::string>&& stringy() && {
+    return static_cast<::std::unique_ptr<::std::string>&&>(__fbthrift_field_stringy);
   }
 
   /** Glean { "field": "stringy" } */
-  template <typename..., typename fbthrift_T = ::std::unique_ptr<::std::string>>
-  FOLLY_ERASE const fbthrift_T&& stringy() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_stringy);
+  FOLLY_ERASE const ::std::unique_ptr<::std::string>&& stringy() const&& {
+    return static_cast<const ::std::unique_ptr<::std::string>&&>(__fbthrift_field_stringy);
   }
   /** Glean { "field": "bytey" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::string>>
-  FOLLY_ERASE fbthrift_T& bytey_ref() & {
+  FOLLY_ERASE ::std::shared_ptr<const ::std::string>& bytey_ref() & {
     return __fbthrift_field_bytey;
   }
 
   /** Glean { "field": "bytey" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::string>>
-  FOLLY_ERASE const fbthrift_T& bytey_ref() const& {
+  FOLLY_ERASE const ::std::shared_ptr<const ::std::string>& bytey_ref() const& {
     return __fbthrift_field_bytey;
   }
 
   /** Glean { "field": "bytey" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::string>>
-  FOLLY_ERASE fbthrift_T&& bytey_ref() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_bytey);
+  FOLLY_ERASE ::std::shared_ptr<const ::std::string>&& bytey_ref() && {
+    return static_cast<::std::shared_ptr<const ::std::string>&&>(__fbthrift_field_bytey);
   }
 
   /** Glean { "field": "bytey" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::string>>
-  FOLLY_ERASE const fbthrift_T&& bytey_ref() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_bytey);
+  FOLLY_ERASE const ::std::shared_ptr<const ::std::string>&& bytey_ref() const&& {
+    return static_cast<const ::std::shared_ptr<const ::std::string>&&>(__fbthrift_field_bytey);
   }
 
   /** Glean { "field": "bytey" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::string>>
-  FOLLY_ERASE fbthrift_T& bytey() & {
+  FOLLY_ERASE ::std::shared_ptr<const ::std::string>& bytey() & {
     return __fbthrift_field_bytey;
   }
 
   /** Glean { "field": "bytey" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::string>>
-  FOLLY_ERASE const fbthrift_T& bytey() const& {
+  FOLLY_ERASE const ::std::shared_ptr<const ::std::string>& bytey() const& {
     return __fbthrift_field_bytey;
   }
 
   /** Glean { "field": "bytey" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::string>>
-  FOLLY_ERASE fbthrift_T&& bytey() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_bytey);
+  FOLLY_ERASE ::std::shared_ptr<const ::std::string>&& bytey() && {
+    return static_cast<::std::shared_ptr<const ::std::string>&&>(__fbthrift_field_bytey);
   }
 
   /** Glean { "field": "bytey" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::std::string>>
-  FOLLY_ERASE const fbthrift_T&& bytey() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_bytey);
+  FOLLY_ERASE const ::std::shared_ptr<const ::std::string>&& bytey() const&& {
+    return static_cast<const ::std::shared_ptr<const ::std::string>&&>(__fbthrift_field_bytey);
   }
 
   /** Glean { "field": "buffy" } */
@@ -4884,51 +4868,43 @@ class ComposeStruct final  {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_primitive), __isset.at(2), __isset.bit(2)};
   }
   /** Glean { "field": "aliased" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>>
-  FOLLY_ERASE fbthrift_T& aliased_ref() & {
+  FOLLY_ERASE ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>& aliased_ref() & {
     return __fbthrift_field_aliased;
   }
 
   /** Glean { "field": "aliased" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>>
-  FOLLY_ERASE const fbthrift_T& aliased_ref() const& {
+  FOLLY_ERASE const ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>& aliased_ref() const& {
     return __fbthrift_field_aliased;
   }
 
   /** Glean { "field": "aliased" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>>
-  FOLLY_ERASE fbthrift_T&& aliased_ref() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_aliased);
+  FOLLY_ERASE ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>&& aliased_ref() && {
+    return static_cast<::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>&&>(__fbthrift_field_aliased);
   }
 
   /** Glean { "field": "aliased" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>>
-  FOLLY_ERASE const fbthrift_T&& aliased_ref() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_aliased);
+  FOLLY_ERASE const ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>&& aliased_ref() const&& {
+    return static_cast<const ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>&&>(__fbthrift_field_aliased);
   }
 
   /** Glean { "field": "aliased" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>>
-  FOLLY_ERASE fbthrift_T& aliased() & {
+  FOLLY_ERASE ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>& aliased() & {
     return __fbthrift_field_aliased;
   }
 
   /** Glean { "field": "aliased" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>>
-  FOLLY_ERASE const fbthrift_T& aliased() const& {
+  FOLLY_ERASE const ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>& aliased() const& {
     return __fbthrift_field_aliased;
   }
 
   /** Glean { "field": "aliased" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>>
-  FOLLY_ERASE fbthrift_T&& aliased() && {
-    return static_cast<fbthrift_T&&>(__fbthrift_field_aliased);
+  FOLLY_ERASE ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>&& aliased() && {
+    return static_cast<::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>&&>(__fbthrift_field_aliased);
   }
 
   /** Glean { "field": "aliased" } */
-  template <typename..., typename fbthrift_T = ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>>
-  FOLLY_ERASE const fbthrift_T&& aliased() const&& {
-    return static_cast<const fbthrift_T&&>(__fbthrift_field_aliased);
+  FOLLY_ERASE const ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>&& aliased() const&& {
+    return static_cast<const ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>&&>(__fbthrift_field_aliased);
   }
 
   /** Glean { "field": "xstruct" } */

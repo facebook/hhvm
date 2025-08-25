@@ -14,6 +14,13 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
+}}{{!
+There are downstream plugin code generators which take the address of field
+accessor functions. They need to be able to accurately determine if an accessor
+is emitted as a template or regular function.
+
+If the code-generator or template implementation changes which accessors are
+emitted as templates, gen::cpp::is_field_accessor_template must be kept in sync.
 }}{{#struct:fields}}
 {{#field:use_field_ref?}}
 
@@ -72,31 +79,27 @@
  private:
 {{/struct:legacy_api?}}
   {{> common/field_docblock}}
-  template <typename..., typename fbthrift_T = {{field:cpp_storage_type}}>
-  {{field:cpp_accessor_attribute}} fbthrift_T& {{field:cpp_name}}_ref() & {
+  {{field:cpp_accessor_attribute}} {{field:cpp_storage_type}}& {{field:cpp_name}}_ref() & {
 {{> module_types_h/field_interceptor}}
     return {{> common/field_value}};
   }
 
   {{> common/field_docblock}}
-  template <typename..., typename fbthrift_T = {{field:cpp_storage_type}}>
-  {{field:cpp_accessor_attribute}} const fbthrift_T& {{field:cpp_name}}_ref() const& {
+  {{field:cpp_accessor_attribute}} const {{field:cpp_storage_type}}& {{field:cpp_name}}_ref() const& {
 {{> module_types_h/field_interceptor}}
     return {{> common/field_value}};
   }
 
   {{> common/field_docblock}}
-  template <typename..., typename fbthrift_T = {{field:cpp_storage_type}}>
-  {{field:cpp_accessor_attribute}} fbthrift_T&& {{field:cpp_name}}_ref() && {
+  {{field:cpp_accessor_attribute}} {{field:cpp_storage_type}}&& {{field:cpp_name}}_ref() && {
 {{> module_types_h/field_interceptor}}
-    return static_cast<fbthrift_T&&>({{> common/field_value}});
+    return static_cast<{{field:cpp_storage_type}}&&>({{> common/field_value}});
   }
 
   {{> common/field_docblock}}
-  template <typename..., typename fbthrift_T = {{field:cpp_storage_type}}>
-  {{field:cpp_accessor_attribute}} const fbthrift_T&& {{field:cpp_name}}_ref() const&& {
+  {{field:cpp_accessor_attribute}} const {{field:cpp_storage_type}}&& {{field:cpp_name}}_ref() const&& {
 {{> module_types_h/field_interceptor}}
-    return static_cast<const fbthrift_T&&>({{> common/field_value}});
+    return static_cast<const {{field:cpp_storage_type}}&&>({{> common/field_value}});
   }
 {{^struct:legacy_api?}}
  public:
@@ -104,31 +107,27 @@
 {{#field:eligible_for_storage_name_mangling?}}
 
   {{> common/field_docblock}}
-  template <typename..., typename fbthrift_T = {{field:cpp_storage_type}}>
-  FOLLY_ERASE fbthrift_T& {{field:cpp_name}}() & {
+  FOLLY_ERASE {{field:cpp_storage_type}}& {{field:cpp_name}}() & {
 {{> module_types_h/field_interceptor}}
     return {{> common/field_value}};
   }
 
   {{> common/field_docblock}}
-  template <typename..., typename fbthrift_T = {{field:cpp_storage_type}}>
-  FOLLY_ERASE const fbthrift_T& {{field:cpp_name}}() const& {
+  FOLLY_ERASE const {{field:cpp_storage_type}}& {{field:cpp_name}}() const& {
 {{> module_types_h/field_interceptor}}
     return {{> common/field_value}};
   }
 
   {{> common/field_docblock}}
-  template <typename..., typename fbthrift_T = {{field:cpp_storage_type}}>
-  FOLLY_ERASE fbthrift_T&& {{field:cpp_name}}() && {
+  FOLLY_ERASE {{field:cpp_storage_type}}&& {{field:cpp_name}}() && {
 {{> module_types_h/field_interceptor}}
-    return static_cast<fbthrift_T&&>({{> common/field_value}});
+    return static_cast<{{field:cpp_storage_type}}&&>({{> common/field_value}});
   }
 
   {{> common/field_docblock}}
-  template <typename..., typename fbthrift_T = {{field:cpp_storage_type}}>
-  FOLLY_ERASE const fbthrift_T&& {{field:cpp_name}}() const&& {
+  FOLLY_ERASE const {{field:cpp_storage_type}}&& {{field:cpp_name}}() const&& {
 {{> module_types_h/field_interceptor}}
-    return static_cast<const fbthrift_T&&>({{> common/field_value}});
+    return static_cast<const {{field:cpp_storage_type}}&&>({{> common/field_value}});
   }
 {{/field:eligible_for_storage_name_mangling?}}
 {{/field:use_field_ref?}}

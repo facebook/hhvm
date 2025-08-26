@@ -598,7 +598,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     // pointer (but before we pop the parameters from the stack and make the
     // frame live) so that CheckTypes from within the body of the function can
     // be hoisted through the parameter checks.
-    auto const calleeFP = genCalleeFP(env, callee);
+    auto const calleeFP = genCalleeFP(env, callee, fca.numInputs());
 
     // Callee checks and input initialization.
     emitCalleeGenericsChecks(env, callee, prologueFlags, fca.hasGenerics());

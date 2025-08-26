@@ -7,7 +7,7 @@ JSON for selected code action:
 {
   "command":{
     "arguments":[
-      {"end":{"character":4,"line":11},"start":{"character":4,"line":11}},
+      {"end":{"character":4,"line":12},"start":{"character":4,"line":12}},
       {
         "arguments":[],
         "command":"editor.action.inlineSuggest.trigger",
@@ -23,7 +23,7 @@ JSON for selected code action:
       "FILE.php":[
         {
           "newText":"\n\n  <<__Override>>\n  public function foo(): void {\n    \n  }",
-          "range":{"end":{"character":32,"line":7},"start":{"character":32,"line":7}}
+          "range":{"end":{"character":32,"line":8},"start":{"character":32,"line":8}}
         }
       ]
     }
@@ -38,6 +38,7 @@ Applied edit for code action:
 
 class TheParent {
   public function foo(): void {}
+  private function privFunc(): void {}
 }
 
 class B extends TheParent {

@@ -60,12 +60,14 @@ let override_method_quickfixes
   match Decl_provider.get_class (Tast_env.get_ctx env) parent_name with
   | Decl_entry.Found decl ->
     (* Offer an override action for any inherited method which isn't
-       final and that the current class hasn't already overridden. *)
+       final or private and that the current class hasn't already
+       overridden. *)
     let actions_for_methods ~is_static methods =
       methods
       |> List.filter ~f:(fun (name, meth) ->
              (not (SSet.mem name existing_methods))
-             && not (Typing_defs.get_ce_final meth))
+             && (not (Typing_defs.get_ce_final meth))
+             && not (Typing_defs.class_elt_is_private_not_lsb meth))
       |> List.map ~f:(stub_method_action ~location ~is_static ~parent_name)
     in
     actions_for_methods ~is_static:false (Folded_class.methods decl)

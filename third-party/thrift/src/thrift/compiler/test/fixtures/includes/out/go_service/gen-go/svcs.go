@@ -41,23 +41,26 @@ type MyServiceClientInterface interface {
     HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) (error)
 }
 
-type MyServiceClient struct {
+type myServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServiceClientInterface = (*MyServiceClient)(nil)
+var _ MyServiceClientInterface = (*myServiceClientImpl)(nil)
 
-func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceClient {
-    return &MyServiceClient{
+// Deprecated: this type is deprecated, please use MyServiceClientInterface instead.
+type MyServiceClient = myServiceClientImpl
+
+func NewMyServiceChannelClient(channel thrift.RequestChannel) *myServiceClientImpl {
+    return &myServiceClientImpl{
         ch: channel,
     }
 }
 
-func (c *MyServiceClient) Close() error {
+func (c *myServiceClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *MyServiceClient) Query(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
+func (c *myServiceClientImpl) Query(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
     fbthriftReq := &reqMyServiceQuery{
         S: s,
         I: i,
@@ -72,7 +75,7 @@ func (c *MyServiceClient) Query(ctx context.Context, s *module.MyStruct, i *incl
     return nil
 }
 
-func (c *MyServiceClient) HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
+func (c *myServiceClientImpl) HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
     fbthriftReq := &reqMyServiceHasArgDocs{
         S: s,
         I: i,

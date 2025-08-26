@@ -43,23 +43,26 @@ type NestedContainersClientInterface interface {
     Turtles(ctx context.Context, foo [][]map[int32]map[int32][]int32) (error)
 }
 
-type NestedContainersClient struct {
+type nestedContainersClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ NestedContainersClientInterface = (*NestedContainersClient)(nil)
+var _ NestedContainersClientInterface = (*nestedContainersClientImpl)(nil)
 
-func NewNestedContainersChannelClient(channel thrift.RequestChannel) *NestedContainersClient {
-    return &NestedContainersClient{
+// Deprecated: this type is deprecated, please use NestedContainersClientInterface instead.
+type NestedContainersClient = nestedContainersClientImpl
+
+func NewNestedContainersChannelClient(channel thrift.RequestChannel) *nestedContainersClientImpl {
+    return &nestedContainersClientImpl{
         ch: channel,
     }
 }
 
-func (c *NestedContainersClient) Close() error {
+func (c *nestedContainersClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *NestedContainersClient) MapList(ctx context.Context, foo map[int32][]int32) (error) {
+func (c *nestedContainersClientImpl) MapList(ctx context.Context, foo map[int32][]int32) (error) {
     fbthriftReq := &reqNestedContainersMapList{
         Foo: foo,
     }
@@ -73,7 +76,7 @@ func (c *NestedContainersClient) MapList(ctx context.Context, foo map[int32][]in
     return nil
 }
 
-func (c *NestedContainersClient) MapSet(ctx context.Context, foo map[int32][]int32) (error) {
+func (c *nestedContainersClientImpl) MapSet(ctx context.Context, foo map[int32][]int32) (error) {
     fbthriftReq := &reqNestedContainersMapSet{
         Foo: foo,
     }
@@ -87,7 +90,7 @@ func (c *NestedContainersClient) MapSet(ctx context.Context, foo map[int32][]int
     return nil
 }
 
-func (c *NestedContainersClient) ListMap(ctx context.Context, foo []map[int32]int32) (error) {
+func (c *nestedContainersClientImpl) ListMap(ctx context.Context, foo []map[int32]int32) (error) {
     fbthriftReq := &reqNestedContainersListMap{
         Foo: foo,
     }
@@ -101,7 +104,7 @@ func (c *NestedContainersClient) ListMap(ctx context.Context, foo []map[int32]in
     return nil
 }
 
-func (c *NestedContainersClient) ListSet(ctx context.Context, foo [][]int32) (error) {
+func (c *nestedContainersClientImpl) ListSet(ctx context.Context, foo [][]int32) (error) {
     fbthriftReq := &reqNestedContainersListSet{
         Foo: foo,
     }
@@ -115,7 +118,7 @@ func (c *NestedContainersClient) ListSet(ctx context.Context, foo [][]int32) (er
     return nil
 }
 
-func (c *NestedContainersClient) Turtles(ctx context.Context, foo [][]map[int32]map[int32][]int32) (error) {
+func (c *nestedContainersClientImpl) Turtles(ctx context.Context, foo [][]map[int32]map[int32][]int32) (error) {
     fbthriftReq := &reqNestedContainersTurtles{
         Foo: foo,
     }

@@ -39,23 +39,26 @@ type MyInteractionClientInterface interface {
     Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error)
 }
 
-type MyInteractionClient struct {
+type myInteractionClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyInteractionClientInterface = (*MyInteractionClient)(nil)
+var _ MyInteractionClientInterface = (*myInteractionClientImpl)(nil)
 
-func NewMyInteractionChannelClient(channel thrift.RequestChannel) *MyInteractionClient {
-    return &MyInteractionClient{
+// Deprecated: this type is deprecated, please use MyInteractionClientInterface instead.
+type MyInteractionClient = myInteractionClientImpl
+
+func NewMyInteractionChannelClient(channel thrift.RequestChannel) *myInteractionClientImpl {
+    return &myInteractionClientImpl{
         ch: channel,
     }
 }
 
-func (c *MyInteractionClient) Close() error {
+func (c *myInteractionClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *MyInteractionClient) Frobnicate(ctx context.Context) (int32, error) {
+func (c *myInteractionClientImpl) Frobnicate(ctx context.Context) (int32, error) {
     fbthriftReq := &reqMyInteractionFrobnicate{
     }
     fbthriftResp := newRespMyInteractionFrobnicate()
@@ -68,13 +71,13 @@ func (c *MyInteractionClient) Frobnicate(ctx context.Context) (int32, error) {
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *MyInteractionClient) Ping(ctx context.Context) (error) {
+func (c *myInteractionClientImpl) Ping(ctx context.Context) (error) {
     fbthriftReq := &reqMyInteractionPing{
     }
     return c.ch.SendRequestNoResponse(ctx, "ping", fbthriftReq)
 }
 
-func (c *MyInteractionClient) Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error) {
+func (c *myInteractionClientImpl) Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error) {
     // Must be a cancellable context to prevent goroutine leaks
     if ctx.Done() == nil {
 		return nil, nil, errors.New("context does not support cancellation")
@@ -141,23 +144,26 @@ type MyInteractionFastClientInterface interface {
     Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error)
 }
 
-type MyInteractionFastClient struct {
+type myInteractionFastClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyInteractionFastClientInterface = (*MyInteractionFastClient)(nil)
+var _ MyInteractionFastClientInterface = (*myInteractionFastClientImpl)(nil)
 
-func NewMyInteractionFastChannelClient(channel thrift.RequestChannel) *MyInteractionFastClient {
-    return &MyInteractionFastClient{
+// Deprecated: this type is deprecated, please use MyInteractionFastClientInterface instead.
+type MyInteractionFastClient = myInteractionFastClientImpl
+
+func NewMyInteractionFastChannelClient(channel thrift.RequestChannel) *myInteractionFastClientImpl {
+    return &myInteractionFastClientImpl{
         ch: channel,
     }
 }
 
-func (c *MyInteractionFastClient) Close() error {
+func (c *myInteractionFastClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *MyInteractionFastClient) Frobnicate(ctx context.Context) (int32, error) {
+func (c *myInteractionFastClientImpl) Frobnicate(ctx context.Context) (int32, error) {
     fbthriftReq := &reqMyInteractionFastFrobnicate{
     }
     fbthriftResp := newRespMyInteractionFastFrobnicate()
@@ -170,13 +176,13 @@ func (c *MyInteractionFastClient) Frobnicate(ctx context.Context) (int32, error)
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *MyInteractionFastClient) Ping(ctx context.Context) (error) {
+func (c *myInteractionFastClientImpl) Ping(ctx context.Context) (error) {
     fbthriftReq := &reqMyInteractionFastPing{
     }
     return c.ch.SendRequestNoResponse(ctx, "ping", fbthriftReq)
 }
 
-func (c *MyInteractionFastClient) Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error) {
+func (c *myInteractionFastClientImpl) Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error) {
     // Must be a cancellable context to prevent goroutine leaks
     if ctx.Done() == nil {
 		return nil, nil, errors.New("context does not support cancellation")
@@ -240,23 +246,26 @@ type SerialInteractionClientInterface interface {
     Frobnicate(ctx context.Context) (error)
 }
 
-type SerialInteractionClient struct {
+type serialInteractionClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ SerialInteractionClientInterface = (*SerialInteractionClient)(nil)
+var _ SerialInteractionClientInterface = (*serialInteractionClientImpl)(nil)
 
-func NewSerialInteractionChannelClient(channel thrift.RequestChannel) *SerialInteractionClient {
-    return &SerialInteractionClient{
+// Deprecated: this type is deprecated, please use SerialInteractionClientInterface instead.
+type SerialInteractionClient = serialInteractionClientImpl
+
+func NewSerialInteractionChannelClient(channel thrift.RequestChannel) *serialInteractionClientImpl {
+    return &serialInteractionClientImpl{
         ch: channel,
     }
 }
 
-func (c *SerialInteractionClient) Close() error {
+func (c *serialInteractionClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *SerialInteractionClient) Frobnicate(ctx context.Context) (error) {
+func (c *serialInteractionClientImpl) Frobnicate(ctx context.Context) (error) {
     fbthriftReq := &reqSerialInteractionFrobnicate{
     }
     fbthriftResp := newRespSerialInteractionFrobnicate()
@@ -279,23 +288,26 @@ type BoxedInteractionClientInterface interface {
     GetABox(ctx context.Context) (*ShouldBeBoxed, error)
 }
 
-type BoxedInteractionClient struct {
+type boxedInteractionClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ BoxedInteractionClientInterface = (*BoxedInteractionClient)(nil)
+var _ BoxedInteractionClientInterface = (*boxedInteractionClientImpl)(nil)
 
-func NewBoxedInteractionChannelClient(channel thrift.RequestChannel) *BoxedInteractionClient {
-    return &BoxedInteractionClient{
+// Deprecated: this type is deprecated, please use BoxedInteractionClientInterface instead.
+type BoxedInteractionClient = boxedInteractionClientImpl
+
+func NewBoxedInteractionChannelClient(channel thrift.RequestChannel) *boxedInteractionClientImpl {
+    return &boxedInteractionClientImpl{
         ch: channel,
     }
 }
 
-func (c *BoxedInteractionClient) Close() error {
+func (c *boxedInteractionClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *BoxedInteractionClient) GetABox(ctx context.Context) (*ShouldBeBoxed, error) {
+func (c *boxedInteractionClientImpl) GetABox(ctx context.Context) (*ShouldBeBoxed, error) {
     fbthriftReq := &reqBoxedInteractionGetABox{
     }
     fbthriftResp := newRespBoxedInteractionGetABox()
@@ -319,23 +331,26 @@ type MyServiceClientInterface interface {
     Foo(ctx context.Context) (error)
 }
 
-type MyServiceClient struct {
+type myServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServiceClientInterface = (*MyServiceClient)(nil)
+var _ MyServiceClientInterface = (*myServiceClientImpl)(nil)
 
-func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceClient {
-    return &MyServiceClient{
+// Deprecated: this type is deprecated, please use MyServiceClientInterface instead.
+type MyServiceClient = myServiceClientImpl
+
+func NewMyServiceChannelClient(channel thrift.RequestChannel) *myServiceClientImpl {
+    return &myServiceClientImpl{
         ch: channel,
     }
 }
 
-func (c *MyServiceClient) Close() error {
+func (c *myServiceClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *MyServiceClient) Foo(ctx context.Context) (error) {
+func (c *myServiceClientImpl) Foo(ctx context.Context) (error) {
     fbthriftReq := &reqMyServiceFoo{
     }
     fbthriftResp := newRespMyServiceFoo()
@@ -455,23 +470,26 @@ type FactoriesClientInterface interface {
     Foo(ctx context.Context) (error)
 }
 
-type FactoriesClient struct {
+type factoriesClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FactoriesClientInterface = (*FactoriesClient)(nil)
+var _ FactoriesClientInterface = (*factoriesClientImpl)(nil)
 
-func NewFactoriesChannelClient(channel thrift.RequestChannel) *FactoriesClient {
-    return &FactoriesClient{
+// Deprecated: this type is deprecated, please use FactoriesClientInterface instead.
+type FactoriesClient = factoriesClientImpl
+
+func NewFactoriesChannelClient(channel thrift.RequestChannel) *factoriesClientImpl {
+    return &factoriesClientImpl{
         ch: channel,
     }
 }
 
-func (c *FactoriesClient) Close() error {
+func (c *factoriesClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *FactoriesClient) Foo(ctx context.Context) (error) {
+func (c *factoriesClientImpl) Foo(ctx context.Context) (error) {
     fbthriftReq := &reqFactoriesFoo{
     }
     fbthriftResp := newRespFactoriesFoo()
@@ -591,23 +609,26 @@ type PerformClientInterface interface {
     Foo(ctx context.Context) (error)
 }
 
-type PerformClient struct {
+type performClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ PerformClientInterface = (*PerformClient)(nil)
+var _ PerformClientInterface = (*performClientImpl)(nil)
 
-func NewPerformChannelClient(channel thrift.RequestChannel) *PerformClient {
-    return &PerformClient{
+// Deprecated: this type is deprecated, please use PerformClientInterface instead.
+type PerformClient = performClientImpl
+
+func NewPerformChannelClient(channel thrift.RequestChannel) *performClientImpl {
+    return &performClientImpl{
         ch: channel,
     }
 }
 
-func (c *PerformClient) Close() error {
+func (c *performClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *PerformClient) Foo(ctx context.Context) (error) {
+func (c *performClientImpl) Foo(ctx context.Context) (error) {
     fbthriftReq := &reqPerformFoo{
     }
     fbthriftResp := newRespPerformFoo()
@@ -727,23 +748,26 @@ type InteractWithSharedClientInterface interface {
     DoSomeSimilarThings(ctx context.Context) (*shared.DoSomethingResult, error)
 }
 
-type InteractWithSharedClient struct {
+type interactWithSharedClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ InteractWithSharedClientInterface = (*InteractWithSharedClient)(nil)
+var _ InteractWithSharedClientInterface = (*interactWithSharedClientImpl)(nil)
 
-func NewInteractWithSharedChannelClient(channel thrift.RequestChannel) *InteractWithSharedClient {
-    return &InteractWithSharedClient{
+// Deprecated: this type is deprecated, please use InteractWithSharedClientInterface instead.
+type InteractWithSharedClient = interactWithSharedClientImpl
+
+func NewInteractWithSharedChannelClient(channel thrift.RequestChannel) *interactWithSharedClientImpl {
+    return &interactWithSharedClientImpl{
         ch: channel,
     }
 }
 
-func (c *InteractWithSharedClient) Close() error {
+func (c *interactWithSharedClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *InteractWithSharedClient) DoSomeSimilarThings(ctx context.Context) (*shared.DoSomethingResult, error) {
+func (c *interactWithSharedClientImpl) DoSomeSimilarThings(ctx context.Context) (*shared.DoSomethingResult, error) {
     fbthriftReq := &reqInteractWithSharedDoSomeSimilarThings{
     }
     fbthriftResp := newRespInteractWithSharedDoSomeSimilarThings()
@@ -862,19 +886,22 @@ type BoxServiceClientInterface interface {
     io.Closer
 }
 
-type BoxServiceClient struct {
+type boxServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ BoxServiceClientInterface = (*BoxServiceClient)(nil)
+var _ BoxServiceClientInterface = (*boxServiceClientImpl)(nil)
 
-func NewBoxServiceChannelClient(channel thrift.RequestChannel) *BoxServiceClient {
-    return &BoxServiceClient{
+// Deprecated: this type is deprecated, please use BoxServiceClientInterface instead.
+type BoxServiceClient = boxServiceClientImpl
+
+func NewBoxServiceChannelClient(channel thrift.RequestChannel) *boxServiceClientImpl {
+    return &boxServiceClientImpl{
         ch: channel,
     }
 }
 
-func (c *BoxServiceClient) Close() error {
+func (c *boxServiceClientImpl) Close() error {
     return c.ch.Close()
 }
 

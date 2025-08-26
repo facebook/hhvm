@@ -77,23 +77,26 @@ type GetEntityClientInterface interface {
     GetErr1Collision(ctx context.Context, err int64, err1 int64) (int32, error)
 }
 
-type GetEntityClient struct {
+type getEntityClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ GetEntityClientInterface = (*GetEntityClient)(nil)
+var _ GetEntityClientInterface = (*getEntityClientImpl)(nil)
 
-func NewGetEntityChannelClient(channel thrift.RequestChannel) *GetEntityClient {
-    return &GetEntityClient{
+// Deprecated: this type is deprecated, please use GetEntityClientInterface instead.
+type GetEntityClient = getEntityClientImpl
+
+func NewGetEntityChannelClient(channel thrift.RequestChannel) *getEntityClientImpl {
+    return &getEntityClientImpl{
         ch: channel,
     }
 }
 
-func (c *GetEntityClient) Close() error {
+func (c *getEntityClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *GetEntityClient) GetEntity(ctx context.Context, r *GetEntityRequest) (*GetEntityResponse, error) {
+func (c *getEntityClientImpl) GetEntity(ctx context.Context, r *GetEntityRequest) (*GetEntityResponse, error) {
     fbthriftReq := &reqGetEntityGetEntity{
         R: r,
     }
@@ -107,7 +110,7 @@ func (c *GetEntityClient) GetEntity(ctx context.Context, r *GetEntityRequest) (*
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetBool(ctx context.Context) (bool, error) {
+func (c *getEntityClientImpl) GetBool(ctx context.Context) (bool, error) {
     fbthriftReq := &reqGetEntityGetBool{
     }
     fbthriftResp := newRespGetEntityGetBool()
@@ -120,7 +123,7 @@ func (c *GetEntityClient) GetBool(ctx context.Context) (bool, error) {
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetByte(ctx context.Context) (int8, error) {
+func (c *getEntityClientImpl) GetByte(ctx context.Context) (int8, error) {
     fbthriftReq := &reqGetEntityGetByte{
     }
     fbthriftResp := newRespGetEntityGetByte()
@@ -133,7 +136,7 @@ func (c *GetEntityClient) GetByte(ctx context.Context) (int8, error) {
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetI16(ctx context.Context) (int16, error) {
+func (c *getEntityClientImpl) GetI16(ctx context.Context) (int16, error) {
     fbthriftReq := &reqGetEntityGetI16{
     }
     fbthriftResp := newRespGetEntityGetI16()
@@ -146,7 +149,7 @@ func (c *GetEntityClient) GetI16(ctx context.Context) (int16, error) {
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetI32(ctx context.Context) (int32, error) {
+func (c *getEntityClientImpl) GetI32(ctx context.Context) (int32, error) {
     fbthriftReq := &reqGetEntityGetI32{
     }
     fbthriftResp := newRespGetEntityGetI32()
@@ -159,7 +162,7 @@ func (c *GetEntityClient) GetI32(ctx context.Context) (int32, error) {
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetI64(ctx context.Context) (int64, error) {
+func (c *getEntityClientImpl) GetI64(ctx context.Context) (int64, error) {
     fbthriftReq := &reqGetEntityGetI64{
     }
     fbthriftResp := newRespGetEntityGetI64()
@@ -172,7 +175,7 @@ func (c *GetEntityClient) GetI64(ctx context.Context) (int64, error) {
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetDouble(ctx context.Context) (float64, error) {
+func (c *getEntityClientImpl) GetDouble(ctx context.Context) (float64, error) {
     fbthriftReq := &reqGetEntityGetDouble{
     }
     fbthriftResp := newRespGetEntityGetDouble()
@@ -185,7 +188,7 @@ func (c *GetEntityClient) GetDouble(ctx context.Context) (float64, error) {
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetString(ctx context.Context) (string, error) {
+func (c *getEntityClientImpl) GetString(ctx context.Context) (string, error) {
     fbthriftReq := &reqGetEntityGetString{
     }
     fbthriftResp := newRespGetEntityGetString()
@@ -198,7 +201,7 @@ func (c *GetEntityClient) GetString(ctx context.Context) (string, error) {
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetBinary(ctx context.Context) ([]byte, error) {
+func (c *getEntityClientImpl) GetBinary(ctx context.Context) ([]byte, error) {
     fbthriftReq := &reqGetEntityGetBinary{
     }
     fbthriftResp := newRespGetEntityGetBinary()
@@ -211,7 +214,7 @@ func (c *GetEntityClient) GetBinary(ctx context.Context) ([]byte, error) {
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetMap(ctx context.Context) (map[string]string, error) {
+func (c *getEntityClientImpl) GetMap(ctx context.Context) (map[string]string, error) {
     fbthriftReq := &reqGetEntityGetMap{
     }
     fbthriftResp := newRespGetEntityGetMap()
@@ -224,7 +227,7 @@ func (c *GetEntityClient) GetMap(ctx context.Context) (map[string]string, error)
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetSet(ctx context.Context) ([]string, error) {
+func (c *getEntityClientImpl) GetSet(ctx context.Context) ([]string, error) {
     fbthriftReq := &reqGetEntityGetSet{
     }
     fbthriftResp := newRespGetEntityGetSet()
@@ -237,7 +240,7 @@ func (c *GetEntityClient) GetSet(ctx context.Context) ([]string, error) {
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetList(ctx context.Context) ([]string, error) {
+func (c *getEntityClientImpl) GetList(ctx context.Context) ([]string, error) {
     fbthriftReq := &reqGetEntityGetList{
     }
     fbthriftResp := newRespGetEntityGetList()
@@ -250,7 +253,7 @@ func (c *GetEntityClient) GetList(ctx context.Context) ([]string, error) {
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetLegacyStuff(ctx context.Context, numPos int64, numNeg1 int64, numNeg2 int64) (int32, error) {
+func (c *getEntityClientImpl) GetLegacyStuff(ctx context.Context, numPos int64, numNeg1 int64, numNeg2 int64) (int32, error) {
     fbthriftReq := &reqGetEntityGetLegacyStuff{
         NumPos: numPos,
         NumNeg1: numNeg1,
@@ -266,7 +269,7 @@ func (c *GetEntityClient) GetLegacyStuff(ctx context.Context, numPos int64, numN
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetCtxCollision(ctx1 context.Context, ctx int64) (int32, error) {
+func (c *getEntityClientImpl) GetCtxCollision(ctx1 context.Context, ctx int64) (int32, error) {
     fbthriftReq := &reqGetEntityGetCtxCollision{
         Ctx: ctx,
     }
@@ -280,7 +283,7 @@ func (c *GetEntityClient) GetCtxCollision(ctx1 context.Context, ctx int64) (int3
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetCtx1Collision(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error) {
+func (c *getEntityClientImpl) GetCtx1Collision(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error) {
     fbthriftReq := &reqGetEntityGetCtx1Collision{
         Ctx: ctx,
         Ctx1: ctx1,
@@ -295,7 +298,7 @@ func (c *GetEntityClient) GetCtx1Collision(ctx2 context.Context, ctx int64, ctx1
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetContextCollision(ctx context.Context, context_ int64) (int32, error) {
+func (c *getEntityClientImpl) GetContextCollision(ctx context.Context, context_ int64) (int32, error) {
     fbthriftReq := &reqGetEntityGetContextCollision{
         Context: context_,
     }
@@ -309,7 +312,7 @@ func (c *GetEntityClient) GetContextCollision(ctx context.Context, context_ int6
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetOutCollision(ctx context.Context, out int64) (int32, error) {
+func (c *getEntityClientImpl) GetOutCollision(ctx context.Context, out int64) (int32, error) {
     fbthriftReq := &reqGetEntityGetOutCollision{
         Out: out,
     }
@@ -323,7 +326,7 @@ func (c *GetEntityClient) GetOutCollision(ctx context.Context, out int64) (int32
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetOut1Collision(ctx context.Context, out int64, out1 int64) (int32, error) {
+func (c *getEntityClientImpl) GetOut1Collision(ctx context.Context, out int64, out1 int64) (int32, error) {
     fbthriftReq := &reqGetEntityGetOut1Collision{
         Out: out,
         Out1: out1,
@@ -338,7 +341,7 @@ func (c *GetEntityClient) GetOut1Collision(ctx context.Context, out int64, out1 
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetInCollision(ctx context.Context, in int64) (int32, error) {
+func (c *getEntityClientImpl) GetInCollision(ctx context.Context, in int64) (int32, error) {
     fbthriftReq := &reqGetEntityGetInCollision{
         In: in,
     }
@@ -352,7 +355,7 @@ func (c *GetEntityClient) GetInCollision(ctx context.Context, in int64) (int32, 
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetIn1Collision(ctx context.Context, in int64, in1 int64) (int32, error) {
+func (c *getEntityClientImpl) GetIn1Collision(ctx context.Context, in int64, in1 int64) (int32, error) {
     fbthriftReq := &reqGetEntityGetIn1Collision{
         In: in,
         In1: in1,
@@ -367,7 +370,7 @@ func (c *GetEntityClient) GetIn1Collision(ctx context.Context, in int64, in1 int
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetErrCollision(ctx context.Context, err int64) (int32, error) {
+func (c *getEntityClientImpl) GetErrCollision(ctx context.Context, err int64) (int32, error) {
     fbthriftReq := &reqGetEntityGetErrCollision{
         Err: err,
     }
@@ -381,7 +384,7 @@ func (c *GetEntityClient) GetErrCollision(ctx context.Context, err int64) (int32
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetErr1Collision(ctx context.Context, err int64, err1 int64) (int32, error) {
+func (c *getEntityClientImpl) GetErr1Collision(ctx context.Context, err int64, err1 int64) (int32, error) {
     fbthriftReq := &reqGetEntityGetErr1Collision{
         Err: err,
         Err1: err1,

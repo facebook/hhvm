@@ -35,23 +35,26 @@ type MyRootClientInterface interface {
     DoRoot(ctx context.Context) (error)
 }
 
-type MyRootClient struct {
+type myRootClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyRootClientInterface = (*MyRootClient)(nil)
+var _ MyRootClientInterface = (*myRootClientImpl)(nil)
 
-func NewMyRootChannelClient(channel thrift.RequestChannel) *MyRootClient {
-    return &MyRootClient{
+// Deprecated: this type is deprecated, please use MyRootClientInterface instead.
+type MyRootClient = myRootClientImpl
+
+func NewMyRootChannelClient(channel thrift.RequestChannel) *myRootClientImpl {
+    return &myRootClientImpl{
         ch: channel,
     }
 }
 
-func (c *MyRootClient) Close() error {
+func (c *myRootClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *MyRootClient) DoRoot(ctx context.Context) (error) {
+func (c *myRootClientImpl) DoRoot(ctx context.Context) (error) {
     fbthriftReq := &reqMyRootDoRoot{
     }
     fbthriftResp := newRespMyRootDoRoot()
@@ -177,26 +180,29 @@ type MyNodeClientInterface interface {
     DoMid(ctx context.Context) (error)
 }
 
-type MyNodeClient struct {
+type myNodeClientImpl struct {
     // Inherited/extended service
     MyRootClientInterface
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyNodeClientInterface = (*MyNodeClient)(nil)
+var _ MyNodeClientInterface = (*myNodeClientImpl)(nil)
 
-func NewMyNodeChannelClient(channel thrift.RequestChannel) *MyNodeClient {
-    return &MyNodeClient{
+// Deprecated: this type is deprecated, please use MyNodeClientInterface instead.
+type MyNodeClient = myNodeClientImpl
+
+func NewMyNodeChannelClient(channel thrift.RequestChannel) *myNodeClientImpl {
+    return &myNodeClientImpl{
         MyRootClientInterface: NewMyRootChannelClient(channel),
         ch: channel,
     }
 }
 
-func (c *MyNodeClient) Close() error {
+func (c *myNodeClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *MyNodeClient) DoMid(ctx context.Context) (error) {
+func (c *myNodeClientImpl) DoMid(ctx context.Context) (error) {
     fbthriftReq := &reqMyNodeDoMid{
     }
     fbthriftResp := newRespMyNodeDoMid()
@@ -295,26 +301,29 @@ type MyLeafClientInterface interface {
     DoLeaf(ctx context.Context) (error)
 }
 
-type MyLeafClient struct {
+type myLeafClientImpl struct {
     // Inherited/extended service
     MyNodeClientInterface
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyLeafClientInterface = (*MyLeafClient)(nil)
+var _ MyLeafClientInterface = (*myLeafClientImpl)(nil)
 
-func NewMyLeafChannelClient(channel thrift.RequestChannel) *MyLeafClient {
-    return &MyLeafClient{
+// Deprecated: this type is deprecated, please use MyLeafClientInterface instead.
+type MyLeafClient = myLeafClientImpl
+
+func NewMyLeafChannelClient(channel thrift.RequestChannel) *myLeafClientImpl {
+    return &myLeafClientImpl{
         MyNodeClientInterface: NewMyNodeChannelClient(channel),
         ch: channel,
     }
 }
 
-func (c *MyLeafClient) Close() error {
+func (c *myLeafClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *MyLeafClient) DoLeaf(ctx context.Context) (error) {
+func (c *myLeafClientImpl) DoLeaf(ctx context.Context) (error) {
     fbthriftReq := &reqMyLeafDoLeaf{
     }
     fbthriftResp := newRespMyLeafDoLeaf()

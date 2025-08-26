@@ -35,23 +35,26 @@ type TestServiceClientInterface interface {
     Init(ctx context.Context, int1 int64) (int64, error)
 }
 
-type TestServiceClient struct {
+type testServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ TestServiceClientInterface = (*TestServiceClient)(nil)
+var _ TestServiceClientInterface = (*testServiceClientImpl)(nil)
 
-func NewTestServiceChannelClient(channel thrift.RequestChannel) *TestServiceClient {
-    return &TestServiceClient{
+// Deprecated: this type is deprecated, please use TestServiceClientInterface instead.
+type TestServiceClient = testServiceClientImpl
+
+func NewTestServiceChannelClient(channel thrift.RequestChannel) *testServiceClientImpl {
+    return &testServiceClientImpl{
         ch: channel,
     }
 }
 
-func (c *TestServiceClient) Close() error {
+func (c *testServiceClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *TestServiceClient) Init(ctx context.Context, int1 int64) (int64, error) {
+func (c *testServiceClientImpl) Init(ctx context.Context, int1 int64) (int64, error) {
     fbthriftReq := &reqTestServiceInit{
         Int1: int1,
     }

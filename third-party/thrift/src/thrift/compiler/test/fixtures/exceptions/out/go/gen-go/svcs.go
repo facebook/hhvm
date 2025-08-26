@@ -41,23 +41,26 @@ type RaiserClientInterface interface {
     Get500(ctx context.Context) (string, error)
 }
 
-type RaiserClient struct {
+type raiserClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ RaiserClientInterface = (*RaiserClient)(nil)
+var _ RaiserClientInterface = (*raiserClientImpl)(nil)
 
-func NewRaiserChannelClient(channel thrift.RequestChannel) *RaiserClient {
-    return &RaiserClient{
+// Deprecated: this type is deprecated, please use RaiserClientInterface instead.
+type RaiserClient = raiserClientImpl
+
+func NewRaiserChannelClient(channel thrift.RequestChannel) *raiserClientImpl {
+    return &raiserClientImpl{
         ch: channel,
     }
 }
 
-func (c *RaiserClient) Close() error {
+func (c *raiserClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *RaiserClient) DoBland(ctx context.Context) (error) {
+func (c *raiserClientImpl) DoBland(ctx context.Context) (error) {
     fbthriftReq := &reqRaiserDoBland{
     }
     fbthriftResp := newRespRaiserDoBland()
@@ -70,7 +73,7 @@ func (c *RaiserClient) DoBland(ctx context.Context) (error) {
     return nil
 }
 
-func (c *RaiserClient) DoRaise(ctx context.Context) (error) {
+func (c *raiserClientImpl) DoRaise(ctx context.Context) (error) {
     fbthriftReq := &reqRaiserDoRaise{
     }
     fbthriftResp := newRespRaiserDoRaise()
@@ -83,7 +86,7 @@ func (c *RaiserClient) DoRaise(ctx context.Context) (error) {
     return nil
 }
 
-func (c *RaiserClient) Get200(ctx context.Context) (string, error) {
+func (c *raiserClientImpl) Get200(ctx context.Context) (string, error) {
     fbthriftReq := &reqRaiserGet200{
     }
     fbthriftResp := newRespRaiserGet200()
@@ -96,7 +99,7 @@ func (c *RaiserClient) Get200(ctx context.Context) (string, error) {
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *RaiserClient) Get500(ctx context.Context) (string, error) {
+func (c *raiserClientImpl) Get500(ctx context.Context) (string, error) {
     fbthriftReq := &reqRaiserGet500{
     }
     fbthriftResp := newRespRaiserGet500()

@@ -39,23 +39,26 @@ type SomeServiceClientInterface interface {
     BinaryKeyedMap(ctx context.Context, r []int64) (map[*TBinary]int64, error)
 }
 
-type SomeServiceClient struct {
+type someServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ SomeServiceClientInterface = (*SomeServiceClient)(nil)
+var _ SomeServiceClientInterface = (*someServiceClientImpl)(nil)
 
-func NewSomeServiceChannelClient(channel thrift.RequestChannel) *SomeServiceClient {
-    return &SomeServiceClient{
+// Deprecated: this type is deprecated, please use SomeServiceClientInterface instead.
+type SomeServiceClient = someServiceClientImpl
+
+func NewSomeServiceChannelClient(channel thrift.RequestChannel) *someServiceClientImpl {
+    return &someServiceClientImpl{
         ch: channel,
     }
 }
 
-func (c *SomeServiceClient) Close() error {
+func (c *someServiceClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *SomeServiceClient) BounceMap(ctx context.Context, m included.SomeMap) (included.SomeMap, error) {
+func (c *someServiceClientImpl) BounceMap(ctx context.Context, m included.SomeMap) (included.SomeMap, error) {
     fbthriftReq := &reqSomeServiceBounceMap{
         M: m,
     }
@@ -69,7 +72,7 @@ func (c *SomeServiceClient) BounceMap(ctx context.Context, m included.SomeMap) (
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *SomeServiceClient) BinaryKeyedMap(ctx context.Context, r []int64) (map[*TBinary]int64, error) {
+func (c *someServiceClientImpl) BinaryKeyedMap(ctx context.Context, r []int64) (map[*TBinary]int64, error) {
     fbthriftReq := &reqSomeServiceBinaryKeyedMap{
         R: r,
     }

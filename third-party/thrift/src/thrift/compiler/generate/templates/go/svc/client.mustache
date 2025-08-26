@@ -19,7 +19,7 @@
   This template defined the client type/functions for a thrift service.
 
 }}
-type {{service:go_name}}Client struct {
+type {{service:go_client_name}} struct {
     {{#service:extends?}}
     {{#service:extends}}
     // Inherited/extended service
@@ -29,10 +29,13 @@ type {{service:go_name}}Client struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ {{service:go_name}}ClientInterface = (*{{service:go_name}}Client)(nil)
+var _ {{service:go_name}}ClientInterface = (*{{service:go_client_name}})(nil)
 
-func New{{service:go_name}}ChannelClient(channel thrift.RequestChannel) *{{service:go_name}}Client {
-    return &{{service:go_name}}Client{
+// Deprecated: this type is deprecated, please use {{service:go_name}}ClientInterface instead.
+type {{service:go_name}}Client = {{service:go_client_name}}
+
+func New{{service:go_name}}ChannelClient(channel thrift.RequestChannel) *{{service:go_client_name}} {
+    return &{{service:go_client_name}}{
         {{#service:extends?}}
         {{#service:extends}}
         {{service:go_name}}ClientInterface: {{service:go_package_alias_prefix}}New{{service:go_name}}ChannelClient(channel),
@@ -42,7 +45,7 @@ func New{{service:go_name}}ChannelClient(channel thrift.RequestChannel) *{{servi
     }
 }
 
-func (c *{{service:go_name}}Client) Close() error {
+func (c *{{service:go_client_name}}) Close() error {
     return c.ch.Close()
 }
 

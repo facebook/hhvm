@@ -43,23 +43,26 @@ type FinderClientInterface interface {
     PreviousPlate(ctx context.Context, plate Plate) (Plate, error)
 }
 
-type FinderClient struct {
+type finderClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FinderClientInterface = (*FinderClient)(nil)
+var _ FinderClientInterface = (*finderClientImpl)(nil)
 
-func NewFinderChannelClient(channel thrift.RequestChannel) *FinderClient {
-    return &FinderClient{
+// Deprecated: this type is deprecated, please use FinderClientInterface instead.
+type FinderClient = finderClientImpl
+
+func NewFinderChannelClient(channel thrift.RequestChannel) *finderClientImpl {
+    return &finderClientImpl{
         ch: channel,
     }
 }
 
-func (c *FinderClient) Close() error {
+func (c *finderClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *FinderClient) ByPlate(ctx context.Context, plate Plate) (*Automobile, error) {
+func (c *finderClientImpl) ByPlate(ctx context.Context, plate Plate) (*Automobile, error) {
     fbthriftReq := &reqFinderByPlate{
         Plate: plate,
     }
@@ -73,7 +76,7 @@ func (c *FinderClient) ByPlate(ctx context.Context, plate Plate) (*Automobile, e
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *FinderClient) AliasByPlate(ctx context.Context, plate Plate) (*Car, error) {
+func (c *finderClientImpl) AliasByPlate(ctx context.Context, plate Plate) (*Car, error) {
     fbthriftReq := &reqFinderAliasByPlate{
         Plate: plate,
     }
@@ -87,7 +90,7 @@ func (c *FinderClient) AliasByPlate(ctx context.Context, plate Plate) (*Car, err
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *FinderClient) PreviousPlate(ctx context.Context, plate Plate) (Plate, error) {
+func (c *finderClientImpl) PreviousPlate(ctx context.Context, plate Plate) (Plate, error) {
     fbthriftReq := &reqFinderPreviousPlate{
         Plate: plate,
     }

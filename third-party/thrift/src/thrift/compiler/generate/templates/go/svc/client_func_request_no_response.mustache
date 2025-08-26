@@ -19,7 +19,7 @@
   This template defines the client oneway function.
 
 }}
-func (c *{{service:go_name}}Client) {{> svc/func_signature}} {
+func (c *{{service:go_client_name}}) {{> svc/func_signature}} {
     fbthriftReq := &req{{service:go_name}}{{function:go_name}}{
         {{#function:args}}
         {{#field:type}}

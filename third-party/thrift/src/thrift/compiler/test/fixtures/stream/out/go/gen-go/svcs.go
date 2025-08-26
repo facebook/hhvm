@@ -42,23 +42,26 @@ type PubSubStreamingServiceClientInterface interface {
     ReturnstreamFast(ctx context.Context, i32From int32, i32To int32) (<-chan int32 /* elem stream */, <-chan error /* stream err */, error)
 }
 
-type PubSubStreamingServiceClient struct {
+type pubSubStreamingServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ PubSubStreamingServiceClientInterface = (*PubSubStreamingServiceClient)(nil)
+var _ PubSubStreamingServiceClientInterface = (*pubSubStreamingServiceClientImpl)(nil)
 
-func NewPubSubStreamingServiceChannelClient(channel thrift.RequestChannel) *PubSubStreamingServiceClient {
-    return &PubSubStreamingServiceClient{
+// Deprecated: this type is deprecated, please use PubSubStreamingServiceClientInterface instead.
+type PubSubStreamingServiceClient = pubSubStreamingServiceClientImpl
+
+func NewPubSubStreamingServiceChannelClient(channel thrift.RequestChannel) *pubSubStreamingServiceClientImpl {
+    return &pubSubStreamingServiceClientImpl{
         ch: channel,
     }
 }
 
-func (c *PubSubStreamingServiceClient) Close() error {
+func (c *pubSubStreamingServiceClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *PubSubStreamingServiceClient) Returnstream(ctx context.Context, i32From int32, i32To int32) (<-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
+func (c *pubSubStreamingServiceClientImpl) Returnstream(ctx context.Context, i32From int32, i32To int32) (<-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
     // Must be a cancellable context to prevent goroutine leaks
     if ctx.Done() == nil {
 		return nil, nil, errors.New("context does not support cancellation")
@@ -114,7 +117,7 @@ func (c *PubSubStreamingServiceClient) Returnstream(ctx context.Context, i32From
     return fbthriftElemChan, fbthriftErrChan, nil
 }
 
-func (c *PubSubStreamingServiceClient) Streamthrows(ctx context.Context, foo int32) (<-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
+func (c *pubSubStreamingServiceClientImpl) Streamthrows(ctx context.Context, foo int32) (<-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
     // Must be a cancellable context to prevent goroutine leaks
     if ctx.Done() == nil {
 		return nil, nil, errors.New("context does not support cancellation")
@@ -169,7 +172,7 @@ func (c *PubSubStreamingServiceClient) Streamthrows(ctx context.Context, foo int
     return fbthriftElemChan, fbthriftErrChan, nil
 }
 
-func (c *PubSubStreamingServiceClient) Servicethrows(ctx context.Context, foo int32) (<-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
+func (c *pubSubStreamingServiceClientImpl) Servicethrows(ctx context.Context, foo int32) (<-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
     // Must be a cancellable context to prevent goroutine leaks
     if ctx.Done() == nil {
 		return nil, nil, errors.New("context does not support cancellation")
@@ -224,7 +227,7 @@ func (c *PubSubStreamingServiceClient) Servicethrows(ctx context.Context, foo in
     return fbthriftElemChan, fbthriftErrChan, nil
 }
 
-func (c *PubSubStreamingServiceClient) Servicethrows2(ctx context.Context, foo int32) (<-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
+func (c *pubSubStreamingServiceClientImpl) Servicethrows2(ctx context.Context, foo int32) (<-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
     // Must be a cancellable context to prevent goroutine leaks
     if ctx.Done() == nil {
 		return nil, nil, errors.New("context does not support cancellation")
@@ -279,7 +282,7 @@ func (c *PubSubStreamingServiceClient) Servicethrows2(ctx context.Context, foo i
     return fbthriftElemChan, fbthriftErrChan, nil
 }
 
-func (c *PubSubStreamingServiceClient) Boththrows(ctx context.Context, foo int32) (<-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
+func (c *pubSubStreamingServiceClientImpl) Boththrows(ctx context.Context, foo int32) (<-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
     // Must be a cancellable context to prevent goroutine leaks
     if ctx.Done() == nil {
 		return nil, nil, errors.New("context does not support cancellation")
@@ -334,7 +337,7 @@ func (c *PubSubStreamingServiceClient) Boththrows(ctx context.Context, foo int32
     return fbthriftElemChan, fbthriftErrChan, nil
 }
 
-func (c *PubSubStreamingServiceClient) Responseandstreamstreamthrows(ctx context.Context, foo int32) (int32, <-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
+func (c *pubSubStreamingServiceClientImpl) Responseandstreamstreamthrows(ctx context.Context, foo int32) (int32, <-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
     var fbthriftRespZero int32
     // Must be a cancellable context to prevent goroutine leaks
     if ctx.Done() == nil {
@@ -390,7 +393,7 @@ func (c *PubSubStreamingServiceClient) Responseandstreamstreamthrows(ctx context
     return fbthriftResp.GetSuccess(), fbthriftElemChan, fbthriftErrChan, nil
 }
 
-func (c *PubSubStreamingServiceClient) Responseandstreamservicethrows(ctx context.Context, foo int32) (int32, <-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
+func (c *pubSubStreamingServiceClientImpl) Responseandstreamservicethrows(ctx context.Context, foo int32) (int32, <-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
     var fbthriftRespZero int32
     // Must be a cancellable context to prevent goroutine leaks
     if ctx.Done() == nil {
@@ -446,7 +449,7 @@ func (c *PubSubStreamingServiceClient) Responseandstreamservicethrows(ctx contex
     return fbthriftResp.GetSuccess(), fbthriftElemChan, fbthriftErrChan, nil
 }
 
-func (c *PubSubStreamingServiceClient) Responseandstreamboththrows(ctx context.Context, foo int32) (int32, <-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
+func (c *pubSubStreamingServiceClientImpl) Responseandstreamboththrows(ctx context.Context, foo int32) (int32, <-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
     var fbthriftRespZero int32
     // Must be a cancellable context to prevent goroutine leaks
     if ctx.Done() == nil {
@@ -502,7 +505,7 @@ func (c *PubSubStreamingServiceClient) Responseandstreamboththrows(ctx context.C
     return fbthriftResp.GetSuccess(), fbthriftElemChan, fbthriftErrChan, nil
 }
 
-func (c *PubSubStreamingServiceClient) ReturnstreamFast(ctx context.Context, i32From int32, i32To int32) (<-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
+func (c *pubSubStreamingServiceClientImpl) ReturnstreamFast(ctx context.Context, i32From int32, i32To int32) (<-chan int32 /* elem stream */, <-chan error /* stream err */, error) {
     // Must be a cancellable context to prevent goroutine leaks
     if ctx.Done() == nil {
 		return nil, nil, errors.New("context does not support cancellation")

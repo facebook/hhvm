@@ -43,26 +43,29 @@ type ExtendTestServiceClientInterface interface {
     Check(ctx context.Context, struct1 *test0.HsFoo) (bool, error)
 }
 
-type ExtendTestServiceClient struct {
+type extendTestServiceClientImpl struct {
     // Inherited/extended service
     test0.HsTestServiceClientInterface
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ ExtendTestServiceClientInterface = (*ExtendTestServiceClient)(nil)
+var _ ExtendTestServiceClientInterface = (*extendTestServiceClientImpl)(nil)
 
-func NewExtendTestServiceChannelClient(channel thrift.RequestChannel) *ExtendTestServiceClient {
-    return &ExtendTestServiceClient{
+// Deprecated: this type is deprecated, please use ExtendTestServiceClientInterface instead.
+type ExtendTestServiceClient = extendTestServiceClientImpl
+
+func NewExtendTestServiceChannelClient(channel thrift.RequestChannel) *extendTestServiceClientImpl {
+    return &extendTestServiceClientImpl{
         HsTestServiceClientInterface: test0.NewHsTestServiceChannelClient(channel),
         ch: channel,
     }
 }
 
-func (c *ExtendTestServiceClient) Close() error {
+func (c *extendTestServiceClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *ExtendTestServiceClient) Check(ctx context.Context, struct1 *test0.HsFoo) (bool, error) {
+func (c *extendTestServiceClientImpl) Check(ctx context.Context, struct1 *test0.HsFoo) (bool, error) {
     fbthriftReq := &reqExtendTestServiceCheck{
         Struct1: struct1,
     }

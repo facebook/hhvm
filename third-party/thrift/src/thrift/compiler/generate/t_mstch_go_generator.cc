@@ -551,6 +551,7 @@ class mstch_go_service : public mstch_service {
         this,
         {
             {"service:go_name", &mstch_go_service::go_name},
+            {"service:go_client_name", &mstch_go_service::go_client_name},
             {"service:go_qualified_name", &mstch_go_service::go_qualified_name},
             {"service:go_package_alias_prefix",
              &mstch_go_service::go_package_alias_prefix_},
@@ -558,6 +559,10 @@ class mstch_go_service : public mstch_service {
   }
 
   mstch::node go_name() { return go::munge_ident(service_->name()); }
+  mstch::node go_client_name() {
+    return go::munge_ident(service_->name(), /* exported = */ false) +
+        "ClientImpl";
+  }
   mstch::node go_qualified_name() {
     auto prefix = data_.go_package_alias_prefix(service_->program());
     auto name = go::munge_ident(service_->name());

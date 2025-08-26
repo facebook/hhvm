@@ -35,23 +35,26 @@ type ServiceClientInterface interface {
     Func(ctx context.Context, arg1 StringWithAdapter_7208, arg2 StringWithCppAdapter, arg3 *Foo) (MyI32_4873, error)
 }
 
-type ServiceClient struct {
+type serviceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ ServiceClientInterface = (*ServiceClient)(nil)
+var _ ServiceClientInterface = (*serviceClientImpl)(nil)
 
-func NewServiceChannelClient(channel thrift.RequestChannel) *ServiceClient {
-    return &ServiceClient{
+// Deprecated: this type is deprecated, please use ServiceClientInterface instead.
+type ServiceClient = serviceClientImpl
+
+func NewServiceChannelClient(channel thrift.RequestChannel) *serviceClientImpl {
+    return &serviceClientImpl{
         ch: channel,
     }
 }
 
-func (c *ServiceClient) Close() error {
+func (c *serviceClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *ServiceClient) Func(ctx context.Context, arg1 StringWithAdapter_7208, arg2 StringWithCppAdapter, arg3 *Foo) (MyI32_4873, error) {
+func (c *serviceClientImpl) Func(ctx context.Context, arg1 StringWithAdapter_7208, arg2 StringWithCppAdapter, arg3 *Foo) (MyI32_4873, error) {
     fbthriftReq := &reqServiceFunc{
         Arg1: arg1,
         Arg2: arg2,
@@ -178,23 +181,26 @@ type AdapterServiceClientInterface interface {
     AdaptedTypes(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error)
 }
 
-type AdapterServiceClient struct {
+type adapterServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ AdapterServiceClientInterface = (*AdapterServiceClient)(nil)
+var _ AdapterServiceClientInterface = (*adapterServiceClientImpl)(nil)
 
-func NewAdapterServiceChannelClient(channel thrift.RequestChannel) *AdapterServiceClient {
-    return &AdapterServiceClient{
+// Deprecated: this type is deprecated, please use AdapterServiceClientInterface instead.
+type AdapterServiceClient = adapterServiceClientImpl
+
+func NewAdapterServiceChannelClient(channel thrift.RequestChannel) *adapterServiceClientImpl {
+    return &adapterServiceClientImpl{
         ch: channel,
     }
 }
 
-func (c *AdapterServiceClient) Close() error {
+func (c *adapterServiceClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *AdapterServiceClient) Count(ctx context.Context) (*CountingStruct, error) {
+func (c *adapterServiceClientImpl) Count(ctx context.Context) (*CountingStruct, error) {
     fbthriftReq := &reqAdapterServiceCount{
     }
     fbthriftResp := newRespAdapterServiceCount()
@@ -207,7 +213,7 @@ func (c *AdapterServiceClient) Count(ctx context.Context) (*CountingStruct, erro
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *AdapterServiceClient) AdaptedTypes(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error) {
+func (c *adapterServiceClientImpl) AdaptedTypes(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error) {
     fbthriftReq := &reqAdapterServiceAdaptedTypes{
         Arg: arg,
     }

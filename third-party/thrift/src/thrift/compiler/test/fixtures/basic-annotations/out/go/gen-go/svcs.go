@@ -34,23 +34,26 @@ type BadInteractionClientInterface interface {
     Foo(ctx context.Context) (error)
 }
 
-type BadInteractionClient struct {
+type badInteractionClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ BadInteractionClientInterface = (*BadInteractionClient)(nil)
+var _ BadInteractionClientInterface = (*badInteractionClientImpl)(nil)
 
-func NewBadInteractionChannelClient(channel thrift.RequestChannel) *BadInteractionClient {
-    return &BadInteractionClient{
+// Deprecated: this type is deprecated, please use BadInteractionClientInterface instead.
+type BadInteractionClient = badInteractionClientImpl
+
+func NewBadInteractionChannelClient(channel thrift.RequestChannel) *badInteractionClientImpl {
+    return &badInteractionClientImpl{
         ch: channel,
     }
 }
 
-func (c *BadInteractionClient) Close() error {
+func (c *badInteractionClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *BadInteractionClient) Foo(ctx context.Context) (error) {
+func (c *badInteractionClientImpl) Foo(ctx context.Context) (error) {
     fbthriftReq := &reqBadInteractionFoo{
     }
     fbthriftResp := newRespBadInteractionFoo()
@@ -86,23 +89,26 @@ type MyServiceClientInterface interface {
     GoDoNothing(ctx context.Context) (error)
 }
 
-type MyServiceClient struct {
+type myServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServiceClientInterface = (*MyServiceClient)(nil)
+var _ MyServiceClientInterface = (*myServiceClientImpl)(nil)
 
-func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceClient {
-    return &MyServiceClient{
+// Deprecated: this type is deprecated, please use MyServiceClientInterface instead.
+type MyServiceClient = myServiceClientImpl
+
+func NewMyServiceChannelClient(channel thrift.RequestChannel) *myServiceClientImpl {
+    return &myServiceClientImpl{
         ch: channel,
     }
 }
 
-func (c *MyServiceClient) Close() error {
+func (c *myServiceClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *MyServiceClient) Ping(ctx context.Context) (error) {
+func (c *myServiceClientImpl) Ping(ctx context.Context) (error) {
     fbthriftReq := &reqMyServicePing{
     }
     fbthriftResp := newRespMyServicePing()
@@ -115,7 +121,7 @@ func (c *MyServiceClient) Ping(ctx context.Context) (error) {
     return nil
 }
 
-func (c *MyServiceClient) GetRandomData(ctx context.Context) (string, error) {
+func (c *myServiceClientImpl) GetRandomData(ctx context.Context) (string, error) {
     fbthriftReq := &reqMyServiceGetRandomData{
     }
     fbthriftResp := newRespMyServiceGetRandomData()
@@ -128,7 +134,7 @@ func (c *MyServiceClient) GetRandomData(ctx context.Context) (string, error) {
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *MyServiceClient) HasDataById(ctx context.Context, id int64) (bool, error) {
+func (c *myServiceClientImpl) HasDataById(ctx context.Context, id int64) (bool, error) {
     fbthriftReq := &reqMyServiceHasDataById{
         Id: id,
     }
@@ -142,7 +148,7 @@ func (c *MyServiceClient) HasDataById(ctx context.Context, id int64) (bool, erro
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *MyServiceClient) GoGetDataById(ctx context.Context, id int64) (string, error) {
+func (c *myServiceClientImpl) GoGetDataById(ctx context.Context, id int64) (string, error) {
     fbthriftReq := &reqMyServiceGoGetDataById{
         Id: id,
     }
@@ -156,7 +162,7 @@ func (c *MyServiceClient) GoGetDataById(ctx context.Context, id int64) (string, 
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *MyServiceClient) PutDataById(ctx context.Context, id int64, data string) (error) {
+func (c *myServiceClientImpl) PutDataById(ctx context.Context, id int64, data string) (error) {
     fbthriftReq := &reqMyServicePutDataById{
         Id: id,
         Data: data,
@@ -171,7 +177,7 @@ func (c *MyServiceClient) PutDataById(ctx context.Context, id int64, data string
     return nil
 }
 
-func (c *MyServiceClient) LobDataById(ctx context.Context, id int64, data string) (error) {
+func (c *myServiceClientImpl) LobDataById(ctx context.Context, id int64, data string) (error) {
     fbthriftReq := &reqMyServiceLobDataById{
         Id: id,
         Data: data,
@@ -179,7 +185,7 @@ func (c *MyServiceClient) LobDataById(ctx context.Context, id int64, data string
     return c.ch.SendRequestNoResponse(ctx, "lobDataById", fbthriftReq)
 }
 
-func (c *MyServiceClient) GoDoNothing(ctx context.Context) (error) {
+func (c *myServiceClientImpl) GoDoNothing(ctx context.Context) (error) {
     fbthriftReq := &reqMyServiceGoDoNothing{
     }
     fbthriftResp := newRespMyServiceGoDoNothing()
@@ -629,23 +635,26 @@ type MyServicePrioParentClientInterface interface {
     Pong(ctx context.Context) (error)
 }
 
-type MyServicePrioParentClient struct {
+type myServicePrioParentClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServicePrioParentClientInterface = (*MyServicePrioParentClient)(nil)
+var _ MyServicePrioParentClientInterface = (*myServicePrioParentClientImpl)(nil)
 
-func NewMyServicePrioParentChannelClient(channel thrift.RequestChannel) *MyServicePrioParentClient {
-    return &MyServicePrioParentClient{
+// Deprecated: this type is deprecated, please use MyServicePrioParentClientInterface instead.
+type MyServicePrioParentClient = myServicePrioParentClientImpl
+
+func NewMyServicePrioParentChannelClient(channel thrift.RequestChannel) *myServicePrioParentClientImpl {
+    return &myServicePrioParentClientImpl{
         ch: channel,
     }
 }
 
-func (c *MyServicePrioParentClient) Close() error {
+func (c *myServicePrioParentClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *MyServicePrioParentClient) Ping(ctx context.Context) (error) {
+func (c *myServicePrioParentClientImpl) Ping(ctx context.Context) (error) {
     fbthriftReq := &reqMyServicePrioParentPing{
     }
     fbthriftResp := newRespMyServicePrioParentPing()
@@ -658,7 +667,7 @@ func (c *MyServicePrioParentClient) Ping(ctx context.Context) (error) {
     return nil
 }
 
-func (c *MyServicePrioParentClient) Pong(ctx context.Context) (error) {
+func (c *myServicePrioParentClientImpl) Pong(ctx context.Context) (error) {
     fbthriftReq := &reqMyServicePrioParentPong{
     }
     fbthriftResp := newRespMyServicePrioParentPong()
@@ -836,26 +845,29 @@ type MyServicePrioChildClientInterface interface {
     Pang(ctx context.Context) (error)
 }
 
-type MyServicePrioChildClient struct {
+type myServicePrioChildClientImpl struct {
     // Inherited/extended service
     MyServicePrioParentClientInterface
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServicePrioChildClientInterface = (*MyServicePrioChildClient)(nil)
+var _ MyServicePrioChildClientInterface = (*myServicePrioChildClientImpl)(nil)
 
-func NewMyServicePrioChildChannelClient(channel thrift.RequestChannel) *MyServicePrioChildClient {
-    return &MyServicePrioChildClient{
+// Deprecated: this type is deprecated, please use MyServicePrioChildClientInterface instead.
+type MyServicePrioChildClient = myServicePrioChildClientImpl
+
+func NewMyServicePrioChildChannelClient(channel thrift.RequestChannel) *myServicePrioChildClientImpl {
+    return &myServicePrioChildClientImpl{
         MyServicePrioParentClientInterface: NewMyServicePrioParentChannelClient(channel),
         ch: channel,
     }
 }
 
-func (c *MyServicePrioChildClient) Close() error {
+func (c *myServicePrioChildClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *MyServicePrioChildClient) Pang(ctx context.Context) (error) {
+func (c *myServicePrioChildClientImpl) Pang(ctx context.Context) (error) {
     fbthriftReq := &reqMyServicePrioChildPang{
     }
     fbthriftResp := newRespMyServicePrioChildPang()
@@ -948,23 +960,26 @@ type BadServiceClientInterface interface {
     Bar(ctx context.Context) (int32, error)
 }
 
-type BadServiceClient struct {
+type badServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ BadServiceClientInterface = (*BadServiceClient)(nil)
+var _ BadServiceClientInterface = (*badServiceClientImpl)(nil)
 
-func NewBadServiceChannelClient(channel thrift.RequestChannel) *BadServiceClient {
-    return &BadServiceClient{
+// Deprecated: this type is deprecated, please use BadServiceClientInterface instead.
+type BadServiceClient = badServiceClientImpl
+
+func NewBadServiceChannelClient(channel thrift.RequestChannel) *badServiceClientImpl {
+    return &badServiceClientImpl{
         ch: channel,
     }
 }
 
-func (c *BadServiceClient) Close() error {
+func (c *badServiceClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *BadServiceClient) Bar(ctx context.Context) (int32, error) {
+func (c *badServiceClientImpl) Bar(ctx context.Context) (int32, error) {
     fbthriftReq := &reqBadServiceBar{
     }
     fbthriftResp := newRespBadServiceBar()
@@ -1089,23 +1104,26 @@ type FooBarBazServiceClientInterface interface {
     Baz(ctx context.Context) (error)
 }
 
-type FooBarBazServiceClient struct {
+type fooBarBazServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FooBarBazServiceClientInterface = (*FooBarBazServiceClient)(nil)
+var _ FooBarBazServiceClientInterface = (*fooBarBazServiceClientImpl)(nil)
 
-func NewFooBarBazServiceChannelClient(channel thrift.RequestChannel) *FooBarBazServiceClient {
-    return &FooBarBazServiceClient{
+// Deprecated: this type is deprecated, please use FooBarBazServiceClientInterface instead.
+type FooBarBazServiceClient = fooBarBazServiceClientImpl
+
+func NewFooBarBazServiceChannelClient(channel thrift.RequestChannel) *fooBarBazServiceClientImpl {
+    return &fooBarBazServiceClientImpl{
         ch: channel,
     }
 }
 
-func (c *FooBarBazServiceClient) Close() error {
+func (c *fooBarBazServiceClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *FooBarBazServiceClient) FooStructured(ctx context.Context) (error) {
+func (c *fooBarBazServiceClientImpl) FooStructured(ctx context.Context) (error) {
     fbthriftReq := &reqFooBarBazServiceFooStructured{
     }
     fbthriftResp := newRespFooBarBazServiceFooStructured()
@@ -1118,7 +1136,7 @@ func (c *FooBarBazServiceClient) FooStructured(ctx context.Context) (error) {
     return nil
 }
 
-func (c *FooBarBazServiceClient) BarNonStructured(ctx context.Context) (error) {
+func (c *fooBarBazServiceClientImpl) BarNonStructured(ctx context.Context) (error) {
     fbthriftReq := &reqFooBarBazServiceBarNonStructured{
     }
     fbthriftResp := newRespFooBarBazServiceBarNonStructured()
@@ -1131,7 +1149,7 @@ func (c *FooBarBazServiceClient) BarNonStructured(ctx context.Context) (error) {
     return nil
 }
 
-func (c *FooBarBazServiceClient) Baz(ctx context.Context) (error) {
+func (c *fooBarBazServiceClientImpl) Baz(ctx context.Context) (error) {
     fbthriftReq := &reqFooBarBazServiceBaz{
     }
     fbthriftResp := newRespFooBarBazServiceBaz()

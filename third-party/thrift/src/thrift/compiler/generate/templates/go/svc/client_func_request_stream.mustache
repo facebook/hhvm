@@ -19,7 +19,7 @@
   This template defines the client stream function.
 
 }}
-func (c *{{service:go_name}}Client) {{> svc/func_signature}} {
+func (c *{{service:go_client_name}}) {{> svc/func_signature}} {
     {{#function:stream_has_first_response?}}
     {{#function:stream_first_response_type}}
     var fbthriftRespZero {{#type:structured?}}*{{/type:structured?}}{{> common/type}}

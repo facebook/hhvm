@@ -35,23 +35,26 @@ type FooServiceClientInterface interface {
     SimpleRPC(ctx context.Context) (error)
 }
 
-type FooServiceClient struct {
+type fooServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FooServiceClientInterface = (*FooServiceClient)(nil)
+var _ FooServiceClientInterface = (*fooServiceClientImpl)(nil)
 
-func NewFooServiceChannelClient(channel thrift.RequestChannel) *FooServiceClient {
-    return &FooServiceClient{
+// Deprecated: this type is deprecated, please use FooServiceClientInterface instead.
+type FooServiceClient = fooServiceClientImpl
+
+func NewFooServiceChannelClient(channel thrift.RequestChannel) *fooServiceClientImpl {
+    return &fooServiceClientImpl{
         ch: channel,
     }
 }
 
-func (c *FooServiceClient) Close() error {
+func (c *fooServiceClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *FooServiceClient) SimpleRPC(ctx context.Context) (error) {
+func (c *fooServiceClientImpl) SimpleRPC(ctx context.Context) (error) {
     fbthriftReq := &reqFooServiceSimpleRPC{
     }
     fbthriftResp := newRespFooServiceSimpleRPC()
@@ -171,23 +174,26 @@ type FB303ServiceClientInterface interface {
     SimpleRPC(ctx context.Context, intParameter int32) (*ReservedKeyword, error)
 }
 
-type FB303ServiceClient struct {
+type fB303ServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FB303ServiceClientInterface = (*FB303ServiceClient)(nil)
+var _ FB303ServiceClientInterface = (*fB303ServiceClientImpl)(nil)
 
-func NewFB303ServiceChannelClient(channel thrift.RequestChannel) *FB303ServiceClient {
-    return &FB303ServiceClient{
+// Deprecated: this type is deprecated, please use FB303ServiceClientInterface instead.
+type FB303ServiceClient = fB303ServiceClientImpl
+
+func NewFB303ServiceChannelClient(channel thrift.RequestChannel) *fB303ServiceClientImpl {
+    return &fB303ServiceClientImpl{
         ch: channel,
     }
 }
 
-func (c *FB303ServiceClient) Close() error {
+func (c *fB303ServiceClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *FB303ServiceClient) SimpleRPC(ctx context.Context, intParameter int32) (*ReservedKeyword, error) {
+func (c *fB303ServiceClientImpl) SimpleRPC(ctx context.Context, intParameter int32) (*ReservedKeyword, error) {
     fbthriftReq := &reqFB303ServiceSimpleRPC{
         IntParameter: intParameter,
     }
@@ -328,23 +334,26 @@ type MyServiceClientInterface interface {
     RpcSkippedCodegen(ctx context.Context) (error)
 }
 
-type MyServiceClient struct {
+type myServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServiceClientInterface = (*MyServiceClient)(nil)
+var _ MyServiceClientInterface = (*myServiceClientImpl)(nil)
 
-func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceClient {
-    return &MyServiceClient{
+// Deprecated: this type is deprecated, please use MyServiceClientInterface instead.
+type MyServiceClient = myServiceClientImpl
+
+func NewMyServiceChannelClient(channel thrift.RequestChannel) *myServiceClientImpl {
+    return &myServiceClientImpl{
         ch: channel,
     }
 }
 
-func (c *MyServiceClient) Close() error {
+func (c *myServiceClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *MyServiceClient) Ping(ctx context.Context) (error) {
+func (c *myServiceClientImpl) Ping(ctx context.Context) (error) {
     fbthriftReq := &reqMyServicePing{
     }
     fbthriftResp := newRespMyServicePing()
@@ -357,7 +366,7 @@ func (c *MyServiceClient) Ping(ctx context.Context) (error) {
     return nil
 }
 
-func (c *MyServiceClient) GetRandomData(ctx context.Context) (string, error) {
+func (c *myServiceClientImpl) GetRandomData(ctx context.Context) (string, error) {
     fbthriftReq := &reqMyServiceGetRandomData{
     }
     fbthriftResp := newRespMyServiceGetRandomData()
@@ -370,7 +379,7 @@ func (c *MyServiceClient) GetRandomData(ctx context.Context) (string, error) {
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *MyServiceClient) Sink(ctx context.Context, sink int64) (error) {
+func (c *myServiceClientImpl) Sink(ctx context.Context, sink int64) (error) {
     fbthriftReq := &reqMyServiceSink{
         Sink: sink,
     }
@@ -384,7 +393,7 @@ func (c *MyServiceClient) Sink(ctx context.Context, sink int64) (error) {
     return nil
 }
 
-func (c *MyServiceClient) PutDataById(ctx context.Context, id int64, data string) (error) {
+func (c *myServiceClientImpl) PutDataById(ctx context.Context, id int64, data string) (error) {
     fbthriftReq := &reqMyServicePutDataById{
         Id: id,
         Data: data,
@@ -399,7 +408,7 @@ func (c *MyServiceClient) PutDataById(ctx context.Context, id int64, data string
     return nil
 }
 
-func (c *MyServiceClient) HasDataById(ctx context.Context, id int64) (bool, error) {
+func (c *myServiceClientImpl) HasDataById(ctx context.Context, id int64) (bool, error) {
     fbthriftReq := &reqMyServiceHasDataById{
         Id: id,
     }
@@ -413,7 +422,7 @@ func (c *MyServiceClient) HasDataById(ctx context.Context, id int64) (bool, erro
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *MyServiceClient) GetDataById(ctx context.Context, id int64) (string, error) {
+func (c *myServiceClientImpl) GetDataById(ctx context.Context, id int64) (string, error) {
     fbthriftReq := &reqMyServiceGetDataById{
         Id: id,
     }
@@ -427,7 +436,7 @@ func (c *MyServiceClient) GetDataById(ctx context.Context, id int64) (string, er
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *MyServiceClient) DeleteDataById(ctx context.Context, id int64) (error) {
+func (c *myServiceClientImpl) DeleteDataById(ctx context.Context, id int64) (error) {
     fbthriftReq := &reqMyServiceDeleteDataById{
         Id: id,
     }
@@ -441,7 +450,7 @@ func (c *MyServiceClient) DeleteDataById(ctx context.Context, id int64) (error) 
     return nil
 }
 
-func (c *MyServiceClient) LobDataById(ctx context.Context, id int64, data string) (error) {
+func (c *myServiceClientImpl) LobDataById(ctx context.Context, id int64, data string) (error) {
     fbthriftReq := &reqMyServiceLobDataById{
         Id: id,
         Data: data,
@@ -449,7 +458,7 @@ func (c *MyServiceClient) LobDataById(ctx context.Context, id int64, data string
     return c.ch.SendRequestNoResponse(ctx, "lobDataById", fbthriftReq)
 }
 
-func (c *MyServiceClient) InvalidReturnForHack(ctx context.Context) ([]float32, error) {
+func (c *myServiceClientImpl) InvalidReturnForHack(ctx context.Context) ([]float32, error) {
     fbthriftReq := &reqMyServiceInvalidReturnForHack{
     }
     fbthriftResp := newRespMyServiceInvalidReturnForHack()
@@ -462,7 +471,7 @@ func (c *MyServiceClient) InvalidReturnForHack(ctx context.Context) ([]float32, 
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *MyServiceClient) RpcSkippedCodegen(ctx context.Context) (error) {
+func (c *myServiceClientImpl) RpcSkippedCodegen(ctx context.Context) (error) {
     fbthriftReq := &reqMyServiceRpcSkippedCodegen{
     }
     fbthriftResp := newRespMyServiceRpcSkippedCodegen()
@@ -1061,23 +1070,26 @@ type DbMixedStackArgumentsClientInterface interface {
     GetDataByKey1(ctx context.Context, key string) ([]byte, error)
 }
 
-type DbMixedStackArgumentsClient struct {
+type dbMixedStackArgumentsClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ DbMixedStackArgumentsClientInterface = (*DbMixedStackArgumentsClient)(nil)
+var _ DbMixedStackArgumentsClientInterface = (*dbMixedStackArgumentsClientImpl)(nil)
 
-func NewDbMixedStackArgumentsChannelClient(channel thrift.RequestChannel) *DbMixedStackArgumentsClient {
-    return &DbMixedStackArgumentsClient{
+// Deprecated: this type is deprecated, please use DbMixedStackArgumentsClientInterface instead.
+type DbMixedStackArgumentsClient = dbMixedStackArgumentsClientImpl
+
+func NewDbMixedStackArgumentsChannelClient(channel thrift.RequestChannel) *dbMixedStackArgumentsClientImpl {
+    return &dbMixedStackArgumentsClientImpl{
         ch: channel,
     }
 }
 
-func (c *DbMixedStackArgumentsClient) Close() error {
+func (c *dbMixedStackArgumentsClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *DbMixedStackArgumentsClient) GetDataByKey0(ctx context.Context, key string) ([]byte, error) {
+func (c *dbMixedStackArgumentsClientImpl) GetDataByKey0(ctx context.Context, key string) ([]byte, error) {
     fbthriftReq := &reqDbMixedStackArgumentsGetDataByKey0{
         Key: key,
     }
@@ -1091,7 +1103,7 @@ func (c *DbMixedStackArgumentsClient) GetDataByKey0(ctx context.Context, key str
     return fbthriftResp.GetSuccess(), nil
 }
 
-func (c *DbMixedStackArgumentsClient) GetDataByKey1(ctx context.Context, key string) ([]byte, error) {
+func (c *dbMixedStackArgumentsClientImpl) GetDataByKey1(ctx context.Context, key string) ([]byte, error) {
     fbthriftReq := &reqDbMixedStackArgumentsGetDataByKey1{
         Key: key,
     }

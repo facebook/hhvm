@@ -35,23 +35,26 @@ type HsTestServiceClientInterface interface {
     Init(ctx context.Context, int1 int64) (int64, error)
 }
 
-type HsTestServiceClient struct {
+type hsTestServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ HsTestServiceClientInterface = (*HsTestServiceClient)(nil)
+var _ HsTestServiceClientInterface = (*hsTestServiceClientImpl)(nil)
 
-func NewHsTestServiceChannelClient(channel thrift.RequestChannel) *HsTestServiceClient {
-    return &HsTestServiceClient{
+// Deprecated: this type is deprecated, please use HsTestServiceClientInterface instead.
+type HsTestServiceClient = hsTestServiceClientImpl
+
+func NewHsTestServiceChannelClient(channel thrift.RequestChannel) *hsTestServiceClientImpl {
+    return &hsTestServiceClientImpl{
         ch: channel,
     }
 }
 
-func (c *HsTestServiceClient) Close() error {
+func (c *hsTestServiceClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *HsTestServiceClient) Init(ctx context.Context, int1 int64) (int64, error) {
+func (c *hsTestServiceClientImpl) Init(ctx context.Context, int1 int64) (int64, error) {
     fbthriftReq := &reqHsTestServiceInit{
         Int1: int1,
     }

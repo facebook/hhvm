@@ -40,23 +40,26 @@ type CClientInterface interface {
     Thing(ctx context.Context, a int32, b string, c []int32) (string, error)
 }
 
-type CClient struct {
+type cClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ CClientInterface = (*CClient)(nil)
+var _ CClientInterface = (*cClientImpl)(nil)
 
-func NewCChannelClient(channel thrift.RequestChannel) *CClient {
-    return &CClient{
+// Deprecated: this type is deprecated, please use CClientInterface instead.
+type CClient = cClientImpl
+
+func NewCChannelClient(channel thrift.RequestChannel) *cClientImpl {
+    return &cClientImpl{
         ch: channel,
     }
 }
 
-func (c *CClient) Close() error {
+func (c *cClientImpl) Close() error {
     return c.ch.Close()
 }
 
-func (c *CClient) F(ctx context.Context) (error) {
+func (c *cClientImpl) F(ctx context.Context) (error) {
     fbthriftReq := &reqCF{
     }
     fbthriftResp := newRespCF()
@@ -69,7 +72,7 @@ func (c *CClient) F(ctx context.Context) (error) {
     return nil
 }
 
-func (c *CClient) Numbers(ctx context.Context) (<-chan Number /* elem stream */, <-chan error /* stream err */, error) {
+func (c *cClientImpl) Numbers(ctx context.Context) (<-chan Number /* elem stream */, <-chan error /* stream err */, error) {
     // Must be a cancellable context to prevent goroutine leaks
     if ctx.Done() == nil {
 		return nil, nil, errors.New("context does not support cancellation")
@@ -123,7 +126,7 @@ func (c *CClient) Numbers(ctx context.Context) (<-chan Number /* elem stream */,
     return fbthriftElemChan, fbthriftErrChan, nil
 }
 
-func (c *CClient) Thing(ctx context.Context, a int32, b string, c []int32) (string, error) {
+func (c *cClientImpl) Thing(ctx context.Context, a int32, b string, c []int32) (string, error) {
     fbthriftReq := &reqCThing{
         A: a,
         B: b,

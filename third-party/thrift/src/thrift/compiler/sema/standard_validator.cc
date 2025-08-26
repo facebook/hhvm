@@ -806,8 +806,7 @@ void validate_field_default_value(sema_context& ctx, const t_field& field) {
         field,
         validation_to_diagnostic_level(
             sema_parameters.struct_optional_field_custom_default),
-        "Optional field should not have custom default value: "
-        "`{}` (in `{}`).",
+        "Optional field cannot have custom default value: `{}` (in `{}`).",
         field.name(),
         parent_node.name());
 

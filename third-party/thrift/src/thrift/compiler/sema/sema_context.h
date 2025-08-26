@@ -151,7 +151,7 @@ struct sema_params {
   // Action to take on optional fields in structs (and exceptions) that have a
   // custom default value.
   validation_level struct_optional_field_custom_default =
-      validation_level::warn;
+      validation_level::error;
 
   // Action to take on union fields (which are implicitly optional) that have a
   // custom default value.

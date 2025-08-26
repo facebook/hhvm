@@ -157,7 +157,7 @@ Options:
                 struct_optional_field_custom_default=none|warn|error
                   Action to take on optional fields in structs (and exceptions)
                   that have a custom default value.
-                  Default: warn
+                  Default: error
 
                 union_field_custom_default=none|warn|error
                   Action to take on union fields (which are implicitly optional)

@@ -37,7 +37,7 @@ using namespace testing;
 class EvbHandshakeHelperTest : public Test {
  protected:
   void SetUp() override {
-    original_.getEventBase()->runInEventBaseThreadAndWait([=] {
+    original_.getEventBase()->runInEventBaseThreadAndWait([=, this] {
       originalThreadId_ = std::this_thread::get_id();
       auto evb = original_.getEventBase();
       auto sslSock =
@@ -48,7 +48,7 @@ class EvbHandshakeHelperTest : public Test {
     });
 
     alternate_.getEventBase()->runInEventBaseThreadAndWait(
-        [=] { alternateThreadId_ = std::this_thread::get_id(); });
+        [=, this] { alternateThreadId_ = std::this_thread::get_id(); });
 
     mockHelper_ = new MockHandshakeHelper<UseOwnedRawPtrPolicy>();
 
@@ -105,7 +105,7 @@ TEST_F(EvbHandshakeHelperTest, TestSuccessPath) {
       }));
 
   original_.getEventBase()->runInEventBaseThreadAndWait(
-      [=] { evbHelper_->start(std::move(sockPtr_), &mockCb_); });
+      [=, this] { evbHelper_->start(std::move(sockPtr_), &mockCb_); });
 
   if (!barrier.try_wait_for(2s)) {
     FAIL() << "Timeout waiting for connectionReady callback to be called";
@@ -139,7 +139,7 @@ TEST_F(EvbHandshakeHelperTest, TestFailPath) {
       }));
 
   original_.getEventBase()->runInEventBaseThreadAndWait(
-      [=] { evbHelper_->start(std::move(sockPtr_), &mockCb_); });
+      [=, this] { evbHelper_->start(std::move(sockPtr_), &mockCb_); });
 
   if (!barrier.try_wait_for(2s)) {
     FAIL() << "Timeout while waiting for connectionError callback to be called";
@@ -170,7 +170,7 @@ TEST_F(EvbHandshakeHelperTest, TestDropConnection) {
       }));
 
   original_.getEventBase()->runInEventBaseThreadAndWait(
-      [=] { evbHelper_->start(std::move(sockPtr_), &mockCb_); });
+      [=, this] { evbHelper_->start(std::move(sockPtr_), &mockCb_); });
 
   if (!barrier.try_wait_for(2s)) {
     FAIL() << "Timeout while waiting for startInternal to be called";
@@ -179,7 +179,7 @@ TEST_F(EvbHandshakeHelperTest, TestDropConnection) {
   barrier.reset();
 
   original_.getEventBase()->runInEventBaseThreadAndWait(
-      [=] { evbHelper_->dropConnection(SSLErrorEnum::DROPPED); });
+      [=, this] { evbHelper_->dropConnection(SSLErrorEnum::DROPPED); });
 
   if (!barrier.try_wait_for(2s)) {
     FAIL() << "Timeout while waiting for dropConnection to be called";
@@ -222,7 +222,7 @@ TEST_F(EvbHandshakeHelperTest, TestDropConnectionTricky) {
       }));
 
   original_.getEventBase()->runInEventBaseThreadAndWait(
-      [=] { evbHelper_->start(std::move(sockPtr_), &mockCb_); });
+      [=, this] { evbHelper_->start(std::move(sockPtr_), &mockCb_); });
 
   if (!barrier.try_wait_for(2s)) {
     FAIL() << "Timeout while waiting for startInternal to be called";
@@ -231,13 +231,13 @@ TEST_F(EvbHandshakeHelperTest, TestDropConnectionTricky) {
   barrier.reset();
 
   // Race the dropConnection() and handshakeSuccess() calls
-  original_.getEventBase()->runInEventBaseThread([=, &raceBarrier] {
+  original_.getEventBase()->runInEventBaseThread([=, this, &raceBarrier] {
     raceBarrier.wait().get();
     evbHelper_->dropConnection(SSLErrorEnum::DROPPED);
   });
 
   alternate_.getEventBase()->runInEventBaseThread(
-      [=, &raceBarrier, &connectionReadyCalled]() mutable {
+      [=, this, &raceBarrier, &connectionReadyCalled]() mutable {
         raceBarrier.wait().get();
         evbHelper_->connectionReady(std::move(sockPtr_), "test", {}, {});
         connectionReadyCalled.post();

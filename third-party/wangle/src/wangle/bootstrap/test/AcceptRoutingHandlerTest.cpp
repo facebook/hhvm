@@ -96,7 +96,7 @@ class AcceptRoutingHandlerTest : public Test {
     auto clientPipelinePromise =
         std::make_shared<folly::Promise<DefaultPipeline*>>();
 
-    getEventBase()->runInEventBaseThread([=]() {
+    getEventBase()->runInEventBaseThread([=, this]() {
       clientConnect().thenValue([=](DefaultPipeline* clientPipeline) {
         VLOG(4) << "Client connected. Send data.";
         auto data = IOBuf::create(1);
@@ -115,7 +115,7 @@ class AcceptRoutingHandlerTest : public Test {
     auto clientPipelinePromise =
         std::make_shared<folly::Promise<DefaultPipeline*>>();
 
-    getEventBase()->runInEventBaseThread([=]() {
+    getEventBase()->runInEventBaseThread([=, this]() {
       clientConnectAndWrite().thenValue([=](DefaultPipeline* clientPipeline) {
         VLOG(4) << "Client close";
         clientPipeline->close().thenValue(
@@ -129,7 +129,7 @@ class AcceptRoutingHandlerTest : public Test {
   Future<DefaultPipeline*> justClientConnect() {
     auto clientPipelinePromise =
         std::make_shared<folly::Promise<DefaultPipeline*>>();
-    getEventBase()->runInEventBaseThread([=]() {
+    getEventBase()->runInEventBaseThread([=, this]() {
       clientConnect().thenValue([=](DefaultPipeline* clientPipeline) {
         clientPipelinePromise->setValue(clientPipeline);
       });

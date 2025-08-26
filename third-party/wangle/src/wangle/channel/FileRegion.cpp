@@ -168,7 +168,7 @@ void FileRegion::FileWriteRequest::fail(
     const char* fn,
     const AsyncSocketException& ex) {
   socket_->getEventBase()->runInEventBaseThread(
-      [=] { WriteRequest::fail(fn, ex); });
+      [=, this] { WriteRequest::fail(fn, ex); });
 }
 
 FileRegion::FileWriteRequest::FileReadHandler::FileReadHandler(

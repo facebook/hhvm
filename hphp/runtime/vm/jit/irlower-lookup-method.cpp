@@ -212,8 +212,7 @@ void cgLdClsMethodCacheFunc(IRLS& env, const IRInstruction* inst) {
   auto const sf = checkRDSHandleInitialized(v, ch);
   fwdJcc(v, env, CC_NE, sf, inst->taken());
   markRDSAccess(v, ch);
-  emitLdLowPtr(v, rvmtl()[ch + offsetof(StaticMethodCache, m_func)],
-               dst, sizeof(LowPtr<const Func>));
+  emitLdLowPtr<const Func>(v, rvmtl()[ch + offsetof(StaticMethodCache, m_func)], dst);
 }
 
 void cgLdClsMethodCacheCls(IRLS& env, const IRInstruction* inst) {
@@ -232,8 +231,7 @@ void cgLdClsMethodCacheCls(IRLS& env, const IRInstruction* inst) {
 
   // The StaticMethodCache here is guaranteed to already be initialized in RDS
   // by the pre-conditions of this instruction.
-  emitLdLowPtr(v, rvmtl()[ch + offsetof(StaticMethodCache, m_cls)],
-               dst, sizeof(LowPtr<const Class>));
+  emitLdLowPtr<const Class>(v, rvmtl()[ch + offsetof(StaticMethodCache, m_cls)], dst);
 }
 
 void cgLookupClsMethodFCache(IRLS& env, const IRInstruction* inst) {
@@ -279,8 +277,7 @@ void cgLdClsMethodFCacheFunc(IRLS& env, const IRInstruction* inst) {
   auto const sf = checkRDSHandleInitialized(v, ch);
   fwdJcc(v, env, CC_NE, sf, inst->taken());
   markRDSAccess(v, ch);
-  emitLdLowPtr(v, rvmtl()[ch + offsetof(StaticMethodFCache, m_func)],
-               dst, sizeof(LowPtr<const Func>));
+  emitLdLowPtr<const Func>(v, rvmtl()[ch + offsetof(StaticMethodFCache, m_func)], dst);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

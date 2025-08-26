@@ -248,7 +248,7 @@ void implLdCached(IRLS& env, const IRInstruction* inst,
       [&] (Vout& v) {
         markRDSAccess(v, ch);
         auto const ptr = v.makeReg();
-        emitLdLowPtr(v, rvmtl()[ch], ptr, sizeof(LowPtr<T>));
+        emitLdLowPtr<T>(v, rvmtl()[ch], ptr);
         return ptr;
       }
     );
@@ -257,7 +257,7 @@ void implLdCached(IRLS& env, const IRInstruction* inst,
     auto const pptr = rds::handleToPtr<LowPtr<T>, rds::Mode::Persistent>(ch);
     markRDSAccess(v, ch);
     auto const ptr = v.makeReg();
-    emitLdLowPtr(v, *v.cns(pptr), ptr, sizeof(LowPtr<T>));
+    emitLdLowPtr<T>(v, *v.cns(pptr), ptr);
 
     auto const sf = v.makeReg();
     v << testq{ptr, ptr, sf};

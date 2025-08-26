@@ -156,11 +156,10 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
     auto const ptrSize = safe_cast<int32_t>(sizeof(LowPtr<uint8_t>));
     auto const dest = v.makeReg();
-    emitLdLowPtr(
+    emitLdLowPtr<uint8_t>(
       v,
       r_func_prologue_callee()[numArgsInclUnpack * ptrSize + pTabOff],
-      dest,
-      sizeof(LowPtr<uint8_t>)
+      dest
     );
     v << callphpr{dest, func_prologue_regs(withCtx)};
   } else {
@@ -241,12 +240,7 @@ void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
     // Load the FuncEntry address dynamically from the function.
     auto dest = v.makeReg();
     auto const funcEntryOff = safe_cast<int32_t>(Func::funcEntryOff());
-    emitLdLowPtr(
-      v,
-      callee[funcEntryOff],
-      dest,
-      sizeof(LowPtr<uint8_t>)
-    );
+    emitLdLowPtr<uint8_t>(v, callee[funcEntryOff], dest);
     // We have to use an ifdef instead of `if (use_lowptr)` here due to
     // funcIdOffset only being defined in non-lowptr mode.
 #ifdef USE_LOWPTR
@@ -577,12 +571,12 @@ namespace {
             auto const ret = v.makeReg();
             auto const unit = v.makeReg();
             v << load{func[Func::unitOff()], unit};
-            emitLdLowPtr(v, unit[Unit::moduleNameOff()], ret, sizeof(LowStringPtr));
+            emitLdLowPtr<StringData>(v, unit[Unit::moduleNameOff()], ret);
             return ret;
           },
           [&] (Vout& v) {
             auto const ret = v.makeReg();
-            emitLdLowPtr(v, shared[Func::extendedSharedOriginalModuleName()], ret, sizeof(LowStringPtr));
+            emitLdLowPtr<StringData>(v, shared[Func::extendedSharedOriginalModuleName()], ret);
             return ret;
           });
         emitCmpLowPtr(v, sf, callerModuleName, calleeModuleName);

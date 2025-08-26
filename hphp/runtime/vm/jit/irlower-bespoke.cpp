@@ -882,7 +882,7 @@ void cgStructDictSlot(IRLS& env, const IRInstruction* inst) {
 
   // Load the string in the hash table and check if it matches the
   // key.
-  emitLdLowPtr(v, strPtr, hashStr, sizeof(LowStringPtr));
+  emitLdLowPtr<const StringData>(v, strPtr, hashStr);
   v << cmpq{rkey, hashStr, hashSF};
 
   // If the key is definitely static and the strings don't match and the color

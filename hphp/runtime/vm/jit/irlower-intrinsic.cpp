@@ -1047,7 +1047,7 @@ void cgLdUnitPerRequestFilepath(IRLS& env, const IRInstruction* inst) {
       [&] (Vout& v) { v << trap{TRAP_REASON, Fixup::none()}; }
     );
   }
-  emitLdLowPtr(v, rvmtl()[handle], dst, sizeof(LowStringPtr));
+  emitLdLowPtr<const StringData>(v, rvmtl()[handle], dst);
 }
 
 static StringData* dirFromFilepathImpl(const StringData* filepath) {

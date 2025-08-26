@@ -20,6 +20,7 @@
 
 #include "hphp/util/blob-encoder.h"
 #include "hphp/util/low-ptr.h"
+#include "hphp/util/ptr.h"
 
 #include <cstdint>
 #include <folly/Format.h>
@@ -47,6 +48,7 @@ extern const StaticString empty_string_ref; // const StaticString&
 
 struct StringData;
 using LowStringPtr = LowPtr<const StringData>;
+using PackedStringPtr = PackedPtr<const StringData>;
 
 template<>
 struct BlobEncoderHelper<LowStringPtr> {

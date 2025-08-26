@@ -208,6 +208,7 @@ private:
 template<class T>
 struct LowPtr {
   using storage_type = detail::low_storage_t;
+  constexpr static uint32_t bits = sizeof(detail::low_storage_t) * 8;
   enum class Unchecked {};
 
   /*

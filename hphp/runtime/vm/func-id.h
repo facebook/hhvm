@@ -20,7 +20,7 @@
 #include <folly/Format.h>
 
 #include "hphp/util/hash.h"
-#include "hphp/util/low-ptr.h"
+#include "hphp/util/ptr.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,18 +38,16 @@ struct FuncId {
   using Int = uint32_t;
 
 #ifdef USE_LOWPTR
-  using Id = LowPtr<const Func>;
+  using Id = PackedPtr<const Func>;
   Int toInt() const {
-    return static_cast<uint32_t>(
-      reinterpret_cast<uintptr_t>(
-        m_id.get()));
+    return m_id.getRaw();
   }
   const Func* getFunc() const {
     assertx(!isInvalid() && !isDummy());
     return m_id;
   }
   static FuncId fromInt(Int num) {
-    return FuncId{Id(reinterpret_cast<const Func*>(num))};
+    return FuncId{Id::fromRaw(num)};
   }
   Int toStableInt() const;
 #else

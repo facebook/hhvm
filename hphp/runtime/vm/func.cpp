@@ -390,15 +390,13 @@ void Func::setNewFuncId() {
   s_funcid_counter->increment();
 
   if (!Cfg::Repo::Authoritative) {
-    s_stableFuncIDs.insert_or_assign(
-      static_cast<uint32_t>(reinterpret_cast<intptr_t>(this)), id);
+    s_stableFuncIDs.insert_or_assign(getFuncId().toInt(), id);
   }
 }
 
 uint32_t Func::getStableId() const {
   if (Cfg::Repo::Authoritative) return getFuncId().toInt();
-  auto const it = s_stableFuncIDs.find(
-    static_cast<uint32_t>(reinterpret_cast<intptr_t>(this)));
+  auto const it = s_stableFuncIDs.find(getFuncId().toInt());
   assertx(it != s_stableFuncIDs.end());
   return it->second;
 }

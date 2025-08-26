@@ -244,10 +244,15 @@ void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
     // We have to use an ifdef instead of `if (use_lowptr)` here due to
     // funcIdOffset only being defined in non-lowptr mode.
 #ifdef USE_LOWPTR
-  // TFuncs are identified with their func ids in lowptr mode.
-  v << copy{callee, r_func_entry_callee_id()};
+    // TFuncs are identified with their func ids in lowptr mode.
+#ifdef USE_PACKEDPTR
+    // Funcs are identified with their PackedPtr representation in packedptr mode.
+    v << shrqi{3, callee, r_func_entry_callee_id(), v.makeReg()};
 #else
-  v << load{callee[Func::funcIdOffset()], r_func_entry_callee_id()};
+    v << copy{callee, r_func_entry_callee_id()};
+#endif
+#else
+    v << load{callee[Func::funcIdOffset()], r_func_entry_callee_id()};
 #endif
     v << callphpr{dest, func_entry_regs(withCtx)};
   }

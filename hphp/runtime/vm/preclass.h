@@ -397,7 +397,7 @@ private:
   int m_line1;
   int m_line2;
   Attr m_attrs;
-  LowStringPtr m_name;
+  PackedStringPtr m_name;
   LowStringPtr m_parent;
   LowStringPtr m_docComment;
   int32_t m_numDeclMethods;

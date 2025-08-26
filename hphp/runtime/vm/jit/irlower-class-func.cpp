@@ -49,7 +49,7 @@ void cgLdClsName(IRLS& env, const IRInstruction* inst) {
 
   auto const preclass = v.makeReg();
   v << load{src[Class::preClassOff()], preclass};
-  emitLdLowPtr<const StringData>(v, preclass[PreClass::nameOffset()], dst);
+  emitLdPackedPtr<const StringData>(v, preclass[PreClass::nameOffset()], dst);
 }
 
 void cgLdLazyCls(IRLS& env, const IRInstruction* inst) {
@@ -59,7 +59,7 @@ void cgLdLazyCls(IRLS& env, const IRInstruction* inst) {
 
   auto const preclass = v.makeReg();
   v << load{src[Class::preClassOff()], preclass};
-  emitLdLowPtr<const StringData>(v, preclass[PreClass::nameOffset()], dst);
+  emitLdPackedPtr<const StringData>(v, preclass[PreClass::nameOffset()], dst);
 }
 
 void cgLdLazyClsName(IRLS& env, const IRInstruction* inst) {

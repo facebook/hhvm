@@ -593,11 +593,12 @@ TEST_F(ServerProtocolTest, TestClientHelloFullHandshakeFlow) {
   mockKeyScheduler_ = new MockKeyScheduler();
   mockHandshakeContext_ = new MockHandshakeContext();
   EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs(
-          [=]() { return std::unique_ptr<KeyScheduler>(mockKeyScheduler_); }));
+      .WillOnce(InvokeWithoutArgs([=, this]() {
+        return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
+      }));
   EXPECT_CALL(
       *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs([=]() {
+      .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
   EXPECT_CALL(
@@ -723,7 +724,8 @@ TEST_F(ServerProtocolTest, TestClientHelloFullHandshakeFlow) {
       .InSequence(contextSeq);
   EXPECT_CALL(*certManager_, getCert(_, _, _, _))
       .WillOnce(Invoke(
-          [=](const folly::Optional<std::string>& sni,
+          [=, this](
+              const folly::Optional<std::string>& sni,
               const std::vector<SignatureScheme>& /* supportedSigSchemes */,
               const std::vector<SignatureScheme>& peerSigSchemes,
               const ClientHello& chlo) {
@@ -866,11 +868,12 @@ TEST_F(ServerProtocolTest, TestClientHelloCompressedCertFlow) {
   mockKeyScheduler_ = new MockKeyScheduler();
   mockHandshakeContext_ = new MockHandshakeContext();
   EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs(
-          [=]() { return std::unique_ptr<KeyScheduler>(mockKeyScheduler_); }));
+      .WillOnce(InvokeWithoutArgs([=, this]() {
+        return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
+      }));
   EXPECT_CALL(
       *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs([=]() {
+      .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
   EXPECT_CALL(
@@ -996,7 +999,8 @@ TEST_F(ServerProtocolTest, TestClientHelloCompressedCertFlow) {
       .InSequence(contextSeq);
   EXPECT_CALL(*certManager_, getCert(_, _, _, _))
       .WillOnce(Invoke(
-          [=](const folly::Optional<std::string>& sni,
+          [=, this](
+              const folly::Optional<std::string>& sni,
               const std::vector<SignatureScheme>& /* supportedSigSchemes */,
               const std::vector<SignatureScheme>& peerSigSchemes,
               const ClientHello& chlo) {
@@ -1165,11 +1169,12 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
   Sequence factorySchedulerSeq;
   EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
       .InSequence(factorySchedulerSeq)
-      .WillOnce(InvokeWithoutArgs(
-          [=]() { return std::unique_ptr<KeyScheduler>(mockKeyScheduler_); }));
+      .WillOnce(InvokeWithoutArgs([=, this]() {
+        return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
+      }));
   EXPECT_CALL(
       *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs([=]() {
+      .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
   EXPECT_CALL(
@@ -1329,7 +1334,8 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
       .InSequence(contextSeq);
   EXPECT_CALL(*certManager_, getCert(_, _, _, _))
       .WillOnce(Invoke(
-          [=](const folly::Optional<std::string>& sni,
+          [=, this](
+              const folly::Optional<std::string>& sni,
               const std::vector<SignatureScheme>& /* supportedSigSchemes */,
               const std::vector<SignatureScheme>& peerSigSchemes,
               const ClientHello& chlo) {
@@ -1522,11 +1528,12 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
   mockKeyScheduler_ = new MockKeyScheduler();
   mockHandshakeContext_ = new MockHandshakeContext();
   EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs(
-          [=]() { return std::unique_ptr<KeyScheduler>(mockKeyScheduler_); }));
+      .WillOnce(InvokeWithoutArgs([=, this]() {
+        return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
+      }));
   EXPECT_CALL(
       *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs([=]() {
+      .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
   EXPECT_CALL(
@@ -1659,7 +1666,8 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
       .InSequence(contextSeq);
   EXPECT_CALL(*certManager_, getCert(_, _, _, _))
       .WillOnce(Invoke(
-          [=](const folly::Optional<std::string>& sni,
+          [=, this](
+              const folly::Optional<std::string>& sni,
               const std::vector<SignatureScheme>& /* supportedSigSchemes */,
               const std::vector<SignatureScheme>& peerSigSchemes,
               const ClientHello& chlo) {
@@ -1804,11 +1812,12 @@ TEST_F(ServerProtocolTest, TestClientHelloCertRequestFlow) {
   mockKeyScheduler_ = new MockKeyScheduler();
   mockHandshakeContext_ = new MockHandshakeContext();
   EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs(
-          [=]() { return std::unique_ptr<KeyScheduler>(mockKeyScheduler_); }));
+      .WillOnce(InvokeWithoutArgs([=, this]() {
+        return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
+      }));
   EXPECT_CALL(
       *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs([=]() {
+      .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
   EXPECT_CALL(
@@ -1936,7 +1945,8 @@ TEST_F(ServerProtocolTest, TestClientHelloCertRequestFlow) {
       .InSequence(contextSeq);
   EXPECT_CALL(*certManager_, getCert(_, _, _, _))
       .WillOnce(Invoke(
-          [=](const folly::Optional<std::string>& sni,
+          [=, this](
+              const folly::Optional<std::string>& sni,
               const std::vector<SignatureScheme>& /* supportedSigSchemes */,
               const std::vector<SignatureScheme>& peerSigSchemes,
               const ClientHello& chlo) {
@@ -2065,7 +2075,7 @@ TEST_F(ServerProtocolTest, TestClientHelloPskFlow) {
   context_->setSupportedPskModes({PskKeyExchangeMode::psk_ke});
   setUpExpectingClientHello();
   EXPECT_CALL(*mockTicketCipher_, _decrypt(_))
-      .WillOnce(InvokeWithoutArgs([=]() {
+      .WillOnce(InvokeWithoutArgs([=, this]() {
         ResumptionState res;
         res.version = TestProtocolVersion;
         res.cipher = CipherSuite::TLS_AES_128_GCM_SHA256;
@@ -2079,11 +2089,12 @@ TEST_F(ServerProtocolTest, TestClientHelloPskFlow) {
   mockKeyScheduler_ = new MockKeyScheduler();
   mockHandshakeContext_ = new MockHandshakeContext();
   EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs(
-          [=]() { return std::unique_ptr<KeyScheduler>(mockKeyScheduler_); }));
+      .WillOnce(InvokeWithoutArgs([=, this]() {
+        return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
+      }));
   EXPECT_CALL(
       *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs([=]() {
+      .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
   EXPECT_CALL(
@@ -2291,7 +2302,7 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheFlow) {
   context_->setSupportedPskModes({PskKeyExchangeMode::psk_dhe_ke});
   setUpExpectingClientHello();
   EXPECT_CALL(*mockTicketCipher_, _decrypt(_))
-      .WillOnce(InvokeWithoutArgs([=]() {
+      .WillOnce(InvokeWithoutArgs([=, this]() {
         ResumptionState res;
         res.version = TestProtocolVersion;
         res.cipher = CipherSuite::TLS_AES_128_GCM_SHA256;
@@ -2305,11 +2316,12 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheFlow) {
   mockKeyScheduler_ = new MockKeyScheduler();
   mockHandshakeContext_ = new MockHandshakeContext();
   EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs(
-          [=]() { return std::unique_ptr<KeyScheduler>(mockKeyScheduler_); }));
+      .WillOnce(InvokeWithoutArgs([=, this]() {
+        return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
+      }));
   EXPECT_CALL(
       *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs([=]() {
+      .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
   EXPECT_CALL(
@@ -2607,8 +2619,9 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloFullHandshakeFlow) {
   Sequence contextSeq;
   mockKeyScheduler_ = new MockKeyScheduler();
   EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs(
-          [=]() { return std::unique_ptr<KeyScheduler>(mockKeyScheduler_); }));
+      .WillOnce(InvokeWithoutArgs([=, this]() {
+        return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
+      }));
   EXPECT_CALL(
       *mockHandshakeContext_,
       appendToTranscript(BufMatches("clienthelloencoding")))
@@ -2717,7 +2730,8 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloFullHandshakeFlow) {
       .InSequence(contextSeq);
   EXPECT_CALL(*certManager_, getCert(_, _, _, _))
       .WillOnce(Invoke(
-          [=](const folly::Optional<std::string>& sni,
+          [=, this](
+              const folly::Optional<std::string>& sni,
               const std::vector<SignatureScheme>& /* supportedSigSchemes */,
               const std::vector<SignatureScheme>& peerSigSchemes,
               const ClientHello& chlo) {
@@ -2850,7 +2864,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloPskDheFlow) {
   context_->setSupportedPskModes({PskKeyExchangeMode::psk_dhe_ke});
   setUpExpectingClientHelloRetry();
   EXPECT_CALL(*mockTicketCipher_, _decrypt(_))
-      .WillOnce(InvokeWithoutArgs([=]() {
+      .WillOnce(InvokeWithoutArgs([=, this]() {
         ResumptionState res;
         res.version = TestProtocolVersion;
         res.cipher = CipherSuite::TLS_AES_128_GCM_SHA256;
@@ -2863,8 +2877,9 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloPskDheFlow) {
   Sequence contextSeq;
   mockKeyScheduler_ = new MockKeyScheduler();
   EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs(
-          [=]() { return std::unique_ptr<KeyScheduler>(mockKeyScheduler_); }));
+      .WillOnce(InvokeWithoutArgs([=, this]() {
+        return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
+      }));
   EXPECT_CALL(
       *mockKeyScheduler_, deriveEarlySecret(RangeMatches("resumesecret")));
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(BufMatches("client")))
@@ -3081,8 +3096,9 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
   Sequence factorySchedulerSeq;
   EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
       .InSequence(factorySchedulerSeq)
-      .WillOnce(InvokeWithoutArgs(
-          [=]() { return std::unique_ptr<KeyScheduler>(mockKeyScheduler_); }));
+      .WillOnce(InvokeWithoutArgs([=, this]() {
+        return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
+      }));
   EXPECT_CALL(*decrypter, _decryptClientHelloHRR_Stateful(_, _))
       .InSequence(contextSeq)
       .WillOnce(Invoke(
@@ -3240,7 +3256,8 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
       .InSequence(contextSeq);
   EXPECT_CALL(*certManager_, getCert(_, _, _, _))
       .WillOnce(Invoke(
-          [=](const folly::Optional<std::string>& sni,
+          [=, this](
+              const folly::Optional<std::string>& sni,
               const std::vector<SignatureScheme>& /* supportedSigSchemes */,
               const std::vector<SignatureScheme>& peerSigSchemes,
               const ClientHello& chlo) {
@@ -3408,8 +3425,9 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
   Sequence contextSeq;
   mockKeyScheduler_ = new MockKeyScheduler();
   EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs(
-          [=]() { return std::unique_ptr<KeyScheduler>(mockKeyScheduler_); }));
+      .WillOnce(InvokeWithoutArgs([=, this]() {
+        return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
+      }));
   EXPECT_CALL(
       *mockHandshakeContext_,
       appendToTranscript(BufMatches("clienthelloencoding")))
@@ -3525,7 +3543,8 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
       .InSequence(contextSeq);
   EXPECT_CALL(*certManager_, getCert(_, _, _, _))
       .WillOnce(Invoke(
-          [=](const folly::Optional<std::string>& sni,
+          [=, this](
+              const folly::Optional<std::string>& sni,
               const std::vector<SignatureScheme>& /* supportedSigSchemes */,
               const std::vector<SignatureScheme>& peerSigSchemes,
               const ClientHello& chlo) {
@@ -3660,7 +3679,7 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheEarlyFlow) {
   acceptEarlyData();
   setUpExpectingClientHello();
   EXPECT_CALL(*mockTicketCipher_, _decrypt(_))
-      .WillOnce(InvokeWithoutArgs([=]() {
+      .WillOnce(InvokeWithoutArgs([=, this]() {
         ResumptionState res;
         res.version = TestProtocolVersion;
         res.cipher = CipherSuite::TLS_AES_128_GCM_SHA256;
@@ -3678,11 +3697,12 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheEarlyFlow) {
   mockKeyScheduler_ = new MockKeyScheduler();
   mockHandshakeContext_ = new MockHandshakeContext();
   EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs(
-          [=]() { return std::unique_ptr<KeyScheduler>(mockKeyScheduler_); }));
+      .WillOnce(InvokeWithoutArgs([=, this]() {
+        return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
+      }));
   EXPECT_CALL(
       *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs([=]() {
+      .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
   EXPECT_CALL(
@@ -3952,7 +3972,7 @@ TEST_F(ServerProtocolTest, TestClientHelloPskEarlyFlow) {
   acceptEarlyData();
   setUpExpectingClientHello();
   EXPECT_CALL(*mockTicketCipher_, _decrypt(_))
-      .WillOnce(InvokeWithoutArgs([=]() {
+      .WillOnce(InvokeWithoutArgs([=, this]() {
         ResumptionState res;
         res.version = TestProtocolVersion;
         res.cipher = CipherSuite::TLS_AES_128_GCM_SHA256;
@@ -3970,11 +3990,12 @@ TEST_F(ServerProtocolTest, TestClientHelloPskEarlyFlow) {
   mockKeyScheduler_ = new MockKeyScheduler();
   mockHandshakeContext_ = new MockHandshakeContext();
   EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs(
-          [=]() { return std::unique_ptr<KeyScheduler>(mockKeyScheduler_); }));
+      .WillOnce(InvokeWithoutArgs([=, this]() {
+        return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
+      }));
   EXPECT_CALL(
       *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
-      .WillOnce(InvokeWithoutArgs([=]() {
+      .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
   EXPECT_CALL(
@@ -5818,7 +5839,7 @@ TEST_F(ServerProtocolTest, TestFullHandshakeFinished) {
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockTicketCipher_, _encrypt(_))
-      .WillOnce(Invoke([=](ResumptionState& resState) {
+      .WillOnce(Invoke([=, this](ResumptionState& resState) {
         EXPECT_EQ(resState.version, TestProtocolVersion);
         EXPECT_EQ(resState.cipher, CipherSuite::TLS_AES_128_GCM_SHA256);
         EXPECT_TRUE(folly::IOBufEqualTo()(
@@ -6002,7 +6023,7 @@ TEST_F(ServerProtocolTest, TestWriteNewSessionTicket) {
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockTicketCipher_, _encrypt(_))
-      .WillOnce(Invoke([=](ResumptionState& resState) {
+      .WillOnce(Invoke([=, this](ResumptionState& resState) {
         EXPECT_EQ(resState.version, TestProtocolVersion);
         EXPECT_EQ(resState.cipher, CipherSuite::TLS_AES_128_GCM_SHA256);
         EXPECT_TRUE(folly::IOBufEqualTo()(
@@ -6071,7 +6092,7 @@ TEST_F(ServerProtocolTest, TestWriteNewSessionTicketWithAppToken) {
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockTicketCipher_, _encrypt(_))
-      .WillOnce(Invoke([=](ResumptionState& resState) {
+      .WillOnce(Invoke([=, this](ResumptionState& resState) {
         EXPECT_EQ(resState.serverCert, cert_);
         EXPECT_EQ(*resState.alpn, "h2");
         EXPECT_EQ(resState.ticketAgeAdd, 0x44444444);
@@ -6099,7 +6120,7 @@ TEST_F(
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockTicketCipher_, _encrypt(_))
-      .WillOnce(Invoke([=](ResumptionState& resState) {
+      .WillOnce(Invoke([=, this](ResumptionState& resState) {
         EXPECT_EQ(resState.serverCert, cert_);
         EXPECT_EQ(*resState.alpn, "h2");
         EXPECT_EQ(resState.ticketAgeAdd, 0x44444444);
@@ -6123,7 +6144,7 @@ TEST_F(
       .WillOnce(Invoke(
           [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockTicketCipher_, _encrypt(_))
-      .WillOnce(Invoke([=](ResumptionState& resState) {
+      .WillOnce(Invoke([=, this](ResumptionState& resState) {
         EXPECT_EQ(resState.serverCert, cert_);
         EXPECT_EQ(*resState.alpn, "h2");
         EXPECT_EQ(resState.ticketAgeAdd, 0x44444444);

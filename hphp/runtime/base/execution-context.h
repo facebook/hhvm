@@ -656,6 +656,7 @@ public:
   Variant m_setprofileCallback;
   Variant m_memThresholdCallback;
   Variant m_timeThresholdCallback;
+  String m_xenonRequestOutputFile;
   uint64_t m_setprofileFlags;
   bool m_executingSetprofileCallback;
   req::fast_set<String,

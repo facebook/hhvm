@@ -24,11 +24,11 @@
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/server/xbox-server.h"
+#include "hphp/runtime/ext/json/ext_json.h"
 
 #include "hphp/util/configs/xenon.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/timer.h"
-
 #include <chrono>
 
 #include <folly/Random.h>
@@ -80,6 +80,7 @@ const StaticString
   s_file("file"),
   s_interpreter("Interpreter"),
   s_isWait("ioWaitSample"),
+  s_tid("tid"),
   s_jit("Jit"),
   s_line("line"),
   s_metadata("metadata"),
@@ -260,7 +261,7 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
                              .fromWaitHandle(wh)
                              .withMetadata()
                              .ignoreArgs());
-  m_stackSnapshots.append(make_dict_array(
+  Array dict = make_dict_array(
     s_time_ns, now_ns,
     s_lastTriggerTime, triggerTime,
     s_stack, bt,
@@ -275,7 +276,26 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
     (HttpServer::Server ? HttpServer::Server->getPageServer()->getActiveWorker() : 0) : -1,
     s_cli_workers,
     Cfg::Xenon::TrackActiveWorkers ? cli_server_active_workers() : -1
-  ));
+  );
+  m_stackSnapshots.append(dict);
+
+  const String path = g_context->m_xenonRequestOutputFile;
+  if (!path.isNull() && !path.empty()) {
+    // Since callers may use the same file for multiple requests,
+    // we want to include the originating thread ID and provide locking.
+    dict.set(s_tid, Process::GetThreadPid());
+    auto const opts = k_JSON_FB_FORCE_HACK_ARRAYS;
+    String out = Variant::attach(HHVM_FN(json_encode)(dict, opts)).toString();
+
+    // Synchronize file append using a static mutex
+    static std::mutex xenon_file_mutex;
+    std::lock_guard<std::mutex> lock(xenon_file_mutex);
+    auto f = std::fopen(path.c_str(), "a");
+    if (f) {
+      std::fprintf(f, "%s\n", out.c_str());
+      std::fclose(f);
+    }
+  }
 }
 
 void XenonRequestLocalData::requestInit() {
@@ -341,6 +361,11 @@ bool HHVM_FUNCTION(xenon_get_is_profiled_request, void) {
   return Xenon::getInstance().getIsProfiledRequest();
 }
 
+void HHVM_FUNCTION(xenon_set_request_output_file, const String& path) {
+  g_context->m_xenonRequestOutputFile = path;
+}
+
+
 struct xenonExtension final : Extension {
   xenonExtension() : Extension("xenon", "2.0", NO_ONCALL_YET) { }
 
@@ -351,6 +376,8 @@ struct xenonExtension final : Extension {
                 xenon_get_and_clear_missed_sample_count);
     HHVM_FALIAS(HH\\xenon_get_is_profiled_request,
                 xenon_get_is_profiled_request);
+    HHVM_FALIAS(HH\\xenon_set_request_output_file,
+                xenon_set_request_output_file);
   }
 
   void requestInit() override {

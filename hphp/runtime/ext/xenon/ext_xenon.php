@@ -41,4 +41,10 @@ function xenon_get_and_clear_missed_sample_count(): int;
  */
 <<__Native>>
 function xenon_get_is_profiled_request(): bool;
+
+/**
+ * Set a file for xenon to log samples into (calling request only)
+ */
+<<__Native>>
+function xenon_set_request_output_file(string $path): void;
 }

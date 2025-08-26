@@ -112,6 +112,7 @@ ExecutionContext::ExecutionContext()
   , m_inlineInterpState(InlineInterpState::NONE)
   , m_lastErrorPath(staticEmptyString())
   , m_lastErrorLine(0)
+  , m_xenonRequestOutputFile(staticEmptyString())
   , m_executingSetprofileCallback(false)
   , m_logger_hook(*this)
 {

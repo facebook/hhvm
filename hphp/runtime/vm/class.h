@@ -137,7 +137,7 @@ enum class ClassKind {
   Enum = AttrEnum
 };
 
-using ClassPtr = AtomicSharedLowPtr<Class>;
+using ClassPtr = AtomicSharedPackedPtr<Class>;
 
 // Since native instance dtors can be release functions, they have to have
 // compatible signatures.

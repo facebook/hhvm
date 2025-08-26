@@ -229,13 +229,20 @@ const PackageInfo::Deployment* PackageInfo::getActiveDeployment() const {
   return *s_requestActiveDeployment;
 }
 
-bool PackageInfo::isPackageInActiveDeployment(const StringData* package) const {
-  if (!package || package->empty()) return false;
+bool PackageInfo::implPackageExists(const StringData* package) const {
+  assertx(package);
+  if (package->empty()) return false;
   auto const activeDeployment = getActiveDeployment();
   // If there's no active deployment, return whether package exists at all
   if (!activeDeployment) return packages().contains(package->toCppString());
-  return activeDeployment->m_packages.contains(package->toCppString())
-         || activeDeployment->m_soft_packages.contains(package->toCppString());
+  switch (activeDeployment->getDeployKind(package->toCppString())) {
+    case DeployKind::Hard:
+    case DeployKind::Soft:
+    case DeployKind::HardOrSoft:
+      return true;
+    case DeployKind::NotDeployed:
+      return false;
+  }
 }
 
 namespace {

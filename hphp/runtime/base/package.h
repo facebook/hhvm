@@ -34,7 +34,8 @@ struct StringData;
 enum class DeployKind {
   Hard,
   Soft,
-  HardOrSoft,
+  HardOrSoft, // TODO(T225881098) this should be deleted along with PackageV1
+  NotDeployed,
 };
 
 struct PackageInfo {
@@ -76,6 +77,16 @@ struct PackageInfo {
         sd(patterns);
       }
     }
+
+    DeployKind getDeployKind(const std::string& package) const {
+      if (m_packages.contains(package)) {
+        return DeployKind::Hard;
+      } else if (m_soft_packages.contains(package)) {
+        return DeployKind::Soft;
+      } else {
+        return DeployKind::NotDeployed;
+      }
+    }
   };
 
   using PackageMap = hphp_vector_map<std::string, Package>;
@@ -88,7 +99,7 @@ struct PackageInfo {
   PackageInfo() = default;
 
   const Deployment* getActiveDeployment() const;
-  bool isPackageInActiveDeployment(const StringData* package) const;
+  bool implPackageExists(const StringData* package) const;
 
   bool moduleInDeployment(const StringData* module,
                           const Deployment& deployment,

@@ -273,7 +273,7 @@ TypeOrReduced builtin_package_exists(ISS& env, const php::Func* func,
   auto const unit = env.index.lookup_func_unit(*env.ctx.func);
   if (!unit) return NoReduced{};
   constprop(env);
-  return unit->packageInfo.isPackageInActiveDeployment(packageName)
+  return unit->packageInfo.implPackageExists(packageName)
     ? TTrue : TFalse;
 }
 

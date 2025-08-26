@@ -1607,9 +1607,8 @@ Array HHVM_FUNCTION(get_all_deployments) {
 
 bool HHVM_FUNCTION(package_exists, StringArg name) {
   assertx(name.get());
-  if (name.get()->empty()) return false;
   auto const& packageInfo = g_context->getPackageInfo();
-  return packageInfo.isPackageInActiveDeployment(name.get());
+  return packageInfo.implPackageExists(name.get());
 }
 
 Array HHVM_FUNCTION(active_config_experiments) {

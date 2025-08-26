@@ -18,7 +18,6 @@
 
 #include <stdint.h>
 
-#include <atomic>
 #include <chrono>
 #include <memory>
 #include <string>
@@ -40,6 +39,7 @@
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
+#include <thrift/lib/cpp2/server/DecoratorDataStorage.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/ServerConfigs.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
@@ -80,8 +80,8 @@ class ThriftRequestCore : public ResponseChannelRequest {
       server::ServerConfigs& serverConfigs,
       RequestRpcMetadata&& metadata,
       Cpp2ConnContext& connContext,
-      apache::thrift::detail::ServiceInterceptorRequestStorageContext
-          serviceInterceptorsStorage);
+      RequestsRegistry::DecoratorAndInterceptorStorage
+          decoratorAndInterceptorStorage);
 
   ~ThriftRequestCore() override { cancelTimeout(); }
 
@@ -624,34 +624,45 @@ class ThriftRequestCore : public ResponseChannelRequest {
 };
 
 namespace detail {
-// This class is used to manage the memory for ServiceInterceptors. This logic
-// exists in a separate base class because this subobject must be initialized
-// before ThriftRequestCore (which requires pointers to the storage to
-// construct).
-// Other subclasses of ThriftRequestCore (such as RocketThriftRequest) use
-// RequestRegistry for memory management, which abstracts away this logic.
-class ThriftHttp2RequestServiceInterceptorsBase {
+// This class is used to manage the memory for ServiceInterceptors and method
+// decorators. This logic exists in a separate base class because this subobject
+// must be initialized before ThriftRequestCore (which requires pointers to the
+// storage to construct). Other subclasses of ThriftRequestCore (such as
+// RocketThriftRequest) use RequestRegistry for memory management, which
+// abstracts away this logic.
+class ThriftHttp2RequestServiceInterceptorsAndDecoratorsBase {
  protected:
   using ServiceInterceptorRequestStorageContext =
       apache::thrift::detail::ServiceInterceptorRequestStorageContext;
   using ServiceInterceptorOnRequestStorage =
       apache::thrift::detail::ServiceInterceptorOnRequestStorage;
 
-  util::AllocationColocator<ServiceInterceptorRequestStorageContext>::Ptr
-      serviceInterceptorsStorage_;
+  util::AllocationColocator<RequestsRegistry::DecoratorAndInterceptorStorage>::
+      Ptr decoratorAndInterceptorStorage_;
 
-  explicit ThriftHttp2RequestServiceInterceptorsBase(
-      std::size_t numServiceInterceptors) {
-    util::AllocationColocator<ServiceInterceptorRequestStorageContext> alloc;
-    serviceInterceptorsStorage_ = alloc.allocate(
+  explicit ThriftHttp2RequestServiceInterceptorsAndDecoratorsBase(
+      server::ServerConfigs& serverConfigs) {
+    util::AllocationColocator<RequestsRegistry::DecoratorAndInterceptorStorage>
+        alloc;
+    auto& decoratorDataPerRequestBlueprint =
+        serverConfigs.getDecoratorDataPerRequestBlueprint();
+    std::size_t numServiceInterceptors =
+        serverConfigs.getServiceInterceptors().size();
+    decoratorAndInterceptorStorage_ = alloc.allocate(
         [&,
+         decoratorDataLocator =
+             decoratorDataPerRequestBlueprint.planStorage(alloc),
          onRequest = alloc.array<ServiceInterceptorOnRequestStorage>(
              numServiceInterceptors)](auto make) mutable {
-          return ServiceInterceptorRequestStorageContext{
-              numServiceInterceptors,
-              make(
-                  std::move(onRequest),
-                  [] { return ServiceInterceptorOnRequestStorage(); }),
+          return RequestsRegistry::DecoratorAndInterceptorStorage{
+              decoratorDataPerRequestBlueprint.initStorageForRequest(
+                  make, std::move(decoratorDataLocator)),
+              ServiceInterceptorRequestStorageContext{
+                  numServiceInterceptors,
+                  make(
+                      std::move(onRequest),
+                      [] { return ServiceInterceptorOnRequestStorage(); }),
+              },
           };
         });
   }
@@ -660,7 +671,7 @@ class ThriftHttp2RequestServiceInterceptorsBase {
 
 // HTTP2 uses this
 class ThriftRequest final
-    : private detail::ThriftHttp2RequestServiceInterceptorsBase,
+    : private detail::ThriftHttp2RequestServiceInterceptorsAndDecoratorsBase,
       public ThriftRequestCore {
  public:
   ThriftRequest(
@@ -668,13 +679,13 @@ class ThriftRequest final
       std::shared_ptr<ThriftChannelIf> channel,
       RequestRpcMetadata&& metadata,
       std::unique_ptr<Cpp2ConnContext> connContext)
-      : detail::ThriftHttp2RequestServiceInterceptorsBase(
-            serverConfigs.getServiceInterceptors().size()),
+      : detail::ThriftHttp2RequestServiceInterceptorsAndDecoratorsBase(
+            serverConfigs),
         ThriftRequestCore(
             serverConfigs,
             std::move(metadata),
             *connContext,
-            std::move(*serviceInterceptorsStorage_)),
+            std::move(*decoratorAndInterceptorStorage_)),
         channel_(std::move(channel)),
         connContext_(std::move(connContext)) {
     serverConfigs_.incActiveRequests();

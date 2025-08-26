@@ -719,7 +719,8 @@ Cpp2Connection::Cpp2Request::Cpp2Request(
           &connection_->context_,
           req_->getHeader(),
           std::move(methodName),
-          std::move(colocationParams.data)),
+          std::move(colocationParams.data.interceptorStorage),
+          std::move(colocationParams.data.decoratorDataStorage)),
       stateMachine_(
           util::includeInRecentRequestsCount(reqContext_.getMethodName()),
           server.getAdaptiveConcurrencyController(),

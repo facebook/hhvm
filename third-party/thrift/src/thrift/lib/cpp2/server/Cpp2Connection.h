@@ -29,6 +29,7 @@
 #include <thrift/lib/cpp2/async/HeaderServerChannel.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
+#include <thrift/lib/cpp2/server/DecoratorDataStorage.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/Overload.h>
 #include <thrift/lib/cpp2/server/RequestsRegistry.h>
@@ -166,8 +167,8 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
 
     using ServiceInterceptorsStorage =
         apache::thrift::detail::ServiceInterceptorRequestStorageContext;
-    using ColocatedConstructionParams =
-        RequestsRegistry::ColocatedData<ServiceInterceptorsStorage>;
+    using ColocatedConstructionParams = RequestsRegistry::ColocatedData<
+        RequestsRegistry::DecoratorAndInterceptorStorage>;
 
     template <typename... Args>
     static auto colocateWithDebugStub(
@@ -175,15 +176,23 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
         server::ServerConfigs& server,
         Args&...) {
       auto numServiceInterceptors = server.getServiceInterceptors().size();
+      auto& decoratorDataPerRequestBlueprint =
+          server.getDecoratorDataPerRequestBlueprint();
       using RequestStorage =
           apache::thrift::detail::ServiceInterceptorOnRequestStorage;
-      return [numServiceInterceptors,
+      return [&decoratorDataPerRequestBlueprint,
+              decoratorDataLocator =
+                  decoratorDataPerRequestBlueprint.planStorage(alloc),
+              numServiceInterceptors,
               onRequest = alloc.array<RequestStorage>(numServiceInterceptors)](
                  auto make) mutable {
-        return ServiceInterceptorsStorage{
-            numServiceInterceptors,
-            make(std::move(onRequest), [] { return RequestStorage(); }),
-        };
+        return RequestsRegistry::DecoratorAndInterceptorStorage{
+            decoratorDataPerRequestBlueprint.initStorageForRequest(
+                make, std::move(decoratorDataLocator)),
+            ServiceInterceptorsStorage{
+                numServiceInterceptors,
+                make(std::move(onRequest), [] { return RequestStorage(); }),
+            }};
       };
     }
 

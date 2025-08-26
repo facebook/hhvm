@@ -2762,4 +2762,9 @@ const std::vector<std::string> ThriftServer::getInstalledServerModuleNames()
   return moduleNames;
 }
 
+server::DecoratorDataPerRequestBlueprint&
+ThriftServer::getDecoratorDataPerRequestBlueprint() {
+  return decoratorDataPerRequestBlueprint_.value();
+}
+
 } // namespace apache::thrift

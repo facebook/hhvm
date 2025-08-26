@@ -48,8 +48,8 @@ class RocketThriftRequest : public ThriftRequestCore {
  protected:
   using ServiceInterceptorsStorage =
       apache::thrift::detail::ServiceInterceptorRequestStorageContext;
-  using ColocatedConstructionParams =
-      RequestsRegistry::ColocatedData<ServiceInterceptorsStorage>;
+  using ColocatedConstructionParams = RequestsRegistry::ColocatedData<
+      RequestsRegistry::DecoratorAndInterceptorStorage>;
 
  public:
   folly::EventBase* getEventBase() noexcept final { return &evb_; }
@@ -61,15 +61,23 @@ class RocketThriftRequest : public ThriftRequestCore {
       server::ServerConfigs& server,
       Args&...) {
     auto numServiceInterceptors = server.getServiceInterceptors().size();
+    auto& decoratorDataPerRequestBlueprint =
+        server.getDecoratorDataPerRequestBlueprint();
     using RequestStorage =
         apache::thrift::detail::ServiceInterceptorOnRequestStorage;
     return [numServiceInterceptors,
+            &decoratorDataPerRequestBlueprint,
+            decoratorDataLocator =
+                decoratorDataPerRequestBlueprint.planStorage(alloc),
             onRequest = alloc.array<RequestStorage>(numServiceInterceptors)](
                auto make) mutable {
-      return ServiceInterceptorsStorage{
-          numServiceInterceptors,
-          make(std::move(onRequest), [] { return RequestStorage(); }),
-      };
+      return RequestsRegistry::DecoratorAndInterceptorStorage{
+          decoratorDataPerRequestBlueprint.initStorageForRequest(
+              make, std::move(decoratorDataLocator)),
+          ServiceInterceptorsStorage{
+              numServiceInterceptors,
+              make(std::move(onRequest), [] { return RequestStorage(); }),
+          }};
     };
   }
 
@@ -78,7 +86,8 @@ class RocketThriftRequest : public ThriftRequestCore {
       server::ServerConfigs& serverConfigs,
       RequestRpcMetadata&& metadata,
       Cpp2ConnContext& connContext,
-      ServiceInterceptorsStorage serviceInterceptorsStorage,
+      RequestsRegistry::DecoratorAndInterceptorStorage
+          decoratorAndInterceptorsStorage,
       folly::EventBase& evb,
       RocketServerFrameContext&& context);
 

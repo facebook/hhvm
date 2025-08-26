@@ -26,6 +26,8 @@
 #include <folly/io/async/Request.h>
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
+#include <thrift/lib/cpp2/server/DecoratorDataStorage.h>
+#include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
 #include <thrift/lib/cpp2/transport/core/RequestStateMachine.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/util/AllocationColocator.h>
@@ -268,31 +270,39 @@ class RequestsRegistry {
     util::AllocationColocator<>::UnsafeCursor cursor;
   };
 
+  struct DecoratorAndInterceptorStorage {
+    DecoratorDataStorage decoratorDataStorage;
+    detail::ServiceInterceptorRequestStorageContext interceptorStorage;
+  };
+
   /**
    * makeRequest achieves the following:
    *   1. Allocates a "header" DebugStub in front of the TRequest
    *      (ResponseChannelRequest) object. This DebugStub is then used for
    *      keeping track of request state even after it has finished.
-   *   2. Exposes an API contract such that TRequest can customize the layout of
-   *      memory performed in the layout. In other words, we automatically
-   *      inject a "header", but TRequest can inject other objects as well.
+   *   2. Exposes an API contract such that TRequest can customize the
+   * layout of memory performed in the layout. In other words, we
+   * automatically inject a "header", but TRequest can inject other objects
+   * as well.
    *   3. (1) and (2) are all done in one malloc.
    *
    * (2) is achieved by a customization point,
-   * `TRequest::colocateWithDebugStub(alloc, ...)`, which plugs into both the
-   * planning and allocation phases of AllocationColocator (with a similar API).
-   * That is, `TRequest::colocateWithDebugStub` returns a function that will be
-   * used as the callback passed to `AllocationColocator::allocate`.
+   * `TRequest::colocateWithDebugStub(alloc, ...)`, which plugs into both
+   * the planning and allocation phases of AllocationColocator (with a
+   * similar API). That is, `TRequest::colocateWithDebugStub` returns a
+   * function that will be used as the callback passed to
+   * `AllocationColocator::allocate`.
    *
-   * Afterwards, the DebugStub's reserved memory and any data returned from the
-   * callback is passed to the constructor of TRequest. TRequest's constructor
-   * MUST initialize the DebugStub object. The underlying memory is managed by
-   * DebugStub so skipping initialization will result in undefined behavior and
-   * a memory leak.
+   * Afterwards, the DebugStub's reserved memory and any data returned from
+   * the callback is passed to the constructor of TRequest. TRequest's
+   * constructor MUST initialize the DebugStub object. The underlying memory
+   * is managed by DebugStub so skipping initialization will result in
+   * undefined behavior and a memory leak.
    *
    * The memory layout is as follows:
    *   +---------------------------------------------------------------------+
-   *   | DebugStub | TRequest | defined by TRequest::colocateWithDebugStub() |
+   *   | DebugStub | TRequest | defined by TRequest::colocateWithDebugStub()
+   * |
    *   +---------------------------------------------------------------------+
    */
   template <typename TRequest, typename... Args>

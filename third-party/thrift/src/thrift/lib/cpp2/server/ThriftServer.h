@@ -3293,6 +3293,10 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   std::optional<server::DecoratorDataPerRequestBlueprint>
       decoratorDataPerRequestBlueprint_;
 
+ public:
+  server::DecoratorDataPerRequestBlueprint&
+  getDecoratorDataPerRequestBlueprint() override;
+
   friend class detail::ThriftServerInternals;
 };
 

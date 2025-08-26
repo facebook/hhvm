@@ -51,8 +51,8 @@ ThriftRequestCore::ThriftRequestCore(
     server::ServerConfigs& serverConfigs,
     RequestRpcMetadata&& metadata,
     Cpp2ConnContext& connContext,
-    apache::thrift::detail::ServiceInterceptorRequestStorageContext
-        serviceInterceptorsStorage)
+    RequestsRegistry::DecoratorAndInterceptorStorage
+        decoratorAndInterceptorStorage)
     : serverConfigs_(serverConfigs),
       kind_(metadata.kind().value_or(RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)),
       checksumRequested_(metadata.crc32c().has_value()),
@@ -68,7 +68,8 @@ ThriftRequestCore::ThriftRequestCore(
           &connContext,
           &header_,
           metadata.name() ? std::move(*metadata.name()).str() : std::string{},
-          std::move(serviceInterceptorsStorage)),
+          std::move(decoratorAndInterceptorStorage.interceptorStorage),
+          std::move(decoratorAndInterceptorStorage.decoratorDataStorage)),
       queueTimeout_(*this),
       taskTimeout_(*this, serverConfigs_),
       stateMachine_(

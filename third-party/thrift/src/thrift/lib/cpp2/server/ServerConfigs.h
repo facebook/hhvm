@@ -29,6 +29,7 @@
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
 #include <thrift/lib/cpp/server/TServerObserver.h>
 #include <thrift/lib/cpp/transport/THeader.h>
+#include <thrift/lib/cpp2/server/DecoratorDataRuntime.h>
 #include <thrift/lib/cpp2/server/Overload.h>
 #include <thrift/lib/cpp2/server/PreprocessResult.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorBase.h>
@@ -250,6 +251,9 @@ class ServerConfigs {
   }
 
   virtual InterceptorMetricCallback& getInterceptorMetricCallback() const = 0;
+
+  virtual server::DecoratorDataPerRequestBlueprint&
+  getDecoratorDataPerRequestBlueprint() = 0;
 
  private:
   folly::relaxed_atomic<int32_t> activeRequests_{0};

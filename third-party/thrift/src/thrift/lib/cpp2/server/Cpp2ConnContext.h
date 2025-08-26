@@ -36,6 +36,7 @@
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/async/InterceptorFlags.h>
+#include <thrift/lib/cpp2/server/DecoratorDataStorage.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
 #include <thrift/lib/cpp2/util/TypeErasedValue.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -595,6 +596,7 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
       Cpp2ConnContext* ctx,
       apache::thrift::detail::ServiceInterceptorRequestStorageContext
           serviceInterceptorsStorage,
+      DecoratorDataStorage decoratorDataStorage,
       detail::RequestInternalFieldsT internalFields,
       apache::thrift::transport::THeader* header = nullptr,
       std::string methodName = std::string{})
@@ -602,6 +604,7 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
         ctx_(ctx),
         methodName_(std::move(methodName)),
         serviceInterceptorsStorage_(std::move(serviceInterceptorsStorage)),
+        decoratorDataStorage_(std::move(decoratorDataStorage)),
         internalFields_(std::move(internalFields)) {}
 
  public:
@@ -610,10 +613,12 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
       apache::thrift::transport::THeader* header = nullptr,
       std::string methodName = std::string{},
       apache::thrift::detail::ServiceInterceptorRequestStorageContext
-          serviceInterceptorsStorage = {})
+          serviceInterceptorsStorage = {},
+      DecoratorDataStorage decoratorDataStorage = {})
       : Cpp2RequestContext(
             ctx,
             std::move(serviceInterceptorsStorage),
+            std::move(decoratorDataStorage),
             detail::createPerRequestInternalFields(),
             header,
             std::move(methodName)) {}
@@ -844,6 +849,7 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
   folly::IOBuf frameworkMetadata_;
   apache::thrift::detail::ServiceInterceptorRequestStorageContext
       serviceInterceptorsStorage_;
+  DecoratorDataStorage decoratorDataStorage_;
   detail::RequestInternalFieldsT internalFields_;
   size_t wiredRequestBytes_{0};
 

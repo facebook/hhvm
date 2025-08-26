@@ -16,7 +16,6 @@
 
 #include <thrift/lib/cpp2/transport/rocket/server/RocketThriftRequests.h>
 
-#include <functional>
 #include <memory>
 #include <utility>
 
@@ -424,14 +423,15 @@ RocketThriftRequest::RocketThriftRequest(
     server::ServerConfigs& serverConfigs,
     RequestRpcMetadata&& metadata,
     Cpp2ConnContext& connContext,
-    ServiceInterceptorsStorage serviceInterceptorsStorage,
+    RequestsRegistry::DecoratorAndInterceptorStorage
+        decoratorAndInterceptorsStorage,
     folly::EventBase& evb,
     RocketServerFrameContext&& context)
     : ThriftRequestCore(
           serverConfigs,
           std::move(metadata),
           connContext,
-          std::move(serviceInterceptorsStorage)),
+          std::move(decoratorAndInterceptorsStorage)),
       evb_(evb),
       context_(std::move(context)) {
   detail::onRocketThriftRequestReceived(

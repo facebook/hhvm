@@ -175,6 +175,11 @@ class ServerConfigsMock : public ServerConfigs {
     return *noopInterceptorMetricCallback_;
   }
 
+  server::DecoratorDataPerRequestBlueprint&
+  getDecoratorDataPerRequestBlueprint() override {
+    return decoratorDataRuntime_;
+  }
+
  public:
   uint64_t maxResponseSize_{0};
   std::chrono::milliseconds queueTimeout_{std::chrono::milliseconds(500)};
@@ -199,6 +204,7 @@ class ServerConfigsMock : public ServerConfigs {
       cConfig_.getObserver(), *this, thriftServerConfig_};
   std::unique_ptr<NoopInterceptorMetricCallback> noopInterceptorMetricCallback_{
       std::make_unique<NoopInterceptorMetricCallback>()};
+  server::DecoratorDataPerRequestBlueprint decoratorDataRuntime_{0};
 };
 
 } // namespace apache::thrift::server

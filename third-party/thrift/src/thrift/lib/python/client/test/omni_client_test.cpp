@@ -231,24 +231,25 @@ class OmniClientTest : public ::testing::Test {
       const Result& expected,
       const RpcKind rpcKind = RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
       const bool clearEventHandlers = false) {
-    connectToServer<S>([=](OmniClient& client) -> folly::coro::Task<void> {
-      if (clearEventHandlers) {
-        client.clearEventHandlers();
-      }
-      std::string args = S::template serialize<std::string>(req);
-      auto data = apache::thrift::MethodMetadata::Data(
-          function, apache::thrift::FunctionQualifier::Unspecified);
-      auto resp = co_await client.semifuture_send(
-          service,
-          function,
-          args,
-          std::move(data),
-          headers,
-          {},
-          co_await folly::coro::co_current_executor,
-          rpcKind);
-      testContains<S>(std::move(resp.buf.value()), expected);
-    });
+    connectToServer<S>(
+        [=, this](OmniClient& client) -> folly::coro::Task<void> {
+          if (clearEventHandlers) {
+            client.clearEventHandlers();
+          }
+          std::string args = S::template serialize<std::string>(req);
+          auto data = apache::thrift::MethodMetadata::Data(
+              function, apache::thrift::FunctionQualifier::Unspecified);
+          auto resp = co_await client.semifuture_send(
+              service,
+              function,
+              args,
+              std::move(data),
+              headers,
+              {},
+              co_await folly::coro::co_current_executor,
+              rpcKind);
+          testContains<S>(std::move(resp.buf.value()), expected);
+        });
   }
 
   template <class S = CompactSerializer, class Request, class Result>

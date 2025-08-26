@@ -1533,7 +1533,7 @@ TEST_P(HeaderOrRocket, StickyToThreadPool) {
     folly::SemiFuture<folly::Unit> semifuture_priorityHigh() override {
       EXPECT_THAT(
           *folly::getCurrentThreadName(), testing::StartsWith("foo-pri1"));
-      return folly::makeSemiFuture().defer([=](auto&&) {
+      return folly::makeSemiFuture().defer([=, this](auto&&) {
         callCount_++;
         EXPECT_THAT(
             *folly::getCurrentThreadName(), testing::StartsWith("foo-pri1"));

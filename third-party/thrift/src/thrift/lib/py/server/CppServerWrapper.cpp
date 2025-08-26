@@ -262,6 +262,7 @@ class PythonAsyncProcessor : public AsyncProcessor {
     }
 
     auto task = [=,
+                 this,
                  reqCaptured = std::move(req),
                  serializedCompressedRequestCaptured =
                      std::move(serializedCompressedRequest),

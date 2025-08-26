@@ -280,7 +280,7 @@ func TestALPN(t *testing.T) {
 		return net.Dial("tcp", addr.String())
 	})
 
-	createAlpnClient := func(opts ...ClientOption) (*dummyif.DummyClient, error) {
+	createAlpnClient := func(opts ...ClientOption) (dummyif.DummyClientInterface, error) {
 		channel, err := NewClient(opts...)
 		if err != nil {
 			return nil, fmt.Errorf("could not create client: %w", err)

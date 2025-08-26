@@ -490,7 +490,7 @@ void Class::destroy() {
   // Need to recheck now we have the lock
   if (!m_cachedClass.bound()) return;
   // Only do this once.
-  m_cachedClass = rds::Link<LowPtr<Class>, rds::Mode::NonLocal>{};
+  m_cachedClass = rds::Link<PackedPtr<Class>, rds::Mode::NonLocal>{};
 
   /*
    * Regardless of refCount, this Class is now unusable.  Remove it
@@ -639,7 +639,7 @@ void Class::releaseRefs() {
           auto const it = scopedClones.find(this);
           assertx(it != scopedClones.end());
           it->second->m_cachedClass =
-            rds::Link<LowPtr<Class>, rds::Mode::NonLocal>{};
+            rds::Link<PackedPtr<Class>, rds::Mode::NonLocal>{};
           scopedClones.erase(it);
         }
       }

@@ -663,7 +663,7 @@ inline rds::Handle Class::classIdHandle() const {
   return classIdLink().handle();
 }
 
-inline void Class::setClassHandle(rds::Link<LowPtr<Class>,
+inline void Class::setClassHandle(rds::Link<PackedPtr<Class>,
                                   rds::Mode::NonLocal> link) const {
   assertx(!m_cachedClass.bound());
   m_cachedClass = link;

@@ -23,6 +23,7 @@
 #include "hphp/util/portability.h"
 #include "hphp/util/low-ptr.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/ptr.h"
 
 #include <folly/AtomicHashMap.h>
 
@@ -188,15 +189,14 @@ private:
   // Data members.
 
 public:
-  mutable rds::Link<LowPtr<Class>, rds::Mode::NonLocal> m_cachedClass;
+  mutable rds::Link<PackedPtr<Class>, rds::Mode::NonLocal> m_cachedClass;
   union {
     mutable rds::Link<TypeAlias, rds::Mode::NonLocal> m_cachedTypeAlias{};
     mutable rds::Link<ArrayData*, rds::Mode::NonLocal> m_cachedReifiedGenerics;
   };
 
   template<class T>
-  using ListType = AtomicLowPtr<T, std::memory_order_acquire,
-                                   std::memory_order_release>;
+  using ListType = AtomicPackedPtr<T>;
 private:
   ListType<Class> m_clsList{nullptr};
 };
@@ -288,14 +288,14 @@ private:
   // Data members.
 
 public:
-  mutable rds::Link<LowPtr<Func>, rds::Mode::NonLocal> m_cachedFunc;
+  mutable rds::Link<PackedPtr<Func>, rds::Mode::NonLocal> m_cachedFunc;
 
 private:
-  AtomicLowPtr<Func, std::memory_order_acquire, std::memory_order_release> m_func;
+  AtomicPackedPtr<Func> m_func;
 };
 
-using NamedTypePair = std::pair<LowStringPtr,LowPtr<const NamedType>>;
-using NamedFuncPair = std::pair<LowStringPtr,LowPtr<const NamedFunc>>;
+using NamedTypePair = std::pair<LowStringPtr,PackedPtr<const NamedType>>;
+using NamedFuncPair = std::pair<LowStringPtr,PackedPtr<const NamedFunc>>;
 
 /*
  * Size of the combined NamedType and NamedFunc tables.

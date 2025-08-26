@@ -49,6 +49,7 @@
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/functional.h"
+#include "hphp/util/ptr.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 
@@ -820,7 +821,7 @@ void Func::def(Func* func) {
       // Binding an RDS handle is an atomic operation. For persistent handles an
       // initial value can ve specified when binding succeeds which is also
       // atomically assigned. For normal handles the initial value is ignored.
-      LowPtr<Func> init = func;
+      PackedPtr<Func> init = func;
       ne->m_cachedFunc.bind(
         persistent ? rds::Mode::Persistent : rds::Mode::Normal,
         rds::LinkName{"Func", func->name()},

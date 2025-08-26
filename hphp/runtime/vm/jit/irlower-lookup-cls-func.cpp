@@ -181,7 +181,7 @@ const Class* autoloadKnownPersistentType(rds::Handle h,
     StrNR(const_cast<StringData*>(name))
   );
   auto const ptr =
-    rds::handleToRef<LowPtr<Class>, rds::Mode::Persistent>(h).get();
+    rds::handleToRef<PackedPtr<Class>, rds::Mode::Persistent>(h).get();
   // Autoloader should have inited it as a side-effect.
   if (UNLIKELY(!ptr)) {
     ClassCache::loadFail(name, fallback);
@@ -204,7 +204,7 @@ const Class* lookupKnownType(rds::Handle cache_handle,
   if (UNLIKELY(!rds::isHandleInit(cache_handle, rds::NormalTag{}))) {
     ClassCache::loadFail(name, fallback);
   }
-  return rds::handleToRef<LowPtr<Class>, rds::Mode::Normal>(cache_handle).get();
+  return rds::handleToRef<PackedPtr<Class>, rds::Mode::Normal>(cache_handle).get();
 }
 
 const Func* loadUnknownFunc(const StringData* name) {
@@ -248,16 +248,16 @@ void implLdCached(IRLS& env, const IRInstruction* inst,
       [&] (Vout& v) {
         markRDSAccess(v, ch);
         auto const ptr = v.makeReg();
-        emitLdLowPtr<T>(v, rvmtl()[ch], ptr);
+        emitLdPackedPtr<T>(v, rvmtl()[ch], ptr);
         return ptr;
       }
     );
   } else {
     assertx(rds::isPersistentHandle(ch));
-    auto const pptr = rds::handleToPtr<LowPtr<T>, rds::Mode::Persistent>(ch);
+    auto const pptr = rds::handleToPtr<PackedPtr<T>, rds::Mode::Persistent>(ch);
     markRDSAccess(v, ch);
     auto const ptr = v.makeReg();
-    emitLdLowPtr<T>(v, *v.cns(pptr), ptr);
+    emitLdPackedPtr<T>(v, *v.cns(pptr), ptr);
 
     auto const sf = v.makeReg();
     v << testq{ptr, ptr, sf};

@@ -596,6 +596,20 @@ def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
             assert storage_type == "HPHP::detail::AtomicStorage"
             ptr = get(ptr, "_M_i")
         ptr = unsigned_cast(ptr, inner.GetPointerType())
+    elif name == "HPHP::ptrimpl::PtrImpl":
+        inner = val.type.GetTemplateArgumentType(0)
+        storage = template_type(val.type.GetTemplateArgumentType(1))
+        formatting = template_type(val.type.GetTemplateArgumentType(2))
+        ptr = get(val, "m_s")
+        if storage == "HPHP::ptrimpl::Atomic":
+            ptr = get(ptr, "_M_i")
+        if formatting == "HPHP::ptrimpl::UInt32Packed":
+            addr = ptr.unsigned << 3
+            ptr = val.CreateValueFromExpression(
+                "(tmp)", f"({inner.GetPointerType()}) {addr}"
+            )
+        else:
+            ptr = unsigned_cast(ptr, inner.GetPointerType())
     elif name == "HPHP::CompactTaggedPtr":
         inner = val.type.GetTemplateArgumentType(0)
         addr = get(val, "m_data").unsigned & 0xFFFFFFFFFFFF
@@ -957,7 +971,7 @@ def string_data_val(val: lldb.SBValue, keep_case: bool = True) -> str:
 
     if val.type.IsPointerType():
         val = deref(val)
-    assert val.type.name == "HPHP::StringData"
+    assert val.type.name == "HPHP::StringData", f"invalid type {val.type.name}"
 
     addr = val.load_addr
     assert (

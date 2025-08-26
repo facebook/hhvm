@@ -37,7 +37,9 @@ class TestMcrouterProcessingTime(McrouterTestCase):
         os.remove(self.debug_file)
 
     def test_mcrouter_processing_time(self) -> None:
-        self.assertEqual(self.mcrouter.leaseGet("key1"), {"value": "", "token": 0})
+        lease_get_cmd = "lease-get key1\r\n"
+        response = self.mcrouter.issue_command(lease_get_cmd)
+        self.assertEqual(response, "SERVER_ERROR Reply timeout\r\n")
         time.sleep(0.5)
         stat = self.mcrouter.stats()
         self.mcrouter.terminate()

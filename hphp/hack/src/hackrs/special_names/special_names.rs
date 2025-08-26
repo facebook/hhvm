@@ -19,7 +19,7 @@ use pos::TypeConstName;
 use pos::TypeName;
 
 macro_rules! lazy {
-    ($value:expr_2021) => {
+    ($value:expr) => {
         Lazy::new(|| $value.into())
     };
 }

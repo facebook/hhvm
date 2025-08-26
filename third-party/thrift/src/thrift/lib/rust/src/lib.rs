@@ -18,13 +18,13 @@
 #![deny(warnings)]
 
 macro_rules! bail_err {
-    ($e:expr_2021) => {
+    ($e:expr) => {
         return Err(From::from($e))
     };
 }
 
 macro_rules! ensure_err {
-    ($cond:expr_2021, $e:expr_2021 $(,)?) => {
+    ($cond:expr, $e:expr $(,)?) => {
         if !$cond {
             bail_err!($e);
         }

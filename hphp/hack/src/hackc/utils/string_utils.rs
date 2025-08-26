@@ -569,7 +569,7 @@ mod string_utils_tests {
     mod types {
         mod fix_casing {
             macro_rules! test_case {
-                ($name: ident, $input: expr_2021, $expected: expr_2021) => {
+                ($name: ident, $input: expr, $expected: expr) => {
                     #[test]
                     fn $name() {
                         assert_eq!(crate::types::fix_casing($input), $expected);

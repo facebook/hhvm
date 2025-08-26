@@ -387,7 +387,7 @@ pub fn should_break(len: Option<usize>, more: bool, idx: usize) -> bool {
 /// applying the serializer expression twice.
 #[macro_export]
 macro_rules! serialize {
-    ($protocol:ty, $serializer:expr_2021) => {
+    ($protocol:ty, $serializer:expr) => {
         <$protocol as $crate::Protocol>::serializer($serializer, $serializer)
     };
 }

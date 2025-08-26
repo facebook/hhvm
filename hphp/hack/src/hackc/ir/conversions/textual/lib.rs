@@ -24,7 +24,7 @@ pub fn keep_going_mode() -> bool {
 //   textual_todo! { w.comment("TODO: Try-Catch Block")? };
 #[allow(unused)]
 macro_rules! textual_todo {
-    ( message = ($($msg:expr_2021),+), $($rest:tt)+ ) => {
+    ( message = ($($msg:expr),+), $($rest:tt)+ ) => {
         (if $crate::keep_going_mode() {
             $($rest)+
         } else {

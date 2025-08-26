@@ -7,10 +7,10 @@ macro_rules! bail {
     ($msg:literal $(,)?) => {
         return Err(CmpError::error(format!($msg)))
     };
-    ($err:expr_2021 $(,)?) => {
+    ($err:expr $(,)?) => {
         return Err(CmpError::error(format!($err)))
     };
-    ($fmt:expr_2021, $($arg:tt)*) => {
+    ($fmt:expr, $($arg:tt)*) => {
         return Err(CmpError::error(format!($fmt, $($arg)*)))
     };
 }

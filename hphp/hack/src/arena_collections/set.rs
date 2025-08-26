@@ -72,7 +72,7 @@ where
 #[macro_export]
 macro_rules! set {
   ( ) => ({ Set::empty() });
-  ( $arena:expr_2021; $($x:expr_2021),* ) => ({
+  ( $arena:expr; $($x:expr),* ) => ({
       let mut temp_map = Set::empty();
       $(
           temp_map = temp_map.add($arena, $x);

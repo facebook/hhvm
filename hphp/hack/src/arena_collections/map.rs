@@ -168,7 +168,7 @@ impl<'a, K: TrivialDrop, V: TrivialDrop> TrivialDrop for Node<'a, K, V> {}
 #[macro_export]
 macro_rules! map {
   ( ) => ({ Map::empty() });
-  ( $arena:expr_2021; $($x:expr_2021 => $y:expr_2021),* ) => ({
+  ( $arena:expr; $($x:expr => $y:expr),* ) => ({
       let mut temp_map = Map::empty();
       $(
           temp_map = temp_map.add($arena, $x, $y);

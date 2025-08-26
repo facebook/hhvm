@@ -231,7 +231,7 @@ pub fn assert_func_struct_eq(func_a: &Func, func_b: &Func) {
 }
 
 macro_rules! cmp_eq {
-    ($a:expr_2021, $b:expr_2021, $($rest:tt)+) => {
+    ($a:expr, $b:expr, $($rest:tt)+) => {
         if $a == $b {
             Ok(())
         } else {

@@ -34,10 +34,10 @@ macro_rules! format_bytes {
 
 #[macro_export]
 macro_rules! writeln_bytes {
-    ($stream:expr_2021) => {
+    ($stream:expr) => {
         ($stream).write_all(b"\n")
     };
-    ($stream:expr_2021, $($toks:tt)*) => {{
+    ($stream:expr, $($toks:tt)*) => {{
         write_bytes!($stream, $($toks)*).and_then(|()| ($stream).write_all(b"\n"))
     }};
 }

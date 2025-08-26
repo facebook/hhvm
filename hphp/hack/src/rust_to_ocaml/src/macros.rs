@@ -6,7 +6,7 @@
 /// Provide impls of `Serialize` and `Deserialize` which delegate to the impls
 /// of `std::fmt::Display` and `std::str::FromStr` respectively.
 macro_rules! serde_from_display {
-    ($name:ident, $expecting:expr_2021) => {
+    ($name:ident, $expecting:expr) => {
         impl ::serde::Serialize for $name {
             fn serialize<S: ::serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
                 serializer.serialize_str(&self.to_string())

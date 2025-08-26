@@ -81,7 +81,7 @@ use crate::write::triple_quotes;
 use crate::write::wrap_by;
 
 macro_rules! write_if {
-    ($pred:expr_2021, $($rest:tt)*) => {
+    ($pred:expr, $($rest:tt)*) => {
         if ($pred) { write!($($rest)*) } else { Ok(()) }
     };
 }

@@ -14,10 +14,10 @@ pub struct Vec<'a, T>(BVec<'a, T>);
 
 #[macro_export]
 macro_rules! pvec {
-    (in $arena: expr_2021) => {
+    (in $arena: expr) => {
         Vec::new_in($arena);
     };
-    (in $arena: expr_2021; $($x:expr_2021),*) => {{
+    (in $arena: expr; $($x:expr),*) => {{
         let mut v = bumpalo::collections::Vec::new_in($arena);
         $(v.push($x);)*
         Vec::from(v)

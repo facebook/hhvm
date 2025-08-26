@@ -219,6 +219,8 @@ class EchoInteractionIf : public apache::thrift::Tile, public apache::thrift::Se
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_multiParam{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_echoInteraction{apache::thrift::detail::si::InvocationType::AsyncTm};
  protected:
+  std::vector<std::reference_wrapper<ServiceMethodDecoratorBase>> fbthrift_getDecorators() override;
+
   ServiceMethodDecoratorList<::cpp2::DecoratedService> __fbthrift_methodDecorators;
   friend void decorate(ServiceHandler<::cpp2::DecoratedService>& handler, ServiceMethodDecoratorList<::cpp2::DecoratedService> decorators);
 };
@@ -1041,6 +1043,8 @@ class ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService> : virtu
   static ::cpp2::DecoratedService_ExtendsUndecoratedServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_extension{apache::thrift::detail::si::InvocationType::AsyncTm};
  protected:
+  std::vector<std::reference_wrapper<ServiceMethodDecoratorBase>> fbthrift_getDecorators() override;
+
   ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService> __fbthrift_methodDecorators;
   friend void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>& handler, ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService> decorators);
 };
@@ -1193,6 +1197,8 @@ class ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService> : virtual
   static ::cpp2::DecoratedService_ExtendsDecoratedServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_extension{apache::thrift::detail::si::InvocationType::AsyncTm};
  protected:
+  std::vector<std::reference_wrapper<ServiceMethodDecoratorBase>> fbthrift_getDecorators() override;
+
   ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsDecoratedService> __fbthrift_methodDecorators;
   friend void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>& handler, ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsDecoratedService> decorators);
 };
@@ -1470,6 +1476,8 @@ class ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsD
   static ::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_secondExtension{apache::thrift::detail::si::InvocationType::AsyncTm};
  protected:
+  std::vector<std::reference_wrapper<ServiceMethodDecoratorBase>> fbthrift_getDecorators() override;
+
   ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService> __fbthrift_methodDecorators;
   friend void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>& handler, ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService> decorators);
 };

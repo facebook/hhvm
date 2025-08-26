@@ -23,6 +23,9 @@ namespace apache::thrift {
 
 class ServiceMethodDecoratorBase {
  public:
+  struct BeforeStartServingParams {
+    server::DecoratorDataHandleFactory* decoratorDataHandleFactory = nullptr;
+  };
   struct BeforeParams {
     server::DecoratorData decoratorData;
   };
@@ -31,7 +34,7 @@ class ServiceMethodDecoratorBase {
   };
   virtual ~ServiceMethodDecoratorBase() = default;
   virtual std::string_view getName() const = 0;
-  virtual void useDecoratorData(server::DecoratorDataHandleFactory) {}
+  virtual void onBeforeStartServing(BeforeStartServingParams) {}
 };
 
 } // namespace apache::thrift

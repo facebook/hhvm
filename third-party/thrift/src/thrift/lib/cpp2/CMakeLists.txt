@@ -279,6 +279,7 @@ add_library(
   server/Cpp2Connection.cpp
   server/Cpp2Worker.cpp
   server/CPUConcurrencyController.cpp
+  server/DecoratorDataRuntime.cpp
   server/IOUringUtil.cpp
   server/LegacyHeaderRoutingHandler.cpp
   server/LoggingEvent.cpp

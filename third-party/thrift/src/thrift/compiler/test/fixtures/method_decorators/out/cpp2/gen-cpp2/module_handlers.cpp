@@ -19,6 +19,14 @@ apache::thrift::ServiceHandler<::cpp2::DecoratedService>::CreateMethodMetadataRe
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::cpp2::DecoratedServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+std::vector<std::reference_wrapper<apache::thrift::ServiceMethodDecoratorBase>> apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_getDecorators() {
+  std::vector<std::reference_wrapper<apache::thrift::ServiceMethodDecoratorBase>> out;
+  for (auto& decoratorPtr : __fbthrift_methodDecorators) {
+    out.emplace_back(std::ref(*decoratorPtr));
+  }
+  return out;
+}
+
 void apache::thrift::decorate(apache::thrift::ServiceHandler<::cpp2::DecoratedService>& handler, apache::thrift::ServiceMethodDecoratorList<::cpp2::DecoratedService> decorators) {
   handler.__fbthrift_methodDecorators = std::move(decorators);
 }
@@ -2593,6 +2601,14 @@ apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedServic
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::cpp2::DecoratedService_ExtendsUndecoratedServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
+std::vector<std::reference_wrapper<apache::thrift::ServiceMethodDecoratorBase>> apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>::fbthrift_getDecorators() {
+  std::vector<std::reference_wrapper<apache::thrift::ServiceMethodDecoratorBase>> out;
+  for (auto& decoratorPtr : __fbthrift_methodDecorators) {
+    out.emplace_back(std::ref(*decoratorPtr));
+  }
+  return out;
+}
+
 void apache::thrift::decorate(apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>& handler, apache::thrift::ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService> decorators) {
   handler.__fbthrift_methodDecorators = std::move(decorators);
 }
@@ -2827,6 +2843,14 @@ std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<:
 
 apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>::CreateMethodMetadataResult apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>::createMethodMetadata() {
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::cpp2::DecoratedService_ExtendsDecoratedServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
+}
+
+std::vector<std::reference_wrapper<apache::thrift::ServiceMethodDecoratorBase>> apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>::fbthrift_getDecorators() {
+  std::vector<std::reference_wrapper<apache::thrift::ServiceMethodDecoratorBase>> out;
+  for (auto& decoratorPtr : __fbthrift_methodDecorators) {
+    out.emplace_back(std::ref(*decoratorPtr));
+  }
+  return out;
 }
 
 void apache::thrift::decorate(apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>& handler, apache::thrift::ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsDecoratedService> decorators) {
@@ -3296,6 +3320,14 @@ std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<:
 
 apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::CreateMethodMetadataResult apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::createMethodMetadata() {
   return ::apache::thrift::detail::ap::createMethodMetadataMap<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
+}
+
+std::vector<std::reference_wrapper<apache::thrift::ServiceMethodDecoratorBase>> apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::fbthrift_getDecorators() {
+  std::vector<std::reference_wrapper<apache::thrift::ServiceMethodDecoratorBase>> out;
+  for (auto& decoratorPtr : __fbthrift_methodDecorators) {
+    out.emplace_back(std::ref(*decoratorPtr));
+  }
+  return out;
 }
 
 void apache::thrift::decorate(apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>& handler, apache::thrift::ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService> decorators) {

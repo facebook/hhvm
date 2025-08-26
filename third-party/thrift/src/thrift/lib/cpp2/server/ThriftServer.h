@@ -68,6 +68,7 @@
 #include <thrift/lib/cpp2/server/AdaptiveConcurrency.h>
 #include <thrift/lib/cpp2/server/CPUConcurrencyController.h>
 #include <thrift/lib/cpp2/server/ControlServerInterface.h>
+#include <thrift/lib/cpp2/server/DecoratorDataRuntime.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/MonitoringServerInterface.h>
 #include <thrift/lib/cpp2/server/PolledServiceHealth.h>
@@ -1976,7 +1977,10 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   void stopCPUWorkers();
   void stopAcceptingAndJoinOutstandingRequests();
 
-  void callInterceptorsOnStartServing();
+  void callInterceptorsOnStartServing(
+      server::DecoratorDataPerRequestBlueprint::Setup& decoratorDataSetup);
+  void callDecoratorsAndHandlersBeforeStartServing(
+      server::DecoratorDataPerRequestBlueprint::Setup& decoratorDataSetup);
   void callHandlersOnStartServing();
   void callOnStopRequested();
 
@@ -2041,7 +2045,10 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
      * The server is about to start and is executing
      * TServerEventHandler::preStart hooks. If getRejectRequestsUntilStarted()
      * is true, the server only responds to internal methods. See
-     * ServerConfigs::getInternalMethods.
+     * ServerConfigs::getInternalMethods. Once the server enters this state,
+     * we have finished calling onBeforeStartServing / co_onBeforeStartServing
+     * for decorators and handlers and co_onStartServing for interceptors
+     * TODO(ezou) rename interceptors onStartServing to co_onBeforeStartServing
      */
     PRE_STARTING,
     /**
@@ -3278,6 +3285,13 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   InjectedFailure maybeInjectFailure() const {
     return failureInjection_.test();
   }
+
+ private:
+  // This stores the decorator data state. DecoratorDataRuntimeSetup is
+  // represents the startup state. Once the server is ready to start serving,
+  // it transistions to DecoratorDataRuntime
+  std::optional<server::DecoratorDataPerRequestBlueprint>
+      decoratorDataPerRequestBlueprint_;
 
   friend class detail::ThriftServerInternals;
 };

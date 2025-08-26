@@ -20,10 +20,13 @@
 #include <folly/coro/AsyncScope.h>
 #include <folly/coro/Task.h>
 #include <folly/futures/Future.h>
+#include <thrift/lib/cpp2/server/ServiceMethodDecoratorBase.h>
 
 namespace apache::thrift {
 class ThriftServer;
 class ThriftServerStopController;
+
+class ServiceMethodDecoratorBase;
 
 /**
  * Base-class for user-implemented service handlers. This serves as a channel
@@ -41,6 +44,20 @@ class ServiceHandlerBase {
 
  public:
 #if FOLLY_HAS_COROUTINES
+  struct BeforeStartServingParams {
+    server::DecoratorDataHandleFactory* decoratorDataHandleFactory = nullptr;
+  };
+
+  /**
+   * co_onBeforeStartServing is a lifecycle method guaranteed to be called
+   * before the server starts accepting connections. It happens before
+   * co_onStartServing() is called.
+   */
+  virtual folly::coro::Task<void> co_onBeforeStartServing(
+      BeforeStartServingParams) {
+    co_return;
+  }
+
   virtual folly::coro::Task<void> co_onStartServing() { co_return; }
   virtual folly::coro::Task<void> co_onStopRequested() {
     throw MethodNotImplemented();
@@ -66,6 +83,11 @@ class ServiceHandlerBase {
     }
 #endif
     return folly::makeSemiFuture();
+  }
+
+  virtual std::vector<std::reference_wrapper<ServiceMethodDecoratorBase>>
+  fbthrift_getDecorators() {
+    return {};
   }
 
   ThriftServer* getServer() { return server_; }

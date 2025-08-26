@@ -22,6 +22,7 @@
 #include <folly/memory/not_null.h>
 
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
+#include <thrift/lib/cpp2/server/DecoratorDataRuntime.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
 #include <thrift/lib/cpp2/server/metrics/InterceptorMetricCallback.h>
 
@@ -64,6 +65,7 @@ class ServiceInterceptorBase {
         std::vector<folly::not_null<const syntax_graph::ServiceNode*>>;
     ServiceSchema serviceSchema;
 #endif
+    server::DecoratorDataHandleFactory* decoratorDataHandleFactory = nullptr;
   };
 
   virtual folly::coro::Task<void> co_onStartServing(InitParams);

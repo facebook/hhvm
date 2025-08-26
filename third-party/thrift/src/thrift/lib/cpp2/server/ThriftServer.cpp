@@ -719,10 +719,18 @@ void ThriftServer::setup() {
     connEventCallback_ = std::make_shared<ConnectionEventCallback>(*this);
     ServerBootstrap::useConnectionEventCallback(connEventCallback_);
 
+    server::DecoratorDataPerRequestBlueprint::Setup decoratorDataSetup;
+
+    // Call decorator and handler beforeStartServing()
+    callDecoratorsAndHandlersBeforeStartServing(decoratorDataSetup);
+
     // Interceptor onStartServing() needs to be called before we bind to the
     // socket, otherwise it is possible for connections to be accepted
     // (and onConnection() called) before onStartServing is called.
-    callInterceptorsOnStartServing();
+    callInterceptorsOnStartServing(decoratorDataSetup);
+
+    decoratorDataPerRequestBlueprint_ =
+        std::move(decoratorDataSetup).finalize();
 
     if (socket_) {
       ServerBootstrap::bind(std::move(socket_));
@@ -1812,18 +1820,49 @@ void ThriftServer::ensureProcessedServiceDescriptionInitialized() {
   }
 }
 
-void ThriftServer::callInterceptorsOnStartServing() {
+void ThriftServer::callInterceptorsOnStartServing(
+    server::DecoratorDataPerRequestBlueprint::Setup& decoratorDataSetup) {
 #if FOLLY_HAS_COROUTINES
   ServiceInterceptorBase::InitParams initParams;
 #ifdef THRIFT_SCHEMA_AVAILABLE
   initParams.serviceSchema =
       decoratedProcessorFactory_->getServiceSchemaNodes();
 #endif
-
+  auto decoratorDataHandleFactory = decoratorDataSetup.getHandleFactory();
+  initParams.decoratorDataHandleFactory = &decoratorDataHandleFactory;
   std::vector<folly::coro::Task<void>> tasks;
   for (const auto& interceptor : getServiceInterceptors()) {
     tasks.emplace_back(interceptor->co_onStartServing(initParams));
   }
+  folly::coro::blockingWait(folly::coro::collectAllRange(std::move(tasks)));
+#endif // FOLLY_HAS_COROUTINES
+}
+
+void ThriftServer::callDecoratorsAndHandlersBeforeStartServing(
+    server::DecoratorDataPerRequestBlueprint::Setup& decoratorDataSetup) {
+  auto decoratorDataHandleFactory = decoratorDataSetup.getHandleFactory();
+  auto handlerList = collectServiceHandlers();
+#if FOLLY_HAS_COROUTINES
+  std::vector<folly::coro::Task<void>> tasks;
+  tasks.reserve(handlerList.size());
+#endif // FOLLY_HAS_COROUTINES
+  for (auto handler : handlerList) {
+    auto decorators = handler->fbthrift_getDecorators();
+    std::for_each(
+        decorators.begin(),
+        decorators.end(),
+        [&decoratorDataHandleFactory](auto& decorator) {
+          ServiceMethodDecoratorBase::BeforeStartServingParams
+              decoratorInitParams{&decoratorDataHandleFactory};
+          decorator.get().onBeforeStartServing(decoratorInitParams);
+        });
+#if FOLLY_HAS_COROUTINES
+    tasks.emplace_back(handler->co_onBeforeStartServing(
+        ServiceHandlerBase::BeforeStartServingParams{
+            &decoratorDataHandleFactory}));
+#endif // FOLLY_HAS_COROUTINES
+  }
+#if FOLLY_HAS_COROUTINES
   folly::coro::blockingWait(folly::coro::collectAllRange(std::move(tasks)));
 #endif // FOLLY_HAS_COROUTINES
 }

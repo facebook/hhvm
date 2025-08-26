@@ -21,8 +21,6 @@ namespace watchman {
 class QueryContextBase;
 }
 
-namespace {
-
 enum since_what { SINCE_OCLOCK, SINCE_CCLOCK, SINCE_MTIME, SINCE_CTIME };
 
 static struct {
@@ -181,9 +179,6 @@ class SinceExpr : public QueryExpr {
     return std::vector<std::string>{};
   }
 };
-
-} // anonymous namespace
-
 W_TERM_PARSER(since, SinceExpr::parse);
 
 /* vim:ts=2:sw=2:et:

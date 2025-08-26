@@ -126,7 +126,7 @@ class FizzServerAcceptor : AsyncServerSocket::AcceptCallback {
     int fd = fdNetworkSocket.toFd();
     LOG(INFO) << "Connection accepted from " << clientAddr;
 
-    via(threadExe_->weakRef()).thenValue([=](auto&&) {
+    via(threadExe_->weakRef()).thenValue([=, this](auto&&) {
       auto evb = folly::EventBaseManager::get()->getEventBase();
       auto task = new ServerTask(evb, serverContext_);
       task->start(fd);

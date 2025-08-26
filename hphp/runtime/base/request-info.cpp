@@ -119,7 +119,7 @@ void RequestInfo::InvokeOOMKiller(int maxToKill) {
   while (!s_pendingOOMs.compare_exchange_weak(pendingOOMs,
                                               std::max(pendingOOMs, maxToKill),
                                               std::memory_order_acq_rel,
-                                              std::memory_order_acq_rel));
+                                              std::memory_order_acquire));
   ExecutePerRequest(
     [] (RequestInfo* t) {
       t->m_reqInjectionData.setHostOOMFlag();
@@ -225,8 +225,8 @@ static Exception* generate_request_cpu_timeout_exception(
 
 static Exception* generate_memory_exceeded_exception(c_WaitableWaitHandle* wh) {
   auto exceptionMsg = folly::sformat(
-    "request has exceeded memory limit {} of {} used", 
-    tl_heap->getStatsCopy().usage(), 
+    "request has exceeded memory limit {} of {} used",
+    tl_heap->getStatsCopy().usage(),
     RID().getMemoryLimitNumeric());
 
   auto exceptionStack = createBacktrace(BacktraceArgs()

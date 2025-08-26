@@ -28,7 +28,7 @@ void ClockSpec::init() {
 }
 
 ClockSpec::ClockSpec(const json_ref& value) {
-  auto parseClockString = [=](const char* str) {
+  auto parseClockString = [=, this](const char* str) {
     uint64_t start_time;
     int pid;
     ClockRoot root_number;

@@ -164,6 +164,7 @@ SemiFuture<SubscriptionPtr> WatchmanClient::subscribe(
     std::string subscriptionName) {
   return watchImpl(path).thenValue(
       [=,
+       this,
        callback = std::move(callback),
        subscriptionName =
            std::move(subscriptionName)](WatchPathPtr watch_path) mutable {
@@ -194,7 +195,7 @@ SemiFuture<dynamic> WatchmanClient::unsubscribe(SubscriptionPtr sub) {
   sub->active_ = false;
   return conn_
       ->run(dynamic::array("unsubscribe", sub->watchPath_->root_, sub->name_))
-      .ensure([=] {
+      .ensure([=, this] {
         std::lock_guard<std::mutex> guard(mutex_);
         subscriptionMap_.erase(sub->name_);
       })

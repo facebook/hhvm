@@ -68,7 +68,6 @@ let expand_ty ?var_hook ?pos env ty =
               ~env
               Typing_error.(primary @@ Primary.Unresolved_tyvar pos));
           mk (p, Tvar v))
-      (* TODO(T36532263) see if that needs updating *)
       | (_, Taccess _) -> ety
       | (p, Tclass_ptr ty) -> mk (p, Tclass_ptr (exp_ty ty))
     in

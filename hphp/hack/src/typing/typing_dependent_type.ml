@@ -132,7 +132,6 @@ module ExprDepTy = struct
         if SSet.mem name seen then
           (env, ty)
         else
-          (* TODO(T69551141) handle type arguments here? *)
           let (env, tyl) =
             TUtils.get_concrete_supertypes ~abstract_enum:true env ty
           in
@@ -162,7 +161,6 @@ module ExprDepTy = struct
       | (r, Tclass_ptr ty) ->
         let (env, ty) = make ~seen env ty in
         (env, mk (r, Tclass_ptr ty))
-      (* TODO(T36532263) check if this is legal *)
       | ( _,
           ( Tnonnull | Tprim _ | Tshape _ | Ttuple _ | Tdynamic | Tvec_or_dict _
           | Tfun _ | Tany _ | Tvar _ | Tneg _ | Tlabel _ ) ) ->

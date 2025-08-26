@@ -183,7 +183,7 @@ let rec truthiness env ty =
     Always_truthy
   | Ttuple _ -> Possibly_falsy
   | Tfun _ -> Always_truthy
-  | Taccess _ -> (* TODO(T36532263) check if that's ok *) Unknown
+  | Taccess _ -> Unknown
   | Tvec_or_dict _ -> Possibly_falsy
   | Tclass_ptr _ -> Always_truthy
 
@@ -260,7 +260,7 @@ let rec find_sketchy_types env acc ty =
   | Tneg _ ->
     acc
   | Tclass_ptr _ ->
-    (* TODO(T199606542) Extend the sketchy null check to support class pointers *)
+    (* TODO(T199610905) Extend the sketchy null check to support class pointers *)
     acc
 
 let find_sketchy_types env ty = find_sketchy_types env [] ty

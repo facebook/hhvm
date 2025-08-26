@@ -124,9 +124,9 @@ class FakeStreamHandle
     return WebTransport::FCState::UNBLOCKED;
   }
 
-  folly::Expected<folly::SemiFuture<folly::Unit>, WebTransport::ErrorCode>
+  folly::Expected<folly::SemiFuture<uint64_t>, WebTransport::ErrorCode>
   awaitWritable() override {
-    return folly::makeFuture(folly::unit);
+    return folly::makeFuture<uint64_t>(0);
   }
 
   GenericApiRet resetStream(uint32_t err) override {
@@ -267,7 +267,7 @@ class FakeSharedWebTransport : public WebTransport {
     return h->second->writeStreamData(std::move(data), fin, deliveryCallback);
   }
 
-  folly::Expected<folly::SemiFuture<folly::Unit>, ErrorCode> awaitWritable(
+  folly::Expected<folly::SemiFuture<uint64_t>, ErrorCode> awaitWritable(
       uint64_t id) override {
     auto h = writeHandles.find(id);
     if (h == writeHandles.end()) {

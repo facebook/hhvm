@@ -167,10 +167,10 @@ WebTransportImpl::StreamWriteHandle::writeStreamData(
   return *fcState;
 }
 
-folly::Expected<folly::SemiFuture<folly::Unit>, WebTransport::ErrorCode>
+folly::Expected<folly::SemiFuture<uint64_t>, WebTransport::ErrorCode>
 WebTransportImpl::StreamWriteHandle::awaitWritable() {
   CHECK(!writePromise_) << "awaitWritable already called";
-  auto contract = folly::makePromiseContract<folly::Unit>();
+  auto contract = folly::makePromiseContract<uint64_t>();
   writePromise_.emplace(std::move(contract.promise));
   writePromise_->setInterruptHandler(
       [this](const folly::exception_wrapper& ex) {
@@ -209,9 +209,9 @@ void WebTransportImpl::StreamWriteHandle::onStopSending(uint32_t errorCode) {
 }
 
 void WebTransportImpl::StreamWriteHandle::onStreamWriteReady(
-    quic::StreamId, uint64_t) noexcept {
+    quic::StreamId, uint64_t maxToSend) noexcept {
   if (writePromise_) {
-    writePromise_->setValue();
+    writePromise_->setValue(maxToSend);
     writePromise_.reset();
   }
 }

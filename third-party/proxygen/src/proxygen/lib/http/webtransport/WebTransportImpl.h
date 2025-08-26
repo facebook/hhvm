@@ -156,7 +156,7 @@ class WebTransportImpl : public WebTransport {
     }
     return it->second.setPriority(level, order, incremental);
   }
-  folly::Expected<folly::SemiFuture<folly::Unit>, ErrorCode> awaitWritable(
+  folly::Expected<folly::SemiFuture<uint64_t>, ErrorCode> awaitWritable(
       uint64_t streamId) override {
     auto it = wtEgressStreams_.find(streamId);
     if (it == wtEgressStreams_.end()) {
@@ -229,7 +229,7 @@ class WebTransportImpl : public WebTransport {
       return impl_.tp_.setWebTransportStreamPriority(
           getID(), {level, incremental, order});
     }
-    folly::Expected<folly::SemiFuture<folly::Unit>, ErrorCode> awaitWritable()
+    folly::Expected<folly::SemiFuture<uint64_t>, ErrorCode> awaitWritable()
         override;
 
     void onStopSending(uint32_t errorCode);
@@ -242,7 +242,7 @@ class WebTransportImpl : public WebTransport {
 
     WebTransportImpl& impl_;
     HTTPCodec::StreamID id_;
-    folly::Optional<folly::Promise<folly::Unit>> writePromise_;
+    folly::Optional<folly::Promise<uint64_t>> writePromise_;
     folly::CancellationSource cancellationSource_;
   };
 

@@ -223,7 +223,7 @@ class WebTransport {
 
     // The returned Future will complete when the stream is available for more
     // writes.
-    virtual folly::Expected<folly::SemiFuture<folly::Unit>, ErrorCode>
+    virtual folly::Expected<folly::SemiFuture<uint64_t>, ErrorCode>
     awaitWritable() = 0;
 
    protected:
@@ -269,8 +269,8 @@ class WebTransport {
       uint64_t streamId, uint32_t error) = 0;
   virtual folly::Expected<folly::Unit, ErrorCode> setPriority(
       uint64_t streamId, uint8_t level, uint32_t order, bool incremental) = 0;
-  virtual folly::Expected<folly::SemiFuture<folly::Unit>, ErrorCode>
-  awaitWritable(uint64_t streamId) = 0;
+  virtual folly::Expected<folly::SemiFuture<uint64_t>, ErrorCode> awaitWritable(
+      uint64_t streamId) = 0;
 
   virtual folly::Expected<folly::Unit, ErrorCode> stopSending(
       uint64_t streamId, uint32_t error) = 0;

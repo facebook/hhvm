@@ -44,10 +44,10 @@ class MockStreamWriteHandle : public WebTransport::StreamWriteHandle {
               (std::unique_ptr<folly::IOBuf>,
                bool,
                WebTransport::ByteEventCallback*));
-  MOCK_METHOD((folly::Expected<folly::SemiFuture<folly::Unit>,
-                               WebTransport::ErrorCode>),
-              awaitWritable,
-              ());
+  MOCK_METHOD(
+      (folly::Expected<folly::SemiFuture<uint64_t>, WebTransport::ErrorCode>),
+      awaitWritable,
+      ());
 
   MOCK_METHOD(GenericApiRet, resetStream, (uint32_t));
   MOCK_METHOD(GenericApiRet, setPriority, (uint8_t, uint32_t, bool));
@@ -102,10 +102,10 @@ class MockWebTransport : public WebTransport {
   MOCK_METHOD(quic::TransportInfo, getTransportInfo, (), (const, override));
   MOCK_METHOD((const folly::SocketAddress&), getPeerAddress, (), (const));
   MOCK_METHOD(GenericApiRet, closeSession, (folly::Optional<uint32_t>));
-  MOCK_METHOD((folly::Expected<folly::SemiFuture<folly::Unit>,
-                               WebTransport::ErrorCode>),
-              awaitWritable,
-              (uint64_t));
+  MOCK_METHOD(
+      (folly::Expected<folly::SemiFuture<uint64_t>, WebTransport::ErrorCode>),
+      awaitWritable,
+      (uint64_t));
 
   void cleanupStream(uint64_t id) {
     auto handleIt = writeHandles_.find(id);

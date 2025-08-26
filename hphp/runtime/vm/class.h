@@ -213,14 +213,14 @@ struct Class : AtomicCountable {
 
     LowStringPtr name;
    private:
-    mutable AtomicLowPtr<const StringData> m_mangledName = nullptr;
+    mutable AtomicPackedPtr<const StringData> m_mangledName = nullptr;
 
    public:
     /* Most derived class that declared this property. */
-    LowPtr<Class> cls;
+    AtomicPackedPtr<Class> cls;
 
     /* Least derived class that declared this property. */
-    LowPtr<Class> baseCls;
+    AtomicPackedPtr<Class> baseCls;
 
     Attr attrs;
 

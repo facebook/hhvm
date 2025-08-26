@@ -142,7 +142,7 @@ class HTTPDownstreamTest : public testing::Test {
 
   Promise<folly::Unit> sendRequestLater(HTTPMessage req, bool eof = false) {
     Promise<folly::Unit> reqp;
-    reqp.getSemiFuture().via(&eventBase_).thenValue([=](auto&&) {
+    reqp.getSemiFuture().via(&eventBase_).thenValue([=, this](auto&&) {
       sendRequest(req);
       transport_->addReadEvent(requests_, milliseconds(0));
       if (eof) {

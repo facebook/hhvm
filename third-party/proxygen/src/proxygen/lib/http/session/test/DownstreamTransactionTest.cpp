@@ -52,7 +52,8 @@ class DownstreamTransactionTest : public testing::Test {
             }));
     EXPECT_CALL(transport_, sendBody(txn, _, false, false))
         .WillRepeatedly(Invoke(
-            [=](Unused, std::shared_ptr<folly::IOBuf> body, Unused, Unused) {
+            [=,
+             this](Unused, std::shared_ptr<folly::IOBuf> body, Unused, Unused) {
               auto cur = body->computeChainDataLength();
               sent_ += cur;
               return cur;
@@ -61,7 +62,7 @@ class DownstreamTransactionTest : public testing::Test {
       EXPECT_CALL(transport_, sendEOM(txn, _));
     } else {
       EXPECT_CALL(transport_, sendEOM(txn, _))
-          .WillOnce(InvokeWithoutArgs([=]() {
+          .WillOnce(InvokeWithoutArgs([=, this]() {
             CHECK_EQ(sent_, size);
             txn->onIngressBody(makeBuf(size), 0);
             txn->onIngressEOM();
@@ -70,10 +71,10 @@ class DownstreamTransactionTest : public testing::Test {
     }
     EXPECT_CALL(handler_, _onBodyWithOffset(_, _))
         .WillRepeatedly(
-            Invoke([=](uint64_t, std::shared_ptr<folly::IOBuf> body) {
+            Invoke([=, this](uint64_t, std::shared_ptr<folly::IOBuf> body) {
               received_ += body->computeChainDataLength();
             }));
-    EXPECT_CALL(handler_, _onEOM()).WillOnce(InvokeWithoutArgs([=] {
+    EXPECT_CALL(handler_, _onEOM()).WillOnce(InvokeWithoutArgs([=, this] {
       CHECK_EQ(received_, size);
     }));
     EXPECT_CALL(transport_, notifyPendingEgress())

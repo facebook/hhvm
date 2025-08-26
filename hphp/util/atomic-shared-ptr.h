@@ -18,6 +18,7 @@
 
 #include "hphp/util/atomic-countable.h"
 #include "hphp/util/low-ptr.h"
+#include "hphp/util/ptr.h"
 
 #include <type_traits>
 
@@ -29,7 +30,7 @@ namespace HPHP {
 /**
  * Thread-safe ref-counting smart pointer.
  */
-template<typename T, bool isLow>
+template<typename T, typename S>
 struct AtomicSharedPtrImpl {
   explicit AtomicSharedPtrImpl(T* px = nullptr) noexcept : m_px(px) {
     if (m_px) m_px->incAtomicCount();
@@ -46,7 +47,7 @@ struct AtomicSharedPtrImpl {
   }
 
   template<class Y>
-  AtomicSharedPtrImpl(const AtomicSharedPtrImpl<Y, isLow>& src) noexcept
+  AtomicSharedPtrImpl(const AtomicSharedPtrImpl<Y, S>& src) noexcept
     : m_px(nullptr) {
     operator=(src.get());
   }
@@ -78,7 +79,7 @@ struct AtomicSharedPtrImpl {
   }
 
   template<class Y>
-  AtomicSharedPtrImpl& operator=(const AtomicSharedPtrImpl<Y, isLow>& src) noexcept {
+  AtomicSharedPtrImpl& operator=(const AtomicSharedPtrImpl<Y, S>& src) noexcept {
     return operator=(src.get());
   }
 
@@ -143,13 +144,16 @@ protected:
   }
 
 private:
-  typename std::conditional<isLow, LowPtr<T>, T*>::type m_px;
+  S m_px;
 };
 
 template<typename T>
-using AtomicSharedPtr = AtomicSharedPtrImpl<T, false>;
+using AtomicSharedPtr = AtomicSharedPtrImpl<T, T*>;
 
 template<typename T>
-using AtomicSharedLowPtr = AtomicSharedPtrImpl<T, true>;
+using AtomicSharedLowPtr = AtomicSharedPtrImpl<T, LowPtr<T>>;
+
+template<typename T>
+using AtomicSharedPackedPtr = AtomicSharedPtrImpl<T, PackedPtr<T>>;
 
 }

@@ -24,11 +24,21 @@
 
 namespace apache::thrift {
 
+template <typename Tag>
+struct is_inline_adapter : std::false_type {};
+template <typename Tag, typename T>
+struct is_inline_adapter<type::adapted<InlineAdapter<T>, Tag>>
+    : std::true_type {};
+template <typename Tag>
+inline constexpr bool is_inline_adapter_v = is_inline_adapter<Tag>::value;
+
 template <class T>
 ::testing::AssertionResult thriftEqualHelper(
     const char* left, const char* right, const T& a, const T& b) {
+  using Tag = type::infer_tag<T>;
   static_assert(
-      is_thrift_class_v<T> || util::is_thrift_enum_v<T>,
+      is_thrift_class_v<T> || util::is_thrift_enum_v<T> ||
+          is_inline_adapter_v<Tag>,
       "Thrift equal helper only works for thrift structs, unions, exceptions, and enums.");
   ::testing::AssertionResult result(false);
   if (facebook::thrift::debug_thrift_data_difference(

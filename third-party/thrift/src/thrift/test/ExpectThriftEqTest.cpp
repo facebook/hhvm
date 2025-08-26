@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
 #include <thrift/test/gen-cpp2/enum_types.h>
 #include <thrift/test/gen-cpp2/structs_types.h>
 
@@ -21,6 +22,7 @@
 #include <thrift/lib/cpp2/reflection/testing.h>
 
 namespace apache::thrift::test {
+
 TEST(ExpectThriftEqTest, structs) {
   Basic b1;
   EXPECT_THRIFT_EQ(b1, b1);
@@ -36,6 +38,12 @@ TEST(ExpectThriftTagEqTest, fields) {
   s.shared_fields() = std::make_shared<std::vector<HasInt>>();
   using Tag = op::get_type_tag<OptionalFieldsStruct, ident::shared_fields>;
   EXPECT_THRIFT_TAG_EQ(Tag{}, *s.shared_fields(), *s.shared_fields());
+}
+
+TEST(ExpectThriftTagEqTest, InlineAdapter) {
+  protocol::Object a;
+  protocol::Object b;
+  EXPECT_THRIFT_EQ(a, b);
 }
 
 } // namespace apache::thrift::test

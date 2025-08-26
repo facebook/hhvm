@@ -57,6 +57,13 @@ struct BlobEncoderHelper<LowStringPtr> {
   static void serde(BlobDecoder&, LowStringPtr&);
 };
 
+template<>
+struct BlobEncoderHelper<PackedStringPtr> {
+  // Implemented in string-data.cpp
+  static void serde(BlobEncoder&, PackedStringPtr);
+  static void serde(BlobDecoder&, PackedStringPtr&);
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

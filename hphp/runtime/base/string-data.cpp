@@ -995,6 +995,20 @@ void BlobEncoderHelper<LowStringPtr>::serde(BlobDecoder& decoder,
   s = sd;
 }
 
+
+void BlobEncoderHelper<PackedStringPtr>::serde(BlobEncoder& encoder,
+  PackedStringPtr s) {
+  auto const sd = s.get();
+  encoder(sd);
+}
+
+void BlobEncoderHelper<PackedStringPtr>::serde(BlobDecoder& decoder,
+  PackedStringPtr& s) {
+  const StringData* sd;
+  decoder(sd);
+  s = sd;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Debug
 

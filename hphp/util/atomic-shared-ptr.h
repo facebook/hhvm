@@ -16,9 +16,9 @@
 
 #pragma once
 
+#include "hphp/util/atomic-countable.h"
 #include "hphp/util/low-ptr.h"
 
-#include <cassert>
 #include <type_traits>
 
 namespace HPHP {
@@ -153,4 +153,3 @@ template<typename T>
 using AtomicSharedLowPtr = AtomicSharedPtrImpl<T, true>;
 
 }
-

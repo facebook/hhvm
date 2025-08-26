@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "hphp/runtime/base/atomic-countable.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/lazy-string-data.h"
@@ -35,6 +34,7 @@
 #include "hphp/runtime/vm/unit.h"
 
 #include "hphp/util/atomic.h"
+#include "hphp/util/atomic-countable.h"
 #include "hphp/util/check-size.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/low-ptr.h"

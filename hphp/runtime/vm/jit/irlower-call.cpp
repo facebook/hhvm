@@ -154,13 +154,9 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     // doesn't exceed what the target expects, we can skip the stub
     // and call the prologue directly.
     auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
-    auto const ptrSize = safe_cast<int32_t>(sizeof(LowPtr<uint8_t>));
+    auto const ptrSize = safe_cast<int32_t>(sizeof(LowTCA));
     auto const dest = v.makeReg();
-    emitLdLowPtr<uint8_t>(
-      v,
-      r_func_prologue_callee()[numArgsInclUnpack * ptrSize + pTabOff],
-      dest
-    );
+    v << loadzlq{r_func_prologue_callee()[numArgsInclUnpack * ptrSize + pTabOff], dest};
     v << callphpr{dest, func_prologue_regs(withCtx)};
   } else {
     // It was not statically determined that the arguments are passed in a way
@@ -240,7 +236,7 @@ void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
     // Load the FuncEntry address dynamically from the function.
     auto dest = v.makeReg();
     auto const funcEntryOff = safe_cast<int32_t>(Func::funcEntryOff());
-    emitLdLowPtr<uint8_t>(v, callee[funcEntryOff], dest);
+    v << loadzlq{callee[funcEntryOff], dest};
     // We have to use an ifdef instead of `if (use_lowptr)` here due to
     // funcIdOffset only being defined in non-lowptr mode.
 #ifdef USE_LOWPTR

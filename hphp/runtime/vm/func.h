@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/iter.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/generics-info.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/type-constraint.h"
@@ -1737,7 +1738,7 @@ private:
   // For asserts only.
   int m_magic;
 #endif
-  AtomicLowPtr<uint8_t> m_funcEntry{nullptr};
+  jit::AtomicLowTCA m_funcEntry{nullptr};
 #ifndef USE_LOWPTR
   FuncId m_funcId{FuncId::Invalid};
 #endif
@@ -1846,10 +1847,10 @@ private:
   AtomicAttr m_attrs;
   // This must be the last field declared in this structure, and the Func class
   // should not be inherited from.
-  AtomicLowPtr<uint8_t> m_prologueTable[1];
+  jit::AtomicLowTCA m_prologueTable[1];
 };
-static constexpr size_t kFuncSize = debug ? (use_lowptr ? 72 : 112)
-                                          : (use_lowptr ? 64 : 104);
+static constexpr size_t kFuncSize = debug ? (use_lowptr ? 72 : 96)
+                                          : (use_lowptr ? 64 : 88);
 static_assert(CheckSize<Func, kFuncSize>(), "");
 
 ///////////////////////////////////////////////////////////////////////////////

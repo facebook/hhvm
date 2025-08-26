@@ -26,6 +26,7 @@
 #include "hphp/util/compact-tagged-ptrs.h"
 #include "hphp/util/optional.h"
 #include "hphp/util/hash-set.h"
+#include "hphp/util/ptr.h"
 
 namespace HPHP::jit {
 
@@ -39,10 +40,8 @@ using CTCA = const unsigned char*;
 
 using TcaRange = folly::Range<TCA>;
 
-using LowTCA = LowPtr<uint8_t>;
-using AtomicLowTCA = AtomicLowPtr<uint8_t,
-                                  std::memory_order_acquire,
-                                  std::memory_order_release>;
+using LowTCA = SmallPtr<uint8_t>;
+using AtomicLowTCA = AtomicSmallPtr<uint8_t>;
 
 struct ctca_identity_hash {
   size_t operator()(CTCA val) const {

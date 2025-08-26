@@ -122,7 +122,7 @@ void fill_record(const Func* func, const void* addr,
                         + Func::prologueTableOff();
   if (func_end <= addr && addr < func->mallocEnd()) {
     auto const idx = (reinterpret_cast<const char*>(addr) - func_end)
-                     / sizeof(AtomicLowPtr<uint8_t>);
+                     / sizeof(AtomicLowTCA);
     record.setStr("member", "m_prologueTable");
     record.setInt("index", idx);
   }

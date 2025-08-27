@@ -27,8 +27,13 @@
 namespace apache::thrift::compiler {
 namespace detail {
 
-// Parses command-line arguments and returns the input file name if successful;
-// otherwise returns an empty optional.
+/**
+ * Parses the Thrift compiler's command-line arguments and returns the input
+ * file name if successful, or an empty optional on failure.
+ *
+ * See also: `parse_args()`
+ *
+ */
 [[nodiscard]] std::optional<std::string> parse_command_line_args(
     const std::vector<std::string>& args,
     parsing_params& parsing_params,
@@ -66,8 +71,17 @@ struct gen_params {
   bool inject_schema_const = false;
 };
 
-// Returns the input file name if successful, otherwise returns an empty
-// string.
+/**
+ * Parses the Thrift compiler's command-line arguments and returns the input
+ * file name if successful, or an empty string on failure.
+ *
+ * Updates the given parameter objects (parsing, generator, diagnostic and
+ * semantic) accordingly.
+ *
+ * @param arguments Command-line arguments, as typically received by the
+ *        `main()` method - i.e., including the program name (in the first
+ *        position) and the input file name (last).
+ */
 std::string parse_args(
     const std::vector<std::string>& arguments,
     parsing_params& pparams,

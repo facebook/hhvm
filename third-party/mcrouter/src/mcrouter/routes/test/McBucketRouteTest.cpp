@@ -95,7 +95,7 @@ TEST(McBucketRouteTest, checkParams) {
       mockSrHandle, folly::parseJson(kMcBucketRouteConfig));
   mockFiberContext();
   auto name = rh->routeName();
-  std::vector<std::string> params;
+  std::vector<std::string_view> params;
   folly::split('|', name, params, true);
   EXPECT_TRUE(params.size() == 4);
   EXPECT_EQ(params[0], "bucketize");

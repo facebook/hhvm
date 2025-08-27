@@ -176,8 +176,20 @@ std::optional<scope> ifDynamicPatch(
   }
 
   auto uri = type.asStruct().uri();
-  if (!uri.ends_with("Patch") || uri.ends_with("SafePatch")) {
+
+  if (!uri.ends_with("Patch")) {
     return {};
+  }
+
+  if (uri.ends_with("SafePatch")) {
+    if (!object.contains(FieldId{2}) || !object.at(FieldId{2}).is_binary()) {
+      // Invalid safe patch. We just print the raw content.
+      return {};
+    }
+    protocol::DynamicPatch patch;
+    patch.decode<CompactProtocolReader>(object.at(FieldId{2}).as_binary());
+    Uri origUri = Uri{protocol::detail::fromSafePatchUri(std::string(uri))};
+    return debugTree(patch, finder, origUri);
   }
 
   auto patch = protocol::DynamicPatch::fromObject(object);

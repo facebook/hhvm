@@ -1127,6 +1127,11 @@ class DiffVisitorBase {
   std::stack<Mask*> maskInPath_{{&path_}};
 };
 
+namespace detail {
+std::string toSafePatchUri(std::string s);
+std::string fromSafePatchUri(std::string s);
+} // namespace detail
+
 /// @cond
 // Convert a normal struct uri to patch uri
 std::string toPatchUri(std::string s);

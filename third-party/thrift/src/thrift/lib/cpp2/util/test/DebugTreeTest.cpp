@@ -619,4 +619,35 @@ TEST(DebugTreeTest, PatchAsProtocolObject) {
 )");
 }
 
+TEST(DebugTreeTest, SafePatch) {
+  DefPatch patch;
+  patch.patch<ident::field>() += 10;
+
+  EXPECT_EQ(
+      to_string(debugTree(patch)),
+      R"(<StructPatch: Def (DebugTree.thrift)>
+├─ ensure
+│  ╰─ field
+│     ╰─ 0
+╰─ patch
+   ╰─ field
+      ╰─ I32Patch
+         ╰─ add
+            ╰─ 10
+)");
+
+  EXPECT_EQ(
+      to_string(debugTree(patch.toSafePatch())),
+      R"(<StructPatch: Def (DebugTree.thrift)>
+├─ ensure
+│  ╰─ field
+│     ╰─ 0
+╰─ patch
+   ╰─ field
+      ╰─ I32Patch
+         ╰─ add
+            ╰─ 10
+)");
+}
+
 } // namespace apache::thrift::detail

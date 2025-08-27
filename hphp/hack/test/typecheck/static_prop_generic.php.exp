@@ -1,0 +1,14 @@
+ERROR: File "static_prop_generic.php--fileb.php", line 6, characters 1-93:
+Incomplete position information! We couldn't find the exact line of your type error in this definition. Please run `hh rage` and post in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4279])
+  File "static_prop_generic.php--fileb.php", line 4, characters 33-33:
+  A generic parameter cannot be used in the type of a static property
+  File "static_prop_generic.php--fileb.php", line 4, characters 33-33:
+  This is where the type of the static property was declared
+  File "static_prop_generic.php--fileb.php", line 6, characters 16-16:
+  This is the class containing the static property
+ERROR: File "static_prop_generic.php--fileb.php", line 7, characters 33-33:
+A generic parameter cannot be used in the type of a static property (Typing[4279])
+  File "static_prop_generic.php--fileb.php", line 7, characters 33-33:
+  This is where the type of the static property was declared
+  File "static_prop_generic.php--fileb.php", line 6, characters 16-16:
+  This is the class containing the static property

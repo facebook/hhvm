@@ -111,7 +111,7 @@ class TypeSystemBuilder {
   void addType(Uri, const SerializableTypeDefinitionEntry&);
   void addTypes(SerializableTypeSystem);
 
-  std::unique_ptr<TypeSystem> build() &&;
+  std::unique_ptr<SourceIndexedTypeSystem> build() &&;
 
   /**
    * A helper class that provides a more declarative experience when defining a

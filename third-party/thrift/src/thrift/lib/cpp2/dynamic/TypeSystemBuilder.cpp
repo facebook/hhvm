@@ -152,7 +152,7 @@ class TypeSystemImpl final : public SourceIndexedTypeSystem {
 
 } // namespace
 
-std::unique_ptr<TypeSystem> TypeSystemBuilder::build() && {
+std::unique_ptr<SourceIndexedTypeSystem> TypeSystemBuilder::build() && {
   auto typeSystem = std::make_unique<TypeSystemImpl>();
 
   // Fill in definitions with uninitialized stubs

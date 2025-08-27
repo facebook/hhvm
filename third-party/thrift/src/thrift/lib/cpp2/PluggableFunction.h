@@ -187,7 +187,7 @@ class PluggableFunction<Ret(Args...)> {
   _ret THRIFT__PLUGGABLE_FUNC_IMPL_##_name(__VA_ARGS__); \
   static bool THRIFT__PLUGGABLE_FUNC_SETTER_##_name =    \
       (_name = THRIFT__PLUGGABLE_FUNC_IMPL_##_name, 0);  \
-  _ret THRIFT__PLUGGABLE_FUNC_IMPL_##_name(__VA_ARGS__)
+  inline _ret THRIFT__PLUGGABLE_FUNC_IMPL_##_name(__VA_ARGS__)
 
 /**
  * This is a test-friendly version of THRIFT_PLUGGABLE_FUNC_SET that

@@ -47,12 +47,10 @@ class codegen_data {
   // whether to use reflect codec
   bool use_reflect_codec = false;
 
-  // Records field names for every struct in the program.
+  // Records field names for every structured definition in the program.
   // This is needed to resolve some edge case name collisions.
-  std::map<std::string, std::set<std::string>> struct_to_field_names = {};
-  // Req/Resp structs are internal and must be unexported (i.e. lowercase)
-  // This set will help us track these srtucts by name.
-  std::set<std::string> req_resp_struct_names;
+  std::map<const t_structured*, std::set<std::string>> struct_to_field_names =
+      {};
   // Req/resp structs in the program.
   std::vector<const t_struct*> req_resp_structs = {};
   // A vector of types for which we need to generate metadata.

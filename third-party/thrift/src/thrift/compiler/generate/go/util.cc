@@ -137,8 +137,7 @@ void codegen_data::compute_go_package_aliases() {
 
 void codegen_data::compute_struct_to_field_names() {
   for (t_structured* struct_ : current_program_->structs_and_unions()) {
-    struct_to_field_names[struct_->name()] =
-        go::get_struct_go_field_names(struct_);
+    struct_to_field_names[struct_] = go::get_struct_go_field_names(struct_);
   }
 }
 
@@ -157,9 +156,7 @@ void codegen_data::compute_req_resp_structs() {
   }
 
   for (auto struct_ : req_resp_structs) {
-    req_resp_struct_names.insert(struct_->name());
-    struct_to_field_names[struct_->name()] =
-        go::get_struct_go_field_names(struct_);
+    struct_to_field_names[struct_] = go::get_struct_go_field_names(struct_);
   }
 }
 
@@ -648,6 +645,7 @@ void make_func_req_resp_structs(
 
   auto req_struct_name = go::munge_ident("req" + prefix + funcGoName, false);
   auto req_struct = new t_struct(func->program(), req_struct_name);
+  req_struct->set_generated();
   for (auto member : func->params().get_members()) {
     req_struct->append_field(std::unique_ptr<t_field>(member));
   }
@@ -655,6 +653,7 @@ void make_func_req_resp_structs(
 
   auto resp_struct_name = go::munge_ident("resp" + prefix + funcGoName, false);
   auto resp_struct = new t_struct(func->program(), resp_struct_name);
+  resp_struct->set_generated();
   if (!func->return_type()->is_void()) {
     auto resp_field = std::make_unique<t_field>(
         func->return_type(), DEFAULT_RETVAL_FIELD_NAME, 0);
@@ -674,6 +673,7 @@ void make_func_req_resp_structs(
     auto stream_struct_name =
         go::munge_ident("stream" + prefix + funcGoName, false);
     auto stream_struct = new t_struct(func->program(), stream_struct_name);
+    stream_struct->set_generated();
     auto elem_field = std::make_unique<t_field>(
         func->stream()->elem_type(), DEFAULT_RETVAL_FIELD_NAME, 0);
     elem_field->set_qualifier(t_field_qualifier::optional);

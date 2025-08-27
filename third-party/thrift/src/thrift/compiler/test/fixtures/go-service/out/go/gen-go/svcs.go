@@ -49,6 +49,7 @@ type GetEntity interface {
     GetIn1Collision(ctx context.Context, in int64, in1 int64) (int32, error)
     GetErrCollision(ctx context.Context, err int64) (int32, error)
     GetErr1Collision(ctx context.Context, err int64, err1 int64) (int32, error)
+    MyMethodWithConflictingParamAccessors(ctx context.Context, setFoo bool, foo string) (error)
 }
 
 type GetEntityClientInterface interface {
@@ -75,6 +76,7 @@ type GetEntityClientInterface interface {
     GetIn1Collision(ctx context.Context, in int64, in1 int64) (int32, error)
     GetErrCollision(ctx context.Context, err int64) (int32, error)
     GetErr1Collision(ctx context.Context, err int64, err1 int64) (int32, error)
+    MyMethodWithConflictingParamAccessors(ctx context.Context, setFoo bool, foo string) (error)
 }
 
 type getEntityClientImpl struct {
@@ -399,6 +401,21 @@ func (c *getEntityClientImpl) GetErr1Collision(ctx context.Context, err int64, e
     return fbthriftResp.GetSuccess(), nil
 }
 
+func (c *getEntityClientImpl) MyMethodWithConflictingParamAccessors(ctx context.Context, setFoo bool, foo string) (error) {
+    fbthriftReq := &reqGetEntityMyMethodWithConflictingParamAccessors{
+        SetFoo: setFoo,
+        Foo: foo,
+    }
+    fbthriftResp := newRespGetEntityMyMethodWithConflictingParamAccessors()
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "myMethodWithConflictingParamAccessors", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return fbthriftErr
+    } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
+        return fbthriftEx
+    }
+    return nil
+}
+
 
 type GetEntityProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
@@ -434,6 +451,7 @@ func NewGetEntityProcessor(handler GetEntity) *GetEntityProcessor {
     p.AddToProcessorFunctionMap("getIn1Collision", &procFuncGetEntityGetIn1Collision{handler: handler})
     p.AddToProcessorFunctionMap("getErrCollision", &procFuncGetEntityGetErrCollision{handler: handler})
     p.AddToProcessorFunctionMap("getErr1Collision", &procFuncGetEntityGetErr1Collision{handler: handler})
+    p.AddToProcessorFunctionMap("myMethodWithConflictingParamAccessors", &procFuncGetEntityMyMethodWithConflictingParamAccessors{handler: handler})
     p.AddToFunctionServiceMap("getEntity", "GetEntity")
     p.AddToFunctionServiceMap("getBool", "GetEntity")
     p.AddToFunctionServiceMap("getByte", "GetEntity")
@@ -456,6 +474,7 @@ func NewGetEntityProcessor(handler GetEntity) *GetEntityProcessor {
     p.AddToFunctionServiceMap("getIn1Collision", "GetEntity")
     p.AddToFunctionServiceMap("getErrCollision", "GetEntity")
     p.AddToFunctionServiceMap("getErr1Collision", "GetEntity")
+    p.AddToFunctionServiceMap("myMethodWithConflictingParamAccessors", "GetEntity")
 
     return p
 }
@@ -1618,6 +1637,57 @@ func (p *procFuncGetEntityGetErr1Collision) RunContext(ctx context.Context, reqS
     }
 
     result.Success = &retval
+    return result, nil
+}
+
+
+type procFuncGetEntityMyMethodWithConflictingParamAccessors struct {
+    handler GetEntity
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncGetEntityMyMethodWithConflictingParamAccessors)(nil)
+
+func (p *procFuncGetEntityMyMethodWithConflictingParamAccessors) Read(decoder thrift.Decoder) (thrift.Struct, error) {
+    args := newReqGetEntityMyMethodWithConflictingParamAccessors()
+    if err := args.Read(decoder); err != nil {
+        return nil, err
+    }
+    decoder.ReadMessageEnd()
+    return args, nil
+}
+
+func (p *procFuncGetEntityMyMethodWithConflictingParamAccessors) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
+    var err2 error
+    messageType := thrift.REPLY
+    switch result.(type) {
+    case thrift.ApplicationExceptionIf:
+        messageType = thrift.EXCEPTION
+    }
+
+    if err2 = encoder.WriteMessageBegin("myMethodWithConflictingParamAccessors", messageType, seqId); err2 != nil {
+        err = err2
+    }
+    if err2 = result.Write(encoder); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = encoder.Flush(); err == nil && err2 != nil {
+        err = err2
+    }
+    return err
+}
+
+func (p *procFuncGetEntityMyMethodWithConflictingParamAccessors) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+    args := reqStruct.(*reqGetEntityMyMethodWithConflictingParamAccessors)
+    result := newRespGetEntityMyMethodWithConflictingParamAccessors()
+    err := p.handler.MyMethodWithConflictingParamAccessors(ctx, args.SetFoo, args.Foo)
+    if err != nil {
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing MyMethodWithConflictingParamAccessors: " + err.Error(), err)
+        return x, x
+    }
+
     return result, nil
 }
 

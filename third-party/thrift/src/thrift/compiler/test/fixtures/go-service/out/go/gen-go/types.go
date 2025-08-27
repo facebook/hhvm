@@ -6176,6 +6176,255 @@ func (x *respGetEntityGetErr1Collision) setDefaults() *respGetEntityGetErr1Colli
     return x
 }
 
+type reqGetEntityMyMethodWithConflictingParamAccessors struct {
+    SetFoo bool `thrift:"set_foo,1" json:"set_foo" db:"set_foo"`
+    Foo string `thrift:"foo,2" json:"foo" db:"foo"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqGetEntityMyMethodWithConflictingParamAccessors)(nil)
+
+// Deprecated: GetEntityMyMethodWithConflictingParamAccessorsArgsDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityMyMethodWithConflictingParamAccessorsArgsDeprecated = reqGetEntityMyMethodWithConflictingParamAccessors
+
+func newReqGetEntityMyMethodWithConflictingParamAccessors() *reqGetEntityMyMethodWithConflictingParamAccessors {
+    return (&reqGetEntityMyMethodWithConflictingParamAccessors{}).setDefaults()
+}
+
+func (x *reqGetEntityMyMethodWithConflictingParamAccessors) GetSetFoo() bool {
+    return x.SetFoo
+}
+
+func (x *reqGetEntityMyMethodWithConflictingParamAccessors) GetFoo() string {
+    return x.Foo
+}
+
+func (x *reqGetEntityMyMethodWithConflictingParamAccessors) SetSetFooNonCompat(value bool) *reqGetEntityMyMethodWithConflictingParamAccessors {
+    x.SetFoo = value
+    return x
+}
+
+func (x *reqGetEntityMyMethodWithConflictingParamAccessors) SetSetFoo(value bool) *reqGetEntityMyMethodWithConflictingParamAccessors {
+    x.SetFoo = value
+    return x
+}
+
+func (x *reqGetEntityMyMethodWithConflictingParamAccessors) SetFoo_NonCompat(value string) *reqGetEntityMyMethodWithConflictingParamAccessors {
+    x.Foo = value
+    return x
+}
+
+func (x *reqGetEntityMyMethodWithConflictingParamAccessors) SetFoo_(value string) *reqGetEntityMyMethodWithConflictingParamAccessors {
+    x.Foo = value
+    return x
+}
+
+func (x *reqGetEntityMyMethodWithConflictingParamAccessors) writeField1(p thrift.Encoder) error {  // SetFoo
+    if err := p.WriteFieldBegin("set_foo", thrift.BOOL, 1); err != nil {
+        return thrift.PrependError("reqGetEntityMyMethodWithConflictingParamAccessors write field begin error: ", err)
+    }
+
+    item := x.SetFoo
+    if err := p.WriteBool(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqGetEntityMyMethodWithConflictingParamAccessors write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityMyMethodWithConflictingParamAccessors) writeField2(p thrift.Encoder) error {  // Foo
+    if err := p.WriteFieldBegin("foo", thrift.STRING, 2); err != nil {
+        return thrift.PrependError("reqGetEntityMyMethodWithConflictingParamAccessors write field begin error: ", err)
+    }
+
+    item := x.Foo
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqGetEntityMyMethodWithConflictingParamAccessors write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityMyMethodWithConflictingParamAccessors) readField1(p thrift.Decoder) error {  // SetFoo
+    result, err := p.ReadBool()
+    if err != nil {
+        return err
+    }
+
+    x.SetFoo = result
+    return nil
+}
+
+func (x *reqGetEntityMyMethodWithConflictingParamAccessors) readField2(p thrift.Decoder) error {  // Foo
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.Foo = result
+    return nil
+}
+
+
+
+func (x *reqGetEntityMyMethodWithConflictingParamAccessors) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqGetEntityMyMethodWithConflictingParamAccessors"); err != nil {
+        return thrift.PrependError("reqGetEntityMyMethodWithConflictingParamAccessors write struct begin error: ", err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqGetEntityMyMethodWithConflictingParamAccessors write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqGetEntityMyMethodWithConflictingParamAccessors write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityMyMethodWithConflictingParamAccessors) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqGetEntityMyMethodWithConflictingParamAccessors read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqGetEntityMyMethodWithConflictingParamAccessors field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 1 && wireType == thrift.BOOL) || (id == thrift.NO_FIELD_ID && fieldName == "set_foo")):  // set_foo
+            fieldReadErr = x.readField1(p)
+        case ((id == 2 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "foo")):  // foo
+            fieldReadErr = x.readField2(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqGetEntityMyMethodWithConflictingParamAccessors read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqGetEntityMyMethodWithConflictingParamAccessors) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqGetEntityMyMethodWithConflictingParamAccessors) setDefaults() *reqGetEntityMyMethodWithConflictingParamAccessors {
+    return x.
+        SetSetFooNonCompat(false).
+        SetFoo_NonCompat("")
+}
+
+type respGetEntityMyMethodWithConflictingParamAccessors struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respGetEntityMyMethodWithConflictingParamAccessors)(nil)
+var _ thrift.WritableResult = (*respGetEntityMyMethodWithConflictingParamAccessors)(nil)
+
+// Deprecated: GetEntityMyMethodWithConflictingParamAccessorsResultDeprecated is deprecated, since it is supposed to be internal.
+type GetEntityMyMethodWithConflictingParamAccessorsResultDeprecated = respGetEntityMyMethodWithConflictingParamAccessors
+
+func newRespGetEntityMyMethodWithConflictingParamAccessors() *respGetEntityMyMethodWithConflictingParamAccessors {
+    return (&respGetEntityMyMethodWithConflictingParamAccessors{}).setDefaults()
+}
+
+
+
+func (x *respGetEntityMyMethodWithConflictingParamAccessors) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respGetEntityMyMethodWithConflictingParamAccessors) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respGetEntityMyMethodWithConflictingParamAccessors"); err != nil {
+        return thrift.PrependError("respGetEntityMyMethodWithConflictingParamAccessors write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respGetEntityMyMethodWithConflictingParamAccessors write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respGetEntityMyMethodWithConflictingParamAccessors write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respGetEntityMyMethodWithConflictingParamAccessors) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respGetEntityMyMethodWithConflictingParamAccessors read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respGetEntityMyMethodWithConflictingParamAccessors field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respGetEntityMyMethodWithConflictingParamAccessors read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respGetEntityMyMethodWithConflictingParamAccessors) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respGetEntityMyMethodWithConflictingParamAccessors) setDefaults() *respGetEntityMyMethodWithConflictingParamAccessors {
+    return x
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

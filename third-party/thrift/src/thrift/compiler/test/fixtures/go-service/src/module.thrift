@@ -59,4 +59,9 @@ service GetEntity {
 
   i32 getErrCollision(1: i64 err);
   i32 getErr1Collision(1: i64 err, 2: i64 err1);
+
+  void myMethodWithConflictingParamAccessors(
+    1: bool set_foo = false,
+    2: string foo = '',
+  );
 }

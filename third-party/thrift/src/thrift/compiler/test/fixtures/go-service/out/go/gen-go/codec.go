@@ -133,6 +133,13 @@ var (
                 ElementTypeSpec: premadeCodecTypeSpec_string,
             },
     }
+    premadeCodecTypeSpec_void = &thrift.TypeSpec{
+        FullName: "void",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
+            },
+    }
 )
 
 // Premade struct specs
@@ -1232,6 +1239,54 @@ var (
                 "success": 0,
             },
         }
+    premadeStructSpec_reqGetEntityMyMethodWithConflictingParamAccessors =
+        &thrift.StructSpec{
+            Name:                 "reqGetEntityMyMethodWithConflictingParamAccessors",
+            ScopedName:           "module.reqGetEntityMyMethodWithConflictingParamAccessors",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.BOOL,
+                    Name:                 "set_foo",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_bool,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   2,
+                    WireType:             thrift.STRING,
+                    Name:                 "foo",
+                    ReflectIndex:         1,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+                2: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "set_foo": 0,
+                "foo": 1,
+            },
+        }
+    premadeStructSpec_respGetEntityMyMethodWithConflictingParamAccessors =
+        &thrift.StructSpec{
+            Name:                 "respGetEntityMyMethodWithConflictingParamAccessors",
+            ScopedName:           "module.respGetEntityMyMethodWithConflictingParamAccessors",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
@@ -1247,6 +1302,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_double.FullName] = premadeCodecTypeSpec_double
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_binary.FullName] = premadeCodecTypeSpec_binary
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
     return fbthriftTypeSpecsMap
 }()
 

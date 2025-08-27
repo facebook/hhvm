@@ -110,6 +110,11 @@ var (
                     ValueType: premadeThriftType_string,
                 },
         }
+    premadeThriftType_void =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+        }
 )
 
 // Premade struct metadatas
@@ -180,6 +185,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
     fbthriftThriftTypesMap["double"] = premadeThriftType_double
     fbthriftThriftTypesMap["binary"] = premadeThriftType_binary
+    fbthriftThriftTypesMap["void"] = premadeThriftType_void
     return fbthriftThriftTypesMap
 }()
 
@@ -438,6 +444,25 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                             Name:       "err1",
                             IsOptional: false,
                             Type:       premadeThriftType_i64,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "myMethodWithConflictingParamAccessors",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_void,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "set_foo",
+                            IsOptional: false,
+                            Type:       premadeThriftType_bool,
+                        },
+                        &metadata.ThriftField{
+                            Id:         2,
+                            Name:       "foo",
+                            IsOptional: false,
+                            Type:       premadeThriftType_string,
                         },
                     },
                 },

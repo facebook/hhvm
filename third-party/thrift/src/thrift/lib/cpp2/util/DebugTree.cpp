@@ -186,29 +186,25 @@ std::optional<scope> ifDynamicPatch(
 }
 } // namespace
 
-TypeFinder& TypeFinder::add(const syntax_graph::ProgramNode& p) {
-  for (auto d : p.definitions()) {
-    d->visit([&](auto& def) {
-      if constexpr (__FBTHRIFT_IS_VALID(def, def.uri(), TypeRef::of(def))) {
-        uriToType_.emplace(def.uri(), TypeRef::of(def));
-      }
+OptionalTypeRef TypeFinder::findType(const Uri& uri) {
+  OptionalTypeRef ret;
+  if (auto typeSystemDefinitionRef =
+          SchemaRegistry::get().getTypeSystemDefinitionRefByUri(uri.uri)) {
+    typeSystemDefinitionRef->visit([&](auto& typeSystemDef) {
+      SchemaRegistry::get()
+          .getSyntaxGraphNode(typeSystemDef)
+          .visit([&](auto& syntaxGraphDef) {
+            if constexpr (__FBTHRIFT_IS_VALID(
+                              syntaxGraphDef, TypeRef::of(syntaxGraphDef))) {
+              ret = TypeRef::of(syntaxGraphDef);
+            }
+          });
     });
   }
-  for (auto i : p.includes()) {
-    add(*i);
-  }
-  return *this;
+  return ret;
 }
 
-OptionalTypeRef TypeFinder::findType(const Uri& uri) const {
-  if (auto p = folly::get_ptr(uriToType_, uri.uri)) {
-    return *p;
-  }
-
-  return {};
-}
-
-OptionalTypeRef TypeFinder::findTypeInAny(const type::Type& type) const {
+OptionalTypeRef TypeFinder::findTypeInAny(const type::Type& type) {
   const type::TypeUri* uri = nullptr;
   const auto& name = *type.toThrift().name();
   switch (name.getType()) {
@@ -363,8 +359,8 @@ scope DebugTree<type::AnyStruct>::operator()(
       any.protocol()->name());
 
   // We used heuristic to check whether a struct is Any. However, it might not
-  // be a real Any, in which case `parseValueFromAny` will probably throw and we
-  // still want to print the data we have.
+  // be a real Any, in which case `parseValueFromAny` will probably throw and
+  // we still want to print the data we have.
   try {
     // NOLINTNEXTLINE(facebook-hte-DetailCall)
     auto value = protocol::detail::parseValueFromAny(any);

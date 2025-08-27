@@ -47,16 +47,8 @@ struct Uri {
 // get the field name from field id.
 class TypeFinder {
  public:
-  template <class T>
-  TypeFinder& add() {
-    return add(SchemaRegistry::get().getDefinitionNode<T>().program());
-  }
-  TypeFinder& add(const syntax_graph::ProgramNode& node);
-  OptionalTypeRef findType(const Uri& uri) const;
-  OptionalTypeRef findTypeInAny(const type::Type& type) const;
-
- private:
-  std::unordered_map<std::string, TypeRef> uriToType_;
+  static OptionalTypeRef findType(const Uri& uri);
+  static OptionalTypeRef findTypeInAny(const type::Type& type);
 };
 
 // We can specialize this class to support pretty-printing custom type
@@ -102,13 +94,8 @@ scope debugTree(const T& t, const TypeFinder& finder) {
 }
 
 template <class T, class... Args>
-scope debugTree(
-    const T& t, const syntax_graph::SyntaxGraph& graph, Args&&... args) {
-  TypeFinder finder;
-  for (const auto& p : graph.programs()) {
-    finder.add(*p);
-  }
-  return debugTree(t, finder, std::forward<Args>(args)...);
+scope debugTree(const T& t, const syntax_graph::SyntaxGraph&, Args&&... args) {
+  return debugTree(t, TypeFinder{}, std::forward<Args>(args)...);
 }
 
 template <class T>
@@ -283,9 +270,7 @@ struct DebugTree<T, std::enable_if_t<op::is_patch_v<T>>> {
     }
     return debugTree(patch, finder, ref);
   }
-  scope operator()(const T& t) {
-    return debugTree(t, TypeFinder{}.add<typename T::value_type>());
-  }
+  scope operator()(const T& t) { return debugTree(t, TypeFinder{}); }
 };
 template <class T>
 struct DebugTree<T, std::enable_if_t<is_thrift_class_v<T>>> {
@@ -296,7 +281,7 @@ struct DebugTree<T, std::enable_if_t<is_thrift_class_v<T>>> {
     }
     return debugTree(value, finder, ref);
   }
-  scope operator()(const T& t) { return debugTree(t, TypeFinder{}.add<T>()); }
+  scope operator()(const T& t) { return debugTree(t, TypeFinder{}); }
 };
 
 } // namespace apache::thrift::detail

@@ -109,7 +109,7 @@ else
     RUSTFMT_PATH="${RUSTFMT_PATH:-"$(realpath "$FBCODE_ROOT/../tools/third-party/rustfmt/rustfmt")"}"
 fi
 
-REGEN_COMMAND="$(realpath --relative-to="${FBCODE_ROOT}" "${BASH_SOURCE[0]}")"
+REGEN_COMMAND="buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen"
 cd "$FBCODE_ROOT"
 
 BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"

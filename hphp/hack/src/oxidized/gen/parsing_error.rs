@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1678040748804598fcbd6f77f10174a4>>
+// @generated SignedSource<<a613a9bd2971444e71977ebcbb5e6adf>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidized_regen.sh
+//   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
 
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;

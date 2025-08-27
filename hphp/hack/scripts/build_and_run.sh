@@ -16,8 +16,9 @@ FB_DUNE_BUILD_DIR="${HACK_ROOT}/facebook/redirect/dune_build"
 HACK_SUBDIR="$1"
 TARGET="$2"
 
-ARGS=($@)
-ARGS=(${ARGS[@]:2})
+ARGS=("$@")
+ARGS=("${ARGS[@]:2}")
+
 
 function dune_build() {
   # OCaml

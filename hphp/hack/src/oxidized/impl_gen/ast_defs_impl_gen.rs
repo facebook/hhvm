@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<808b76f1cdd7a4a4f73b31ba06758db5>>
+// @generated SignedSource<<a36da80b6f9ffd29bea8a63c766590fc>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidized_regen.sh
+//   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
 
 #![allow(clippy::all)]
 use crate::ast_defs::*;

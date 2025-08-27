@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cebc16fbf6024d4da47a6274ca984c7f>>
+// @generated SignedSource<<ef8d063408a03df82bdf7d184c22b4ad>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidized_regen.sh
+//   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
 
 pub use aast_defs::*;
 use arena_trait::TrivialDrop;

@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dd7b3436423f595b8de6bd04c38fcde5>>
+// @generated SignedSource<<63fb2a8b37b5ca5f1954bf4aab496ca0>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidized_regen.sh
+//   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
 
 use no_pos_hash::NoPosHash;
 use ocamlrep::FromOcamlRep;

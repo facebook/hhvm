@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fb61672ba09f8fd97e6b1ab85de4c45b>>
+// @generated SignedSource<<9f71ac8f6616bafee402c8b82064b9d5>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidized_regen.sh
+//   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
 
 #![allow(unused_variables, non_snake_case)]
 use std::ops::ControlFlow;

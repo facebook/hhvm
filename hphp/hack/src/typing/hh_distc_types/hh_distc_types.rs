@@ -6,7 +6,7 @@
 // @generated <<SignedSource::*O*zOeWoEQle#+L!plEphiEmie@IsG>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidized_regen.sh
+//   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep::FromOcamlRep;

@@ -118,6 +118,11 @@ class MockServerConfigs : public apache::thrift::server::ServerConfigs {
       getInterceptorMetricCallback,
       (),
       (const, override));
+  MOCK_METHOD(
+      server::DecoratorDataPerRequestBlueprint&,
+      getDecoratorDataPerRequestBlueprint,
+      (),
+      (override));
 };
 
 } // namespace apache::thrift::server::test

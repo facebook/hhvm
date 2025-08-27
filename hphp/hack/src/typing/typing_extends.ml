@@ -11,6 +11,11 @@
 (* Checks that a class implements an interface *)
 (*****************************************************************************)
 
+[@@@alert "-dependencies"]
+(* if Child depends on Parent, then we don't need to also
+   * track that Child::foo depends on Parent
+*)
+
 open Hh_prelude
 open Option.Monad_infix
 open Typing_defs

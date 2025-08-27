@@ -17,11 +17,6 @@ module DICheck = Decl_init_check
 module SN = Naming_special_names
 module Native = Typing_native
 
-(* Suppress the alert because we don't yet have a tast
- * when we're building the nast, so can't register dependencies yet
- *)
-[@@@alert "-dependencies"]
-
 module SSetWTop = struct
   type t =
     | Top
@@ -256,22 +251,23 @@ let is_whitelisted = function
 let is_lateinit cv =
   Naming_attributes.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes
 
-let class_prop_pos class_name prop_name ctx : Pos_or_decl.t =
-  match Decl_provider.get_class ctx class_name with
+let class_prop_pos class_name prop_name tenv : Pos_or_decl.t =
+  match Typing_env.get_class tenv class_name with
   | Decl_entry.DoesNotExist
   | Decl_entry.NotYetAvailable ->
     Pos_or_decl.none
   | Decl_entry.Found decl ->
-    (match Folded_class.get_prop decl prop_name with
+    (match Typing_env.get_prop tenv decl prop_name with
     | None -> Pos_or_decl.none
     | Some elt ->
       let member_origin = elt.Typing_defs.ce_origin in
-      let get_class_by_name ctx x =
+      let get_class_by_name tenv x =
+        let ctx = Typing_env.get_ctx tenv in
         let open Option.Monad_infix in
         Naming_provider.get_type_path ctx x >>= fun fn ->
         Ast_provider.find_class_in_file ctx fn x ~full:false
       in
-      (match get_class_by_name ctx member_origin with
+      (match get_class_by_name tenv member_origin with
       | None -> Pos_or_decl.none
       | Some cls ->
         (match
@@ -777,10 +773,7 @@ let class_ tenv c =
                          SMap.bindings class_uninit_props
                          |> List.map ~f:(fun (name, _) ->
                                 let pos =
-                                  class_prop_pos
-                                    (snd c.c_name)
-                                    name
-                                    (Typing_env.get_ctx tenv)
+                                  class_prop_pos (snd c.c_name) name tenv
                                 in
                                 (pos, name));
                      })

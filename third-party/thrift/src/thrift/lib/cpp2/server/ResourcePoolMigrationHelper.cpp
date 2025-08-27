@@ -15,6 +15,7 @@
  */
 
 #include <folly/logging/xlog.h>
+#include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/ServerFlags.h>
 
 #include <thrift/lib/cpp2/server/ResourcePoolMigrationHelper.h>
@@ -36,6 +37,7 @@ bool ResourcePoolMigrationHelper::isMigrationEnabled() {
            "(`--thrift_disable_resource_pool_migration`) or unsetting thrift flag "
            "(`enable_resource_pool_migration`). The process must be restarted for "
            "either flag change to take effect.";
+    THRIFT_APPLICATION_EVENT(resourcePoolMigrationIsDisabled).log();
     return false;
   }
 
@@ -90,6 +92,7 @@ bool ResourcePoolMigrationHelper::isMigrationEnabled() {
            "not safe to move forward with migration as it may violate a server "
            "state invariant. These flag changes are now reverted. Fix this race "
            "so that migration can proceed.";
+    THRIFT_APPLICATION_EVENT(resourcePoolMigrationIsBlocked).log();
     return false;
   }
 
@@ -100,6 +103,7 @@ bool ResourcePoolMigrationHelper::isMigrationEnabled() {
          "(`enable_resource_pool_migration`). The process must be restarted for "
          "either flag change to take effect.";
 
+  THRIFT_APPLICATION_EVENT(resourcePoolMigrationIsEnabled).log();
   return true;
 }
 

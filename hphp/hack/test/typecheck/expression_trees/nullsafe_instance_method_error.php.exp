@@ -1,6 +1,6 @@
 ERROR: File "nullsafe_instance_method_error.php", line 8, characters 16-26:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 385, characters 26-35:
-  Expected `ExampleInt`
+  File "expr_tree.php", line 413, characters 26-35:
+  Expected `int`
   File "nullsafe_instance_method_error.php", line 8, characters 16-26:
-  But got `?ExampleInt` (use of `?->` operator)
+  But got `?int` (use of `?->` operator)

@@ -1,2 +1,4 @@
 ERROR: File "invalid_call3.php", line 6, characters 14-23:
-`ExampleInt` does not support this operator (it has no instance method named `__unwrap`) (Typing[4053])
+You are trying to access the method `__unwrap` but this is an int (Typing[4062])
+  File "expr_tree.php", line 413, characters 42-51:
+  Definition is here

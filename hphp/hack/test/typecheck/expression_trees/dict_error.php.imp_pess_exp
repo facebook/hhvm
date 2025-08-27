@@ -3,4 +3,4 @@ Invalid argument (Typing[4110])
   File "dict_error.php", line 23, characters 39-84:
   Expected `Spliceable<DictError, mixed, _>`
   File "dict_error.php", line 73, characters 15-24:
-  But got `ExampleInt`
+  But got `int`

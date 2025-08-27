@@ -1,5 +1,8 @@
 <?hh
 
+<<file: __EnableUnstableFeatures('case_types')>>
+<<file: __EnableUnstableFeatures('case_type_where_clauses')>>
+
 /**
  * An example DSL for testing expression trees (ETs).
  *
@@ -33,6 +36,14 @@ type ExprTreeInfo<TInfer> = shape(
   ?'type' => (function(): TInfer),
   'variables' => vec<string>,
 );
+
+case type ExprTreeOpType<+T as ExampleMixedOpType> as ExampleType =
+  | null where T super ExampleMixedOpType
+  | int where T super ExampleIntOpType
+  | float where T super ExampleFloatOpType
+  | string where T super ExampleStringOpType
+  | bool where T super ExampleBoolOpType
+  | T;
 
 final class ExprTree<TVisitor, TResult, +TInfer>
   implements Spliceable<TVisitor, TResult, TInfer> {
@@ -75,23 +86,25 @@ class ExampleDsl {
     return new ExprTree($pos, $metadata, $ast);
   }
 
-  public static function lift<TInfer>(ExampleDslExpression<TInfer> $x)[]: ExampleDslExpression<TInfer> {
+  public static function lift<TInfer>(
+    ExampleDslExpression<TInfer> $x,
+  )[]: ExampleDslExpression<TInfer> {
     return $x;
   }
 
   // Virtual types. These do not have to be implemented, as they are only used
   // in the virtualized version of the expression tree, to work out the virtual type
   // of literals during type checking.
-  public static function intType()[]: ExampleInt {
+  public static function intType()[]: int {
     throw new Exception();
   }
-  public static function floatType(): ExampleFloat {
+  public static function floatType(): float {
     throw new Exception();
   }
-  public static function boolType(): ExampleBool {
+  public static function boolType(): bool {
     throw new Exception();
   }
-  public static function stringType(): ExampleString {
+  public static function stringType(): string {
     throw new Exception();
   }
   public static function voidType(): ExampleVoid {
@@ -110,7 +123,9 @@ class ExampleDsl {
   public static function shapeType<T>(T $_): ExampleShape<T> {
     throw new Exception();
   }
-  public static function operationType<T>(T $_): T {
+  public static function operationType<T as ExampleMixedOpType>(
+    ExprTreeOpType<T> $_,
+  )[]: T {
     throw new Exception();
   }
 
@@ -174,11 +189,20 @@ class ExampleDsl {
     vec<ExampleDsl::TAst> $body,
     vec<ExampleDsl::TAst> $args_with_optional_params = vec[],
   )[]: ExampleDsl::TAst {
-    return "(".concat_arg_list(HH\Lib\Vec\concat($args, $args_with_optional_params)).")"." ==> {\n".concat_block($body)."}";
+    return "(".
+      concat_arg_list(HH\Lib\Vec\concat($args, $args_with_optional_params)).
+      ")".
+      " ==> {\n".
+      concat_block($body).
+      "}";
   }
 
-  public function visitOptionalParameter(?ExprPos $_, string $param_name, ExampleDsl::TAst $default_value)[]: ExampleDsl::TAst {
-    return $param_name . " = ". $default_value;
+  public function visitOptionalParameter(
+    ?ExprPos $_,
+    string $param_name,
+    ExampleDsl::TAst $default_value,
+  )[]: ExampleDsl::TAst {
+    return $param_name." = ".$default_value;
   }
 
   public function visitGlobalFunction<T>(
@@ -219,7 +243,7 @@ class ExampleDsl {
   public function visitTernary(
     ?ExprPos $_,
     ExampleDsl::TAst $condition,
-    ?ExampleDsl::TAst $truthy,
+    ExampleDsl::TAst $truthy,
     ExampleDsl::TAst $falsy,
   )[]: ExampleDsl::TAst {
     return $condition." ? ".$truthy." : ".$falsy;
@@ -350,7 +374,7 @@ class ExampleDsl {
 
   public function visitShape(
     ?ExprPos $_,
-    vec<(ExampleDsl::TAst, ExampleDsl::TAst)> $operand
+    vec<(ExampleDsl::TAst, ExampleDsl::TAst)> $operand,
   )[]: ExampleDsl::TAst {
     $v = HH\Lib\Vec\map($operand, $kv ==> $kv[0]."=>".$kv[1]);
     return "shape(".concat_arg_list($v).")";
@@ -359,29 +383,33 @@ class ExampleDsl {
   // Note, these types are not super narrow,
   // but they are inferred by the desugaring process rather than
   // being run against this specific declaration, so that is fine.
-  public static async function shapeAt(ExampleContext $_): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleMixed>> {
+  public static async function shapeAt(
+    ExampleContext $_,
+  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleMixed>> {
     throw new Error("No runtime implementation yet");
   }
 
-  public static async function shapePut(ExampleContext $_): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleMixed>> {
+  public static async function shapePut(
+    ExampleContext $_,
+  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleMixed>> {
     throw new Error("No runtime implementation yet");
   }
 
-  public static async function shapeIdx(ExampleContext $_): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleMixed>> {
+  public static async function shapeIdx(
+    ExampleContext $_,
+  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleMixed>> {
     throw new Error("No runtime implementation yet");
   }
 }
 
 // Type declarations used when checking DSL expressions.
-interface ExampleMixed {
+interface ExampleMixedOpType {
   public function __tripleEquals(ExampleMixed $_): ExampleBool;
   public function __notTripleEquals(ExampleMixed $_): ExampleBool;
   public function __questionQuestion(?ExampleMixed $_): ?ExampleMixed;
 }
 
-interface ExampleArraykey extends ExampleMixed {}
-
-interface ExampleInt extends ExampleArraykey {
+interface ExampleIntOpType extends ExampleMixedOpType {
   public function __plus(ExampleInt $_): ExampleInt;
   public function __minus(ExampleInt $_): ExampleInt;
   public function __star(ExampleInt $_): ExampleInt;
@@ -404,41 +432,63 @@ interface ExampleInt extends ExampleArraykey {
   public function __postfixMinusMinus(): void;
 }
 
-interface ExampleBool extends ExampleMixed {
+interface ExampleBoolOpType extends ExampleMixedOpType {
   public function __ampamp(ExampleBool $_): ExampleBool;
   public function __barbar(ExampleBool $_): ExampleBool;
   public function __bool(): bool;
   public function __exclamationMark(): ExampleBool;
 }
 
-interface ExampleString extends ExampleArraykey, XHPChild {
+interface ExampleStringOpType extends ExampleMixedOpType {
   public function __dot(ExampleString $_): ExampleString;
 }
 
-interface ExampleFloat extends ExampleMixed {}
+interface ExampleFloatOpType extends ExampleMixedOpType {}
+
+type ExampleInt = int;
+
+type ExampleBool = bool;
+
+type ExampleString = string;
+
+type ExampleFloat = float;
+
+case type ExampleMixedNonNull as ExprTreeOpType<ExampleMixedOpType> =
+  | int
+  | float
+  | string
+  | bool
+  | ExampleMixedOpType;
+
+case type ExampleMixed as ?ExampleMixedNonNull =
+  | ExampleMixedNonNull
+  | null;
+
+case type ExampleType = ExampleMixed | ExampleVoid;
 
 final class ExampleContext {}
 
+<<__Sealed>>
 interface ExampleVoid {}
 
-interface ExampleFunction<T> {
+interface ExampleFunction<T> extends ExampleMixedOpType {
   public function __unwrap(): T;
 }
 
-interface ExampleShape<T> {
+interface ExampleShape<T> extends ExampleMixedOpType {
   public function __unwrap(): T;
 }
 
-abstract class ExampleKeyedCollection<+Tkey as ExampleArraykey, +Tvalue> {
-  public static function __makeType<Tk as ExampleArraykey, Tv>(
+abstract class ExampleKeyedCollection<+Tkey as arraykey, +Tvalue> {
+  public static function __makeType<Tk as arraykey, Tv>(
     (Tk, Tv) ...$_
   ): ExampleKeyedCollection<Tk, Tv> {
     throw new Exception();
   }
 }
 
-abstract class ExampleKeyedCollectionMut<Tkey as ExampleArraykey, Tvalue> {
-  public static function __makeType<Tk as ExampleArraykey, Tv>(
+abstract class ExampleKeyedCollectionMut<Tkey as arraykey, Tvalue> {
+  public static function __makeType<Tk as arraykey, Tv>(
     (Tk, Tv) ...$_
   ): ExampleKeyedCollectionMut<Tk, Tv> {
     throw new Exception();

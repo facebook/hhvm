@@ -2,25 +2,25 @@ ERROR: File "shape_put_wrong.php", line 9, characters 10-152:
 Invalid return type (Typing[4110])
   File "shape_put_wrong.php", line 8, characters 15-46:
   Expected `dynamic`
-  File "expr_tree.php", line 74, characters 8-53:
+  File "expr_tree.php", line 85, characters 8-53:
   But got `ExprTree<ExampleDsl, string, _>`
 ERROR: File "shape_put_wrong.php", line 9, characters 10-152:
 Invalid return type (Typing[4110])
   File "shape_put_wrong.php", line 8, characters 15-46:
-  Expected `~Spliceable<ExampleDsl, string, ExampleInt>`
+  Expected `~Spliceable<ExampleDsl, string, int>`
   File "shape_put_wrong.php", line 9, characters 21-151:
   But got `~ExprTree<ExampleDsl, string, _>` because method or function was called on dynamic or like-type
 ERROR: File "shape_put_wrong.php", line 9, characters 10-152:
 Invalid return type (Typing[4110])
   File "shape_put_wrong.php", line 8, characters 36-45:
-  Expected `ExampleInt`
-  File "expr_tree.php", line 454, characters 73-73:
+  Expected `int`
+  File "expr_tree.php", line 504, characters 73-73:
     via this generic `T`
-  File "expr_tree.php", line 91, characters 38-48:
-  But got `ExampleBool`
+  File "expr_tree.php", line 104, characters 38-41:
+  But got `bool`
 ERROR: File "shape_put_wrong.php", line 19, characters 5-47:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 110, characters 26-34:
+  File "expr_tree.php", line 123, characters 26-34:
   Expected `dynamic`
   File "Shapes.hhi", line 112, characters 10-19:
   Type `shape(...)` is not a subtype of `dynamic` under dynamic-aware subtyping
@@ -30,7 +30,7 @@ Too many arguments (expected 3 but got 4) (Typing[4105])
   Definition is here
 ERROR: File "shape_put_wrong.php", line 22, characters 5-32:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 110, characters 26-34:
+  File "expr_tree.php", line 123, characters 26-34:
   Expected `dynamic`
   File "Shapes.hhi", line 112, characters 10-19:
   Type `shape(...)` is not a subtype of `dynamic` under dynamic-aware subtyping
@@ -41,4 +41,6 @@ Too few arguments (required 3 but got 1) (Typing[4104])
 ERROR: File "shape_put_wrong.php", line 25, characters 34-39:
 Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
 ERROR: File "shape_put_wrong.php", line 28, characters 5-37:
-`ExampleString` does not support this operator (it has no instance method named `__unwrap`) (Typing[4053])
+You are trying to access the method `__unwrap` but this is a string (Typing[4062])
+  File "expr_tree.php", line 107, characters 40-45:
+  Definition is here

@@ -1,7 +1,7 @@
 ERROR: File "void_return_errors3.php", line 6, characters 14-87:
 Invalid return type (Typing[4336])
   File "void_return_errors3.php", line 6, characters 32-41:
-  Expected `ExampleInt`
+  Expected `int`
   File "void_return_errors3.php", line 6, characters 14-87:
   But got `void` because this function does not always return a value
 ERROR: File "void_return_errors3.php", line 6, characters 14-87:

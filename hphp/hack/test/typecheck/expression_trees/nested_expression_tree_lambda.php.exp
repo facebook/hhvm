@@ -2,9 +2,9 @@ ERROR: File "nested_expression_tree_lambda.php", line 6, characters 28-40:
 Expression trees may not be used directly inside of other expression trees. (Parsing[1002])
 ERROR: File "nested_expression_tree_lambda.php", line 6, characters 28-40:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 61, characters 21-26:
+  File "expr_tree.php", line 72, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 214, characters 5-20:
+  File "expr_tree.php", line 238, characters 5-20:
     resulting from expanding the type constant `ExampleDsl::TAst`
-  File "expr_tree.php", line 74, characters 8-53:
-  But got `ExprTree<ExampleDsl, string, ExampleInt>`
+  File "expr_tree.php", line 85, characters 8-53:
+  But got `ExprTree<ExampleDsl, string, int>`

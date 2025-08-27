@@ -13,7 +13,7 @@ This null coalesce will always evaluate to its right-hand side. (Warn[12023])
 WARN: File "questionquestion.php", line 15, characters 5-12:
 This null coalesce will always evaluate to its left-hand side. (Warn[12023])
   File "questionquestion.php", line 10, characters 31-40:
-  The expression on the left has type `ExampleInt` which can never be `null`.
+  The expression on the left has type `int` which can never be `null`.
 WARN: File "questionquestion.php", line 17, characters 11-20:
 This null coalesce will always evaluate to its right-hand side. (Warn[12023])
   File "questionquestion.php", line 17, characters 11-14:
@@ -29,8 +29,4 @@ Expression trees do not support array access (e.g. `arr[0]`) as the left side of
 ERROR: File "questionquestion.php", line 30, characters 5-6:
 Variable `$x` is undefined, or not always defined. (Naming[2050])
 ERROR: File "questionquestion.php", line 23, characters 5-19:
-You are trying to access the method `__plus` but this object can be null. (Typing[4064])
-  File "questionquestion.php", line 10, characters 15-25:
-  This can be null
-  File "expr_tree.php", line 113, characters 50-50:
-    via this generic `T`
+`ExampleMixedOpType` does not support this operator (it has no instance method named `__plus`) (Typing[4053])

@@ -27,7 +27,9 @@ cpp_include "thrift/lib/thrift/SerializableDynamic.h"
 
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
+include "thrift/annotation/hack.thrift"
 
+@hack.MigrationBlockingLegacyJSONSerialization
 union Dynamic {
   @thrift.DeprecatedUnvalidatedAnnotations{
     items = {"java.swift.name": "_boolean"},

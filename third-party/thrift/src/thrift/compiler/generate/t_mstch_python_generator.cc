@@ -102,6 +102,14 @@ class python_generator_context {
   type_kind type_kind_;
 };
 
+bool is_const_value_primitive(
+    const t_const_value& self, t_primitive_type::type kind) {
+  const t_primitive_type* primitive = self.ttype().empty()
+      ? nullptr
+      : self.ttype()->get_true_type()->try_as<t_primitive_type>();
+  return primitive != nullptr && primitive->primitive_type() == kind;
+}
+
 const t_const* find_structured_adapter_annotation(
     const t_named& node, const char* uri = kPythonAdapterUri) {
   return node.find_structured_annotation_or_null(uri);
@@ -668,8 +676,6 @@ class python_mstch_struct : public mstch_struct {
             {"struct:fields_ordered_by_id",
              &python_mstch_struct::fields_ordered_by_id},
             {"struct:has_adapter?", &python_mstch_struct::adapter},
-            {"struct:should_generate_patch?",
-             &python_mstch_struct::should_generate_patch},
         });
   }
 
@@ -683,9 +689,6 @@ class python_mstch_struct : public mstch_struct {
 
   mstch::node adapter() {
     return adapter_node(adapter_annotation_, nullptr, context_, pos_);
-  }
-  mstch::node should_generate_patch() {
-    return apache::thrift::compiler::should_generate_patch(struct_);
   }
 
  private:
@@ -869,6 +872,43 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
         whisker::object(whisker::native_handle<python_generator_context>(
             python_context_, make_prototype_for_context()));
     return globals;
+  }
+
+  prototype<t_const_value>::ptr make_prototype_for_const_value(
+      const prototype_database& proto) const override {
+    auto base = t_mstch_generator::make_prototype_for_const_value(proto);
+    auto def = whisker::dsl::prototype_builder<h_const_value>::extends(base);
+
+    def.property("py3_enum_value_name", [](const t_const_value& self) {
+      return self.is_enum() && self.get_enum_value() != nullptr
+          ? whisker::make::string(python::get_py3_name_class_scope(
+                *self.get_enum_value(), self.get_enum()->name()))
+          : whisker::make::null;
+    });
+    def.property("py3_binary?", [](const t_const_value& self) {
+      return self.kind() == t_const_value::CV_STRING &&
+          is_const_value_primitive(self, t_primitive_type::type::t_binary);
+    });
+    def.property("unicode_value", [](const t_const_value& self) {
+      return self.kind() == t_const_value::CV_STRING
+          ? whisker::make::string(
+                get_escaped_string<nonascii_handling::no_escape>(
+                    self.get_string()))
+          : whisker::make::null;
+    });
+    def.property("value_for_bool?", [](const t_const_value& self) {
+      return is_const_value_primitive(self, t_primitive_type::type::t_bool);
+    });
+    def.property("value_for_floating_point?", [](const t_const_value& self) {
+      return is_const_value_primitive(self, t_primitive_type::type::t_float) ||
+          is_const_value_primitive(self, t_primitive_type::type::t_double);
+    });
+    def.property("value_for_set?", [](const t_const_value& self) {
+      return !self.ttype().empty() &&
+          self.ttype()->get_true_type()->is<t_set>();
+    });
+
+    return std::move(def).make();
   }
 
   prototype<t_enum>::ptr make_prototype_for_enum(
@@ -1068,6 +1108,9 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     def.property("disable_field_caching?", [this](const t_structured& self) {
       return has_option("disable_field_cache") ||
           self.has_structured_annotation(kPythonDisableFieldCacheUri);
+    });
+    def.property("should_generate_patch?", [](const t_structured& self) {
+      return should_generate_patch(&self);
     });
 
     return std::move(def).make();
@@ -1322,35 +1365,12 @@ class python_mstch_const_value : public mstch_const_value {
     register_methods(
         this,
         {
-            {"value:py3_enum_value_name",
-             &python_mstch_const_value::py3_enum_value_name},
-            {"value:py3_binary?", &python_mstch_const_value::is_binary},
-            {"value:unicode_value", &python_mstch_const_value::unicode_value},
             {"value:const_enum_type",
              &python_mstch_const_value::const_enum_type},
-            {"value:value_for_bool?",
-             &python_mstch_const_value::value_for_bool},
-            {"value:value_for_floating_point?",
-             &python_mstch_const_value::value_for_floating_point},
             {"value:list_elem_type", &python_mstch_const_value::list_elem_type},
-            {"value:value_for_set?", &python_mstch_const_value::value_for_set},
             {"value:map_key_type", &python_mstch_const_value::map_key_type},
             {"value:map_val_type", &python_mstch_const_value::map_val_type},
         });
-  }
-
-  mstch::node unicode_value() {
-    if (type_ != cv::CV_STRING) {
-      return {};
-    }
-    return get_escaped_string<nonascii_handling::no_escape>(
-        const_value_->get_string());
-  }
-
-  mstch::node is_binary() {
-    auto& ttype = const_value_->ttype();
-    return type_ == cv::CV_STRING && ttype &&
-        ttype->get_true_type()->is_binary();
   }
 
   mstch::node const_enum_type() {
@@ -1363,29 +1383,6 @@ class python_mstch_const_value : public mstch_const_value {
       return context_.type_factory->make_mstch_object(type, context_);
     }
     return {};
-  }
-
-  mstch::node value_for_bool() {
-    if (auto ttype = const_value_->ttype()) {
-      return ttype->get_true_type()->is_bool();
-    }
-    return false;
-  }
-
-  mstch::node value_for_floating_point() {
-    if (auto ttype = const_value_->ttype()) {
-      return ttype->get_true_type()->is_floating_point();
-    }
-    return false;
-  }
-
-  mstch::node py3_enum_value_name() {
-    if (!const_value_->is_enum() || const_value_->get_enum_value() == nullptr) {
-      return mstch::node();
-    }
-    const auto& enum_name = const_value_->get_enum()->name();
-    return python::get_py3_name_class_scope(
-        *const_value_->get_enum_value(), enum_name);
   }
 
   mstch::node list_elem_type() {
@@ -1403,13 +1400,6 @@ class python_mstch_const_value : public mstch_const_value {
           elem_type, context_, pos_);
     }
     return {};
-  }
-
-  mstch::node value_for_set() {
-    if (auto ttype = const_value_->ttype()) {
-      return ttype->get_true_type()->is<t_set>();
-    }
-    return false;
   }
 
   mstch::node map_key_type() {

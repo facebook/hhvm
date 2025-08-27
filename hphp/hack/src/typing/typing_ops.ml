@@ -49,7 +49,7 @@ let sub_type_i_apply_reason_callback
   log_sub_type env p ty_sub ty_super;
   Typing_utils.sub_type_i ~is_coeffect env ty_sub ty_super @@ Some callback
 
-(** Tries to add constraint that ty_sub is subtype of ty_super in envs *)
+(** see .mli **)
 let sub_type_i
     ?(is_coeffect = false)
     p

@@ -70,6 +70,7 @@ type locl_phase = private LoclPhase [@@deriving eq, hash, show]
  * Reasons used for decl types should be 'phase t_ so that they can be localized
  * to be used in the localized version of the type. *)
 
+(** Shape field kinds *)
 type field_kind =
   | Absent
   | Optional

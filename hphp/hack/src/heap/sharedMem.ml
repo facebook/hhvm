@@ -1259,7 +1259,7 @@ end = struct
       keys
       KeyMap.empty
 
-  (** Equivalent to moving a set of entries (= key + value) to some heap of old entries. *)
+  (** see .mli **)
   let oldify_batch keys =
     Direct.oldify_batch keys;
     KeySet.iter Cache.remove keys

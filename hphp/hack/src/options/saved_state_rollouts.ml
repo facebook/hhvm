@@ -8,9 +8,9 @@
 
 open Hh_prelude
 
+(** see .mli **)
 type t = {
   optimized_member_fanout: bool;
-      (** optimized_member_fanout is not used but we leave it as a template *)
   new_naming_table: bool;
 }
 [@@deriving eq, show]
@@ -42,7 +42,6 @@ external get_current_rollout_flag : int -> string option
 external default_saved_state_rollouts : unit -> t
   = "default_saved_state_rollouts"
 
-(** @param  get_default   typically an external config reading, e.g. from JK *)
 let make
     ~current_rolled_out_flag_idx
     ~(deactivate_saved_state_rollout : bool)

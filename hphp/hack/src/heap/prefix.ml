@@ -7,14 +7,7 @@
  *
  *)
 
-(*****************************************************************************)
-(* The prefix is used to guarantee that we are not mixing different kind of
- * keys in the heap.
- * It just creates a new prefix every time its called.
- * The $ at the end of the prefix ensures that we don't have ambiguities if a key
- * happens to start with a digit.
- *)
-(*****************************************************************************)
+(** see .mli **)
 
 type t = string
 

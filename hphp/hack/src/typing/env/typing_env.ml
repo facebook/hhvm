@@ -37,6 +37,7 @@ module M = struct
 
   let pp_env _ _ = Printf.printf "%s\n" "<env>"
 
+  (** see .mli **)
   let get_tcopt env = env.genv.tcopt
 
   let map_tcopt env ~f =
@@ -644,8 +645,6 @@ module M = struct
   let set_current_package_membership env package =
     { env with genv = { env.genv with current_package = package } }
 
-  (** Register the current top-level structure as being dependent on the current
-    module *)
   let make_depend_on_current_module env =
     Option.iter
       Typing_env_types.(env.genv.current_module)
@@ -777,6 +776,7 @@ module M = struct
       ~name
       td
 
+  (** see .mli **)
   let get_class (env : env) (name : Decl_provider.type_key) : Cls.t Decl_entry.t
       =
     let res =
@@ -829,6 +829,8 @@ module M = struct
     | Some e -> Decl_entry.Found e.te_constraint
 
   (* TODO: do we want to introduce a Cls.enum_class_type ? *)
+
+  (** see .mli **)
   let get_enum env x =
     Decl_entry.bind (get_class env x) @@ fun tc ->
     if Option.is_some (Cls.enum_type tc) then
@@ -843,6 +845,7 @@ module M = struct
     | Decl_entry.NotYetAvailable ->
       false
 
+  (** see .mli **)
   let is_enum_class env x =
     match get_enum env x with
     | Decl_entry.Found cls -> Ast_defs.is_c_enum_class (Cls.kind cls)
@@ -855,10 +858,13 @@ module M = struct
     Cls.get_typeconst class_ mid [@alert "-dependencies"]
 
   (* Used to access class constants. *)
+
+  (** see .mli **)
   let get_const env class_ mid =
     Deps.make_depend_on_class_const env class_ mid;
     Cls.get_const class_ mid [@alert "-dependencies"]
 
+  (** see .mli **)
   let consts env class_ =
     Deps.make_depend_on_class env (Cls.name class_) (Decl_entry.Found class_);
     Cls.consts class_ [@alert "-dependencies"]
@@ -944,6 +950,7 @@ module M = struct
     in
     suggest_member members mid
 
+  (** see .mli **)
   let get_method env (class_ : Cls.t) mid =
     (* The type of a member is stored separately in the heap. This means that
      * any user of the member also has a dependency on the class where the member
@@ -953,6 +960,7 @@ module M = struct
     Deps.add_member_dep ~is_method:true ~is_static:false env class_ mid ce_opt;
     ce_opt
 
+  (** see .mli **)
   let get_prop env (class_ : Cls.t) mid =
     (* The type of a member is stored separately in the heap. This means that
      * any user of the member also has a dependency on the class where the member
@@ -1029,6 +1037,7 @@ module M = struct
 
   let get_val_kind env = env.genv.val_kind
 
+  (** see .mli **)
   let get_self_ty env = Option.map env.genv.self ~f:snd
 
   let get_self_class_type env =
@@ -1040,6 +1049,7 @@ module M = struct
     end
     | None -> None
 
+  (** see .mli **)
   let get_self_id env = Option.map env.genv.self ~f:fst
 
   let get_self_class env =
@@ -1048,6 +1058,7 @@ module M = struct
 
   let get_parent_ty env = Option.map env.genv.parent ~f:snd
 
+  (** see .mli **)
   let get_parent_id env = Option.map env.genv.parent ~f:fst
 
   let get_parent_class env =
@@ -2035,7 +2046,6 @@ module M = struct
        }
 
   module Log = struct
-    (** Convert a type variable from an environment into json *)
     let tyvar_to_json
         (p_locl_ty : locl_ty -> string)
         (p_internal_type : internal_type -> string)
@@ -2079,6 +2089,7 @@ module M = struct
     | LoclType lty -> LoclType (update_reason t lty ~f)
     | ConstraintType cty -> ConstraintType (update_cty_reason t cty ~f)
 
+  (** see .mli **)
   let inside_expr_tree env expr_tree_hint =
     let outer_locals =
       match next_cont_opt env with
@@ -2149,6 +2160,7 @@ module M = struct
     in
     (env, r1, r2, new_macro_type_mapping)
 
+  (** see .mli **)
   let is_in_expr_tree env = Option.is_some env.in_expr_tree
 
   let rank_of_tparam env tparam = Type_parameter_env.get_rank env.tpenv tparam
@@ -2156,5 +2168,5 @@ end
 
 include M
 
-(** Use the .mli to control which items are exposed in Tast_env *)
+(** see .mli **)
 module Expose_to_tast_env = M

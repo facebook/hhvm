@@ -297,8 +297,6 @@ let[@warning "-21"] oldify_defs (* -21 for dune stubs *)
     if collect_garbage then SharedMem.GC.collect `gentle;
     ()
 
-(** Remove provided defs from the heap of old decls.
-    For classes, it removes both shallow and folded classes. *)
 let[@warning "-21"] remove_old_defs (* -21 for dune stubs *)
     (ctx : Provider_context.t)
     ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } as names)
@@ -556,10 +554,7 @@ let invalidate_folded_classes
 (* The main entry point *)
 (*****************************************************************************)
 
-(** Oldify any defs in [defs] which aren't already in
-[previously_oldified_defs], then determines which symbols need to be
-re-typechecked as a result of comparing the current versions of the symbols
-to their old versions. *)
+(** see .mli **)
 let redo_type_decl
     (ctx : Provider_context.t)
     ~during_init
@@ -637,10 +632,7 @@ let redo_type_decl
 
   { fanout; old_decl_missing_count }
 
-(** Mark all provided [defs] as old, as long as they were not previously
-    oldified.
-    For classes, also remove all descendants, since we oldified and therefore
-    removed their elements/members. *)
+(** see .mli **)
 let oldify_decls_and_remove_descendants
     (ctx : Provider_context.t)
     ?(collect_garbage = true)

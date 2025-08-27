@@ -589,7 +589,7 @@ let set_tyvar_type_const env var ((_, tyconstid_) as tyconstid) ty =
   let env = set_tyvar_appears_covariantly env var in
   env
 
-(** Conjoin a subtype proposition onto the subtype_prop in the environment *)
+(** see .mli **)
 let add_subtype_prop env prop =
   { env with subtype_prop = TL.conj env.subtype_prop prop }
 

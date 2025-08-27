@@ -18,6 +18,7 @@ external freopen : string -> string -> Unix.file_descr -> unit = "hh_freopen"
 (** Option type intead of exception throwing. *)
 val get_env : string -> string option
 
+(** Get the user from the $USER or $USERNAME or $LOGNAME environment variable. *)
 val getenv_user : unit -> string option
 
 val getenv_home : unit -> string option
@@ -85,6 +86,7 @@ val rm_dir_tree : ?skip_mocking:bool -> string -> unit
 
 val restart : unit -> 'a
 
+(** Try to get the current system username from environment variables or commands such as `logname` *)
 val logname_impl : unit -> string
 
 val logname : unit -> string
@@ -144,6 +146,7 @@ external lutimes : string -> unit = "hh_lutimes"
 
 type touch_mode =
   | Touch_existing of { follow_symlinks: bool }
+      (** This won't open/close fds, which is important for some callers. *)
   | Touch_existing_or_create_new of {
       mkdir_if_new: bool;
       perm_if_new: Unix.file_perm;

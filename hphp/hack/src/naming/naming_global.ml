@@ -7,13 +7,7 @@
  *
  *)
 
-(** Module "naming" a program.
- *
- * The naming phase consists in several things
- * 1- get all the global names
- * 2- transform all the local names into a unique identifier
- *)
-
+(** see .mli *)
 open Hh_prelude
 
 (*****************************************************************************)
@@ -353,7 +347,6 @@ module Env = struct
       (p :: current_file_symbols_acc, is_okay_acc)
 end
 
-(** Remove defs from reverse naming table *)
 let remove_decls ~backend ~funs ~classes ~typedefs ~consts ~modules =
   Naming_provider.remove_type_batch backend (typedefs @ classes);
   Naming_provider.remove_fun_batch backend funs;

@@ -11,13 +11,13 @@ open Hh_prelude
 
 type error_code = int
 
+(** see .mli **)
 type format =
-  | Context  (** Underlined references and color *)
-  | Raw  (** Compact format with color but no references *)
-  | Highlighted  (** Numbered and colored references *)
-  | Plain  (** Verbose positions and no color *)
+  | Context
+  | Raw
+  | Highlighted
+  | Plain
   | Extended
-      (** Verbose context showing expressions, statements, hints, and declarations involved in error *)
 
 let claim_as_reason : Pos.t Message.t -> Pos_or_decl.t Message.t =
  (fun (p, m) -> (Pos_or_decl.of_raw_pos p, m))

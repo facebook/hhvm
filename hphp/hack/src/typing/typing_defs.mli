@@ -50,9 +50,9 @@ type const_decl = {
 type class_elt = {
   ce_visibility: ce_visibility;
   ce_type: decl_ty Hh_prelude.Lazy.t;
-  ce_origin: string;
+  ce_origin: string;  (** identifies the class from which this elt originates *)
   ce_deprecated: string option;
-  ce_pos: Pos_or_decl.t Hh_prelude.Lazy.t;
+  ce_pos: Pos_or_decl.t Hh_prelude.Lazy.t;  (** pos of the type of the elt *)
   ce_flags: Typing_defs_flags.ClassElt.t;
   ce_sort_text: string option;
   ce_overlapping_tparams: SSet.t option;
@@ -63,7 +63,7 @@ type fun_elt = {
   fe_deprecated: string option;
   fe_module: Ast_defs.id option;
   fe_package: Aast_defs.package_membership option;
-  fe_internal: bool;
+  fe_internal: bool;  (** Top-level functions have limited visibilities *)
   fe_type: decl_ty;
   fe_pos: Pos_or_decl.t;
   fe_php_std_lib: bool;
@@ -84,7 +84,9 @@ type class_const = {
   cc_pos: Pos_or_decl.t;
   cc_type: decl_ty;
   cc_origin: string;
+      (** identifies the class from which this const originates *)
   cc_refs: class_const_ref list;
+      (** references to the constants used in the initializer *)
 }
 [@@deriving show]
 
@@ -168,7 +170,11 @@ type phase_ty =
 type deserialization_error =
   | Wrong_phase of string
   | Not_supported of string
+      (** The specific type or some component thereof is not one that we support
+          deserializing, usually because not enough information was serialized to be
+          able to deserialize it again. *)
   | Deserialization_error of string
+      (** The input JSON was invalid for some reason. *)
 [@@deriving show]
 
 (** How should we treat the wildcard character _ when localizing?

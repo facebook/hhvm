@@ -7,6 +7,13 @@
  *
  *)
 
+(** Module "naming" a program.
+ *
+ * The naming phase consists in several things
+ * 1- get all the global names
+ * 2- transform all the local names into a unique identifier
+ *)
+
 (** GEnv is solely a set of thin wrappers around Naming_provider. *)
 module GEnv : sig
   val get_fun_full_pos :

@@ -21,18 +21,14 @@ type server_state =
   | Server_dead
 [@@deriving show]
 
+(** see .mli **)
 type options = {
   root: Path.t;
   allow_subscriptions: bool;
-      (** Disable the informant - use the dummy instead. *)
   use_dummy: bool;
-      (** Don't trigger a server restart if the distance between two
-            revisions we are moving between is less than this. *)
   min_distance_restart: int;
   watchman_debug_logging: bool;
-      (** Informant should ignore the hh_version when doing version checks. *)
   ignore_hh_version: bool;
-      (** Was the server initialized with a precomputed saved-state? *)
   is_saved_state_precomputed: bool;
 }
 

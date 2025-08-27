@@ -10,12 +10,14 @@ type flag_name = string
 
 type t = {
   optimized_member_fanout: bool;
+      (** optimized_member_fanout is not used but we leave it as a template *)
   new_naming_table: bool;
 }
 [@@deriving eq, show]
 
 val default : t
 
+(** @param  get_default   typically an external config reading, e.g. from JK *)
 val make :
   current_rolled_out_flag_idx:int ->
   deactivate_saved_state_rollout:bool ->

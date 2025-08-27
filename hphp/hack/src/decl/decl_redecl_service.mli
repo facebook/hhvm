@@ -46,7 +46,8 @@ val oldify_decls_and_remove_descendants :
   defs:FileInfo.names ->
   unit
 
-(** Remove the given old definitions from the decl heaps. *)
+(** Remove provided defs from the heap of old decls.
+    For classes, it removes both shallow and folded classes. *)
 val remove_old_defs :
   Provider_context.t ->
   bucket_size:int ->

@@ -6,6 +6,7 @@
  *
  *)
 
+(** Might raise {!Naming_table.File_info_not_found} *)
 val handle :
   'res.
   ServerEnv.genv ->

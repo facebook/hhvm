@@ -290,24 +290,17 @@ let is_default_visibility_behaviour = function
 
 let default_visibility_behaviour = Expand_visible_newtype_only
 
-(** Tracks information about how a type was expanded *)
+(** see .mli **)
 type expand_env = {
   type_expansions: Type_expansions.t;
   make_internal_opaque: bool;
-      (** Localize internal classes outside their module as if newtypes i.e. opaque *)
   visibility_behavior: visibility_behavior;
   substs: locl_ty SMap.t;
   no_substs: SSet.t;
   this_ty: locl_ty;
-      (** The type that is substituted for `this` in signatures. It should be
-       * set to an expression dependent type if appropriate
-       *)
   on_error: Typing_error.Reasons_callback.t option;
   wildcard_action: wildcard_action;
   ish_weakening: bool;
-      (** If true, for refinement hints (is/as), approximate E by ~E & arraykey to account
-       * for intish and stringish casts
-       *)
 }
 
 let empty_expand_env =

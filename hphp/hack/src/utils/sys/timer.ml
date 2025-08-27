@@ -130,7 +130,7 @@ and schedule ?(exns = []) () =
   | exn :: _ -> reraise exn
   | _ -> ()
 
-(** Will invoke [callback ()] after [interval] seconds *)
+(** see .mli **)
 let set_timer ~interval ~callback =
   let target_time = Unix.gettimeofday () +. interval in
   let id = !next_id in

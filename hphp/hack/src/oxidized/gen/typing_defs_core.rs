@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9f19c9d5b5dc15ebf97169f9ce6679c5>>
+// @generated SignedSource<<81f57fccbd1db57773d3bf873fae6d60>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -471,7 +471,7 @@ pub struct FunParam {
 #[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }), map)")]
 pub type FunParams = Vec<FunParam>;
 
-/// The type of a function AND a method.
+/// The type of a function AND a method
 #[derive(
     Clone,
     Debug,
@@ -1303,6 +1303,7 @@ pub enum ConstraintType_ {
     #[rust_to_ocaml(name = "Tcan_traverse")]
     TcanTraverse(CanTraverse),
     /// The type of container destructuring via list() or splat `...`
+    /// Implements valid destructuring operations via subtyping.
     Tdestructure(Destructure),
     /// The type of a value we want to decompose based on a runtime type test.
     /// In the expression:

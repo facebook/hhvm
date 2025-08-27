@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c429f0084ee76848cbf19a554f50fb2e>>
+// @generated SignedSource<<ea4feed2e0a855dce869541100ddea0d>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -436,7 +436,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunParam<'arena>);
 #[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }), map)")]
 pub type FunParams<'a> = [&'a FunParam<'a>];
 
-/// The type of a function AND a method.
+/// The type of a function AND a method
 #[derive(
     Clone,
     Debug,

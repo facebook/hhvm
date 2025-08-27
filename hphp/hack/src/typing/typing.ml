@@ -2632,13 +2632,7 @@ module rec Expr : sig
     Tast.expr ->
     env * (env -> env * branch_info) * (env -> env * branch_info)
 
-  (** Typechecks a call.
-  Returns in this order the typed expressions for the arguments, for the
-  variadic arguments, the return type, and a boolean indicating whether fake
-  members should be forgotten. If dynamic_func is not None, then we are trying
-  to call the function with dynamic arguments using the fact that is is a SDT
-  function. That is, we have already ruled out trying to call it with just its
-  declared type. *)
+  (** see .mli *)
   val call :
     expected:ExpectedTy.t option ->
     ?nullsafe:pos option ->

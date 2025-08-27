@@ -110,7 +110,7 @@ type param_mode =
 
 type xhp_attr = Xhp_attribute.t [@@deriving eq, show]
 
-(* Denotes the categories of requirements we apply to constructor overrides.
+(** Denotes the categories of requirements we apply to constructor overrides.
  *
  * In the default case, we use Inconsistent. If a class has <<__ConsistentConstruct>>,
  * or if it inherits a class that has <<__ConsistentConstruct>>, we use inherited.
@@ -198,7 +198,7 @@ type 'ty fun_type = {
   ft_where_constraints: 'ty where_constraint list;
   ft_params: 'ty fun_params;
   ft_implicit_params: 'ty fun_implicit_params;
-  ft_ret: 'ty;
+  ft_ret: 'ty;  (** Carries through the sync/async information from the aast *)
   ft_flags: Typing_defs_flags.Fun.t;
   ft_cross_package: cross_package_decl;
   ft_instantiated: bool;
@@ -427,7 +427,7 @@ and 'phase refined_const_bounds = {
   tr_upper: 'phase ty list;
 }
 
-(* Whether all fields of this shape are known, types of each of the
+(** Whether all fields of this shape are known, types of each of the
  * known arms. *)
 and 'phase shape_type = {
   s_origin: type_origin; [@transform.opaque]
@@ -620,7 +620,8 @@ type destructure_kind =
 [@@deriving eq, ord, show]
 
 type destructure = {
-  (* This represents the standard parameters of a function or the fields in a list
+  d_required: locl_ty list;
+      (** This represents the standard parameters of a function or the fields in a list
    * destructuring assignment. Example:
    *
    * function take(bool $b, float $f = 3.14, arraykey ...$aks): void {}
@@ -632,14 +633,13 @@ type destructure = {
    *
    * (bool, float, int, string) <: splat([#1], [opt#2], ...#3)
    *)
-  d_required: locl_ty list;
-  (* Represents the optional parameters in a function, only used for splats *)
   d_optional: locl_ty list;
-  (* Represents a function's variadic parameter, also only used for splats *)
+      (** Represents the optional parameters in a function, only used for splats *)
   d_variadic: locl_ty option;
-  (* list() destructuring allows for partial matches on lists, even when the operation
-   * might throw i.e. list($a) = vec[]; *)
+      (** Represents a function's variadic parameter, also only used for splats *)
   d_kind: destructure_kind;
+      (** list() destructuring allows for partial matches on lists, even when the operation
+   * might throw i.e. list($a) = vec[]; *)
 }
 [@@deriving show]
 
@@ -708,7 +708,7 @@ type constraint_type_ =
   | Tcan_index_assign of can_index_assign
   | Tcan_traverse of can_traverse
   | Tdestructure of destructure
-      (** The type of a list destructuring assignment.
+      (** The type of container destructuring via list() or splat `...`
           Implements valid destructuring operations via subtyping. *)
   | Ttype_switch of {
       predicate: type_predicate;

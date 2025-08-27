@@ -35,9 +35,10 @@ let uri_of_string (s : string) : DocumentUri.t = DocumentUri.Uri s
 
 let string_of_uri (DocumentUri.Uri s) : string = s
 
+(** see .mli **)
 type position = {
-  line: int;  (** zero-based *)
-  character: int;  (** zero-based *)
+  line: int;
+  character: int;
 }
 [@@deriving eq, of_yojson]
 
@@ -412,7 +413,7 @@ module Initialize = struct
     documentLinkProvider: documentLinkOptions option;
     executeCommandProvider: executeCommandOptions option;
     implementationProvider: bool;
-    rageProviderFB: bool;  (** Nuclide-specific feature *)
+    rageProviderFB: bool;
     server_experimental: ServerExperimentalCapabilities.t option;
   }
 
@@ -778,7 +779,7 @@ module WorkspaceSymbol = struct
 
   and result = SymbolInformation.t list
 
-  and workspaceSymbolParams = { query: string  (** a non-empty query string *) }
+  and workspaceSymbolParams = { query: string }
 end
 
 module DocumentSymbol = struct

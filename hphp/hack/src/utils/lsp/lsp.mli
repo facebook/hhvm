@@ -544,7 +544,7 @@ module Initialize : sig
     documentLinkProvider: documentLinkOptions option;
     executeCommandProvider: executeCommandOptions option;
     implementationProvider: bool;
-    rageProviderFB: bool;
+    rageProviderFB: bool;  (** Nuclide-specific feature *)
     server_experimental: ServerExperimentalCapabilities.t option;
   }
 
@@ -988,7 +988,7 @@ module WorkspaceSymbol : sig
 
   and result = SymbolInformation.t list
 
-  and workspaceSymbolParams = { query: string }
+  and workspaceSymbolParams = { query: string  (** a non-empty query string *) }
 end
 
 (** Document Symbols request, method="textDocument/documentSymbol" *)

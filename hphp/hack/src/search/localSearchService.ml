@@ -30,7 +30,7 @@ let get_tombstone (path : Relative_path.t) : int64 =
   let path_hash = SharedMemHash.hash_string fixed_path_str in
   path_hash
 
-(** Update files when they were discovered *)
+(** see .mli **)
 let update_file_from_addenda
     ~(sienv : si_env)
     ~(path : Relative_path.t)

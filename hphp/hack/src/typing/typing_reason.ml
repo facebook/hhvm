@@ -174,7 +174,6 @@ let cstr_variance_to_json = function
   | Inv dir ->
     Hh_json.(JSON_Object [("Inv", JSON_Array [variance_dir_to_json dir])])
 
-(** Shape field kinds *)
 type field_kind =
   | Absent
   | Optional
@@ -1586,7 +1585,7 @@ let axiom_to_json = function
  * Reasons used for decl types should be 'phase t_ so that they can be localized
  * to be used in the localized version of the type. *)
 
-(** The reason why something is expected to have a certain type *)
+(** see .mli **)
 type _ t_ =
   (* -- Superset of reasons used by decl provider -- *)
   | From_witness_decl : witness_decl -> 'phase t_

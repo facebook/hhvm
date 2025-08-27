@@ -10,10 +10,11 @@
 open Core
 module Unix = Caml_unix
 
+(** see .mli **)
 type timings = {
   start_time: float;
-  deadline_time: float;  (** caller-supplied deadline *)
-  timeout_time: float;  (** actual time we raised the timeout *)
+  deadline_time: float;
+  timeout_time: float;
 }
 
 let show_timings (t : timings) : string =

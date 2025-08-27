@@ -312,6 +312,19 @@ inline bool operator!=(
   return !(lhs == rhs);
 }
 
+class SourceIdentifierHash {
+ public:
+  using is_transparent = void;
+
+  std::size_t operator()(const SourceIdentifier& sourceIdentifier) const {
+    return operator()(SourceIdentifierView(sourceIdentifier));
+  }
+  std::size_t operator()(SourceIdentifierView sourceIdentifier) const {
+    return folly::hash::hash_combine(
+        sourceIdentifier.location, sourceIdentifier.name);
+  }
+};
+
 /**
  * An interface for a Thrift "type system", which is a store of schema
  * information.

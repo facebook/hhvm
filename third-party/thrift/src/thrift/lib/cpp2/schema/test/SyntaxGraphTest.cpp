@@ -793,6 +793,13 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
       type_system::PresenceQualifier::OPTIONAL_);
   EXPECT_EQ(structNode.fields()[0].type().asStruct().uri(), uri);
   EXPECT_EQ(&structNode.fields()[0].type().asStruct(), &structNode);
+  EXPECT_EQ(
+      &structNode,
+      &typeSystem
+           .getUserDefinedTypeBySourceIdentifier(
+               {"file://thrift/lib/cpp2/schema/test/syntax_graph.thrift",
+                "TestRecursiveStruct"})
+           ->asStruct());
 
   EXPECT_EQ(&syntaxGraph.asTypeSystemStructNode(def->asStruct()), &structNode);
   const auto& sgStructNode = syntaxGraph.asSyntaxGraphStructNode(structNode);
@@ -812,6 +819,13 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
   EXPECT_EQ(
       &mainProgram.definitionsByName().at("TestUnion")->asUnion(),
       &sgUnionNode);
+  EXPECT_EQ(
+      &unionNode,
+      &typeSystem
+           .getUserDefinedTypeBySourceIdentifier(
+               {"file://thrift/lib/cpp2/schema/test/syntax_graph.thrift",
+                "TestUnion"})
+           ->asUnion());
   checkAnnotationsOnTestUnion(sgUnionNode);
   {
     const auto& annot = *unionNode.getAnnotationOrNull(
@@ -872,6 +886,13 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
   EXPECT_EQ(enumNode.values()[1].i32, 1);
   EXPECT_EQ(enumNode.values()[2].name, "VALUE_2");
   EXPECT_EQ(enumNode.values()[2].i32, 2);
+  EXPECT_EQ(
+      &enumNode,
+      &typeSystem
+           .getUserDefinedTypeBySourceIdentifier(
+               {"file://thrift/lib/cpp2/schema/test/syntax_graph.thrift",
+                "TestEnum"})
+           ->asEnum());
   const auto& sgEnumNode = syntaxGraph.asSyntaxGraphEnumNode(enumNode);
   EXPECT_EQ(
       &mainProgram.definitionsByName().at("TestEnum")->asEnum(), &sgEnumNode);

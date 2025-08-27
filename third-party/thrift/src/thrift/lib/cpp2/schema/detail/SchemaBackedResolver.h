@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/schema/SchemaV1.h>
 #include <thrift/lib/cpp2/schema/detail/Resolver.h>
 
@@ -42,6 +43,9 @@ class SchemaBackedResolver : public Resolver {
    */
   virtual const DefinitionNode* getDefinitionNodeByUri(
       std::string_view uri) const;
+
+  virtual const DefinitionNode* getDefinitionNodeBySourceIdentifier(
+      type_system::SourceIdentifierView sourceIdentifier) const;
 
  protected:
   folly::not_null_unique_ptr<SchemaIndex> index_;

@@ -879,7 +879,7 @@ std::optional<type_system::SerializableRecord> toFieldCustomDefault(
   return toSerializableRecord(type, *value);
 }
 
-class TypeSystemFacade final : public type_system::TypeSystem {
+class TypeSystemFacade final : public type_system::SourceIndexedTypeSystem {
   // Thrift files (and therefore SyntaxGraph) cannot define opaque alias types.
   // Therefore, they are not necessary for the TypeSystem for SyntaxGraph.
   using TSDefinition = std::variant<
@@ -905,6 +905,27 @@ class TypeSystemFacade final : public type_system::TypeSystem {
     // guaranteed to be possible as we don't require URIs for all user-defined
     // types.
     return std::nullopt;
+  }
+
+  std::optional<type_system::DefinitionRef>
+  getUserDefinedTypeBySourceIdentifier(
+      type_system::SourceIdentifierView sourceIdentifier) const override {
+    if (const DefinitionNode* def =
+            resolver_.getDefinitionNodeBySourceIdentifier(sourceIdentifier)) {
+      return convertUserDefinedType(def);
+    }
+    return std::nullopt;
+  }
+
+  std::optional<type_system::SourceIdentifierView>
+  getSourceIdentiferForUserDefinedType(
+      type_system::DefinitionRef) const override {
+    throw std::runtime_error("not implemented");
+  }
+
+  type_system::SourceIndexedTypeSystem::NameToDefinitionsMap
+  getUserDefinedTypesAtLocation(std::string_view) const override {
+    throw std::runtime_error("not implemented");
   }
 
   // Convert the definition to TypeSystem's representation.
@@ -1165,7 +1186,7 @@ class TypeSystemFacade final : public type_system::TypeSystem {
 };
 } // namespace
 
-const type_system::TypeSystem& SyntaxGraph::asTypeSystem() const {
+const type_system::SourceIndexedTypeSystem& SyntaxGraph::asTypeSystem() const {
   if (auto facade = typeSystemFacade_.rlock(); *facade) {
     return **facade;
   }

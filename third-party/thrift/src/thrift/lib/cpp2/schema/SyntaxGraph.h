@@ -1714,14 +1714,15 @@ class SyntaxGraph final : public detail::WithDebugPrinting<SyntaxGraph> {
   const ProgramNode& findProgramByName(std::string_view name) const;
 
   /**
-   * Provides a view of all definitions in the schema as a TypeSystem.
+   * Provides a view of all definitions in the schema as a
+   * SourceIndexedTypeSystem.
    *
    * This object must be kept alive for the lifetime of the returned object.
    *
    * Throws `std::runtime_error` if this instance does not support URI-based
    * lookup (which does not happen with any official Resolver implementations).
    */
-  const type_system::TypeSystem& asTypeSystem() const;
+  const type_system::SourceIndexedTypeSystem& asTypeSystem() const;
 
   /**
    * Allows converting a SyntaxGraph node into its corresponding TypeSystem
@@ -1760,7 +1761,8 @@ class SyntaxGraph final : public detail::WithDebugPrinting<SyntaxGraph> {
 
  private:
   folly::not_null_unique_ptr<const detail::Resolver> resolver_;
-  mutable folly::Synchronized<std::unique_ptr<type_system::TypeSystem>>
+  mutable folly::Synchronized<
+      std::unique_ptr<type_system::SourceIndexedTypeSystem>>
       typeSystemFacade_;
 
   friend const DefinitionNode& detail::lookUpDefinition(

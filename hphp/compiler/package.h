@@ -97,6 +97,7 @@ enum class FileInBuildReason {
   fromSymbolRefs,
   fromPackageV1,
   fromPackageV2,
+  fromPackageV2Soft,
   fromSymbolRefsAndPackageV2,
   noFilepath,
   unknownFile,

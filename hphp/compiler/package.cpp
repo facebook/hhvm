@@ -1501,6 +1501,8 @@ const char* show(FileInBuildReason r) {
       return "fromPackageV1";
     case FileInBuildReason::fromPackageV2:
       return "fromPackageV2";
+    case FileInBuildReason::fromPackageV2Soft:
+      return "fromPackageV2Soft";
     case FileInBuildReason::fromSymbolRefsAndPackageV2:
       return "fromSymbolRefsAndPackageV2";
     case FileInBuildReason::notIncluded:

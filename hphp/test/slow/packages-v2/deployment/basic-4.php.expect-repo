@@ -4,4 +4,5 @@ f [fromPackageV2] basic-3.php
 f [fromPackageV2] basic-4.php
 f [fromPackageV2] prod/foo.inc.php
 f [fromPackageV2] prod/internal_prod/zap.inc.php
+f [fromPackageV2Soft] softprod/quz.inc.php
 I am in prod/internal_prod/

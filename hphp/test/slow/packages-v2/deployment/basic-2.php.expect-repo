@@ -6,5 +6,6 @@ f [fromPackageV2] prod/foo.inc.php
 f [fromPackageV2] prod/intern/bar.inc.php
 f [fromPackageV2] prod/internal_prod/zap.inc.php
 f [fromPackageV2] prod/zot.inc.php
+f [fromPackageV2Soft] softprod/quz.inc.php
 I am foo in prod/
 I am bar in prod/intern/

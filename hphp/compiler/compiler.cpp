@@ -1126,7 +1126,7 @@ bool process(CompilerOptions &po) {
     * anti-lexicographic order so a simple linear search returns the most
     * precise path that includes a given file.
     */
-  std::vector<std::pair<std::string , bool>> pathsInDeployment;
+  std::vector<std::pair<std::string, DeployKind>> pathsInDeployment;
 
   if (!Cfg::Eval::ActiveDeployment.empty()) {
     auto const& packageInfo =
@@ -1145,17 +1145,17 @@ bool process(CompilerOptions &po) {
     if (Cfg::Eval::PackageV2) {
       // PackageV2: precompute a sorted mapping (include_paths -> in_active_deployment)
       for (auto const& it : packageInfo.packages()) {
-        bool isPackageDeployed =
-          (activeDeployment->second).m_packages.contains(it.first);
+        auto const deployKind =
+          activeDeployment->second.getDeployKind(it.first);
         for (auto ip : it.second.m_include_paths) {
-          pathsInDeployment.push_back(std::pair(ip, isPackageDeployed));
+          pathsInDeployment.push_back(std::pair(ip, deployKind));
         }
       }
       std::sort(pathsInDeployment.begin(), pathsInDeployment.end(), std::greater());
       // files that do not have a __PackageOverride and do not match an
       // include_path belong to the default package, which is always included
       // in the active deployment
-      pathsInDeployment.push_back(std::pair(Cfg::Server::SourceRoot + po.inputDir, true));
+      pathsInDeployment.push_back(std::pair(Cfg::Server::SourceRoot + po.inputDir, DeployKind::Hard));
     } else {
       // PackageV1: precompute the set of modules in the current deployment
       moduleInDeployment.reserve(index->modules.size());
@@ -1367,7 +1367,7 @@ bool process(CompilerOptions &po) {
     assertx((Cfg::Eval::PackageV2 && buildMode != PackageV2BuildMode::packageV2Disabled) ||
             (!Cfg::Eval::PackageV2 && buildMode == PackageV2BuildMode::packageV2Disabled));
 
-    auto isIncludedByPackageV2 = [&](const Package::ParseMeta& p) {
+    auto deployedByPackageV2 = [&](const Package::ParseMeta& p) {
       if (isPackageV2Enabled(buildMode) && !Cfg::Eval::ActiveDeployment.empty()) {
         // emit should never be invoked on files excluded from the build
         // with --exclude-file or --exclude-pattern
@@ -1380,7 +1380,7 @@ bool process(CompilerOptions &po) {
            RepoOptions::forFile(po.inputDir.c_str()).packageInfo();
           auto const activeDeployment =
             packageInfo.deployments().find(Cfg::Eval::ActiveDeployment);
-          return ((activeDeployment->second).m_packages.contains(p.m_packageOverride->data()));
+          return activeDeployment->second.getDeployKind(p.m_packageOverride->data());
         }
         // match file with the include_path declarations and return
         // if most precise one that matches belongs to the active deployment
@@ -1391,7 +1391,7 @@ bool process(CompilerOptions &po) {
           }
         }
       }
-      return false;
+      return DeployKind::NotDeployed;
     };
 
     auto const includeInBuildReason = [&] (const Package::ParseMeta& p) {
@@ -1405,19 +1405,23 @@ bool process(CompilerOptions &po) {
 
       if (Cfg::Eval::PackageV2) {
         assertx(!(Cfg::Eval::ActiveDeployment.empty()));
-        auto const includedByPackageV2 = isIncludedByPackageV2(p);
+        auto const deployed = deployedByPackageV2(p);
         if (emitPass == EmitPass::SymbolRefsOnDemandFiles)  {
-          if (includedByPackageV2) {
+          if (deployed != DeployKind::NotDeployed) {
             return FileInBuildReason::fromSymbolRefsAndPackageV2;
           } else {
             return FileInBuildReason::fromSymbolRefs;
           }
         }
-        if (includedByPackageV2) {
+        if (deployed != DeployKind::NotDeployed) {
           if (emitPass == EmitPass::IncludeDirFiles) {
             return FileInBuildReason::fromSymbolRefsAndPackageV2;
           } else {
-            return FileInBuildReason::fromPackageV2;
+            // Only consider soft-include when a build is fully
+            // defined by packages
+            return deployed == DeployKind::Soft
+              ? FileInBuildReason::fromPackageV2Soft
+              : FileInBuildReason::fromPackageV2;
           }
         } else if (emitPass == EmitPass::PackageV2RulesOnly) {
           return FileInBuildReason::notIncluded;

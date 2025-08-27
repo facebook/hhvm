@@ -1,19 +1,26 @@
 [packages]
 
+[packages.softprod]
+include_paths=["//softprod"]
+
 [packages.prod]
 #include_paths=["//prod/", "//basic-1.php", "//basic-2.php", "//basic-3.php"]
 include_paths=["//prod/", "//"]
+soft_includes=["softprod"]
 
 [packages.intern]
 include_paths=["//prod/intern/"]
 includes=["prod"]
+soft_includes=["softprod"]
 
 [deployments]
 
 [deployments.my-prod]
 packages = ["prod"]
+soft_packages = ["softprod"]
 domains = ['www\.my-prod\.com']
 
 [deployments.my-intern]
 packages = ["intern", "prod"]
+soft_packages = ["softprod"]
 domains = ['www\.my-intern\.com']

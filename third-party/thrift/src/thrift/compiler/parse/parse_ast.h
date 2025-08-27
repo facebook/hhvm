@@ -65,7 +65,7 @@ struct parsing_params {
    * Determines whether implicit URIs are generated and explicit URIs are
    * allowed for typedefs without the @thrift.AllowLegacyTypedefUri annotation.
    */
-  bool typedef_uri_requires_annotation = false;
+  bool typedef_uri_requires_annotation = true;
 
   /**
    * Whether to use the legacy type ref resolution behavior, which produces a

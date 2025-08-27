@@ -387,6 +387,16 @@ const ProgramNode& SyntaxGraph::findProgramByName(std::string_view name) const {
       fmt::format("Program not found for name '{}'", name));
 }
 
+const ProgramNode& SyntaxGraph::findProgramByPath(std::string_view path) const {
+  for (const ProgramNode* program : resolver_->programs()) {
+    if (program->path() == path) {
+      return *program;
+    }
+  }
+  folly::throw_exception<std::out_of_range>(
+      fmt::format("Program not found for path '{}'", path));
+}
+
 namespace detail {
 
 WithAnnotations::WithAnnotations(std::vector<Annotation>&& annotations)

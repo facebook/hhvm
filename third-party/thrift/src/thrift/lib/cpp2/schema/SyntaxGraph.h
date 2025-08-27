@@ -1713,6 +1713,12 @@ class SyntaxGraph final : public detail::WithDebugPrinting<SyntaxGraph> {
    */
   const ProgramNode& findProgramByName(std::string_view name) const;
 
+  // TODO(dokwon): Add indexing for perf.
+  /**
+   * Find program by path.
+   */
+  const ProgramNode& findProgramByPath(std::string_view path) const;
+
   /**
    * Provides a view of all definitions in the schema as a
    * SourceIndexedTypeSystem.

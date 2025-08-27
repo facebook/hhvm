@@ -16,7 +16,9 @@
 
 #pragma once
 
+#include <mutex>
 #include <stdexcept>
+#include <unordered_set>
 
 #include <fmt/format.h>
 #include <folly/Likely.h>
@@ -58,6 +60,43 @@
 
 namespace apache::thrift::detail {
 
+class TestOnlyFunctionRegistry {
+ public:
+  static bool isTestOnly(const char* name) {
+    return getInstance().isTestOnlyImpl(name);
+  }
+
+  static void markAsTestOnly(const char* name) {
+    getInstance().markAsTestOnlyImpl(name);
+  }
+
+ private:
+  FOLLY_EXPORT static TestOnlyFunctionRegistry& getInstance() {
+    static TestOnlyFunctionRegistry instance;
+    return instance;
+  }
+
+  TestOnlyFunctionRegistry() = default;
+
+  bool isTestOnlyImpl(const char* name) const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    return testOnlyFunctions_.find(name) != testOnlyFunctions_.end();
+  }
+
+  void markAsTestOnlyImpl(const char* name) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    testOnlyFunctions_.insert(name);
+  }
+
+  mutable std::mutex mutex_;
+  std::unordered_set<std::string> testOnlyFunctions_;
+};
+
+// Helper function to mark a function as test-only
+inline void markFunctionAsTestOnly(const char* name) {
+  TestOnlyFunctionRegistry::markAsTestOnly(name);
+}
+
 template <typename Sig>
 class PluggableFunction;
 
@@ -83,9 +122,12 @@ class PluggableFunction<Ret(Args...)> {
             return " pluggable function: override after override";
         }
       }();
-
+      // Allow overrides if they're coming from test functions or if late
+      // overrides are allowed
       if (!(allowLateOverride_ &&
-            reason == Reason::OVERRIDE_AFTER_INVOCATION)) {
+            reason == Reason::OVERRIDE_AFTER_INVOCATION) &&
+          !(TestOnlyFunctionRegistry::isTestOnly(name_) &&
+            reason == Reason::OVERRIDE_AFTER_OVERRIDE)) {
         std::string msg = fmt::format("[{}] {}", name_, reasonText);
         folly::terminate_with<std::logic_error>(msg);
       }
@@ -145,4 +187,24 @@ class PluggableFunction<Ret(Args...)> {
   _ret THRIFT__PLUGGABLE_FUNC_IMPL_##_name(__VA_ARGS__); \
   static bool THRIFT__PLUGGABLE_FUNC_SETTER_##_name =    \
       (_name = THRIFT__PLUGGABLE_FUNC_IMPL_##_name, 0);  \
+  _ret THRIFT__PLUGGABLE_FUNC_IMPL_##_name(__VA_ARGS__)
+
+/**
+ * This is a test-friendly version of THRIFT_PLUGGABLE_FUNC_SET that
+ * overrides any existing implementation, including previously set ones.
+ * This is useful in tests where we need to ensure our test implementation
+ * is used regardless of any existing implementations.
+ *
+ * When used, this macro will define the implementation function and
+ * forcibly set it as the active implementation, overriding any existing ones.
+ *
+ * Additionally, this macro marks the function as "test-only", which prevents
+ * it from being overridden by other functions using THRIFT_PLUGGABLE_FUNC_SET.
+ */
+#define THRIFT_PLUGGABLE_FUNC_SET_TEST(_ret, _name, ...)                 \
+  _ret THRIFT__PLUGGABLE_FUNC_IMPL_##_name(__VA_ARGS__);                 \
+  static bool THRIFT__PLUGGABLE_FUNC_TEST_MARKER_##_name =               \
+      (::apache::thrift::detail::markFunctionAsTestOnly(#_name), false); \
+  static bool THRIFT__PLUGGABLE_FUNC_SETTER_##_name =                    \
+      (_name = THRIFT__PLUGGABLE_FUNC_IMPL_##_name, 0);                  \
   _ret THRIFT__PLUGGABLE_FUNC_IMPL_##_name(__VA_ARGS__)

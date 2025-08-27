@@ -46,7 +46,7 @@ constexpr std::string_view kPostProcessing = "POSTPROCESSING";
 
 namespace detail {
 
-THRIFT_PLUGGABLE_FUNC_SET(
+THRIFT_PLUGGABLE_FUNC_SET_TEST(
     InterceptorFrameworkMetadataStorage,
     initializeInterceptorFrameworkMetadataStorage) {
   FrameworkMetadata metadata;
@@ -56,7 +56,7 @@ THRIFT_PLUGGABLE_FUNC_SET(
   return storage;
 }
 
-THRIFT_PLUGGABLE_FUNC_SET(
+THRIFT_PLUGGABLE_FUNC_SET_TEST(
     void,
     postProcessFrameworkMetadata,
     InterceptorFrameworkMetadataStorage& storage,
@@ -65,7 +65,7 @@ THRIFT_PLUGGABLE_FUNC_SET(
   frameworkMetadata.postProcessing() = kPostProcessing;
 }
 
-THRIFT_PLUGGABLE_FUNC_SET(
+THRIFT_PLUGGABLE_FUNC_SET_TEST(
     std::unique_ptr<folly::IOBuf>,
     serializeFrameworkMetadata,
     InterceptorFrameworkMetadataStorage&& frameworkMetadata) {
@@ -74,7 +74,7 @@ THRIFT_PLUGGABLE_FUNC_SET(
       .move();
 }
 
-THRIFT_PLUGGABLE_FUNC_SET(
+THRIFT_PLUGGABLE_FUNC_SET_TEST(
     InterceptorFrameworkMetadataStorage,
     deserializeFrameworkMetadata,
     const folly::IOBuf& frameworkMetadataBuf) {
@@ -84,7 +84,7 @@ THRIFT_PLUGGABLE_FUNC_SET(
   return ret;
 }
 
-THRIFT_PLUGGABLE_FUNC_SET(
+THRIFT_PLUGGABLE_FUNC_SET_TEST(
     void,
     handleFrameworkMetadata,
     std::unique_ptr<folly::IOBuf>&& frameworkMetadata,

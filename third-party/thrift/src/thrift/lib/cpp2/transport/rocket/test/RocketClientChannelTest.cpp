@@ -52,7 +52,7 @@ std::unique_ptr<folly::IOBuf> makeFrameworkMetadataHook(
   return folly::IOBuf::copyBuffer("some_content");
 }
 
-THRIFT_PLUGGABLE_FUNC_SET(
+THRIFT_PLUGGABLE_FUNC_SET_TEST(
     std::unique_ptr<folly::IOBuf>,
     makeFrameworkMetadata,
     const RpcOptions& rpcOptions,

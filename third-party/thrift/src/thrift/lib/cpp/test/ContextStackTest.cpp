@@ -43,7 +43,7 @@ THRIFT_PLUGGABLE_FUNC_SET(
       folly::sformat("{}_postprocessed", storage.value<std::string>()));
 }
 
-THRIFT_PLUGGABLE_FUNC_SET(
+THRIFT_PLUGGABLE_FUNC_SET_TEST(
     std::unique_ptr<folly::IOBuf>,
     serializeFrameworkMetadata,
     InterceptorFrameworkMetadataStorage&& storage) {

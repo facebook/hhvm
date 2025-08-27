@@ -24,7 +24,7 @@
 using namespace apache::thrift;
 
 namespace apache::thrift::detail {
-THRIFT_PLUGGABLE_FUNC_SET(
+THRIFT_PLUGGABLE_FUNC_SET_TEST(
     void,
     handleFrameworkMetadata,
     std::unique_ptr<folly::IOBuf>&& frameworkMetadata,

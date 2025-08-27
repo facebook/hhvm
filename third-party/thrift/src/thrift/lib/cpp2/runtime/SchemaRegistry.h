@@ -83,7 +83,7 @@ namespace test {
 struct SchemaTest;
 }
 
-class SchemaRegistry : public type_system::TypeSystem {
+class SchemaRegistry : public type_system::SourceIndexedTypeSystem {
  public:
   // Access the global registry.
   static SchemaRegistry& get();
@@ -156,6 +156,15 @@ class SchemaRegistry : public type_system::TypeSystem {
     return syntaxGraph_->asSyntaxGraphDefinition(node);
   }
 
+  /**
+   * Gets TypeSystem node for given source identifier, or nullopt if not found.
+   */
+  std::optional<type_system::DefinitionRef>
+  getTypeSystemDefinitionRefBySourceIdentifier(
+      type_system::SourceIdentifierView sourceIdentifier) const {
+    return getUserDefinedTypeBySourceIdentifier(sourceIdentifier);
+  }
+
   explicit SchemaRegistry(BaseSchemaRegistry& base);
   ~SchemaRegistry() override;
 
@@ -172,6 +181,24 @@ class SchemaRegistry : public type_system::TypeSystem {
     // an empty optional even though we can enumerate all URIs for files with
     // the `any` cpp2 compiler option enabled.
     return std::nullopt;
+  }
+  std::optional<type_system::DefinitionRef>
+  getUserDefinedTypeBySourceIdentifier(
+      type_system::SourceIdentifierView sourceIdentifier) const override {
+    if (auto* node =
+            resolver_->getDefinitionNodeBySourceIdentifier(sourceIdentifier)) {
+      return syntaxGraph_->asTypeSystemDefinitionRef(*node);
+    }
+    return std::nullopt;
+  }
+  std::optional<type_system::SourceIdentifierView>
+  getSourceIdentiferForUserDefinedType(
+      type_system::DefinitionRef) const override {
+    throw std::runtime_error("not implemented");
+  }
+  type_system::SourceIndexedTypeSystem::NameToDefinitionsMap
+  getUserDefinedTypesAtLocation(std::string_view) const override {
+    throw std::runtime_error("not implemented");
   }
 
   using Ptr = std::shared_ptr<type::Schema>;

@@ -773,6 +773,32 @@ TEST(SyntaxGraphTest, getNode) {
   EXPECT_EQ(annot.definition().name(), "Experimental");
 }
 
+TEST(SyntaxGraphTest, getTypeSystemDefinitionRefBySourceIdentifier) {
+  auto& registry = SchemaRegistry::get();
+
+  EXPECT_EQ(
+      &registry.getTypeSystemDefinitionRef<test::TestStruct>().asStruct(),
+      &registry
+           .getTypeSystemDefinitionRefBySourceIdentifier(
+               {"file://thrift/lib/cpp2/schema/test/syntax_graph.thrift",
+                "TestStruct"})
+           ->asStruct());
+  EXPECT_EQ(
+      &registry.getTypeSystemDefinitionRef<test::TestUnion>().asUnion(),
+      &registry
+           .getTypeSystemDefinitionRefBySourceIdentifier(
+               {"file://thrift/lib/cpp2/schema/test/syntax_graph.thrift",
+                "TestUnion"})
+           ->asUnion());
+  EXPECT_EQ(
+      &registry.getTypeSystemDefinitionRef<test::TestEnum>().asEnum(),
+      &registry
+           .getTypeSystemDefinitionRefBySourceIdentifier(
+               {"file://thrift/lib/cpp2/schema/test/syntax_graph.thrift",
+                "TestEnum"})
+           ->asEnum());
+}
+
 TEST_F(ServiceSchemaTest, asTypeSystem) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
   auto& mainProgram = syntaxGraph.findProgramByName("syntax_graph");

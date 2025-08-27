@@ -70,6 +70,9 @@ class IncrementalResolver : public SchemaBackedResolver {
       type::ProgramId programId,
       folly::span<const std::string_view> bundle) const;
 
+  const DefinitionNode* getDefinitionNodeBySourceIdentifier(
+      type_system::SourceIdentifierView sourceIdentifier) const override;
+
   const ProgramNode& programOf(const type::ProgramId& id) const override;
   const protocol::Value& valueOf(const type::ValueId& id) const override;
   const DefinitionNode* definitionOf(

@@ -1009,6 +1009,12 @@ const DefinitionNode* IncrementalResolver::getDefinitionNodeByUri(
   return index_->definitionForUri(uri);
 }
 
+const DefinitionNode* IncrementalResolver::getDefinitionNodeBySourceIdentifier(
+    type_system::SourceIdentifierView sourceIdentifier) const {
+  auto schemaReadGuard = schema_.rlock();
+  return index_->definitionForSourceIdentifier(sourceIdentifier);
+}
+
 const DefinitionNode* IncrementalResolver::getDefinitionNodeByUri(
     const std::string_view uri,
     type::ProgramId programId,

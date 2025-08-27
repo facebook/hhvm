@@ -141,6 +141,11 @@ void HHVM_METHOD(
   data->endSink();
 }
 
+void HHVM_METHOD(TClientBufferedStream, disable16KBBufferingPolicy) {
+  auto data = TClientBufferedStream::GetDataOrThrowException(this_);
+  data->use16KBBufferingPolicy_ = false;
+}
+
 Object HHVM_METHOD(TClientBufferedStream, genNext) {
   auto data = TClientBufferedStream::GetDataOrThrowException(this_);
   if (!data->streamBridge_) {
@@ -350,6 +355,7 @@ static struct ThriftExtension final : Extension {
     Native::registerNativeDataInfo<TClientBufferedStream>(
       Native::NDIFlags::NO_COPY);
     HHVM_ME(TClientBufferedStream, genNext);
+    HHVM_ME(TClientBufferedStream, disable16KBBufferingPolicy);
 
     Native::registerNativeDataInfo<TClientSink>(Native::NDIFlags::NO_COPY);
     HHVM_ME(TClientSink, sendPayloadOrSinkComplete);

@@ -287,8 +287,10 @@ struct TClientBufferedStream : SystemLib::ClassLoader<"TClientBufferedStream"> {
   }
 
   bool shouldRequestMore() {
-    return (outstanding_ <= bufferOptions_.chunkSize / 2) ||
-        (payloadDataSize_ >= kRequestCreditPayloadSize);
+    if (outstanding_ <= bufferOptions_.chunkSize / 2) {
+      return true;
+    }
+    return use16KBBufferingPolicy_ && (payloadDataSize_ >= kRequestCreditPayloadSize);
   }
 
   BufferAndErrorPair clientQueueToVec() {
@@ -338,6 +340,7 @@ struct TClientBufferedStream : SystemLib::ClassLoader<"TClientBufferedStream"> {
 
  private:
   Object genNext();
+  void disable16KBBufferingPolicy();
 
  public:
   apache::thrift::detail::ClientStreamBridge::ClientPtr streamBridge_;
@@ -345,6 +348,7 @@ struct TClientBufferedStream : SystemLib::ClassLoader<"TClientBufferedStream"> {
   apache::thrift::detail::ClientStreamBridge::ClientQueue queue_;
   int32_t outstanding_ = 0;
   size_t payloadDataSize_ = 0;
+  bool use16KBBufferingPolicy_ = true;
   static constexpr size_t kRequestCreditPayloadSize = 16384;
 };
 

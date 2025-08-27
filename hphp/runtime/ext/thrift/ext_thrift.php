@@ -148,6 +148,9 @@ final class TClientBufferedStream {
 
   <<__Native>>
   public function genNext(): Awaitable<(?vec<string>,?string)>;
+
+  <<__Native>>
+  public function disable16KBBufferingPolicy(): void;
 }
 
 <<__NativeData>>

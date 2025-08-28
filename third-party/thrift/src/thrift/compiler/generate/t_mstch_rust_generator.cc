@@ -158,8 +158,8 @@ bool can_derive_ord(const t_type* type) {
   // value implement Eq.
   if (type->is<t_map>() && !has_custom_type_annotation) {
     auto map_type = dynamic_cast<const t_map*>(type);
-    auto key_elem_type = map_type->get_key_type();
-    auto val_elem_type = map_type->get_val_type();
+    auto key_elem_type = &map_type->key_type().deref();
+    auto val_elem_type = &map_type->val_type().deref();
 
     return key_elem_type && val_elem_type && can_derive_ord(key_elem_type) &&
         can_derive_ord(val_elem_type);
@@ -388,9 +388,9 @@ bool type_has_transitive_adapter(
     auto map_type = dynamic_cast<const t_map*>(type);
     if (map_type) {
       return type_has_transitive_adapter(
-                 map_type->get_key_type(), step_through_newtypes) ||
+                 &map_type->key_type().deref(), step_through_newtypes) ||
           type_has_transitive_adapter(
-                 map_type->get_val_type(), step_through_newtypes);
+                 &map_type->val_type().deref(), step_through_newtypes);
     }
   } else if (type->is<t_struct>() || type->is<t_union>()) {
     auto struct_type = dynamic_cast<const t_structured*>(type);
@@ -609,8 +609,8 @@ std::string get_resolved_name(const t_type* t) {
   if (auto c = dynamic_cast<const t_map*>(t)) {
     return fmt::format(
         "map<{},{}>",
-        get_resolved_name(c->get_key_type()),
-        get_resolved_name(c->get_val_type()));
+        get_resolved_name(&c->key_type().deref()),
+        get_resolved_name(&c->val_type().deref()));
   }
   return t->get_full_name();
 }
@@ -1110,8 +1110,10 @@ class rust_mstch_program : public mstch_program {
     } else if (const t_set* set_type = dynamic_cast<const t_set*>(type)) {
       dependent = generate_reference_set(set_type->get_elem_type());
     } else if (const t_map* map_type = dynamic_cast<const t_map*>(type)) {
-      bool dependent_map_key = generate_reference_set(map_type->get_key_type());
-      bool dependent_map_val = generate_reference_set(map_type->get_val_type());
+      bool dependent_map_key =
+          generate_reference_set(&map_type->key_type().deref());
+      bool dependent_map_val =
+          generate_reference_set(&map_type->val_type().deref());
       dependent = dependent_map_key || dependent_map_val;
     }
     return dependent;
@@ -2150,8 +2152,8 @@ mstch::node mstch_rust_value::map_entries() {
   if (!map_type) {
     return mstch::node();
   }
-  auto key_type = map_type->get_key_type();
-  auto value_type = map_type->get_val_type();
+  auto key_type = &map_type->key_type().deref();
+  auto value_type = &map_type->val_type().deref();
 
   mstch::array entries;
   for (auto entry : const_value_->get_map()) {

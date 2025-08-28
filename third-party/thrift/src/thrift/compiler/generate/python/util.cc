@@ -71,9 +71,9 @@ static void get_needed_includes_by_patch_impl(
   }
   if (const t_map* asMap = type.try_as<t_map>()) {
     get_needed_includes_by_patch_impl(
-        root, *asMap->get_key_type(), seen, result);
+        root, asMap->key_type().deref(), seen, result);
     get_needed_includes_by_patch_impl(
-        root, *asMap->get_val_type(), seen, result);
+        root, asMap->val_type().deref(), seen, result);
   }
   if (const t_structured* asStructured = type.try_as<t_structured>()) {
     if (!should_generate_patch(asStructured)) {
@@ -106,8 +106,8 @@ bool type_contains_patch(const t_type* type) {
   }
 
   if (auto map = dynamic_cast<t_map const*>(type)) {
-    return type_contains_patch(map->get_key_type()) ||
-        type_contains_patch(map->get_val_type());
+    return type_contains_patch(&map->key_type().deref()) ||
+        type_contains_patch(&map->val_type().deref());
   }
 
   if (auto set = dynamic_cast<t_set const*>(type)) {

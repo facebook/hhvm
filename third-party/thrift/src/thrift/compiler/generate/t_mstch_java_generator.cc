@@ -1267,8 +1267,8 @@ class mstch_java_const : public mstch_const {
     // we don't have the constant values to work with.
     if (const_->type()->is<t_map>()) {
       t_map* map = (t_map*)const_->type();
-      if (map->get_key_type()->is<t_enum>()) {
-        return map->get_key_type()->has_unstructured_annotation(
+      if (map->key_type()->is<t_enum>()) {
+        return map->key_type()->has_unstructured_annotation(
             "java.swift.skip_enum_name_map");
       }
     }

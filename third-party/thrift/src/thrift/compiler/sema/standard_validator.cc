@@ -277,7 +277,7 @@ class adapter_or_wrapper_checker {
         type = inner_typedf->get_type();
       } else if (type->is<t_container>()) {
         if (const auto* map = dynamic_cast<const t_map*>(type)) {
-          type = map->get_val_type();
+          type = &map->val_type().deref();
         } else if (const auto* list = dynamic_cast<const t_list*>(type)) {
           type = list->get_elem_type();
         } else {

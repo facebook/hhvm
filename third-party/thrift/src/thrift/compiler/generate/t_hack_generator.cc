@@ -1443,7 +1443,7 @@ void t_hack_generator::generate_json_map_element(
     const std::string& key,
     const std::string& value,
     const std::string& prefix_thrift) {
-  const t_type* keytype = tmap->get_key_type()->get_true_type();
+  const t_type* keytype = tmap->key_type()->get_true_type();
   auto error = std::runtime_error(
       "compiler error: Thrift Hack compiler"
       "does not support complex types as the key of a map.");
@@ -1891,7 +1891,7 @@ bool t_hack_generator::is_hack_const_type(const t_type* type) {
     } else if (const auto* tset = dynamic_cast<const t_set*>(type)) {
       return is_hack_const_type(tset->get_elem_type());
     } else if (const auto* tmap = dynamic_cast<const t_map*>(type)) {
-      return is_hack_const_type(tmap->get_key_type()) &&
+      return is_hack_const_type(&tmap->key_type().deref()) &&
           is_hack_const_type(tmap->get_val_type());
     }
   }
@@ -2123,7 +2123,7 @@ std::string t_hack_generator::render_const_value_helper(
       out << ")";
     }
   } else if (const auto* tmap = dynamic_cast<const t_map*>(type)) {
-    const t_type* ktype = tmap->get_key_type();
+    const t_type* ktype = &tmap->key_type().deref();
     const t_type* vtype = tmap->get_val_type();
     if (!hack_collections_ || structured_annotations || force_arrays) {
       out << "dict[\n";
@@ -2371,7 +2371,7 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
     auto tmap_tmeta = t_const_value::make_map();
     tmap_tmeta->add_map(
         std::make_unique<t_const_value>("keyType"),
-        type_to_tmeta(tmap->get_key_type()));
+        type_to_tmeta(&tmap->key_type().deref()));
     tmap_tmeta->add_map(
         std::make_unique<t_const_value>("valueType"),
         type_to_tmeta(tmap->get_val_type()));
@@ -2962,7 +2962,7 @@ void t_hack_generator::generate_php_type_spec(
     }
     indent(out) << "'class' => " << sname << "::class,\n";
   } else if (const auto* tmap = dynamic_cast<const t_map*>(t)) {
-    const t_type* ktype = tmap->get_key_type();
+    const t_type* ktype = &tmap->key_type().deref();
     const t_type* vtype = tmap->get_val_type();
     if (find_hack_adapter(ktype)) {
       throw std::runtime_error(
@@ -3231,7 +3231,7 @@ void t_hack_generator::generate_hack_array_from_shape_lambda(
     std::ostream& out, t_name_generator& namer, const t_map* t) {
   bool stringify_map_keys = false;
   if (shape_arraykeys_) {
-    const t_type* key_type = t->get_key_type()->get_true_type();
+    const t_type* key_type = t->key_type()->get_true_type();
     if (key_type->is<t_primitive_type>() && key_type->is_string_or_binary()) {
       stringify_map_keys = true;
     }
@@ -3671,8 +3671,10 @@ bool t_hack_generator::
     if (ttype->is<t_map>()) {
       container_type = "Dict\\";
       if (shape_arraykeys_) {
-        const t_type* key_type =
-            static_cast<const t_map*>(ttype)->get_key_type()->get_true_type();
+        const t_type* key_type = static_cast<const t_map*>(ttype)
+                                     ->key_type()
+                                     .deref()
+                                     .get_true_type();
         if (is_shape_method && key_type->is<t_primitive_type>() &&
             key_type->is_string_or_binary()) {
           stringify_map_keys = true;
@@ -4939,7 +4941,7 @@ std::string t_hack_generator::render_service_metadata_response(
     } else if (const auto* tset = dynamic_cast<const t_set*>(next)) {
       queue.push(tset->get_elem_type());
     } else if (const auto* tmap = dynamic_cast<const t_map*>(next)) {
-      queue.push(tmap->get_key_type());
+      queue.push(&tmap->key_type().deref());
       queue.push(tmap->get_val_type());
     } else if (dynamic_cast<const t_interaction*>(next)) {
       continue;
@@ -6658,7 +6660,8 @@ std::string t_hack_generator::type_to_typehint(
         ">";
   } else if (const auto* tmap = dynamic_cast<const t_map*>(ttype)) {
     std::string prefix = get_container_keyword(ttype, variations);
-    std::string key_type = type_to_typehint(tmap->get_key_type(), variations);
+    std::string key_type =
+        type_to_typehint(&tmap->key_type().deref(), variations);
     if (variations[TypeToTypehintVariations::IS_SHAPE] && shape_arraykeys_ &&
         key_type == "string") {
       key_type = "arraykey";
@@ -6759,7 +6762,7 @@ std::string t_hack_generator::type_to_param_typehint(
     if (strict_types_) {
       return prefix + type_to_typehint(ttype);
     } else {
-      const t_type* key_type = tmap->get_key_type();
+      const t_type* key_type = &tmap->key_type().deref();
       return prefix + "KeyedContainer<" +
           (!is_type_arraykey(*key_type) ? "arraykey"
                                         : type_to_param_typehint(key_type)) +

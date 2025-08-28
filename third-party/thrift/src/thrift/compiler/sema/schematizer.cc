@@ -831,7 +831,7 @@ protocol_value_builder::protocol_value_builder() : ty_{nullptr} {}
         return as_value_type();
       },
       [&](const t_map& map) {
-        return protocol_value_builder{*map.get_key_type()};
+        return protocol_value_builder{map.key_type().deref()};
       },
       [&](auto&&) -> protocol_value_builder {
         throw std::logic_error(fmt::format(

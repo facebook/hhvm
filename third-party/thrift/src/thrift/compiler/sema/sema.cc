@@ -280,9 +280,14 @@ void match_type_with_const_value(
         match_type_with_const_value(ctx, mctx, elem_type, set_val);
       }
     }
-  } else if (type->is<t_map>()) {
-    auto* key_type = dynamic_cast<const t_map*>(type)->get_key_type();
-    auto* val_type = dynamic_cast<const t_map*>(type)->get_val_type();
+  } else if (const auto* map_type = type->try_as<t_map>()) {
+    // TODO: t_type::get_type() is deprecated, alternate impl
+    // &map_type->key_type().deref() crashes the compiler test
+    // nonexist_type_in_variable for calling deref() on an unresolved type Fix
+    // this in order to deprecate use of get_type()
+    auto* key_type = map_type->key_type().get_type();
+    auto* val_type = map_type->val_type().get_type();
+
     if (value->kind() == t_const_value::CV_MAP) {
       for (auto map_val : value->get_map()) {
         match_type_with_const_value(ctx, mctx, key_type, map_val.first);

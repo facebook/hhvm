@@ -119,8 +119,8 @@ bool same_types(const t_type* a, const t_type* b) {
   } else if (resolved_a->is<t_map>()) {
     const auto* map_a = static_cast<const t_map*>(resolved_a);
     const auto* map_b = static_cast<const t_map*>(resolved_b);
-    return same_types(map_a->get_key_type(), map_b->get_key_type()) &&
-        same_types(map_a->get_val_type(), map_b->get_val_type());
+    return same_types(&map_a->key_type().deref(), &map_b->key_type().deref()) &&
+        same_types(&map_a->val_type().deref(), &map_b->val_type().deref());
   }
   return true;
 }
@@ -1342,8 +1342,8 @@ class cpp_mstch_type : public mstch_type {
       } else if (next->is<t_set>()) {
         queue.push(static_cast<const t_set*>(next)->get_elem_type());
       } else if (next->is<t_map>()) {
-        queue.push(static_cast<const t_map*>(next)->get_key_type());
-        queue.push(static_cast<const t_map*>(next)->get_val_type());
+        queue.push(&static_cast<const t_map*>(next)->key_type().deref());
+        queue.push(&static_cast<const t_map*>(next)->val_type().deref());
       } else {
         assert(false);
       }
@@ -2349,8 +2349,8 @@ class cpp_mstch_field : public mstch_field {
       return zero_copy_arg_impl(*true_type.as<t_set>().get_elem_type());
     } else if (true_type.is<t_map>()) {
       const auto& m = true_type.as<t_map>();
-      return zero_copy_arg_impl(*m.get_key_type()) ||
-          zero_copy_arg_impl(*m.get_val_type());
+      return zero_copy_arg_impl(m.key_type().deref()) ||
+          zero_copy_arg_impl(m.val_type().deref());
     }
     return false;
   }

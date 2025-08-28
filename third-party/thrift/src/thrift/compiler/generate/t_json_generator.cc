@@ -300,11 +300,13 @@ string t_json_generator::to_spec_args(const t_type* type) {
     return to_spec_args_named(type);
   } else if (type->is<t_map>()) {
     return R"({ "key_type" : { "type_enum" : ")" +
-        to_string(((t_map*)type)->get_key_type()) + R"(", "spec_args" : )" +
-        to_spec_args(((t_map*)type)->get_key_type()) +
+        to_string(&((t_map*)type)->key_type().deref()) +
+        R"(", "spec_args" : )" +
+        to_spec_args(&((t_map*)type)->key_type().deref()) +
         R"( }, "val_type" : { "type_enum" : ")" +
-        to_string(((t_map*)type)->get_val_type()) + R"(", "spec_args" : )" +
-        to_spec_args(((t_map*)type)->get_val_type()) + "} } ";
+        to_string(&((t_map*)type)->val_type().deref()) +
+        R"(", "spec_args" : )" +
+        to_spec_args(&((t_map*)type)->val_type().deref()) + "} } ";
   } else if (type->is<t_set>()) {
     return R"({ "type_enum" : ")" + to_string(((t_set*)type)->get_elem_type()) +
         R"(", "spec_args" : )" + to_spec_args(((t_set*)type)->get_elem_type()) +

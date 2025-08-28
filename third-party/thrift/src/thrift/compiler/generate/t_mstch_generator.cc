@@ -144,9 +144,10 @@ mstch::map t_mstch_generator::dump(const t_type& orig_type) {
         dump(*dynamic_cast<const t_set&>(type).get_elem_type()));
   } else if (type.is<t_map>()) {
     result.emplace(
-        "key_type", dump(*dynamic_cast<const t_map&>(type).get_key_type()));
+        "key_type", dump(dynamic_cast<const t_map&>(type).key_type().deref()));
     result.emplace(
-        "value_type", dump(*dynamic_cast<const t_map&>(type).get_val_type()));
+        "value_type",
+        dump(dynamic_cast<const t_map&>(type).val_type().deref()));
   } else if (type.is<t_typedef>()) {
     result.emplace(
         "typedef_type", dump(*dynamic_cast<const t_typedef&>(type).get_type()));

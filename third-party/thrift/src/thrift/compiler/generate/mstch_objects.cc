@@ -133,9 +133,7 @@ mstch::node mstch_type::get_set_type() {
 mstch::node mstch_type::get_key_type() {
   if (resolved_type_->is<t_map>()) {
     return context_.type_factory->make_mstch_object(
-        dynamic_cast<const t_map*>(resolved_type_)->get_key_type(),
-        context_,
-        pos_);
+        &resolved_type_->as<t_map>().key_type().deref(), context_, pos_);
   }
   return mstch::node();
 }
@@ -143,9 +141,7 @@ mstch::node mstch_type::get_key_type() {
 mstch::node mstch_type::get_value_type() {
   if (resolved_type_->is<t_map>()) {
     return context_.type_factory->make_mstch_object(
-        dynamic_cast<const t_map*>(resolved_type_)->get_val_type(),
-        context_,
-        pos_);
+        &resolved_type_->as<t_map>().val_type().deref(), context_, pos_);
   }
   return mstch::node();
 }
@@ -217,7 +213,7 @@ mstch::node mstch_const_value::map_elems() {
   std::pair<const t_type*, const t_type*> expected_types;
   if (expected_type_ && expected_type_->is<t_map>()) {
     const auto* m = dynamic_cast<const t_map*>(expected_type_);
-    expected_types = {m->get_key_type(), m->get_val_type()};
+    expected_types = {&m->key_type().deref(), &m->val_type().deref()};
   }
   return make_mstch_array(
       const_value_->get_map(),

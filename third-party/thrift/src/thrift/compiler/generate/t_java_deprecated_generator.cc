@@ -363,8 +363,8 @@ void t_java_deprecated_generator::print_const_value(
       indent(out) << "static {" << endl;
       indent_up();
     }
-    const t_type* ktype = ((t_map*)type)->get_key_type();
-    const t_type* vtype = ((t_map*)type)->get_val_type();
+    const t_type* ktype = &((t_map*)type)->key_type().deref();
+    const t_type* vtype = &((t_map*)type)->val_type().deref();
     const vector<pair<t_const_value*, t_const_value*>>& val = value->get_map();
     vector<pair<t_const_value*, t_const_value*>>::const_iterator v_iter;
     for (v_iter = val.begin(); v_iter != val.end(); ++v_iter) {
@@ -2321,8 +2321,8 @@ void t_java_deprecated_generator::generate_field_value_meta_data(
       generate_field_value_meta_data(out, elem_type);
     } else { // map
       indent(out) << "new MapMetaData(TType.MAP, ";
-      const t_type* key_type = ((t_map*)type)->get_key_type();
-      const t_type* val_type = ((t_map*)type)->get_val_type();
+      const t_type* key_type = &((t_map*)type)->key_type().deref();
+      const t_type* val_type = &((t_map*)type)->val_type().deref();
       generate_field_value_meta_data(out, key_type);
       out << ", ";
       generate_field_value_meta_data(out, val_type);
@@ -3384,8 +3384,8 @@ void t_java_deprecated_generator::generate_deserialize_map_element(
     ofstream& out, const t_map* tmap, string prefix) {
   string key = tmp("_key");
   string val = tmp("_val");
-  t_field fkey(*tmap->get_key_type(), key);
-  t_field fval(*tmap->get_val_type(), val);
+  t_field fkey(tmap->key_type().deref(), key);
+  t_field fval(tmap->val_type().deref(), val);
 
   indent(out) << declare_field(&fkey) << endl;
   indent(out) << declare_field(&fval) << endl;
@@ -3527,8 +3527,8 @@ void t_java_deprecated_generator::generate_serialize_container(
 
   if (ttype->is<t_map>()) {
     indent(out) << "oprot.writeMapBegin(new TMap("
-                << type_to_enum(((t_map*)ttype)->get_key_type()) << ", "
-                << type_to_enum(((t_map*)ttype)->get_val_type()) << ", "
+                << type_to_enum(&((t_map*)ttype)->key_type().deref()) << ", "
+                << type_to_enum(&((t_map*)ttype)->val_type().deref()) << ", "
                 << prefix << ".size()));" << endl;
   } else if (ttype->is<t_set>()) {
     indent(out) << "oprot.writeSetBegin(new TSet("
@@ -3543,9 +3543,9 @@ void t_java_deprecated_generator::generate_serialize_container(
   string iter = tmp("_iter");
   if (ttype->is<t_map>()) {
     indent(out) << "for (Map.Entry<"
-                << type_name(((t_map*)ttype)->get_key_type(), true, false)
+                << type_name(&((t_map*)ttype)->key_type().deref(), true, false)
                 << ", "
-                << type_name(((t_map*)ttype)->get_val_type(), true, false)
+                << type_name(&((t_map*)ttype)->val_type().deref(), true, false)
                 << "> " << iter << " : " << prefix << ".entrySet())";
   } else if (ttype->is<t_set>()) {
     indent(out) << "for (" << type_name(((t_set*)ttype)->get_elem_type()) << " "
@@ -3583,9 +3583,9 @@ void t_java_deprecated_generator::generate_serialize_container(
  */
 void t_java_deprecated_generator::generate_serialize_map_element(
     ofstream& out, const t_map* tmap, string iter, string /*map*/) {
-  t_field kfield(*tmap->get_key_type(), iter + ".getKey()");
+  t_field kfield(tmap->key_type().deref(), iter + ".getKey()");
   generate_serialize_field(out, &kfield, "");
-  t_field vfield(*tmap->get_val_type(), iter + ".getValue()");
+  t_field vfield(tmap->val_type().deref(), iter + ".getValue()");
   generate_serialize_field(out, &vfield, "");
 }
 
@@ -3632,8 +3632,8 @@ string t_java_deprecated_generator::type_name(
     }
     return prefix +
         (skip_generic ? ""
-                      : "<" + type_name(tmap->get_key_type(), true) + "," +
-                 type_name(tmap->get_val_type(), true) + ">");
+                      : "<" + type_name(&tmap->key_type().deref(), true) + "," +
+                 type_name(&tmap->val_type().deref(), true) + ">");
   } else if (ttype->is<t_set>()) {
     const t_set* tset = (t_set*)ttype;
     if (in_init) {
@@ -4100,8 +4100,8 @@ bool t_java_deprecated_generator::is_comparable(
     enclosing->pop_back();
     return ret;
   } else if (type->is<t_map>()) {
-    return is_comparable(((t_map*)type)->get_key_type(), enclosing) &&
-        is_comparable(((t_map*)type)->get_val_type(), enclosing);
+    return is_comparable(&((t_map*)type)->key_type().deref(), enclosing) &&
+        is_comparable(&((t_map*)type)->val_type().deref(), enclosing);
   } else if (type->is<t_set>()) {
     return is_comparable(((t_set*)type)->get_elem_type(), enclosing);
   } else if (type->is<t_list>()) {
@@ -4134,8 +4134,8 @@ bool t_java_deprecated_generator::type_has_naked_binary(const t_type* type) {
   } else if (type->is<t_structured>()) {
     return false;
   } else if (type->is<t_map>()) {
-    return type_has_naked_binary(((t_map*)type)->get_key_type()) ||
-        type_has_naked_binary(((t_map*)type)->get_val_type());
+    return type_has_naked_binary(&((t_map*)type)->key_type().deref()) ||
+        type_has_naked_binary(&((t_map*)type)->val_type().deref());
   } else if (type->is<t_set>()) {
     return type_has_naked_binary(((t_set*)type)->get_elem_type());
   } else if (type->is<t_list>()) {

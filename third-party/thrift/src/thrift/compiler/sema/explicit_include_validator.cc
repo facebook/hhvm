@@ -88,8 +88,8 @@ void visit_type(sema_context& ctx, const t_named& src, const t_type& type) {
     visit_type(ctx, src, *set.get_elem_type());
   } else if (type.is<t_map>()) {
     const auto& map = *dynamic_cast<const t_map*>(&type);
-    visit_type(ctx, src, *map.get_key_type());
-    visit_type(ctx, src, *map.get_val_type());
+    visit_type(ctx, src, map.key_type().deref());
+    visit_type(ctx, src, map.val_type().deref());
   }
 }
 } // namespace

@@ -71,8 +71,8 @@ class mstch_starlark_type : public mstch_type {
     }
     if (type->is<t_map>()) {
       const t_map* map = dynamic_cast<const t_map*>(type);
-      return is_supported_type(map->get_key_type()) &&
-          is_supported_type(map->get_val_type());
+      return is_supported_type(&map->key_type().deref()) &&
+          is_supported_type(&map->val_type().deref());
     }
     return false;
   }

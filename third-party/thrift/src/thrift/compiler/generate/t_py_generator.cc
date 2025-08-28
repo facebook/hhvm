@@ -547,11 +547,11 @@ void t_py_generator::generate_json_container(
                 << ".items():" << endl;
     indent_up();
 
-    generate_json_map_key(out, ((t_map*)ttype)->get_key_type(), kp, k);
+    generate_json_map_key(out, &((t_map*)ttype)->key_type().deref(), kp, k);
 
     generate_json_collection_element(
         out,
-        ((t_map*)ttype)->get_val_type(),
+        &((t_map*)ttype)->val_type().deref(),
         prefix_thrift,
         v,
         "[" + kp + "] = ",
@@ -1222,8 +1222,8 @@ string t_py_generator::render_const_value(
     indent_down();
     indent(out) << "})";
   } else if (type->is<t_map>()) {
-    const t_type* ktype = ((t_map*)type)->get_key_type();
-    const t_type* vtype = ((t_map*)type)->get_val_type();
+    const t_type* ktype = &((t_map*)type)->key_type().deref();
+    const t_type* vtype = &((t_map*)type)->val_type().deref();
     out << "{" << endl;
     indent_up();
     if (value->kind() == t_const_value::CV_MAP) {
@@ -3404,8 +3404,8 @@ void t_py_generator::generate_deserialize_map_element(
     string value_actual_type) {
   string key = tmp("_key");
   string val = tmp("_val");
-  t_field fkey(*tmap->get_key_type(), key);
-  t_field fval(*tmap->get_val_type(), val);
+  t_field fkey(tmap->key_type().deref(), key);
+  t_field fval(tmap->val_type().deref(), val);
 
   generate_deserialize_field(out, &fkey, "", false, key_actual_type);
   generate_deserialize_field(out, &fval, "", false, value_actual_type);
@@ -3538,8 +3538,8 @@ void t_py_generator::generate_serialize_container(
     ofstream& out, const t_type* ttype, string prefix) {
   if (ttype->is<t_map>()) {
     indent(out) << "oprot.writeMapBegin("
-                << type_to_enum(((t_map*)ttype)->get_key_type()) << ", "
-                << type_to_enum(((t_map*)ttype)->get_val_type()) << ", "
+                << type_to_enum(&((t_map*)ttype)->key_type().deref()) << ", "
+                << type_to_enum(&((t_map*)ttype)->val_type().deref()) << ", "
                 << "len(" << prefix << "))" << endl;
   } else if (ttype->is<t_set>()) {
     indent(out) << "oprot.writeSetBegin("
@@ -3602,10 +3602,10 @@ void t_py_generator::generate_serialize_container(
  */
 void t_py_generator::generate_serialize_map_element(
     ofstream& out, const t_map* tmap, string kiter, string viter) {
-  t_field kfield(*tmap->get_key_type(), kiter);
+  t_field kfield(tmap->key_type().deref(), kiter);
   generate_serialize_field(out, &kfield, "");
 
-  t_field vfield(*tmap->get_val_type(), viter);
+  t_field vfield(tmap->val_type().deref(), viter);
   generate_serialize_field(out, &vfield, "");
 }
 
@@ -3860,10 +3860,10 @@ string t_py_generator::type_to_spec_args(const t_type* ttype) {
     return ret + "]";
   } else if (ttype->is<t_map>()) {
     auto tmap = (t_map*)ttype;
-    return std::string("(") + type_to_enum(tmap->get_key_type()) + "," +
-        type_to_spec_args(tmap->get_key_type()) + "," +
-        type_to_enum(tmap->get_val_type()) + "," +
-        type_to_spec_args(tmap->get_val_type()) + ")";
+    return std::string("(") + type_to_enum(&tmap->key_type().deref()) + "," +
+        type_to_spec_args(&tmap->key_type().deref()) + "," +
+        type_to_enum(&tmap->val_type().deref()) + "," +
+        type_to_spec_args(&tmap->val_type().deref()) + ")";
 
   } else if (ttype->is<t_set>()) {
     return "(" + type_to_enum(((t_set*)ttype)->get_elem_type()) + "," +

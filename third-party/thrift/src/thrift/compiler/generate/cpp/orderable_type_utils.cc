@@ -169,13 +169,13 @@ bool type_is_orderable_walk(
     return result = !has_disqualifying_annotation &&
         type_is_orderable_walk(
                memo,
-               *asMap->get_key_type(),
+               *asMap->key_type(),
                &type,
                context,
                forceCustomTypeOrderable) &&
         type_is_orderable_walk(
                memo,
-               *asMap->get_val_type(),
+               *asMap->val_type(),
                &type,
                context,
                forceCustomTypeOrderable);
@@ -282,8 +282,8 @@ bool has_custom_set_or_map(
   if (const t_map* asMap = type.try_as<t_map>()) {
     // Examples:
     // 1: map<i32, CustomSet1> foo;
-    return has_custom_set_or_map(*asMap->get_key_type(), seen) ||
-        has_custom_set_or_map(*asMap->get_val_type(), seen);
+    return has_custom_set_or_map(asMap->key_type().deref(), seen) ||
+        has_custom_set_or_map(asMap->val_type().deref(), seen);
   }
   return false;
 }

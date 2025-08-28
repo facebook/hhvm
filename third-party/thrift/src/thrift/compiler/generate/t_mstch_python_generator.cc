@@ -225,8 +225,8 @@ bool is_invariant_container_type(const t_type* type) {
   const t_type* true_type = type->get_true_type();
   if (true_type->is<t_map>()) {
     const t_map* map_type = dynamic_cast<const t_map*>(true_type);
-    const t_type* key_type = map_type->get_key_type()->get_true_type();
-    const t_type* val_type = map_type->get_val_type()->get_true_type();
+    const t_type* key_type = map_type->key_type().deref().get_true_type();
+    const t_type* val_type = map_type->val_type().deref().get_true_type();
     return key_type->is<t_structured>() || key_type->is<t_container>() ||
         is_invariant_adapter(
                find_structured_adapter_annotation(*key_type), key_type) ||
@@ -498,9 +498,11 @@ class python_mstch_program : public mstch_program {
           dynamic_cast<const t_set&>(*true_type).get_elem_type(), is_typedef);
     } else if (true_type->is<t_map>()) {
       visit_type_with_typedef(
-          dynamic_cast<const t_map&>(*true_type).get_key_type(), is_typedef);
+          &dynamic_cast<const t_map&>(*true_type).key_type().deref(),
+          is_typedef);
       visit_type_with_typedef(
-          dynamic_cast<const t_map&>(*true_type).get_val_type(), is_typedef);
+          &dynamic_cast<const t_map&>(*true_type).val_type().deref(),
+          is_typedef);
     }
   }
 
@@ -1423,7 +1425,9 @@ class python_mstch_const_value : public mstch_const_value {
       const auto* type = ttype->get_true_type();
       if (type->is<t_map>()) {
         return context_.type_factory->make_mstch_object(
-            dynamic_cast<const t_map*>(type)->get_key_type(), context_, pos_);
+            &dynamic_cast<const t_map*>(type)->key_type().deref(),
+            context_,
+            pos_);
       }
     }
     return {};
@@ -1434,7 +1438,9 @@ class python_mstch_const_value : public mstch_const_value {
       const auto* type = ttype->get_true_type();
       if (type->is<t_map>()) {
         return context_.type_factory->make_mstch_object(
-            dynamic_cast<const t_map*>(type)->get_val_type(), context_, pos_);
+            &dynamic_cast<const t_map*>(type)->val_type().deref(),
+            context_,
+            pos_);
       }
     }
     return {};

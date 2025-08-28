@@ -2356,8 +2356,8 @@ void t_cocoa_generator::generate_deserialize_map_element(
     std::ofstream& out, const t_map* tmap, const std::string& fieldName) {
   std::string key = tmp("_key");
   std::string val = tmp("_val");
-  const t_type* key_type = tmap->get_key_type();
-  const t_type* valType = tmap->get_val_type();
+  const t_type* key_type = &tmap->key_type().deref();
+  const t_type* valType = &tmap->val_type().deref();
   t_field fkey(*key_type, key);
   t_field fval(*valType, val);
 
@@ -2524,9 +2524,9 @@ void t_cocoa_generator::generate_serialize_container(
 
   if (ttype->is<t_map>()) {
     indent(out) << "[outProtocol writeMapBeginWithKeyType: "
-                << type_to_enum(((t_map*)ttype)->get_key_type())
+                << type_to_enum(&((t_map*)ttype)->key_type().deref())
                 << " valueType: "
-                << type_to_enum(((t_map*)ttype)->get_val_type())
+                << type_to_enum(&((t_map*)ttype)->val_type().deref())
                 << " size: (int)[" << fieldName << " count]];" << std::endl;
   } else if (ttype->is<t_set>()) {
     indent(out) << "[outProtocol writeSetBeginWithElementType: "
@@ -2627,10 +2627,10 @@ void t_cocoa_generator::generate_serialize_map_element(
     const t_map* tmap,
     const std::string& key,
     const std::string& mapName) {
-  t_field kfield(*tmap->get_key_type(), key);
+  t_field kfield(tmap->key_type().deref(), key);
   generate_serialize_field(out, &kfield, decontainerize(&kfield, key));
   t_field vfield(
-      *tmap->get_val_type(), "[" + mapName + " objectForKey: " + key + "]");
+      tmap->val_type().deref(), "[" + mapName + " objectForKey: " + key + "]");
   generate_serialize_field(
       out, &vfield, decontainerize(&vfield, vfield.name()));
 }
@@ -2785,8 +2785,8 @@ void t_cocoa_generator::print_const_value(
     }
     out << std::endl;
   } else if (type->is<t_map>()) {
-    const t_type* ktype = ((t_map*)type)->get_key_type();
-    const t_type* vtype = ((t_map*)type)->get_val_type();
+    const t_type* ktype = &((t_map*)type)->key_type().deref();
+    const t_type* vtype = &((t_map*)type)->val_type().deref();
     const std::vector<std::pair<t_const_value*, t_const_value*>>& value_list =
         value->get_map();
     std::vector<std::pair<t_const_value*, t_const_value*>>::const_iterator

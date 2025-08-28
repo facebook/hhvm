@@ -84,12 +84,12 @@ const t_type* get_set_elem_type(const t_type& type) {
 
 const t_type* get_map_key_type(const t_type& type) {
   assert(type.is<t_map>());
-  return dynamic_cast<const t_map&>(type).get_key_type();
+  return &dynamic_cast<const t_map&>(type).key_type().deref();
 }
 
 const t_type* get_map_val_type(const t_type& type) {
   assert(type.is<t_map>());
-  return dynamic_cast<const t_map&>(type).get_val_type();
+  return &dynamic_cast<const t_map&>(type).val_type().deref();
 }
 
 bool type_needs_convert(const t_type* type) {
@@ -102,8 +102,8 @@ bool container_needs_convert(const t_type* type) {
   const t_type* true_type = type->get_true_type();
 
   if (const t_map* map_type = dynamic_cast<const t_map*>(true_type)) {
-    return container_needs_convert(map_type->get_key_type()) ||
-        container_needs_convert(map_type->get_val_type());
+    return container_needs_convert(&map_type->key_type().deref()) ||
+        container_needs_convert(&map_type->val_type().deref());
   } else if (const t_list* list_type = dynamic_cast<const t_list*>(true_type)) {
     return container_needs_convert(list_type->get_elem_type());
   } else if (const t_set* set_type = dynamic_cast<const t_set*>(true_type)) {

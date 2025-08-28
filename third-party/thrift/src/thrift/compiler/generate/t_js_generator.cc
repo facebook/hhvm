@@ -433,8 +433,8 @@ string t_js_generator::render_const_value(
 
     out << "})";
   } else if (type->is<t_map>()) {
-    const t_type* ktype = ((t_map*)type)->get_key_type();
-    const t_type* vtype = ((t_map*)type)->get_val_type();
+    const t_type* ktype = &((t_map*)type)->key_type().deref();
+    const t_type* vtype = &((t_map*)type)->val_type().deref();
     out << "{";
 
     const vector<pair<t_const_value*, t_const_value*>>& val = value->get_map();
@@ -1388,8 +1388,8 @@ void t_js_generator::generate_deserialize_map_element(
     ofstream& out, const t_map* tmap, string prefix) {
   string key = tmp("key");
   string val = tmp("val");
-  t_field fkey(*tmap->get_key_type(), key);
-  t_field fval(*tmap->get_val_type(), val);
+  t_field fkey(tmap->key_type().deref(), key);
+  t_field fval(tmap->val_type().deref(), val);
 
   indent(out) << declare_field(&fkey, false, false) << ";" << endl;
   indent(out) << declare_field(&fval, false, false) << ";" << endl;
@@ -1522,8 +1522,8 @@ void t_js_generator::generate_serialize_container(
     ofstream& out, const t_type* ttype, string prefix) {
   if (ttype->is<t_map>()) {
     indent(out) << "output.writeMapBegin("
-                << type_to_enum(((t_map*)ttype)->get_key_type()) << ", "
-                << type_to_enum(((t_map*)ttype)->get_val_type()) << ", "
+                << type_to_enum(&((t_map*)ttype)->key_type().deref()) << ", "
+                << type_to_enum(&((t_map*)ttype)->val_type().deref()) << ", "
                 << "Thrift.objectLength(" << prefix << "));" << endl;
   } else if (ttype->is<t_set>()) {
     indent(out) << "output.writeSetBegin("
@@ -1590,10 +1590,10 @@ void t_js_generator::generate_serialize_container(
  */
 void t_js_generator::generate_serialize_map_element(
     ofstream& out, const t_map* tmap, string kiter, string viter) {
-  t_field kfield(*tmap->get_key_type(), kiter);
+  t_field kfield(tmap->key_type().deref(), kiter);
   generate_serialize_field(out, &kfield);
 
-  t_field vfield(*tmap->get_val_type(), viter);
+  t_field vfield(tmap->val_type().deref(), viter);
   generate_serialize_field(out, &vfield);
 }
 

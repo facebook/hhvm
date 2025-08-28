@@ -123,8 +123,8 @@ std::string to_flat_type_name(const t_type* type) {
 
     return fmt::format(
         "Map__{}_{}",
-        to_flat_type_name(mapType->get_key_type()),
-        to_flat_type_name(mapType->get_val_type()));
+        to_flat_type_name(&mapType->key_type().deref()),
+        to_flat_type_name(&mapType->val_type().deref()));
   }
 
   if (true_type->is_binary()) {
@@ -348,8 +348,8 @@ class pyi_mstch_program : public mstch_program {
       add_containers(visited, setType);
     } else if (type->is<t_map>()) {
       const auto* mapType = dynamic_cast<const t_map*>(type);
-      add_containers(visited, mapType->get_key_type());
-      add_containers(visited, mapType->get_val_type());
+      add_containers(visited, &mapType->key_type().deref());
+      add_containers(visited, &mapType->val_type().deref());
     }
 
     visited.insert(name);

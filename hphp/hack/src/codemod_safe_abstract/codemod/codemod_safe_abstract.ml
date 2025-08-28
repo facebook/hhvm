@@ -51,6 +51,7 @@ let parse_args_exn () : args =
   in
   let errors_file = Option.value_exn ~message:usage !errors_file in
   let root = Option.value_exn ~message:usage !root in
+  let () = Printf.printf "Codemodding %s from %s\n" root errors_file in
   { root; errors_file }
 
 let () =

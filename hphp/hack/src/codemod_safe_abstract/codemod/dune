@@ -6,10 +6,10 @@
  (libraries
     utils_core
     default_injector_config
-    sys_utils
     parser
     errors
-    hackfmt))
+    hackfmt
+    pos))
 
 (alias
  (name codemod_safe_abstract)

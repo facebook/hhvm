@@ -53,6 +53,11 @@ struct RpcTransportStats {
   std::chrono::nanoseconds responseRoundTripLatency{0};
 };
 
+struct ClientBridgePtrPair {
+  detail::ClientSinkBridge::ClientPtr sink;
+  detail::ClientStreamBridge::ClientPtr stream;
+};
+
 class ClientReceiveState {
  public:
   ClientReceiveState() : protocolId_(-1) {}
@@ -210,6 +215,23 @@ class ClientReceiveState {
         std::move(clientSinkBridge),
         std::move(tHeader),
         nullptr);
+  }
+
+  static ClientReceiveState create(
+      std::unique_ptr<folly::IOBuf> buf,
+      std::unique_ptr<apache::thrift::transport::THeader> tHeader,
+      ClientBridgePtrPair clientBridgePtrPair,
+      BufferOptions bufferOptions = BufferOptions(),
+      uint16_t protocolId = static_cast<uint16_t>(-1)) {
+    auto ret = ClientReceiveState(
+        protocolId,
+        std::move(buf),
+        std::move(tHeader),
+        nullptr,
+        std::move(clientBridgePtrPair.stream),
+        bufferOptions);
+    ret.sink_ = std::move(clientBridgePtrPair.sink);
+    return ret;
   }
 
  private:

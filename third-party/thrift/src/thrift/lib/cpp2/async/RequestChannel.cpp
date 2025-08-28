@@ -15,6 +15,7 @@
  */
 
 #include <thrift/lib/cpp2/Flags.h>
+#include <thrift/lib/cpp2/async/ClientBiDiBridge.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataPlugins.h>
 
@@ -270,6 +271,18 @@ SinkClientCallback* createSinkClientCallback(
   return apache::thrift::detail::ClientSinkBridge::create(
       new RequestClientCallbackWrapper<
           apache::thrift::detail::ClientSinkBridge::ClientPtr>(
+          std::move(requestCallback)));
+}
+
+BiDiClientCallback* createBiDiClientCallback(
+    RequestClientCallback::Ptr requestCallback) {
+  DCHECK(requestCallback->isInlineSafe())
+      << "Bidirectional streaming methods do not support the callback client "
+         "method flavor. "
+         "Use co_, sync_, or semifuture_ instead.";
+
+  return apache::thrift::detail::ClientBiDiBridge::create(
+      new RequestClientCallbackWrapper<apache::thrift::ClientBridgePtrPair>(
           std::move(requestCallback)));
 }
 

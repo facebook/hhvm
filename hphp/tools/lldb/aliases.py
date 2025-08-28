@@ -22,13 +22,15 @@ class SimpleAlias:
 class RegexAlias:
     alias: str
     substitutions: List[str]
+    help: str
+    syntax_help: str
 
     @classmethod
     def register_lldb_alias(
         cls,
         debugger: lldb.SBDebugger,
     ) -> None:
-        command = f"command regex {cls.alias} {" ".join("'" + s + "'" for s in cls.substitutions)}"
+        command = f"command regex -h '{cls.help}' -s '{cls.syntax_help}' {cls.alias} {" ".join("'" + s + "'" for s in cls.substitutions)}"
         debugger.HandleCommand(command)
 
 
@@ -38,6 +40,8 @@ class Show(RegexAlias):
         "s/env(ironment)?/settings show target.env-vars/",
         "s/args/settings show target.run-args/",
     ]
+    help = "Generic command for showing things about the debugger."
+    syntax_help = "show {env(ironment) | args}"
 
 
 # (Un?)fortunately 'set' is already an existing command in LLDB,
@@ -47,6 +51,8 @@ class Unset(RegexAlias):
     substitutions = [
         "s/env[ \t]+([a-zA-Z_]+[a-zA-Z0-9_]*)/settings remove target.env-vars %1/"
     ]
+    help = 'Unset certain variables. Complement to some "settings set".'
+    syntax_help = "unset env <setting-index | setting-key>"
 
 
 class ThreadReturn(SimpleAlias):
@@ -79,6 +85,10 @@ class Info(RegexAlias):
         r"s/proc[ \t]+mappings/memory region --all/",
         "s/shared/image list/",
     ]
+    help = "Generic command for showing things about the program being debugged."
+    syntax_help = (
+        "info {break, threads, registers, all-registers, proc mappings, shared}"
+    )
 
 
 class DeleteBreakpoint(SimpleAlias):
@@ -102,6 +112,8 @@ class DumpMemory(RegexAlias):
     substitutions = [
         "s/memory[ \t]+([^ \t]+)[ \t]+([^ \t]+)[ \t]+([ \t]+)/memory read --outfile %1 %2 %3/",
     ]
+    help = "Dump target code/data to a local file"
+    syntax_help = "dump memory <file> <start> <end>"
 
 
 def __lldb_init_module(debugger: lldb.SBDebugger, _top_module: str = "") -> None:

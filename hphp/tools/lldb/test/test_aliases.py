@@ -47,7 +47,7 @@ class AliasesTestCase(base.TestHHVMTypesBinary):
             self.assertRegex(actual_lines[0], r"\[\s*\d+\].*")
 
         with self.subTest("delete"):
-            self.run_commands(["delete 1"])
+            self.run_commands(["delete 1 2"])
             self.assertEmpty(self.target.breakpoints)
 
         with self.subTest("bt"):

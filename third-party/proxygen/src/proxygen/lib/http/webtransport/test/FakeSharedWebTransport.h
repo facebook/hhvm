@@ -96,15 +96,20 @@ class FakeStreamHandle
       std::unique_ptr<folly::IOBuf> data,
       bool fin,
       WebTransport::ByteEventCallback* deliveryCallback) override {
-    auto length = data->computeChainDataLength();
+    size_t length = 0;
     if (data) {
+      length = data->computeChainDataLength();
       dataWritten_ += length;
     }
     if (immediateDelivery_) {
-      dataDelivered_ += length;
-      buf_.append(std::move(data));
+      if (data) {
+        dataDelivered_ += length;
+        buf_.append(std::move(data));
+      }
     } else {
-      inflightBuf_.append(std::move(data));
+      if (data) {
+        inflightBuf_.append(std::move(data));
+      }
     }
     fin_ = fin;
     if (promise_) {

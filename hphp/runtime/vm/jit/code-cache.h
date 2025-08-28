@@ -118,6 +118,7 @@ struct CodeCache {
   const CodeBlock& main()   const { return m_main; }
   const CodeBlock& cold()   const { return m_cold; }
   const CodeBlock& frozen() const { return m_frozen; }
+  const bool isAnySectionFull() const;
 
   const CodeBlock& bytecode() const { return m_bytecode; }
         CodeBlock& bytecode()       { return m_bytecode; }

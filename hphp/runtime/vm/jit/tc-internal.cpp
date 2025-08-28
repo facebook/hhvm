@@ -241,14 +241,13 @@ TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind,
   const bool reachedMaxLiveMainLimit =
     getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage;
 
-  auto const main_under = code().main().used() < Cfg::CodeCache::AMaxUsage;
-  auto const cold_under = code().cold().used() < Cfg::CodeCache::AColdMaxUsage;
-  auto const froz_under = code().frozen().used() < Cfg::CodeCache::AFrozenMaxUsage;
-
-  if (!reachedMaxLiveMainLimit && main_under && cold_under && froz_under) {
+  if (!reachedMaxLiveMainLimit && !code().isAnySectionFull()) {
     return shouldTranslateNoSizeLimit(sk, kind, noThreshold);
   }
 
+  auto const main_under = code().main().used() < Cfg::CodeCache::AMaxUsage;
+  auto const cold_under = code().cold().used() < Cfg::CodeCache::AColdMaxUsage;
+  auto const froz_under = code().frozen().used() < Cfg::CodeCache::AFrozenMaxUsage;
   // Set a flag so we quickly bail from trying to generate new
   // translations next time.
   s_TCisFull.store(true, std::memory_order_release);
@@ -403,7 +402,7 @@ void checkFreeProfData() {
   // generated.
   if (profData() &&
       !Cfg::Eval::EnableReusableTC &&
-      (code().main().used() >= Cfg::CodeCache::AMaxUsage ||
+      (code().isAnySectionFull() ||
        getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage) &&
       !transdb::enabled() &&
       !mcgen::retranslateAllEnabled()) {
@@ -426,7 +425,7 @@ bool profileFunc(const Func* func) {
   // being added to ProfData.
   if (mcgen::retranslateAllScheduled()) return false;
 
-  if (code().main().used() >= Cfg::CodeCache::AMaxUsage) return false;
+  if (code().isAnySectionFull()) return false;
 
   if (getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage) {
     return false;

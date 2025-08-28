@@ -331,6 +331,12 @@ void CodeCache::unprotect() {
   mprotect(m_base, m_codeSize, PROT_READ | PROT_WRITE | PROT_EXEC);
 }
 
+const bool CodeCache::isAnySectionFull() const {
+  return m_main.used() >= Cfg::CodeCache::AMaxUsage ||
+         m_cold.used() >= Cfg::CodeCache::AColdMaxUsage ||
+         m_frozen.used() >= Cfg::CodeCache::AFrozenMaxUsage;
+}
+
 CodeCache::View CodeCache::view(TransKind kind) {
   auto view = [&] {
     if (isProfiling(kind)) {

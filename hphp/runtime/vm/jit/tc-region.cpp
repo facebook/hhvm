@@ -121,14 +121,6 @@ size_t infoSize(const FuncMetaInfo& info) {
   return sz;
 }
 
-bool checkTCLimits() {
-  auto const main_under = code().main().used() < Cfg::CodeCache::AMaxUsage;
-  auto const cold_under = code().cold().used() < Cfg::CodeCache::AColdMaxUsage;
-  auto const froz_under = code().frozen().used() < Cfg::CodeCache::AFrozenMaxUsage;
-
-  return main_under && cold_under && froz_under;
-}
-
 void relocateOptFunc(FuncMetaInfo& info,
                      PrologueTCAMap& prologueTCAs,
                      SrcKeyTransMap& srcKeyTrans,
@@ -224,7 +216,7 @@ void relocateSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
     // make sure we don't get ahead of the translation threads
     mcgen::waitForTranslate(finfo);
 
-    if (!checkTCLimits()) {
+    if (code().isAnySectionFull()) {
       FTRACE(1, "relocateSortedOptFuncs: ran out of space in the TC. "
              "Skipping function {} {}\n", finfo.func->getFuncId(),
              finfo.func->fullName());

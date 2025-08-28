@@ -297,9 +297,7 @@ void reportJitMaturity() {
   } else if (beforeRetranslateAll) {
     maturity = std::min(kMaxMaturityBeforeRTA, codeSize * 100 / fullSize);
   } else if (liveSize >= Cfg::Jit::MaxLiveMainUsage ||
-             code().main().used() >= Cfg::CodeCache::AMaxUsage ||
-             code().cold().used() >= Cfg::CodeCache::AColdMaxUsage ||
-             code().frozen().used() >= Cfg::CodeCache::AFrozenMaxUsage) {
+             code().isAnySectionFull()) {
     maturity = g_maxJitMaturity;
   } else if (Cfg::Jit::PGOOnly && mcgen::retranslateAllComplete()) {
     maturity = 100;

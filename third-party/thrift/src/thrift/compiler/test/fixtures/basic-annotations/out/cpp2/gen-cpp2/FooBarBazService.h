@@ -81,6 +81,14 @@ class ServiceHandler<::cpp2::FooBarBazService> : public apache::thrift::ServerIn
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_foo{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_bar{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_baz{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_foo(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_foo(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_before_bar(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_bar(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_before_baz(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_baz(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
 };
 
 namespace detail {

@@ -51,6 +51,8 @@ class ServiceHandler<::cpp2::NullService> : public apache::thrift::ServerInterfa
 
  private:
   static ::cpp2::NullServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
+ public:
+
 };
 
 namespace detail {

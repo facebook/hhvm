@@ -24,9 +24,9 @@
 {{#let export partial param_type |param|}}
 {{#pragma ignore-newlines}}
 {{#if param.type.resolves_to_complex_return?}}{{!
-}}const {{param.type.cpp_type}}&
+}}const {{param.type.cpp_standard_type}}&
 {{#else}}
-{{param.type.cpp_type}}
+{{param.type.cpp_standard_type}}
 {{/if param.type.resolves_to_complex_return?}}
 {{/let partial}}
 
@@ -55,9 +55,71 @@ p_{{param.cpp_name}}
 {{#if function.return_type.void?}}
 {{#else}}
 {{#if function.return_type.resolves_to_complex_return?}}
-const {{function.return_type.cpp_type}}&
+const {{function.return_type.cpp_standard_type}}&
 {{#else}}
-{{function.return_type.cpp_type}}
+{{function.return_type.cpp_standard_type}}
 {{/if function.return_type.resolves_to_complex_return?}}
 {{/if function.return_type.void?}}
+{{/let partial}}
+
+{{!
+  after_params_unused - Decorators after_* methods have const-ref access
+  to the method return type. If the return type is an interaction, we also have
+  a const-ref access to the returned interaction
+}}
+{{#let export partial after_params_unused |function| captures |return_param_type|}}
+{{#pragma ignore-newlines}}
+{{#if function.creates_interaction?}}{{! For interactions we have a const-ref to the interaction and the return type if non-void}}
+, const {{function.created_interaction}}If& /*interaction*/
+{{#if function.return_type.void?}}
+{{#else}}
+, {{#partial return_param_type function=function}} /*result*/
+{{/if function.return_type.void?}}
+{{#else}}{{! Otherwise just const-ref access to the return type return type if non-void}}
+{{#if function.return_type.void?}}
+{{#else}}
+, {{#partial return_param_type function=function}} /*result*/
+{{/if function.return_type.void?}}
+{{/if function.creates_interaction?}}
+{{/let partial}}
+
+{{!
+  after_params - Decorators after_* methods have const-ref access
+  to the method return type. If the return type is an interaction, we also have
+  a const-ref access to the returned interaction. This one doesn't have the
+  param commented out.
+}}
+{{#let export partial after_params |function| captures |return_param_type|}}
+{{#pragma ignore-newlines}}
+{{#if function.creates_interaction?}}{{! For interactions we have a const-ref to the interaction and the return type if non-void}}
+, const {{function.created_interaction}}If& interaction
+{{#if function.return_type.void?}}
+{{#else}}
+, {{#partial return_param_type function=function}} result
+{{/if function.return_type.void?}}
+{{#else}}{{! Otherwise just const-ref access to the return type return type if non-void}}
+{{#if function.return_type.void?}}
+{{#else}}
+, {{#partial return_param_type function=function}} result
+{{/if function.return_type.void?}}
+{{/if function.creates_interaction?}}
+{{/let partial}}
+
+{{!
+  before_invocation_args - args passed to the decorator before_* function
+}}
+{{#let export partial before_invocation_args |function|}}
+{{#pragma ignore-newlines}}
+{{#each (array.enumerate function.params.fields with_first=true) as |index param first?|}}
+{{#if (not first?)}}, {{/if}}
+{{#if param.type.resolves_to_complex_return?}}
+{{#if function.stack_arguments?}}
+args.uarg_{{param.cpp_name}}
+{{#else}}
+*args.uarg_{{param.cpp_name}}
+{{/if function.stack_arguments?}}
+{{#else}}
+args.uarg_{{param.cpp_name}}
+{{/if param.type.resolves_to_complex_return?}}
+{{/each}}
 {{/let partial}}

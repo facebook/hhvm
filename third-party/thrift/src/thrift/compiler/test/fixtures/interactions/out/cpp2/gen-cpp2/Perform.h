@@ -176,6 +176,16 @@ class SerialInteractionIf : public apache::thrift::SerialInteractionTile, public
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_createMyInteractionFast{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_createSerialInteraction{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_foo{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_createMyInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_createMyInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const MyInteractionIf& /*interaction*/) {}
+  virtual void fbthrift_execute_decorators_before_createMyInteractionFast(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_createMyInteractionFast(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const MyInteractionFastIf& /*interaction*/) {}
+  virtual void fbthrift_execute_decorators_before_createSerialInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_createSerialInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const SerialInteractionIf& /*interaction*/) {}
+  virtual void fbthrift_execute_decorators_before_foo(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_foo(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
 };
 
 namespace detail {

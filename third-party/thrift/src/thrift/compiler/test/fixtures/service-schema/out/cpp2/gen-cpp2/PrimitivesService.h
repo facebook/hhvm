@@ -91,6 +91,14 @@ class ServiceHandler<::facebook::thrift::test::PrimitivesService> : public apach
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_init{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_method_that_throws{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_return_void_method{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_init(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_param0*/, ::std::int64_t /*p_param1*/) {}
+  virtual void fbthrift_execute_decorators_after_init(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_method_that_throws(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_method_that_throws(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::facebook::thrift::test::Result /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_return_void_method(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_id*/, const ::cpp2::I& /*p_i*/) {}
+  virtual void fbthrift_execute_decorators_after_return_void_method(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
 };
 
 namespace detail {

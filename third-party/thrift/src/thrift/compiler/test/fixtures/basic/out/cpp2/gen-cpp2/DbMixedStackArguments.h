@@ -75,6 +75,12 @@ class ServiceHandler<::test::fixtures::basic::DbMixedStackArguments> : public ap
   static ::test::fixtures::basic::DbMixedStackArgumentsServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_getDataByKey0{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_getDataByKey1{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_getDataByKey0(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_key*/) {}
+  virtual void fbthrift_execute_decorators_after_getDataByKey0(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_getDataByKey1(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_key*/) {}
+  virtual void fbthrift_execute_decorators_after_getDataByKey1(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) {}
 };
 
 namespace detail {

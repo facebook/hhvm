@@ -65,6 +65,36 @@ class ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService> : virtua
  private:
   static ::cpp2_struct_footprint::ExtendedFootprintServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_getComplexMap{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+  void fbthrift_execute_decorators_before_processIOBuf(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2_struct_footprint::IOBuf& /*p_buf*/, const ::cpp2_struct_footprint::IOBufPtr& /*p_ptr*/, ::cpp2_struct_footprint::I32Alias /*p_alias*/) override {}
+  void fbthrift_execute_decorators_after_processIOBuf(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_before_getStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_after_getStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2_struct_footprint::SimpleStruct& /*result*/) override {}
+  void fbthrift_execute_decorators_before_setStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2_struct_footprint::SimpleStruct& /*p_input*/) override {}
+  void fbthrift_execute_decorators_after_setStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_before_setStructList(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::cpp2_struct_footprint::SimpleStruct>& /*p_items*/) override {}
+  void fbthrift_execute_decorators_after_setStructList(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_before_getStructList(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_after_getStructList(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::cpp2_struct_footprint::SimpleStruct>& /*result*/) override {}
+  void fbthrift_execute_decorators_before_getNestedContainer(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_after_getNestedContainer(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::std::vector<::cpp2_struct_footprint::SimpleStruct>>& /*result*/) override {}
+  void fbthrift_execute_decorators_before_getTypedefStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_after_getTypedefStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2_struct_footprint::MyStruct& /*result*/) override {}
+  void fbthrift_execute_decorators_before_getTypedefList(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_after_getTypedefList(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2_struct_footprint::StructList& /*result*/) override {}
+  void fbthrift_execute_decorators_before_getUnion(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_after_getUnion(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2_struct_footprint::TestUnion& /*result*/) override {}
+  void fbthrift_execute_decorators_before_getCalculator(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_after_getCalculator(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const CalculatorIf& /*interaction*/) override {}
+  void fbthrift_execute_decorators_before_streamStructs(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_after_streamStructs(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_before_streamWithSinkInitial(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_input*/) override {}
+  void fbthrift_execute_decorators_after_streamWithSinkInitial(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2_struct_footprint::Struct1& /*result*/) override {}
+  void fbthrift_execute_decorators_before_streamWithSinkException(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_input*/) override {}
+  void fbthrift_execute_decorators_after_streamWithSinkException(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2_struct_footprint::Struct1& /*result*/) override {}
+
+  virtual void fbthrift_execute_decorators_before_getComplexMap(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_getComplexMap(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>& /*result*/) {}
 };
 
 namespace detail {

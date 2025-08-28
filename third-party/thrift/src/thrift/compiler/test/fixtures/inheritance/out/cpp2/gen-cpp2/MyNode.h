@@ -65,6 +65,12 @@ class ServiceHandler<::cpp2::MyNode> : virtual public ::cpp2::MyRootSvIf {
  private:
   static ::cpp2::MyNodeServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_do_mid{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+  void fbthrift_execute_decorators_before_do_root(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_after_do_root(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+
+  virtual void fbthrift_execute_decorators_before_do_mid(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_do_mid(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
 };
 
 namespace detail {

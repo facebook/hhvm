@@ -169,6 +169,14 @@ class SharedInteractionIf : public apache::thrift::Tile, public apache::thrift::
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_do_some_similar_things{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_createMyInteraction{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_createshared.SharedInteraction{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_do_some_similar_things(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_do_some_similar_things(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::thrift::shared_interactions::DoSomethingResult& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_createMyInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_createMyInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const MyInteractionIf& /*interaction*/) {}
+  virtual void fbthrift_execute_decorators_before_createshared.SharedInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_createshared.SharedInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const SharedInteractionIf& /*interaction*/) {}
 };
 
 namespace detail {

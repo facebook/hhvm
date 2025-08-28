@@ -71,6 +71,12 @@ class ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService> : public ap
   static ::cpp2::HeaderClientMethodsAnnotationOnServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_echo{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_echo_2{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::EchoRequest& /*p_request*/) {}
+  virtual void fbthrift_execute_decorators_after_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::EchoResponse& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_echo_2(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::EchoRequest& /*p_request*/) {}
+  virtual void fbthrift_execute_decorators_after_echo_2(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::EchoResponse& /*result*/) {}
 };
 
 namespace detail {

@@ -36,6 +36,7 @@
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/async/InterceptorFlags.h>
+#include <thrift/lib/cpp2/server/DecoratorData.h>
 #include <thrift/lib/cpp2/server/DecoratorDataStorage.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
 #include <thrift/lib/cpp2/util/TypeErasedValue.h>
@@ -819,6 +820,10 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
     return &serviceInterceptorsStorage_.frameworkMetadata;
   }
 
+  const server::DecoratorData getDecoratorData() const {
+    return server::DecoratorData::fromStorage(decoratorDataStorage_);
+  }
+
  protected:
   apache::thrift::server::TServerObserver::CallTimestamps timestamps_;
 
@@ -832,6 +837,10 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
   const InterceptorFrameworkMetadataStorage&
   getServiceInterceptorFrameworkMetadata() {
     return serviceInterceptorsStorage_.frameworkMetadata;
+  }
+
+  server::DecoratorData getDecoratorDataMutable() {
+    return server::DecoratorData::fromStorage(decoratorDataStorage_);
   }
 
   Cpp2ConnContext* ctx_;
@@ -874,6 +883,10 @@ class Cpp2RequestContextUnsafeAPI {
   const InterceptorFrameworkMetadataStorage&
   getServiceInterceptorFrameworkMetadata() {
     return requestContext_.getServiceInterceptorFrameworkMetadata();
+  }
+
+  server::DecoratorData getDecoratorDataMutable() {
+    return requestContext_.getDecoratorDataMutable();
   }
 
  private:

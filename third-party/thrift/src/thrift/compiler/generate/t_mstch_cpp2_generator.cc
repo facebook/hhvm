@@ -405,6 +405,10 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
       return cpp_context_->resolver().get_native_type(type);
     });
 
+    def.property("cpp_standard_type", [&](const t_type& type) {
+      return cpp_context_->resolver().get_standard_type(type);
+    });
+
     return std::move(def).make();
   }
 
@@ -506,6 +510,10 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     // representing the return value.
     def.property("cpp_recv_arg?", [&](const t_function& f) {
       return !f.return_type()->is_void() || f.sink_or_stream();
+    });
+
+    def.property("created_interaction", [](const t_function& f) {
+      return cpp2::get_name(f.interaction().get_type());
     });
 
     return std::move(def).make();

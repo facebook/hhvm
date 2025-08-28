@@ -92,6 +92,10 @@ class BoxedInteractionIf : public apache::thrift::Tile, public apache::thrift::S
  private:
   static ::cpp2::BoxServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_getABoxSession{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_getABoxSession(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::ShouldBeBoxed& /*p_req*/) {}
+  virtual void fbthrift_execute_decorators_after_getABoxSession(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const BoxedInteractionIf& /*interaction*/, const ::cpp2::ShouldBeBoxed& /*result*/) {}
 };
 
 namespace detail {

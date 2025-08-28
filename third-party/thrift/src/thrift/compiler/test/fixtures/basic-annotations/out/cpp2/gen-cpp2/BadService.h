@@ -93,6 +93,12 @@ class BadInteractionIf : public apache::thrift::Tile, public apache::thrift::Ser
   static ::cpp2::GoodServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_createBadInteraction{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_bar{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_createBadInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_createBadInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const GoodInteractionIf& /*interaction*/) {}
+  virtual void fbthrift_execute_decorators_before_bar(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_bar(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
 };
 
 namespace detail {

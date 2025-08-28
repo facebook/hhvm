@@ -55,6 +55,16 @@ class ServiceHandler<::cpp2::MyServiceFast> : public apache::thrift::ServerInter
   virtual void async_eb_lobDataById(apache::thrift::HandlerCallbackOneWay::Ptr callback, ::std::int64_t p_id, const ::std::string& p_data);
  private:
   static ::cpp2::MyServiceFastServiceInfoHolder __fbthrift_serviceInfoHolder;
+ public:
+
+  virtual void fbthrift_execute_decorators_before_hasDataById(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_id*/) {}
+  virtual void fbthrift_execute_decorators_after_hasDataById(apache::thrift::Cpp2RequestContext& /*requestCtx*/, bool /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_getDataById(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_id*/) {}
+  virtual void fbthrift_execute_decorators_after_getDataById(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_putDataById(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_id*/, const ::std::string& /*p_data*/) {}
+  virtual void fbthrift_execute_decorators_after_putDataById(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_before_lobDataById(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_id*/, const ::std::string& /*p_data*/) {}
+  virtual void fbthrift_execute_decorators_after_lobDataById(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
 };
 
 namespace detail {

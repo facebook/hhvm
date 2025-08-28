@@ -46,17 +46,7 @@ std::vector<folly::not_null<const apache::thrift::syntax_graph::ServiceNode*>> {
 }
 #endif
 {{/service:has_service_schema}}
-{{#if service:self.cpp_requires_method_decorator?}}
-std::vector<std::reference_wrapper<apache::thrift::ServiceMethodDecoratorBase>> {{> service_common/service_class_name}}::fbthrift_getDecorators() {
-  std::vector<std::reference_wrapper<apache::thrift::ServiceMethodDecoratorBase>> out;
-  for (auto& decoratorPtr : __fbthrift_methodDecorators) {
-    out.emplace_back(std::ref(*decoratorPtr));
-  }
-  return out;
-}
-
-{{#partial decorator_cpp.decorate_function service=service:self}}
-{{/if service:self.cpp_requires_method_decorator?}}
+{{#partial decorator_cpp.decorator_definitions service=service:self}}
 
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> {{> service_common/service_class_name}}::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();

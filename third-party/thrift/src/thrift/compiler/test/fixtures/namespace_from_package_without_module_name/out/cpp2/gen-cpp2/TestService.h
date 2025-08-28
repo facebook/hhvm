@@ -65,6 +65,10 @@ class ServiceHandler<::test::namespace_from_package_without_module_name::TestSer
  private:
   static ::test::namespace_from_package_without_module_name::TestServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_init{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_init(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_int1*/) {}
+  virtual void fbthrift_execute_decorators_after_init(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/) {}
 };
 
 namespace detail {

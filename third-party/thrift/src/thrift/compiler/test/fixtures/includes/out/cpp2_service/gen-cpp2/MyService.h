@@ -73,6 +73,12 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
   static ::cpp2::MyServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_query{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_has_arg_docs{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_query(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::MyStruct& /*p_s*/, const ::cpp2::Included& /*p_i*/) {}
+  virtual void fbthrift_execute_decorators_after_query(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_before_has_arg_docs(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::MyStruct& /*p_s*/, const ::cpp2::Included& /*p_i*/) {}
+  virtual void fbthrift_execute_decorators_after_has_arg_docs(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
 };
 
 namespace detail {

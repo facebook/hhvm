@@ -82,6 +82,14 @@ class ServiceHandler<::cpp2::C> : public apache::thrift::ServerInterface {
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_f{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_numbers{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_thing{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_f(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_f(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_before_numbers(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_numbers(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_before_thing(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_a*/, const ::std::string& /*p_b*/, const ::std::set<::std::int32_t>& /*p_c*/) {}
+  virtual void fbthrift_execute_decorators_after_thing(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) {}
 };
 
 namespace detail {

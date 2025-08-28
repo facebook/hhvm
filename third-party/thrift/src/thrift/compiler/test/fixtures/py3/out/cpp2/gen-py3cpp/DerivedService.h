@@ -65,6 +65,94 @@ class ServiceHandler<::py3::simple::DerivedService> : virtual public ::py3::simp
  private:
   static ::py3::simple::DerivedServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_get_six{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+  void fbthrift_execute_decorators_before_get_five(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_after_get_five(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) override {}
+  void fbthrift_execute_decorators_before_add_five(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_num*/) override {}
+  void fbthrift_execute_decorators_after_add_five(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) override {}
+  void fbthrift_execute_decorators_before_do_nothing(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_after_do_nothing(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_before_concat(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_first*/, const ::std::string& /*p_second*/) override {}
+  void fbthrift_execute_decorators_after_concat(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) override {}
+  void fbthrift_execute_decorators_before_get_value(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::py3::simple::SimpleStruct& /*p_simple_struct*/) override {}
+  void fbthrift_execute_decorators_after_get_value(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) override {}
+  void fbthrift_execute_decorators_before_negate(apache::thrift::Cpp2RequestContext& /*requestCtx*/, bool /*p_input*/) override {}
+  void fbthrift_execute_decorators_after_negate(apache::thrift::Cpp2RequestContext& /*requestCtx*/, bool /*result*/) override {}
+  void fbthrift_execute_decorators_before_tiny(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int8_t /*p_input*/) override {}
+  void fbthrift_execute_decorators_after_tiny(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int8_t /*result*/) override {}
+  void fbthrift_execute_decorators_before_small(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int16_t /*p_input*/) override {}
+  void fbthrift_execute_decorators_after_small(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int16_t /*result*/) override {}
+  void fbthrift_execute_decorators_before_big(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_input*/) override {}
+  void fbthrift_execute_decorators_after_big(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/) override {}
+  void fbthrift_execute_decorators_before_two(apache::thrift::Cpp2RequestContext& /*requestCtx*/, double /*p_input*/) override {}
+  void fbthrift_execute_decorators_after_two(apache::thrift::Cpp2RequestContext& /*requestCtx*/, double /*result*/) override {}
+  void fbthrift_execute_decorators_before_expected_exception(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_after_expected_exception(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_before_unexpected_exception(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_after_unexpected_exception(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) override {}
+  void fbthrift_execute_decorators_before_sum_i16_list(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::int16_t>& /*p_numbers*/) override {}
+  void fbthrift_execute_decorators_after_sum_i16_list(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) override {}
+  void fbthrift_execute_decorators_before_sum_i32_list(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::int32_t>& /*p_numbers*/) override {}
+  void fbthrift_execute_decorators_after_sum_i32_list(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) override {}
+  void fbthrift_execute_decorators_before_sum_i64_list(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::int64_t>& /*p_numbers*/) override {}
+  void fbthrift_execute_decorators_after_sum_i64_list(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) override {}
+  void fbthrift_execute_decorators_before_concat_many(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::string>& /*p_words*/) override {}
+  void fbthrift_execute_decorators_after_concat_many(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) override {}
+  void fbthrift_execute_decorators_before_count_structs(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::py3::simple::SimpleStruct>& /*p_items*/) override {}
+  void fbthrift_execute_decorators_after_count_structs(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) override {}
+  void fbthrift_execute_decorators_before_sum_set(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::set<::std::int32_t>& /*p_numbers*/) override {}
+  void fbthrift_execute_decorators_after_sum_set(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) override {}
+  void fbthrift_execute_decorators_before_contains_word(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::set<::std::string>& /*p_words*/, const ::std::string& /*p_word*/) override {}
+  void fbthrift_execute_decorators_after_contains_word(apache::thrift::Cpp2RequestContext& /*requestCtx*/, bool /*result*/) override {}
+  void fbthrift_execute_decorators_before_get_map_value(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::std::string>& /*p_words*/, const ::std::string& /*p_key*/) override {}
+  void fbthrift_execute_decorators_after_get_map_value(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) override {}
+  void fbthrift_execute_decorators_before_map_length(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& /*p_items*/) override {}
+  void fbthrift_execute_decorators_after_map_length(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int16_t /*result*/) override {}
+  void fbthrift_execute_decorators_before_sum_map_values(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::std::int16_t>& /*p_items*/) override {}
+  void fbthrift_execute_decorators_after_sum_map_values(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int16_t /*result*/) override {}
+  void fbthrift_execute_decorators_before_complex_sum_i32(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::py3::simple::ComplexStruct& /*p_counter*/) override {}
+  void fbthrift_execute_decorators_after_complex_sum_i32(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) override {}
+  void fbthrift_execute_decorators_before_repeat_name(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::py3::simple::ComplexStruct& /*p_counter*/) override {}
+  void fbthrift_execute_decorators_after_repeat_name(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) override {}
+  void fbthrift_execute_decorators_before_get_struct(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_after_get_struct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::py3::simple::SimpleStruct& /*result*/) override {}
+  void fbthrift_execute_decorators_before_fib(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int16_t /*p_n*/) override {}
+  void fbthrift_execute_decorators_after_fib(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::int32_t>& /*result*/) override {}
+  void fbthrift_execute_decorators_before_unique_words(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::string>& /*p_words*/) override {}
+  void fbthrift_execute_decorators_after_unique_words(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::set<::std::string>& /*result*/) override {}
+  void fbthrift_execute_decorators_before_words_count(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::string>& /*p_words*/) override {}
+  void fbthrift_execute_decorators_after_words_count(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::std::int16_t>& /*result*/) override {}
+  void fbthrift_execute_decorators_before_set_enum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::py3::simple::AnEnum /*p_in_enum*/) override {}
+  void fbthrift_execute_decorators_after_set_enum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::py3::simple::AnEnum /*result*/) override {}
+  void fbthrift_execute_decorators_before_list_of_lists(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int16_t /*p_num_lists*/, ::std::int16_t /*p_num_items*/) override {}
+  void fbthrift_execute_decorators_after_list_of_lists(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::vector<::std::int32_t>>& /*result*/) override {}
+  void fbthrift_execute_decorators_before_word_character_frequency(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_sentence*/) override {}
+  void fbthrift_execute_decorators_after_word_character_frequency(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>& /*result*/) override {}
+  void fbthrift_execute_decorators_before_list_of_sets(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_some_words*/) override {}
+  void fbthrift_execute_decorators_after_list_of_sets(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::set<::std::string>>& /*result*/) override {}
+  void fbthrift_execute_decorators_before_nested_map_argument(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& /*p_struct_map*/) override {}
+  void fbthrift_execute_decorators_after_nested_map_argument(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) override {}
+  void fbthrift_execute_decorators_before_make_sentence(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::vector<::std::string>>& /*p_word_chars*/) override {}
+  void fbthrift_execute_decorators_after_make_sentence(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) override {}
+  void fbthrift_execute_decorators_before_get_union(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::set<::std::int32_t>>& /*p_sets*/) override {}
+  void fbthrift_execute_decorators_after_get_union(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::set<::std::int32_t>& /*result*/) override {}
+  void fbthrift_execute_decorators_before_get_keys(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::map<::std::string, ::std::string>>& /*p_string_map*/) override {}
+  void fbthrift_execute_decorators_after_get_keys(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::set<::std::string>& /*result*/) override {}
+  void fbthrift_execute_decorators_before_lookup_double(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_key*/) override {}
+  void fbthrift_execute_decorators_after_lookup_double(apache::thrift::Cpp2RequestContext& /*requestCtx*/, double /*result*/) override {}
+  void fbthrift_execute_decorators_before_retrieve_binary(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_something*/) override {}
+  void fbthrift_execute_decorators_after_retrieve_binary(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) override {}
+  void fbthrift_execute_decorators_before_contain_binary(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::string>& /*p_binaries*/) override {}
+  void fbthrift_execute_decorators_after_contain_binary(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::set<::std::string>& /*result*/) override {}
+  void fbthrift_execute_decorators_before_contain_enum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::py3::simple::AnEnum>& /*p_the_enum*/) override {}
+  void fbthrift_execute_decorators_after_contain_enum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::py3::simple::AnEnum>& /*result*/) override {}
+  void fbthrift_execute_decorators_before_get_binary_union_struct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::py3::simple::BinaryUnion& /*p_u*/) override {}
+  void fbthrift_execute_decorators_after_get_binary_union_struct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::py3::simple::BinaryUnionStruct& /*result*/) override {}
+  void fbthrift_execute_decorators_before_get_struct_hidden(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
+  void fbthrift_execute_decorators_after_get_struct_hidden(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::py3::simple::SimpleStruct& /*result*/) override {}
+
+  virtual void fbthrift_execute_decorators_before_get_six(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_get_six(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
 };
 
 namespace detail {

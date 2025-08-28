@@ -65,6 +65,10 @@ class ServiceHandler<::test::fixtures::basic::FB303Service> : public apache::thr
  private:
   static ::test::fixtures::basic::FB303ServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_simple_rpc{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_simple_rpc(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_int_parameter*/) {}
+  virtual void fbthrift_execute_decorators_after_simple_rpc(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::test::fixtures::basic::ReservedKeyword& /*result*/) {}
 };
 
 namespace detail {

@@ -155,6 +155,28 @@ class ServiceHandler<::test::fixtures::basic::MyService> : public apache::thrift
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_lobDataById{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_invalid_return_for_hack{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_rpc_skipped_codegen{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_ping(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_ping(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_before_getRandomData(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_getRandomData(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_sink(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_sink*/) {}
+  virtual void fbthrift_execute_decorators_after_sink(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_before_putDataById(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_id*/, const ::std::string& /*p_data*/) {}
+  virtual void fbthrift_execute_decorators_after_putDataById(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_before_hasDataById(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_id*/) {}
+  virtual void fbthrift_execute_decorators_after_hasDataById(apache::thrift::Cpp2RequestContext& /*requestCtx*/, bool /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_getDataById(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_id*/) {}
+  virtual void fbthrift_execute_decorators_after_getDataById(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_deleteDataById(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_id*/) {}
+  virtual void fbthrift_execute_decorators_after_deleteDataById(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_before_lobDataById(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_id*/, const ::std::string& /*p_data*/) {}
+  virtual void fbthrift_execute_decorators_after_lobDataById(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_before_invalid_return_for_hack(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_invalid_return_for_hack(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::set<float>& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_rpc_skipped_codegen(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_rpc_skipped_codegen(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
 };
 
 namespace detail {

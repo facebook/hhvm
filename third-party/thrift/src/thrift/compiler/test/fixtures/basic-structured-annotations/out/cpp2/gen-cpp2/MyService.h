@@ -77,6 +77,12 @@ class ServiceHandler<::test::fixtures::basic-structured-annotations::MyService> 
   static ::test::fixtures::basic-structured-annotations::MyServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_first{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_second{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_first(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_first(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::test::fixtures::basic-structured-annotations::annotated_inline_string& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_second(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_count*/) {}
+  virtual void fbthrift_execute_decorators_after_second(apache::thrift::Cpp2RequestContext& /*requestCtx*/, bool /*result*/) {}
 };
 
 namespace detail {

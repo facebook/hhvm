@@ -32,6 +32,7 @@ namespace apache::thrift::server {
 class DecoratorData {
  public:
   static DecoratorData fromStorage(DecoratorDataStorage& storage);
+  static const DecoratorData fromStorage(const DecoratorDataStorage& storage);
 
   ~DecoratorData() = default;
   DecoratorData(const DecoratorData&) = delete;
@@ -63,6 +64,7 @@ class DecoratorData {
 
  private:
   explicit DecoratorData(DecoratorDataStorage& storage);
+  explicit DecoratorData(const DecoratorDataStorage& storage);
 
   folly::span<DecoratorDataEntry> decoratorData_;
 };

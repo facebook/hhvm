@@ -211,6 +211,34 @@ class CalculatorIf : public apache::thrift::Tile, public apache::thrift::ServerI
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_streamStructs{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_streamWithSinkInitial{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_streamWithSinkException{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_processIOBuf(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2_struct_footprint::IOBuf& /*p_buf*/, const ::cpp2_struct_footprint::IOBufPtr& /*p_ptr*/, ::cpp2_struct_footprint::I32Alias /*p_alias*/) {}
+  virtual void fbthrift_execute_decorators_after_processIOBuf(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_before_getStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_getStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2_struct_footprint::SimpleStruct& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_setStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2_struct_footprint::SimpleStruct& /*p_input*/) {}
+  virtual void fbthrift_execute_decorators_after_setStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_before_setStructList(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::cpp2_struct_footprint::SimpleStruct>& /*p_items*/) {}
+  virtual void fbthrift_execute_decorators_after_setStructList(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_before_getStructList(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_getStructList(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::cpp2_struct_footprint::SimpleStruct>& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_getNestedContainer(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_getNestedContainer(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::std::vector<::cpp2_struct_footprint::SimpleStruct>>& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_getTypedefStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_getTypedefStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2_struct_footprint::MyStruct& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_getTypedefList(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_getTypedefList(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2_struct_footprint::StructList& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_getUnion(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_getUnion(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2_struct_footprint::TestUnion& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_getCalculator(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_getCalculator(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const CalculatorIf& /*interaction*/) {}
+  virtual void fbthrift_execute_decorators_before_streamStructs(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_streamStructs(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_before_streamWithSinkInitial(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_input*/) {}
+  virtual void fbthrift_execute_decorators_after_streamWithSinkInitial(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2_struct_footprint::Struct1& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_streamWithSinkException(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_input*/) {}
+  virtual void fbthrift_execute_decorators_after_streamWithSinkException(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2_struct_footprint::Struct1& /*result*/) {}
 };
 
 namespace detail {

@@ -114,6 +114,20 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service1> : public apache::thr
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_method4{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_method5{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_method6{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_method1(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_method1(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_before_method2(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_x*/, const ::test_cpp2::cpp_reflection::struct1& /*p_y*/, double /*p_z*/) {}
+  virtual void fbthrift_execute_decorators_after_method2(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_before_method3(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_method3(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_method4(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_i*/, const ::test_cpp2::cpp_reflection::struct1& /*p_j*/, double /*p_k*/) {}
+  virtual void fbthrift_execute_decorators_after_method4(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_method5(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_method5(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::test_cpp2::cpp_reflection::struct2& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_method6(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_l*/, const ::test_cpp2::cpp_reflection::struct1& /*p_m*/, double /*p_n*/) {}
+  virtual void fbthrift_execute_decorators_after_method6(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::test_cpp2::cpp_reflection::struct2& /*result*/) {}
 };
 
 namespace detail {

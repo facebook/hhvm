@@ -334,6 +334,64 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_members{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_field{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_fields{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_get(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_get(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_getter(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_getter(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_lists(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_lists(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_maps(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_maps(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_name(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_name(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_name_to_value(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_name_to_value(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_names(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_names(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_prefix_tree(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_prefix_tree(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_sets(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_sets(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_setter(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_setter(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_str(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_str(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_strings(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_strings(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_type(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_type(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_value(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_value(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_value_to_name(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_value_to_name(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_values(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_values(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_id(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_id(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_ids(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_ids(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_descriptor(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_descriptor(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_descriptors(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_descriptors(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_key(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_key(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_keys(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_keys(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_annotation(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_annotation(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_annotations(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_annotations(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_member(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_member(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_members(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_members(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_field(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_field(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_fields(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_fields(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
 };
 
 namespace detail {

@@ -53,6 +53,8 @@ class ServiceHandler<::some::valid::ns::EmptyService> : public apache::thrift::S
 
  private:
   static ::some::valid::ns::EmptyServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
+ public:
+
 };
 
 namespace detail {

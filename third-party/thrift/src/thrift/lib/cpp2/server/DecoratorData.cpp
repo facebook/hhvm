@@ -23,7 +23,15 @@ namespace apache::thrift::server {
   return DecoratorData(storage);
 }
 
+/* static */ const DecoratorData DecoratorData::fromStorage(
+    const DecoratorDataStorage& storage) {
+  return DecoratorData(storage);
+}
+
 DecoratorData::DecoratorData(DecoratorDataStorage& storage)
+    : decoratorData_{folly::span(storage.decoratorData.get(), storage.count)} {}
+
+DecoratorData::DecoratorData(const DecoratorDataStorage& storage)
     : decoratorData_{folly::span(storage.decoratorData.get(), storage.count)} {}
 
 } // namespace apache::thrift::server

@@ -75,6 +75,12 @@ class ServiceHandler<::facebook::thrift::test::AdapterService> : public apache::
   static ::facebook::thrift::test::AdapterServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_count{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_adaptedTypes{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_count(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_count(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::facebook::thrift::test::CountingStruct& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_adaptedTypes(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::facebook::thrift::test::detail::HeapAllocated& /*p_arg*/) {}
+  virtual void fbthrift_execute_decorators_after_adaptedTypes(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::facebook::thrift::test::detail::HeapAllocated& /*result*/) {}
 };
 
 namespace detail {

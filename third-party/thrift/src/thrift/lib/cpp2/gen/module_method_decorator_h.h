@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <thrift/lib/cpp2/server/DecoratorData.h>
 #include <thrift/lib/cpp2/server/ServiceMethodDecoratorBase.h>
 
 namespace apache::thrift {

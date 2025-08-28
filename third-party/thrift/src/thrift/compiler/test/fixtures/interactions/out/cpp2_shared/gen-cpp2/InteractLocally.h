@@ -101,6 +101,10 @@ class SharedInteractionIf : public apache::thrift::Tile, public apache::thrift::
  private:
   static ::thrift::shared_interactions::InteractLocallyServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_createSharedInteraction{apache::thrift::detail::si::InvocationType::AsyncTm};
+ public:
+
+  virtual void fbthrift_execute_decorators_before_createSharedInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_createSharedInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const SharedInteractionIf& /*interaction*/) {}
 };
 
 namespace detail {

@@ -377,7 +377,12 @@ void scheduleSerializeOptProf() {
 extern "C" void __gcov_reset() __attribute__((__weak__));
 // LLVM/clang API. See llvm-project/compiler-rt/lib/profile/InstrProfiling.h
 extern "C" void __llvm_profile_reset_counters() __attribute__((__weak__));
+// ROAR API
 extern "C" void __roar_api_trigger_warmup() __attribute__((__weak__));
+extern "C" bool __roar_api_pgo_enabled()    __attribute__((__weak__));
+extern "C" bool __roar_api_cspgo_enabled()  __attribute__((__weak__));
+extern "C" void __roar_api_wait_for_pgo()   __attribute__((__weak__));
+extern "C" void __roar_api_wait_for_cspgo() __attribute__((__weak__));
 
 /*
  * This is the main driver for the profile-guided retranslation of all the
@@ -904,6 +909,18 @@ void checkSerializeOptProf() {
       } else {
         Logger::FInfo("retranslateAll: serializeOptProfData failed: {}",
                       errMsg);
+      }
+    }
+
+    // When running under ROAR, we trigger ROAR's PGO/CSPGO after
+    // retranslate-all, and we want to wait for ROAR to finish generating its
+    // PGO/CSPGO code so that it can serialize that code to the jumpstart file
+    // on disk.
+    if (use_roar) {
+      if (__roar_api_cspgo_enabled && __roar_api_cspgo_enabled()) {
+        __roar_api_wait_for_cspgo();
+      } else if (__roar_api_pgo_enabled && __roar_api_pgo_enabled()) {
+        __roar_api_wait_for_pgo();
       }
     }
 

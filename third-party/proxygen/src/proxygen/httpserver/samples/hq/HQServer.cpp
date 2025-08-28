@@ -266,6 +266,8 @@ HQServer::HQServer(HQServerParams params,
         },
         1s);
   }
+  server_->setShouldRegisterKnobParamHandlerFn(
+      [](TransportKnobParamId transportKnobParamId) -> bool { return true; });
 }
 
 void HQServer::start(std::vector<folly::EventBase*> evbs) {

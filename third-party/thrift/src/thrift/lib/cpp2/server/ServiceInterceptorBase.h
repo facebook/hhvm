@@ -22,6 +22,7 @@
 #include <folly/memory/not_null.h>
 
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
+#include <thrift/lib/cpp2/server/DecoratorData.h>
 #include <thrift/lib/cpp2/server/DecoratorDataRuntime.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
 #include <thrift/lib/cpp2/server/metrics/InterceptorMetricCallback.h>
@@ -115,6 +116,12 @@ class ServiceInterceptorBase {
      * has_value()
      */
     const InterceptorFrameworkMetadataStorage* frameworkMetadata = nullptr;
+    /**
+     * Interceptors have access to decorator data on request through this
+     * pointer. In order to read DecoratorData, DecoratorDataHandles need to be
+     * initialized from the userDecoratorData() function.
+     */
+    const server::DecoratorData* decoratorData = nullptr;
   };
   virtual folly::coro::Task<void> internal_onRequest(
       ConnectionInfo, RequestInfo, InterceptorMetricCallback&) = 0;
@@ -148,6 +155,12 @@ class ServiceInterceptorBase {
      * `{service_name}.{interaction_name}.{method_name}`.
      */
     std::string_view qualifiedMethodName = "";
+    /**
+     * Interceptors have access to decorator data on response through this
+     * pointer. In order to read DecoratorData, DecoratorDataHandles need to be
+     * initialized from the userDecoratorData() function.
+     */
+    const server::DecoratorData* decoratorData = nullptr;
   };
   virtual folly::coro::Task<void> internal_onResponse(
       ConnectionInfo, ResponseInfo, InterceptorMetricCallback&) = 0;

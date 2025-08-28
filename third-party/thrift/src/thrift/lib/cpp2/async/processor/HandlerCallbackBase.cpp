@@ -344,6 +344,7 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
     auto connectionInfo = ServiceInterceptorBase::ConnectionInfo{
         connectionCtx,
         connectionCtx->getStorageForServiceInterceptorOnConnectionByIndex(i)};
+    const server::DecoratorData decoratorData = reqCtx_->getDecoratorData();
     auto requestInfo = ServiceInterceptorBase::RequestInfo{
         reqCtx_,
         reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i),
@@ -352,7 +353,8 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
         methodNameInfo_.definingServiceName,
         methodNameInfo_.methodName,
         methodNameInfo_.qualifiedMethodName,
-        reqCtx_->getInterceptorFrameworkMetadata()};
+        reqCtx_->getInterceptorFrameworkMetadata(),
+        &decoratorData};
     try {
       co_await serviceInterceptors[i]->internal_onRequest(
           connectionInfo, requestInfo, server->getInterceptorMetricCallback());
@@ -393,6 +395,7 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse(
     auto connectionInfo = ServiceInterceptorBase::ConnectionInfo{
         connectionCtx,
         connectionCtx->getStorageForServiceInterceptorOnConnectionByIndex(i)};
+    const server::DecoratorData decoratorData = reqCtx_->getDecoratorData();
     auto responseInfo = ServiceInterceptorBase::ResponseInfo{
         reqCtx_,
         reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i),
@@ -400,7 +403,8 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse(
         methodNameInfo_.serviceName,
         methodNameInfo_.definingServiceName,
         methodNameInfo_.methodName,
-        methodNameInfo_.qualifiedMethodName};
+        methodNameInfo_.qualifiedMethodName,
+        &decoratorData};
     try {
       co_await serviceInterceptors[i]->internal_onResponse(
           connectionInfo,

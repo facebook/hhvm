@@ -42,6 +42,11 @@ pub(crate) use {{program:crate}} as types;
 #[allow(unused_imports)]
 pub use {{program:types}}_split{{.}}::*;
 {{/program:type_splits}}
+pub mod __constructors {
+{{#program:type_splits}}
+  pub use {{program:types}}_split{{.}}::__constructors::*;
+{{/program:type_splits}}
+}
 {{/program:split_mode_enabled?}}
 {{!
 ================================================================================

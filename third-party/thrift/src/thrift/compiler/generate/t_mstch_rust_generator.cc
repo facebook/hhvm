@@ -968,10 +968,20 @@ class rust_mstch_program : public mstch_program {
     // `T(inner)` is an expression, and also for non-newtype typedefs referring
     // to these.
     std::set<std::string> types;
-    for (const t_enum* t : program_->enums()) {
+    std::vector<t_enum*> enums;
+    std::vector<t_typedef*> typedefs;
+    if (options_.types_split_count > 0) {
+      enums = enum_split_assignments_[split_id_];
+      typedefs = typedef_split_assignments_[split_id_];
+    } else {
+      enums = program_->enums();
+      typedefs = program_->typedefs();
+    }
+
+    for (const t_enum* t : enums) {
       types.insert(type_rust_name(t));
     }
-    for (const t_typedef* t : program_->typedefs()) {
+    for (const t_typedef* t : typedefs) {
       if (typedef_has_constructor_expression(t)) {
         types.insert(type_rust_name(t));
       }
@@ -1038,7 +1048,8 @@ class rust_mstch_program : public mstch_program {
 
     // Identify dependencies within types
     for (t_typedef* typedf : program_->typedefs()) {
-      if (generate_reference_set(typedf->get_type())) {
+      if (generate_reference_set(typedf->get_type()) ||
+          (typedef_has_constructor_expression(typedf))) {
         dependent_types.insert(typedf);
       }
     }

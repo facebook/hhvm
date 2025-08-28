@@ -105,3 +105,18 @@ mod dot_dot {{> lib/block}}{{!
     }
 }
 {{/program:nonexhaustiveStructs?}}
+{{!
+================================================================================
+}}
+
+#[doc(hidden)]
+#[deprecated]
+#[allow(hidden_glob_reexports)]
+pub mod __constructors {
+    {{#program:types_with_constructors}}
+    mod {{.}} {
+        pub use {{program:crate}}::{{.}};
+    }
+    pub use self::{{.}}::*;
+    {{/program:types_with_constructors}}
+}

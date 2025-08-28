@@ -1,4 +1,4 @@
-~Spliceable<ExampleDsl, string, ExampleInt>
+~Spliceable<ExampleDsl, string, int>
 ---
 I am a comment associated with $one.
 ---

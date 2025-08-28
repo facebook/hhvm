@@ -667,6 +667,11 @@ SSATmp* simplifyLdObjClass(State& env, const IRInstruction* inst) {
   if (!(ty < TObj)) return nullptr;
 
   if (auto const exact = ty.clsSpec().exactCls()) return cns(env, exact);
+
+  if (auto const srcInst = inst->src(0)->inst(); srcInst->is(AllocObj)) {
+    return srcInst->src(0);
+  }
+
   return nullptr;
 }
 
@@ -1697,6 +1702,7 @@ X(NeqRes, Res)
 SSATmp* simplifyEqCls(State& env, const IRInstruction* inst) {
   auto const left = inst->src(0);
   auto const right = inst->src(1);
+  if (left == right) return cns(env, true);
   if (left->hasConstVal() && right->hasConstVal()) {
     return cns(env, left->clsVal() == right->clsVal());
   }
@@ -1706,6 +1712,7 @@ SSATmp* simplifyEqCls(State& env, const IRInstruction* inst) {
 SSATmp* simplifyEqLazyCls(State& env, const IRInstruction* inst) {
   auto const left = inst->src(0);
   auto const right = inst->src(1);
+  if (left == right) return cns(env, true);
   if (left->hasConstVal() && right->hasConstVal()) {
     return cns(env, left->lclsVal().name() == right->lclsVal().name());
   }

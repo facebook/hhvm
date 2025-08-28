@@ -84,7 +84,7 @@ quic::StreamId HQDownstreamSessionTest::sendHeader() {
 folly::Promise<folly::Unit> HQDownstreamSessionTest::sendRequestLater(
     proxygen::HTTPMessage req, bool eof) {
   folly::Promise<folly::Unit> reqp;
-  reqp.getSemiFuture().via(&eventBase_).thenValue([=](auto&&) {
+  reqp.getSemiFuture().via(&eventBase_).thenValue([=, this](auto&&) {
     auto id = sendRequest(req, eof);
     socketDriver_->addReadEvent(
         id, getStream(id).buf.move(), std::chrono::milliseconds(0));

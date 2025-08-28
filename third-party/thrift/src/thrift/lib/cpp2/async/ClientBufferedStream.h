@@ -38,6 +38,8 @@ namespace apache::thrift {
 template <typename T>
 class ClientBufferedStream {
  public:
+  using ElementType = T;
+
   ClientBufferedStream() {}
   ClientBufferedStream(
       apache::thrift::detail::ClientStreamBridge::ClientPtr streamBridge,

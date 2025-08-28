@@ -209,6 +209,7 @@ class ThriftPresult
 
  public:
   using size = std::tuple_size<Fields>;
+  using InitialResponsePResultType = ThriftPresult;
 
   CurIsSetHelper& isSet() { return *this; }
   const CurIsSetHelper& isSet() const { return *this; }
@@ -468,89 +469,6 @@ folly::exception_wrapper recv_wrapped_helper(
     return folly::exception_wrapper(folly::current_exception());
   }
 }
-
-template <typename PResult, typename Protocol, typename... ReturnTs>
-folly::exception_wrapper recv_wrapped(
-    Protocol* prot, ClientReceiveState& state, ReturnTs&... _returns) {
-  prot->setInput(state.serializedResponse().buffer.get());
-  auto guard = folly::makeGuard([&] { prot->setInput(nullptr); });
-  apache::thrift::ContextStack* ctx = state.ctx();
-  PResult result;
-  foreach(
-      [&](auto index, auto& obj) {
-        result.template get<index.value>().value = &obj;
-      },
-      _returns...);
-  auto ew = recv_wrapped_helper(prot, state, result);
-  if (!ew) {
-    constexpr const auto kHasReturnType = sizeof...(_returns) != 0;
-    ew = apache::thrift::detail::ac::extract_exn<kHasReturnType>(result);
-  }
-  if (ctx && ew) {
-    ctx->handlerErrorWrapped(ew);
-  }
-  return ew;
-}
-
-template <typename PResult, typename Protocol, typename Response, typename Item>
-folly::exception_wrapper recv_wrapped(
-    Protocol* prot,
-    ClientReceiveState& state,
-    apache::thrift::ResponseAndClientBufferedStream<Response, Item>& _return) {
-  prot->setInput(state.serializedResponse().buffer.get());
-  auto guard = folly::makeGuard([&] { prot->setInput(nullptr); });
-  apache::thrift::ContextStack* ctx = state.ctx();
-
-  typename PResult::InitialResponsePResultType result;
-  result.template get<0>().value = &_return.response;
-
-  auto ew = recv_wrapped_helper(prot, state, result);
-  if (!ew) {
-    ew = apache::thrift::detail::ac::extract_exn<true>(result);
-  }
-  if (ctx && ew) {
-    ctx->handlerErrorWrapped(ew);
-  }
-
-  if (!ew) {
-    _return.stream = apache::thrift::detail::ap::decode_client_buffered_stream<
-        Protocol,
-        typename PResult::StreamPResultType,
-        Item>(state.extractStreamBridge(), state.bufferOptions());
-  }
-  return ew;
-}
-
-template <typename PResult, typename Protocol, typename Item>
-folly::exception_wrapper recv_wrapped(
-    Protocol* prot,
-    ClientReceiveState& state,
-    apache::thrift::ClientBufferedStream<Item>& _return) {
-  prot->setInput(state.serializedResponse().buffer.get());
-  auto guard = folly::makeGuard([&] { prot->setInput(nullptr); });
-  apache::thrift::ContextStack* ctx = state.ctx();
-
-  typename PResult::InitialResponsePResultType result;
-
-  auto ew = recv_wrapped_helper(prot, state, result);
-  if (!ew) {
-    ew = apache::thrift::detail::ac::extract_exn<false>(result);
-  }
-  if (ctx && ew) {
-    ctx->handlerErrorWrapped(ew);
-  }
-
-  if (!ew) {
-    _return = apache::thrift::detail::ap::decode_client_buffered_stream<
-        Protocol,
-        typename PResult::StreamPResultType,
-        Item>(state.extractStreamBridge(), state.bufferOptions());
-  }
-  return ew;
-}
-
-#if FOLLY_HAS_COROUTINES
-
 template <
     typename ProtocolReader,
     typename ProtocolWriter,
@@ -558,8 +476,8 @@ template <
     typename SinkType,
     typename FinalResponsePResult,
     typename FinalResponseType>
-ClientSink<SinkType, FinalResponseType> createSink(
-    apache::thrift::detail::ClientSinkBridge::ClientPtr impl) {
+ClientSink<SinkType, FinalResponseType> createSink(ClientReceiveState& state) {
+#if FOLLY_HAS_COROUTINES
   static apache::thrift::detail::ap::StreamElementEncoderImpl<
       ErrorBlame::CLIENT,
       ProtocolWriter,
@@ -567,102 +485,129 @@ ClientSink<SinkType, FinalResponseType> createSink(
       SinkType>
       encode;
   return ClientSink<SinkType, FinalResponseType>(
-      std::move(impl),
+      state.extractSink(),
       &encode,
       apache::thrift::detail::ap::decode_stream_element<
           ProtocolReader,
           FinalResponsePResult,
           FinalResponseType>);
-}
+#else
+  (void)state;
+  std::terminate();
 #endif
+}
+
+template <typename ProtocolReader, typename StreamPResult, typename StreamType>
+ClientBufferedStream<StreamType> createStream(ClientReceiveState& state) {
+  return apache::thrift::detail::ap::
+      decode_client_buffered_stream<ProtocolReader, StreamPResult, StreamType>(
+          state.extractStreamBridge(), state.bufferOptions());
+}
 
 template <
     typename PResult,
     typename ProtocolReader,
+    typename InitialResponse = void,
+    typename Sink = void,
+    typename Stream = void>
+folly::exception_wrapper recv_wrapped_impl(
+    ProtocolReader* prot,
+    ClientReceiveState& state,
+    InitialResponse* resp = nullptr,
+    Sink* sink = nullptr,
+    Stream* stream = nullptr) {
+  prot->setInput(state.serializedResponse().buffer.get());
+  auto guard = folly::makeGuard([&] { prot->setInput(nullptr); });
+  apache::thrift::ContextStack* ctx = state.ctx();
+  typename PResult::InitialResponsePResultType result;
+  constexpr bool kHasReturnType = !std::is_void_v<InitialResponse>;
+  if constexpr (kHasReturnType) {
+    result.template get<0>().value = resp;
+  }
+  auto ew = recv_wrapped_helper(prot, state, result);
+  if (!ew) {
+    ew = apache::thrift::detail::ac::extract_exn<kHasReturnType>(result);
+  }
+  if (ew) {
+    if (ctx) {
+      ctx->handlerErrorWrapped(ew);
+    }
+    return ew;
+  }
+  if constexpr (!std::is_void_v<Sink>) {
+    *sink = createSink<
+        ProtocolReader,
+        typename ProtocolReader::ProtocolWriter,
+        typename PResult::SinkPResultType,
+        typename Sink::ElementType,
+        typename PResult::FinalResponsePResultType,
+        typename Sink::FinalResponseType>(state);
+  }
+  if constexpr (!std::is_void_v<Stream>) {
+    *stream = createStream<
+        ProtocolReader,
+        typename PResult::StreamPResultType,
+        typename Stream::ElementType>(state);
+  }
+
+  return ew; // empty
+}
+
+template <typename PResult, typename Protocol>
+folly::exception_wrapper recv_wrapped(
+    Protocol* prot, ClientReceiveState& state) {
+  return recv_wrapped_impl<PResult>(prot, state);
+}
+
+template <typename PResult, typename Protocol, typename Response>
+folly::exception_wrapper recv_wrapped(
+    Protocol* prot, ClientReceiveState& state, Response& result) {
+  return recv_wrapped_impl<PResult>(prot, state, &result);
+}
+
+template <typename PResult, typename Protocol, typename Response, typename Item>
+folly::exception_wrapper recv_wrapped(
+    Protocol* prot,
+    ClientReceiveState& state,
+    apache::thrift::ResponseAndClientBufferedStream<Response, Item>& _return) {
+  return recv_wrapped_impl<PResult>(
+      prot, state, &_return.response, (void*)nullptr, &_return.stream);
+}
+
+template <typename PResult, typename Protocol, typename Item>
+folly::exception_wrapper recv_wrapped(
+    Protocol* prot,
+    ClientReceiveState& state,
+    apache::thrift::ClientBufferedStream<Item>& _return) {
+  return recv_wrapped_impl<PResult>(
+      prot, state, (void*)nullptr, (void*)nullptr, &_return);
+}
+
+template <
+    typename PResult,
+    typename Protocol,
     typename Response,
     typename Item,
     typename FinalResponse>
 folly::exception_wrapper recv_wrapped(
-    ProtocolReader* prot,
+    Protocol* prot,
     ClientReceiveState& state,
     apache::thrift::ResponseAndClientSink<Response, Item, FinalResponse>&
         _return) {
-#if FOLLY_HAS_COROUTINES
-  prot->setInput(state.serializedResponse().buffer.get());
-  auto guard = folly::makeGuard([&] { prot->setInput(nullptr); });
-  apache::thrift::ContextStack* ctx = state.ctx();
-
-  typename PResult::InitialResponsePResultType result;
-  result.template get<0>().value = &_return.response;
-
-  auto ew = recv_wrapped_helper(prot, state, result);
-  if (!ew) {
-    ew = apache::thrift::detail::ac::extract_exn<true>(result);
-  }
-  if (ctx && ew) {
-    ctx->handlerErrorWrapped(ew);
-  }
-
-  if (!ew) {
-    _return.sink = createSink<
-        ProtocolReader,
-        typename ProtocolReader::ProtocolWriter,
-        typename PResult::SinkPResultType,
-        Item,
-        typename PResult::FinalResponsePResultType,
-        FinalResponse>(state.extractSink());
-  }
-  return ew;
-#else
-  (void)prot;
-  (void)state;
-  (void)impl;
-  (void)_return;
-  std::terminate();
-#endif
+  return recv_wrapped_impl<PResult>(
+      prot, state, &_return.response, &_return.sink);
 }
 
 template <
     typename PResult,
-    typename ProtocolReader,
+    typename Protocol,
     typename Item,
     typename FinalResponse>
 folly::exception_wrapper recv_wrapped(
-    ProtocolReader* prot,
+    Protocol* prot,
     ClientReceiveState& state,
     apache::thrift::ClientSink<Item, FinalResponse>& _return) {
-#if FOLLY_HAS_COROUTINES
-  prot->setInput(state.serializedResponse().buffer.get());
-  auto guard = folly::makeGuard([&] { prot->setInput(nullptr); });
-  apache::thrift::ContextStack* ctx = state.ctx();
-
-  typename PResult::InitialResponsePResultType result;
-
-  auto ew = recv_wrapped_helper(prot, state, result);
-  if (!ew) {
-    ew = apache::thrift::detail::ac::extract_exn<false>(result);
-  }
-  if (ctx && ew) {
-    ctx->handlerErrorWrapped(ew);
-  }
-
-  if (!ew) {
-    _return = createSink<
-        ProtocolReader,
-        typename ProtocolReader::ProtocolWriter,
-        typename PResult::SinkPResultType,
-        Item,
-        typename PResult::FinalResponsePResultType,
-        FinalResponse>(state.extractSink());
-  }
-  return ew;
-#else
-  (void)prot;
-  (void)state;
-  (void)impl;
-  (void)_return;
-  std::terminate();
-#endif
+  return recv_wrapped_impl<PResult>(prot, state, (void*)nullptr, &_return);
 }
 
 [[noreturn]] void throw_app_exn(const char* msg);

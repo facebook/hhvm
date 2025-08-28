@@ -39,13 +39,18 @@ class FOLLY_EXPORT SinkThrew : public TApplicationException {
 
 template <typename T, typename R = void>
 class ClientSink {
-#if FOLLY_HAS_COROUTINES
+ private:
   using PayloadSerializer = apache::thrift::detail::StreamElementEncoder<T>*;
   using FinalResponseDeserializer =
       folly::Try<R> (*)(folly::Try<StreamPayload>&&);
 
  public:
+  using ElementType = T;
+  using FinalResponseType = R;
+
   ClientSink() = default;
+
+#if FOLLY_HAS_COROUTINES
 
   ClientSink(
       apache::thrift::detail::ClientSinkBridge::ClientPtr impl,

@@ -28,7 +28,7 @@ Some type arguments violate their constraints (Typing[4323])
   But got `B`
   File "lambda_wellformed_bad.php", line 13, characters 32-32:
     by the definition of `T2`
-  File "lambda_wellformed_bad.php", line 10, characters 44-45:
+  File "lambda_wellformed_bad.php", line 13, characters 37-38:
   This `as` or `=` refinement constraint is violated
   File "lambda_wellformed_bad.php", line 10, characters 18-19:
   `T2` is a constrained type parameter

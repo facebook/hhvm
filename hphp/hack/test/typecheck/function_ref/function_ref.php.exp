@@ -82,5 +82,5 @@ Invalid argument (Typing[4411])
   Function readonly mismatch
   File "function_ref.php", line 104, characters 19-38:
   This function is not marked readonly
-  File "function_ref.php", line 58, characters 30-33:
+  File "function_ref.php", line 19, characters 10-12:
   This function is marked readonly

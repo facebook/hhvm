@@ -22,7 +22,7 @@ Some type arguments violate their constraints (Typing[4323])
   But got `mixed`
   File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
     via this generic `T`
-  File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
+  File "constraint_newtype_param_type_advanced.php", line 7, characters 28-34:
     by the definition of `T` arising from an implicit `as mixed` constraint on this type
 ERROR: File "constraint_newtype_param_type_advanced.php", line 7, characters 28-34:
 Some type arguments violate their constraints (Typing[4323])
@@ -48,7 +48,7 @@ Some type arguments violate their constraints (Typing[4323])
   But got `mixed`
   File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
     via this generic `T`
-  File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
+  File "constraint_newtype_param_type_advanced.php", line 7, characters 30-33:
     by the definition of `T` arising from an implicit `as mixed` constraint on this type
 ERROR: File "constraint_newtype_param_type_advanced.php", line 7, characters 30-33:
 Some type arguments violate their constraints (Typing[4323])
@@ -74,5 +74,5 @@ Some type arguments violate their constraints (Typing[4323])
   But got `mixed`
   File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
     via this generic `T`
-  File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
+  File "constraint_newtype_param_type_advanced.php", line 7, characters 32-32:
     by the definition of `T` arising from an implicit `as mixed` constraint on this type

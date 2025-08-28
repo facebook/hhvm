@@ -14,5 +14,5 @@ Invalid return type (Typing[4110])
   But got `mixed`
   File "new_classname1.bad.php", line 4, characters 49-50:
     via this generic `T1`
-  File "new_classname1.bad.php", line 4, characters 49-50:
+  File "new_classname1.bad.php", line 3, characters 15-16:
     by the definition of `T1` arising from an implicit `as mixed` constraint on this type

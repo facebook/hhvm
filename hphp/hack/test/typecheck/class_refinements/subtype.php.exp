@@ -132,7 +132,7 @@ A `where` type constraint is violated here (Typing[4323])
   But got `Box with { type T as C2 super C4 }`
   File "subtype.php", line 23, characters 43-44:
     via this generic `Ta`
-  File "subtype.php", line 21, characters 49-51:
+  File "subtype.php", line 37, characters 37-38:
   This `super` refinement constraint is violated
   File "subtype.php", line 37, characters 21-22:
   Expected `C4`

@@ -28,7 +28,7 @@ Invalid constraint on `newtype` (Typing[4332])
   But got `T`
   File "assume_where_clause_for_variant.php", line 12, characters 36-36:
     via this generic `T`
-  File "assume_where_clause_for_variant.php", line 12, characters 36-36:
+  File "assume_where_clause_for_variant.php", line 18, characters 9-9:
   This type argument to `IFoo` must match exactly (it is invariant)
 ERROR: File "assume_where_clause_for_variant.php", line 16, characters 11-23:
 Invalid constraint on `newtype` (Typing[4332])
@@ -38,7 +38,7 @@ Invalid constraint on `newtype` (Typing[4332])
   But got `mixed`
   File "assume_where_clause_for_variant.php", line 12, characters 36-36:
     via this generic `T`
-  File "assume_where_clause_for_variant.php", line 12, characters 36-36:
+  File "assume_where_clause_for_variant.php", line 18, characters 9-9:
   This type argument to `IFoo` must match exactly (it is invariant)
   File "assume_where_clause_for_variant.php", line 16, characters 25-25:
     by the definition of `T`

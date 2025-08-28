@@ -14,5 +14,5 @@ A `where` type constraint is violated here (Typing[4323])
   This is the method with `where` type constraints
   File "accessloose.php", line 17, characters 61-61:
   Type member `T` cannot be accessed
-  File "accessloose.php", line 17, characters 57-61:
+  File "accessloose.php", line 50, characters 18-43:
     on a loose refinement

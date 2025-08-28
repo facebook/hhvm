@@ -18,7 +18,7 @@ Invalid return type (Typing[4110])
   But got `Tx` from this `is` expression test
   File "instance_of_tparam.php", line 21, characters 22-22:
     via this generic `T`
-  File "instance_of_tparam.php", line 21, characters 22-22:
+  File "instance_of_tparam.php", line 24, characters 13-16:
   This type argument to `D` must match exactly (it is invariant)
 ERROR: File "instance_of_tparam.php", line 25, characters 12-13:
 Invalid return type (Typing[4110])
@@ -28,9 +28,9 @@ Invalid return type (Typing[4110])
   But got `mixed` from this `is` expression test
   File "instance_of_tparam.php", line 21, characters 22-22:
     via this generic `T`
-  File "instance_of_tparam.php", line 21, characters 22-22:
+  File "instance_of_tparam.php", line 24, characters 13-16:
   This type argument to `D` must match exactly (it is invariant)
-  File "instance_of_tparam.php", line 21, characters 22-22:
+  File "instance_of_tparam.php", line 24, characters 13-16:
     by the definition of `Tx` arising from an implicit `as mixed` constraint on this type
 ERROR: File "instance_of_tparam.php", line 25, characters 12-13:
 Invalid return type (Typing[4110])

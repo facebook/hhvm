@@ -148,7 +148,7 @@ impl<'a> Reason<'a> {
 
             DynamicCoercion(r) => r.pos(),
             ExprDepType((r, _, _)) | Typeconst((r, _, _, _)) => r.pos(),
-            Instantiate { var: r, .. } => r.pos(),
+            Instantiate { type__: r, .. } => r.pos(),
             _ => None,
         }
     }

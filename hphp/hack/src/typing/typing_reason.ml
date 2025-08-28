@@ -1718,6 +1718,9 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | SDT_call (pos_or_decl, _) ->
     pos_or_decl
   | Opaque_type_from_module (pos_or_decl, _, _) -> pos_or_decl
+  (* When fetching a position of a generic instantiation, report the type
+     application rather than the definition *)
+  | Instantiate { type_ = t; _ } -> to_raw_pos t
   (* Recurse into flow-like reasons to find the position of the leftmost witness *)
   | Flow { from = t; _ }
   | Lower_bound { bound = t; _ }
@@ -1732,7 +1735,6 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
     to_raw_pos t
   | Expr_dep_type (t, _, _) -> to_raw_pos t
   | Typeconst (t, _, _, _) -> to_raw_pos t
-  | Instantiate { var = t; _ } -> to_raw_pos t
 
 let get_pri : type ph. ph t_ -> int = function
   | No_reason -> 0

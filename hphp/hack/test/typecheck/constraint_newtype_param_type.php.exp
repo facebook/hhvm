@@ -22,5 +22,5 @@ Some type arguments violate their constraints (Typing[4323])
   But got `mixed`
   File "constraint_newtype_param_type.php--a.php", line 4, characters 15-15:
     via this generic `T`
-  File "constraint_newtype_param_type.php--a.php", line 4, characters 15-15:
+  File "constraint_newtype_param_type.php--a.php", line 6, characters 27-27:
     by the definition of `T` arising from an implicit `as mixed` constraint on this type

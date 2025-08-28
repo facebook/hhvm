@@ -1,6 +1,6 @@
 WARN: File "idx2_3.php", line 10, characters 8-17:
 Invalid type argument due to disjoint types in a union (Warn[12017])
-  File "collections/interfaces.hhi", line 845, characters 22-23:
+  File "idx2_3.php", line 3, characters 19-24:
   `string` is one of the disjoint types
   File "idx2_3.php", line 10, characters 16-16:
   `int` is one of the disjoint types

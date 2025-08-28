@@ -8,7 +8,7 @@ Some type arguments violate their constraints (Typing[4323])
   Expected a class with `{type TInner = string}`
   File "projected_type_const_error3.php", line 21, characters 20-25:
   But got `IntBox`
-  File "projected_type_const_error3.php", line 13, characters 55-58:
+  File "projected_type_const_error3.php", line 21, characters 28-33:
   This `as` or `=` refinement constraint is violated
   File "projected_type_const_error3.php", line 13, characters 20-23:
   `TBox` is a constrained type parameter
@@ -30,7 +30,7 @@ Some type arguments violate their constraints (Typing[4323])
   Expected a class with `{type TInner = string}`
   File "projected_type_const_error3.php", line 21, characters 20-25:
   But got `IntBox`
-  File "projected_type_const_error3.php", line 13, characters 55-58:
+  File "projected_type_const_error3.php", line 21, characters 28-33:
   This `super` refinement constraint is violated
   File "projected_type_const_error3.php", line 13, characters 20-23:
   `TBox` is a constrained type parameter

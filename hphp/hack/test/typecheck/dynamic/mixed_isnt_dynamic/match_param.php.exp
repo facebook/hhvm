@@ -8,5 +8,5 @@ The method `do` is not compatible with the overridden method (Typing[4341])
   Type `(function(dynamic $x): mixed)` is not a subtype of `(function(mixed $x): mixed)`
   File "match_param.php", line 14, characters 22-28:
   Expected `dynamic`
-  File "match_param.php", line 4, characters 22-24:
+  File "match_param.php", line 13, characters 33-37:
   Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping

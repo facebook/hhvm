@@ -1,4 +1,4 @@
 ERROR: File "T120247995.php", line 10, characters 13-16:
 You are trying to access the method `ohno` but this is an int (Typing[4062])
-  File "interfaces.hhi", line 92, characters 66-67:
+  File "T120247995.php", line 5, characters 15-15:
   Definition is here

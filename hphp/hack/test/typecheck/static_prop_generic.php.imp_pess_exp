@@ -6,13 +6,13 @@ A generic parameter cannot be used in the type of a static property (Typing[4279
   This is the class containing the static property
 ERROR: File "static_prop_generic.php--fileb.php", line 8, characters 10-10:
 A generic parameter cannot be used in the type of a static property (Typing[4279])
-  File "static_prop_generic.php--fileb.php", line 8, characters 10-10:
+  File "static_prop_generic.php--filea.php", line 6, characters 33-33:
   This is where the type of the static property was declared
   File "static_prop_generic.php--fileb.php", line 6, characters 16-16:
   This is the class containing the static property
 ERROR: File "static_prop_generic.php--fileb.php", line 9, characters 10-10:
 A generic parameter cannot be used in the type of a static property (Typing[4279])
-  File "static_prop_generic.php--fileb.php", line 9, characters 10-10:
+  File "static_prop_generic.php--fileb.php", line 4, characters 33-33:
   This is where the type of the static property was declared
   File "static_prop_generic.php--fileb.php", line 6, characters 16-16:
   This is the class containing the static property

@@ -74,5 +74,5 @@ Invalid argument (Typing[4110])
   But got `(~_ & mixed)` because type parameter `Tk2` of `f` could not be determined. Please add explicit type parameters to the invocation of `f`
   File "super_constraint_9.php", line 7, characters 49-51:
     via this generic `Tk2`
-  File "super_constraint_9.php", line 7, characters 49-51:
+  File "super_constraint_9.php", line 21, characters 10-10:
   This type argument to `Foo` must match exactly (it is invariant)

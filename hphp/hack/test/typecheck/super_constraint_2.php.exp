@@ -2,17 +2,17 @@ ERROR: File "super_constraint_2.php", line 27, characters 12-26:
 Invalid return type (Typing[4323])
   File "super_constraint_2.php", line 10, characters 23-24:
   `Tu` is a constrained type parameter
-  File "super_constraint_2.php", line 10, characters 32-32:
+  File "super_constraint_2.php", line 23, characters 10-15:
   This type constraint is violated
   File "super_constraint_2.php", line 26, characters 6-18:
   Expected `FooDerived123`
-  File "super_constraint_2.php", line 10, characters 32-32:
+  File "super_constraint_2.php", line 23, characters 10-15:
   But got `Foo123`
 ERROR: File "super_constraint_2.php", line 27, characters 12-26:
 Invalid return type (Typing[4110])
   File "super_constraint_2.php", line 26, characters 6-18:
   Expected `FooDerived123`
-  File "super_constraint_2.php", line 10, characters 32-32:
+  File "super_constraint_2.php", line 23, characters 10-15:
   But got `Foo123`
   File "super_constraint_2.php", line 10, characters 52-53:
     via this generic `Tu`

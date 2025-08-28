@@ -1,6 +1,6 @@
 WARN: File "idx_classname.php", line 11, characters 5-26:
 Invalid type argument due to disjoint types in a union (Warn[12017])
-  File "hackarray.hhi", line 22, characters 31-32:
+  File "hackarray.hhi", line 52, characters 67-69:
   `int` is one of the disjoint types
   File "idx_classname.php", line 9, characters 31-45:
   `classname<this>` is one of the disjoint types

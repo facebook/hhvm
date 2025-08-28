@@ -62,10 +62,10 @@ in the client or server source rather than the type definition source.
   }}{{enum:name}}){{/type:enum}}{{!
 }}{{#type:has_adapter?}}{{!
   }}, {{adapter:name}}, lambda: {{!
-  }}{{#adapter:is_transitive?}}{{!
-    }}{{#adapter:transitive_annotation}}{{> types/constant_value }}{{/adapter:transitive_annotation}}{{!
-  }}{{/adapter:is_transitive?}}{{!
-  }}{{^adapter:is_transitive?}}{{!
+  }}{{#adapter:transitive_annotation}}{{!
+    }}{{> types/constant_value }}{{!
+  }}{{/adapter:transitive_annotation}}{{!
+  }}{{^adapter:transitive_annotation}}{{!
     }}None{{!
-  }}{{/adapter:is_transitive?}}{{!
+  }}{{/adapter:transitive_annotation}}{{!
 }}){{/type:has_adapter?}}

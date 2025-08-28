@@ -21,12 +21,12 @@ A tuple of:
 if the field has an adapter, else None.
 }}{{#field:has_adapter?}}({{!
   }}{{adapter:name}}, lambda: {{!
-  }}{{#adapter:is_transitive?}}{{!
-    }}{{#adapter:transitive_annotation}}{{> types/constant_value }}{{/adapter:transitive_annotation}}{{!
-  }}{{/adapter:is_transitive?}}{{!
-  }}{{^adapter:is_transitive?}}{{!
+  }}{{#adapter:transitive_annotation}}{{!
+    }}{{> types/constant_value }}{{!
+  }}{{/adapter:transitive_annotation}}{{!
+  }}{{^adapter:transitive_annotation}}{{!
     }}None{{!
-  }}{{/adapter:is_transitive?}}{{!
+  }}{{/adapter:transitive_annotation}}{{!
 }}){{/field:has_adapter?}}{{!
 }}{{^field:has_adapter?}}{{!
   }}None{{!

@@ -26,14 +26,14 @@
 # @fbthrift_strip_from_fixtures
 ){{/constant:generated?}}
 {{#constant:has_adapter?}}
-{{constant:name}} = {{constant:adapter_name}}.from_thrift(
+{{constant:name}} = {{adapter:name}}.from_thrift(
     _fbthrift_unadapted_{{constant:name}},
-    transitive_annotation={{#constant:is_adapter_transitive?}}{{!
-        }}{{#constant:transitive_adapter_annotation}}{{> types/constant_value }}{{/constant:transitive_adapter_annotation}}{{!
-    }}{{/constant:is_adapter_transitive?}}{{!
-    }}{{^constant:is_adapter_transitive?}}{{!
+    transitive_annotation={{#adapter:transitive_annotation}}{{!
+        }}{{> types/constant_value }}{{!
+    }}{{/adapter:transitive_annotation}}{{!
+    }}{{^adapter:transitive_annotation}}{{!
         }}None
-    }}{{/constant:is_adapter_transitive?}},
+    }}{{/adapter:transitive_annotation}},
     constant_uri={{#constant:uri}}"{{constant:uri}}"{{/constant:uri}}{{!
         }}{{^constant:uri}}None{{/constant:uri}},
 )

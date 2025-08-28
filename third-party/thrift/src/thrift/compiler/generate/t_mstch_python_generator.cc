@@ -160,35 +160,32 @@ std::string mangle_program_path(
 class python_mstch_const_value;
 
 mstch::node adapter_node(
+    mstch_context& context,
     const t_const* adapter_annotation,
     const t_const* transitive_adapter_annotation,
-    mstch_context& context,
-    mstch_element_position pos) {
+    bool singular_type_hint = true) {
   if (!adapter_annotation) {
     return false;
   }
   auto type_hint = get_annotation_property(adapter_annotation, "typeHint");
   bool is_generic = type_hint.ends_with("[]");
-  if (is_generic) {
+  if (singular_type_hint && is_generic) {
     type_hint = type_hint.substr(0, type_hint.size() - 2);
   }
-  bool is_transitive = (transitive_adapter_annotation != nullptr);
-  mstch::map node{
+  return mstch::map{
       {"adapter:name", get_annotation_property(adapter_annotation, "name")},
       {"adapter:type_hint", std::string(type_hint)},
       {"adapter:is_generic?", is_generic},
-      {"adapter:is_transitive?", is_transitive},
+      {"adapter:transitive_annotation",
+       transitive_adapter_annotation == nullptr
+           ? nullptr
+           : mstch::make_shared_node<python_mstch_const_value>(
+                 transitive_adapter_annotation->value(),
+                 context,
+                 mstch_element_position{},
+                 transitive_adapter_annotation,
+                 &*transitive_adapter_annotation->type())},
   };
-  if (is_transitive) {
-    node["adapter:transitive_annotation"] =
-        mstch::make_shared_node<python_mstch_const_value>(
-            transitive_adapter_annotation->value(),
-            context,
-            pos,
-            transitive_adapter_annotation,
-            &*transitive_adapter_annotation->type());
-  }
-  return node;
 }
 
 bool is_invariant_adapter(
@@ -635,7 +632,7 @@ class python_mstch_type : public mstch_type {
 
   mstch::node adapter() {
     return adapter_node(
-        adapter_annotation_, transitive_adapter_annotation_, context_, pos_);
+        context_, adapter_annotation_, transitive_adapter_annotation_);
   }
 
  protected:
@@ -657,7 +654,7 @@ class python_mstch_typedef : public mstch_typedef {
   }
 
   mstch::node adapter() {
-    return adapter_node(adapter_annotation_, nullptr, context_, pos_);
+    return adapter_node(context_, adapter_annotation_, nullptr);
   }
 
  private:
@@ -688,7 +685,7 @@ class python_mstch_struct : public mstch_struct {
   }
 
   mstch::node adapter() {
-    return adapter_node(adapter_annotation_, nullptr, context_, pos_);
+    return adapter_node(context_, adapter_annotation_, nullptr);
   }
 
  private:
@@ -732,7 +729,7 @@ class python_mstch_field : public mstch_field {
   }
   mstch::node adapter() {
     return adapter_node(
-        adapter_annotation_, transitive_adapter_annotation_, context_, pos_);
+        context_, adapter_annotation_, transitive_adapter_annotation_);
   }
 
  private:
@@ -1314,38 +1311,16 @@ class python_mstch_const : public mstch_const {
     register_methods(
         this,
         {
-            {"constant:has_adapter?", &python_mstch_const::has_adapter},
-            {"constant:adapter_name", &python_mstch_const::adapter_name},
-            {"constant:adapter_type_hint",
-             &python_mstch_const::adapter_type_hint},
-            {"constant:is_adapter_transitive?",
-             &python_mstch_const::is_adapter_transitive},
-            {"constant:transitive_adapter_annotation",
-             &python_mstch_const::transitive_adapter_annotation},
+            {"constant:has_adapter?", &python_mstch_const::adapter},
         });
   }
 
-  mstch::node has_adapter() { return adapter_annotation_ != nullptr; }
-
-  mstch::node adapter_name() {
-    return get_annotation_property(adapter_annotation_, "name");
-  }
-
-  mstch::node adapter_type_hint() {
-    return get_annotation_property(adapter_annotation_, "typeHint");
-  }
-
-  mstch::node is_adapter_transitive() {
-    return transitive_adapter_annotation_ != nullptr;
-  }
-
-  mstch::node transitive_adapter_annotation() {
-    return mstch::make_shared_node<python_mstch_const_value>(
-        transitive_adapter_annotation_->value(),
+  mstch::node adapter() {
+    return adapter_node(
         context_,
-        pos_,
+        adapter_annotation_,
         transitive_adapter_annotation_,
-        &*transitive_adapter_annotation_->type());
+        /*singular_type_hint=*/false);
   }
 
  private:

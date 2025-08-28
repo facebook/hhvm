@@ -286,6 +286,14 @@ void buildValuesForSizeofTests() {
   takeArrayData(k.get());
 }
 
+// aliases tests
+uint32_t takeInt(uint32_t v) { return v; }
+void takeAnotherInt(uint32_t UNUSED v) { return; }
+void buildValuesForAliasesTests() {
+  uint32_t x = takeInt(42);
+  takeAnotherInt(x);
+}
+
 } // namespace lldb_test
 } // namespace HPHP
 
@@ -309,8 +317,10 @@ int main(int argc, char** argv) {
     HPHP::lldb_test::buildValuesForSizeofTests();
   } else if (!strcmp(argv[1], "utility")) {
     HPHP::lldb_test::buildValuesForUtilityTests();
+  } else if (!strcmp(argv[1], "aliases")) {
+    HPHP::lldb_test::buildValuesForAliasesTests();
   } else {
-    std::cout << "Invalid option (options: \"typed-values\", \"other-values\", \"nameof-values\", \"sizeof-values\", \"utility\"" << std::endl;
+    std::cout << "Invalid option (options: \"typed-values\", \"other-values\", \"nameof-values\", \"sizeof-values\", \"utility\", \"aliases\"" << std::endl;
     return 1;
   }
   return 0;

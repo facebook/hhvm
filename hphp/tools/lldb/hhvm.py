@@ -6,6 +6,9 @@
 
 import sys
 
+# pyre-fixme[21]: Could not find module `aliases`.
+import aliases
+
 # pyre-fixme[21]: Could not find module `cores`.
 import cores
 
@@ -50,6 +53,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _internal_dict) -> None:
         None
     """
     top_module = sys.modules[__name__].__name__
+    aliases.__lldb_init_module(debugger, top_module)
     cores.__lldb_init_module(debugger, top_module)
     hhbc.__lldb_init_module(debugger, top_module)
     idx.__lldb_init_module(debugger, top_module)

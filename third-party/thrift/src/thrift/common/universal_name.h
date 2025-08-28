@@ -20,20 +20,35 @@
 #include <string_view>
 #include <vector>
 
-namespace apache::thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
+/**
+ * Checks that the given (split) labels form a valid Thrift URI domain.
+ *
+ * @throws std::invalid_argument on failure
+ */
 void check_univeral_name_domain(const std::vector<std::string>& domain);
+
+/**
+ * Checks that the given (split) segments form a valid Thrift URI path.
+ *
+ * @throws std::invalid_argument on failure
+ */
 void check_universal_name_path(const std::vector<std::string>& path);
 
-} // namespace detail
+} // namespace apache::thrift::detail
 
-// Validates that uri is a valid universal name of the form:
-// {domain}/{path}. For example: facebook.com/thrift/Value.
-//
-// The scheme "fbthrift://"" is implied and not included in the uri.
-//
-// Throws std::invalid_argument on failure.
+namespace apache::thrift {
+/**
+ * Validates that uri is a valid Thrift universal name (aka Thrift URI) of the
+ * form: {domain}/{path}/{type}.
+ *
+ * For example: facebook.com/thrift/Value.
+ *
+ * The URI scheme "fbthrift://"" is implied and must not be included in the uri.
+ *
+ * @throws std::invalid_argument on failure.
+ */
 void validate_universal_name(std::string_view uri);
 
 } // namespace apache::thrift

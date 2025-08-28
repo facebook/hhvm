@@ -69,7 +69,7 @@ class AliasesNoLaunchTestCase(base.TestHHVMTypesBinary):
     def launchProcess(self) -> bool:
         return False
 
-    def test_regex_aliases_produce_same_output(self):
+    def test_regex_aliases_produce_same_output(self) -> None:
         _, output_a = self.run_commands(["show environment"])
         _, output_b = self.run_commands(["settings show target.env-vars"])
         self.assertEqual(output_a.strip(), output_b.strip())

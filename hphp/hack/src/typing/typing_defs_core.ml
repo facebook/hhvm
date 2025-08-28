@@ -1281,11 +1281,10 @@ type can_index = {
 }
 [@@deriving show]
 
-(* `$source[key] = write` update source to type val *)
+(* `$source[key] = write` update the array to type val *)
 type can_index_assign = {
   cia_key: locl_ty;
   cia_write: locl_ty;
-  cia_source: locl_ty;
   cia_val: locl_ty;
   cia_index_expr: Nast.expr;
   cia_expr_pos: Pos.t;
@@ -1437,25 +1436,18 @@ let can_index_assign_compare ~normalize_lists cia1 cia2 =
         (ty_compare ~normalize_lists cia1.cia_write cia2.cia_write)
         (fun _ ->
           chain_compare
-            (ty_compare ~normalize_lists cia1.cia_source cia2.cia_source)
+            (ty_compare ~normalize_lists cia1.cia_val cia2.cia_val)
             (fun _ ->
               chain_compare
-                (ty_compare ~normalize_lists cia1.cia_val cia2.cia_val)
+                (Aast.compare_pos cia1.cia_expr_pos cia2.cia_expr_pos)
                 (fun _ ->
                   chain_compare
-                    (Aast.compare_pos cia1.cia_expr_pos cia2.cia_expr_pos)
+                    (Aast.compare_pos cia1.cia_array_pos cia2.cia_array_pos)
                     (fun _ ->
                       chain_compare
-                        (Aast.compare_pos cia1.cia_array_pos cia2.cia_array_pos)
+                        (Aast.compare_pos cia1.cia_index_pos cia2.cia_index_pos)
                         (fun _ ->
-                          chain_compare
-                            (Aast.compare_pos
-                               cia1.cia_index_pos
-                               cia2.cia_index_pos)
-                            (fun _ ->
-                              Aast.compare_pos
-                                cia1.cia_write_pos
-                                cia2.cia_write_pos)))))))
+                          Aast.compare_pos cia1.cia_write_pos cia2.cia_write_pos))))))
 
 let can_traverse_compare ~normalize_lists ct1 ct2 =
   chain_compare

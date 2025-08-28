@@ -508,7 +508,6 @@ class ['a] internal_type_visitor : ['a] internal_type_visitor_type =
     method on_can_index_assign acc _r cia =
       let acc = this#on_locl_type acc cia.cia_key in
       let acc = this#on_locl_type acc cia.cia_write in
-      let acc = this#on_locl_type acc cia.cia_source in
       this#on_locl_type acc cia.cia_val
 
     method on_can_traverse acc _r ct =

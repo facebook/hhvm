@@ -715,7 +715,6 @@ module Size = struct
       1
       + ty_size env cia.cia_key
       + ty_size env cia.cia_write
-      + ty_size env cia.cia_source
       + ty_size env cia.cia_val
     | (_, Tcan_traverse ct) ->
       1 + ty_size env ct.ct_val + type_size_option ~f:(ty_size env) ct.ct_key

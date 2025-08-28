@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<81f57fccbd1db57773d3bf873fae6d60>>
+// @generated SignedSource<<0ebf9597250dca5c07dee76f3c37ad87>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1213,7 +1213,6 @@ pub struct CanIndex {
 pub struct CanIndexAssign {
     pub key: Ty,
     pub write: Ty,
-    pub source: Ty,
     pub val: Ty,
     pub index_expr: nast::Expr,
     pub expr_pos: pos::Pos,

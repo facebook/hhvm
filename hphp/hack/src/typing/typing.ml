@@ -6203,6 +6203,8 @@ end = struct
              Aast_defs.Anormal value;
             ] ->
               let (_, shapepos, _) = shape in
+              let (_, fieldpos, _) = field in
+              let (_, valuepos, _) = value in
               (* infer the input shape type *)
               let (env, _tes, tshape) =
                 expr ~expected:None ~ctxt:Context.default env shape
@@ -6216,22 +6218,50 @@ end = struct
                 expr ~expected:None ~ctxt:Context.default env value
               in
               (* compute assignment type *)
-              let ( env,
-                    ( res,
-                      _arr_ty_mismatch_opt,
-                      _key_ty_mismatch_opt,
-                      _val_ty_mismatch_opt ) ) =
-                Typing_array_access.assign_array_get
-                  ~array_pos:p
-                  ~expr_pos:shapepos
-                  Reason.URassign
-                  env
-                  tshape
-                  field
-                  tfield
-                  tvalue
-              in
-              (env, res)
+              if TypecheckerOptions.constraint_array_index_assign env.genv.tcopt
+              then (
+                let (env, val_ty) = Env.fresh_type_invariant env p in
+                let (env, ty_err_opt) =
+                  SubType.sub_type_i
+                    env
+                    (LoclType tshape)
+                    (ConstraintType
+                       (mk_constraint_type
+                          ( Reason.witness p,
+                            Tcan_index_assign
+                              {
+                                cia_key = tfield;
+                                cia_write = tvalue;
+                                cia_val = val_ty;
+                                cia_index_expr = field;
+                                cia_expr_pos = shapepos;
+                                cia_array_pos = p;
+                                cia_index_pos = fieldpos;
+                                cia_write_pos = valuepos;
+                              } )))
+                    (Some (Typing_error.Reasons_callback.unify_error_at p))
+                in
+                Option.iter
+                  ~f:(Typing_error_utils.add_typing_error ~env)
+                  ty_err_opt;
+                (env, val_ty)
+              ) else
+                let ( env,
+                      ( res,
+                        _arr_ty_mismatch_opt,
+                        _key_ty_mismatch_opt,
+                        _val_ty_mismatch_opt ) ) =
+                  Typing_array_access.assign_array_get
+                    ~array_pos:p
+                    ~expr_pos:shapepos
+                    Reason.URassign
+                    env
+                    tshape
+                    field
+                    tfield
+                    tvalue
+                in
+                (env, res)
             | _ -> (env, res))
       (* Special function `Shapes::removeKey` *)
       | remove_key when String.equal remove_key SN.Shapes.removeKey ->
@@ -12678,20 +12708,47 @@ end = struct
         in
         let env = might_throw ~join_pos:p env in
         let (_, p1, _) = e1 in
+        let (_, index_pos, _) = e in
         let ( env,
               ( ty1',
                 arr_ty_mismatch_opt,
                 key_ty_mismatch_opt,
                 val_ty_mismatch_opt ) ) =
-          Typing_array_access.assign_array_get
-            ~array_pos:p1
-            ~expr_pos:p
-            ur
-            env
-            ty1
-            e
-            ty
-            ty2
+          if TypecheckerOptions.constraint_array_index_assign env.genv.tcopt
+          then (
+            let (env, val_ty) = Env.fresh_type_invariant env p in
+            let (env, ty_err_opt) =
+              SubType.sub_type_i
+                env
+                (LoclType ty1)
+                (ConstraintType
+                   (mk_constraint_type
+                      ( Reason.witness p,
+                        Tcan_index_assign
+                          {
+                            cia_key = ty;
+                            cia_write = ty2;
+                            cia_val = val_ty;
+                            cia_index_expr = e;
+                            cia_expr_pos = p;
+                            cia_array_pos = p1;
+                            cia_index_pos = index_pos;
+                            cia_write_pos = pos2;
+                          } )))
+                (Some (Typing_error.Reasons_callback.unify_error_at p))
+            in
+            Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+            (env, (val_ty, None, None, None))
+          ) else
+            Typing_array_access.assign_array_get
+              ~array_pos:p1
+              ~expr_pos:p
+              ur
+              env
+              ty1
+              e
+              ty
+              ty2
         in
         let (ty1_is_hack_collection, ty_err_opt) = is_hack_collection env ty1 in
         let (env, te1) =

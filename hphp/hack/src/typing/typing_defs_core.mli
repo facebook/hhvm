@@ -662,7 +662,6 @@ type can_index = {
 type can_index_assign = {
   cia_key: locl_ty;
   cia_write: locl_ty;
-  cia_source: locl_ty;
   cia_val: locl_ty;
   cia_index_expr: Nast.expr;
   cia_expr_pos: Pos.t;

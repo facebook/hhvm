@@ -662,7 +662,6 @@ module Full = struct
   let tcan_index_assign ~fuel k cia =
     let (fuel, key_doc) = k ~fuel cia.cia_key in
     let (fuel, write_doc) = k ~fuel cia.cia_write in
-    let (fuel, source_doc) = k ~fuel cia.cia_source in
     let (fuel, val_doc) = k ~fuel cia.cia_val in
     ( fuel,
       Concat
@@ -672,8 +671,6 @@ module Full = struct
           key_doc;
           comma_sep;
           write_doc;
-          comma_sep;
-          source_doc;
           comma_sep;
           val_doc;
           text ")";

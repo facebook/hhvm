@@ -1762,9 +1762,8 @@ module M = struct
       | (_, Tcan_index_assign cia) ->
         let (env, pos1, neg1) = get_tyvars env cia.cia_key in
         let (env, pos2, neg2) = get_tyvars env cia.cia_write in
-        let (env, pos3, neg3) = get_tyvars env cia.cia_source in
-        let (env, pos4, neg4) = get_tyvars env cia.cia_val in
-        (env, unions [pos1; pos2; pos3; pos4], unions [neg1; neg2; neg3; neg4])
+        let (env, pos3, neg3) = get_tyvars env cia.cia_val in
+        (env, unions [pos1; pos2; pos3], unions [neg1; neg2; neg3])
       | (_, Tcan_traverse ct) ->
         let (env, pos1, neg1) = get_tyvars env ct.ct_val in
         let (env, pos2, neg2) =

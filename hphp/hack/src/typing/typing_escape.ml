@@ -388,14 +388,11 @@ let refresh_ctype renv v cty_orig =
   | (r, Tcan_index_assign cia) ->
     let (renv, cia_key, ch1) = refresh_type renv inv cia.cia_key in
     let (renv, cia_write, ch2) = refresh_type renv inv cia.cia_write in
-    let (renv, cia_source, ch3) = refresh_type renv inv cia.cia_source in
-    let (renv, cia_val, ch4) = refresh_type renv inv cia.cia_val in
+    let (renv, cia_val, ch3) = refresh_type renv inv cia.cia_val in
     ( renv,
       mk_constraint_type
-        ( r,
-          Tcan_index_assign { cia with cia_key; cia_write; cia_source; cia_val }
-        ),
-      ch1 || ch2 || ch3 || ch4 )
+        (r, Tcan_index_assign { cia with cia_key; cia_write; cia_val }),
+      ch1 || ch2 || ch3 )
   | (r, Tcan_traverse ct) ->
     let (renv, ct_val, ch1) = refresh_type renv inv ct.ct_val in
     let (renv, ct_key, ch2) =

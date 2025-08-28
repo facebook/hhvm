@@ -436,7 +436,6 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
       let {
         cia_key;
         cia_write;
-        cia_source;
         cia_val;
         cia_index_expr;
         cia_expr_pos;
@@ -448,13 +447,11 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
       in
       let (env, cia_key) = this#on_type env cia_key in
       let (env, cia_write) = this#on_type env cia_write in
-      let (env, cia_source) = this#on_type env cia_source in
       let (env, cia_val) = this#on_type env cia_val in
       let cia =
         {
           cia_key;
           cia_write;
-          cia_source;
           cia_val;
           cia_index_expr;
           cia_expr_pos;

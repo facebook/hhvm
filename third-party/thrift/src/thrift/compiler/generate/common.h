@@ -90,4 +90,7 @@ inline std::string get_escaped_string(std::string_view str) {
   return escaped;
 }
 
+// Generates a unique cache id for a given program and namespace.
+std::string program_cache_id(const t_program* prog, std::string ns);
+
 } // namespace apache::thrift::compiler

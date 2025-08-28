@@ -28,6 +28,7 @@
 
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/uri.h>
+#include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/cpp/name_resolver.h>
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/rust/uri.h>
@@ -979,7 +980,8 @@ class rust_mstch_program : public mstch_program {
   }
 
   mstch::node current_split_structs() {
-    std::string id = program_->name() + get_program_namespace(program_);
+    std::string id =
+        program_cache_id(program_, get_program_namespace(program_));
     return make_mstch_array_cached(
         struct_split_assignments_[split_id_],
         *context_.struct_factory,
@@ -992,7 +994,8 @@ class rust_mstch_program : public mstch_program {
   }
 
   mstch::node current_split_enums() {
-    std::string id = program_->name() + get_program_namespace(program_);
+    std::string id =
+        program_cache_id(program_, get_program_namespace(program_));
     return make_mstch_array_cached(
         enum_split_assignments_[split_id_],
         *context_.enum_factory,

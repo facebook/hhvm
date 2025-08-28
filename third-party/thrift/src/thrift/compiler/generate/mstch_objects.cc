@@ -85,8 +85,8 @@ mstch::node mstch_enum::values() {
 
 mstch::node mstch_type::get_structured() {
   if (type_->is<t_structured>()) {
-    std::string id =
-        type_->program()->name() + get_type_namespace(type_->program());
+    std::string id = program_cache_id(
+        type_->program(), get_type_namespace(type_->program()));
     return make_mstch_array_cached(
         std::vector<const t_structured*>{
             dynamic_cast<const t_structured*>(type_)},
@@ -99,8 +99,8 @@ mstch::node mstch_type::get_structured() {
 
 mstch::node mstch_type::get_enum() {
   if (resolved_type_->is<t_enum>()) {
-    std::string id =
-        type_->program()->name() + get_type_namespace(type_->program());
+    std::string id = program_cache_id(
+        type_->program(), get_type_namespace(type_->program()));
     return make_mstch_array_cached(
         std::vector<const t_enum*>{dynamic_cast<const t_enum*>(resolved_type_)},
         *context_.enum_factory,
@@ -482,8 +482,8 @@ mstch::node mstch_service::extends() {
 
 mstch::node mstch_service::make_mstch_extended_service_cached(
     const t_service* service) {
-  std::string id =
-      service->program()->name() + get_service_namespace(service->program());
+  std::string id = program_cache_id(
+      service->program(), get_service_namespace(service->program()));
   return make_mstch_element_cached(
       service, *context_.service_factory, context_.service_cache, id, 0, 1);
 }
@@ -513,7 +513,7 @@ mstch::node mstch_const::field() {
 }
 
 mstch::node mstch_program::structs() {
-  std::string id = program_->name() + get_program_namespace(program_);
+  std::string id = program_cache_id(program_, get_program_namespace(program_));
   return make_mstch_array_cached(
       program_->structured_definitions(),
       *context_.struct_factory,
@@ -522,13 +522,13 @@ mstch::node mstch_program::structs() {
 }
 
 mstch::node mstch_program::enums() {
-  std::string id = program_->name() + get_program_namespace(program_);
+  std::string id = program_cache_id(program_, get_program_namespace(program_));
   return make_mstch_array_cached(
       program_->enums(), *context_.enum_factory, context_.enum_cache, id);
 }
 
 mstch::node mstch_program::services() {
-  std::string id = program_->name() + get_program_namespace(program_);
+  std::string id = program_cache_id(program_, get_program_namespace(program_));
   return make_mstch_array_cached(
       program_->services(),
       *context_.service_factory,

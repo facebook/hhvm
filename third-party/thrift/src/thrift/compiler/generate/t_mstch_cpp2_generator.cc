@@ -920,7 +920,8 @@ class cpp_mstch_program : public mstch_program {
     // Generate the sorted nodes
     mstch::array ret;
     ret.reserve(sorted.size());
-    std::string id = program_->name() + get_program_namespace(program_);
+    std::string id =
+        program_cache_id(program_, get_program_namespace(program_));
     std::transform(
         sorted.begin(),
         sorted.end(),
@@ -942,7 +943,8 @@ class cpp_mstch_program : public mstch_program {
   }
 
   mstch::node split_structs() {
-    std::string id = program_->name() + get_program_namespace(program_);
+    std::string id =
+        program_cache_id(program_, get_program_namespace(program_));
     return make_mstch_array_cached(
         split_id_ ? *split_structs_ : program_->structured_definitions(),
         *context_.struct_factory,
@@ -961,7 +963,8 @@ class cpp_mstch_program : public mstch_program {
         }
       }
     }
-    std::string id = program_->name() + get_program_namespace(program_);
+    std::string id =
+        program_cache_id(program_, get_program_namespace(program_));
     return make_mstch_array_cached(
         split_id_ ? *split_enums_ : program_->enums(),
         *context_.enum_factory,

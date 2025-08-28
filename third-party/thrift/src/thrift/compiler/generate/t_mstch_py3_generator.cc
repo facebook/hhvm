@@ -441,7 +441,8 @@ class py3_mstch_program : public mstch_program {
   }
 
   mstch::node filtered_objects() {
-    std::string id = program_->name() + get_program_namespace(program_);
+    std::string id =
+        program_cache_id(program_, get_program_namespace(program_));
     return make_mstch_array_cached(
         objects_, *context_.struct_factory, context_.struct_cache, id);
   }

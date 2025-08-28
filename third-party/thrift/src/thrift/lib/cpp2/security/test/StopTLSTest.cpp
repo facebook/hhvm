@@ -243,6 +243,6 @@ TEST_F(AsyncStopTLSTest, ClientStopTLS) {
       &transport_, AsyncStopTLS::Role::Client, std::chrono::milliseconds(10));
   ASSERT_NE(stoptlsCB, nullptr);
 
-  evb.runInLoop([=] { stoptlsCB->endOfTLS(&transport_, nullptr); });
+  evb.runInLoop([=, this] { stoptlsCB->endOfTLS(&transport_, nullptr); });
   evb.loop();
 }

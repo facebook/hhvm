@@ -668,8 +668,8 @@ class structure_annotations {
 
   void run() {
     const_ast_visitor visitor;
-    visitor.add_named_visitor([=](const auto& node) { visit_def(node); });
-    visitor.add_function_visitor([=](const t_function& node) {
+    visitor.add_named_visitor([=, this](const auto& node) { visit_def(node); });
+    visitor.add_function_visitor([=, this](const t_function& node) {
       for (const t_field& param : node.params().fields()) {
         visit_def(param);
       }

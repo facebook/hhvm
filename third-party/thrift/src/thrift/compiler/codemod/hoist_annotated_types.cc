@@ -39,14 +39,16 @@ class hoist_annotated_types {
   void run() {
     const_ast_visitor visitor;
 
-    visitor.add_container_visitor([=](const auto& type) { visit_type(type); });
+    visitor.add_container_visitor(
+        [=, this](const auto& type) { visit_type(type); });
     // Have to visit containers first to handle nesting correctly
     visitor(prog_);
 
     visitor = {};
-    visitor.add_function_visitor([=](const auto& f) { visit_function(f); });
-    visitor.add_const_visitor([=](const auto& c) { visit_const(c); });
-    visitor.add_field_visitor([=](const auto& f) { visit_field(f); });
+    visitor.add_function_visitor(
+        [=, this](const auto& f) { visit_function(f); });
+    visitor.add_const_visitor([=, this](const auto& c) { visit_const(c); });
+    visitor.add_field_visitor([=, this](const auto& f) { visit_field(f); });
 
     visitor(prog_);
 

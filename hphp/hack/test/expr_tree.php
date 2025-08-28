@@ -37,7 +37,7 @@ type ExprTreeInfo<TInfer> = shape(
   'variables' => vec<string>,
 );
 
-case type ExprTreeOpType<+T as ExampleMixedOpType> as ExampleType =
+case type ExprTreeOpType<+T as ExampleMixedOpType> =
   | null where T super ExampleMixedOpType
   | int where T super ExampleIntOpType
   | float where T super ExampleFloatOpType

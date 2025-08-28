@@ -179,7 +179,7 @@ struct SerializableThriftSourceInfo {
    * for a user-defined type.
    *
    * Examples:
-   *   - "file:///thrift/lib/thrift/standard.thrift"
+   *   - "file://thrift/lib/thrift/standard.thrift"
    *   - "fbsource://xplat/thrift/lib/thrift/standard.thrift"
    */
   2: string locator;

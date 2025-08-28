@@ -13,8 +13,14 @@ open Hh_prelude
     will typically call [add_deferment ~d:(d.php, "\\D")]. *)
 type deferment = Relative_path.t * string [@@deriving show, ord]
 
-(** We raise [Defer] when a file requires a number of decls above the threshold *)
+(** We raise [Defer] when a file requires a number of decls above the threshold.
+    This is an internal implementation detail. External code should use is_defer_exn. *)
 exception Defer
+
+let is_defer_exn exn =
+  match exn with
+  | Defer -> true
+  | _ -> false
 
 type state = {
   enabled: bool;

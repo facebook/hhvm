@@ -25,8 +25,12 @@ let handle_exn_as_error : type res. Pos.t -> (unit -> res option) -> res option
     =
  fun pos f ->
   try f () with
-  | (WorkerCancel.Worker_should_exit | Deferred_decl.Defer) as exn ->
-    (* Cancellation requests must be re-raised *)
+  | WorkerCancel.Worker_should_exit as exn ->
+    (* Cancellation request must be re-raised *)
+    let e = Exception.wrap exn in
+    Exception.reraise e
+  | exn when Deferred_decl.is_defer_exn exn ->
+    (* Defer exception must be re-raised *)
     let e = Exception.wrap exn in
     Exception.reraise e
   | exn ->

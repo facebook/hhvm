@@ -2515,6 +2515,24 @@ class EnumMeta(type):
     def __getitem__(cls, attribute):
         return cls.__members__[attribute]
 
+    def __contains__(cls, item):
+        if isinstance(item, cls):
+            return True
+
+        # This is a foreign flag, and since they can compare as ints
+        # They could show as 'in' an enum, by stdlib doesn't
+        if isinstance(item, Flag):
+            return False
+
+        # Special Behavior for lazy flag combinations
+        if issubclass(cls, Flag):
+            try:
+                # Try O(1) but fall back to O(n)
+                return item in cls.__reversed_map__ or cls._fbthrift_missing_(item) is not None
+            except ValueError:
+                return False
+        return item in cls.__reversed_map__
+
     def __iter__(cls):
         return iter(cls.__members__.values())
 
@@ -2624,6 +2642,9 @@ class Flag(Enum):
         """
         Returns member (possibly creating it) if one can be found for value.
         """
+        if value == 0:
+            return cls._fbthrift_create_pseudo_member_(value)
+
         masked_value = 0
         for m in cls:
             masked_value |= value & m._fbthrift_value_

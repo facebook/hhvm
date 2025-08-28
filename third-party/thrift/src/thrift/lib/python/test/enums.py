@@ -18,8 +18,11 @@
 from __future__ import annotations
 
 import pickle
+
+import sys
 import types
 import unittest
+from enum import Flag as PyFlag, IntEnum as PyIntEnum
 from typing import cast, Type, TypeVar
 
 import python_test.enums.thrift_mutable_types as mutable_types
@@ -454,7 +457,8 @@ class FlagTests(unittest.TestCase):
 
     def test_zero(self) -> None:
         zero = self.Perm(0)
-        self.assertNotIn(zero, self.Perm)
+        # This is stdlib Python Behavior
+        self.assertIn(zero, self.Perm)
         self.assertIsInstance(zero, self.Perm)
 
     def test_logical(self) -> None:
@@ -465,7 +469,8 @@ class FlagTests(unittest.TestCase):
     def test_combination(self) -> None:
         combo = self.Perm(self.Perm.read.value | self.Perm.execute.value)
         self.assertEqual(combo, self.Perm.read.value + self.Perm.execute.value)
-        self.assertNotIn(combo, self.Perm)
+        # This is stdlib Python Behavior
+        self.assertIn(combo, self.Perm)
         self.assertIsInstance(combo, self.Perm)
         self.assertIs(combo, self.Perm.read | self.Perm.execute)
 
@@ -473,7 +478,8 @@ class FlagTests(unittest.TestCase):
         x = self.File(name="/bin/sh", permissions=(self.Perm.read | self.Perm.execute))
         self.assertEqual(x.permissions, self.Perm.read.value + self.Perm.execute.value)
         self.assertEqual(x.permissions, 5)
-        self.assertNotIn(x.permissions, self.Perm)
+        # This is stdlib Python Behavior
+        self.assertIn(x.permissions, self.Perm)
         self.assertIsInstance(x.permissions, self.Perm)
         self.assertIs(x.permissions, self.Perm.read | self.Perm.execute)
 
@@ -552,3 +558,53 @@ class EnumMetaTests(unittest.TestCase):
     def test_delete(self) -> None:
         with self.assertRaises(AttributeError):
             del self.Color.red
+
+
+class PyColor(PyIntEnum):
+    red = 0
+    blue = 1
+    green = 2
+
+
+class OtherPyColor(PyIntEnum):
+    red = 0
+    blue = 1
+    green = 2
+
+
+class PyPerm(PyFlag):
+    read = 4
+    write = 2
+    execute = 1
+
+
+class TestWithStdlibEnums(unittest.TestCase):
+    def test_enum_behavior_matrix(self) -> None:
+        if sys.version_info < (3, 12):
+            # Testing Python 3.12 behavior only
+            return
+        for y in (PyColor, Color, OtherPyColor):
+            for x in (PyColor, Color, OtherPyColor):
+                with self.subTest(x=x, y=y):
+                    self.assertIsInstance(x.red, int)
+                    self.assertIn(x.red, y)
+                    self.assertIn(0, x)
+                    # A thrift-python flag can be found in a pure python enum
+                    # Because they directly convert to ints and python flags do not.
+                    # self.assertNotIn(Perm.write, x)
+                    self.assertNotIn(PyPerm.write, x)
+
+    def test_flag_behavior_matrix(self) -> None:
+        if sys.version_info < (3, 12):
+            # Testing Python 3.12 behavior only
+            return
+        for x in (PyPerm, Perm):
+            with self.subTest(x=x):
+                # pyre is being really weird here, I can't ignore these because it says the ignores are unused
+                # But this cast makes pyre happy.
+                x = cast(Type[Perm], x)
+                combined = x.read | x.write
+                self.assertIn(combined, x)
+                self.assertIn(combined.value, x)
+                self.assertIn(0, x)
+                self.assertIn(x(0), x)

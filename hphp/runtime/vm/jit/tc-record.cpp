@@ -513,61 +513,51 @@ void logTranslation(const Translator* trans, const TransRange& range) {
   StructuredLog::log("hhvm_jit", cols);
 }
 
+/*
+ * This function is like a request-agnostic version of server_warmup_status().
+ * Returning an empty string means "warmed up"; otherwise, the string contains
+ * the reason why HHVM isn't warmed-up yet.
+ */
 std::string warmupStatusString() {
-  // This function is like a request-agnostic version of
-  // server_warmup_status().
-  // Three conditions necessary for the jit to qualify as "warmed-up":
-  std::string status_str;
+  if (s_warmedUp.load(std::memory_order_acquire)) return "";
 
-  if (!s_warmedUp.load(std::memory_order_acquire)) {
-    if (jit::mcgen::retranslateAllPending()) {
-      status_str = "Waiting on retranslateAll().\n";
-    } else {
-      auto checkCodeSize = [&](std::string name, uint32_t maxSize) {
-        assertx(!s_used_counters.empty());
-        auto series = s_used_counters.at(name);
-        if (!series) {
-          status_str = "initializing";
-          return;
-        }
-        auto const codeSize = series->getSum();
-        if (codeSize < maxSize / Cfg::Jit::WarmupMinFillFactor) {
-          folly::format(&status_str,
-                        "Code.{} is still to small to be considered warm. "
-                        "({} of max {})\n",
-                        name, codeSize, maxSize);
-          return;
-        }
-        auto const codeSizeRate = series->getRateByDuration(
-          std::chrono::seconds(Cfg::Jit::WarmupRateSeconds));
-        if (codeSizeRate > Cfg::Jit::WarmupMaxCodeGenRate) {
-          folly::format(&status_str,
-                        "Code.{} is still increasing at a rate of {}\n",
-                        name, codeSizeRate);
-        }
-      };
-      checkCodeSize("main", Cfg::CodeCache::ASize);
-    }
-    if (status_str.empty()) {
-      if (RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) {
-        status_str = "JIT running in SerializeAndExit mode";
-      } else {
-        s_warmedUp.store(true, std::memory_order_release);
-      }
-    }
+  if (jit::mcgen::retranslateAllPending()) {
+    return "Waiting on retranslateAll().\n";
   }
+
+  auto checkCodeSize = [&](std::string name, uint32_t maxSize) -> std::string {
+    assertx(!s_used_counters.empty());
+    auto series = s_used_counters.at(name);
+    if (!series) return "initializing";
+    auto const codeSize = series->getSum();
+    if (codeSize < maxSize / Cfg::Jit::WarmupMinFillFactor) {
+      return folly::sformat("Code.{} is still to small to be considered warm. "
+                            "({} of max {})\n", name, codeSize, maxSize);
+    }
+    auto const codeSizeRate = series->getRateByDuration(
+        std::chrono::seconds(Cfg::Jit::WarmupRateSeconds));
+    if (codeSizeRate > Cfg::Jit::WarmupMaxCodeGenRate) {
+      return folly::sformat("Code.{} is still increasing at a rate of {}\n",
+                            name, codeSizeRate);
+    }
+    return "";
+  };
+  std::string status_str = checkCodeSize("main", Cfg::CodeCache::ASize);
+  if (!status_str.empty()) return status_str;
 
   // If we are running with ROAR, we also should wait for PGO/CSPGO to be
   // complete before reporting warmed up.
-  if (status_str.empty() && __roar_api_pending_warmups) {
-    int roar_warmup_status = __roar_api_pending_warmups();
-    if (roar_warmup_status != 0) {
-      status_str = "Waiting on ROAR warmup.\n";
-    }
+  if (__roar_api_pending_warmups && __roar_api_pending_warmups() != 0) {
+    return "Waiting on ROAR warmup.\n";
   }
 
-  // Empty string means "warmed up".
-  return status_str;
+  if (RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) {
+    return "JIT running in SerializeAndExit mode\n";
+  }
+
+  s_warmedUp.store(true, std::memory_order_release);
+
+  return "";
 }
 
 }

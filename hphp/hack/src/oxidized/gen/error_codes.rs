@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<94cff489a74888de8fe88897a18c6902>>
+// @generated SignedSource<<763733dd6f294a69b55fc52299b4745e>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -642,9 +642,6 @@ pub enum Warning {
     AsAlwaysSucceeds = 12011,
     AsAlwaysFails = 12012,
     ClassPointerToString = 12013,
-    SafeAbstractCall = 12014,
-    SafeAbstractNew = 12015,
-    SafeAbstractCallNeedsConcrete = 12016,
     NoDisjointUnion = 12017,
     SafeAbstractConstAccess = 12018,
     SwitchRedundancy = 12019,

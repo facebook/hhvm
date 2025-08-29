@@ -258,6 +258,31 @@ let create ctx Indexable.{ path; fanout } ~gen_sym_hash ~root_path ~hhi_path =
     root_path;
   }
 
+let file_limit_mb = 5
+
+let mb = 1024 * 1024
+
+let file_limit_bytes = file_limit_mb * mb
+
+let file_too_big_or_error path =
+  try
+    let filesize = Unix.((stat @@ Relative_path.to_absolute path).st_size) in
+    filesize >= file_limit_bytes
+  with
+  | Unix.Unix_error _ -> true
+
+let create_or_file_too_big ctx indexable ~gen_sym_hash ~root_path ~hhi_path =
+  if file_too_big_or_error indexable.Indexable.path then (
+    Hh_logger.log
+      "Skipping file %s because it is greater than %d MB"
+      (Relative_path.suffix indexable.Indexable.path)
+      file_limit_mb;
+    None
+  ) else
+    Some (create ctx indexable ~gen_sym_hash ~root_path ~hhi_path)
+
+let create = create_or_file_too_big
+
 let referenced ctx t =
   let open Option.Monad_infix in
   let path sym =

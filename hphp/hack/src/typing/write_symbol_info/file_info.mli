@@ -61,4 +61,4 @@ val create :
   gen_sym_hash:bool ->
   root_path:string ->
   hhi_path:string ->
-  t
+  t option

@@ -8,6 +8,7 @@
 
 open Hh_prelude
 open Hh_json
+open Option.Monad_infix
 module Fact_acc = Predicate.Fact_acc
 
 module JobReturn = struct
@@ -142,7 +143,7 @@ let recheck_job
      symbols *)
   let gen_references = Option.is_some opts.referenced_file in
   let files_info =
-    List.map
+    List.filter_map
       fa
       ~f:
         (File_info.create
@@ -186,7 +187,7 @@ let sym_hashes ctx ~files =
         (Indexable.from_file file)
     in
     let sym_hash =
-      match fi.File_info.sym_hash with
+      match fi >>= fun fi -> fi.File_info.sym_hash with
       | None ->
         failwith "Internal error" (* can't happen since gen_sym_hash = true *)
       | Some sh -> sh

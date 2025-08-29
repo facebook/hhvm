@@ -663,7 +663,7 @@ struct CompactWriter {
           const Class::Prop* prop = fieldInfo.getProp();
           return prop &&
             prop->preProp->userAttributes().count(
-                LowStringPtr(SKIP_CHECKS_ATTR.get())) != 0;
+              PackedStringPtr(SKIP_CHECKS_ATTR.get())) != 0;
         };
         if (hasSkipChecksAttr()) {
           raise_warning("[Suppressed] " + message);
@@ -750,7 +750,7 @@ struct CompactReader {
                         const StructSpec& spec,
                         int16_t fieldNum,
                         TType fieldType,
-                        StrictUnionChecker& strictUnionChecker 
+                        StrictUnionChecker& strictUnionChecker
                       ) {
       INC_TPC(thrift_read_slow);
       while (fieldType != T_STOP) {
@@ -920,13 +920,13 @@ struct CompactReader {
       }
       return readFieldThrift(spec, type, hasTypeWrapper);
     }
-    
+
     Variant readFieldThrift(const FieldSpec& spec, TType type, bool& hasTypeWrapper) {
       auto thriftValue = readFieldInternal(spec, type, hasTypeWrapper);
       hasTypeWrapper = hasTypeWrapper || spec.isTypeWrapped;
       return thriftValue;
     }
-    
+
     Variant readFieldHack(const FieldSpec& spec, TType type, bool& hasTypeWrapper) {
       auto thriftValue = readFieldInternal(spec, type, hasTypeWrapper);
       hasTypeWrapper = hasTypeWrapper || spec.isTypeWrapped;

@@ -166,7 +166,7 @@ RuntimeStruct* RuntimeStruct::allocate(size_t fieldsLength) {
   return rs;
 }
 
-LowStringPtr RuntimeStruct::getKey(size_t idx) const {
+PackedStringPtr RuntimeStruct::getKey(size_t idx) const {
   assertx(idx < m_fields.size());
   return m_fields[idx];
 }

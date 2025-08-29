@@ -183,7 +183,7 @@ struct alignas(8) EventKey {
     return m_op;
   }
 
-  LowStringPtr getStrKey() const {
+  PackedStringPtr getStrKey() const {
     if (m_key_spec != Spec::Str32) return nullptr;
     return (const StringData*)safe_cast<uintptr_t>(m_key);
   }
@@ -1280,7 +1280,7 @@ ArrayOp getEventArrayOp(uint64_t key) {
   return EventKey(key).getOp();
 }
 
-LowStringPtr getEventStrKey(uint64_t key) {
+PackedStringPtr getEventStrKey(uint64_t key) {
   return EventKey(key).getStrKey();
 }
 

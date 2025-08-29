@@ -27,7 +27,7 @@ namespace HPHP {
     auto const typeVar = TypeConstraint(
         AnnotType::Mixed,
         TypeConstraintFlags::TypeVar,
-        LowStringPtr(StringData::MakeStatic("T"))
+        StringData::MakeStatic("T")
     );
     auto const tic = TypeIntersectionConstraint(std::vector<TypeConstraint>({typeVar}));
     EXPECT_EQ(KindOfNull, tic.defaultValue()->m_type);
@@ -40,7 +40,7 @@ namespace HPHP {
         | TypeConstraintFlags::Resolved
         | TypeConstraintFlags::DisplayNullable
         | TypeConstraintFlags::UpperBound),
-        LowStringPtr(StringData::MakeStatic("HH\\string"))
+        StringData::MakeStatic("HH\\string")
     );
     auto const tic = TypeIntersectionConstraint(std::vector<TypeConstraint>({nullableString}));
     EXPECT_EQ(KindOfNull, tic.defaultValue()->m_type);

@@ -119,7 +119,7 @@ private:
 
   static RuntimeStruct* allocate(size_t fieldsLength);
 
-  LowStringPtr getKey(size_t index) const;
+  PackedStringPtr getKey(size_t index) const;
   const Field& getField(size_t index) const;
 
   void setKey(size_t index, StringData* key);
@@ -128,7 +128,7 @@ private:
   // Private fields, along with extra array.
 
   const StringData* m_stableIdentifier;
-  CompactVector<LowStringPtr> m_fields;
+  CompactVector<PackedStringPtr> m_fields;
   std::atomic<const bespoke::StructLayout*> m_assignedLayout;
 
   friend struct StructDictInit;

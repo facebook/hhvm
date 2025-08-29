@@ -34,10 +34,10 @@ namespace HPHP {
  * case that it's empty (minimizing sizeof(UserAttributeMap)).
  */
 struct UserAttributeMap {
-  using value_type = std::pair<LowStringPtr, TypedValue>;
+  using value_type = std::pair<PackedStringPtr, TypedValue>;
 private:
   using Map = folly::sorted_vector_map<
-    LowStringPtr,
+    PackedStringPtr,
     TypedValue,
     string_data_lt_type,
     VMAllocator<value_type>,

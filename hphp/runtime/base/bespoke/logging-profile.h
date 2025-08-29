@@ -407,7 +407,7 @@ size_t countSinks();
 
 // Accessors for logged events. TODO(kshaunak): Expose a better API.
 ArrayOp getEventArrayOp(uint64_t key);
-LowStringPtr getEventStrKey(uint64_t key);
+PackedStringPtr getEventStrKey(uint64_t key);
 DataType getEventValType(uint64_t key);
 
 }

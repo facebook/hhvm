@@ -809,7 +809,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
     }
     if (!f || !f->nativeFuncPtr() ||
         (f->userAttributes().count(
-          LowStringPtr(s_attr_Deprecated.get())))) {
+          PackedStringPtr(s_attr_Deprecated.get())))) {
       ret->attrs |= AttrNoFCallBuiltin;
     }
   }

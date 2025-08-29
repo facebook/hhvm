@@ -15,7 +15,7 @@ using namespace watchman;
 
 #ifdef _WIN32
 
-#include "eden/common/utils/WinUtil.h"
+#include "eden/common/utils/windows/WinUtil.h"
 
 // Things are more complicated here than on unix.
 // We maintain an overlapped context for reads and

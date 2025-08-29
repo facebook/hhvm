@@ -26,7 +26,7 @@
 #endif
 
 #ifdef _WIN32
-#include "eden/common/utils/WinUtil.h"
+#include "eden/common/utils/windows/WinUtil.h" // @manual
 #endif
 
 using namespace watchman;

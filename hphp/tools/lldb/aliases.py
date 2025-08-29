@@ -1,9 +1,10 @@
+import abc
 from typing import List
 
 import lldb
 
 
-class SimpleAlias:
+class SimpleAlias(abc.ABC):
     alias: str
     command: str
 
@@ -19,7 +20,7 @@ class SimpleAlias:
 # LLDB seems to have less-than-stellar support for the regular expressionses defined in
 # substitutions, i.e. failing to understand \s or \S, hence the verbose regexes in some of the
 # aliases below.
-class RegexAlias:
+class RegexAlias(abc.ABC):
     alias: str
     substitutions: List[str]
     help: str

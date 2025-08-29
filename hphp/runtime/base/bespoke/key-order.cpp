@@ -63,7 +63,7 @@ KeyOrder KeyOrder::remove(const StringData* k) const {
   if (!valid()) return *this;
   KeyOrderData newOrder{*m_keys};
   newOrder.erase(std::remove_if(newOrder.begin(), newOrder.end(),
-                                [&](LowStringPtr key) { return k->same(key); }),
+                                [&](PackedStringPtr key) { return k->same(key); }),
                  newOrder.end());
   return Make(newOrder);
 }

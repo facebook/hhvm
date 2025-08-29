@@ -185,7 +185,7 @@ void mergeValid(I&& begin, I&& end, UnionFind<T>& uf, F&& elem) {
 // Sort keys in KeyOrder by descending order of frequency.
 KeyOrder sortKeyOrder(const KeyOrder& ko, const KeyFrequencies& keys) {
   if (ko.empty() || !ko.valid()) return ko;
-  auto const frequency = [&](LowStringPtr key) {
+  auto const frequency = [&](PackedStringPtr key) {
     auto const it = keys.find(key.get());
     return it == keys.end() ? 0 : it->second;
   };

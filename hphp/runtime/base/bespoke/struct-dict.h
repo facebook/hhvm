@@ -144,7 +144,7 @@ private:
 struct StructLayout : public ConcreteLayout {
 
   struct Field {
-    LowStringPtr key;
+    PackedStringPtr key;
     bool required = false;
     uint8_t type_mask = 0;
 
@@ -216,7 +216,7 @@ struct StructLayout : public ConcreteLayout {
   // If maybeDup is true, a hash miss does not imply that the field is not
   // present in the layout and StructLayout::m_key_to_slot needs to be checked.
   struct PerfectHashEntry {
-    LowStringPtr str;
+    PackedStringPtr str;
     uint8_t typeMask;
     bool maybeDup;
     uint16_t slot;
@@ -246,7 +246,7 @@ struct StructLayout : public ConcreteLayout {
 private:
   // Callers must check whether the key is static before using one of these
   // wrapper types. The wrappers dispatch to the right hash/equal function.
-  struct StaticKey { LowStringPtr key; };
+  struct StaticKey { PackedStringPtr key; };
   struct NonStaticKey { const StringData* key; };
 
   // Use heterogeneous lookup to optimize the lookup for static keys.

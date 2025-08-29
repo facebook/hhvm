@@ -28,7 +28,7 @@ struct ArrayData;
 
 namespace bespoke {
 
-using KeyOrderData = std::vector<LowStringPtr>;
+using KeyOrderData = std::vector<PackedStringPtr>;
 
 // KeyOrder represents insertion order of static string keys. We construct
 // unique KeyOrders for profiling, but delete them all after layout selection.

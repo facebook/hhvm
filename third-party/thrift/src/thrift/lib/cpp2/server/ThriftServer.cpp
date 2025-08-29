@@ -1841,29 +1841,29 @@ void ThriftServer::callDecoratorsAndHandlersBeforeStartServing(
     server::DecoratorDataPerRequestBlueprint::Setup& decoratorDataSetup) {
   auto decoratorDataHandleFactory = decoratorDataSetup.getHandleFactory();
   auto handlerList = collectServiceHandlers();
-#if FOLLY_HAS_COROUTINES
-  std::vector<folly::coro::Task<void>> tasks;
-  tasks.reserve(handlerList.size());
-#endif // FOLLY_HAS_COROUTINES
   for (auto handler : handlerList) {
     auto decorators = handler->fbthrift_getDecorators();
-    std::for_each(
-        decorators.begin(),
-        decorators.end(),
-        [&decoratorDataHandleFactory](auto& decorator) {
-          ServiceMethodDecoratorBase::BeforeStartServingParams
-              decoratorInitParams{&decoratorDataHandleFactory};
-          decorator.get().onBeforeStartServing(decoratorInitParams);
-        });
-#if FOLLY_HAS_COROUTINES
-    tasks.emplace_back(handler->co_onBeforeStartServing(
+    for (auto& decorator : decorators) {
+      ServiceMethodDecoratorBase::BeforeStartServingParams decoratorInitParams{
+          &decoratorDataHandleFactory};
+      decorator.get().onBeforeStartServing(decoratorInitParams);
+    }
+  }
+  std::vector<folly::SemiFuture<folly::Unit>> futures;
+  futures.reserve(handlerList.size());
+  for (auto handler : handlerList) {
+    futures.emplace_back(handler->semifuture_onBeforeStartServing(
         ServiceHandlerBase::BeforeStartServingParams{
             &decoratorDataHandleFactory}));
-#endif // FOLLY_HAS_COROUTINES
   }
-#if FOLLY_HAS_COROUTINES
-  folly::coro::blockingWait(folly::coro::collectAllRange(std::move(tasks)));
-#endif // FOLLY_HAS_COROUTINES
+  auto results =
+      folly::collectAll(futures).via(getHandlerExecutorKeepAlive()).get();
+  for (auto& result : results) {
+    if (result.hasException()) {
+      XLOG(FATAL) << "Exception thrown by beforeStartServing(): "
+                  << folly::exceptionStr(result.exception());
+    }
+  }
 }
 
 void ThriftServer::callHandlersOnStartServing() {

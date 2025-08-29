@@ -43,11 +43,10 @@ class ServiceHandlerBase {
 #endif
 
  public:
-#if FOLLY_HAS_COROUTINES
   struct BeforeStartServingParams {
     server::DecoratorDataHandleFactory* decoratorDataHandleFactory = nullptr;
   };
-
+#if FOLLY_HAS_COROUTINES
   /**
    * co_onBeforeStartServing is a lifecycle method guaranteed to be called
    * before the server starts accepting connections. It happens before
@@ -64,6 +63,14 @@ class ServiceHandlerBase {
   }
 #endif
 
+  virtual folly::SemiFuture<folly::Unit> semifuture_onBeforeStartServing(
+      BeforeStartServingParams params) {
+#if FOLLY_HAS_COROUTINES
+    return co_onBeforeStartServing(std::move(params)).semi();
+#else
+    return folly::makeSemiFuture();
+#endif
+  }
   virtual folly::SemiFuture<folly::Unit> semifuture_onStartServing() {
 #if FOLLY_HAS_COROUTINES
     return co_onStartServing().semi();

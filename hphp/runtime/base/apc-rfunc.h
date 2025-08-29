@@ -50,11 +50,10 @@ private:
 
 private:
   APCHandle m_handle;
-  LowPtr<const NamedFunc> m_entity;
-  LowPtr<const StringData> m_name;
+  PackedPtr<const NamedFunc> m_entity;
+  PackedPtr<const StringData> m_name;
 public:
   APCHandle* m_generics;
 };
 
 } // namespace HPHP
-

@@ -43,8 +43,8 @@ struct APCNamedClass {
   }
 
 private:
-  LowPtr<const NamedType> m_entity;
-  LowPtr<const StringData> m_name;
+  PackedPtr<const NamedType> m_entity;
+  PackedPtr<const StringData> m_name;
   APCHandle m_handle;
 };
 
@@ -71,10 +71,9 @@ struct APCNamedFunc {
   }
 
 private:
-  LowPtr<const NamedFunc> m_entity;
-  LowPtr<const StringData> m_name;
+  PackedPtr<const NamedFunc> m_entity;
+  PackedPtr<const StringData> m_name;
   APCHandle m_handle;
 };
 
 }
-

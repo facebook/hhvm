@@ -55,11 +55,9 @@ struct APCClsMeth {
   }
 
 private:
-  LowPtr<const StringData> m_clsName;
-  LowPtr<const StringData> m_methName;
+  PackedPtr<const StringData> m_clsName;
+  PackedPtr<const StringData> m_methName;
   APCHandle m_handle;
 };
 
 }
-
-

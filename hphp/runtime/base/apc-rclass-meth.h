@@ -37,11 +37,10 @@ private:
 
 private:
   APCHandle m_handle;
-  LowPtr<const StringData> m_cls_name;
-  LowPtr<const StringData> m_func_name;
+  PackedPtr<const StringData> m_cls_name;
+  PackedPtr<const StringData> m_func_name;
 public:
   APCHandle* m_generics;
 };
 
 } // namespace HPHP
-

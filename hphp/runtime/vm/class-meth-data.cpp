@@ -35,19 +35,11 @@ ClsMethDataMap s_map;
 
 #endif
 
-template <class T>
-static ClsMethData::low_storage_t to_low(T* px) {
-  ClsMethData::low_storage_t ones = ~0;
-  auto ptr = reinterpret_cast<uintptr_t>(px);
-  always_assert((ptr & ones) == ptr);
-  return (ClsMethData::low_storage_t)(ptr);
-}
-
 }
 
 ClsMethData::ClsMethData(Class* cls, Func* func)
-  : m_cls{to_low(cls)}
-  , m_func{to_low(func)} {
+  : m_cls{cls}
+  , m_func{func} {
   assertx(cls);
   assertx(func);
 }

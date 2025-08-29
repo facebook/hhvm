@@ -534,7 +534,9 @@ def unsigned_cast(v: lldb.SBValue, t: lldb.SBType) -> lldb.SBValue:
     # which is reverted.  If this worked properly we could have this cast
     # operation follow C style semantics according to the types in play (as
     # opposed to forcing no sign extension).
+    debug_print(f"unsigned_cast(v=0x{v.unsigned:x}) {t.name}")
     ret = v.target.EvaluateExpression(f"({t.name}){v.unsigned}")
+    debug_print(f"unsigned_cast(v=0x{v.unsigned:x}) {t.name} res {ret.unsigned:x}")
 
     assert (
         ret is not None and ret.GetError().Success()
@@ -574,13 +576,16 @@ def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
     # debug_print(f"rawptr(val=0x{val.unsigned:x})")
 
     if val.type.IsPointerType():
+        debug_print(f"rawptr(val=0x{val.unsigned:x}) is pointer type")
         return val
     elif val.type.IsReferenceType():
+        debug_print(f"rawptr(val=0x{val.unsigned:x}) is reference type")
         return referenced_value(val)
 
     name = template_type(val.type)
     ptr = None
 
+    debug_print(f"rawptr(val=0x{val.unsigned:x}) template {name}")
     if name == "std::unique_ptr":
         # This is a synthetic value, so we can just use its synthesized child.
         # We could also do utils.get(val.GetNonSyntheticValue(), "_M_t", "_M_t", "_M_head_impl")
@@ -601,15 +606,24 @@ def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
         storage = template_type(val.type.GetTemplateArgumentType(1))
         formatting = template_type(val.type.GetTemplateArgumentType(2))
         ptr = get(val, "m_s")
+        debug_print(f"rawptr(val=0x{ptr.unsigned:x}) template {storage} {formatting}")
         if storage == "HPHP::ptrimpl::Atomic":
             ptr = get(ptr, "_M_i")
+            debug_print(f"rawptr(val=0x{ptr.unsigned:x}) read atomic")
+
         if formatting == "HPHP::ptrimpl::UInt32Packed":
             addr = ptr.unsigned << 3
             ptr = val.CreateValueFromExpression(
                 "(tmp)", f"({inner.GetPointerType()}) {addr}"
             )
+            debug_print(f"rawptr(val=0x{ptr.unsigned:x}) read packed")
         else:
+            debug_print(
+                f"rawptr(val=0x{ptr.unsigned:x}) start non packed: ({inner.GetPointerType()}) {ptr.unsigned:x}"
+            )
             ptr = unsigned_cast(ptr, inner.GetPointerType())
+            debug_print(f"rawptr(val=0x{ptr.unsigned:x}) end non packed")
+        debug_print(f"rawptr(val=0x{val.unsigned:x}) ptrimpl done {ptr.unsigned:x}")
     elif name == "HPHP::CompactTaggedPtr":
         inner = val.type.GetTemplateArgumentType(0)
         addr = get(val, "m_data").unsigned & 0xFFFFFFFFFFFF
@@ -1099,12 +1113,8 @@ def pretty_tv(typ: lldb.SBValue, data: lldb.SBValue) -> str:
     elif typ.unsigned == DT("ClsMeth"):
         # For non-lowptr, m_data is a pointer, so try and dereference first
         val = referenced_value(get(data, "pclsmeth", "m_data"))
-        cls = unsigned_cast(
-            get(val, "m_cls"), Type("HPHP::Class", target).GetPointerType()
-        )
-        func = unsigned_cast(
-            get(val, "m_func"), Type("HPHP::Func", target).GetPointerType()
-        )
+        cls = get(val, "m_cls")
+        func = get(val, "m_func")
         name = f"{nameof(cls)}::{nameof(func)}"
     elif typ.unsigned == DT("RFunc"):
         val = get(data, "prfunc")

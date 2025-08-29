@@ -975,7 +975,7 @@ const StaticString s_defaults("defaults");
 
 static Array HHVM_METHOD(ReflectionFunctionAbstract, getCoeffects) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
-  std::vector<LowStringPtr> result;
+  std::vector<PackedStringPtr> result;
   for (auto const& name : func->staticCoeffectNames()) {
     if (name->equal(s_pure.get())) continue;
     result.push_back(name);

@@ -372,7 +372,7 @@ RuntimeCoeffects RuntimeCoeffects::automatic() {
 }
 
 std::pair<StaticCoeffects, RuntimeCoeffects>
-getCoeffectsInfoFromList(std::vector<LowStringPtr> staticCoeffects,
+getCoeffectsInfoFromList(std::vector<PackedStringPtr> staticCoeffects,
                          bool ctor) {
   if (staticCoeffects.empty()) {
     return {StaticCoeffects::defaults(), RuntimeCoeffects::none()};

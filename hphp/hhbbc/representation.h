@@ -449,7 +449,7 @@ struct Func : FuncBase {
   /*
    * Lists of all static coeffect names and coeffect rules
    */
-  CompactVector<LowStringPtr> staticCoeffects;
+  CompactVector<PackedStringPtr> staticCoeffects;
   CompactVector<CoeffectRule> coeffectRules;
 
   /*
@@ -531,7 +531,7 @@ struct Const {
    */
   Optional<TypedValue> val;
 
-  std::vector<LowStringPtr> coeffects;
+  std::vector<PackedStringPtr> coeffects;
 
   SArray resolvedTypeStructure;
 
@@ -631,12 +631,12 @@ struct Class : ClassBase {
   /*
    * Names of inherited interfaces.
    */
-  CompactVector<LowStringPtr> interfaceNames;
+  CompactVector<PackedStringPtr> interfaceNames;
 
   /*
    * Names of included enums.
    */
-  CompactVector<LowStringPtr> includedEnumNames;
+  CompactVector<PackedStringPtr> includedEnumNames;
 
   /*
    * Names of used traits, number of declared (i.e., non-trait, non-inherited)
@@ -646,7 +646,7 @@ struct Class : ClassBase {
    * WholeProgram mode, we won't see these because traits will already be
    * flattened.
    */
-  CompactVector<LowStringPtr> usedTraitNames;
+  CompactVector<PackedStringPtr> usedTraitNames;
   CompactVector<PreClass::ClassRequirement> requirements;
 
   /*

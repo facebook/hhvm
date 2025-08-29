@@ -56,7 +56,7 @@ struct FuncEmitter {
   using EHEntVec = std::vector<EHEnt>;
 
   using CoeffectRuleVec = std::vector<CoeffectRule>;
-  using StaticCoeffectsVec = std::vector<LowStringPtr>;
+  using StaticCoeffectsVec = std::vector<PackedStringPtr>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Initialization and execution.
@@ -320,7 +320,7 @@ public:
    */
   int line1;
   int line2;
-  LowStringPtr name;
+  PackedStringPtr name;
   Attr attrs;
 
   ParamInfoVec params;

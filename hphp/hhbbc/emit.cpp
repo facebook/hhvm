@@ -1096,7 +1096,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
       assertx(cconst.invariance == php::Const::Invariance::None);
       pce->addContextConstant(
         cconst.name,
-        std::vector<LowStringPtr>(cconst.coeffects),
+        std::vector<PackedStringPtr>(cconst.coeffects),
         cconst.isAbstract,
         cconst.isFromTrait
       );

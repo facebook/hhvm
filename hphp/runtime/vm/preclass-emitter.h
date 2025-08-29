@@ -93,10 +93,10 @@ struct PreClassEmitter {
   private:
     friend struct PreClassEmitter;
 
-    LowStringPtr m_name;
+    PackedStringPtr m_name;
     Attr m_attrs;
     LowStringPtr m_userType;
-    LowStringPtr m_docComment;
+    PackedStringPtr m_docComment;
     TypedValue m_val;
     RepoAuthType m_repoAuthType;
     TypeIntersectionConstraint m_typeConstraints{};
@@ -104,7 +104,7 @@ struct PreClassEmitter {
   };
 
   struct Const {
-    using CoeffectsVec = std::vector<LowStringPtr>;
+    using CoeffectsVec = std::vector<PackedStringPtr>;
     using Invariance = PreClass::Const::Invariance;
 
     Const()
@@ -176,10 +176,10 @@ struct PreClassEmitter {
     }
 
    private:
-    LowStringPtr m_name;
+   PackedStringPtr m_name;
     // Class which originally defined this const, if HHBBC has
     // propagated the definition (nullptr otherwise).
-    LowStringPtr m_cls;
+    PackedStringPtr m_cls;
     Optional<TypedValue> m_val;
     CoeffectsVec m_coeffects;
     Array m_resolvedTypeStructure;
@@ -227,11 +227,11 @@ struct PreClassEmitter {
   void setDocComment(const StringData* sd) { m_docComment = sd; }
 
   void addInterface(const StringData* n);
-  const std::vector<LowStringPtr>& interfaces() const {
+  const std::vector<PackedStringPtr>& interfaces() const {
     return m_interfaces;
   }
   void addEnumInclude(const StringData* n);
-  const std::vector<LowStringPtr>& enumIncludes() const {
+  const std::vector<PackedStringPtr>& enumIncludes() const {
     return m_enumIncludes;
   }
   bool addMethod(FuncEmitter* method);
@@ -272,7 +272,7 @@ struct PreClassEmitter {
   void addClassRequirement(const PreClass::ClassRequirement req) {
     m_requirements.push_back(req);
   }
-  const std::vector<LowStringPtr>& usedTraits() const {
+  const std::vector<PackedStringPtr>& usedTraits() const {
     return m_usedTraits;
   }
   const std::vector<PreClass::ClassRequirement>& requirements() const {
@@ -301,22 +301,22 @@ struct PreClassEmitter {
 
  private:
   using MethodMap = hphp_hash_map<
-    LowStringPtr, FuncEmitter*, string_data_hash, string_data_same
+    PackedStringPtr, FuncEmitter*, string_data_hash, string_data_same
   >;
 
   int m_line1;
   int m_line2;
-  LowStringPtr m_name;
+  PackedStringPtr m_name;
   Attr m_attrs;
-  LowStringPtr m_parent;
-  LowStringPtr m_docComment;
+  PackedStringPtr m_parent;
+  PackedStringPtr m_docComment;
   TypeConstraint m_enumBaseTy;
   Slot m_ifaceVtableSlot{kInvalidSlot};
   int m_memoizeInstanceSerial{0};
 
-  std::vector<LowStringPtr> m_interfaces;
-  std::vector<LowStringPtr> m_enumIncludes;
-  std::vector<LowStringPtr> m_usedTraits;
+  std::vector<PackedStringPtr> m_interfaces;
+  std::vector<PackedStringPtr> m_enumIncludes;
+  std::vector<PackedStringPtr> m_usedTraits;
   std::vector<PreClass::ClassRequirement> m_requirements;
   UserAttributeMap m_userAttributes;
   MethodVec m_methods;

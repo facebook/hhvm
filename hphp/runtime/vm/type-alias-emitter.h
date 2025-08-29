@@ -70,7 +70,7 @@ struct TypeAliasEmitter {
 
 private:
   UnitEmitter& m_ue;
-  LowStringPtr m_name;
+  PackedStringPtr m_name;
   Attr m_attrs;
   TypeConstraint m_value;
   int m_line0;

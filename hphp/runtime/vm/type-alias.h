@@ -57,7 +57,7 @@ enum class AliasKind {
  */
 struct PreTypeAlias {
   Unit* unit;
-  LowStringPtr name;
+  PackedStringPtr name;
   Attr attrs;
   TypeConstraint value;
   int line0;

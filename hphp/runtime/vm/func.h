@@ -70,7 +70,7 @@ using ArFunction = TypedValue* (*)(ActRec* ar);
 struct NativeArgs; // never defined
 using NativeFunction = void(*)(NativeArgs*);
 
-using StaticCoeffectNamesMap = CompactVector<LowStringPtr>;
+using StaticCoeffectNamesMap = CompactVector<PackedStringPtr>;
 
 ///////////////////////////////////////////////////////////////////////////////
 // EH table.

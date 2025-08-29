@@ -61,13 +61,13 @@ namespace rds {
  * Symbols for rds::Link's.
  */
 struct LinkID { const char* type; };
-struct LinkName { const char* type; LowStringPtr name; };
+struct LinkName { const char* type; PackedStringPtr name; };
 
 /*
  * Class constant values are TypedValue's stored in RDS.
  */
-struct ClsConstant { LowStringPtr clsName;
-                     LowStringPtr cnsName; };
+struct ClsConstant { PackedStringPtr clsName;
+                     PackedStringPtr cnsName; };
 
 /*
  * StaticMethod{F,}Cache allocations.

@@ -102,10 +102,10 @@ struct PreClass : AtomicCountable {
                       userAttributes() const { return m_userAttributes; }
 
   private:
-    LowStringPtr m_name;
+    PackedStringPtr m_name;
     Attr m_attrs;
     LowStringPtr m_userType;
-    LowStringPtr m_docComment;
+    PackedStringPtr m_docComment;
     TypedValue m_val;
     RepoAuthType m_repoAuthType;
     TypeIntersectionConstraint m_typeConstraints;
@@ -164,12 +164,12 @@ struct PreClass : AtomicCountable {
     StaticCoeffects coeffects()  const;
 
   private:
-    LowStringPtr m_name;
+    PackedStringPtr m_name;
     // The original class which defined this constant, if
     // non-null. This is normally the PreClass where this constant
     // exists. However if this is non-null, HHBBC has propagated the
     // constant and we need to preserve the original declaring class.
-    LowStringPtr m_cls;
+    PackedStringPtr m_cls;
     /* m_aux.u_isAbstractConst indicates an abstract constant. A TypedValue
      * with KindOfUninit represents a constant whose value is not
      * statically available (e.g. "const X = self::Y + 5;") */
@@ -221,9 +221,9 @@ private:
   using ConstMap = IndexedStringMap<Const,Slot>;
 
 public:
-  using InterfaceVec = VMFixedVector<LowStringPtr>;
-  using IncludedEnumsVec = VMFixedVector<LowStringPtr>;
-  using UsedTraitVec = VMFixedVector<LowStringPtr>;
+  using InterfaceVec = VMFixedVector<PackedStringPtr>;
+  using IncludedEnumsVec = VMFixedVector<PackedStringPtr>;
+  using UsedTraitVec = VMFixedVector<PackedStringPtr>;
   using ClassRequirementsVec = VMFixedVector<ClassRequirement>;
 
 
@@ -393,13 +393,13 @@ public:
 
 private:
   Unit* m_unit;
-  LowPtr<NamedType> m_namedType;
+  PackedPtr<NamedType> m_namedType;
   int m_line1;
   int m_line2;
   Attr m_attrs;
   PackedStringPtr m_name;
-  LowStringPtr m_parent;
-  LowStringPtr m_docComment;
+  PackedStringPtr m_parent;
+  PackedStringPtr m_docComment;
   int32_t m_numDeclMethods;
   Slot m_ifaceVtableSlot{kInvalidSlot};
   TypeConstraint m_enumBaseTy;

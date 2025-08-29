@@ -54,7 +54,7 @@ ERROR: File "supportdyn.bad.php", line 21, characters 3-11:
 `await` can only operate on an `Awaitable` (Typing[4110])
   File "supportdyn.bad.php", line 21, characters 3-11:
   Expected `Awaitable<nothing>`
-  File "supportdyn.bad.php", line 18, characters 21-39:
+  File "supportdyn.bad.php", line 18, characters 32-38:
   But got `nonnull`
 ERROR: File "supportdyn.bad.php", line 26, characters 27-30:
 Invalid type hint (Typing[4062])

@@ -49,6 +49,11 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
       let ((env, e2), ty) = extract_inner env ty in
       let (env, ty) = TUtils.union env (MakeType.null r) ty in
       ((env, Option.merge e1 e2 ~f:Typing_error.both), ty)
+    | Tnewtype (n, [ty], _)
+      when String.equal n Naming_special_names.Classes.cSupportDyn ->
+      let ((env, e2), ty) = extract_inner env ty in
+      let (env, ty) = TUtils.make_supportdyn r env ty in
+      ((env, Option.merge e1 e2 ~f:Typing_error.both), ty)
     | Tintersection tyl ->
       let ((env, e2), rtyl) =
         TUtils.run_on_intersection_with_ty_err env tyl ~f:extract_inner

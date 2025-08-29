@@ -1,5 +1,5 @@
 class ExampleDsl
-~ExprTree<ExampleDsl, string, int>
+~ExampleExpression<int>
 ---
 The DSL itself: used as in ExampleDsl`...`. hackc generates a call to makeTree, which
 should return something that implements Spliceable, here an ExprTree

@@ -1,4 +1,4 @@
-~Spliceable<ExampleDsl, string, int>
+~ExampleExpression<int>
 ---
 I am a comment associated with $one.
 ---
@@ -12,5 +12,5 @@ should return something that implements Spliceable, here an ExprTree
 Defined in `ExampleDsl`
 ---
 public static function lift<TInfer>(
-  ExampleDslExpression<TInfer> $x
-)[]: ~ExampleDslExpression<TInfer>
+  ExampleExpression<TInfer> $x
+)[]: ~ExampleExpression<TInfer>

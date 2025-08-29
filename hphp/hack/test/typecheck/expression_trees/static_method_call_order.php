@@ -5,31 +5,31 @@
 class MyExample {
   public static function foo(
     ExampleContext $_,
-  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(int, string): void)>>> {
+  ): Awaitable<ExampleExpression<ExampleFunction<(function(int, string): void)>>> {
     throw new Exception();
   }
 
   public static function bar(
     ExampleContext $_,
-  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(float, bool): int)>>> {
+  ): Awaitable<ExampleExpression<ExampleFunction<(function(float, bool): int)>>> {
     throw new Exception();
   }
 
   public static function baz(
     ExampleContext $_,
-  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(): float)>>> {
+  ): Awaitable<ExampleExpression<ExampleFunction<(function(): float)>>> {
     throw new Exception();
   }
 
   public static function qux(
     ExampleContext $_,
-  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(): bool)>>> {
+  ): Awaitable<ExampleExpression<ExampleFunction<(function(): bool)>>> {
     throw new Exception();
   }
 
   public static function qaal(
     ExampleContext $_,
-  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(): string)>>> {
+  ): Awaitable<ExampleExpression<ExampleFunction<(function(): string)>>> {
     throw new Exception();
   }
 }

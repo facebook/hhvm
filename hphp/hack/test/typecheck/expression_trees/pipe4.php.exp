@@ -2,19 +2,17 @@ ERROR: File "pipe4.php", line 12, characters 47-48:
 Invalid argument (Typing[4110])
   File "pipe4.php", line 5, characters 14-16:
   Expected `int`
-  File "pipe4.php", line 5, characters 23-72:
-  But got `ExprTree<ExampleDsl, string, int>`
+  File "pipe4.php", line 5, characters 23-51:
+  But got `ExampleExpression<int>`
 ERROR: File "pipe4.php", line 14, characters 10-12:
 Invalid return type (Typing[4110])
-  File "pipe4.php", line 9, characters 57-68:
+  File "pipe4.php", line 9, characters 36-47:
   Expected `float`
-  File "pipe4.php", line 5, characters 62-71:
+  File "pipe4.php", line 5, characters 41-50:
   But got `int`
-  File "expr_tree.php", line 49, characters 44-49:
+  File "expr_tree.php", line 88, characters 26-31:
     via this generic `TInfer`
-  File "expr_tree.php", line 91, characters 29-34:
-    via this generic `TInfer`
-  File "expr_tree.php", line 504, characters 73-73:
+  File "expr_tree.php", line 496, characters 52-52:
     via this generic `T`
-  File "expr_tree.php", line 85, characters 47-52:
+  File "expr_tree.php", line 82, characters 26-31:
     via this generic `TInfer`

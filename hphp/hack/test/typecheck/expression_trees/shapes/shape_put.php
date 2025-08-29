@@ -8,7 +8,7 @@
 
 type MyExampleShape = ExampleShape<shape('y' => ExampleString)>;
 
-function h(): ExampleDslExpression<ExampleString> {
+function h(): ExampleExpression<ExampleString> {
   return ExampleDsl`{
     $f = (MyExampleShape $shape) ==> ExampleDsl::shapeAt($shape, 'y');
     $x = shape();

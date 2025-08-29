@@ -5,7 +5,7 @@
 type MyExampleShape = ExampleShape<shape('y' => ExampleString)>;
 
 // known to not exists
-function a(): ExampleDslExpression<ExampleInt> {
+function a(): ExampleExpression<ExampleInt> {
   return ExampleDsl`{
     $x = shape('y' => 'test');
     return ExampleDsl::shapeIdx($x, 'z');//
@@ -13,7 +13,7 @@ function a(): ExampleDslExpression<ExampleInt> {
 }
 
 // known to not exists
-function b(): ExampleDslExpression<ExampleInt> {
+function b(): ExampleExpression<ExampleInt> {
   return ExampleDsl`{
     $x = shape('y' => 'test');
     return ExampleDsl::shapeIdx($x, 'z', 3);
@@ -22,7 +22,7 @@ function b(): ExampleDslExpression<ExampleInt> {
 
 
 // wrong return type
-function f(): ExampleDslExpression<ExampleInt> {
+function f(): ExampleExpression<ExampleInt> {
   return ExampleDsl`{
     $x = shape('y' => 'test');
     return ExampleDsl::shapeIdx($x, 'y');
@@ -30,7 +30,7 @@ function f(): ExampleDslExpression<ExampleInt> {
 }
 
 // wrong return type
-function f2(): ExampleDslExpression<ExampleInt> {
+function f2(): ExampleExpression<ExampleInt> {
   return ExampleDsl`{
     $x = shape();
     return ExampleDsl::shapeIdx($x, 'y', 'test');
@@ -56,7 +56,7 @@ function g(): void {
   }`;
 }
 
-function j(): ExampleDslExpression<ExampleString> {
+function j(): ExampleExpression<ExampleString> {
   // open shapes are  not supported, as we can't lift the type of mixed => ExampleMixed yet,
   // until type unification is implemented
   return ExampleDsl`{

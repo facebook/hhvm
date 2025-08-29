@@ -1,6 +1,6 @@
 ERROR: File "splice_err4.php", line 13, characters 25-26:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 90, characters 5-32:
-  Expected `Spliceable<ExampleDsl, string, _>`
+  File "expr_tree.php", line 87, characters 5-29:
+  Expected `ExampleExpression<_>`
   File "splice_err4.php", line 9, characters 10-10:
   But got `int`

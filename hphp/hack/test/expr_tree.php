@@ -12,9 +12,7 @@
  */
 
 // main function
-function print_et<TInfer>(
-  ExprTree<ExampleDsl, ExampleDsl::TAst, TInfer> $et,
-): void {
+function print_et<TInfer>(ExampleExpression<TInfer> $et): void {
   $visitor = new ExampleDsl();
   $string = $et->visit($visitor);
   echo($string."\n");
@@ -45,15 +43,14 @@ case type ExprTreeOpType<+T as ExampleMixedOpType> =
   | bool where T super ExampleBoolOpType
   | T;
 
-final class ExprTree<TVisitor, TResult, +TInfer>
-  implements Spliceable<TVisitor, TResult, TInfer> {
+final class ExprTree<TInfer> implements ExampleExpression<TInfer> {
   public function __construct(
     private ?ExprPos $pos,
-    private ExprTreeInfo<TInfer> $metadata,
-    private (function(TVisitor): TResult) $ast,
+    private ?ExprTreeInfo<TInfer> $metadata,
+    private (function(ExampleDsl): ExampleDsl::TAst) $ast,
   )[] {}
 
-  public function visit(TVisitor $v): TResult {
+  public function visit(ExampleDsl $v): ExampleDsl::TAst {
     return ($this->ast)($v);
   }
 
@@ -62,7 +59,7 @@ final class ExprTree<TVisitor, TResult, +TInfer>
   }
 
   public function getSplices(): dict<string, mixed> {
-    return $this->metadata['splices'];
+    return Shapes::idx($this->metadata, 'splices', dict[]);
   }
 }
 
@@ -74,7 +71,7 @@ class ExampleDsl {
   // The desugared expression tree literal will call this method.
   public static function makeTree<TInfer>(
     ?ExprPos $pos,
-    shape(
+    ?shape(
       'splices' => dict<string, mixed>,
       'functions' => vec<mixed>,
       'static_methods' => vec<mixed>,
@@ -82,13 +79,13 @@ class ExampleDsl {
       'variables' => vec<string>,
     ) $metadata,
     (function(ExampleDsl): ExampleDsl::TAst) $ast,
-  )[]: ExprTree<ExampleDsl, ExampleDsl::TAst, TInfer> {
+  )[]: ExampleExpression<TInfer> {
     return new ExprTree($pos, $metadata, $ast);
   }
 
   public static function lift<TInfer>(
-    ExampleDslExpression<TInfer> $x,
-  )[]: ExampleDslExpression<TInfer> {
+    ExampleExpression<TInfer> $x,
+  )[]: ExampleExpression<TInfer> {
     return $x;
   }
 
@@ -111,9 +108,7 @@ class ExampleDsl {
     throw new Exception();
   }
   public static function symbolType<T>(
-    (function(
-      ExampleContext,
-    ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, T>>) $_,
+    (function(ExampleContext): Awaitable<ExampleExpression<T>>) $_,
   ): T {
     throw new Exception();
   }
@@ -207,18 +202,14 @@ class ExampleDsl {
 
   public function visitGlobalFunction<T>(
     ?ExprPos $_,
-    (function(
-      ExampleContext,
-    ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, T>>) $_,
+    (function(ExampleContext): Awaitable<ExampleExpression<T>>) $_,
   )[]: ExampleDsl::TAst {
     return "function_ptr";
   }
 
   public function visitStaticMethod<T>(
     ?ExprPos $_,
-    (function(
-      ExampleContext,
-    ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, T>>) $_,
+    (function(ExampleContext): Awaitable<ExampleExpression<T>>) $_,
   )[]: ExampleDsl::TAst {
     return "function_ptr";
   }
@@ -366,7 +357,7 @@ class ExampleDsl {
   public function splice<T>(
     ?ExprPos $_,
     string $_key,
-    ExampleDslExpression<T> $splice_val,
+    ExampleExpression<T> $splice_val,
     ?vec<string> $_macro_vars = null,
   ): ExampleDsl::TAst {
     return "\${".($splice_val->visit($this))."}";
@@ -385,19 +376,19 @@ class ExampleDsl {
   // being run against this specific declaration, so that is fine.
   public static async function shapeAt(
     ExampleContext $_,
-  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleMixed>> {
+  ): Awaitable<ExampleExpression<ExampleMixed>> {
     throw new Error("No runtime implementation yet");
   }
 
   public static async function shapePut(
     ExampleContext $_,
-  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleMixed>> {
+  ): Awaitable<ExampleExpression<ExampleMixed>> {
     throw new Error("No runtime implementation yet");
   }
 
   public static async function shapeIdx(
     ExampleContext $_,
-  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleMixed>> {
+  ): Awaitable<ExampleExpression<ExampleMixed>> {
     throw new Error("No runtime implementation yet");
   }
 }
@@ -501,7 +492,8 @@ class ExampleDsl2 extends ExampleDsl {}
 // The type of positions passed to the expression tree visitor.
 type ExprPos = shape(...);
 
-type ExampleDslExpression<T> = Spliceable<ExampleDsl, ExampleDsl::TAst, T>;
+interface ExampleExpression<+T>
+  extends Spliceable<ExampleDsl, ExampleDsl::TAst, T> {}
 
 function concat_arg_list(vec<string> $args)[]: string {
   return implode(",", $args);

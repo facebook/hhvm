@@ -16,7 +16,7 @@ class DictError {
       'variables' => vec<string>,
     ) $metadata,
     (function(DictError): DictError::TAst) $ast,
-  ): ExprTree<DictError, DictError::TAst, TInfer> {
+  ): Spliceable<DictError, DictError::TAst, TInfer> {
     throw new Exception();
   }
 

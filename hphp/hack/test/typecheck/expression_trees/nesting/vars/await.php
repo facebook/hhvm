@@ -2,11 +2,11 @@
 <<file: __EnableUnstableFeatures('expression_tree_nested_bindings')>>
 <<file: __EnableUnstableFeatures('expression_trees')>>
 
-async function g(ExampleDslExpression<ExampleString> $s): Awaitable<ExampleDslExpression<ExampleInt>> {
+async function g(ExampleExpression<ExampleString> $s): Awaitable<ExampleExpression<ExampleInt>> {
   return ExampleDsl`1`;
 }
 
-async function f(): Awaitable<ExampleDslExpression<ExampleInt>> {
+async function f(): Awaitable<ExampleExpression<ExampleInt>> {
   return ExampleDsl`{
     $x = "hello";
     return ${await g(ExampleDsl`$x`)};

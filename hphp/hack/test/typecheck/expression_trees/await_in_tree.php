@@ -3,7 +3,7 @@
 <<file: __EnableUnstableFeatures('await_in_splice')>>
 
 async function myTestFunction2(
-): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt>> {
+): Awaitable<ExampleExpression<ExampleInt>> {
   return ExampleDsl`1`;
 }
 

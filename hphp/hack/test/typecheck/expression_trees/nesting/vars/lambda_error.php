@@ -3,20 +3,20 @@
 <<file: __EnableUnstableFeatures('expression_tree_nested_bindings')>>
 
 function g(
-  ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $a,
+  ExampleExpression<ExampleInt> $a,
   string $b,
-): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
+): ExampleExpression<ExampleInt> {
   return $a;
 }
 
 function h(
   int $b,
-  ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $a,
-): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
+  ExampleExpression<ExampleInt> $a,
+): ExampleExpression<ExampleInt> {
   return $a;
 }
 
-function i(int $b): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
+function i(int $b): ExampleExpression<ExampleInt> {
   return ExampleDsl`1`;
 }
 

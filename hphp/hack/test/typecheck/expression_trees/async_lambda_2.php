@@ -6,7 +6,7 @@ class BC { }
 
 type Action = Lambda<(function(int, BC): ExampleInt)>;
 
-type Lambda<T> = ExampleDslExpression<ExampleFunction<T>>;
+type Lambda<T> = ExampleExpression<ExampleFunction<T>>;
 
 final class C {
   const type TAction = (function(BC): Awaitable<Action>);

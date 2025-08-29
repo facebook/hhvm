@@ -17,7 +17,7 @@ class MyExampleDsl {
       'variables' => vec<string>,
     ) $metadata,
     (function(MyExampleDsl): MyExampleDsl::TAst) $ast,
-  ): \ExprTree<MyExampleDsl, MyExampleDsl::TAst, TInfer> {
+  ): \ExampleExpression<TInfer> {
     throw new \Exception();
   }
 

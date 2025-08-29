@@ -6,5 +6,5 @@ Dynamic access of properties and methods is only permitted on values of type `dy
   Did you mean `->z` instead?
 ERROR: File "instance_method_error2.php", line 8, characters 16-17:
 Variable `$z` is undefined, or not always defined. (Naming[2050])
-  File "instance_method_error2.php", line 5, characters 62-63:
+  File "instance_method_error2.php", line 5, characters 41-42:
   Did you mean `$y` instead?

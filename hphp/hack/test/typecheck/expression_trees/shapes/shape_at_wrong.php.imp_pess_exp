@@ -1,22 +1,20 @@
 ERROR: File "shape_at_wrong.php", line 9, characters 10-98:
 Invalid return type (Typing[4110])
-  File "shape_at_wrong.php", line 8, characters 15-46:
+  File "shape_at_wrong.php", line 8, characters 15-43:
   Expected `dynamic`
-  File "expr_tree.php", line 85, characters 8-53:
-  But got `ExprTree<ExampleDsl, string, _>`
+  File "expr_tree.php", line 82, characters 8-32:
+  But got `ExampleExpression<_>`
 ERROR: File "shape_at_wrong.php", line 9, characters 10-98:
 Invalid return type (Typing[4110])
-  File "shape_at_wrong.php", line 8, characters 15-46:
-  Expected `~Spliceable<ExampleDsl, string, int>`
+  File "shape_at_wrong.php", line 8, characters 15-43:
+  Expected `~ExampleExpression<int>`
   File "shape_at_wrong.php", line 9, characters 21-97:
-  But got `~ExprTree<ExampleDsl, string, _>` because method or function was called on dynamic or like-type
+  But got `~ExampleExpression<_>` because method or function was called on dynamic or like-type
 ERROR: File "shape_at_wrong.php", line 9, characters 10-98:
 Invalid return type (Typing[4110])
-  File "shape_at_wrong.php", line 8, characters 36-45:
+  File "shape_at_wrong.php", line 8, characters 33-42:
   Expected `int`
-  File "expr_tree.php", line 504, characters 73-73:
-    via this generic `T`
-  File "expr_tree.php", line 107, characters 40-45:
+  File "expr_tree.php", line 104, characters 40-45:
   But got `string`
 ERROR: File "shape_at_wrong.php", line 18, characters 5-41:
 Too many arguments (expected 2 but got 3) (Typing[4105])
@@ -34,5 +32,5 @@ You are calling `Shapes::at()` on a field known to not exist (Typing[4251])
   The field `x` is not defined in this shape
 ERROR: File "shape_at_wrong.php", line 30, characters 5-33:
 You are trying to access the method `__unwrap` but this is a string (Typing[4062])
-  File "expr_tree.php", line 107, characters 40-45:
+  File "expr_tree.php", line 104, characters 40-45:
   Definition is here

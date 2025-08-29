@@ -1,4 +1,4 @@
 ERROR: File "property_access_error3.php", line 7, characters 13-19:
 You are trying to access the property `my_prop` but this is an int (Typing[4373])
-  File "property_access_error3.php", line 13, characters 92-101:
+  File "property_access_error3.php", line 13, characters 71-80:
   Definition is here

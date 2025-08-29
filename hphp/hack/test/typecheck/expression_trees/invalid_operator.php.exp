@@ -18,25 +18,25 @@ Variable `$x` is undefined, or not always defined. (Naming[2050])
   Did you mean `$z` instead?
 ERROR: File "invalid_operator.php", line 13, characters 19-27:
 Invalid return type (Typing[4110])
-  File "expr_tree.php", line 72, characters 21-26:
+  File "expr_tree.php", line 69, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 84, characters 28-43:
+  File "expr_tree.php", line 81, characters 28-43:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "invalid_operator.php", line 13, characters 23-25:
   But got `Foo`
 ERROR: File "invalid_operator.php", line 16, characters 19-26:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 72, characters 21-26:
+  File "expr_tree.php", line 69, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 158, characters 5-20:
+  File "expr_tree.php", line 153, characters 5-20:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "invalid_operator.php", line 9, characters 7-9:
   But got `int`
 ERROR: File "invalid_operator.php", line 19, characters 19-42:
 Invalid return type (Typing[4110])
-  File "expr_tree.php", line 72, characters 21-26:
+  File "expr_tree.php", line 69, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 84, characters 28-43:
+  File "expr_tree.php", line 81, characters 28-43:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "invalid_operator.php", line 19, characters 19-42:
   But got `(function(): int)`

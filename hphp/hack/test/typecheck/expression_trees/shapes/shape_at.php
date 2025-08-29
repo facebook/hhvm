@@ -8,21 +8,21 @@
 
 type MyExampleShape = ExampleShape<shape('y' => ExampleString)>;
 
-function f(): ExampleDslExpression<ExampleString> {
+function f(): ExampleExpression<ExampleString> {
   return ExampleDsl`{
     $x = shape('y' => 'test');
     return ExampleDsl::shapeAt($x, 'y');
   }`;
 }
 
-function g(): ExampleDslExpression<ExampleString> {
+function g(): ExampleExpression<ExampleString> {
   return ExampleDsl`{
     $f = (MyExampleShape $shape) ==> ExampleDsl::shapeAt($shape, 'y');
     return $f(shape('y' => 'test2'));
   }`;
 }
 
-function h(): ExampleDslExpression<?ExampleString> {
+function h(): ExampleExpression<?ExampleString> {
   // nullable  field
   return ExampleDsl`{
     $f = (ExampleShape<shape('y' => ?ExampleString)> $shape) ==>
@@ -31,7 +31,7 @@ function h(): ExampleDslExpression<?ExampleString> {
   }`;
 }
 
-function i(): ExampleDslExpression<ExampleString> {
+function i(): ExampleExpression<ExampleString> {
   // optional field
   return ExampleDsl`{
     $f = (ExampleShape<shape(?'y' => ExampleString)> $shape) ==>
@@ -40,7 +40,7 @@ function i(): ExampleDslExpression<ExampleString> {
   }`;
 }
 
-function j(): ExampleDslExpression<mixed> {
+function j(): ExampleExpression<mixed> {
   // open shape
   return ExampleDsl`{
     $f = (ExampleShape<shape(...)> $shape) ==> ExampleDsl::shapeAt($shape, 'y');

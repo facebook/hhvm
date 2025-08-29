@@ -1,7 +1,7 @@
 <?hh
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-async function myTestFunction2(): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt>> {
+async function myTestFunction2(): Awaitable<ExampleExpression<ExampleInt>> {
   return ExampleDsl`1`;
 }
 

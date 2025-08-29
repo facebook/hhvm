@@ -2,17 +2,17 @@ ERROR: File "boolean_operators.php", line 27, characters 7-33:
 `ExampleMixedOpType` does not support this operator (it has no instance method named `__barbar`) (Typing[4053])
 ERROR: File "boolean_operators.php", line 28, characters 19-33:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 437, characters 28-38:
+  File "expr_tree.php", line 428, characters 28-38:
   Expected `~bool`
-  File "boolean_operators.php", line 7, characters 82-93:
+  File "boolean_operators.php", line 7, characters 61-72:
   But got `?bool`
 ERROR: File "boolean_operators.php", line 32, characters 7-33:
 `ExampleMixedOpType` does not support this operator (it has no instance method named `__ampamp`) (Typing[4053])
 ERROR: File "boolean_operators.php", line 33, characters 19-33:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 436, characters 28-38:
+  File "expr_tree.php", line 427, characters 28-38:
   Expected `~bool`
-  File "boolean_operators.php", line 7, characters 82-93:
+  File "boolean_operators.php", line 7, characters 61-72:
   But got `?bool`
 ERROR: File "boolean_operators.php", line 37, characters 7-22:
 `ExampleMixedOpType` does not support this operator (it has no instance method named `__exclamationMark`) (Typing[4053])

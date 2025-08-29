@@ -1,7 +1,7 @@
 File "splice_err4.php", line 13, characters 23-27:
 This value cannot be inserted (spliced) into a `ExampleDsl` expression tree (Typing[4110])
   File "expr_tree.php", line 200, characters 5-27:
-  Expected `ExampleDslExpression<T>` because you are splicing into a `ExampleDsl` expression or block
+  Expected `ExampleExpression<T>` because you are splicing into a `ExampleDsl` expression or block
   File "splice_err4.php", line 9, characters 10-10:
   But got `~(int | ExprTree<ExampleDsl, mixed, TInfer#1>)`
   File "splice_err4.php", line 13, characters 25-26:

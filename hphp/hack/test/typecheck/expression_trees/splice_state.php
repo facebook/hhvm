@@ -9,7 +9,7 @@ class Foo {
   }
 }
 
-function lift<T>(T $_): ExprTree<ExampleDsl, ExampleDsl::TAst, T> {
+function lift<T>(T $_): ExampleExpression<T> {
   throw new Exception();
 }
 

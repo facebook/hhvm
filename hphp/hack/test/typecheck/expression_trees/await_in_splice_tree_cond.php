@@ -2,7 +2,7 @@
 <<file: __EnableUnstableFeatures('expression_trees')>>
 <<file: __EnableUnstableFeatures('await_in_splice')>>
 
-async function myTestFunction1(): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt>> {
+async function myTestFunction1(): Awaitable<ExampleExpression<ExampleInt>> {
   return ExampleDsl`2`;
 }
 

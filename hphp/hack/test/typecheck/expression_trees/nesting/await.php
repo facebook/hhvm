@@ -1,7 +1,7 @@
 <?hh
 <<file: __EnableUnstableFeatures('expression_trees')>>
 
-async function g(): Awaitable<ExampleDslExpression<ExampleInt>> {
+async function g(): Awaitable<ExampleExpression<ExampleInt>> {
   return ExampleDsl`1`;
 }
 

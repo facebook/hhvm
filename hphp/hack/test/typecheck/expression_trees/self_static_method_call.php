@@ -5,7 +5,7 @@
 final class MyClass {
   public static async function bar(
     ExampleContext $_,
-  ): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(ExampleString): ExampleInt)>> {
+  ): Awaitable<ExampleExpression<(function(ExampleString): ExampleInt)>> {
     throw new Exception();
   }
 

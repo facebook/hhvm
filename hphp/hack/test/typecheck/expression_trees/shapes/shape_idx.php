@@ -8,27 +8,27 @@
 
 type MyExampleShape = ExampleShape<shape('y' => ExampleString)>;
 
-function f1(): ExampleDslExpression<?ExampleString> {
+function f1(): ExampleExpression<?ExampleString> {
   return ExampleDsl`{
     $x = shape('y' => 'test');
     return ExampleDsl::shapeIdx($x, 'y');
   }`;
 }
 
-function f2(): ExampleDslExpression<ExampleString> {
+function f2(): ExampleExpression<ExampleString> {
   return ExampleDsl`{
     $x = shape('y' => 'test');
     return ExampleDsl::shapeIdx($x, 'y', 'test');
   }`;
 }
 
-function f27(): ExampleDslExpression<ExampleString> {
+function f27(): ExampleExpression<ExampleString> {
   return ExampleDsl`{
     return ExampleDsl::shapeIdx(null, 'y', 'test');
   }`;
 }
 
-function f3(): ExampleDslExpression<ExampleString> {
+function f3(): ExampleExpression<ExampleString> {
   return ExampleDsl`{
     // Note: we don't support open shapes here yet, as we don't have a way to convert mixed => ExampleMixed without type unification
     $f = (ExampleShape<shape(?'y' => ExampleString)> $shape) ==>
@@ -37,7 +37,7 @@ function f3(): ExampleDslExpression<ExampleString> {
   }`;
 }
 
-function f4(): ExampleDslExpression<?ExampleString> {
+function f4(): ExampleExpression<?ExampleString> {
   return ExampleDsl`{
     $f = (?ExampleShape<shape(?'y' => ExampleString)> $shape) ==>
       ExampleDsl::shapeIdx($shape, 'y');
@@ -45,7 +45,7 @@ function f4(): ExampleDslExpression<?ExampleString> {
   }`;
 }
 
-function f5(): ExampleDslExpression<ExampleString> {
+function f5(): ExampleExpression<ExampleString> {
   return ExampleDsl`{
     $f = (?ExampleShape<shape(?'y' => ExampleString)> $shape) ==>
       ExampleDsl::shapeIdx($shape, 'y', 'default');
@@ -53,7 +53,7 @@ function f5(): ExampleDslExpression<ExampleString> {
   }`;
 }
 
-function g(): ExampleDslExpression<ExampleString> {
+function g(): ExampleExpression<ExampleString> {
   return ExampleDsl`{
     $f = (MyExampleShape $shape) ==>
       ExampleDsl::shapeIdx($shape, 'y', 'default');
@@ -61,7 +61,7 @@ function g(): ExampleDslExpression<ExampleString> {
   }`;
 }
 
-function h(): ExampleDslExpression<?ExampleString> {
+function h(): ExampleExpression<?ExampleString> {
   // nullable  field
   return ExampleDsl`{
     $f = (ExampleShape<shape('y' => ?ExampleString)> $shape) ==>
@@ -70,7 +70,7 @@ function h(): ExampleDslExpression<?ExampleString> {
   }`;
 }
 
-function h2(): ExampleDslExpression<?ExampleString> {
+function h2(): ExampleExpression<?ExampleString> {
   // nullable  field. A provided null field take precedence over the default value,
   // so this can return null.
   return ExampleDsl`{

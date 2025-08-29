@@ -3,7 +3,7 @@
 <<file: __EnableUnstableFeatures('await_in_splice')>>
 
 async function myTestFunction2(
-): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt>> {
+): Awaitable<ExampleExpression<ExampleInt>> {
   echo 1;
   await RescheduleWaitHandle::create(0, 0);
   echo 2;

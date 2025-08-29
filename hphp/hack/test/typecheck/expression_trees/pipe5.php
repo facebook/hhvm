@@ -2,15 +2,15 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function foo(int $_): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
+function foo(int $_): ExampleExpression<ExampleInt> {
   throw new Exception();
 }
 
-function bar(ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $x): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleString> {
+function bar(ExampleExpression<ExampleInt> $x): ExampleExpression<ExampleString> {
   throw new Exception();
 }
 
-function test(): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleString> {
+function test(): ExampleExpression<ExampleString> {
   $et = 1
     |> $$ . "Hello" . $$
     |> (int)$$

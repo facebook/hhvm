@@ -4,12 +4,12 @@
 
 async function bar(
   ExampleContext $_,
-): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(): void)>>> {
+): Awaitable<ExampleExpression<ExampleFunction<(function(): void)>>> {
   throw new Exception();
 }
 async function baz(
   ExampleContext $_,
-): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(ExampleInt): void)>>> {
+): Awaitable<ExampleExpression<ExampleFunction<(function(ExampleInt): void)>>> {
   throw new Exception();
 }
 

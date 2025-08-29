@@ -4,7 +4,7 @@
 
 async function bar(
   ExampleContext $_,
-): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(ExampleString): ExampleInt)>>> {
+): Awaitable<ExampleExpression<ExampleFunction<(function(ExampleString): ExampleInt)>>> {
   throw new Exception();
 }
 

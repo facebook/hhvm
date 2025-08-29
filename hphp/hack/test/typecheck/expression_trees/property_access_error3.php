@@ -10,7 +10,7 @@ function test(): void {
 
 async function foo(
   ExampleContext $_,
-): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(ExampleInt): ExampleInt)>>> {
+): Awaitable<ExampleExpression<ExampleFunction<(function(ExampleInt): ExampleInt)>>> {
   throw new Exception();
 }
 

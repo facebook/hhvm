@@ -16,14 +16,14 @@ function test_error(): (function(): nothing) {
 }
 
 // This should not throw an error
-function test(): (function(): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt>) {
+function test(): (function(): ExampleExpression<ExampleInt>) {
   $x = () ==> {
     return ExampleDsl`1`;
   };
   return $x;
 }
 
-function test2(): (function(): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt>) {
+function test2(): (function(): ExampleExpression<ExampleInt>) {
   // The expression tree could be constructed outside of the lambda and this would be okay
   $y = ExampleDsl`1`;
   $x = () ==> {
@@ -32,7 +32,7 @@ function test2(): (function(): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt
   return $x;
 }
 
-function test3(): (function(): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt>) {
+function test3(): (function(): ExampleExpression<ExampleInt>) {
   // The expression tree could be returned directly and this would also okay
   return () ==> {
     return ExampleDsl`1`;

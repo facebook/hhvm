@@ -2,12 +2,12 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function foo(): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
+function foo(): ExampleExpression<ExampleInt> {
   throw new Exception();
 }
 
 abstract class MyClass {
-  protected ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $prop;
+  protected ExampleExpression<ExampleInt> $prop;
 }
 
 abstract class MyChildClass extends MyClass {

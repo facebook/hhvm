@@ -2,7 +2,7 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-class MySpliceableClass implements Spliceable<ExampleDsl, ExampleDsl::TAst, MySpliceableClass> {
+class MySpliceableClass implements ExampleExpression<MySpliceableClass> {
   public function visit(ExampleDsl $v): ExampleDsl::TAst {
     throw new Exception();
   }

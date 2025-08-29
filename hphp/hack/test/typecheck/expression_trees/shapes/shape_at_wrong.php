@@ -5,7 +5,7 @@
 type MyExampleShape = ExampleShape<shape('y' => ExampleString)>;
 
 // wrong return type
-function f(): ExampleDslExpression<ExampleInt> {
+function f(): ExampleExpression<ExampleInt> {
   return ExampleDsl`{
     $x = shape('y' => 'test');
     return ExampleDsl::shapeAt($x, 'y');

@@ -4,9 +4,9 @@ ERROR: File "await_in_tree.php", line 12, characters 14-39:
 `await` can only be used inside `async` functions (NastCheck[3003])
 ERROR: File "await_in_tree.php", line 12, characters 20-39:
 This value cannot be inserted (spliced) into a `ExampleDsl` expression tree (Typing[4110])
-  File "expr_tree.php", line 369, characters 5-27:
-  Expected `ExampleDslExpression<T>` because you are splicing into a `ExampleDsl` expression or block
-  File "await_in_tree.php", line 6, characters 4-64:
-  But got `Awaitable<ExprTree<ExampleDsl, string, int>>`
+  File "expr_tree.php", line 360, characters 5-24:
+  Expected `ExampleExpression<T>` because you are splicing into a `ExampleDsl` expression or block
+  File "await_in_tree.php", line 6, characters 4-43:
+  But got `Awaitable<ExampleExpression<int>>`
   File "await_in_tree.php", line 12, characters 22-38:
   Hack values need to be converted (lifted) to compatible types before splicing. For more information see: https://docs.hhvm.com/hack/expression-trees/splicing

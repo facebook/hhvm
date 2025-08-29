@@ -1,10 +1,8 @@
 ERROR: File "shape_put_wrong.php", line 9, characters 10-152:
 Invalid return type (Typing[4110])
-  File "shape_put_wrong.php", line 8, characters 36-45:
+  File "shape_put_wrong.php", line 8, characters 33-42:
   Expected `int`
-  File "expr_tree.php", line 504, characters 73-73:
-    via this generic `T`
-  File "expr_tree.php", line 104, characters 38-41:
+  File "expr_tree.php", line 101, characters 38-41:
   But got `bool`
 ERROR: File "shape_put_wrong.php", line 19, characters 5-47:
 Too many arguments (expected 3 but got 4) (Typing[4105])
@@ -18,5 +16,5 @@ ERROR: File "shape_put_wrong.php", line 25, characters 34-39:
 Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
 ERROR: File "shape_put_wrong.php", line 28, characters 5-37:
 You are trying to access the method `__unwrap` but this is a string (Typing[4062])
-  File "expr_tree.php", line 107, characters 40-45:
+  File "expr_tree.php", line 104, characters 40-45:
   Definition is here

@@ -1,6 +1,6 @@
-ERROR: File "potential_void_return.php", line 24, characters 5-469:
+ERROR: File "potential_void_return.php", line 17, characters 5-469:
 This function can exit with and without returning a value (Typing[4421])
-  File "potential_void_return.php", line 28, characters 9-41:
+  File "potential_void_return.php", line 21, characters 9-41:
   Returning a value here.
-  File "potential_void_return.php", line 24, characters 5-469:
+  File "potential_void_return.php", line 17, characters 5-469:
   This function does not always return a value

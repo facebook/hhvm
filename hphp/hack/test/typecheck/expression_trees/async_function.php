@@ -4,7 +4,7 @@
 
 // A regular server side async/awaitable function
 async function my_gk_example():
-  Awaitable<Spliceable<ExampleDsl, ExampleDsl::TAst, ExampleInt>>
+  Awaitable<ExampleExpression<ExampleInt>>
 {
   throw new Exception();
 }
@@ -12,7 +12,7 @@ async function my_gk_example():
 // A helper function that calls the async function and splices in the result
 async function my_helper(
   ExampleContext $_,
-): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFunction<(function(): ExampleInt)>>> {
+): Awaitable<ExampleExpression<ExampleFunction<(function(): ExampleInt)>>> {
   $f = await my_gk_example();
   return ExampleDsl`() ==> ${ $f }`;
 }

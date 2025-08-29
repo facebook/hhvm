@@ -212,31 +212,45 @@ class EchoBodySource : public HTTPSourceFilter {
 
 class ByteEventFilter : public HTTPSourceFilter {
  public:
-  ByteEventFilter(uint8_t headerEvents,
-                  uint8_t bodyEvents,
-                  HTTPByteEventCallbackPtr callback)
+  ByteEventFilter(
+      uint8_t headerEvents,
+      uint8_t bodyEvents,
+      HTTPByteEventCallbackPtr callback,
+      uint32_t maxBytesPerRead = std::numeric_limits<uint32_t>::max())
       : headerEvents_(headerEvents),
         bodyEvents_(bodyEvents),
-        callback_(std::move(callback)) {
+        callback_(std::move(callback)),
+        max_(maxBytesPerRead) {
     setHeapAllocated();
   }
 
   folly::coro::Task<HTTPHeaderEvent> readHeaderEvent() override {
     auto ev = co_await HTTPSourceFilter::readHeaderEventImpl();
-    HTTPByteEventRegistration reg;
-    reg.events = headerEvents_;
-    reg.callback = callback_;
-    ev.byteEventRegistrations.emplace_back(std::move(reg));
+    for (auto eventType : HTTPByteEvent::kByteEventTypes) {
+      if (headerEvents_ & folly::to_underlying(eventType)) {
+        HTTPByteEventRegistration reg;
+        reg.events = folly::to_underlying(eventType);
+        reg.callback = callback_;
+        ev.byteEventRegistrations.emplace_back(std::move(reg));
+      }
+    }
     lifetime(ev)();
     co_return ev;
   }
 
   folly::coro::Task<HTTPBodyEvent> readBodyEvent(uint32_t max) override {
-    auto ev = co_await HTTPSourceFilter::readBodyEventImpl(max);
-    HTTPByteEventRegistration reg;
-    reg.events = bodyEvents_;
-    reg.callback = callback_;
-    ev.byteEventRegistrations.emplace_back(std::move(reg));
+    auto ev = co_await HTTPSourceFilter::readBodyEventImpl(std::min(max_, max));
+    for (auto eventType : HTTPByteEvent::kByteEventTypes) {
+      if (bodyEvents_ & folly::to_underlying(eventType)) {
+        XLOG(DBG4) << "registering for event t="
+                   << folly::to_underlying(eventType);
+        HTTPByteEventRegistration reg;
+        reg.events = folly::to_underlying(eventType);
+
+        reg.callback = callback_;
+        ev.byteEventRegistrations.emplace_back(std::move(reg));
+      }
+    }
     lifetime(ev)();
     co_return ev;
   }
@@ -252,6 +266,7 @@ class ByteEventFilter : public HTTPSourceFilter {
   uint8_t headerEvents_;
   uint8_t bodyEvents_;
   HTTPByteEventCallbackPtr callback_;
+  uint32_t max_;
 };
 
 class YieldExceptionSource : public HTTPSource {

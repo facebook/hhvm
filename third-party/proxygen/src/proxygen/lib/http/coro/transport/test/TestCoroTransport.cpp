@@ -11,6 +11,10 @@
 
 using TransportErrorCode = folly::coro::TransportIf::ErrorCode;
 
+namespace {
+const uint32_t kAckDelayMs = 50;
+}
+
 namespace proxygen::coro::test {
 
 folly::coro::Task<size_t> TestCoroTransport::read(
@@ -82,8 +86,8 @@ folly::coro::Task<size_t> TestCoroTransport::read(
   size_t totalRead = 0;
   do {
     auto rbuf = readBuf.preallocate(minReadSize, newAllocationSize);
-    auto rc = co_await folly::coro::TransportIf::read(
-        rbuf.first, rbuf.second, timeout);
+    auto rc = co_await read(
+        folly::MutableByteRange((uint8_t *)rbuf.first, rbuf.second), timeout);
     if (rc == 0) {
       break;
     }
@@ -97,34 +101,40 @@ folly::coro::Task<folly::Unit> TestCoroTransport::write(
     folly::ByteRange buf,
     std::chrono::milliseconds timeout,
     folly::WriteFlags writeFlags,
-    WriteInfo * /*unused*/) noexcept {
+    WriteInfo *writeInfo) noexcept {
   // TODO: check for closed
-  return write(folly::IOBuf::copyBuffer(buf), timeout, writeFlags);
+  return write(folly::IOBuf::copyBuffer(buf), timeout, writeFlags, writeInfo);
 }
 
 folly::coro::Task<folly::Unit> TestCoroTransport::write(
     folly::IOBufQueue &ioBufQueue,
     std::chrono::milliseconds timeout,
     folly::WriteFlags writeFlags,
-    WriteInfo * /*unused*/) noexcept {
+    WriteInfo *writeInfo) noexcept {
   auto head = ioBufQueue.move();
   auto clone = head->clone();
   ioBufQueue.append(std::move(head));
-  return write(std::move(clone), timeout, writeFlags);
+  return write(std::move(clone), timeout, writeFlags, writeInfo);
 }
 
 folly::coro::Task<folly::Unit> TestCoroTransport::write(
     std::unique_ptr<folly::IOBuf> buf,
     std::chrono::milliseconds timeout,
-    folly::WriteFlags /*writeFlags*/,
-    WriteInfo * /*unused*/) {
+    folly::WriteFlags writeFlags,
+    WriteInfo *writeInfo) {
   if (state_->writesClosed) {
     co_yield folly::coro::co_error(folly::OperationCancelled());
   }
   folly::IOBufQueue bufQueue{folly::IOBufQueue::cacheChainLength()};
   bufQueue.append(std::move(buf));
-  state_->writeOffset += bufQueue.chainLength();
+  auto length = bufQueue.chainLength();
+  state_->writeOffset += length;
   state_->writeEvents.emplace_back(std::move(bufQueue));
+
+  if (isSet(writeFlags, folly::WriteFlags::TIMESTAMP_WRITE)) {
+    fireByteEvents(folly::AsyncSocketObserverInterface::ByteEvent::Type::WRITE,
+                   state_->writeOffset);
+  }
   while (writesPaused_) {
     writeEvent_.reset();
     auto status = co_await writeEvent_.timedWait(evb_, timeout);
@@ -135,6 +145,36 @@ folly::coro::Task<folly::Unit> TestCoroTransport::write(
       co_yield folly::coro::co_error(
           folly::AsyncSocketException(TransportErrorCode::CANCELED, ""));
     }
+  }
+  if (isSet(writeFlags, folly::WriteFlags::TIMESTAMP_TX) &&
+      byteEventsEnabled_) {
+    if (fastTxAck_) {
+      fireByteEvents(folly::AsyncSocketObserverInterface::ByteEvent::Type::TX,
+                     state_->writeOffset);
+    } else {
+      evb_->runInLoop([this, offset = state_->writeOffset] {
+        fireByteEvents(folly::AsyncSocketObserverInterface::ByteEvent::Type::TX,
+                       offset);
+      });
+    }
+  }
+  if (isSet(writeFlags, folly::WriteFlags::TIMESTAMP_ACK) &&
+      byteEventsEnabled_) {
+    if (fastTxAck_) {
+      fireByteEvents(folly::AsyncSocketObserverInterface::ByteEvent::Type::ACK,
+                     state_->writeOffset);
+    } else {
+      evb_->runAfterDelay(
+          [this, offset = state_->writeOffset] {
+            fireByteEvents(
+                folly::AsyncSocketObserverInterface::ByteEvent::Type::ACK,
+                offset);
+          },
+          kAckDelayMs);
+    }
+  }
+  if (writeInfo) {
+    writeInfo->bytesWritten = length;
   }
   co_return folly::unit;
 }

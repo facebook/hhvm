@@ -429,6 +429,12 @@ class HTTPCoroSession
   // whether we were previously in excess of ingress limit but no longer are.
   bool shouldResumeIngress(const StreamState& stream, uint64_t delta) const;
 
+  // Set the amount of time to wait for a TX or ACK ByteEvent to fire once
+  // scheduled (bytes accepted by the transport).
+  // Currently only supported for TCP.
+  virtual void setByteEventTimeout(std::chrono::milliseconds) {
+  }
+
   const folly::SocketAddress& getLocalAddress() const override {
     return localAddr_;
   }
@@ -830,6 +836,7 @@ class HTTPUniplexTransportSession : public HTTPCoroSession {
   std::list<PendingByteEvent> kernelWriteEvents_;
   RateLimitFilter* rateLimitFilter_{nullptr};
   folly::CancellationSource readCancellationSource_;
+  AsyncSocketByteEventObserver byteEventObserver_;
 
  public:
   void start();
@@ -918,6 +925,9 @@ class HTTPUniplexTransportSession : public HTTPCoroSession {
   void deliverAbort(StreamState& stream,
                     HTTPErrorCode error,
                     std::string_view details) override;
+  void setByteEventTimeout(std::chrono::milliseconds timeout) override {
+    byteEventObserver_.setByteEventTimeout(timeout);
+  }
   void registerByteEvents(
       HTTPCodec::StreamID id,
       folly::Optional<uint64_t> streamByteOffset,
@@ -932,6 +942,7 @@ class HTTPUniplexTransportSession : public HTTPCoroSession {
       readCancellationSource_.requestCancellation();
     }
   }
+  void maybeEnableByteEvents();
 };
 
 constexpr uint8_t kMaxDatagramHeaderSize = 16;

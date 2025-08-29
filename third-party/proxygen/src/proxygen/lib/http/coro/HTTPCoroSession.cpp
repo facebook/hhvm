@@ -411,6 +411,7 @@ HTTPCoroSession* HTTPCoroSession::makeDownstreamCoroSession(
 }
 
 void HTTPUniplexTransportSession::start() {
+  maybeEnableByteEvents();
   if (!codec_->supportsParallelRequests()) {
     maxConcurrentOutgoingStreamsRemote_ = isDownstream() ? 0 : 1;
   }
@@ -1246,8 +1247,7 @@ void HTTPCoroSession::connectionError(
 void HTTPUniplexTransportSession::handleConnectionError(HTTPErrorCode httpError,
                                                         std::string msg) {
   HTTPError err(httpError, msg);
-  PendingByteEvent::cancelEvents(transportWriteEvents_, err);
-  PendingByteEvent::cancelEvents(kernelWriteEvents_, err);
+  byteEventObserver_.cancelEvents(err);
   codec_->generateImmediateGoaway(writeBuf_,
                                   HTTPErrorCode2ErrorCode(httpError, false),
                                   folly::IOBuf::copyBuffer(msg));
@@ -1873,48 +1873,14 @@ folly::coro::Task<void> HTTPCoroSession::transferBody(
 
 void HTTPUniplexTransportSession::registerByteEvents(
     HTTPCodec::StreamID id,
-    folly::Optional<uint64_t> streamByteOffset,
+    folly::Optional<uint64_t> /*streamByteOffset*/, // quic only
     folly::Optional<HTTPByteEvent::FieldSectionInfo> fsInfo,
     uint64_t bodyOffset,
-    std::vector<HTTPByteEventRegistration>&& registrations,
+    std::vector<HTTPByteEventRegistration>&& regs,
     bool eom) {
   auto sessionByteOffset = sessionBytesScheduled_ + writeBuf_.chainLength();
-  auto localRegistrations = std::move(registrations); // ensure dtor invoked
-  for (auto& reg : localRegistrations) {
-    if (reg.events == 0) {
-      // no-op
-      continue;
-    }
-    if (!reg.callback) {
-      XLOG(ERR) << "Attempted byte event registration with no callback";
-      continue;
-    }
-    HTTPByteEvent ev;
-    ev.fieldSectionInfo = fsInfo;
-    ev.streamID = reg.streamID ? *reg.streamID : id;
-    ev.bodyOffset = bodyOffset;
-    ev.transportOffset = sessionByteOffset;
-    ev.eom = eom;
-    if (reg.events & uint8_t(HTTPByteEvent::Type::TRANSPORT_WRITE)) {
-      ev.type = HTTPByteEvent::Type::TRANSPORT_WRITE;
-      transportWriteEvents_.emplace_back(sessionByteOffset, ev, reg.callback);
-    }
-    if (reg.events & uint8_t(HTTPByteEvent::Type::KERNEL_WRITE)) {
-      ev.type = HTTPByteEvent::Type::KERNEL_WRITE;
-      kernelWriteEvents_.emplace_back(sessionByteOffset, ev, reg.callback);
-    }
-    // No support for TCP TX/ACK
-    std::array<HTTPByteEvent::Type, 2> types{
-        HTTPByteEvent::Type::NIC_TX, HTTPByteEvent::Type::CUMULATIVE_ACK};
-    for (auto t : types) {
-      ev.type = t;
-      if (reg.events & uint8_t(t) && reg.callback) {
-        reg.callback->onByteEventCanceled(
-            ev, HTTPError(HTTPErrorCode::CANCEL, "TX/ACK Unsupported"));
-      }
-    }
-    reg.callback.reset();
-  }
+  byteEventObserver_.registerByteEvents(
+      id, sessionByteOffset, fsInfo, bodyOffset, std::move(regs), eom);
 }
 
 void HTTPQuicCoroSession::registerByteEvents(
@@ -3109,22 +3075,37 @@ folly::coro::Task<void> HTTPUniplexTransportSession::writeLoop() noexcept {
     }
 
     if (!writeBuf_.empty()) {
-      folly::IOBufQueue writeBuf(std::move(writeBuf_));
-      auto length = writeBuf.chainLength();
-      sessionBytesScheduled_ += length;
-      auto sessionWrittenOffset = sessionBytesScheduled_;
-      XLOG(DBG4) << "Writing length=" << length << " sess=" << *this;
-      PendingByteEvent::fireEvents(transportWriteEvents_, sessionWrittenOffset);
-      auto result =
-          co_await co_awaitTry(coroTransport_->write(writeBuf, writeTimeout_));
+      uint64_t writeLength = writeBuf_.chainLength();
+      folly::WriteFlags writeFlags = folly::WriteFlags::NONE;
+      auto txAckEvent = byteEventObserver_.nextTxAckEvent();
+      if (txAckEvent) {
+        // If there's a TX or ACK event, we have to split the write on the
+        // event offset, and update the writeFlags.
+        XLOG(DBG5) << "Split writeBuf_ at " << txAckEvent->sessionByteOffset;
+        XCHECK_GT(txAckEvent->sessionByteOffset, sessionBytesScheduled_);
+        writeLength = txAckEvent->sessionByteOffset - sessionBytesScheduled_;
+        writeFlags = txAckEvent->writeFlags();
+      }
+      folly::IOBufQueue writeBuf{folly::IOBufQueue::cacheChainLength()};
+      writeBuf.append(writeBuf_.split(writeLength));
+      sessionBytesScheduled_ += writeLength;
+      XLOG(DBG4) << "Writing length=" << writeLength << " sess=" << *this;
+      byteEventObserver_.transportWrite(sessionBytesScheduled_);
+      auto result = co_await co_awaitTry(
+          coroTransport_->write(writeBuf, writeTimeout_, writeFlags));
       if (result.hasException()) {
         XLOG(DBG4) << "Write error, err=" << result.exception()
                    << " sess=" << *this;
+        if (txAckEvent) {
+          txAckEvent->cancel(HTTPError(HTTPErrorCode::TRANSPORT_WRITE_ERROR,
+                                       result.exception().what().c_str()));
+        }
         writeError.emplace(result.exception().what());
       } else {
-        XLOG(DBG4) << "Wrote length=" << length << " sess=" << *this;
-        deliverLifecycleEvent(&LifecycleObserver::onWrite, *this, length);
-        PendingByteEvent::fireEvents(kernelWriteEvents_, sessionWrittenOffset);
+        XLOG(DBG4) << "Wrote length=" << writeLength << " sess=" << *this;
+        deliverLifecycleEvent(&LifecycleObserver::onWrite, *this, writeLength);
+        byteEventObserver_.transportWriteComplete(sessionBytesScheduled_,
+                                                  std::move(txAckEvent));
       }
     }
   }
@@ -3146,8 +3127,21 @@ folly::coro::Task<void> HTTPUniplexTransportSession::writeLoop() noexcept {
   if (!streams_.empty()) {
     co_await waitForAllStreams();
   }
+  co_await byteEventObserver_.zeroRefs();
   writesFinished_.post();
   readCancellationSource_.requestCancellation();
+}
+
+void HTTPUniplexTransportSession::maybeEnableByteEvents() {
+  if (!byteEventObserver_.isRegistered()) {
+    auto transport = coroTransport_->getTransport();
+    if (transport) {
+      auto sock = transport->getUnderlyingTransport<folly::AsyncSocket>();
+      if (sock) {
+        sock->addLifecycleObserver(&byteEventObserver_);
+      }
+    }
+  }
 }
 
 bool HTTPQuicCoroSession::hasControlWrite() const {

@@ -400,18 +400,24 @@ class HTTPDownstreamSessionTest : public HTTPCoroSessionTest {
       const std::function<void(HTTPFixedSource &,
                                TestHTTPTransport &,
                                HTTPCodec &,
-                               folly::IOBufQueue &)> &setupFn) {
-    auto handler = addSimpleStrictHandler(
-        [this, &mockByteEventCallback, headerEvents, bodyEvents, setupFn](
-            folly::EventBase *evb,
-            HTTPSessionContextPtr /*ctx*/,
-            HTTPSourceHolder requestSource)
-            -> folly::coro::Task<HTTPSourceHolder> {
+                               folly::IOBufQueue &)> &setupFn,
+      uint32_t maxBytesPerRead = std::numeric_limits<uint32_t>::max()) {
+    auto handler =
+        addSimpleStrictHandler([this,
+                                &mockByteEventCallback,
+                                headerEvents,
+                                bodyEvents,
+                                setupFn,
+                                maxBytesPerRead](folly::EventBase *evb,
+                                                 HTTPSessionContextPtr /*ctx*/,
+                                                 HTTPSourceHolder requestSource)
+                                   -> folly::coro::Task<HTTPSourceHolder> {
           co_await expectRequest(requestSource, HTTPMethod::GET, "/");
           auto filter =
               new ByteEventFilter(headerEvents,
                                   bodyEvents,
-                                  mockByteEventCallback.getWeakRefCountedPtr());
+                                  mockByteEventCallback.getWeakRefCountedPtr(),
+                                  maxBytesPerRead);
           auto resp = HTTPFixedSource::makeFixedResponse(200, makeBuf(100));
           if (setupFn) {
             setupFn(*resp, *transport_, *clientCodec_, writeBuf_);
@@ -546,7 +552,7 @@ TEST_P(HTTPDownstreamSessionTest, SimpleByteEvents) {
                                    uint8_t(HTTPByteEvent::Type::KERNEL_WRITE),
                                nullptr);
 
-  auto expectedEvents = isHQ() ? 6 : 4;
+  auto expectedEvents = 6;
   EXPECT_CALL(mockByteEventCallback, onByteEvent(_))
       .Times(expectedEvents)
       .WillRepeatedly(Invoke([this, id](HTTPByteEvent event) {
@@ -569,18 +575,6 @@ TEST_P(HTTPDownstreamSessionTest, SimpleByteEvents) {
           }
         }
       }));
-  if (!isHQ()) {
-    EXPECT_CALL(mockByteEventCallback, onByteEventCanceled(_, _))
-        .WillOnce(Invoke([](const HTTPByteEvent &event, const HTTPError &) {
-          EXPECT_EQ(event.type, HTTPByteEvent::Type::CUMULATIVE_ACK);
-        }))
-        .RetiresOnSaturation();
-    EXPECT_CALL(mockByteEventCallback, onByteEventCanceled(_, _))
-        .WillOnce(Invoke([](const HTTPByteEvent &event, const HTTPError &) {
-          EXPECT_EQ(event.type, HTTPByteEvent::Type::NIC_TX);
-        }))
-        .RetiresOnSaturation();
-  }
   evb_.loop();
   expectResponse(id, 200);
   parseOutput();
@@ -734,6 +728,78 @@ TEST_P(H2DownstreamSessionTest, ByteEventsCancelOnProtocolError) {
             EXPECT_EQ(event.type, HTTPByteEvent::Type::KERNEL_WRITE);
             EXPECT_EQ(err.code, HTTPErrorCode::FLOW_CONTROL_ERROR);
           }));
+  evb_.loop();
+}
+
+TEST_P(H12DownstreamSessionTest, ByteEventTimeout) {
+  session_->setByteEventTimeout(std::chrono::seconds(2));
+  sendRequest("/");
+
+  static_cast<TestUniplexTransport *>(transport_)->setByteEventsEnabled(false);
+  MockByteEventCallback mockByteEventCallback;
+  auto handler = addHandlerWithByteEvents(
+      mockByteEventCallback, uint8_t(HTTPByteEvent::Type::NIC_TX), 0, nullptr);
+
+  EXPECT_CALL(mockByteEventCallback, onByteEventCanceled(_, _))
+      .WillOnce(Invoke([](const HTTPByteEvent &event, const HTTPError &err) {
+        EXPECT_EQ(event.type, HTTPByteEvent::Type::NIC_TX);
+        EXPECT_EQ(err.code, HTTPErrorCode::READ_TIMEOUT);
+      }));
+  evb_.loop();
+}
+
+TEST_P(H12DownstreamSessionTest, TooManyByteEvents) {
+  sendRequest("/");
+
+  MockByteEventCallback mockByteEventCallback;
+  auto handler =
+      addHandlerWithByteEvents(mockByteEventCallback,
+                               0,
+                               uint8_t(HTTPByteEvent::Type::NIC_TX) |
+                                   uint8_t(HTTPByteEvent::Type::CUMULATIVE_ACK),
+                               nullptr,
+                               1 /*byte at a time*/);
+
+  EXPECT_CALL(mockByteEventCallback, onByteEventCanceled(_, _)).Times(104);
+  EXPECT_CALL(mockByteEventCallback, onByteEvent(_)).Times(96);
+
+  evb_.loop();
+}
+
+TEST_P(H12DownstreamSessionTest, CancelPendingByteEvents) {
+  session_->setWriteTimeout(std::chrono::milliseconds(250));
+  auto id = sendRequest("/");
+
+  MockByteEventCallback mockByteEventCallback;
+  auto handler =
+      addHandlerWithByteEvents(mockByteEventCallback,
+                               0,
+                               uint8_t(HTTPByteEvent::Type::KERNEL_WRITE) |
+                                   uint8_t(HTTPByteEvent::Type::NIC_TX) |
+                                   uint8_t(HTTPByteEvent::Type::CUMULATIVE_ACK),
+                               nullptr,
+                               50 /* two body byte events */);
+  // Write timeout
+  transport_->pauseWrites(id);
+
+  EXPECT_CALL(mockByteEventCallback, onByteEventCanceled(_, _)).Times(6);
+  evb_.loop();
+  expectedError_ = TransportErrorCode::NETWORK_ERROR;
+}
+
+TEST_P(H12DownstreamSessionTest, TxAckBeforeScheduleByteEvents) {
+  static_cast<TestUniplexTransport *>(transport_)->setFastTxAckEvents(true);
+  sendRequest("/");
+
+  MockByteEventCallback mockByteEventCallback;
+  auto handler =
+      addHandlerWithByteEvents(mockByteEventCallback,
+                               0,
+                               uint8_t(HTTPByteEvent::Type::NIC_TX) |
+                                   uint8_t(HTTPByteEvent::Type::CUMULATIVE_ACK),
+                               nullptr);
+
+  EXPECT_CALL(mockByteEventCallback, onByteEvent(_)).Times(2);
   evb_.loop();
 }
 
@@ -1503,8 +1569,7 @@ TEST_P(HTTPDownstreamSessionTest, LifecycleObserver) {
         wangle::TransportInfo curInfo;
         bool gotSocketInfo =
             ctx->getCurrentTransportInfo(&curInfo, /*includeSetupFields=*/true);
-        // H3 should always have a socket set. But not H1, H2
-        EXPECT_EQ(gotSocketInfo, this->isHQ());
+        EXPECT_TRUE(gotSocketInfo);
         EXPECT_EQ(*curInfo.appProtocol, "blarf");
         co_await expectRequest(requestSource, HTTPMethod::GET, "/");
         co_return HTTPFixedSource::makeFixedResponse(200, makeBuf(100));
@@ -1598,8 +1663,7 @@ TEST_P(HTTPDownstreamSessionTest, LifecycleObserverRemoveCallback) {
         wangle::TransportInfo curInfo;
         bool gotSocketInfo =
             ctx->getCurrentTransportInfo(&curInfo, /*includeSetupFields=*/true);
-        // H3 should always have a socket set. But not H1, H2
-        EXPECT_EQ(gotSocketInfo, this->isHQ());
+        EXPECT_TRUE(gotSocketInfo);
         EXPECT_EQ(*curInfo.appProtocol, "blarf");
         co_await expectRequest(requestSource, HTTPMethod::GET, "/");
         co_return HTTPFixedSource::makeFixedResponse(200, makeBuf(100));
@@ -1682,8 +1746,7 @@ TEST_P(HTTPDownstreamSessionTest, MultiLifecycleObserver) {
         wangle::TransportInfo curInfo;
         bool gotSocketInfo =
             ctx->getCurrentTransportInfo(&curInfo, /*includeSetupFields=*/true);
-        // H3 should always have a socket set. But not H1, H2
-        EXPECT_EQ(gotSocketInfo, this->isHQ());
+        EXPECT_TRUE(gotSocketInfo);
         EXPECT_EQ(*curInfo.appProtocol, "blarf");
         co_await expectRequest(requestSource, HTTPMethod::GET, "/");
         co_return HTTPFixedSource::makeFixedResponse(200, makeBuf(100));

@@ -11,6 +11,8 @@
 #include "proxygen/lib/http/coro/util/CancellableBaton.h"
 #include <folly/Random.h>
 #include <folly/io/Cursor.h>
+#include <folly/io/async/test/MockAsyncSocket.h>
+#include <folly/io/async/test/MockAsyncTransport.h>
 #include <folly/io/coro/Transport.h>
 #include <proxygen/lib/transport/test/MockAsyncTransportCertificate.h>
 
@@ -29,9 +31,18 @@ class TestCoroTransport : public folly::coro::TransportIf {
   };
 
   TestCoroTransport(folly::EventBase *evb, TestCoroTransport::State *state)
-      : evb_(evb), state_(state) {
+      : mockAsyncSocket_(evb), evb_(evb), state_(state) {
     localPort_ = folly::Random::rand32();
     peerPort_ = folly::Random::rand32();
+    ON_CALL(mockAsyncTransport_, getWrappedTransport())
+        .WillByDefault(testing::Return(&mockAsyncSocket_));
+    ON_CALL(mockAsyncSocket_, addLifecycleObserver(testing::_))
+        .WillByDefault(testing::Invoke(
+            [this](folly::AsyncSocket::LegacyLifecycleObserver *observer) {
+              observers_.push_back(observer);
+              observer->byteEventsEnabled(&mockAsyncSocket_);
+              observer->observerAttach(&mockAsyncSocket_);
+            }));
   }
 
   folly::SocketAddress getLocalAddress() const noexcept override {
@@ -83,7 +94,7 @@ class TestCoroTransport : public folly::coro::TransportIf {
   }
 
   folly::AsyncTransport *getTransport() const override {
-    return nullptr;
+    return &mockAsyncSocket_;
   }
 
   const folly::AsyncTransportCertificate *getPeerCertificate() const override {
@@ -98,6 +109,28 @@ class TestCoroTransport : public folly::coro::TransportIf {
 
   void addReadError(folly::coro::TransportIf::ErrorCode err);
 
+  void fireByteEvents(folly::AsyncSocketObserverInterface::ByteEvent::Type type,
+                      uint64_t offset) {
+    folly::AsyncSocketObserverInterface::ByteEvent byteEvent;
+    byteEvent.type = type;
+    byteEvent.offset = offset;
+    for (auto observer : observers_) {
+      observer->byteEvent(&mockAsyncSocket_, byteEvent);
+    }
+  }
+
+  void setByteEventsEnabled(bool enabled) {
+    byteEventsEnabled_ = enabled;
+  }
+
+  void setFastTxAckEvents(bool fast) {
+    fastTxAck_ = fast;
+  }
+
+  mutable testing::NiceMock<folly::test::MockAsyncTransport>
+      mockAsyncTransport_;
+  mutable testing::NiceMock<folly::test::MockAsyncSocket> mockAsyncSocket_;
+  std::list<folly::AsyncSocket::LegacyLifecycleObserver *> observers_;
   bool writesPaused_{false};
   folly::EventBase *evb_;
   detail::CancellableBaton readEvent_;
@@ -106,6 +139,8 @@ class TestCoroTransport : public folly::coro::TransportIf {
   uint16_t localPort_;
   uint16_t peerPort_;
   MockAsyncTransportCertificate mockCertificate;
+  bool byteEventsEnabled_{true};
+  bool fastTxAck_{false};
 };
 
 } // namespace proxygen::coro::test

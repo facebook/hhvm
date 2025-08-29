@@ -228,14 +228,14 @@ void cgLdMethCallerName(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const off = isCls ?
     Func::methCallerClsNameOff() : Func::methCallerMethNameOff();
-  emitLdLowPtr<StringData>(v, func[off], dst);
+  emitLdPackedPtr<StringData>(v, func[off], dst);
 }
 
 void cgLdFuncCls(IRLS& env, const IRInstruction* inst) {
   auto const func = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-  emitLdLowPtr<Class>(v, func[Func::clsOff()], dst);
+  emitLdPackedPtr<Class>(v, func[Func::clsOff()], dst);
 }
 
 void cgFuncHasAttr(IRLS& env, const IRInstruction* inst) {

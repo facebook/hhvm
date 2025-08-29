@@ -1695,7 +1695,12 @@ private:
 
 private:
   static constexpr int kMagic = 0xba5eba11;
-  static constexpr intptr_t kNeedsFullName = 0x1;
+  static constexpr uintptr_t kNeedsFullName =
+#ifdef USE_PACKEDPTR
+  0xffffffff << 3;
+#else
+  0x1;
+#endif
 
 public:
   enum class FuncLookupResult {
@@ -1742,7 +1747,7 @@ private:
 #ifndef USE_LOWPTR
   FuncId m_funcId{FuncId::Invalid};
 #endif
-  mutable AtomicLowPtr<const StringData> m_fullName{nullptr};
+  mutable AtomicPackedPtr<const StringData> m_fullName{nullptr};
   LowStringPtr m_name{nullptr};
 
   struct ClsOrMethCaller {
@@ -1750,9 +1755,9 @@ private:
       // The first Class in the inheritance hierarchy that declared this method.
       // Note that this may be an abstract class that did not provide an
       // implementation.
-      LowPtr<Class> m_base{nullptr};
+      PackedPtr<Class> m_base{nullptr};
       // Class that provided this method implementation
-      AtomicLowPtr<Class> m_impl{nullptr};
+      AtomicPackedPtr<Class> m_impl{nullptr};
 
       Cls() {}
 
@@ -1768,9 +1773,9 @@ private:
       }
     };
     struct MethCaller {
-      LowStringPtr m_methName;
+      PackedStringPtr m_methName;
       // Class name provided by meth_caller()
-      LowStringPtr m_clsName;
+      PackedStringPtr m_clsName;
     };
 
     // The first part of the union is valid if !isMethCaller
@@ -1814,7 +1819,7 @@ private:
 
   union {
     Slot m_methodSlot{0};
-    LowPtr<const NamedFunc> m_namedFunc;
+    PackedPtr<const NamedFunc> m_namedFunc;
   };
 
   mutable ClonedFlag m_cloned;

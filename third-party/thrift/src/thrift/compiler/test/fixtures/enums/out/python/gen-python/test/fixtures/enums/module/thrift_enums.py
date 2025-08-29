@@ -37,7 +37,8 @@ class Metasyntactic(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "Metasyntactic":
         return self
 
-    def _to_py_deprecated(self) -> int:
+    # pyre-ignore[11]: Annotation `module.ttypes.Metasyntactic` is not defined as a type.
+    def _to_py_deprecated(self) -> "module.ttypes.Metasyntactic":
         return self.value
 import typing as _std_python_typing
 
@@ -68,7 +69,8 @@ class MyEnum1(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "MyEnum1":
         return self
 
-    def _to_py_deprecated(self) -> int:
+    # pyre-ignore[11]: Annotation `module.ttypes.MyEnum1` is not defined as a type.
+    def _to_py_deprecated(self) -> "module.ttypes.MyEnum1":
         return self.value
 import typing as _std_python_typing
 
@@ -96,7 +98,8 @@ class MyEnum2(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "MyEnum2":
         return self
 
-    def _to_py_deprecated(self) -> int:
+    # pyre-ignore[11]: Annotation `module.ttypes.MyEnum2` is not defined as a type.
+    def _to_py_deprecated(self) -> "module.ttypes.MyEnum2":
         return self.value
 import typing as _std_python_typing
 
@@ -127,7 +130,8 @@ class MyEnum3(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "MyEnum3":
         return self
 
-    def _to_py_deprecated(self) -> int:
+    # pyre-ignore[11]: Annotation `module.ttypes.MyEnum3` is not defined as a type.
+    def _to_py_deprecated(self) -> "module.ttypes.MyEnum3":
         return self.value
 import typing as _std_python_typing
 
@@ -156,7 +160,8 @@ class MyEnum4(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "MyEnum4":
         return self
 
-    def _to_py_deprecated(self) -> int:
+    # pyre-ignore[11]: Annotation `module.ttypes.MyEnum4` is not defined as a type.
+    def _to_py_deprecated(self) -> "module.ttypes.MyEnum4":
         return self.value
 import typing as _std_python_typing
 
@@ -184,7 +189,8 @@ class MyBitmaskEnum1(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "MyBitmaskEnum1":
         return self
 
-    def _to_py_deprecated(self) -> int:
+    # pyre-ignore[11]: Annotation `module.ttypes.MyBitmaskEnum1` is not defined as a type.
+    def _to_py_deprecated(self) -> "module.ttypes.MyBitmaskEnum1":
         return self.value
 import typing as _std_python_typing
 
@@ -212,7 +218,8 @@ class MyBitmaskEnum2(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "MyBitmaskEnum2":
         return self
 
-    def _to_py_deprecated(self) -> int:
+    # pyre-ignore[11]: Annotation `module.ttypes.MyBitmaskEnum2` is not defined as a type.
+    def _to_py_deprecated(self) -> "module.ttypes.MyBitmaskEnum2":
         return self.value
 
 def _fbthrift_gen_metadata_enum_Metasyntactic(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:

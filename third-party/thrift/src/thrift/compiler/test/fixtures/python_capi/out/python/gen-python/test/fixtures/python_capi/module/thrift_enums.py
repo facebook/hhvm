@@ -35,7 +35,8 @@ class MyEnum(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "MyEnum":
         return self
 
-    def _to_py_deprecated(self) -> int:
+    # pyre-ignore[11]: Annotation `module.ttypes.MyEnum` is not defined as a type.
+    def _to_py_deprecated(self) -> "module.ttypes.MyEnum":
         return self.value
 import typing as _std_python_typing
 
@@ -62,7 +63,8 @@ class AnnoyingEnum(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "AnnoyingEnum":
         return self
 
-    def _to_py_deprecated(self) -> int:
+    # pyre-ignore[11]: Annotation `module.ttypes.AnnoyingEnum` is not defined as a type.
+    def _to_py_deprecated(self) -> "module.ttypes.AnnoyingEnum":
         return self.value
 
 def _fbthrift_gen_metadata_enum_MyEnum(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:

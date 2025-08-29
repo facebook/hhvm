@@ -55,7 +55,16 @@ class {{enum:name}}(_fbthrift_python_types.{{!
     {{! NB: thrift-py3 now uses thrift-python enums}}
         return self
 
-    def _to_py_deprecated(self) -> int:
+    {{!
+        To prevent the need to import the `thrift-py-deprecated` type,
+        ignore the static type check error due to the lack of the import for the type.
+    }}
+    # pyre-ignore[11]: Annotation `{{program:py_deprecated_module_path}}.ttypes.{{enum:name}}` is not defined as a type.
+    def _to_py_deprecated(self) -> "{{program:py_deprecated_module_path}}.ttypes.{{enum:name}}":
+        {{!
+            At run-time, `thrift-py-deprecated` enum values are just integers.
+            Return the integer value.
+        }}
         return self.value
 {{/program:enums}}
 

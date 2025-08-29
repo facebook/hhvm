@@ -33,7 +33,8 @@ class EmptyEnum(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "EmptyEnum":
         return self
 
-    def _to_py_deprecated(self) -> int:
+    # pyre-ignore[11]: Annotation `module.ttypes.EmptyEnum` is not defined as a type.
+    def _to_py_deprecated(self) -> "module.ttypes.EmptyEnum":
         return self.value
 import typing as _std_python_typing
 
@@ -62,7 +63,8 @@ class City(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "City":
         return self
 
-    def _to_py_deprecated(self) -> int:
+    # pyre-ignore[11]: Annotation `module.ttypes.City` is not defined as a type.
+    def _to_py_deprecated(self) -> "module.ttypes.City":
         return self.value
 import typing as _std_python_typing
 
@@ -92,7 +94,8 @@ class Company(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "Company":
         return self
 
-    def _to_py_deprecated(self) -> int:
+    # pyre-ignore[11]: Annotation `module.ttypes.Company` is not defined as a type.
+    def _to_py_deprecated(self) -> "module.ttypes.Company":
         return self.value
 
 def _fbthrift_gen_metadata_enum_EmptyEnum(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:

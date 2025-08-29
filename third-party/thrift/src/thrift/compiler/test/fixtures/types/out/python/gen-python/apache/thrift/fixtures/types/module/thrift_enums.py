@@ -38,7 +38,8 @@ class has_bitwise_ops(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "has_bitwise_ops":
         return self
 
-    def _to_py_deprecated(self) -> int:
+    # pyre-ignore[11]: Annotation `module.ttypes.has_bitwise_ops` is not defined as a type.
+    def _to_py_deprecated(self) -> "module.ttypes.has_bitwise_ops":
         return self.value
 import typing as _std_python_typing
 
@@ -65,7 +66,8 @@ class is_unscoped(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "is_unscoped":
         return self
 
-    def _to_py_deprecated(self) -> int:
+    # pyre-ignore[11]: Annotation `module.ttypes.is_unscoped` is not defined as a type.
+    def _to_py_deprecated(self) -> "module.ttypes.is_unscoped":
         return self.value
 import typing as _std_python_typing
 
@@ -92,7 +94,8 @@ class MyForwardRefEnum(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "MyForwardRefEnum":
         return self
 
-    def _to_py_deprecated(self) -> int:
+    # pyre-ignore[11]: Annotation `module.ttypes.MyForwardRefEnum` is not defined as a type.
+    def _to_py_deprecated(self) -> "module.ttypes.MyForwardRefEnum":
         return self.value
 
 def _fbthrift_gen_metadata_enum_has_bitwise_ops(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:

@@ -546,5 +546,4 @@ class ToPyDeprecatedConverterTest(unittest.TestCase):
             self.assertEqual(py_deprecated_color, py_deprecated_types.Color.RED)
 
         python_enum_value = python_types.Color.RED
-        # pyre-fixme[6]: For 1st argument expected `Color` but got `int`.
         takes_enum(python_enum_value._to_py_deprecated())

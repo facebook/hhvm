@@ -40,7 +40,8 @@ class AnEnum(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "AnEnum":
         return self
 
-    def _to_py_deprecated(self) -> int:
+    # pyre-ignore[11]: Annotation `module.ttypes.AnEnum` is not defined as a type.
+    def _to_py_deprecated(self) -> "module.ttypes.AnEnum":
         return self.value
 import typing as _std_python_typing
 
@@ -68,7 +69,8 @@ class AnEnumRenamed(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "AnEnumRenamed":
         return self
 
-    def _to_py_deprecated(self) -> int:
+    # pyre-ignore[11]: Annotation `module.ttypes.AnEnumRenamed` is not defined as a type.
+    def _to_py_deprecated(self) -> "module.ttypes.AnEnumRenamed":
         return self.value
 import typing as _std_python_typing
 
@@ -97,7 +99,8 @@ class Flags(_fbthrift_python_types.Flag):
     def _to_py3(self) -> "Flags":
         return self
 
-    def _to_py_deprecated(self) -> int:
+    # pyre-ignore[11]: Annotation `module.ttypes.Flags` is not defined as a type.
+    def _to_py_deprecated(self) -> "module.ttypes.Flags":
         return self.value
 
 def _fbthrift_gen_metadata_enum_AnEnum(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:

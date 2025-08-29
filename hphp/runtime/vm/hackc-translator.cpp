@@ -1172,7 +1172,7 @@ void translateCoeffects(TranslationState& ts, const hhbc::Coeffects& coeffects) 
   for (auto const& cc_this : cc_this_vec) {
     auto const& types = cc_this.types;
 
-    std::vector<LowStringPtr> names;
+    std::vector<PackedStringPtr> names;
     names.reserve(types.len - 1);
     for (int i = 0; i < types.len - 1; i++) {
       names.push_back(toStaticString(types.data[i]));
@@ -1188,7 +1188,7 @@ void translateCoeffects(TranslationState& ts, const hhbc::Coeffects& coeffects) 
     auto const pos = cc_reified.index;
     auto const& types = cc_reified.types;
 
-    std::vector<LowStringPtr> names;
+    std::vector<PackedStringPtr> names;
     names.reserve(types.len - 1);
     for (int i = 0; i < types.len - 1; i++) {
       names.push_back(toStaticString(types.data[i]));
@@ -1212,9 +1212,9 @@ if (coeffects.caller) {
   }
 }
 
-std::pair<std::vector<LowStringPtr>, hphp_fast_set<const StringData*>>
+std::pair<std::vector<PackedStringPtr>, hphp_fast_set<const StringData*>>
 translateTParamInfo(const Vector<TParamInfo>& tParamInfo) {
-  std::vector<LowStringPtr> typeParamNames;
+  std::vector<PackedStringPtr> typeParamNames;
   hphp_fast_set<const StringData*> shadowedTParams;
   for (auto const& t : range(tParamInfo)) {
     auto const name = toStaticString(t.name._0);
@@ -1356,7 +1356,7 @@ void translateClass(TranslationState& ts,
   if (dc) ts.pce->setDocComment(makeDocComment(dc.value()));
   ts.pce->setUserAttributes(userAttrs);
 
-  std::vector<LowStringPtr> names;
+  std::vector<PackedStringPtr> names;
   for (auto const& tparam: range(c.tparams)) {
     names.emplace_back(toStaticString(tparam._0));
   }

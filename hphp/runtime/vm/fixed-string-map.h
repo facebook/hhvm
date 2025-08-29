@@ -87,7 +87,7 @@ private:
 
 private:
   struct Elm {
-    LowStringPtr sd;
+    PackedStringPtr sd;
     V data;
   };
 

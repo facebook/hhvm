@@ -72,7 +72,7 @@ ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj) {
 GenericsInfo
 extractSizeAndPosFromReifiedAttribute(
   const ArrayData* arr,
-  const folly::Range<const LowStringPtr*>& typeParamNames
+  const folly::Range<const PackedStringPtr*>& typeParamNames
 ) {
   size_t len = 0, cur = 0;
   bool isReified = false, isSoft = false;

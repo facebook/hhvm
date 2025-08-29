@@ -288,8 +288,8 @@ public:
    */
   void recordSourceLocation(const Location::Range& sLoc, Offset start);
 
-  const folly::Range<const LowStringPtr*> getTypeParamNames() const {
-    return folly::Range<const LowStringPtr*>(
+  const folly::Range<const PackedStringPtr*> getTypeParamNames() const {
+    return folly::Range<const PackedStringPtr*>(
       typeParamNames.data(),
       typeParamNames.size()
     );
@@ -328,7 +328,7 @@ public:
 
   LazyStringData retUserType;
   TypeIntersectionConstraint retTypeConstraints;
-  std::vector<LowStringPtr> typeParamNames;
+  std::vector<PackedStringPtr> typeParamNames;
   StaticCoeffectsVec staticCoeffects;
   CoeffectRuleVec coeffectRules;
 

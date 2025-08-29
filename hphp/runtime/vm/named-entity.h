@@ -294,8 +294,8 @@ private:
   AtomicPackedPtr<Func> m_func;
 };
 
-using NamedTypePair = std::pair<LowStringPtr,PackedPtr<const NamedType>>;
-using NamedFuncPair = std::pair<LowStringPtr,PackedPtr<const NamedFunc>>;
+using NamedTypePair = std::pair<PackedStringPtr,PackedPtr<const NamedType>>;
+using NamedFuncPair = std::pair<PackedStringPtr,PackedPtr<const NamedFunc>>;
 
 /*
  * Size of the combined NamedType and NamedFunc tables.

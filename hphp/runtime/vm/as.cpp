@@ -1770,7 +1770,7 @@ void parse_coeffects_cc_param(AsmState& as) {
  *                             ;
  */
 void parse_coeffects_cc_this(AsmState& as) {
-  std::vector<LowStringPtr> names;
+  std::vector<PackedStringPtr> names;
   std::string name;
   while (as.in.readword(name)) {
     auto sstr = makeStaticString(name);
@@ -1789,7 +1789,7 @@ void parse_coeffects_cc_this(AsmState& as) {
  *                                ;
  */
 void parse_coeffects_cc_reified(AsmState& as) {
-  std::vector<LowStringPtr> names;
+  std::vector<PackedStringPtr> names;
   std::string name;
 
   as.in.skipWhitespace();
@@ -2346,8 +2346,8 @@ void check_native(AsmState& as) {
   }
 }
 
-std::vector<LowStringPtr> parse_tparam_names(AsmState& as) {
-  std::vector<LowStringPtr> typeNames;
+std::vector<PackedStringPtr> parse_tparam_names(AsmState& as) {
+  std::vector<PackedStringPtr> typeNames;
   as.in.skipSpaceTab();
   if (as.in.peek() != '[') {
     return typeNames;

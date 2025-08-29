@@ -438,7 +438,7 @@ struct Func : FuncBase {
   /*
    * Contains the names of type params defined for this method or function
    */
-  CompactVector<LowStringPtr> typeParamNames;
+  CompactVector<PackedStringPtr> typeParamNames;
 
   /*
    * Static coeffects in bit encoding
@@ -672,7 +672,7 @@ struct Class : ClassBase {
   /*
    * Contains the names of type params defined for this class
    */
-  CompactVector<LowStringPtr> typeParamNames;
+  CompactVector<PackedStringPtr> typeParamNames;
 
   /*
    * This is a reified class.

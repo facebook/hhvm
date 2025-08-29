@@ -969,7 +969,7 @@ void emit_finish_func(EmitUnitState& state, UnitEmitter& ue, FuncEmitter& fe,
   fe.userAttributes = func.userAttributes;
   fe.retUserType = ue.mergeLitstr(func.returnUserType);
   fe.retTypeConstraints = func.retTypeConstraints;
-  fe.typeParamNames = std::vector<LowStringPtr>(
+  fe.typeParamNames = std::vector<PackedStringPtr>(
     func.typeParamNames.begin(),
     func.typeParamNames.end()
   );
@@ -1201,7 +1201,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
   assertx(uvIt == useVars.end());
 
   pce->setEnumBaseTy(cls.enumBaseTy);
-  std::vector<LowStringPtr> names;
+  std::vector<PackedStringPtr> names;
   for (auto const& name : cls.typeParamNames) {
     names.emplace_back(name);
   }

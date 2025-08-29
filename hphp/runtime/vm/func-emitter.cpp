@@ -146,7 +146,7 @@ LineTable createLineTable(const SrcLoc& srcLoc, Offset bclen) {
 }
 
 GenericsInfo getGenericsInfoNoReified(
-  const folly::Range<const LowStringPtr*>& typeParamNames
+  const folly::Range<const PackedStringPtr*>& typeParamNames
 ) {
   std::vector<TypeParamInfo> typeParamInfos;
   for (auto const& name : typeParamNames) {

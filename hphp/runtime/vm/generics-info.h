@@ -32,7 +32,7 @@ struct TypeParamInfo {
   // Does the type parameter contain a warn annotation
   bool m_isWarn    : 1;
   // Name of the template param
-  LowStringPtr m_typeName;
+  PackedStringPtr m_typeName;
 };
 
 /*
@@ -81,4 +81,3 @@ struct GenericsInfo {
 };
 
 }
-

@@ -35,11 +35,11 @@ namespace {
 
 SSATmp* getTypeCnsClsName(IRGS& env, SSATmp* cls, const StringData* cnsName) {
   auto const clsSpec = cls->type().clsSpec();
-  auto const cnsSlot = (clsSpec.cls()) 
-    ? clsSpec.cls()->clsCnsSlot(cnsName, ConstModifiers::Kind::Type, true) 
+  auto const cnsSlot = (clsSpec.cls())
+    ? clsSpec.cls()->clsCnsSlot(cnsName, ConstModifiers::Kind::Type, true)
     : kInvalidSlot;
 
-  auto const lookupByName = [&] () -> SSATmp* { 
+  auto const lookupByName = [&] () -> SSATmp* {
     return gen(
       env,
       LdTypeCnsClsName,
@@ -47,7 +47,7 @@ SSATmp* getTypeCnsClsName(IRGS& env, SSATmp* cls, const StringData* cnsName) {
       cns(env, cnsName)
     );
   };
-  
+
   if (cnsSlot == kInvalidSlot) {
     return lookupByName();
   }
@@ -72,7 +72,7 @@ SSATmp* getTypeCnsClsName(IRGS& env, SSATmp* cls, const StringData* cnsName) {
 }
 
 SSATmp* resolveTypeConstantChain(IRGS& env, const Func* f, SSATmp* cls,
-                                 const std::vector<LowStringPtr>& types) {
+                                 const std::vector<PackedStringPtr>& types) {
   auto result = cls;
   auto const ctx = f->isMethod() ? cns(env, f->implCls()) : cns(env, nullptr);
   for (auto const type : types) {
@@ -110,7 +110,7 @@ SSATmp* emitCCParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
 }
 
 SSATmp* emitCCThis(IRGS& env, const Func* f,
-                   const std::vector<LowStringPtr>& types,
+                   const std::vector<PackedStringPtr>& types,
                    const StringData* name,
                    SSATmp* prologueCtx) {
   assertx(!f->isClosureBody());
@@ -124,7 +124,7 @@ SSATmp* emitCCThis(IRGS& env, const Func* f,
 const StaticString s_classname("classname");
 
 SSATmp* emitCCReified(IRGS& env, const Func* f,
-                      const std::vector<LowStringPtr>& types,
+                      const std::vector<PackedStringPtr>& types,
                       const StringData* name,
                       uint32_t idx,
                       SSATmp* prologueCtx,

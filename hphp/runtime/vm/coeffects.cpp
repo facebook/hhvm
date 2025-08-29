@@ -153,7 +153,7 @@ Optional<std::string> CoeffectRule::toString(const Func* f) const {
 namespace {
 
 const Class* resolveTypeConstantChain(const Class* cls,
-                                      const std::vector<LowStringPtr>& types) {
+                                      const std::vector<PackedStringPtr>& types) {
   auto result = cls;
   for (auto const type : types) {
     auto const name = jit::loadClsTypeCnsClsNameHelper(result, type);
@@ -182,7 +182,7 @@ RuntimeCoeffects emitCCParam(const Func* f,
 }
 
 RuntimeCoeffects emitCCThis(const Func* f,
-                            const std::vector<LowStringPtr>& types,
+                            const std::vector<PackedStringPtr>& types,
                             const StringData* name,
                             void* prologueCtx) {
   assertx(!f->isClosureBody());
@@ -197,7 +197,7 @@ RuntimeCoeffects emitCCThis(const Func* f,
 const StaticString s_classname("classname");
 
 RuntimeCoeffects emitCCReified(const Func* f,
-                               const std::vector<LowStringPtr>& types,
+                               const std::vector<PackedStringPtr>& types,
                                const StringData* name,
                                uint32_t idx,
                                void* prologueCtx,

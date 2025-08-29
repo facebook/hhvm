@@ -207,13 +207,13 @@ bool PreClassEmitter::addConstant(const StringData* n,
 }
 
 void PreClassEmitter::setTypeParamNames(
-  std::vector<LowStringPtr>&& typeParamNames
+  std::vector<PackedStringPtr>&& typeParamNames
 ) {
   this->m_typeParamNames = FixedVector(typeParamNames);
 }
 
-folly::Range<const LowStringPtr*> PreClassEmitter::getTypeParamNames() const {
-  return folly::Range<const LowStringPtr*>(
+folly::Range<const PackedStringPtr*> PreClassEmitter::getTypeParamNames() const {
+  return folly::Range<const PackedStringPtr*>(
     m_typeParamNames.begin(),
     m_typeParamNames.end()
   );
@@ -283,7 +283,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   pc->m_numDeclMethods = -1;
   pc->m_ifaceVtableSlot = m_ifaceVtableSlot;
   pc->m_dynConstructSampleRate = dynConstructSampleRate;
-  pc->m_typeParamNames = FixedVector<LowStringPtr>(m_typeParamNames);
+  pc->m_typeParamNames = FixedVector<PackedStringPtr>(m_typeParamNames);
 
   // Set user attributes.
   [&] {

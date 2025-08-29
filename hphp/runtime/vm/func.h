@@ -631,7 +631,7 @@ public:
    *
    * Should not be indexed past numNamedLocals() - 1.
    */
-  LowStringPtr const* localNames() const;
+  PackedStringPtr const* localNames() const;
 
   /*
    * Number of stack slots used by locals and iterator cells.
@@ -1359,7 +1359,7 @@ public:
   // SharedData.
 
 private:
-  using NamedLocalsMap = IndexedStringMap<LowStringPtr, Id>;
+  using NamedLocalsMap = IndexedStringMap<PackedStringPtr, Id>;
 
   using BCPtr = TokenOrPtr<unsigned char>;
   using LineTablePtr = TokenOrPtr<LineTable>;

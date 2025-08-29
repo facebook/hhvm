@@ -329,8 +329,8 @@ public:
     return m_nativeDataInfo;
   }
 
-  const folly::Range<const LowStringPtr*> typeParamNames() const {
-    return folly::Range<const LowStringPtr*>(
+  const folly::Range<const PackedStringPtr*> typeParamNames() const {
+    return folly::Range<const PackedStringPtr*>(
       m_typeParamNames.begin(),
       m_typeParamNames.end()
     );
@@ -413,7 +413,7 @@ private:
   PropMap m_properties;
   ConstMap m_constants;
   int64_t m_dynConstructSampleRate;
-  FixedVector<LowStringPtr> m_typeParamNames;
+  FixedVector<PackedStringPtr> m_typeParamNames;
 };
 
 using PreClassPtr = AtomicSharedPtr<PreClass>;

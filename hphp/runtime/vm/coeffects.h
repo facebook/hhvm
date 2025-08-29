@@ -180,7 +180,7 @@ struct CoeffectRule final {
   { assertx(ctx_name); }
 
   CoeffectRule(CCThis,
-               std::vector<LowStringPtr> types,
+               std::vector<PackedStringPtr> types,
                const StringData* ctx_name)
     : m_type(Type::CCThis)
     , m_types(types)
@@ -190,7 +190,7 @@ struct CoeffectRule final {
   CoeffectRule(CCReified,
                bool is_class,
                uint32_t index,
-               std::vector<LowStringPtr> types,
+               std::vector<PackedStringPtr> types,
                const StringData* ctx_name)
     : m_type(Type::CCReified)
     , m_isClass(is_class)
@@ -247,8 +247,8 @@ struct CoeffectRule final {
   Type m_type{Type::Invalid};
   bool m_isClass{false};
   uint32_t m_index{0};
-  std::vector<LowStringPtr> m_types{};
-  LowStringPtr m_name{nullptr};
+  std::vector<PackedStringPtr> m_types{};
+  PackedStringPtr m_name{nullptr};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

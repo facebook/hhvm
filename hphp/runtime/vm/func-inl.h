@@ -476,7 +476,7 @@ inline const StringData* Func::localVarName(Id id) const {
   return id < numNamedLocals() ? shared()->m_localNames[id] : nullptr;
 }
 
-inline LowStringPtr const* Func::localNames() const {
+inline PackedStringPtr const* Func::localNames() const {
   return shared()->m_localNames.accessList();
 }
 

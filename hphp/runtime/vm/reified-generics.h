@@ -53,7 +53,7 @@ ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj);
 GenericsInfo
 extractSizeAndPosFromReifiedAttribute(
   const ArrayData* arr,
-  const folly::Range<const LowStringPtr*>& typeParamNames
+  const folly::Range<const PackedStringPtr*>& typeParamNames
 );
 
 // Extract and return only the size from the attribute array

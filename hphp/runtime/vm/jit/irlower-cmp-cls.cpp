@@ -303,7 +303,7 @@ void cgIsTypeStructCached(IRLS& env, const IRInstruction* inst) {
 
   markRDSAccess(v, ch.handle());
   auto const rhs = v.makeReg();
-  emitLdLowPtr<const Class>(v, offset[rvmtl() + ch.handle() + sizeof(ArrayData*)], rhs);
+  emitLdPackedPtr<const Class>(v, offset[rvmtl() + ch.handle() + sizeof(ArrayData*)], rhs);
   auto const lhs = [&] {
     assertx(isObj);
     if (auto const exact = cellTy.clsSpec().exactCls()) return v.cns(exact);

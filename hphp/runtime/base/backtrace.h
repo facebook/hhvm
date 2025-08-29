@@ -56,7 +56,7 @@ struct CompactFrame final {
     return hash_int64_pair(prevPc, f >> 4);
   }
 
-  const LowPtr<const Func> func;
+  const PackedPtr<const Func> func;
   int32_t prevPc;
 };
 

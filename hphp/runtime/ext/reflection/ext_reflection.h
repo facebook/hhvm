@@ -114,7 +114,7 @@ struct ReflectionFuncHandle :
   }
 
  private:
-  LowPtr<const Func> m_func{nullptr};
+  PackedPtr<const Func> m_func{nullptr};
 };
 
 /* A ReflectionClassHandle is a NativeData object wrapping a Class* for the
@@ -156,7 +156,7 @@ struct ReflectionClassHandle : SystemLib::ClassLoader<"ReflectionClass"> {
   void wakeup(const Variant& content, ObjectData* obj);
 
  private:
-  LowPtr<const Class> m_cls{nullptr};
+ PackedPtr<const Class> m_cls{nullptr};
 };
 
 /* A ReflectionConstHandle is a NativeData object wrapping a Const*
@@ -196,7 +196,7 @@ struct ReflectionConstHandle :
 
  private:
   const Class::Const* m_const;
-  LowPtr<const Class> m_cls;
+  PackedPtr<const Class> m_cls;
 };
 
 /**

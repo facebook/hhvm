@@ -90,10 +90,10 @@ struct TSClassCache {
 
   struct Pair {
     ArrayData*  m_key;
-    LowPtr<const Class> m_value;
+    PackedPtr<const Class> m_value;
   };
 
-  static LowPtr<const Class> write(rds::Handle, ArrayData* lookup);
+  static const Class* write(rds::Handle, ArrayData* lookup);
 
   Pair m_pairs[kNumLines];
 };
@@ -102,8 +102,8 @@ struct TSClassCache {
 //////////////////////////////////////////////////////////////////////
 
 struct StaticMethodCache {
-  LowPtr<const Func> m_func;
-  LowPtr<const Class> m_cls;
+  PackedPtr<const Func> m_func;
+  PackedPtr<const Class> m_cls;
 
   static rds::Handle alloc(const StringData* cls,
                       const StringData* meth,
@@ -115,7 +115,7 @@ struct StaticMethodCache {
 };
 
 struct StaticMethodFCache {
-  LowPtr<const Func> m_func;
+  PackedPtr<const Func> m_func;
   int m_static;
 
   static rds::Handle alloc(const StringData* cls,

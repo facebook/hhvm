@@ -194,7 +194,7 @@ const Class* ClassCache::lookup(rds::Handle handle, StringData* name,
 //////////////////////////////////////////////////////////////////////
 // TSClassCache
 
-LowPtr<const Class> TSClassCache::write(rds::Handle handle, ArrayData* ad) {
+const Class* TSClassCache::write(rds::Handle handle, ArrayData* ad) {
   assertx(ad);
   if (!ad->isStatic()) return nullptr;
   auto const thiz = rds::handleToPtr<TSClassCache, rds::Mode::Local>(handle);

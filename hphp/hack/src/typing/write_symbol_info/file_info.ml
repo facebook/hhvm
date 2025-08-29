@@ -219,6 +219,11 @@ let create ctx Indexable.{ path; fanout } ~gen_sym_hash ~root_path ~hhi_path =
   in
   let tast = tast.Tast_with_dynamic.under_normal_assumptions in
   let tast_elapsed_s = Unix.gettimeofday () -. start_time in
+  (if Float.(tast_elapsed_s >= 240.) then
+    let { Unix.tm_min = tast_min; tm_sec = tast_sec; _ } =
+      Unix.gmtime tast_elapsed_s
+    in
+    Hh_logger.log "tast: %s %dm%ds" path_str tast_min tast_sec);
   let cst =
     Provider_context.PositionedSyntaxTree.root
       (Ast_provider.compute_cst ~ctx ~entry)
@@ -242,11 +247,6 @@ let create ctx Indexable.{ path; fanout } ~gen_sym_hash ~root_path ~hhi_path =
     else
       None
   in
-  (if Float.(tast_elapsed_s >= 240.) then
-    let { Unix.tm_min = tast_min; tm_sec = tast_sec; _ } =
-      Unix.gmtime tast_elapsed_s
-    in
-    Hh_logger.log "tast: %s %dm%ds" path_str tast_min tast_sec);
   {
     path = path_str;
     tast;

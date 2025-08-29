@@ -5181,15 +5181,23 @@ end = struct
           ~lhs:{ sub_supportdyn; ty_sub }
           ~rhs:{ super_like; super_supportdyn = false; ty_super }
           env
+      | (_, (Tvar _ | Tunion _)) ->
+        default_subtype
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lhs:{ sub_supportdyn; ty_sub }
+          ~rhs:{ super_like; super_supportdyn = false; ty_super }
+          env
       | ( _,
-          ( Tany _ | Tdynamic | Tunion _ | Tintersection _ | Tdependent _
-          | Taccess _ | Tgeneric _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
+          ( Tany _ | Tdynamic | Tintersection _ | Tdependent _ | Taccess _
+          | Tgeneric _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
           | Tvec_or_dict _ | Tclass _ | Tnewtype _ | Tneg _
           | Tprim
               Aast.(
                 ( Tnull | Tvoid | Tint | Tbool | Tfloat | Tstring | Tresource
                 | Tnoreturn ))
-          | Tvar _ | Tlabel _ | Tclass_ptr _ ) ) -> begin
+          | Tlabel _ | Tclass_ptr _ ) ) -> begin
         match
           match get_node ty_sub with
           | Tnewtype _ -> Ok subtype_env

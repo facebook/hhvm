@@ -2,13 +2,45 @@ ERROR: File "splice_err7.php", line 5, characters 23-27:
 Splicing can only occur inside expression tree literals (between backticks) (Parsing[1002])
 ERROR: File "splice_err7.php", line 5, characters 16-27:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 87, characters 5-29:
+  File "expr_tree.php", line 42, characters 5-29:
   Expected `ExampleExpression<_>`
   File "", line 0, characters 0-0:
   But got `(function($x): _)`
 ERROR: File "splice_err7.php", line 5, characters 16-27:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 87, characters 5-29:
+  File "expr_tree.php", line 42, characters 5-29:
   Expected `ExampleExpression<_>`
+  File "splice_err7.php", line 5, characters 16-27:
+  But got `(function(Spliceable<_, mixed, _> $x): _)`
+ERROR: File "splice_err7.php", line 5, characters 16-27:
+Invalid argument (Typing[4323])
+  File "expr_tree.php", line 115, characters 31-35:
+  `THack` is a constrained type parameter
+  File "expr_tree.php", line 115, characters 50-69:
+  This type constraint is violated
+  File "expr_tree.php", line 115, characters 51-69:
+  Expected `ExampleAutoLiftable`
+  File "", line 0, characters 0-0:
+  But got `(function($x): _)`
+ERROR: File "splice_err7.php", line 5, characters 16-27:
+Invalid argument (Typing[4323])
+  File "expr_tree.php", line 115, characters 31-35:
+  `THack` is a constrained type parameter
+  File "expr_tree.php", line 115, characters 50-69:
+  This type constraint is violated
+  File "expr_tree.php", line 115, characters 51-69:
+  Expected `ExampleAutoLiftable`
+  File "splice_err7.php", line 5, characters 16-27:
+  But got `(function(Spliceable<_, mixed, _> $x): _)`
+ERROR: File "splice_err7.php", line 5, characters 16-27:
+Invalid argument (Typing[4110])
+  File "expr_tree.php", line 116, characters 5-31:
+  Expected `ExampleUnion<_, _>`
+  File "", line 0, characters 0-0:
+  But got `(function($x): _)`
+ERROR: File "splice_err7.php", line 5, characters 16-27:
+Invalid argument (Typing[4110])
+  File "expr_tree.php", line 116, characters 5-31:
+  Expected `ExampleUnion<_, _>`
   File "splice_err7.php", line 5, characters 16-27:
   But got `(function(Spliceable<_, mixed, _> $x): _)`

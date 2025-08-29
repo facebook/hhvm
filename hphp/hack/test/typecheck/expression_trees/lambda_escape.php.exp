@@ -2,5 +2,5 @@ ERROR: File "lambda_escape.php", line 15, characters 10-11:
 Invalid return type (Typing[4110])
   File "lambda_escape.php", line 11, characters 37-43:
   Expected `nothing`
-  File "expr_tree.php", line 82, characters 8-32:
+  File "expr_tree.php", line 94, characters 8-32:
   But got `ExampleExpression<int>`

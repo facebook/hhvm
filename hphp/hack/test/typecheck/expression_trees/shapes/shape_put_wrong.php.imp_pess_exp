@@ -2,7 +2,7 @@ ERROR: File "shape_put_wrong.php", line 9, characters 10-152:
 Invalid return type (Typing[4110])
   File "shape_put_wrong.php", line 8, characters 15-43:
   Expected `dynamic`
-  File "expr_tree.php", line 82, characters 8-32:
+  File "expr_tree.php", line 94, characters 8-32:
   But got `ExampleExpression<_>`
 ERROR: File "shape_put_wrong.php", line 9, characters 10-152:
 Invalid return type (Typing[4110])
@@ -14,11 +14,11 @@ ERROR: File "shape_put_wrong.php", line 9, characters 10-152:
 Invalid return type (Typing[4110])
   File "shape_put_wrong.php", line 8, characters 33-42:
   Expected `int`
-  File "expr_tree.php", line 101, characters 38-41:
+  File "expr_tree.php", line 137, characters 38-41:
   But got `bool`
 ERROR: File "shape_put_wrong.php", line 19, characters 5-47:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 118, characters 26-34:
+  File "expr_tree.php", line 154, characters 26-34:
   Expected `dynamic`
   File "Shapes.hhi", line 112, characters 10-19:
   Type `shape(...)` is not a subtype of `dynamic` under dynamic-aware subtyping
@@ -28,7 +28,7 @@ Too many arguments (expected 3 but got 4) (Typing[4105])
   Definition is here
 ERROR: File "shape_put_wrong.php", line 22, characters 5-32:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 118, characters 26-34:
+  File "expr_tree.php", line 154, characters 26-34:
   Expected `dynamic`
   File "Shapes.hhi", line 112, characters 10-19:
   Type `shape(...)` is not a subtype of `dynamic` under dynamic-aware subtyping
@@ -40,5 +40,5 @@ ERROR: File "shape_put_wrong.php", line 25, characters 34-39:
 Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
 ERROR: File "shape_put_wrong.php", line 28, characters 5-37:
 You are trying to access the method `__unwrap` but this is a string (Typing[4062])
-  File "expr_tree.php", line 104, characters 40-45:
+  File "expr_tree.php", line 140, characters 40-45:
   Definition is here

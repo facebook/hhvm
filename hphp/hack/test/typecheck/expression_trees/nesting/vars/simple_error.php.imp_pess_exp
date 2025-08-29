@@ -1,12 +1,12 @@
 ERROR: File "simple_error.php", line 6, characters 31-51:
 Typing error (Typing[4110])
-  File "expr_tree.php", line 404, characters 26-35:
+  File "expr_tree.php", line 440, characters 26-35:
   Expected `int`
-  File "expr_tree.php", line 104, characters 40-45:
+  File "expr_tree.php", line 140, characters 40-45:
   But got `string`
 ERROR: File "simple_error.php", line 7, characters 30-50:
 Typing error (Typing[4110])
-  File "expr_tree.php", line 122, characters 5-21:
+  File "expr_tree.php", line 158, characters 5-21:
   Expected `ExprTreeOpType<nothing>`
-  File "expr_tree.php", line 95, characters 39-41:
+  File "expr_tree.php", line 131, characters 39-41:
   But got `int`

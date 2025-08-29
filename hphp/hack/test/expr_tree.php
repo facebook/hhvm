@@ -35,6 +35,18 @@ type ExprTreeInfo<TInfer> = shape(
   'variables' => vec<string>,
 );
 
+case type HackValue = int | float | string | bool | Container<mixed>;
+
+case type ExampleUnion<+THack as ?HackValue, +TInfer> =
+  | THack
+  | ExampleExpression<TInfer>;
+
+case type ExampleAutoLiftable as HackValue,ExprTreeOpType<ExampleMixedOpType> =
+  | int
+  | float
+  | string
+  | bool;
+
 case type ExprTreeOpType<+T as ExampleMixedOpType> =
   | null where T super ExampleMixedOpType
   | int where T super ExampleIntOpType
@@ -83,10 +95,34 @@ class ExampleDsl {
     return new ExprTree($pos, $metadata, $ast);
   }
 
-  public static function lift<TInfer>(
-    ExampleExpression<TInfer> $x,
-  )[]: ExampleExpression<TInfer> {
-    return $x;
+  private static function autolift(
+    ExampleDsl $visitor,
+    ?ExampleAutoLiftable $e,
+  ): ExampleDsl::TAst {
+    if ($e is null) {
+      return $visitor->visitNull(null);
+    } else if ($e is int) {
+      return $visitor->visitInt(null, $e);
+    } else if ($e is float) {
+      return $visitor->visitFloat(null, $e);
+    } else if ($e is string) {
+      return $visitor->visitString(null, $e);
+    } else {
+      return $visitor->visitBool(null, $e);
+    }
+  }
+
+  public static function lift<THack as TInfer as ?ExampleAutoLiftable, TInfer>(
+    ExampleUnion<THack, TInfer> $e,
+  ): ExampleExpression<TInfer> {
+    if ($e is ExampleExpression<_>) {
+      return $e;
+    }
+    return ExampleDsl::makeTree(
+      null,
+      null,
+      ($visitor) ==> self::autolift($visitor, $e),
+    );
   }
 
   // Virtual types. These do not have to be implemented, as they are only used

@@ -1,12 +1,10 @@
 ERROR: File "splice_err5.php", line 9, characters 23-27:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 404, characters 26-35:
+  File "expr_tree.php", line 440, characters 26-35:
   Expected `int`
-  File "expr_tree.php", line 104, characters 40-45:
+  File "splice_err5.php", line 9, characters 25-26:
   But got `string`
-  File "expr_tree.php", line 82, characters 26-31:
+  File "expr_tree.php", line 117, characters 24-29:
     via this generic `TInfer`
-  File "expr_tree.php", line 88, characters 26-31:
-    via this generic `TInfer`
-  File "expr_tree.php", line 496, characters 52-52:
+  File "expr_tree.php", line 532, characters 52-52:
     via this generic `T`

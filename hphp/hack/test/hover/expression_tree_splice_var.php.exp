@@ -2,7 +2,7 @@
 ---
 I am a comment associated with $one.
 ---
-Parameter: $x
+Parameter: $e
 ---
 class ExampleDsl
 ---
@@ -11,6 +11,9 @@ should return something that implements Spliceable, here an ExprTree
 ---
 Defined in `ExampleDsl`
 ---
-public static function lift<TInfer>(
-  ExampleExpression<TInfer> $x
-)[]: ~ExampleExpression<TInfer>
+public static function lift<
+  THack as TInfer as ?ExampleAutoLiftable,
+  TInfer
+>(ExampleUnion<THack, TInfer> $e): ~ExampleExpression<
+  TInfer
+>

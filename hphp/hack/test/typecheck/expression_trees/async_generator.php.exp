@@ -12,9 +12,9 @@ Invalid return type (Typing[4110])
   But got `Generator<_, _, _>` (result of function containing a `yield`)
 ERROR: File "async_generator.php", line 6, characters 29-35:
 Invalid `yield` (Typing[4110])
-  File "expr_tree.php", line 69, characters 21-26:
+  File "expr_tree.php", line 81, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 81, characters 28-43:
+  File "expr_tree.php", line 93, characters 28-43:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "async_generator.php", line 6, characters 29-35:
   But got `AsyncGenerator<?_, int, nothing>` (result of `async function` with `yield` in the body)
@@ -26,9 +26,9 @@ Invalid `yield` (Typing[4110])
   But got `AsyncGenerator<?_, int, nothing>` (result of `async function` with `yield` in the body)
 ERROR: File "async_generator.php", line 6, characters 29-35:
 Some elements in this collection are incompatible (Typing[4110])
-  File "expr_tree.php", line 69, characters 21-26:
+  File "expr_tree.php", line 81, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 184, characters 9-24:
+  File "expr_tree.php", line 220, characters 9-24:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "async_generator.php", line 6, characters 29-35:
   But got `null` (`$generator->send()` can always send a `null` back to a `yield`)

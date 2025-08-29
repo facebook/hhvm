@@ -378,11 +378,12 @@ extern "C" void __gcov_reset() __attribute__((__weak__));
 // LLVM/clang API. See llvm-project/compiler-rt/lib/profile/InstrProfiling.h
 extern "C" void __llvm_profile_reset_counters() __attribute__((__weak__));
 // ROAR API
-extern "C" void __roar_api_trigger_warmup() __attribute__((__weak__));
-extern "C" bool __roar_api_pgo_enabled()    __attribute__((__weak__));
-extern "C" bool __roar_api_cspgo_enabled()  __attribute__((__weak__));
-extern "C" void __roar_api_wait_for_pgo()   __attribute__((__weak__));
-extern "C" void __roar_api_wait_for_cspgo() __attribute__((__weak__));
+extern "C" int  __roar_api_pending_warmups() __attribute__((__weak__));;
+extern "C" void __roar_api_trigger_warmup()  __attribute__((__weak__));
+extern "C" bool __roar_api_pgo_enabled()     __attribute__((__weak__));
+extern "C" bool __roar_api_cspgo_enabled()   __attribute__((__weak__));
+extern "C" void __roar_api_wait_for_pgo()    __attribute__((__weak__));
+extern "C" void __roar_api_wait_for_cspgo()  __attribute__((__weak__));
 
 /*
  * This is the main driver for the profile-guided retranslation of all the
@@ -557,14 +558,24 @@ void retranslateAll(bool skipSerialize) {
   // If running with ROAR, we call __roar_api_trigger_warmup(), which will reset
   // ROAR's profile counters and start collecting profile data for the specified
   // collection period before optimizing the code.
+  // Note that, when ROAR does its own jumpstart, it'll have already produced
+  // optimized code at this point and, in this case, we don't want to trigger
+  // another warmup cycle.  This situation is detected by checking that
+  // __roar_api_pending_warmups() returns 0.
   if (use_roar) {
-    if (__roar_api_trigger_warmup) {
+    always_assert(__roar_api_pending_warmups);
+    if (__roar_api_pending_warmups() != 0) {
       if (serverMode) {
-        Logger::Info(
-            "Calling __roar_api_trigger_warmup (retranslateAll finished)"
-        );
+        Logger::Info("Calling __roar_api_trigger_warmup (retranslateAll "
+                     "finished)");
       }
+      always_assert(__roar_api_trigger_warmup);
       __roar_api_trigger_warmup();
+    } else {
+      if (serverMode) {
+        Logger::Info("Skipping call to __roar_api_trigger_warmup due to no "
+                     "pending warmups");
+      }
     }
   } else {
     if (__llvm_profile_reset_counters) {

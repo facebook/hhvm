@@ -52,7 +52,7 @@ type GetEntity interface {
     MyMethodWithConflictingParamAccessors(ctx context.Context, setFoo bool, foo string) (error)
 }
 
-type GetEntityClientInterface interface {
+type GetEntityClient interface {
     io.Closer
     GetEntity(ctx context.Context, r *GetEntityRequest) (*GetEntityResponse, error)
     GetBool(ctx context.Context) (bool, error)
@@ -79,13 +79,16 @@ type GetEntityClientInterface interface {
     MyMethodWithConflictingParamAccessors(ctx context.Context, setFoo bool, foo string) (error)
 }
 
+// Temporary alias while we are migrating
+type GetEntityClientInterface = GetEntityClient
+
 type getEntityClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ GetEntityClientInterface = (*getEntityClientImpl)(nil)
+var _ GetEntityClient = (*getEntityClientImpl)(nil)
 
-func NewGetEntityChannelClient(channel thrift.RequestChannel) *getEntityClientImpl {
+func NewGetEntityChannelClient(channel thrift.RequestChannel) GetEntityClient {
     return &getEntityClientImpl{
         ch: channel,
     }

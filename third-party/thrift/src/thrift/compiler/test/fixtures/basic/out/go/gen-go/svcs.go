@@ -30,18 +30,21 @@ type FooService interface {
     SimpleRPC(ctx context.Context) (error)
 }
 
-type FooServiceClientInterface interface {
+type FooServiceClient interface {
     io.Closer
     SimpleRPC(ctx context.Context) (error)
 }
+
+// Temporary alias while we are migrating
+type FooServiceClientInterface = FooServiceClient
 
 type fooServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FooServiceClientInterface = (*fooServiceClientImpl)(nil)
+var _ FooServiceClient = (*fooServiceClientImpl)(nil)
 
-func NewFooServiceChannelClient(channel thrift.RequestChannel) *fooServiceClientImpl {
+func NewFooServiceChannelClient(channel thrift.RequestChannel) FooServiceClient {
     return &fooServiceClientImpl{
         ch: channel,
     }
@@ -166,18 +169,21 @@ type FB303Service interface {
     SimpleRPC(ctx context.Context, intParameter int32) (*ReservedKeyword, error)
 }
 
-type FB303ServiceClientInterface interface {
+type FB303ServiceClient interface {
     io.Closer
     SimpleRPC(ctx context.Context, intParameter int32) (*ReservedKeyword, error)
 }
+
+// Temporary alias while we are migrating
+type FB303ServiceClientInterface = FB303ServiceClient
 
 type fB303ServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FB303ServiceClientInterface = (*fB303ServiceClientImpl)(nil)
+var _ FB303ServiceClient = (*fB303ServiceClientImpl)(nil)
 
-func NewFB303ServiceChannelClient(channel thrift.RequestChannel) *fB303ServiceClientImpl {
+func NewFB303ServiceChannelClient(channel thrift.RequestChannel) FB303ServiceClient {
     return &fB303ServiceClientImpl{
         ch: channel,
     }
@@ -314,7 +320,7 @@ type MyService interface {
     RpcSkippedCodegen(ctx context.Context) (error)
 }
 
-type MyServiceClientInterface interface {
+type MyServiceClient interface {
     io.Closer
     Ping(ctx context.Context) (error)
     GetRandomData(ctx context.Context) (string, error)
@@ -328,13 +334,16 @@ type MyServiceClientInterface interface {
     RpcSkippedCodegen(ctx context.Context) (error)
 }
 
+// Temporary alias while we are migrating
+type MyServiceClientInterface = MyServiceClient
+
 type myServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServiceClientInterface = (*myServiceClientImpl)(nil)
+var _ MyServiceClient = (*myServiceClientImpl)(nil)
 
-func NewMyServiceChannelClient(channel thrift.RequestChannel) *myServiceClientImpl {
+func NewMyServiceChannelClient(channel thrift.RequestChannel) MyServiceClient {
     return &myServiceClientImpl{
         ch: channel,
     }
@@ -1055,19 +1064,22 @@ type DbMixedStackArguments interface {
     GetDataByKey1(ctx context.Context, key string) ([]byte, error)
 }
 
-type DbMixedStackArgumentsClientInterface interface {
+type DbMixedStackArgumentsClient interface {
     io.Closer
     GetDataByKey0(ctx context.Context, key string) ([]byte, error)
     GetDataByKey1(ctx context.Context, key string) ([]byte, error)
 }
 
+// Temporary alias while we are migrating
+type DbMixedStackArgumentsClientInterface = DbMixedStackArgumentsClient
+
 type dbMixedStackArgumentsClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ DbMixedStackArgumentsClientInterface = (*dbMixedStackArgumentsClientImpl)(nil)
+var _ DbMixedStackArgumentsClient = (*dbMixedStackArgumentsClientImpl)(nil)
 
-func NewDbMixedStackArgumentsChannelClient(channel thrift.RequestChannel) *dbMixedStackArgumentsClientImpl {
+func NewDbMixedStackArgumentsChannelClient(channel thrift.RequestChannel) DbMixedStackArgumentsClient {
     return &dbMixedStackArgumentsClientImpl{
         ch: channel,
     }

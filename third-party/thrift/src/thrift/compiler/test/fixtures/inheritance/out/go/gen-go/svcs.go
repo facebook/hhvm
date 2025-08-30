@@ -30,18 +30,21 @@ type MyRoot interface {
     DoRoot(ctx context.Context) (error)
 }
 
-type MyRootClientInterface interface {
+type MyRootClient interface {
     io.Closer
     DoRoot(ctx context.Context) (error)
 }
+
+// Temporary alias while we are migrating
+type MyRootClientInterface = MyRootClient
 
 type myRootClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyRootClientInterface = (*myRootClientImpl)(nil)
+var _ MyRootClient = (*myRootClientImpl)(nil)
 
-func NewMyRootChannelClient(channel thrift.RequestChannel) *myRootClientImpl {
+func NewMyRootChannelClient(channel thrift.RequestChannel) MyRootClient {
     return &myRootClientImpl{
         ch: channel,
     }
@@ -169,25 +172,28 @@ type MyNode interface {
     DoMid(ctx context.Context) (error)
 }
 
-type MyNodeClientInterface interface {
+type MyNodeClient interface {
     io.Closer
     // Inherited/extended service
-    MyRootClientInterface
+    MyRootClient
 
     DoMid(ctx context.Context) (error)
 }
 
+// Temporary alias while we are migrating
+type MyNodeClientInterface = MyNodeClient
+
 type myNodeClientImpl struct {
     // Inherited/extended service
-    MyRootClientInterface
+    MyRootClient
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyNodeClientInterface = (*myNodeClientImpl)(nil)
+var _ MyNodeClient = (*myNodeClientImpl)(nil)
 
-func NewMyNodeChannelClient(channel thrift.RequestChannel) *myNodeClientImpl {
+func NewMyNodeChannelClient(channel thrift.RequestChannel) MyNodeClient {
     return &myNodeClientImpl{
-        MyRootClientInterface: NewMyRootChannelClient(channel),
+        MyRootClient: NewMyRootChannelClient(channel),
         ch: channel,
     }
 }
@@ -287,25 +293,28 @@ type MyLeaf interface {
     DoLeaf(ctx context.Context) (error)
 }
 
-type MyLeafClientInterface interface {
+type MyLeafClient interface {
     io.Closer
     // Inherited/extended service
-    MyNodeClientInterface
+    MyNodeClient
 
     DoLeaf(ctx context.Context) (error)
 }
 
+// Temporary alias while we are migrating
+type MyLeafClientInterface = MyLeafClient
+
 type myLeafClientImpl struct {
     // Inherited/extended service
-    MyNodeClientInterface
+    MyNodeClient
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyLeafClientInterface = (*myLeafClientImpl)(nil)
+var _ MyLeafClient = (*myLeafClientImpl)(nil)
 
-func NewMyLeafChannelClient(channel thrift.RequestChannel) *myLeafClientImpl {
+func NewMyLeafChannelClient(channel thrift.RequestChannel) MyLeafClient {
     return &myLeafClientImpl{
-        MyNodeClientInterface: NewMyNodeChannelClient(channel),
+        MyNodeClient: NewMyNodeChannelClient(channel),
         ch: channel,
     }
 }

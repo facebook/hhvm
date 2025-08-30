@@ -36,20 +36,23 @@ type Finder interface {
     PreviousPlate(ctx context.Context, plate Plate) (Plate, error)
 }
 
-type FinderClientInterface interface {
+type FinderClient interface {
     io.Closer
     ByPlate(ctx context.Context, plate Plate) (*Automobile, error)
     AliasByPlate(ctx context.Context, plate Plate) (*Car, error)
     PreviousPlate(ctx context.Context, plate Plate) (Plate, error)
 }
 
+// Temporary alias while we are migrating
+type FinderClientInterface = FinderClient
+
 type finderClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FinderClientInterface = (*finderClientImpl)(nil)
+var _ FinderClient = (*finderClientImpl)(nil)
 
-func NewFinderChannelClient(channel thrift.RequestChannel) *finderClientImpl {
+func NewFinderChannelClient(channel thrift.RequestChannel) FinderClient {
     return &finderClientImpl{
         ch: channel,
     }

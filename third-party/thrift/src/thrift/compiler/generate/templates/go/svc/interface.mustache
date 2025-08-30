@@ -28,11 +28,11 @@ type {{service:go_name}} interface {
     {{/service:functions}}
 }
 
-type {{service:go_name}}ClientInterface interface {
+type {{service:go_name}}Client interface {
     io.Closer
     {{#service:extends}}
     // Inherited/extended service
-    {{service:go_qualified_name}}ClientInterface
+    {{service:go_qualified_name}}Client
 
     {{/service:extends}}
     {{#service:functions}}
@@ -42,4 +42,7 @@ type {{service:go_name}}ClientInterface interface {
     {{/function:go_client_supported?}}
     {{/service:functions}}
 }
+
+// Temporary alias while we are migrating
+type {{service:go_name}}ClientInterface = {{service:go_name}}Client
 {{! new line }}

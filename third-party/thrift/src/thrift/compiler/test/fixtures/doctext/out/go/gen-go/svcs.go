@@ -33,20 +33,23 @@ type C interface {
     Thing(ctx context.Context, a int32, b string, c []int32) (string, error)
 }
 
-type CClientInterface interface {
+type CClient interface {
     io.Closer
     F(ctx context.Context) (error)
     Numbers(ctx context.Context) (<-chan Number /* elem stream */, <-chan error /* stream err */, error)
     Thing(ctx context.Context, a int32, b string, c []int32) (string, error)
 }
 
+// Temporary alias while we are migrating
+type CClientInterface = CClient
+
 type cClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ CClientInterface = (*cClientImpl)(nil)
+var _ CClient = (*cClientImpl)(nil)
 
-func NewCChannelClient(channel thrift.RequestChannel) *cClientImpl {
+func NewCChannelClient(channel thrift.RequestChannel) CClient {
     return &cClientImpl{
         ch: channel,
     }

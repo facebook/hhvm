@@ -35,19 +35,22 @@ type MyService interface {
     HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) (error)
 }
 
-type MyServiceClientInterface interface {
+type MyServiceClient interface {
     io.Closer
     Query(ctx context.Context, s *module.MyStruct, i *includes.Included) (error)
     HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) (error)
 }
 
+// Temporary alias while we are migrating
+type MyServiceClientInterface = MyServiceClient
+
 type myServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServiceClientInterface = (*myServiceClientImpl)(nil)
+var _ MyServiceClient = (*myServiceClientImpl)(nil)
 
-func NewMyServiceChannelClient(channel thrift.RequestChannel) *myServiceClientImpl {
+func NewMyServiceChannelClient(channel thrift.RequestChannel) MyServiceClient {
     return &myServiceClientImpl{
         ch: channel,
     }

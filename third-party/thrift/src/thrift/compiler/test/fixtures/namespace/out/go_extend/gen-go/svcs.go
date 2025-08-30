@@ -35,25 +35,28 @@ type ExtendTestService interface {
     Check(ctx context.Context, struct1 *test0.HsFoo) (bool, error)
 }
 
-type ExtendTestServiceClientInterface interface {
+type ExtendTestServiceClient interface {
     io.Closer
     // Inherited/extended service
-    test0.HsTestServiceClientInterface
+    test0.HsTestServiceClient
 
     Check(ctx context.Context, struct1 *test0.HsFoo) (bool, error)
 }
 
+// Temporary alias while we are migrating
+type ExtendTestServiceClientInterface = ExtendTestServiceClient
+
 type extendTestServiceClientImpl struct {
     // Inherited/extended service
-    test0.HsTestServiceClientInterface
+    test0.HsTestServiceClient
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ ExtendTestServiceClientInterface = (*extendTestServiceClientImpl)(nil)
+var _ ExtendTestServiceClient = (*extendTestServiceClientImpl)(nil)
 
-func NewExtendTestServiceChannelClient(channel thrift.RequestChannel) *extendTestServiceClientImpl {
+func NewExtendTestServiceChannelClient(channel thrift.RequestChannel) ExtendTestServiceClient {
     return &extendTestServiceClientImpl{
-        HsTestServiceClientInterface: test0.NewHsTestServiceChannelClient(channel),
+        HsTestServiceClient: test0.NewHsTestServiceChannelClient(channel),
         ch: channel,
     }
 }

@@ -33,7 +33,7 @@ type Raiser interface {
     Get500(ctx context.Context) (string, error)
 }
 
-type RaiserClientInterface interface {
+type RaiserClient interface {
     io.Closer
     DoBland(ctx context.Context) (error)
     DoRaise(ctx context.Context) (error)
@@ -41,13 +41,16 @@ type RaiserClientInterface interface {
     Get500(ctx context.Context) (string, error)
 }
 
+// Temporary alias while we are migrating
+type RaiserClientInterface = RaiserClient
+
 type raiserClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ RaiserClientInterface = (*raiserClientImpl)(nil)
+var _ RaiserClient = (*raiserClientImpl)(nil)
 
-func NewRaiserChannelClient(channel thrift.RequestChannel) *raiserClientImpl {
+func NewRaiserChannelClient(channel thrift.RequestChannel) RaiserClient {
     return &raiserClientImpl{
         ch: channel,
     }

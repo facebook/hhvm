@@ -29,18 +29,21 @@ type BadInteraction interface {
     Foo(ctx context.Context) (error)
 }
 
-type BadInteractionClientInterface interface {
+type BadInteractionClient interface {
     io.Closer
     Foo(ctx context.Context) (error)
 }
+
+// Temporary alias while we are migrating
+type BadInteractionClientInterface = BadInteractionClient
 
 type badInteractionClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ BadInteractionClientInterface = (*badInteractionClientImpl)(nil)
+var _ BadInteractionClient = (*badInteractionClientImpl)(nil)
 
-func NewBadInteractionChannelClient(channel thrift.RequestChannel) *badInteractionClientImpl {
+func NewBadInteractionChannelClient(channel thrift.RequestChannel) BadInteractionClient {
     return &badInteractionClientImpl{
         ch: channel,
     }
@@ -75,7 +78,7 @@ type MyService interface {
     GoDoNothing(ctx context.Context) (error)
 }
 
-type MyServiceClientInterface interface {
+type MyServiceClient interface {
     io.Closer
     Ping(ctx context.Context) (error)
     GetRandomData(ctx context.Context) (string, error)
@@ -86,13 +89,16 @@ type MyServiceClientInterface interface {
     GoDoNothing(ctx context.Context) (error)
 }
 
+// Temporary alias while we are migrating
+type MyServiceClientInterface = MyServiceClient
+
 type myServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServiceClientInterface = (*myServiceClientImpl)(nil)
+var _ MyServiceClient = (*myServiceClientImpl)(nil)
 
-func NewMyServiceChannelClient(channel thrift.RequestChannel) *myServiceClientImpl {
+func NewMyServiceChannelClient(channel thrift.RequestChannel) MyServiceClient {
     return &myServiceClientImpl{
         ch: channel,
     }
@@ -623,19 +629,22 @@ type MyServicePrioParent interface {
     Pong(ctx context.Context) (error)
 }
 
-type MyServicePrioParentClientInterface interface {
+type MyServicePrioParentClient interface {
     io.Closer
     Ping(ctx context.Context) (error)
     Pong(ctx context.Context) (error)
 }
 
+// Temporary alias while we are migrating
+type MyServicePrioParentClientInterface = MyServicePrioParentClient
+
 type myServicePrioParentClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServicePrioParentClientInterface = (*myServicePrioParentClientImpl)(nil)
+var _ MyServicePrioParentClient = (*myServicePrioParentClientImpl)(nil)
 
-func NewMyServicePrioParentChannelClient(channel thrift.RequestChannel) *myServicePrioParentClientImpl {
+func NewMyServicePrioParentChannelClient(channel thrift.RequestChannel) MyServicePrioParentClient {
     return &myServicePrioParentClientImpl{
         ch: channel,
     }
@@ -828,25 +837,28 @@ type MyServicePrioChild interface {
     Pang(ctx context.Context) (error)
 }
 
-type MyServicePrioChildClientInterface interface {
+type MyServicePrioChildClient interface {
     io.Closer
     // Inherited/extended service
-    MyServicePrioParentClientInterface
+    MyServicePrioParentClient
 
     Pang(ctx context.Context) (error)
 }
 
+// Temporary alias while we are migrating
+type MyServicePrioChildClientInterface = MyServicePrioChildClient
+
 type myServicePrioChildClientImpl struct {
     // Inherited/extended service
-    MyServicePrioParentClientInterface
+    MyServicePrioParentClient
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServicePrioChildClientInterface = (*myServicePrioChildClientImpl)(nil)
+var _ MyServicePrioChildClient = (*myServicePrioChildClientImpl)(nil)
 
-func NewMyServicePrioChildChannelClient(channel thrift.RequestChannel) *myServicePrioChildClientImpl {
+func NewMyServicePrioChildChannelClient(channel thrift.RequestChannel) MyServicePrioChildClient {
     return &myServicePrioChildClientImpl{
-        MyServicePrioParentClientInterface: NewMyServicePrioParentChannelClient(channel),
+        MyServicePrioParentClient: NewMyServicePrioParentChannelClient(channel),
         ch: channel,
     }
 }
@@ -943,18 +955,21 @@ type BadService interface {
     Bar(ctx context.Context) (int32, error)
 }
 
-type BadServiceClientInterface interface {
+type BadServiceClient interface {
     io.Closer
     Bar(ctx context.Context) (int32, error)
 }
+
+// Temporary alias while we are migrating
+type BadServiceClientInterface = BadServiceClient
 
 type badServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ BadServiceClientInterface = (*badServiceClientImpl)(nil)
+var _ BadServiceClient = (*badServiceClientImpl)(nil)
 
-func NewBadServiceChannelClient(channel thrift.RequestChannel) *badServiceClientImpl {
+func NewBadServiceChannelClient(channel thrift.RequestChannel) BadServiceClient {
     return &badServiceClientImpl{
         ch: channel,
     }
@@ -1082,20 +1097,23 @@ type FooBarBazService interface {
     Baz(ctx context.Context) (error)
 }
 
-type FooBarBazServiceClientInterface interface {
+type FooBarBazServiceClient interface {
     io.Closer
     FooStructured(ctx context.Context) (error)
     BarNonStructured(ctx context.Context) (error)
     Baz(ctx context.Context) (error)
 }
 
+// Temporary alias while we are migrating
+type FooBarBazServiceClientInterface = FooBarBazServiceClient
+
 type fooBarBazServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FooBarBazServiceClientInterface = (*fooBarBazServiceClientImpl)(nil)
+var _ FooBarBazServiceClient = (*fooBarBazServiceClientImpl)(nil)
 
-func NewFooBarBazServiceChannelClient(channel thrift.RequestChannel) *fooBarBazServiceClientImpl {
+func NewFooBarBazServiceChannelClient(channel thrift.RequestChannel) FooBarBazServiceClient {
     return &fooBarBazServiceClientImpl{
         ch: channel,
     }

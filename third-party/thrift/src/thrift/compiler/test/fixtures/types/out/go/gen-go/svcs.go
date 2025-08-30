@@ -33,19 +33,22 @@ type SomeService interface {
     BinaryKeyedMap(ctx context.Context, r []int64) (map[*TBinary]int64, error)
 }
 
-type SomeServiceClientInterface interface {
+type SomeServiceClient interface {
     io.Closer
     BounceMap(ctx context.Context, m included.SomeMap) (included.SomeMap, error)
     BinaryKeyedMap(ctx context.Context, r []int64) (map[*TBinary]int64, error)
 }
 
+// Temporary alias while we are migrating
+type SomeServiceClientInterface = SomeServiceClient
+
 type someServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ SomeServiceClientInterface = (*someServiceClientImpl)(nil)
+var _ SomeServiceClient = (*someServiceClientImpl)(nil)
 
-func NewSomeServiceChannelClient(channel thrift.RequestChannel) *someServiceClientImpl {
+func NewSomeServiceChannelClient(channel thrift.RequestChannel) SomeServiceClient {
     return &someServiceClientImpl{
         ch: channel,
     }

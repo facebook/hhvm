@@ -30,18 +30,21 @@ type HsTestService interface {
     Init(ctx context.Context, int1 int64) (int64, error)
 }
 
-type HsTestServiceClientInterface interface {
+type HsTestServiceClient interface {
     io.Closer
     Init(ctx context.Context, int1 int64) (int64, error)
 }
+
+// Temporary alias while we are migrating
+type HsTestServiceClientInterface = HsTestServiceClient
 
 type hsTestServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ HsTestServiceClientInterface = (*hsTestServiceClientImpl)(nil)
+var _ HsTestServiceClient = (*hsTestServiceClientImpl)(nil)
 
-func NewHsTestServiceChannelClient(channel thrift.RequestChannel) *hsTestServiceClientImpl {
+func NewHsTestServiceChannelClient(channel thrift.RequestChannel) HsTestServiceClient {
     return &hsTestServiceClientImpl{
         ch: channel,
     }

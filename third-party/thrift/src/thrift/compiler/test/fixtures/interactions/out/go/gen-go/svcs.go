@@ -32,20 +32,23 @@ type MyInteraction interface {
     Ping(ctx context.Context) (error)
 }
 
-type MyInteractionClientInterface interface {
+type MyInteractionClient interface {
     io.Closer
     Frobnicate(ctx context.Context) (int32, error)
     Ping(ctx context.Context) (error)
     Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error)
 }
 
+// Temporary alias while we are migrating
+type MyInteractionClientInterface = MyInteractionClient
+
 type myInteractionClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyInteractionClientInterface = (*myInteractionClientImpl)(nil)
+var _ MyInteractionClient = (*myInteractionClientImpl)(nil)
 
-func NewMyInteractionChannelClient(channel thrift.RequestChannel) *myInteractionClientImpl {
+func NewMyInteractionChannelClient(channel thrift.RequestChannel) MyInteractionClient {
     return &myInteractionClientImpl{
         ch: channel,
     }
@@ -134,20 +137,23 @@ type MyInteractionFast interface {
     Ping(ctx context.Context) (error)
 }
 
-type MyInteractionFastClientInterface interface {
+type MyInteractionFastClient interface {
     io.Closer
     Frobnicate(ctx context.Context) (int32, error)
     Ping(ctx context.Context) (error)
     Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error)
 }
 
+// Temporary alias while we are migrating
+type MyInteractionFastClientInterface = MyInteractionFastClient
+
 type myInteractionFastClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyInteractionFastClientInterface = (*myInteractionFastClientImpl)(nil)
+var _ MyInteractionFastClient = (*myInteractionFastClientImpl)(nil)
 
-func NewMyInteractionFastChannelClient(channel thrift.RequestChannel) *myInteractionFastClientImpl {
+func NewMyInteractionFastChannelClient(channel thrift.RequestChannel) MyInteractionFastClient {
     return &myInteractionFastClientImpl{
         ch: channel,
     }
@@ -235,18 +241,21 @@ type SerialInteraction interface {
     Frobnicate(ctx context.Context) (error)
 }
 
-type SerialInteractionClientInterface interface {
+type SerialInteractionClient interface {
     io.Closer
     Frobnicate(ctx context.Context) (error)
 }
+
+// Temporary alias while we are migrating
+type SerialInteractionClientInterface = SerialInteractionClient
 
 type serialInteractionClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ SerialInteractionClientInterface = (*serialInteractionClientImpl)(nil)
+var _ SerialInteractionClient = (*serialInteractionClientImpl)(nil)
 
-func NewSerialInteractionChannelClient(channel thrift.RequestChannel) *serialInteractionClientImpl {
+func NewSerialInteractionChannelClient(channel thrift.RequestChannel) SerialInteractionClient {
     return &serialInteractionClientImpl{
         ch: channel,
     }
@@ -274,18 +283,21 @@ type BoxedInteraction interface {
     GetABox(ctx context.Context) (*ShouldBeBoxed, error)
 }
 
-type BoxedInteractionClientInterface interface {
+type BoxedInteractionClient interface {
     io.Closer
     GetABox(ctx context.Context) (*ShouldBeBoxed, error)
 }
+
+// Temporary alias while we are migrating
+type BoxedInteractionClientInterface = BoxedInteractionClient
 
 type boxedInteractionClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ BoxedInteractionClientInterface = (*boxedInteractionClientImpl)(nil)
+var _ BoxedInteractionClient = (*boxedInteractionClientImpl)(nil)
 
-func NewBoxedInteractionChannelClient(channel thrift.RequestChannel) *boxedInteractionClientImpl {
+func NewBoxedInteractionChannelClient(channel thrift.RequestChannel) BoxedInteractionClient {
     return &boxedInteractionClientImpl{
         ch: channel,
     }
@@ -314,18 +326,21 @@ type MyService interface {
     Foo(ctx context.Context) (error)
 }
 
-type MyServiceClientInterface interface {
+type MyServiceClient interface {
     io.Closer
     Foo(ctx context.Context) (error)
 }
+
+// Temporary alias while we are migrating
+type MyServiceClientInterface = MyServiceClient
 
 type myServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServiceClientInterface = (*myServiceClientImpl)(nil)
+var _ MyServiceClient = (*myServiceClientImpl)(nil)
 
-func NewMyServiceChannelClient(channel thrift.RequestChannel) *myServiceClientImpl {
+func NewMyServiceChannelClient(channel thrift.RequestChannel) MyServiceClient {
     return &myServiceClientImpl{
         ch: channel,
     }
@@ -450,18 +465,21 @@ type Factories interface {
     Foo(ctx context.Context) (error)
 }
 
-type FactoriesClientInterface interface {
+type FactoriesClient interface {
     io.Closer
     Foo(ctx context.Context) (error)
 }
+
+// Temporary alias while we are migrating
+type FactoriesClientInterface = FactoriesClient
 
 type factoriesClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FactoriesClientInterface = (*factoriesClientImpl)(nil)
+var _ FactoriesClient = (*factoriesClientImpl)(nil)
 
-func NewFactoriesChannelClient(channel thrift.RequestChannel) *factoriesClientImpl {
+func NewFactoriesChannelClient(channel thrift.RequestChannel) FactoriesClient {
     return &factoriesClientImpl{
         ch: channel,
     }
@@ -586,18 +604,21 @@ type Perform interface {
     Foo(ctx context.Context) (error)
 }
 
-type PerformClientInterface interface {
+type PerformClient interface {
     io.Closer
     Foo(ctx context.Context) (error)
 }
+
+// Temporary alias while we are migrating
+type PerformClientInterface = PerformClient
 
 type performClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ PerformClientInterface = (*performClientImpl)(nil)
+var _ PerformClient = (*performClientImpl)(nil)
 
-func NewPerformChannelClient(channel thrift.RequestChannel) *performClientImpl {
+func NewPerformChannelClient(channel thrift.RequestChannel) PerformClient {
     return &performClientImpl{
         ch: channel,
     }
@@ -722,18 +743,21 @@ type InteractWithShared interface {
     DoSomeSimilarThings(ctx context.Context) (*shared.DoSomethingResult, error)
 }
 
-type InteractWithSharedClientInterface interface {
+type InteractWithSharedClient interface {
     io.Closer
     DoSomeSimilarThings(ctx context.Context) (*shared.DoSomethingResult, error)
 }
+
+// Temporary alias while we are migrating
+type InteractWithSharedClientInterface = InteractWithSharedClient
 
 type interactWithSharedClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ InteractWithSharedClientInterface = (*interactWithSharedClientImpl)(nil)
+var _ InteractWithSharedClient = (*interactWithSharedClientImpl)(nil)
 
-func NewInteractWithSharedChannelClient(channel thrift.RequestChannel) *interactWithSharedClientImpl {
+func NewInteractWithSharedChannelClient(channel thrift.RequestChannel) InteractWithSharedClient {
     return &interactWithSharedClientImpl{
         ch: channel,
     }
@@ -858,17 +882,20 @@ func (p *procFuncInteractWithSharedDoSomeSimilarThings) RunContext(ctx context.C
 type BoxService interface {
 }
 
-type BoxServiceClientInterface interface {
+type BoxServiceClient interface {
     io.Closer
 }
+
+// Temporary alias while we are migrating
+type BoxServiceClientInterface = BoxServiceClient
 
 type boxServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ BoxServiceClientInterface = (*boxServiceClientImpl)(nil)
+var _ BoxServiceClient = (*boxServiceClientImpl)(nil)
 
-func NewBoxServiceChannelClient(channel thrift.RequestChannel) *boxServiceClientImpl {
+func NewBoxServiceChannelClient(channel thrift.RequestChannel) BoxServiceClient {
     return &boxServiceClientImpl{
         ch: channel,
     }

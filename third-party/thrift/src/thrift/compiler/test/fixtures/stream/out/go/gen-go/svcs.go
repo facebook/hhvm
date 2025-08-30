@@ -29,7 +29,7 @@ var _ = metadata.GoUnusedProtection__
 type PubSubStreamingService interface {
 }
 
-type PubSubStreamingServiceClientInterface interface {
+type PubSubStreamingServiceClient interface {
     io.Closer
     Returnstream(ctx context.Context, i32From int32, i32To int32) (<-chan int32 /* elem stream */, <-chan error /* stream err */, error)
     Streamthrows(ctx context.Context, foo int32) (<-chan int32 /* elem stream */, <-chan error /* stream err */, error)
@@ -42,13 +42,16 @@ type PubSubStreamingServiceClientInterface interface {
     ReturnstreamFast(ctx context.Context, i32From int32, i32To int32) (<-chan int32 /* elem stream */, <-chan error /* stream err */, error)
 }
 
+// Temporary alias while we are migrating
+type PubSubStreamingServiceClientInterface = PubSubStreamingServiceClient
+
 type pubSubStreamingServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ PubSubStreamingServiceClientInterface = (*pubSubStreamingServiceClientImpl)(nil)
+var _ PubSubStreamingServiceClient = (*pubSubStreamingServiceClientImpl)(nil)
 
-func NewPubSubStreamingServiceChannelClient(channel thrift.RequestChannel) *pubSubStreamingServiceClientImpl {
+func NewPubSubStreamingServiceChannelClient(channel thrift.RequestChannel) PubSubStreamingServiceClient {
     return &pubSubStreamingServiceClientImpl{
         ch: channel,
     }

@@ -23,19 +23,19 @@ type {{service:go_client_name}} struct {
     {{#service:extends?}}
     {{#service:extends}}
     // Inherited/extended service
-    {{service:go_qualified_name}}ClientInterface
+    {{service:go_qualified_name}}Client
     {{/service:extends}}
     {{/service:extends?}}
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ {{service:go_name}}ClientInterface = (*{{service:go_client_name}})(nil)
+var _ {{service:go_name}}Client = (*{{service:go_client_name}})(nil)
 
-func New{{service:go_name}}ChannelClient(channel thrift.RequestChannel) *{{service:go_client_name}} {
+func New{{service:go_name}}ChannelClient(channel thrift.RequestChannel) {{service:go_name}}Client {
     return &{{service:go_client_name}}{
         {{#service:extends?}}
         {{#service:extends}}
-        {{service:go_name}}ClientInterface: {{service:go_package_alias_prefix}}New{{service:go_name}}ChannelClient(channel),
+        {{service:go_name}}Client: {{service:go_package_alias_prefix}}New{{service:go_name}}ChannelClient(channel),
         {{/service:extends}}
         {{/service:extends?}}
         ch: channel,

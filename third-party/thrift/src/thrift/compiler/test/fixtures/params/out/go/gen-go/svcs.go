@@ -34,7 +34,7 @@ type NestedContainers interface {
     Turtles(ctx context.Context, foo [][]map[int32]map[int32][]int32) (error)
 }
 
-type NestedContainersClientInterface interface {
+type NestedContainersClient interface {
     io.Closer
     MapList(ctx context.Context, foo map[int32][]int32) (error)
     MapSet(ctx context.Context, foo map[int32][]int32) (error)
@@ -43,13 +43,16 @@ type NestedContainersClientInterface interface {
     Turtles(ctx context.Context, foo [][]map[int32]map[int32][]int32) (error)
 }
 
+// Temporary alias while we are migrating
+type NestedContainersClientInterface = NestedContainersClient
+
 type nestedContainersClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ NestedContainersClientInterface = (*nestedContainersClientImpl)(nil)
+var _ NestedContainersClient = (*nestedContainersClientImpl)(nil)
 
-func NewNestedContainersChannelClient(channel thrift.RequestChannel) *nestedContainersClientImpl {
+func NewNestedContainersChannelClient(channel thrift.RequestChannel) NestedContainersClient {
     return &nestedContainersClientImpl{
         ch: channel,
     }

@@ -30,18 +30,21 @@ type Service interface {
     Func(ctx context.Context, arg1 StringWithAdapter_7208, arg2 StringWithCppAdapter, arg3 *Foo) (MyI32_4873, error)
 }
 
-type ServiceClientInterface interface {
+type ServiceClient interface {
     io.Closer
     Func(ctx context.Context, arg1 StringWithAdapter_7208, arg2 StringWithCppAdapter, arg3 *Foo) (MyI32_4873, error)
 }
+
+// Temporary alias while we are migrating
+type ServiceClientInterface = ServiceClient
 
 type serviceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ ServiceClientInterface = (*serviceClientImpl)(nil)
+var _ ServiceClient = (*serviceClientImpl)(nil)
 
-func NewServiceChannelClient(channel thrift.RequestChannel) *serviceClientImpl {
+func NewServiceChannelClient(channel thrift.RequestChannel) ServiceClient {
     return &serviceClientImpl{
         ch: channel,
     }
@@ -172,19 +175,22 @@ type AdapterService interface {
     AdaptedTypes(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error)
 }
 
-type AdapterServiceClientInterface interface {
+type AdapterServiceClient interface {
     io.Closer
     Count(ctx context.Context) (*CountingStruct, error)
     AdaptedTypes(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error)
 }
 
+// Temporary alias while we are migrating
+type AdapterServiceClientInterface = AdapterServiceClient
+
 type adapterServiceClientImpl struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ AdapterServiceClientInterface = (*adapterServiceClientImpl)(nil)
+var _ AdapterServiceClient = (*adapterServiceClientImpl)(nil)
 
-func NewAdapterServiceChannelClient(channel thrift.RequestChannel) *adapterServiceClientImpl {
+func NewAdapterServiceChannelClient(channel thrift.RequestChannel) AdapterServiceClient {
     return &adapterServiceClientImpl{
         ch: channel,
     }

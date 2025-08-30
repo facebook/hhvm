@@ -45,9 +45,6 @@ type myInteractionClientImpl struct {
 // Compile time interface enforcer
 var _ MyInteractionClientInterface = (*myInteractionClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use MyInteractionClientInterface instead.
-type MyInteractionClient = myInteractionClientImpl
-
 func NewMyInteractionChannelClient(channel thrift.RequestChannel) *myInteractionClientImpl {
     return &myInteractionClientImpl{
         ch: channel,
@@ -150,9 +147,6 @@ type myInteractionFastClientImpl struct {
 // Compile time interface enforcer
 var _ MyInteractionFastClientInterface = (*myInteractionFastClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use MyInteractionFastClientInterface instead.
-type MyInteractionFastClient = myInteractionFastClientImpl
-
 func NewMyInteractionFastChannelClient(channel thrift.RequestChannel) *myInteractionFastClientImpl {
     return &myInteractionFastClientImpl{
         ch: channel,
@@ -252,9 +246,6 @@ type serialInteractionClientImpl struct {
 // Compile time interface enforcer
 var _ SerialInteractionClientInterface = (*serialInteractionClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use SerialInteractionClientInterface instead.
-type SerialInteractionClient = serialInteractionClientImpl
-
 func NewSerialInteractionChannelClient(channel thrift.RequestChannel) *serialInteractionClientImpl {
     return &serialInteractionClientImpl{
         ch: channel,
@@ -293,9 +284,6 @@ type boxedInteractionClientImpl struct {
 }
 // Compile time interface enforcer
 var _ BoxedInteractionClientInterface = (*boxedInteractionClientImpl)(nil)
-
-// Deprecated: this type is deprecated, please use BoxedInteractionClientInterface instead.
-type BoxedInteractionClient = boxedInteractionClientImpl
 
 func NewBoxedInteractionChannelClient(channel thrift.RequestChannel) *boxedInteractionClientImpl {
     return &boxedInteractionClientImpl{
@@ -336,9 +324,6 @@ type myServiceClientImpl struct {
 }
 // Compile time interface enforcer
 var _ MyServiceClientInterface = (*myServiceClientImpl)(nil)
-
-// Deprecated: this type is deprecated, please use MyServiceClientInterface instead.
-type MyServiceClient = myServiceClientImpl
 
 func NewMyServiceChannelClient(channel thrift.RequestChannel) *myServiceClientImpl {
     return &myServiceClientImpl{
@@ -476,9 +461,6 @@ type factoriesClientImpl struct {
 // Compile time interface enforcer
 var _ FactoriesClientInterface = (*factoriesClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use FactoriesClientInterface instead.
-type FactoriesClient = factoriesClientImpl
-
 func NewFactoriesChannelClient(channel thrift.RequestChannel) *factoriesClientImpl {
     return &factoriesClientImpl{
         ch: channel,
@@ -614,9 +596,6 @@ type performClientImpl struct {
 }
 // Compile time interface enforcer
 var _ PerformClientInterface = (*performClientImpl)(nil)
-
-// Deprecated: this type is deprecated, please use PerformClientInterface instead.
-type PerformClient = performClientImpl
 
 func NewPerformChannelClient(channel thrift.RequestChannel) *performClientImpl {
     return &performClientImpl{
@@ -754,9 +733,6 @@ type interactWithSharedClientImpl struct {
 // Compile time interface enforcer
 var _ InteractWithSharedClientInterface = (*interactWithSharedClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use InteractWithSharedClientInterface instead.
-type InteractWithSharedClient = interactWithSharedClientImpl
-
 func NewInteractWithSharedChannelClient(channel thrift.RequestChannel) *interactWithSharedClientImpl {
     return &interactWithSharedClientImpl{
         ch: channel,
@@ -891,9 +867,6 @@ type boxServiceClientImpl struct {
 }
 // Compile time interface enforcer
 var _ BoxServiceClientInterface = (*boxServiceClientImpl)(nil)
-
-// Deprecated: this type is deprecated, please use BoxServiceClientInterface instead.
-type BoxServiceClient = boxServiceClientImpl
 
 func NewBoxServiceChannelClient(channel thrift.RequestChannel) *boxServiceClientImpl {
     return &boxServiceClientImpl{

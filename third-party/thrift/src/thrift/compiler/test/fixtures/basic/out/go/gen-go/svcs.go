@@ -41,9 +41,6 @@ type fooServiceClientImpl struct {
 // Compile time interface enforcer
 var _ FooServiceClientInterface = (*fooServiceClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use FooServiceClientInterface instead.
-type FooServiceClient = fooServiceClientImpl
-
 func NewFooServiceChannelClient(channel thrift.RequestChannel) *fooServiceClientImpl {
     return &fooServiceClientImpl{
         ch: channel,
@@ -179,9 +176,6 @@ type fB303ServiceClientImpl struct {
 }
 // Compile time interface enforcer
 var _ FB303ServiceClientInterface = (*fB303ServiceClientImpl)(nil)
-
-// Deprecated: this type is deprecated, please use FB303ServiceClientInterface instead.
-type FB303ServiceClient = fB303ServiceClientImpl
 
 func NewFB303ServiceChannelClient(channel thrift.RequestChannel) *fB303ServiceClientImpl {
     return &fB303ServiceClientImpl{
@@ -339,9 +333,6 @@ type myServiceClientImpl struct {
 }
 // Compile time interface enforcer
 var _ MyServiceClientInterface = (*myServiceClientImpl)(nil)
-
-// Deprecated: this type is deprecated, please use MyServiceClientInterface instead.
-type MyServiceClient = myServiceClientImpl
 
 func NewMyServiceChannelClient(channel thrift.RequestChannel) *myServiceClientImpl {
     return &myServiceClientImpl{
@@ -1075,9 +1066,6 @@ type dbMixedStackArgumentsClientImpl struct {
 }
 // Compile time interface enforcer
 var _ DbMixedStackArgumentsClientInterface = (*dbMixedStackArgumentsClientImpl)(nil)
-
-// Deprecated: this type is deprecated, please use DbMixedStackArgumentsClientInterface instead.
-type DbMixedStackArgumentsClient = dbMixedStackArgumentsClientImpl
 
 func NewDbMixedStackArgumentsChannelClient(channel thrift.RequestChannel) *dbMixedStackArgumentsClientImpl {
     return &dbMixedStackArgumentsClientImpl{

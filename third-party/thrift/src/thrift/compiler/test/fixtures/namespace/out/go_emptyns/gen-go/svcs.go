@@ -41,9 +41,6 @@ type testServiceClientImpl struct {
 // Compile time interface enforcer
 var _ TestServiceClientInterface = (*testServiceClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use TestServiceClientInterface instead.
-type TestServiceClient = testServiceClientImpl
-
 func NewTestServiceChannelClient(channel thrift.RequestChannel) *testServiceClientImpl {
     return &testServiceClientImpl{
         ch: channel,

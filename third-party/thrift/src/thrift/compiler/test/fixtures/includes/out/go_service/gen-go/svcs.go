@@ -47,9 +47,6 @@ type myServiceClientImpl struct {
 // Compile time interface enforcer
 var _ MyServiceClientInterface = (*myServiceClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use MyServiceClientInterface instead.
-type MyServiceClient = myServiceClientImpl
-
 func NewMyServiceChannelClient(channel thrift.RequestChannel) *myServiceClientImpl {
     return &myServiceClientImpl{
         ch: channel,

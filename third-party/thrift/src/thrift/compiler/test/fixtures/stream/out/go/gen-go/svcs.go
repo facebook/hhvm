@@ -48,9 +48,6 @@ type pubSubStreamingServiceClientImpl struct {
 // Compile time interface enforcer
 var _ PubSubStreamingServiceClientInterface = (*pubSubStreamingServiceClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use PubSubStreamingServiceClientInterface instead.
-type PubSubStreamingServiceClient = pubSubStreamingServiceClientImpl
-
 func NewPubSubStreamingServiceChannelClient(channel thrift.RequestChannel) *pubSubStreamingServiceClientImpl {
     return &pubSubStreamingServiceClientImpl{
         ch: channel,

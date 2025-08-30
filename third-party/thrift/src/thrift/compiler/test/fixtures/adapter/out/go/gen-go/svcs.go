@@ -41,9 +41,6 @@ type serviceClientImpl struct {
 // Compile time interface enforcer
 var _ ServiceClientInterface = (*serviceClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use ServiceClientInterface instead.
-type ServiceClient = serviceClientImpl
-
 func NewServiceChannelClient(channel thrift.RequestChannel) *serviceClientImpl {
     return &serviceClientImpl{
         ch: channel,
@@ -186,9 +183,6 @@ type adapterServiceClientImpl struct {
 }
 // Compile time interface enforcer
 var _ AdapterServiceClientInterface = (*adapterServiceClientImpl)(nil)
-
-// Deprecated: this type is deprecated, please use AdapterServiceClientInterface instead.
-type AdapterServiceClient = adapterServiceClientImpl
 
 func NewAdapterServiceChannelClient(channel thrift.RequestChannel) *adapterServiceClientImpl {
     return &adapterServiceClientImpl{

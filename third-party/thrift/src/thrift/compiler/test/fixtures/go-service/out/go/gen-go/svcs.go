@@ -85,9 +85,6 @@ type getEntityClientImpl struct {
 // Compile time interface enforcer
 var _ GetEntityClientInterface = (*getEntityClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use GetEntityClientInterface instead.
-type GetEntityClient = getEntityClientImpl
-
 func NewGetEntityChannelClient(channel thrift.RequestChannel) *getEntityClientImpl {
     return &getEntityClientImpl{
         ch: channel,

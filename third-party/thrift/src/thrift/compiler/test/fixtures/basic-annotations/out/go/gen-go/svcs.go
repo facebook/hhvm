@@ -40,9 +40,6 @@ type badInteractionClientImpl struct {
 // Compile time interface enforcer
 var _ BadInteractionClientInterface = (*badInteractionClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use BadInteractionClientInterface instead.
-type BadInteractionClient = badInteractionClientImpl
-
 func NewBadInteractionChannelClient(channel thrift.RequestChannel) *badInteractionClientImpl {
     return &badInteractionClientImpl{
         ch: channel,
@@ -94,9 +91,6 @@ type myServiceClientImpl struct {
 }
 // Compile time interface enforcer
 var _ MyServiceClientInterface = (*myServiceClientImpl)(nil)
-
-// Deprecated: this type is deprecated, please use MyServiceClientInterface instead.
-type MyServiceClient = myServiceClientImpl
 
 func NewMyServiceChannelClient(channel thrift.RequestChannel) *myServiceClientImpl {
     return &myServiceClientImpl{
@@ -641,9 +635,6 @@ type myServicePrioParentClientImpl struct {
 // Compile time interface enforcer
 var _ MyServicePrioParentClientInterface = (*myServicePrioParentClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use MyServicePrioParentClientInterface instead.
-type MyServicePrioParentClient = myServicePrioParentClientImpl
-
 func NewMyServicePrioParentChannelClient(channel thrift.RequestChannel) *myServicePrioParentClientImpl {
     return &myServicePrioParentClientImpl{
         ch: channel,
@@ -853,9 +844,6 @@ type myServicePrioChildClientImpl struct {
 // Compile time interface enforcer
 var _ MyServicePrioChildClientInterface = (*myServicePrioChildClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use MyServicePrioChildClientInterface instead.
-type MyServicePrioChildClient = myServicePrioChildClientImpl
-
 func NewMyServicePrioChildChannelClient(channel thrift.RequestChannel) *myServicePrioChildClientImpl {
     return &myServicePrioChildClientImpl{
         MyServicePrioParentClientInterface: NewMyServicePrioParentChannelClient(channel),
@@ -965,9 +953,6 @@ type badServiceClientImpl struct {
 }
 // Compile time interface enforcer
 var _ BadServiceClientInterface = (*badServiceClientImpl)(nil)
-
-// Deprecated: this type is deprecated, please use BadServiceClientInterface instead.
-type BadServiceClient = badServiceClientImpl
 
 func NewBadServiceChannelClient(channel thrift.RequestChannel) *badServiceClientImpl {
     return &badServiceClientImpl{
@@ -1109,9 +1094,6 @@ type fooBarBazServiceClientImpl struct {
 }
 // Compile time interface enforcer
 var _ FooBarBazServiceClientInterface = (*fooBarBazServiceClientImpl)(nil)
-
-// Deprecated: this type is deprecated, please use FooBarBazServiceClientInterface instead.
-type FooBarBazServiceClient = fooBarBazServiceClientImpl
 
 func NewFooBarBazServiceChannelClient(channel thrift.RequestChannel) *fooBarBazServiceClientImpl {
     return &fooBarBazServiceClientImpl{

@@ -51,9 +51,6 @@ type extendTestServiceClientImpl struct {
 // Compile time interface enforcer
 var _ ExtendTestServiceClientInterface = (*extendTestServiceClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use ExtendTestServiceClientInterface instead.
-type ExtendTestServiceClient = extendTestServiceClientImpl
-
 func NewExtendTestServiceChannelClient(channel thrift.RequestChannel) *extendTestServiceClientImpl {
     return &extendTestServiceClientImpl{
         HsTestServiceClientInterface: test0.NewHsTestServiceChannelClient(channel),

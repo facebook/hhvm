@@ -41,9 +41,6 @@ type hsTestServiceClientImpl struct {
 // Compile time interface enforcer
 var _ HsTestServiceClientInterface = (*hsTestServiceClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use HsTestServiceClientInterface instead.
-type HsTestServiceClient = hsTestServiceClientImpl
-
 func NewHsTestServiceChannelClient(channel thrift.RequestChannel) *hsTestServiceClientImpl {
     return &hsTestServiceClientImpl{
         ch: channel,

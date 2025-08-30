@@ -41,9 +41,6 @@ type myRootClientImpl struct {
 // Compile time interface enforcer
 var _ MyRootClientInterface = (*myRootClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use MyRootClientInterface instead.
-type MyRootClient = myRootClientImpl
-
 func NewMyRootChannelClient(channel thrift.RequestChannel) *myRootClientImpl {
     return &myRootClientImpl{
         ch: channel,
@@ -188,9 +185,6 @@ type myNodeClientImpl struct {
 // Compile time interface enforcer
 var _ MyNodeClientInterface = (*myNodeClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use MyNodeClientInterface instead.
-type MyNodeClient = myNodeClientImpl
-
 func NewMyNodeChannelClient(channel thrift.RequestChannel) *myNodeClientImpl {
     return &myNodeClientImpl{
         MyRootClientInterface: NewMyRootChannelClient(channel),
@@ -308,9 +302,6 @@ type myLeafClientImpl struct {
 }
 // Compile time interface enforcer
 var _ MyLeafClientInterface = (*myLeafClientImpl)(nil)
-
-// Deprecated: this type is deprecated, please use MyLeafClientInterface instead.
-type MyLeafClient = myLeafClientImpl
 
 func NewMyLeafChannelClient(channel thrift.RequestChannel) *myLeafClientImpl {
     return &myLeafClientImpl{

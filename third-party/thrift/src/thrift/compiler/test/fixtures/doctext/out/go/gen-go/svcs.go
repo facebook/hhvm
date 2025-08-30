@@ -46,9 +46,6 @@ type cClientImpl struct {
 // Compile time interface enforcer
 var _ CClientInterface = (*cClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use CClientInterface instead.
-type CClient = cClientImpl
-
 func NewCChannelClient(channel thrift.RequestChannel) *cClientImpl {
     return &cClientImpl{
         ch: channel,

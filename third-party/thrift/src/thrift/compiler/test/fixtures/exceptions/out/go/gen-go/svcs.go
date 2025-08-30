@@ -47,9 +47,6 @@ type raiserClientImpl struct {
 // Compile time interface enforcer
 var _ RaiserClientInterface = (*raiserClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use RaiserClientInterface instead.
-type RaiserClient = raiserClientImpl
-
 func NewRaiserChannelClient(channel thrift.RequestChannel) *raiserClientImpl {
     return &raiserClientImpl{
         ch: channel,

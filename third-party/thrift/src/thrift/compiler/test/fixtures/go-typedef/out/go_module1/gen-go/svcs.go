@@ -49,9 +49,6 @@ type finderClientImpl struct {
 // Compile time interface enforcer
 var _ FinderClientInterface = (*finderClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use FinderClientInterface instead.
-type FinderClient = finderClientImpl
-
 func NewFinderChannelClient(channel thrift.RequestChannel) *finderClientImpl {
     return &finderClientImpl{
         ch: channel,

@@ -49,9 +49,6 @@ type nestedContainersClientImpl struct {
 // Compile time interface enforcer
 var _ NestedContainersClientInterface = (*nestedContainersClientImpl)(nil)
 
-// Deprecated: this type is deprecated, please use NestedContainersClientInterface instead.
-type NestedContainersClient = nestedContainersClientImpl
-
 func NewNestedContainersChannelClient(channel thrift.RequestChannel) *nestedContainersClientImpl {
     return &nestedContainersClientImpl{
         ch: channel,

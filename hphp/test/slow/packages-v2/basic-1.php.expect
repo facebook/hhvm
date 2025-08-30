@@ -2,9 +2,11 @@ Packages
   intern
     include_paths => [fake_flib/intern/]
     includes => [prod]
+    soft_includes => []
   prod
     include_paths => [basic-3.php, doesnotexists/, fake_flib/]
     includes => []
+    soft_includes => []
 Deployments
   my-intern
     domains => [www\.my-intern\.com]

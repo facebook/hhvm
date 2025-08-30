@@ -1548,15 +1548,20 @@ Array HHVM_FUNCTION(get_all_packages) {
   DictInit result(packageInfo.packages().size());
   for (auto const& [name, p] : packageInfo.packages()) {
     if (Cfg::Eval::PackageV2) {
-      DictInit package(2);
+      DictInit package(3);
 
       VecInit includes(p.m_includes.size());
       for (auto& s : p.m_includes) includes.append(String{makeStaticString(s)});
       package.set(s_includes.get(), includes.toVariant());
 
+      VecInit soft_includes(p.m_soft_includes.size());
+      for (auto& s : p.m_soft_includes) soft_includes.append(String{makeStaticString(s)});
+      package.set(s_soft_includes.get(), soft_includes.toVariant());
+
       VecInit include_paths(p.m_include_paths.size());
       for (auto& s : p.m_include_paths) include_paths.append(String{makeStaticString(s)});
       package.set(s_include_paths.get(), include_paths.toVariant());
+
       result.set(makeStaticString(name), package.toVariant());
     } else {
       DictInit package(3);

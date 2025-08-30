@@ -67,8 +67,11 @@ class ServiceHandler<::facebook::thrift::test::Service> : public apache::thrift:
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_func{apache::thrift::detail::si::InvocationType::AsyncTm};
  public:
 
-  virtual void fbthrift_execute_decorators_before_func(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_arg1*/, const ::std::string& /*p_arg2*/, const ::facebook::thrift::test::Foo& /*p_arg3*/) {}
-  virtual void fbthrift_execute_decorators_after_func(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_func(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_arg1*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_arg2*/, apache::thrift::detail::DecoratorArgType<::facebook::thrift::test::Foo>::type /*p_arg3*/) {}
+  virtual void fbthrift_execute_decorators_after_func(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::facebook::thrift::test::MyI32_4873>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_func(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::facebook::thrift::test::MyI32_4873>::type result) {
+    static_cast<ServiceHandler<::facebook::thrift::test::Service>*>(iface)->fbthrift_execute_decorators_after_func(*ctx, result);
+  }
 };
 
 namespace detail {

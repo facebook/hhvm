@@ -100,7 +100,10 @@ void GoodServiceAsyncProcessor::executeRequest_bar(
       /* .definingServiceName =*/ "BadService",
       /* .methodName =*/ "bar",
       /* .qualifiedMethodName =*/ "BadService.bar"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::GoodService>::fbthrift_invoke_decorator_after_bar};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -114,7 +117,9 @@ void GoodServiceAsyncProcessor::executeRequest_bar(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_bar(*serverRequest.requestContext());
 
@@ -274,7 +279,8 @@ void GoodServiceAsyncProcessor::executeRequest_BadInteraction_foo(
       /* .definingServiceName =*/ "BadService",
       /* .methodName =*/ "BadInteraction.foo",
       /* .qualifiedMethodName =*/ "BadService.BadInteraction.foo"};
-  auto callback =
+  auto decoratorCallback = apache::thrift::HandlerCallback<void>::DecoratorAfterCallback::noop();
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -289,7 +295,8 @@ void GoodServiceAsyncProcessor::executeRequest_BadInteraction_foo(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
-          std::move(tile));
+          std::move(tile),
+          std::move(decoratorCallback));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;

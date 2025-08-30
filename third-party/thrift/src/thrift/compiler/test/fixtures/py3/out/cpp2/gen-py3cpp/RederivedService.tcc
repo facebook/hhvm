@@ -100,7 +100,10 @@ void RederivedServiceAsyncProcessor::executeRequest_get_seven(
       /* .definingServiceName =*/ "RederivedService",
       /* .methodName =*/ "get_seven",
       /* .qualifiedMethodName =*/ "RederivedService.get_seven"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::RederivedService>::fbthrift_invoke_decorator_after_get_seven};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -114,7 +117,9 @@ void RederivedServiceAsyncProcessor::executeRequest_get_seven(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_get_seven(*serverRequest.requestContext());
 

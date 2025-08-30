@@ -104,7 +104,10 @@ class SharedInteractionIf : public apache::thrift::Tile, public apache::thrift::
  public:
 
   virtual void fbthrift_execute_decorators_before_createSharedInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_createSharedInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const SharedInteractionIf& /*interaction*/) {}
+  virtual void fbthrift_execute_decorators_after_createSharedInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_createSharedInteraction(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::thrift::shared_interactions::InteractLocally>*>(iface)->fbthrift_execute_decorators_after_createSharedInteraction(*ctx);
+  }
 };
 
 namespace detail {

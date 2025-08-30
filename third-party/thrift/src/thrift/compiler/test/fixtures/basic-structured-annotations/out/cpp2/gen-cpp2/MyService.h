@@ -80,9 +80,15 @@ class ServiceHandler<::test::fixtures::basic-structured-annotations::MyService> 
  public:
 
   virtual void fbthrift_execute_decorators_before_first(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_first(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::test::fixtures::basic-structured-annotations::annotated_inline_string& /*result*/) {}
-  virtual void fbthrift_execute_decorators_before_second(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_count*/) {}
-  virtual void fbthrift_execute_decorators_after_second(apache::thrift::Cpp2RequestContext& /*requestCtx*/, bool /*result*/) {}
+  virtual void fbthrift_execute_decorators_after_first(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::test::fixtures::basic-structured-annotations::annotated_inline_string>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_first(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::test::fixtures::basic-structured-annotations::annotated_inline_string>::type result) {
+    static_cast<ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>*>(iface)->fbthrift_execute_decorators_after_first(*ctx, result);
+  }
+  virtual void fbthrift_execute_decorators_before_second(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_count*/) {}
+  virtual void fbthrift_execute_decorators_after_second(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<bool>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_second(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<bool>::type result) {
+    static_cast<ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>*>(iface)->fbthrift_execute_decorators_after_second(*ctx, result);
+  }
 };
 
 namespace detail {

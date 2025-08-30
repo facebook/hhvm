@@ -102,7 +102,10 @@ void AdapterServiceAsyncProcessor::executeRequest_count(
       /* .definingServiceName =*/ "AdapterService",
       /* .methodName =*/ "count",
       /* .qualifiedMethodName =*/ "AdapterService.count"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::CountingStruct>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::fbthrift_invoke_decorator_after_count};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::CountingStruct>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -116,7 +119,9 @@ void AdapterServiceAsyncProcessor::executeRequest_count(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_count(*serverRequest.requestContext());
 
@@ -267,7 +272,10 @@ void AdapterServiceAsyncProcessor::executeRequest_adaptedTypes(
       /* .definingServiceName =*/ "AdapterService",
       /* .methodName =*/ "adaptedTypes",
       /* .qualifiedMethodName =*/ "AdapterService.adaptedTypes"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>::fbthrift_invoke_decorator_after_adaptedTypes};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -281,7 +289,9 @@ void AdapterServiceAsyncProcessor::executeRequest_adaptedTypes(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_adaptedTypes(*serverRequest.requestContext(), *args.uarg_arg);
 

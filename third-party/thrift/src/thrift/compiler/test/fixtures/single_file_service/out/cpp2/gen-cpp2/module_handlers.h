@@ -106,9 +106,15 @@ class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface 
  public:
 
   virtual void fbthrift_execute_decorators_before_createI(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_createI(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const IIf& /*interaction*/) {}
+  virtual void fbthrift_execute_decorators_after_createI(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_createI(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::A>*>(iface)->fbthrift_execute_decorators_after_createI(*ctx);
+  }
   virtual void fbthrift_execute_decorators_before_foo(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_foo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Foo& /*result*/) {}
+  virtual void fbthrift_execute_decorators_after_foo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Foo>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_foo(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::cpp2::Foo>::type result) {
+    static_cast<ServiceHandler<::cpp2::A>*>(iface)->fbthrift_execute_decorators_after_foo(*ctx, result);
+  }
 };
 
 namespace detail {
@@ -303,16 +309,25 @@ class ServiceHandler<::cpp2::B> : virtual public ::cpp2::ASvIf {
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_sink_stuff{apache::thrift::detail::si::InvocationType::AsyncTm};
  public:
   void fbthrift_execute_decorators_before_createI(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
-  void fbthrift_execute_decorators_after_createI(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const IIf& /*interaction*/) override {}
+  void fbthrift_execute_decorators_after_createI(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
   void fbthrift_execute_decorators_before_foo(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
-  void fbthrift_execute_decorators_after_foo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Foo& /*result*/) override {}
+  void fbthrift_execute_decorators_after_foo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Foo>::type /*result*/) override {}
 
-  virtual void fbthrift_execute_decorators_before_bar(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Foo& /*p_foo*/) {}
+  virtual void fbthrift_execute_decorators_before_bar(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::cpp2::Foo>::type /*p_foo*/) {}
   virtual void fbthrift_execute_decorators_after_bar(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_bar(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::B>*>(iface)->fbthrift_execute_decorators_after_bar(*ctx);
+  }
   virtual void fbthrift_execute_decorators_before_stream_stuff(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_stream_stuff(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_stream_stuff(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::B>*>(iface)->fbthrift_execute_decorators_after_stream_stuff(*ctx);
+  }
   virtual void fbthrift_execute_decorators_before_sink_stuff(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_sink_stuff(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_sink_stuff(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::B>*>(iface)->fbthrift_execute_decorators_after_sink_stuff(*ctx);
+  }
 };
 
 namespace detail {
@@ -538,7 +553,10 @@ class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface 
  public:
 
   virtual void fbthrift_execute_decorators_before_createI(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_createI(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const IIf& /*interaction*/) {}
+  virtual void fbthrift_execute_decorators_after_createI(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_createI(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::C>*>(iface)->fbthrift_execute_decorators_after_createI(*ctx);
+  }
 };
 
 namespace detail {

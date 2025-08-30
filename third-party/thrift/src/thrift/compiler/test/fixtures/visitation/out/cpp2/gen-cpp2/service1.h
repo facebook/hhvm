@@ -118,16 +118,34 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service1> : public apache::thr
 
   virtual void fbthrift_execute_decorators_before_method1(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_method1(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_before_method2(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_x*/, const ::test_cpp2::cpp_reflection::struct1& /*p_y*/, double /*p_z*/) {}
+  static void fbthrift_invoke_decorator_after_method1(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::test_cpp2::cpp_reflection::service1>*>(iface)->fbthrift_execute_decorators_after_method1(*ctx);
+  }
+  virtual void fbthrift_execute_decorators_before_method2(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_x*/, apache::thrift::detail::DecoratorArgType<::test_cpp2::cpp_reflection::struct1>::type /*p_y*/, apache::thrift::detail::DecoratorArgType<double>::type /*p_z*/) {}
   virtual void fbthrift_execute_decorators_after_method2(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_method2(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::test_cpp2::cpp_reflection::service1>*>(iface)->fbthrift_execute_decorators_after_method2(*ctx);
+  }
   virtual void fbthrift_execute_decorators_before_method3(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_method3(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
-  virtual void fbthrift_execute_decorators_before_method4(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_i*/, const ::test_cpp2::cpp_reflection::struct1& /*p_j*/, double /*p_k*/) {}
-  virtual void fbthrift_execute_decorators_after_method4(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_after_method3(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_method3(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
+    static_cast<ServiceHandler<::test_cpp2::cpp_reflection::service1>*>(iface)->fbthrift_execute_decorators_after_method3(*ctx, result);
+  }
+  virtual void fbthrift_execute_decorators_before_method4(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_i*/, apache::thrift::detail::DecoratorArgType<::test_cpp2::cpp_reflection::struct1>::type /*p_j*/, apache::thrift::detail::DecoratorArgType<double>::type /*p_k*/) {}
+  virtual void fbthrift_execute_decorators_after_method4(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_method4(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
+    static_cast<ServiceHandler<::test_cpp2::cpp_reflection::service1>*>(iface)->fbthrift_execute_decorators_after_method4(*ctx, result);
+  }
   virtual void fbthrift_execute_decorators_before_method5(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_method5(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::test_cpp2::cpp_reflection::struct2& /*result*/) {}
-  virtual void fbthrift_execute_decorators_before_method6(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_l*/, const ::test_cpp2::cpp_reflection::struct1& /*p_m*/, double /*p_n*/) {}
-  virtual void fbthrift_execute_decorators_after_method6(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::test_cpp2::cpp_reflection::struct2& /*result*/) {}
+  virtual void fbthrift_execute_decorators_after_method5(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::test_cpp2::cpp_reflection::struct2>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_method5(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::test_cpp2::cpp_reflection::struct2>::type result) {
+    static_cast<ServiceHandler<::test_cpp2::cpp_reflection::service1>*>(iface)->fbthrift_execute_decorators_after_method5(*ctx, result);
+  }
+  virtual void fbthrift_execute_decorators_before_method6(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_l*/, apache::thrift::detail::DecoratorArgType<::test_cpp2::cpp_reflection::struct1>::type /*p_m*/, apache::thrift::detail::DecoratorArgType<double>::type /*p_n*/) {}
+  virtual void fbthrift_execute_decorators_after_method6(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::test_cpp2::cpp_reflection::struct2>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_method6(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::test_cpp2::cpp_reflection::struct2>::type result) {
+    static_cast<ServiceHandler<::test_cpp2::cpp_reflection::service1>*>(iface)->fbthrift_execute_decorators_after_method6(*ctx, result);
+  }
 };
 
 namespace detail {

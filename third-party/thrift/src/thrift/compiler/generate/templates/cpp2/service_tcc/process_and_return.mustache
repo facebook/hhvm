@@ -16,6 +16,7 @@
 
 }}
 {{#import "method_decorators/params" as decorator_params}}
+{{#import "method_decorators/decorator_cpp" as decorator_cpp}}
 {{#service:functions?}}
 //
 // Service Methods
@@ -186,6 +187,13 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
       /* .definingServiceName =*/ "{{service:parent_service_name}}",
       /* .methodName =*/ "{{> common/function_name}}",
       /* .qualifiedMethodName =*/ "{{#if service:interaction?}}{{service:parent_service_name}}{{#else}}{{service:name}}{{/if service:interaction?}}.{{> common/function_name}}"};
+{{#if service:self.interaction?}}{{! TODO(ezou) deal with this case properly}}
+  auto decoratorCallback = apache::thrift::HandlerCallbackOneWay::DecoratorAfterCallback::noop();
+{{#else}}
+  apache::thrift::HandlerCallbackOneWay::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<{{service:self.qualified_name}}>::fbthrift_invoke_decorator_after_{{function:self.cpp_name}}};
+{{/if service:self.interaction?}}
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
       apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
       std::move(ctxStack),
@@ -196,8 +204,9 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
       serverRequest.requestContext(),
       requestPileNotification,
       concurrencyControllerNotification,
-      std::move(serverRequest.requestData()){{#if in_or_creates_interaction?}},
-      std::move(tile){{/if in_or_creates_interaction?}});
+      std::move(serverRequest.requestData()),
+      {{#if in_or_creates_interaction?}}std::move(tile), {{#else}}apache::thrift::TilePtr(),{{/if in_or_creates_interaction?}}
+      std::move(decoratorCallback));
 {{/function:oneway?}}
 {{^function:oneway?}}
     folly::exception_wrapper ew(std::current_exception());
@@ -221,7 +230,14 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
       /* .definingServiceName =*/ "{{service:parent_service_name}}",
       /* .methodName =*/ "{{> common/function_name}}",
       /* .qualifiedMethodName =*/ "{{#if service:interaction?}}{{service:parent_service_name}}{{#else}}{{service:name}}{{/if service:interaction?}}.{{> common/function_name}}"};
-  auto callback =
+{{#if service:self.interaction?}}{{! TODO(ezou) deal with this case properly}}
+  auto decoratorCallback = apache::thrift::HandlerCallback<{{> types/return_type_server}}>::DecoratorAfterCallback::noop();
+{{#else}}
+  apache::thrift::HandlerCallback<{{> types/return_type_server}}>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<{{service:self.qualified_name}}>::fbthrift_invoke_decorator_after_{{function:self.cpp_name}}};
+{{/if service:self.interaction?}}
+ auto callback =
       apache::thrift::HandlerCallbackPtr<{{> types/return_type_server}}>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -235,8 +251,9 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()){{#if in_or_creates_interaction?}},
-          std::move(tile){{/if in_or_creates_interaction?}});
+          std::move(serverRequest.requestData()),
+          {{#if in_or_creates_interaction?}}std::move(tile),{{#else}}apache::thrift::TilePtr(),{{/if in_or_creates_interaction?}}
+          std::move(decoratorCallback));
 {{/function:oneway?}}
 {{#if service:self.interaction?}}{{! TODO implement later}}{{#else}}
 

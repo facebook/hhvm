@@ -95,12 +95,24 @@ class ServiceHandler<::cpp2::Raiser> : public apache::thrift::ServerInterface {
 
   virtual void fbthrift_execute_decorators_before_doBland(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_doBland(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_doBland(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::Raiser>*>(iface)->fbthrift_execute_decorators_after_doBland(*ctx);
+  }
   virtual void fbthrift_execute_decorators_before_doRaise(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_doRaise(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_doRaise(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::Raiser>*>(iface)->fbthrift_execute_decorators_after_doRaise(*ctx);
+  }
   virtual void fbthrift_execute_decorators_before_get200(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_get200(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) {}
+  virtual void fbthrift_execute_decorators_after_get200(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_get200(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::string>::type result) {
+    static_cast<ServiceHandler<::cpp2::Raiser>*>(iface)->fbthrift_execute_decorators_after_get200(*ctx, result);
+  }
   virtual void fbthrift_execute_decorators_before_get500(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_get500(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) {}
+  virtual void fbthrift_execute_decorators_after_get500(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_get500(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::string>::type result) {
+    static_cast<ServiceHandler<::cpp2::Raiser>*>(iface)->fbthrift_execute_decorators_after_get500(*ctx, result);
+  }
 };
 
 namespace detail {

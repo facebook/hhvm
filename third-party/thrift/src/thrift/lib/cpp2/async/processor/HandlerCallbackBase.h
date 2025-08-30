@@ -19,6 +19,7 @@
 #include <thrift/lib/cpp2/TrustedServerException.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/async/ServerRequestData.h>
+#include <thrift/lib/cpp2/server/DecoratorArgType.h>
 #include <thrift/lib/cpp2/server/IOWorkerContext.h>
 #include <thrift/lib/cpp2/server/RequestCompletionCallback.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
@@ -39,6 +40,53 @@ folly::coro::Task<void> processServiceInterceptorsOnRequest(
     HandlerCallbackBase&,
     detail::ServiceInterceptorOnRequestArguments arguments);
 #endif // FOLLY_HAS_COROUTINES
+
+/**
+ * This is a CRTP base class for DecoratorAfterCallback.
+ */
+template <typename Derived, typename CallbackType>
+struct DecoratorAfterCallbackBase {
+  static constexpr Derived noop() { return {nullptr, nullptr}; }
+  void* iface;
+  CallbackType afterCallback;
+};
+
+template <typename Derived, typename ResultType, typename ArgType>
+struct DecoratorAfterCallbackWithResult
+    : public DecoratorAfterCallbackBase<
+          Derived,
+          void (*)(void*, Cpp2RequestContext*, ArgType)> {
+  void invoke(Cpp2RequestContext* ctx, ResultType result) {
+    if (this->iface != nullptr) {
+      this->afterCallback(
+          this->iface, ctx, Derived::extractDecoratorArg(result));
+    }
+  }
+};
+
+template <typename Derived, typename ResultType>
+struct DecoratorAfterCallbackWithResult<Derived, ResultType, void>
+    : public DecoratorAfterCallbackBase<
+          Derived,
+          void (*)(void*, Cpp2RequestContext*)> {
+  void invoke(Cpp2RequestContext* ctx, ResultType) {
+    if (this->iface != nullptr) {
+      this->afterCallback(this->iface, ctx);
+    }
+  }
+};
+
+struct DecoratorAfterCallbackNoResult
+    : public DecoratorAfterCallbackBase<
+          DecoratorAfterCallbackNoResult,
+          void (*)(void*, Cpp2RequestContext*)> {
+  void invoke(Cpp2RequestContext* ctx) {
+    if (this->iface != nullptr) {
+      this->afterCallback(this->iface, ctx);
+    }
+  }
+};
+
 } // namespace detail
 
 /**

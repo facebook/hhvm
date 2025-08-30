@@ -75,10 +75,16 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_has_arg_docs{apache::thrift::detail::si::InvocationType::AsyncTm};
  public:
 
-  virtual void fbthrift_execute_decorators_before_query(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::MyStruct& /*p_s*/, const ::cpp2::Included& /*p_i*/) {}
+  virtual void fbthrift_execute_decorators_before_query(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::cpp2::MyStruct>::type /*p_s*/, apache::thrift::detail::DecoratorArgType<::cpp2::Included>::type /*p_i*/) {}
   virtual void fbthrift_execute_decorators_after_query(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_before_has_arg_docs(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::MyStruct& /*p_s*/, const ::cpp2::Included& /*p_i*/) {}
+  static void fbthrift_invoke_decorator_after_query(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::MyService>*>(iface)->fbthrift_execute_decorators_after_query(*ctx);
+  }
+  virtual void fbthrift_execute_decorators_before_has_arg_docs(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::cpp2::MyStruct>::type /*p_s*/, apache::thrift::detail::DecoratorArgType<::cpp2::Included>::type /*p_i*/) {}
   virtual void fbthrift_execute_decorators_after_has_arg_docs(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_has_arg_docs(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::MyService>*>(iface)->fbthrift_execute_decorators_after_has_arg_docs(*ctx);
+  }
 };
 
 namespace detail {

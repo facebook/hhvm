@@ -20,6 +20,7 @@
 #include <folly/coro/Task.h>
 #include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/async/processor/HandlerCallbackBase.h>
+#include <thrift/lib/cpp2/server/DecoratorArgType.h>
 #include <thrift/lib/cpp2/util/IntrusiveSharedPtr.h>
 
 namespace apache::thrift {
@@ -28,7 +29,61 @@ class HandlerCallbackOneWay : public HandlerCallbackBase {
  public:
   using Ptr =
       util::IntrusiveSharedPtr<HandlerCallbackOneWay, IntrusiveSharedPtrAccess>;
-  using HandlerCallbackBase::HandlerCallbackBase;
+  using DecoratorAfterCallback = detail::DecoratorAfterCallbackNoResult;
+
+  HandlerCallbackOneWay()
+      : HandlerCallbackBase(),
+        decoratorCallback_(DecoratorAfterCallback::noop()) {}
+
+  HandlerCallbackOneWay(
+      ResponseChannelRequest::UniquePtr req,
+      ContextStack::UniquePtr ctx,
+      MethodNameInfo methodNameInfo,
+      exnw_ptr ewp,
+      folly::EventBase* eb,
+      concurrency::ThreadManager* tm,
+      Cpp2RequestContext* reqCtx,
+      TilePtr&& interaction = {},
+      DecoratorAfterCallback&& decoratorCallback =
+          DecoratorAfterCallback::noop())
+      : HandlerCallbackBase(
+            std::move(req),
+            std::move(ctx),
+            std::move(methodNameInfo),
+            std::move(ewp),
+            eb,
+            tm,
+            reqCtx,
+            std::move(interaction)),
+        decoratorCallback_(std::move(decoratorCallback)) {}
+
+  HandlerCallbackOneWay(
+      ResponseChannelRequest::UniquePtr req,
+      ContextStack::UniquePtr ctx,
+      MethodNameInfo methodNameInfo,
+      exnw_ptr ewp,
+      folly::EventBase* eb,
+      folly::Executor::KeepAlive<> executor,
+      Cpp2RequestContext* reqCtx,
+      RequestCompletionCallback* notifyRequestPile,
+      RequestCompletionCallback* notifyConcurrencyController,
+      ServerRequestData requestData,
+      TilePtr&& interaction = {},
+      DecoratorAfterCallback&& decoratorCallback =
+          DecoratorAfterCallback::noop())
+      : HandlerCallbackBase(
+            std::move(req),
+            std::move(ctx),
+            std::move(methodNameInfo),
+            std::move(ewp),
+            eb,
+            std::move(executor),
+            reqCtx,
+            notifyRequestPile,
+            notifyConcurrencyController,
+            std::move(requestData),
+            std::move(interaction)),
+        decoratorCallback_(std::move(decoratorCallback)) {}
 
  private:
 #if FOLLY_HAS_COROUTINES
@@ -42,6 +97,8 @@ class HandlerCallbackOneWay : public HandlerCallbackBase {
     // function is executing.
     return Ptr(typename Ptr::UnsafelyFromRawPointer(), this);
   }
+
+  DecoratorAfterCallback decoratorCallback_;
 
  public:
   void done() noexcept;

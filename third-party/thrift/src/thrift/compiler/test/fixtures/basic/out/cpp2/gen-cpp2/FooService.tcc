@@ -100,7 +100,10 @@ void FooServiceAsyncProcessor::executeRequest_simple_rpc(
       /* .definingServiceName =*/ "FooService",
       /* .methodName =*/ "simple_rpc",
       /* .qualifiedMethodName =*/ "FooService.simple_rpc"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>::fbthrift_invoke_decorator_after_simple_rpc};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -114,7 +117,9 @@ void FooServiceAsyncProcessor::executeRequest_simple_rpc(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_simple_rpc(*serverRequest.requestContext());
 

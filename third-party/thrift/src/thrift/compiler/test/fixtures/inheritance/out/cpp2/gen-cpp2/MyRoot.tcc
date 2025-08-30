@@ -100,7 +100,10 @@ void MyRootAsyncProcessor::executeRequest_do_root(
       /* .definingServiceName =*/ "MyRoot",
       /* .methodName =*/ "do_root",
       /* .qualifiedMethodName =*/ "MyRoot.do_root"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::MyRoot>::fbthrift_invoke_decorator_after_do_root};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -114,7 +117,9 @@ void MyRootAsyncProcessor::executeRequest_do_root(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_do_root(*serverRequest.requestContext());
 

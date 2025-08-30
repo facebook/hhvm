@@ -75,8 +75,14 @@ class ServiceHandler<::cpp2::MyServicePrioParent> : public apache::thrift::Serve
 
   virtual void fbthrift_execute_decorators_before_ping(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_ping(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_ping(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::MyServicePrioParent>*>(iface)->fbthrift_execute_decorators_after_ping(*ctx);
+  }
   virtual void fbthrift_execute_decorators_before_pong(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_pong(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_pong(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::MyServicePrioParent>*>(iface)->fbthrift_execute_decorators_after_pong(*ctx);
+  }
 };
 
 namespace detail {

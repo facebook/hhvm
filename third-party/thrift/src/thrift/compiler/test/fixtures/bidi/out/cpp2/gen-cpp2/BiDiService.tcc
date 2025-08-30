@@ -123,6 +123,9 @@ void BiDiServiceAsyncProcessor::executeRequest_simple(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_simple(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -302,6 +305,9 @@ void BiDiServiceAsyncProcessor::executeRequest_response(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_response(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

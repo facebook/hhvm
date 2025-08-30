@@ -169,6 +169,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_get(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_get(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -328,6 +331,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_getter(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_getter(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -487,6 +493,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_lists(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_lists(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -646,6 +655,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_maps(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_maps(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -805,6 +817,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_name(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_name(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -964,6 +979,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_name_to_value(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_name_to_value(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1123,6 +1141,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_names(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_names(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1282,6 +1303,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_prefix_tree(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_prefix_tree(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1441,6 +1465,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_sets(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_sets(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1600,6 +1627,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_setter(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_setter(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1759,6 +1789,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_str(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_str(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1918,6 +1951,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_strings(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_strings(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2077,6 +2113,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_type(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_type(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2236,6 +2275,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_value(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_value(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2395,6 +2437,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_value_to_name(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_value_to_name(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2554,6 +2599,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_values(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_values(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2713,6 +2761,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_id(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_id(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2872,6 +2923,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_ids(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_ids(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -3031,6 +3085,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptor(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_descriptor(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -3190,6 +3247,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptors(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_descriptors(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -3349,6 +3409,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_key(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_key(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -3508,6 +3571,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_keys(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_keys(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -3667,6 +3733,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotation(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_annotation(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -3826,6 +3895,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotations(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_annotations(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -3985,6 +4057,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_member(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_member(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -4144,6 +4219,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_members(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_members(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -4303,6 +4381,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_field(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_field(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -4462,6 +4543,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_fields(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_fields(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

@@ -120,6 +120,9 @@ void HeaderClientMethodsAnnotationOnFunctionAsyncProcessor::executeRequest_echo(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_echo(*serverRequest.requestContext(), *args.uarg_request);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -282,6 +285,9 @@ void HeaderClientMethodsAnnotationOnFunctionAsyncProcessor::executeRequest_echo_
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_echo_2(*serverRequest.requestContext(), *args.uarg_request);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

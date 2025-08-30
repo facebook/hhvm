@@ -115,6 +115,9 @@ void MyRootAsyncProcessor::executeRequest_do_root(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_do_root(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

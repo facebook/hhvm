@@ -18,11 +18,11 @@ namespace cpp2 apache.thrift.test
 
 include "thrift/annotation/cpp.thrift"
 
-struct ServiceMethodDecoratorTestRequest {
-  1: string id;
+struct EchoRequest {
+  1: string text;
 }
 
-struct ServiceMethodDecoratorTestResponse {
+struct EchoResponse {
   1: string text;
 }
 
@@ -30,13 +30,7 @@ struct ServiceMethodDecoratorTestResponse {
 service ServiceMethodDecoratorTest {
   void noop();
 
-  string echo(1: string text);
-
-  i64 increment(1: i64 num);
-
   i64 sum(1: list<i64> nums);
 
-  ServiceMethodDecoratorTestResponse withStruct(
-    1: ServiceMethodDecoratorTestRequest request,
-  );
+  EchoResponse echo(1: EchoRequest request);
 }

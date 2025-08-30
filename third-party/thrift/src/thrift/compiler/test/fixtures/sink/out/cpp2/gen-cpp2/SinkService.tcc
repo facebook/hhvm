@@ -155,6 +155,9 @@ void SinkServiceAsyncProcessor::executeRequest_method(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_method(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -325,6 +328,9 @@ void SinkServiceAsyncProcessor::executeRequest_methodAndReponse(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_methodAndReponse(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -497,6 +503,9 @@ void SinkServiceAsyncProcessor::executeRequest_methodThrow(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_methodThrow(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -685,6 +694,9 @@ void SinkServiceAsyncProcessor::executeRequest_methodSinkThrow(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_methodSinkThrow(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -855,6 +867,9 @@ void SinkServiceAsyncProcessor::executeRequest_methodFinalThrow(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_methodFinalThrow(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1025,6 +1040,9 @@ void SinkServiceAsyncProcessor::executeRequest_methodBothThrow(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_methodBothThrow(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1197,6 +1215,9 @@ void SinkServiceAsyncProcessor::executeRequest_methodFast(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_methodFast(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

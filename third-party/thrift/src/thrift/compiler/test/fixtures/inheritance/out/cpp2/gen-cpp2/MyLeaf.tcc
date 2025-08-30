@@ -115,6 +115,9 @@ void MyLeafAsyncProcessor::executeRequest_do_leaf(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_do_leaf(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

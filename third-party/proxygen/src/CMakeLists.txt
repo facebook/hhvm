@@ -79,7 +79,7 @@ find_package(Zstd REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Threads)
-find_package(Cares)
+find_package(c-ares REQUIRED)
 find_package(Boost 1.58 REQUIRED
   COMPONENTS
     iostreams

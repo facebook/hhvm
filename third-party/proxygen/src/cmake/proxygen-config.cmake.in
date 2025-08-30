@@ -41,6 +41,7 @@ find_dependency(Boost 1.58 REQUIRED
     system
     thread
 )
+find_dependency(c-ares REQUIRED)
 
 if(NOT TARGET proxygen::proxygen)
     include("${CMAKE_CURRENT_LIST_DIR}/proxygen-targets.cmake")

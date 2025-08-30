@@ -96,6 +96,7 @@ class SimpleXMLElement {
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getIterator(): HH\FIXME\MISSING_RETURN_TYPE;
   public function count(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function isTruthy()[]: bool;
   public function xpath(string $path): HH\FIXME\MISSING_RETURN_TYPE;
   public function registerXPathNamespace(
     string $prefix,

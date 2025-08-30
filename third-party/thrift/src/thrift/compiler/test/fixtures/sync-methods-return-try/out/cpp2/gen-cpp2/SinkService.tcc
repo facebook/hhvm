@@ -160,7 +160,7 @@ void SinkServiceAsyncProcessor::executeRequest_method(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_method.
   iface_->fbthrift_execute_decorators_before_method(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -338,7 +338,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodAndReponse(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_methodAndReponse.
   iface_->fbthrift_execute_decorators_before_methodAndReponse(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -518,7 +518,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodThrow(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_methodThrow.
   iface_->fbthrift_execute_decorators_before_methodThrow(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -714,7 +714,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodSinkThrow(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_methodSinkThrow.
   iface_->fbthrift_execute_decorators_before_methodSinkThrow(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -892,7 +892,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodFinalThrow(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_methodFinalThrow.
   iface_->fbthrift_execute_decorators_before_methodFinalThrow(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1070,7 +1070,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodBothThrow(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_methodBothThrow.
   iface_->fbthrift_execute_decorators_before_methodBothThrow(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1250,7 +1250,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodFast(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_methodFast.
   iface_->fbthrift_execute_decorators_before_methodFast(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {

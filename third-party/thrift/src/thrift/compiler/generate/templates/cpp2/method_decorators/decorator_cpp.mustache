@@ -40,7 +40,25 @@ void apache::thrift::ServiceHandler<{{leaf_service.qualified_name}}>::fbthrift_e
     decorator->after_{{function.cpp_name}}(std::move(afterParams){{#partial params.after_invocation_args function=function}});
   });
 }
-{{/each}}{{! Interactions are implemented later - they need to go on the actual interaction handler}}
+{{/each}}
+{{#each service.interactions as |interaction|}}{{#each interaction.functions as |function|}}
+
+void apache::thrift::ServiceHandler<{{leaf_service.qualified_name}}>::fbthrift_execute_decorators_before_{{interaction.name}}_{{function.cpp_name}}(
+  apache::thrift::Cpp2RequestContext& requestCtx{{#each function.params.fields as |param|}}, {{#partial params.param_type param=param}} {{#partial params.param_name param=param}}{{/each}}) {
+  std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
+    ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
+    decorator->before_{{interaction.name}}_{{function.cpp_name}}(std::move(beforeParams){{#each function.params.fields as |param|}}, {{#partial params.param_name param=param}}{{/each}});
+  });
+}
+
+void apache::thrift::ServiceHandler<{{leaf_service.qualified_name}}>::fbthrift_execute_decorators_after_{{interaction.name}}_{{function.cpp_name}}(
+  apache::thrift::Cpp2RequestContext& requestCtx{{#partial params.after_param service=service function=function}}) {
+  std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
+    ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
+    decorator->after_{{interaction.name}}_{{function.cpp_name}}(std::move(afterParams){{#if function.return_type.void?}}{{#else}}, result{{/if function.return_type.void?}});
+  });
+}
+{{/each}}{{/each}}
 {{/let partial}}
 
 {{!

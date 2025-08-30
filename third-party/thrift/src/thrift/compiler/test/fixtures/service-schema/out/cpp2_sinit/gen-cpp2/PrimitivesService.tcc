@@ -130,7 +130,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_init(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_init.
   iface_->fbthrift_execute_decorators_before_init(*serverRequest.requestContext(), args.uarg_param0, args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -297,7 +297,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_method_that_throws(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_method_that_throws.
   iface_->fbthrift_execute_decorators_before_method_that_throws(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -488,7 +488,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_return_void_method(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_return_void_method.
   iface_->fbthrift_execute_decorators_before_return_void_method(*serverRequest.requestContext(), args.uarg_id, *args.uarg_i);
 
   const auto makeExecuteHandler = [&] {

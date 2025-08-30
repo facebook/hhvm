@@ -120,7 +120,7 @@ void MyRootAsyncProcessor::executeRequest_do_root(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_do_root.
   iface_->fbthrift_execute_decorators_before_do_root(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {

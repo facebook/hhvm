@@ -120,7 +120,7 @@ void MyServicePrioChildAsyncProcessor::executeRequest_pang(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_pang.
   iface_->fbthrift_execute_decorators_before_pang(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {

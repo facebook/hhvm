@@ -131,7 +131,7 @@ void NestedContainersAsyncProcessor::executeRequest_mapList(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_mapList.
   iface_->fbthrift_execute_decorators_before_mapList(*serverRequest.requestContext(), *args.uarg_foo);
 
   const auto makeExecuteHandler = [&] {
@@ -298,7 +298,7 @@ void NestedContainersAsyncProcessor::executeRequest_mapSet(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_mapSet.
   iface_->fbthrift_execute_decorators_before_mapSet(*serverRequest.requestContext(), *args.uarg_foo);
 
   const auto makeExecuteHandler = [&] {
@@ -465,7 +465,7 @@ void NestedContainersAsyncProcessor::executeRequest_listMap(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_listMap.
   iface_->fbthrift_execute_decorators_before_listMap(*serverRequest.requestContext(), *args.uarg_foo);
 
   const auto makeExecuteHandler = [&] {
@@ -632,7 +632,7 @@ void NestedContainersAsyncProcessor::executeRequest_listSet(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_listSet.
   iface_->fbthrift_execute_decorators_before_listSet(*serverRequest.requestContext(), *args.uarg_foo);
 
   const auto makeExecuteHandler = [&] {
@@ -799,7 +799,7 @@ void NestedContainersAsyncProcessor::executeRequest_turtles(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_turtles.
   iface_->fbthrift_execute_decorators_before_turtles(*serverRequest.requestContext(), *args.uarg_foo);
 
   const auto makeExecuteHandler = [&] {

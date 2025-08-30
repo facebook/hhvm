@@ -123,7 +123,7 @@ void TestServiceAsyncProcessor::executeRequest_init(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_init.
   iface_->fbthrift_execute_decorators_before_init(*serverRequest.requestContext(), args.uarg_int1);
 
   const auto makeExecuteHandler = [&] {

@@ -125,7 +125,7 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey0(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_getDataByKey0.
   iface_->fbthrift_execute_decorators_before_getDataByKey0(*serverRequest.requestContext(), *args.uarg_key);
 
   const auto makeExecuteHandler = [&] {
@@ -295,7 +295,7 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey1(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_getDataByKey1.
   iface_->fbthrift_execute_decorators_before_getDataByKey1(*serverRequest.requestContext(), *args.uarg_key);
 
   const auto makeExecuteHandler = [&] {

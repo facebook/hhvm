@@ -188,7 +188,10 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
       /* .methodName =*/ "{{> common/function_name}}",
       /* .qualifiedMethodName =*/ "{{#if service:interaction?}}{{service:parent_service_name}}{{#else}}{{service:name}}{{/if service:interaction?}}.{{> common/function_name}}"};
 {{#if service:self.interaction?}}{{! TODO(ezou) deal with this case properly}}
-  auto decoratorCallback = apache::thrift::HandlerCallbackOneWay::DecoratorAfterCallback::noop();
+  apache::thrift::HandlerCallbackOneWay::DecoratorAfterCallback decoratorCallback{
+    // apache::thrift::detail::TileInternalAPI(iface).getDecoratorIface(),
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<{{service:parent_service_cpp_name}}>::fbthrift_invoke_decorator_after_{{service:name}}_{{function:self.cpp_name}}};
 {{#else}}
   apache::thrift::HandlerCallbackOneWay::DecoratorAfterCallback decoratorCallback{
     static_cast<void*>(iface_),
@@ -230,8 +233,10 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
       /* .definingServiceName =*/ "{{service:parent_service_name}}",
       /* .methodName =*/ "{{> common/function_name}}",
       /* .qualifiedMethodName =*/ "{{#if service:interaction?}}{{service:parent_service_name}}{{#else}}{{service:name}}{{/if service:interaction?}}.{{> common/function_name}}"};
-{{#if service:self.interaction?}}{{! TODO(ezou) deal with this case properly}}
-  auto decoratorCallback = apache::thrift::HandlerCallback<{{> types/return_type_server}}>::DecoratorAfterCallback::noop();
+{{#if service:self.interaction?}}
+  apache::thrift::HandlerCallback<{{> types/return_type_server}}>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<{{service:parent_service_cpp_name}}>::fbthrift_invoke_decorator_after_{{service:name}}_{{function:self.cpp_name}}};
 {{#else}}
   apache::thrift::HandlerCallback<{{> types/return_type_server}}>::DecoratorAfterCallback decoratorCallback{
     static_cast<void*>(iface_),
@@ -255,8 +260,11 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
           {{#if in_or_creates_interaction?}}std::move(tile),{{#else}}apache::thrift::TilePtr(),{{/if in_or_creates_interaction?}}
           std::move(decoratorCallback));
 {{/function:oneway?}}
-{{#if service:self.interaction?}}{{! TODO implement later}}{{#else}}
-
+{{#if service:self.interaction?}}
+  // Execute method decorator before_{{service:name}}_{{function:cpp_name}}.
+  iface_->fbthrift_execute_decorators_before_{{service:name}}_{{function:self.cpp_name}}(*serverRequest.requestContext(){{#partial decorator_params.before_invocation_args function=function:self}});
+{{#else}}
+  // Execute method decorator before_{{function:cpp_name}}.
   iface_->fbthrift_execute_decorators_before_{{function:self.cpp_name}}(*serverRequest.requestContext(){{#partial decorator_params.before_invocation_args function=function:self}});
 
 {{/if service:self.interaction?}}

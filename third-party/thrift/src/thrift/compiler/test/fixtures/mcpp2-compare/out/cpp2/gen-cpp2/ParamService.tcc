@@ -183,7 +183,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_i16_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_void_ret_i16_param.
   iface_->fbthrift_execute_decorators_before_void_ret_i16_param(*serverRequest.requestContext(), args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -353,7 +353,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_byte_i16_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_void_ret_byte_i16_param.
   iface_->fbthrift_execute_decorators_before_void_ret_byte_i16_param(*serverRequest.requestContext(), args.uarg_param1, args.uarg_param2);
 
   const auto makeExecuteHandler = [&] {
@@ -520,7 +520,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_void_ret_map_param.
   iface_->fbthrift_execute_decorators_before_void_ret_map_param(*serverRequest.requestContext(), *args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -690,7 +690,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_setlist_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_void_ret_map_setlist_param.
   iface_->fbthrift_execute_decorators_before_void_ret_map_setlist_param(*serverRequest.requestContext(), *args.uarg_param1, *args.uarg_param2);
 
   const auto makeExecuteHandler = [&] {
@@ -857,7 +857,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_typedef_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_void_ret_map_typedef_param.
   iface_->fbthrift_execute_decorators_before_void_ret_map_typedef_param(*serverRequest.requestContext(), args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -1024,7 +1024,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_enum_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_void_ret_enum_param.
   iface_->fbthrift_execute_decorators_before_void_ret_enum_param(*serverRequest.requestContext(), args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -1191,7 +1191,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_struct_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_void_ret_struct_param.
   iface_->fbthrift_execute_decorators_before_void_ret_struct_param(*serverRequest.requestContext(), *args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -1358,7 +1358,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_listunion_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_void_ret_listunion_param.
   iface_->fbthrift_execute_decorators_before_void_ret_listunion_param(*serverRequest.requestContext(), *args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -1528,7 +1528,7 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_i32_i64_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_bool_ret_i32_i64_param.
   iface_->fbthrift_execute_decorators_before_bool_ret_i32_i64_param(*serverRequest.requestContext(), args.uarg_param1, args.uarg_param2);
 
   const auto makeExecuteHandler = [&] {
@@ -1698,7 +1698,7 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_map_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_bool_ret_map_param.
   iface_->fbthrift_execute_decorators_before_bool_ret_map_param(*serverRequest.requestContext(), *args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -1868,7 +1868,7 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_union_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_bool_ret_union_param.
   iface_->fbthrift_execute_decorators_before_bool_ret_union_param(*serverRequest.requestContext(), *args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -2041,7 +2041,7 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_float_double_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_i64_ret_float_double_param.
   iface_->fbthrift_execute_decorators_before_i64_ret_float_double_param(*serverRequest.requestContext(), args.uarg_param1, args.uarg_param2);
 
   const auto makeExecuteHandler = [&] {
@@ -2214,7 +2214,7 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_string_typedef_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_i64_ret_string_typedef_param.
   iface_->fbthrift_execute_decorators_before_i64_ret_string_typedef_param(*serverRequest.requestContext(), *args.uarg_param1, *args.uarg_param2);
 
   const auto makeExecuteHandler = [&] {
@@ -2398,7 +2398,7 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_i32_i32_i32_i32_i32_para
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_i64_ret_i32_i32_i32_i32_i32_param.
   iface_->fbthrift_execute_decorators_before_i64_ret_i32_i32_i32_i32_i32_param(*serverRequest.requestContext(), args.uarg_param1, args.uarg_param2, args.uarg_param3, args.uarg_param4, args.uarg_param5);
 
   const auto makeExecuteHandler = [&] {
@@ -2568,7 +2568,7 @@ void ParamServiceAsyncProcessor::executeRequest_double_ret_setstruct_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_double_ret_setstruct_param.
   iface_->fbthrift_execute_decorators_before_double_ret_setstruct_param(*serverRequest.requestContext(), *args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -2738,7 +2738,7 @@ void ParamServiceAsyncProcessor::executeRequest_string_ret_string_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_string_ret_string_param.
   iface_->fbthrift_execute_decorators_before_string_ret_string_param(*serverRequest.requestContext(), *args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -2908,7 +2908,7 @@ void ParamServiceAsyncProcessor::executeRequest_binary_ret_binary_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_binary_ret_binary_param.
   iface_->fbthrift_execute_decorators_before_binary_ret_binary_param(*serverRequest.requestContext(), *args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -3078,7 +3078,7 @@ void ParamServiceAsyncProcessor::executeRequest_map_ret_bool_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_map_ret_bool_param.
   iface_->fbthrift_execute_decorators_before_map_ret_bool_param(*serverRequest.requestContext(), args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -3251,7 +3251,7 @@ void ParamServiceAsyncProcessor::executeRequest_list_ret_map_setlist_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_list_ret_map_setlist_param.
   iface_->fbthrift_execute_decorators_before_list_ret_map_setlist_param(*serverRequest.requestContext(), *args.uarg_param1, *args.uarg_param2);
 
   const auto makeExecuteHandler = [&] {
@@ -3421,7 +3421,7 @@ void ParamServiceAsyncProcessor::executeRequest_mapsetlistmapliststring_ret_list
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_mapsetlistmapliststring_ret_listlistlist_param.
   iface_->fbthrift_execute_decorators_before_mapsetlistmapliststring_ret_listlistlist_param(*serverRequest.requestContext(), *args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -3591,7 +3591,7 @@ void ParamServiceAsyncProcessor::executeRequest_typedef_ret_i32_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_typedef_ret_i32_param.
   iface_->fbthrift_execute_decorators_before_typedef_ret_i32_param(*serverRequest.requestContext(), args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -3763,7 +3763,7 @@ void ParamServiceAsyncProcessor::executeRequest_listtypedef_ret_typedef_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_listtypedef_ret_typedef_param.
   iface_->fbthrift_execute_decorators_before_listtypedef_ret_typedef_param(*serverRequest.requestContext(), *args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -3933,7 +3933,7 @@ void ParamServiceAsyncProcessor::executeRequest_enum_ret_double_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_enum_ret_double_param.
   iface_->fbthrift_execute_decorators_before_enum_ret_double_param(*serverRequest.requestContext(), args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -4106,7 +4106,7 @@ void ParamServiceAsyncProcessor::executeRequest_enum_ret_double_enum_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_enum_ret_double_enum_param.
   iface_->fbthrift_execute_decorators_before_enum_ret_double_enum_param(*serverRequest.requestContext(), args.uarg_param1, args.uarg_param2);
 
   const auto makeExecuteHandler = [&] {
@@ -4276,7 +4276,7 @@ void ParamServiceAsyncProcessor::executeRequest_listenum_ret_map_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_listenum_ret_map_param.
   iface_->fbthrift_execute_decorators_before_listenum_ret_map_param(*serverRequest.requestContext(), *args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -4448,7 +4448,7 @@ void ParamServiceAsyncProcessor::executeRequest_struct_ret_i16_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_struct_ret_i16_param.
   iface_->fbthrift_execute_decorators_before_struct_ret_i16_param(*serverRequest.requestContext(), args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -4618,7 +4618,7 @@ void ParamServiceAsyncProcessor::executeRequest_setstruct_ret_set_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_setstruct_ret_set_param.
   iface_->fbthrift_execute_decorators_before_setstruct_ret_set_param(*serverRequest.requestContext(), *args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -4791,7 +4791,7 @@ void ParamServiceAsyncProcessor::executeRequest_union_ret_i32_i32_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_union_ret_i32_i32_param.
   iface_->fbthrift_execute_decorators_before_union_ret_i32_i32_param(*serverRequest.requestContext(), args.uarg_param1, args.uarg_param2);
 
   const auto makeExecuteHandler = [&] {
@@ -4961,7 +4961,7 @@ void ParamServiceAsyncProcessor::executeRequest_listunion_string_param(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_listunion_string_param.
   iface_->fbthrift_execute_decorators_before_listunion_string_param(*serverRequest.requestContext(), *args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -5188,7 +5188,7 @@ void ParamServiceAsyncProcessor::executeRequest_annotatedParams(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_annotatedParams.
   iface_->fbthrift_execute_decorators_before_annotatedParams(*serverRequest.requestContext(), *args.uarg_no_annotation, *args.uarg_opt_ref_type_shared, args.uarg_base_type, *args.uarg_list_type, *args.uarg_set_type, *args.uarg_map_type, *args.uarg_map_struct_type, *args.uarg_iobuf_type, *args.uarg_iobuf_ptr, *args.uarg_list_i32_template, *args.uarg_list_string_template, *args.uarg_set_template, *args.uarg_map_template, *args.uarg_typedef_list_template, *args.uarg_typedef_deque_template, *args.uarg_typedef_set_template, *args.uarg_typedef_map_template, *args.uarg_iobuf_type_val, *args.uarg_iobuf_ptr_val, *args.uarg_struct_struct);
 
   const auto makeExecuteHandler = [&] {

@@ -105,6 +105,11 @@ class BadInteractionIf : public apache::thrift::Tile, public apache::thrift::Ser
   static void fbthrift_invoke_decorator_after_bar(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
     static_cast<ServiceHandler<::cpp2::GoodService>*>(iface)->fbthrift_execute_decorators_after_bar(*ctx, result);
   }
+  virtual void fbthrift_execute_decorators_before_BadInteraction_foo(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_BadInteraction_foo(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_BadInteraction_foo(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::GoodService>*>(iface)->fbthrift_execute_decorators_after_BadInteraction_foo(*ctx);
+  }
 };
 
 namespace detail {

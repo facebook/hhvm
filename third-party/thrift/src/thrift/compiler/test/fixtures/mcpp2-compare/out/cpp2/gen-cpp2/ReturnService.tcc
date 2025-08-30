@@ -162,7 +162,7 @@ void ReturnServiceAsyncProcessor::executeRequest_noReturn(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_noReturn.
   iface_->fbthrift_execute_decorators_before_noReturn(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -326,7 +326,7 @@ void ReturnServiceAsyncProcessor::executeRequest_boolReturn(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_boolReturn.
   iface_->fbthrift_execute_decorators_before_boolReturn(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -493,7 +493,7 @@ void ReturnServiceAsyncProcessor::executeRequest_i16Return(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_i16Return.
   iface_->fbthrift_execute_decorators_before_i16Return(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -660,7 +660,7 @@ void ReturnServiceAsyncProcessor::executeRequest_i32Return(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_i32Return.
   iface_->fbthrift_execute_decorators_before_i32Return(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -827,7 +827,7 @@ void ReturnServiceAsyncProcessor::executeRequest_i64Return(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_i64Return.
   iface_->fbthrift_execute_decorators_before_i64Return(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -994,7 +994,7 @@ void ReturnServiceAsyncProcessor::executeRequest_floatReturn(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_floatReturn.
   iface_->fbthrift_execute_decorators_before_floatReturn(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1161,7 +1161,7 @@ void ReturnServiceAsyncProcessor::executeRequest_doubleReturn(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_doubleReturn.
   iface_->fbthrift_execute_decorators_before_doubleReturn(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1330,7 +1330,7 @@ void ReturnServiceAsyncProcessor::executeRequest_stringReturn(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_stringReturn.
   iface_->fbthrift_execute_decorators_before_stringReturn(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1497,7 +1497,7 @@ void ReturnServiceAsyncProcessor::executeRequest_binaryReturn(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_binaryReturn.
   iface_->fbthrift_execute_decorators_before_binaryReturn(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1664,7 +1664,7 @@ void ReturnServiceAsyncProcessor::executeRequest_mapReturn(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_mapReturn.
   iface_->fbthrift_execute_decorators_before_mapReturn(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1831,7 +1831,7 @@ void ReturnServiceAsyncProcessor::executeRequest_simpleTypedefReturn(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_simpleTypedefReturn.
   iface_->fbthrift_execute_decorators_before_simpleTypedefReturn(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1998,7 +1998,7 @@ void ReturnServiceAsyncProcessor::executeRequest_complexTypedefReturn(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_complexTypedefReturn.
   iface_->fbthrift_execute_decorators_before_complexTypedefReturn(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -2165,7 +2165,7 @@ void ReturnServiceAsyncProcessor::executeRequest_list_mostComplexTypedefReturn(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_list_mostComplexTypedefReturn.
   iface_->fbthrift_execute_decorators_before_list_mostComplexTypedefReturn(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -2334,7 +2334,7 @@ void ReturnServiceAsyncProcessor::executeRequest_enumReturn(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_enumReturn.
   iface_->fbthrift_execute_decorators_before_enumReturn(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -2503,7 +2503,7 @@ void ReturnServiceAsyncProcessor::executeRequest_list_EnumReturn(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_list_EnumReturn.
   iface_->fbthrift_execute_decorators_before_list_EnumReturn(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -2670,7 +2670,7 @@ void ReturnServiceAsyncProcessor::executeRequest_structReturn(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_structReturn.
   iface_->fbthrift_execute_decorators_before_structReturn(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -2837,7 +2837,7 @@ void ReturnServiceAsyncProcessor::executeRequest_set_StructReturn(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_set_StructReturn.
   iface_->fbthrift_execute_decorators_before_set_StructReturn(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -3006,7 +3006,7 @@ void ReturnServiceAsyncProcessor::executeRequest_unionReturn(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_unionReturn.
   iface_->fbthrift_execute_decorators_before_unionReturn(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -3173,7 +3173,7 @@ void ReturnServiceAsyncProcessor::executeRequest_list_UnionReturn(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_list_UnionReturn.
   iface_->fbthrift_execute_decorators_before_list_UnionReturn(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -3345,7 +3345,7 @@ void ReturnServiceAsyncProcessor::executeRequest_readDataEb(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_readDataEb.
   iface_->fbthrift_execute_decorators_before_readDataEb(*serverRequest.requestContext(), args.uarg_size);
 
   const auto makeExecuteHandler = [&] {
@@ -3515,7 +3515,7 @@ void ReturnServiceAsyncProcessor::executeRequest_readData(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_readData.
   iface_->fbthrift_execute_decorators_before_readData(*serverRequest.requestContext(), args.uarg_size);
 
   const auto makeExecuteHandler = [&] {

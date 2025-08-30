@@ -483,6 +483,491 @@ CO_TEST_P(ServiceMethodDecoratorTestP, DecoratorDataPassed) {
       ElementsAre("asset", "asset", "after_echo"));
 }
 
+namespace {
+constexpr server::DecoratorDataKey<bool> kOnRequestData;
+constexpr server::DecoratorDataKey<bool> kOnResponseData;
+} // namespace
+
+CO_TEST_P(ServiceMethodDecoratorTestP, PerformsInteractions) {
+  if (transportType() != TransportType::ROCKET) {
+    // only rocket supports interactions
+    co_return;
+  }
+  struct Decorator : public ServiceMethodDecorator<PerformInteractionTest> {
+    std::string_view getName() const override { return "Decorator"; }
+
+    void onBeforeStartServing(BeforeStartServingParams params) override {
+      onRequestData_ =
+          params.decoratorDataHandleFactory->makeHandleForKey(kOnRequestData);
+      onResponseData_ =
+          params.decoratorDataHandleFactory->makeHandleForKey(kOnResponseData);
+    }
+
+    void before_createPerformedInteraction(BeforeParams beforeParams) override {
+      EXPECT_EQ(beforeParams.decoratorData.get(onRequestData_), nullptr);
+      beforeParams.decoratorData.put(onRequestData_, true);
+    }
+
+    void after_createPerformedInteraction(AfterParams afterParams) override {
+      const auto* onRequestData = afterParams.decoratorData.get(onRequestData_);
+      EXPECT_NE(onRequestData, nullptr);
+      EXPECT_TRUE(*onRequestData);
+      afterParams.decoratorData.put(onResponseData_, true);
+    }
+
+    void before_PerformedInteraction_perform(
+        BeforeParams beforeParams) override {
+      EXPECT_EQ(beforeParams.decoratorData.get(onRequestData_), nullptr);
+      beforeParams.decoratorData.put(onRequestData_, true);
+    }
+
+    void after_PerformedInteraction_perform(AfterParams afterParams) override {
+      const auto* onRequestData = afterParams.decoratorData.get(onRequestData_);
+      EXPECT_NE(onRequestData, nullptr);
+      EXPECT_TRUE(*onRequestData);
+      afterParams.decoratorData.put(onResponseData_, true);
+    }
+
+    server::DecoratorDataHandle<bool> onRequestData_ =
+        server::DecoratorDataHandle<bool>::uninitialized();
+    server::DecoratorDataHandle<bool> onResponseData_ =
+        server::DecoratorDataHandle<bool>::uninitialized();
+  };
+
+  struct Interceptor : public ServiceInterceptor<folly::Unit, folly::Unit> {
+    std::string getName() const override { return "Interceptor"; }
+
+    folly::coro::Task<void> co_onStartServing(InitParams params) override {
+      onRequestData_ =
+          params.decoratorDataHandleFactory->makeHandleForKey(kOnRequestData);
+      onResponseData_ =
+          params.decoratorDataHandleFactory->makeHandleForKey(kOnResponseData);
+      co_return;
+    }
+
+    folly::coro::Task<std::optional<folly::Unit>> onRequest(
+        folly::Unit*, RequestInfo info) override {
+      const auto* onRequestData = info.decoratorData->get(onRequestData_);
+      EXPECT_NE(onRequestData, nullptr);
+      EXPECT_TRUE(*onRequestData);
+      co_return std::nullopt;
+    }
+
+    folly::coro::Task<void> onResponse(
+        folly::Unit*, folly::Unit*, ResponseInfo info) override {
+      const auto* onResponseData = info.decoratorData->get(onResponseData_);
+      EXPECT_NE(onResponseData, nullptr);
+      EXPECT_TRUE(*onResponseData);
+      co_return;
+    }
+
+    server::DecoratorDataHandle<bool> onRequestData_ =
+        server::DecoratorDataHandle<bool>::uninitialized();
+    server::DecoratorDataHandle<bool> onResponseData_ =
+        server::DecoratorDataHandle<bool>::uninitialized();
+  };
+
+  struct Module : public ServerModule {
+    explicit Module() { interceptors_ = {std::make_shared<Interceptor>()}; }
+
+    std::string getName() const override { return "Module"; }
+
+    std::vector<std::shared_ptr<ServiceInterceptorBase>>
+    getServiceInterceptors() override {
+      return interceptors_;
+    }
+
+    std::vector<std::shared_ptr<ServiceInterceptorBase>> interceptors_;
+  };
+
+  class Handler : public ServiceHandler<PerformInteractionTest> {
+   public:
+    class PerformedInteraction : public PerformedInteractionIf {
+     public:
+      PerformedInteraction(
+          const server::DecoratorDataHandle<bool>& onRequestData)
+          : onRequestData_{onRequestData} {}
+
+      folly::coro::Task<void> co_perform(RequestParams params) override {
+        const auto* onRequestData =
+            params.getRequestContext()->getDecoratorData().get(onRequestData_);
+        EXPECT_NE(onRequestData, nullptr);
+        EXPECT_TRUE(*onRequestData);
+        co_return;
+      }
+
+      const server::DecoratorDataHandle<bool>& onRequestData_;
+    };
+
+    folly::coro::Task<void> co_onBeforeStartServing(
+        BeforeStartServingParams params) override {
+      onRequestData_ =
+          params.decoratorDataHandleFactory->makeHandleForKey(kOnRequestData);
+      co_return;
+    }
+
+   private:
+    std::unique_ptr<PerformedInteractionIf> createPerformedInteraction()
+        override {
+      return std::make_unique<PerformedInteraction>(onRequestData_);
+    }
+
+    server::DecoratorDataHandle<bool> onRequestData_ =
+        server::DecoratorDataHandle<bool>::uninitialized();
+  };
+
+  auto handler = std::make_shared<Handler>();
+  {
+    auto decorator = std::make_shared<Decorator>();
+    ServiceMethodDecoratorList<PerformInteractionTest> decorators;
+    decorators.push_back(std::move(decorator));
+    apache::thrift::decorate(*handler, std::move(decorators));
+  }
+  auto runner = makeServer(handler, [&](ThriftServer& server) {
+    server.addModule(std::make_unique<Module>());
+  });
+
+  auto client = makeClient<Client<PerformInteractionTest>>(*runner);
+  auto performsInteraction = client->createPerformedInteraction();
+  co_await performsInteraction.co_perform();
+}
+
+CO_TEST_P(ServiceMethodDecoratorTestP, ReturnsInteractions) {
+  if (transportType() != TransportType::ROCKET) {
+    // only rocket supports interactions
+    co_return;
+  }
+
+  struct Decorator : public ServiceMethodDecorator<ReturnsInteractionTest> {
+    std::string_view getName() const override { return "Decorator"; }
+
+    void onBeforeStartServing(BeforeStartServingParams params) override {
+      onRequestData_ =
+          params.decoratorDataHandleFactory->makeHandleForKey(kOnRequestData);
+      onResponseData_ =
+          params.decoratorDataHandleFactory->makeHandleForKey(kOnResponseData);
+    }
+
+    void before_startAdding(
+        BeforeParams beforeParams, int64_t initValue) override {
+      EXPECT_EQ(beforeParams.decoratorData.get(onRequestData_), nullptr);
+      beforeParams.decoratorData.put(onRequestData_, true);
+      before_startAddingCount++;
+      beforeVals.push_back(initValue);
+    }
+
+    void after_startAdding(AfterParams afterParams, int64_t result) override {
+      const auto* onRequestData = afterParams.decoratorData.get(onRequestData_);
+      EXPECT_NE(onRequestData, nullptr);
+      EXPECT_TRUE(*onRequestData);
+      afterParams.decoratorData.put(onResponseData_, true);
+      after_startAddingCount++;
+      afterVals.push_back(result);
+    }
+
+    void before_RunningSum_add(
+        BeforeParams beforeParams, int64_t val) override {
+      EXPECT_EQ(beforeParams.decoratorData.get(onRequestData_), nullptr);
+      beforeParams.decoratorData.put(onRequestData_, true);
+      before_addCount++;
+      beforeVals.push_back(val);
+    }
+
+    void after_RunningSum_add(AfterParams afterParams, int64_t val) override {
+      const auto* onRequestData = afterParams.decoratorData.get(onRequestData_);
+      EXPECT_NE(onRequestData, nullptr);
+      EXPECT_TRUE(*onRequestData);
+      afterParams.decoratorData.put(onResponseData_, true);
+      after_addCount++;
+      afterVals.push_back(val);
+    }
+
+    std::vector<int64_t> beforeVals;
+    std::size_t before_startAddingCount = 0;
+    std::size_t before_addCount = 0;
+
+    std::vector<int64_t> afterVals;
+    std::size_t after_startAddingCount = 0;
+    std::size_t after_addCount = 0;
+
+    server::DecoratorDataHandle<bool> onRequestData_ =
+        server::DecoratorDataHandle<bool>::uninitialized();
+    server::DecoratorDataHandle<bool> onResponseData_ =
+        server::DecoratorDataHandle<bool>::uninitialized();
+  };
+
+  // This interceptor just checks if the onRequest / onResopnse data is set.
+  struct Interceptor : public ServiceInterceptor<folly::Unit, folly::Unit> {
+    std::string getName() const override { return "Interceptor"; }
+
+    folly::coro::Task<void> co_onStartServing(InitParams params) override {
+      onRequestData_ =
+          params.decoratorDataHandleFactory->makeHandleForKey(kOnRequestData);
+      onResponseData_ =
+          params.decoratorDataHandleFactory->makeHandleForKey(kOnResponseData);
+      co_return;
+    }
+
+    folly::coro::Task<std::optional<folly::Unit>> onRequest(
+        folly::Unit*, RequestInfo info) override {
+      const auto* onRequestData = info.decoratorData->get(onRequestData_);
+      EXPECT_NE(onRequestData, nullptr);
+      EXPECT_TRUE(*onRequestData);
+      co_return std::nullopt;
+    }
+
+    folly::coro::Task<void> onResponse(
+        folly::Unit*, folly::Unit*, ResponseInfo info) override {
+      const auto* onResponseData = info.decoratorData->get(onResponseData_);
+      EXPECT_NE(onResponseData, nullptr);
+      EXPECT_TRUE(*onResponseData);
+      co_return;
+    }
+
+    server::DecoratorDataHandle<bool> onRequestData_ =
+        server::DecoratorDataHandle<bool>::uninitialized();
+    server::DecoratorDataHandle<bool> onResponseData_ =
+        server::DecoratorDataHandle<bool>::uninitialized();
+  };
+
+  struct Module : public ServerModule {
+    explicit Module() { interceptors_ = {std::make_shared<Interceptor>()}; }
+
+    std::string getName() const override { return "Module"; }
+
+    std::vector<std::shared_ptr<ServiceInterceptorBase>>
+    getServiceInterceptors() override {
+      return interceptors_;
+    }
+
+    std::vector<std::shared_ptr<ServiceInterceptorBase>> interceptors_;
+  };
+
+  class Handler : public ServiceHandler<ReturnsInteractionTest> {
+   public:
+    class RunningSum : public RunningSumIf {
+     public:
+      RunningSum(
+          int64_t initValue,
+          const server::DecoratorDataHandle<bool>& onRequestData)
+          : sum_{initValue}, onRequestData_{onRequestData} {}
+
+      folly::coro::Task<int64_t> co_add(
+          RequestParams params, int64_t val) override {
+        const auto* onRequestData =
+            params.getRequestContext()->getDecoratorData().get(onRequestData_);
+        EXPECT_NE(onRequestData, nullptr);
+        EXPECT_TRUE(*onRequestData);
+        sum_ += val;
+        co_return sum_;
+      }
+
+     private:
+      int64_t sum_;
+      const server::DecoratorDataHandle<bool>& onRequestData_;
+    };
+
+    folly::coro::Task<void> co_onBeforeStartServing(
+        BeforeStartServingParams params) override {
+      onRequestData_ =
+          params.decoratorDataHandleFactory->makeHandleForKey(kOnRequestData);
+      co_return;
+    }
+
+    folly::coro::Task<TileAndResponse<RunningSumIf, int64_t>> co_startAdding(
+        int64_t initValue) override {
+      co_return TileAndResponse<RunningSumIf, int64_t>{
+          std::make_unique<RunningSum>(initValue, onRequestData_), initValue};
+    }
+
+   private:
+    server::DecoratorDataHandle<bool> onRequestData_ =
+        server::DecoratorDataHandle<bool>::uninitialized();
+  };
+
+  auto handler = std::make_shared<Handler>();
+  auto decorator = std::make_shared<Decorator>();
+  {
+    ServiceMethodDecoratorList<ReturnsInteractionTest> decorators;
+    // Copy so that we can reference decorator later
+    decorators.push_back(decorator);
+    apache::thrift::decorate(*handler, std::move(decorators));
+  }
+  auto runner = makeServer(handler, [&](ThriftServer& server) {
+    server.addModule(std::make_unique<Module>());
+  });
+
+  auto client = makeClient<Client<ReturnsInteractionTest>>(*runner);
+
+  auto [runningSum, _] = co_await client->co_startAdding(0);
+  EXPECT_EQ(decorator->before_startAddingCount, 1);
+  EXPECT_EQ(decorator->after_startAddingCount, 1);
+  EXPECT_THAT(decorator->beforeVals, ElementsAre(0));
+  EXPECT_THAT(decorator->afterVals, ElementsAre(0));
+  EXPECT_EQ(decorator->before_addCount, 0);
+  EXPECT_EQ(decorator->after_addCount, 0);
+
+  co_await runningSum.co_add(5);
+  EXPECT_EQ(decorator->before_startAddingCount, 1);
+  EXPECT_EQ(decorator->after_startAddingCount, 1);
+  EXPECT_THAT(decorator->beforeVals, ElementsAre(0, 5));
+  EXPECT_THAT(decorator->afterVals, ElementsAre(0, 5));
+  EXPECT_EQ(decorator->before_addCount, 1);
+  EXPECT_EQ(decorator->after_addCount, 1);
+
+  co_await runningSum.co_add(10);
+  EXPECT_EQ(decorator->before_startAddingCount, 1);
+  EXPECT_EQ(decorator->after_startAddingCount, 1);
+  EXPECT_THAT(decorator->beforeVals, ElementsAre(0, 5, 10));
+  EXPECT_THAT(decorator->afterVals, ElementsAre(0, 5, 15));
+  EXPECT_EQ(decorator->before_addCount, 2);
+  EXPECT_EQ(decorator->after_addCount, 2);
+}
+
+CO_TEST_P(ServiceMethodDecoratorTestP, InheritedInteractions) {
+  if (transportType() != TransportType::ROCKET) {
+    // only rocket supports interactions
+    co_return;
+  }
+  struct Decorator : public ServiceMethodDecorator<InheritsInteractionTest> {
+    std::string_view getName() const override { return "Decorator"; }
+
+    void onBeforeStartServing(BeforeStartServingParams params) override {
+      onRequestData_ =
+          params.decoratorDataHandleFactory->makeHandleForKey(kOnRequestData);
+      onResponseData_ =
+          params.decoratorDataHandleFactory->makeHandleForKey(kOnResponseData);
+    }
+
+    void before_createPerformedInteraction(BeforeParams beforeParams) override {
+      EXPECT_EQ(beforeParams.decoratorData.get(onRequestData_), nullptr);
+      beforeParams.decoratorData.put(onRequestData_, true);
+    }
+
+    void after_createPerformedInteraction(AfterParams afterParams) override {
+      const auto* onRequestData = afterParams.decoratorData.get(onRequestData_);
+      EXPECT_NE(onRequestData, nullptr);
+      EXPECT_TRUE(*onRequestData);
+      afterParams.decoratorData.put(onResponseData_, true);
+    }
+
+    void before_PerformedInteraction_perform(
+        BeforeParams beforeParams) override {
+      EXPECT_EQ(beforeParams.decoratorData.get(onRequestData_), nullptr);
+      beforeParams.decoratorData.put(onRequestData_, true);
+    }
+
+    void after_PerformedInteraction_perform(AfterParams afterParams) override {
+      const auto* onRequestData = afterParams.decoratorData.get(onRequestData_);
+      EXPECT_NE(onRequestData, nullptr);
+      EXPECT_TRUE(*onRequestData);
+      afterParams.decoratorData.put(onResponseData_, true);
+    }
+
+    server::DecoratorDataHandle<bool> onRequestData_ =
+        server::DecoratorDataHandle<bool>::uninitialized();
+    server::DecoratorDataHandle<bool> onResponseData_ =
+        server::DecoratorDataHandle<bool>::uninitialized();
+  };
+
+  struct Interceptor : public ServiceInterceptor<folly::Unit, folly::Unit> {
+    std::string getName() const override { return "Interceptor"; }
+
+    folly::coro::Task<void> co_onStartServing(InitParams params) override {
+      onRequestData_ =
+          params.decoratorDataHandleFactory->makeHandleForKey(kOnRequestData);
+      onResponseData_ =
+          params.decoratorDataHandleFactory->makeHandleForKey(kOnResponseData);
+      co_return;
+    }
+
+    folly::coro::Task<std::optional<folly::Unit>> onRequest(
+        folly::Unit*, RequestInfo info) override {
+      const auto* onRequestData = info.decoratorData->get(onRequestData_);
+      EXPECT_NE(onRequestData, nullptr);
+      EXPECT_TRUE(*onRequestData);
+      co_return std::nullopt;
+    }
+
+    folly::coro::Task<void> onResponse(
+        folly::Unit*, folly::Unit*, ResponseInfo info) override {
+      const auto* onResponseData = info.decoratorData->get(onResponseData_);
+      EXPECT_NE(onResponseData, nullptr);
+      EXPECT_TRUE(*onResponseData);
+      co_return;
+    }
+
+    server::DecoratorDataHandle<bool> onRequestData_ =
+        server::DecoratorDataHandle<bool>::uninitialized();
+    server::DecoratorDataHandle<bool> onResponseData_ =
+        server::DecoratorDataHandle<bool>::uninitialized();
+  };
+
+  struct Module : public ServerModule {
+    explicit Module() { interceptors_ = {std::make_shared<Interceptor>()}; }
+
+    std::string getName() const override { return "Module"; }
+
+    std::vector<std::shared_ptr<ServiceInterceptorBase>>
+    getServiceInterceptors() override {
+      return interceptors_;
+    }
+
+    std::vector<std::shared_ptr<ServiceInterceptorBase>> interceptors_;
+  };
+
+  class Handler : public ServiceHandler<InheritsInteractionTest> {
+   public:
+    class PerformedInteraction : public PerformedInteractionIf {
+     public:
+      PerformedInteraction(
+          const server::DecoratorDataHandle<bool>& onRequestData)
+          : onRequestData_{onRequestData} {}
+
+      folly::coro::Task<void> co_perform(RequestParams params) override {
+        const auto* onRequestData =
+            params.getRequestContext()->getDecoratorData().get(onRequestData_);
+        EXPECT_NE(onRequestData, nullptr);
+        EXPECT_TRUE(*onRequestData);
+        co_return;
+      }
+
+      const server::DecoratorDataHandle<bool>& onRequestData_;
+    };
+
+    folly::coro::Task<void> co_onBeforeStartServing(
+        BeforeStartServingParams params) override {
+      onRequestData_ =
+          params.decoratorDataHandleFactory->makeHandleForKey(kOnRequestData);
+      co_return;
+    }
+
+   private:
+    std::unique_ptr<PerformedInteractionIf> createPerformedInteraction()
+        override {
+      return std::make_unique<PerformedInteraction>(onRequestData_);
+    }
+
+    server::DecoratorDataHandle<bool> onRequestData_ =
+        server::DecoratorDataHandle<bool>::uninitialized();
+  };
+
+  auto handler = std::make_shared<Handler>();
+  {
+    auto decorator = std::make_shared<Decorator>();
+    ServiceMethodDecoratorList<InheritsInteractionTest> decorators;
+    decorators.push_back(std::move(decorator));
+    apache::thrift::decorate(*handler, std::move(decorators));
+  }
+  auto runner = makeServer(handler, [&](ThriftServer& server) {
+    server.addModule(std::make_unique<Module>());
+  });
+
+  auto client = makeClient<Client<PerformInteractionTest>>(*runner);
+  auto performsInteraction = client->createPerformedInteraction();
+  co_await performsInteraction.co_perform();
+}
+
 INSTANTIATE_TEST_SUITE_P(
     ServiceMethodDecoratorTestP,
     ServiceMethodDecoratorTestP,

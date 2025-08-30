@@ -105,6 +105,8 @@ set(
 # append proxygen::coro sources
 set(
     PROXYGEN_CORO_SOURCES
+    dns/CAresResolver.cpp
+    dns/CachingDNSResolver.cpp
     dns/DNSModule.cpp
     dns/DNSResolver.cpp
     dns/Rfc6724.cpp
@@ -307,6 +309,7 @@ target_link_libraries(
     Boost::iostreams
     ZLIB::ZLIB
     ${HTTP3_DEPEND_LIBS}
+    c-ares::cares
 )
 
 # Install the headers, excluding unit testing related headers

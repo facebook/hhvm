@@ -97,6 +97,7 @@ RequestFamily, "request_family"
 NumberAnswers, "number_answers"
 NumberDNSRetries, "number_retries"
 ResolvedSuccess, "resolved_success"
+TXT, "TXT"
 
 /* ---- Used in DNSCache only ---- */
 DNSCacheHit, "dns_cache_hit"

@@ -27,9 +27,8 @@ using std::unique_ptr;
 using std::vector;
 
 /* Make sure C-Ares error codes that map to DNS RCODE values are unchanged */
-#if !(ARES_SUCCESS == 0 && ARES_EREFUSED == 6)
-#error "C-Ares status does not map to DNS RCODE values"
-#endif
+static_assert(ARES_SUCCESS == 0 && ARES_EREFUSED == 6,
+              "C-Ares status does not map to DNS RCODE values");
 
 /* Convert a C-Ares status value to an DNS RCODE; -1 for unknown */
 #define ARES_TO_RCODE(x) (((x) <= ARES_EREFUSED) ? (x) : -1)

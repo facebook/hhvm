@@ -90,12 +90,6 @@ void FileRegion::FileWriteRequest::messageAvailable(size_t&& count) noexcept {
   }
 }
 
-#ifdef __GLIBC__
-#if (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 9))
-#define GLIBC_AT_LEAST_2_9 1
-#endif
-#endif
-
 void FileRegion::FileWriteRequest::start() {
   started_ = true;
   readBase_ = readPool.try_get()->getEventBase();
@@ -120,12 +114,12 @@ void FileRegion::FileWriteRequest::start() {
       return;
     }
 
-#ifndef GLIBC_AT_LEAST_2_9
+#if !defined(__GLIBC__)
     fail(
         __func__,
         AsyncSocketException(
             AsyncSocketException::NOT_SUPPORTED,
-            "writeFile unsupported on glibc < 2.9"));
+            "writeFile supported only with glibc"));
     return;
 #else
     int pipeFds[2] = {0};

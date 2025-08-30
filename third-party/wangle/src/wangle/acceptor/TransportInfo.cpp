@@ -54,11 +54,11 @@ bool TransportInfo::initWithSocket(const folly::AsyncSocket* sock) {
   cwndBytes = cwnd * mss;
 #endif // __APPLE__
   ssthresh = tcpinfo.tcpi_snd_ssthresh;
-#if __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 17
+#if defined(__GLIBC__)
   rtx = tcpinfo.tcpi_total_retrans;
 #else
   rtx = -1;
-#endif // __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 17
+#endif // __GLIBC__
   validTcpinfo = true;
 #else
   (void)sock; // unused

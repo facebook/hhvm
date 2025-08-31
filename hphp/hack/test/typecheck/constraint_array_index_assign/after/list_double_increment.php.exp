@@ -1,0 +1,14 @@
+ERROR: File "list_double_increment.php", line 6, characters 13-14:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+ERROR: File "list_double_increment.php", line 6, characters 23-24:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+ERROR: File "list_double_increment.php", line 6, characters 3-31:
+Typing error (Typing[4110])
+  File "list_double_increment.php", line 6, characters 3-31:
+  Expected an array that can be updated
+  File "list_double_increment.php", line 6, characters 3-31:
+  But got `_` because a type could not be determined here
+ERROR: File "list_double_increment.php", line 6, characters 13-14:
+Unsequenced modifications to local variable. Modified here (Typing[4144])
+  File "list_double_increment.php", line 6, characters 23-24:
+  And also modified here

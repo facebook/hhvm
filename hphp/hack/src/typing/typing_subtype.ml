@@ -6844,6 +6844,89 @@ end = struct
     can_index_assign: can_index_assign;
   }
 
+  (* Check that an index to a map-like collection passes the basic test of
+   * being a subtype of arraykey
+   *)
+  let check_arraykey_index error env pos container_ty index_ty =
+    if TypecheckerOptions.disallow_invalid_arraykey (Env.get_tcopt env) then (
+      let (env, container_ty) = Env.expand_type env container_ty in
+      let reason =
+        match get_node container_ty with
+        | Tclass ((_, cn), _, _) -> Reason.index_class cn
+        | _ -> Reason.index_array
+      in
+      let info_of_type ty = (get_pos ty, lazy (Typing_print.error env ty)) in
+      let container_info = info_of_type container_ty in
+      let index_info = info_of_type index_ty in
+      let ty_arraykey = MakeType.arraykey (Reason.idx_dict pos) in
+      (* If we have an error in coercion here, we will add a `Hole` indicating the
+         actual and expected type. The `Hole` may then be used in a codemod to
+         add a call to `UNSAFE_CAST` so we need to consider what type we expect.
+         There is a somewhat common pattern in older parts of www to do something like:
+
+         ```
+         function keyset_issue(?string $x): keyset<string> {
+           $xs = keyset<string>[];
+           ...
+           /* HH_FIXME[4435] keyset values must be arraykeys */
+           $xs[] = $x;
+           return Keyset\filter_nulls($xs);
+         }
+         ```
+         (even though it is impossible for keysets to contain nulls).
+
+         If we were to add an expected type of 'arraykey' here it would be
+         correct but adding an `UNSAFE_CAST<?string,arraykey>($x)` means we
+         get cascading errors; here, we now have the wrong return type.
+
+         To try and prevent this, if this is an optional type where the nonnull
+         part can be coerced to arraykey, we prefer that type as our expected type.
+      *)
+      let base_error = error pos container_info index_info in
+      let (ty_actual, is_option) =
+        match deref index_ty with
+        | (_, Toption inner_ty) -> (inner_ty, true)
+        | _ -> (index_ty, false)
+      in
+      let (env, e1) =
+        Typing_coercion.coerce_type
+          ~coerce_for_op:true
+          pos
+          reason
+          env
+          ty_actual
+          ty_arraykey
+          Enforced
+        @@ Typing_error.Callback.always base_error
+      in
+      let (ty_mismatch, e2) =
+        match e1 with
+        | None when is_option ->
+          (Error (index_ty, ty_actual), Some (Typing_error.primary base_error))
+        | None -> (Ok index_ty, None)
+        | Some _ -> (Error (index_ty, ty_arraykey), None)
+      in
+      Option.(
+        iter ~f:(Typing_error_utils.add_typing_error ~env)
+        @@ merge e1 e2 ~f:Typing_error.both);
+      (env, ty_mismatch)
+    ) else
+      (env, Ok index_ty)
+
+  let check_arraykey_index_write =
+    let mk_err pos (container_pos, container_ty_name) (key_pos, key_ty_name) =
+      Typing_error.Primary.Invalid_arraykey
+        {
+          pos;
+          ctxt = `write;
+          container_pos;
+          container_ty_name;
+          key_pos;
+          key_ty_name;
+        }
+    in
+    check_arraykey_index mk_err
+
   (* Since array update constraint solving is under development,
    * it is an experimental feature and will only be turned on
    * if the flag constraint_array_index_assign is set.
@@ -6874,10 +6957,15 @@ end = struct
   and simplify_
       ~subtype_env
       ~this_ty
-      ~lhs:{ ty_sub; _ }
-      ~rhs:{ reason_super; can_index_assign }
+      ~lhs:{ ty_sub; sub_supportdyn }
+      ~rhs:({ reason_super; can_index_assign = cia } as _rhs)
       env =
-    ignore this_ty;
+    let maybe_make_supportdyn r env ty =
+      if Option.is_some sub_supportdyn then
+        Typing_utils.make_supportdyn r env ty
+      else
+        (env, ty)
+    in
     let (env, ty_sub) = Env.expand_type env ty_sub in
     let subtype_env =
       Subtype_env.possibly_add_violated_constraint
@@ -6891,11 +6979,130 @@ end = struct
         ~ty_sub:(LoclType ty_sub)
         ~ty_super:
           (ConstraintType
-             (mk_constraint_type
-                (reason_super, Tcan_index_assign can_index_assign)))
+             (mk_constraint_type (reason_super, Tcan_index_assign cia)))
     in
     let invalid ~fail env = invalid ~fail env in
+    let arity_error r name env =
+      invalid
+        ~fail:
+          (Some
+             Typing_error.(
+               primary
+               @@ Primary.Array_get_arity
+                    { pos = cia.cia_expr_pos; name; decl_pos = Reason.to_pos r }))
+        env
+    in
+    let simplify_default ~subtype_env lhs rhs env =
+      Subtype.simplify
+        ~subtype_env
+        ~this_ty
+        ~lhs:{ sub_supportdyn; ty_sub = lhs }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super = rhs }
+        env
+    in
+    let simplify_key tk env =
+      let tk =
+        if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
+          Typing_make_type.locl_like
+            (Reason.dynamic_coercion (get_reason tk))
+            tk
+        else
+          tk
+      in
+      simplify_default ~subtype_env cia.cia_key tk env
+    in
+    let simplify_val tv env =
+      simplify_default ~subtype_env tv cia.cia_val env
+    in
+    let pessimise_type env ty =
+      Typing_union.union env ty (MakeType.dynamic (get_reason ty))
+    in
+    let maybe_pessimise_type env ty =
+      if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+        pessimise_type env ty
+      else
+        (env, ty)
+    in
     match deref ty_sub with
+    | (r_sub, Tclass ((_, n), _, argl))
+      when String.equal n SN.Collections.cVector ->
+      (match argl with
+      | [tv] ->
+        let tk = MakeType.int (Reason.idx_vector cia.cia_index_pos) in
+        let (env, tv) = maybe_pessimise_type env tv in
+        let (env, tv) = maybe_make_supportdyn r_sub env tv in
+        simplify_key tk env
+        &&& simplify_default ~subtype_env cia.cia_write tv
+        &&& simplify_val tv
+      | _ -> arity_error r_sub n env)
+    | (r_sub, Tclass (((_, n) as id), e, argl))
+      when String.equal n SN.Collections.cVec ->
+      (match argl with
+      | [tv] ->
+        let tk = MakeType.int (Reason.idx_vector cia.cia_index_pos) in
+        simplify_key tk env &&& fun env ->
+        let (env, tv) = maybe_make_supportdyn r_sub env tv in
+        let (env, tv') = Typing_union.union env tv cia.cia_write in
+        let ty = mk (r_sub, Tclass (id, e, [tv'])) in
+        simplify_val ty env
+      | _ -> arity_error r_sub n env)
+    | (r_sub, Tclass (((_, n) as id), e, argl))
+      when String.equal n SN.Collections.cDict ->
+      let (env, idx_err) =
+        check_arraykey_index_write env cia.cia_expr_pos ty_sub cia.cia_key
+      in
+      (match argl with
+      | [tk; tv] ->
+        let (env, tv) = maybe_make_supportdyn r_sub env tv in
+        let (env, tk') =
+          let ak_t = MakeType.arraykey (Reason.idx_dict cia.cia_index_pos) in
+          match idx_err with
+          | Ok _ ->
+            let (env, tkey_new) =
+              Typing_intersection.intersect
+                env
+                ~r:(Reason.idx_dict cia.cia_index_pos)
+                cia.cia_key
+                ak_t
+            in
+            Typing_union.union env tk tkey_new
+          | _ -> Typing_union.union env tk cia.cia_key
+        in
+        let (env, tv') = Typing_union.union env tv cia.cia_write in
+        let ty = mk (r_sub, Tclass (id, e, [tk'; tv'])) in
+        simplify_val ty env
+      | _ -> arity_error r_sub n env)
+    | (r_sub, Tclass ((_, n), _, argl)) when String.equal n SN.Collections.cMap
+      ->
+      (match argl with
+      | [tk; tv] ->
+        let (env, tv) = maybe_pessimise_type env tv in
+        let (env, tv) = maybe_make_supportdyn r_sub env tv in
+        let (env, tk) = maybe_pessimise_type env tk in
+        simplify_key tk env
+        &&& simplify_default ~subtype_env cia.cia_write tv
+        &&& simplify_val tv
+      | _ -> arity_error r_sub n env)
+    | (r_sub, Tclass ((_, n), _, _))
+      when String.equal n SN.Collections.cKeyedContainer
+           || String.equal n SN.Collections.cAnyArray
+           || String.equal n SN.Collections.cPair
+           || String.equal n SN.Collections.cConstVector
+           || String.equal n SN.Collections.cImmVector
+           || String.equal n SN.Collections.cConstMap
+           || String.equal n SN.Collections.cImmMap ->
+      invalid
+        ~fail:
+          (Some
+             Typing_error.(
+               primary
+               @@ Primary.Const_mutation
+                    {
+                      pos = cia.cia_expr_pos;
+                      decl_pos = Reason.to_pos r_sub;
+                      ty_name = lazy (Typing_print.error env ty_sub);
+                    }))
+        env
     | _ -> invalid ~fail env
 end
 

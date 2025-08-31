@@ -78,15 +78,9 @@ class ServiceHandler<::facebook::thrift::test::AdapterService> : public apache::
  public:
 
   virtual void fbthrift_execute_decorators_before_count(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_count(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::facebook::thrift::test::CountingStruct>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_count(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::facebook::thrift::test::CountingStruct>::type result) {
-    static_cast<ServiceHandler<::facebook::thrift::test::AdapterService>*>(iface)->fbthrift_execute_decorators_after_count(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_adaptedTypes(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::facebook::thrift::test::detail::HeapAllocated>::type /*p_arg*/) {}
-  virtual void fbthrift_execute_decorators_after_adaptedTypes(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::facebook::thrift::test::HeapAllocated>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_adaptedTypes(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::facebook::thrift::test::HeapAllocated>::type result) {
-    static_cast<ServiceHandler<::facebook::thrift::test::AdapterService>*>(iface)->fbthrift_execute_decorators_after_adaptedTypes(*ctx, result);
-  }
+  virtual void fbthrift_execute_decorators_after_count(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::facebook::thrift::test::CountingStruct& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_adaptedTypes(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::facebook::thrift::test::detail::HeapAllocated& /*p_arg*/) {}
+  virtual void fbthrift_execute_decorators_after_adaptedTypes(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::facebook::thrift::test::detail::HeapAllocated& /*result*/) {}
 };
 
 namespace detail {

@@ -204,24 +204,12 @@ class SerialInteractionIf : public apache::thrift::SerialInteractionTile, public
 
   virtual void fbthrift_execute_decorators_before_foo(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_foo(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_foo(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::Factories>*>(iface)->fbthrift_execute_decorators_after_foo(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_interact(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_arg*/) {}
-  virtual void fbthrift_execute_decorators_after_interact(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_interact(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::Factories>*>(iface)->fbthrift_execute_decorators_after_interact(*ctx);
-  }
+  virtual void fbthrift_execute_decorators_before_interact(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_arg*/) {}
+  virtual void fbthrift_execute_decorators_after_interact(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const MyInteractionIf& /*interaction*/) {}
   virtual void fbthrift_execute_decorators_before_interactFast(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_interactFast(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_interactFast(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
-    static_cast<ServiceHandler<::cpp2::Factories>*>(iface)->fbthrift_execute_decorators_after_interactFast(*ctx, result);
-  }
+  virtual void fbthrift_execute_decorators_after_interactFast(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const MyInteractionFastIf& /*interaction*/, ::std::int32_t /*result*/) {}
   virtual void fbthrift_execute_decorators_before_serialize(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_serialize(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_serialize(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>::type result) {
-    static_cast<ServiceHandler<::cpp2::Factories>*>(iface)->fbthrift_execute_decorators_after_serialize(*ctx, result);
-  }
+  virtual void fbthrift_execute_decorators_after_serialize(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const SerialInteractionIf& /*interaction*/, ::std::int32_t /*result*/) {}
 };
 
 namespace detail {

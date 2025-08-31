@@ -104,10 +104,7 @@ void FooBarBazServiceAsyncProcessor::executeRequest_foo(
       /* .definingServiceName =*/ "FooBarBazService",
       /* .methodName =*/ "foo",
       /* .qualifiedMethodName =*/ "FooBarBazService.foo"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::cpp2::FooBarBazService>::fbthrift_invoke_decorator_after_foo};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -121,9 +118,7 @@ void FooBarBazServiceAsyncProcessor::executeRequest_foo(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_foo(*serverRequest.requestContext());
 
@@ -268,10 +263,7 @@ void FooBarBazServiceAsyncProcessor::executeRequest_bar(
       /* .definingServiceName =*/ "FooBarBazService",
       /* .methodName =*/ "bar",
       /* .qualifiedMethodName =*/ "FooBarBazService.bar"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::cpp2::FooBarBazService>::fbthrift_invoke_decorator_after_bar};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -285,9 +277,7 @@ void FooBarBazServiceAsyncProcessor::executeRequest_bar(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_bar(*serverRequest.requestContext());
 
@@ -432,10 +422,7 @@ void FooBarBazServiceAsyncProcessor::executeRequest_baz(
       /* .definingServiceName =*/ "FooBarBazService",
       /* .methodName =*/ "baz",
       /* .qualifiedMethodName =*/ "FooBarBazService.baz"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::cpp2::FooBarBazService>::fbthrift_invoke_decorator_after_baz};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -449,9 +436,7 @@ void FooBarBazServiceAsyncProcessor::executeRequest_baz(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_baz(*serverRequest.requestContext());
 

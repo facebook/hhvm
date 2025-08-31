@@ -109,10 +109,7 @@ void MyServiceAsyncProcessor::executeRequest_foo(
       /* .definingServiceName =*/ "MyService",
       /* .methodName =*/ "foo",
       /* .qualifiedMethodName =*/ "MyService.foo"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::cpp2::MyService>::fbthrift_invoke_decorator_after_foo};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -126,9 +123,7 @@ void MyServiceAsyncProcessor::executeRequest_foo(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_foo(*serverRequest.requestContext());
 
@@ -277,10 +272,7 @@ void MyServiceAsyncProcessor::executeRequest_interact(
       /* .definingServiceName =*/ "MyService",
       /* .methodName =*/ "interact",
       /* .qualifiedMethodName =*/ "MyService.interact"};
-  apache::thrift::HandlerCallback<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, void>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::cpp2::MyService>::fbthrift_invoke_decorator_after_interact};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, void>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -295,8 +287,7 @@ void MyServiceAsyncProcessor::executeRequest_interact(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
-          std::move(tile),
-          std::move(decoratorCallback));
+          std::move(tile));
 
   iface_->fbthrift_execute_decorators_before_interact(*serverRequest.requestContext(), args.uarg_arg);
 
@@ -442,10 +433,7 @@ void MyServiceAsyncProcessor::executeRequest_interactFast(
       /* .definingServiceName =*/ "MyService",
       /* .methodName =*/ "interactFast",
       /* .qualifiedMethodName =*/ "MyService.interactFast"};
-  apache::thrift::HandlerCallback<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionFastIf, ::std::int32_t>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::cpp2::MyService>::fbthrift_invoke_decorator_after_interactFast};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionFastIf, ::std::int32_t>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -460,8 +448,7 @@ void MyServiceAsyncProcessor::executeRequest_interactFast(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
-          std::move(tile),
-          std::move(decoratorCallback));
+          std::move(tile));
 
   iface_->fbthrift_execute_decorators_before_interactFast(*serverRequest.requestContext());
 
@@ -610,10 +597,7 @@ void MyServiceAsyncProcessor::executeRequest_serialize(
       /* .definingServiceName =*/ "MyService",
       /* .methodName =*/ "serialize",
       /* .qualifiedMethodName =*/ "MyService.serialize"};
-  apache::thrift::HandlerCallback<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::SerialInteractionIf, ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::cpp2::MyService>::fbthrift_invoke_decorator_after_serialize};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::SerialInteractionIf, ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -628,8 +612,7 @@ void MyServiceAsyncProcessor::executeRequest_serialize(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
-          std::move(tile),
-          std::move(decoratorCallback));
+          std::move(tile));
 
   iface_->fbthrift_execute_decorators_before_serialize(*serverRequest.requestContext());
 
@@ -805,8 +788,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_frobnicate(
       /* .definingServiceName =*/ "MyService",
       /* .methodName =*/ "MyInteraction.frobnicate",
       /* .qualifiedMethodName =*/ "MyService.MyInteraction.frobnicate"};
-  auto decoratorCallback = apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback::noop();
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -821,8 +803,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_frobnicate(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
-          std::move(tile),
-          std::move(decoratorCallback));
+          std::move(tile));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -980,7 +961,6 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_ping(
       /* .definingServiceName =*/ "MyService",
       /* .methodName =*/ "MyInteraction.ping",
       /* .qualifiedMethodName =*/ "MyService.MyInteraction.ping"};
-  auto decoratorCallback = apache::thrift::HandlerCallbackOneWay::DecoratorAfterCallback::noop();
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
       apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
       std::move(ctxStack),
@@ -992,8 +972,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_ping(
       requestPileNotification,
       concurrencyControllerNotification,
       std::move(serverRequest.requestData()),
-      std::move(tile), 
-      std::move(decoratorCallback));
+      std::move(tile));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1113,8 +1092,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_truthify(
       /* .definingServiceName =*/ "MyService",
       /* .methodName =*/ "MyInteraction.truthify",
       /* .qualifiedMethodName =*/ "MyService.MyInteraction.truthify"};
-  auto decoratorCallback = apache::thrift::HandlerCallback<::apache::thrift::ServerStream<bool>>::DecoratorAfterCallback::noop();
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<bool>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1129,8 +1107,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_truthify(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
-          std::move(tile),
-          std::move(decoratorCallback));
+          std::move(tile));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1279,8 +1256,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_encode(
       /* .definingServiceName =*/ "MyService",
       /* .methodName =*/ "MyInteraction.encode",
       /* .qualifiedMethodName =*/ "MyService.MyInteraction.encode"};
-  auto decoratorCallback = apache::thrift::HandlerCallback<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::DecoratorAfterCallback::noop();
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1295,8 +1271,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_encode(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
-          std::move(tile),
-          std::move(decoratorCallback));
+          std::move(tile));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1474,8 +1449,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_frobnicate(
       /* .definingServiceName =*/ "MyService",
       /* .methodName =*/ "MyInteractionFast.frobnicate",
       /* .qualifiedMethodName =*/ "MyService.MyInteractionFast.frobnicate"};
-  auto decoratorCallback = apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback::noop();
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1490,8 +1464,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_frobnicate(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
-          std::move(tile),
-          std::move(decoratorCallback));
+          std::move(tile));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1628,7 +1601,6 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_ping(
       /* .definingServiceName =*/ "MyService",
       /* .methodName =*/ "MyInteractionFast.ping",
       /* .qualifiedMethodName =*/ "MyService.MyInteractionFast.ping"};
-  auto decoratorCallback = apache::thrift::HandlerCallbackOneWay::DecoratorAfterCallback::noop();
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
       apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
       std::move(ctxStack),
@@ -1640,8 +1612,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_ping(
       requestPileNotification,
       concurrencyControllerNotification,
       std::move(serverRequest.requestData()),
-      std::move(tile), 
-      std::move(decoratorCallback));
+      std::move(tile));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1758,8 +1729,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_truthify(
       /* .definingServiceName =*/ "MyService",
       /* .methodName =*/ "MyInteractionFast.truthify",
       /* .qualifiedMethodName =*/ "MyService.MyInteractionFast.truthify"};
-  auto decoratorCallback = apache::thrift::HandlerCallback<::apache::thrift::ServerStream<bool>>::DecoratorAfterCallback::noop();
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<bool>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1774,8 +1744,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_truthify(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
-          std::move(tile),
-          std::move(decoratorCallback));
+          std::move(tile));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1921,8 +1890,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_encode(
       /* .definingServiceName =*/ "MyService",
       /* .methodName =*/ "MyInteractionFast.encode",
       /* .qualifiedMethodName =*/ "MyService.MyInteractionFast.encode"};
-  auto decoratorCallback = apache::thrift::HandlerCallback<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::DecoratorAfterCallback::noop();
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1937,8 +1905,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_encode(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
-          std::move(tile),
-          std::move(decoratorCallback));
+          std::move(tile));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2107,8 +2074,7 @@ void MyServiceAsyncProcessor::executeRequest_SerialInteraction_frobnicate(
       /* .definingServiceName =*/ "MyService",
       /* .methodName =*/ "SerialInteraction.frobnicate",
       /* .qualifiedMethodName =*/ "MyService.SerialInteraction.frobnicate"};
-  auto decoratorCallback = apache::thrift::HandlerCallback<void>::DecoratorAfterCallback::noop();
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2123,8 +2089,7 @@ void MyServiceAsyncProcessor::executeRequest_SerialInteraction_frobnicate(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
-          std::move(tile),
-          std::move(decoratorCallback));
+          std::move(tile));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;

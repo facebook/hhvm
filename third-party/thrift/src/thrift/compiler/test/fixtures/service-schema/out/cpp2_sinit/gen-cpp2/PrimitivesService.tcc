@@ -110,10 +110,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_init(
       /* .definingServiceName =*/ "PrimitivesService",
       /* .methodName =*/ "init",
       /* .qualifiedMethodName =*/ "PrimitivesService.init"};
-  apache::thrift::HandlerCallback<::std::int64_t>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::fbthrift_invoke_decorator_after_init};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -127,9 +124,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_init(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_init(*serverRequest.requestContext(), args.uarg_param0, args.uarg_param1);
 
@@ -277,10 +272,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_method_that_throws(
       /* .definingServiceName =*/ "PrimitivesService",
       /* .methodName =*/ "method_that_throws",
       /* .qualifiedMethodName =*/ "PrimitivesService.method_that_throws"};
-  apache::thrift::HandlerCallback<::facebook::thrift::test::Result>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::fbthrift_invoke_decorator_after_method_that_throws};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::facebook::thrift::test::Result>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -294,9 +286,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_method_that_throws(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_method_that_throws(*serverRequest.requestContext());
 
@@ -468,10 +458,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_return_void_method(
       /* .definingServiceName =*/ "PrimitivesService",
       /* .methodName =*/ "return_void_method",
       /* .qualifiedMethodName =*/ "PrimitivesService.return_void_method"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::fbthrift_invoke_decorator_after_return_void_method};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -485,9 +472,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_return_void_method(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_return_void_method(*serverRequest.requestContext(), args.uarg_id, *args.uarg_i);
 

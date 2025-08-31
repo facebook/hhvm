@@ -78,16 +78,10 @@ class ServiceHandler<::apache::thrift::fixtures::types::SomeService> : public ap
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_binary_keyed_map{apache::thrift::detail::si::InvocationType::AsyncTm};
  public:
 
-  virtual void fbthrift_execute_decorators_before_bounce_map(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::apache::thrift::fixtures::types::SomeMap>::type /*p_m*/) {}
-  virtual void fbthrift_execute_decorators_after_bounce_map(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::apache::thrift::fixtures::types::SomeMap>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_bounce_map(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::apache::thrift::fixtures::types::SomeMap>::type result) {
-    static_cast<ServiceHandler<::apache::thrift::fixtures::types::SomeService>*>(iface)->fbthrift_execute_decorators_after_bounce_map(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_binary_keyed_map(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::int64_t>>::type /*p_r*/) {}
-  virtual void fbthrift_execute_decorators_after_binary_keyed_map(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_binary_keyed_map(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>>::type result) {
-    static_cast<ServiceHandler<::apache::thrift::fixtures::types::SomeService>*>(iface)->fbthrift_execute_decorators_after_binary_keyed_map(*ctx, result);
-  }
+  virtual void fbthrift_execute_decorators_before_bounce_map(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::apache::thrift::fixtures::types::SomeMap& /*p_m*/) {}
+  virtual void fbthrift_execute_decorators_after_bounce_map(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::apache::thrift::fixtures::types::SomeMap& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_binary_keyed_map(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::int64_t>& /*p_r*/) {}
+  virtual void fbthrift_execute_decorators_after_binary_keyed_map(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>& /*result*/) {}
 };
 
 namespace detail {

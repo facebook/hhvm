@@ -103,10 +103,7 @@ void TestServiceAsyncProcessor::executeRequest_init(
       /* .definingServiceName =*/ "TestService",
       /* .methodName =*/ "init",
       /* .qualifiedMethodName =*/ "TestService.init"};
-  apache::thrift::HandlerCallback<::std::int64_t>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::test::namespace_from_package_without_module_name::TestService>::fbthrift_invoke_decorator_after_init};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -120,9 +117,7 @@ void TestServiceAsyncProcessor::executeRequest_init(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_init(*serverRequest.requestContext(), args.uarg_int1);
 

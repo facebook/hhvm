@@ -103,31 +103,16 @@ class ServiceHandler<::cpp2::NestedContainers> : public apache::thrift::ServerIn
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_turtles{apache::thrift::detail::si::InvocationType::AsyncTm};
  public:
 
-  virtual void fbthrift_execute_decorators_before_mapList(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>>::type /*p_foo*/) {}
+  virtual void fbthrift_execute_decorators_before_mapList(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& /*p_foo*/) {}
   virtual void fbthrift_execute_decorators_after_mapList(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_mapList(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::NestedContainers>*>(iface)->fbthrift_execute_decorators_after_mapList(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_mapSet(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::map<::std::int32_t, ::std::set<::std::int32_t>>>::type /*p_foo*/) {}
+  virtual void fbthrift_execute_decorators_before_mapSet(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& /*p_foo*/) {}
   virtual void fbthrift_execute_decorators_after_mapSet(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_mapSet(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::NestedContainers>*>(iface)->fbthrift_execute_decorators_after_mapSet(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_listMap(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>::type /*p_foo*/) {}
+  virtual void fbthrift_execute_decorators_before_listMap(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& /*p_foo*/) {}
   virtual void fbthrift_execute_decorators_after_listMap(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_listMap(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::NestedContainers>*>(iface)->fbthrift_execute_decorators_after_listMap(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_listSet(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::set<::std::int32_t>>>::type /*p_foo*/) {}
+  virtual void fbthrift_execute_decorators_before_listSet(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::set<::std::int32_t>>& /*p_foo*/) {}
   virtual void fbthrift_execute_decorators_after_listSet(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_listSet(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::NestedContainers>*>(iface)->fbthrift_execute_decorators_after_listSet(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_turtles(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>>::type /*p_foo*/) {}
+  virtual void fbthrift_execute_decorators_before_turtles(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>& /*p_foo*/) {}
   virtual void fbthrift_execute_decorators_after_turtles(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_turtles(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::NestedContainers>*>(iface)->fbthrift_execute_decorators_after_turtles(*ctx);
-  }
 };
 
 namespace detail {

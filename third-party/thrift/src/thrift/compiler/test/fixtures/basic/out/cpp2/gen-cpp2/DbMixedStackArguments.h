@@ -77,16 +77,10 @@ class ServiceHandler<::test::fixtures::basic::DbMixedStackArguments> : public ap
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_getDataByKey1{apache::thrift::detail::si::InvocationType::AsyncTm};
  public:
 
-  virtual void fbthrift_execute_decorators_before_getDataByKey0(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_key*/) {}
-  virtual void fbthrift_execute_decorators_after_getDataByKey0(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_getDataByKey0(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::string>::type result) {
-    static_cast<ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>*>(iface)->fbthrift_execute_decorators_after_getDataByKey0(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_getDataByKey1(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_key*/) {}
-  virtual void fbthrift_execute_decorators_after_getDataByKey1(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_getDataByKey1(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::string>::type result) {
-    static_cast<ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>*>(iface)->fbthrift_execute_decorators_after_getDataByKey1(*ctx, result);
-  }
+  virtual void fbthrift_execute_decorators_before_getDataByKey0(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_key*/) {}
+  virtual void fbthrift_execute_decorators_after_getDataByKey0(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_getDataByKey1(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_key*/) {}
+  virtual void fbthrift_execute_decorators_after_getDataByKey1(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) {}
 };
 
 namespace detail {

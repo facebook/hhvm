@@ -86,19 +86,10 @@ class ServiceHandler<::cpp2::C> : public apache::thrift::ServerInterface {
 
   virtual void fbthrift_execute_decorators_before_f(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_f(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_f(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::C>*>(iface)->fbthrift_execute_decorators_after_f(*ctx);
-  }
   virtual void fbthrift_execute_decorators_before_numbers(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_numbers(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_numbers(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::C>*>(iface)->fbthrift_execute_decorators_after_numbers(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_thing(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_a*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_b*/, apache::thrift::detail::DecoratorArgType<::std::set<::std::int32_t>>::type /*p_c*/) {}
-  virtual void fbthrift_execute_decorators_after_thing(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_thing(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::string>::type result) {
-    static_cast<ServiceHandler<::cpp2::C>*>(iface)->fbthrift_execute_decorators_after_thing(*ctx, result);
-  }
+  virtual void fbthrift_execute_decorators_before_thing(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_a*/, const ::std::string& /*p_b*/, const ::std::set<::std::int32_t>& /*p_c*/) {}
+  virtual void fbthrift_execute_decorators_after_thing(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) {}
 };
 
 namespace detail {

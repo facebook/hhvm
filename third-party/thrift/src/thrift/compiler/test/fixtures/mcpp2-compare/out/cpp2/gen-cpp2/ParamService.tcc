@@ -163,10 +163,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_i16_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "void_ret_i16_param",
       /* .qualifiedMethodName =*/ "ParamService.void_ret_i16_param"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_void_ret_i16_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -180,9 +177,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_i16_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_void_ret_i16_param(*serverRequest.requestContext(), args.uarg_param1);
 
@@ -333,10 +328,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_byte_i16_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "void_ret_byte_i16_param",
       /* .qualifiedMethodName =*/ "ParamService.void_ret_byte_i16_param"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_void_ret_byte_i16_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -350,9 +342,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_byte_i16_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_void_ret_byte_i16_param(*serverRequest.requestContext(), args.uarg_param1, args.uarg_param2);
 
@@ -500,10 +490,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "void_ret_map_param",
       /* .qualifiedMethodName =*/ "ParamService.void_ret_map_param"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_void_ret_map_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -517,9 +504,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_void_ret_map_param(*serverRequest.requestContext(), *args.uarg_param1);
 
@@ -670,10 +655,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_setlist_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "void_ret_map_setlist_param",
       /* .qualifiedMethodName =*/ "ParamService.void_ret_map_setlist_param"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_void_ret_map_setlist_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -687,9 +669,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_setlist_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_void_ret_map_setlist_param(*serverRequest.requestContext(), *args.uarg_param1, *args.uarg_param2);
 
@@ -837,10 +817,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_typedef_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "void_ret_map_typedef_param",
       /* .qualifiedMethodName =*/ "ParamService.void_ret_map_typedef_param"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_void_ret_map_typedef_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -854,9 +831,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_typedef_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_void_ret_map_typedef_param(*serverRequest.requestContext(), args.uarg_param1);
 
@@ -1004,10 +979,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_enum_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "void_ret_enum_param",
       /* .qualifiedMethodName =*/ "ParamService.void_ret_enum_param"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_void_ret_enum_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1021,9 +993,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_enum_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_void_ret_enum_param(*serverRequest.requestContext(), args.uarg_param1);
 
@@ -1171,10 +1141,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_struct_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "void_ret_struct_param",
       /* .qualifiedMethodName =*/ "ParamService.void_ret_struct_param"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_void_ret_struct_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1188,9 +1155,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_struct_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_void_ret_struct_param(*serverRequest.requestContext(), *args.uarg_param1);
 
@@ -1338,10 +1303,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_listunion_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "void_ret_listunion_param",
       /* .qualifiedMethodName =*/ "ParamService.void_ret_listunion_param"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_void_ret_listunion_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1355,9 +1317,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_listunion_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_void_ret_listunion_param(*serverRequest.requestContext(), *args.uarg_param1);
 
@@ -1508,10 +1468,7 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_i32_i64_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "bool_ret_i32_i64_param",
       /* .qualifiedMethodName =*/ "ParamService.bool_ret_i32_i64_param"};
-  apache::thrift::HandlerCallback<bool>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_bool_ret_i32_i64_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<bool>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1525,9 +1482,7 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_i32_i64_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_bool_ret_i32_i64_param(*serverRequest.requestContext(), args.uarg_param1, args.uarg_param2);
 
@@ -1678,10 +1633,7 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_map_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "bool_ret_map_param",
       /* .qualifiedMethodName =*/ "ParamService.bool_ret_map_param"};
-  apache::thrift::HandlerCallback<bool>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_bool_ret_map_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<bool>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1695,9 +1647,7 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_map_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_bool_ret_map_param(*serverRequest.requestContext(), *args.uarg_param1);
 
@@ -1848,10 +1798,7 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_union_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "bool_ret_union_param",
       /* .qualifiedMethodName =*/ "ParamService.bool_ret_union_param"};
-  apache::thrift::HandlerCallback<bool>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_bool_ret_union_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<bool>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1865,9 +1812,7 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_union_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_bool_ret_union_param(*serverRequest.requestContext(), *args.uarg_param1);
 
@@ -2021,10 +1966,7 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_float_double_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "i64_ret_float_double_param",
       /* .qualifiedMethodName =*/ "ParamService.i64_ret_float_double_param"};
-  apache::thrift::HandlerCallback<::std::int64_t>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_i64_ret_float_double_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2038,9 +1980,7 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_float_double_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_i64_ret_float_double_param(*serverRequest.requestContext(), args.uarg_param1, args.uarg_param2);
 
@@ -2194,10 +2134,7 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_string_typedef_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "i64_ret_string_typedef_param",
       /* .qualifiedMethodName =*/ "ParamService.i64_ret_string_typedef_param"};
-  apache::thrift::HandlerCallback<::std::int64_t>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_i64_ret_string_typedef_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2211,9 +2148,7 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_string_typedef_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_i64_ret_string_typedef_param(*serverRequest.requestContext(), *args.uarg_param1, *args.uarg_param2);
 
@@ -2378,10 +2313,7 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_i32_i32_i32_i32_i32_para
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "i64_ret_i32_i32_i32_i32_i32_param",
       /* .qualifiedMethodName =*/ "ParamService.i64_ret_i32_i32_i32_i32_i32_param"};
-  apache::thrift::HandlerCallback<::std::int64_t>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_i64_ret_i32_i32_i32_i32_i32_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2395,9 +2327,7 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_i32_i32_i32_i32_i32_para
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_i64_ret_i32_i32_i32_i32_i32_param(*serverRequest.requestContext(), args.uarg_param1, args.uarg_param2, args.uarg_param3, args.uarg_param4, args.uarg_param5);
 
@@ -2548,10 +2478,7 @@ void ParamServiceAsyncProcessor::executeRequest_double_ret_setstruct_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "double_ret_setstruct_param",
       /* .qualifiedMethodName =*/ "ParamService.double_ret_setstruct_param"};
-  apache::thrift::HandlerCallback<double>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_double_ret_setstruct_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<double>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2565,9 +2492,7 @@ void ParamServiceAsyncProcessor::executeRequest_double_ret_setstruct_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_double_ret_setstruct_param(*serverRequest.requestContext(), *args.uarg_param1);
 
@@ -2718,10 +2643,7 @@ void ParamServiceAsyncProcessor::executeRequest_string_ret_string_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "string_ret_string_param",
       /* .qualifiedMethodName =*/ "ParamService.string_ret_string_param"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_string_ret_string_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2735,9 +2657,7 @@ void ParamServiceAsyncProcessor::executeRequest_string_ret_string_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_string_ret_string_param(*serverRequest.requestContext(), *args.uarg_param1);
 
@@ -2888,10 +2808,7 @@ void ParamServiceAsyncProcessor::executeRequest_binary_ret_binary_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "binary_ret_binary_param",
       /* .qualifiedMethodName =*/ "ParamService.binary_ret_binary_param"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_binary_ret_binary_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2905,9 +2822,7 @@ void ParamServiceAsyncProcessor::executeRequest_binary_ret_binary_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_binary_ret_binary_param(*serverRequest.requestContext(), *args.uarg_param1);
 
@@ -3058,10 +2973,7 @@ void ParamServiceAsyncProcessor::executeRequest_map_ret_bool_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "map_ret_bool_param",
       /* .qualifiedMethodName =*/ "ParamService.map_ret_bool_param"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_map_ret_bool_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3075,9 +2987,7 @@ void ParamServiceAsyncProcessor::executeRequest_map_ret_bool_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_map_ret_bool_param(*serverRequest.requestContext(), args.uarg_param1);
 
@@ -3231,10 +3141,7 @@ void ParamServiceAsyncProcessor::executeRequest_list_ret_map_setlist_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "list_ret_map_setlist_param",
       /* .qualifiedMethodName =*/ "ParamService.list_ret_map_setlist_param"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<bool>>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_list_ret_map_setlist_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<bool>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3248,9 +3155,7 @@ void ParamServiceAsyncProcessor::executeRequest_list_ret_map_setlist_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_list_ret_map_setlist_param(*serverRequest.requestContext(), *args.uarg_param1, *args.uarg_param2);
 
@@ -3401,10 +3306,7 @@ void ParamServiceAsyncProcessor::executeRequest_mapsetlistmapliststring_ret_list
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "mapsetlistmapliststring_ret_listlistlist_param",
       /* .qualifiedMethodName =*/ "ParamService.mapsetlistmapliststring_ret_listlistlist_param"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_mapsetlistmapliststring_ret_listlistlist_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3418,9 +3320,7 @@ void ParamServiceAsyncProcessor::executeRequest_mapsetlistmapliststring_ret_list
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_mapsetlistmapliststring_ret_listlistlist_param(*serverRequest.requestContext(), *args.uarg_param1);
 
@@ -3571,10 +3471,7 @@ void ParamServiceAsyncProcessor::executeRequest_typedef_ret_i32_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "typedef_ret_i32_param",
       /* .qualifiedMethodName =*/ "ParamService.typedef_ret_i32_param"};
-  apache::thrift::HandlerCallback<::some::valid::ns::simpleTypeDef>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_typedef_ret_i32_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::some::valid::ns::simpleTypeDef>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3588,9 +3485,7 @@ void ParamServiceAsyncProcessor::executeRequest_typedef_ret_i32_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_typedef_ret_i32_param(*serverRequest.requestContext(), args.uarg_param1);
 
@@ -3743,10 +3638,7 @@ void ParamServiceAsyncProcessor::executeRequest_listtypedef_ret_typedef_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "listtypedef_ret_typedef_param",
       /* .qualifiedMethodName =*/ "ParamService.listtypedef_ret_typedef_param"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::simpleTypeDef>>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_listtypedef_ret_typedef_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::some::valid::ns::simpleTypeDef>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3760,9 +3652,7 @@ void ParamServiceAsyncProcessor::executeRequest_listtypedef_ret_typedef_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_listtypedef_ret_typedef_param(*serverRequest.requestContext(), *args.uarg_param1);
 
@@ -3913,10 +3803,7 @@ void ParamServiceAsyncProcessor::executeRequest_enum_ret_double_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "enum_ret_double_param",
       /* .qualifiedMethodName =*/ "ParamService.enum_ret_double_param"};
-  apache::thrift::HandlerCallback<::some::valid::ns::MyEnumA>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_enum_ret_double_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::some::valid::ns::MyEnumA>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3930,9 +3817,7 @@ void ParamServiceAsyncProcessor::executeRequest_enum_ret_double_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_enum_ret_double_param(*serverRequest.requestContext(), args.uarg_param1);
 
@@ -4086,10 +3971,7 @@ void ParamServiceAsyncProcessor::executeRequest_enum_ret_double_enum_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "enum_ret_double_enum_param",
       /* .qualifiedMethodName =*/ "ParamService.enum_ret_double_enum_param"};
-  apache::thrift::HandlerCallback<::some::valid::ns::MyEnumA>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_enum_ret_double_enum_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::some::valid::ns::MyEnumA>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -4103,9 +3985,7 @@ void ParamServiceAsyncProcessor::executeRequest_enum_ret_double_enum_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_enum_ret_double_enum_param(*serverRequest.requestContext(), args.uarg_param1, args.uarg_param2);
 
@@ -4256,10 +4136,7 @@ void ParamServiceAsyncProcessor::executeRequest_listenum_ret_map_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "listenum_ret_map_param",
       /* .qualifiedMethodName =*/ "ParamService.listenum_ret_map_param"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::MyEnumA>>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_listenum_ret_map_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::some::valid::ns::MyEnumA>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -4273,9 +4150,7 @@ void ParamServiceAsyncProcessor::executeRequest_listenum_ret_map_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_listenum_ret_map_param(*serverRequest.requestContext(), *args.uarg_param1);
 
@@ -4428,10 +4303,7 @@ void ParamServiceAsyncProcessor::executeRequest_struct_ret_i16_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "struct_ret_i16_param",
       /* .qualifiedMethodName =*/ "ParamService.struct_ret_i16_param"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::MyStruct>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_struct_ret_i16_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::MyStruct>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -4445,9 +4317,7 @@ void ParamServiceAsyncProcessor::executeRequest_struct_ret_i16_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_struct_ret_i16_param(*serverRequest.requestContext(), args.uarg_param1);
 
@@ -4598,10 +4468,7 @@ void ParamServiceAsyncProcessor::executeRequest_setstruct_ret_set_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "setstruct_ret_set_param",
       /* .qualifiedMethodName =*/ "ParamService.setstruct_ret_set_param"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_setstruct_ret_set_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -4615,9 +4482,7 @@ void ParamServiceAsyncProcessor::executeRequest_setstruct_ret_set_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_setstruct_ret_set_param(*serverRequest.requestContext(), *args.uarg_param1);
 
@@ -4771,10 +4636,7 @@ void ParamServiceAsyncProcessor::executeRequest_union_ret_i32_i32_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "union_ret_i32_i32_param",
       /* .qualifiedMethodName =*/ "ParamService.union_ret_i32_i32_param"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::ComplexUnion>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_union_ret_i32_i32_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::ComplexUnion>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -4788,9 +4650,7 @@ void ParamServiceAsyncProcessor::executeRequest_union_ret_i32_i32_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_union_ret_i32_i32_param(*serverRequest.requestContext(), args.uarg_param1, args.uarg_param2);
 
@@ -4941,10 +4801,7 @@ void ParamServiceAsyncProcessor::executeRequest_listunion_string_param(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "listunion_string_param",
       /* .qualifiedMethodName =*/ "ParamService.listunion_string_param"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_listunion_string_param};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -4958,9 +4815,7 @@ void ParamServiceAsyncProcessor::executeRequest_listunion_string_param(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_listunion_string_param(*serverRequest.requestContext(), *args.uarg_param1);
 
@@ -5168,10 +5023,7 @@ void ParamServiceAsyncProcessor::executeRequest_annotatedParams(
       /* .definingServiceName =*/ "ParamService",
       /* .methodName =*/ "annotatedParams",
       /* .qualifiedMethodName =*/ "ParamService.annotatedParams"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::fbthrift_invoke_decorator_after_annotatedParams};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -5185,9 +5037,7 @@ void ParamServiceAsyncProcessor::executeRequest_annotatedParams(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_annotatedParams(*serverRequest.requestContext(), *args.uarg_no_annotation, *args.uarg_opt_ref_type_shared, args.uarg_base_type, *args.uarg_list_type, *args.uarg_set_type, *args.uarg_map_type, *args.uarg_map_struct_type, *args.uarg_iobuf_type, *args.uarg_iobuf_ptr, *args.uarg_list_i32_template, *args.uarg_list_string_template, *args.uarg_set_template, *args.uarg_map_template, *args.uarg_typedef_list_template, *args.uarg_typedef_deque_template, *args.uarg_typedef_set_template, *args.uarg_typedef_map_template, *args.uarg_iobuf_type_val, *args.uarg_iobuf_ptr_val, *args.uarg_struct_struct);
 

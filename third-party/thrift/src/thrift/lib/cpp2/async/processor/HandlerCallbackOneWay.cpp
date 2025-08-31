@@ -18,7 +18,6 @@
 
 namespace apache::thrift {
 void HandlerCallbackOneWay::done() noexcept {
-  decoratorCallback_.invoke(getRequestContext());
 #if FOLLY_HAS_COROUTINES
   if (!shouldProcessServiceInterceptorsOnResponse()) {
     return;

@@ -79,11 +79,8 @@ class ServiceHandler<::facebook::thrift::test::ExtendedService> : virtual public
   void fbthrift_execute_decorators_before_base_method(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
   void fbthrift_execute_decorators_after_base_method(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
 
-  virtual void fbthrift_execute_decorators_before_init(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_param0*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_param1*/) {}
-  virtual void fbthrift_execute_decorators_after_init(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_init(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type result) {
-    static_cast<ServiceHandler<::facebook::thrift::test::ExtendedService>*>(iface)->fbthrift_execute_decorators_after_init(*ctx, result);
-  }
+  virtual void fbthrift_execute_decorators_before_init(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_param0*/, ::std::int64_t /*p_param1*/) {}
+  virtual void fbthrift_execute_decorators_after_init(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/) {}
 };
 
 namespace detail {

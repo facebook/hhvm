@@ -474,215 +474,89 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
  public:
 
   virtual void fbthrift_execute_decorators_before_get_five(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_get_five(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_get_five(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_get_five(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_add_five(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_num*/) {}
-  virtual void fbthrift_execute_decorators_after_add_five(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_add_five(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_add_five(*ctx, result);
-  }
+  virtual void fbthrift_execute_decorators_after_get_five(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_add_five(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_num*/) {}
+  virtual void fbthrift_execute_decorators_after_add_five(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
   virtual void fbthrift_execute_decorators_before_do_nothing(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_do_nothing(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_do_nothing(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_do_nothing(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_concat(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_first*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_second*/) {}
-  virtual void fbthrift_execute_decorators_after_concat(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_concat(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::string>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_concat(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_get_value(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::py3::simple::SimpleStruct>::type /*p_simple_struct*/) {}
-  virtual void fbthrift_execute_decorators_after_get_value(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_get_value(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_get_value(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_negate(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<bool>::type /*p_input*/) {}
-  virtual void fbthrift_execute_decorators_after_negate(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<bool>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_negate(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<bool>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_negate(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_tiny(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int8_t>::type /*p_input*/) {}
-  virtual void fbthrift_execute_decorators_after_tiny(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int8_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_tiny(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int8_t>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_tiny(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_small(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int16_t>::type /*p_input*/) {}
-  virtual void fbthrift_execute_decorators_after_small(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int16_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_small(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int16_t>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_small(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_big(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_input*/) {}
-  virtual void fbthrift_execute_decorators_after_big(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_big(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_big(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_two(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<double>::type /*p_input*/) {}
-  virtual void fbthrift_execute_decorators_after_two(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<double>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_two(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<double>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_two(*ctx, result);
-  }
+  virtual void fbthrift_execute_decorators_before_concat(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_first*/, const ::std::string& /*p_second*/) {}
+  virtual void fbthrift_execute_decorators_after_concat(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_get_value(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::py3::simple::SimpleStruct& /*p_simple_struct*/) {}
+  virtual void fbthrift_execute_decorators_after_get_value(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_negate(apache::thrift::Cpp2RequestContext& /*requestCtx*/, bool /*p_input*/) {}
+  virtual void fbthrift_execute_decorators_after_negate(apache::thrift::Cpp2RequestContext& /*requestCtx*/, bool /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_tiny(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int8_t /*p_input*/) {}
+  virtual void fbthrift_execute_decorators_after_tiny(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int8_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_small(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int16_t /*p_input*/) {}
+  virtual void fbthrift_execute_decorators_after_small(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int16_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_big(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_input*/) {}
+  virtual void fbthrift_execute_decorators_after_big(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_two(apache::thrift::Cpp2RequestContext& /*requestCtx*/, double /*p_input*/) {}
+  virtual void fbthrift_execute_decorators_after_two(apache::thrift::Cpp2RequestContext& /*requestCtx*/, double /*result*/) {}
   virtual void fbthrift_execute_decorators_before_expected_exception(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_expected_exception(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_expected_exception(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_expected_exception(*ctx);
-  }
   virtual void fbthrift_execute_decorators_before_unexpected_exception(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_unexpected_exception(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_unexpected_exception(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_unexpected_exception(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_sum_i16_list(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::int16_t>>::type /*p_numbers*/) {}
-  virtual void fbthrift_execute_decorators_after_sum_i16_list(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_sum_i16_list(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_sum_i16_list(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_sum_i32_list(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::int32_t>>::type /*p_numbers*/) {}
-  virtual void fbthrift_execute_decorators_after_sum_i32_list(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_sum_i32_list(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_sum_i32_list(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_sum_i64_list(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::int64_t>>::type /*p_numbers*/) {}
-  virtual void fbthrift_execute_decorators_after_sum_i64_list(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_sum_i64_list(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_sum_i64_list(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_concat_many(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::string>>::type /*p_words*/) {}
-  virtual void fbthrift_execute_decorators_after_concat_many(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_concat_many(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::string>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_concat_many(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_count_structs(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::py3::simple::SimpleStruct>>::type /*p_items*/) {}
-  virtual void fbthrift_execute_decorators_after_count_structs(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_count_structs(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_count_structs(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_sum_set(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::set<::std::int32_t>>::type /*p_numbers*/) {}
-  virtual void fbthrift_execute_decorators_after_sum_set(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_sum_set(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_sum_set(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_contains_word(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::set<::std::string>>::type /*p_words*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_word*/) {}
-  virtual void fbthrift_execute_decorators_after_contains_word(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<bool>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_contains_word(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<bool>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_contains_word(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_get_map_value(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::map<::std::string, ::std::string>>::type /*p_words*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_key*/) {}
-  virtual void fbthrift_execute_decorators_after_get_map_value(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_get_map_value(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::string>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_get_map_value(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_map_length(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::map<::std::string, ::py3::simple::SimpleStruct>>::type /*p_items*/) {}
-  virtual void fbthrift_execute_decorators_after_map_length(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int16_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_map_length(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int16_t>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_map_length(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_sum_map_values(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::map<::std::string, ::std::int16_t>>::type /*p_items*/) {}
-  virtual void fbthrift_execute_decorators_after_sum_map_values(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int16_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_sum_map_values(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int16_t>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_sum_map_values(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_complex_sum_i32(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::py3::simple::ComplexStruct>::type /*p_counter*/) {}
-  virtual void fbthrift_execute_decorators_after_complex_sum_i32(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_complex_sum_i32(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_complex_sum_i32(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_repeat_name(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::py3::simple::ComplexStruct>::type /*p_counter*/) {}
-  virtual void fbthrift_execute_decorators_after_repeat_name(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_repeat_name(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::string>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_repeat_name(*ctx, result);
-  }
+  virtual void fbthrift_execute_decorators_after_unexpected_exception(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_sum_i16_list(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::int16_t>& /*p_numbers*/) {}
+  virtual void fbthrift_execute_decorators_after_sum_i16_list(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_sum_i32_list(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::int32_t>& /*p_numbers*/) {}
+  virtual void fbthrift_execute_decorators_after_sum_i32_list(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_sum_i64_list(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::int64_t>& /*p_numbers*/) {}
+  virtual void fbthrift_execute_decorators_after_sum_i64_list(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_concat_many(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::string>& /*p_words*/) {}
+  virtual void fbthrift_execute_decorators_after_concat_many(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_count_structs(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::py3::simple::SimpleStruct>& /*p_items*/) {}
+  virtual void fbthrift_execute_decorators_after_count_structs(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_sum_set(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::set<::std::int32_t>& /*p_numbers*/) {}
+  virtual void fbthrift_execute_decorators_after_sum_set(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_contains_word(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::set<::std::string>& /*p_words*/, const ::std::string& /*p_word*/) {}
+  virtual void fbthrift_execute_decorators_after_contains_word(apache::thrift::Cpp2RequestContext& /*requestCtx*/, bool /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_get_map_value(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::std::string>& /*p_words*/, const ::std::string& /*p_key*/) {}
+  virtual void fbthrift_execute_decorators_after_get_map_value(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_map_length(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::py3::simple::SimpleStruct>& /*p_items*/) {}
+  virtual void fbthrift_execute_decorators_after_map_length(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int16_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_sum_map_values(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::std::int16_t>& /*p_items*/) {}
+  virtual void fbthrift_execute_decorators_after_sum_map_values(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int16_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_complex_sum_i32(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::py3::simple::ComplexStruct& /*p_counter*/) {}
+  virtual void fbthrift_execute_decorators_after_complex_sum_i32(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_repeat_name(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::py3::simple::ComplexStruct& /*p_counter*/) {}
+  virtual void fbthrift_execute_decorators_after_repeat_name(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) {}
   virtual void fbthrift_execute_decorators_before_get_struct(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_get_struct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::py3::simple::SimpleStruct>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_get_struct(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::py3::simple::SimpleStruct>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_get_struct(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_fib(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int16_t>::type /*p_n*/) {}
-  virtual void fbthrift_execute_decorators_after_fib(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::vector<::std::int32_t>>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_fib(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::vector<::std::int32_t>>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_fib(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_unique_words(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::string>>::type /*p_words*/) {}
-  virtual void fbthrift_execute_decorators_after_unique_words(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::set<::std::string>>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_unique_words(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::set<::std::string>>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_unique_words(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_words_count(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::string>>::type /*p_words*/) {}
-  virtual void fbthrift_execute_decorators_after_words_count(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::map<::std::string, ::std::int16_t>>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_words_count(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::map<::std::string, ::std::int16_t>>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_words_count(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_set_enum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::py3::simple::AnEnum>::type /*p_in_enum*/) {}
-  virtual void fbthrift_execute_decorators_after_set_enum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::py3::simple::AnEnum>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_set_enum(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::py3::simple::AnEnum>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_set_enum(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_list_of_lists(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int16_t>::type /*p_num_lists*/, apache::thrift::detail::DecoratorArgType<::std::int16_t>::type /*p_num_items*/) {}
-  virtual void fbthrift_execute_decorators_after_list_of_lists(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::vector<::std::vector<::std::int32_t>>>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_list_of_lists(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::vector<::std::vector<::std::int32_t>>>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_list_of_lists(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_word_character_frequency(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_sentence*/) {}
-  virtual void fbthrift_execute_decorators_after_word_character_frequency(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_word_character_frequency(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_word_character_frequency(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_list_of_sets(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_some_words*/) {}
-  virtual void fbthrift_execute_decorators_after_list_of_sets(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::vector<::std::set<::std::string>>>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_list_of_sets(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::vector<::std::set<::std::string>>>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_list_of_sets(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_nested_map_argument(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>>::type /*p_struct_map*/) {}
-  virtual void fbthrift_execute_decorators_after_nested_map_argument(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_nested_map_argument(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_nested_map_argument(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_make_sentence(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::vector<::std::string>>>::type /*p_word_chars*/) {}
-  virtual void fbthrift_execute_decorators_after_make_sentence(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_make_sentence(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::string>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_make_sentence(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_get_union(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::set<::std::int32_t>>>::type /*p_sets*/) {}
-  virtual void fbthrift_execute_decorators_after_get_union(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::set<::std::int32_t>>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_get_union(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::set<::std::int32_t>>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_get_union(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_get_keys(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::map<::std::string, ::std::string>>>::type /*p_string_map*/) {}
-  virtual void fbthrift_execute_decorators_after_get_keys(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::set<::std::string>>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_get_keys(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::set<::std::string>>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_get_keys(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_lookup_double(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_key*/) {}
-  virtual void fbthrift_execute_decorators_after_lookup_double(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<double>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_lookup_double(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<double>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_lookup_double(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_retrieve_binary(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_something*/) {}
-  virtual void fbthrift_execute_decorators_after_retrieve_binary(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_retrieve_binary(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::string>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_retrieve_binary(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_contain_binary(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::string>>::type /*p_binaries*/) {}
-  virtual void fbthrift_execute_decorators_after_contain_binary(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::set<::std::string>>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_contain_binary(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::set<::std::string>>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_contain_binary(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_contain_enum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::py3::simple::AnEnum>>::type /*p_the_enum*/) {}
-  virtual void fbthrift_execute_decorators_after_contain_enum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::vector<::py3::simple::AnEnum>>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_contain_enum(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::vector<::py3::simple::AnEnum>>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_contain_enum(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_get_binary_union_struct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::py3::simple::BinaryUnion>::type /*p_u*/) {}
-  virtual void fbthrift_execute_decorators_after_get_binary_union_struct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::py3::simple::BinaryUnionStruct>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_get_binary_union_struct(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::py3::simple::BinaryUnionStruct>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_get_binary_union_struct(*ctx, result);
-  }
+  virtual void fbthrift_execute_decorators_after_get_struct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::py3::simple::SimpleStruct& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_fib(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int16_t /*p_n*/) {}
+  virtual void fbthrift_execute_decorators_after_fib(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::int32_t>& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_unique_words(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::string>& /*p_words*/) {}
+  virtual void fbthrift_execute_decorators_after_unique_words(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::set<::std::string>& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_words_count(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::string>& /*p_words*/) {}
+  virtual void fbthrift_execute_decorators_after_words_count(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::std::int16_t>& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_set_enum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::py3::simple::AnEnum /*p_in_enum*/) {}
+  virtual void fbthrift_execute_decorators_after_set_enum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::py3::simple::AnEnum /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_list_of_lists(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int16_t /*p_num_lists*/, ::std::int16_t /*p_num_items*/) {}
+  virtual void fbthrift_execute_decorators_after_list_of_lists(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::vector<::std::int32_t>>& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_word_character_frequency(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_sentence*/) {}
+  virtual void fbthrift_execute_decorators_after_word_character_frequency(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_list_of_sets(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_some_words*/) {}
+  virtual void fbthrift_execute_decorators_after_list_of_sets(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::set<::std::string>>& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_nested_map_argument(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>& /*p_struct_map*/) {}
+  virtual void fbthrift_execute_decorators_after_nested_map_argument(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_make_sentence(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::vector<::std::string>>& /*p_word_chars*/) {}
+  virtual void fbthrift_execute_decorators_after_make_sentence(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_get_union(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::set<::std::int32_t>>& /*p_sets*/) {}
+  virtual void fbthrift_execute_decorators_after_get_union(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::set<::std::int32_t>& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_get_keys(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::map<::std::string, ::std::string>>& /*p_string_map*/) {}
+  virtual void fbthrift_execute_decorators_after_get_keys(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::set<::std::string>& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_lookup_double(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_key*/) {}
+  virtual void fbthrift_execute_decorators_after_lookup_double(apache::thrift::Cpp2RequestContext& /*requestCtx*/, double /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_retrieve_binary(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_something*/) {}
+  virtual void fbthrift_execute_decorators_after_retrieve_binary(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_contain_binary(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::string>& /*p_binaries*/) {}
+  virtual void fbthrift_execute_decorators_after_contain_binary(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::set<::std::string>& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_contain_enum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::py3::simple::AnEnum>& /*p_the_enum*/) {}
+  virtual void fbthrift_execute_decorators_after_contain_enum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::py3::simple::AnEnum>& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_get_binary_union_struct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::py3::simple::BinaryUnion& /*p_u*/) {}
+  virtual void fbthrift_execute_decorators_after_get_binary_union_struct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::py3::simple::BinaryUnionStruct& /*result*/) {}
   virtual void fbthrift_execute_decorators_before_get_struct_hidden(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_get_struct_hidden(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::py3::simple::SimpleStruct>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_get_struct_hidden(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::py3::simple::SimpleStruct>::type result) {
-    static_cast<ServiceHandler<::py3::simple::SimpleService>*>(iface)->fbthrift_execute_decorators_after_get_struct_hidden(*ctx, result);
-  }
+  virtual void fbthrift_execute_decorators_after_get_struct_hidden(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::py3::simple::SimpleStruct& /*result*/) {}
 };
 
 namespace detail {

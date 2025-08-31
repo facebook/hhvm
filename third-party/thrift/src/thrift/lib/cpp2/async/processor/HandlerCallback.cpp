@@ -28,8 +28,7 @@ HandlerCallback<void>::HandlerCallback(
     folly::EventBase* eb,
     concurrency::ThreadManager* tm,
     Cpp2RequestContext* reqCtx,
-    TilePtr&& interaction,
-    DecoratorAfterCallback&& decoratorCallback)
+    TilePtr&& interaction)
     : HandlerCallbackBase(
           std::move(req),
           std::move(ctx),
@@ -39,8 +38,7 @@ HandlerCallback<void>::HandlerCallback(
           tm,
           reqCtx,
           std::move(interaction)),
-      cp_(cp),
-      decoratorCallback_(std::move(decoratorCallback)) {
+      cp_(cp) {
   this->protoSeqId_ = protoSeqId;
 }
 
@@ -57,8 +55,7 @@ HandlerCallback<void>::HandlerCallback(
     RequestCompletionCallback* notifyRequestPile,
     RequestCompletionCallback* notifyConcurrencyController,
     ServerRequestData requestData,
-    TilePtr&& interaction,
-    DecoratorAfterCallback&& decoratorCallback)
+    TilePtr&& interaction)
     : HandlerCallbackBase(
           std::move(req),
           std::move(ctx),
@@ -71,8 +68,7 @@ HandlerCallback<void>::HandlerCallback(
           notifyConcurrencyController,
           std::move(requestData),
           std::move(interaction)),
-      cp_(cp),
-      decoratorCallback_(std::move(decoratorCallback)) {
+      cp_(cp) {
   this->protoSeqId_ = protoSeqId;
 }
 

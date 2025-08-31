@@ -108,10 +108,7 @@ void MyServiceAsyncProcessor::executeRequest_query(
       /* .definingServiceName =*/ "MyService",
       /* .methodName =*/ "query",
       /* .qualifiedMethodName =*/ "MyService.query"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::cpp2::MyService>::fbthrift_invoke_decorator_after_query};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -125,9 +122,7 @@ void MyServiceAsyncProcessor::executeRequest_query(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_query(*serverRequest.requestContext(), *args.uarg_s, *args.uarg_i);
 
@@ -278,10 +273,7 @@ void MyServiceAsyncProcessor::executeRequest_has_arg_docs(
       /* .definingServiceName =*/ "MyService",
       /* .methodName =*/ "has_arg_docs",
       /* .qualifiedMethodName =*/ "MyService.has_arg_docs"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::cpp2::MyService>::fbthrift_invoke_decorator_after_has_arg_docs};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -295,9 +287,7 @@ void MyServiceAsyncProcessor::executeRequest_has_arg_docs(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_has_arg_docs(*serverRequest.requestContext(), *args.uarg_s, *args.uarg_i);
 

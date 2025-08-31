@@ -105,10 +105,7 @@ void SomeServiceAsyncProcessor::executeRequest_bounce_map(
       /* .definingServiceName =*/ "SomeService",
       /* .methodName =*/ "bounce_map",
       /* .qualifiedMethodName =*/ "SomeService.bounce_map"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::apache::thrift::fixtures::types::SomeMap>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>::fbthrift_invoke_decorator_after_bounce_map};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::apache::thrift::fixtures::types::SomeMap>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -122,9 +119,7 @@ void SomeServiceAsyncProcessor::executeRequest_bounce_map(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_bounce_map(*serverRequest.requestContext(), *args.uarg_m);
 
@@ -275,10 +270,7 @@ void SomeServiceAsyncProcessor::executeRequest_binary_keyed_map(
       /* .definingServiceName =*/ "SomeService",
       /* .methodName =*/ "binary_keyed_map",
       /* .qualifiedMethodName =*/ "SomeService.binary_keyed_map"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>::fbthrift_invoke_decorator_after_binary_keyed_map};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -292,9 +284,7 @@ void SomeServiceAsyncProcessor::executeRequest_binary_keyed_map(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_binary_keyed_map(*serverRequest.requestContext(), *args.uarg_r);
 

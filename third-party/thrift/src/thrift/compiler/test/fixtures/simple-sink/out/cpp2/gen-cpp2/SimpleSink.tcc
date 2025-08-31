@@ -104,10 +104,7 @@ void SimpleSinkAsyncProcessor::executeRequest_simple(
       /* .definingServiceName =*/ "SimpleSink",
       /* .methodName =*/ "simple",
       /* .qualifiedMethodName =*/ "SimpleSink.simple"};
-  apache::thrift::HandlerCallback</* TODO (@sazonovk) */>::DecoratorCb decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::cpp2::SimpleSink>::__fbthrift_invoke_decorator_after_simple};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr</* TODO (@sazonovk) */>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -121,8 +118,7 @@ void SimpleSinkAsyncProcessor::executeRequest_simple(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()), apache::thrift::TilePtr()
-    , std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->__fbthrift_execute_decorators_before_simple(*serverRequest.requestContext());
 

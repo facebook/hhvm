@@ -94,11 +94,8 @@ class BoxedInteractionIf : public apache::thrift::Tile, public apache::thrift::S
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_getABoxSession{apache::thrift::detail::si::InvocationType::AsyncTm};
  public:
 
-  virtual void fbthrift_execute_decorators_before_getABoxSession(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::cpp2::ShouldBeBoxed>::type /*p_req*/) {}
-  virtual void fbthrift_execute_decorators_after_getABoxSession(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::ShouldBeBoxed>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_getABoxSession(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::cpp2::ShouldBeBoxed>::type result) {
-    static_cast<ServiceHandler<::cpp2::BoxService>*>(iface)->fbthrift_execute_decorators_after_getABoxSession(*ctx, result);
-  }
+  virtual void fbthrift_execute_decorators_before_getABoxSession(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::ShouldBeBoxed& /*p_req*/) {}
+  virtual void fbthrift_execute_decorators_after_getABoxSession(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const BoxedInteractionIf& /*interaction*/, const ::cpp2::ShouldBeBoxed& /*result*/) {}
 };
 
 namespace detail {

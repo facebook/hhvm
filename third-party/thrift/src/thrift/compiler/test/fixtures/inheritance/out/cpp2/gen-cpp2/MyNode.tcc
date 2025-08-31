@@ -100,10 +100,7 @@ void MyNodeAsyncProcessor::executeRequest_do_mid(
       /* .definingServiceName =*/ "MyNode",
       /* .methodName =*/ "do_mid",
       /* .qualifiedMethodName =*/ "MyNode.do_mid"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::cpp2::MyNode>::fbthrift_invoke_decorator_after_do_mid};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -117,9 +114,7 @@ void MyNodeAsyncProcessor::executeRequest_do_mid(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_do_mid(*serverRequest.requestContext());
 

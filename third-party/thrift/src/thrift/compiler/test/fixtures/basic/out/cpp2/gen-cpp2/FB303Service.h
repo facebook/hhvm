@@ -67,11 +67,8 @@ class ServiceHandler<::test::fixtures::basic::FB303Service> : public apache::thr
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_simple_rpc{apache::thrift::detail::si::InvocationType::AsyncTm};
  public:
 
-  virtual void fbthrift_execute_decorators_before_simple_rpc(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_int_parameter*/) {}
-  virtual void fbthrift_execute_decorators_after_simple_rpc(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::test::fixtures::basic::ReservedKeyword>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_simple_rpc(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::test::fixtures::basic::ReservedKeyword>::type result) {
-    static_cast<ServiceHandler<::test::fixtures::basic::FB303Service>*>(iface)->fbthrift_execute_decorators_after_simple_rpc(*ctx, result);
-  }
+  virtual void fbthrift_execute_decorators_before_simple_rpc(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_int_parameter*/) {}
+  virtual void fbthrift_execute_decorators_after_simple_rpc(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::test::fixtures::basic::ReservedKeyword& /*result*/) {}
 };
 
 namespace detail {

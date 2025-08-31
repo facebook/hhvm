@@ -73,9 +73,6 @@ class ServiceHandler<::cpp2::MyServicePrioChild> : virtual public ::cpp2::MyServ
 
   virtual void fbthrift_execute_decorators_before_pang(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_pang(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_pang(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::MyServicePrioChild>*>(iface)->fbthrift_execute_decorators_after_pang(*ctx);
-  }
 };
 
 namespace detail {

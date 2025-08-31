@@ -142,10 +142,7 @@ void ReturnServiceAsyncProcessor::executeRequest_noReturn(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "noReturn",
       /* .qualifiedMethodName =*/ "ReturnService.noReturn"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_noReturn};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -159,9 +156,7 @@ void ReturnServiceAsyncProcessor::executeRequest_noReturn(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_noReturn(*serverRequest.requestContext());
 
@@ -306,10 +301,7 @@ void ReturnServiceAsyncProcessor::executeRequest_boolReturn(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "boolReturn",
       /* .qualifiedMethodName =*/ "ReturnService.boolReturn"};
-  apache::thrift::HandlerCallback<bool>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_boolReturn};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<bool>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -323,9 +315,7 @@ void ReturnServiceAsyncProcessor::executeRequest_boolReturn(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_boolReturn(*serverRequest.requestContext());
 
@@ -473,10 +463,7 @@ void ReturnServiceAsyncProcessor::executeRequest_i16Return(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "i16Return",
       /* .qualifiedMethodName =*/ "ReturnService.i16Return"};
-  apache::thrift::HandlerCallback<::std::int16_t>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_i16Return};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int16_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -490,9 +477,7 @@ void ReturnServiceAsyncProcessor::executeRequest_i16Return(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_i16Return(*serverRequest.requestContext());
 
@@ -640,10 +625,7 @@ void ReturnServiceAsyncProcessor::executeRequest_i32Return(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "i32Return",
       /* .qualifiedMethodName =*/ "ReturnService.i32Return"};
-  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_i32Return};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -657,9 +639,7 @@ void ReturnServiceAsyncProcessor::executeRequest_i32Return(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_i32Return(*serverRequest.requestContext());
 
@@ -807,10 +787,7 @@ void ReturnServiceAsyncProcessor::executeRequest_i64Return(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "i64Return",
       /* .qualifiedMethodName =*/ "ReturnService.i64Return"};
-  apache::thrift::HandlerCallback<::std::int64_t>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_i64Return};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -824,9 +801,7 @@ void ReturnServiceAsyncProcessor::executeRequest_i64Return(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_i64Return(*serverRequest.requestContext());
 
@@ -974,10 +949,7 @@ void ReturnServiceAsyncProcessor::executeRequest_floatReturn(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "floatReturn",
       /* .qualifiedMethodName =*/ "ReturnService.floatReturn"};
-  apache::thrift::HandlerCallback<float>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_floatReturn};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<float>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -991,9 +963,7 @@ void ReturnServiceAsyncProcessor::executeRequest_floatReturn(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_floatReturn(*serverRequest.requestContext());
 
@@ -1141,10 +1111,7 @@ void ReturnServiceAsyncProcessor::executeRequest_doubleReturn(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "doubleReturn",
       /* .qualifiedMethodName =*/ "ReturnService.doubleReturn"};
-  apache::thrift::HandlerCallback<double>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_doubleReturn};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<double>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1158,9 +1125,7 @@ void ReturnServiceAsyncProcessor::executeRequest_doubleReturn(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_doubleReturn(*serverRequest.requestContext());
 
@@ -1310,10 +1275,7 @@ void ReturnServiceAsyncProcessor::executeRequest_stringReturn(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "stringReturn",
       /* .qualifiedMethodName =*/ "ReturnService.stringReturn"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_stringReturn};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1327,9 +1289,7 @@ void ReturnServiceAsyncProcessor::executeRequest_stringReturn(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_stringReturn(*serverRequest.requestContext());
 
@@ -1477,10 +1437,7 @@ void ReturnServiceAsyncProcessor::executeRequest_binaryReturn(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "binaryReturn",
       /* .qualifiedMethodName =*/ "ReturnService.binaryReturn"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_binaryReturn};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1494,9 +1451,7 @@ void ReturnServiceAsyncProcessor::executeRequest_binaryReturn(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_binaryReturn(*serverRequest.requestContext());
 
@@ -1644,10 +1599,7 @@ void ReturnServiceAsyncProcessor::executeRequest_mapReturn(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "mapReturn",
       /* .qualifiedMethodName =*/ "ReturnService.mapReturn"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_mapReturn};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1661,9 +1613,7 @@ void ReturnServiceAsyncProcessor::executeRequest_mapReturn(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_mapReturn(*serverRequest.requestContext());
 
@@ -1811,10 +1761,7 @@ void ReturnServiceAsyncProcessor::executeRequest_simpleTypedefReturn(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "simpleTypedefReturn",
       /* .qualifiedMethodName =*/ "ReturnService.simpleTypedefReturn"};
-  apache::thrift::HandlerCallback<::some::valid::ns::simpleTypeDef>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_simpleTypedefReturn};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::some::valid::ns::simpleTypeDef>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1828,9 +1775,7 @@ void ReturnServiceAsyncProcessor::executeRequest_simpleTypedefReturn(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_simpleTypedefReturn(*serverRequest.requestContext());
 
@@ -1978,10 +1923,7 @@ void ReturnServiceAsyncProcessor::executeRequest_complexTypedefReturn(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "complexTypedefReturn",
       /* .qualifiedMethodName =*/ "ReturnService.complexTypedefReturn"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::complexStructTypeDef>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_complexTypedefReturn};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::complexStructTypeDef>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1995,9 +1937,7 @@ void ReturnServiceAsyncProcessor::executeRequest_complexTypedefReturn(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_complexTypedefReturn(*serverRequest.requestContext());
 
@@ -2145,10 +2085,7 @@ void ReturnServiceAsyncProcessor::executeRequest_list_mostComplexTypedefReturn(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "list_mostComplexTypedefReturn",
       /* .qualifiedMethodName =*/ "ReturnService.list_mostComplexTypedefReturn"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::mostComplexTypeDef>>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_list_mostComplexTypedefReturn};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::some::valid::ns::mostComplexTypeDef>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2162,9 +2099,7 @@ void ReturnServiceAsyncProcessor::executeRequest_list_mostComplexTypedefReturn(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_list_mostComplexTypedefReturn(*serverRequest.requestContext());
 
@@ -2314,10 +2249,7 @@ void ReturnServiceAsyncProcessor::executeRequest_enumReturn(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "enumReturn",
       /* .qualifiedMethodName =*/ "ReturnService.enumReturn"};
-  apache::thrift::HandlerCallback<::some::valid::ns::MyEnumA>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_enumReturn};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::some::valid::ns::MyEnumA>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2331,9 +2263,7 @@ void ReturnServiceAsyncProcessor::executeRequest_enumReturn(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_enumReturn(*serverRequest.requestContext());
 
@@ -2483,10 +2413,7 @@ void ReturnServiceAsyncProcessor::executeRequest_list_EnumReturn(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "list_EnumReturn",
       /* .qualifiedMethodName =*/ "ReturnService.list_EnumReturn"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::MyEnumA>>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_list_EnumReturn};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::some::valid::ns::MyEnumA>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2500,9 +2427,7 @@ void ReturnServiceAsyncProcessor::executeRequest_list_EnumReturn(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_list_EnumReturn(*serverRequest.requestContext());
 
@@ -2650,10 +2575,7 @@ void ReturnServiceAsyncProcessor::executeRequest_structReturn(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "structReturn",
       /* .qualifiedMethodName =*/ "ReturnService.structReturn"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::MyStruct>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_structReturn};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::MyStruct>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2667,9 +2589,7 @@ void ReturnServiceAsyncProcessor::executeRequest_structReturn(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_structReturn(*serverRequest.requestContext());
 
@@ -2817,10 +2737,7 @@ void ReturnServiceAsyncProcessor::executeRequest_set_StructReturn(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "set_StructReturn",
       /* .qualifiedMethodName =*/ "ReturnService.set_StructReturn"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_set_StructReturn};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2834,9 +2751,7 @@ void ReturnServiceAsyncProcessor::executeRequest_set_StructReturn(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_set_StructReturn(*serverRequest.requestContext());
 
@@ -2986,10 +2901,7 @@ void ReturnServiceAsyncProcessor::executeRequest_unionReturn(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "unionReturn",
       /* .qualifiedMethodName =*/ "ReturnService.unionReturn"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::ComplexUnion>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_unionReturn};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::ComplexUnion>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3003,9 +2915,7 @@ void ReturnServiceAsyncProcessor::executeRequest_unionReturn(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_unionReturn(*serverRequest.requestContext());
 
@@ -3153,10 +3063,7 @@ void ReturnServiceAsyncProcessor::executeRequest_list_UnionReturn(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "list_UnionReturn",
       /* .qualifiedMethodName =*/ "ReturnService.list_UnionReturn"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_list_UnionReturn};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3170,9 +3077,7 @@ void ReturnServiceAsyncProcessor::executeRequest_list_UnionReturn(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_list_UnionReturn(*serverRequest.requestContext());
 
@@ -3325,10 +3230,7 @@ void ReturnServiceAsyncProcessor::executeRequest_readDataEb(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "readDataEb",
       /* .qualifiedMethodName =*/ "ReturnService.readDataEb"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::IOBuf>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_readDataEb};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::IOBuf>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3342,9 +3244,7 @@ void ReturnServiceAsyncProcessor::executeRequest_readDataEb(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_readDataEb(*serverRequest.requestContext(), args.uarg_size);
 
@@ -3495,10 +3395,7 @@ void ReturnServiceAsyncProcessor::executeRequest_readData(
       /* .definingServiceName =*/ "ReturnService",
       /* .methodName =*/ "readData",
       /* .qualifiedMethodName =*/ "ReturnService.readData"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::some::valid::ns::IOBufPtr>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::fbthrift_invoke_decorator_after_readData};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::some::valid::ns::IOBufPtr>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3512,9 +3409,7 @@ void ReturnServiceAsyncProcessor::executeRequest_readData(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_readData(*serverRequest.requestContext(), args.uarg_size);
 

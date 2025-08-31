@@ -109,10 +109,7 @@ void ServiceAsyncProcessor::executeRequest_func(
       /* .definingServiceName =*/ "Service",
       /* .methodName =*/ "func",
       /* .qualifiedMethodName =*/ "Service.func"};
-  apache::thrift::HandlerCallback<::facebook::thrift::test::MyI32_4873>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::facebook::thrift::test::Service>::fbthrift_invoke_decorator_after_func};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<::facebook::thrift::test::MyI32_4873>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -126,9 +123,7 @@ void ServiceAsyncProcessor::executeRequest_func(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_func(*serverRequest.requestContext(), *args.uarg_arg1, *args.uarg_arg2, *args.uarg_arg3);
 

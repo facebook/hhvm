@@ -34,10 +34,10 @@ void apache::thrift::ServiceHandler<{{leaf_service.qualified_name}}>::fbthrift_e
 }
 
 void apache::thrift::ServiceHandler<{{leaf_service.qualified_name}}>::fbthrift_execute_decorators_after_{{function.cpp_name}}(
-  apache::thrift::Cpp2RequestContext& requestCtx{{#partial params.after_param service=service function=function}}) {
+  apache::thrift::Cpp2RequestContext& requestCtx{{#partial params.after_params function=function}}) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
-    decorator->after_{{function.cpp_name}}(std::move(afterParams){{#partial params.after_invocation_args function=function}});
+    decorator->after_{{function.cpp_name}}(std::move(afterParams){{#if function.return_type.void?}}{{#else}}, result{{/if function.return_type.void?}});
   });
 }
 {{/each}}{{! Interactions are implemented later - they need to go on the actual interaction handler}}

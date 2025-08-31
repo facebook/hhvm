@@ -102,10 +102,7 @@ void MyServicePrioParentAsyncProcessor::executeRequest_ping(
       /* .definingServiceName =*/ "MyServicePrioParent",
       /* .methodName =*/ "ping",
       /* .qualifiedMethodName =*/ "MyServicePrioParent.ping"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::fbthrift_invoke_decorator_after_ping};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -119,9 +116,7 @@ void MyServicePrioParentAsyncProcessor::executeRequest_ping(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_ping(*serverRequest.requestContext());
 
@@ -266,10 +261,7 @@ void MyServicePrioParentAsyncProcessor::executeRequest_pong(
       /* .definingServiceName =*/ "MyServicePrioParent",
       /* .methodName =*/ "pong",
       /* .qualifiedMethodName =*/ "MyServicePrioParent.pong"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::fbthrift_invoke_decorator_after_pong};
- auto callback =
+  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -283,9 +275,7 @@ void MyServicePrioParentAsyncProcessor::executeRequest_pong(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
+          std::move(serverRequest.requestData()));
 
   iface_->fbthrift_execute_decorators_before_pong(*serverRequest.requestContext());
 

@@ -96,15 +96,9 @@ class BadInteractionIf : public apache::thrift::Tile, public apache::thrift::Ser
  public:
 
   virtual void fbthrift_execute_decorators_before_createBadInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_createBadInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_createBadInteraction(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::GoodService>*>(iface)->fbthrift_execute_decorators_after_createBadInteraction(*ctx);
-  }
+  virtual void fbthrift_execute_decorators_after_createBadInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const GoodInteractionIf& /*interaction*/) {}
   virtual void fbthrift_execute_decorators_before_bar(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_bar(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_bar(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
-    static_cast<ServiceHandler<::cpp2::GoodService>*>(iface)->fbthrift_execute_decorators_after_bar(*ctx, result);
-  }
+  virtual void fbthrift_execute_decorators_after_bar(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
 };
 
 namespace detail {

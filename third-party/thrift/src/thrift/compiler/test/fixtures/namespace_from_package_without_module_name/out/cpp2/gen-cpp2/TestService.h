@@ -67,11 +67,8 @@ class ServiceHandler<::test::namespace_from_package_without_module_name::TestSer
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_init{apache::thrift::detail::si::InvocationType::AsyncTm};
  public:
 
-  virtual void fbthrift_execute_decorators_before_init(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_int1*/) {}
-  virtual void fbthrift_execute_decorators_after_init(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_init(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type result) {
-    static_cast<ServiceHandler<::test::namespace_from_package_without_module_name::TestService>*>(iface)->fbthrift_execute_decorators_after_init(*ctx, result);
-  }
+  virtual void fbthrift_execute_decorators_before_init(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_int1*/) {}
+  virtual void fbthrift_execute_decorators_after_init(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/) {}
 };
 
 namespace detail {

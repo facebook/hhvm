@@ -129,112 +129,85 @@ class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid:
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_oneway_void_ret_struct_param{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_oneway_void_ret_listunion_param{apache::thrift::detail::si::InvocationType::AsyncTm};
  public:
-  void fbthrift_execute_decorators_before_void_ret_i16_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int16_t>::type /*p_param1*/) override {}
+  void fbthrift_execute_decorators_before_void_ret_i16_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int16_t /*p_param1*/) override {}
   void fbthrift_execute_decorators_after_void_ret_i16_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
-  void fbthrift_execute_decorators_before_void_ret_byte_i16_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int8_t>::type /*p_param1*/, apache::thrift::detail::DecoratorArgType<::std::int16_t>::type /*p_param2*/) override {}
+  void fbthrift_execute_decorators_before_void_ret_byte_i16_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int8_t /*p_param1*/, ::std::int16_t /*p_param2*/) override {}
   void fbthrift_execute_decorators_after_void_ret_byte_i16_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
-  void fbthrift_execute_decorators_before_void_ret_map_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::map<::std::string, ::std::int64_t>>::type /*p_param1*/) override {}
+  void fbthrift_execute_decorators_before_void_ret_map_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::std::int64_t>& /*p_param1*/) override {}
   void fbthrift_execute_decorators_after_void_ret_map_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
-  void fbthrift_execute_decorators_before_void_ret_map_setlist_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::map<::std::string, ::std::int64_t>>::type /*p_param1*/, apache::thrift::detail::DecoratorArgType<::std::set<::std::vector<::std::string>>>::type /*p_param2*/) override {}
+  void fbthrift_execute_decorators_before_void_ret_map_setlist_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::std::int64_t>& /*p_param1*/, const ::std::set<::std::vector<::std::string>>& /*p_param2*/) override {}
   void fbthrift_execute_decorators_after_void_ret_map_setlist_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
-  void fbthrift_execute_decorators_before_void_ret_map_typedef_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::simpleTypeDef>::type /*p_param1*/) override {}
+  void fbthrift_execute_decorators_before_void_ret_map_typedef_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::some::valid::ns::simpleTypeDef /*p_param1*/) override {}
   void fbthrift_execute_decorators_after_void_ret_map_typedef_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
-  void fbthrift_execute_decorators_before_void_ret_enum_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::MyEnumA>::type /*p_param1*/) override {}
+  void fbthrift_execute_decorators_before_void_ret_enum_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::some::valid::ns::MyEnumA /*p_param1*/) override {}
   void fbthrift_execute_decorators_after_void_ret_enum_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
-  void fbthrift_execute_decorators_before_void_ret_struct_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::MyStruct>::type /*p_param1*/) override {}
+  void fbthrift_execute_decorators_before_void_ret_struct_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::some::valid::ns::MyStruct& /*p_param1*/) override {}
   void fbthrift_execute_decorators_after_void_ret_struct_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
-  void fbthrift_execute_decorators_before_void_ret_listunion_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::some::valid::ns::ComplexUnion>>::type /*p_param1*/) override {}
+  void fbthrift_execute_decorators_before_void_ret_listunion_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::some::valid::ns::ComplexUnion>& /*p_param1*/) override {}
   void fbthrift_execute_decorators_after_void_ret_listunion_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
-  void fbthrift_execute_decorators_before_bool_ret_i32_i64_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_param1*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_param2*/) override {}
-  void fbthrift_execute_decorators_after_bool_ret_i32_i64_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<bool>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_bool_ret_map_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::map<::std::string, ::std::int64_t>>::type /*p_param1*/) override {}
-  void fbthrift_execute_decorators_after_bool_ret_map_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<bool>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_bool_ret_union_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::ComplexUnion>::type /*p_param1*/) override {}
-  void fbthrift_execute_decorators_after_bool_ret_union_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<bool>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_i64_ret_float_double_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<float>::type /*p_param1*/, apache::thrift::detail::DecoratorArgType<double>::type /*p_param2*/) override {}
-  void fbthrift_execute_decorators_after_i64_ret_float_double_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_i64_ret_string_typedef_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_param1*/, apache::thrift::detail::DecoratorArgType<::std::set<::some::valid::ns::mostComplexTypeDef>>::type /*p_param2*/) override {}
-  void fbthrift_execute_decorators_after_i64_ret_string_typedef_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_i64_ret_i32_i32_i32_i32_i32_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_param1*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_param2*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_param3*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_param4*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_param5*/) override {}
-  void fbthrift_execute_decorators_after_i64_ret_i32_i32_i32_i32_i32_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_double_ret_setstruct_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::set<::some::valid::ns::MyStruct>>::type /*p_param1*/) override {}
-  void fbthrift_execute_decorators_after_double_ret_setstruct_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<double>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_string_ret_string_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_param1*/) override {}
-  void fbthrift_execute_decorators_after_string_ret_string_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_binary_ret_binary_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_param1*/) override {}
-  void fbthrift_execute_decorators_after_binary_ret_binary_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_map_ret_bool_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<bool>::type /*p_param1*/) override {}
-  void fbthrift_execute_decorators_after_map_ret_bool_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::map<::std::string, ::std::int64_t>>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_list_ret_map_setlist_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::map<::std::int32_t, ::std::vector<::std::string>>>::type /*p_param1*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::string>>::type /*p_param2*/) override {}
-  void fbthrift_execute_decorators_after_list_ret_map_setlist_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::vector<bool>>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_mapsetlistmapliststring_ret_listlistlist_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>>::type /*p_param1*/) override {}
-  void fbthrift_execute_decorators_after_mapsetlistmapliststring_ret_listlistlist_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_typedef_ret_i32_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_param1*/) override {}
-  void fbthrift_execute_decorators_after_typedef_ret_i32_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::some::valid::ns::simpleTypeDef>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_listtypedef_ret_typedef_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::complexStructTypeDef>::type /*p_param1*/) override {}
-  void fbthrift_execute_decorators_after_listtypedef_ret_typedef_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::vector<::some::valid::ns::simpleTypeDef>>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_enum_ret_double_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<double>::type /*p_param1*/) override {}
-  void fbthrift_execute_decorators_after_enum_ret_double_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::some::valid::ns::MyEnumA>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_enum_ret_double_enum_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<double>::type /*p_param1*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::MyEnumA>::type /*p_param2*/) override {}
-  void fbthrift_execute_decorators_after_enum_ret_double_enum_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::some::valid::ns::MyEnumA>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_listenum_ret_map_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::map<::std::string, ::std::int64_t>>::type /*p_param1*/) override {}
-  void fbthrift_execute_decorators_after_listenum_ret_map_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::vector<::some::valid::ns::MyEnumA>>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_struct_ret_i16_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int16_t>::type /*p_param1*/) override {}
-  void fbthrift_execute_decorators_after_struct_ret_i16_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::some::valid::ns::MyStruct>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_setstruct_ret_set_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::set<::std::string>>::type /*p_param1*/) override {}
-  void fbthrift_execute_decorators_after_setstruct_ret_set_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::set<::some::valid::ns::MyStruct>>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_union_ret_i32_i32_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_param1*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_param2*/) override {}
-  void fbthrift_execute_decorators_after_union_ret_i32_i32_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::some::valid::ns::ComplexUnion>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_listunion_string_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_param1*/) override {}
-  void fbthrift_execute_decorators_after_listunion_string_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::vector<::some::valid::ns::ComplexUnion>>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_annotatedParams(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::containerStruct>::type /*p_no_annotation*/, apache::thrift::detail::DecoratorArgType<::std::set<::std::int32_t>>::type /*p_opt_ref_type_shared*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::CppFakeI32>::type /*p_base_type*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::FollySmallVectorI64>::type /*p_list_type*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::SortedVectorSetString>::type /*p_set_type*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::FakeMap>::type /*p_map_type*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::UnorderedMapStruct>::type /*p_map_struct_type*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::IOBuf>::type /*p_iobuf_type*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::IOBufPtr>::type /*p_iobuf_ptr*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::int32_t>>::type /*p_list_i32_template*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::string>>::type /*p_list_string_template*/, apache::thrift::detail::DecoratorArgType<::std::set<::std::string>>::type /*p_set_template*/, apache::thrift::detail::DecoratorArgType<::std::map<::std::int64_t, ::std::string>>::type /*p_map_template*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::std_list>::type /*p_typedef_list_template*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::std_deque>::type /*p_typedef_deque_template*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::folly_set>::type /*p_typedef_set_template*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::folly_map>::type /*p_typedef_map_template*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::IOBuf>::type /*p_iobuf_type_val*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::IOBufPtr>::type /*p_iobuf_ptr_val*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::containerStruct>::type /*p_struct_struct*/) override {}
+  void fbthrift_execute_decorators_before_bool_ret_i32_i64_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_param1*/, ::std::int64_t /*p_param2*/) override {}
+  void fbthrift_execute_decorators_after_bool_ret_i32_i64_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, bool /*result*/) override {}
+  void fbthrift_execute_decorators_before_bool_ret_map_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::std::int64_t>& /*p_param1*/) override {}
+  void fbthrift_execute_decorators_after_bool_ret_map_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, bool /*result*/) override {}
+  void fbthrift_execute_decorators_before_bool_ret_union_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::some::valid::ns::ComplexUnion& /*p_param1*/) override {}
+  void fbthrift_execute_decorators_after_bool_ret_union_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, bool /*result*/) override {}
+  void fbthrift_execute_decorators_before_i64_ret_float_double_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, float /*p_param1*/, double /*p_param2*/) override {}
+  void fbthrift_execute_decorators_after_i64_ret_float_double_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/) override {}
+  void fbthrift_execute_decorators_before_i64_ret_string_typedef_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_param1*/, const ::std::set<::some::valid::ns::mostComplexTypeDef>& /*p_param2*/) override {}
+  void fbthrift_execute_decorators_after_i64_ret_string_typedef_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/) override {}
+  void fbthrift_execute_decorators_before_i64_ret_i32_i32_i32_i32_i32_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_param1*/, ::std::int32_t /*p_param2*/, ::std::int32_t /*p_param3*/, ::std::int32_t /*p_param4*/, ::std::int32_t /*p_param5*/) override {}
+  void fbthrift_execute_decorators_after_i64_ret_i32_i32_i32_i32_i32_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/) override {}
+  void fbthrift_execute_decorators_before_double_ret_setstruct_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::set<::some::valid::ns::MyStruct>& /*p_param1*/) override {}
+  void fbthrift_execute_decorators_after_double_ret_setstruct_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, double /*result*/) override {}
+  void fbthrift_execute_decorators_before_string_ret_string_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_param1*/) override {}
+  void fbthrift_execute_decorators_after_string_ret_string_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) override {}
+  void fbthrift_execute_decorators_before_binary_ret_binary_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_param1*/) override {}
+  void fbthrift_execute_decorators_after_binary_ret_binary_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) override {}
+  void fbthrift_execute_decorators_before_map_ret_bool_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, bool /*p_param1*/) override {}
+  void fbthrift_execute_decorators_after_map_ret_bool_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::std::int64_t>& /*result*/) override {}
+  void fbthrift_execute_decorators_before_list_ret_map_setlist_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::int32_t, ::std::vector<::std::string>>& /*p_param1*/, const ::std::vector<::std::string>& /*p_param2*/) override {}
+  void fbthrift_execute_decorators_after_list_ret_map_setlist_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<bool>& /*result*/) override {}
+  void fbthrift_execute_decorators_before_mapsetlistmapliststring_ret_listlistlist_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& /*p_param1*/) override {}
+  void fbthrift_execute_decorators_after_mapsetlistmapliststring_ret_listlistlist_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& /*result*/) override {}
+  void fbthrift_execute_decorators_before_typedef_ret_i32_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_param1*/) override {}
+  void fbthrift_execute_decorators_after_typedef_ret_i32_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::some::valid::ns::simpleTypeDef /*result*/) override {}
+  void fbthrift_execute_decorators_before_listtypedef_ret_typedef_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::some::valid::ns::complexStructTypeDef& /*p_param1*/) override {}
+  void fbthrift_execute_decorators_after_listtypedef_ret_typedef_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::some::valid::ns::simpleTypeDef>& /*result*/) override {}
+  void fbthrift_execute_decorators_before_enum_ret_double_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, double /*p_param1*/) override {}
+  void fbthrift_execute_decorators_after_enum_ret_double_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::some::valid::ns::MyEnumA /*result*/) override {}
+  void fbthrift_execute_decorators_before_enum_ret_double_enum_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, double /*p_param1*/, ::some::valid::ns::MyEnumA /*p_param2*/) override {}
+  void fbthrift_execute_decorators_after_enum_ret_double_enum_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::some::valid::ns::MyEnumA /*result*/) override {}
+  void fbthrift_execute_decorators_before_listenum_ret_map_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::std::int64_t>& /*p_param1*/) override {}
+  void fbthrift_execute_decorators_after_listenum_ret_map_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::some::valid::ns::MyEnumA>& /*result*/) override {}
+  void fbthrift_execute_decorators_before_struct_ret_i16_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int16_t /*p_param1*/) override {}
+  void fbthrift_execute_decorators_after_struct_ret_i16_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::some::valid::ns::MyStruct& /*result*/) override {}
+  void fbthrift_execute_decorators_before_setstruct_ret_set_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::set<::std::string>& /*p_param1*/) override {}
+  void fbthrift_execute_decorators_after_setstruct_ret_set_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::set<::some::valid::ns::MyStruct>& /*result*/) override {}
+  void fbthrift_execute_decorators_before_union_ret_i32_i32_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_param1*/, ::std::int32_t /*p_param2*/) override {}
+  void fbthrift_execute_decorators_after_union_ret_i32_i32_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::some::valid::ns::ComplexUnion& /*result*/) override {}
+  void fbthrift_execute_decorators_before_listunion_string_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_param1*/) override {}
+  void fbthrift_execute_decorators_after_listunion_string_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::some::valid::ns::ComplexUnion>& /*result*/) override {}
+  void fbthrift_execute_decorators_before_annotatedParams(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::some::valid::ns::containerStruct& /*p_no_annotation*/, const ::std::set<::std::int32_t>& /*p_opt_ref_type_shared*/, ::some::valid::ns::CppFakeI32 /*p_base_type*/, const ::some::valid::ns::FollySmallVectorI64& /*p_list_type*/, const ::some::valid::ns::SortedVectorSetString& /*p_set_type*/, const ::some::valid::ns::FakeMap& /*p_map_type*/, const ::some::valid::ns::UnorderedMapStruct& /*p_map_struct_type*/, const ::some::valid::ns::IOBuf& /*p_iobuf_type*/, const ::some::valid::ns::IOBufPtr& /*p_iobuf_ptr*/, const ::std::vector<::std::int32_t>& /*p_list_i32_template*/, const ::std::vector<::std::string>& /*p_list_string_template*/, const ::std::set<::std::string>& /*p_set_template*/, const ::std::map<::std::int64_t, ::std::string>& /*p_map_template*/, const ::some::valid::ns::std_list& /*p_typedef_list_template*/, const ::some::valid::ns::std_deque& /*p_typedef_deque_template*/, const ::some::valid::ns::folly_set& /*p_typedef_set_template*/, const ::some::valid::ns::folly_map& /*p_typedef_map_template*/, const ::some::valid::ns::IOBuf& /*p_iobuf_type_val*/, const ::some::valid::ns::IOBufPtr& /*p_iobuf_ptr_val*/, const ::some::valid::ns::containerStruct& /*p_struct_struct*/) override {}
   void fbthrift_execute_decorators_after_annotatedParams(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
 
   virtual void fbthrift_execute_decorators_before_simple_function(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_simple_function(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<bool>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_simple_function(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<bool>::type result) {
-    static_cast<ServiceHandler<::extra::svc::ExtraService>*>(iface)->fbthrift_execute_decorators_after_simple_function(*ctx, result);
-  }
+  virtual void fbthrift_execute_decorators_after_simple_function(apache::thrift::Cpp2RequestContext& /*requestCtx*/, bool /*result*/) {}
   virtual void fbthrift_execute_decorators_before_throws_function(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_throws_function(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_throws_function(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::extra::svc::ExtraService>*>(iface)->fbthrift_execute_decorators_after_throws_function(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_throws_function2(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<bool>::type /*p_param1*/) {}
-  virtual void fbthrift_execute_decorators_after_throws_function2(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<bool>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_throws_function2(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<bool>::type result) {
-    static_cast<ServiceHandler<::extra::svc::ExtraService>*>(iface)->fbthrift_execute_decorators_after_throws_function2(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_throws_function3(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<bool>::type /*p_param1*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_param2*/) {}
-  virtual void fbthrift_execute_decorators_after_throws_function3(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::map<::std::int32_t, ::std::string>>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_throws_function3(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::map<::std::int32_t, ::std::string>>::type result) {
-    static_cast<ServiceHandler<::extra::svc::ExtraService>*>(iface)->fbthrift_execute_decorators_after_throws_function3(*ctx, result);
-  }
+  virtual void fbthrift_execute_decorators_before_throws_function2(apache::thrift::Cpp2RequestContext& /*requestCtx*/, bool /*p_param1*/) {}
+  virtual void fbthrift_execute_decorators_after_throws_function2(apache::thrift::Cpp2RequestContext& /*requestCtx*/, bool /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_throws_function3(apache::thrift::Cpp2RequestContext& /*requestCtx*/, bool /*p_param1*/, const ::std::string& /*p_param2*/) {}
+  virtual void fbthrift_execute_decorators_after_throws_function3(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::int32_t, ::std::string>& /*result*/) {}
   virtual void fbthrift_execute_decorators_before_oneway_void_ret(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_oneway_void_ret(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_oneway_void_ret(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::extra::svc::ExtraService>*>(iface)->fbthrift_execute_decorators_after_oneway_void_ret(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_oneway_void_ret_i32_i32_i32_i32_i32_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_param1*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_param2*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_param3*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_param4*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_param5*/) {}
+  virtual void fbthrift_execute_decorators_before_oneway_void_ret_i32_i32_i32_i32_i32_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_param1*/, ::std::int32_t /*p_param2*/, ::std::int32_t /*p_param3*/, ::std::int32_t /*p_param4*/, ::std::int32_t /*p_param5*/) {}
   virtual void fbthrift_execute_decorators_after_oneway_void_ret_i32_i32_i32_i32_i32_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_oneway_void_ret_i32_i32_i32_i32_i32_param(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::extra::svc::ExtraService>*>(iface)->fbthrift_execute_decorators_after_oneway_void_ret_i32_i32_i32_i32_i32_param(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_oneway_void_ret_map_setlist_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::map<::std::string, ::std::int64_t>>::type /*p_param1*/, apache::thrift::detail::DecoratorArgType<::std::set<::std::vector<::std::string>>>::type /*p_param2*/) {}
+  virtual void fbthrift_execute_decorators_before_oneway_void_ret_map_setlist_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::map<::std::string, ::std::int64_t>& /*p_param1*/, const ::std::set<::std::vector<::std::string>>& /*p_param2*/) {}
   virtual void fbthrift_execute_decorators_after_oneway_void_ret_map_setlist_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_oneway_void_ret_map_setlist_param(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::extra::svc::ExtraService>*>(iface)->fbthrift_execute_decorators_after_oneway_void_ret_map_setlist_param(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_oneway_void_ret_struct_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::some::valid::ns::MyStruct>::type /*p_param1*/) {}
+  virtual void fbthrift_execute_decorators_before_oneway_void_ret_struct_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::some::valid::ns::MyStruct& /*p_param1*/) {}
   virtual void fbthrift_execute_decorators_after_oneway_void_ret_struct_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_oneway_void_ret_struct_param(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::extra::svc::ExtraService>*>(iface)->fbthrift_execute_decorators_after_oneway_void_ret_struct_param(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_oneway_void_ret_listunion_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::some::valid::ns::ComplexUnion>>::type /*p_param1*/) {}
+  virtual void fbthrift_execute_decorators_before_oneway_void_ret_listunion_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::some::valid::ns::ComplexUnion>& /*p_param1*/) {}
   virtual void fbthrift_execute_decorators_after_oneway_void_ret_listunion_param(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_oneway_void_ret_listunion_param(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::extra::svc::ExtraService>*>(iface)->fbthrift_execute_decorators_after_oneway_void_ret_listunion_param(*ctx);
-  }
 };
 
 namespace detail {

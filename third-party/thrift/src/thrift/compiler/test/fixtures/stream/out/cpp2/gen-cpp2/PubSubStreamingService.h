@@ -135,51 +135,24 @@ class ServiceHandler<::cpp2::PubSubStreamingService> : public apache::thrift::Se
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_responseandstreamboththrows{apache::thrift::detail::si::InvocationType::AsyncTm};
  public:
 
-  virtual void fbthrift_execute_decorators_before_returnstream(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_i32_from*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_i32_to*/) {}
+  virtual void fbthrift_execute_decorators_before_returnstream(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_i32_from*/, ::std::int32_t /*p_i32_to*/) {}
   virtual void fbthrift_execute_decorators_after_returnstream(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_returnstream(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::PubSubStreamingService>*>(iface)->fbthrift_execute_decorators_after_returnstream(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_streamthrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_foo*/) {}
+  virtual void fbthrift_execute_decorators_before_streamthrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_foo*/) {}
   virtual void fbthrift_execute_decorators_after_streamthrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_streamthrows(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::PubSubStreamingService>*>(iface)->fbthrift_execute_decorators_after_streamthrows(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_servicethrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_foo*/) {}
+  virtual void fbthrift_execute_decorators_before_servicethrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_foo*/) {}
   virtual void fbthrift_execute_decorators_after_servicethrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_servicethrows(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::PubSubStreamingService>*>(iface)->fbthrift_execute_decorators_after_servicethrows(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_servicethrows2(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_foo*/) {}
+  virtual void fbthrift_execute_decorators_before_servicethrows2(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_foo*/) {}
   virtual void fbthrift_execute_decorators_after_servicethrows2(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_servicethrows2(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::PubSubStreamingService>*>(iface)->fbthrift_execute_decorators_after_servicethrows2(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_boththrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_foo*/) {}
+  virtual void fbthrift_execute_decorators_before_boththrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_foo*/) {}
   virtual void fbthrift_execute_decorators_after_boththrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_boththrows(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::PubSubStreamingService>*>(iface)->fbthrift_execute_decorators_after_boththrows(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_responseandstreamstreamthrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_foo*/) {}
-  virtual void fbthrift_execute_decorators_after_responseandstreamstreamthrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_responseandstreamstreamthrows(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>::type result) {
-    static_cast<ServiceHandler<::cpp2::PubSubStreamingService>*>(iface)->fbthrift_execute_decorators_after_responseandstreamstreamthrows(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_responseandstreamservicethrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_foo*/) {}
-  virtual void fbthrift_execute_decorators_after_responseandstreamservicethrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_responseandstreamservicethrows(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>::type result) {
-    static_cast<ServiceHandler<::cpp2::PubSubStreamingService>*>(iface)->fbthrift_execute_decorators_after_responseandstreamservicethrows(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_responseandstreamboththrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_foo*/) {}
-  virtual void fbthrift_execute_decorators_after_responseandstreamboththrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_responseandstreamboththrows(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>::type result) {
-    static_cast<ServiceHandler<::cpp2::PubSubStreamingService>*>(iface)->fbthrift_execute_decorators_after_responseandstreamboththrows(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_returnstreamFast(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_i32_from*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_i32_to*/) {}
+  virtual void fbthrift_execute_decorators_before_responseandstreamstreamthrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_foo*/) {}
+  virtual void fbthrift_execute_decorators_after_responseandstreamstreamthrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_responseandstreamservicethrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_foo*/) {}
+  virtual void fbthrift_execute_decorators_after_responseandstreamservicethrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_responseandstreamboththrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_foo*/) {}
+  virtual void fbthrift_execute_decorators_after_responseandstreamboththrows(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_returnstreamFast(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int32_t /*p_i32_from*/, ::std::int32_t /*p_i32_to*/) {}
   virtual void fbthrift_execute_decorators_after_returnstreamFast(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_returnstreamFast(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::PubSubStreamingService>*>(iface)->fbthrift_execute_decorators_after_returnstreamFast(*ctx);
-  }
 };
 
 namespace detail {

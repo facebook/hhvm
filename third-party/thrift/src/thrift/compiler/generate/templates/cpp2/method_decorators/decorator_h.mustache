@@ -32,7 +32,7 @@
 {{/if (object.eq? service.extends null)}}
 {{#each service.functions as |function|}}
   virtual void before_{{function.cpp_name}}(BeforeParams /*beforeParams*/{{#each function.params.fields as |param|}}, {{#partial params.param_type param=param}} /*{{#partial params.param_name param=param}}*/{{/each}}) {}
-  virtual void after_{{function.cpp_name}}(AfterParams /*afterParams*/{{#partial params.after_param_unused service=service function=function}}) {}
+  virtual void after_{{function.cpp_name}}(AfterParams /*afterParams*/{{#partial params.after_params_unused function=function}}) {}
 {{/each}}
 {{/let partial}}
 
@@ -45,7 +45,7 @@
   // BEGIN interaction {{interaction.name}} methods
 {{#each interaction.functions as |function|}}
   virtual void before_{{interaction.name}}_{{function.cpp_name}}(BeforeParams /*beforeParams*/{{#each function.params.fields as |param|}}, {{#partial params.param_type param=param}} /*{{#partial params.param_name param=param}}*/{{/each}}) {}
-  virtual void after_{{interaction.name}}_{{function.cpp_name}}(AfterParams /*afterParams*/{{#partial params.after_param_unused service=service function=function}}) {}
+  virtual void after_{{interaction.name}}_{{function.cpp_name}}(AfterParams /*afterParams*/{{#partial params.after_params_unused function=function}}) {}
 {{/each}}
   // END interaction {{interaction.name}} methods
 {{/each}}
@@ -55,7 +55,7 @@
   decorator_interface_declaration - The full method decorator declaration for a given t_service, e.g
   ServiceMethodDecorator<MyService>.
 }}
-{{#let partial decorator_interface_declaration |service| captures |decorator_interface_functions decorator_interaction_functions|}}
+{{#let export partial decorator_interface_declaration |service| captures |decorator_interface_functions decorator_interaction_functions|}}
 template <>
 class ServiceMethodDecorator<{{service.qualified_name}}> : public ServiceMethodDecoratorBase {
  public:
@@ -76,7 +76,7 @@ class ServiceMethodDecorator<{{service.qualified_name}}> : public ServiceMethodD
 {{/if (object.eq? service.extends null)}}
 {{#each service.functions as |function|}}
   void fbthrift_execute_decorators_before_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#each function.params.fields as |param|}}, {{#partial params.param_type param=param}} /*{{#partial params.param_name param=param}}*/{{/each}}) override {}
-  void fbthrift_execute_decorators_after_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#partial params.after_param_unused service=service function=function}}) override {}
+  void fbthrift_execute_decorators_after_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#partial params.after_params_unused function=function}}) override {}
 {{/each}}{{! Interaction methods are deliberately omitted here - they need to exist on the interaction but require some additional plumbing that isn't implemented yet}}
 {{/let partial}}
 
@@ -93,7 +93,7 @@ class ServiceMethodDecorator<{{service.qualified_name}}> : public ServiceMethodD
 {{/if (object.eq? service.extends null)}}
 {{#each service.functions as |function|}}
   void fbthrift_execute_decorators_before_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#each function.params.fields as |param|}}, {{#partial params.param_type param=param}} /*{{#partial params.param_name param=param}}*/{{/each}}) override;
-  void fbthrift_execute_decorators_after_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#partial params.after_param_unused service=service function=function}}) override;
+  void fbthrift_execute_decorators_after_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#partial params.after_params_unused function=function}}) override;
 {{/each}}{{! Interaction methods are deliberately omitted here - they need to exist on the interaction but require some additional plumbing that isn't implemented yet}}
 {{/let partial}}
 
@@ -109,10 +109,7 @@ class ServiceMethodDecorator<{{service.qualified_name}}> : public ServiceMethodD
 {{#if (object.eq? service.extends null)}}{{#else}}{{#partial override_methods_has_decorators service=service.extends}}{{/if (object.eq? service.extends null)}}
 {{#each service.functions as |function|}}
   virtual void fbthrift_execute_decorators_before_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#each function.params.fields as |param|}}, {{#partial params.param_type param=param}} /*{{#partial params.param_name param=param}}*/{{/each}});
-  virtual void fbthrift_execute_decorators_after_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#partial params.after_param_unused service=service function=function}});
-  static void fbthrift_invoke_decorator_after_{{function.cpp_name}}(void* iface, apache::thrift::Cpp2RequestContext* ctx{{#partial params.after_param service=service function=function}}) {
-    static_cast<ServiceHandler<{{service.qualified_name}}>*>(iface)->fbthrift_execute_decorators_after_{{function.cpp_name}}(*ctx{{#partial params.after_invocation_args function=function}});
-  }
+  virtual void fbthrift_execute_decorators_after_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#partial params.after_params_unused function=function}});
 {{/each}}{{! Interaction methods are deliberately omitted here - they need to exist on the interaction but require some additional plumbing that isn't implemented yet}}
  private:
   ServiceMethodDecoratorList<{{service.qualified_name}}> fbthrift_methodDecorators_;
@@ -121,10 +118,7 @@ class ServiceMethodDecorator<{{service.qualified_name}}> : public ServiceMethodD
 {{#if (object.eq? service.extends null)}}{{#else}}{{#partial override_methods_no_decorators service=service.extends}}{{/if (object.eq? service.extends null)}}
 {{#each service.functions as |function|}}
   virtual void fbthrift_execute_decorators_before_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#each function.params.fields as |param|}}, {{#partial params.param_type param=param}} /*{{#partial params.param_name param=param}}*/{{/each}}) {}
-  virtual void fbthrift_execute_decorators_after_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#partial params.after_param_unused service=service function=function}}) {}
-  static void fbthrift_invoke_decorator_after_{{function.cpp_name}}(void* iface, apache::thrift::Cpp2RequestContext* ctx{{#partial params.after_param service=service function=function}}) {
-    static_cast<ServiceHandler<{{service.qualified_name}}>*>(iface)->fbthrift_execute_decorators_after_{{function.cpp_name}}(*ctx{{#partial params.after_invocation_args function=function}});
-  }
+  virtual void fbthrift_execute_decorators_after_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#partial params.after_params_unused function=function}}) {}
 {{/each}}{{! Interaction methods are deliberately omitted here - they need to exist on the interaction but require some additional plumbing that isn't implemented yet}}
 {{/if service.cpp_requires_method_decorator?}}
 {{/if service.interaction?}}
@@ -135,10 +129,8 @@ class ServiceMethodDecorator<{{service.qualified_name}}> : public ServiceMethodD
   if the service generates the decorator interface - currently just the
   decorator function
 }}
-{{#let export partial additional_declarations |service| captures |decorator_interface_declaration params|}}
+{{#let export partial additional_declarations |service| captures |params|}}
 {{#if service.interaction?}}{{#else}}{{! None of this applies to interaction handlers}}{{#if service.cpp_requires_method_decorator?}}
-
-{{#partial decorator_interface_declaration service=service}}
 
 void decorate(ServiceHandler<{{service.qualified_name}}>& handler, ServiceMethodDecoratorList<{{service.qualified_name}}> decorators);
 {{/if service.cpp_requires_method_decorator?}}{{/if service.interaction?}}

@@ -96,17 +96,12 @@ CO_TEST_P(ServiceMethodDecoratorTestP, DecoratorMethodsAreRun) {
       std::size_t useDecoratorData = 0;
 
       std::size_t beforeNoop = 0;
-      std::size_t afterNoop = 0;
 
       std::size_t beforeSum = 0;
       std::vector<int64_t> sumValues = {};
-      std::size_t afterSum = 0;
-      int64_t sumResult = 0;
 
       std::size_t beforeEcho = 0;
       std::string echoText;
-      std::size_t afterEcho = 0;
-      std::string echoResult;
     } decorator;
 
     struct Interceptor {
@@ -134,26 +129,14 @@ CO_TEST_P(ServiceMethodDecoratorTestP, DecoratorMethodsAreRun) {
 
     void before_noop(BeforeParams) override { state_.beforeNoop++; }
 
-    void after_noop(AfterParams) override { state_.afterNoop++; }
-
     void before_sum(BeforeParams, const std::vector<int64_t>& values) override {
       state_.beforeSum++;
       state_.sumValues = values;
     }
 
-    void after_sum(AfterParams, int64_t sum) override {
-      state_.afterSum++;
-      state_.sumResult = sum;
-    }
-
     void before_echo(BeforeParams, const EchoRequest& request) override {
       state_.beforeEcho++;
       state_.echoText = *request.text();
-    }
-
-    void after_echo(AfterParams, const EchoResponse& response) override {
-      state_.afterEcho++;
-      state_.echoResult = *response.text();
     }
 
     TestState::Decorator& state_;
@@ -246,7 +229,6 @@ CO_TEST_P(ServiceMethodDecoratorTestP, DecoratorMethodsAreRun) {
   EXPECT_EQ(state.decorator.beforeNoop, 1);
   EXPECT_EQ(state.interceptor.onRequest, 1);
   EXPECT_EQ(state.handler.coNoop, 1);
-  EXPECT_EQ(state.decorator.afterNoop, 1);
 
   auto sum = co_await client->co_sum({1, 2, 3});
   EXPECT_EQ(sum, 6);
@@ -254,8 +236,6 @@ CO_TEST_P(ServiceMethodDecoratorTestP, DecoratorMethodsAreRun) {
   EXPECT_THAT(state.decorator.sumValues, ElementsAre(1, 2, 3));
   EXPECT_EQ(state.interceptor.onRequest, 2);
   EXPECT_EQ(state.handler.coSum, 1);
-  EXPECT_EQ(state.decorator.afterSum, 1);
-  EXPECT_EQ(state.decorator.sumResult, 6);
 
   EchoRequest request;
   request.text() = "hello";
@@ -265,33 +245,26 @@ CO_TEST_P(ServiceMethodDecoratorTestP, DecoratorMethodsAreRun) {
   EXPECT_EQ(state.decorator.echoText, "hello");
   EXPECT_EQ(state.interceptor.onRequest, 3);
   EXPECT_EQ(state.handler.coEcho, 1);
-  EXPECT_EQ(state.decorator.afterEcho, 1);
-  EXPECT_EQ(state.decorator.echoResult, "hello");
 }
 
 CO_TEST_P(ServiceMethodDecoratorTestP, MultipleDecorators) {
   constexpr std::size_t kNumDecorators = 10;
 
   struct TestState {
-    TestState() : beforeNoop(kNumDecorators, 0), afterNoop(kNumDecorators, 0) {}
+    TestState() : beforeNoop(kNumDecorators, 0) {}
     std::vector<std::size_t> beforeNoop;
-    std::vector<std::size_t> afterNoop;
   };
 
   struct CountingDecorator
       : ServiceMethodDecorator<ServiceMethodDecoratorTest> {
     CountingDecorator(TestState& state, std::size_t idx)
-        : beforeCounter_{state.beforeNoop[idx]},
-          afterCounter_{state.afterNoop[idx]} {}
+        : beforeCounter_{state.beforeNoop[idx]} {}
 
     std::string_view getName() const override { return "CountingDecorator"; }
 
     void before_noop(BeforeParams) override { beforeCounter_++; }
 
-    void after_noop(AfterParams) override { afterCounter_++; }
-
     std::size_t& beforeCounter_;
-    std::size_t& afterCounter_;
   };
 
   struct Handler : public ServiceHandler<ServiceMethodDecoratorTest> {
@@ -316,23 +289,17 @@ CO_TEST_P(ServiceMethodDecoratorTestP, MultipleDecorators) {
       state.beforeNoop.begin(), state.beforeNoop.end(), [](std::size_t count) {
         EXPECT_EQ(count, 1);
       });
-  std::for_each(
-      state.afterNoop.begin(), state.afterNoop.end(), [](std::size_t count) {
-        EXPECT_EQ(count, 1);
-      });
 }
 
 namespace {
 using AssetData = std::vector<std::string>;
-constexpr server::DecoratorDataKey<AssetData> kAssetsOnRequest;
-constexpr server::DecoratorDataKey<AssetData> kAssetsOnResponse;
+constexpr server::DecoratorDataKey<AssetData> kAssets;
 } // namespace
 
 CO_TEST_P(ServiceMethodDecoratorTestP, DecoratorDataPassed) {
   struct TestState {
     std::vector<std::string> observedByInterceptorOnRequest = {};
     std::vector<std::string> observedByHandler = {};
-    std::vector<std::string> observedByInterceptorOnResponse = {};
   };
 
   class AssetExtractionDecorator
@@ -343,35 +310,17 @@ CO_TEST_P(ServiceMethodDecoratorTestP, DecoratorDataPassed) {
     }
 
     void onBeforeStartServing(BeforeStartServingParams params) override {
-      assetDataOnRequest_ =
-          params.decoratorDataHandleFactory->makeHandleForKey(kAssetsOnRequest);
-      assetDataOnResponse_ =
-          params.decoratorDataHandleFactory->makeHandleForKey(
-              kAssetsOnResponse);
+      assetData_ = params.decoratorDataHandleFactory->makeHandleForKey(kAssets);
     }
 
     void before_echo(
         BeforeParams beforeParams, const EchoRequest& request) override {
       std::vector<std::string> assets = {*request.text()};
-      beforeParams.decoratorData.put(assetDataOnRequest_, std::move(assets));
-    }
-
-    void after_echo(
-        AfterParams afterParams, const EchoResponse& response) override {
-      std::vector<std::string> assets;
-      if (const auto* extractedAssets =
-              afterParams.decoratorData.get(assetDataOnRequest_)) {
-        assets = *extractedAssets;
-      }
-      assets.push_back(*response.text());
-      assets.push_back("after_echo");
-      afterParams.decoratorData.put(assetDataOnResponse_, std::move(assets));
+      beforeParams.decoratorData.put(assetData_, std::move(assets));
     }
 
    private:
-    server::DecoratorDataHandle<AssetData> assetDataOnRequest_ =
-        server::DecoratorDataHandle<AssetData>::uninitialized();
-    server::DecoratorDataHandle<AssetData> assetDataOnResponse_ =
+    server::DecoratorDataHandle<AssetData> assetData_ =
         server::DecoratorDataHandle<AssetData>::uninitialized();
   };
 
@@ -384,36 +333,20 @@ CO_TEST_P(ServiceMethodDecoratorTestP, DecoratorDataPassed) {
     }
 
     folly::coro::Task<void> co_onStartServing(InitParams params) override {
-      assetDataOnRequest_ =
-          params.decoratorDataHandleFactory->makeHandleForKey(kAssetsOnRequest);
-      assetDataOnResponse_ =
-          params.decoratorDataHandleFactory->makeHandleForKey(
-              kAssetsOnResponse);
+      assetData_ = params.decoratorDataHandleFactory->makeHandleForKey(kAssets);
       co_return;
     }
 
     folly::coro::Task<std::optional<folly::Unit>> onRequest(
         folly::Unit*, RequestInfo info) override {
-      if (const auto* extractedAssets =
-              info.decoratorData->get(assetDataOnRequest_)) {
+      if (const auto* extractedAssets = info.decoratorData->get(assetData_)) {
         state_.observedByInterceptorOnRequest = *extractedAssets;
       }
       co_return std::nullopt;
     }
 
-    folly::coro::Task<void> onResponse(
-        folly::Unit*, folly::Unit*, ResponseInfo info) override {
-      if (const auto* extractedAssets =
-              info.decoratorData->get(assetDataOnResponse_)) {
-        state_.observedByInterceptorOnResponse = *extractedAssets;
-      }
-      co_return;
-    }
-
     TestState& state_;
-    server::DecoratorDataHandle<AssetData> assetDataOnRequest_ =
-        server::DecoratorDataHandle<AssetData>::uninitialized();
-    server::DecoratorDataHandle<AssetData> assetDataOnResponse_ =
+    server::DecoratorDataHandle<AssetData> assetData_ =
         server::DecoratorDataHandle<AssetData>::uninitialized();
   };
 
@@ -437,8 +370,7 @@ CO_TEST_P(ServiceMethodDecoratorTestP, DecoratorDataPassed) {
 
     folly::coro::Task<void> co_onBeforeStartServing(
         BeforeStartServingParams params) override {
-      assetData_ =
-          params.decoratorDataHandleFactory->makeHandleForKey(kAssetsOnRequest);
+      assetData_ = params.decoratorDataHandleFactory->makeHandleForKey(kAssets);
       co_return;
     }
 
@@ -478,9 +410,6 @@ CO_TEST_P(ServiceMethodDecoratorTestP, DecoratorDataPassed) {
   EXPECT_EQ(*response.text(), "asset");
   EXPECT_THAT(state.observedByInterceptorOnRequest, ElementsAre("asset"));
   EXPECT_THAT(state.observedByHandler, ElementsAre("asset"));
-  EXPECT_THAT(
-      state.observedByInterceptorOnResponse,
-      ElementsAre("asset", "asset", "after_echo"));
 }
 
 INSTANTIATE_TEST_SUITE_P(

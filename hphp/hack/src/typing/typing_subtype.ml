@@ -6958,7 +6958,7 @@ end = struct
       ~subtype_env
       ~this_ty
       ~lhs:{ ty_sub; sub_supportdyn }
-      ~rhs:({ reason_super; can_index_assign = cia } as _rhs)
+      ~rhs:({ reason_super; can_index_assign = cia } as rhs)
       env =
     let maybe_make_supportdyn r env ty =
       if Option.is_some sub_supportdyn then
@@ -7023,7 +7023,18 @@ end = struct
       else
         (env, ty)
     in
+    let mk_prop ~subtype_env ~this_ty ~lhs ~rhs =
+      simplify ~subtype_env ~this_ty ~lhs ~rhs
+    in
     match deref ty_sub with
+    | (_, Tvar _) ->
+      mk_issubtype_prop
+        ~sub_supportdyn
+        ~coerce:subtype_env.Subtype_env.coerce
+        env
+        (LoclType ty_sub)
+        (ConstraintType
+           (mk_constraint_type (reason_super, Tcan_index_assign cia)))
     | (r_sub, Tclass ((_, n), _, argl))
       when String.equal n SN.Collections.cVector ->
       (match argl with
@@ -7102,6 +7113,133 @@ end = struct
                       decl_pos = Reason.to_pos r_sub;
                       ty_name = lazy (Typing_print.error env ty_sub);
                     }))
+        env
+    | (r_sub, Tintersection ty_subs) ->
+      (* A & B <: C iif A <: C | !B *)
+      (match Subtype_negation.find_type_with_exact_negation env ty_subs with
+      | (env, Some non_ty, tyl) ->
+        let ty_sub = MakeType.intersection r_sub tyl in
+        let lift_rhs { reason_super; can_index_assign } =
+          mk_constraint_type (reason_super, Tcan_index_assign can_index_assign)
+        and lhs = (sub_supportdyn, ty_sub)
+        and rhs_subtype =
+          Subtype.
+            { super_supportdyn = false; super_like = false; ty_super = non_ty }
+        and rhs_can_index_assign = { reason_super; can_index_assign = cia } in
+        let rhs = (reason_super, rhs_subtype, rhs_can_index_assign) in
+        Common.simplify_disj_r
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ~lift_rhs
+          ~mk_prop
+          lhs
+          rhs
+          env
+      | _ ->
+        let update_reason =
+          Typing_env.update_reason ~f:(fun r_sub_prj ->
+              Typing_reason.prj_inter_sub ~sub:r_sub ~sub_prj:r_sub_prj)
+        in
+        let rec loop ty_subs tys errs env =
+          match ty_subs with
+          | [] ->
+            (match tys with
+            | [] ->
+              let err = Typing_error.intersect_opt @@ List.filter_opt errs in
+              invalid ~fail:err env
+            | _ ->
+              let (env, ty) =
+                Typing_intersection.intersect_list env r_sub tys
+              in
+              simplify_val ty env)
+          | ty_sub :: ty_subs ->
+            let ty_sub = update_reason env ty_sub in
+            let (env, val_ty) = Env.fresh_type env cia.cia_array_pos in
+            let (env, prop) =
+              simplify_
+                ~subtype_env
+                ~this_ty
+                ~lhs:{ sub_supportdyn; ty_sub }
+                ~rhs:
+                  {
+                    reason_super;
+                    can_index_assign = { cia with cia_val = val_ty };
+                  }
+                env
+            in
+            (match TL.get_error_if_unsat prop with
+            | Some err -> loop ty_subs tys (err :: errs) env
+            | _ ->
+              if true then
+                (env, prop) &&& fun env -> loop ty_subs (val_ty :: tys) errs env
+              else
+                (*I sm dropping errors here. Is that ok?*)
+                loop ty_subs tys errs env)
+        in
+        loop ty_subs [] [] env)
+    | (r_sub, Tgeneric _generic_nm) ->
+      let get_transitive_upper_bounds env ty =
+        let rec iter seen env acc tyl =
+          match tyl with
+          | [] -> (env, acc)
+          | ty :: tyl ->
+            let (env, ety) = Env.expand_type env ty in
+            (match get_node ety with
+            | Tgeneric n ->
+              if SSet.mem n seen then
+                iter seen env acc tyl
+              else
+                iter
+                  (SSet.add n seen)
+                  env
+                  acc
+                  (Typing_set.elements (Env.get_upper_bounds env n) @ tyl)
+            | _ -> iter seen env (Typing_set.add ty acc) tyl)
+        in
+        let (env, resl) = iter SSet.empty env Typing_set.empty [ty] in
+        (env, Typing_set.elements resl)
+      in
+      let (env, tyl) = get_transitive_upper_bounds env ty_sub in
+      if List.is_empty tyl then
+        invalid ~fail env
+      else
+        let (env, ty) = Typing_intersection.intersect_list env r_sub tyl in
+        simplify_
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn; ty_sub = ty }
+          ~rhs
+          env
+    | (r_sub, Tunion ty_subs) ->
+      Common.simplify_union_l
+        ~subtype_env
+        ~this_ty
+        ~update_reason:
+          (Typing_env.update_reason ~f:(fun r_sub_prj ->
+               Typing_reason.prj_union_sub ~sub:r_sub ~sub_prj:r_sub_prj))
+        ~mk_prop
+        (sub_supportdyn, ty_subs)
+        rhs
+        env
+    | (r_sub, Tnewtype (name_sub, tyl, _)) ->
+      let (env, ty_newtype) =
+        Typing_utils.get_newtype_super env r_sub name_sub tyl
+      in
+      Common.simplify_newtype_l
+        ~subtype_env
+        ~this_ty
+        ~mk_prop:simplify_
+        (sub_supportdyn, r_sub, name_sub, ty_newtype)
+        rhs
+        env
+    | (r_sub, Tdependent (dep_ty, ty_inner)) ->
+      Common.simplify_dependent_l
+        ~subtype_env
+        ~this_ty
+        ~mk_prop:simplify_
+        (sub_supportdyn, r_sub, dep_ty, ty_inner)
+        rhs
         env
     | _ -> invalid ~fail env
 end

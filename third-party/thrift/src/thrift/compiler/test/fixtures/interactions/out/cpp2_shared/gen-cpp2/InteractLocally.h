@@ -108,21 +108,6 @@ class SharedInteractionIf : public apache::thrift::Tile, public apache::thrift::
   static void fbthrift_invoke_decorator_after_createSharedInteraction(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
     static_cast<ServiceHandler<::thrift::shared_interactions::InteractLocally>*>(iface)->fbthrift_execute_decorators_after_createSharedInteraction(*ctx);
   }
-  virtual void fbthrift_execute_decorators_before_SharedInteraction_init(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_SharedInteraction_init(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_SharedInteraction_init(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
-    static_cast<ServiceHandler<::thrift::shared_interactions::InteractLocally>*>(iface)->fbthrift_execute_decorators_after_SharedInteraction_init(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_SharedInteraction_do_something(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_SharedInteraction_do_something(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::thrift::shared_interactions::DoSomethingResult>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_SharedInteraction_do_something(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::thrift::shared_interactions::DoSomethingResult>::type result) {
-    static_cast<ServiceHandler<::thrift::shared_interactions::InteractLocally>*>(iface)->fbthrift_execute_decorators_after_SharedInteraction_do_something(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_SharedInteraction_tear_down(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_SharedInteraction_tear_down(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_SharedInteraction_tear_down(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::thrift::shared_interactions::InteractLocally>*>(iface)->fbthrift_execute_decorators_after_SharedInteraction_tear_down(*ctx);
-  }
 };
 
 namespace detail {

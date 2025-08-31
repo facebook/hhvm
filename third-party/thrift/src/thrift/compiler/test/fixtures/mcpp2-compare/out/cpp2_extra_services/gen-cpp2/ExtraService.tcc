@@ -131,7 +131,7 @@ void ExtraServiceAsyncProcessor::executeRequest_simple_function(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_simple_function.
+
   iface_->fbthrift_execute_decorators_before_simple_function(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -300,7 +300,7 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_throws_function.
+
   iface_->fbthrift_execute_decorators_before_throws_function(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -485,7 +485,7 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function2(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_throws_function2.
+
   iface_->fbthrift_execute_decorators_before_throws_function2(*serverRequest.requestContext(), args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -676,7 +676,7 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function3(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_throws_function3.
+
   iface_->fbthrift_execute_decorators_before_throws_function3(*serverRequest.requestContext(), args.uarg_param1, args.uarg_param2);
 
   const auto makeExecuteHandler = [&] {
@@ -850,7 +850,7 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret(
       std::move(serverRequest.requestData()),
       apache::thrift::TilePtr(),
       std::move(decoratorCallback));
-  // Execute method decorator before_oneway_void_ret.
+
   iface_->fbthrift_execute_decorators_before_oneway_void_ret(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -994,7 +994,7 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_i32_i32_i32_i32_
       std::move(serverRequest.requestData()),
       apache::thrift::TilePtr(),
       std::move(decoratorCallback));
-  // Execute method decorator before_oneway_void_ret_i32_i32_i32_i32_i32_param.
+
   iface_->fbthrift_execute_decorators_before_oneway_void_ret_i32_i32_i32_i32_i32_param(*serverRequest.requestContext(), args.uarg_param1, args.uarg_param2, args.uarg_param3, args.uarg_param4, args.uarg_param5);
 
   const auto makeExecuteHandler = [&] {
@@ -1125,7 +1125,7 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_map_setlist_para
       std::move(serverRequest.requestData()),
       apache::thrift::TilePtr(),
       std::move(decoratorCallback));
-  // Execute method decorator before_oneway_void_ret_map_setlist_param.
+
   iface_->fbthrift_execute_decorators_before_oneway_void_ret_map_setlist_param(*serverRequest.requestContext(), args.uarg_param1, args.uarg_param2);
 
   const auto makeExecuteHandler = [&] {
@@ -1257,7 +1257,7 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_struct_param(
       std::move(serverRequest.requestData()),
       apache::thrift::TilePtr(),
       std::move(decoratorCallback));
-  // Execute method decorator before_oneway_void_ret_struct_param.
+
   iface_->fbthrift_execute_decorators_before_oneway_void_ret_struct_param(*serverRequest.requestContext(), args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {
@@ -1389,7 +1389,7 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_listunion_param(
       std::move(serverRequest.requestData()),
       apache::thrift::TilePtr(),
       std::move(decoratorCallback));
-  // Execute method decorator before_oneway_void_ret_listunion_param.
+
   iface_->fbthrift_execute_decorators_before_oneway_void_ret_listunion_param(*serverRequest.requestContext(), args.uarg_param1);
 
   const auto makeExecuteHandler = [&] {

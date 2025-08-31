@@ -126,7 +126,7 @@ void RaiserAsyncProcessor::executeRequest_doBland(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_doBland.
+
   iface_->fbthrift_execute_decorators_before_doBland(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -290,7 +290,7 @@ void RaiserAsyncProcessor::executeRequest_doRaise(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_doRaise.
+
   iface_->fbthrift_execute_decorators_before_doRaise(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -472,7 +472,7 @@ void RaiserAsyncProcessor::executeRequest_get200(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_get200.
+
   iface_->fbthrift_execute_decorators_before_get200(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -639,7 +639,7 @@ void RaiserAsyncProcessor::executeRequest_get500(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_get500.
+
   iface_->fbthrift_execute_decorators_before_get500(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {

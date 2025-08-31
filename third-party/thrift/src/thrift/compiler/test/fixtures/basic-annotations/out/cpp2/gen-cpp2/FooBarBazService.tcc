@@ -124,7 +124,7 @@ void FooBarBazServiceAsyncProcessor::executeRequest_foo(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_foo.
+
   iface_->fbthrift_execute_decorators_before_foo(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -288,7 +288,7 @@ void FooBarBazServiceAsyncProcessor::executeRequest_bar(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_bar.
+
   iface_->fbthrift_execute_decorators_before_bar(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -452,7 +452,7 @@ void FooBarBazServiceAsyncProcessor::executeRequest_baz(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_baz.
+
   iface_->fbthrift_execute_decorators_before_baz(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {

@@ -125,7 +125,7 @@ void SomeServiceAsyncProcessor::executeRequest_bounce_map(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_bounce_map.
+
   iface_->fbthrift_execute_decorators_before_bounce_map(*serverRequest.requestContext(), *args.uarg_m);
 
   const auto makeExecuteHandler = [&] {
@@ -295,7 +295,7 @@ void SomeServiceAsyncProcessor::executeRequest_binary_keyed_map(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_binary_keyed_map.
+
   iface_->fbthrift_execute_decorators_before_binary_keyed_map(*serverRequest.requestContext(), *args.uarg_r);
 
   const auto makeExecuteHandler = [&] {

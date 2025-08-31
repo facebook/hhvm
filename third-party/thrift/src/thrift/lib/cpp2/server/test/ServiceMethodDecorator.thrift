@@ -34,25 +34,3 @@ service ServiceMethodDecoratorTest {
 
   EchoResponse echo(1: EchoRequest request);
 }
-
-interaction PerformedInteraction {
-  void perform();
-}
-
-@cpp.GenerateServiceMethodDecorator
-service PerformInteractionTest {
-  performs PerformedInteraction;
-}
-
-interaction RunningSum {
-  i64 add(1: i64 num);
-}
-
-@cpp.GenerateServiceMethodDecorator
-service ReturnsInteractionTest {
-  RunningSum, i64 startAdding(1: i64 num);
-}
-
-@cpp.GenerateServiceMethodDecorator
-service InheritsInteractionTest extends PerformInteractionTest {
-}

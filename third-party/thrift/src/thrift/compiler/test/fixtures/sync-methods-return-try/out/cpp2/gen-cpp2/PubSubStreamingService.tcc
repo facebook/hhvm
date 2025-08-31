@@ -164,7 +164,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_returnstream(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_returnstream.
+
   iface_->fbthrift_execute_decorators_before_returnstream(*serverRequest.requestContext(), *args.uarg_from, *args.uarg_to);
 
   const auto makeExecuteHandler = [&] {
@@ -336,7 +336,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_streamthrows(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_streamthrows.
+
   iface_->fbthrift_execute_decorators_before_streamthrows(*serverRequest.requestContext(), *args.uarg_foo);
 
   const auto makeExecuteHandler = [&] {
@@ -508,7 +508,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_servicethrows.
+
   iface_->fbthrift_execute_decorators_before_servicethrows(*serverRequest.requestContext(), *args.uarg_foo);
 
   const auto makeExecuteHandler = [&] {
@@ -698,7 +698,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows2(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_servicethrows2.
+
   iface_->fbthrift_execute_decorators_before_servicethrows2(*serverRequest.requestContext(), *args.uarg_foo);
 
   const auto makeExecuteHandler = [&] {
@@ -888,7 +888,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_boththrows(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_boththrows.
+
   iface_->fbthrift_execute_decorators_before_boththrows(*serverRequest.requestContext(), *args.uarg_foo);
 
   const auto makeExecuteHandler = [&] {
@@ -1078,7 +1078,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamstrea
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_responseandstreamstreamthrows.
+
   iface_->fbthrift_execute_decorators_before_responseandstreamstreamthrows(*serverRequest.requestContext(), args.uarg_foo);
 
   const auto makeExecuteHandler = [&] {
@@ -1252,7 +1252,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamservi
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_responseandstreamservicethrows.
+
   iface_->fbthrift_execute_decorators_before_responseandstreamservicethrows(*serverRequest.requestContext(), args.uarg_foo);
 
   const auto makeExecuteHandler = [&] {
@@ -1444,7 +1444,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreambotht
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_responseandstreamboththrows.
+
   iface_->fbthrift_execute_decorators_before_responseandstreamboththrows(*serverRequest.requestContext(), args.uarg_foo);
 
   const auto makeExecuteHandler = [&] {

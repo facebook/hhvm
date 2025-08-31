@@ -129,7 +129,7 @@ void ServiceAsyncProcessor::executeRequest_func(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_func.
+
   iface_->fbthrift_execute_decorators_before_func(*serverRequest.requestContext(), *args.uarg_arg1, *args.uarg_arg2, *args.uarg_arg3);
 
   const auto makeExecuteHandler = [&] {

@@ -99,11 +99,6 @@ class BoxedInteractionIf : public apache::thrift::Tile, public apache::thrift::S
   static void fbthrift_invoke_decorator_after_getABoxSession(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::cpp2::ShouldBeBoxed>::type result) {
     static_cast<ServiceHandler<::cpp2::BoxService>*>(iface)->fbthrift_execute_decorators_after_getABoxSession(*ctx, result);
   }
-  virtual void fbthrift_execute_decorators_before_BoxedInteraction_getABox(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_BoxedInteraction_getABox(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::ShouldBeBoxed>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_BoxedInteraction_getABox(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::cpp2::ShouldBeBoxed>::type result) {
-    static_cast<ServiceHandler<::cpp2::BoxService>*>(iface)->fbthrift_execute_decorators_after_BoxedInteraction_getABox(*ctx, result);
-  }
 };
 
 namespace detail {

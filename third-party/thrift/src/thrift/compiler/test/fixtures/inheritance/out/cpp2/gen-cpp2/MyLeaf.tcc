@@ -120,7 +120,7 @@ void MyLeafAsyncProcessor::executeRequest_do_leaf(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_do_leaf.
+
   iface_->fbthrift_execute_decorators_before_do_leaf(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {

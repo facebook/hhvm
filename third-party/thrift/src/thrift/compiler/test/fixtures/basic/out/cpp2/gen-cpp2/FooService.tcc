@@ -120,7 +120,7 @@ void FooServiceAsyncProcessor::executeRequest_simple_rpc(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_simple_rpc.
+
   iface_->fbthrift_execute_decorators_before_simple_rpc(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {

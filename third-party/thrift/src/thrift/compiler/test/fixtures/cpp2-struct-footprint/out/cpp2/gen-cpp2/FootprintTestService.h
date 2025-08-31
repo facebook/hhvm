@@ -278,11 +278,6 @@ class CalculatorIf : public apache::thrift::Tile, public apache::thrift::ServerI
   static void fbthrift_invoke_decorator_after_streamWithSinkException(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndServerStream<::cpp2_struct_footprint::Struct1, ::cpp2_struct_footprint::SimpleStruct>>::type result) {
     static_cast<ServiceHandler<::cpp2_struct_footprint::FootprintTestService>*>(iface)->fbthrift_execute_decorators_after_streamWithSinkException(*ctx, result);
   }
-  virtual void fbthrift_execute_decorators_before_Calculator_add(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_a*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_b*/) {}
-  virtual void fbthrift_execute_decorators_after_Calculator_add(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_Calculator_add(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
-    static_cast<ServiceHandler<::cpp2_struct_footprint::FootprintTestService>*>(iface)->fbthrift_execute_decorators_after_Calculator_add(*ctx, result);
-  }
 };
 
 namespace detail {

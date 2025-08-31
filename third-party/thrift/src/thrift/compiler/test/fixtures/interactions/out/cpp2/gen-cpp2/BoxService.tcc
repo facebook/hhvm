@@ -124,7 +124,7 @@ void BoxServiceAsyncProcessor::executeRequest_getABoxSession(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
-  // Execute method decorator before_getABoxSession.
+
   iface_->fbthrift_execute_decorators_before_getABoxSession(*serverRequest.requestContext(), *args.uarg_req);
 
   const auto makeExecuteHandler = [&] {
@@ -283,9 +283,7 @@ void BoxServiceAsyncProcessor::executeRequest_BoxedInteraction_getABox(
       /* .definingServiceName =*/ "BoxService",
       /* .methodName =*/ "BoxedInteraction.getABox",
       /* .qualifiedMethodName =*/ "BoxService.BoxedInteraction.getABox"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::cpp2::ShouldBeBoxed>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<BoxService>::fbthrift_invoke_decorator_after_BoxedInteraction_getABox};
+  auto decoratorCallback = apache::thrift::HandlerCallback<std::unique_ptr<::cpp2::ShouldBeBoxed>>::DecoratorAfterCallback::noop();
  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::ShouldBeBoxed>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -303,8 +301,6 @@ void BoxServiceAsyncProcessor::executeRequest_BoxedInteraction_getABox(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
-  // Execute method decorator before_BoxedInteraction_getABox.
-  iface_->fbthrift_execute_decorators_before_BoxedInteraction_getABox(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;

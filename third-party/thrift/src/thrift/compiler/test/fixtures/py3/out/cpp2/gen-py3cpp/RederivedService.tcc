@@ -120,7 +120,7 @@ void RederivedServiceAsyncProcessor::executeRequest_get_seven(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_get_seven.
+
   iface_->fbthrift_execute_decorators_before_get_seven(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {

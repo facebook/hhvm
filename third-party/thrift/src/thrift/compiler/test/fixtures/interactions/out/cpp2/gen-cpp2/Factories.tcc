@@ -129,7 +129,7 @@ void FactoriesAsyncProcessor::executeRequest_foo(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_foo.
+
   iface_->fbthrift_execute_decorators_before_foo(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -297,7 +297,7 @@ void FactoriesAsyncProcessor::executeRequest_interact(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
-  // Execute method decorator before_interact.
+
   iface_->fbthrift_execute_decorators_before_interact(*serverRequest.requestContext(), args.uarg_arg);
 
   const auto makeExecuteHandler = [&] {
@@ -462,7 +462,7 @@ void FactoriesAsyncProcessor::executeRequest_interactFast(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
-  // Execute method decorator before_interactFast.
+
   iface_->fbthrift_execute_decorators_before_interactFast(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -630,7 +630,7 @@ void FactoriesAsyncProcessor::executeRequest_serialize(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
-  // Execute method decorator before_serialize.
+
   iface_->fbthrift_execute_decorators_before_serialize(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -805,9 +805,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_frobnicate(
       /* .definingServiceName =*/ "Factories",
       /* .methodName =*/ "MyInteraction.frobnicate",
       /* .qualifiedMethodName =*/ "Factories.MyInteraction.frobnicate"};
-  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<Factories>::fbthrift_invoke_decorator_after_MyInteraction_frobnicate};
+  auto decoratorCallback = apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback::noop();
  auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -825,8 +823,6 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_frobnicate(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
-  // Execute method decorator before_MyInteraction_frobnicate.
-  iface_->fbthrift_execute_decorators_before_MyInteraction_frobnicate(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -984,10 +980,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_ping(
       /* .definingServiceName =*/ "Factories",
       /* .methodName =*/ "MyInteraction.ping",
       /* .qualifiedMethodName =*/ "Factories.MyInteraction.ping"};
-  apache::thrift::HandlerCallbackOneWay::DecoratorAfterCallback decoratorCallback{
-    // apache::thrift::detail::TileInternalAPI(iface).getDecoratorIface(),
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<Factories>::fbthrift_invoke_decorator_after_MyInteraction_ping};
+  auto decoratorCallback = apache::thrift::HandlerCallbackOneWay::DecoratorAfterCallback::noop();
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
       apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
       std::move(ctxStack),
@@ -1001,8 +994,6 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_ping(
       std::move(serverRequest.requestData()),
       std::move(tile), 
       std::move(decoratorCallback));
-  // Execute method decorator before_MyInteraction_ping.
-  iface_->fbthrift_execute_decorators_before_MyInteraction_ping(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1122,9 +1113,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_truthify(
       /* .definingServiceName =*/ "Factories",
       /* .methodName =*/ "MyInteraction.truthify",
       /* .qualifiedMethodName =*/ "Factories.MyInteraction.truthify"};
-  apache::thrift::HandlerCallback<::apache::thrift::ServerStream<bool>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<Factories>::fbthrift_invoke_decorator_after_MyInteraction_truthify};
+  auto decoratorCallback = apache::thrift::HandlerCallback<::apache::thrift::ServerStream<bool>>::DecoratorAfterCallback::noop();
  auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<bool>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -1142,8 +1131,6 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_truthify(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
-  // Execute method decorator before_MyInteraction_truthify.
-  iface_->fbthrift_execute_decorators_before_MyInteraction_truthify(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1292,9 +1279,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_encode(
       /* .definingServiceName =*/ "Factories",
       /* .methodName =*/ "MyInteraction.encode",
       /* .qualifiedMethodName =*/ "Factories.MyInteraction.encode"};
-  apache::thrift::HandlerCallback<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<Factories>::fbthrift_invoke_decorator_after_MyInteraction_encode};
+  auto decoratorCallback = apache::thrift::HandlerCallback<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::DecoratorAfterCallback::noop();
  auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -1312,8 +1297,6 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_encode(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
-  // Execute method decorator before_MyInteraction_encode.
-  iface_->fbthrift_execute_decorators_before_MyInteraction_encode(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1491,9 +1474,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_frobnicate(
       /* .definingServiceName =*/ "Factories",
       /* .methodName =*/ "MyInteractionFast.frobnicate",
       /* .qualifiedMethodName =*/ "Factories.MyInteractionFast.frobnicate"};
-  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<Factories>::fbthrift_invoke_decorator_after_MyInteractionFast_frobnicate};
+  auto decoratorCallback = apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback::noop();
  auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -1511,8 +1492,6 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_frobnicate(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
-  // Execute method decorator before_MyInteractionFast_frobnicate.
-  iface_->fbthrift_execute_decorators_before_MyInteractionFast_frobnicate(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1649,10 +1628,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_ping(
       /* .definingServiceName =*/ "Factories",
       /* .methodName =*/ "MyInteractionFast.ping",
       /* .qualifiedMethodName =*/ "Factories.MyInteractionFast.ping"};
-  apache::thrift::HandlerCallbackOneWay::DecoratorAfterCallback decoratorCallback{
-    // apache::thrift::detail::TileInternalAPI(iface).getDecoratorIface(),
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<Factories>::fbthrift_invoke_decorator_after_MyInteractionFast_ping};
+  auto decoratorCallback = apache::thrift::HandlerCallbackOneWay::DecoratorAfterCallback::noop();
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
       apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
       std::move(ctxStack),
@@ -1666,8 +1642,6 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_ping(
       std::move(serverRequest.requestData()),
       std::move(tile), 
       std::move(decoratorCallback));
-  // Execute method decorator before_MyInteractionFast_ping.
-  iface_->fbthrift_execute_decorators_before_MyInteractionFast_ping(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1784,9 +1758,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_truthify(
       /* .definingServiceName =*/ "Factories",
       /* .methodName =*/ "MyInteractionFast.truthify",
       /* .qualifiedMethodName =*/ "Factories.MyInteractionFast.truthify"};
-  apache::thrift::HandlerCallback<::apache::thrift::ServerStream<bool>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<Factories>::fbthrift_invoke_decorator_after_MyInteractionFast_truthify};
+  auto decoratorCallback = apache::thrift::HandlerCallback<::apache::thrift::ServerStream<bool>>::DecoratorAfterCallback::noop();
  auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<bool>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -1804,8 +1776,6 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_truthify(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
-  // Execute method decorator before_MyInteractionFast_truthify.
-  iface_->fbthrift_execute_decorators_before_MyInteractionFast_truthify(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1951,9 +1921,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_encode(
       /* .definingServiceName =*/ "Factories",
       /* .methodName =*/ "MyInteractionFast.encode",
       /* .qualifiedMethodName =*/ "Factories.MyInteractionFast.encode"};
-  apache::thrift::HandlerCallback<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<Factories>::fbthrift_invoke_decorator_after_MyInteractionFast_encode};
+  auto decoratorCallback = apache::thrift::HandlerCallback<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::DecoratorAfterCallback::noop();
  auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -1971,8 +1939,6 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_encode(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
-  // Execute method decorator before_MyInteractionFast_encode.
-  iface_->fbthrift_execute_decorators_before_MyInteractionFast_encode(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2141,9 +2107,7 @@ void FactoriesAsyncProcessor::executeRequest_SerialInteraction_frobnicate(
       /* .definingServiceName =*/ "Factories",
       /* .methodName =*/ "SerialInteraction.frobnicate",
       /* .qualifiedMethodName =*/ "Factories.SerialInteraction.frobnicate"};
-  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<Factories>::fbthrift_invoke_decorator_after_SerialInteraction_frobnicate};
+  auto decoratorCallback = apache::thrift::HandlerCallback<void>::DecoratorAfterCallback::noop();
  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -2161,8 +2125,6 @@ void FactoriesAsyncProcessor::executeRequest_SerialInteraction_frobnicate(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
-  // Execute method decorator before_SerialInteraction_frobnicate.
-  iface_->fbthrift_execute_decorators_before_SerialInteraction_frobnicate(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;

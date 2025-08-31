@@ -127,7 +127,7 @@ void CAsyncProcessor::executeRequest_f(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_f.
+
   iface_->fbthrift_execute_decorators_before_f(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -291,7 +291,7 @@ void CAsyncProcessor::executeRequest_numbers(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_numbers.
+
   iface_->fbthrift_execute_decorators_before_numbers(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -469,7 +469,7 @@ void CAsyncProcessor::executeRequest_thing(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_thing.
+
   iface_->fbthrift_execute_decorators_before_thing(*serverRequest.requestContext(), args.uarg_a, *args.uarg_b, *args.uarg_c);
 
   const auto makeExecuteHandler = [&] {

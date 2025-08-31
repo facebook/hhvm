@@ -128,7 +128,7 @@ void MyServiceAsyncProcessor::executeRequest_query(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_query.
+
   iface_->fbthrift_execute_decorators_before_query(*serverRequest.requestContext(), *args.uarg_s, *args.uarg_i);
 
   const auto makeExecuteHandler = [&] {
@@ -298,7 +298,7 @@ void MyServiceAsyncProcessor::executeRequest_has_arg_docs(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_has_arg_docs.
+
   iface_->fbthrift_execute_decorators_before_has_arg_docs(*serverRequest.requestContext(), *args.uarg_s, *args.uarg_i);
 
   const auto makeExecuteHandler = [&] {

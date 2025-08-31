@@ -751,34 +751,6 @@ prototype<t_interface>::ptr t_whisker_generator::make_prototype_for_interface(
   def.property(
       "functions", mem_fn(&t_interface::functions, proto.of<t_function>()));
   def.property("interaction?", mem_fn(&t_interface::is_interaction));
-
-  // This property retrieves the interactions of on this interface alone
-  def.property("interactions", [&proto](const t_interface& interface) {
-    if (interface.is_interaction()) {
-      // Interactions cannot contain other interactions
-      return whisker::array::of({});
-    }
-
-    std::vector<const t_interaction*> interactions;
-    interactions.reserve(interface.functions().size());
-    for (const auto& function : interface.functions()) {
-      if (const auto& interaction = function.interaction()) {
-        auto* ptr = &interaction->as<t_interaction>();
-        if (std::find(interactions.begin(), interactions.end(), ptr) !=
-            interactions.end()) {
-          continue; // Already seen this interaction.
-        }
-        interactions.push_back(ptr);
-      }
-    }
-
-    whisker::array::raw refs;
-    refs.reserve(interactions.size());
-    for (const auto* interaction : interactions) {
-      refs.emplace_back(proto.create<t_interaction>(*interaction));
-    }
-    return whisker::array::of(std::move(refs));
-  });
   return std::move(def).make();
 }
 
@@ -792,6 +764,26 @@ prototype<t_service>::ptr t_whisker_generator::make_prototype_for_service(
     return build_user_type_footprint(service, proto);
   });
 
+  def.property("interactions", [&proto](const t_interface& interface) {
+    // Probably a short list in most cases, so vec should be fine
+    std::vector<const t_interaction*> interactions;
+    for (const auto& function : interface.functions()) {
+      if (const auto& interaction = function.interaction()) {
+        auto* ptr = &interaction->as<t_interaction>();
+        if (std::find(interactions.begin(), interactions.end(), ptr) !=
+            interactions.end()) {
+          continue; // Already seen this interaction.
+        }
+        interactions.push_back(ptr);
+      }
+    }
+    whisker::array::raw refs;
+    refs.reserve(interactions.size());
+    for (const auto* interaction : interactions) {
+      refs.emplace_back(proto.create<t_interaction>(*interaction));
+    }
+    return whisker::array::of(std::move(refs));
+  });
   return std::move(def).make();
 }
 

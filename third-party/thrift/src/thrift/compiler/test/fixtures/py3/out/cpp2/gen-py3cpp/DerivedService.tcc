@@ -120,7 +120,7 @@ void DerivedServiceAsyncProcessor::executeRequest_get_six(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_get_six.
+
   iface_->fbthrift_execute_decorators_before_get_six(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {

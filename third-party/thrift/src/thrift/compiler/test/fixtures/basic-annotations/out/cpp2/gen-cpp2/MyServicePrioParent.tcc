@@ -122,7 +122,7 @@ void MyServicePrioParentAsyncProcessor::executeRequest_ping(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_ping.
+
   iface_->fbthrift_execute_decorators_before_ping(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -286,7 +286,7 @@ void MyServicePrioParentAsyncProcessor::executeRequest_pong(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_pong.
+
   iface_->fbthrift_execute_decorators_before_pong(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {

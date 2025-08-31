@@ -128,7 +128,7 @@ void BiDiServiceAsyncProcessor::executeRequest_simple(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_simple.
+
   iface_->fbthrift_execute_decorators_before_simple(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -315,7 +315,7 @@ void BiDiServiceAsyncProcessor::executeRequest_response(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-  // Execute method decorator before_response.
+
   iface_->fbthrift_execute_decorators_before_response(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {

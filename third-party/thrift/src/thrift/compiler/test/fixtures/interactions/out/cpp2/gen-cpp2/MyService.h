@@ -243,51 +243,6 @@ class SerialInteractionIf : public apache::thrift::SerialInteractionTile, public
   static void fbthrift_invoke_decorator_after_serialize(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>::type result) {
     static_cast<ServiceHandler<::cpp2::MyService>*>(iface)->fbthrift_execute_decorators_after_serialize(*ctx, result);
   }
-  virtual void fbthrift_execute_decorators_before_MyInteraction_frobnicate(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_MyInteraction_frobnicate(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_MyInteraction_frobnicate(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
-    static_cast<ServiceHandler<::cpp2::MyService>*>(iface)->fbthrift_execute_decorators_after_MyInteraction_frobnicate(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_MyInteraction_ping(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_MyInteraction_ping(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_MyInteraction_ping(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::MyService>*>(iface)->fbthrift_execute_decorators_after_MyInteraction_ping(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_MyInteraction_truthify(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_MyInteraction_truthify(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_MyInteraction_truthify(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::MyService>*>(iface)->fbthrift_execute_decorators_after_MyInteraction_truthify(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_MyInteraction_encode(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_MyInteraction_encode(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_MyInteraction_encode(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::type result) {
-    static_cast<ServiceHandler<::cpp2::MyService>*>(iface)->fbthrift_execute_decorators_after_MyInteraction_encode(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_MyInteractionFast_frobnicate(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_MyInteractionFast_frobnicate(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_MyInteractionFast_frobnicate(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type result) {
-    static_cast<ServiceHandler<::cpp2::MyService>*>(iface)->fbthrift_execute_decorators_after_MyInteractionFast_frobnicate(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_MyInteractionFast_ping(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_MyInteractionFast_ping(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_MyInteractionFast_ping(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::MyService>*>(iface)->fbthrift_execute_decorators_after_MyInteractionFast_ping(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_MyInteractionFast_truthify(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_MyInteractionFast_truthify(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_MyInteractionFast_truthify(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::MyService>*>(iface)->fbthrift_execute_decorators_after_MyInteractionFast_truthify(*ctx);
-  }
-  virtual void fbthrift_execute_decorators_before_MyInteractionFast_encode(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_MyInteractionFast_encode(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_MyInteractionFast_encode(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::type result) {
-    static_cast<ServiceHandler<::cpp2::MyService>*>(iface)->fbthrift_execute_decorators_after_MyInteractionFast_encode(*ctx, result);
-  }
-  virtual void fbthrift_execute_decorators_before_SerialInteraction_frobnicate(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_SerialInteraction_frobnicate(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  static void fbthrift_invoke_decorator_after_SerialInteraction_frobnicate(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
-    static_cast<ServiceHandler<::cpp2::MyService>*>(iface)->fbthrift_execute_decorators_after_SerialInteraction_frobnicate(*ctx);
-  }
 };
 
 namespace detail {

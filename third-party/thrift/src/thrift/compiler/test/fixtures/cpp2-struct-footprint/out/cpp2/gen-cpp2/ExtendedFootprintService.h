@@ -92,8 +92,6 @@ class ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService> : virtua
   void fbthrift_execute_decorators_after_streamWithSinkInitial(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndServerStream<::cpp2_struct_footprint::Struct1, ::cpp2_struct_footprint::SimpleStruct>>::type /*result*/) override {}
   void fbthrift_execute_decorators_before_streamWithSinkException(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_input*/) override {}
   void fbthrift_execute_decorators_after_streamWithSinkException(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndServerStream<::cpp2_struct_footprint::Struct1, ::cpp2_struct_footprint::SimpleStruct>>::type /*result*/) override {}
-  void fbthrift_execute_decorators_before_Calculator_add(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_a*/, apache::thrift::detail::DecoratorArgType<::std::int32_t>::type /*p_b*/) override {}
-  void fbthrift_execute_decorators_after_Calculator_add(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int32_t>::type /*result*/) override {}
 
   virtual void fbthrift_execute_decorators_before_getComplexMap(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_getComplexMap(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>::type /*result*/) {}

@@ -208,8 +208,7 @@ HTTP3::ErrorCode HTTPErrorCode2HTTP3ErrorCode(HTTPErrorCode ec,
 // with the same meaning and return only one code
 // Convert an H2 error code read off the wire to an HTTPErrorCode
 HTTPErrorCode ErrorCode2HTTPErrorCode(ErrorCode ec) {
-  XCHECK(ec != ErrorCode::NO_ERROR);
-  if (ec >= ErrorCode::PROTOCOL_ERROR && ec <= ErrorCode::HTTP_1_1_REQUIRED) {
+  if (ec >= ErrorCode::NO_ERROR && ec <= ErrorCode::HTTP_1_1_REQUIRED) {
     return HTTPErrorCode(ec);
   }
   // Any unknown custom error codes are mapped to PROTOCOL_ERROR here.
@@ -218,8 +217,7 @@ HTTPErrorCode ErrorCode2HTTPErrorCode(ErrorCode ec) {
 
 // Convert an H3 error code read off the wire to an HTTPErrorCode
 HTTPErrorCode HTTP3ErrorCode2HTTPErrorCode(HTTP3::ErrorCode ec) {
-  XCHECK(ec != HTTP3::ErrorCode::HTTP_NO_ERROR);
-  if ((ec >= HTTP3::ErrorCode::HTTP_GENERAL_PROTOCOL_ERROR &&
+  if ((ec >= HTTP3::ErrorCode::HTTP_NO_ERROR &&
        ec <= HTTP3::ErrorCode::HTTP_VERSION_FALLBACK) ||
       (ec >= HTTP3::ErrorCode::HTTP_QPACK_DECOMPRESSION_FAILED &&
        ec <= HTTP3::ErrorCode::HTTP_QPACK_DECODER_STREAM_ERROR)) {

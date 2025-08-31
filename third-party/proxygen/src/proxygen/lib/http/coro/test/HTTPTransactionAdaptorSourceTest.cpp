@@ -408,6 +408,34 @@ CO_TEST_P_X(HTTPTransactionAdaptorSourceTests, DownstreamErrors) {
   adaptor_->setEgressSource(std::move(response));
 }
 
+CO_TEST_P_X(HTTPTransactionAdaptorSourceTests, IngressNoErrorAbortNoCrash) {
+  auto ingressSource = adaptor_->getIngressSource();
+  auto handler = std::make_shared<TestHandler>();
+
+  auto msg = std::make_unique<HTTPMessage>();
+  msg->setMethod(HTTPMethod::GET);
+  msg->setURL("https://www.facebook.com/");
+
+  getHandler()->onHeadersComplete(std::move(msg));
+  getHandler()->onBody(folly::IOBuf::copyBuffer("hello world"));
+  // Do not send EOM to simulate incomplete ingress
+
+  // Simulate an inbound RST_STREAM(NO_ERROR) via codec status on the exception
+  HTTPException ex(HTTPException::Direction::INGRESS_AND_EGRESS,
+                   "rst_stream_no_error");
+  ex.setCodecStatusCode(ErrorCode::NO_ERROR);
+  EXPECT_CALL(*mockTxn_, sendAbort(_)).Times(1);
+  getHandler()->onError(ex);
+
+  // The adaptor will abort the ingress source; consuming should surface an
+  // error
+  auto responseTry = co_await co_awaitTry(folly::coro::detachOnCancel(
+      handler->handleRequest(&evb_, ctx_.acquireKeepAlive(), ingressSource)));
+  EXPECT_TRUE(responseTry.hasException());
+
+  getHandler()->detachTransaction();
+}
+
 INSTANTIATE_TEST_SUITE_P(HTTPTransactionAdaptorSourceTests,
                          HTTPTransactionAdaptorSourceTests,
                          Values(TransportType::TCP),

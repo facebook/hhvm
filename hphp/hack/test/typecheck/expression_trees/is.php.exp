@@ -12,25 +12,25 @@ ERROR: File "is.php", line 7, characters 35-36:
 Variable `$x` is undefined, or not always defined. (Naming[2050])
 ERROR: File "is.php", line 5, characters 35-44:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 81, characters 21-26:
+  File "expr_tree.php", line 86, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 305, characters 6-21:
+  File "expr_tree.php", line 311, characters 6-21:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "is.php", line 5, characters 35-44:
   But got `bool`
 ERROR: File "is.php", line 6, characters 35-47:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 81, characters 21-26:
+  File "expr_tree.php", line 86, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 305, characters 6-21:
+  File "expr_tree.php", line 311, characters 6-21:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "is.php", line 6, characters 35-47:
   But got `bool`
 ERROR: File "is.php", line 7, characters 35-50:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 81, characters 21-26:
+  File "expr_tree.php", line 86, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 305, characters 6-21:
+  File "expr_tree.php", line 311, characters 6-21:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "is.php", line 7, characters 35-50:
   But got `bool`

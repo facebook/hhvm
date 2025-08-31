@@ -11,7 +11,7 @@ function f(): void {
       $splice0 = ${
         ExampleDsl::lift(ExampleDsl::makeTree(
           darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 40, "end_column" => 42],
-          darray["splices" => dict[], "functions" => vec[], "static_methods" => vec[], "variables" => vec["$x"]],
+          darray["splices" => dict[], "functions" => vec[], "static_methods" => vec[], "variables" => vec["$x"], "lexically_enclosing_tree" => darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 13, "end_column" => 90]],
           (
             (ExampleDsl $v) ==> {
               return $v->visitLocal(darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 40, "end_column" => 42], "$x");
@@ -25,7 +25,7 @@ function f(): void {
             $splice0 = ${
               ExampleDsl::lift(ExampleDsl::makeTree(
                 darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 77, "end_column" => 79],
-                darray["splices" => dict[], "functions" => vec[], "static_methods" => vec[], "variables" => vec["$a"]],
+                darray["splices" => dict[], "functions" => vec[], "static_methods" => vec[], "variables" => vec["$a"], "lexically_enclosing_tree" => darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 64, "end_column" => 86]],
                 (
                   (ExampleDsl $v) ==> {
                     return $v->visitLocal(darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 77, "end_column" => 79], "$a");
@@ -35,7 +35,7 @@ function f(): void {
             };
             return ExampleDsl::makeTree(
               darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 64, "end_column" => 86],
-              darray["splices" => dict["$0splice0" => $splice0], "functions" => vec[], "static_methods" => vec[], "variables" => vec["$a", "$y"]],
+              darray["splices" => dict["$0splice0" => $splice0], "functions" => vec[], "static_methods" => vec[], "variables" => vec["$a", "$y"], "lexically_enclosing_tree" => darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 13, "end_column" => 90]],
               (
                 (ExampleDsl $v) ==> {
                   return $v->visitBinop(darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 64, "end_column" => 86], $v->splice(darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 64, "end_column" => 81], "$0splice0", $splice0, vec["$a"]), "__plus", $v->visitLocal(darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 84, "end_column" => 86], "$y"));
@@ -47,7 +47,7 @@ function f(): void {
       };
       return ExampleDsl::makeTree(
         darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 13, "end_column" => 90],
-        darray["splices" => dict["$0splice0" => $splice0, "$0splice1" => $splice1], "functions" => vec[], "static_methods" => vec[], "variables" => vec[]],
+        darray["splices" => dict["$0splice0" => $splice0, "$0splice1" => $splice1], "functions" => vec[], "static_methods" => vec[], "variables" => vec[], "lexically_enclosing_tree" => NULL],
         (
           (ExampleDsl $v) ==> {
             return $v->visitCall(darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 13, "end_column" => 90], $v->visitLambda(darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 13, "end_column" => 90], vec[], vec[$v->visitAssign(darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 14, "end_column" => 20], $v->visitLocal(darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 14, "end_column" => 16], "$x"), $v->visitInt(darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 19, "end_column" => 20], 1)), $v->visitAssign(darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 22, "end_column" => 44], $v->visitLocal(darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 22, "end_column" => 24], "$y"), $v->splice(darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 27, "end_column" => 44], "$0splice0", $splice0, vec["$x"])), $v->visitAssign(darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 46, "end_column" => 88], $v->visitLocal(darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 46, "end_column" => 48], "$z"), $v->splice(darray["path" => __FILE__, "start_line" => 5, "end_line" => 5, "start_column" => 51, "end_column" => 88], "$0splice1", $splice1, vec["$a", "$y"]))]), vec[]);

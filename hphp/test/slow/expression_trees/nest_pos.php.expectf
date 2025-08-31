@@ -1,0 +1,24 @@
+dict(5) {
+  ["path"]=>
+  string(%s) "%s"
+  ["start_line"]=>
+  int(10)
+  ["end_line"]=>
+  int(18)
+  ["start_column"]=>
+  int(4)
+  ["end_column"]=>
+  int(5)
+}
+dict(5) {
+  ["path"]=>
+  string(%s) "%s"
+  ["start_line"]=>
+  int(10)
+  ["end_line"]=>
+  int(18)
+  ["start_column"]=>
+  int(4)
+  ["end_column"]=>
+  int(5)
+}

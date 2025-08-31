@@ -33,6 +33,7 @@ type ExprTreeInfo<TInfer> = shape(
   // TInfer to the virtualised type.
   ?'type' => (function(): TInfer),
   'variables' => vec<string>,
+  'lexically_enclosing_tree' => ?ExprPos,
 );
 
 case type HackValue = int | float | string | bool | Container<mixed>;
@@ -70,6 +71,10 @@ final class ExprTree<TInfer> implements ExampleExpression<TInfer> {
     return $this->pos;
   }
 
+  public function getEnclosingPos(): ?ExprPos {
+    return $this->metadata['lexically_enclosing_tree'];
+  }
+
   public function getSplices(): dict<string, mixed> {
     return Shapes::idx($this->metadata, 'splices', dict[]);
   }
@@ -89,6 +94,7 @@ class ExampleDsl {
       'static_methods' => vec<mixed>,
       ?'type' => (function(): TInfer),
       'variables' => vec<string>,
+      'lexically_enclosing_tree' => ?ExprPos,
     ) $metadata,
     (function(ExampleDsl): ExampleDsl::TAst) $ast,
   )[]: ExampleExpression<TInfer> {

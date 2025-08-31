@@ -11,7 +11,7 @@ final class MyClass {
 function foo(): void {
   $fun_call = ExampleDsl::makeTree(
     darray["path" => __FILE__, "start_line" => 12, "end_line" => 14, "start_column" => 25, "end_column" => 3],
-    darray["splices" => dict[], "functions" => vec[], "static_methods" => vec[], "variables" => vec[]],
+    darray["splices" => dict[], "functions" => vec[], "static_methods" => vec[], "variables" => vec[], "lexically_enclosing_tree" => NULL],
     (
       (ExampleDsl $v) ==> {
         return $v->visitLambda(darray["path" => __FILE__, "start_line" => 12, "end_line" => 14, "start_column" => 25, "end_column" => 3], vec["$foo"], vec[$v->visitCall(darray["path" => __FILE__, "start_line" => 13, "end_line" => 13, "start_column" => 4, "end_column" => 27], $v->visitInstanceMethod(darray["path" => __FILE__, "start_line" => 13, "end_line" => 13, "start_column" => 4, "end_column" => 13], $v->visitLocal(darray["path" => __FILE__, "start_line" => 13, "end_line" => 13, "start_column" => 4, "end_column" => 8], "$foo"), "bar"), vec[$v->visitString(darray["path" => __FILE__, "start_line" => 13, "end_line" => 13, "start_column" => 14, "end_column" => 19], "baz"), $v->visitString(darray["path" => __FILE__, "start_line" => 13, "end_line" => 13, "start_column" => 21, "end_column" => 26], "brr")])]);

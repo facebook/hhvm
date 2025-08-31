@@ -195,6 +195,8 @@ pub struct Env<'a> {
     pub in_async: bool,
     // Whether we are in an expression tree
     in_expr_tree: bool,
+    // The position of the DSL Class of the enclosing expression tree, if any
+    pub enclosing_et_pos: Option<Pos>,
 
     pub indexed_source_text: &'a IndexedSourceText<'a>,
     pub parser_options: &'a ParserOptions,
@@ -233,6 +235,7 @@ impl<'a> Env<'a> {
             found_await: false,
             in_async: false,
             in_expr_tree: false,
+            enclosing_et_pos: None,
             indexed_source_text,
             parser_options,
             pos_none: Pos::NONE,
@@ -2378,6 +2381,9 @@ fn p_prefixed_code_expr<'a>(
         (Err(e), _) => Err(e),
     }?;
     env.in_expr_tree = true;
+    let mut old_et_pos = None;
+    std::mem::swap(&mut old_et_pos, &mut env.enclosing_et_pos);
+    env.enclosing_et_pos = Some(p_pos(&c.body, env));
     let src_expr = if !c.body.is_compound_statement() {
         p_expr(&c.body, env)?
     } else {
@@ -2413,6 +2419,7 @@ fn p_prefixed_code_expr<'a>(
         });
         ast::Expr::new((), pos, expr)
     };
+    std::mem::swap(&mut old_et_pos, &mut env.enclosing_et_pos);
     let desugar_result = desugar(&nested_id, src_expr, env, is_nested);
     for (pos, msg) in desugar_result.errors {
         raise_parsing_error_pos(&pos, env, &msg);
@@ -2423,7 +2430,6 @@ fn p_prefixed_code_expr<'a>(
     // Since expression trees can't directly nest, we don't need to restore the
     // old value, it must be false.
     env.in_expr_tree = false;
-
     Ok(desugar_result.expr.2)
 }
 

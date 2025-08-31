@@ -1,6 +1,6 @@
-ERROR: File "dict_error.php", line 76, characters 12-13:
+ERROR: File "dict_error.php", line 79, characters 12-13:
 Invalid argument (Typing[4110])
-  File "dict_error.php", line 23, characters 39-84:
+  File "dict_error.php", line 25, characters 5-50:
   Expected `Spliceable<DictError, mixed, _>`
-  File "dict_error.php", line 73, characters 15-24:
+  File "dict_error.php", line 76, characters 15-24:
   But got `int`

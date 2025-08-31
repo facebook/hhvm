@@ -15,6 +15,7 @@ function g(): ExprTree<(function(optional ExampleInt): ExampleInt)> {
       "functions" => vec[],
       "static_methods" => vec[],
       "variables" => vec[],
+      "lexically_enclosing_tree" => NULL,
     ],
     (
       (ExampleDsl $v) ==> {

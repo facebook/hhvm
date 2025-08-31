@@ -1,4 +1,4 @@
 ERROR: File "invalid_call3.php", line 6, characters 14-23:
 You are trying to access the method `__unwrap` but this is an int (Typing[4062])
-  File "expr_tree.php", line 440, characters 42-51:
+  File "expr_tree.php", line 446, characters 42-51:
   Definition is here

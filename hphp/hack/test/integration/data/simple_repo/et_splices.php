@@ -27,6 +27,7 @@ type ExprTreeInfo<TInfer> = shape(
   // TInfer to the virtualised type.
   ?'type' => (function(): TInfer),
   'variables' => vec<string>,
+  'lexically_enclosing_tree' => ?ExprPos,
 );
 
 final class ExprTree<TVisitor, TResult, +TInfer>
@@ -64,6 +65,7 @@ class ExampleDsl {
       'static_methods' => vec<mixed>,
       ?'type' => (function(): TInfer),
       'variables' => vec<string>,
+      'lexically_enclosing_tree' => ?ExprPos,
     ) $metadata,
     (function(ExampleDsl): ExampleDsl::TAst) $ast,
   )[]: ExprTree<ExampleDsl, ExampleDsl::TAst, TInfer> {

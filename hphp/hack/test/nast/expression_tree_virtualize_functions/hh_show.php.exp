@@ -44,6 +44,7 @@
                                       ((SFlit_str ([6:3-13], "functions")), ((), [6:3-13], (ValCollection (([6:3-13], Vec), None, []))));
                                       ((SFlit_str ([6:3-13], "static_methods")), ((), [6:3-13], (ValCollection (([6:3-13], Vec), None, []))));
                                       ((SFlit_str ([6:3-13], "variables")), ((), [6:3-13], (ValCollection (([6:3-13], Vec), None, []))));
+                                      ((SFlit_str ([6:3-13], "lexically_enclosing_tree")), ((), [Pos.none], Null));
                                       ((SFlit_str ([6:3-13], "type")),
                                        ((), [6:14-9:4],
                                         (Efun

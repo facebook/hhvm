@@ -1,6 +1,6 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('expression_trees')>>
+<<file: __EnableUnstableFeatures('expression_trees')>>
 
 class DictError {
   const type TAst = mixed;
@@ -14,13 +14,16 @@ class DictError {
       'static_methods' => vec<mixed>,
       ?'type' => TInfer,
       'variables' => vec<string>,
+      'lexically_enclosing_tree' => ?ExprPos,
     ) $metadata,
     (function(DictError): DictError::TAst) $ast,
   ): Spliceable<DictError, DictError::TAst, TInfer> {
     throw new Exception();
   }
 
-  public static function lift<TInfer>(Spliceable<DictError, DictError::TAst, TInfer> $x)[]: Spliceable<DictError, DictError::TAst, TInfer> {
+  public static function lift<TInfer>(
+    Spliceable<DictError, DictError::TAst, TInfer> $x,
+  )[]: Spliceable<DictError, DictError::TAst, TInfer> {
     return $x;
   }
 

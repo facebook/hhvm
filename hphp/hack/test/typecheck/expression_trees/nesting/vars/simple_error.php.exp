@@ -1,12 +1,12 @@
 ERROR: File "simple_error.php", line 6, characters 31-51:
 Typing error (Typing[4110])
-  File "expr_tree.php", line 440, characters 26-35:
+  File "expr_tree.php", line 446, characters 26-35:
   Expected `int`
-  File "expr_tree.php", line 140, characters 40-45:
+  File "expr_tree.php", line 146, characters 40-45:
   But got `string`
 ERROR: File "simple_error.php", line 7, characters 43-48:
 Was expecting an object but type is unknown (Typing[4297])
   File "simple_error.php", line 7, characters 43-48:
   It is unknown because type parameter `T` of `operationType` could not be determined. Please add explicit type parameters to the invocation of `operationType`
-  File "expr_tree.php", line 159, characters 8-8:
+  File "expr_tree.php", line 165, characters 8-8:
     via this generic `T`

@@ -197,6 +197,7 @@ pub fn desugar(
         &state.static_method_pointers,
         env.is_typechecker(),
         &free_vars,
+        &env.enclosing_et_pos,
         virtualized_expr,
     );
 
@@ -726,6 +727,13 @@ fn exprpos(pos: &Pos) -> Expr {
         ];
 
         shape_literal(pos, fields)
+    }
+}
+
+fn exprpos_opt(pos: &Option<Pos>) -> Expr {
+    match pos {
+        None => null_literal(Pos::NONE),
+        Some(pos) => exprpos(pos),
     }
 }
 
@@ -2148,6 +2156,7 @@ fn maketree_metadata(
     static_methods: &[Expr],
     is_typecheck: bool,
     freevars: &BTreeMap<(isize, String), Pos>,
+    enclosing_et_pos: &Option<Pos>,
     virtual_expr: Expr,
 ) -> Expr {
     let key_value_pairs = splices
@@ -2194,6 +2203,7 @@ fn maketree_metadata(
         ("functions", functions_vec),
         ("static_methods", static_method_vec),
         ("variables", freevars_vec),
+        ("lexically_enclosing_tree", exprpos_opt(enclosing_et_pos)),
     ];
     if is_typecheck {
         fields.push(("type", virtual_expr))

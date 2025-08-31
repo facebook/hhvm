@@ -2,9 +2,9 @@ ERROR: File "elvis.php", line 7, characters 19-33:
 Unsupported expression tree syntax: Elvis operator (Parsing[1002])
 ERROR: File "elvis.php", line 7, characters 19-33:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 81, characters 21-26:
+  File "expr_tree.php", line 86, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 273, characters 5-20:
+  File "expr_tree.php", line 279, characters 5-20:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "elvis.php", line 7, characters 19-22:
   But got `bool`

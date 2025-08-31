@@ -100,6 +100,8 @@
                                                                     (
                                                                     (SFlit_str ([4:8-18], "variables")), ((), [4:8-18], (ValCollection (([4:8-18], Vec), None, []))));
                                                                     (
+                                                                    (SFlit_str ([4:8-18], "lexically_enclosing_tree")), ((), [Pos.none], Null));
+                                                                    (
                                                                     (
                                                                     SFlit_str ([4:8-18], "type")),
                                                                     (

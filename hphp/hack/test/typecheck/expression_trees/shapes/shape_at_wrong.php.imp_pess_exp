@@ -2,7 +2,7 @@ ERROR: File "shape_at_wrong.php", line 9, characters 10-98:
 Invalid return type (Typing[4110])
   File "shape_at_wrong.php", line 8, characters 15-43:
   Expected `dynamic`
-  File "expr_tree.php", line 94, characters 8-32:
+  File "expr_tree.php", line 100, characters 8-32:
   But got `ExampleExpression<_>`
 ERROR: File "shape_at_wrong.php", line 9, characters 10-98:
 Invalid return type (Typing[4110])
@@ -14,7 +14,7 @@ ERROR: File "shape_at_wrong.php", line 9, characters 10-98:
 Invalid return type (Typing[4110])
   File "shape_at_wrong.php", line 8, characters 33-42:
   Expected `int`
-  File "expr_tree.php", line 140, characters 40-45:
+  File "expr_tree.php", line 146, characters 40-45:
   But got `string`
 ERROR: File "shape_at_wrong.php", line 18, characters 5-41:
 Too many arguments (expected 2 but got 3) (Typing[4105])
@@ -32,5 +32,5 @@ You are calling `Shapes::at()` on a field known to not exist (Typing[4251])
   The field `x` is not defined in this shape
 ERROR: File "shape_at_wrong.php", line 30, characters 5-33:
 You are trying to access the method `__unwrap` but this is a string (Typing[4062])
-  File "expr_tree.php", line 140, characters 40-45:
+  File "expr_tree.php", line 146, characters 40-45:
   Definition is here

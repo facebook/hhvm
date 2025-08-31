@@ -24,6 +24,7 @@ function f(): void {
       "functions" => vec[],
       "static_methods" => vec[],
       "variables" => vec[],
+      "lexically_enclosing_tree" => NULL,
     ],
     (
       (ExampleDsl $v) ==> {

@@ -2,9 +2,9 @@ ERROR: File "parent_static_method_call.php", line 15, characters 28-45:
 Static method calls in expression trees require explicit class names. (Parsing[1002])
 ERROR: File "parent_static_method_call.php", line 15, characters 28-45:
 Invalid return type (Typing[4110])
-  File "expr_tree.php", line 81, characters 21-26:
+  File "expr_tree.php", line 86, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 93, characters 28-43:
+  File "expr_tree.php", line 99, characters 28-43:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "parent_static_method_call.php", line 8, characters 6-72:
   But got `Awaitable<ExampleExpression<(function(string): int)>>`

@@ -63,6 +63,7 @@
                                                                     (), [5:5-8], (Lvar ([5:5-8], $0fp4)))]))));
                                                                 ((SFlit_str ([4:3-13], "static_methods")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, []))));
                                                                 ((SFlit_str ([4:3-13], "variables")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, []))));
+                                                                ((SFlit_str ([4:3-13], "lexically_enclosing_tree")), ((), [Pos.none], Null));
                                                                 ((SFlit_str ([4:3-13], "type")),
                                                                  ((), [5:5-11:4],
                                                                   (Efun

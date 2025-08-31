@@ -110,15 +110,16 @@ const {{function.return_type.cpp_standard_type}}&
 }}
 {{#let export partial before_invocation_args |function|}}
 {{#pragma ignore-newlines}}
-{{#each function.params.fields as |param|}}
+{{#each (array.enumerate function.params.fields with_first=true) as |index param first?|}}
+{{#if (not first?)}}, {{/if}}
 {{#if param.type.resolves_to_complex_return?}}
 {{#if function.stack_arguments?}}
-, args.uarg_{{param.cpp_name}}
+args.uarg_{{param.cpp_name}}
 {{#else}}
-, *args.uarg_{{param.cpp_name}}
+*args.uarg_{{param.cpp_name}}
 {{/if function.stack_arguments?}}
 {{#else}}
-, args.uarg_{{param.cpp_name}}
+args.uarg_{{param.cpp_name}}
 {{/if param.type.resolves_to_complex_return?}}
 {{/each}}
 {{/let partial}}

@@ -118,9 +118,6 @@ void FB303ServiceAsyncProcessor::executeRequest_simple_rpc(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_simple_rpc(*serverRequest.requestContext(), args.uarg_int_parameter);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

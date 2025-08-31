@@ -516,10 +516,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
       return cpp2::get_name(f.interaction().get_type());
     });
 
-    def.property("stack_arguments?", [this](const t_function& function) {
-      return cpp2::is_stack_arguments(compiler_options(), function);
-    });
-
     return std::move(def).make();
   }
 

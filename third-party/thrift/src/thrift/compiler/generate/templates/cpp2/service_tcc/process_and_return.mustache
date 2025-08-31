@@ -14,9 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}
-{{#import "method_decorators/params" as decorator_params}}
-{{#service:functions?}}
+}}{{#service:functions?}}
 //
 // Service Methods
 //
@@ -238,11 +236,6 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
           std::move(serverRequest.requestData()){{#if in_or_creates_interaction?}},
           std::move(tile){{/if in_or_creates_interaction?}});
 {{/function:oneway?}}
-{{#if service:self.interaction?}}{{! TODO implement later}}{{#else}}
-
-  iface_->fbthrift_execute_decorators_before_{{function:self.cpp_name}}(*serverRequest.requestContext(){{#partial decorator_params.before_invocation_args function=function:self}});
-
-{{/if service:self.interaction?}}
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = {{^service:interaction?}}iface_{{/service:interaction?}}{{#service:interaction?}}&iface{{/service:interaction?}}](auto&& cb, ArgsState args) mutable {
       (void)args;

@@ -125,9 +125,6 @@ void service1AsyncProcessor::executeRequest_method1(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_method1(*serverRequest.requestContext());
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -293,9 +290,6 @@ void service1AsyncProcessor::executeRequest_method2(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_method2(*serverRequest.requestContext(), args.uarg_x, *args.uarg_y, args.uarg_z);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -452,9 +446,6 @@ void service1AsyncProcessor::executeRequest_method3(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_method3(*serverRequest.requestContext());
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -623,9 +614,6 @@ void service1AsyncProcessor::executeRequest_method4(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_method4(*serverRequest.requestContext(), args.uarg_i, *args.uarg_j, args.uarg_k);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -785,9 +773,6 @@ void service1AsyncProcessor::executeRequest_method5(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_method5(*serverRequest.requestContext());
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -956,9 +941,6 @@ void service1AsyncProcessor::executeRequest_method6(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_method6(*serverRequest.requestContext(), args.uarg_l, *args.uarg_m, args.uarg_n);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

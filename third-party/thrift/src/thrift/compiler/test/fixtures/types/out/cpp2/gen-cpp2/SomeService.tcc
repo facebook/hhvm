@@ -120,9 +120,6 @@ void SomeServiceAsyncProcessor::executeRequest_bounce_map(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_bounce_map(*serverRequest.requestContext(), *args.uarg_m);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -285,9 +282,6 @@ void SomeServiceAsyncProcessor::executeRequest_binary_keyed_map(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_binary_keyed_map(*serverRequest.requestContext(), *args.uarg_r);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

@@ -121,9 +121,6 @@ void ExtendedServiceAsyncProcessor::executeRequest_init(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_init(*serverRequest.requestContext(), args.uarg_param0, args.uarg_param1);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

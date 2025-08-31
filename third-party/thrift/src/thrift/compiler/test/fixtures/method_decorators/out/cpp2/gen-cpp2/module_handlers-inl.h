@@ -127,9 +127,6 @@ void DecoratedServiceAsyncProcessor::executeRequest_noop(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_noop(*serverRequest.requestContext());
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -289,9 +286,6 @@ void DecoratedServiceAsyncProcessor::executeRequest_echo(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_echo(*serverRequest.requestContext(), *args.uarg_text);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -454,9 +448,6 @@ void DecoratedServiceAsyncProcessor::executeRequest_increment(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_increment(*serverRequest.requestContext(), args.uarg_num);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -619,9 +610,6 @@ void DecoratedServiceAsyncProcessor::executeRequest_sum(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_sum(*serverRequest.requestContext(), *args.uarg_nums);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -784,9 +772,6 @@ void DecoratedServiceAsyncProcessor::executeRequest_withStruct(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_withStruct(*serverRequest.requestContext(), *args.uarg_request);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -955,9 +940,6 @@ void DecoratedServiceAsyncProcessor::executeRequest_multiParam(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_multiParam(*serverRequest.requestContext(), *args.uarg_text, args.uarg_num, *args.uarg_request);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1119,9 +1101,6 @@ void DecoratedServiceAsyncProcessor::executeRequest_echoInteraction(
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
           std::move(tile));
-
-  iface_->fbthrift_execute_decorators_before_echoInteraction(*serverRequest.requestContext());
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1643,9 +1622,6 @@ void UndecoratedServiceAsyncProcessor::executeRequest_noop(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_noop(*serverRequest.requestContext());
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1805,9 +1781,6 @@ void UndecoratedServiceAsyncProcessor::executeRequest_echo(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_echo(*serverRequest.requestContext(), *args.uarg_text);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1970,9 +1943,6 @@ void UndecoratedServiceAsyncProcessor::executeRequest_increment(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_increment(*serverRequest.requestContext(), args.uarg_num);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2135,9 +2105,6 @@ void UndecoratedServiceAsyncProcessor::executeRequest_sum(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_sum(*serverRequest.requestContext(), *args.uarg_nums);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2300,9 +2267,6 @@ void UndecoratedServiceAsyncProcessor::executeRequest_withStruct(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_withStruct(*serverRequest.requestContext(), *args.uarg_request);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2471,9 +2435,6 @@ void UndecoratedServiceAsyncProcessor::executeRequest_multiParam(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_multiParam(*serverRequest.requestContext(), *args.uarg_text, args.uarg_num, *args.uarg_request);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2646,9 +2607,6 @@ void DecoratedService_ExtendsUndecoratedServiceAsyncProcessor::executeRequest_ex
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_extension(*serverRequest.requestContext());
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2818,9 +2776,6 @@ void DecoratedService_ExtendsDecoratedServiceAsyncProcessor::executeRequest_exte
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_extension(*serverRequest.requestContext());
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2990,9 +2945,6 @@ void UndecoratedService_ExtendsDecoratedServiceAsyncProcessor::executeRequest_ex
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_extension(*serverRequest.requestContext());
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -3165,9 +3117,6 @@ void DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceAsyncProc
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_secondExtension(*serverRequest.requestContext(), *args.uarg_input);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

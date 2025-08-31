@@ -32,6 +32,33 @@ namespace apache::thrift::test {
 
 namespace {
 
+class MockMethodDecorator
+    : public ServiceMethodDecorator<ServiceMethodDecoratorTest> {
+ public:
+  MOCK_METHOD(std::string_view, getName, (), (const, override));
+  MOCK_METHOD(
+      void,
+      onBeforeStartServing,
+      (ServiceMethodDecoratorBase::BeforeStartServingParams),
+      (override));
+};
+
+class Handler : public ServiceHandler<ServiceMethodDecoratorTest> {
+ public:
+  Handler(std::size_t& counter) : counter_{counter} {}
+
+  folly::coro::Task<void> co_onBeforeStartServing(
+      BeforeStartServingParams) override {
+    counter_++;
+    co_return;
+  }
+
+  folly::coro::Task<void> co_noop() override { co_return; }
+
+ private:
+  std::size_t& counter_;
+};
+
 using TransportType = Cpp2ConnContext::TransportType;
 
 std::unique_ptr<HTTP2RoutingHandler> createHTTP2RoutingHandler(
@@ -90,326 +117,67 @@ class ServiceMethodDecoratorTestP
 
 } // namespace
 
-CO_TEST_P(ServiceMethodDecoratorTestP, DecoratorMethodsAreRun) {
-  struct TestState {
-    struct Decorator {
-      std::size_t useDecoratorData = 0;
-
-      std::size_t beforeNoop = 0;
-
-      std::size_t beforeSum = 0;
-      std::vector<int64_t> sumValues = {};
-
-      std::size_t beforeEcho = 0;
-      std::string echoText;
-    } decorator;
-
-    struct Interceptor {
-      std::size_t useDecoratorData = 0;
-      std::size_t onRequest = 0;
-    } interceptor;
-
-    struct Handler {
-      std::size_t useDecoratorData = 0;
-      std::size_t coNoop = 0;
-      std::size_t coSum = 0;
-      std::size_t coEcho = 0;
-    } handler;
-  };
-
-  struct CountingDecorator
+CO_TEST_P(ServiceMethodDecoratorTestP, DecoratorDataIsSetup) {
+  struct CountUseDecoratorData
       : ServiceMethodDecorator<ServiceMethodDecoratorTest> {
-    CountingDecorator(TestState::Decorator& state) : state_{state} {}
+    CountUseDecoratorData(std::size_t& counter) : counter_{counter} {}
 
-    std::string_view getName() const override { return "CountingDecorator"; }
-
-    void onBeforeStartServing(BeforeStartServingParams) override {
-      state_.useDecoratorData++;
+    std::string_view getName() const override {
+      return "CountUseDecoratorData";
     }
 
-    void before_noop(BeforeParams) override { state_.beforeNoop++; }
+    void onBeforeStartServing(BeforeStartServingParams) override { counter_++; }
 
-    void before_sum(BeforeParams, const std::vector<int64_t>& values) override {
-      state_.beforeSum++;
-      state_.sumValues = values;
-    }
-
-    void before_echo(BeforeParams, const EchoRequest& request) override {
-      state_.beforeEcho++;
-      state_.echoText = *request.text();
-    }
-
-    TestState::Decorator& state_;
+    std::size_t& counter_;
   };
 
-  struct Interceptor : public ServiceInterceptor<folly::Unit, folly::Unit> {
-    explicit Interceptor(TestState::Interceptor& state) : state_{state} {}
+  struct CountInterceptor
+      : public ServiceInterceptor<folly::Unit, folly::Unit> {
+    CountInterceptor(std::size_t& counter) : counter_{counter} {}
 
-    std::string getName() const override { return "Interceptor"; }
+    std::string getName() const override { return "CountInterceptor"; }
 
     folly::coro::Task<void> co_onStartServing(InitParams) override {
-      state_.useDecoratorData++;
+      counter_++;
       co_return;
     }
 
-    folly::coro::Task<std::optional<folly::Unit>> onRequest(
-        folly::Unit*, RequestInfo) override {
-      state_.onRequest++;
-      co_return std::nullopt;
-    }
-
-    TestState::Interceptor& state_;
+    std::size_t& counter_;
   };
 
   struct Module : public ServerModule {
-    explicit Module(TestState::Interceptor& state) {
-      interceptors_ = {std::make_shared<Interceptor>(state)};
-    }
+    Module(std::size_t& counter) : counter_{counter} {}
 
-    std::string getName() const override { return "Module"; }
+    std::string getName() const override { return "TestModule"; }
 
     std::vector<std::shared_ptr<ServiceInterceptorBase>>
     getServiceInterceptors() override {
-      return interceptors_;
+      return {std::make_shared<CountInterceptor>(counter_)};
     }
 
-    std::vector<std::shared_ptr<ServiceInterceptorBase>> interceptors_;
+    std::size_t& counter_;
   };
 
-  struct Handler : public ServiceHandler<ServiceMethodDecoratorTest> {
-    explicit Handler(TestState::Handler& state) : state_{state} {}
-
-    folly::coro::Task<void> co_onBeforeStartServing(
-        BeforeStartServingParams) override {
-      state_.useDecoratorData++;
-      co_return;
-    }
-
-    folly::coro::Task<void> co_noop() override {
-      state_.coNoop++;
-      co_return;
-    }
-
-    folly::coro::Task<int64_t> co_sum(
-        std::unique_ptr<std::vector<int64_t>> values) override {
-      state_.coSum++;
-      co_return std::accumulate(values->begin(), values->end(), 0);
-    }
-
-    folly::coro::Task<std::unique_ptr<EchoResponse>> co_echo(
-        std::unique_ptr<EchoRequest> request) override {
-      state_.coEcho++;
-      EchoResponse response;
-      response.text() = *request->text();
-      co_return std::make_unique<EchoResponse>(std::move(response));
-    }
-
-    TestState::Handler& state_;
-  };
-
-  TestState state;
-  auto handler = std::make_shared<Handler>(state.handler);
+  std::size_t counter{0};
+  std::size_t interceptorCounter{0};
+  std::size_t handlerCounter{0};
+  auto handler = std::make_shared<Handler>(handlerCounter);
   {
-    auto decorator = std::make_shared<CountingDecorator>(state.decorator);
+    auto decorator = std::make_shared<CountUseDecoratorData>(counter);
     ServiceMethodDecoratorList<ServiceMethodDecoratorTest> decorators;
     decorators.push_back(std::move(decorator));
     apache::thrift::decorate(*handler, std::move(decorators));
   }
 
   auto runner = makeServer(handler, [&](ThriftServer& server) {
-    server.addModule(std::make_unique<Module>(state.interceptor));
+    server.addModule(std::make_unique<Module>(interceptorCounter));
   });
   auto client = makeClient<Client<ServiceMethodDecoratorTest>>(*runner);
 
-  EXPECT_EQ(state.decorator.useDecoratorData, 1);
-  EXPECT_EQ(state.interceptor.useDecoratorData, 1);
-  EXPECT_EQ(state.handler.useDecoratorData, 1);
-
   co_await client->co_noop();
-  EXPECT_EQ(state.decorator.beforeNoop, 1);
-  EXPECT_EQ(state.interceptor.onRequest, 1);
-  EXPECT_EQ(state.handler.coNoop, 1);
-
-  auto sum = co_await client->co_sum({1, 2, 3});
-  EXPECT_EQ(sum, 6);
-  EXPECT_EQ(state.decorator.beforeSum, 1);
-  EXPECT_THAT(state.decorator.sumValues, ElementsAre(1, 2, 3));
-  EXPECT_EQ(state.interceptor.onRequest, 2);
-  EXPECT_EQ(state.handler.coSum, 1);
-
-  EchoRequest request;
-  request.text() = "hello";
-  auto response = co_await client->co_echo(std::move(request));
-  EXPECT_EQ(*response.text(), "hello");
-  EXPECT_EQ(state.decorator.beforeEcho, 1);
-  EXPECT_EQ(state.decorator.echoText, "hello");
-  EXPECT_EQ(state.interceptor.onRequest, 3);
-  EXPECT_EQ(state.handler.coEcho, 1);
-}
-
-CO_TEST_P(ServiceMethodDecoratorTestP, MultipleDecorators) {
-  constexpr std::size_t kNumDecorators = 10;
-
-  struct TestState {
-    TestState() : beforeNoop(kNumDecorators, 0) {}
-    std::vector<std::size_t> beforeNoop;
-  };
-
-  struct CountingDecorator
-      : ServiceMethodDecorator<ServiceMethodDecoratorTest> {
-    CountingDecorator(TestState& state, std::size_t idx)
-        : beforeCounter_{state.beforeNoop[idx]} {}
-
-    std::string_view getName() const override { return "CountingDecorator"; }
-
-    void before_noop(BeforeParams) override { beforeCounter_++; }
-
-    std::size_t& beforeCounter_;
-  };
-
-  struct Handler : public ServiceHandler<ServiceMethodDecoratorTest> {
-    folly::coro::Task<void> co_noop() override { co_return; }
-  };
-
-  TestState state;
-  auto handler = std::make_shared<Handler>();
-  {
-    ServiceMethodDecoratorList<ServiceMethodDecoratorTest> decorators;
-    for (std::size_t i = 0; i < kNumDecorators; ++i) {
-      auto decorator = std::make_shared<CountingDecorator>(state, i);
-      decorators.push_back(std::move(decorator));
-    }
-    apache::thrift::decorate(*handler, std::move(decorators));
-  }
-
-  auto runner = makeServer(handler);
-  auto client = makeClient<Client<ServiceMethodDecoratorTest>>(*runner);
-  co_await client->co_noop();
-  std::for_each(
-      state.beforeNoop.begin(), state.beforeNoop.end(), [](std::size_t count) {
-        EXPECT_EQ(count, 1);
-      });
-}
-
-namespace {
-using AssetData = std::vector<std::string>;
-constexpr server::DecoratorDataKey<AssetData> kAssets;
-} // namespace
-
-CO_TEST_P(ServiceMethodDecoratorTestP, DecoratorDataPassed) {
-  struct TestState {
-    std::vector<std::string> observedByInterceptorOnRequest = {};
-    std::vector<std::string> observedByHandler = {};
-  };
-
-  class AssetExtractionDecorator
-      : public ServiceMethodDecorator<ServiceMethodDecoratorTest> {
-   public:
-    std::string_view getName() const override {
-      return "AssetExtractionDecorator";
-    }
-
-    void onBeforeStartServing(BeforeStartServingParams params) override {
-      assetData_ = params.decoratorDataHandleFactory->makeHandleForKey(kAssets);
-    }
-
-    void before_echo(
-        BeforeParams beforeParams, const EchoRequest& request) override {
-      std::vector<std::string> assets = {*request.text()};
-      beforeParams.decoratorData.put(assetData_, std::move(assets));
-    }
-
-   private:
-    server::DecoratorDataHandle<AssetData> assetData_ =
-        server::DecoratorDataHandle<AssetData>::uninitialized();
-  };
-
-  struct AssetExtractionInterceptor
-      : public ServiceInterceptor<folly::Unit, folly::Unit> {
-    explicit AssetExtractionInterceptor(TestState& state) : state_{state} {}
-
-    std::string getName() const override {
-      return "AssetExtractionInterceptor";
-    }
-
-    folly::coro::Task<void> co_onStartServing(InitParams params) override {
-      assetData_ = params.decoratorDataHandleFactory->makeHandleForKey(kAssets);
-      co_return;
-    }
-
-    folly::coro::Task<std::optional<folly::Unit>> onRequest(
-        folly::Unit*, RequestInfo info) override {
-      if (const auto* extractedAssets = info.decoratorData->get(assetData_)) {
-        state_.observedByInterceptorOnRequest = *extractedAssets;
-      }
-      co_return std::nullopt;
-    }
-
-    TestState& state_;
-    server::DecoratorDataHandle<AssetData> assetData_ =
-        server::DecoratorDataHandle<AssetData>::uninitialized();
-  };
-
-  struct Module : public ServerModule {
-    explicit Module(TestState& state) {
-      interceptors_ = {std::make_shared<AssetExtractionInterceptor>(state)};
-    }
-
-    std::string getName() const override { return "Module"; }
-
-    std::vector<std::shared_ptr<ServiceInterceptorBase>>
-    getServiceInterceptors() override {
-      return interceptors_;
-    }
-
-    std::vector<std::shared_ptr<ServiceInterceptorBase>> interceptors_;
-  };
-
-  struct Handler : public ServiceHandler<ServiceMethodDecoratorTest> {
-    explicit Handler(TestState& state) : state_{state} {}
-
-    folly::coro::Task<void> co_onBeforeStartServing(
-        BeforeStartServingParams params) override {
-      assetData_ = params.decoratorDataHandleFactory->makeHandleForKey(kAssets);
-      co_return;
-    }
-
-    folly::coro::Task<std::unique_ptr<EchoResponse>> co_echo(
-        RequestParams params, std::unique_ptr<EchoRequest> request) override {
-      if (const auto* extractedAssets =
-              params.getRequestContext()->getDecoratorData().get(assetData_)) {
-        state_.observedByHandler = *extractedAssets;
-      }
-      EchoResponse response;
-      response.text() = *request->text();
-      co_return std::make_unique<EchoResponse>(std::move(response));
-    }
-
-    TestState& state_;
-    server::DecoratorDataHandle<AssetData> assetData_ =
-        server::DecoratorDataHandle<AssetData>::uninitialized();
-  };
-
-  TestState state;
-  auto handler = std::make_shared<Handler>(state);
-  {
-    auto decorator = std::make_shared<AssetExtractionDecorator>();
-    ServiceMethodDecoratorList<ServiceMethodDecoratorTest> decorators;
-    decorators.push_back(std::move(decorator));
-    apache::thrift::decorate(*handler, std::move(decorators));
-  }
-
-  auto runner = makeServer(handler, [&](ThriftServer& server) {
-    server.addModule(std::make_unique<Module>(state));
-  });
-  auto client = makeClient<Client<ServiceMethodDecoratorTest>>(*runner);
-
-  EchoRequest request;
-  request.text() = "asset";
-  auto response = co_await client->co_echo(std::move(request));
-  EXPECT_EQ(*response.text(), "asset");
-  EXPECT_THAT(state.observedByInterceptorOnRequest, ElementsAre("asset"));
-  EXPECT_THAT(state.observedByHandler, ElementsAre("asset"));
+  EXPECT_EQ(counter, 1);
+  EXPECT_EQ(interceptorCounter, 1);
+  EXPECT_EQ(handlerCounter, 1);
 }
 
 INSTANTIATE_TEST_SUITE_P(

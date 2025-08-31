@@ -122,9 +122,6 @@ void CAsyncProcessor::executeRequest_f(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_f(*serverRequest.requestContext());
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -281,9 +278,6 @@ void CAsyncProcessor::executeRequest_numbers(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_numbers(*serverRequest.requestContext());
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -454,9 +448,6 @@ void CAsyncProcessor::executeRequest_thing(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_thing(*serverRequest.requestContext(), args.uarg_a, *args.uarg_b, *args.uarg_c);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

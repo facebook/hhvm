@@ -159,9 +159,6 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_returnstream(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_returnstream(*serverRequest.requestContext(), *args.uarg_from, *args.uarg_to);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -326,9 +323,6 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_streamthrows(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_streamthrows(*serverRequest.requestContext(), *args.uarg_foo);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -493,9 +487,6 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_servicethrows(*serverRequest.requestContext(), *args.uarg_foo);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -678,9 +669,6 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows2(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_servicethrows2(*serverRequest.requestContext(), *args.uarg_foo);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -863,9 +851,6 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_boththrows(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_boththrows(*serverRequest.requestContext(), *args.uarg_foo);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1048,9 +1033,6 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamstrea
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_responseandstreamstreamthrows(*serverRequest.requestContext(), args.uarg_foo);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1217,9 +1199,6 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamservi
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_responseandstreamservicethrows(*serverRequest.requestContext(), args.uarg_foo);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1404,9 +1383,6 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreambotht
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_responseandstreamboththrows(*serverRequest.requestContext(), args.uarg_foo);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

@@ -123,9 +123,6 @@ void MyServiceAsyncProcessor::executeRequest_query(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_query(*serverRequest.requestContext(), *args.uarg_s, *args.uarg_i);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -288,9 +285,6 @@ void MyServiceAsyncProcessor::executeRequest_has_arg_docs(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_has_arg_docs(*serverRequest.requestContext(), *args.uarg_s, *args.uarg_i);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

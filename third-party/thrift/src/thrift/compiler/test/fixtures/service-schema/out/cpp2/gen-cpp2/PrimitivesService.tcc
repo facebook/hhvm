@@ -125,9 +125,6 @@ void PrimitivesServiceAsyncProcessor::executeRequest_init(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_init(*serverRequest.requestContext(), args.uarg_param0, args.uarg_param1);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -287,9 +284,6 @@ void PrimitivesServiceAsyncProcessor::executeRequest_method_that_throws(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_method_that_throws(*serverRequest.requestContext());
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -473,9 +467,6 @@ void PrimitivesServiceAsyncProcessor::executeRequest_return_void_method(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_return_void_method(*serverRequest.requestContext(), args.uarg_id, *args.uarg_i);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

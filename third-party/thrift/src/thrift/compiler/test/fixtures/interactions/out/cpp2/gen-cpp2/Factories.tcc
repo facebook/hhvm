@@ -124,9 +124,6 @@ void FactoriesAsyncProcessor::executeRequest_foo(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_foo(*serverRequest.requestContext());
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -288,9 +285,6 @@ void FactoriesAsyncProcessor::executeRequest_interact(
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
           std::move(tile));
-
-  iface_->fbthrift_execute_decorators_before_interact(*serverRequest.requestContext(), args.uarg_arg);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -449,9 +443,6 @@ void FactoriesAsyncProcessor::executeRequest_interactFast(
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
           std::move(tile));
-
-  iface_->fbthrift_execute_decorators_before_interactFast(*serverRequest.requestContext());
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -613,9 +604,6 @@ void FactoriesAsyncProcessor::executeRequest_serialize(
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
           std::move(tile));
-
-  iface_->fbthrift_execute_decorators_before_serialize(*serverRequest.requestContext());
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

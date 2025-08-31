@@ -120,9 +120,6 @@ void BoxServiceAsyncProcessor::executeRequest_getABoxSession(
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
           std::move(tile));
-
-  iface_->fbthrift_execute_decorators_before_getABoxSession(*serverRequest.requestContext(), *args.uarg_req);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

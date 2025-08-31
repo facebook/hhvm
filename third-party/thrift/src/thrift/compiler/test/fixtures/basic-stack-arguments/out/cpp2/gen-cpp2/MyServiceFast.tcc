@@ -125,9 +125,6 @@ void MyServiceFastAsyncProcessor::executeRequest_hasDataById(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_hasDataById(*serverRequest.requestContext(), args.uarg_id);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -292,9 +289,6 @@ void MyServiceFastAsyncProcessor::executeRequest_getDataById(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_getDataById(*serverRequest.requestContext(), args.uarg_id);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -462,9 +456,6 @@ void MyServiceFastAsyncProcessor::executeRequest_putDataById(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_putDataById(*serverRequest.requestContext(), args.uarg_id, args.uarg_data);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -612,9 +603,6 @@ void MyServiceFastAsyncProcessor::executeRequest_lobDataById(
       requestPileNotification,
       concurrencyControllerNotification,
       std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_lobDataById(*serverRequest.requestContext(), args.uarg_id, args.uarg_data);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

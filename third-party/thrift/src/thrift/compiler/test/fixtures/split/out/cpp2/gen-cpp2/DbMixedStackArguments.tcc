@@ -120,9 +120,6 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey0(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_getDataByKey0(*serverRequest.requestContext(), *args.uarg_key);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -285,9 +282,6 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey1(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
-
-  iface_->fbthrift_execute_decorators_before_getDataByKey1(*serverRequest.requestContext(), *args.uarg_key);
-
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

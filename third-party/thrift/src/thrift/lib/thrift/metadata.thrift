@@ -31,6 +31,7 @@ namespace go 'github.com/facebook/fbthrift/thrift/lib/thrift/metadata'
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/rust.thrift"
 include "thrift/annotation/thrift.thrift"
+include "thrift/annotation/hack.thrift"
 
 package "facebook.com/thrift/metadata"
 
@@ -52,6 +53,7 @@ struct ThriftConstValuePair {
   2: ThriftConstValue value;
 }
 
+@hack.MigrationBlockingLegacyJSONSerialization
 union ThriftConstValue {
   1: bool cv_bool;
   2: i64 cv_integer;
@@ -159,6 +161,7 @@ struct ThriftSinkType {
   3: optional ThriftType initialResponseType;
 }
 
+@hack.MigrationBlockingLegacyJSONSerialization
 union ThriftType {
   1: ThriftPrimitiveType t_primitive;
   2: ThriftListType t_list;

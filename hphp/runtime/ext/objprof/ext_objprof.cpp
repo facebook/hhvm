@@ -93,7 +93,7 @@ using ClassProp = std::pair<std::string, std::string>;
 
 // Stack of pointers used for avoiding back-links when performing a DFS scan
 // starting at a root node.
-using ObjprofValuePtrStack = std::vector<const void*>;
+using ObjprofSeenValuePtrs = std::unordered_set<const void*>;
 
 enum ObjprofFlags {
   DEFAULT = 1,
@@ -105,7 +105,7 @@ struct ObjprofState {
   const ObjectData* source;
   Optional<ObjprofStack> stack;
   Optional<PathsToObject> paths;
-  ObjprofValuePtrStack val_stack;
+  ObjprofSeenValuePtrs seen_vals;
   const hphp_fast_set<std::string>& exclude_classes;
   ObjprofFlags flags;
   // While iterating the heap objprof is retaining pointers to heap objects,
@@ -131,10 +131,8 @@ std::string pathString(const ObjprofStack& stack, const char* sep) {
   return os.str();
 }
 
-bool cycleExists(ObjprofState& env, const void* ptr) {
-  auto ptr_begin = env.val_stack.begin();
-  auto ptr_end = env.val_stack.end();
-  return std::find(ptr_begin, ptr_end, ptr) != ptr_end;
+bool seenValue(ObjprofState& env, const void* ptr) {
+  return env.seen_vals.contains(ptr);
 }
 
 void issueWarnings(std::vector<std::string>& deferred_warnings) {
@@ -181,20 +179,13 @@ std::pair<int, double> sizeOfArray(
   const ArrayData* ad, ObjprofState& env, Class* cls,
   hphp_fast_map<ClassProp, ObjprofMetrics>* histogram
 ) {
-  if (cycleExists(env, ad)) {
-    FTRACE(3, "Cycle found for ArrayData*({})\n", ad);
-    return std::make_pair(0, 0);
-  }
-
-  if (env.val_stack.size() >= Cfg::Eval::ObjProfMaxNesting) {
-    env.deferred_warnings.push_back(
-      "objprof: data structure is too deep, pruning traversal"
-    );
+  if (seenValue(env, ad)) {
+    FTRACE(3, "Seen ArrayData*({})\n", ad);
     return std::make_pair(0, 0);
   }
 
   FTRACE(3, "\n\nInserting ArrayData*({})\n", ad);
-  env.val_stack.push_back(ad);
+  env.seen_vals.insert(ad);
 
   int size = 0;
   double sized = 0;
@@ -287,11 +278,6 @@ std::pair<int, double> sizeOfArray(
       return false;
     });
   }
-
-  FTRACE(3, "Popping {} frm stack in sizeOfArray. Stack size before pop {}\n",
-    env.val_stack.back(), env.val_stack.size()
-  );
-  env.val_stack.pop_back();
 
   return std::make_pair(size, sized);
 }
@@ -480,20 +466,13 @@ std::pair<int, double> getObjSize(
 ) {
   Class* cls = obj->getVMClass();
 
-  if (cycleExists(env, obj)) {
-    FTRACE(3, "Cycle found for {}*({})\n", obj->getClassName().data(), obj);
-    return std::make_pair(0, 0);
-  }
-
-  if (env.val_stack.size() >= Cfg::Eval::ObjProfMaxNesting) {
-    env.deferred_warnings.push_back(
-      "objprof: data structure is too deep, pruning traversal"
-    );
+  if (seenValue(env, obj)) {
+    FTRACE(3, "Seen {}*({})\n", obj->getClassName().data(), obj);
     return std::make_pair(0, 0);
   }
 
   FTRACE(3, "\n\nInserting {}*({})\n", obj->getClassName().data(), obj);
-  env.val_stack.push_back(obj);
+  env.seen_vals.insert(obj);
 
   FTRACE(1, "Getting object size for type {} at {}\n",
     obj->getClassName().data(),
@@ -529,10 +508,6 @@ std::pair<int, double> getObjSize(
     }
 
     if (env.stack) env.stack->pop_back();
-    FTRACE(3, "Popping {} frm stack in getObjSize. Stack size before pop {}\n",
-      env.val_stack.back(), env.val_stack.size()
-    );
-    env.val_stack.pop_back();
     return std::make_pair(size, sized);
   }
 
@@ -609,11 +584,6 @@ std::pair<int, double> getObjSize(
   );
 
   if (env.stack) env.stack->pop_back();
-  FTRACE(3, "Popping {} frm stack in getObjSize. Stack size before pop {}\n",
-    env.val_stack.back(), env.val_stack.size()
-  );
-  env.val_stack.pop_back();
-
   return std::make_pair(size, sized);
 }
 
@@ -643,7 +613,7 @@ Array HHVM_FUNCTION(objprof_get_data,
       .source = nullptr,
       .stack = std::nullopt,
       .paths = std::nullopt,
-      .val_stack = ObjprofValuePtrStack{},
+      .seen_vals = ObjprofSeenValuePtrs{},
       .exclude_classes = exclude_classes,
       .flags = (ObjprofFlags)flags,
       .deferred_warnings = deferred_warnings
@@ -940,7 +910,7 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
       .source = nullptr,
       .stack = std::nullopt,
       .paths = std::nullopt,
-      .val_stack = ObjprofValuePtrStack{},
+      .seen_vals = ObjprofSeenValuePtrs{},
       .exclude_classes = exclude_classes,
       .flags = (ObjprofFlags)flags,
       .deferred_warnings = deferred_warnings
@@ -966,7 +936,7 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
     .source = nullptr,
     .stack = std::nullopt,
     .paths = std::nullopt,
-    .val_stack = ObjprofValuePtrStack{},
+    .seen_vals = ObjprofSeenValuePtrs{},
     .exclude_classes = exclude_classes,
     .flags = (ObjprofFlags)flags,
     .deferred_warnings = deferred_warnings
@@ -1025,7 +995,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
         .source = obj,
         .stack = ObjprofStack{},
         .paths = PathsToObject{},
-        .val_stack = ObjprofValuePtrStack{},
+        .seen_vals = ObjprofSeenValuePtrs{},
         .exclude_classes = exclude_classes,
         .flags = (ObjprofFlags)flags,
         .deferred_warnings = deferred_warnings
@@ -1083,7 +1053,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
         .source = nullptr,
         .stack = ObjprofStack{},
         .paths = PathsToObject{},
-        .val_stack = ObjprofValuePtrStack{},
+        .seen_vals = ObjprofSeenValuePtrs{},
         .exclude_classes = exclude_classes,
         .flags = (ObjprofFlags)flags,
         .deferred_warnings = deferred_warnings

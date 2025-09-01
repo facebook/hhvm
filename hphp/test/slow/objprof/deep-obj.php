@@ -3,7 +3,7 @@
 
 function generate($arr) :mixed{
   for ($i = 0; $i < 2000; $i++) {
-    $arr = vec[$arr];
+    $arr = vec[$arr, $arr];
   }
   return $arr;
 }

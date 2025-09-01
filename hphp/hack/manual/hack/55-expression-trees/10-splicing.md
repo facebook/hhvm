@@ -3,7 +3,7 @@ Expression trees support "splicing", where you insert one expression tree into a
 ```hack
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function splicing_example(bool $b): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleString> {
+function splicing_example(bool $b): ExampleExpression<ExampleString> {
   $name = $b ? ExampleDsl`"world"` : ExampleDsl`"universe"`;
   return ExampleDsl`"Hello, ".${$name}."!"`;
 }
@@ -16,7 +16,7 @@ The above example is equivalent to this:
 ```hack
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function splicing_example2(bool $b): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleString> {
+function splicing_example2(bool $b): ExampleExpression<ExampleString> {
   return $b ? ExampleDsl`"Hello, "."world"."!"` : ExampleDsl`"Hello, "."universe"."!"`;
 }
 ```

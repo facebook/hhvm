@@ -72,7 +72,7 @@ final class ExprTree<TInfer> implements ExampleExpression<TInfer> {
   }
 
   public function getEnclosingPos(): ?ExprPos {
-    return $this->metadata['lexically_enclosing_tree'];
+    return Shapes::idx($this->metadata, 'lexically_enclosing_tree', null);
   }
 
   public function getSplices(): dict<string, mixed> {

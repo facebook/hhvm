@@ -2,7 +2,7 @@
 // @codegen-command : buck run fbcode//hphp/hack/src/hh_manual:hh_manual extract fbcode/hphp/hack/manual/hack/
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function splicing_example(bool $b): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleString> {
+function splicing_example(bool $b): ExampleExpression<ExampleString> {
   $name = $b ? ExampleDsl`"world"` : ExampleDsl`"universe"`;
   return ExampleDsl`"Hello, ".${$name}."!"`;
 }

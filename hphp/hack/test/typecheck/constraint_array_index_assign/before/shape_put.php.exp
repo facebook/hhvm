@@ -1,0 +1,26 @@
+ERROR: File "shape_put.php", line 9, characters 23-34:
+Unbound name: `ExampleShape` (Naming[2049])
+ERROR: File "shape_put.php", line 9, characters 49-61:
+Unbound name: `ExampleString` (Naming[2049])
+ERROR: File "shape_put.php", line 11, characters 15-34:
+Unbound name: `ExampleDslExpression` (Naming[2049])
+ERROR: File "shape_put.php", line 11, characters 36-48:
+Unbound name: `ExampleString` (Naming[2049])
+ERROR: File "shape_put.php", line 12, characters 10-19:
+Unbound name: `ExampleDsl` (Naming[2049])
+ERROR: File "shape_put.php", line 12, characters 10-19:
+Unbound name: `ExampleDsl` (an object type) (Naming[2049])
+ERROR: File "shape_put.php", line 12, characters 21-182:
+Unbound name: `ExampleDsl` (an object type) (Naming[2049])
+ERROR: File "shape_put.php", line 13, characters 10-69:
+Unbound name: `ExampleDsl` (an object type) (Naming[2049])
+ERROR: File "shape_put.php", line 13, characters 38-47:
+Unbound name: `ExampleDsl` (an object type) (Naming[2049])
+ERROR: File "shape_put.php", line 14, characters 10-16:
+Unbound name: `ExampleDsl` (an object type) (Naming[2049])
+ERROR: File "shape_put.php", line 15, characters 10-19:
+Unbound name: `ExampleDsl` (an object type) (Naming[2049])
+ERROR: File "shape_put.php", line 15, characters 10-47:
+Unbound name: `ExampleDsl` (an object type) (Naming[2049])
+ERROR: File "shape_put.php", line 15, characters 40-46:
+Unbound name: `ExampleDsl` (an object type) (Naming[2049])

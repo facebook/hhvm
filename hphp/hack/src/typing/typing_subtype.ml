@@ -7044,7 +7044,7 @@ end = struct
         let (env, tv) = maybe_make_supportdyn r_sub env tv in
         simplify_key tk env
         &&& simplify_default ~subtype_env cia.cia_write tv
-        &&& simplify_val tv
+        &&& simplify_val ty_sub
       | _ -> arity_error r_sub n env)
     | (r_sub, Tclass (((_, n) as id), e, argl))
       when String.equal n SN.Collections.cVec ->
@@ -7092,8 +7092,72 @@ end = struct
         let (env, tk) = maybe_pessimise_type env tk in
         simplify_key tk env
         &&& simplify_default ~subtype_env cia.cia_write tv
-        &&& simplify_val tv
+        &&& simplify_val ty_sub
       | _ -> arity_error r_sub n env)
+    | ( r_sub,
+        Ttuple
+          { t_required; t_extra = Textra { t_optional = []; t_variadic = _ } }
+      ) ->
+      let fail reason =
+        invalid
+          ~fail:
+            (Some
+               Typing_error.(
+                 primary
+                 @@ Primary.Generic_unify
+                      {
+                        pos = cia.cia_index_pos;
+                        msg = Reason.string_of_ureason reason;
+                      }))
+          env
+      in
+      begin
+        match cia.cia_index_expr with
+        | (_, _, Int n) ->
+          let idx = int_of_string_opt n in
+          (match Option.map ~f:(List.split_n t_required) idx with
+          | Some (tyl', _ :: tyl'') ->
+            let ty = MakeType.tuple r_sub (tyl' @ (cia.cia_write :: tyl'')) in
+            let (env, ty) = maybe_make_supportdyn r_sub env ty in
+            simplify_val ty env
+          | _ -> fail Reason.index_tuple)
+        | _ -> fail Reason.URtuple_access
+      end
+    | ( r_sub,
+        Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } )
+      ->
+      (match
+         Typing_shapes.tshape_field_name_with_ty_err env cia.cia_index_expr
+       with
+      | Error ty_err -> invalid ~fail:(Some ty_err) env
+      | Ok field ->
+        let (env, fdm) =
+          if Option.is_some sub_supportdyn then
+            let f env _name { sft_optional; sft_ty } =
+              let (env, sft_ty) = TUtils.make_supportdyn r_sub env sft_ty in
+              (env, { sft_optional; sft_ty })
+            in
+            TShapeMap.map_env f env fdm
+          else
+            (env, fdm)
+        in
+        let fdm' =
+          TShapeMap.add
+            field
+            { sft_optional = false; sft_ty = cia.cia_write }
+            fdm
+        in
+        let ty =
+          mk
+            ( r_sub,
+              Tshape
+                {
+                  s_origin = Missing_origin;
+                  s_unknown_value = shape_kind;
+                  s_fields = fdm';
+                } )
+        in
+        simplify_val ty env)
     | (r_sub, Tclass ((_, n), _, _))
       when String.equal n SN.Collections.cKeyedContainer
            || String.equal n SN.Collections.cAnyArray

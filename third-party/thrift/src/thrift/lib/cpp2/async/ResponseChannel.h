@@ -142,6 +142,19 @@ class ResponseChannelRequest {
   }
 #endif
 
+  FOLLY_NODISCARD static bool sendBiDiReply(
+      ResponseChannelRequest::UniquePtr request,
+      folly::EventBase* eb,
+      ResponsePayload&& payload,
+      BiDiServerCallbackPtr callback,
+      folly::Optional<uint32_t> crc32 = folly::none) {
+    SCOPE_EXIT {
+      eb->runInEventBaseThread([request = std::move(request)] {});
+    };
+    return request->sendBiDiReply(
+        std::move(payload), std::move(callback), crc32);
+  }
+
   virtual void sendException(
       ResponsePayload&& response, MessageChannel::SendCallback* cb = nullptr) {
     // Until we start requesting payloads without the envelope we can pass any
@@ -189,6 +202,13 @@ class ResponseChannelRequest {
   FOLLY_NODISCARD virtual bool sendSinkReply(
       ResponsePayload&&,
       SinkServerCallbackPtr,
+      folly::Optional<uint32_t> = folly::none) {
+    throw std::logic_error("unimplemented");
+  }
+
+  FOLLY_NODISCARD virtual bool sendBiDiReply(
+      ResponsePayload&&,
+      BiDiServerCallbackPtr,
       folly::Optional<uint32_t> = folly::none) {
     throw std::logic_error("unimplemented");
   }

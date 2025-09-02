@@ -250,6 +250,32 @@ class ThriftRequestCore : public ResponseChannelRequest {
   }
 #endif
 
+  bool sendBiDiReply(
+      ResponsePayload&& response,
+      BiDiServerCallbackPtr callback,
+      folly::Optional<uint32_t> crc32c) final {
+    if (tryCancel()) {
+      cancelTimeout();
+      auto metadata = makeResponseRpcMetadata(
+          header_.extractAllWriteHeaders(),
+          header_.extractProxiedPayloadMetadata(),
+          header_.getChecksum());
+      if (crc32c) {
+        metadata.crc32c() = *crc32c;
+      }
+      auto alive = sendReplyInternal(
+          std::move(metadata),
+          std::move(response).buffer(),
+          std::move(callback));
+
+      if (auto* observer = serverConfigs_.getObserver()) {
+        observer->sentReply();
+      }
+      return alive;
+    }
+    return false;
+  }
+
   void sendErrorWrapped(folly::exception_wrapper ew, std::string exCode) final {
     if (exCode == kConnectionClosingErrorCode) {
       closeConnection(std::move(ew));
@@ -367,6 +393,13 @@ class ThriftRequestCore : public ResponseChannelRequest {
   }
 #endif
 
+  virtual bool sendBiDiThriftResponse(
+      ResponseRpcMetadata&&,
+      std::unique_ptr<folly::IOBuf>,
+      BiDiServerCallbackPtr) noexcept {
+    LOG(FATAL) << "sendBiDiThriftResponse not implemented";
+  }
+
   virtual void sendThriftException(
       ResponseRpcMetadata&&,
       std::unique_ptr<folly::IOBuf>,
@@ -474,6 +507,19 @@ class ThriftRequestCore : public ResponseChannelRequest {
     }
   }
 #endif
+
+  bool sendReplyInternal(
+      ResponseRpcMetadata&& metadata,
+      std::unique_ptr<folly::IOBuf> buf,
+      BiDiServerCallbackPtr serverCb) {
+    if (checkResponseSize(*buf)) {
+      return sendBiDiThriftResponse(
+          std::move(metadata), std::move(buf), std::move(serverCb));
+    } else {
+      sendResponseTooBigEx();
+      return false;
+    }
+  }
 
   void sendResponseTooBigEx() {
     sendErrorWrappedInternal(

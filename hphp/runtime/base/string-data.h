@@ -535,8 +535,8 @@ private:
  * Some static StringData has a SymbolPrefix allocated right in front.
  */
 struct SymbolPrefix {
-  AtomicLowPtr<NamedType> nty;
-  AtomicLowPtr<Class> cls;
+  AtomicPackedPtr<NamedType> nty;
+  AtomicPackedPtr<Class> cls;
 };
 
 static_assert(sizeof(SymbolPrefix) % alignof(StringData) == 0, "");

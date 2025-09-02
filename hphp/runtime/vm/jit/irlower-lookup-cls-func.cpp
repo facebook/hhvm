@@ -139,7 +139,11 @@ void implLdOrLookupCls(IRLS& env, const IRInstruction* inst, bool lookup,
     v << loadl{src[StringData::cachedClassOffset()], low};
     v << testl{low, low, sf2};
     fwdJcc(v, env, CC_E, sf2, then);
-    v << movzlq{low, cls1};
+    if (use_packedptr) {
+      v << lea{baseless(low * 8 + 0), cls1};
+    } else {
+      v << movzlq{low, cls1};
+    }
   } else {
     v << load{src[StringData::cachedClassOffset()], cls1};
     v << testq{cls1, cls1, sf2};

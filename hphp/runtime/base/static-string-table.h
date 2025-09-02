@@ -59,7 +59,7 @@ extern StringData** precomputed_chars;
 
 inline bool is_static_string(const StringData* s) {
   if (!use_lowptr) return s->isStatic();
-  return (uint64_t)s < ((1ull << 32) - 1);
+  return (uint64_t)s < kLowArenaMaxAddr;
 }
 
 /*

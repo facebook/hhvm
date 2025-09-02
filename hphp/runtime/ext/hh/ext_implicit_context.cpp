@@ -92,12 +92,7 @@ int64_t memoKeyForInsert(const Class* key, const Variant& serializedValue) {
   );
 
   for (auto const& e : vec) {
-#ifdef USE_LOWPTR
-    uint32_t cls = (uint32_t)(uintptr_t)e.first;
-    assertx(cls == (uintptr_t)e.first);
-#else
-    auto const cls = (uintptr_t)e.first;
-#endif
+    auto const cls = PackedPtr<Class>::toRaw(e.first);
     sb.append(reinterpret_cast<const char*>(&cls), sizeof(cls));
     serialize_memoize_tv(sb, 0, e.second);
   }

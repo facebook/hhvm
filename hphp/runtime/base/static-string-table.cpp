@@ -57,7 +57,7 @@ bool isMagicKey(StrInternKey k) {
 const StringData* to_sdata(StrInternKey key) {
   assertx(!isMagicKey(key));
   static_assert(std::is_unsigned<StrInternKey>(), "cast must zero-extend");
-  return reinterpret_cast<const StringData*>(key);
+  return PackedStringPtr::fromRaw(key);
 }
 
 struct strintern_eq {
@@ -169,7 +169,7 @@ StringData* insertStaticString(StringData* sd,
                                void (*deleter)(StringData*)) {
   assertx(sd->isStatic());
   auto pair = s_stringDataMap->insert(
-    safe_cast<StrInternKey>(reinterpret_cast<uintptr_t>(sd)),
+    PackedStringPtr::toRaw(sd),
     rds::Link<TypedValue, rds::Mode::NonLocal>{}
   );
 

@@ -1,0 +1,16 @@
+[packages]
+
+[packages.foo]
+include_paths = [ "//basic.php", "//noactivedeploytement.php" ]
+
+[packages.bar]
+
+[packages.softbar]
+
+[packages.bat]
+
+[deployments]
+
+[deployments.my-prod]
+packages = [ "foo", "bar" ]
+soft_packages = [ "softbar" ]

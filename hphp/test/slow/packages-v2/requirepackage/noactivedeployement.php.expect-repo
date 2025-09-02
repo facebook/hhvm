@@ -1,0 +1,5 @@
+f [fromIncludedDir] basic.php
+f [fromIncludedDir] noactivedeployement.php
+string(10) "in A1::bar"
+string(5) "in a1"
+string(5) "in b1"

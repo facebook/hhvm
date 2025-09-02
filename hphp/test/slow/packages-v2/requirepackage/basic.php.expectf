@@ -1,0 +1,5 @@
+string(9) "in A::bar"
+string(4) "in a"
+
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'Package bat should be loaded' in %s
+%A

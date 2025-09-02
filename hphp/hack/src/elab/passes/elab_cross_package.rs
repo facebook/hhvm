@@ -25,7 +25,9 @@ pub struct ElabCrossPackagePass;
 impl Pass for ElabCrossPackagePass {
     fn on_ty_method__bottom_up(&mut self, _env: &Env, elem: &mut Method_) -> ControlFlow<()> {
         for ua in &elem.user_attributes {
-            if let user_attributes::CROSS_PACKAGE = ua.name.name() {
+            if user_attributes::CROSS_PACKAGE == ua.name.name()
+                || user_attributes::REQUIRE_PACKAGE == ua.name.name()
+            {
                 ua.params
                     .iter()
                     .for_each(|pkg| elem.body.fb_ast.insert(0, assert_package_is_loaded(pkg)));
@@ -37,7 +39,9 @@ impl Pass for ElabCrossPackagePass {
 
     fn on_ty_fun__bottom_up(&mut self, _env: &Env, elem: &mut Fun_) -> ControlFlow<()> {
         for ua in &elem.user_attributes {
-            if let user_attributes::CROSS_PACKAGE = ua.name.name() {
+            if user_attributes::CROSS_PACKAGE == ua.name.name()
+                || user_attributes::REQUIRE_PACKAGE == ua.name.name()
+            {
                 ua.params
                     .iter()
                     .for_each(|pkg| elem.body.fb_ast.insert(0, assert_package_is_loaded(pkg)));

@@ -2,13 +2,13 @@
 
 shift
 
-cat <<EOF > "${INSTALL_DIR}/low-ptr-def.h"
+cat <<EOF > "${INSTALL_DIR}/ptr-def.h"
 #pragma once
 
 EOF
 
 if [[ $1 == "--low" ]] ; then
-    cat <<EOF >> "${INSTALL_DIR}/low-ptr-def.h"
+    cat <<EOF >> "${INSTALL_DIR}/ptr-def.h"
 #ifndef USE_LOWPTR
 #define USE_LOWPTR 1
 #endif
@@ -16,7 +16,7 @@ if [[ $1 == "--low" ]] ; then
 EOF
 fi
 
-cat <<EOF >> "${INSTALL_DIR}/low-ptr-def.h"
+cat <<EOF >> "${INSTALL_DIR}/ptr-def.h"
 #ifdef __has_feature
  #if __has_feature(address_sanitizer) || __has_feature(thread_sanitizer)
   #undef USE_LOWPTR
@@ -34,7 +34,7 @@ cat <<EOF >> "${INSTALL_DIR}/low-ptr-def.h"
 EOF
 
 if [[ $2 == "--packed" ]] ; then
-    cat <<EOF >> "${INSTALL_DIR}/low-ptr-def.h"
+    cat <<EOF >> "${INSTALL_DIR}/ptr-def.h"
 #ifdef USE_LOWPTR
 #define USE_PACKEDPTR 1
 #endif

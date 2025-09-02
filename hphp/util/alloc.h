@@ -31,7 +31,6 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/jemalloc-util.h"
-#include "hphp/util/low-ptr-def.h"
 #include "hphp/util/ptr.h"
 #include "hphp/util/read-only-arena.h"
 #include "hphp/util/slab-manager.h"

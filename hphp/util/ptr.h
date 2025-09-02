@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "hphp/util/low-ptr-def.h"
+#include "hphp/util/ptr-def.h"
 #include "hphp/util/ptr-impl.h"
 
 namespace HPHP {

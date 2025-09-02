@@ -290,10 +290,11 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Server.LogTierOverwriteInputs = false, ffledgling
 
-  Enable publishing thread hints to scx when the thread hint UDS path is set.
-  Path to a Unix Domain Socket that can be used to receive a file descriptor for
-  the thread hint map.
+  Enable publishing thread hints to scx when the thread hint path is set. Path
+  to a Unix Domain Socket can be used to receive a file descriptor for the
+  thread hint map if necessary.
 
+- std::string Server.ScxThreadHintPath = "", jtwarren
 - std::string Server.ScxThreadHintUdsPath = "", jtwarren
 - uint16_t Server.ScxThreadHintFirstFlush = 1024, jtwarren
 - uint16_t Server.ScxThreadHintIdle = 1024, jtwarren

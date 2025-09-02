@@ -58,7 +58,7 @@ private:
   ThreadHint& operator=(const ThreadHint&) = delete;
   ThreadHint& operator=(ThreadHint&&) = delete;
 
-  void initHintMap(const std::string_view path);
+  int getThreadHintFd();
 
   folly::File m_threadHint;
 

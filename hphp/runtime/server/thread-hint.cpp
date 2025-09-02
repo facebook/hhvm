@@ -41,8 +41,10 @@ ThreadHint &ThreadHint::getInstance() {
 }
 
 ThreadHint::ThreadHint() {
-  if (!Cfg::Server::ScxThreadHintUdsPath.empty()) {
-    initHintMap(Cfg::Server::ScxThreadHintUdsPath);
+  int fd = getThreadHintFd();
+  if (fd >= 0) {
+    m_threadHint = folly::File(fd, false);
+    FTRACE(1, "ThreadHint: Thread hint fd set to {}\n", m_threadHint.fd());
   }
 }
 
@@ -102,15 +104,28 @@ static int receiveFd(const std::string_view path) {
   return *((int*)CMSG_DATA(cmsg));
 }
 
-void ThreadHint::initHintMap(const std::string_view path) {
-  FTRACE(1, "ThreadHint: Attempting to get fd from {}\n", path);
-  int uds_fd = receiveFd(path);
-  if (uds_fd < 0) {
-    FTRACE(1, "ThreadHint: Failed to get fd from {}, errno={}\n", path, errno);
-    return;
+int ThreadHint::getThreadHintFd() {
+  if (auto const& path = Cfg::Server::ScxThreadHintPath; !path.empty()) {
+    FTRACE(1, "ThreadHint: Setting thread hint path to {}\n", path);
+    int fd = bpf_obj_get(path.c_str());
+    if (fd < 0) {
+      FTRACE(1, "ThreadHint: Failed to open BPF map at {}: {}\n",
+             path, folly::errnoStr(errno));
+    }
+    return fd;
   }
-  FTRACE(1, "ThreadHint: Successfully received fd {}\n", uds_fd);
-  m_threadHint = folly::File(uds_fd, false);
+
+  if (auto const& path = Cfg::Server::ScxThreadHintUdsPath; !path.empty()) {
+    FTRACE(1, "ThreadHint: Attempting to get fd from {}\n", path);
+    int fd = receiveFd(path);
+    if (fd < 0) {
+      FTRACE(1, "ThreadHint: Failed to get fd from {}, errno={}\n",
+             path, folly::errnoStr(errno));
+    }
+    return fd;
+  }
+
+  return -1;
 }
 
 static constexpr uint16_t getHint(ThreadHint::Priority priority) {

@@ -48,6 +48,7 @@ type serverOptions struct {
 	connContext       ConnContextFunc
 	serverStats       *stats.ServerStats
 	processorStats    map[string]*stats.TimingSeries
+	serverObserver    ServerObserver
 }
 
 func defaultServerOptions() *serverOptions {
@@ -59,6 +60,7 @@ func defaultServerOptions() *serverOptions {
 		connContext:       WithConnInfo,
 		processorStats:    make(map[string]*stats.TimingSeries),
 		serverStats:       stats.NewServerStats(stats.NewTimingConfig(defaultStatsPeriod), defaultStatsPeriod),
+		serverObserver:    newNoopServerObserver(),
 	}
 }
 
@@ -118,6 +120,13 @@ func WithServerStats(serverStats *stats.ServerStats) ServerOption {
 func WithProcessorStats(processorStats map[string]*stats.TimingSeries) ServerOption {
 	return func(server *serverOptions) {
 		server.processorStats = processorStats
+	}
+}
+
+// WithServerObserver allows the user to provide a custom ServerObserver for the server.
+func WithServerObserver(serverObserver ServerObserver) ServerOption {
+	return func(server *serverOptions) {
+		server.serverObserver = serverObserver
 	}
 }
 

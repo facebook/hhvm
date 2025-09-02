@@ -527,3 +527,9 @@ func TestGoroutinePerRequest(t *testing.T) {
 		runTestFunc(t, TransportIDRocket)
 	})
 }
+
+func TestServerObserverDefaultNotNil(t *testing.T) {
+	serverOptions := newServerOptions()
+	assert.NotNil(t, serverOptions.serverObserver)
+	assert.IsType(t, &noopServerObserver{}, serverOptions.serverObserver)
+}

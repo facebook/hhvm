@@ -1992,6 +1992,20 @@ union LargeChangeNotification {
 union ChangeNotification {
   1: SmallChangeNotification smallChange;
   2: LargeChangeNotification largeChange;
+  3: StateChangeNotification stateChange;
+}
+
+struct StateEntered {
+  1: string name;
+}
+
+struct StateLeft {
+  1: string name;
+}
+
+union StateChangeNotification {
+  1: StateEntered stateEntered;
+  2: StateLeft stateLeft;
 }
 
 /**
@@ -2050,6 +2064,7 @@ struct ChangesSinceV2Params {
   7: optional list<string> excludedSuffixes;
   8: optional PathString root;
   9: SyncBehavior sync;
+  10: optional bool includeStateChanges;
 }
 
 /*

@@ -159,6 +159,10 @@ std::string get_py3_name_class_scope(
   return name;
 }
 
+// Convert a string value into a valid Python string literal, by wrapping it in
+// quotes, and escaping any quotes/backslashes in the content.
+std::string to_python_string_literal(std::string val);
+
 // can put this back into python_capi when python_capi_converter removed from
 // thrift-py3
 std::string gen_capi_module_prefix_impl(const t_program* program);

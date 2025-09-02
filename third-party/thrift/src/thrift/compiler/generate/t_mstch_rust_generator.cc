@@ -2429,15 +2429,12 @@ class rust_mstch_deprecated_annotation : public mstch_deprecated_annotation {
     register_methods(
         this,
         {
-            {"annotation:value?",
-             &rust_mstch_deprecated_annotation::rust_has_value},
             {"annotation:rust_name",
              &rust_mstch_deprecated_annotation::rust_name},
             {"annotation:rust_value",
              &rust_mstch_deprecated_annotation::rust_value},
         });
   }
-  mstch::node rust_has_value() { return !val_.value.empty(); }
   mstch::node rust_name() {
     return boost::algorithm::replace_all_copy(key_, ".", "_");
   }

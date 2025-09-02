@@ -1299,35 +1299,6 @@ class py3_mstch_const_value : public mstch_const_value {
   }
 };
 
-class py3_mstch_deprecated_annotation : public mstch_deprecated_annotation {
- public:
-  py3_mstch_deprecated_annotation(
-      const t_annotation* a, mstch_context& ctx, mstch_element_position pos)
-      : mstch_deprecated_annotation(a, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"annotation:value?", &py3_mstch_deprecated_annotation::has_value},
-            {"annotation:py_quoted_key",
-             &py3_mstch_deprecated_annotation::py_quoted_key},
-            {"annotation:py_quoted_value",
-             &py3_mstch_deprecated_annotation::py_quoted_value},
-        });
-  }
-
-  mstch::node has_value() { return !val_.value.empty(); }
-  mstch::node py_quoted_key() { return to_python_string_literal(key_); }
-  mstch::node py_quoted_value() { return to_python_string_literal(val_.value); }
-
- protected:
-  std::string to_python_string_literal(std::string val) const {
-    std::string quotes = R"(""")";
-    boost::algorithm::replace_all(val, "\\", "\\\\");
-    boost::algorithm::replace_all(val, "\"", "\\\"");
-    return quotes + val + quotes;
-  }
-};
-
 std::string py3_mstch_program::visit_type_impl(
     const t_type* orig_type, bool fromTypeDef) {
   bool hasPy3EnableCppAdapterAnnot =
@@ -1554,6 +1525,19 @@ class t_mstch_py3_generator : public t_mstch_generator {
   std::unordered_map<const t_type*, py3_mstch_type::cached_properties>
       type_props_cache_;
   cpp_name_resolver cpp_name_resolver_;
+
+  whisker::map::raw globals() const override {
+    whisker::map::raw globals = t_mstch_generator::globals();
+    globals["py_string_literal"] = whisker::dsl::make_function(
+        "py_string_literal",
+        [](whisker::dsl::function::context ctx) -> whisker::object {
+          ctx.declare_named_arguments({});
+          ctx.declare_arity(1);
+          return whisker::make::string(python::to_python_string_literal(
+              ctx.argument<whisker::string>(0)));
+        });
+    return globals;
+  }
 };
 
 py3_mstch_type::cached_properties& py3_mstch_type::get_cached_props(
@@ -1598,7 +1582,6 @@ void t_mstch_py3_generator::set_mstch_factories() {
   mstch_context_.add<py3_mstch_enum>();
   mstch_context_.add<py3_mstch_enum_value>();
   mstch_context_.add<py3_mstch_const_value>();
-  mstch_context_.add<py3_mstch_deprecated_annotation>();
 }
 
 void t_mstch_py3_generator::generate_init_files() {

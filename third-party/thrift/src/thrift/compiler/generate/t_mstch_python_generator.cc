@@ -907,6 +907,14 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     globals["python"] =
         whisker::object(whisker::native_handle<python_generator_context>(
             python_context_, make_prototype_for_context()));
+    globals["py_string_literal"] = whisker::dsl::make_function(
+        "py_string_literal",
+        [](whisker::dsl::function::context ctx) -> whisker::object {
+          ctx.declare_named_arguments({});
+          ctx.declare_arity(1);
+          return whisker::make::string(python::to_python_string_literal(
+              ctx.argument<whisker::string>(0)));
+        });
     return globals;
   }
 
@@ -1447,36 +1455,6 @@ class python_mstch_const_value : public mstch_const_value {
   }
 };
 
-class python_mstch_deprecated_annotation : public mstch_deprecated_annotation {
- public:
-  python_mstch_deprecated_annotation(
-      const t_annotation* a, mstch_context& ctx, mstch_element_position pos)
-      : mstch_deprecated_annotation(a, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"annotation:value?",
-             &python_mstch_deprecated_annotation::has_value},
-            {"annotation:py_quoted_key",
-             &python_mstch_deprecated_annotation::py_quoted_key},
-            {"annotation:py_quoted_value",
-             &python_mstch_deprecated_annotation::py_quoted_value},
-        });
-  }
-
-  mstch::node has_value() { return !val_.value.empty(); }
-  mstch::node py_quoted_key() { return to_python_string_literal(key_); }
-  mstch::node py_quoted_value() { return to_python_string_literal(val_.value); }
-
- protected:
-  std::string to_python_string_literal(std::string val) const {
-    std::string quotes = R"(""")";
-    boost::algorithm::replace_all(val, "\\", "\\\\");
-    boost::algorithm::replace_all(val, "\"", "\\\"");
-    return quotes + val + quotes;
-  }
-};
-
 void t_mstch_python_generator::set_mstch_factories() {
   mstch_context_.add<python_mstch_program>();
   mstch_context_.add<python_mstch_service>();
@@ -1488,7 +1466,6 @@ void t_mstch_python_generator::set_mstch_factories() {
   mstch_context_.add<python_mstch_field>(&diags_);
   mstch_context_.add<python_mstch_const>(&diags_);
   mstch_context_.add<python_mstch_const_value>();
-  mstch_context_.add<python_mstch_deprecated_annotation>();
 }
 
 void t_mstch_python_generator::generate_file(

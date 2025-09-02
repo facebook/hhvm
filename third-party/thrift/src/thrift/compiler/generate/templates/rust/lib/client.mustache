@@ -530,9 +530,9 @@ pub struct make_{{service:rust_name}};
 /// ```
 impl dyn {{service:rust_name}} {
     {{#service:annotations}}
-    {{#annotation:value?}}
+    {{#if (not (string.empty? annotation:value))}}
     pub const {{annotation:rust_name}}: &'static ::std::primitive::str = {{annotation:rust_value}};
-    {{/annotation:value?}}
+    {{/if (not (string.empty? annotation:value))}}
     {{/service:annotations}}
     pub fn new<P, T>(
         protocol: P,

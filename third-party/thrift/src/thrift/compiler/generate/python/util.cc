@@ -265,6 +265,13 @@ std::unordered_set<std::string_view> extract_modules_and_insert_into(
   return module_paths;
 }
 
+std::string to_python_string_literal(std::string val) {
+  std::string quotes = R"(""")";
+  boost::algorithm::replace_all(val, "\\", "\\\\");
+  boost::algorithm::replace_all(val, "\"", "\\\"");
+  return quotes + val + quotes;
+}
+
 std::string gen_capi_module_prefix_impl(const t_program* program) {
   std::string prefix =
       get_py3_namespace_with_name_and_prefix(program, "", "__");

@@ -18,8 +18,6 @@
 
 A single annotation, written out for python consumption in a dict.
 Annotations may start/end with quotes hence we take extra care
+An annotation without an explicitly provided value is implicitly assigned the default value "1".
 }}
-{{annotation:py_quoted_key}}: {{!
-  }}{{#annotation:value?}}{{annotation:py_quoted_value}}{{/annotation:value?}}{{!
-  An annotation without an explicitly provided value is implicitly assigned the default value "1".
-  }}{{^annotation:value?}}"1"{{/annotation:value?}},
+{{(py_string_literal annotation:key)}}: {{#if (string.empty? annotation:value)}}"1"{{#else}}{{(py_string_literal annotation:value)}}{{/if}},

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <vector>
 #include <thrift/lib/cpp2/server/DecoratorData.h>
 #include <thrift/lib/cpp2/server/DecoratorDataKey.h>

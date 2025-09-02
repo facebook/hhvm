@@ -62,6 +62,18 @@ impl Config {
                     })
                 }
             };
+        let mut used_include_paths = NameSet::default();
+        let mut check_each_include_path_is_used_once =
+            |errors: &mut Vec<Error>, include_paths: &Option<NameSet>| {
+                if let Some(l) = include_paths {
+                    l.iter().for_each(|include_path| {
+                        if used_include_paths.contains(include_path) {
+                            errors.push(Error::duplicate_include_path(include_path))
+                        }
+                        used_include_paths.insert(include_path.clone());
+                    })
+                }
+            };
         let check_package_includes_are_transitively_closed =
             |errors: &mut Vec<Error>, package_name: &Spanned<String>, package: &Package| {
                 let mut includes = package.includes.as_ref().unwrap_or_default().clone();
@@ -119,6 +131,7 @@ impl Config {
         for (package_name, package) in self.packages.iter() {
             check_packages_are_defined(errors, &package.includes, &package.soft_includes);
             check_each_glob_is_used_once(errors, &package.uses);
+            check_each_include_path_is_used_once(errors, &package.include_paths);
             check_package_v2_fields(errors, package_name, package);
             if package_v2 {
                 check_package_includes_are_transitively_closed(errors, package_name, package);

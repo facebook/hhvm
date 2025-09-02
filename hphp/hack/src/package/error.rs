@@ -19,6 +19,10 @@ pub enum Error {
         name: String,
         span: (usize, usize),
     },
+    DuplicateIncludePath {
+        name: String,
+        span: (usize, usize),
+    },
     IncompleteDeployment {
         name: String,
         span: (usize, usize),
@@ -61,6 +65,14 @@ impl Error {
     pub fn duplicate_use(x: &Spanned<String>) -> Self {
         let Range { start, end } = x.span();
         Self::DuplicateUse {
+            name: x.get_ref().into(),
+            span: (start, end),
+        }
+    }
+
+    pub fn duplicate_include_path(x: &Spanned<String>) -> Self {
+        let Range { start, end } = x.span();
+        Self::DuplicateIncludePath {
             name: x.get_ref().into(),
             span: (start, end),
         }
@@ -129,6 +141,7 @@ impl Error {
     pub fn span(&self) -> (usize, usize) {
         match self {
             Self::DuplicateUse { span, .. }
+            | Self::DuplicateIncludePath { span, .. }
             | Self::UndefinedInclude { span, .. }
             | Self::IncompleteDeployment { span, .. }
             | Self::InvalidIncludePath { span, .. }
@@ -156,6 +169,13 @@ impl Display for Error {
             }
             Self::DuplicateUse { name, .. } => {
                 write!(f, "This module can only be used in one package: {}", name)?;
+            }
+            Self::DuplicateIncludePath { name, .. } => {
+                write!(
+                    f,
+                    "This include_path can only be used in one package: {}",
+                    name
+                )?;
             }
             Self::IncompleteDeployment {
                 name,

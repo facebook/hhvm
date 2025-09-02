@@ -408,4 +408,17 @@ mod test {
         assert!(include_paths[1].get_ref().ends_with("longer/"));
         assert!(include_paths[2].get_ref().ends_with("long/"));
     }
+
+    #[test]
+    fn test_no_duplicate_include_paths() {
+        let test_path = SRCDIR.as_path().join("tests/package-9.toml");
+        let info = PackageInfo::from_text(true, false, test_path.to_str().unwrap()).unwrap();
+        let errors = info.errors.iter().map(|e| e.msg()).collect::<Vec<_>>();
+        let expected = [
+            String::from("This include_path can only be used in one package: path/to/longest/"),
+            String::from("This include_path can only be used in one package: path/to/long/"),
+        ];
+        assert!(errors[0] == expected[0]);
+        assert!(errors[1] == expected[1]);
+    }
 }

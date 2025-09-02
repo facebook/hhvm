@@ -305,8 +305,11 @@ class RequestsRegistry {
    * |
    *   +---------------------------------------------------------------------+
    */
+  template <typename TRequest>
+  using Ptr = std::unique_ptr<TRequest, Deleter>;
+
   template <typename TRequest, typename... Args>
-  static std::unique_ptr<TRequest, Deleter> makeRequest(Args&&... args) {
+  static Ptr<TRequest> makeRequest(Args&&... args) {
     static_assert(std::is_base_of_v<ResponseChannelRequest, TRequest>);
 
     DebugStubColocator alloc;
@@ -337,7 +340,7 @@ class RequestsRegistry {
         ColocatedData<T>{stub, std::move(*colocatedData), std::move(cursor)},
         std::forward<Args>(args)...);
 
-    return std::unique_ptr<TRequest, Deleter>(request, stub);
+    return Ptr<TRequest>(request, stub);
   }
 
   intptr_t genRootId();

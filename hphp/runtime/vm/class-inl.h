@@ -170,10 +170,10 @@ Class::PropInitVec::deepInitBits() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Pre- and post-allocations.
 
-inline LowPtr<Func>* Class::funcVec() const {
-  return reinterpret_cast<LowPtr<Func>*>(
+inline PackedPtr<Func>* Class::funcVec() const {
+  return reinterpret_cast<PackedPtr<Func>*>(
     reinterpret_cast<uintptr_t>(this) -
-    m_funcVecLen * sizeof(LowPtr<Func>)
+    m_funcVecLen * sizeof(PackedPtr<Func>)
   );
 }
 
@@ -189,7 +189,7 @@ inline const void* Class::mallocEnd() const {
          + classVecLen() * sizeof(*classVec());
 }
 
-inline const LowPtr<Class>* Class::classVec() const {
+inline const PackedPtr<Class>* Class::classVec() const {
   return m_classVec;
 }
 
@@ -372,13 +372,13 @@ inline size_t Class::numMethods() const {
 
 inline Func* Class::getMethod(Slot idx) const {
   assertx(idx < numMethods());
-  auto funcVec = (LowPtr<Func>*)this;
+  auto funcVec = (PackedPtr<Func>*)this;
   return funcVec[-((int32_t)idx + 1)];
 }
 
 inline void Class::setMethod(Slot idx, Func* func) {
   assertx(idx < numMethods());
-  auto funcVec = (LowPtr<Func>*)this;
+  auto funcVec = (PackedPtr<Func>*)this;
   funcVec[-((int32_t)idx + 1)] = func;
 }
 

@@ -444,8 +444,8 @@ struct Class : AtomicCountable {
    * instance checks.
    */
   struct VtableVecSlot {
-    LowPtr<Func>* vtable;
-    LowPtr<Class> iface;
+    PackedPtr<Func>* vtable;
+    PackedPtr<Class> iface;
   };
 
   /*
@@ -577,7 +577,7 @@ public:
   /*
    * Pointer to this Class's FuncVec, which is allocated before this.
    */
-  LowPtr<Func>* funcVec() const;
+  PackedPtr<Func>* funcVec() const;
 
   /*
    * The start of malloc'd memory for `this' (i.e., including anything
@@ -595,7 +595,7 @@ public:
    * `this', which contain this class's inheritance hierarchy (including `this'
    * as the last element).
    */
-  const LowPtr<Class>* classVec() const;
+  const PackedPtr<Class>* classVec() const;
 
   /*
    * The size of the classVec.
@@ -1968,7 +1968,7 @@ private:
   mutable default_ptr<ExtraData> m_extra;
   uint32_t m_memoSize{0};
 
-  LowPtr<Func> m_invoke; // __invoke, iff non-static (or closure)
+  PackedPtr<Func> m_invoke; // __invoke, iff non-static (or closure)
 
   ConstMap m_constants;
 
@@ -2060,8 +2060,8 @@ private:
   std::atomic<bool> m_useLazyAPCDeserialization{false};
   int32_t m_declPropNumAccessible;
 
-  LowPtr<Func> m_ctor;
-  LowPtr<Func> m_toString;
+  PackedPtr<Func> m_ctor;
+  PackedPtr<Func> m_toString;
 
   mutable rds::Link<PropInitVec*, rds::Mode::Normal> m_propDataCache;
   mutable rds::Link<PackedPtr<Class>, rds::Mode::NonLocal> m_cachedClass;
@@ -2086,7 +2086,7 @@ private:
    * Vector of Class pointers that encodes the inheritance hierarchy, including
     * this Class as the last element.
    */
-  LowPtr<Class> m_classVec[1]; // Dynamically sized; must come last.
+  PackedPtr<Class> m_classVec[1]; // Dynamically sized; must come last.
 };
 
 ///////////////////////////////////////////////////////////////////////////////

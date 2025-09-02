@@ -30,6 +30,7 @@
 #include "hphp/util/atomic-countable.h"
 #include "hphp/util/atomic-shared-ptr.h"
 #include "hphp/util/fixed-vector.h"
+#include "hphp/util/ptr.h"
 
 #include <type_traits>
 #include <unordered_set>
@@ -51,8 +52,13 @@ namespace Native { struct NativeDataInfo; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using BuiltinCtorFunction = LowPtr<ObjectData*(Class*)>;
-using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*)>;
+#ifdef FULLPTR_FOR_BUILTINS
+using BuiltinCtorFunction = FullPtr<ObjectData*(Class*)>;
+using BuiltinDtorFunction = FullPtr<void(ObjectData*, const Class*)>;
+#else
+using BuiltinCtorFunction = SmallPtr<ObjectData*(Class*)>;
+using BuiltinDtorFunction = SmallPtr<void(ObjectData*, const Class*)>;
+#endif
 
 /*
  * A PreClass represents the source-level definition of a PHP class, interface,

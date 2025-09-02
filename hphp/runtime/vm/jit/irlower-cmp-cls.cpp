@@ -71,10 +71,10 @@ void cgEqLazyCls(IRLS& env, const IRInstruction* inst) {
 template <typename Cls, typename Len>
 Vreg check_clsvec(Vout& v, Vreg d, Vreg lhs, Cls rhs, Len rhsVecLen) {
   // If it's a subclass, rhs must be at the appropriate index.
-  auto const vecOffset = rhsVecLen * static_cast<int>(sizeof(LowPtr<Class>)) +
-    (Class::classVecOff() - sizeof(LowPtr<Class>));
+  auto const vecOffset = rhsVecLen * static_cast<int>(sizeof(PackedPtr<Class>)) +
+    (Class::classVecOff() - sizeof(PackedPtr<Class>));
   auto const sf = v.makeReg();
-  emitCmpLowPtr<Class>(v, sf, rhs, lhs[vecOffset]);
+  emitCmpPackedPtr<Class>(v, sf, rhs, lhs[vecOffset]);
   v << setcc{CC_E, sf, d};
   return d;
 }
@@ -157,7 +157,7 @@ void cgInstanceOfIfaceVtable(IRLS& env, const IRInstruction* inst) {
       auto const ifaceOff = slot * sizeof(Class::VtableVecSlot) +
                             offsetof(Class::VtableVecSlot, iface);
       auto const sf = v.makeReg();
-      emitCmpLowPtr<Class>(v, sf, iface, vtableVec[ifaceOff]);
+      emitCmpPackedPtr<Class>(v, sf, iface, vtableVec[ifaceOff]);
 
       auto tmp = v.makeReg();
       v << setcc{CC_E, sf, tmp};
@@ -209,7 +209,7 @@ void cgExtendsClass(IRLS& env, const IRInstruction* inst) {
   // Test if it is the exact same class.
   // TODO(#2044801): We should be doing this control flow at the IR level.
   auto const sf = v.makeReg();
-  emitCmpLowPtr<Class>(v, sf, v.cns(rhsCls), lhs);
+  emitCmpPackedPtr<Class>(v, sf, v.cns(rhsCls), lhs);
 
   if (rhsCls->attrs() & AttrNoOverride) {
     // If the test class cannot be extended, we only need to do the same-class

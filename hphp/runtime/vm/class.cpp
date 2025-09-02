@@ -288,9 +288,15 @@ unsigned loadUsedTraits(PreClass* preClass,
  * construct one.
  */
 constexpr size_t sizeof_Class = Class::classVecOff();
+constexpr size_t extra_builtin_ptrs =
+#ifdef FULLPTR_FOR_BUILTINS
+  8;
+#else
+  0;
+#endif
 
-static constexpr size_t kClassSize = debug ? (use_lowptr ? 280 : 320)
-                                           : (use_lowptr ? 276 : 320);
+static constexpr size_t kClassSize = (debug ? (use_lowptr ? 280 : 312)
+                                            : (use_lowptr ? 276 : 312)) + extra_builtin_ptrs;
 static_assert(CheckSize<sizeof_Class, kClassSize>(), "");
 
 /*
@@ -325,7 +331,7 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
   // We need to pad this allocation so that the actual start of the Class is
   // 8-byte aligned.
   auto const mask = alignof(Class) - 1;
-  auto const funcvec_sz = sizeof(LowPtr<Func>) * funcVecLen;
+  auto const funcvec_sz = sizeof(PackedPtr<Func>) * funcVecLen;
   auto const prefix_sz = (funcvec_sz + mask) & ~mask;
 
   auto const size = sizeof_Class + prefix_sz
@@ -3984,7 +3990,7 @@ void Class::setInterfaceVtables() {
 
   const size_t nVtables = maxSlot + 1;
   auto const vtableVecSz = nVtables * sizeof(VtableVecSlot);
-  auto const memSz = vtableVecSz + totalMethods * sizeof(LowPtr<Func>);
+  auto const memSz = vtableVecSz + totalMethods * sizeof(PackedPtr<Func>);
   auto const mem = static_cast<char*>(vm_malloc(memSz));
   auto cursor = mem;
 
@@ -4013,8 +4019,8 @@ void Class::setInterfaceVtables() {
     always_assert(slot < nVtables);
 
     auto const nMethods = iface->numMethods();
-    auto const vtable = reinterpret_cast<LowPtr<Func>*>(cursor);
-    cursor += nMethods * sizeof(LowPtr<Func>);
+    auto const vtable = reinterpret_cast<PackedPtr<Func>*>(cursor);
+    cursor += nMethods * sizeof(PackedPtr<Func>);
     if (vtableVec[slot].vtable != nullptr) {
       raise_error("Static analysis failure: "
                   "%s was expected to fatal at runtime, but didn't "
@@ -4644,9 +4650,9 @@ void Class::setClassVec() {
 void Class::setFuncVec(MethodMapBuilder& builder) {
   auto funcVec = this->funcVec();
 
-  memset(funcVec, 0, m_funcVecLen * sizeof(LowPtr<Func>));
+  memset(funcVec, 0, m_funcVecLen * sizeof(PackedPtr<Func>));
 
-  funcVec = (LowPtr<Func>*)this;
+  funcVec = (PackedPtr<Func>*)this;
   assertx(builder.size() <= m_funcVecLen);
 
   for (Slot i = 0; i < builder.size(); i++) {

@@ -89,8 +89,8 @@ void cgLdClsMethod(IRLS& env, const IRInstruction* inst) {
   assertx(idx >= 0);
 
   auto& v = vmain(env);
-  auto const methOff = -(idx + 1) * sizeof(LowPtr<Func>);
-  emitLdLowPtr<Func>(v, cls[methOff], dst);
+  auto const methOff = -(idx + 1) * sizeof(PackedPtr<Func>);
+  emitLdPackedPtr<Func>(v, cls[methOff], dst);
 }
 
 void cgLdIfaceMethod(IRLS& env, const IRInstruction* inst) {
@@ -106,7 +106,7 @@ void cgLdIfaceMethod(IRLS& env, const IRInstruction* inst) {
   auto const vtableOff = extra->vtableIdx * sizeof(Class::VtableVecSlot) +
     offsetof(Class::VtableVecSlot, vtable);
   v << load{vtable_vec[vtableOff], vtable};
-  emitLdLowPtr<Func>(v, vtable[extra->methodIdx * sizeof(LowPtr<Func>)], func);
+  emitLdPackedPtr<Func>(v, vtable[extra->methodIdx * sizeof(PackedPtr<Func>)], func);
 }
 
 void cgLdObjInvoke(IRLS& env, const IRInstruction* inst) {
@@ -114,7 +114,7 @@ void cgLdObjInvoke(IRLS& env, const IRInstruction* inst) {
   auto const cls = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
-  emitLdLowPtr<Func>(v, cls[Class::invokeOff()], dst);
+  emitLdPackedPtr<Func>(v, cls[Class::invokeOff()], dst);
 }
 
 IMPL_OPCODE_CALL(HasToString)

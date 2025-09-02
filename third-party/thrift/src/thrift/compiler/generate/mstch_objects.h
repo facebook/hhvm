@@ -789,7 +789,6 @@ class mstch_field : public mstch_base {
             {"field:self", &mstch_field::self},
             {"field:value", &mstch_field::value},
             {"field:type", &mstch_field::type},
-            {"field:idl_type", &mstch_field::idl_type},
             {"field:index", &mstch_field::index},
             {"field:annotations", &mstch_field::annotations},
             {"field:structured_annotations",
@@ -800,15 +799,6 @@ class mstch_field : public mstch_base {
   whisker::object self() { return make_self(*field_); }
   mstch::node value();
   mstch::node type();
-  /**
-   * Integer corresponding to the Thrift IDL type of the field, as defined by
-   * `enum BaseType`.
-   *
-   * This corresponds to the "true" IDL type (i.e., after resolving aliases) and
-   * does not include type parameters (such as map key and values, container
-   * element types, etc.).
-   */
-  mstch::node idl_type();
   mstch::node index() { return pos_.index; }
   mstch::node annotations() { return mstch_base::annotations(field_); }
   mstch::node structured_annotations() {

@@ -261,6 +261,98 @@ bool field_has_invariant_type(const t_field* field) {
       field->get_type());
 }
 
+/**
+ * Integer corresponding to the Thrift IDL type of the field, as defined by
+ * `enum BaseType`.
+ *
+ * This corresponds to the "true" IDL type (i.e., after resolving aliases) and
+ * does not include type parameters (such as map key and values, container
+ * element types, etc.).
+ */
+int field_idl_type(const t_field& field) {
+  // Copied from 'thrift/lib/cpp2/type/BaseType.h' for now,
+  // DO_BEFORE(hchok,20250930): it should be moved to a common place where
+  // both runtime and compiler can include.
+  enum class BaseType {
+    Void = 0,
+
+    // Integer types.
+    Bool = 1,
+    Byte = 2,
+    I16 = 3,
+    I32 = 4,
+    I64 = 5,
+
+    // Floating point types.
+    Float = 6,
+    Double = 7,
+
+    // String types.
+    String = 8,
+    Binary = 9,
+
+    // Enum type class.
+    Enum = 10,
+
+    // Structured type classes.
+    Struct = 11,
+    Union = 12,
+    Exception = 13,
+
+    // Container type classes.
+    List = 14,
+    Set = 15,
+    Map = 16
+  };
+
+  // Mapping from compiler implementation details to a public enum `BaseType`
+  BaseType idl_type = std::invoke(
+      [](const t_type* true_type) -> BaseType {
+        if (const auto* primitive = true_type->try_as<t_primitive_type>()) {
+          switch (primitive->primitive_type()) {
+            case t_primitive_type::type::t_void:
+              return BaseType::Void;
+            case t_primitive_type::type::t_bool:
+              return BaseType::Bool;
+            case t_primitive_type::type::t_byte:
+              return BaseType::Byte;
+            case t_primitive_type::type::t_i16:
+              return BaseType::I16;
+            case t_primitive_type::type::t_i32:
+              return BaseType::I32;
+            case t_primitive_type::type::t_i64:
+              return BaseType::I64;
+            case t_primitive_type::type::t_float:
+              return BaseType::Float;
+            case t_primitive_type::type::t_double:
+              return BaseType::Double;
+            case t_primitive_type::type::t_string:
+              return BaseType::String;
+            case t_primitive_type::type::t_binary:
+              return BaseType::Binary;
+          }
+        } else if (true_type->is<t_list>()) {
+          return BaseType::List;
+        } else if (true_type->is<t_set>()) {
+          return BaseType::Set;
+        } else if (true_type->is<t_map>()) {
+          return BaseType::Map;
+        } else if (true_type->is<t_enum>()) {
+          return BaseType::Enum;
+        } else if (true_type->is<t_structured>()) {
+          return BaseType::Struct;
+        }
+
+        // AST types which are not valid to be a field type - e.g. service
+        throw std::runtime_error(fmt::format(
+            "Mapping Error: Failed to map type '{}' to 'BaseType'",
+            true_type->get_full_name()));
+      },
+      field.get_type()->get_true_type());
+
+  return static_cast<std::underlying_type_t<BaseType>>(idl_type);
+}
+
 bool service_has_any_streaming_types(const t_service* service) {
   return std::any_of(
       service->functions().begin(),
@@ -992,6 +1084,9 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
         }
       }
       return py_name;
+    });
+    def.property("idl_type", [](const t_field& self) {
+      return whisker::make::i64(field_idl_type(self));
     });
     def.property(
         "tablebased_qualifier", [](const t_field& self) -> whisker::string {

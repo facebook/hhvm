@@ -3919,7 +3919,7 @@ void Class::setInterfaces() {
     m_preClass->enforceInMaybeSealedParentWhitelist(cp->preClass());
     declInterfaces.push_back(ClassPtr(cp));
     if (!interfacesBuilder.contains(cp->name())) {
-      interfacesBuilder.add(cp->name(), LowPtr<Class>(cp));
+      interfacesBuilder.add(cp->name(), PackedPtr<Class>(cp));
     }
     int size = cp->m_interfaces.size();
     for (int i = 0; i < size; i++) {
@@ -3951,7 +3951,7 @@ void Class::setInterfaces() {
         Class* cls = Class::lookup(name.get());
         assertx(cls != nullptr);
         assertx(cls->attrs() & AttrInterface);
-        interfacesBuilder.add(cls->name(), LowPtr<Class>(cls));
+        interfacesBuilder.add(cls->name(), PackedPtr<Class>(cls));
       };
       maybe_add(s_StringishObject);
       maybe_add(s_Stringish);
@@ -4203,7 +4203,7 @@ void Class::setIncludedEnums() {
                   m_preClass->name()->data(), cp->name()->data());
     }
     if (!includedEnumsBuilder.contains(cp->name())) {
-      includedEnumsBuilder.add(cp->name(), LowPtr<Class>(cp));
+      includedEnumsBuilder.add(cp->name(), PackedPtr<Class>(cp));
     }
     int size = cp->m_extra->m_includedEnums.size();
     for (int i = 0; i < size; i++) {

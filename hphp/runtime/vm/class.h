@@ -211,7 +211,7 @@ struct Class : AtomicCountable {
     RepoAuthType repoAuthType;
     TypeIntersectionConstraint typeConstraints;
 
-    LowStringPtr name;
+    PackedStringPtr name;
    private:
     mutable AtomicPackedPtr<const StringData> m_mangledName = nullptr;
 
@@ -453,8 +453,8 @@ struct Class : AtomicCountable {
    */
   using MethodMap         = FixedStringMap<Slot, Slot>;
   using MethodMapBuilder  = FixedStringToSlotMapBuilder<Func*, Slot>;
-  using InterfaceMap      = IndexedStringMap<LowPtr<Class>, int>;
-  using IncludedEnumMap   = IndexedStringMap<LowPtr<Class>, int>;
+  using InterfaceMap      = IndexedStringMap<PackedPtr<Class>, int>;
+  using IncludedEnumMap   = IndexedStringMap<PackedPtr<Class>, int>;
   using RequirementMap    = IndexedStringMap<
                               const PreClass::ClassRequirement*, int>;
 
@@ -465,7 +465,7 @@ struct Class : AtomicCountable {
    * @see: Class::ExtraData::m_scopedClones
    */
   using ScopedClonesMap =
-    hphp_hash_map<LowPtr<Class>, ClassPtr, smart_pointer_hash<LowPtr<Class>>>;
+    hphp_hash_map<PackedPtr<Class>, ClassPtr, smart_pointer_hash<PackedPtr<Class>>>;
 
   using classVecLen_t = uint16_t;
   using funcVecLen_t = uint16_t;

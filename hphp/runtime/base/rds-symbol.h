@@ -76,14 +76,14 @@ struct ClsConstant { PackedStringPtr clsName;
  * context.
  */
 struct StaticMethod  {
-  LowStringPtr clsName;
-  LowStringPtr methName;
-  LowStringPtr ctxName;
+  PackedStringPtr clsName;
+  PackedStringPtr methName;
+  PackedStringPtr ctxName;
 };
 struct StaticMethodF {
-  LowStringPtr clsName;
-  LowStringPtr methName;
-  LowStringPtr ctxName;
+  PackedStringPtr clsName;
+  PackedStringPtr methName;
+  PackedStringPtr ctxName;
 };
 
 /*
@@ -138,24 +138,24 @@ struct Profile {
   ProfileKind kind;
   TransID transId;
   Offset bcOff;
-  LowStringPtr name;
+  PackedStringPtr name;
 };
 
 /*
  * Static class properties in Mode::Local.
  */
-struct SPropCache { LowPtr<const Class> cls; Slot slot; };
+struct SPropCache { PackedPtr<const Class> cls; Slot slot; };
 
 struct StaticMemoValue { FuncId funcId; };
 struct StaticMemoCache { FuncId funcId; };
 
 struct LSBMemoValue {
-  LowPtr<const Class> cls;
+  PackedPtr<const Class> cls;
   FuncId funcId;
 };
 
 struct LSBMemoCache {
-  LowPtr<const Class> cls;
+  PackedPtr<const Class> cls;
   FuncId funcId;
 };
 
@@ -165,13 +165,13 @@ struct TSCache {
 
 struct ConstMemoCache {
   FuncId funcId;
-  LowPtr<const Class> cls;
+  PackedPtr<const Class> cls;
   const ArrayData* paramVals;
   bool asyncEager;
 };
 
 struct ModuleCache {
-  LowStringPtr name;
+  PackedStringPtr name;
 };
 
 using Symbol = std::variant<

@@ -567,7 +567,7 @@ private:
   // These are organized in reverse order of frequency of use.  Do not re-order
   // without checking perf!
 private:
-  LowStringPtr m_origFilepath{nullptr};
+  PackedStringPtr m_origFilepath{nullptr};
 
   /*
    * m_mergeState is read without a lock, but only written to under

@@ -1224,13 +1224,23 @@ let check_class_get
         primary
         @@ Primary.Abstract_function_pointer
              { class_name = cid; meth_name = mid; pos = p; decl_pos = def_pos })
-  | CI _ when get_ce_abstract ce ->
-    Typing_error_utils.add_typing_error
-      ~env
-      Typing_error.(
-        primary
-        @@ Primary.Classname_abstract_call
-             { class_name = cid; meth_name = mid; pos = p; decl_pos = def_pos })
+  | CI (_, name) when get_ce_abstract ce ->
+    let is_newable = Env.get_newable env name in
+    if is_newable then
+      (* If T is newable, any concrete implementation will have all static methods implemented. *)
+      ()
+    else
+      Typing_error_utils.add_typing_error
+        ~env
+        Typing_error.(
+          primary
+          @@ Primary.Classname_abstract_call
+               {
+                 class_name = cid;
+                 meth_name = mid;
+                 pos = p;
+                 decl_pos = def_pos;
+               })
   | CI (_, class_name) when get_ce_synthesized ce ->
     Typing_error_utils.add_typing_error
       ~env

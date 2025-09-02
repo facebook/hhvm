@@ -1428,7 +1428,7 @@ private:
     UserAttributeMap m_userAttributes;
     // The link can be bound for const Func.
     mutable rds::Link<bool, rds::Mode::Normal> m_funcHasDebuggerIntr;
-    LowStringPtr m_originalUnit;
+    PackedStringPtr m_originalUnit;
     TypeIntersectionConstraint m_retTypeConstraints;
     RepoAuthType m_repoReturnType;
     RepoAuthType m_repoAwaitedReturnType;
@@ -1491,8 +1491,8 @@ private:
     RuntimeCoeffects m_coeffectEscapes{RuntimeCoeffects::none()};
     // (2 bytes unused)
     int64_t m_dynCallSampleRate;
-    LowStringPtr m_docComment;
-    LowStringPtr m_originalModuleName;
+    PackedStringPtr m_docComment;
+    PackedStringPtr m_originalModuleName;
   };
   static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 224 : 256>(), "");
 
@@ -1748,7 +1748,7 @@ private:
   FuncId m_funcId{FuncId::Invalid};
 #endif
   mutable AtomicPackedPtr<const StringData> m_fullName{nullptr};
-  LowStringPtr m_name{nullptr};
+  PackedStringPtr m_name{nullptr};
 
   struct ClsOrMethCaller {
     struct Cls {

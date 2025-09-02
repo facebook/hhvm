@@ -114,7 +114,7 @@ inline bool any(OBFlags f) { return f != OBFlags::None; }
 inline bool operator!(OBFlags f) { return f == OBFlags::None; }
 
 struct VMParserFrame {
-  LowStringPtr filename;
+  PackedStringPtr filename;
   int lineNumber;
 };
 

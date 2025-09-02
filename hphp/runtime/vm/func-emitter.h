@@ -349,9 +349,9 @@ public:
     };
   };
 
-  LowStringPtr docComment;
-  LowStringPtr originalUnit;
-  LowStringPtr originalModuleName;
+  PackedStringPtr docComment;
+  PackedStringPtr originalUnit;
+  PackedStringPtr originalModuleName;
 
   UserAttributeMap userAttributes;
 

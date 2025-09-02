@@ -572,19 +572,19 @@ namespace {
             auto const ret = v.makeReg();
             auto const unit = v.makeReg();
             v << load{func[Func::unitOff()], unit};
-            emitLdLowPtr<StringData>(v, unit[Unit::moduleNameOff()], ret);
+            emitLdPackedPtr<StringData>(v, unit[Unit::moduleNameOff()], ret);
             return ret;
           },
           [&] (Vout& v) {
             auto const ret = v.makeReg();
-            emitLdLowPtr<StringData>(v, shared[Func::extendedSharedOriginalModuleName()], ret);
+            emitLdPackedPtr<StringData>(v, shared[Func::extendedSharedOriginalModuleName()], ret);
             return ret;
           });
-        emitCmpLowPtr(v, sf, callerModuleName, calleeModuleName);
+        emitCmpPackedPtr(v, sf, callerModuleName, calleeModuleName);
       } else {
         auto const unit = v.makeReg();
         v << load{func[Func::unitOff()], unit};
-        emitCmpLowPtr(v, sf, callerModuleName, unit[Unit::moduleNameOff()]);
+        emitCmpPackedPtr(v, sf, callerModuleName, unit[Unit::moduleNameOff()]);
       };
     } else {
       assertx(inst->src(0)->isA(TCls));
@@ -593,7 +593,7 @@ namespace {
       auto const preclass = v.makeReg();
       v << load{cls[Class::preClassOff()], preclass};
       v << load{preclass[PreClass::unitOffset()], unit};
-      emitCmpLowPtr(v, sf, callerModuleName, unit[Unit::moduleNameOff()]);
+      emitCmpPackedPtr(v, sf, callerModuleName, unit[Unit::moduleNameOff()]);
     }
 
     return sf;

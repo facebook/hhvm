@@ -122,7 +122,7 @@ inline void Unit::makeFilepathPerRequest() {
   assertx(m_extended);
   auto u = getExtended();
   assertx(!u->m_perRequestFilepath.bound());
-  u->m_perRequestFilepath = rds::alloc<LowStringPtr>();
+  u->m_perRequestFilepath = rds::alloc<PackedStringPtr>();
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -90,7 +90,7 @@ TypeConstraint::TypeConstraint(Type type, TypeConstraintFlags flags, ClassConstr
 
 TypeConstraint::TypeConstraint(Type type,
                                TypeConstraintFlags flags,
-                               const LowStringPtr typeName)
+                               const PackedStringPtr typeName)
   : TypeConstraint(
     type,
     flags,
@@ -103,7 +103,7 @@ TypeConstraint::TypeConstraint(Type type, TypeConstraintFlags flags)
 
 TypeConstraint::TypeConstraint(TypeConstraintFlags flags,
                                UnionTypeMask mask,
-                               LowStringPtr typeName,
+                               PackedStringPtr typeName,
                                LowPtr<const UnionClassList> classes)
   : m_flags(flags)
   , m_u {
@@ -113,7 +113,7 @@ TypeConstraint::TypeConstraint(TypeConstraintFlags flags,
   initUnion();
 }
 
-TypeConstraint::UnionBuilder::UnionBuilder(LowStringPtr typeName, size_t capacity) : m_typeName(typeName) {
+TypeConstraint::UnionBuilder::UnionBuilder(PackedStringPtr typeName, size_t capacity) : m_typeName(typeName) {
   m_classes.m_list.reserve(capacity);
 }
 
@@ -424,13 +424,13 @@ void TypeConstraint::serdeSingle(SerDe& sd)  {
   }
 }
 
-ClassConstraint::ClassConstraint(LowStringPtr typeName)
+ClassConstraint::ClassConstraint(PackedStringPtr typeName)
   : ClassConstraint(nullptr, typeName, nullptr) {
   assertx(!typeName || typeName->isStatic());
 }
 
-ClassConstraint::ClassConstraint(LowStringPtr clsName,
-                                 LowStringPtr typeName,
+ClassConstraint::ClassConstraint(PackedStringPtr clsName,
+  PackedStringPtr typeName,
                                  LowPtr<const NamedType> namedType)
   : m_clsName(clsName)
   , m_typeName(typeName)
@@ -507,7 +507,7 @@ void TypeConstraint::initSingle() {
 }
 
 ClassConstraint TypeConstraint::makeClass(Type type,
-                                          const LowStringPtr typeName) {
+                                          const PackedStringPtr typeName) {
   switch (type) {
     case Type::SubObject:
       return ClassConstraint { typeName, typeName, nullptr };
@@ -2010,7 +2010,7 @@ void TypeConstraint::verifyReturnFail(tv_lval c, const Class* ctx,
 
 void TypeConstraint::resolveType(AnnotType t,
                                  bool nullable,
-                                 LowStringPtr clsName) {
+                                 PackedStringPtr clsName) {
   if (isUnion()) {
     not_implemented(); // TODO(T151885113)
   }

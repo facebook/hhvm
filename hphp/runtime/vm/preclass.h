@@ -110,7 +110,7 @@ struct PreClass : AtomicCountable {
   private:
     PackedStringPtr m_name;
     Attr m_attrs;
-    LowStringPtr m_userType;
+    PackedStringPtr m_userType;
     PackedStringPtr m_docComment;
     TypedValue m_val;
     RepoAuthType m_repoAuthType;

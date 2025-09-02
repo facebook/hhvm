@@ -801,7 +801,7 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
       funcs,
       [&] (auto& sd, size_t i) {
         int sn;
-        LowStringPtr name;
+        PackedStringPtr name;
         sd(sn);
         sd(name);
 

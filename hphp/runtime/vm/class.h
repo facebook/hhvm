@@ -254,7 +254,7 @@ struct Class : AtomicCountable {
     RepoAuthType repoAuthType;
     TypeIntersectionConstraint typeConstraints;
 
-    LowStringPtr name;
+    PackedStringPtr name;
 
     /* Most derived class that declared this property. */
     LowPtr<Class> cls;
@@ -280,7 +280,7 @@ struct Class : AtomicCountable {
   struct Const {
     /* Most derived class that declared this constant. */
     LowPtr<const Class> cls;
-    LowStringPtr name;
+    PackedStringPtr name;
     TypedValueAux val;
     const PreClass::Const* preConst;
 #ifndef USE_LOWPTR

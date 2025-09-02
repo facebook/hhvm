@@ -29,6 +29,7 @@
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/extern-worker.h"
 #include "hphp/util/low-ptr.h"
+#include "hphp/util/ptr.h"
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/tribool.h"
@@ -50,7 +51,7 @@ namespace HHBBC {
  * static array.
  */
 using SString  = const StringData*;
-using LSString = LowPtr<const StringData>;
+using LSString = PackedPtr<const StringData>;
 using SArray   = const ArrayData*;
 
 struct Bytecode;

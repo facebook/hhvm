@@ -373,7 +373,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     ex->m_coeffectEscapes = coeffectsInfo.second;
     ex->m_docComment = docComment;
     ex->m_originalModuleName =
-      originalModuleName ? originalModuleName : LowStringPtr(unit.moduleName());
+      originalModuleName ? originalModuleName : PackedStringPtr(unit.moduleName());
     assertx(ex->m_originalModuleName);
   }
 

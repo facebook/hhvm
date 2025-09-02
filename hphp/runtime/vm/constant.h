@@ -29,7 +29,7 @@ namespace HPHP {
  * This is the runtime representation of a constant.
  */
 struct Constant {
-  LowStringPtr name;
+  PackedStringPtr name;
   TypedValue val;
   Attr attrs;
 
@@ -76,4 +76,3 @@ struct Constant {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

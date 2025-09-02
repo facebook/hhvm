@@ -103,9 +103,9 @@ struct TypeConstraint {
   struct ClassConstraint {
     /// Resolved class name. Only valid if this TypeConstraint represents a
     /// resolved object.
-    LowStringPtr m_clsName;
+    PackedStringPtr m_clsName;
     /// Source type name. In general this is the name from the source code.
-    LowStringPtr m_typeName;
+    PackedStringPtr m_typeName;
     /// The NamedType is used to differentiate implementations of
     /// TypeConstraints between requests. The m_typeName is common (it's a
     /// 'Foo') and the NamedType is specialized for each request to indicate the
@@ -113,9 +113,9 @@ struct TypeConstraint {
     LowPtr<const NamedType> m_namedType;
 
     ClassConstraint() = default;
-    explicit ClassConstraint(LowStringPtr typeName);
-    ClassConstraint(LowStringPtr clsName,
-                    LowStringPtr typeName,
+    explicit ClassConstraint(PackedStringPtr typeName);
+    ClassConstraint(PackedStringPtr clsName,
+      PackedStringPtr typeName,
                     LowPtr<const NamedType> namedType);
     explicit ClassConstraint(Class& cls);
 
@@ -170,12 +170,12 @@ struct TypeConstraint {
     // thye must only point at persistant global objects. Use allocObjects() to
     // uniquify/allocate.
     LowPtr<const UnionClassList> m_classes;
-    LowStringPtr m_typeName;
+    PackedStringPtr m_typeName;
     UnionTypeMask m_mask;
 
     UnionConstraint() = default;
     UnionConstraint(UnionTypeMask mask,
-                    LowStringPtr typeName,
+      PackedStringPtr typeName,
                     LowPtr<const UnionClassList> classes)
       : m_classes(classes)
       , m_typeName(typeName)
@@ -195,11 +195,11 @@ struct TypeConstraint {
   TypeConstraint(Type type, TypeConstraintFlags flags, ClassConstraint class_);
   TypeConstraint(Type type,
                  TypeConstraintFlags flags,
-                 const LowStringPtr typeName);
+                 const PackedStringPtr typeName);
   TypeConstraint(Type type, TypeConstraintFlags flags);
 
   template<std::ranges::sized_range R>
-  static TypeConstraint makeUnion(LowStringPtr typeName, R&& tcs) {
+  static TypeConstraint makeUnion(PackedStringPtr typeName, R&& tcs) {
     assertx(typeName != nullptr);
     if (tcs.empty()) {
       return TypeConstraint{typeName, TypeConstraintFlags::NoFlags};
@@ -225,7 +225,7 @@ struct TypeConstraint {
 
   size_t stableHash() const;
 
-  void resolveType(AnnotType t, bool nullable, LowStringPtr clsName);
+  void resolveType(AnnotType t, bool nullable, PackedStringPtr clsName);
   void unresolve();
 
   void addFlags(TypeConstraintFlags flags) {
@@ -577,11 +577,11 @@ struct TypeConstraint {
 private:
   void initSingle();
   void initUnion();
-  ClassConstraint makeClass(Type type, const LowStringPtr typeName);
+  ClassConstraint makeClass(Type type, const PackedStringPtr typeName);
 
   TypeConstraint(TypeConstraintFlags flags,
                  UnionTypeMask mask,
-                 LowStringPtr typeName,
+                 PackedStringPtr typeName,
                  LowPtr<const UnionClassList> classes);
 
   // There are a few cases where a type constraint does not pass, but we don't
@@ -649,14 +649,14 @@ private:
   };
 
   struct UnionBuilder {
-    const LowStringPtr m_typeName;
+    const PackedStringPtr m_typeName;
     TypeConstraintFlags m_flags = TypeConstraintFlags::Union;
     UnionTypeMask m_preciseTypeMask = 0;
     ResolvedType m_resolved = ResolvedType::Unspecified;
     UnionClassList m_classes;
     bool m_containsNonnull = false;
 
-    UnionBuilder(LowStringPtr typeName, size_t capacity);
+    UnionBuilder(PackedStringPtr typeName, size_t capacity);
     Optional<TypeConstraint> recordConstraint(const TypeConstraint& tc);
     TypeConstraint finish() &&;
 

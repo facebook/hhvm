@@ -290,7 +290,7 @@ public:
 
   Location::Range m_fatalLoc;
   FatalOp m_fatalOp;
-  LowStringPtr m_moduleName{makeStaticString(Module::DEFAULT)};
+  PackedStringPtr m_moduleName{makeStaticString(Module::DEFAULT)};
   std::string m_fatalMsg;
   PackageInfo m_packageInfo;
 

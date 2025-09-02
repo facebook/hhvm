@@ -237,7 +237,7 @@ void cgCheckSubClsCns(IRLS& env, const IRInstruction* inst) {
 
   auto const constOffset = slot * sizeof(Class::Const);
 
-  emitCmpLowPtr<StringData>(
+  emitCmpPackedPtr<StringData>(
     v, sf, v.cns(extra->cnsName),
     tmp[constOffset + offsetof(Class::Const, name)]
   );

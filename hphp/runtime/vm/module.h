@@ -29,8 +29,8 @@ namespace HPHP {
  */
 struct Module {
 
-  LowStringPtr name;
-  LowStringPtr docComment;
+  PackedStringPtr name;
+  PackedStringPtr docComment;
   int line0; // start line number on the src file
   int line1; // end line number on the src file
   Attr attrs;

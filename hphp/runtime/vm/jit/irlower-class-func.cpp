@@ -218,7 +218,7 @@ void cgLdFuncName(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const func = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-  emitLdLowPtr<const StringData>(v, func[Func::nameOff()], dst);
+  emitLdPackedPtr<const StringData>(v, func[Func::nameOff()], dst);
 }
 
 void cgLdMethCallerName(IRLS& env, const IRInstruction* inst) {

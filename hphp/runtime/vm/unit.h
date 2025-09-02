@@ -610,7 +610,7 @@ private:
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;
   std::unique_ptr<FatalInfo> m_fatalInfo{nullptr};
-  LowStringPtr m_moduleName{makeStaticString(Module::DEFAULT)};
+  PackedStringPtr m_moduleName{makeStaticString(Module::DEFAULT)};
   std::vector<DeclDep> m_deps;
 
   rds::Link<req::dynamic_bitset, rds::Mode::Normal> m_coverage;
@@ -641,7 +641,7 @@ struct UnitExtended : Unit {
   std::atomic<int64_t> m_cacheRefCount{0};
 
   // Used by Eval.ReuseUnitsByHash:
-  rds::Link<LowStringPtr, rds::Mode::Normal> m_perRequestFilepath;
+  rds::Link<PackedStringPtr, rds::Mode::Normal> m_perRequestFilepath;
 
   // Used by Eval.IdleUnitTimeoutSecs:
   std::atomic<Treadmill::Clock::time_point> m_lastTouchRequestStartTime{};

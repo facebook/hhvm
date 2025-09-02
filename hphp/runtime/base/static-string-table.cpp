@@ -24,6 +24,7 @@
 #include "hphp/runtime/server/memory-stats.h"
 
 #include "hphp/util/low-ptr.h"
+#include "hphp/util/ptr.h"
 
 #include <folly/AtomicHashMap.h>
 
@@ -40,9 +41,9 @@ StringData** precomputed_chars;
 namespace {
 
 // the string key will one of these values:
-//  * a valid LowPtr<StringData>, or
+//  * a valid PackedPtr<StringData>, or
 //  * -1, -2, or -3 AHM magic values.
-using StrInternKey = LowStringPtr::storage_type;
+using StrInternKey = PackedPtr<StringData>::storage_type;
 
 // Return true if k is one of AHM's magic values.
 // https://fburl.com/code/axj01lio

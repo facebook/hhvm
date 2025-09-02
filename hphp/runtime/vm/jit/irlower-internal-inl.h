@@ -190,7 +190,7 @@ void emitSpecializedTypeTest(Vout& v, IRLS& /*env*/, Type type, Loc dataSrc,
     auto const data = materialize(v, dataSrc);
     auto const sf = v.makeReg();
     if (type < TObj) {
-      emitCmpLowPtr(v, sf, type.clsSpec().cls(),
+      emitCmpPackedPtr(v, sf, type.clsSpec().cls(),
                     data[ObjectData::getVMClassOffset()]);
     } else {
       v << cmpq{v.cns(type.clsSpec().cls()), data, sf};

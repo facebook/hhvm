@@ -567,12 +567,12 @@ private:
   // coercing class_meth types.
   void verifyPropTypeHintImpl(tv_lval, const Class::Prop&) const;
 
-// offset:  0       8       12      16
-// 64bit:   header  cls             [subclass][props...]
-// lowptr:  header  cls     [subclass][props...]
+// offset:     0       8       12      16
+// 64bit:      header  cls             [subclass][props...]
+// packedptr:  header  cls     [subclass][props...]
 
 private:
-  const LowPtr<Class> m_cls;
+  const PackedPtr<Class> m_cls;
 };
 #if defined(__x86_64__)
 #pragma pack(pop)
@@ -610,13 +610,13 @@ ALWAYS_INLINE void tvWriteObject(ObjectData* pobj, TypedValue* to) {
   CLASSNAME_IS(#originalName)                                          \
   friend ObjectData* new_##originalName##_Instance(Class*);            \
   friend void delete_##originalName(ObjectData*, const Class*);        \
-  static HPHP::LowPtr<Class> s_classOf;                                \
-  static inline HPHP::LowPtr<Class>& classof() {                       \
+  static HPHP::PackedPtr<Class> s_classOf;                             \
+  static inline HPHP::PackedPtr<Class>& classof() {                    \
     return s_classOf;                                                  \
   }
 
 #define IMPLEMENT_CLASS_NO_SWEEP(cls)                                  \
-  HPHP::LowPtr<Class> c_##cls::s_classOf;
+  HPHP::PackedPtr<Class> c_##cls::s_classOf;
 
 namespace req {
 

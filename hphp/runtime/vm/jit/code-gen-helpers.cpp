@@ -487,7 +487,7 @@ Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsQuad) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Vreg emitLdObjClass(Vout& v, Vreg obj, Vreg d) {
-  emitLdLowPtr<Class>(v, obj[ObjectData::getVMClassOffset()], d);
+  emitLdPackedPtr<Class>(v, obj[ObjectData::getVMClassOffset()], d);
   return d;
 }
 

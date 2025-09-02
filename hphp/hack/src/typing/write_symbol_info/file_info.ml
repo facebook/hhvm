@@ -73,8 +73,8 @@ let compute_member_clusters_hash hash member_clusters =
 
 (* We fetch the class for things that are already found in the decl store. So
    it should never be the case that the decl doesn't exist. *)
-let get_class_exn ctx class_name =
-  Decl_provider.get_class ctx class_name
+let get_class_exn tast_env class_name =
+  Tast_env.get_class tast_env class_name
   |> Decl_entry.to_option
   |> Option.value_or_thunk ~default:(fun () ->
          failwith
@@ -85,7 +85,9 @@ let get_class_exn ctx class_name =
 (* Use the folded decl of a container definition (class/interface/trait) to
    collect inherited members of that definition. Particularly, we collect
    methods, properties, class constants, and type constants. *)
-let collect_inherited_members ctx def =
+let collect_inherited_members ctx tast_def =
+  let def = tast_def in
+  let tast_env = Tast_env.def_env ctx def in
   let empty_member_cluster container =
     {
       container;
@@ -96,7 +98,7 @@ let collect_inherited_members ctx def =
     }
   in
   let update_member_cluster add ~name ~origin (mcs : member_cluster SMap.t) =
-    let origin_decl = get_class_exn ctx origin in
+    let origin_decl = get_class_exn tast_env origin in
     let kind = Class.kind origin_decl in
     let container = { name = origin; kind } in
     SMap.update
@@ -123,7 +125,7 @@ let collect_inherited_members ctx def =
   let inherited_member_clusters = function
     | Aast_defs.Class class_ when has_proper_inherited_members class_ ->
       let class_name = snd class_.Aast_defs.c_name in
-      let class_decl = get_class_exn ctx class_name in
+      let class_decl = get_class_exn tast_env class_name in
       (* Collect members indexed by their origin *)
       let mcs = SMap.empty in
       let mcs =
@@ -171,7 +173,7 @@ let collect_inherited_members ctx def =
           { mc with class_constants = cc :: mc.class_constants }
         in
         let update = update_member_cluster add_class_constant in
-        Class.consts class_decl
+        Tast_env.consts tast_env class_decl
         |> List.fold ~init:mcs ~f:(fun mcs (name, elt) ->
                let origin = elt.Typing_defs.cc_origin in
                (* Skip if

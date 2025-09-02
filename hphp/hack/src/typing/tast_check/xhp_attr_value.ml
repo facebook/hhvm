@@ -89,7 +89,7 @@ let handler =
     method! at_expr env (_, _, e_) =
       match e_ with
       | Xml ((_, class_name), attrs, _children) ->
-        (match Decl_provider.get_class (Tast_env.get_ctx env) class_name with
+        (match Tast_env.get_class env class_name with
         | Decl_entry.Found cls -> List.iter attrs ~f:(check_attr_value env cls)
         | Decl_entry.DoesNotExist
         | Decl_entry.NotYetAvailable ->

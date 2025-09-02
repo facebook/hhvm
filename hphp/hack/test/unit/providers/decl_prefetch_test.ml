@@ -6,6 +6,11 @@
  *
  *)
 
+[@@@alert "-dependencies"]
+(* Doesn't matter that we skip registering dependencies here, since
+ * this is a test.
+ *)
+
 open Hh_prelude
 open Asserter
 open Common_provider

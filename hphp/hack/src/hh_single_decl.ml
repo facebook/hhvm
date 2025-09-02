@@ -6,6 +6,11 @@
  *
  *)
 
+[@@@alert "-dependencies"]
+(* Doesn't matter that we skip registering dependencies here, since
+ * hh_single_decl is not incremental
+ *)
+
 open Hh_prelude
 open Direct_decl_parser
 

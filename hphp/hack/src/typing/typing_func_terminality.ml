@@ -11,12 +11,11 @@ open Hh_prelude
 open Aast
 open Typing_defs
 module Env = Typing_env
-module Cls = Folded_class
 
 (* Not adding a Typing_dep here because it will be added when the
  * Nast is fully processed (by the caller of this code) *)
-let get_fun ctx name =
-  match Decl_provider.get_fun ctx name |> Decl_entry.to_option with
+let get_fun env name =
+  match Typing_env.get_fun env name |> Decl_entry.to_option with
   | Some { fe_type; _ } -> begin
     match get_node fe_type with
     | Tfun ft -> Some ft
@@ -25,13 +24,13 @@ let get_fun ctx name =
   | _ -> None
 
 let get_static_meth
-    (ctx : Provider_context.t) (cls_name : string) (meth_name : string) =
-  match Decl_provider.get_class ctx cls_name with
+    (env : Typing_env_types.env) (cls_name : string) (meth_name : string) =
+  match Typing_env.get_class env cls_name with
   | Decl_entry.DoesNotExist
   | Decl_entry.NotYetAvailable ->
     None
   | Decl_entry.Found cls -> begin
-    match Cls.get_smethod cls meth_name with
+    match Typing_env.get_static_member true env cls meth_name with
     | None -> None
     | Some { Typing_defs.ce_type = (lazy ty); _ } -> begin
       match get_node ty with
@@ -58,8 +57,7 @@ let static_meth_is_noreturn env ci meth_id =
   in
   match class_name with
   | Some class_name ->
-    funopt_is_noreturn
-      (get_static_meth (Env.get_ctx env) class_name (snd meth_id))
+    funopt_is_noreturn (get_static_meth env class_name (snd meth_id))
   | None -> false
 
 let typed_expression_exits (ty, _, _e) = is_type_no_return (get_node ty)
@@ -67,7 +65,7 @@ let typed_expression_exits (ty, _, _e) = is_type_no_return (get_node ty)
 let expression_exits env (_, _, e) =
   match e with
   | Call { func = (_, _, Id (_, fun_name)); _ } ->
-    funopt_is_noreturn @@ get_fun (Env.get_ctx env) fun_name
+    funopt_is_noreturn @@ get_fun env fun_name
   | Call { func = (_, _, Class_const ((_, _, ci), meth_id)); _ } ->
     static_meth_is_noreturn env ci meth_id
   | _ -> false

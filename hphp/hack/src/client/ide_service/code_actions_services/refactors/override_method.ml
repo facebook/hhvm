@@ -57,7 +57,7 @@ let override_method_quickfixes
     SSet.of_list (List.map cls.Aast.c_methods ~f:(fun m -> snd m.Aast.m_name))
   in
 
-  match Decl_provider.get_class (Tast_env.get_ctx env) parent_name with
+  match Tast_env.get_class env parent_name with
   | Decl_entry.Found decl ->
     (* Offer an override action for any inherited method which isn't
        final or private and that the current class hasn't already

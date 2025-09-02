@@ -1097,7 +1097,7 @@ module M = struct
       Cls.final class_ && (not @@ Cls.abstract class_)
     in
     let is_final_non_consistent_construct class_ =
-      match snd @@ Cls.construct class_ with
+      match snd @@ get_construct env class_ with
       | FinalClass -> true
       | Inconsistent
       | ConsistentConstruct ->

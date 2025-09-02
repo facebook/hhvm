@@ -8,7 +8,7 @@
    typing_defs_core
    typing_error
    heap_libc
-   test_injector_config)
- (inline_tests)
+   test_injector_config
+   ounit2)
  (preprocess
-  (pps ppx_assert ppx_expect ppx_inline_test)))
+  (pps ppx_assert ppx_expect ppx_compare)))

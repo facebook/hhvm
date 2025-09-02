@@ -24,7 +24,34 @@ type t =
       patt: t;
     }
 
-and primary = Any_prim
+and primary =
+  | Any_prim (* Existing wildcard *)
+  | Member_not_found of {
+      patt_is_static: static_pattern option; (* Static vs instance pattern *)
+      patt_kind: member_kind_pattern; (* Kind of member pattern *)
+      patt_class_name: Patt_string.t; (* Class name pattern *)
+      patt_member_name: Patt_string.t; (* Member name pattern *)
+      patt_visibility: visibility_pattern option; (* Optional visibility *)
+    }  (** Member not found pattern *)
+
+and static_pattern =
+  | Static_only (* Match only static members *)
+  | Instance_only (* Match only instance members *)
+
+and member_kind_pattern =
+  | Any_member_kind (* Match any kind *)
+  | Method_only (* Methods (static or instance) *)
+  | Property_only (* Properties (static or instance) *)
+  | Class_constant_only (* Class constants (only static) *)
+  | Class_typeconst_only (* Type constants (only static) *)
+
+and visibility_pattern =
+  | Any_visibility
+  | Public_only
+  | Private_only
+  | Protected_only
+  | Internal_only
+[@@deriving eq, show]
 
 and secondary =
   | Of_error of t

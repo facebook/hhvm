@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f6382ab968637b7751981adbd570e8b5>>
+// @generated SignedSource<<4e252e106fa912c12b26d21ec6fafdc8>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -62,6 +62,38 @@ pub enum PattError {
 
 #[derive(
     Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C, u8)]
+pub enum Primary {
+    #[rust_to_ocaml(name = "Any_prim")]
+    AnyPrim,
+    /// Member not found pattern
+    #[rust_to_ocaml(prefix = "patt_")]
+    #[rust_to_ocaml(name = "Member_not_found")]
+    MemberNotFound {
+        is_static: Option<StaticPattern>,
+        kind: MemberKindPattern,
+        class_name: patt_string::PattString,
+        member_name: patt_string::PattString,
+        visibility: Option<VisibilityPattern>,
+    },
+}
+
+#[derive(
+    Clone,
     Copy,
     Debug,
     Deserialize,
@@ -79,12 +111,83 @@ pub enum PattError {
 )]
 #[rust_to_ocaml(and)]
 #[repr(u8)]
-pub enum Primary {
-    #[rust_to_ocaml(name = "Any_prim")]
-    AnyPrim,
+pub enum StaticPattern {
+    #[rust_to_ocaml(name = "Static_only")]
+    StaticOnly,
+    #[rust_to_ocaml(name = "Instance_only")]
+    InstanceOnly,
 }
-impl TrivialDrop for Primary {}
-arena_deserializer::impl_deserialize_in_arena!(Primary);
+impl TrivialDrop for StaticPattern {}
+arena_deserializer::impl_deserialize_in_arena!(StaticPattern);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(u8)]
+pub enum MemberKindPattern {
+    #[rust_to_ocaml(name = "Any_member_kind")]
+    AnyMemberKind,
+    #[rust_to_ocaml(name = "Method_only")]
+    MethodOnly,
+    #[rust_to_ocaml(name = "Property_only")]
+    PropertyOnly,
+    #[rust_to_ocaml(name = "Class_constant_only")]
+    ClassConstantOnly,
+    #[rust_to_ocaml(name = "Class_typeconst_only")]
+    ClassTypeconstOnly,
+}
+impl TrivialDrop for MemberKindPattern {}
+arena_deserializer::impl_deserialize_in_arena!(MemberKindPattern);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[repr(u8)]
+pub enum VisibilityPattern {
+    #[rust_to_ocaml(name = "Any_visibility")]
+    AnyVisibility,
+    #[rust_to_ocaml(name = "Public_only")]
+    PublicOnly,
+    #[rust_to_ocaml(name = "Private_only")]
+    PrivateOnly,
+    #[rust_to_ocaml(name = "Protected_only")]
+    ProtectedOnly,
+    #[rust_to_ocaml(name = "Internal_only")]
+    InternalOnly,
+}
+impl TrivialDrop for VisibilityPattern {}
+arena_deserializer::impl_deserialize_in_arena!(VisibilityPattern);
 
 #[derive(
     Clone,

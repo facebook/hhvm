@@ -87,6 +87,68 @@ let match_exists patt ~matches ~scruts ~env =
   in
   aux scruts
 
+(* -- Member not found pattern helpers -------------------------------------- *)
+
+let matches_static_pattern patt_is_static ~scrut ~env =
+  let open Patt_error in
+  match patt_is_static with
+  | None -> Match.matched env (* No static pattern means match any *)
+  | Some Static_only ->
+    (match scrut with
+    | `static -> Match.matched env
+    | `instance -> Match.no_match)
+  | Some Instance_only ->
+    (match scrut with
+    | `instance -> Match.matched env
+    | `static -> Match.no_match)
+
+let matches_member_kind_instance patt_kind ~scrut ~env =
+  let open Patt_error in
+  let scrut_kind_matches = function
+    | Any_member_kind -> true
+    | Method_only ->
+      (match scrut with
+      | `method_ -> true
+      | _ -> false)
+    | Property_only ->
+      (match scrut with
+      | `property -> true
+      | _ -> false)
+    | Class_constant_only
+    | Class_typeconst_only ->
+      false (* These don't exist for instance members *)
+  in
+  if scrut_kind_matches patt_kind then
+    Match.matched env
+  else
+    Match.no_match
+
+let matches_member_kind_static patt_kind ~scrut ~env =
+  let open Patt_error in
+  let scrut_kind_matches = function
+    | Any_member_kind -> true
+    | Method_only ->
+      (match scrut with
+      | `static_method -> true
+      | _ -> false)
+    | Property_only ->
+      (match scrut with
+      | `class_variable -> true
+      | _ -> false)
+    | Class_constant_only ->
+      (match scrut with
+      | `class_constant -> true
+      | _ -> false)
+    | Class_typeconst_only ->
+      (match scrut with
+      | `class_typeconst -> true
+      | _ -> false)
+  in
+  if scrut_kind_matches patt_kind then
+    Match.matched env
+  else
+    Match.no_match
+
 (* -- Strings --------------------------------------------------------------- *)
 
 let matches_patt_string_help t ~scrut =
@@ -354,6 +416,39 @@ let matches_error ?(env = Env.empty) t ~scrut =
   and aux_primary t err_prim ~env =
     match (t, err_prim) with
     | (Any_prim, _) -> Match.matched env
+    (* -- Member not found patterns ------------------------------------------ *)
+    | ( Member_not_found
+          {
+            patt_is_static;
+            patt_kind;
+            patt_class_name;
+            patt_member_name;
+            patt_visibility = _;
+          },
+        Typing_error.Primary.Member_not_found
+          { kind; class_name; member_name; _ } ) ->
+      Match.(
+        matches_static_pattern patt_is_static ~scrut:`instance ~env
+        >>= fun env ->
+        matches_member_kind_instance patt_kind ~scrut:kind ~env >>= fun env ->
+        matches_string patt_class_name ~scrut:class_name ~env >>= fun env ->
+        matches_string patt_member_name ~scrut:member_name ~env)
+    | ( Member_not_found
+          {
+            patt_is_static;
+            patt_kind;
+            patt_class_name;
+            patt_member_name;
+            patt_visibility = _;
+          },
+        Typing_error.Primary.Smember_not_found
+          { kind; class_name; member_name; _ } ) ->
+      Match.(
+        matches_static_pattern patt_is_static ~scrut:`static ~env >>= fun env ->
+        matches_member_kind_static patt_kind ~scrut:kind ~env >>= fun env ->
+        matches_string patt_class_name ~scrut:class_name ~env >>= fun env ->
+        matches_string patt_member_name ~scrut:member_name ~env)
+    | (Member_not_found _, _) -> Match.no_match
   (* -- Secondary errors ---------------------------------------------------- *)
   and aux_secondary t err_snd ~env =
     match (t, err_snd) with

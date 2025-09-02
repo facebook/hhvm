@@ -148,8 +148,11 @@ patt_binding_ty::PattBindingTy
 patt_locl_ty::Prim
 patt_error::Primary
 patt_error::Callback
+patt_error::MemberKindPattern
 patt_error::ReasonsCallback
 patt_error::Secondary
+patt_error::StaticPattern
+patt_error::VisibilityPattern
 patt_error::PattError
 patt_string::PattString
 patt_name::PattName

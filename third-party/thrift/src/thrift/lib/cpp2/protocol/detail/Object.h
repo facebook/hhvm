@@ -190,6 +190,8 @@ class ObjectWriter : public BaseObjectAdapter {
     cur_.emplace(target);
   }
 
+  static constexpr bool kSupportsArithmeticVectors() { return false; }
+
   uint32_t writeStructBegin(const char* /*name*/) {
     beginValue().emplace_object();
     return 0;

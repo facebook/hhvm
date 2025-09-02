@@ -604,11 +604,22 @@ template <typename Tag>
 struct ListEncode {
   template <typename Protocol, typename T>
   uint32_t operator()(Protocol& prot, const T& list) const {
+    using elem_type = type::native_type<Tag>;
     uint32_t xfer = 0;
     xfer += prot.writeListBegin(
         typeTagToTType<Tag>, checked_container_size(list.size()));
-    for (const auto& elem : list) {
-      xfer += Encode<Tag>{}(prot, elem);
+
+    if constexpr (apache::thrift::detail::pm::
+                      should_process_as_arithmetic_vector_v<
+                          Protocol,
+                          detail::TypeTagToTType<Tag>,
+                          T>) {
+      xfer += prot.template writeArithmeticVector<elem_type>(
+          list.data(), list.size());
+    } else {
+      for (const auto& elem : list) {
+        xfer += Encode<Tag>{}(prot, elem);
+      }
     }
     xfer += prot.writeListEnd();
     return xfer;
@@ -912,27 +923,37 @@ struct Decode<type::list<Tag>> {
       // is not supported yet
       constexpr auto should_resize_without_initialization = false;
 #endif
+      using value_type = typename ListType::value_type;
       constexpr auto should_resize =
           folly::is_detected_v<
               apache::thrift::detail::pm::detect_resize,
               ListType,
               decltype(s)> &&
-          std::is_trivial_v<typename ListType::value_type>;
+          std::is_trivial_v<value_type>;
       // Do special treatments for lists of primitive types, as we found
       // resize is more performant than reserve.
       if constexpr (should_resize_without_initialization) {
         folly::resizeWithoutInitialization(list, s);
-        auto outIt = list.begin();
-        const auto outEnd = list.end();
-        try {
-          for (; outIt != outEnd; ++outIt) {
-            Decode<Tag>{}(prot, *outIt);
+        if constexpr (apache::thrift::detail::pm::
+                          should_process_as_arithmetic_vector_v<
+                              Protocol,
+                              detail::TypeTagToTType<Tag>,
+                              ListType>) {
+          prot.template readArithmeticVector<value_type>(
+              list.data(), list.size());
+        } else {
+          auto outIt = list.begin();
+          const auto outEnd = list.end();
+          try {
+            for (; outIt != outEnd; ++outIt) {
+              Decode<Tag>{}(prot, *outIt);
+            }
+          } catch (...) {
+            // For behaviour parity, initialize the leftover elements when
+            // exceptions happen
+            std::fill(outIt, outEnd, typename ListType::value_type());
+            throw;
           }
-        } catch (...) {
-          // For behaviour parity, initialize the leftover elements when
-          // exceptions happen
-          std::fill(outIt, outEnd, typename ListType::value_type());
-          throw;
         }
       } else if constexpr (should_resize) {
         list.resize(s);

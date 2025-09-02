@@ -116,6 +116,8 @@ class HashProtocol {
 
   static constexpr bool kSortKeys() { return false; }
 
+  static constexpr bool kSupportsArithmeticVectors() { return false; }
+
   uint32_t writeStructBegin(const char*) { return (acc_.beginUnordered(), 0); }
   uint32_t writeStructEnd() { return (acc_.endUnordered(), 0); }
   uint32_t writeFieldBegin(const char*, protocol::TType, int16_t id) {

@@ -68,6 +68,8 @@ class DebugProtocolWriter {
 
   static constexpr bool kHasIndexSupport() { return false; }
 
+  static constexpr bool kSupportsArithmeticVectors() { return false; }
+
   void setOutput(
       folly::IOBufQueue* queue,
       size_t maxGrowth = std::numeric_limits<size_t>::max());

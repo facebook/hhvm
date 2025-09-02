@@ -22,11 +22,11 @@ let nothing_ty = Typing_make_type.nothing Typing_reason.none
 (* To handle typechecking against placeholder, e.g., `... as C<_>`, we convert
    the generic the placeholder is elaborated to into a type variable so that
    the subtyping query can be discharged. *)
-let replace_placeholders_with_tvars env ty =
+let replace_placeholders_with_tvars env pos ty =
   let replace_placeholder env ty =
     match T.get_node ty with
     | T.Tgeneric name when String.contains name '#' ->
-      Typing_env.fresh_type env Pos.none
+      Typing_env.fresh_type env pos
     | _ -> (env, ty)
   in
   match T.get_node ty with
@@ -81,8 +81,8 @@ let trivial_check pos env lhs_ty rhs_ty ~always ~never : unit =
     in
     let (env, rhs_ty) = Env.expand_type env rhs_ty in
     let Equal = Tast_env.eq_typing_env in
-    let env = Typing_env.open_tyvars env Pos.none in
-    let (env, rhs_ty) = replace_placeholders_with_tvars env rhs_ty in
+    let env = Typing_env.open_tyvars env pos in
+    let (env, rhs_ty) = replace_placeholders_with_tvars env pos rhs_ty in
     if Env.is_sub_type env lhs_ty nothing_ty then
       (* If we have a nothing in our hands, there was a bigger problem
          originating from earlier in the program. Don't flag it here, as it is
@@ -93,7 +93,7 @@ let trivial_check pos env lhs_ty rhs_ty ~always ~never : unit =
          propositions with the fresh type variables. Instead, we use `sub_type`
          which feedback the propositions against unconstrained type variables as
          assumptions. *)
-      let callback = Typing_error.Reasons_callback.unify_error_at Pos.none in
+      let callback = Typing_error.Reasons_callback.unify_error_at pos in
       let (env, err_opt1) = TUtils.sub_type env lhs_ty rhs_ty (Some callback) in
       let (env, err_opt2) = Typing_solver.close_tyvars_and_solve env in
       let err_opt = Option.merge err_opt1 err_opt2 ~f:Typing_error.both in

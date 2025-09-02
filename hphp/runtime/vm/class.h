@@ -257,7 +257,7 @@ struct Class : AtomicCountable {
     PackedStringPtr name;
 
     /* Most derived class that declared this property. */
-    LowPtr<Class> cls;
+    PackedPtr<Class> cls;
 
     Attr attrs;
     Slot serializationIdx;
@@ -279,7 +279,7 @@ struct Class : AtomicCountable {
    */
   struct Const {
     /* Most derived class that declared this constant. */
-    LowPtr<const Class> cls;
+    PackedPtr<const Class> cls;
     PackedStringPtr name;
     TypedValueAux val;
     const PreClass::Const* preConst;
@@ -2072,7 +2072,7 @@ private:
   mutable rds::Link<Array, rds::Mode::Normal> m_nonScalarConstantCache;
 
 public:
-  LowPtr<Class> m_next{nullptr}; // used by NamedType
+  PackedPtr<Class> m_next{nullptr}; // used by NamedType
 
 private:
 #ifndef NDEBUG

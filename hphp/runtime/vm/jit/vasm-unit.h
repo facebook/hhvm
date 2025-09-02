@@ -174,7 +174,7 @@ struct Vframe {
   // Parent of root frame
   static constexpr int Top = -1;
 
-  LowPtr<const Func> func;
+  PackedPtr<const Func> func;
   int32_t callOff{-1};
   SBInvOffset sbToRootSbOff{-1};
   int parent;

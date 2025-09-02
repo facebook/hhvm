@@ -32,6 +32,7 @@
 #include "hphp/util/exception.h"
 #include "hphp/util/jemalloc-util.h"
 #include "hphp/util/low-ptr-def.h"
+#include "hphp/util/ptr.h"
 #include "hphp/util/read-only-arena.h"
 #include "hphp/util/slab-manager.h"
 
@@ -446,7 +447,7 @@ template<typename T> using LocalAllocator =
 
 
 template<typename T, typename... Args>
-inline LowPtr<T> static_new(Args&&... args) {
+inline PackedPtr<T> static_new(Args&&... args) {
   void* p = lower_malloc(sizeof(T));
   return new (p) T(std::forward<Args>(args)...);
 }

@@ -22,6 +22,7 @@
 #include <folly/CPortability.h>
 #include "folly/memory/detail/MallocImpl.h"
 #include "hphp/util/low-ptr-def.h"
+#include "hphp/util/ptr.h"
 
 #if FOLLY_SANITIZE
 // ASan is less precise than valgrind so we'll need a superset of those tweaks

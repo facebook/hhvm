@@ -110,13 +110,13 @@ struct TypeConstraint {
     /// TypeConstraints between requests. The m_typeName is common (it's a
     /// 'Foo') and the NamedType is specialized for each request to indicate the
     /// actual underlying implementation of that Class* for each request.
-    LowPtr<const NamedType> m_namedType;
+    PackedPtr<const NamedType> m_namedType;
 
     ClassConstraint() = default;
     explicit ClassConstraint(PackedStringPtr typeName);
     ClassConstraint(PackedStringPtr clsName,
       PackedStringPtr typeName,
-                    LowPtr<const NamedType> namedType);
+                    PackedPtr<const NamedType> namedType);
     explicit ClassConstraint(Class& cls);
 
     size_t stableHash() const;
@@ -169,14 +169,14 @@ struct TypeConstraint {
     // TypeConstaints are global objects (they're used and cached by the JIT) so
     // thye must only point at persistant global objects. Use allocObjects() to
     // uniquify/allocate.
-    LowPtr<const UnionClassList> m_classes;
+    PackedPtr<const UnionClassList> m_classes;
     PackedStringPtr m_typeName;
     UnionTypeMask m_mask;
 
     UnionConstraint() = default;
     UnionConstraint(UnionTypeMask mask,
       PackedStringPtr typeName,
-                    LowPtr<const UnionClassList> classes)
+                    PackedPtr<const UnionClassList> classes)
       : m_classes(classes)
       , m_typeName(typeName)
       , m_mask(mask)
@@ -185,7 +185,7 @@ struct TypeConstraint {
     size_t stableHash() const;
     bool operator==(const UnionConstraint& o) const;
 
-    static LowPtr<const UnionClassList> allocObjects(UnionClassList objects);
+    static PackedPtr<const UnionClassList> allocObjects(UnionClassList objects);
   };
 
   static_assert(CheckSize<UnionConstraint, use_lowptr ? 12 : 24>(), "");
@@ -582,7 +582,7 @@ private:
   TypeConstraint(TypeConstraintFlags flags,
                  UnionTypeMask mask,
                  PackedStringPtr typeName,
-                 LowPtr<const UnionClassList> classes);
+                 PackedPtr<const UnionClassList> classes);
 
   // There are a few cases where a type constraint does not pass, but we don't
   // raise an error. Some of these cases are resolved by mutating val instead.
@@ -690,7 +690,7 @@ struct TcUnionPieceIterator {
 
 private:
   TypeConstraint m_outTc;
-  LowPtr<const TypeConstraint::UnionClassList> m_classes;
+  PackedPtr<const TypeConstraint::UnionClassList> m_classes;
   TypeConstraintFlags m_flags;
   size_t m_nextClass;
   TypeConstraint::UnionTypeMask m_mask;

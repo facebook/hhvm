@@ -104,7 +104,7 @@ TypeConstraint::TypeConstraint(Type type, TypeConstraintFlags flags)
 TypeConstraint::TypeConstraint(TypeConstraintFlags flags,
                                UnionTypeMask mask,
                                PackedStringPtr typeName,
-                               LowPtr<const UnionClassList> classes)
+                               PackedPtr<const UnionClassList> classes)
   : m_flags(flags)
   , m_u {
       .union_={mask, typeName, classes}
@@ -332,7 +332,7 @@ TypeConstraint TypeConstraint::UnionBuilder::finish() && {
     raise_error(msg);
   }
 
-  LowPtr<const UnionClassList> classes = nullptr;
+  PackedPtr<const UnionClassList> classes = nullptr;
   if (!m_classes.m_list.empty()) {
     classes = UnionConstraint::allocObjects(std::move(m_classes));
   }
@@ -431,7 +431,7 @@ ClassConstraint::ClassConstraint(PackedStringPtr typeName)
 
 ClassConstraint::ClassConstraint(PackedStringPtr clsName,
   PackedStringPtr typeName,
-                                 LowPtr<const NamedType> namedType)
+                                 PackedPtr<const NamedType> namedType)
   : m_clsName(clsName)
   , m_typeName(typeName)
   , m_namedType(namedType)
@@ -566,7 +566,7 @@ size_t UnionClassList::stableHash() const {
 namespace {
 struct UnionClassListHasher {
   using is_transparent = void;
-  size_t operator()(LowPtr<const UnionClassList> s) const {
+  size_t operator()(PackedPtr<const UnionClassList> s) const {
     return s->stableHash();
   }
   size_t operator()(const UnionClassList &s) const {
@@ -575,19 +575,19 @@ struct UnionClassListHasher {
 };
 struct UnionClassListEq {
   using is_transparent = void;
-  bool operator()(const UnionClassList& s1, LowPtr<const UnionClassList> s2) const {
+  bool operator()(const UnionClassList& s1, PackedPtr<const UnionClassList> s2) const {
     return s1 == *s2;
   }
-  bool operator()(LowPtr<const UnionClassList> s1, LowPtr<const UnionClassList> s2) const {
+  bool operator()(PackedPtr<const UnionClassList> s1, PackedPtr<const UnionClassList> s2) const {
     return *s1 == *s2;
   }
 };
 }
 
-LowPtr<const UnionClassList>
+PackedPtr<const UnionClassList>
 UnionConstraint::allocObjects(UnionClassList objects) {
   struct Table {
-    hphp_fast_set<LowPtr<const UnionClassList>, UnionClassListHasher, UnionClassListEq> table;
+    hphp_fast_set<PackedPtr<const UnionClassList>, UnionClassListHasher, UnionClassListEq> table;
   };
   static folly::Synchronized<Table> g_table;
 

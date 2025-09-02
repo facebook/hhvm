@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
 
-#include "hphp/util/low-ptr.h"
 #include "hphp/util/rds-local.h"
 
 #include <folly/Format.h>

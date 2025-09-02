@@ -23,7 +23,6 @@
 #include <folly/Format.h>
 
 #include "hphp/util/assertions.h"
-#include "hphp/util/low-ptr.h"
 #include "hphp/util/optional.h"
 #include "hphp/util/portability.h"
 

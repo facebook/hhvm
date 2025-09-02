@@ -23,7 +23,6 @@
 
 #include "hphp/runtime/server/memory-stats.h"
 
-#include "hphp/util/low-ptr.h"
 #include "hphp/util/ptr.h"
 
 #include <folly/AtomicHashMap.h>

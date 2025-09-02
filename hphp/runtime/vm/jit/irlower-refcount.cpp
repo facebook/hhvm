@@ -50,7 +50,6 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/configs/hhir.h"
 #include "hphp/util/configs/jit.h"
-#include "hphp/util/low-ptr.h"
 #include "hphp/util/trace.h"
 
 #include <folly/Format.h>

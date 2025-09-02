@@ -36,7 +36,6 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/configs/hhir.h"
 #include "hphp/util/immed.h"
-#include "hphp/util/low-ptr.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/roar.h"
 #include "hphp/util/trace.h"

@@ -20,7 +20,6 @@
 #include <type_traits>
 
 #include "hphp/util/assertions.h"
-#include "hphp/util/low-ptr.h"
 #include "hphp/util/optional.h"
 #include "hphp/util/smalllocks.h"
 
@@ -179,24 +178,15 @@ struct LockFreePtrWrapper {
   }
 
   template<typename U>
-  typename std::enable_if<std::is_same<T,U>::value && is_lowptr_v<U>,
-                          typename lowptr_traits<U>::pointer>::type
-  getImpl() const {
-    auto p = unlocked();
-    return reinterpret_cast<T*>(&p)->get();
-  }
-
-  template<typename U>
   typename std::enable_if<std::is_same<T,U>::value &&
-                          !std::is_pointer<U>::value &&
-                          !is_lowptr_v<U>, Holder>::type
+                          !std::is_pointer<U>::value, Holder>::type
   getImpl() const {
     return Holder { unlocked() };
   }
 
   template<typename U>
   typename std::enable_if<std::is_same<T,U>::value &&
-                          (std::is_pointer<U>::value || is_lowptr_v<U>),
+                          std::is_pointer<U>::value,
                           T>::type
   copyImpl() const {
     return get();
@@ -204,8 +194,7 @@ struct LockFreePtrWrapper {
 
   template<typename U>
   typename std::enable_if<std::is_same<T,U>::value &&
-                          !std::is_pointer<U>::value &&
-                          !is_lowptr_v<U>, T>::type
+                          !std::is_pointer<U>::value, T>::type
   copyImpl() const {
     // We need to force a copy, rather than a move from get().val. If you
     // change this, make sure you know what you're doing.

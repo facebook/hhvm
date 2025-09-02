@@ -27,7 +27,7 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
 
-#include "hphp/util/low-ptr.h"
+#include "hphp/util/ptr.h"
 #include "hphp/util/rds-local.h"
 
 #include <vector>

@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/types.h"
 
 #include "hphp/util/configs/eval.h"
-#include "hphp/util/low-ptr.h"
+#include "hphp/util/ptr.h"
 
 #include <folly/small_vector.h>
 

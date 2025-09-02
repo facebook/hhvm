@@ -20,9 +20,8 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/type-alias.h"
 
-#include "hphp/util/portability.h"
-#include "hphp/util/low-ptr.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/portability.h"
 #include "hphp/util/ptr.h"
 
 #include <folly/AtomicHashMap.h>

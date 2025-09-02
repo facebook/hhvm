@@ -24,7 +24,7 @@
 
 namespace HPHP {
 
-using LowStrPtr = LowPtr<const StringData>;
+using PackedStringPtr = PackedPtr<const StringData>;
 
 namespace lldb_test {
 
@@ -170,9 +170,9 @@ void takePtrToResource(OptResource* UNUSED v) { return; }
 void takeObject(Object UNUSED v) { return; }
 void takeReqPtr(req::ptr<ObjectData> UNUSED v) { return; }
 void takeOptional(Optional<String> UNUSED v) { return; }
-void takeLowPtr(LowPtr<Class> UNUSED v) { return; }
-void takeLowPtrRef(const LowPtr<Class> UNUSED &v) { return; }
-void takeLowStrPtr(LowStrPtr UNUSED v) { return; }
+void takeLowPtr(PackedPtr<Class> UNUSED v) { return; }
+void takeLowPtrRef(const PackedPtr<Class> UNUSED &v) { return; }
+void takeLowStrPtr(PackedStringPtr UNUSED v) { return; }
 void takeExtension(Extension UNUSED v) { return; }
 void takeArrayData(ArrayData UNUSED *v) { return; }
 void takeArrayVec(Array UNUSED v) { return; }
@@ -195,7 +195,7 @@ void buildOtherValues() {
   auto s = String("hello");
   auto rsc = OptResource(req::make<DummyResource>());
   auto cls = TestObject->getVMClass();
-  auto lp = LowPtr(cls);
+  auto lp = PackedPtr(cls);
   auto func = cls->getCtor();
   auto lazy_cls = LazyClassData::create(StringData::MakeStatic("SpecialLazyClass"));
 
@@ -214,7 +214,7 @@ void buildOtherValues() {
   takeOptional(Optional<String>());
   takeLowPtr(lp);
   takeLowPtrRef(lp);
-  takeLowStrPtr(LowStrPtr(StringData::MakeStatic("hello")));
+  takeLowStrPtr(PackedStringPtr(StringData::MakeStatic("hello")));
   takeExtension(Extension("test-extension", "0.5", "test-oncall"));
   takeArrayData(vec.get());
   takeArrayVec(vec);

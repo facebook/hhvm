@@ -24,7 +24,6 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/type-specialization.h"
 #include "hphp/util/bitset.h"
-#include "hphp/util/low-ptr.h"
 
 #include <cstdint>
 #include <type_traits>

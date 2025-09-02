@@ -21,6 +21,12 @@
 
 namespace HPHP {
 
+#ifdef USE_LOWPTR
+constexpr bool use_lowptr = true;
+#else
+constexpr bool use_lowptr = false;
+#endif
+
 #if defined(USE_PACKEDPTR) && defined(USE_LOWPTR)
 constexpr bool use_packedptr = true;
 #else

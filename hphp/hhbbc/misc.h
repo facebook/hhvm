@@ -28,7 +28,6 @@
 
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/extern-worker.h"
-#include "hphp/util/low-ptr.h"
 #include "hphp/util/ptr.h"
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"

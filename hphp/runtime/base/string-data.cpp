@@ -982,20 +982,6 @@ size_t BlobEncoderHelper<const StringData*>::peekSize(BlobDecoder& decoder) {
   return sizeBytes + size;
 }
 
-void BlobEncoderHelper<LowStringPtr>::serde(BlobEncoder& encoder,
-                                            LowStringPtr s) {
-  auto const sd = s.get();
-  encoder(sd);
-}
-
-void BlobEncoderHelper<LowStringPtr>::serde(BlobDecoder& decoder,
-                                            LowStringPtr& s) {
-  const StringData* sd;
-  decoder(sd);
-  s = sd;
-}
-
-
 void BlobEncoderHelper<PackedStringPtr>::serde(BlobEncoder& encoder,
   PackedStringPtr s) {
   auto const sd = s.get();

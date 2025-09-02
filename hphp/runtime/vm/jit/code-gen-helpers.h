@@ -26,7 +26,6 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/immed.h"
-#include "hphp/util/low-ptr.h"
 #include "hphp/util/ptr.h"
 #include "hphp/util/ringbuffer.h"
 
@@ -60,11 +59,6 @@ void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref);
 void ldLowPtrImpl(Vout& v, Vptr mem, Vreg reg, size_t size);
 
 template <typename T>
-void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg) {
-  ldLowPtrImpl(v, mem, reg, LowPtr<T>::bits);
-}
-
-template <typename T>
 void emitLdPackedPtr(Vout& v, Vptr mem, Vreg reg) {
   ldLowPtrImpl(v, mem, reg, PackedPtr<T>::bits);
 }
@@ -73,11 +67,6 @@ void emitLdPackedPtr(Vout& v, Vptr mem, Vreg reg) {
  * Store the LowPtr<T> in `reg' into `mem', with storage size `size'.
  */
 void stLowPtrImpl(Vout& v, Vreg reg, Vptr mem, size_t size);
-
-template <typename T>
-void emitStLowPtr(Vout& v, Vreg reg, Vptr mem) {
-  stLowPtrImpl(v, reg, mem, LowPtr<T>::bits);
-}
 
 template <typename T>
 void emitStPackedPtr(Vout& v, Vreg reg, Vptr mem) {
@@ -252,29 +241,6 @@ void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vptr mem, size_t size);
 void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vreg reg, size_t size);
 void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg, Vptr mem, size_t size);
 void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg1, Vreg reg2, size_t size);
-
-/*
- * Compare two LowPtrs, setting the result in `sf'.
- */
-template<class T>
-void emitCmpLowPtr(Vout& v, Vreg sf, const T* c, Vptr mem) {
-  cmpLowPtrImpl(v, sf, c, mem, LowPtr<T>::bits);
-}
-
-template<class T>
-void emitCmpLowPtr(Vout& v, Vreg sf, const T* c, Vreg reg) {
-  cmpLowPtrImpl(v, sf, c, reg, LowPtr<T>::bits);
-}
-
-template<class T>
-void emitCmpLowPtr(Vout& v, Vreg sf, Vreg reg, Vptr mem) {
-  cmpLowPtrImpl(v, sf, reg, mem, LowPtr<T>::bits);
-}
-
-template<class T>
-void emitCmpLowPtr(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
-  cmpLowPtrImpl(v, sf, reg1, reg2, LowPtr<T>::bits);
-}
 
 /*
  * Compare two LowPtrs, setting the result in `sf'.

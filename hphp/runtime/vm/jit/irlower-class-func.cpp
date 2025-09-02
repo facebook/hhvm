@@ -33,7 +33,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/configs/eval.h"
-#include "hphp/util/low-ptr.h"
+#include "hphp/util/ptr.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {

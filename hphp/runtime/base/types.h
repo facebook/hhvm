@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/func-id.h"
 
 #include "hphp/util/blob-encoder.h"
-#include "hphp/util/low-ptr.h"
 #include "hphp/util/ptr.h"
 
 #include <cstdint>
@@ -47,15 +46,7 @@ extern const StaticString empty_string_ref; // const StaticString&
 ///////////////////////////////////////////////////////////////////////////////
 
 struct StringData;
-using LowStringPtr = LowPtr<const StringData>;
 using PackedStringPtr = PackedPtr<const StringData>;
-
-template<>
-struct BlobEncoderHelper<LowStringPtr> {
-  // Implemented in string-data.cpp
-  static void serde(BlobEncoder&, LowStringPtr);
-  static void serde(BlobDecoder&, LowStringPtr&);
-};
 
 template<>
 struct BlobEncoderHelper<PackedStringPtr> {

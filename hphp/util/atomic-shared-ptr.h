@@ -17,7 +17,6 @@
 #pragma once
 
 #include "hphp/util/atomic-countable.h"
-#include "hphp/util/low-ptr.h"
 #include "hphp/util/ptr.h"
 
 #include <type_traits>
@@ -149,9 +148,6 @@ private:
 
 template<typename T>
 using AtomicSharedPtr = AtomicSharedPtrImpl<T, T*>;
-
-template<typename T>
-using AtomicSharedLowPtr = AtomicSharedPtrImpl<T, LowPtr<T>>;
 
 template<typename T>
 using AtomicSharedPackedPtr = AtomicSharedPtrImpl<T, PackedPtr<T>>;

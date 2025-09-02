@@ -44,7 +44,6 @@
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/util/alloc.h"
-#include "hphp/util/low-ptr.h"
 #include "hphp/runtime/base/implicit-context.h"
 
 

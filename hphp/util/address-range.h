@@ -19,6 +19,7 @@
 #include "hphp/util/alloc-defs.h"
 
 #include "hphp/util/lock-free-ptr-wrapper.h"
+#include "hphp/util/ptr.h"
 
 namespace HPHP {
 
@@ -52,6 +53,12 @@ constexpr size_t kLocalArenaSizeLimit = 64ull << 30;
 // Extra pages for Arena 0
 constexpr uintptr_t kArena0Base = 2ull << 40;
 constexpr uintptr_t kDebugAddr = 3ull << 39;
+
+inline bool is_low_mem(void* m) {
+  assertx(use_lowptr);
+  auto const i = reinterpret_cast<uintptr_t>(m);
+  return i < kLowArenaMaxAddr;
+}
 
 namespace alloc {
 

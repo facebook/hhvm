@@ -51,7 +51,7 @@ void cgEqCls(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   auto const sf = v.makeReg();
-  emitCmpLowPtr<Class>(v, sf, src2, src1);
+  v << cmpq{src2, src1, sf};
   v << setcc{CC_E, sf, dst};
 }
 

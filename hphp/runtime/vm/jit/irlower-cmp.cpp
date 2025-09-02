@@ -304,7 +304,7 @@ void cgEqFunc(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const sf = v.makeReg();
 
-  emitCmpLowPtr<Func>(v, sf, s1, s0);
+  v << cmpq{s1, s0, sf};
   v << setcc{CC_E, sf, d};
 }
 
@@ -317,7 +317,7 @@ void cgEqFuncId(IRLS& env, const IRInstruction* inst) {
   auto const sf = v.makeReg();
   #ifdef USE_LOWPTR
     assertx(Cfg::Repo::Authoritative);
-    emitCmpLowPtr(v, sf, funcPtr, func);
+    v << cmpq{func, v.cns(funcPtr), sf};
   #else
     auto const funcId = funcPtr->getFuncId();
     auto const off = Func::funcIdOffset();

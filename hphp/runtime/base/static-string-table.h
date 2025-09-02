@@ -59,7 +59,7 @@ extern StringData** precomputed_chars;
 
 inline bool is_static_string(const StringData* s) {
   if (!use_lowptr) return s->isStatic();
-  return (uint64_t)s < kLowArenaMaxAddr;
+  return is_low_mem(reinterpret_cast<void*>(const_cast<StringData*>(s)));
 }
 
 /*

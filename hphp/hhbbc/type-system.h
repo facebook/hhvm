@@ -20,7 +20,6 @@
 #include <utility>
 
 #include "hphp/util/copy-ptr.h"
-#include "hphp/util/low-ptr.h"
 #include "hphp/util/ptr.h"
 
 #include "hphp/runtime/base/repo-auth-type.h"

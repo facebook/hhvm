@@ -38,7 +38,6 @@
 #include "hphp/util/atomic-countable.h"
 #include "hphp/util/check-size.h"
 #include "hphp/util/fixed-vector.h"
-#include "hphp/util/low-ptr.h"
 #include "hphp/util/ptr.h"
 
 #include <atomic>

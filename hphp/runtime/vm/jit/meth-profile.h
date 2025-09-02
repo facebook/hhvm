@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/func.h"
 
-#include "hphp/util/low-ptr.h"
+#include "hphp/util/ptr.h"
 
 namespace HPHP {
 

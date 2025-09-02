@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "hphp/util/low-ptr.h"
+#include "hphp/util/ptr.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP {
@@ -127,13 +128,11 @@ struct AtomicVector : AtomicGrowableVector<std::atomic<T>, T> {
 };
 
 template<typename T>
-struct AtomicLowPtrVector
-  : AtomicGrowableVector<AtomicLowPtr<T,
-                                      std::memory_order_acquire,
-                                      std::memory_order_release>,
+struct AtomicPackedPtrVector
+  : AtomicGrowableVector<AtomicPackedPtr<T>,
                          T*>
 {
-  AtomicLowPtrVector(size_t size, const T* def);
+  AtomicPackedPtrVector(size_t size, const T* def);
 
   /*
    * Accessors
@@ -150,11 +149,10 @@ struct AtomicLowPtrVector
    * have been parsed.
    */
   template<typename V>
-  friend void UnsafeReinitEmptyAtomicLowPtrVector(AtomicLowPtrVector<V>& vec,
+  friend void UnsafeReinitEmptyAtomicPackedPtrVector(AtomicPackedPtrVector<V>& vec,
                                                   size_t size);
 };
 
 }
 
 #include "hphp/util/atomic-vector-inl.h"
-

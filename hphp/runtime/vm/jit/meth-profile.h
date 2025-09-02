@@ -120,7 +120,7 @@ private:
 private:
   // We need to store Func* and tags together to handle the race condition in MethProfile::reduce
   std::atomic<const Func*> m_curMeth;
-  AtomicLowPtr<const Class> m_curClass;
+  AtomicPackedPtr<const Class> m_curClass;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

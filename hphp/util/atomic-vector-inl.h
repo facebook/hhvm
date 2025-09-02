@@ -151,31 +151,29 @@ void UnsafeReinitEmptyAtomicVector(AtomicVector<T>& vec, size_t size) {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename T>
-AtomicLowPtrVector<T>::AtomicLowPtrVector(size_t size, const T* def)
-  : AtomicGrowableVector<AtomicLowPtr<T,
-                                      std::memory_order_acquire,
-                                      std::memory_order_release>,
+AtomicPackedPtrVector<T>::AtomicPackedPtrVector(size_t size, const T* def)
+  : AtomicGrowableVector<AtomicPackedPtr<T>,
                          T*>(size, def)
 {}
 
 template<typename T>
-T* AtomicLowPtrVector<T>::get(size_t i) const {
+T* AtomicPackedPtrVector<T>::get(size_t i) const {
   return (*this)[i];
 }
 
 template<typename T>
-void AtomicLowPtrVector<T>::set(size_t i, const T* val) {
+void AtomicPackedPtrVector<T>::set(size_t i, const T* val) {
   (*this)[i] = val;
 }
 
 template<typename T>
-void UnsafeReinitEmptyAtomicLowPtrVector(AtomicLowPtrVector<T>& vec,
+void UnsafeReinitEmptyAtomicPackedPtrVector(AtomicPackedPtrVector<T>& vec,
                                          size_t size) {
   always_assert(vec.size() == 0);
 
   auto const defVal = vec.m_default;
-  vec.~AtomicLowPtrVector<T>();
-  new (&vec) AtomicLowPtrVector<T>(size, defVal);
+  vec.~AtomicPackedPtrVector<T>();
+  new (&vec) AtomicPackedPtrVector<T>(size, defVal);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -39,6 +39,7 @@
 #include "hphp/util/check-size.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/low-ptr.h"
+#include "hphp/util/ptr.h"
 
 #include <atomic>
 #include <utility>
@@ -53,7 +54,7 @@ struct NamedFunc;
 struct PreClass;
 struct StringData;
 struct StructuredLogEntry;
-template <typename T> struct AtomicLowPtrVector;
+template <typename T> struct AtomicPackedPtrVector;
 
 /*
  * Signature for native functions called by the hhvm using the hhvm
@@ -125,7 +126,7 @@ struct Func final {
 #ifndef USE_LOWPTR
   // DO NOT access it directly, instead use Func::getFuncVec()
   // Exposed in the header file for gdb python macros
-  static AtomicLowPtrVector<const Func> s_funcVec;
+  static AtomicPackedPtrVector<const Func> s_funcVec;
 #endif
   /////////////////////////////////////////////////////////////////////////////
   // Types.

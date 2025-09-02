@@ -77,9 +77,9 @@ Mutex g_funcsMutex;
  */
 static std::atomic<FuncId::Int> s_nextFuncId{1};
 #ifndef USE_LOWPTR
-AtomicLowPtrVector<const Func> Func::s_funcVec{0, nullptr};
+AtomicPackedPtrVector<const Func> Func::s_funcVec{0, nullptr};
 static InitFiniNode s_funcVecReinit([]{
-  UnsafeReinitEmptyAtomicLowPtrVector(
+  UnsafeReinitEmptyAtomicPackedPtrVector(
     Func::s_funcVec, Cfg::Eval::FuncCountHint);
 }, InitFiniNode::When::PostRuntimeOptions, "s_funcVec reinit");
 #else

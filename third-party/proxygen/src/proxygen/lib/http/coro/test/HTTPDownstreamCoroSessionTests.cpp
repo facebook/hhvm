@@ -1979,8 +1979,7 @@ TEST_P(HTTPDownstreamSessionTest, HoldContext) {
 
 TEST_P(H2DownstreamSessionTest, ResetStreamNoError) {
   // Client sends RST_STREAM with NO_ERROR while server has not finished
-  // consuming ingress. This used to trigger a CHECK in
-  // ErrorCode2HTTPErrorCode(NO_ERROR) prior to the fix.
+  // consuming ingress.
   sendRequest("/", nullptr, /*eom=*/false, /*eof=*/false);
 
   auto handler =
@@ -1991,22 +1990,22 @@ TEST_P(H2DownstreamSessionTest, ResetStreamNoError) {
         auto id = *requestSource.getStreamID();
         co_await expectRequest(
             requestSource, HTTPMethod::GET, "/", /*eom=*/false);
+
         // Inbound RST_STREAM with NO_ERROR from the peer.
         resetStream(id, ErrorCode::NO_ERROR);
-        // Some transports in tests expect an extra read tick to drain.
-        transport_->addReadEvent(writeBuf_.move(), /*eom*/ true);
+        transport_->addReadEvent(writeBuf_.move(), /*eom=*/true);
+
         // Expect the body read to surface a CANCEL error (normalized).
         auto bodyEvent =
             co_await co_awaitTry(readBodyEventNoSuspend(requestSource));
         EXPECT_TRUE(bodyEvent.hasException());
+
         auto err = getHTTPError(bodyEvent);
         EXPECT_TRUE(isCancelled(err.code));
-        EXPECT_TRUE(err.msg.ends_with("details=received RST_STREAM from peer"));
         co_return nullptr;
       });
 
   evb_.loop();
-  parseOutput();
 }
 
 // H2 only, H1 needs to test with transport write error

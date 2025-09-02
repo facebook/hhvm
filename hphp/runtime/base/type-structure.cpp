@@ -969,7 +969,7 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
             clsName.data(),
             cnsName.data());
         }
-        auto tv = cls->clsCnsGet(cnsName.get(), ConstModifiers::Kind::Type,
+        auto tv = cls->clsCnsGet(cnsName.get(), ConstModifierFlags::Kind::Type,
                                  !env.allow_partial);
         if (!tv.is_init()) {
           assertx(env.allow_partial);

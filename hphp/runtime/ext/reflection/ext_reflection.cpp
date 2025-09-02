@@ -1653,7 +1653,7 @@ void addClassConstantNames(const Class* cls,
   bool has_constants_from_included_enums = false;
   for (size_t i = 0; i < numConsts; i++) {
     if (!consts[i].isAbstractAndUninit() &&
-        consts[i].kind() == ConstModifiers::Kind::Value) {
+        consts[i].kind() == ConstModifierFlags::Kind::Value) {
       if (consts[i].cls == cls) {
         st->add(const_cast<StringData*>(consts[i].name.get()));
       } else if (cls->hasIncludedEnums()
@@ -1746,7 +1746,7 @@ static Array HHVM_STATIC_METHOD(
   return orderedConstantsHelper(
     get_class_from_name(clsname),
     [](Class::Const c) -> bool {
-      return c.isAbstractAndUninit() && c.kind() == ConstModifiers::Kind::Value;
+      return c.isAbstractAndUninit() && c.kind() == ConstModifierFlags::Kind::Value;
     }
   );
 }
@@ -1759,7 +1759,7 @@ static Array HHVM_STATIC_METHOD(
   return orderedConstantsHelper(
     get_class_from_name(clsname),
     [](Class::Const c) -> bool {
-      return c.kind() == ConstModifiers::Kind::Type;
+      return c.kind() == ConstModifierFlags::Kind::Type;
     }
   );
 }
@@ -1963,7 +1963,7 @@ static bool HHVM_METHOD(ReflectionTypeConstant, __init,
 
   for (size_t i = 0; i < numConsts; i++) {
     if (const_name.same(consts[i].name)
-        && consts[i].kind() == ConstModifiers::Kind::Type) {
+        && consts[i].kind() == ConstModifierFlags::Kind::Type) {
       auto handle = ReflectionConstHandle::Get(this_);
       handle->setConst(&consts[i]);
       handle->setClass(cls);
@@ -1995,7 +1995,7 @@ static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
 
   if (isArrayLikeType(cns->val.m_type)) {
     auto typeCns = cns->preConst;
-    assertx(typeCns->kind() == ConstModifiers::Kind::Type);
+    assertx(typeCns->kind() == ConstModifierFlags::Kind::Type);
     assertx(!typeCns->isAbstractAndUninit());
     assertx(isArrayLikeType(typeCns->val().m_type));
     return TypeStructure::toString(Array::attach(typeCns->val().m_data.parr),

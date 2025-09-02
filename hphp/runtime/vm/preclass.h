@@ -151,14 +151,14 @@ struct PreClass : AtomicCountable {
     }
     bool isFromTrait()     const { return m_fromTrait; }
     bool isAbstractAndUninit()   const {
-      return (m_val.constModifiers().isAbstract() &&
+      return (m_val.constModifierFlags().isAbstract &&
               !m_val.is_init() &&
               m_val.is_const_val_missing());
     }
     bool isAbstract()            const {
-      return m_val.constModifiers().isAbstract();
+      return m_val.constModifierFlags().isAbstract;
     }
-    ConstModifiers::Kind kind()  const { return m_val.constModifiers().kind(); }
+    ConstModifierFlags::Kind kind()  const { return m_val.constModifierFlags().kind; }
     Invariance invariance() const { return m_invariance; }
 
     StaticCoeffects coeffects()  const;

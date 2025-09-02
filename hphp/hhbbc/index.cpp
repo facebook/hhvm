@@ -4313,7 +4313,7 @@ struct ClassInfo2 {
     ConstIndex idx;
     // Store the kind here as well, so we don't need to potentially
     // find another class to determine it.
-    ConstModifiers::Kind kind;
+    ConstModifierFlags::Kind kind;
     template <typename SerDe> void serde(SerDe& sd) {
       sd(idx)(kind);
     }
@@ -9566,7 +9566,7 @@ struct FlattenJob {
         std::any_of(
           begin(cinfo->clsConstants), end(cinfo->clsConstants),
           [] (auto const& cns) {
-            return cns.second.kind == ConstModifiers::Kind::Type;
+            return cns.second.kind == ConstModifierFlags::Kind::Type;
           }
         );
       if (has86init) {
@@ -10665,9 +10665,9 @@ private:
         cinfo.name,
         name,
         cnsIdx.idx.cls,
-        ConstModifiers::show(cns.kind),
+        ConstModifierFlags::show(cns.kind),
         existingIdx.idx.cls,
-        ConstModifiers::show(existing.kind)
+        ConstModifierFlags::show(existing.kind)
       );
       return false;
     }
@@ -10690,7 +10690,7 @@ private:
        * Type and Context constants can be overridden.
        */
       auto const& cnsCls = index.cls(cnsIdx.idx.cls);
-      if (cns.kind == ConstModifiers::Kind::Value &&
+      if (cns.kind == ConstModifierFlags::Kind::Value &&
           !existing.isAbstract &&
           (existingCnsCls.attrs & AttrInterface) &&
           !((cnsCls.attrs & AttrInterface) && fromTrait)) {
@@ -10718,7 +10718,7 @@ private:
            (Cfg::Eval::TraitConstantInterfaceBehavior &&
             (cnsCls.attrs & AttrTrait))) &&
           (existing.isAbstract ||
-           cns.kind == ConstModifiers::Kind::Type)) {
+           cns.kind == ConstModifierFlags::Kind::Type)) {
         // Because existing has val, this covers the case where it is
         // abstract with default allow incoming to win.  Also, type
         // constants from interfaces may be overridden even if they're
@@ -16957,7 +16957,7 @@ void make_class_infos_local(
 
         for (size_t i = 0, size = cinfo->cls->constants.size(); i < size; ++i) {
           auto const& cns = cinfo->cls->constants[i];
-          if (cns.kind != ConstModifiers::Kind::Value) continue;
+          if (cns.kind != ConstModifierFlags::Kind::Value) continue;
           if (!cns.val.has_value())                    continue;
           if (cns.val->m_type != KindOfUninit)         continue;
           if (i >= cinfo->clsConstTypes.size()) {
@@ -18035,7 +18035,7 @@ void Index::preresolve_type_structures() {
 
       for (auto& cns : const_cast<php::Class*>(cinfo->cls)->constants) {
         assertx(cns.invariance == php::Const::Invariance::None);
-        if (cns.kind != ConstModifiers::Kind::Type) continue;
+        if (cns.kind != ConstModifierFlags::Kind::Type) continue;
         if (!cns.val.has_value()) continue;
         if (!cns.resolvedTypeStructure) continue;
 
@@ -18063,7 +18063,7 @@ void Index::preresolve_type_structures() {
 
           // Overridden in some strange way. Be pessimistic.
           if (!scns.val.has_value() ||
-              scns.kind != ConstModifiers::Kind::Type) {
+              scns.kind != ConstModifierFlags::Kind::Type) {
             invariance = php::Const::Invariance::None;
             break;
           }
@@ -18820,7 +18820,7 @@ ClsConstLookupResult Index::lookup_class_constant(Context ctx,
     // Is it a value and is it non-abstract (we only deal with
     // concrete constants).
     auto const& cns = *it->second.get();
-    if (cns.kind != ConstModifiers::Kind::Value) return notFound();
+    if (cns.kind != ConstModifierFlags::Kind::Value) return notFound();
     if (!cns.val.has_value()) return notFound();
 
     auto const cnsIdx = it->second.idx;
@@ -18932,7 +18932,7 @@ Index::lookup_class_constants(const php::Class& cls) const {
   auto const cinfo = folly::get_default(m_data->classInfo, cls.name);
   for (size_t i = 0, size = cls.constants.size(); i < size; ++i) {
     auto const& cns = cls.constants[i];
-    if (cns.kind != ConstModifiers::Kind::Value) continue;
+    if (cns.kind != ConstModifierFlags::Kind::Value) continue;
     if (!cns.val) continue;
     if (cns.val->m_type != KindOfUninit) {
       out.emplace_back(cns.name, ClsConstInfo{ from_cell(*cns.val), 0 });
@@ -19001,7 +19001,7 @@ Index::lookup_class_type_constant(
 
     // Is it an actual non-abstract type-constant?
     auto const& cns = *it->second;
-    if (cns.kind != ConstModifiers::Kind::Type) return notFound();
+    if (cns.kind != ConstModifierFlags::Kind::Type) return notFound();
     if (!cns.val.has_value()) return abstract();
 
     assertx(tvIsDict(*cns.val));
@@ -19767,7 +19767,7 @@ void Index::refine_class_constants(const Context& ctx,
   for (auto& c : resolved) {
     assertx(c.first < constants.size());
     auto& cnst = constants[c.first];
-    assertx(cnst.kind == ConstModifiers::Kind::Value);
+    assertx(cnst.kind == ConstModifierFlags::Kind::Value);
 
     always_assert(cnst.val && type(*cnst.val) == KindOfUninit);
     if (auto const val = tv(c.second.type)) {
@@ -23731,10 +23731,10 @@ void mark_fixed_class_constants(const php::Class& cls,
     auto const& cns = cls.constants[i];
     auto const fixed = [&] {
       if (!cns.val) return true;
-      if (cns.kind == ConstModifiers::Kind::Type) {
+      if (cns.kind == ConstModifierFlags::Kind::Type) {
         // A type-constant is fixed if it's been resolved.
         return cns.resolvedTypeStructure && cns.contextInsensitive;
-      } else if (cns.kind == ConstModifiers::Kind::Value) {
+      } else if (cns.kind == ConstModifierFlags::Kind::Value) {
         // A normal constant is fixed if it's a scalar.
         return type(*cns.val) != KindOfUninit;
       } else {
@@ -23758,7 +23758,7 @@ void mark_fixed_class_constants(const php::Class& cls,
     if (!cinfo) continue;
     assertx(idx.idx < cinfo->cls->constants.size());
     auto const& cns = cinfo->cls->constants[idx.idx];
-    if (cns.kind != ConstModifiers::Kind::Type) continue;
+    if (cns.kind != ConstModifierFlags::Kind::Type) continue;
     if (!cns.val.has_value()) continue;
     auto const ts = [&] () -> SArray {
       if (cns.resolvedTypeStructure &&
@@ -24354,7 +24354,7 @@ AnalysisIndex::lookup_flattened_class_type_constants(
 
   out.reserve(cinfo->clsConstants.size());
   for (auto const& [name, idx] : cinfo->clsConstants) {
-    if (idx.kind != ConstModifiers::Kind::Type) continue;
+    if (idx.kind != ConstModifierFlags::Kind::Type) continue;
     out.emplace_back(name, idx.idx);
   }
   std::sort(
@@ -24371,7 +24371,7 @@ AnalysisIndex::lookup_class_constants(const php::Class& cls) const {
   std::vector<std::pair<SString, ClsConstInfo>> out;
   out.reserve(cls.constants.size());
   for (auto const& cns : cls.constants) {
-    if (cns.kind != ConstModifiers::Kind::Value) continue;
+    if (cns.kind != ConstModifierFlags::Kind::Value) continue;
     if (!cns.val) continue;
     if (cns.val->m_type != KindOfUninit) {
       out.emplace_back(cns.name, ClsConstInfo{ from_cell(*cns.val), 0 });
@@ -24439,7 +24439,7 @@ AnalysisIndex::lookup_class_constant(const Type& cls,
     auto const& idx = idxIt->second;
 
     assertx(!m_data->badClasses.contains(idx.idx.cls));
-    if (idx.kind != ConstModifiers::Kind::Value) return notFound();
+    if (idx.kind != ConstModifierFlags::Kind::Value) return notFound();
 
     if (!m_data->deps->add(idx.idx)) return conservative();
 
@@ -24449,7 +24449,7 @@ AnalysisIndex::lookup_class_constant(const Type& cls,
 
     assertx(idx.idx.idx < cnsCls->constants.size());
     auto const& cns = cnsCls->constants[idx.idx.idx];
-    assertx(cns.kind == ConstModifiers::Kind::Value);
+    assertx(cns.kind == ConstModifierFlags::Kind::Value);
 
     if (!cns.val.has_value()) return notFound();
 
@@ -24559,7 +24559,7 @@ AnalysisIndex::lookup_class_type_constant(
     auto const& idx = idxIt->second;
 
     assertx(!m_data->badClasses.contains(idx.idx.cls));
-    if (idx.kind != ConstModifiers::Kind::Type) return notFound();
+    if (idx.kind != ConstModifierFlags::Kind::Type) return notFound();
 
     if (!m_data->deps->add(idx.idx)) return conservative(rcls.name());
 
@@ -24569,7 +24569,7 @@ AnalysisIndex::lookup_class_type_constant(
 
     assertx(idx.idx.idx < cnsCls->constants.size());
     auto const& cns = cnsCls->constants[idx.idx.idx];
-    assertx(cns.kind == ConstModifiers::Kind::Type);
+    assertx(cns.kind == ConstModifierFlags::Kind::Type);
     if (!cns.val.has_value()) return abstract();
     assertx(tvIsDict(*cns.val));
 
@@ -24650,7 +24650,7 @@ AnalysisIndex::lookup_class_type_constant(const php::Class& ctx,
 
   assertx(idx.idx < cinfo->cls->constants.size());
   auto const& cns = cinfo->cls->constants[idx.idx];
-  if (cns.kind != ConstModifiers::Kind::Type) return notFound();
+  if (cns.kind != ConstModifierFlags::Kind::Type) return notFound();
   if (!cns.val.has_value()) return abstract();
 
   assertx(tvIsDict(*cns.val));
@@ -25502,7 +25502,7 @@ void AnalysisIndex::refine_class_constants(const FuncAnalysisResult& fa) {
   for (auto const& c : *resolved) {
     assertx(c.first < constants.size());
     auto& cns = constants[c.first];
-    assertx(cns.kind == ConstModifiers::Kind::Value);
+    assertx(cns.kind == ConstModifierFlags::Kind::Value);
     always_assert(cns.val.has_value());
     always_assert(type(*cns.val) == KindOfUninit);
 

@@ -644,14 +644,14 @@ ArrayData* loadClsTypeCnsHelper(
   TypedValue typeCns;
   if (no_throw_on_undefined) {
     try {
-      typeCns = cls->clsCnsGet(name, ConstModifiers::Kind::Type);
+      typeCns = cls->clsCnsGet(name, ConstModifierFlags::Kind::Type);
     } catch (Exception&) {
       return getFake();
     } catch (Object&) {
       return getFake();
     }
   } else {
-    typeCns = cls->clsCnsGet(name, ConstModifiers::Kind::Type);
+    typeCns = cls->clsCnsGet(name, ConstModifierFlags::Kind::Type);
   }
   if (typeCns.m_type == KindOfUninit) {
     if (no_throw_on_undefined) {

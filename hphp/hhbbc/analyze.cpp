@@ -590,7 +590,7 @@ FuncAnalysis do_analyze(const IIndex& index,
 
   // Schedule initial work
   for (auto const& cns : ctx.cls->constants) {
-    if (cns.kind != ConstModifiers::Kind::Value) continue;
+    if (cns.kind != ConstModifierFlags::Kind::Value) continue;
     if (!cns.val) continue;
     if (cns.val->m_type != KindOfUninit) continue;
     clsCnsWork->add(cns.name);
@@ -621,7 +621,7 @@ FuncAnalysis do_analyze(const IIndex& index,
   // into the Index.
   for (size_t i = 0, size = ctx.cls->constants.size(); i < size; ++i) {
     auto const& cns = ctx.cls->constants[i];
-    if (cns.kind != ConstModifiers::Kind::Value) continue;
+    if (cns.kind != ConstModifierFlags::Kind::Value) continue;
     if (!cns.val) continue;
     if (cns.val->m_type != KindOfUninit) continue;
     auto& info = clsCnsWork->constants.at(cns.name);

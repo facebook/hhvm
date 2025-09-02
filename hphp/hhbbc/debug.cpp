@@ -149,7 +149,7 @@ void dump_class_state(std::ostream& out,
       auto const ty = from_cell(*constant->val);
       out << clsName << "::" << constant->name->data() << " :: "
           << (ty.subtypeOf(BUninit) ? "<dynamic>" : show(ty));
-      if (constant->kind == ConstModifiers::Kind::Type) {
+      if (constant->kind == ConstModifierFlags::Kind::Type) {
         if (constant->resolvedTypeStructure) {
           out << " (" << show(dict_val(constant->resolvedTypeStructure)) << ")";
           switch ((php::Const::Invariance)constant->invariance) {

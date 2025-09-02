@@ -113,7 +113,7 @@ struct PreClassEmitter {
       , m_val(make_tv<KindOfUninit>())
       , m_coeffects({})
       , m_resolvedTypeStructure()
-      , m_kind(ConstModifiers::Kind::Value)
+      , m_kind(ConstModifierFlags::Kind::Value)
       , m_invariance(Invariance::None)
       , m_isAbstract(false)
       , m_fromTrait(false)
@@ -123,7 +123,7 @@ struct PreClassEmitter {
           const TypedValue* val,
           CoeffectsVec coeffects,
           Array resolvedTypeStructure,
-          ConstModifiers::Kind kind,
+          ConstModifierFlags::Kind kind,
           Invariance invariance,
           bool isAbstract,
           bool fromTrait)
@@ -151,7 +151,7 @@ struct PreClassEmitter {
     const Array& resolvedTypeStructure() const {
       return m_resolvedTypeStructure;
     }
-    ConstModifiers::Kind kind() const { return m_kind; }
+    ConstModifierFlags::Kind kind() const { return m_kind; }
     Invariance invariance() const { return m_invariance; }
     bool isFromTrait() const { return m_fromTrait; }
 
@@ -169,7 +169,7 @@ struct PreClassEmitter {
                       m_resolvedTypeStructure.isDict() &&
                       !m_resolvedTypeStructure.empty() &&
                       m_resolvedTypeStructure->isStatic() &&
-                      m_kind == ConstModifiers::Kind::Type &&
+                      m_kind == ConstModifierFlags::Kind::Type &&
                       m_val.has_value()));
       assertx(IMPLIES(m_invariance != Invariance::None,
                       !m_resolvedTypeStructure.isNull()));
@@ -183,7 +183,7 @@ struct PreClassEmitter {
     Optional<TypedValue> m_val;
     CoeffectsVec m_coeffects;
     Array m_resolvedTypeStructure;
-    ConstModifiers::Kind m_kind;
+    ConstModifierFlags::Kind m_kind;
     Invariance m_invariance;
     bool m_isAbstract;
     bool m_fromTrait;
@@ -250,7 +250,7 @@ struct PreClassEmitter {
     const StringData* cls,
     const TypedValue* val,
     Array resolvedTypeStructure,
-    ConstModifiers::Kind kind,
+    ConstModifierFlags::Kind kind,
     Const::Invariance invariance,
     bool fromTrait,
     bool isAbstract
@@ -265,8 +265,8 @@ struct PreClassEmitter {
   );
   bool addAbstractConstant(
     const StringData* n,
-    ConstModifiers::Kind kind =
-    ConstModifiers::Kind::Value,
+    ConstModifierFlags::Kind kind =
+    ConstModifierFlags::Kind::Value,
     bool fromTrait = false);
   void addUsedTrait(const StringData* traitName);
   void addClassRequirement(const PreClass::ClassRequirement req) {

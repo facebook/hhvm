@@ -565,7 +565,7 @@ inline bool Class::hasConstant(const StringData* clsCnsName) const {
   auto clsCnsInd = m_constants.findIndex(clsCnsName);
   return (clsCnsInd != kInvalidSlot) &&
     !m_constants[clsCnsInd].isAbstract() &&
-    m_constants[clsCnsInd].kind() == ConstModifiers::Kind::Value;
+    m_constants[clsCnsInd].kind() == ConstModifierFlags::Kind::Value;
 }
 
 inline bool Class::hasTypeConstant(const StringData* typeConstName,
@@ -573,7 +573,7 @@ inline bool Class::hasTypeConstant(const StringData* typeConstName,
   auto typeConstInd = m_constants.findIndex(typeConstName);
   return (typeConstInd != kInvalidSlot) &&
     (!m_constants[typeConstInd].isAbstractAndUninit() || includeAbs) &&
-    m_constants[typeConstInd].kind() == ConstModifiers::Kind::Type;
+    m_constants[typeConstInd].kind() == ConstModifierFlags::Kind::Type;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

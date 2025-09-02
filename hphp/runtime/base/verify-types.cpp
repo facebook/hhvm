@@ -435,7 +435,7 @@ bool checkTypeConstants(const UnitEmitter& hhbc) {
       auto& cconst = constMap[idx];
       if (auto const ts = cconst.resolvedTypeStructure().get()) {
         auto const cns = cls->clsCnsGet(cconst.name(),
-                                        ConstModifiers::Kind::Type);
+                                        ConstModifierFlags::Kind::Type);
         if (!cns.is_init()) {
           Logger::FError("Unable to load type constant {}::{}",
                          cls->name()->data(), cconst.name()->data());

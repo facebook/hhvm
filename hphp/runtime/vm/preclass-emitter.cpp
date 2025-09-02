@@ -139,10 +139,10 @@ bool PreClassEmitter::addProperty(
 }
 
 bool PreClassEmitter::addAbstractConstant(const StringData* n,
-                                          ConstModifiers::Kind kind,
+                                          ConstModifierFlags::Kind kind,
                                           bool fromTrait) {
-  assertx(kind == ConstModifiers::Kind::Value ||
-          kind == ConstModifiers::Kind::Type);
+  assertx(kind == ConstModifierFlags::Kind::Value ||
+          kind == ConstModifierFlags::Kind::Type);
 
   auto it = m_constMap.find(n);
   if (it != m_constMap.end()) {
@@ -168,7 +168,7 @@ bool PreClassEmitter::addContextConstant(
   PreClassEmitter::Const cns(n, nullptr, nullptr,
                              std::move(coeffects),
                              Array{},
-                             ConstModifiers::Kind::Context,
+                             ConstModifierFlags::Kind::Context,
                              Const::Invariance::None,
                              isAbstract, fromTrait);
   m_constMap.add(cns.name(), cns);
@@ -179,14 +179,14 @@ bool PreClassEmitter::addConstant(const StringData* n,
                                   const StringData* cls,
                                   const TypedValue* val,
                                   Array resolvedTypeStructure,
-                                  ConstModifiers::Kind kind,
+                                  ConstModifierFlags::Kind kind,
                                   Const::Invariance invariance,
                                   bool fromTrait,
                                   bool isAbstract) {
-  assertx(kind == ConstModifiers::Kind::Value ||
-          kind == ConstModifiers::Kind::Type);
-  assertx(IMPLIES(kind == ConstModifiers::Kind::Value, !cls));
-  assertx(IMPLIES(kind == ConstModifiers::Kind::Value,
+  assertx(kind == ConstModifierFlags::Kind::Value ||
+          kind == ConstModifierFlags::Kind::Type);
+  assertx(IMPLIES(kind == ConstModifierFlags::Kind::Value, !cls));
+  assertx(IMPLIES(kind == ConstModifierFlags::Kind::Value,
                   resolvedTypeStructure.isNull()));
   assertx(IMPLIES(!resolvedTypeStructure.isNull(),
                   resolvedTypeStructure.isDict() &&
@@ -355,9 +355,10 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   for (unsigned i = 0; i < m_constMap.size(); ++i) {
     const Const& const_ = m_constMap[i];
     TypedValueAux tvaux;
+    tvaux.constModifierFlags() = {};
     tvaux.constModifiers() = {};
-    tvaux.constModifiers().setIsAbstract(const_.isAbstract());
-    if (const_.kind() == ConstModifiers::Kind::Context) {
+    tvaux.constModifierFlags().isAbstract = const_.isAbstract();
+    if (const_.kind() == ConstModifierFlags::Kind::Context) {
       auto const coeffects =
         getCoeffectsInfoFromList(const_.coeffects(), false).first;
       tvaux.constModifiers().setCoeffects(coeffects);
@@ -374,13 +375,13 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
       }
     }
 
-    tvaux.constModifiers().setKind(const_.kind());
+    tvaux.constModifierFlags().kind = const_.kind();
 
     assertx(
-      IMPLIES(const_.kind() != ConstModifiers::Kind::Type, !const_.cls())
+      IMPLIES(const_.kind() != ConstModifierFlags::Kind::Type, !const_.cls())
     );
     assertx(
-      IMPLIES(const_.kind() != ConstModifiers::Kind::Type,
+      IMPLIES(const_.kind() != ConstModifierFlags::Kind::Type,
               const_.resolvedTypeStructure().isNull())
     );
     assertx(
@@ -409,6 +410,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     for (auto cnsMap : *nativeConsts) {
       TypedValueAux tvaux;
       tvCopy(cnsMap.second, tvaux);
+      tvaux.constModifierFlags() = {};
       tvaux.constModifiers() = {};
       constBuild.add(cnsMap.first, PreClass::Const(cnsMap.first,
                                                    m_name,

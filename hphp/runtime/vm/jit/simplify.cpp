@@ -501,7 +501,7 @@ SSATmp* simplifyLookupClsCtxCns(State& env, const IRInstruction* inst) {
   // if an object of this cls is known to exist, we can safely use
   // slot based optimizations
   auto const slot =
-    cls->clsCnsSlot(ctxName, ConstModifiers::Kind::Context, objectExists);
+    cls->clsCnsSlot(ctxName, ConstModifierFlags::Kind::Context, objectExists);
   if (slot == kInvalidSlot) return nullptr; // we will raise warning/error
   return gen(env, LdClsCtxCns, ClsCnsSlotData { ctxName, slot}, clsTmp);
 }
@@ -515,12 +515,12 @@ SSATmp* simplifyLdClsCtxCns(State& env, const IRInstruction* inst) {
 
   assertx(extra->slot < cls->numConstants());
   auto const& ctxCns = cls->constants()[extra->slot];
-  assertx(ctxCns.kind() == ConstModifiers::Kind::Context);
+  assertx(ctxCns.kind() == ConstModifierFlags::Kind::Context);
 
   if (clsSpec.exact()) {
     assertx(!ctxCns.isAbstractAndUninit());
     auto const coeffect =
-      ctxCns.val.constModifiers().getCoeffects().toRequired();
+      ctxCns.val.constModifiers().getCoeffects(ctxCns.val.constModifierFlags()).toRequired();
     return cns(env, coeffect.value());
   }
   return nullptr;

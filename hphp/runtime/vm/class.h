@@ -289,22 +289,22 @@ struct Class : AtomicCountable {
 
     bool isAbstractAndUninit() const {
       return
-        val.constModifiers().isAbstract() &&
+        val.constModifierFlags().isAbstract &&
         !val.is_init() &&
         val.is_const_val_missing();
     }
     bool isAbstract() const {
-      return val.constModifiers().isAbstract();
+      return val.constModifierFlags().isAbstract;
     }
     void concretize() {
       // Type constant is abstract and has a default
       assertx(isAbstract() && val.is_init());
-      val.constModifiers().setIsAbstract(false);
+      val.constModifierFlags().isAbstract = false;
     }
 
-    ConstModifiers::Kind kind() const { return val.constModifiers().kind(); }
+    ConstModifierFlags::Kind kind() const { return val.constModifierFlags().kind; }
 
-    StringData* getPointedClsName() const {
+    const StringData* getPointedClsName() const {
 #ifndef USE_LOWPTR
       return pointedClsName;
 #else
@@ -1145,7 +1145,7 @@ public:
    * such constant.
    */
   TypedValue clsCnsGet(const StringData* clsCnsName,
-                       ConstModifiers::Kind what = ConstModifiers::Kind::Value,
+                       ConstModifierFlags::Kind what = ConstModifierFlags::Kind::Value,
                        bool resolve = true) const;
 
   /*
@@ -1168,14 +1168,14 @@ public:
    */
   const TypedValue* cnsNameToTV(const StringData* clsCnsName,
                                 Slot& clsCnsInd,
-                                ConstModifiers::Kind what
-                                  = ConstModifiers::Kind::Value) const;
+                                ConstModifierFlags::Kind what
+                                  = ConstModifierFlags::Kind::Value) const;
 
   /*
    * Get the slot for a constant with name, which can optionally be abstract and
    * either must be or must not be a type constant.
    */
-  Slot clsCnsSlot(const StringData* name, ConstModifiers::Kind want,
+  Slot clsCnsSlot(const StringData* name, ConstModifierFlags::Kind want,
                   bool allowAbstract) const;
 
   /////////////////////////////////////////////////////////////////////////////

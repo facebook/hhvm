@@ -243,12 +243,12 @@ PreClass::Const::Const(const StringData* name,
 void PreClass::Const::prettyPrint(std::ostream& out,
                                   const PreClass* preClass) const {
   switch (kind()) {
-    case ConstModifiers::Kind::Value:
+    case ConstModifierFlags::Kind::Value:
       break;
-    case ConstModifiers::Kind::Type:
+    case ConstModifierFlags::Kind::Type:
       out << "Type ";
       break;
-    case ConstModifiers::Kind::Context:
+    case ConstModifierFlags::Kind::Context:
       out << "Context ";
       break;
   }
@@ -262,7 +262,7 @@ void PreClass::Const::prettyPrint(std::ostream& out,
     out << std::endl;
     return;
   }
-  if (kind() == ConstModifiers::Kind::Context) {
+  if (kind() == ConstModifierFlags::Kind::Context) {
     out << "Constant ";
     name();
     out << " " << coeffects().toString()
@@ -302,8 +302,8 @@ void PreClass::Const::prettyPrint(std::ostream& out,
 }
 
 StaticCoeffects PreClass::Const::coeffects() const {
-  assertx(kind() == ConstModifiers::Kind::Context);
-  return m_val.constModifiers().getCoeffects();
+  assertx(kind() == ConstModifierFlags::Kind::Context);
+  return m_val.constModifiers().getCoeffects(m_val.constModifierFlags());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -535,7 +535,7 @@ struct Const {
 
   SArray resolvedTypeStructure;
 
-  ConstModifiers::Kind kind;
+  ConstModifierFlags::Kind kind;
 
   using Invariance = PreClass::Const::Invariance;
   Invariance invariance : 2;

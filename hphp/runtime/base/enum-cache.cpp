@@ -139,7 +139,7 @@ const EnumValues* EnumCache::loadEnumValues(
   bool persist = true;
   for (size_t i = 0; i < numConstants; i++) {
     if (consts[i].isAbstractAndUninit()
-        || consts[i].kind() != ConstModifiers::Kind::Value) {
+        || consts[i].kind() != ConstModifierFlags::Kind::Value) {
       continue;
     }
     // The outer condition below enables caching of enum constants defined

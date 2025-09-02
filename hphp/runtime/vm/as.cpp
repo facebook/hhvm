@@ -2579,11 +2579,11 @@ void parse_class_constant(AsmState& as) {
 
   bool isType = as.in.tryConsume("isType");
   auto const kind =
-    isType ? ConstModifiers::Kind::Type : ConstModifiers::Kind::Value;
+    isType ? ConstModifierFlags::Kind::Type : ConstModifierFlags::Kind::Value;
 
   as.in.skipWhitespace();
   bool isAbstract;
-  if (kind == ConstModifiers::Kind::Value) {
+  if (kind == ConstModifierFlags::Kind::Value) {
     isAbstract = attrs & AttrAbstract;
   } else {
     isAbstract = as.in.tryConsume("isAbstract");

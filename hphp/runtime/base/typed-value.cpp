@@ -40,14 +40,13 @@ std::string TypedValue::pretty() const {
   return Trace::prettyNode(tname(m_type).c_str(), std::string(buf));
 }
 
-StaticCoeffects ConstModifiers::getCoeffects() const {
-  assertx(kind() == ConstModifiers::Kind::Context);
-  return StaticCoeffects::fromValue(rawData >> ConstModifiers::kDataShift);
+StaticCoeffects ConstModifiers::getCoeffects(ConstModifierFlags flags) const {
+  assertx(flags.kind == ConstModifierFlags::Kind::Context);
+  return StaticCoeffects::fromValue(u_coeffectsData);
 }
 
 void ConstModifiers::setCoeffects(StaticCoeffects coeffects) {
-  rawData = (uintptr_t)(coeffects.value() << ConstModifiers::kDataShift)
-              | (rawData & ~ConstModifiers::kMask);
+  u_coeffectsData = coeffects.value();
 }
 
 //////////////////////////////////////////////////////////////////////

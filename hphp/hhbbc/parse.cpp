@@ -962,7 +962,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   auto& constMap = pce.constMap();
   for (size_t idx = 0; idx < constMap.size(); ++idx) {
     auto& cconst = constMap[idx];
-    auto const cconstValue = (cconst.kind() == ConstModifiers::Kind::Type)
+    auto const cconstValue = (cconst.kind() == ConstModifierFlags::Kind::Type)
       ? getTypeStructureConst(cconst)
       : cconst.valOption();
 
@@ -999,7 +999,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
             tvaux,
             {},
             nullptr,
-            ConstModifiers::Kind::Value,
+            ConstModifierFlags::Kind::Value,
             php::Const::Invariance::None,
             false,
             false,

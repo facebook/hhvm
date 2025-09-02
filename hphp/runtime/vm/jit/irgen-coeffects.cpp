@@ -36,7 +36,7 @@ namespace {
 SSATmp* getTypeCnsClsName(IRGS& env, SSATmp* cls, const StringData* cnsName) {
   auto const clsSpec = cls->type().clsSpec();
   auto const cnsSlot = (clsSpec.cls())
-    ? clsSpec.cls()->clsCnsSlot(cnsName, ConstModifiers::Kind::Type, true)
+    ? clsSpec.cls()->clsCnsSlot(cnsName, ConstModifierFlags::Kind::Type, true)
     : kInvalidSlot;
 
   auto const lookupByName = [&] () -> SSATmp* {

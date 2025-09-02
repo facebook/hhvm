@@ -652,7 +652,7 @@ std::string member_tv_initializer(TypedValue cell) {
 
 void print_class_constant(Output& out, const PreClass::Const* cns) {
   switch (cns->kind()) {
-    case ConstModifiers::Kind::Context:
+    case ConstModifierFlags::Kind::Context:
       out.indent();
       out.fmt(".ctx {}", cns->name());
       if (cns->isAbstract()) {
@@ -664,7 +664,7 @@ void print_class_constant(Output& out, const PreClass::Const* cns) {
       out.fmt(";");
       out.nl();
       break;
-    case ConstModifiers::Kind::Value:
+    case ConstModifierFlags::Kind::Value:
       if (cns->isAbstract()) {
         out.fmtln(".const {} isAbstract;", cns->name());
       } else {
@@ -672,7 +672,7 @@ void print_class_constant(Output& out, const PreClass::Const* cns) {
         out.fmtln(".const {} = {};", cns->name(), member_tv_initializer(cns->val()));
       }
       break;
-    case ConstModifiers::Kind::Type:
+    case ConstModifierFlags::Kind::Type:
       out.indent();
       out.fmt(".const {} isType", cns->name());
       if (cns->isAbstract()) {

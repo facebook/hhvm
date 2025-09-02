@@ -1090,7 +1090,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
     if (nativeConsts && nativeConsts->count(cconst.name)) {
       continue;
     }
-    if (cconst.kind == ConstModifiers::Kind::Context) {
+    if (cconst.kind == ConstModifierFlags::Kind::Context) {
       assertx(cconst.cls->tsame(cls.name));
       assertx(!cconst.resolvedTypeStructure);
       assertx(cconst.invariance == php::Const::Invariance::None);

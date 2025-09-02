@@ -1517,10 +1517,10 @@ Class::clsCtxCnsGet(const StringData* name, bool failIsFatal) const {
     return RuntimeCoeffects::none();
   }
   auto const& cns = m_constants[slot];
-  if (cns.kind() != ConstModifiers::Kind::Context) {
+  if (cns.kind() != ConstModifierFlags::Kind::Context) {
     if (!failIsFatal) return std::nullopt;
     raise_error("%s is a %s, looking for a context constant",
-                name->data(), ConstModifiers::show(cns.kind()));
+                name->data(), ConstModifierFlags::show(cns.kind()));
   }
   if (cns.isAbstractAndUninit()) {
     if (!failIsFatal) return std::nullopt;
@@ -1531,7 +1531,7 @@ Class::clsCtxCnsGet(const StringData* name, bool failIsFatal) const {
     return RuntimeCoeffects::none();
   }
 
-  return cns.val.constModifiers().getCoeffects().toRequired();
+  return cns.val.constModifiers().getCoeffects(cns.val.constModifierFlags()).toRequired();
 }
 
 ArrayData* Class::resolvedTypeCnsGet(ArrayData* ad) const {
@@ -1543,9 +1543,9 @@ ArrayData* Class::resolvedTypeCnsGet(ArrayData* ad) const {
 }
 
 TypedValue Class::clsCnsGet(const StringData* clsCnsName,
-                            ConstModifiers::Kind what,
+                            ConstModifierFlags::Kind what,
                             bool resolve) const {
-  always_assert(what != ConstModifiers::Kind::Context);
+  always_assert(what != ConstModifierFlags::Kind::Context);
   Slot clsCnsInd;
   auto cnsVal = cnsNameToTV(clsCnsName, clsCnsInd, what);
   if (!cnsVal) return make_tv<KindOfUninit>();
@@ -1559,7 +1559,7 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
   // class will compare equal to the same constant accessed through the
   // child's parent class.
   if (cns.cls != this
-      && what == ConstModifiers::Kind::Value) {
+      && what == ConstModifierFlags::Kind::Value) {
     return cns.cls->clsCnsGet(clsCnsName, what, resolve);
   }
 
@@ -1567,9 +1567,9 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
 
   if (cnsVal->m_type != KindOfUninit) {
     switch (cns.kind()) {
-      case ConstModifiers::Kind::Value:
+      case ConstModifierFlags::Kind::Value:
         return *cnsVal;
-      case ConstModifiers::Kind::Type: {
+      case ConstModifierFlags::Kind::Type: {
         // Type constants with the low bit set are already resolved and can be
         // returned after masking out that bit.
         //
@@ -1589,7 +1589,7 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
         }
         break;
       }
-      case ConstModifiers::Kind::Context:
+      case ConstModifierFlags::Kind::Context:
         not_reached();
     }
   }
@@ -1631,7 +1631,7 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
         raise_error(
           folly::sformat(
             "Cannot declare self-referencing {} '{}::{}'",
-            ConstModifiers::show(cns.kind()),
+            ConstModifierFlags::show(cns.kind()),
             name(),
             clsCnsName
           )
@@ -1664,7 +1664,7 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
     }
   };
 
-  if (cns.kind() == ConstModifiers::Kind::Type) {
+  if (cns.kind() == ConstModifierFlags::Kind::Type) {
     assertx(typeCns);
 
     Array resolvedTS;
@@ -1771,8 +1771,8 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
 
 const TypedValue* Class::cnsNameToTV(const StringData* clsCnsName,
                                      Slot& clsCnsInd,
-                                     ConstModifiers::Kind what) const {
-  always_assert(what != ConstModifiers::Kind::Context);
+                                     ConstModifierFlags::Kind what) const {
+  always_assert(what != ConstModifierFlags::Kind::Context);
   clsCnsInd = m_constants.findIndex(clsCnsName);
   if (clsCnsInd == kInvalidSlot) return nullptr;
   if (m_constants[clsCnsInd].isAbstractAndUninit()) return nullptr;
@@ -1781,12 +1781,12 @@ const TypedValue* Class::cnsNameToTV(const StringData* clsCnsName,
   if (kind != what) return nullptr;
 
   auto const ret = &m_constants[clsCnsInd].val;
-  assertx(IMPLIES(kind == ConstModifiers::Kind::Value, tvIsPlausible(*ret)));
+  assertx(IMPLIES(kind == ConstModifierFlags::Kind::Value, tvIsPlausible(*ret)));
   return ret;
 }
 
 Slot Class::clsCnsSlot(
-  const StringData* name, ConstModifiers::Kind want, bool allowAbstract
+  const StringData* name, ConstModifierFlags::Kind want, bool allowAbstract
 ) const {
   auto slot = m_constants.findIndex(name);
   if (slot == kInvalidSlot) return slot;
@@ -2424,7 +2424,7 @@ void setConstVal(Class::Const& cns, const PreClass::Const& preConst) {
 
   // Do this check first, to avoid stomping on bits that other const
   // types might use.
-  if (preConst.kind() != ConstModifiers::Kind::Type) return;
+  if (preConst.kind() != ConstModifierFlags::Kind::Type) return;
   cns.setPointedClsName(nullptr);
 
   auto const a = preConst.resolvedTypeStructure().get();
@@ -2457,7 +2457,7 @@ void Class::importTraitConsts(ConstMap::Builder& builder) {
     // The declaring class for type constants can be used to resolve self:: and
     // parent:: references and must therefore refer to the importing class and
     // not the declaring trait.
-    if (tConst.kind() == ConstModifiers::Kind::Type && !isFromInterface) {
+    if (tConst.kind() == ConstModifierFlags::Kind::Type && !isFromInterface) {
       tConst.cls = this;
     }
 
@@ -2474,10 +2474,10 @@ void Class::importTraitConsts(ConstMap::Builder& builder) {
       raise_error("%s cannot inherit the %s %s from %s, because it "
                   "was previously inherited as a %s from %s",
                   m_preClass->name()->data(),
-                  ConstModifiers::show(tConst.kind()),
+                  ConstModifierFlags::show(tConst.kind()),
                   tConst.name->data(),
                   declCls->name()->data(),
-                  ConstModifiers::show(existingConst.kind()),
+                  ConstModifierFlags::show(existingConst.kind()),
                   existingConstName->data());
     }
 
@@ -2511,7 +2511,7 @@ void Class::importTraitConsts(ConstMap::Builder& builder) {
           raise_error("%s cannot inherit the %s %s from %s, because "
                       "it was previously inherited from %s",
                       m_preClass->name()->data(),
-                      ConstModifiers::show(tConst.kind()),
+                      ConstModifierFlags::show(tConst.kind()),
                       tConst.name->data(),
                       declCls->name()->data(),
                       existingConstName->data());
@@ -2523,8 +2523,8 @@ void Class::importTraitConsts(ConstMap::Builder& builder) {
       if (isFromInterface) return;
 
       // Type and Context constants in interfaces can be overridden.
-      if (tConst.kind() == ConstModifiers::Kind::Type ||
-          tConst.kind() == ConstModifiers::Kind::Context)  {
+      if (tConst.kind() == ConstModifierFlags::Kind::Type ||
+          tConst.kind() == ConstModifierFlags::Kind::Context)  {
         return;
       }
       if (existingConst.cls != declCls) {
@@ -2537,7 +2537,7 @@ void Class::importTraitConsts(ConstMap::Builder& builder) {
               raise_error("%s cannot inherit the %s %s, because "
                           "it was previously inherited from %s",
                           m_preClass->name()->data(),
-                          ConstModifiers::show(tConst.kind()),
+                          ConstModifierFlags::show(tConst.kind()),
                           tConst.name->data(),
                           existingConstName->data());
             }
@@ -2621,10 +2621,10 @@ void Class::setConstants() {
           raise_error("%s cannot inherit the %s %s from %s, because it "
                      "was previously inherited as a %s from %s",
                      m_preClass->name()->data(),
-                     ConstModifiers::show(eConst.kind()),
+                     ConstModifierFlags::show(eConst.kind()),
                      eConst.name->data(),
                      eConst.cls->name()->data(),
-                     ConstModifiers::show(existingConst.kind()),
+                     ConstModifierFlags::show(existingConst.kind()),
                      existingConst.cls->name()->data());
         }
 
@@ -2645,7 +2645,7 @@ void Class::setConstants() {
             raise_error("%s cannot inherit the %s %s from %s, because "
                       "it was previously inherited from %s",
                       m_preClass->name()->data(),
-                      ConstModifiers::show(eConst.kind()),
+                      ConstModifierFlags::show(eConst.kind()),
                       eConst.name->data(),
                       eConst.cls->name()->data(),
                       existingConst.cls->name()->data());
@@ -2677,10 +2677,10 @@ void Class::setConstants() {
         raise_error("%s cannot inherit the %s %s from %s, because it "
                     "was previously inherited as a %s from %s",
                     m_preClass->name()->data(),
-                    ConstModifiers::show(iConst.kind()),
+                    ConstModifierFlags::show(iConst.kind()),
                     iConst.name->data(),
                     iConst.cls->name()->data(),
-                    ConstModifiers::show(existingConst.kind()),
+                    ConstModifierFlags::show(existingConst.kind()),
                     existingConst.cls->name()->data());
       }
 
@@ -2705,7 +2705,7 @@ void Class::setConstants() {
           raise_error("%s cannot inherit the %s %s from %s, because "
                     "it was previously inherited from %s",
                     m_preClass->name()->data(),
-                    ConstModifiers::show(iConst.kind()),
+                    ConstModifierFlags::show(iConst.kind()),
                     iConst.name->data(),
                     iConst.cls->name()->data(),
                     existingConst.cls->name()->data());
@@ -2756,7 +2756,7 @@ void Class::setConstants() {
           !builder[it2->second].isAbstractAndUninit()) {
         raise_error("Cannot re-declare as abstract previously defined "
                     "%s %s::%s in %s",
-                    ConstModifiers::show(builder[it2->second].kind()),
+                    ConstModifierFlags::show(builder[it2->second].kind()),
                     builder[it2->second].cls->name()->data(),
                     preConst->name()->data(),
                     m_preClass->name()->data());
@@ -2765,8 +2765,8 @@ void Class::setConstants() {
       if (preConst->kind() != builder[it2->second].kind()) {
         raise_error("Cannot re-declare as a %s previously defined "
                     "%s %s::%s in %s",
-                    ConstModifiers::show(preConst->kind()),
-                    ConstModifiers::show(builder[it2->second].kind()),
+                    ConstModifierFlags::show(preConst->kind()),
+                    ConstModifierFlags::show(builder[it2->second].kind()),
                     builder[it2->second].cls->name()->data(),
                     preConst->name()->data(),
                     m_preClass->name()->data());
@@ -2795,7 +2795,7 @@ void Class::setConstants() {
                     "must therefore be declared abstract or define "
                     "the remaining constants",
                     m_preClass->name()->data(),
-                    ConstModifiers::show(constant.kind()),
+                    ConstModifierFlags::show(constant.kind()),
                     constant.name->data());
       }
     }
@@ -2811,7 +2811,7 @@ void Class::setConstants() {
           "Class %s contains abstract %s (%s) and "
           "therefore cannot be declared 'abstract final'",
           m_preClass->name()->data(),
-          ConstModifiers::show(constant.kind()),
+          ConstModifierFlags::show(constant.kind()),
           constant.name->data());
       }
     }
@@ -2822,7 +2822,7 @@ void Class::setConstants() {
   // have replaced it with a resolved value.
   for (auto& pair : builder) {
     auto& cns = builder[pair.second];
-    if (cns.kind() == ConstModifiers::Kind::Type) {
+    if (cns.kind() == ConstModifierFlags::Kind::Type) {
       setConstVal(cns, *cns.preConst);
     }
 

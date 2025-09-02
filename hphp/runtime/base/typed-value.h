@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/lazy-class.h"
 #include "hphp/util/type-scan.h"
@@ -84,40 +85,10 @@ static_assert(alignof(Value) == 8);
 #endif
 static_assert(sizeof(Value) == 8);
 
-struct ConstModifiers {
+struct ConstModifierFlags {
+
   // Note that cgCheckSubClsCns relies on Value being 0.
   enum class Kind : uint8_t { Value = 0, Type = 1, Context = 2 };
-
-  uint32_t rawData;
-
-  static uint32_t constexpr kDataShift = 3;
-  static uint32_t constexpr kMask = (uint32_t)-1UL << kDataShift;
-  static uint32_t constexpr kKindMask = (1 << (kDataShift - 1)) - 1;
-  static uint32_t constexpr kAbstractMask = 1 << (kDataShift - 1);
-
-  StringData* getPointedClsName() const {
-    assertx(use_lowptr);
-    return (StringData*)(uintptr_t)(rawData & kMask);
-  }
-  StaticCoeffects getCoeffects() const;
-  bool isAbstract() const { return rawData & kAbstractMask; }
-  Kind kind() const { return static_cast<Kind>(rawData & kKindMask); }
-
-  void setPointedClsName(StringData* clsName) {
-    assertx(use_lowptr);
-    rawData = (uintptr_t)clsName | (rawData & ~kMask);
-  }
-  void setCoeffects(StaticCoeffects coeffects);
-  void setIsAbstract(bool isAbstract) {
-    if (isAbstract) {
-      rawData |= kAbstractMask;
-    } else {
-      rawData &= ~kAbstractMask;
-    }
-  }
-  void setKind(Kind kind) {
-    rawData |= (uint32_t(kind) & kKindMask);
-  }
 
   static const char* show(Kind t) {
     switch (t) {
@@ -127,6 +98,39 @@ struct ConstModifiers {
     }
     not_reached();
   }
+
+  Kind kind;
+  bool isAbstract;
+};
+
+union AuxFlagsUnion {
+  uint16_t u_raw;
+  ConstModifierFlags u_constModifierFlags;
+};
+
+static_assert(sizeof(AuxFlagsUnion) == 2);
+
+struct ConstModifiers {
+
+  union {
+    uint32_t u_coeffectsData;
+#ifdef USE_LOWPTR
+    UninitPackedPtr<const StringData> u_clsName;
+#endif
+  };
+
+#ifdef USE_LOWPTR
+  const StringData* getPointedClsName() const {
+    return u_clsName;
+  }
+
+  void setPointedClsName(StringData* clsName) {
+    u_clsName = clsName;
+  }
+#endif
+
+  StaticCoeffects getCoeffects(ConstModifierFlags flags) const;
+  void setCoeffects(StaticCoeffects coeffects);
 };
 
 /*
@@ -148,12 +152,15 @@ union AuxUnion {
   ConstModifiers u_constModifiers;
 };
 
+static_assert(sizeof(AuxUnion) == 4);
+
 /*
  * A TypedValue is a type-discriminated PHP Value.
  */
 struct alignas(8) TypedValue {
   Value m_data;
   DataType m_type;
+  AuxFlagsUnion m_auxFlags;
   AuxUnion m_aux;
 
   std::string pretty() const; // debug formatting. see trace.h
@@ -202,9 +209,6 @@ static_assert(!(kConstValMissing & 0x1));
  * Subclass of TypedValue which exposes m_aux accessors.
  */
 struct TypedValueAux : TypedValue {
-  static constexpr size_t auxOffset = offsetof(TypedValue, m_aux);
-  static constexpr size_t auxSize = sizeof(decltype(m_aux));
-
   const int32_t& hash() const { return m_aux.u_hash; }
         int32_t& hash()       { return m_aux.u_hash; }
 
@@ -215,6 +219,13 @@ struct TypedValueAux : TypedValue {
   }
   ConstModifiers& constModifiers() {
     return m_aux.u_constModifiers;
+  }
+
+  const ConstModifierFlags& constModifierFlags() const {
+    return m_auxFlags.u_constModifierFlags;
+  }
+  ConstModifierFlags& constModifierFlags() {
+    return m_auxFlags.u_constModifierFlags;
   }
 
   void serde(BlobEncoder&) const = delete;
@@ -396,7 +407,7 @@ typename std::enable_if<
 }
 
 ALWAYS_INLINE TypedValue make_tv_of_type(Value value, DataType dt) {
-  return TypedValue { value, dt, {0} };
+  return TypedValue { value, dt, {0}, {0} };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

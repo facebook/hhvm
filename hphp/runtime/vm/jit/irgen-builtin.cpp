@@ -736,7 +736,7 @@ SSATmp* impl_opt_type_structure(IRGS& env, const ParamPrep& params,
   if (!isNormalClass(cls)) return nullptr;
 
   auto const cnsSlot =
-    cls->clsCnsSlot(cnsName, ConstModifiers::Kind::Type, true);
+    cls->clsCnsSlot(cnsName, ConstModifierFlags::Kind::Type, true);
   if (cnsSlot == kInvalidSlot) return nullptr;
 
   // If we do this earlier, we might raise multiple notices

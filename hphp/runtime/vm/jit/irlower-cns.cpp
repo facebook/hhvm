@@ -243,20 +243,18 @@ void cgCheckSubClsCns(IRLS& env, const IRInstruction* inst) {
   );
   fwdJcc(v, env, CC_NE, sf, inst->taken());
 
-  static_assert(sizeof(ConstModifiers::rawData) == 4);
-
   auto const sf2 = v.makeReg();
   auto const kindOffset =
     constOffset +
     offsetof(Class::Const, val) +
-    TypedValueAux::auxOffset +
-    offsetof(AuxUnion, u_constModifiers) +
-    offsetof(ConstModifiers, rawData);
+    offsetof(TypedValueAux, m_auxFlags) +
+    offsetof(AuxFlagsUnion, u_constModifierFlags) +
+    offsetof(ConstModifierFlags, kind);
 
-  static_assert((int)ConstModifiers::Kind::Value == 0);
+  static_assert((int)ConstModifierFlags::Kind::Value == 0);
 
-  v << testlim{
-    safe_cast<int32_t>(ConstModifiers::kKindMask),
+  v << testbim{
+    safe_cast<int8_t>(-1),
     tmp[kindOffset],
     sf2
   };
@@ -361,18 +359,6 @@ void ldResolvedTypeHelper(Vout& v, Slot slot, Vreg cls, Vreg cns) {
   };
 }
 
-Vreg getConstModifiersRawData(Vout& v, Slot slot, Vreg cls) {
-  auto const cnsVec = v.makeReg();
-  auto const rawData = v.makeReg();
-
-  v << load{cls[Class::constantsVecOff()], cnsVec};
-  auto const offset = cnsVec[slot * sizeof(Class::Const) +
-                             offsetof(Class::Const, val) +
-                             offsetof(TypedValue, m_aux)];
-  v << loadzlq{offset, rawData};
-  return rawData;
-}
-
 } // namespace
 
 void cgLdResolvedTypeCns(IRLS& env, const IRInstruction* inst) {
@@ -429,16 +415,19 @@ void cgLdResolvedTypeCnsClsName(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   auto const slot = extra->slot;
-#ifndef USE_LOWPTR
   auto const cnsVec = v.makeReg();
   v << load{cls[Class::constantsVecOff()], cnsVec};
+#ifndef USE_LOWPTR
   auto const offset = cnsVec[slot * sizeof(Class::Const) +
                              offsetof(Class::Const, pointedClsName)];
   v << load{offset, dst};
 #else
-  auto const rawData = getConstModifiersRawData(v, slot, cls);
-  v << andqi{static_cast<int32_t>(ConstModifiers::kMask), rawData,
-             dst, v.makeReg()};
+  auto const rawAddr = cnsVec[slot * sizeof(Class::Const) +
+                              offsetof(Class::Const, val) +
+                              offsetof(TypedValue, m_aux) +
+                              offsetof(AuxUnion, u_constModifiers) +
+                              offsetof(ConstModifiers, u_clsName)];
+  emitLdPackedPtr<const StringData>(v, rawAddr, dst);
 #endif
 }
 
@@ -454,21 +443,27 @@ void cgLdClsCtxCns(IRLS& env, const IRInstruction* inst) {
   auto const slot = inst->extra<LdClsCtxCns>()->slot;
   auto& v = vmain(env);
 
-  auto const rawData = getConstModifiersRawData(v, slot, cls);
-  v << shrqi{static_cast<int32_t>(ConstModifiers::kDataShift), rawData,
-             dst, v.makeReg()};
+  auto const cnsVec = v.makeReg();
+  v << load{cls[Class::constantsVecOff()], cnsVec};
+  auto const rawAddr = cnsVec[slot * sizeof(Class::Const) +
+                              offsetof(Class::Const, val) +
+                              offsetof(TypedValue, m_aux) +
+                              offsetof(AuxUnion, u_constModifiers) +
+                              offsetof(ConstModifiers, u_coeffectsData)];
+  v << loadzlq{rawAddr, dst};
 
   if (debug) {
     // Lets assert that the slot we are loading is context constant
     auto const type = v.makeReg();
     auto const sf = v.makeReg();
-    v << andqi{
-      static_cast<int32_t>(ConstModifiers::kKindMask),
-      rawData,
-      type,
-      v.makeReg()
-    };
-    v << testqi{static_cast<int32_t>(ConstModifiers::Kind::Context), type, sf};
+    auto const kindAddr = cnsVec[slot * sizeof(Class::Const) +
+                                 offsetof(Class::Const, val) +
+                                 offsetof(TypedValue, m_auxFlags) +
+                                 offsetof(AuxFlagsUnion, u_constModifierFlags) +
+                                 offsetof(ConstModifierFlags, kind)];
+
+    v << loadzbq{kindAddr, type};
+    v << testqi{static_cast<int32_t>(ConstModifierFlags::Kind::Context), type, sf};
     unlikelyIfThen(
       v, vcold(env), CC_Z, sf,
       [&] (Vout& v) { v << trap{TRAP_REASON, Fixup::none()}; }
@@ -476,9 +471,8 @@ void cgLdClsCtxCns(IRLS& env, const IRInstruction* inst) {
     // Lets assert that the upper bits are zero
     auto const shifted = v.makeReg();
     auto const sf2 = v.makeReg();
-    // 16 bits for coeffects and kDataShift for aux data
-    v << shrqi{static_cast<int32_t>(ConstModifiers::kDataShift) + 16, rawData,
-               shifted, v.makeReg()};
+    // 16 bits for coeffects
+    v << shrqi{16, dst, shifted, v.makeReg()};
     v << testq{shifted, shifted, sf2};
     unlikelyIfThen(
       v, vcold(env), CC_NZ, sf2,

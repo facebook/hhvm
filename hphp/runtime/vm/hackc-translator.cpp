@@ -426,8 +426,8 @@ void addConstant(TranslationState& ts,
                  Optional<hhbc::TypedValue> tv,
                  bool isAbstract) {
   auto const kind = isType
-    ? ConstModifiers::Kind::Type
-    : ConstModifiers::Kind::Value;
+    ? ConstModifierFlags::Kind::Type
+    : ConstModifierFlags::Kind::Value;
 
   if (!tv) {
     assertx(isAbstract);

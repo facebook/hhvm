@@ -711,7 +711,7 @@ Resolution resolve_type_access_list(ResolveCtx& ctx,
   auto lookup = ctx.index->lookup_class_type_constant(
     clsType, sval(val(cnsName).pstr),
     [&] (const php::Const& cns, const php::Class& thiz) {
-      assertx(cns.kind == ConstModifiers::Kind::Type);
+      assertx(cns.kind == ConstModifierFlags::Kind::Type);
       assertx(cns.val.has_value());
       assertx(tvIsDict(*cns.val));
       assertx(val(*cns.val).parr->isStatic());
@@ -1095,7 +1095,7 @@ Resolution resolve_type_structure(const ISS& env, SArray ts) {
 Resolution resolve_type_structure(const IIndex& index,
                                   const php::Const& cns,
                                   const php::Class& thiz) {
-  assertx(cns.kind == ConstModifiers::Kind::Type);
+  assertx(cns.kind == ConstModifierFlags::Kind::Type);
   assertx(cns.val.has_value());
   assertx(tvIsDict(*cns.val));
   assertx(val(*cns.val).parr->isStatic());

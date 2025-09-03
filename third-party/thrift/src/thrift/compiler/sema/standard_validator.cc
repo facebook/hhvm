@@ -45,6 +45,7 @@
 #include <thrift/compiler/generate/cpp/util.h>
 #include <thrift/compiler/sema/explicit_include_validator.h>
 #include <thrift/compiler/sema/reserved_identifier.h>
+#include <thrift/compiler/sema/resolution_mismatch.h>
 
 namespace apache::thrift::compiler {
 
@@ -1918,6 +1919,8 @@ ast_validator standard_validator() {
   validator.add_const_visitor(&forbid_exception_as_const_type);
 
   add_explicit_include_validators(validator);
+
+  validator.add_program_visitor(&report_resolution_mismatches);
 
   return validator;
 }

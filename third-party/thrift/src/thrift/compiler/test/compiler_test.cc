@@ -3246,3 +3246,51 @@ TEST(CompilerTest, bidirectional_streaming) {
       }
       )");
 }
+
+// A thrift program called "<scope>.thrift" can implicitly use any definitions
+// of an included thrift program called "<scope>.thrift", without having to
+// specify the scope name, e.g. "foo.Foo" can be used as "Foo" in "foo.thrift".
+TEST(CompilerTest, implicit_scope_addition_with_direct_include) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["a/foo.thrift"] = R"(
+    struct Foo {
+      1: i32 val;
+    }
+  )";
+
+  name_contents_map["b/foo.thrift"] = R"(
+    include "a/foo.thrift"
+
+    struct Bar {
+    1: Foo val; # expected-warning@5#original[Foo]#replacement[foo.Foo]@8: Identifier 'Foo' refers to a definition in another thrift program. Use an explicit scoped identifier. [implicit_scope_usage]
+    }
+  )";
+  check_compile(name_contents_map, "b/foo.thrift");
+}
+
+TEST(CompilerTest, implicit_scope_addition_with_multiple_includes) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["a/foo.thrift"] = R"(
+    include "b/foo.thrift"
+
+    struct Foo {
+      1: i32 val;
+    }
+  )";
+
+  name_contents_map["b/foo.thrift"] = R"(
+    struct Foo {
+      1: i16 val;
+    }
+  )";
+
+  name_contents_map["main/foo.thrift"] = R"(
+    include "a/foo.thrift" # expected-warning@2#original[]#replacement[as a_foo]@27: Multiple programs named 'foo', please specify an appropriate include alias to disambiguate. [implicit_scope_usage]
+    include "b/foo.thrift"
+
+    struct Bar {
+      1: Foo val; # expected-warning@6#original[Foo]#replacement[a_foo.Foo]@10: Identifier 'Foo' refers to a definition in another thrift program. Use an explicit scoped identifier. [implicit_scope_usage]
+    }
+  )";
+  check_compile(name_contents_map, "main/foo.thrift");
+}

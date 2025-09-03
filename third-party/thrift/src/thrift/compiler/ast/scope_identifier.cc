@@ -63,6 +63,10 @@ bool identifier::has_scope() const {
   return !std::holds_alternative<unscoped_id>(type_);
 }
 
+bool identifier::is_enum_id() const {
+  return std::holds_alternative<enum_id>(type_);
+}
+
 bool identifier::is_scoped_id() const {
   return std::holds_alternative<scoped_id>(type_);
 }

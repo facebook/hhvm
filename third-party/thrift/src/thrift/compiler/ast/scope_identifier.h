@@ -73,6 +73,7 @@ class identifier {
 
   bool has_scope() const;
   std::string_view scope() const;
+  bool is_enum_id() const;
   bool is_scoped_id() const;
   source_range src_range() const;
 

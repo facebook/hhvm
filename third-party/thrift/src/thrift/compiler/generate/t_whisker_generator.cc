@@ -588,7 +588,7 @@ prototype<t_program>::ptr t_whisker_generator::make_prototype_for_program(
   });
   def.property("schema_name", [this](const t_program& self) {
     auto name = detail::schematizer::name_schema(source_mgr_, self);
-    if (self.find(name)) {
+    if (self.find({name, source_range{}})) {
       return object(std::move(name));
     }
     return object();

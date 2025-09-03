@@ -75,6 +75,8 @@ struct source_range {
    * location included in this range, if any)..
    */
   source_location end;
+
+  friend bool operator==(source_range, source_range) = default;
 };
 
 // A resolved (source) location that provides the file name, line and column.

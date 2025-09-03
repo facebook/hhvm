@@ -53,7 +53,8 @@ void t_program::add_definition(std::unique_ptr<t_named> definition) {
   assert(definition != nullptr);
 
   program_scope_.add_definition(
-      scope::scoped_id{name(), definition->name()}, definition.get());
+      scope::scoped_id{definition->src_range(), name(), definition->name()},
+      definition.get());
 
   // [TEMPORARY] Add global definition for <scope>.<name>
   global_scope_->add_definition(*definition, definition->name());
@@ -240,7 +241,7 @@ const t_named* t_program::find_global_by_id(scope::identifier id) const {
         // `common.thrift` as `Foo`, even if it's not defined in the local
         // program.
         return global_scope_->find(
-            scope::identifier{scope::scoped_id{name(), id.name}});
+            scope::identifier{scope::scoped_id{id.loc, name(), id.name}});
       },
       [&](scope::scoped_id&& id) -> const t_named* {
         // This could be a scoped external definition
@@ -250,8 +251,8 @@ const t_named* t_program::find_global_by_id(scope::identifier id) const {
 
         // Or an unscoped definition with the same scope name as the local
         // program.
-        return global_scope_->find(
-            scope::identifier{scope::enum_id{name(), id.scope, id.name}});
+        return global_scope_->find(scope::identifier{
+            scope::enum_id{id.loc, name(), id.scope, id.name}});
       },
       [&](scope::enum_id&& id) -> const t_named* {
         return global_scope_->find(id);

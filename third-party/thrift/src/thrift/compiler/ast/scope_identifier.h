@@ -21,25 +21,35 @@
 #include <variant>
 
 #include <thrift/compiler/detail/overload.h>
+#include <thrift/compiler/source_location.h>
 
 namespace apache::thrift::compiler::scope {
 
 // An identifier without any scope, e.g. `Foo`
 struct unscoped_id {
+  source_range loc;
   std::string_view name;
+
+  friend bool operator==(const unscoped_id&, const unscoped_id&);
 };
 
 // An identifier with a scope, e.g. `foo.Bar`
 struct scoped_id {
+  source_range loc;
   std::string_view scope;
   std::string_view name;
+
+  friend bool operator==(const scoped_id&, const scoped_id&);
 };
 
 // A fully qualified enum value identifier, e.g. `foo.Bar.BAZ`
 struct enum_id {
+  source_range loc;
   std::string_view scope;
   std::string_view enum_name;
   std::string_view value_name;
+
+  friend bool operator==(const enum_id&, const enum_id&);
 };
 
 struct identifier_hasher;
@@ -56,14 +66,15 @@ class identifier {
 
   template <typename T>
   /* implicit */ identifier(T ty) : type_(std::move(ty)) {}
-  identifier(std::string_view scope, std::string_view name)
-      : type_(parse(scope, name)) {}
-  /* implicit */ identifier(std::string_view id) : type_(parse(id)) {}
-  /* implicit */ identifier(const std::string& id) : type_(parse(id)) {}
+  identifier(std::string_view scope, std::string_view name, source_range loc)
+      : type_(parse(scope, name, loc)) {}
+  identifier(std::string_view id, source_range loc) : type_(parse(id, loc)) {}
+  identifier(const std::string& id, source_range loc) : type_(parse(id, loc)) {}
 
   bool has_scope() const;
   std::string_view scope() const;
   bool is_scoped_id() const;
+  source_range src_range() const;
 
   const enum_id* get_enum_id() const { return std::get_if<enum_id>(&type_); }
   enum_id* get_enum_id() { return std::get_if<enum_id>(&type_); }
@@ -80,9 +91,12 @@ class identifier {
 
   std::string fmtDebug() const;
 
+  friend bool operator==(const identifier&, const identifier&) = default;
+
  private:
-  static Type parse(std::string_view scope, std::string_view name);
-  static Type parse(std::string_view name);
+  static Type parse(
+      std::string_view scope, std::string_view name, source_range loc);
+  static Type parse(std::string_view name, source_range loc);
 
  private:
   Type type_;

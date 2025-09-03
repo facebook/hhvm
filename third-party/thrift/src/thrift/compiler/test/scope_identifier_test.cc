@@ -19,9 +19,10 @@
 #include <thrift/compiler/ast/scope_identifier.h>
 
 using namespace apache::thrift::compiler::scope;
+using source_range = apache::thrift::compiler::source_range;
 
 identifier make_id(std::string_view name) {
-  return identifier{name};
+  return identifier{name, source_range{}};
 }
 
 identifier::Pieces make_pieces(
@@ -36,7 +37,7 @@ std::pair<std::string_view, std::string_view> make_pieces(
 
 TEST(ScopeIdentifierTest, parse) {
   for (const std::string_view ident : {"foo", "foo.bar", "foo.bar.baz"}) {
-    const identifier id{ident};
+    const identifier id{ident, source_range{}};
     ASSERT_EQ(ident, id.fmtDebug());
   }
 }

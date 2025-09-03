@@ -220,7 +220,7 @@ bool has_runtime_annotation(const t_named& named) {
 }
 
 bool has_schema(source_manager& sm, const t_program& program) {
-  return program.find(schematizer::name_schema(sm, program));
+  return program.find({schematizer::name_schema(sm, program), source_range{}});
 }
 
 bool generate_reduced_client(const t_interface& i) {

@@ -22,22 +22,26 @@
 namespace apache::thrift::compiler::scope {
 
 identifier::Type identifier::parse(
-    std::string_view scope, std::string_view name) {
+    std::string_view scope, std::string_view name, source_range loc) {
   const auto pos = name.find_first_of('.');
   if (pos == std::string_view::npos) {
-    return scoped_id{scope, name};
+    return scoped_id{.loc = loc, .scope = scope, .name = name};
   }
 
   std::string_view enum_name = name.substr(0, pos);
   std::string_view value_name = name.substr(pos + 1);
 
-  return enum_id{scope, enum_name, value_name};
+  return enum_id{
+      .loc = loc,
+      .scope = scope,
+      .enum_name = enum_name,
+      .value_name = value_name};
 }
 
-identifier::Type identifier::parse(std::string_view name) {
+identifier::Type identifier::parse(std::string_view name, source_range loc) {
   auto pos = name.find_first_of('.');
   if (pos == std::string_view::npos) {
-    return unscoped_id{name};
+    return unscoped_id{.loc = loc, .name = name};
   }
 
   std::string_view scope = name.substr(0, pos);
@@ -45,10 +49,11 @@ identifier::Type identifier::parse(std::string_view name) {
 
   auto second_dot = name_or_enum.find_first_of('.');
   if (second_dot == std::string_view::npos) {
-    return scoped_id{scope, name_or_enum};
+    return scoped_id{.loc = loc, .scope = scope, .name = name_or_enum};
   }
 
   return enum_id{
+      loc,
       scope,
       name_or_enum.substr(0, second_dot),
       name_or_enum.substr(second_dot + 1)};
@@ -60,6 +65,13 @@ bool identifier::has_scope() const {
 
 bool identifier::is_scoped_id() const {
   return std::holds_alternative<scoped_id>(type_);
+}
+
+source_range identifier::src_range() const {
+  return visit(
+      [](const unscoped_id& id) { return id.loc; },
+      [&](const scoped_id& id) { return id.loc; },
+      [&](const enum_id& id) { return id.loc; });
 }
 
 std::string_view identifier::get_base_name() const {
@@ -112,6 +124,19 @@ identifier::Pieces identifier::split() const {
       [&](const enum_id& id) {
         return Pieces{id.scope, id.enum_name, id.value_name};
       });
+}
+
+bool operator==(const unscoped_id& lhs, const unscoped_id& rhs) {
+  return lhs.name == rhs.name;
+}
+
+bool operator==(const scoped_id& lhs, const scoped_id& rhs) {
+  return lhs.scope == rhs.scope && lhs.name == rhs.name;
+}
+
+bool operator==(const enum_id& lhs, const enum_id& rhs) {
+  return lhs.scope == rhs.scope && lhs.enum_name == rhs.enum_name &&
+      lhs.value_name == rhs.value_name;
 }
 
 } // namespace apache::thrift::compiler::scope

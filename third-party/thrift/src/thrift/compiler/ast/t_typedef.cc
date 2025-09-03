@@ -59,7 +59,8 @@ std::unique_ptr<t_typedef> t_typedef::make_unnamed(
 
 bool t_placeholder_typedef::resolve() {
   if (type_.empty()) {
-    type_ = t_type_ref::from_ptr(program()->find<t_type>(name()), src_range());
+    type_ = t_type_ref::from_ptr(
+        program()->find<t_type>(scope::identifier{name(), src_range()}));
     if (!type_.empty()) {
       // Update the type to mirror the underlying one.
       // TODO(afuller): Update codegen to always skip over placeholders via

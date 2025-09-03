@@ -573,7 +573,8 @@ class ast_builder : public parser_actions {
     auto find_base_service = [&]() -> const t_service* {
       if (base.str.size() != 0) {
         auto base_name = base.str;
-        if (const t_service* result = program_.find<t_service>(base_name)) {
+        if (const t_service* result = program_.find<t_service>(
+                scope::identifier{base_name, base.range()})) {
           return result;
         }
         diags_.error(
@@ -616,7 +617,8 @@ class ast_builder : public parser_actions {
     t_type_ref return_type = ret.type;
     if (return_name.size()) {
       // Handle an interaction or return type name.
-      if (auto interaction_ptr = program_.find<t_interaction>(return_name)) {
+      if (auto interaction_ptr = program_.find<t_interaction>(
+              scope::identifier{return_name, ret.name.range()})) {
         interaction = t_type_ref::from_ptr(interaction_ptr, ret.name.range());
       } else if (ret.type) {
         diags_.error(
@@ -849,7 +851,11 @@ class ast_builder : public parser_actions {
     // Register enum value names in scope.
     for (const auto& value : enum_node->consts()) {
       program_.add_enum_definition(
-          scope::enum_id{program_.name(), enum_node->name(), value.name()},
+          scope::enum_id{
+              value.src_range(),
+              program_.name(),
+              enum_node->name(),
+              value.name()},
           value);
     }
 
@@ -889,13 +895,13 @@ class ast_builder : public parser_actions {
 
   std::unique_ptr<t_const_value> on_const_ref(const identifier& name) override {
     auto find_const =
-        [this](source_location loc, const std::string& name) -> const t_const* {
-      validate_not_ambiguous_enum(loc, name);
-      return program_.find<t_const>(name);
+        [this](source_range loc, const std::string& name) -> const t_const* {
+      validate_not_ambiguous_enum(loc.begin, name);
+      return program_.find<t_const>(scope::identifier{name, loc});
     };
 
     auto name_str = fmt::to_string(name.str);
-    if (const t_const* constant = find_const(name.loc, name_str)) {
+    if (const t_const* constant = find_const(name.range(), name_str)) {
       // Copy const_value to perform isolated mutations.
       auto result = constant->value()->clone();
       // We only want to clone the value, while discarding all real type

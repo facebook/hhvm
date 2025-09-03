@@ -26,7 +26,7 @@ t_type_ref t_global_scope::ref_type(
     const std::string& name,
     const source_range& range) {
   // Try to resolve the type.
-  if (const t_type* type = program.find<t_type>(name)) {
+  if (const t_type* type = program.find<t_type>({name, range})) {
     return {*type, range}; // We found the type!
   }
 

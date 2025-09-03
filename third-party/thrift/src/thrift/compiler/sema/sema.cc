@@ -71,7 +71,7 @@ class type_ref_resolver {
       : ctx_{ctx}, bundle_{bundle} {}
 
   const t_type* resolve_implicit_includes(const t_placeholder_typedef& td) {
-    const scope::identifier id{td.name()};
+    const scope::identifier id{td.name(), td.src_range()};
     return dynamic_cast<const t_type*>(bundle_.root_program()->find(id));
   }
 
@@ -218,7 +218,8 @@ const t_const* try_resolve_enum_by_id(
         }
 
         // (2) requires resolving the enum alias, then finding its value.
-        return resolve_maybe_aliased_enum_with_value(id.scope, id.name);
+        return resolve_maybe_aliased_enum_with_value(
+            scope::identifier{id.scope, id.loc}, id.name);
       },
       [&](const scope::enum_id& id) {
         // `id` is the fully qualified name, e.g.
@@ -228,7 +229,9 @@ const t_const* try_resolve_enum_by_id(
         // 2. A typedef to an enum type
         // So we'll try to resolve the enum type, then find the value.
         return resolve_maybe_aliased_enum_with_value(
-            scope::scoped_id{id.scope, id.enum_name}, id.value_name);
+            scope::scoped_id{
+                .loc = id.loc, .scope = id.scope, .name = id.enum_name},
+            id.value_name);
       });
 }
 
@@ -246,7 +249,8 @@ void match_type_with_const_value(
   // Verify that the const value is correctly resolved at this point.
   if (value && value->kind() == t_const_value::CV_IDENTIFIER) {
     const std::string& value_id = value->get_identifier();
-    const scope::identifier id{value_id};
+    const scope::identifier id{
+        value_id, value->src_range().value_or(source_range{})};
     const t_const* constant;
     if (type->is<t_enum>()) {
       // Try to resolve enum values from typedefs
@@ -431,14 +435,17 @@ void mutate_inject_metadata_fields(
   }
 
   std::string type_string;
+  source_range loc{};
   try {
-    type_string =
-        annotation->get_value_from_structured_annotation("type").get_string();
+    const auto& annotation_value =
+        annotation->get_value_from_structured_annotation("type");
+    type_string = annotation_value.get_string();
+    loc = annotation_value.src_range().value_or(source_range{});
   } catch (const std::exception& e) {
     ctx.error("{}", e.what());
     return;
   }
-  const scope::identifier id{type_string};
+  const scope::identifier id{type_string, loc};
 
   const t_type* ttype = node.program()->find<t_type>(id);
   if (!ttype && annotation->program()) {

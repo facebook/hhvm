@@ -2,32 +2,40 @@ ERROR: File "variadic_method_not_found.php", line 19, characters 21-23:
 No instance method `foo` in `D` (Typing[4053])
   File "variadic_method_not_found.php", line 5, characters 19-21:
   Did you mean `bar` instead?
-  File "variadic_method_not_found.php", line 10, characters 36-36:
+  File "variadic_method_not_found.php", line 19, characters 14-18:
   This is why I think it is an object of type D
+  File "variadic_method_not_found.php", line 10, characters 36-36:
+    from this definition
   File "variadic_method_not_found.php", line 3, characters 7-7:
   Declaration of `D` is here
 ERROR: File "variadic_method_not_found.php", line 25, characters 21-23:
 No instance method `foo` in `D` (Typing[4053])
   File "variadic_method_not_found.php", line 5, characters 19-21:
   Did you mean `bar` instead?
+  File "variadic_method_not_found.php", line 25, characters 14-18:
+  This is why I think it is an object of type D
   File "variadic_method_not_found.php", line 24, characters 19-20:
-  This is why I think it is an object of type D (variadic argument)
+    from this definition (variadic argument)
   File "variadic_method_not_found.php", line 3, characters 7-7:
   Declaration of `D` is here
 ERROR: File "variadic_method_not_found.php", line 29, characters 38-40:
 No instance method `foo` in `D` (Typing[4053])
   File "variadic_method_not_found.php", line 5, characters 19-21:
   Did you mean `bar` instead?
-  File "variadic_method_not_found.php", line 10, characters 36-36:
+  File "variadic_method_not_found.php", line 29, characters 31-35:
   This is why I think it is an object of type D
+  File "variadic_method_not_found.php", line 10, characters 36-36:
+    from this definition
   File "variadic_method_not_found.php", line 3, characters 7-7:
   Declaration of `D` is here
 ERROR: File "variadic_method_not_found.php", line 31, characters 40-42:
 No instance method `foo` in `D` (Typing[4053])
   File "variadic_method_not_found.php", line 5, characters 19-21:
   Did you mean `bar` instead?
+  File "variadic_method_not_found.php", line 31, characters 33-37:
+  This is why I think it is an object of type D
   File "variadic_method_not_found.php", line 31, characters 25-26:
-  This is why I think it is an object of type D (variadic argument)
+    from this definition (variadic argument)
   File "variadic_method_not_found.php", line 3, characters 7-7:
   Declaration of `D` is here
 ERROR: File "variadic_method_not_found.php", line 33, characters 25-29:
@@ -38,8 +46,10 @@ ERROR: File "variadic_method_not_found.php", line 36, characters 35-37:
 No instance method `foo` in `D` (Typing[4053])
   File "variadic_method_not_found.php", line 5, characters 19-21:
   Did you mean `bar` instead?
+  File "variadic_method_not_found.php", line 36, characters 28-32:
+  This is why I think it is an object of type D
   File "variadic_method_not_found.php", line 36, characters 20-21:
-  This is why I think it is an object of type D (variadic argument)
+    from this definition (variadic argument)
   File "variadic_method_not_found.php", line 3, characters 7-7:
   Declaration of `D` is here
 ERROR: File "variadic_method_not_found.php", line 39, characters 12-16:
@@ -50,7 +60,9 @@ ERROR: File "variadic_method_not_found.php", line 44, characters 19-21:
 No instance method `foo` in `D` (Typing[4053])
   File "variadic_method_not_found.php", line 5, characters 19-21:
   Did you mean `bar` instead?
+  File "variadic_method_not_found.php", line 44, characters 12-16:
+  This is why I think it is an object of type D
   File "variadic_method_not_found.php", line 43, characters 29-30:
-  This is why I think it is an object of type D (variadic argument)
+    from this definition (variadic argument)
   File "variadic_method_not_found.php", line 3, characters 7-7:
   Declaration of `D` is here

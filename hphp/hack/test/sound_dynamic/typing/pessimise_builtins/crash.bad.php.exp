@@ -20,3 +20,9 @@ Invalid argument (Typing[4110])
   Expected `shape(?'a' => _, ...)`
   File "crash.bad.php", line 13, characters 15-17:
   But got `string`
+ERROR: File "crash.bad.php", line 20, characters 11-13:
+Invalid argument (Typing[4110])
+  File "Shapes.hhi", line 42, characters 19-24:
+  Expected `shape(?'b' => _, ...)`
+  File "crash.bad.php", line 13, characters 15-17:
+  But got `string`

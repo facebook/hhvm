@@ -13,8 +13,8 @@ Invalid index type for this vec (Typing[4449])
   File "idx_classname.php", line 9, characters 31-45:
   It is incompatible with a classname string for this
 ERROR: File "idx_classname.php", line 12, characters 5-21:
-Invalid index type for this vec (Typing[4324])
-  File "idx_classname.php", line 12, characters 15-20:
+Typing error (Typing[4110])
+  File "idx_classname.php", line 12, characters 5-13:
   Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
   File "idx_classname.php", line 9, characters 31-45:
   But got `string`

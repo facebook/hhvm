@@ -1,4 +1,16 @@
 ERROR: File "is_vector_access.php", line 7, characters 10-16:
-This is not an object of type `KeyedContainer`, this is a value of generic type Tv#3 (Typing[4324])
-  File "is_vector_access.php", line 6, characters 12-13:
-  Definition is here
+Typing error (Typing[4110])
+  File "is_vector_access.php", line 7, characters 10-16:
+  Expected an array that can be indexed
+  File "is_vector_access.php", line 5, characters 19-27:
+  But got `Tv#3` from this `is` expression test
+  File "collections/Vector.hhi", line 48, characters 52-53:
+    via this generic `Tv`
+  File "collections/interfaces.hhi", line 575, characters 25-26:
+    via this generic `Tv`
+  File "collections/interfaces.hhi", line 305, characters 27-28:
+    via this generic `Tv`
+  File "interfaces.hhi", line 115, characters 23-24:
+    via this generic `Tv`
+  File "interfaces.hhi", line 92, characters 66-67:
+    via this generic `Tv`

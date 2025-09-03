@@ -4,23 +4,11 @@ Typing error (Typing[4429])
   Expected `num` because this is used in an arithmetic operation
   File "arities02.php", line 3, characters 35-40:
   But got `string`
-ERROR: File "arities02.php", line 23, characters 11-15:
-Typing error (Typing[4429])
-  File "arities02.php", line 23, characters 11-23:
-  Expected `num` because this is used in an arithmetic operation
-  File "arities02.php", line 3, characters 43-48:
-  But got `string`
 ERROR: File "arities02.php", line 23, characters 19-23:
 Typing error (Typing[4429])
   File "arities02.php", line 23, characters 11-23:
   Expected `num` because this is used in an arithmetic operation
   File "arities02.php", line 3, characters 35-40:
-  But got `string`
-ERROR: File "arities02.php", line 23, characters 19-23:
-Typing error (Typing[4429])
-  File "arities02.php", line 23, characters 11-23:
-  Expected `num` because this is used in an arithmetic operation
-  File "arities02.php", line 3, characters 43-48:
   But got `string`
 ERROR: File "arities02.php", line 34, characters 17-19:
 You are trying to access the method `bar` but this is a string (Typing[4062])

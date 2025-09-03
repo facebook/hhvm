@@ -43,35 +43,17 @@ Typing error (Typing[4110])
   File "index_array_bad.php", line 22, characters 8-10:
   Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
   File "index_array_bad.php", line 12, characters 3-7:
-  But got `nonnull`
-ERROR: File "index_array_bad.php", line 22, characters 8-14:
-Typing error (Typing[4110])
-  File "index_array_bad.php", line 22, characters 8-10:
-  Expected `~arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
-  File "index_array_bad.php", line 12, characters 3-7:
   But got `mixed`
 ERROR: File "index_array_bad.php", line 23, characters 8-14:
 Typing error (Typing[4110])
   File "index_array_bad.php", line 23, characters 8-10:
   Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
   File "index_array_bad.php", line 12, characters 3-7:
-  But got `nonnull`
-ERROR: File "index_array_bad.php", line 23, characters 8-14:
-Typing error (Typing[4110])
-  File "index_array_bad.php", line 23, characters 8-10:
-  Expected `~arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
-  File "index_array_bad.php", line 12, characters 3-7:
   But got `mixed`
 ERROR: File "index_array_bad.php", line 24, characters 8-14:
 Typing error (Typing[4110])
   File "index_array_bad.php", line 24, characters 8-10:
   Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
-  File "index_array_bad.php", line 12, characters 3-7:
-  But got `nonnull`
-ERROR: File "index_array_bad.php", line 24, characters 8-14:
-Typing error (Typing[4110])
-  File "index_array_bad.php", line 24, characters 8-10:
-  Expected `~arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
   File "index_array_bad.php", line 12, characters 3-7:
   But got `mixed`
 ERROR: File "index_array_bad.php", line 32, characters 24-31:

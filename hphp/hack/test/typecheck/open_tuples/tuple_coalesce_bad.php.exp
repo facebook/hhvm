@@ -1,8 +1,6 @@
-ERROR: File "tuple_coalesce_bad.php", line 6, characters 12-12:
-Invalid index type for this tuple (Typing[4116])
 ERROR: File "tuple_coalesce_bad.php", line 12, characters 12-12:
-Invalid index type for this tuple (Typing[4116])
+Tuple accessed with an index out of bounds (Typing[4116])
 ERROR: File "tuple_coalesce_bad.php", line 14, characters 12-12:
-Invalid index type for this tuple (Typing[4116])
+Tuple accessed with an index out of bounds (Typing[4116])
 ERROR: File "tuple_coalesce_bad.php", line 17, characters 12-12:
-Invalid index type for this tuple (Typing[4116])
+Tuple accessed with an index out of bounds (Typing[4116])

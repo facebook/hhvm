@@ -21,7 +21,7 @@ File "type_structure1.php", line 37, characters 5-32:
 File "type_structure1.php", line 38, characters 5-48:
   nothing
 File "type_structure1.php", line 39, characters 5-68:
-  _
+  nothing
 File "type_structure1.php", line 42, characters 5-17:
   shape('bar' => TypeStructure<shape('x' => (num, num))>, 'foo' => TypeStructure<D>)
 File "type_structure1.php", line 43, characters 5-24:

@@ -2,5 +2,5 @@ ERROR: File "bad_inout_use_arg17.php", line 6, characters 11-27:
 Expected argument marked `inout` to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use `inout` here, assign to/from a temporary local variable. (Typing[4208])
   File "bad_inout_use_arg17.php", line 6, characters 11-20:
   This is an object of type Map<string, int>
-  File "bad_inout_use_arg17.php", line 5, characters 31-46:
-    from this definition
+  File "bad_inout_use_arg17.php", line 6, characters 11-20:
+    from this definition because a type could not be determined here

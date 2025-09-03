@@ -132,6 +132,7 @@ add_library(
   sema/schematizer.cc
   sema/standard_validator.cc
   sema/sema_context.cc
+  sema/resolution_mismatch.cc
 )
 target_compile_definitions(compiler_lib PRIVATE THRIFT_OSS)
 target_link_libraries(

@@ -726,78 +726,16 @@ class python_mstch_function : public mstch_function {
   }
 };
 
-class python_mstch_type : public mstch_type {
- public:
-  python_mstch_type(
-      const t_type* type,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      diagnostics_engine* diags)
-      : mstch_type(type, ctx, pos),
-        adapter_annotation_(find_structured_adapter_annotation(*type)),
-        transitive_adapter_annotation_(
-            get_transitive_annotation_of_adapter_or_null(*type)),
-        diags_(*diags) {
-    register_methods(
-        this,
-        {
-            {"type:adapter", &python_mstch_type::adapter},
-        });
-  }
-
-  whisker::object adapter() {
-    return adapter_node(
-        context_, diags_, adapter_annotation_, transitive_adapter_annotation_);
-  }
-
- protected:
-  const t_const* adapter_annotation_;
-  const t_const* transitive_adapter_annotation_;
-  diagnostics_engine& diags_;
-};
-
-class python_mstch_typedef : public mstch_typedef {
- public:
-  python_mstch_typedef(
-      const t_typedef* t,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      diagnostics_engine* diags)
-      : mstch_typedef(t, ctx, pos),
-        adapter_annotation_(find_structured_adapter_annotation(*t)),
-        diags_(*diags) {
-    register_methods(
-        this,
-        {
-            {"typedef:adapter", &python_mstch_typedef::adapter},
-        });
-  }
-
-  whisker::object adapter() {
-    return adapter_node(context_, diags_, adapter_annotation_, nullptr);
-  }
-
- private:
-  const t_const* adapter_annotation_;
-  diagnostics_engine& diags_;
-};
-
 class python_mstch_struct : public mstch_struct {
  public:
   python_mstch_struct(
-      const t_structured* s,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      diagnostics_engine* diags)
-      : mstch_struct(s, ctx, pos),
-        adapter_annotation_(find_structured_adapter_annotation(*s)),
-        diags_(*diags) {
+      const t_structured* s, mstch_context& ctx, mstch_element_position pos)
+      : mstch_struct(s, ctx, pos) {
     register_methods(
         this,
         {
             {"struct:fields_ordered_by_id",
              &python_mstch_struct::fields_ordered_by_id},
-            {"struct:adapter", &python_mstch_struct::adapter},
         });
   }
 
@@ -808,34 +746,18 @@ class python_mstch_struct : public mstch_struct {
     });
     return make_mstch_fields(fields);
   }
-
-  whisker::object adapter() {
-    return adapter_node(context_, diags_, adapter_annotation_, nullptr);
-  }
-
- private:
-  const t_const* adapter_annotation_;
-  diagnostics_engine& diags_;
 };
 
 class python_mstch_field : public mstch_field {
  public:
   python_mstch_field(
-      const t_field* field,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      diagnostics_engine* diags)
-      : mstch_field(field, ctx, pos),
-        adapter_annotation_(find_structured_adapter_annotation(*field)),
-        transitive_adapter_annotation_(
-            get_transitive_annotation_of_adapter_or_null(*field)),
-        diags_(*diags) {
+      const t_field* field, mstch_context& ctx, mstch_element_position pos)
+      : mstch_field(field, ctx, pos) {
     register_methods(
         this,
         {
             {"field:user_default_value",
              &python_mstch_field::user_default_value},
-            {"field:adapter", &python_mstch_field::adapter},
         });
   }
 
@@ -857,15 +779,6 @@ class python_mstch_field : public mstch_field {
     return context_.const_value_factory->make_mstch_object(
         value, context_, pos_, nullptr, nullptr);
   }
-  whisker::object adapter() {
-    return adapter_node(
-        context_, diags_, adapter_annotation_, transitive_adapter_annotation_);
-  }
-
- private:
-  const t_const* adapter_annotation_;
-  const t_const* transitive_adapter_annotation_;
-  diagnostics_engine& diags_;
 };
 
 // Generator-specific validator that enforces "name" and "value" are not used
@@ -1010,6 +923,23 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     return globals;
   }
 
+  prototype<t_const>::ptr make_prototype_for_const(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_const(proto);
+    auto def = whisker::dsl::prototype_builder<h_const>::extends(base);
+
+    def.property("adapter", [this](const t_const& self) {
+      return adapter_node(
+          mstch_context_,
+          diags_,
+          find_structured_adapter_annotation(self),
+          get_transitive_annotation_of_adapter_or_null(self),
+          /*singular_type_hint=*/false);
+    });
+
+    return std::move(def).make();
+  }
+
   prototype<t_const_value>::ptr make_prototype_for_const_value(
       const prototype_database& proto) const override {
     auto base = t_mstch_generator::make_prototype_for_const_value(proto);
@@ -1108,6 +1038,13 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     def.property("sorted_key_serialize?", [](const t_field& self) {
       return self.has_structured_annotation(kPythonSortSetOnSerializeUri) ||
           self.has_structured_annotation(kPythonKeySortMapOnSerializeUri);
+    });
+    def.property("adapter", [this](const t_field& self) {
+      return adapter_node(
+          mstch_context_,
+          diags_,
+          find_structured_adapter_annotation(self),
+          get_transitive_annotation_of_adapter_or_null(self));
     });
 
     return std::move(def).make();
@@ -1254,6 +1191,13 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     def.property("should_generate_patch?", [](const t_structured& self) {
       return should_generate_patch(&self);
     });
+    def.property("adapter", [this](const t_structured& self) {
+      return adapter_node(
+          mstch_context_,
+          diags_,
+          find_structured_adapter_annotation(self),
+          nullptr);
+    });
 
     return std::move(def).make();
   }
@@ -1322,6 +1266,30 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     def.property("has_adapter?", [](const t_type& self) {
       // Check for adapters on NON-RESOLVED type (i.e. including on typedefs)
       return find_structured_adapter_annotation(self) != nullptr;
+    });
+    def.property("adapter", [this](const t_type& self) {
+      // Check for adapters on NON-RESOLVED type (i.e. including on typedefs)
+      return adapter_node(
+          mstch_context_,
+          diags_,
+          find_structured_adapter_annotation(self),
+          get_transitive_annotation_of_adapter_or_null(self));
+    });
+
+    return std::move(def).make();
+  }
+
+  prototype<t_typedef>::ptr make_prototype_for_typedef(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_typedef(proto);
+    auto def = whisker::dsl::prototype_builder<h_typedef>::extends(base);
+
+    def.property("adapter", [this](const t_typedef& self) {
+      return adapter_node(
+          mstch_context_,
+          diags_,
+          find_structured_adapter_annotation(self),
+          nullptr);
     });
 
     return std::move(def).make();
@@ -1445,43 +1413,6 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
   std::filesystem::path generate_root_path_;
 };
 
-class python_mstch_const : public mstch_const {
- public:
-  python_mstch_const(
-      const t_const* c,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const t_const* current_const,
-      const t_type* expected_type,
-      const t_field* field,
-      diagnostics_engine* diags)
-      : mstch_const(c, ctx, pos, current_const, expected_type, field),
-        adapter_annotation_(find_structured_adapter_annotation(*c)),
-        transitive_adapter_annotation_(
-            get_transitive_annotation_of_adapter_or_null(*c)),
-        diags_(*diags) {
-    register_methods(
-        this,
-        {
-            {"constant:adapter", &python_mstch_const::adapter},
-        });
-  }
-
-  whisker::object adapter() {
-    return adapter_node(
-        context_,
-        diags_,
-        adapter_annotation_,
-        transitive_adapter_annotation_,
-        /*singular_type_hint=*/false);
-  }
-
- private:
-  const t_const* adapter_annotation_;
-  const t_const* transitive_adapter_annotation_;
-  diagnostics_engine& diags_;
-};
-
 class python_mstch_const_value : public mstch_const_value {
  public:
   python_mstch_const_value(
@@ -1563,11 +1494,8 @@ void t_mstch_python_generator::set_mstch_factories() {
   mstch_context_.add<python_mstch_service>();
   mstch_context_.add<python_mstch_interaction>();
   mstch_context_.add<python_mstch_function>();
-  mstch_context_.add<python_mstch_type>(&diags_);
-  mstch_context_.add<python_mstch_typedef>(&diags_);
-  mstch_context_.add<python_mstch_struct>(&diags_);
-  mstch_context_.add<python_mstch_field>(&diags_);
-  mstch_context_.add<python_mstch_const>(&diags_);
+  mstch_context_.add<python_mstch_struct>();
+  mstch_context_.add<python_mstch_field>();
   mstch_context_.add<python_mstch_const_value>();
 }
 
@@ -1718,9 +1646,8 @@ class t_python_patch_generator : public t_mstch_python_prototypes_generator {
  private:
   void set_mstch_factories() {
     mstch_context_.add<python_mstch_program>();
-    mstch_context_.add<python_mstch_struct>(&diags_);
-    mstch_context_.add<python_mstch_field>(&diags_);
-    mstch_context_.add<python_mstch_type>(&diags_);
+    mstch_context_.add<python_mstch_struct>();
+    mstch_context_.add<python_mstch_field>();
   }
 };
 

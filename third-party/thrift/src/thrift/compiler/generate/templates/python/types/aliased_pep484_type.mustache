@@ -21,9 +21,8 @@ This is for pep 484 typing
 This is useful for typing call paterns since it allows python container types OR
 thrift-python specific container types.
 
-}}{{#type:has_adapter?}}{{!
-  }}{{adapter:type_hint}}{{#adapter:is_generic?}}[{{> types/unadapted_pep484_type}}]{{/adapter:is_generic?}}{{!
-}}{{/type:has_adapter?}}{{!
-}}{{^type:has_adapter?}}{{!
+}}{{#if type:has_adapter?}}{{#let adapter = type:adapter}}{{!
+  }}{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{> types/unadapted_pep484_type}}]{{/if}}{{!
+}}{{#else}}{{!
   }}{{> types/aliased_unadapted_pep484_type}}{{!
-}}{{/type:has_adapter?}}
+}}{{/if type:has_adapter?}}

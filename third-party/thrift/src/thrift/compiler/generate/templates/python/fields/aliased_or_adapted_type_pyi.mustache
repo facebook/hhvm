@@ -16,9 +16,8 @@
 
 }}{{!
 Adapted type if field has adapter, otherwise the original type
-}}{{#field:has_adapter?}}{{!
-  }}{{adapter:type_hint}}{{#adapter:is_generic?}}[{{#field:type}}{{> types/aliased_pep484_type}}{{/field:type}}]{{/adapter:is_generic?}}{{!
-}}{{/field:has_adapter?}}{{!
-}}{{^field:has_adapter?}}{{!
+}}{{#if field:has_adapter?}}{{#let adapter = field:adapter}}{{!
+  }}{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#field:type}}{{> types/aliased_pep484_type}}{{/field:type}}]{{/if}}{{!
+}}{{#else}}{{!
   }}{{#field:type}}{{> types/aliased_pep484_type}}{{/field:type}}{{!
-}}{{/field:has_adapter?}}
+}}{{/if field:has_adapter?}}

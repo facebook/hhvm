@@ -19,15 +19,13 @@ A tuple of:
   1. adapter class,
   2. a lambda that returns transitive annotation (if the adapter is applied via transitive annotation, else None.)
 if the field has an adapter, else None.
-}}{{#field:has_adapter?}}({{!
-  }}{{adapter:name}}, lambda: {{!
-  }}{{#adapter:transitive_annotation}}{{!
-    }}{{> types/constant_value }}{{!
-  }}{{/adapter:transitive_annotation}}{{!
-  }}{{^adapter:transitive_annotation}}{{!
+}}{{#if field:has_adapter?}}{{#let adapter = field:adapter}}({{!
+  }}{{adapter.name}}, lambda: {{!
+  }}{{#if (object.notnull? adapter.transitive_annotation)}}{{!
+    }}{{#with adapter.transitive_annotation}}{{> types/constant_value }}{{/with}}{{!
+  }}{{#else}}{{!
     }}None{{!
-  }}{{/adapter:transitive_annotation}}{{!
-}}){{/field:has_adapter?}}{{!
-}}{{^field:has_adapter?}}{{!
+  }}{{/if (object.notnull? adapter.transitive_annotation)}}{{!
+}}){{#else}}{{!
   }}None{{!
-}}{{/field:has_adapter?}}
+}}{{/if field:has_adapter?}}

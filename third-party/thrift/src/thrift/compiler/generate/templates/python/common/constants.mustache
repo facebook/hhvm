@@ -19,24 +19,24 @@
 
 {{#program:constants}}
 
-{{#constant:has_adapter?}}_fbthrift_unadapted_{{/constant:has_adapter?}}{{constant:name}} = {{#constant:generated?}} (
+{{#if constant:has_adapter?}}_fbthrift_unadapted_{{/if}}{{constant:name}} = {{#constant:generated?}} (
 # @fbthrift_strip_from_fixtures
 {{/constant:generated?}}{{#constant:value}}
 {{> types/constant_value}}{{/constant:value}}{{#constant:generated?}}
 # @fbthrift_strip_from_fixtures
 ){{/constant:generated?}}
-{{#constant:has_adapter?}}
-{{constant:name}} = {{adapter:name}}.from_thrift(
+{{#if constant:has_adapter?}}
+{{#let adapter = constant:adapter}}
+{{constant:name}} = {{adapter.name}}.from_thrift(
     _fbthrift_unadapted_{{constant:name}},
-    transitive_annotation={{#adapter:transitive_annotation}}{{!
-        }}{{> types/constant_value }}{{!
-    }}{{/adapter:transitive_annotation}}{{!
-    }}{{^adapter:transitive_annotation}}{{!
+    transitive_annotation={{#if (object.notnull? adapter.transitive_annotation)}}{{!
+        }}{{#with adapter.transitive_annotation}}{{> types/constant_value }}{{/with}}{{!
+    }}{{#else}}{{!
         }}None
-    }}{{/adapter:transitive_annotation}},
+    }}{{/if (object.notnull? adapter.transitive_annotation)}},
     constant_uri={{#constant:uri}}"{{constant:uri}}"{{/constant:uri}}{{!
         }}{{^constant:uri}}None{{/constant:uri}},
 )
-{{/constant:has_adapter?}}
+{{/if constant:has_adapter?}}
 {{/program:constants}}
 {{/program:constants?}}

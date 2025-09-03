@@ -16,4 +16,4 @@
 
 }}{{!
 Raw struct name, with special preffix if directly adapted
-}}{{#struct:has_adapter?}}_fbthrift_unadapted_{{/struct:has_adapter?}}{{struct:py_name}}
+}}{{#if struct:has_adapter?}}_fbthrift_unadapted_{{/if}}{{struct:py_name}}

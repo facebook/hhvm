@@ -204,11 +204,12 @@ use abc.ABCMeta.register(cls, subclass) to register.
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.{{> structs/unadapted_name}}, {{> structs/unadapted_name}})
 {{/struct:exception?}}
 {{/python.enable_abstract_types?}}
-{{#struct:has_adapter?}}
+{{#if struct:has_adapter?}}
+{{#let adapter = struct:adapter}}
 
 
-{{struct:py_name}} = {{adapter:type_hint}}{{#adapter:is_generic?}}[{{> structs/unadapted_name}}]{{/adapter:is_generic?}}
-{{/struct:has_adapter?}}
+{{struct:py_name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{> structs/unadapted_name}}]{{/if}}
+{{/if struct:has_adapter?}}
 {{> private/alias_prefix}}{{struct:py_name}} = {{struct:py_name}}{{!
 }}{{/program:structs}}
 

@@ -18,11 +18,10 @@
 {{#program:typedefs?}}
 
 {{#program:typedefs}}
-{{typedef:name}} = {{#typedef:has_adapter?}}{{!
-    }}{{adapter:type_hint}}{{#adapter:is_generic?}}[{{#typedef:type}}{{> types/python_type}}{{/typedef:type}}]{{/adapter:is_generic?}}{{!
-}}{{/typedef:has_adapter?}}{{!
-}}{{^typedef:has_adapter?}}{{!
+{{typedef:name}} = {{#if typedef:has_adapter?}}{{#let adapter = typedef:adapter}}{{!
+    }}{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#typedef:type}}{{> types/python_type}}{{/typedef:type}}]{{/if}}{{!
+}}{{#else}}{{!
     }}{{#typedef:type}}{{> types/python_type}}{{/typedef:type}}{{!
-}}{{/typedef:has_adapter?}}
+}}{{/if typedef:has_adapter?}}
 {{/program:typedefs}}
 {{/program:typedefs?}}

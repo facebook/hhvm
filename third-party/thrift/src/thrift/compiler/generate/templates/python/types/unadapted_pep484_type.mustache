@@ -24,7 +24,7 @@ thrift-python specific container types.
 }}{{> types/unadapted_builtin_pep484_type}}{{!
 }}{{#type:structured}}{{!
     }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
-  }}{{^type:need_module_path?}}{{^struct:has_adapter?}}{{> private/alias_prefix}}{{/struct:has_adapter?}}{{/type:need_module_path?}}{{> structs/unadapted_name}}{{!
+  }}{{#if (not (or type:need_module_path? struct:has_adapter?))}}{{> private/alias_prefix}}{{/if}}{{> structs/unadapted_name}}{{!
 }}{{/type:structured}}{{!
 }}{{#type:list?}}{{> types/sequence }}[{{!
     }}{{#type:list_elem_type}}{{> types/pep484_type}}{{/type:list_elem_type}}{{!

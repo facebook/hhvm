@@ -128,32 +128,32 @@ class {{> structs/unadapted_name}}({{!
     def _to_py3(self) -> "{{program:module_path}}.types.{{> structs/unadapted_name}}": ...  # type: ignore
     def _to_py_deprecated(self) -> "{{program:py_deprecated_module_path}}.ttypes.{{> structs/unadapted_name}}": ...  # type: ignore
     {{/struct:legacy_api?}}
-{{#struct:has_adapter?}}
-{{struct:py_name}} = {{adapter:type_hint}}{{#adapter:is_generic?}}[{{> structs/unadapted_name}}]{{/adapter:is_generic?}}
-{{/struct:has_adapter?}}
+{{#if struct:has_adapter?}}
+{{#let adapter = struct:adapter}}
+{{struct:py_name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{> structs/unadapted_name}}]{{/if}}
+{{/if struct:has_adapter?}}
 {{> private/alias_prefix}}{{struct:py_name}} = {{struct:py_name}}{{!
 }}{{/program:structs}}
 {{#program:constants?}}
 
 {{#program:constants}}
 
-{{#constant:has_adapter?}}_fbthrift_unadapted_{{/constant:has_adapter?}}{{constant:name}}: {{#constant:type}}{{!
+{{#if constant:has_adapter?}}_fbthrift_unadapted_{{/if}}{{constant:name}}: {{#constant:type}}{{!
     }}{{> types/constant_pep484_type}}{{!
 }}{{/constant:type}} = ...
-{{#constant:has_adapter?}}
-{{constant:name}}: {{adapter:type_hint}} = ...
-{{/constant:has_adapter?}}
+{{#if constant:has_adapter?}}
+{{constant:name}}: {{constant:adapter.type_hint}} = ...
+{{/if constant:has_adapter?}}
 {{/program:constants}}
 {{/program:constants?}}
 {{#program:typedefs?}}
 
 {{#program:typedefs}}
-{{typedef:name}} = {{#typedef:has_adapter?}}{{!
-    }}{{adapter:type_hint}}{{#adapter:is_generic?}}[{{#typedef:type}}{{> types/typedef_pep484_type}}{{/typedef:type}}]{{/adapter:is_generic?}}{{!
-}}{{/typedef:has_adapter?}}{{!
-}}{{^typedef:has_adapter?}}{{!
+{{typedef:name}} = {{#if typedef:has_adapter?}}{{#let adapter = typedef:adapter}}{{!
+    }}{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#typedef:type}}{{> types/typedef_pep484_type}}{{/typedef:type}}]{{/if}}{{!
+}}{{#else}}{{!
     }}{{#typedef:type}}{{> types/typedef_pep484_type}}{{/typedef:type}}{{!
-}}{{/typedef:has_adapter?}}
+}}{{/if typedef:has_adapter?}}
 {{/program:typedefs}}
 {{/program:typedefs?}}
 {{#program:services?}}

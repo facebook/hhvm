@@ -181,13 +181,13 @@ whisker::object adapter_node(
   }
   whisker::map::raw node;
   node.emplace(
-      "adapter:name",
+      "name",
       whisker::make::string(
           get_annotation_property(adapter_annotation, "name")));
-  node.emplace("adapter:type_hint", whisker::make::string(type_hint));
-  node.emplace("adapter:is_generic?", is_generic);
+  node.emplace("type_hint", whisker::make::string(type_hint));
+  node.emplace("is_generic?", is_generic);
   node.emplace(
-      "adapter:transitive_annotation",
+      "transitive_annotation",
       transitive_adapter_annotation == nullptr
           ? whisker::make::null
           // TODO(T230131540): Temporary Whisker-to-mstch transition, as the
@@ -741,7 +741,7 @@ class python_mstch_type : public mstch_type {
     register_methods(
         this,
         {
-            {"type:has_adapter?", &python_mstch_type::adapter},
+            {"type:adapter", &python_mstch_type::adapter},
         });
   }
 
@@ -769,7 +769,7 @@ class python_mstch_typedef : public mstch_typedef {
     register_methods(
         this,
         {
-            {"typedef:has_adapter?", &python_mstch_typedef::adapter},
+            {"typedef:adapter", &python_mstch_typedef::adapter},
         });
   }
 
@@ -797,7 +797,7 @@ class python_mstch_struct : public mstch_struct {
         {
             {"struct:fields_ordered_by_id",
              &python_mstch_struct::fields_ordered_by_id},
-            {"struct:has_adapter?", &python_mstch_struct::adapter},
+            {"struct:adapter", &python_mstch_struct::adapter},
         });
   }
 
@@ -835,7 +835,7 @@ class python_mstch_field : public mstch_field {
         {
             {"field:user_default_value",
              &python_mstch_field::user_default_value},
-            {"field:has_adapter?", &python_mstch_field::adapter},
+            {"field:adapter", &python_mstch_field::adapter},
         });
   }
 
@@ -1142,6 +1142,9 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     auto def = whisker::dsl::prototype_builder<h_named>::extends(base);
 
     def.property("py_name", &python::get_py3_name<t_named>);
+    def.property("has_adapter?", [](const t_named& self) {
+      return find_structured_adapter_annotation(self) != nullptr;
+    });
 
     return std::move(def).make();
   }
@@ -1316,6 +1319,10 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     def.property("contains_patch?", [](const t_type& self) {
       return type_contains_patch(self.get_true_type());
     });
+    def.property("has_adapter?", [](const t_type& self) {
+      // Check for adapters on NON-RESOLVED type (i.e. including on typedefs)
+      return find_structured_adapter_annotation(self) != nullptr;
+    });
 
     return std::move(def).make();
   }
@@ -1456,7 +1463,7 @@ class python_mstch_const : public mstch_const {
     register_methods(
         this,
         {
-            {"constant:has_adapter?", &python_mstch_const::adapter},
+            {"constant:adapter", &python_mstch_const::adapter},
         });
   }
 

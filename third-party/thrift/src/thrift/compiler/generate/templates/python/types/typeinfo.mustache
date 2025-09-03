@@ -23,7 +23,7 @@ Structs and enums will be namespaced appropriately if they are either defined
 in a different thrift file, or defined in the same thrift file but this is
 in the client or server source rather than the type definition source.
 
-}}{{#type:has_adapter?}}_fbthrift_python_types.AdaptedTypeInfo({{/type:has_adapter?}}{{!
+}}{{#if type:has_adapter?}}_fbthrift_python_types.AdaptedTypeInfo({{/if}}{{!
 }}{{#type:bool?}}_fbthrift_python_types.typeinfo_bool{{/type:bool?}}{{!
 }}{{#type:byte?}}_fbthrift_python_types.typeinfo_byte{{/type:byte?}}{{!
 }}{{#type:i16?}}_fbthrift_python_types.typeinfo_i16{{/type:i16?}}{{!
@@ -60,12 +60,11 @@ in the client or server source rather than the type definition source.
 }}{{#type:enum}}_fbthrift_python_types.EnumTypeInfo({{!
   }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
   }}{{enum:name}}){{/type:enum}}{{!
-}}{{#type:has_adapter?}}{{!
-  }}, {{adapter:name}}, lambda: {{!
-  }}{{#adapter:transitive_annotation}}{{!
-    }}{{> types/constant_value }}{{!
-  }}{{/adapter:transitive_annotation}}{{!
-  }}{{^adapter:transitive_annotation}}{{!
+}}{{#if type:has_adapter?}}{{#let adapter = type:adapter}}{{!
+  }}, {{adapter.name}}, lambda: {{!
+  }}{{#if (object.notnull? adapter.transitive_annotation)}}{{!
+    }}{{#with adapter.transitive_annotation}}{{> types/constant_value }}{{/with}}{{!
+  }}{{#else}}{{!
     }}None{{!
-  }}{{/adapter:transitive_annotation}}{{!
-}}){{/type:has_adapter?}}
+  }}{{/if (object.notnull? adapter.transitive_annotation)}}{{!
+}}){{/if type:has_adapter?}}

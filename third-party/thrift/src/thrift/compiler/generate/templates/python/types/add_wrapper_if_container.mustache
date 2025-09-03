@@ -18,10 +18,10 @@
 to pick the Thrift container wrapper type for mutable types
 }}
 {{#pragma ignore-newlines}}
-{{^field:has_adapter?}}
+{{#if (not field:has_adapter?)}}
 {{#field:type}}
 {{#type:list?}} | _fbthrift_python_mutable_types._ThriftListWrapper{{/type:list?}}
 {{#type:set?}} | _fbthrift_python_mutable_types._ThriftSetWrapper{{/type:set?}}
 {{#type:map?}} | _fbthrift_python_mutable_types._ThriftMapWrapper{{/type:map?}}
 {{/field:type}}
-{{/field:has_adapter?}}
+{{/if (not field:has_adapter?)}}

@@ -104,9 +104,6 @@ Options:
               explicitly provided include paths (via `-I` and/or
               `$THRIFT_INCLUDE_PATH`).
               Default: true (but will soon change to false).
-  --typedef-uri-requires-annotation=true|false
-              Disable URI support for typedefs without the
-              @thrift.AllowLegacyTypedefUri annotation.
 
   --gen STR   Generate code with a dynamically-registered generator.
               STR has the form language[:key1=val1[,key2,[key3=val3]]].
@@ -828,11 +825,6 @@ std::string parse_args(
                    /*prefix=*/"allow-self-relative-includes",
                    &pparams.allow_self_relative_includes)) {
       continue;
-    } else if (maybe_parse_boolean_flag(
-                   flag,
-                   /*prefix=*/"typedef-uri-requires-annotation",
-                   &pparams.typedef_uri_requires_annotation)) {
-      continue;
     } else if (flag == "record-genfiles") {
       const std::string* arg = consume_arg("genfile file specification");
       if (arg == nullptr) {
@@ -1070,9 +1062,6 @@ void record_invocation_params(
   parse_params_metric.add(
       "allow_self_relative_includes=" +
       std::to_string(pparams.allow_self_relative_includes));
-  parse_params_metric.add(
-      "typedef_uri_requires_annotation=" +
-      std::to_string(pparams.typedef_uri_requires_annotation));
   parse_params_metric.add(
       "use_legacy_type_ref_resolution=" +
       std::to_string(pparams.use_legacy_type_ref_resolution));

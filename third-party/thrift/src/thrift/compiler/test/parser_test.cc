@@ -229,7 +229,6 @@ TEST(ParserTest, typedef_uri_requires_annotation) {
   diagnostics_engine diags(source_mgr, [](const diagnostic&) {});
 
   parsing_params params;
-  params.typedef_uri_requires_annotation = false;
   if (char* includes = std::getenv("IMPLICIT_INCLUDES")) {
     params.incl_searchpath.emplace_back(includes);
   }
@@ -241,38 +240,7 @@ TEST(ParserTest, typedef_uri_requires_annotation) {
     EXPECT_EQ(uri, type->uri());
   };
 
-  // Parse with enforcement disabled
-  std::unique_ptr<t_program_bundle> enforce_off =
-      parse_ast(source_mgr, diags, "test.thrift", params);
-  EXPECT_FALSE(diags.has_errors());
-
-  expect_name_and_uri(
-      enforce_off->root_program()->structs_and_unions()[0],
-      "test.MyStruct",
-      "meta.com/thrift/test/MyStruct");
-
-  expect_name_and_uri(
-      enforce_off->root_program()->typedefs()[0],
-      "test.MyTypedef",
-      "meta.com/thrift/test/MyTypedef");
-
-  expect_name_and_uri(
-      enforce_off->root_program()->typedefs()[1],
-      "test.MyLegacyTypedef",
-      "meta.com/thrift/test/MyLegacyTypedef");
-
-  expect_name_and_uri(
-      enforce_off->root_program()->typedefs()[2],
-      "test.MyExplicitTypedef",
-      "meta.com/thrift/test_explicit/ExplicitTypedef");
-
-  expect_name_and_uri(
-      enforce_off->root_program()->typedefs()[3],
-      "test.MyExplicitLegacyTypedef",
-      "meta.com/thrift/test_explicit/ExplicitLegacyTypedef");
-
   // Parse with enforcement enabled
-  params.typedef_uri_requires_annotation = true;
   std::unique_ptr<t_program_bundle> enforce_on =
       parse_ast(source_mgr, diags, "test.thrift", params);
   EXPECT_FALSE(diags.has_errors());

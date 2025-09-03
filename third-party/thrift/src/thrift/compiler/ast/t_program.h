@@ -99,9 +99,6 @@ class t_program : public t_named {
             parent ? parent->global_scope_
                    : std::make_shared<t_global_scope>()) {}
 
-  void set_typedef_uri_requires_annotation(bool val) {
-    typedef_uri_requires_annotation_ = val;
-  }
   void set_use_global_resolution(bool val) { use_global_resolution_ = val; }
   void set_package(t_package package) { package_ = std::move(package); }
   const t_package& package() const { return package_; }
@@ -386,8 +383,6 @@ class t_program : public t_named {
   // in which they were added to the global scope.
   std::unordered_map<std::string_view, scopes_by_priority> available_scopes_;
   bool use_global_resolution_;
-  // DO_BEFORE(hchok,20250901): Clean up typedef URI flag once rolled out
-  bool typedef_uri_requires_annotation_ = true;
 
   t_program(
       std::string path,

@@ -60,13 +60,6 @@ struct parsing_params {
    */
   bool allow_self_relative_includes = true;
 
-  // DO_BEFORE(hchok,20250901): Clean up typedef URI flag once rolled out
-  /**
-   * Determines whether implicit URIs are generated and explicit URIs are
-   * allowed for typedefs without the @thrift.AllowLegacyTypedefUri annotation.
-   */
-  bool typedef_uri_requires_annotation = true;
-
   /**
    * Whether to use the legacy type ref resolution behavior, which produces a
    * worse AST. Do not use in new code. Only enabled for plugins.

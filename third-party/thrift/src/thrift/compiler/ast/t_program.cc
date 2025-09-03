@@ -29,13 +29,7 @@ namespace {
 /**
  * Determine if a node is eligible to have a URI.
  */
-bool is_uri_eligible(
-    const t_named& node, bool typedef_uri_requires_annotation) {
-  if (!typedef_uri_requires_annotation) {
-    // Always set URI
-    return true;
-  }
-
+bool is_uri_eligible(const t_named& node) {
   if (dynamic_cast<const t_typedef*>(&node) == nullptr) {
     // Node is not a typedef => set uri.
     return true;
@@ -59,7 +53,7 @@ void t_program::add_definition(std::unique_ptr<t_named> definition) {
   // [TEMPORARY] Add global definition for <scope>.<name>
   global_scope_->add_definition(*definition, definition->name());
 
-  if (!is_uri_eligible(*definition, typedef_uri_requires_annotation_)) {
+  if (!is_uri_eligible(*definition)) {
     // Not eligible for URIs - ensure that the URI value is empty
     definition->set_uri("");
   } else if (!definition->explicit_uri()) {

@@ -1291,8 +1291,7 @@ TEST(CompilerTest, boxed_ref_and_optional) {
         @thrift.TerseWrite
         6: MyStruct2 field6;
     }
-  )",
-      {"--typedef-uri-requires-annotation=true"});
+  )");
 }
 
 TEST(CompilerTest, unique_ref) {
@@ -3005,7 +3004,7 @@ TEST(CompilerTest, unresolved_struct_in_const) {
   check_compile(name_contents_map, "main.thrift");
 }
 
-TEST(Compilertest, typedef_uri) {
+TEST(CompilerTest, typedef_uri) {
   // Implicit URI, no validation
   check_compile(
       R"(
@@ -3054,16 +3053,17 @@ TEST(Compilertest, typedef_uri) {
       {"--extra-validation", "typedef_explicit_uri=none"});
 }
 
-TEST(Compilertest, typedef_explicit_uri) {
+TEST(CompilerTest, typedef_explicit_uri) {
   // Implicit URI, no validation
   check_compile(
       R"(
+    include "thrift/annotation/thrift.thrift"
     package "facebook.com/thrift/test"
 
+    @thrift.AllowLegacyTypedefUri
     typedef i32 MyInt1;
   )",
-      {"--typedef-uri-requires-annotation=false",
-       "--extra-validation",
+      {"--extra-validation",
        "nonallowed_typedef_with_uri=none,typedef_explicit_uri=none"});
 
   // Explicit URI, no validation
@@ -3071,74 +3071,63 @@ TEST(Compilertest, typedef_explicit_uri) {
       R"(
     include "thrift/annotation/thrift.thrift"
 
+    @thrift.AllowLegacyTypedefUri
     @thrift.Uri{value="facebook.com/thrift/MyExplicitUri"}
     typedef i32 MyInt2;
   )",
-      {"--typedef-uri-requires-annotation=false",
-       "--extra-validation",
+      {"--extra-validation",
        "nonallowed_typedef_with_uri=none,typedef_explicit_uri=none"});
 
   // Implicit URI, with validation defaulted to WARN
   check_compile(
       R"(
+    include "thrift/annotation/thrift.thrift"
     package "facebook.com/thrift/test"
 
+    @thrift.AllowLegacyTypedefUri
     typedef i32 MyInt3;
   )",
       {"--extra-validation", "nonallowed_typedef_with_uri=none"});
 
   check_compile(
       R"(
+    include "thrift/annotation/thrift.thrift"
     package "facebook.com/thrift/test"
 
+    @thrift.AllowLegacyTypedefUri
     typedef i32 MyInt3;
   )",
-      {"--typedef-uri-requires-annotation=false",
-       "--extra-validation",
-       "nonallowed_typedef_with_uri=none"});
+      {"--extra-validation", "nonallowed_typedef_with_uri=none"});
 
   // Explicit *empty* URI, with validation defaulted to WARN
   check_compile(
       R"(
     include "thrift/annotation/thrift.thrift"
 
+    @thrift.AllowLegacyTypedefUri
     @thrift.Uri{value=""}
     typedef i32 MyInt4;
   )",
-      {"--typedef-uri-requires-annotation=false",
-       "--extra-validation",
-       "nonallowed_typedef_with_uri=none"});
+      {"--extra-validation", "nonallowed_typedef_with_uri=none"});
 
   // Explicit URI, with validation defaulted to WARN
   check_compile(
       R"(
     include "thrift/annotation/thrift.thrift"
 
+    @thrift.AllowLegacyTypedefUri
     @thrift.Uri{value="facebook.com/thrift/MyExplicitUri"}
+    # expected-warning@-2: Typedef `MyInt5` has an explicit URI, which is not allowed
     typedef i32 MyInt5;
   )",
       {"--extra-validation", "nonallowed_typedef_with_uri=none"});
-
-  check_compile(
-      R"(
-    include "thrift/annotation/thrift.thrift"
-
-    @thrift.Uri{value="facebook.com/thrift/MyExplicitUri"}
-    typedef i32 MyInt5;
-      # expected-warning@-2: Typedef `MyInt5` has an explicit URI, which is not allowed
-  )",
-      {"--typedef-uri-requires-annotation=false",
-       "--extra-validation",
-       "nonallowed_typedef_with_uri=none"});
 
   // No URI, with validation defaulted to WARN
   check_compile(
       R"(
     typedef i32 MyInt6;
   )",
-      {"--typedef-uri-requires-annotation=false",
-       "--extra-validation",
-       "nonallowed_typedef_with_uri=none"});
+      {"--extra-validation", "nonallowed_typedef_with_uri=none"});
 }
 
 TEST(CompilerTest, required_field_qualifier) {

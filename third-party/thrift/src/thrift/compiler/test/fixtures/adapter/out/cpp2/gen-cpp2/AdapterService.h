@@ -79,7 +79,7 @@ class ServiceHandler<::facebook::thrift::test::AdapterService> : public apache::
 
   virtual void fbthrift_execute_decorators_before_count(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_count(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::facebook::thrift::test::CountingStruct& /*result*/) {}
-  virtual void fbthrift_execute_decorators_before_adaptedTypes(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::facebook::thrift::test::detail::HeapAllocated& /*p_arg*/) {}
+  virtual void fbthrift_execute_decorators_before_adaptedTypes(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::facebook::thrift::test::HeapAllocated& /*p_arg*/) {}
   virtual void fbthrift_execute_decorators_after_adaptedTypes(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::facebook::thrift::test::detail::HeapAllocated& /*result*/) {}
 };
 

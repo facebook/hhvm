@@ -247,8 +247,8 @@ void decorate(ServiceHandler<::cpp2::DecoratedService>& handler, ServiceMethodDe
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::DecoratedService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -556896798547907895;
-  static constexpr ::std::string_view definitionKey = {"\xcd\x80\x50\x15\x03\x1a\xba\xbd\xd9\x95\x13\x71\xfb\x86\xc1\x90", 16};
+  static constexpr int64_t programId = -7896720196583643065;
+  static constexpr ::std::string_view definitionKey = {"\xd1\x44\x52\x11\x2f\xc7\x1d\x23\xd8\x24\x12\xd8\xd4\x37\xdf\xe7", 16};
 };
 }
 } // namespace apache::thrift
@@ -719,6 +719,15 @@ class ServiceHandler<::cpp2::UndecoratedService> : public apache::thrift::Server
   virtual folly::coro::Task<std::unique_ptr<::cpp2::Response>> co_multiParam(apache::thrift::RequestParams params, std::unique_ptr<::std::string> p_text, ::std::int64_t p_num, std::unique_ptr<::cpp2::Request> p_request);
 #endif
   virtual void async_tm_multiParam(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::Response>> callback, std::unique_ptr<::std::string> p_text, ::std::int64_t p_num, std::unique_ptr<::cpp2::Request> p_request);
+  virtual void sync_adaptedRequest(::cpp2::Response& /*_return*/, std::unique_ptr<::cpp2::AdaptedRequest> /*request*/);
+  [[deprecated("Use sync_adaptedRequest instead")]] virtual void adaptedRequest(::cpp2::Response& /*_return*/, std::unique_ptr<::cpp2::AdaptedRequest> /*request*/);
+  virtual folly::Future<std::unique_ptr<::cpp2::Response>> future_adaptedRequest(std::unique_ptr<::cpp2::AdaptedRequest> p_request);
+  virtual folly::SemiFuture<std::unique_ptr<::cpp2::Response>> semifuture_adaptedRequest(std::unique_ptr<::cpp2::AdaptedRequest> p_request);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::cpp2::Response>> co_adaptedRequest(std::unique_ptr<::cpp2::AdaptedRequest> p_request);
+  virtual folly::coro::Task<std::unique_ptr<::cpp2::Response>> co_adaptedRequest(apache::thrift::RequestParams params, std::unique_ptr<::cpp2::AdaptedRequest> p_request);
+#endif
+  virtual void async_tm_adaptedRequest(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::Response>> callback, std::unique_ptr<::cpp2::AdaptedRequest> p_request);
  private:
   static ::cpp2::UndecoratedServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_noop{apache::thrift::detail::si::InvocationType::AsyncTm};
@@ -727,6 +736,7 @@ class ServiceHandler<::cpp2::UndecoratedService> : public apache::thrift::Server
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_sum{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_withStruct{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_multiParam{apache::thrift::detail::si::InvocationType::AsyncTm};
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_adaptedRequest{apache::thrift::detail::si::InvocationType::AsyncTm};
  public:
 
   virtual void fbthrift_execute_decorators_before_noop(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
@@ -741,13 +751,15 @@ class ServiceHandler<::cpp2::UndecoratedService> : public apache::thrift::Server
   virtual void fbthrift_execute_decorators_after_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/) {}
   virtual void fbthrift_execute_decorators_before_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) {}
   virtual void fbthrift_execute_decorators_after_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_adaptedRequest(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::AdaptedRequest& /*p_request*/) {}
+  virtual void fbthrift_execute_decorators_after_adaptedRequest(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/) {}
 };
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::UndecoratedService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -556896798547907895;
-  static constexpr ::std::string_view definitionKey = {"\x2f\xe7\xa7\xac\xb0\x12\xa4\x07\x04\x3e\xa3\xc0\x68\xbb\xe6\x72", 16};
+  static constexpr int64_t programId = -7896720196583643065;
+  static constexpr ::std::string_view definitionKey = {"\x8d\xfa\xf4\xc5\x87\xb9\x4e\xf1\x30\x60\xe6\xb9\x4e\xe2\x55\x98", 16};
 };
 }
 } // namespace apache::thrift
@@ -765,6 +777,7 @@ class UndecoratedServiceSvNull : public ::apache::thrift::ServiceHandler<Undecor
   ::std::int64_t sum(std::unique_ptr<::std::vector<::std::int64_t>> /*nums*/) override;
   void withStruct(::cpp2::Response& /*_return*/, std::unique_ptr<::cpp2::Request> /*request*/) override;
   void multiParam(::cpp2::Response& /*_return*/, std::unique_ptr<::std::string> /*text*/, ::std::int64_t /*num*/, std::unique_ptr<::cpp2::Request> /*request*/) override;
+  void adaptedRequest(::cpp2::Response& /*_return*/, std::unique_ptr<::cpp2::AdaptedRequest> /*request*/) override;
 };
 
 class UndecoratedServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
@@ -1005,6 +1018,43 @@ class UndecoratedServiceAsyncProcessor : public ::apache::thrift::GeneratedAsync
   //
   // End of Service Methods
   //
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'adaptedRequest'
+  //
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_adaptedRequest(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_adaptedRequest(apache::thrift::ServerRequest&& serverRequest);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static apache::thrift::SerializedResponse return_adaptedRequest(
+      apache::thrift::ContextStack* ctx,
+      ::cpp2::Response const& _return);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_adaptedRequest(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'adaptedRequest'
+  //
+
+  //
+  // End of Service Methods
+  //
  public:
   UndecoratedServiceAsyncProcessor(::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>* iface) :
       iface_(iface) {}
@@ -1043,6 +1093,8 @@ class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsUndecoratedService>
   virtual void after_withStruct(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
   virtual void before_multiParam(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) {}
   virtual void after_multiParam(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
+  virtual void before_adaptedRequest(BeforeParams /*beforeParams*/, const ::cpp2::AdaptedRequest& /*p_request*/) {}
+  virtual void after_adaptedRequest(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
   // END inherited methods from ::cpp2::DecoratedService_ExtendsUndecoratedService
   virtual void before_extension(BeforeParams /*beforeParams*/) {}
   virtual void after_extension(AfterParams /*afterParams*/) {}
@@ -1088,6 +1140,8 @@ class ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService> : virtu
   void fbthrift_execute_decorators_after_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/) override;
   void fbthrift_execute_decorators_before_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) override;
   void fbthrift_execute_decorators_after_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/) override;
+  void fbthrift_execute_decorators_before_adaptedRequest(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::AdaptedRequest& /*p_request*/) override;
+  void fbthrift_execute_decorators_after_adaptedRequest(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/) override;
 
   virtual void fbthrift_execute_decorators_before_extension(apache::thrift::Cpp2RequestContext& /*requestCtx*/);
   virtual void fbthrift_execute_decorators_after_extension(apache::thrift::Cpp2RequestContext& /*requestCtx*/);
@@ -1101,8 +1155,8 @@ void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::DecoratedService_ExtendsUndecoratedService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -556896798547907895;
-  static constexpr ::std::string_view definitionKey = {"\x3d\x0e\xbf\x65\x19\x77\x41\x0e\x05\xeb\x3b\xb6\xe5\xfc\xb8\xba", 16};
+  static constexpr int64_t programId = -7896720196583643065;
+  static constexpr ::std::string_view definitionKey = {"\x00\xf8\x19\x31\x00\xa6\xc2\xc8\xf4\x48\x29\xb0\x5c\xc1\x03\x9d", 16};
 };
 }
 } // namespace apache::thrift
@@ -1275,8 +1329,8 @@ void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>& 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::DecoratedService_ExtendsDecoratedService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -556896798547907895;
-  static constexpr ::std::string_view definitionKey = {"\x0c\x9f\x1e\x0b\x2c\x40\x73\xf0\x82\x1a\xe9\x5e\x0c\x14\x90\x9c", 16};
+  static constexpr int64_t programId = -7896720196583643065;
+  static constexpr ::std::string_view definitionKey = {"\xbe\x01\xa1\x22\xd0\x33\xd3\xa3\x12\xe6\x3f\x43\x70\xda\x3d\x4c", 16};
 };
 }
 } // namespace apache::thrift
@@ -1416,8 +1470,8 @@ class ServiceHandler<::cpp2::UndecoratedService_ExtendsDecoratedService> : virtu
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::UndecoratedService_ExtendsDecoratedService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -556896798547907895;
-  static constexpr ::std::string_view definitionKey = {"\x00\x32\xa3\xdf\x6e\x11\x1d\x33\x62\x35\xa1\x4e\xad\x33\xd2\x92", 16};
+  static constexpr int64_t programId = -7896720196583643065;
+  static constexpr ::std::string_view definitionKey = {"\x44\x7c\x5c\x76\x45\x8e\xab\x3c\x6d\xe7\x3a\xfb\xd5\x12\xfc\x27", 16};
 };
 }
 } // namespace apache::thrift
@@ -1596,8 +1650,8 @@ void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -556896798547907895;
-  static constexpr ::std::string_view definitionKey = {"\x6d\x32\x44\x53\x26\x6b\x69\x9a\x87\x87\xd3\x5e\x0d\xb5\xda\xb4", 16};
+  static constexpr int64_t programId = -7896720196583643065;
+  static constexpr ::std::string_view definitionKey = {"\xa3\x0c\xe2\xd7\x03\x5d\xc4\x45\x5f\xca\x1c\xe1\x14\xd7\x4c\x9b", 16};
 };
 }
 } // namespace apache::thrift

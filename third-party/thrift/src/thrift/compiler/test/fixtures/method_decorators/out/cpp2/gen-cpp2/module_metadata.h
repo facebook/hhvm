@@ -41,6 +41,11 @@ class StructMetadata<::cpp2::Request> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
+class StructMetadata<::cpp2::detail::AdaptedRequest> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
 class StructMetadata<::cpp2::Response> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
@@ -79,6 +84,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedServic
   static void gen_sum(ThriftMetadata& metadata, ThriftService& context);
   static void gen_withStruct(ThriftMetadata& metadata, ThriftService& context);
   static void gen_multiParam(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_adaptedRequest(ThriftMetadata& metadata, ThriftService& context);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>> {

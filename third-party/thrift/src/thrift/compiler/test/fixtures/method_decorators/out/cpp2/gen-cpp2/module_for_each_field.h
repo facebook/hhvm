@@ -22,6 +22,14 @@ struct ForEachField<::cpp2::Request> {
 };
 
 template <>
+struct ForEachField<::cpp2::detail::AdaptedRequest> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).id_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::cpp2::Response> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {

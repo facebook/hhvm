@@ -9,6 +9,9 @@
 // BEGIN forward_declare
 namespace cpp2 {
 class Request;
+namespace detail {
+class AdaptedRequest;
+} // namespace detail
 class Response;
 } // namespace cpp2
 // END forward_declare

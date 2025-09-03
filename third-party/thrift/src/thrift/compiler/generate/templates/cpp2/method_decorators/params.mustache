@@ -24,9 +24,9 @@
 {{#let export partial param_type |param|}}
 {{#pragma ignore-newlines}}
 {{#if param.type.resolves_to_complex_return?}}{{!
-}}const {{param.type.cpp_standard_type}}&
+}}const {{param.type.cpp_type}}&
 {{#else}}
-{{param.type.cpp_standard_type}}
+{{param.type.cpp_type}}
 {{/if param.type.resolves_to_complex_return?}}
 {{/let partial}}
 
@@ -110,16 +110,15 @@ const {{function.return_type.cpp_standard_type}}&
 }}
 {{#let export partial before_invocation_args |function|}}
 {{#pragma ignore-newlines}}
-{{#each (array.enumerate function.params.fields with_first=true) as |index param first?|}}
-{{#if (not first?)}}, {{/if}}
+{{#each function.params.fields as |param|}}
 {{#if param.type.resolves_to_complex_return?}}
 {{#if function.stack_arguments?}}
-args.uarg_{{param.cpp_name}}
+, args.uarg_{{param.cpp_name}}
 {{#else}}
-*args.uarg_{{param.cpp_name}}
+, *args.uarg_{{param.cpp_name}}
 {{/if function.stack_arguments?}}
 {{#else}}
-args.uarg_{{param.cpp_name}}
+, args.uarg_{{param.cpp_name}}
 {{/if param.type.resolves_to_complex_return?}}
 {{/each}}
 {{/let partial}}

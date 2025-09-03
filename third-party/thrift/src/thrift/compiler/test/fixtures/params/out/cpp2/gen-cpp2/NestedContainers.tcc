@@ -126,6 +126,9 @@ void NestedContainersAsyncProcessor::executeRequest_mapList(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_mapList(*serverRequest.requestContext(), *args.uarg_foo);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -285,6 +288,9 @@ void NestedContainersAsyncProcessor::executeRequest_mapSet(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_mapSet(*serverRequest.requestContext(), *args.uarg_foo);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -444,6 +450,9 @@ void NestedContainersAsyncProcessor::executeRequest_listMap(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_listMap(*serverRequest.requestContext(), *args.uarg_foo);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -603,6 +612,9 @@ void NestedContainersAsyncProcessor::executeRequest_listSet(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_listSet(*serverRequest.requestContext(), *args.uarg_foo);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -762,6 +774,9 @@ void NestedContainersAsyncProcessor::executeRequest_turtles(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_turtles(*serverRequest.requestContext(), *args.uarg_foo);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

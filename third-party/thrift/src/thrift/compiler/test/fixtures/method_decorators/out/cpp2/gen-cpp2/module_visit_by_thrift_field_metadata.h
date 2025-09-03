@@ -27,6 +27,19 @@ struct VisitByFieldId<::cpp2::Request> {
 };
 
 template <>
+struct VisitByFieldId<::cpp2::detail::AdaptedRequest> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).id_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::cpp2::detail::AdaptedRequest");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::cpp2::Response> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {

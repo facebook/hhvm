@@ -2588,6 +2588,156 @@ determineInvocationType:
 //
 
 //
+// Method 'adaptedRequest'
+//
+
+void apache::thrift::ServiceHandler<::cpp2::UndecoratedService>::adaptedRequest(::cpp2::Response& /*_return*/, std::unique_ptr<::cpp2::AdaptedRequest> /*request*/) {
+  apache::thrift::detail::si::throw_app_exn_unimplemented("adaptedRequest");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::UndecoratedService>::sync_adaptedRequest(::cpp2::Response& _return, std::unique_ptr<::cpp2::AdaptedRequest> p_request) {
+  return adaptedRequest(_return, std::move(p_request));
+}
+
+folly::SemiFuture<std::unique_ptr<::cpp2::Response>>
+apache::thrift::ServiceHandler<::cpp2::UndecoratedService>::semifuture_adaptedRequest(std::unique_ptr<::cpp2::AdaptedRequest> p_request) {
+  auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
+  __fbthrift_invocation_adaptedRequest.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
+  auto ret = std::make_unique<::cpp2::Response>();
+  sync_adaptedRequest(*ret, std::move(p_request));
+  return folly::makeSemiFuture(std::move(ret));
+}
+
+folly::Future<std::unique_ptr<::cpp2::Response>>
+apache::thrift::ServiceHandler<::cpp2::UndecoratedService>::future_adaptedRequest(std::unique_ptr<::cpp2::AdaptedRequest> p_request) {
+  auto expected{apache::thrift::detail::si::InvocationType::Future};
+  __fbthrift_invocation_adaptedRequest.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::SemiFuture,
+      std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(
+      semifuture_adaptedRequest(std::move(p_request)),
+      getInternalKeepAlive());
+}
+
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<std::unique_ptr<::cpp2::Response>>
+apache::thrift::ServiceHandler<::cpp2::UndecoratedService>::co_adaptedRequest(std::unique_ptr<::cpp2::AdaptedRequest> p_request) {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_adaptedRequest.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Future,
+      std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
+                             withCapturedArgs<std::unique_ptr<::cpp2::AdaptedRequest> /*request*/>(std::move(p_request)));
+}
+
+folly::coro::Task<std::unique_ptr<::cpp2::Response>> apache::thrift::ServiceHandler<::cpp2::UndecoratedService>::co_adaptedRequest(
+    apache::thrift::RequestParams /* params */, std::unique_ptr<::cpp2::AdaptedRequest> p_request) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_adaptedRequest.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
+  return co_adaptedRequest(std::move(p_request));
+}
+#endif // FOLLY_HAS_COROUTINES
+
+void apache::thrift::ServiceHandler<::cpp2::UndecoratedService>::async_tm_adaptedRequest(
+    apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::Response>> callback, std::unique_ptr<::cpp2::AdaptedRequest> p_request) {
+  // It's possible the coroutine versions will delegate to a future-based
+  // version. If that happens, we need the RequestParams arguments to be
+  // available to the future through the thread-local backchannel, so we create
+  // a RAII object that sets up RequestParams and clears them on destruction.
+  apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
+  auto invocationType =
+      __fbthrift_invocation_adaptedRequest.load(std::memory_order_relaxed);
+  try {
+    switch (invocationType) {
+      case apache::thrift::detail::si::InvocationType::AsyncTm: {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_adaptedRequest.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
+        auto task = co_adaptedRequest(params, std::move(p_request));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_adaptedRequest.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::Future,
+            std::memory_order_relaxed);
+        [[fallthrough]];
+#endif // FOLLY_HAS_COROUTINES
+      }
+      case apache::thrift::detail::si::InvocationType::Future: {
+        auto fut = future_adaptedRequest(std::move(p_request));
+        apache::thrift::detail::si::async_tm_future(
+            std::move(callback), std::move(fut));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::SemiFuture: {
+        auto fut = semifuture_adaptedRequest(std::move(p_request));
+        apache::thrift::detail::si::async_tm_semifuture(
+            std::move(callback), std::move(fut));
+        return;
+      }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam: {
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
+        auto task = co_adaptedRequest(params, std::move(p_request));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro: {
+        auto task = co_adaptedRequest(std::move(p_request));
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::Sync: {
+        ::cpp2::Response _return;
+        sync_adaptedRequest(_return, std::move(p_request));
+        callback->result(std::move(_return));
+        return;
+      }
+      default: {
+        folly::assume_unreachable();
+      }
+    }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie(p_request) = std::move(ex).restoreArgs<std::unique_ptr<::cpp2::AdaptedRequest> /*request*/>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
+  } catch (...) {
+    callback->exception(std::current_exception());
+  }
+}
+//
+// End of Method 'adaptedRequest'
+//
+
+//
 // End of Service Methods
 //
 
@@ -2610,6 +2760,8 @@ void UndecoratedServiceSvNull::echo(::std::string& /*_return*/, std::unique_ptr<
 void UndecoratedServiceSvNull::withStruct(::cpp2::Response& /*_return*/, std::unique_ptr<::cpp2::Request> /*request*/) {  }
 
 void UndecoratedServiceSvNull::multiParam(::cpp2::Response& /*_return*/, std::unique_ptr<::std::string> /*text*/, ::std::int64_t /*num*/, std::unique_ptr<::cpp2::Request> /*request*/) {  }
+
+void UndecoratedServiceSvNull::adaptedRequest(::cpp2::Response& /*_return*/, std::unique_ptr<::cpp2::AdaptedRequest> /*request*/) {  }
 
 
 std::string_view UndecoratedServiceAsyncProcessor::getServiceName() {
@@ -2663,6 +2815,11 @@ const UndecoratedServiceAsyncProcessor::ProcessMap UndecoratedServiceAsyncProces
      &UndecoratedServiceAsyncProcessor::setUpAndProcess_multiParam<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
      &UndecoratedServiceAsyncProcessor::executeRequest_multiParam<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
      &UndecoratedServiceAsyncProcessor::executeRequest_multiParam<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"adaptedRequest",
+    {&UndecoratedServiceAsyncProcessor::setUpAndProcess_adaptedRequest<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &UndecoratedServiceAsyncProcessor::setUpAndProcess_adaptedRequest<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
+     &UndecoratedServiceAsyncProcessor::executeRequest_adaptedRequest<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &UndecoratedServiceAsyncProcessor::executeRequest_adaptedRequest<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
 };
 
 apache::thrift::ServiceRequestInfoMap const& UndecoratedServiceServiceInfoHolder::requestInfoMap() const {
@@ -2711,6 +2868,13 @@ apache::thrift::ServiceRequestInfoMap UndecoratedServiceServiceInfoHolder::stati
     { false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "UndecoratedService.multiParam",
+     std::nullopt,
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt}},
+  {"adaptedRequest",
+    { false,
+     apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+     "UndecoratedService.adaptedRequest",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},
@@ -2836,6 +3000,22 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_multiParam(std::move(afterParams), result);
+  });
+}
+
+void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>::fbthrift_execute_decorators_before_adaptedRequest(
+  apache::thrift::Cpp2RequestContext& requestCtx, const ::cpp2::AdaptedRequest& p_request) {
+  std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
+    ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
+    decorator->before_adaptedRequest(std::move(beforeParams), p_request);
+  });
+}
+
+void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>::fbthrift_execute_decorators_after_adaptedRequest(
+  apache::thrift::Cpp2RequestContext& requestCtx, const ::cpp2::Response& result) {
+  std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
+    ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
+    decorator->after_adaptedRequest(std::move(afterParams), result);
   });
 }
 

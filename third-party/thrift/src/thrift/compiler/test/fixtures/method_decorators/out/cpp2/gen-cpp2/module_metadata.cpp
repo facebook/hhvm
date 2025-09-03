@@ -50,6 +50,30 @@ StructMetadata<::cpp2::Request>::gen(ThriftMetadata& metadata) {
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::cpp2::detail::AdaptedRequest>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.AdaptedRequest", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_AdaptedRequest = res.first->second;
+  module_AdaptedRequest.name() = "module.AdaptedRequest";
+  module_AdaptedRequest.is_union() = false;
+  static const auto* const
+  module_AdaptedRequest_fields = new std::array<EncodedThriftField, 1>{ {
+    { 1, "id", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
+  for (const auto& f : *module_AdaptedRequest_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_AdaptedRequest.fields()->push_back(std::move(field));
+  }
+  module_AdaptedRequest.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::AdaptedStruct<MyAdapter>") } }).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Response>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.Response", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
@@ -313,6 +337,21 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));
 }
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::gen_adaptedRequest([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  func.name() = "adaptedRequest";
+  auto func_ret_type = std::make_unique<Struct<::cpp2::Response>>("module.Response");
+  func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  ::apache::thrift::metadata::ThriftField module_UndecoratedService_adaptedRequest_request_1;
+  module_UndecoratedService_adaptedRequest_request_1.id() = 1;
+  module_UndecoratedService_adaptedRequest_request_1.name() = "request";
+  module_UndecoratedService_adaptedRequest_request_1.is_optional() = false;
+  auto module_UndecoratedService_adaptedRequest_request_1_type = std::make_unique<Struct<::cpp2::detail::AdaptedRequest>>("module.AdaptedRequest");
+  module_UndecoratedService_adaptedRequest_request_1_type->writeAndGenType(*module_UndecoratedService_adaptedRequest_request_1.type(), metadata);
+  func.arguments()->push_back(std::move(module_UndecoratedService_adaptedRequest_request_1));
+  func.is_oneway() = false;
+  service.functions()->push_back(std::move(func));
+}
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
@@ -334,6 +373,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::gen_sum,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::gen_withStruct,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::gen_multiParam,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::gen_adaptedRequest,
   };
   for (auto& function_gen : functions) {
     function_gen(metadata, module_UndecoratedService);

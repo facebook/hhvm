@@ -13,6 +13,13 @@ template uint32_t Request::write<>(apache::thrift::CompactProtocolWriter*) const
 template uint32_t Request::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t Request::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+namespace detail {
+template void AdaptedRequest::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t AdaptedRequest::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t AdaptedRequest::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t AdaptedRequest::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+} // namespace detail
+
 template void Response::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t Response::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t Response::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;

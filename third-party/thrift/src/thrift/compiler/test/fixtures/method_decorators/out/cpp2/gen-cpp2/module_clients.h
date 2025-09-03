@@ -1092,7 +1092,8 @@ struct ServiceMethodTypesFootprint<::cpp2::UndecoratedService> {
   ::std::int64_t,
   ::std::vector<::std::int64_t>,
   ::cpp2::Request,
-  ::cpp2::Response>;
+  ::cpp2::Response,
+  ::cpp2::AdaptedRequest>;
 };
 } // namespace detail
 
@@ -1785,6 +1786,119 @@ class Client<::cpp2::UndecoratedService> : public apache::thrift::GeneratedAsync
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> multiParamCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
   folly::SemiFuture<::cpp2::Response> fbthrift_semifuture_multiParam(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_text, ::std::int64_t p_num, const ::cpp2::Request& p_request);
+ public:
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "UndecoratedService", "function": "adaptedRequest"} */
+  virtual void adaptedRequest(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::cpp2::AdaptedRequest& p_request);
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "UndecoratedService", "function": "adaptedRequest"} */
+  virtual void adaptedRequest(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::cpp2::AdaptedRequest& p_request);
+ protected:
+  void fbthrift_serialize_and_send_adaptedRequest(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::cpp2::AdaptedRequest& p_request, bool stealRpcOptions = false);
+ public:
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "UndecoratedService", "function": "adaptedRequest"} */
+  virtual void sync_adaptedRequest(::cpp2::Response& _return, const ::cpp2::AdaptedRequest& p_request);
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "UndecoratedService", "function": "adaptedRequest"} */
+  virtual void sync_adaptedRequest(apache::thrift::RpcOptions& rpcOptions, ::cpp2::Response& _return, const ::cpp2::AdaptedRequest& p_request);
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "UndecoratedService", "function": "adaptedRequest"} */
+  virtual folly::Future<::cpp2::Response> future_adaptedRequest(const ::cpp2::AdaptedRequest& p_request);
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "UndecoratedService", "function": "adaptedRequest"} */
+  virtual folly::SemiFuture<::cpp2::Response> semifuture_adaptedRequest(const ::cpp2::AdaptedRequest& p_request);
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "UndecoratedService", "function": "adaptedRequest"} */
+  virtual folly::Future<::cpp2::Response> future_adaptedRequest(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::AdaptedRequest& p_request);
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "UndecoratedService", "function": "adaptedRequest"} */
+  virtual folly::SemiFuture<::cpp2::Response> semifuture_adaptedRequest(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::AdaptedRequest& p_request);
+
+#if FOLLY_HAS_COROUTINES
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "UndecoratedService", "function": "adaptedRequest"} */
+  template <int = 0>
+  folly::coro::Task<::cpp2::Response> co_adaptedRequest(const ::cpp2::AdaptedRequest& p_request) {
+    return co_adaptedRequest<false>(nullptr, p_request);
+  }
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "UndecoratedService", "function": "adaptedRequest"} */
+  template <int = 0>
+  folly::coro::Task<::cpp2::Response> co_adaptedRequest(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::AdaptedRequest& p_request) {
+    return co_adaptedRequest<true>(&rpcOptions, p_request);
+  }
+ private:
+  template <bool hasRpcOptions>
+  folly::coro::Task<::cpp2::Response> co_adaptedRequest(apache::thrift::RpcOptions* rpcOptions, const ::cpp2::AdaptedRequest& p_request) {
+    const folly::CancellationToken& cancelToken =
+        co_await folly::coro::co_current_cancellation_token;
+    const bool cancellable = cancelToken.canBeCancelled();
+    apache::thrift::ClientReceiveState returnState;
+    apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
+    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto [ctx, header] = adaptedRequestCtx(rpcOptions);
+    using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
+    auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
+    auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    if (ctx != nullptr) {
+      auto argsAsRefs = std::tie(p_request);
+      auto interceptorTry = ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+      if (interceptorTry.hasException()) {
+        co_yield folly::coro::co_error(std::move(interceptorTry.exception()));
+      }
+    }
+    if constexpr (hasRpcOptions) {
+      fbthrift_serialize_and_send_adaptedRequest(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_request);
+    } else {
+      fbthrift_serialize_and_send_adaptedRequest(*defaultRpcOptions, header, ctx.get(), std::move(wrappedCallback), p_request);
+    }
+    if (cancellable) {
+      folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
+      co_await callback.co_waitUntilDone();
+    } else {
+      co_await callback.co_waitUntilDone();
+    }
+    if (returnState.isException()) {
+      co_yield folly::coro::co_error(std::move(returnState.exception()));
+    }
+    returnState.resetProtocolId(protocolId);
+    returnState.resetCtx(std::move(ctx));
+    ::cpp2::Response _return;
+    SCOPE_EXIT {
+      if (hasRpcOptions && returnState.header()) {
+        auto* rheader = returnState.header();
+        if (!rheader->getHeaders().empty()) {
+          rpcOptions->setReadHeaders(rheader->releaseHeaders());
+        }
+        rpcOptions->setRoutingData(rheader->releaseRoutingData());
+      }
+    };
+    auto ew = recv_wrapped_adaptedRequest(_return, returnState);
+    if (returnState.ctx()) {
+      returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
+    }
+    if (ew) {
+      co_yield folly::coro::co_error(std::move(ew));
+    }
+    co_return _return;
+  }
+ public:
+#endif // FOLLY_HAS_COROUTINES
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "UndecoratedService", "function": "adaptedRequest"} */
+  virtual void adaptedRequest(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const ::cpp2::AdaptedRequest& p_request);
+
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "UndecoratedService", "function": "adaptedRequest"} */
+  static folly::exception_wrapper recv_wrapped_adaptedRequest(::cpp2::Response& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "UndecoratedService", "function": "adaptedRequest"} */
+  static void recv_adaptedRequest(::cpp2::Response& _return, ::apache::thrift::ClientReceiveState& state);
+  // Mock friendly virtual instance method
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "UndecoratedService", "function": "adaptedRequest"} */
+  virtual void recv_instance_adaptedRequest(::cpp2::Response& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "service": "UndecoratedService", "function": "adaptedRequest"} */
+  virtual folly::exception_wrapper recv_instance_wrapped_adaptedRequest(::cpp2::Response& _return, ::apache::thrift::ClientReceiveState& state);
+ private:
+  apache::thrift::SerializedRequest fbthrift_serialize_adaptedRequest(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, const ::cpp2::AdaptedRequest& p_request);
+  template <typename RpcOptions>
+  void fbthrift_send_adaptedRequest(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> adaptedRequestCtx(apache::thrift::RpcOptions* rpcOptions);
+  template <typename CallbackType>
+  folly::SemiFuture<::cpp2::Response> fbthrift_semifuture_adaptedRequest(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::AdaptedRequest& p_request);
  public:
 };
 

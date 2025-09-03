@@ -81,6 +81,75 @@ void swap([[maybe_unused]] Request& a, [[maybe_unused]] Request& b) {
 
 
 namespace cpp2 {
+namespace detail {
+
+std::string_view AdaptedRequest::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<AdaptedRequest>::fields_names[folly::to_underlying(ord) - 1];
+}
+std::string_view AdaptedRequest::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<AdaptedRequest>::name;
+}
+
+AdaptedRequest::AdaptedRequest(const AdaptedRequest&) = default;
+AdaptedRequest& AdaptedRequest::operator=(const AdaptedRequest&) = default;
+AdaptedRequest::AdaptedRequest() {
+}
+
+
+AdaptedRequest::~AdaptedRequest() {}
+
+AdaptedRequest::AdaptedRequest([[maybe_unused]] AdaptedRequest&& other) noexcept :
+    __fbthrift_field_id(std::move(other.__fbthrift_field_id)),
+    __isset(other.__isset) {
+}
+
+AdaptedRequest& AdaptedRequest::operator=([[maybe_unused]] AdaptedRequest&& other) noexcept {
+    this->__fbthrift_field_id = std::move(other.__fbthrift_field_id);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+AdaptedRequest::AdaptedRequest(apache::thrift::FragileConstructor, ::std::string id__arg) :
+    __fbthrift_field_id(std::move(id__arg)) { 
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+void AdaptedRequest::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_id = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  __isset = {};
+}
+
+void AdaptedRequest::__fbthrift_clear_terse_fields() {
+}
+
+bool AdaptedRequest::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool AdaptedRequest::operator==([[maybe_unused]] const AdaptedRequest& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool AdaptedRequest::operator<([[maybe_unused]] const AdaptedRequest& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+void swap([[maybe_unused]] AdaptedRequest& a, [[maybe_unused]] AdaptedRequest& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_id, b.__fbthrift_field_id);
+  swap(a.__isset, b.__isset);
+}
+
+
+} // namespace detail
+} // namespace cpp2
+
+
+namespace cpp2 {
 
 std::string_view Response::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }

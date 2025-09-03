@@ -157,6 +157,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_processIOBuf(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_processIOBuf(*serverRequest.requestContext(), *args.uarg_buf, *args.uarg_ptr, args.uarg_alias);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -313,6 +316,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getStruct(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_getStruct(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -475,6 +481,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_setStruct(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_setStruct(*serverRequest.requestContext(), *args.uarg_input);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -634,6 +643,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_setStructList(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_setStructList(*serverRequest.requestContext(), *args.uarg_items);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -790,6 +802,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getStructList(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_getStructList(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -949,6 +964,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getNestedContainer(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_getNestedContainer(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1108,6 +1126,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getTypedefStruct(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_getTypedefStruct(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1267,6 +1288,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getTypedefList(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_getTypedefList(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1426,6 +1450,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getUnion(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_getUnion(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1587,6 +1614,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getCalculator(
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
           std::move(tile));
+
+  iface_->fbthrift_execute_decorators_before_getCalculator(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1743,6 +1773,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_streamStructs(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_streamStructs(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1907,6 +1940,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_streamWithSinkInitial(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_streamWithSinkInitial(*serverRequest.requestContext(), args.uarg_input);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2073,6 +2109,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_streamWithSinkException(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_streamWithSinkException(*serverRequest.requestContext(), args.uarg_input);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

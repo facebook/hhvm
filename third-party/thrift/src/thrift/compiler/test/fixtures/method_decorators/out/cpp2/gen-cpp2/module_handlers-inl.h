@@ -127,6 +127,9 @@ void DecoratedServiceAsyncProcessor::executeRequest_noop(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_noop(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -286,6 +289,9 @@ void DecoratedServiceAsyncProcessor::executeRequest_echo(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_echo(*serverRequest.requestContext(), *args.uarg_text);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -448,6 +454,9 @@ void DecoratedServiceAsyncProcessor::executeRequest_increment(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_increment(*serverRequest.requestContext(), args.uarg_num);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -610,6 +619,9 @@ void DecoratedServiceAsyncProcessor::executeRequest_sum(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_sum(*serverRequest.requestContext(), *args.uarg_nums);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -772,6 +784,9 @@ void DecoratedServiceAsyncProcessor::executeRequest_withStruct(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_withStruct(*serverRequest.requestContext(), *args.uarg_request);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -940,6 +955,9 @@ void DecoratedServiceAsyncProcessor::executeRequest_multiParam(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_multiParam(*serverRequest.requestContext(), *args.uarg_text, args.uarg_num, *args.uarg_request);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1101,6 +1119,9 @@ void DecoratedServiceAsyncProcessor::executeRequest_echoInteraction(
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
           std::move(tile));
+
+  iface_->fbthrift_execute_decorators_before_echoInteraction(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1520,6 +1541,8 @@ typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apac
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::cpp2::Response*>> UndecoratedService_withStruct_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::string, ::std::string*>, apache::thrift::FieldData<2, ::apache::thrift::type_class::integral, ::std::int64_t*>, apache::thrift::FieldData<3, ::apache::thrift::type_class::structure, ::cpp2::Request*>> UndecoratedService_multiParam_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::cpp2::Response*>> UndecoratedService_multiParam_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::cpp2::AdaptedRequest*, ::apache::thrift::type::adapted<::apache::thrift::test::AdaptedStruct<MyAdapter>, ::apache::thrift::type::struct_t<::cpp2::detail::AdaptedRequest>>>> UndecoratedService_adaptedRequest_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::cpp2::Response*>> UndecoratedService_adaptedRequest_presult;
 //
 // Service Methods
 //
@@ -1622,6 +1645,9 @@ void UndecoratedServiceAsyncProcessor::executeRequest_noop(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_noop(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1781,6 +1807,9 @@ void UndecoratedServiceAsyncProcessor::executeRequest_echo(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_echo(*serverRequest.requestContext(), *args.uarg_text);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1943,6 +1972,9 @@ void UndecoratedServiceAsyncProcessor::executeRequest_increment(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_increment(*serverRequest.requestContext(), args.uarg_num);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2105,6 +2137,9 @@ void UndecoratedServiceAsyncProcessor::executeRequest_sum(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_sum(*serverRequest.requestContext(), *args.uarg_nums);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2267,6 +2302,9 @@ void UndecoratedServiceAsyncProcessor::executeRequest_withStruct(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_withStruct(*serverRequest.requestContext(), *args.uarg_request);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2435,6 +2473,9 @@ void UndecoratedServiceAsyncProcessor::executeRequest_multiParam(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_multiParam(*serverRequest.requestContext(), *args.uarg_text, args.uarg_num, *args.uarg_request);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2494,6 +2535,171 @@ void UndecoratedServiceAsyncProcessor::throw_wrapped_multiParam(
 }
 //
 // End of Method 'multiParam'
+//
+
+//
+// Method 'adaptedRequest'
+//
+template <typename ProtocolIn_, typename ProtocolOut_>
+void UndecoratedServiceAsyncProcessor::setUpAndProcess_adaptedRequest(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    apache::thrift::SerializedCompressedRequest&& serializedRequest,
+    apache::thrift::Cpp2RequestContext* ctx,
+    folly::EventBase* eb,
+    [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
+  if (!setUpRequestProcessing(
+          req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
+    return;
+  }
+  auto scope = iface_->getRequestExecutionScope(
+      ctx, apache::thrift::concurrency::NORMAL);
+  ctx->setRequestExecutionScope(std::move(scope));
+  processInThread(
+      std::move(req),
+      std::move(serializedRequest),
+      ctx,
+      eb,
+      tm,
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      &UndecoratedServiceAsyncProcessor::
+          executeRequest_adaptedRequest<ProtocolIn_, ProtocolOut_>,
+      this);
+}
+
+template <typename ProtocolIn_, typename ProtocolOut_>
+void UndecoratedServiceAsyncProcessor::executeRequest_adaptedRequest(
+    apache::thrift::ServerRequest&& serverRequest) {
+  // make sure getRequestContext is null
+  // so async calls don't accidentally use it
+  iface_->setRequestContext(nullptr);
+  struct ArgsState {
+    std::unique_ptr<::cpp2::AdaptedRequest> uarg_request = std::make_unique<::cpp2::AdaptedRequest>();
+    UndecoratedService_adaptedRequest_pargs pargs() {
+      UndecoratedService_adaptedRequest_pargs args;
+      args.get<0>().value = uarg_request.get();
+      return args;
+    }
+
+    auto asTupleOfRefs() & {
+      return std::tie(
+        std::as_const(*uarg_request)
+      );
+    }
+  } args;
+
+  auto ctxStack = apache::thrift::ContextStack::create(
+      this->getEventHandlersSharedPtr(),
+      this->getServiceName(),
+      "UndecoratedService.adaptedRequest",
+      serverRequest.requestContext());
+  try {
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(
+        pargs,
+        "adaptedRequest",
+        apache::thrift::detail::ServerRequestHelper::compressedRequest(
+            std::move(serverRequest))
+            .uncompress(),
+        ctxStack.get());
+  } catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
+    apache::thrift::detail::ap::process_handle_exn_deserialization<
+        ProtocolOut_>(
+        ew,
+        apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
+            serverRequest.requestContext(),
+        apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+        "adaptedRequest");
+    return;
+  }
+  auto requestPileNotification =
+      apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(
+          serverRequest);
+  auto concurrencyControllerNotification =
+      apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(
+          serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+      /* .serviceName =*/ this->getServiceName(),
+      /* .definingServiceName =*/ "UndecoratedService",
+      /* .methodName =*/ "adaptedRequest",
+      /* .qualifiedMethodName =*/ "UndecoratedService.adaptedRequest"};
+  auto callback =
+      apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::Response>>::make(
+          apache::thrift::detail::ServerRequestHelper::request(
+              std::move(serverRequest)),
+          std::move(ctxStack),
+          std::move(methodNameInfo),
+          return_adaptedRequest<ProtocolIn_, ProtocolOut_>,
+          throw_wrapped_adaptedRequest<ProtocolIn_, ProtocolOut_>,
+          serverRequest.requestContext()->getProtoSeqId(),
+          apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+          apache::thrift::detail::ServerRequestHelper::executor(serverRequest),
+          serverRequest.requestContext(),
+          requestPileNotification,
+          concurrencyControllerNotification,
+          std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_adaptedRequest(*serverRequest.requestContext(), *args.uarg_request);
+
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
+      (void)args;
+      ifacePtr->async_tm_adaptedRequest(std::move(cb), std::move(args.uarg_request));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
+          *callback)) {
+    [](auto callback, auto executeHandler, ArgsState args)
+        -> folly::coro::Task<void> {
+      auto argRefs = args.asTupleOfRefs();
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+          *callback,
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+              argRefs));
+      executeHandler(std::move(callback), std::move(args));
+    }(std::move(callback), makeExecuteHandler(), std::move(args))
+               .scheduleOn(
+                   apache::thrift::detail::ServerRequestHelper::executor(
+                       serverRequest))
+               .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback), std::move(args));
+  }
+#else
+  makeExecuteHandler()(std::move(callback), std::move(args));
+#endif // FOLLY_HAS_COROUTINES
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+apache::thrift::SerializedResponse UndecoratedServiceAsyncProcessor::return_adaptedRequest(
+    apache::thrift::ContextStack* ctx,
+    ::cpp2::Response const& _return) {
+  ProtocolOut_ prot;
+  ::cpp2::UndecoratedService_adaptedRequest_presult result;
+  result.get<0>().value = const_cast<::cpp2::Response*>(&_return);
+  result.setIsSet(0, true);
+  return serializeResponse("adaptedRequest", &prot, ctx, result);
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+void UndecoratedServiceAsyncProcessor::throw_wrapped_adaptedRequest(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    [[maybe_unused]] int32_t protoSeqId,
+    apache::thrift::ContextStack* ctx,
+    folly::exception_wrapper ew,
+    apache::thrift::Cpp2RequestContext* reqCtx) {
+  if (!ew) {
+    return;
+  }
+  {
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<
+        ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "adaptedRequest");
+    return;
+  }
+}
+//
+// End of Method 'adaptedRequest'
 //
 
 //
@@ -2607,6 +2813,9 @@ void DecoratedService_ExtendsUndecoratedServiceAsyncProcessor::executeRequest_ex
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_extension(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2776,6 +2985,9 @@ void DecoratedService_ExtendsDecoratedServiceAsyncProcessor::executeRequest_exte
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_extension(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -2945,6 +3157,9 @@ void UndecoratedService_ExtendsDecoratedServiceAsyncProcessor::executeRequest_ex
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_extension(*serverRequest.requestContext());
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -3117,6 +3332,9 @@ void DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceAsyncProc
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()));
+
+  iface_->fbthrift_execute_decorators_before_secondExtension(*serverRequest.requestContext(), *args.uarg_input);
+
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
       (void)args;

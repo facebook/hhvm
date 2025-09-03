@@ -20,6 +20,11 @@ struct Request {
   1: string id;
 }
 
+@cpp.Adapter{name = "::apache::thrift::test::AdaptedStruct<MyAdapter>"}
+struct AdaptedRequest {
+  1: string id;
+}
+
 struct Response {
   1: string text;
 }
@@ -57,6 +62,7 @@ service UndecoratedService {
   i64 sum(1: list<i64> nums);
   Response withStruct(1: Request request);
   Response multiParam(1: string text, 2: i64 num, 3: Request request);
+  Response adaptedRequest(1: AdaptedRequest request);
 }
 
 // Test 1st level of inheritance

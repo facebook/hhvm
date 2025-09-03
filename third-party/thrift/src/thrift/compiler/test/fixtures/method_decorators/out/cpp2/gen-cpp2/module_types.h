@@ -12,9 +12,14 @@
 namespace apache::thrift {
 namespace ident {
 struct id;
+struct id;
 struct text;
 } // namespace ident
 namespace detail {
+#ifndef APACHE_THRIFT_ACCESSOR_id
+#define APACHE_THRIFT_ACCESSOR_id
+APACHE_THRIFT_DEFINE_ACCESSOR(id);
+#endif
 #ifndef APACHE_THRIFT_ACCESSOR_id
 #define APACHE_THRIFT_ACCESSOR_id
 APACHE_THRIFT_DEFINE_ACCESSOR(id);
@@ -31,6 +36,9 @@ APACHE_THRIFT_DEFINE_ACCESSOR(text);
 // BEGIN forward_declare
 namespace cpp2 {
 class Request;
+namespace detail {
+class AdaptedRequest;
+} // namespace detail
 class Response;
 } // namespace cpp2
 // END forward_declare
@@ -196,6 +204,157 @@ unsigned long Request::read(Protocol_* iprot) {
 }
 
 
+namespace detail {
+/** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "name": "AdaptedRequest", "kind": "struct" } */
+class AdaptedRequest final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
+  static constexpr std::size_t __fbthrift_num_fields = 1;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
+    ::apache::thrift::ident::id
+  >;
+
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = AdaptedRequest;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
+
+
+ public:
+
+  AdaptedRequest();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  AdaptedRequest(apache::thrift::FragileConstructor, ::std::string id__arg);
+
+  AdaptedRequest(AdaptedRequest&&) noexcept;
+
+  AdaptedRequest(const AdaptedRequest& src);
+
+
+  AdaptedRequest& operator=(AdaptedRequest&&) noexcept;
+  AdaptedRequest& operator=(const AdaptedRequest& src);
+
+  ~AdaptedRequest();
+
+ private:
+  ::std::string __fbthrift_field_id;
+ private:
+  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const AdaptedRequest&) const;
+  bool operator<(const AdaptedRequest&) const;
+
+  /** Glean { "field": "id" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> id_ref() const& {
+    return {this->__fbthrift_field_id, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "id" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> id_ref() & {
+    return {this->__fbthrift_field_id, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "id" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> id_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_id), __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "id" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> id() const& {
+    return {this->__fbthrift_field_id, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "id" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> id() & {
+    return {this->__fbthrift_field_id, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "id" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> id() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_id), __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "id" } */
+  [[deprecated("Use `FOO.id().value()` instead of `FOO.get_id()`")]]
+  const ::std::string& get_id() const& {
+    return __fbthrift_field_id;
+  }
+
+  /** Glean { "field": "id" } */
+  [[deprecated("Use `FOO.id().value()` instead of `FOO.get_id()`")]]
+  ::std::string get_id() && {
+    return static_cast<::std::string&&>(__fbthrift_field_id);
+  }
+
+  /** Glean { "field": "id" } */
+  template <typename T_AdaptedRequest_id_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.id() = BAR` instead of `FOO.set_id(BAR)`")]]
+  ::std::string& set_id(T_AdaptedRequest_id_struct_setter&& id_) {
+    id_ref() = std::forward<T_AdaptedRequest_id_struct_setter>(id_);
+    return __fbthrift_field_id;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<AdaptedRequest>;
+  friend void swap(AdaptedRequest& a, AdaptedRequest& b);
+};
+
+template <class Protocol_>
+unsigned long AdaptedRequest::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+} // namespace detail
+
+using AdaptedRequest = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::AdaptedStruct<MyAdapter>, ::cpp2::detail::AdaptedRequest>;
+
+
 /** Glean {"file": "thrift/compiler/test/fixtures/method_decorators/src/module.thrift", "name": "Response", "kind": "struct" } */
 class Response final  {
  private:
@@ -348,12 +507,17 @@ unsigned long Response::read(Protocol_* iprot) {
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::Request, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -556896798547907895;
-  static constexpr ::std::string_view definitionKey = {"\x3c\x65\x57\x72\xef\xa9\x3b\x72\x48\x94\x9e\x5c\xfd\xf7\x20\x7b", 16};
+  static constexpr int64_t programId = -7896720196583643065;
+  static constexpr ::std::string_view definitionKey = {"\xbb\x9c\x4c\x7c\x53\xba\x07\x5b\x6f\x30\x27\x71\x71\x56\x86\x0a", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::detail::AdaptedRequest, false> {
+  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr int64_t programId = -7896720196583643065;
+  static constexpr ::std::string_view definitionKey = {"\x0d\x2b\x94\x20\xce\x67\xee\xda\x92\x9b\x4b\xe6\xf3\x80\x27\x16", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::Response, false> {
   static ::folly::Range<const ::std::string_view*>(*bundle)();
-  static constexpr int64_t programId = -556896798547907895;
-  static constexpr ::std::string_view definitionKey = {"\x28\x1d\x30\x97\xa3\x19\x13\xb6\xed\xd9\x5b\x31\xec\x87\x23\x2c", 16};
+  static constexpr int64_t programId = -7896720196583643065;
+  static constexpr ::std::string_view definitionKey = {"\x5b\x4f\xc5\x5d\x5f\x3d\x15\x3c\xc9\x52\x37\x89\xbd\x17\x1a\xdd", 16};
 };
 } // namespace apache::thrift::detail

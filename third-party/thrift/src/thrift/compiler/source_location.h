@@ -68,13 +68,13 @@ struct source_range {
   /**
    * Beginning of this range in source file, inclusive.
    */
-  source_location begin;
+  source_location begin{};
 
   /**
    * Beginning of this range in source file, exclusive (i.e., one past the last
    * location included in this range, if any)..
    */
-  source_location end;
+  source_location end{};
 
   friend bool operator==(source_range, source_range) = default;
 };

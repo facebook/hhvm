@@ -315,7 +315,14 @@ class t_program : public t_named {
     const auto* global_node = find_global_by_id(id);
 
     if (local_node != global_node) {
-      // [TEMPORARY] If there's a mismatch, for the time being
+      // If the local and global nodes are different, then there is a
+      // resolution mismatch.
+      if (local_node || global_node) {
+        global_scope_->add_resolution_mismatch(
+            id, *this, local_node, global_node);
+      }
+
+      // [TEMPORARY] For the time being
       // we'll return the "old" global resolution.
       return dynamic_cast<const Node*>(global_node);
     }

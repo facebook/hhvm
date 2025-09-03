@@ -32,6 +32,50 @@
 
 namespace apache::thrift::compiler {
 
+// A mismatch between the local and global resolution of a type via an
+// identifier.
+struct ResolutionMismatch {
+  // The identifier used to resolve the definition
+  std::string id;
+
+  // The location of the identifier
+  source_range id_loc;
+
+  // The program that was trying to resolve the identifier
+  const t_program* program;
+
+  // The definition found via the local resolution
+  const t_named* local_node;
+
+  // The definition found via the global resolution
+  const t_named* global_node;
+
+  friend bool operator==(const ResolutionMismatch&, const ResolutionMismatch&) =
+      default;
+};
+
+} // namespace apache::thrift::compiler
+
+namespace std {
+
+template <>
+struct hash<apache::thrift::compiler::ResolutionMismatch> {
+  size_t operator()(
+      const apache::thrift::compiler::ResolutionMismatch& mismatch) const {
+    using namespace apache::thrift::compiler;
+    return std::hash<std::string>{}(mismatch.id) ^
+        std::hash<std::uint_least32_t>{}(mismatch.id_loc.begin.offset()) ^
+        std::hash<std::uint_least32_t>{}(mismatch.id_loc.end.offset()) ^
+        std::hash<const t_program*>{}(mismatch.program) ^
+        std::hash<const t_named*>{}(mismatch.local_node) ^
+        std::hash<const t_named*>{}(mismatch.global_node);
+  }
+};
+
+} // namespace std
+
+namespace apache::thrift::compiler {
+
 /**
  * This represents a global-level scope, i.e. a scope shared between all
  * programs parsed by a single compiler invocation. The global scope is used for
@@ -45,6 +89,7 @@ class t_global_scope {
  public:
   using ProgramScopes = std::
       unordered_map<std::string_view, std::vector<const scope::program_scope*>>;
+  using ResolutionMismatches = std::unordered_set<ResolutionMismatch>;
 
   struct global_id {
     std::string_view scope;
@@ -106,6 +151,10 @@ class t_global_scope {
     return placeholder_typedefs_;
   }
 
+  const ResolutionMismatches& resolution_mismatches() const {
+    return resolution_mismatches_;
+  }
+
   const ProgramScopes& program_scopes() const;
 
   template <typename Node = t_named>
@@ -117,6 +166,19 @@ class t_global_scope {
       return nullptr;
     }
     return dynamic_cast<const Node*>(it->second);
+  }
+
+  void add_resolution_mismatch(
+      scope::identifier id,
+      const t_program& program,
+      const t_named* local_node,
+      const t_named* global_node) {
+    resolution_mismatches_.emplace(ResolutionMismatch{
+        .id = id.fmtDebug(),
+        .id_loc = id.src_range(),
+        .program = &program,
+        .local_node = local_node,
+        .global_node = global_node});
   }
 
  private:
@@ -146,6 +208,10 @@ class t_global_scope {
 
   // A map from URIs to definitions.
   std::map<std::string, const t_named*, std::less<>> definitions_by_uri_;
+
+  // A list of mismatches between the local and global resolution of a type via
+  // an identifier.
+  ResolutionMismatches resolution_mismatches_;
 };
 
 } // namespace apache::thrift::compiler

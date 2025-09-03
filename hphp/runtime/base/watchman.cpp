@@ -257,13 +257,15 @@ private:
                 });
           }
           sharedThis->runCallbacks(queryObj, std::move(results));
-        });
+        }, fmt::format("hphp-watchman-subscription-{}", m_nextSubscriptionId++));
   }
 
   folly::IOThreadPoolExecutor m_exec{1};
 
   const std::filesystem::path m_path;
   const Optional<std::string> m_sockPath;
+
+  std::atomic<uint64_t> m_nextSubscriptionId{0};
 
   struct Data {
     // This future must complete before you can perform query() or subscribe()

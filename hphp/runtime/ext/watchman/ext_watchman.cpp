@@ -318,7 +318,7 @@ struct ActiveSubscription {
         if (!m_callbackInProgress) {
           processNextUpdate();
         }
-      })
+      }, fmt::format("hphp-ext-watchman-{}", m_name))
       .via(WatchmanThreadEventBase::Get())
       .thenValue([this](watchman::SubscriptionPtr wm_sub) { // (ASYNC)
         m_subscriptionPtr = wm_sub;

@@ -60,6 +60,7 @@ pub struct HhConfig {
     pub naming_table_compression_threads: usize,
     pub eden_fetch_parallelism: usize,
     pub use_distc_crawl_dircache: bool,
+    pub distc_clear_missing_decls: bool,
 }
 
 impl HhConfig {
@@ -662,6 +663,9 @@ impl HhConfig {
                 "use_distc_crawl_dircache" => {
                     c.use_distc_crawl_dircache = parse_json(&value)?;
                 }
+                "distc_clear_missing_decls" => {
+                    c.distc_clear_missing_decls = parse_json(&value)?;
+                }
                 _ => {}
             }
         }
@@ -672,6 +676,7 @@ impl HhConfig {
         let experiments = json!({
             "eden_fetch_parallelism": self.eden_fetch_parallelism,
             "use_distc_crawl_dircache": self.use_distc_crawl_dircache,
+            "distc_clear_missing_decls": self.distc_clear_missing_decls,
         });
         experiments.to_string()
     }

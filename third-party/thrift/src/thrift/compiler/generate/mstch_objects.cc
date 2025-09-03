@@ -84,12 +84,12 @@ mstch::node mstch_enum::values() {
 }
 
 mstch::node mstch_type::get_structured() {
-  if (type_->is<t_structured>()) {
+  if (resolved_type_->is<t_structured>()) {
     std::string id = program_cache_id(
         type_->program(), get_type_namespace(type_->program()));
     return make_mstch_array_cached(
         std::vector<const t_structured*>{
-            dynamic_cast<const t_structured*>(type_)},
+            dynamic_cast<const t_structured*>(resolved_type_)},
         *context_.struct_factory,
         context_.struct_cache,
         id);

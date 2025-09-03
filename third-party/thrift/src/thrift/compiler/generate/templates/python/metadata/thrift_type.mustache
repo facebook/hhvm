@@ -18,11 +18,12 @@
 
 Used to turn a type into a thrift metadata ThriftType struct
 
-}}{{#type:typedef?}}_fbthrift_metadata.ThriftType(t_typedef={{! TODO this branch never gets hit
+}}{{#if (and python.emit_typedef_metadata? type:typedef?)}}
+_fbthrift_metadata.ThriftType(t_typedef={{!
     }}_fbthrift_metadata.ThriftTypedefType(name="{{type:program.name}}.{{type:name}}", {{!
     }}underlyingType={{#type:typedef_type}}{{> metadata/thrift_type }}{{/type:typedef_type}}, {{!
-    }}structured_annotations=[]){{/type:typedef?}}{{!
-}}{{^type:typedef?}}{{!
+    }}structured_annotations=[])){{!
+}}{{#else}}{{!
     }}{{#type:bool?}}_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BOOL_TYPE){{/type:bool?}}{{!
     }}{{#type:byte?}}_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BYTE_TYPE){{/type:byte?}}{{!
     }}{{#type:i16?}}_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I16_TYPE){{/type:i16?}}{{!
@@ -59,4 +60,4 @@ Used to turn a type into a thrift metadata ThriftType struct
     }}{{#type:enum}}{{!
     }}_fbthrift_metadata.ThriftType(t_enum=_fbthrift_metadata.ThriftEnumType({{!
     }}name="{{type:program.name}}.{{enum:name}}")){{!
-}}{{/type:enum}}{{/type:typedef?}}
+}}{{/type:enum}}{{/if (and python.emit_typedef_metadata? type:typedef?)}}

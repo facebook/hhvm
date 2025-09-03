@@ -41,5 +41,4 @@ Recursive.
   }}{{#type:map?}}__T.Dict[{{#type:key_type}}{{> common/FieldType}}{{/type:key_type}},{{!
   }} {{#type:value_type}}{{> common/FieldType}}{{/type:value_type}}]{{/type:map?}}{{!
   }}{{#type:enum}}{{#type:externalProgram?}}{{> common/ModulePath}}.{{/type:externalProgram?}}{{enum:name}}{{/type:enum}}{{!
-  }}{{#type:typedef?}}{{#type:typedef_type}}{{#type:structured?}}{{> common/FieldType}}{{/type:structured?}}{{/type:typedef_type}}{{/type:typedef?}}{{!
 }}{{/type:has_adapter?}}

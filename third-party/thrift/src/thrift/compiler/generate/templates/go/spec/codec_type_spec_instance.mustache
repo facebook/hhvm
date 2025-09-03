@@ -19,22 +19,14 @@
   This template defines a codec spec for a Thrift type.
 
 }}
-{{#type:typedef?}}
+{{#if (and type:typedef? type:typedef.typedef:defined_kind?)}}
 {{#type:typedef}}
-{{#typedef:defined_kind?}}
 &thrift.CodecTypedefSpec{
     ScopedName:         "{{typedef:scoped_name}}",
     UnderlyingTypeSpec: {{#type:typedef_type}}{{type:codec_type_spec_getter}}{{/type:typedef_type}},
 },
-{{/typedef:defined_kind?}}
-{{^typedef:defined_kind?}}
-{{#type:typedef_type}}
-{{> spec/codec_type_spec_instance}}
-{{/type:typedef_type}}
-{{/typedef:defined_kind?}}
 {{/type:typedef}}
-{{/type:typedef?}}
-{{^type:typedef?}}
+{{#else}}
 {{#type:primitive?}}
 &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.{{> spec/codec_primitive_type}},
@@ -76,4 +68,4 @@
     ElementTypeSpec: {{#type:set_elem_type}}{{type:codec_type_spec_getter}}{{/type:set_elem_type}},
 },
 {{/type:set?}}
-{{/type:typedef?}}
+{{/if (and type:typedef? type:typedef.typedef:defined_kind?)}}

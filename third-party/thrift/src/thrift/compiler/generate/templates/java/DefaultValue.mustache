@@ -25,10 +25,7 @@
   'Map Constants' for an example.
 
 
-}}{{#type:typedef?}}{{!
-}}{{#type:typedef_type}}{{> DefaultValue}}{{/type:typedef_type}}{{!
-}}{{/type:typedef?}}{{!
-}}{{^type:typedef?}}{{!
+}}{{!
     Integer constants
   }}{{#type:byte?}}(byte){{value:integer_value}}{{/type:byte?}}{{!
   }}{{#type:i16?}}(short){{value:integer_value}}{{/type:i16?}}{{!
@@ -107,5 +104,4 @@
         }}{{#struct:union?}}{{> ConstantUnion}}{{/struct:union?}}{{!
       }}{{/value:referenceable?}}{{!
     }}{{/type:structured}}{{!
-  }}{{/type:structured?}}{{!
-}}{{/type:typedef?}}
+  }}{{/type:structured?}}

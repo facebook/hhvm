@@ -459,7 +459,7 @@ class pyi_mstch_type : public mstch_type {
   const t_program* program_;
 
   const t_program* get_type_program() const {
-    const auto* typeProgram = mstch_type::type_->program();
+    const auto* typeProgram = mstch_type::resolved_type_->program();
     return (typeProgram != nullptr) ? typeProgram : this->program_;
   }
 };

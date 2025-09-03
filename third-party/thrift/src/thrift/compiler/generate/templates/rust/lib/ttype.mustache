@@ -14,10 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#type:typedef?}}{{!
-    }}{{#type:typedef_type}}{{> lib/ttype}}{{/type:typedef_type}}{{!
-}}{{/type:typedef?}}{{!
-}}{{^type:typedef?}}::fbthrift::TType::{{!
+}}::fbthrift::TType::{{!
 }}{{#type:void?}}Void{{/type:void?}}{{!
 }}{{#type:string?}}String{{/type:string?}}{{!
 }}{{#type:binary?}}String{{/type:binary?}}{{!
@@ -28,10 +25,8 @@
 }}{{#type:i64?}}I64{{/type:i64?}}{{!
 }}{{#type:double?}}Double{{/type:double?}}{{!
 }}{{#type:float?}}Float{{/type:float?}}{{!
-}}{{#type:structured}}Struct{{/type:structured}}{{!
+}}{{#type:structured?}}Struct{{/type:structured?}}{{!
 }}{{#type:enum?}}I32{{/type:enum?}}{{!
 }}{{#type:list?}}List{{/type:list?}}{{!
 }}{{#type:set?}}Set{{/type:set?}}{{!
-}}{{#type:map?}}Map{{/type:map?}}{{!
-}}{{/type:typedef?}}{{!
-}}
+}}{{#type:map?}}Map{{/type:map?}}

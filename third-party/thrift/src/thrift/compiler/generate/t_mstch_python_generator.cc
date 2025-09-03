@@ -733,7 +733,7 @@ class python_mstch_type : public mstch_type {
       mstch_context& ctx,
       mstch_element_position pos,
       diagnostics_engine* diags)
-      : mstch_type(type->get_true_type(), ctx, pos),
+      : mstch_type(type, ctx, pos),
         adapter_annotation_(find_structured_adapter_annotation(*type)),
         transitive_adapter_annotation_(
             get_transitive_annotation_of_adapter_or_null(*type)),
@@ -1262,59 +1262,59 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
 
     def.property("program", [this, &proto](const t_type& self) {
       // Override default program getter for t_type with Python-specific
-      // behaviour. t_primitive_type instances are singletons and their program
-      // property is always nullptr.
-      return proto.create<t_program>(*get_type_program(self));
+      // behaviour
+      return proto.create<t_program>(*get_true_type_program(self));
     });
     def.property("module_mangle", [this](const t_type& self) {
       return mangle_program_path(
-                 get_type_program(self), get_option("root_module_prefix"))
+                 get_true_type_program(self), get_option("root_module_prefix"))
           .append(fmt::format("__{}", python_context_->types_import_path()));
     });
     def.property("module_name", [this](const t_type& self) {
       return get_py3_namespace_with_name_and_prefix(
-                 get_type_program(self),
+                 get_true_type_program(self),
                  get_option("root_module_prefix").value_or(""))
           .append(fmt::format(".{}", python_context_->types_import_path()));
     });
     def.property("patch_module_path", [this](const t_type& self) {
       return get_py3_namespace_with_name_and_prefix(
-                 get_type_program(self),
+                 get_true_type_program(self),
                  get_option("root_module_prefix").value_or(""))
           .append(".thrift_patch");
     });
     def.property("need_module_path?", [this](const t_type& self) {
       return !python_context_->is_types_file() ||
-          is_type_defined_in_the_current_program(self);
+          get_true_type_program(self) != get_program();
     });
     def.property("need_patch_module_path?", [this](const t_type& self) {
       return !python_context_->is_patch_file() ||
-          is_type_defined_in_the_current_program(self);
+          get_true_type_program(self) != get_program();
     });
     def.property("metadata_path", [this](const t_type& self) {
       return get_py3_namespace_with_name_and_prefix(
-                 get_type_program(self),
+                 get_true_type_program(self),
                  get_option("root_module_prefix").value_or("")) +
           ".thrift_metadata";
     });
     def.property("py3_namespace", [this](const t_type& self) {
       std::ostringstream ss;
-      for (const auto& path : get_py3_namespace(get_type_program(self))) {
+      for (const auto& path : get_py3_namespace(get_true_type_program(self))) {
         ss << path << ".";
       }
       return ss.str();
     });
     def.property("external_program?", [this](const t_type& self) {
-      auto p = get_type_program(self);
-      return p && p != get_program();
+      return get_true_type_program(self) != get_program();
     });
     def.property("integer?", [](const t_type& self) {
-      return self.is_any_int() || self.is_byte();
+      const t_type& true_type = *self.get_true_type();
+      return true_type.is_any_int() || true_type.is_byte();
     });
-    def.property(
-        "iobuf?", [](const t_type& self) { return is_type_iobuf(&self); });
+    def.property("iobuf?", [](const t_type& self) {
+      return is_type_iobuf(self.get_true_type());
+    });
     def.property("contains_patch?", [](const t_type& self) {
-      return type_contains_patch(&self);
+      return type_contains_patch(self.get_true_type());
     });
 
     return std::move(def).make();
@@ -1325,6 +1325,13 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     whisker::dsl::prototype_builder<
         whisker::native_handle<python_generator_context>>
         ctx;
+
+    ctx.property("emit_typedef_metadata?", [](const python_generator_context&) {
+      // DO_BEFORE(hchok,20250915): Remove this property and update
+      // metadata/thrift_type template depending on whether we decide to start
+      // emitting metadata about typedefs or only the resolved type
+      return false;
+    });
     ctx.property(
         "is_types_file?", mem_fn(&python_generator_context::is_types_file));
     ctx.property(
@@ -1347,20 +1354,14 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     return std::move(ctx).make();
   }
 
-  const t_program* get_type_program(const t_type& type) const {
-    if (const t_program* p = type.program()) {
+  const t_program* get_true_type_program(const t_type& type) const {
+    if (const t_program* p = type.get_true_type()->program()) {
       return p;
     }
+    // t_primitive_type instances are singletons and their program property is
+    // always nullptr, but we can treat them as locally defined (e.g. don't
+    // require imports/qualification)
     return get_program();
-  }
-
-  bool is_type_defined_in_the_current_program(const t_type& type) const {
-    if (const t_program* prog = type.program()) {
-      if (prog != get_program()) {
-        return true;
-      }
-    }
-    return false;
   }
 };
 

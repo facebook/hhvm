@@ -38,6 +38,7 @@ type rocketServerTransport struct {
 	log         func(format string, args ...any)
 	stats       *stats.ServerStats
 	pstats      map[string]*stats.TimingSeries
+	observer    ServerObserver
 }
 
 func newRocketServerTransport(
@@ -48,6 +49,7 @@ func newRocketServerTransport(
 	log func(format string, args ...any),
 	stats *stats.ServerStats,
 	pstats map[string]*stats.TimingSeries,
+	observer ServerObserver,
 ) transport.ServerTransport {
 	return &rocketServerTransport{
 		listener:    listener,
@@ -57,6 +59,7 @@ func newRocketServerTransport(
 		log:         log,
 		stats:       stats,
 		pstats:      pstats,
+		observer:    observer,
 	}
 }
 
@@ -99,6 +102,9 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 			continue
 		}
 
+		// Notify observer that connection was successfully accepted
+		r.observer.ConnAccepted()
+
 		go func(ctx context.Context, conn net.Conn) {
 			// Explicitly force TLS handshake protocol to run (if this is a TLS connection).
 			//
@@ -113,6 +119,8 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 				err = tlsConn.HandshakeContext(ctx)
 				if err != nil {
 					r.log("thrift: error performing TLS handshake with %s: %s\n", conn.RemoteAddr(), err)
+					// Notify observer that connection was rejected due to handshake failure
+					r.observer.ConnRejected()
 					// Handshake failed, we cannot proceed with this connection - close it and return.
 					conn.Close()
 					return
@@ -136,6 +144,8 @@ func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Co
 	// update current connection count
 	r.stats.ConnCount.Incr()
 	defer func() {
+		// Notify observer that connection was dropped by server
+		r.observer.ConnDropped()
 		r.stats.ConnsClosed.RecordEvent()
 		r.stats.ConnCount.Decr()
 	}()

@@ -125,7 +125,7 @@ HTTPBodyEvent HTTPBodyEventQueue::dequeueBodyEvent(uint32_t max) {
 folly::coro::Task<size_t> HTTPBodyEventQueue::waitAvailableBuffer() {
   while (bufferedBodyBytes_ >= limit_) {
     event_.reset();
-    auto status = co_await event_.wait();
+    auto status = co_await event_.timedWait(evb_, writeTimeout_);
     if (status == TimedBaton::Status::timedout) {
       co_yield folly::coro::co_error(HTTPError(
           HTTPErrorCode::READ_TIMEOUT, "timed out waiting for buffer space"));

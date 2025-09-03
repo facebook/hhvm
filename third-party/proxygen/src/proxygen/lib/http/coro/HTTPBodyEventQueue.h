@@ -10,7 +10,7 @@
 
 #include "proxygen/lib/http/coro/HTTPError.h"
 #include "proxygen/lib/http/coro/HTTPSourceHolder.h"
-#include "proxygen/lib/http/coro/util/TimedBaton.h"
+#include "proxygen/lib/http/coro/util/CancellableBaton.h"
 #include <folly/coro/Task.h>
 #include <folly/logging/xlog.h>
 #include <proxygen/lib/http/codec/HTTPCodec.h>
@@ -40,7 +40,11 @@ class HTTPBodyEventQueue {
       Callback& callback,
       size_t limit = 65535,
       std::chrono::milliseconds writeTimeout = std::chrono::seconds(5))
-      : id_(id), callback_(callback), event_(evb, writeTimeout), limit_(limit) {
+      : id_(id),
+        callback_(callback),
+        evb_(evb),
+        writeTimeout_(writeTimeout),
+        limit_(limit) {
   }
 
   virtual ~HTTPBodyEventQueue() = default;
@@ -124,7 +128,9 @@ class HTTPBodyEventQueue {
 
   HTTPCodec::StreamID id_;
   Callback& callback_;
-  TimedBaton event_;
+  folly::EventBase* evb_;
+  std::chrono::milliseconds writeTimeout_;
+  detail::CancellableBaton event_;
   HTTPSourceHolder source_;
   std::list<HTTPBodyEvent> bodyQueue_;
   size_t bufferedBodyBytes_{0};

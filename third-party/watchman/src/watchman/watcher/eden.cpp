@@ -642,6 +642,7 @@ void appendGlobResultToNameAndDTypeVec(
   size_t i = 0;
   size_t numDTypes = glob.dtypes().value().size();
 
+  results.reserve(results.size() + glob.matchingFiles().value().size());
   for (auto& name : glob.matchingFiles().value()) {
     // The server may not support dtypes, so this list may be empty.
     // This cast is OK because eden returns the system dependent bits to us, and

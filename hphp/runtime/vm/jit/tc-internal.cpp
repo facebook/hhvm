@@ -415,7 +415,10 @@ bool shouldProfileNewFuncs() {
 
   // We have one knob to control the number of functions we're allowed to
   // profile:Eval.JitProfileBCSize. We profile new functions this limit is exceeded.
-  return profData()->profilingBCSize() < Cfg::Jit::ProfileBCSize;
+  int64_t limit = Cfg::Jit::EnableProfileBCSizeMultiplier
+                  ? Cfg::Jit::ProfileBCSizeMultiplier * Cfg::Jit::ProfileBCSize
+                  : Cfg::Jit::ProfileBCSize;
+  return profData()->profilingBCSize() < limit;
 }
 
 bool profileFunc(const Func* func) {

@@ -1731,6 +1731,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint32_t Jit.MaxAwaitAllUnroll = 8, UNKNOWN
 - bool Jit.ProfileWarmupRequests = false, UNKNOWN
 - uint32_t Jit.ProfileBCSize, UNKNOWN
+- bool Jit.EnableProfileBCSizeMultiplier = false, UNKNOWN
+- double Jit.ProfileBCSizeMultiplier = 1.0, UNKNOWN
 - uint32_t Jit.ResetProfCountersRequest, UNKNOWN
 - uint32_t Jit.RetranslateAllRequest, UNKNOWN
 - uint32_t Jit.RetranslateAllSeconds, UNKNOWN

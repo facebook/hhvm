@@ -42,8 +42,9 @@ type rocketServer struct {
 	pipeliningEnabled bool
 	numWorkers        int
 
-	stats  *stats.ServerStats
-	pstats map[string]*stats.TimingSeries
+	stats    *stats.ServerStats
+	pstats   map[string]*stats.TimingSeries
+	observer ServerObserver
 }
 
 func newRocketServer(proc Processor, listener net.Listener, opts *serverOptions) Server {
@@ -59,8 +60,9 @@ func newRocketServer(proc Processor, listener net.Listener, opts *serverOptions)
 		pipeliningEnabled: opts.pipeliningEnabled,
 		numWorkers:        opts.numWorkers,
 
-		pstats: opts.processorStats,
-		stats:  opts.serverStats,
+		pstats:   opts.processorStats,
+		stats:    opts.serverStats,
+		observer: opts.serverObserver,
 	}
 }
 
@@ -77,8 +79,9 @@ func newUpgradeToRocketServer(proc Processor, listener net.Listener, opts *serve
 		pipeliningEnabled: opts.pipeliningEnabled,
 		numWorkers:        opts.numWorkers,
 
-		pstats: opts.processorStats,
-		stats:  opts.serverStats,
+		pstats:   opts.processorStats,
+		stats:    opts.serverStats,
+		observer: opts.serverObserver,
 	}
 }
 
@@ -113,7 +116,7 @@ func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload,
 		return nil, err
 	}
 	sendingSocket.MetadataPush(serverMetadataPush)
-	socket := newRocketServerSocket(ctx, s.proc, s.pipeliningEnabled, s.log, s.stats, s.pstats)
+	socket := newRocketServerSocket(ctx, s.proc, s.pipeliningEnabled, s.log, s.stats, s.pstats, s.observer)
 	return rsocket.NewAbstractSocket(
 		rsocket.MetadataPush(socket.metadataPush),
 		rsocket.RequestResponse(socket.requestResonse),
@@ -128,6 +131,7 @@ type rocketServerSocket struct {
 	log               func(format string, args ...any)
 	stats             *stats.ServerStats
 	pstats            map[string]*stats.TimingSeries
+	observer          ServerObserver
 }
 
 func newRocketServerSocket(
@@ -137,6 +141,7 @@ func newRocketServerSocket(
 	log func(format string, args ...any),
 	stats *stats.ServerStats,
 	pstats map[string]*stats.TimingSeries,
+	observer ServerObserver,
 ) *rocketServerSocket {
 	return &rocketServerSocket{
 		ctx:               ctx,
@@ -145,6 +150,7 @@ func newRocketServerSocket(
 		log:               log,
 		stats:             stats,
 		pstats:            pstats,
+		observer:          observer,
 	}
 }
 
@@ -165,6 +171,10 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 	if err != nil {
 		return mono.Error(err)
 	}
+
+	// Notify observer that request was received
+	s.observer.ReceivedRequest()
+
 	s.stats.SchedulingWorkCount.Incr()
 	workItem := func(ctx context.Context) (payload.Payload, error) {
 		s.stats.SchedulingWorkCount.Decr()
@@ -197,6 +207,10 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 		s.log("rocketServer fireAndForget error creating protocol: %v", err)
 		return
 	}
+
+	// Notify observer that request was received
+	s.observer.ReceivedRequest()
+
 	// TODO: support pipelining
 	if err := process(s.ctx, s.proc, protocol, s.pstats); err != nil {
 		s.log("rocketServer fireAndForget process error: %v", err)

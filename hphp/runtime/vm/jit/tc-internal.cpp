@@ -239,7 +239,7 @@ TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind,
   }
 
   const bool reachedMaxLiveMainLimit =
-    getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage;
+    getLiveMainUsage() >= std::max(Cfg::Jit::MaxLiveMainUsage, Cfg::Jit::MaxLiveMainUsageLimit);
 
   if (!reachedMaxLiveMainLimit && !code().isAnySectionFull()) {
     return shouldTranslateNoSizeLimit(sk, kind, noThreshold);
@@ -403,7 +403,7 @@ void checkFreeProfData() {
   if (profData() &&
       !Cfg::Eval::EnableReusableTC &&
       (code().isAnySectionFull() ||
-       getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage) &&
+       getLiveMainUsage() >= std::max(Cfg::Jit::MaxLiveMainUsage, Cfg::Jit::MaxLiveMainUsageLimit)) &&
       !transdb::enabled() &&
       !mcgen::retranslateAllEnabled()) {
     discardProfData();
@@ -430,7 +430,7 @@ bool profileFunc(const Func* func) {
 
   if (code().isAnySectionFull()) return false;
 
-  if (getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage) {
+  if (getLiveMainUsage() >= std::max(Cfg::Jit::MaxLiveMainUsage, Cfg::Jit::MaxLiveMainUsageLimit)) {
     return false;
   }
 

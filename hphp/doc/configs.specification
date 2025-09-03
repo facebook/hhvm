@@ -1618,7 +1618,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint32_t HHIR.InliningCostFactorMain = 100, UNKNOWN
 - uint32_t HHIR.InliningCostFactorCold = 32, UNKNOWN
 - uint32_t HHIR.InliningCostFactorFrozen = 10, UNKNOWN
-- uint32_t HHIR.InliningVasmCostLimit = 300000, UNKNOWN
+- uint32_t HHIR.InliningVasmCostLimit = 150000, UNKNOWN
 - uint32_t HHIR.InliningMaxVasmCostLimit = 25000, UNKNOWN
 - uint32_t HHIR.AlwaysInlineVasmCostLimit = 5000, UNKNOWN
 - uint32_t HHIR.InliningMaxDepth = 8, UNKNOWN
@@ -1732,7 +1732,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool Jit.ProfileWarmupRequests = false, UNKNOWN
 - uint32_t Jit.ProfileBCSize, UNKNOWN
 - bool Jit.EnableProfileBCSizeMultiplier = false, UNKNOWN
-- double Jit.ProfileBCSizeMultiplier = 1.0, UNKNOWN
+- double Jit.ProfileBCSizeMultiplier = 1.3, UNKNOWN
 - uint32_t Jit.ResetProfCountersRequest, UNKNOWN
 - uint32_t Jit.RetranslateAllRequest, UNKNOWN
 - uint32_t Jit.RetranslateAllSeconds, UNKNOWN
@@ -1827,6 +1827,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint8_t Jit.LiveThreshold, UNKNOWN
 - uint8_t Jit.ProfileThreshold, UNKNOWN
 - uint32_t Jit.MaxLiveMainUsage = 96 * 1024 * 1024, UNKNOWN
+- uint32_t Jit.MaxLiveMainUsageLimit = 150994944, UNKNOWN
 - uint32_t Jit.SampleRate = 0, UNKNOWN
 - bool Jit.AlignMacroFusionPairs, UNKNOWN
 - bool Jit.AlignUniqueStubs = true, UNKNOWN

@@ -16,6 +16,7 @@
 #include <folly/json/dynamic.h>
 
 #include "mcrouter/McrouterFiberContext.h"
+#include "mcrouter/ProxyBase.h"
 #include "mcrouter/ProxyRequestContext.h"
 #include "mcrouter/config.h"
 #include "mcrouter/lib/Reply.h"
@@ -23,6 +24,7 @@
 #include "mcrouter/lib/carbon/RoutingGroups.h"
 #include "mcrouter/lib/fbi/cpp/globals.h"
 #include "mcrouter/lib/fbi/cpp/util.h"
+#include "mcrouter/lib/network/MessageHelpers.h"
 #include "mcrouter/routes/McRouteHandleBuilder.h"
 #include "mcrouter/routes/ShardHashFunc.h"
 #include "mcrouter/routes/ShardSplitter.h"
@@ -82,8 +84,11 @@ class ShardSplitRoute {
 
   ShardSplitRoute(
       std::shared_ptr<RouteHandleIf> rh,
-      ShardSplitter shardSplitter)
-      : rh_(std::move(rh)), shardSplitter_(std::move(shardSplitter)) {}
+      ShardSplitter shardSplitter,
+      uint32_t splitShardFanout = 0)
+      : rh_(std::move(rh)),
+        shardSplitter_(std::move(shardSplitter)),
+        splitShardFanout_(splitShardFanout) {}
 
   template <class Request>
   bool traverse(
@@ -128,7 +133,7 @@ class ShardSplitRoute {
         }
       }
     } else {
-      size_t i = globals::hostid() % splitSize;
+      size_t i = getSplitId(req) % splitSize;
       // Note that foreachPossibleClient always calls traverse on a request with
       // no flags set.
       if (i == 0) {
@@ -160,7 +165,7 @@ class ShardSplitRoute {
       }
       return rh_->route(req);
     } else {
-      size_t i = globals::hostid() % splitSize;
+      size_t i = getSplitId(req) % splitSize;
       if (i == 0) {
         return rh_->route(req);
       }
@@ -171,6 +176,7 @@ class ShardSplitRoute {
  private:
   std::shared_ptr<RouteHandleIf> rh_;
   const ShardSplitter shardSplitter_;
+  uint32_t splitShardFanout_;
 
   // from request with key 'prefix:shard:suffix' creates a copy of
   // request with key 'prefix:shardXY:suffix'
@@ -182,14 +188,32 @@ class ShardSplitRoute {
         detail::createSplitKey(req.key_ref()->fullKey(), offset, shard);
     return reqCopy;
   }
+
+  template <class Request>
+  uint32_t getSplitId(const Request& request) const {
+    uint32_t id = globals::hostid();
+    if (splitShardFanout_ > 0) {
+      auto fbid = getFbId<Request>(request);
+      if (fbid.has_value()) {
+        return id + (fbid.value() % splitShardFanout_);
+      }
+      auto id1 = getAssocId1<Request>(request);
+      if (id1.has_value()) {
+        return id + (id1.value() % splitShardFanout_);
+      }
+      // fallthrough
+    }
+    return id;
+  }
 };
 
 template <class RouterInfo>
 std::shared_ptr<typename RouterInfo::RouteHandleIf> createShardSplitRoute(
     std::shared_ptr<typename RouterInfo::RouteHandleIf> rh,
-    ShardSplitter shardSplitter) {
+    ShardSplitter shardSplitter,
+    uint32_t shardSplitFanout) {
   return makeRouteHandleWithInfo<RouterInfo, ShardSplitRoute>(
-      std::move(rh), std::move(shardSplitter));
+      std::move(rh), std::move(shardSplitter), shardSplitFanout);
 }
 
 template <class RouterInfo>
@@ -207,8 +231,23 @@ std::shared_ptr<typename RouterInfo::RouteHandleIf> makeShardSplitRoute(
   auto rh = factory.create(json["destination"]);
   checkLogic(rh != nullptr, "makeShardSplitRoute returned nullptr");
 
+  uint32_t splitShardFanout = 0;
+  if (auto* jSplitShardFanout = json.get_ptr("split_shard_fanout")) {
+    checkLogic(
+        jSplitShardFanout->isInt(),
+        "ShardSplitRoute \"split_shard_fanout\" is not integer");
+    checkLogic(
+        0 <= jSplitShardFanout->asInt() &&
+            jSplitShardFanout->asInt() <= std::numeric_limits<uint32_t>::max(),
+        "Split shard fanout should be in range (0, max(uint32)]");
+    checkLogic(
+        0 <= jSplitShardFanout->asInt() &&
+            jSplitShardFanout->asInt() <= std::numeric_limits<uint32_t>::max(),
+        "Split shard fanout should be in range (0, max(uint32)]");
+    splitShardFanout = jSplitShardFanout->asInt();
+  }
   return makeRouteHandleWithInfo<RouterInfo, ShardSplitRoute>(
-      std::move(rh), ShardSplitter((*jSplits)));
+      std::move(rh), ShardSplitter((*jSplits)), splitShardFanout);
 }
 
 } // namespace mcrouter

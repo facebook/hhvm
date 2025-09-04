@@ -538,8 +538,15 @@ McRouteHandleProvider<RouterInfo>::createSRRoute(
 
   if (!(proxy_.router().opts().disable_shard_split_route)) {
     if (auto jsplits = json.get_ptr("shard_splits")) {
+      uint32_t shardSplitFanout = 0;
+      if (auto* jSplitShardFanout = json.get_ptr("split_shard_fanout")) {
+        checkLogic(
+            jSplitShardFanout->isInt(),
+            "ShardSplitRoute \"split_shard_fanout\" is not integer");
+        shardSplitFanout = jSplitShardFanout->asInt();
+      }
       route = createShardSplitRoute<RouterInfo>(
-          std::move(route), ShardSplitter(*jsplits));
+          std::move(route), ShardSplitter(*jsplits), shardSplitFanout);
     }
   }
 
@@ -762,8 +769,15 @@ McRouteHandleProvider<RouterInfo>::makePoolRoute(
       }
       if (!(proxy_.router().opts().disable_shard_split_route)) {
         if (auto jsplits = json.get_ptr("shard_splits")) {
+          uint32_t shardSplitFanout = 0;
+          if (auto* jSplitShardFanout = json.get_ptr("split_shard_fanout")) {
+            checkLogic(
+                jSplitShardFanout->isInt(),
+                "ShardSplitRoute \"split_shard_fanout\" is not integer");
+            shardSplitFanout = jSplitShardFanout->asInt();
+          }
           route = createShardSplitRoute<RouterInfo>(
-              std::move(route), ShardSplitter(*jsplits));
+              std::move(route), ShardSplitter(*jsplits), shardSplitFanout);
         }
       }
       if (auto jasynclog = json.get_ptr("asynclog")) {

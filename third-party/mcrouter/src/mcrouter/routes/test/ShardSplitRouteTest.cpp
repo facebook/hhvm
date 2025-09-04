@@ -36,7 +36,7 @@ void testDirectOp(ShardSplitter splitter) {
       DeleteRouteTestData(carbon::Result::FOUND))};
   auto rh = get_route_handles(handles)[0];
   McrouterRouteHandle<ShardSplitRoute<McrouterRouterInfo>> splitRoute(
-      rh, splitter);
+      rh, splitter, /* shardSplitFanout */ 0);
 
   TestFiberManager<MemcacheRouterInfo> fm;
   fm.run([&] {

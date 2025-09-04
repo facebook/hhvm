@@ -229,6 +229,22 @@ class HasTenantIdTrait<
     : public std::true_type {};
 
 template <typename Message, typename = std::enable_if_t<true>>
+class HasFbIdTrait : public std::false_type {};
+template <typename Message>
+class HasFbIdTrait<
+    Message,
+    std::void_t<decltype(std::declval<std::decay_t<Message>&>().fbid_ref())>>
+    : public std::true_type {};
+
+template <typename Message, typename = std::enable_if_t<true>>
+class HasAssocId1Trait : public std::false_type {};
+template <typename Message>
+class HasAssocId1Trait<
+    Message,
+    std::void_t<decltype(std::declval<std::decay_t<Message>&>().id1_ref())>>
+    : public std::true_type {};
+
+template <typename Message, typename = std::enable_if_t<true>>
 class HasMcTenantIdTrait : public std::false_type {};
 template <typename Message>
 class HasMcTenantIdTrait<
@@ -280,6 +296,22 @@ uint32_t getTenantId(Message& message) {
     }
     return static_cast<uint32_t>(*message.usecaseId_deprecated());
   }
+}
+
+template <typename Message>
+std::optional<uint64_t> getFbId(const Message& message) {
+  if constexpr (HasFbIdTrait<Message>::value) {
+    return *message.fbid_ref();
+  }
+  return std::nullopt;
+}
+
+template <typename Message>
+std::optional<uint64_t> getAssocId1(const Message& message) {
+  if constexpr (HasAssocId1Trait<Message>::value) {
+    return *message.id1();
+  }
+  return std::nullopt;
 }
 
 template <typename Message, typename = std::enable_if_t<true>>

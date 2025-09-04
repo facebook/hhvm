@@ -119,8 +119,11 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 				err = tlsConn.HandshakeContext(ctx)
 				if err != nil {
 					r.log("thrift: error performing TLS handshake with %s: %s\n", conn.RemoteAddr(), err)
+					// TODO: remove ConnRejected in the next diff
 					// Notify observer that connection was rejected due to handshake failure
 					r.observer.ConnRejected()
+					// Notify observer that connection was dropped due to handshake failure
+					r.observer.ConnDropped()
 					// Handshake failed, we cannot proceed with this connection - close it and return.
 					conn.Close()
 					return
@@ -144,8 +147,6 @@ func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Co
 	// update current connection count
 	r.stats.ConnCount.Incr()
 	defer func() {
-		// Notify observer that connection was dropped by server
-		r.observer.ConnDropped()
 		r.stats.ConnsClosed.RecordEvent()
 		r.stats.ConnCount.Decr()
 	}()
@@ -175,11 +176,13 @@ func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Co
 		headerProtocol, err := NewHeaderProtocol(conn)
 		if err != nil {
 			r.log("thrift: error constructing header protocol from %s: %s\n", conn.RemoteAddr(), err)
+			r.observer.ConnDropped()
 			return
 		}
 		if err := r.processHeaderRequest(ctx, headerProtocol, ruCompProcessor); err != nil {
 			r.log("thrift: error processing first header request from %s: %s\n", conn.RemoteAddr(), err)
 			// TODO: jchistyakov to ensure all other if-paths in this function close the connection properly
+			r.observer.ConnDropped()
 			headerProtocol.Close()
 			return
 		}
@@ -188,21 +191,31 @@ func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Co
 		} else {
 			if err := r.processHeaderRequests(ctx, headerProtocol, ruCompProcessor); err != nil {
 				r.log("thrift: error processing additional header request from %s: %s\n", conn.RemoteAddr(), err)
+				r.observer.ConnDropped()
 			}
 		}
 	case TransportIDHeader:
 		headerProtocol, err := NewHeaderProtocol(conn)
 		if err != nil {
 			r.log("thrift: error constructing header protocol from %s: %s\n", conn.RemoteAddr(), err)
+			r.observer.ConnDropped()
 			return
 		}
 		if err := r.processHeaderRequests(ctx, headerProtocol, r.processor); err != nil {
 			r.log("thrift: error processing header request from %s: %s\n", conn.RemoteAddr(), err)
+			r.observer.ConnDropped()
 		}
 	}
 }
 
 func (r *rocketServerTransport) processRocketRequests(ctx context.Context, conn net.Conn) {
+	defer func() {
+		if err := recover(); err != nil {
+			r.log("panic in rocket processor: %v: %s", err, debug.Stack())
+			// Notify observer that connection was dropped due to panic
+			r.observer.ConnDropped()
+		}
+	}()
 	r.acceptor(ctx, transport.NewTransport(transport.NewTCPConn(conn)), func(*transport.Transport) {})
 }
 

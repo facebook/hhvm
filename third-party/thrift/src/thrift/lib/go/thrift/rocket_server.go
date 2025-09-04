@@ -168,10 +168,14 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 
 	request, err := rocket.DecodeRequestPayload(msg)
 	if err != nil {
+		// Notify observer that connection was dropped due to malformed rocket payload
+		s.observer.ConnDropped()
 		return mono.Error(err)
 	}
 	protocol, err := newProtocolBufferFromRequest(request)
 	if err != nil {
+		// Notify observer that connection was dropped due to protocol buffer creation error
+		s.observer.ConnDropped()
 		return mono.Error(err)
 	}
 
@@ -191,6 +195,8 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 
 		// Track actual handler execution time
 		if err := process(ctx, s.proc, protocol, s.pstats); err != nil {
+			// Notify observer that connection was dropped due to unparseable message begin
+			s.observer.ConnDropped()
 			return nil, err
 		}
 
@@ -225,11 +231,15 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 
 	request, err := rocket.DecodeRequestPayload(msg)
 	if err != nil {
+		// Notify observer that connection was dropped due to malformed rocket payload
+		s.observer.ConnDropped()
 		s.log("rocketServer fireAndForget decode request payload error: %v", err)
 		return
 	}
 	protocol, err := newProtocolBufferFromRequest(request)
 	if err != nil {
+		// Notify observer that connection was dropped due to protocol buffer creation error
+		s.observer.ConnDropped()
 		s.log("rocketServer fireAndForget error creating protocol: %v", err)
 		return
 	}
@@ -244,6 +254,8 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 
 	// TODO: support pipelining
 	if err := process(s.ctx, s.proc, protocol, s.pstats); err != nil {
+		// Notify observer that connection was dropped due to unparseable message begin
+		s.observer.ConnDropped()
 		s.log("rocketServer fireAndForget process error: %v", err)
 		return
 	}

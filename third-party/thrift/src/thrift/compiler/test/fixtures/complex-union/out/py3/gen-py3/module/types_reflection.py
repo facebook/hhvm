@@ -264,7 +264,8 @@ def get_reflection__VirtualComplexUnion() -> __StructSpec:
         name="VirtualComplexUnion",
         kind=__StructType.UNION,
         annotations={
-            """cpp.virtual""": """1""",        },
+            """cpp.virtual""": """1""",
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
@@ -298,7 +299,8 @@ def get_reflection__NonCopyableStruct() -> __StructSpec:
         name="NonCopyableStruct",
         kind=__StructType.STRUCT,
         annotations={
-            """cpp.noncopyable""": """1""",        },
+            """cpp.noncopyable""": """1""",
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
@@ -319,7 +321,8 @@ def get_reflection__NonCopyableUnion() -> __StructSpec:
         name="NonCopyableUnion",
         kind=__StructType.UNION,
         annotations={
-            """cpp.noncopyable""": """1""",        },
+            """cpp.noncopyable""": """1""",
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(

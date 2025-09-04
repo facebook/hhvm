@@ -119,9 +119,6 @@ from {{#service:py3Namespaces}}{{value}}.{{/service:py3Namespaces}}{{service:pro
 cdef object _{{service:name}}_annotations = _py_types.MappingProxyType({
 {{#service:annotations}}
     {{> common/annotation}}
-    {{#last?}}
-
-    {{/last?}}
 {{/service:annotations}}
 })
 

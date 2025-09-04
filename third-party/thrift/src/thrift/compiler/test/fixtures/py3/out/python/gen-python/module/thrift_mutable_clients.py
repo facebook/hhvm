@@ -2198,7 +2198,8 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
 
 class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedService.Sync"]):
     annotations = _py_types.MappingProxyType({
-            """bar""": """1""",            """foo""": """\"\"\"""",
+            """bar""": """1""",
+            """foo""": """\"\"\"""",
     })
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -2211,7 +2212,9 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
-            """bar""": """1""",        """foo""": """\"\"\"""",    }
+            """bar""": """1""",
+            """foo""": """\"\"\"""",
+        }
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

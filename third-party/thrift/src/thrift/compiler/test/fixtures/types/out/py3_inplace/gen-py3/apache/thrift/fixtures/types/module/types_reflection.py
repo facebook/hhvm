@@ -38,7 +38,9 @@ def get_reflection__decorated_struct() -> __StructSpec:
         name="decorated_struct",
         kind=__StructType.STRUCT,
         annotations={
-            """cpp.declare_equal_to""": """1""",            """cpp.declare_hash""": """1""",        },
+            """cpp.declare_equal_to""": """1""",
+            """cpp.declare_hash""": """1""",
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
@@ -192,7 +194,8 @@ def get_reflection__VirtualStruct() -> __StructSpec:
         name="VirtualStruct",
         kind=__StructType.STRUCT,
         annotations={
-            """cpp.virtual""": """1""",        },
+            """cpp.virtual""": """1""",
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
@@ -532,7 +535,8 @@ def get_reflection__MyStruct() -> __StructSpec:
         name="MyStruct",
         kind=__StructType.STRUCT,
         annotations={
-            """cpp.noncomparable""": """1""",        },
+            """cpp.noncomparable""": """1""",
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
@@ -592,7 +596,8 @@ def get_reflection__MyDataItem() -> __StructSpec:
         name="MyDataItem",
         kind=__StructType.STRUCT,
         annotations={
-            """cpp.noncomparable""": """1""",        },
+            """cpp.noncomparable""": """1""",
+        },
     )
     return spec
 def get_reflection__Renaming() -> __StructSpec:
@@ -889,7 +894,8 @@ def get_reflection__AllocatorAware() -> __StructSpec:
         name="AllocatorAware",
         kind=__StructType.STRUCT,
         annotations={
-            """cpp.allocator""": """some_allocator""",        },
+            """cpp.allocator""": """some_allocator""",
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
@@ -988,7 +994,8 @@ def get_reflection__AllocatorAware2() -> __StructSpec:
         name="AllocatorAware2",
         kind=__StructType.STRUCT,
         annotations={
-            """cpp.allocator""": """some_allocator""",        },
+            """cpp.allocator""": """some_allocator""",
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(

@@ -71,9 +71,6 @@ class {{service:name}}(_fbthrift_python_Client["{{service:name}}.Async", "{{serv
     annotations = _py_types.MappingProxyType({
         {{#service:annotations}}
             {{> common/annotation}}
-            {{#last?}}
-
-            {{/last?}}
         {{/service:annotations}}
     })
     {{> clients/client_body }}

@@ -218,9 +218,6 @@ cdef void getNextGenerator_{{service:name}}_{{function:name}}(object generator, 
 cdef object _{{service:name}}_annotations = _py_types.MappingProxyType({
 {{#service:annotations}}
     {{> common/annotation}}
-    {{#last?}}
-
-    {{/last?}}
 {{/service:annotations}}
 })
 

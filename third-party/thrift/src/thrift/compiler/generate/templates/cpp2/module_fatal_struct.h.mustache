@@ -58,10 +58,10 @@ class {{struct:cpp_name}}_struct_traits {
         using keys = __fbthrift_keys;
         using values = __fbthrift_values;
         using map = ::fatal::list<
-            {{#field:fatal_annotations}}
-            {{#let safe_key = (cpp_fatal_string_id annotation:key)}}
-            ::apache::thrift::annotation<keys::{{safe_key}}, values::{{safe_key}}>{{^last?}},{{/last?}}
-            {{/field:fatal_annotations}}
+            {{#each (array.enumerate field:fatal_annotations with_last=true) as |index annot last?|}}
+            {{#let safe_key = (cpp_fatal_string_id annot.annotation:key)}}
+            ::apache::thrift::annotation<keys::{{safe_key}}, values::{{safe_key}}>{{#if (not last?)}},{{/if}}
+            {{/each}}
         >;
       };
 
@@ -98,10 +98,10 @@ class {{struct:cpp_name}}_struct_traits {
     using keys = __fbthrift_keys;
     using values = __fbthrift_values;
     using map = ::fatal::list<
-        {{#struct:fatal_annotations}}
-        {{#let safe_key = (cpp_fatal_string_id annotation:key)}}
-        ::apache::thrift::annotation<keys::{{safe_key}}, values::{{safe_key}}>{{^last?}},{{/last?}}
-        {{/struct:fatal_annotations}}
+        {{#each (array.enumerate struct:fatal_annotations with_last=true) as |index annot last?|}}
+        {{#let safe_key = (cpp_fatal_string_id annot.annotation:key)}}
+        ::apache::thrift::annotation<keys::{{safe_key}}, values::{{safe_key}}>{{#if (not last?)}},{{/if}}
+        {{/each}}
     >;
     {{/struct:fatal_annotations?}}
     using members = __fbthrift_members;

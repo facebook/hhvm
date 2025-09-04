@@ -130,7 +130,8 @@ def get_reflection__CustomFieldNames() -> __StructSpec:
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """java.swift.name""": """internalGreatMessage""",            },
+                """java.swift.name""": """internalGreatMessage""",
+            },
         ),
     )
     return spec

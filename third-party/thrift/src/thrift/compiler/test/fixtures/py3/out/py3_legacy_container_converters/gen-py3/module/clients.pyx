@@ -1869,7 +1869,8 @@ cdef class SimpleService(thrift.py3.client.Client):
         return "module.SimpleService"
 
 cdef object _DerivedService_annotations = _py_types.MappingProxyType({
-    """bar""": """1""",    """foo""": """\"\"\"""",
+    """bar""": """1""",
+    """foo""": """\"\"\"""",
 })
 
 

@@ -75,7 +75,8 @@ def get_reflection__SecretStruct() -> __StructSpec:
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """java.sensitive""": """1""",            },
+                """java.sensitive""": """1""",
+            },
         ),
     )
     return spec

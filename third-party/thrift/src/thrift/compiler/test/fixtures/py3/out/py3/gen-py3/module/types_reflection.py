@@ -356,7 +356,8 @@ def get_reflection__BinaryUnion() -> __StructSpec:
         name="BinaryUnion",
         kind=__StructType.UNION,
         annotations={
-            """cpp.noncomparable""": """1""",        },
+            """cpp.noncomparable""": """1""",
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
@@ -377,7 +378,8 @@ def get_reflection__BinaryUnionStruct() -> __StructSpec:
         name="BinaryUnionStruct",
         kind=__StructType.STRUCT,
         annotations={
-            """cpp.noncomparable""": """1""",        },
+            """cpp.noncomparable""": """1""",
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(

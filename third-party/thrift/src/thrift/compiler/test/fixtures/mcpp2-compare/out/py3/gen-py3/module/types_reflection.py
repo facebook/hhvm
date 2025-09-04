@@ -38,7 +38,8 @@ def get_reflection__ASimpleStruct() -> __StructSpec:
         name="ASimpleStruct",
         kind=__StructType.STRUCT,
         annotations={
-            """no_default_comparators""": """1""",        },
+            """no_default_comparators""": """1""",
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
@@ -232,7 +233,8 @@ def get_reflection__SimpleUnion() -> __StructSpec:
         name="SimpleUnion",
         kind=__StructType.UNION,
         annotations={
-            """cpp.virtual""": """1""",        },
+            """cpp.virtual""": """1""",
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
@@ -266,7 +268,8 @@ def get_reflection__ComplexUnion() -> __StructSpec:
         name="ComplexUnion",
         kind=__StructType.UNION,
         annotations={
-            """cpp.methods""": """void foo(const std::string& bar) {}""",        },
+            """cpp.methods""": """void foo(const std::string& bar) {}""",
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
@@ -868,7 +871,8 @@ def get_reflection__AnotherException() -> __StructSpec:
         name="AnotherException",
         kind=__StructType.EXCEPTION,
         annotations={
-            """cpp.virtual""": """1""",        },
+            """cpp.virtual""": """1""",
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
@@ -915,7 +919,9 @@ def get_reflection__containerStruct() -> __StructSpec:
         name="containerStruct",
         kind=__StructType.STRUCT,
         annotations={
-            """cpp.methods""": """void foo(const std::string& bar) {}""",            """cpp.noncopyable""": """1""",        },
+            """cpp.methods""": """void foo(const std::string& bar) {}""",
+            """cpp.noncopyable""": """1""",
+        },
     )
     defaults = _module_types.containerStruct()
     spec.add_field(
@@ -1496,7 +1502,9 @@ def get_reflection__MyIncludedStruct() -> __StructSpec:
         name="MyIncludedStruct",
         kind=__StructType.STRUCT,
         annotations={
-            """cpp2.declare_equal_to""": """1""",            """cpp2.declare_hash""": """1""",        },
+            """cpp2.declare_equal_to""": """1""",
+            """cpp2.declare_hash""": """1""",
+        },
     )
     defaults = _module_types.MyIncludedStruct()
     spec.add_field(
@@ -1557,7 +1565,12 @@ def get_reflection__AnnotatedStruct() -> __StructSpec:
         name="AnnotatedStruct",
         kind=__StructType.STRUCT,
         annotations={
-            """cpp.declare_equal_to""": """1""",            """cpp.declare_hash""": """1""",            """cpp.noncopyable""": """1""",            """cpp.virtual""": """1""",            """cpp2.methods""": """void foo(const std::string& bar) {}""",        },
+            """cpp.declare_equal_to""": """1""",
+            """cpp.declare_hash""": """1""",
+            """cpp.noncopyable""": """1""",
+            """cpp.virtual""": """1""",
+            """cpp2.methods""": """void foo(const std::string& bar) {}""",
+        },
     )
     defaults = _module_types.AnnotatedStruct()
     spec.add_field(

@@ -94,7 +94,6 @@ using mstch_const_map_element_factory = mstch_factory<
     const t_const*,
     const std::pair<const t_type*, const t_type*>&>;
 using mstch_structured_annotation_factory = mstch_factory<t_const>;
-using mstch_deprecated_annotation_factory = mstch_factory<t_annotation>;
 using mstch_stream_factory = mstch_factory<t_stream>;
 
 namespace detail {
@@ -120,8 +119,6 @@ class mstch_factories {
   std::unique_ptr<mstch_const_map_element_factory> const_map_element_factory;
   std::unique_ptr<mstch_structured_annotation_factory>
       structured_annotation_factory;
-  std::unique_ptr<mstch_deprecated_annotation_factory>
-      deprecated_annotation_factory;
 
   mstch_factories();
 
@@ -196,7 +193,6 @@ class mstch_factories {
   auto& get(detail::structured_annotation_tag*) {
     return structured_annotation_factory;
   }
-  auto& get(t_annotation*) { return deprecated_annotation_factory; }
 
   template <typename MstchType, typename Node, typename... Args, typename Data>
   void make(std::unique_ptr<mstch_factory<Node, Args...>>& factory, Data data) {
@@ -287,10 +283,6 @@ class mstch_base : public mstch::object {
   mstch::node last() { return pos_.last; }
   mstch::node is_struct();
 
-  mstch::node annotations(const t_named* annotated) {
-    return make_mstch_annotations(annotated->unstructured_annotations());
-  }
-
   mstch::node structured_annotations(const t_named* annotated) {
     return make_mstch_array(
         annotated->structured_annotations(),
@@ -334,12 +326,6 @@ class mstch_base : public mstch::object {
           containing_service);
     }
     return make_mstch_array(container, *context_.service_factory);
-  }
-
-  template <typename C, typename... Args>
-  mstch::array make_mstch_annotations(const C& container, const Args&... args) {
-    return make_mstch_array(
-        container, *context_.deprecated_annotation_factory, args...);
   }
 
   template <typename C, typename... Args>
@@ -475,7 +461,6 @@ class mstch_service : public mstch_base {
             {"service:extends?", &mstch_service::has_extends},
             {"service:streams?", &mstch_service::has_streams},
             {"service:sinks?", &mstch_service::has_sinks},
-            {"service:annotations", &mstch_service::annotations},
             {"service:parent_service_name",
              &mstch_service::parent_service_name},
             {"service:interactions", &mstch_service::interactions},
@@ -513,7 +498,6 @@ class mstch_service : public mstch_base {
   mstch::node has_extends() { return service_->extends() != nullptr; }
   mstch::node functions();
   mstch::node extends();
-  mstch::node annotations() { return mstch_base::annotations(service_); }
 
   mstch::node parent_service_name() { return parent_service()->name(); }
 
@@ -580,7 +564,6 @@ class mstch_function : public mstch_base {
             {"function:return_type", &mstch_function::return_type},
             {"function:exceptions", &mstch_function::exceptions},
             {"function:args", &mstch_function::arg_list},
-            {"function:annotations", &mstch_function::annotations},
             {"function:structured_annotations",
              &mstch_function::structured_annotations},
 
@@ -603,7 +586,6 @@ class mstch_function : public mstch_base {
   }
 
   whisker::object self() { return make_self(*function_); }
-  mstch::node annotations() { return mstch_base::annotations(function_); }
 
   mstch::node return_type();
   mstch::node exceptions();
@@ -732,7 +714,6 @@ class mstch_struct : public mstch_base {
              &mstch_struct::fields_in_serialization_order},
             {"struct:exception?", &mstch_struct::is_exception},
             {"struct:plain?", &mstch_struct::is_plain},
-            {"struct:annotations", &mstch_struct::annotations},
             {"struct:structured_annotations",
              &mstch_struct::structured_annotations},
         });
@@ -752,7 +733,6 @@ class mstch_struct : public mstch_base {
   mstch::node is_plain() {
     return !struct_->is<t_exception>() && !struct_->is<t_union>();
   }
-  mstch::node annotations() { return mstch_base::annotations(struct_); }
   mstch::node structured_annotations() {
     return mstch_base::structured_annotations(struct_);
   }
@@ -790,7 +770,6 @@ class mstch_field : public mstch_base {
             {"field:value", &mstch_field::value},
             {"field:type", &mstch_field::type},
             {"field:index", &mstch_field::index},
-            {"field:annotations", &mstch_field::annotations},
             {"field:structured_annotations",
              &mstch_field::structured_annotations},
         });
@@ -800,7 +779,6 @@ class mstch_field : public mstch_base {
   mstch::node value();
   mstch::node type();
   mstch::node index() { return pos_.index; }
-  mstch::node annotations() { return mstch_base::annotations(field_); }
   mstch::node structured_annotations() {
     return mstch_base::structured_annotations(field_);
   }
@@ -1020,28 +998,6 @@ class mstch_structured_annotation : public mstch_base {
 
  protected:
   const t_const& const_;
-};
-
-class mstch_deprecated_annotation : public mstch_base {
- public:
-  using ast_type = t_annotation;
-
-  mstch_deprecated_annotation(
-      const t_annotation* a, mstch_context& ctx, mstch_element_position pos)
-      : mstch_base(ctx, pos), key_(a->first), val_(a->second) {
-    register_methods(
-        this,
-        {
-            {"annotation:key", &mstch_deprecated_annotation::key},
-            {"annotation:value", &mstch_deprecated_annotation::value},
-        });
-  }
-  mstch::node key() { return key_; }
-  mstch::node value() { return val_.value; }
-
- protected:
-  const std::string key_;
-  const deprecated_annotation_value val_;
 };
 
 } // namespace apache::thrift::compiler

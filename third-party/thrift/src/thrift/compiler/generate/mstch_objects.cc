@@ -76,7 +76,6 @@ mstch_factories::mstch_factories() {
   add<mstch_const_value>();
   add<mstch_const_map_element>();
   add<mstch_structured_annotation>();
-  add<mstch_deprecated_annotation>();
 }
 
 mstch::node mstch_enum::values() {

@@ -529,11 +529,11 @@ pub struct make_{{service:rust_name}};
 /// # };
 /// ```
 impl dyn {{service:rust_name}} {
-    {{#service:annotations}}
-    {{#if (not (string.empty? annotation:value))}}
-    pub const {{(rust_annotation_name annotation:key)}}: &'static ::std::primitive::str = {{(rust_quote annotation:value escape_backslashes=true)}};
-    {{/if (not (string.empty? annotation:value))}}
-    {{/service:annotations}}
+    {{#each service:unstructured_annotations as |annotation|}}
+    {{#if (not (string.empty? annotation.value))}}
+    pub const {{(rust_annotation_name annotation.key)}}: &'static ::std::primitive::str = {{(rust_quote annotation.value escape_backslashes=true)}};
+    {{/if (not (string.empty? annotation.value))}}
+    {{/each}}
     pub fn new<P, T>(
         protocol: P,
         transport: T,

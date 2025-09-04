@@ -152,8 +152,6 @@ class t_mstch_generator : public t_whisker_generator {
   mstch::map dump(const t_const_value&);
   mstch::map dump(const std::map<t_const_value*, t_const_value*>::value_type&);
 
-  using annotation = std::pair<std::string, deprecated_annotation_value>;
-  mstch::map dump(const annotation&);
   mstch::map dump(const std::string&);
 
   /**
@@ -174,7 +172,6 @@ class t_mstch_generator : public t_whisker_generator {
   virtual mstch::map extend_const_value(const t_const_value&);
   virtual mstch::map extend_const_value_map_elem(
       const std::map<t_const_value*, t_const_value*>::value_type&);
-  virtual mstch::map extend_annotation(const annotation&);
 
   template <typename element>
   mstch::map dump_elem(const element& elem, int32_t /*index*/) {

@@ -67,9 +67,9 @@ def get_reflection__{{struct:name}}() -> __StructSpec:
             }}{{#struct:union?}}UNION{{/struct:union?}}{{!
             }}{{#struct:plain?}}STRUCT{{/struct:plain?}},
         annotations={
-            {{#struct:annotations}}
+            {{#each struct:unstructured_annotations as |annotation|}}
             {{> common/annotation }}
-            {{/struct:annotations}}
+            {{/each}}
         },
     )
 {{#struct:py3_fields}}
@@ -98,9 +98,9 @@ def get_reflection__{{struct:name}}() -> __StructSpec:
             }}{{/struct:union?}}{{!
             }}{{#struct:union?}}None{{/struct:union?}},
             annotations={
-                {{#field:annotations}}
+                {{#each field:unstructured_annotations as |annotation|}}
                 {{> common/annotation }}
-                {{/field:annotations}}
+                {{/each}}
             },
         ),
     )

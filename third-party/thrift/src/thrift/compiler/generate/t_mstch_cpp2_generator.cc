@@ -319,6 +319,19 @@ int get_split_count(const t_mstch_generator::compiler_options_map& options) {
       iter->second, "Invalid types_cpp_splits value: `" + iter->second + "`");
 }
 
+whisker::object make_whisker_annotations(
+    const std::vector<t_annotation>& annotations) {
+  whisker::array::raw result;
+  result.reserve(annotations.size());
+  for (const t_annotation& a : annotations) {
+    result.push_back(whisker::make::map({
+        {"key", whisker::make::string(a.first)},
+        {"value", whisker::make::string(a.second.value)},
+    }));
+  }
+  return whisker::make::array(std::move(result));
+}
+
 class t_mstch_cpp2_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
@@ -1775,8 +1788,8 @@ class cpp_mstch_struct : public mstch_struct {
     return get_fatal_annotations(struct_->unstructured_annotations()).size() >
         0;
   }
-  mstch::node fatal_annotations() {
-    return make_mstch_annotations(
+  whisker::object fatal_annotations() {
+    return make_whisker_annotations(
         get_fatal_annotations(struct_->unstructured_annotations()));
   }
   mstch::node get_legacy_type_id() {
@@ -2312,8 +2325,8 @@ class cpp_mstch_field : public mstch_field {
     return get_fatal_annotations(field_->unstructured_annotations()).size() > 0;
   }
   mstch::node has_isset() { return cpp2::field_has_isset(field_); }
-  mstch::node fatal_annotations() {
-    return make_mstch_annotations(
+  whisker::object fatal_annotations() {
+    return make_whisker_annotations(
         get_fatal_annotations(field_->unstructured_annotations()));
   }
   mstch::node fatal_required_qualifier() {

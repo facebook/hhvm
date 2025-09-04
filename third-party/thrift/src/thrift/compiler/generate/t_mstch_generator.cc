@@ -64,7 +64,6 @@ mstch::map t_mstch_generator::dump(const t_structured& strct, bool shallow) {
       {"exception?", strct.is<t_exception>()},
       {"union?", strct.is<t_union>()},
       {"plain?", !strct.is<t_exception>() && !strct.is<t_union>()},
-      {"annotations", dump_elems(strct.unstructured_annotations())},
   };
 
   mstch::map extension = extend_struct(strct);
@@ -84,7 +83,6 @@ mstch::map t_mstch_generator::dump(const t_field& field, int32_t index) {
       {"optional?", req == t_field::e_req::optional},
       {"opt_in_req_out?", req == t_field::e_req::opt_in_req_out},
       {"terse?", req == t_field::e_req::terse},
-      {"annotations", dump_elems(field.unstructured_annotations())},
   };
 
   if (field.get_value() != nullptr) {
@@ -102,7 +100,6 @@ mstch::map t_mstch_generator::dump(const t_type& orig_type) {
 
   mstch::map result{
       {"name", type.name()},
-      {"annotations", dump_elems(type.unstructured_annotations())},
 
       {"void?", type.is_void()},
       {"string?", type.is_string()},
@@ -162,7 +159,6 @@ mstch::map t_mstch_generator::dump(const t_enum& enm) {
   mstch::map result{
       {"name", enm.name()},
       {"values", dump_elems(enm.get_enum_values())},
-      {"annotations", dump_elems(enm.unstructured_annotations())},
   };
 
   mstch::map extension = extend_enum(enm);
@@ -185,7 +181,6 @@ mstch::map t_mstch_generator::dump(const t_service& service) {
   const t_service* extends = service.extends();
   mstch::map result{
       {"name", service.name()},
-      {"annotations", dump_elems(service.unstructured_annotations())},
       {"functions", dump_elems(service.get_functions())},
       {"functions?", !service.get_functions().empty()},
       {"extends?", extends != nullptr},
@@ -205,7 +200,6 @@ mstch::map t_mstch_generator::dump(const t_function& function) {
       {"return_type", dump(*function.return_type())},
       {"exceptions", dump_elems(exceptions)},
       {"exceptions?", !exceptions.empty()},
-      {"annotations", dump_elems(function.unstructured_annotations())},
       {"args", dump_elems(function.params().fields())},
   };
 
@@ -295,16 +289,6 @@ mstch::map t_mstch_generator::dump(
   return prepend_prefix("element", std::move(extension));
 }
 
-mstch::map t_mstch_generator::dump(const annotation& pair) {
-  mstch::map result{
-      {"key", pair.first},
-      {"value", pair.second.value},
-  };
-  mstch::map extension = extend_annotation(pair);
-  extension.insert(result.begin(), result.end());
-  return prepend_prefix("annotation", std::move(extension));
-}
-
 mstch::map t_mstch_generator::dump(const t_typedef& typdef) {
   mstch::map result{
       {"type", dump(*typdef.get_type())},
@@ -377,10 +361,6 @@ mstch::map t_mstch_generator::extend_const_value(const t_const_value&) {
 
 mstch::map t_mstch_generator::extend_const_value_map_elem(
     const std::map<t_const_value*, t_const_value*>::value_type&) {
-  return {};
-}
-
-mstch::map t_mstch_generator::extend_annotation(const annotation&) {
   return {};
 }
 

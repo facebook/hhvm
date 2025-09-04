@@ -69,9 +69,9 @@ import {{module_path}}
 
 class {{service:name}}(_fbthrift_python_Client["{{service:name}}.Async", "{{service:name}}.Sync"]):
     annotations = _py_types.MappingProxyType({
-        {{#service:annotations}}
+        {{#each service:unstructured_annotations as |annotation|}}
             {{> common/annotation}}
-        {{/service:annotations}}
+        {{/each}}
     })
     {{> clients/client_body }}
 

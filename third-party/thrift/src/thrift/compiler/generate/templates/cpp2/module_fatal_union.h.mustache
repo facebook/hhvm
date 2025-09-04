@@ -47,24 +47,24 @@ class {{struct:cpp_name}}_tenum_traits {
     {{#field:fatal_annotations?}}
     class annotations {
       struct __fbthrift_keys {
-        {{#field:fatal_annotations}}
-        {{#let safe_key = (cpp_fatal_string_id annotation:key)}}
+        {{#each field:fatal_annotations as |annotation|}}
+        {{#let safe_key = (cpp_fatal_string_id annotation.key)}}
         using {{safe_key}} = __fbthrift_strings_{{program:name}}::{{safe_key}};
-        {{/field:fatal_annotations}}
+        {{/each}}
       };
 
       struct __fbthrift_values {
-        {{#field:fatal_annotations}}
-        using {{(cpp_fatal_string_id annotation:key)}} = {{(cpp_render_fatal annotation:value)}};
-        {{/field:fatal_annotations}}
+        {{#each field:fatal_annotations as |annotation|}}
+        using {{(cpp_fatal_string_id annotation.key)}} = {{(cpp_render_fatal annotation.value)}};
+        {{/each}}
       };
 
      public:
       using keys = __fbthrift_keys;
       using values = __fbthrift_values;
       using map = ::fatal::list<
-          {{#each (array.enumerate field:fatal_annotations with_last=true) as |index annot last?|}}
-          {{#let safe_key = (cpp_fatal_string_id annot.annotation:key)}}
+          {{#each (array.enumerate field:fatal_annotations with_last=true) as |index annotation last?|}}
+          {{#let safe_key = (cpp_fatal_string_id annotation.key)}}
           ::apache::thrift::annotation<keys::{{safe_key}}, values::{{safe_key}}>{{#if (not last?)}},{{/if}}
           {{/each}}
       >;
@@ -156,24 +156,24 @@ class {{struct:cpp_name}}_variant_traits {
   {{#struct:fatal_annotations?}}
   class annotations {
     struct __fbthrift_keys {
-      {{#struct:fatal_annotations}}
-      {{#let safe_key = (cpp_fatal_string_id annotation:key)}}
+      {{#each struct:fatal_annotations as |annotation|}}
+      {{#let safe_key = (cpp_fatal_string_id annotation.key)}}
       using {{safe_key}} = __fbthrift_strings_{{program:name}}::{{safe_key}};
-      {{/struct:fatal_annotations}}
+      {{/each}}
     };
 
     struct __fbthrift_values {
-      {{#struct:fatal_annotations}}
-      using {{(cpp_fatal_string_id annotation:key)}} = {{(cpp_render_fatal annotation:value)}};
-      {{/struct:fatal_annotations}}
+      {{#each struct:fatal_annotations as |annotation|}}
+      using {{(cpp_fatal_string_id annotation.key)}} = {{(cpp_render_fatal annotation.value)}};
+      {{/each}}
     };
 
    public:
     using keys = __fbthrift_keys;
     using values = __fbthrift_values;
     using map = ::fatal::list<
-        {{#each (array.enumerate struct:fatal_annotations with_last=true) as |index annot last?|}}
-        {{#let safe_key = (cpp_fatal_string_id annot.annotation:key)}}
+        {{#each (array.enumerate struct:fatal_annotations with_last=true) as |index annotation last?|}}
+        {{#let safe_key = (cpp_fatal_string_id annotation.key)}}
         ::apache::thrift::annotation<keys::{{safe_key}}, values::{{safe_key}}>{{#if (not last?)}},{{/if}}
         {{/each}}
     >;

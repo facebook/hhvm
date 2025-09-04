@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"sync/atomic"
 	"time"
 
 	"github.com/jjeffcaii/reactor-go/scheduler"
@@ -43,9 +44,10 @@ type rocketServer struct {
 	pipeliningEnabled bool
 	numWorkers        int
 
-	stats    *stats.ServerStats
-	pstats   map[string]*stats.TimingSeries
-	observer ServerObserver
+	stats                   *stats.ServerStats
+	pstats                  map[string]*stats.TimingSeries
+	observer                ServerObserver
+	totalActiveRequestCount atomic.Int64
 }
 
 func newRocketServer(proc Processor, listener net.Listener, opts *serverOptions) Server {
@@ -117,7 +119,7 @@ func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload,
 		return nil, err
 	}
 	sendingSocket.MetadataPush(serverMetadataPush)
-	socket := newRocketServerSocket(ctx, s.proc, s.pipeliningEnabled, s.log, s.stats, s.pstats, s.observer)
+	socket := newRocketServerSocket(ctx, s.proc, s.pipeliningEnabled, s.log, s.stats, s.pstats, s.observer, &s.totalActiveRequestCount)
 	return rsocket.NewAbstractSocket(
 		rsocket.MetadataPush(socket.metadataPush),
 		rsocket.RequestResponse(socket.requestResonse),
@@ -126,13 +128,14 @@ func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload,
 }
 
 type rocketServerSocket struct {
-	ctx               context.Context
-	proc              Processor
-	pipeliningEnabled bool
-	log               func(format string, args ...any)
-	stats             *stats.ServerStats
-	pstats            map[string]*stats.TimingSeries
-	observer          ServerObserver
+	ctx                     context.Context
+	proc                    Processor
+	pipeliningEnabled       bool
+	log                     func(format string, args ...any)
+	stats                   *stats.ServerStats
+	pstats                  map[string]*stats.TimingSeries
+	observer                ServerObserver
+	totalActiveRequestCount *atomic.Int64
 }
 
 func newRocketServerSocket(
@@ -143,16 +146,32 @@ func newRocketServerSocket(
 	stats *stats.ServerStats,
 	pstats map[string]*stats.TimingSeries,
 	observer ServerObserver,
+	totalActiveRequestCount *atomic.Int64,
 ) *rocketServerSocket {
 	return &rocketServerSocket{
-		ctx:               ctx,
-		proc:              proc,
-		pipeliningEnabled: pipeliningEnabled,
-		log:               log,
-		stats:             stats,
-		pstats:            pstats,
-		observer:          observer,
+		ctx:                     ctx,
+		proc:                    proc,
+		pipeliningEnabled:       pipeliningEnabled,
+		log:                     log,
+		stats:                   stats,
+		pstats:                  pstats,
+		observer:                observer,
+		totalActiveRequestCount: totalActiveRequestCount,
 	}
+}
+
+// incrementActiveRequests increments the server-level active request counter and
+// notifies the observer with the current total count across all sockets
+func (s *rocketServerSocket) incrementActiveRequests() {
+	current := s.totalActiveRequestCount.Add(1)
+	s.observer.ActiveRequests(int(current))
+}
+
+// decrementActiveRequests decrements the server-level active request counter and
+// notifies the observer with the current total count across all sockets
+func (s *rocketServerSocket) decrementActiveRequests() {
+	current := s.totalActiveRequestCount.Add(-1)
+	s.observer.ActiveRequests(int(current))
 }
 
 func (s *rocketServerSocket) metadataPush(msg payload.Payload) {
@@ -184,6 +203,10 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 
 	s.stats.SchedulingWorkCount.Incr()
 	workItem := func(ctx context.Context) (payload.Payload, error) {
+		// Increment active requests when processing actually starts
+		s.incrementActiveRequests()
+		defer s.decrementActiveRequests()
+
 		s.stats.SchedulingWorkCount.Decr()
 		s.stats.WorkingCount.Incr()
 		defer s.stats.WorkingCount.Decr()
@@ -251,6 +274,10 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	processStartTime := time.Now()
 	processDelay := processStartTime.Sub(requestReceivedTime)
 	s.observer.ProcessDelay(processDelay)
+
+	// Increment active requests when processing starts
+	s.incrementActiveRequests()
+	defer s.decrementActiveRequests()
 
 	// TODO: support pipelining
 	if err := process(s.ctx, s.proc, protocol, s.pstats); err != nil {

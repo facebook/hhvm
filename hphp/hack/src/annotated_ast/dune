@@ -18,4 +18,4 @@
  (name annotated_ast_utils)
  (modules aast_utils)
  (wrapped false)
- (libraries annotated_ast))
+ (libraries annotated_ast logging))

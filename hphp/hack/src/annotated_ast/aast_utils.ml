@@ -247,10 +247,18 @@ let arg_to_expr arg =
   | Ainout (_, e) -> e
   | Anamed (_, e) -> e
 
-let expr_to_arg pk e =
-  match pk with
-  | Ast_defs.Pnormal -> Anormal e
-  | Ast_defs.Pinout p -> Ainout (p, e)
+let expr_to_arg pk ~(arg_name : sid option) e =
+  match (pk, arg_name) with
+  | (Ast_defs.Pnormal, Some sid) -> Anamed (sid, e)
+  | (Ast_defs.Pnormal, None) -> Anormal e
+  | (Ast_defs.Pinout p, Some (pos, _)) ->
+    let () =
+      HackEventLogger.invariant_violation_bug
+        ~pos:(Pos.show_absolute (Pos.to_absolute pos))
+        "An argument can't be both named and inout. This should be enforced by the structure of Aast_defs.argument"
+    in
+    Ainout (p, e)
+  | (Ast_defs.Pinout p, None) -> Ainout (p, e)
 
 let get_package_name = function
   | PackageConfigAssignment pkg

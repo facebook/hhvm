@@ -7055,13 +7055,12 @@ end = struct
                 (-1, (true, None, paraml)))
           in
           let check_arg env arg opt_param ~arg_idx ~param_idx ~is_variadic =
-            let (param_kind, e) =
+            let (arg_name, param_kind, e) =
               match arg with
-              | Aast_defs.Anormal e -> (Ast_defs.Pnormal, e)
-              | Aast_defs.Ainout (pos, e) -> (Ast_defs.Pinout pos, e)
-              (* TODO(named_params): This is wrong. Once the named param Pnamed is
-               * in we can fix this. *)
-              | Aast_defs.Anamed (_name, e) -> (Ast_defs.Pnormal, e)
+              | Aast_defs.Anormal e -> (None, Ast_defs.Pnormal, e)
+              | Aast_defs.Ainout (pos, e) -> (None, Ast_defs.Pinout pos, e)
+              | Aast_defs.Anamed (arg_name, e) ->
+                (Some arg_name, Ast_defs.Pnormal, e)
             in
             match opt_param with
             | Some param ->
@@ -7136,6 +7135,7 @@ end = struct
                 Some
                   ( Aast_utils.expr_to_arg
                       param_kind
+                      ~arg_name
                       (hole_on_ty_mismatch ~ty_mismatch_opt te),
                     ty ),
                 used_dynamic_info )
@@ -7166,7 +7166,9 @@ end = struct
                 let ty = Typing_env.update_reason env ty ~f:update_reason in
                 (ty, pos, e)
               in
-              (env, Some (Aast_utils.expr_to_arg param_kind te, ty), None)
+              ( env,
+                Some (Aast_utils.expr_to_arg ~arg_name param_kind te, ty),
+                None )
           in
           let open struct
             type arg_with_result =

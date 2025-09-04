@@ -207,6 +207,13 @@ const std::vector<std::any>& field_annotation_values(FieldId) {
   return empty_annotations();
 }
 
+template <class Struct>
+const std::vector<std::any>& struct_annotation_values() {
+  // @lint-ignore CLANGTIDY bugprone-sizeof-expression
+  static_assert(sizeof(Struct) >= 0, "Struct must be a complete type");
+  return empty_annotations();
+}
+
 template <class T>
 inline constexpr bool is_runtime_annotation =
     decltype(detail::st::struct_private_access::
@@ -275,6 +282,85 @@ const Annotation* get_field_annotation() {
   static const Annotation* ret = []() -> const Annotation* {
     for (const std::any& v :
          field_annotation_values<Struct>(op::get_field_id<Struct, Id>::value)) {
+      if (auto* p = std::any_cast<Annotation>(&v)) {
+        return p;
+      }
+    }
+    return nullptr;
+  }();
+
+  return ret;
+}
+
+/// Get the struct/union/exception annotation. If Struct doesn't have the
+/// corresponding Annotation, returns nullptr.
+///
+/// For example, for the following thrift file
+///
+///     @thrift.RuntimeAnnotation
+///     @scope.Struct
+///     struct Doc {
+///       1: string text;
+///     }
+///
+///     @thrift.RuntimeAnnotation
+///     @scope.Struct
+///     struct Version {
+///       1: i32 major;
+///       2: i32 minor;
+///     }
+///
+///     @scope.Struct
+///     struct Other {}
+///
+///     @Doc{text="I am a struct"}
+///     @Version{major=1, minor=0}
+///     struct MyStruct {
+///       1: string field;
+///     }
+///
+///     @Doc{text="I am a union"}
+///     union MyUnion {
+///       1: string str_field;
+///       2: i32 int_field;
+///     }
+///
+///     @Version{major=2, minor=1}
+///     exception MyException {
+///       1: string message;
+///     }
+///
+/// We can write the following code.
+///
+///     // `Doc` annotation exists on MyStruct
+///     assert(get_struct_annotation<Doc, MyStruct>());
+///
+///     // Check the value of `Doc` annotation on MyStruct
+///     assert(*get_struct_annotation<Doc, MyStruct>() ==
+///            Doc{"I am a struct"});
+///
+///     // Works for unions too
+///     assert(*get_struct_annotation<Doc, MyUnion>() ==
+///            Doc{"I am a union"});
+///
+///     // Works for exceptions too
+///     assert(*get_struct_annotation<Version, MyException>() ==
+///            Version{2, 1});
+///
+///     // Build failure since `Other` is not marked with
+///     @thrift.RuntimeAnnotation.
+///     get_struct_annotation<Other, MyStruct>;
+///
+template <class Annotation, class Struct>
+const Annotation* get_struct_annotation() {
+  using detail::annotation::is_runtime_annotation;
+  using detail::annotation::struct_annotation_values;
+  static_assert(
+      is_runtime_annotation<Annotation>,
+      "Annotation is not annotated with @thrift.RuntimeAnnotation.");
+
+  static const Annotation* ret = []() -> const Annotation* {
+    for (const std::any& v : struct_annotation_values<Struct>()) {
       if (auto* p = std::any_cast<Annotation>(&v)) {
         return p;
       }

@@ -37,4 +37,58 @@ TEST(AnnotationTest, GetAnnotationValue) {
   EXPECT_FALSE((get_field_annotation<Doc, MyStruct, ident::field>()));
 }
 
+TEST(AnnotationTest, GetStructAnnotationValue) {
+  Doc expected;
+  expected.text() = "I am a struct";
+
+  // Checking whether a struct has a given annotation. If so, use it.
+  if (auto* doc = get_struct_annotation<Doc, MyStruct>()) {
+    EXPECT_EQ(*doc, expected);
+  } else {
+    ADD_FAILURE();
+  }
+
+  // `Doc` annotation exists on MyStruct
+  EXPECT_TRUE((get_struct_annotation<Doc, MyStruct>()));
+
+  // `Oncall` annotation does not exist on MyStruct
+  EXPECT_FALSE((get_struct_annotation<Oncall, MyStruct>()));
+}
+
+TEST(AnnotationTest, GetUnionAnnotationValue) {
+  Doc expected;
+  expected.text() = "I am a union";
+
+  // Checking whether a union has a given annotation. If so, use it.
+  if (auto* doc = get_struct_annotation<Doc, MyUnion>()) {
+    EXPECT_EQ(*doc, expected);
+  } else {
+    ADD_FAILURE();
+  }
+
+  // `Doc` annotation exists on MyUnion
+  EXPECT_TRUE((get_struct_annotation<Doc, MyUnion>()));
+
+  // `Oncall` annotation does not exist on MyUnion
+  EXPECT_FALSE((get_struct_annotation<Oncall, MyUnion>()));
+}
+
+TEST(AnnotationTest, GetExceptionAnnotationValue) {
+  Doc expected;
+  expected.text() = "I am an exception";
+
+  // Checking whether an exception has a given annotation. If so, use it.
+  if (auto* doc = get_struct_annotation<Doc, MyException>()) {
+    EXPECT_EQ(*doc, expected);
+  } else {
+    ADD_FAILURE();
+  }
+
+  // `Doc` annotation exists on MyException
+  EXPECT_TRUE((get_struct_annotation<Doc, MyException>()));
+
+  // `Oncall` annotation does not exist on MyException
+  EXPECT_FALSE((get_struct_annotation<Oncall, MyException>()));
+}
+
 } // namespace apache::thrift::test

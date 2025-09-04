@@ -164,6 +164,8 @@ class MyUnion;
 namespace apache::thrift::detail::annotation {
 template<>
 const std::vector<std::any>& field_annotation_values<::test::fixtures::basic-structured-annotations::MyStruct>(FieldId);
+template<>
+const std::vector<std::any>& struct_annotation_values<::test::fixtures::basic-structured-annotations::MyStruct>();
 } // namespace apache::thrift::detail::annotation
 
 namespace apache::thrift::detail::qualifier {

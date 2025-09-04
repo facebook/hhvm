@@ -830,4 +830,12 @@ template<> const std::vector<std::any>& field_annotation_values<::test::fixtures
 
   folly::assume_unreachable();
 }
+template<> const std::vector<std::any>& struct_annotation_values<::test::fixtures::basic-structured-annotations::MyStruct>() {
+  static const folly::Indestructible<std::vector<std::any>> ret = [] {
+    std::vector<std::any> values;
+    values.emplace_back(::apache::thrift::detail::make_structured_constant<::test::fixtures::basic-structured-annotations::runtime_annotation>());
+    return values;
+  }();
+  return *ret;
+}
 }

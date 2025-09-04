@@ -27,6 +27,8 @@ struct Oncall {
 
 @thrift.RuntimeAnnotation
 @scope.Struct
+@scope.Union
+@scope.Exception
 @scope.Field
 struct Doc {
   1: string text;
@@ -45,4 +47,15 @@ struct MyStruct {
   @Sensitive
   @Other
   1: string field;
+}
+
+@Doc{text = "I am a union"}
+union MyUnion {
+  1: string stringValue;
+  2: i32 intValue;
+}
+
+@Doc{text = "I am an exception"}
+exception MyException {
+  1: string message;
 }

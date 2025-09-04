@@ -1523,6 +1523,8 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::has_non_optional_and_non_terse_field},
             {"struct:has_field_with_runtime_annotation?",
              &cpp_mstch_struct::has_field_with_runtime_annotation},
+            {"struct:has_struct_runtime_annotation?",
+             &cpp_mstch_struct::has_struct_runtime_annotation},
             {"struct:any?", &cpp_mstch_struct::any},
             {"struct:extra_namespace", &cpp_mstch_struct::extra_namespace},
             {"struct:type_tag", &cpp_mstch_struct::type_tag},
@@ -1850,6 +1852,10 @@ class cpp_mstch_struct : public mstch_struct {
   mstch::node has_field_with_runtime_annotation() {
     const auto& fields = struct_->fields();
     return std::any_of(fields.begin(), fields.end(), has_runtime_annotation);
+  }
+
+  mstch::node has_struct_runtime_annotation() {
+    return has_runtime_annotation(*struct_);
   }
 
   mstch::node extra_namespace() {

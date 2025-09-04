@@ -63,6 +63,10 @@ namespace apache::thrift::detail::annotation {
 template<>
 const std::vector<std::any>& field_annotation_values<{{struct:cpp_fullname}}>(FieldId);
 {{/struct:has_field_with_runtime_annotation?}}
+{{#struct:has_struct_runtime_annotation?}}
+template<>
+const std::vector<std::any>& struct_annotation_values<{{struct:cpp_fullname}}>();
+{{/struct:has_struct_runtime_annotation?}}
 {{/program:structs}}
 } // namespace apache::thrift::detail::annotation
 

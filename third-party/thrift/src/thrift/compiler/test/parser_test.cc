@@ -266,3 +266,32 @@ TEST(ParserTest, typedef_uri_requires_annotation) {
       "test.MyExplicitLegacyTypedef",
       "meta.com/thrift/test_explicit/ExplicitLegacyTypedef");
 }
+
+TEST(ParserTest, unresolved_include_circular_references) {
+  source_manager source_mgr;
+  source_mgr.add_virtual_file("test.thrift", R"(
+    include "some/missing/test.thrift"
+
+    typedef test.Foo Foo;
+
+    struct MyStruct {
+      1: Foo field = Foo.MY_DEFAULT;
+    }
+
+    service MyService {
+      Foo func();
+    }
+
+    const list<Foo> MY_CONSTANT = test.MY_CONSTANT;
+  )");
+  std::optional<diagnostic> diag;
+  diagnostics_engine diags(source_mgr, [&diag](diagnostic d) { diag = d; });
+
+  parsing_params pparams;
+  pparams.allow_missing_includes = true;
+  std::unique_ptr<t_program_bundle> programs =
+      parse_ast(source_mgr, diags, "test.thrift", pparams);
+  EXPECT_TRUE(diags.has_errors());
+  EXPECT_TRUE(diag.has_value());
+  EXPECT_EQ("Circular typedef: Foo --> Foo", diag->message());
+}

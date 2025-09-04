@@ -1753,8 +1753,7 @@ TEST(CompilerTest, undefined_type_include) {
 
     service Foo {
       header.Bar func();
-        # expected-error@-1: Failed to resolve return type of `func`.
-        # expected-error@-2: Type `header.Bar` not defined.
+        # expected-error@-1: Type `header.Bar` not defined.
     }
   )";
   check_compile(name_contents_map, "main.thrift");
@@ -2999,7 +2998,7 @@ TEST(CompilerTest, unresolved_struct_in_const) {
         1: i64 some_field;
     }
     const MyDeclaredStruct X = MyUndeclaredStruct{};
-    # expected-error-1: could not resolve type `MyUndeclaredStruct` (expected `main.MyDeclaredStruct`)
+    # expected-error-1: Type `MyUndeclaredStruct` not defined.
   )";
   check_compile(name_contents_map, "main.thrift");
 }

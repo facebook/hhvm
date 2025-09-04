@@ -270,32 +270,27 @@ void match_type_with_const_value(
     value->assign(t_const_value(*constant->value()));
   }
 
-  if (type->is<t_list>()) {
-    auto* elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
+  if (const t_list* list = type->try_as<t_list>()) {
     if (value->kind() == t_const_value::CV_LIST) {
       for (auto list_val : value->get_list()) {
-        match_type_with_const_value(ctx, mctx, elem_type, list_val);
+        match_type_with_const_value(
+            ctx, mctx, &list->elem_type().deref(), list_val);
       }
     }
-  } else if (type->is<t_set>()) {
-    auto* elem_type = dynamic_cast<const t_set*>(type)->get_elem_type();
+  } else if (const t_set* set = type->try_as<t_set>()) {
     if (value->kind() == t_const_value::CV_LIST) {
       for (auto set_val : value->get_list()) {
-        match_type_with_const_value(ctx, mctx, elem_type, set_val);
+        match_type_with_const_value(
+            ctx, mctx, &set->elem_type().deref(), set_val);
       }
     }
-  } else if (const auto* map_type = type->try_as<t_map>()) {
-    // TODO: t_type::get_type() is deprecated, alternate impl
-    // &map_type->key_type().deref() crashes the compiler test
-    // nonexist_type_in_variable for calling deref() on an unresolved type Fix
-    // this in order to deprecate use of get_type()
-    auto* key_type = map_type->key_type().get_type();
-    auto* val_type = map_type->val_type().get_type();
-
+  } else if (const auto* map = type->try_as<t_map>()) {
     if (value->kind() == t_const_value::CV_MAP) {
       for (auto map_val : value->get_map()) {
-        match_type_with_const_value(ctx, mctx, key_type, map_val.first);
-        match_type_with_const_value(ctx, mctx, val_type, map_val.second);
+        match_type_with_const_value(
+            ctx, mctx, &map->key_type().deref(), map_val.first);
+        match_type_with_const_value(
+            ctx, mctx, &map->val_type().deref(), map_val.second);
       }
     }
   } else if (type->is<t_structured>()) {
@@ -854,12 +849,11 @@ sema::result sema::run(sema_context& ctx, t_program_bundle& bundle) {
     return ret;
   }
 
-  for (auto& mutator : standard_mutators()) {
-    mutator.mutate(ctx, bundle);
-  }
-  // We have no more mutators, so all type references **must** resolve.
   ret.unresolved_types = !resolve_all_types(ctx, bundle);
   if (!ret.unresolved_types) {
+    for (auto& mutator : standard_mutators()) {
+      mutator.mutate(ctx, bundle);
+    }
     standard_validator()(ctx, *bundle.root_program());
   }
   return ret;

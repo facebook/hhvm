@@ -32,34 +32,7 @@
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-THRIFT_FLAG_DEFINE_int64(log_thrift_framework_metadata_sample_rate, 1'000'000);
-
 namespace apache::thrift::detail {
-
-// Log framework metadata information with sampling
-void logFrameworkMetadata(
-    const std::string& serviceName,
-    const std::string& methodName,
-    const folly::IOBuf* frameworkMetadata,
-    bool isFromInterceptor) {
-  // Log framework metadata with sampling
-  LoggingSampler frameworkMetadataSampler{
-      THRIFT_FLAG(log_thrift_framework_metadata_sample_rate)};
-  if (frameworkMetadataSampler.isSampled()) {
-    THRIFT_APPLICATION_EVENT(rpc_metadata_framework_metadata)
-        .logSampled(frameworkMetadataSampler, [&] {
-          folly::dynamic log = folly::dynamic::object;
-
-          log["service_name"] = serviceName;
-          log["method_name"] = methodName;
-          log["is_from_interceptor"] = isFromInterceptor ? 1 : 0;
-          log["framework_metadata_size"] =
-              frameworkMetadata->computeChainDataLength();
-
-          return log;
-        });
-  }
-}
 
 RequestRpcMetadata makeRequestRpcMetadata(
     const RpcOptions& rpcOptions,
@@ -185,13 +158,19 @@ RequestRpcMetadata makeRequestRpcMetadata(
     }
   }
 
-  // Log framework metadata
   if (const auto& fmd = metadata.frameworkMetadata()) {
-    logFrameworkMetadata(
-        methodMetadata.thriftServiceUriOrName_managed().str(),
-        metadata.name().value().str(),
-        fmd.value().get(),
-        isFromInterceptor);
+    THRIFT_APPLICATION_EVENT(rpc_metadata_framework_metadata).log([&] {
+      folly::dynamic log = folly::dynamic::object;
+
+      log["service_name"] =
+          methodMetadata.thriftServiceUriOrName_managed().str(),
+      log["method_name"] = metadata.name().value().str(),
+      log["is_from_interceptor"] = isFromInterceptor ? 1 : 0;
+      log["framework_metadata_size"] =
+          fmd.value().get()->computeChainDataLength();
+
+      return log;
+    });
   }
 
   if (const auto& loggingContext = header.loggingContext()) {

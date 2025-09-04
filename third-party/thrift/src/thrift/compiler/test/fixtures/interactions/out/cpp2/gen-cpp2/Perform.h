@@ -179,13 +179,25 @@ class SerialInteractionIf : public apache::thrift::SerialInteractionTile, public
  public:
 
   virtual void fbthrift_execute_decorators_before_createMyInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_createMyInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const MyInteractionIf& /*interaction*/) {}
+  virtual void fbthrift_execute_decorators_after_createMyInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_createMyInteraction(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::Perform>*>(iface)->fbthrift_execute_decorators_after_createMyInteraction(*ctx);
+  }
   virtual void fbthrift_execute_decorators_before_createMyInteractionFast(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_createMyInteractionFast(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const MyInteractionFastIf& /*interaction*/) {}
+  virtual void fbthrift_execute_decorators_after_createMyInteractionFast(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_createMyInteractionFast(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::Perform>*>(iface)->fbthrift_execute_decorators_after_createMyInteractionFast(*ctx);
+  }
   virtual void fbthrift_execute_decorators_before_createSerialInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_createSerialInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const SerialInteractionIf& /*interaction*/) {}
+  virtual void fbthrift_execute_decorators_after_createSerialInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_createSerialInteraction(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::Perform>*>(iface)->fbthrift_execute_decorators_after_createSerialInteraction(*ctx);
+  }
   virtual void fbthrift_execute_decorators_before_foo(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_foo(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_foo(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::Perform>*>(iface)->fbthrift_execute_decorators_after_foo(*ctx);
+  }
 };
 
 namespace detail {

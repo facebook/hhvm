@@ -107,7 +107,10 @@ void CAsyncProcessor::executeRequest_f(
       /* .definingServiceName =*/ "C",
       /* .methodName =*/ "f",
       /* .qualifiedMethodName =*/ "C.f"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::C>::fbthrift_invoke_decorator_after_f};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -121,7 +124,9 @@ void CAsyncProcessor::executeRequest_f(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_f(*serverRequest.requestContext());
 
@@ -266,7 +271,10 @@ void CAsyncProcessor::executeRequest_numbers(
       /* .definingServiceName =*/ "C",
       /* .methodName =*/ "numbers",
       /* .qualifiedMethodName =*/ "C.numbers"};
-  auto callback =
+  apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::cpp2::number>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::C>::fbthrift_invoke_decorator_after_numbers};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2::number>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -280,7 +288,9 @@ void CAsyncProcessor::executeRequest_numbers(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_numbers(*serverRequest.requestContext());
 
@@ -439,7 +449,10 @@ void CAsyncProcessor::executeRequest_thing(
       /* .definingServiceName =*/ "C",
       /* .methodName =*/ "thing",
       /* .qualifiedMethodName =*/ "C.thing"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::C>::fbthrift_invoke_decorator_after_thing};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -453,7 +466,9 @@ void CAsyncProcessor::executeRequest_thing(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_thing(*serverRequest.requestContext(), args.uarg_a, *args.uarg_b, *args.uarg_c);
 

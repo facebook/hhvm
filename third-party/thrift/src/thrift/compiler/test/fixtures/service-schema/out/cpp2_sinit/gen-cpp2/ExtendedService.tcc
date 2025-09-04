@@ -106,7 +106,10 @@ void ExtendedServiceAsyncProcessor::executeRequest_init(
       /* .definingServiceName =*/ "ExtendedService",
       /* .methodName =*/ "init",
       /* .qualifiedMethodName =*/ "ExtendedService.init"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int64_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>::fbthrift_invoke_decorator_after_init};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -120,7 +123,9 @@ void ExtendedServiceAsyncProcessor::executeRequest_init(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_init(*serverRequest.requestContext(), args.uarg_param0, args.uarg_param1);
 

@@ -111,7 +111,10 @@ void NestedContainersAsyncProcessor::executeRequest_mapList(
       /* .definingServiceName =*/ "NestedContainers",
       /* .methodName =*/ "mapList",
       /* .qualifiedMethodName =*/ "NestedContainers.mapList"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::NestedContainers>::fbthrift_invoke_decorator_after_mapList};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -125,7 +128,9 @@ void NestedContainersAsyncProcessor::executeRequest_mapList(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_mapList(*serverRequest.requestContext(), *args.uarg_foo);
 
@@ -273,7 +278,10 @@ void NestedContainersAsyncProcessor::executeRequest_mapSet(
       /* .definingServiceName =*/ "NestedContainers",
       /* .methodName =*/ "mapSet",
       /* .qualifiedMethodName =*/ "NestedContainers.mapSet"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::NestedContainers>::fbthrift_invoke_decorator_after_mapSet};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -287,7 +295,9 @@ void NestedContainersAsyncProcessor::executeRequest_mapSet(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_mapSet(*serverRequest.requestContext(), *args.uarg_foo);
 
@@ -435,7 +445,10 @@ void NestedContainersAsyncProcessor::executeRequest_listMap(
       /* .definingServiceName =*/ "NestedContainers",
       /* .methodName =*/ "listMap",
       /* .qualifiedMethodName =*/ "NestedContainers.listMap"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::NestedContainers>::fbthrift_invoke_decorator_after_listMap};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -449,7 +462,9 @@ void NestedContainersAsyncProcessor::executeRequest_listMap(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_listMap(*serverRequest.requestContext(), *args.uarg_foo);
 
@@ -597,7 +612,10 @@ void NestedContainersAsyncProcessor::executeRequest_listSet(
       /* .definingServiceName =*/ "NestedContainers",
       /* .methodName =*/ "listSet",
       /* .qualifiedMethodName =*/ "NestedContainers.listSet"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::NestedContainers>::fbthrift_invoke_decorator_after_listSet};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -611,7 +629,9 @@ void NestedContainersAsyncProcessor::executeRequest_listSet(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_listSet(*serverRequest.requestContext(), *args.uarg_foo);
 
@@ -759,7 +779,10 @@ void NestedContainersAsyncProcessor::executeRequest_turtles(
       /* .definingServiceName =*/ "NestedContainers",
       /* .methodName =*/ "turtles",
       /* .qualifiedMethodName =*/ "NestedContainers.turtles"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::NestedContainers>::fbthrift_invoke_decorator_after_turtles};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -773,7 +796,9 @@ void NestedContainersAsyncProcessor::executeRequest_turtles(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_turtles(*serverRequest.requestContext(), *args.uarg_foo);
 

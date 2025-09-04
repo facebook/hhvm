@@ -142,7 +142,10 @@ void FootprintTestServiceAsyncProcessor::executeRequest_processIOBuf(
       /* .definingServiceName =*/ "FootprintTestService",
       /* .methodName =*/ "processIOBuf",
       /* .qualifiedMethodName =*/ "FootprintTestService.processIOBuf"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>::fbthrift_invoke_decorator_after_processIOBuf};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -156,7 +159,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_processIOBuf(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_processIOBuf(*serverRequest.requestContext(), *args.uarg_buf, *args.uarg_ptr, args.uarg_alias);
 
@@ -301,7 +306,10 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getStruct(
       /* .definingServiceName =*/ "FootprintTestService",
       /* .methodName =*/ "getStruct",
       /* .qualifiedMethodName =*/ "FootprintTestService.getStruct"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::cpp2_struct_footprint::SimpleStruct>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>::fbthrift_invoke_decorator_after_getStruct};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2_struct_footprint::SimpleStruct>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -315,7 +323,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getStruct(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_getStruct(*serverRequest.requestContext());
 
@@ -466,7 +476,10 @@ void FootprintTestServiceAsyncProcessor::executeRequest_setStruct(
       /* .definingServiceName =*/ "FootprintTestService",
       /* .methodName =*/ "setStruct",
       /* .qualifiedMethodName =*/ "FootprintTestService.setStruct"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>::fbthrift_invoke_decorator_after_setStruct};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -480,7 +493,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_setStruct(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_setStruct(*serverRequest.requestContext(), *args.uarg_input);
 
@@ -628,7 +643,10 @@ void FootprintTestServiceAsyncProcessor::executeRequest_setStructList(
       /* .definingServiceName =*/ "FootprintTestService",
       /* .methodName =*/ "setStructList",
       /* .qualifiedMethodName =*/ "FootprintTestService.setStructList"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>::fbthrift_invoke_decorator_after_setStructList};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -642,7 +660,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_setStructList(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_setStructList(*serverRequest.requestContext(), *args.uarg_items);
 
@@ -787,7 +807,10 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getStructList(
       /* .definingServiceName =*/ "FootprintTestService",
       /* .methodName =*/ "getStructList",
       /* .qualifiedMethodName =*/ "FootprintTestService.getStructList"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::cpp2_struct_footprint::SimpleStruct>>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>::fbthrift_invoke_decorator_after_getStructList};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::cpp2_struct_footprint::SimpleStruct>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -801,7 +824,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getStructList(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_getStructList(*serverRequest.requestContext());
 
@@ -949,7 +974,10 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getNestedContainer(
       /* .definingServiceName =*/ "FootprintTestService",
       /* .methodName =*/ "getNestedContainer",
       /* .qualifiedMethodName =*/ "FootprintTestService.getNestedContainer"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::string, ::std::vector<::cpp2_struct_footprint::SimpleStruct>>>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>::fbthrift_invoke_decorator_after_getNestedContainer};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::std::string, ::std::vector<::cpp2_struct_footprint::SimpleStruct>>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -963,7 +991,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getNestedContainer(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_getNestedContainer(*serverRequest.requestContext());
 
@@ -1111,7 +1141,10 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getTypedefStruct(
       /* .definingServiceName =*/ "FootprintTestService",
       /* .methodName =*/ "getTypedefStruct",
       /* .qualifiedMethodName =*/ "FootprintTestService.getTypedefStruct"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::cpp2_struct_footprint::MyStruct>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>::fbthrift_invoke_decorator_after_getTypedefStruct};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2_struct_footprint::MyStruct>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1125,7 +1158,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getTypedefStruct(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_getTypedefStruct(*serverRequest.requestContext());
 
@@ -1273,7 +1308,10 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getTypedefList(
       /* .definingServiceName =*/ "FootprintTestService",
       /* .methodName =*/ "getTypedefList",
       /* .qualifiedMethodName =*/ "FootprintTestService.getTypedefList"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::cpp2_struct_footprint::StructList>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>::fbthrift_invoke_decorator_after_getTypedefList};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2_struct_footprint::StructList>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1287,7 +1325,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getTypedefList(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_getTypedefList(*serverRequest.requestContext());
 
@@ -1435,7 +1475,10 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getUnion(
       /* .definingServiceName =*/ "FootprintTestService",
       /* .methodName =*/ "getUnion",
       /* .qualifiedMethodName =*/ "FootprintTestService.getUnion"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::cpp2_struct_footprint::TestUnion>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>::fbthrift_invoke_decorator_after_getUnion};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2_struct_footprint::TestUnion>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1449,7 +1492,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getUnion(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_getUnion(*serverRequest.requestContext());
 
@@ -1598,7 +1643,10 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getCalculator(
       /* .definingServiceName =*/ "FootprintTestService",
       /* .methodName =*/ "getCalculator",
       /* .qualifiedMethodName =*/ "FootprintTestService.getCalculator"};
-  auto callback =
+  apache::thrift::HandlerCallback<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>::CalculatorIf, void>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>::fbthrift_invoke_decorator_after_getCalculator};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>::CalculatorIf, void>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1613,7 +1661,8 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getCalculator(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
-          std::move(tile));
+          std::move(tile),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_getCalculator(*serverRequest.requestContext());
 
@@ -1758,7 +1807,10 @@ void FootprintTestServiceAsyncProcessor::executeRequest_streamStructs(
       /* .definingServiceName =*/ "FootprintTestService",
       /* .methodName =*/ "streamStructs",
       /* .qualifiedMethodName =*/ "FootprintTestService.streamStructs"};
-  auto callback =
+  apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::cpp2_struct_footprint::SimpleStruct>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>::fbthrift_invoke_decorator_after_streamStructs};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2_struct_footprint::SimpleStruct>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1772,7 +1824,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_streamStructs(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_streamStructs(*serverRequest.requestContext());
 
@@ -1925,7 +1979,10 @@ void FootprintTestServiceAsyncProcessor::executeRequest_streamWithSinkInitial(
       /* .definingServiceName =*/ "FootprintTestService",
       /* .methodName =*/ "streamWithSinkInitial",
       /* .qualifiedMethodName =*/ "FootprintTestService.streamWithSinkInitial"};
-  auto callback =
+  apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<::cpp2_struct_footprint::Struct1, ::cpp2_struct_footprint::SimpleStruct>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>::fbthrift_invoke_decorator_after_streamWithSinkInitial};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::cpp2_struct_footprint::Struct1, ::cpp2_struct_footprint::SimpleStruct>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1939,7 +1996,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_streamWithSinkInitial(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_streamWithSinkInitial(*serverRequest.requestContext(), args.uarg_input);
 
@@ -2094,7 +2153,10 @@ void FootprintTestServiceAsyncProcessor::executeRequest_streamWithSinkException(
       /* .definingServiceName =*/ "FootprintTestService",
       /* .methodName =*/ "streamWithSinkException",
       /* .qualifiedMethodName =*/ "FootprintTestService.streamWithSinkException"};
-  auto callback =
+  apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<::cpp2_struct_footprint::Struct1, ::cpp2_struct_footprint::SimpleStruct>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>::fbthrift_invoke_decorator_after_streamWithSinkException};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::cpp2_struct_footprint::Struct1, ::cpp2_struct_footprint::SimpleStruct>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2108,7 +2170,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_streamWithSinkException(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_streamWithSinkException(*serverRequest.requestContext(), args.uarg_input);
 
@@ -2296,7 +2360,8 @@ void FootprintTestServiceAsyncProcessor::executeRequest_Calculator_add(
       /* .definingServiceName =*/ "FootprintTestService",
       /* .methodName =*/ "Calculator.add",
       /* .qualifiedMethodName =*/ "FootprintTestService.Calculator.add"};
-  auto callback =
+  auto decoratorCallback = apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback::noop();
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2311,7 +2376,8 @@ void FootprintTestServiceAsyncProcessor::executeRequest_Calculator_add(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
-          std::move(tile));
+          std::move(tile),
+          std::move(decoratorCallback));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;

@@ -85,10 +85,19 @@ class ServiceHandler<::cpp2::FooBarBazService> : public apache::thrift::ServerIn
 
   virtual void fbthrift_execute_decorators_before_foo(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_foo(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_foo(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::FooBarBazService>*>(iface)->fbthrift_execute_decorators_after_foo(*ctx);
+  }
   virtual void fbthrift_execute_decorators_before_bar(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_bar(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_bar(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::FooBarBazService>*>(iface)->fbthrift_execute_decorators_after_bar(*ctx);
+  }
   virtual void fbthrift_execute_decorators_before_baz(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_baz(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_baz(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::FooBarBazService>*>(iface)->fbthrift_execute_decorators_after_baz(*ctx);
+  }
 };
 
 namespace detail {

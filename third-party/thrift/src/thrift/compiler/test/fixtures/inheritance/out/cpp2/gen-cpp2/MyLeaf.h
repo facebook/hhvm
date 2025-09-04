@@ -73,6 +73,9 @@ class ServiceHandler<::cpp2::MyLeaf> : virtual public ::cpp2::MyNodeSvIf {
 
   virtual void fbthrift_execute_decorators_before_do_leaf(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_do_leaf(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_do_leaf(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::MyLeaf>*>(iface)->fbthrift_execute_decorators_after_do_leaf(*ctx);
+  }
 };
 
 namespace detail {

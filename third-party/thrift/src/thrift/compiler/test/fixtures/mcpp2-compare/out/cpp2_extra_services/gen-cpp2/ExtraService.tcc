@@ -111,7 +111,10 @@ void ExtraServiceAsyncProcessor::executeRequest_simple_function(
       /* .definingServiceName =*/ "ExtraService",
       /* .methodName =*/ "simple_function",
       /* .qualifiedMethodName =*/ "ExtraService.simple_function"};
-  auto callback =
+  apache::thrift::HandlerCallback<bool>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::extra::svc::ExtraService>::fbthrift_invoke_decorator_after_simple_function};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<bool>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -125,7 +128,9 @@ void ExtraServiceAsyncProcessor::executeRequest_simple_function(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_simple_function(*serverRequest.requestContext());
 
@@ -275,7 +280,10 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function(
       /* .definingServiceName =*/ "ExtraService",
       /* .methodName =*/ "throws_function",
       /* .qualifiedMethodName =*/ "ExtraService.throws_function"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::extra::svc::ExtraService>::fbthrift_invoke_decorator_after_throws_function};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -289,7 +297,9 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_throws_function(*serverRequest.requestContext());
 
@@ -455,7 +465,10 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function2(
       /* .definingServiceName =*/ "ExtraService",
       /* .methodName =*/ "throws_function2",
       /* .qualifiedMethodName =*/ "ExtraService.throws_function2"};
-  auto callback =
+  apache::thrift::HandlerCallback<bool>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::extra::svc::ExtraService>::fbthrift_invoke_decorator_after_throws_function2};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<bool>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -469,7 +482,9 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function2(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_throws_function2(*serverRequest.requestContext(), args.uarg_param1);
 
@@ -641,7 +656,10 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function3(
       /* .definingServiceName =*/ "ExtraService",
       /* .methodName =*/ "throws_function3",
       /* .qualifiedMethodName =*/ "ExtraService.throws_function3"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::map<::std::int32_t, ::std::string>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::extra::svc::ExtraService>::fbthrift_invoke_decorator_after_throws_function3};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::map<::std::int32_t, ::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -655,7 +673,9 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function3(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_throws_function3(*serverRequest.requestContext(), args.uarg_param1, args.uarg_param2);
 
@@ -814,6 +834,9 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret(
       /* .definingServiceName =*/ "ExtraService",
       /* .methodName =*/ "oneway_void_ret",
       /* .qualifiedMethodName =*/ "ExtraService.oneway_void_ret"};
+  apache::thrift::HandlerCallbackOneWay::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::extra::svc::ExtraService>::fbthrift_invoke_decorator_after_oneway_void_ret};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
       apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
       std::move(ctxStack),
@@ -824,7 +847,9 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret(
       serverRequest.requestContext(),
       requestPileNotification,
       concurrencyControllerNotification,
-      std::move(serverRequest.requestData()));
+      std::move(serverRequest.requestData()),
+      apache::thrift::TilePtr(),
+      std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_oneway_void_ret(*serverRequest.requestContext());
 
@@ -953,6 +978,9 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_i32_i32_i32_i32_
       /* .definingServiceName =*/ "ExtraService",
       /* .methodName =*/ "oneway_void_ret_i32_i32_i32_i32_i32_param",
       /* .qualifiedMethodName =*/ "ExtraService.oneway_void_ret_i32_i32_i32_i32_i32_param"};
+  apache::thrift::HandlerCallbackOneWay::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::extra::svc::ExtraService>::fbthrift_invoke_decorator_after_oneway_void_ret_i32_i32_i32_i32_i32_param};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
       apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
       std::move(ctxStack),
@@ -963,7 +991,9 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_i32_i32_i32_i32_
       serverRequest.requestContext(),
       requestPileNotification,
       concurrencyControllerNotification,
-      std::move(serverRequest.requestData()));
+      std::move(serverRequest.requestData()),
+      apache::thrift::TilePtr(),
+      std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_oneway_void_ret_i32_i32_i32_i32_i32_param(*serverRequest.requestContext(), args.uarg_param1, args.uarg_param2, args.uarg_param3, args.uarg_param4, args.uarg_param5);
 
@@ -1079,6 +1109,9 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_map_setlist_para
       /* .definingServiceName =*/ "ExtraService",
       /* .methodName =*/ "oneway_void_ret_map_setlist_param",
       /* .qualifiedMethodName =*/ "ExtraService.oneway_void_ret_map_setlist_param"};
+  apache::thrift::HandlerCallbackOneWay::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::extra::svc::ExtraService>::fbthrift_invoke_decorator_after_oneway_void_ret_map_setlist_param};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
       apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
       std::move(ctxStack),
@@ -1089,7 +1122,9 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_map_setlist_para
       serverRequest.requestContext(),
       requestPileNotification,
       concurrencyControllerNotification,
-      std::move(serverRequest.requestData()));
+      std::move(serverRequest.requestData()),
+      apache::thrift::TilePtr(),
+      std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_oneway_void_ret_map_setlist_param(*serverRequest.requestContext(), args.uarg_param1, args.uarg_param2);
 
@@ -1206,6 +1241,9 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_struct_param(
       /* .definingServiceName =*/ "ExtraService",
       /* .methodName =*/ "oneway_void_ret_struct_param",
       /* .qualifiedMethodName =*/ "ExtraService.oneway_void_ret_struct_param"};
+  apache::thrift::HandlerCallbackOneWay::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::extra::svc::ExtraService>::fbthrift_invoke_decorator_after_oneway_void_ret_struct_param};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
       apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
       std::move(ctxStack),
@@ -1216,7 +1254,9 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_struct_param(
       serverRequest.requestContext(),
       requestPileNotification,
       concurrencyControllerNotification,
-      std::move(serverRequest.requestData()));
+      std::move(serverRequest.requestData()),
+      apache::thrift::TilePtr(),
+      std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_oneway_void_ret_struct_param(*serverRequest.requestContext(), args.uarg_param1);
 
@@ -1333,6 +1373,9 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_listunion_param(
       /* .definingServiceName =*/ "ExtraService",
       /* .methodName =*/ "oneway_void_ret_listunion_param",
       /* .qualifiedMethodName =*/ "ExtraService.oneway_void_ret_listunion_param"};
+  apache::thrift::HandlerCallbackOneWay::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::extra::svc::ExtraService>::fbthrift_invoke_decorator_after_oneway_void_ret_listunion_param};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
       apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
       std::move(ctxStack),
@@ -1343,7 +1386,9 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_listunion_param(
       serverRequest.requestContext(),
       requestPileNotification,
       concurrencyControllerNotification,
-      std::move(serverRequest.requestData()));
+      std::move(serverRequest.requestData()),
+      apache::thrift::TilePtr(),
+      std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_oneway_void_ret_listunion_param(*serverRequest.requestContext(), args.uarg_param1);
 

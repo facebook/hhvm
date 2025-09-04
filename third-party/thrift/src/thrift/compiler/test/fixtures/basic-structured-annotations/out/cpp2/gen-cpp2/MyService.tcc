@@ -102,7 +102,10 @@ void MyServiceAsyncProcessor::executeRequest_first(
       /* .definingServiceName =*/ "MyService",
       /* .methodName =*/ "first",
       /* .qualifiedMethodName =*/ "MyService.first"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::fbthrift_invoke_decorator_after_first};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -116,7 +119,9 @@ void MyServiceAsyncProcessor::executeRequest_first(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_first(*serverRequest.requestContext());
 
@@ -267,7 +272,10 @@ void MyServiceAsyncProcessor::executeRequest_second(
       /* .definingServiceName =*/ "MyService",
       /* .methodName =*/ "second",
       /* .qualifiedMethodName =*/ "MyService.second"};
-  auto callback =
+  apache::thrift::HandlerCallback<bool>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::fbthrift_invoke_decorator_after_second};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<bool>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -281,7 +289,9 @@ void MyServiceAsyncProcessor::executeRequest_second(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_second(*serverRequest.requestContext(), args.uarg_count);
 

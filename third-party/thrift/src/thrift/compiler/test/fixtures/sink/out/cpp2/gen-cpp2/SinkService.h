@@ -117,18 +117,39 @@ class ServiceHandler<::cpp2::SinkService> : public apache::thrift::ServerInterfa
 
   virtual void fbthrift_execute_decorators_before_method(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_method(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_method(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::SinkService>*>(iface)->fbthrift_execute_decorators_after_method(*ctx);
+  }
   virtual void fbthrift_execute_decorators_before_methodAndReponse(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_methodAndReponse(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::InitialResponse& /*result*/) {}
+  virtual void fbthrift_execute_decorators_after_methodAndReponse(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_methodAndReponse(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>>::type result) {
+    static_cast<ServiceHandler<::cpp2::SinkService>*>(iface)->fbthrift_execute_decorators_after_methodAndReponse(*ctx, result);
+  }
   virtual void fbthrift_execute_decorators_before_methodThrow(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_methodThrow(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_methodThrow(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::SinkService>*>(iface)->fbthrift_execute_decorators_after_methodThrow(*ctx);
+  }
   virtual void fbthrift_execute_decorators_before_methodSinkThrow(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_methodSinkThrow(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_methodSinkThrow(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::SinkService>*>(iface)->fbthrift_execute_decorators_after_methodSinkThrow(*ctx);
+  }
   virtual void fbthrift_execute_decorators_before_methodFinalThrow(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_methodFinalThrow(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_methodFinalThrow(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::SinkService>*>(iface)->fbthrift_execute_decorators_after_methodFinalThrow(*ctx);
+  }
   virtual void fbthrift_execute_decorators_before_methodBothThrow(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_methodBothThrow(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_methodBothThrow(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::SinkService>*>(iface)->fbthrift_execute_decorators_after_methodBothThrow(*ctx);
+  }
   virtual void fbthrift_execute_decorators_before_methodFast(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_methodFast(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_methodFast(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::SinkService>*>(iface)->fbthrift_execute_decorators_after_methodFast(*ctx);
+  }
 };
 
 namespace detail {

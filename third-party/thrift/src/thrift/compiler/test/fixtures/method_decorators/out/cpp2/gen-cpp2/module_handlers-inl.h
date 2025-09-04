@@ -112,7 +112,10 @@ void DecoratedServiceAsyncProcessor::executeRequest_noop(
       /* .definingServiceName =*/ "DecoratedService",
       /* .methodName =*/ "noop",
       /* .qualifiedMethodName =*/ "DecoratedService.noop"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_invoke_decorator_after_noop};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -126,7 +129,9 @@ void DecoratedServiceAsyncProcessor::executeRequest_noop(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_noop(*serverRequest.requestContext());
 
@@ -274,7 +279,10 @@ void DecoratedServiceAsyncProcessor::executeRequest_echo(
       /* .definingServiceName =*/ "DecoratedService",
       /* .methodName =*/ "echo",
       /* .qualifiedMethodName =*/ "DecoratedService.echo"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_invoke_decorator_after_echo};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -288,7 +296,9 @@ void DecoratedServiceAsyncProcessor::executeRequest_echo(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_echo(*serverRequest.requestContext(), *args.uarg_text);
 
@@ -439,7 +449,10 @@ void DecoratedServiceAsyncProcessor::executeRequest_increment(
       /* .definingServiceName =*/ "DecoratedService",
       /* .methodName =*/ "increment",
       /* .qualifiedMethodName =*/ "DecoratedService.increment"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int64_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_invoke_decorator_after_increment};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -453,7 +466,9 @@ void DecoratedServiceAsyncProcessor::executeRequest_increment(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_increment(*serverRequest.requestContext(), args.uarg_num);
 
@@ -604,7 +619,10 @@ void DecoratedServiceAsyncProcessor::executeRequest_sum(
       /* .definingServiceName =*/ "DecoratedService",
       /* .methodName =*/ "sum",
       /* .qualifiedMethodName =*/ "DecoratedService.sum"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int64_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_invoke_decorator_after_sum};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -618,7 +636,9 @@ void DecoratedServiceAsyncProcessor::executeRequest_sum(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_sum(*serverRequest.requestContext(), *args.uarg_nums);
 
@@ -769,7 +789,10 @@ void DecoratedServiceAsyncProcessor::executeRequest_withStruct(
       /* .definingServiceName =*/ "DecoratedService",
       /* .methodName =*/ "withStruct",
       /* .qualifiedMethodName =*/ "DecoratedService.withStruct"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::cpp2::Response>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_invoke_decorator_after_withStruct};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::Response>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -783,7 +806,9 @@ void DecoratedServiceAsyncProcessor::executeRequest_withStruct(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_withStruct(*serverRequest.requestContext(), *args.uarg_request);
 
@@ -940,7 +965,10 @@ void DecoratedServiceAsyncProcessor::executeRequest_multiParam(
       /* .definingServiceName =*/ "DecoratedService",
       /* .methodName =*/ "multiParam",
       /* .qualifiedMethodName =*/ "DecoratedService.multiParam"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::cpp2::Response>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_invoke_decorator_after_multiParam};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::Response>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -954,7 +982,9 @@ void DecoratedServiceAsyncProcessor::executeRequest_multiParam(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_multiParam(*serverRequest.requestContext(), *args.uarg_text, args.uarg_num, *args.uarg_request);
 
@@ -1103,7 +1133,10 @@ void DecoratedServiceAsyncProcessor::executeRequest_echoInteraction(
       /* .definingServiceName =*/ "DecoratedService",
       /* .methodName =*/ "echoInteraction",
       /* .qualifiedMethodName =*/ "DecoratedService.echoInteraction"};
-  auto callback =
+  apache::thrift::HandlerCallback<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::DecoratedService>::EchoInteractionIf, void>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_invoke_decorator_after_echoInteraction};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::DecoratedService>::EchoInteractionIf, void>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1118,7 +1151,8 @@ void DecoratedServiceAsyncProcessor::executeRequest_echoInteraction(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
-          std::move(tile));
+          std::move(tile),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_echoInteraction(*serverRequest.requestContext());
 
@@ -1275,7 +1309,8 @@ void DecoratedServiceAsyncProcessor::executeRequest_LegacyPerforms_perform(
       /* .definingServiceName =*/ "DecoratedService",
       /* .methodName =*/ "LegacyPerforms.perform",
       /* .qualifiedMethodName =*/ "DecoratedService.LegacyPerforms.perform"};
-  auto callback =
+  auto decoratorCallback = apache::thrift::HandlerCallback<void>::DecoratorAfterCallback::noop();
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1290,7 +1325,8 @@ void DecoratedServiceAsyncProcessor::executeRequest_LegacyPerforms_perform(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
-          std::move(tile));
+          std::move(tile),
+          std::move(decoratorCallback));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1446,7 +1482,8 @@ void DecoratedServiceAsyncProcessor::executeRequest_EchoInteraction_interactionE
       /* .definingServiceName =*/ "DecoratedService",
       /* .methodName =*/ "EchoInteraction.interactionEcho",
       /* .qualifiedMethodName =*/ "DecoratedService.EchoInteraction.interactionEcho"};
-  auto callback =
+  auto decoratorCallback = apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::DecoratorAfterCallback::noop();
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1461,7 +1498,8 @@ void DecoratedServiceAsyncProcessor::executeRequest_EchoInteraction_interactionE
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
-          std::move(tile));
+          std::move(tile),
+          std::move(decoratorCallback));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1630,7 +1668,10 @@ void UndecoratedServiceAsyncProcessor::executeRequest_noop(
       /* .definingServiceName =*/ "UndecoratedService",
       /* .methodName =*/ "noop",
       /* .qualifiedMethodName =*/ "UndecoratedService.noop"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::UndecoratedService>::fbthrift_invoke_decorator_after_noop};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1644,7 +1685,9 @@ void UndecoratedServiceAsyncProcessor::executeRequest_noop(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_noop(*serverRequest.requestContext());
 
@@ -1792,7 +1835,10 @@ void UndecoratedServiceAsyncProcessor::executeRequest_echo(
       /* .definingServiceName =*/ "UndecoratedService",
       /* .methodName =*/ "echo",
       /* .qualifiedMethodName =*/ "UndecoratedService.echo"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::UndecoratedService>::fbthrift_invoke_decorator_after_echo};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1806,7 +1852,9 @@ void UndecoratedServiceAsyncProcessor::executeRequest_echo(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_echo(*serverRequest.requestContext(), *args.uarg_text);
 
@@ -1957,7 +2005,10 @@ void UndecoratedServiceAsyncProcessor::executeRequest_increment(
       /* .definingServiceName =*/ "UndecoratedService",
       /* .methodName =*/ "increment",
       /* .qualifiedMethodName =*/ "UndecoratedService.increment"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int64_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::UndecoratedService>::fbthrift_invoke_decorator_after_increment};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1971,7 +2022,9 @@ void UndecoratedServiceAsyncProcessor::executeRequest_increment(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_increment(*serverRequest.requestContext(), args.uarg_num);
 
@@ -2122,7 +2175,10 @@ void UndecoratedServiceAsyncProcessor::executeRequest_sum(
       /* .definingServiceName =*/ "UndecoratedService",
       /* .methodName =*/ "sum",
       /* .qualifiedMethodName =*/ "UndecoratedService.sum"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int64_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::UndecoratedService>::fbthrift_invoke_decorator_after_sum};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2136,7 +2192,9 @@ void UndecoratedServiceAsyncProcessor::executeRequest_sum(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_sum(*serverRequest.requestContext(), *args.uarg_nums);
 
@@ -2287,7 +2345,10 @@ void UndecoratedServiceAsyncProcessor::executeRequest_withStruct(
       /* .definingServiceName =*/ "UndecoratedService",
       /* .methodName =*/ "withStruct",
       /* .qualifiedMethodName =*/ "UndecoratedService.withStruct"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::cpp2::Response>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::UndecoratedService>::fbthrift_invoke_decorator_after_withStruct};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::Response>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2301,7 +2362,9 @@ void UndecoratedServiceAsyncProcessor::executeRequest_withStruct(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_withStruct(*serverRequest.requestContext(), *args.uarg_request);
 
@@ -2458,7 +2521,10 @@ void UndecoratedServiceAsyncProcessor::executeRequest_multiParam(
       /* .definingServiceName =*/ "UndecoratedService",
       /* .methodName =*/ "multiParam",
       /* .qualifiedMethodName =*/ "UndecoratedService.multiParam"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::cpp2::Response>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::UndecoratedService>::fbthrift_invoke_decorator_after_multiParam};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::Response>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2472,7 +2538,9 @@ void UndecoratedServiceAsyncProcessor::executeRequest_multiParam(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_multiParam(*serverRequest.requestContext(), *args.uarg_text, args.uarg_num, *args.uarg_request);
 
@@ -2623,7 +2691,10 @@ void UndecoratedServiceAsyncProcessor::executeRequest_adaptedRequest(
       /* .definingServiceName =*/ "UndecoratedService",
       /* .methodName =*/ "adaptedRequest",
       /* .qualifiedMethodName =*/ "UndecoratedService.adaptedRequest"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::cpp2::Response>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::UndecoratedService>::fbthrift_invoke_decorator_after_adaptedRequest};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::Response>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2637,7 +2708,9 @@ void UndecoratedServiceAsyncProcessor::executeRequest_adaptedRequest(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_adaptedRequest(*serverRequest.requestContext(), *args.uarg_request);
 
@@ -2798,7 +2871,10 @@ void DecoratedService_ExtendsUndecoratedServiceAsyncProcessor::executeRequest_ex
       /* .definingServiceName =*/ "DecoratedService_ExtendsUndecoratedService",
       /* .methodName =*/ "extension",
       /* .qualifiedMethodName =*/ "DecoratedService_ExtendsUndecoratedService.extension"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>::fbthrift_invoke_decorator_after_extension};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2812,7 +2888,9 @@ void DecoratedService_ExtendsUndecoratedServiceAsyncProcessor::executeRequest_ex
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_extension(*serverRequest.requestContext());
 
@@ -2970,7 +3048,10 @@ void DecoratedService_ExtendsDecoratedServiceAsyncProcessor::executeRequest_exte
       /* .definingServiceName =*/ "DecoratedService_ExtendsDecoratedService",
       /* .methodName =*/ "extension",
       /* .qualifiedMethodName =*/ "DecoratedService_ExtendsDecoratedService.extension"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>::fbthrift_invoke_decorator_after_extension};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2984,7 +3065,9 @@ void DecoratedService_ExtendsDecoratedServiceAsyncProcessor::executeRequest_exte
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_extension(*serverRequest.requestContext());
 
@@ -3142,7 +3225,10 @@ void UndecoratedService_ExtendsDecoratedServiceAsyncProcessor::executeRequest_ex
       /* .definingServiceName =*/ "UndecoratedService_ExtendsDecoratedService",
       /* .methodName =*/ "extension",
       /* .qualifiedMethodName =*/ "UndecoratedService_ExtendsDecoratedService.extension"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::UndecoratedService_ExtendsDecoratedService>::fbthrift_invoke_decorator_after_extension};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3156,7 +3242,9 @@ void UndecoratedService_ExtendsDecoratedServiceAsyncProcessor::executeRequest_ex
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_extension(*serverRequest.requestContext());
 
@@ -3317,7 +3405,10 @@ void DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceAsyncProc
       /* .definingServiceName =*/ "DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService",
       /* .methodName =*/ "secondExtension",
       /* .qualifiedMethodName =*/ "DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService.secondExtension"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::fbthrift_invoke_decorator_after_secondExtension};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3331,7 +3422,9 @@ void DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceAsyncProc
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_secondExtension(*serverRequest.requestContext(), *args.uarg_input);
 

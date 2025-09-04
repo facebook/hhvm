@@ -106,7 +106,10 @@ void RaiserAsyncProcessor::executeRequest_doBland(
       /* .definingServiceName =*/ "Raiser",
       /* .methodName =*/ "doBland",
       /* .qualifiedMethodName =*/ "Raiser.doBland"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::Raiser>::fbthrift_invoke_decorator_after_doBland};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -120,7 +123,9 @@ void RaiserAsyncProcessor::executeRequest_doBland(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_doBland(*serverRequest.requestContext());
 
@@ -265,7 +270,10 @@ void RaiserAsyncProcessor::executeRequest_doRaise(
       /* .definingServiceName =*/ "Raiser",
       /* .methodName =*/ "doRaise",
       /* .qualifiedMethodName =*/ "Raiser.doRaise"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::Raiser>::fbthrift_invoke_decorator_after_doRaise};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -279,7 +287,9 @@ void RaiserAsyncProcessor::executeRequest_doRaise(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_doRaise(*serverRequest.requestContext());
 
@@ -442,7 +452,10 @@ void RaiserAsyncProcessor::executeRequest_get200(
       /* .definingServiceName =*/ "Raiser",
       /* .methodName =*/ "get200",
       /* .qualifiedMethodName =*/ "Raiser.get200"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::Raiser>::fbthrift_invoke_decorator_after_get200};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -456,7 +469,9 @@ void RaiserAsyncProcessor::executeRequest_get200(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_get200(*serverRequest.requestContext());
 
@@ -604,7 +619,10 @@ void RaiserAsyncProcessor::executeRequest_get500(
       /* .definingServiceName =*/ "Raiser",
       /* .methodName =*/ "get500",
       /* .qualifiedMethodName =*/ "Raiser.get500"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::Raiser>::fbthrift_invoke_decorator_after_get500};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -618,7 +636,9 @@ void RaiserAsyncProcessor::executeRequest_get500(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_get500(*serverRequest.requestContext());
 

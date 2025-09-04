@@ -42,37 +42,6 @@ class DecoratedServiceServiceInfoHolder : public apache::thrift::ServiceInfoHold
 } // namespace cpp2
 
 namespace apache::thrift {
-
-template <>
-class ServiceMethodDecorator<::cpp2::DecoratedService> : public ServiceMethodDecoratorBase {
- public:
-  virtual ~ServiceMethodDecorator() = default;
-  virtual void before_createLegacyPerforms(BeforeParams /*beforeParams*/) {}
-  virtual void after_createLegacyPerforms(AfterParams /*afterParams*/, const LegacyPerformsIf& /*interaction*/) {}
-  virtual void before_noop(BeforeParams /*beforeParams*/) {}
-  virtual void after_noop(AfterParams /*afterParams*/) {}
-  virtual void before_echo(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/) {}
-  virtual void after_echo(AfterParams /*afterParams*/, const ::std::string& /*result*/) {}
-  virtual void before_increment(BeforeParams /*beforeParams*/, ::std::int64_t /*p_num*/) {}
-  virtual void after_increment(AfterParams /*afterParams*/, ::std::int64_t /*result*/) {}
-  virtual void before_sum(BeforeParams /*beforeParams*/, const ::std::vector<::std::int64_t>& /*p_nums*/) {}
-  virtual void after_sum(AfterParams /*afterParams*/, ::std::int64_t /*result*/) {}
-  virtual void before_withStruct(BeforeParams /*beforeParams*/, const ::cpp2::Request& /*p_request*/) {}
-  virtual void after_withStruct(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
-  virtual void before_multiParam(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) {}
-  virtual void after_multiParam(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
-  virtual void before_echoInteraction(BeforeParams /*beforeParams*/) {}
-  virtual void after_echoInteraction(AfterParams /*afterParams*/, const EchoInteractionIf& /*interaction*/) {}
-  // BEGIN interaction LegacyPerforms methods
-  virtual void before_LegacyPerforms_perform(BeforeParams /*beforeParams*/) {}
-  virtual void after_LegacyPerforms_perform(AfterParams /*afterParams*/) {}
-  // END interaction LegacyPerforms methods
-  // BEGIN interaction EchoInteraction methods
-  virtual void before_EchoInteraction_interactionEcho(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/) {}
-  virtual void after_EchoInteraction_interactionEcho(AfterParams /*afterParams*/, const ::std::string& /*result*/) {}
-  // END interaction EchoInteraction methods
-};
-
 template <>
 class ServiceHandler<::cpp2::DecoratedService> : public apache::thrift::ServerInterface {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::cpp2::DecoratedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
@@ -222,24 +191,78 @@ class EchoInteractionIf : public apache::thrift::Tile, public apache::thrift::Se
   std::vector<std::reference_wrapper<ServiceMethodDecoratorBase>> fbthrift_getDecorators() override;
 
   virtual void fbthrift_execute_decorators_before_createLegacyPerforms(apache::thrift::Cpp2RequestContext& /*requestCtx*/);
-  virtual void fbthrift_execute_decorators_after_createLegacyPerforms(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const LegacyPerformsIf& /*interaction*/);
+  virtual void fbthrift_execute_decorators_after_createLegacyPerforms(apache::thrift::Cpp2RequestContext& /*requestCtx*/);
+  static void fbthrift_invoke_decorator_after_createLegacyPerforms(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::DecoratedService>*>(iface)->fbthrift_execute_decorators_after_createLegacyPerforms(*ctx);
+  }
   virtual void fbthrift_execute_decorators_before_noop(apache::thrift::Cpp2RequestContext& /*requestCtx*/);
   virtual void fbthrift_execute_decorators_after_noop(apache::thrift::Cpp2RequestContext& /*requestCtx*/);
-  virtual void fbthrift_execute_decorators_before_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_text*/);
-  virtual void fbthrift_execute_decorators_after_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/);
-  virtual void fbthrift_execute_decorators_before_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_num*/);
-  virtual void fbthrift_execute_decorators_after_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/);
-  virtual void fbthrift_execute_decorators_before_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::int64_t>& /*p_nums*/);
-  virtual void fbthrift_execute_decorators_after_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/);
-  virtual void fbthrift_execute_decorators_before_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Request& /*p_request*/);
-  virtual void fbthrift_execute_decorators_after_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/);
-  virtual void fbthrift_execute_decorators_before_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/);
-  virtual void fbthrift_execute_decorators_after_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/);
+  static void fbthrift_invoke_decorator_after_noop(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::DecoratedService>*>(iface)->fbthrift_execute_decorators_after_noop(*ctx);
+  }
+  virtual void fbthrift_execute_decorators_before_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/);
+  virtual void fbthrift_execute_decorators_after_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/);
+  static void fbthrift_invoke_decorator_after_echo(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::string>::type result) {
+    static_cast<ServiceHandler<::cpp2::DecoratedService>*>(iface)->fbthrift_execute_decorators_after_echo(*ctx, result);
+  }
+  virtual void fbthrift_execute_decorators_before_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/);
+  virtual void fbthrift_execute_decorators_after_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/);
+  static void fbthrift_invoke_decorator_after_increment(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type result) {
+    static_cast<ServiceHandler<::cpp2::DecoratedService>*>(iface)->fbthrift_execute_decorators_after_increment(*ctx, result);
+  }
+  virtual void fbthrift_execute_decorators_before_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::int64_t>>::type /*p_nums*/);
+  virtual void fbthrift_execute_decorators_after_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/);
+  static void fbthrift_invoke_decorator_after_sum(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type result) {
+    static_cast<ServiceHandler<::cpp2::DecoratedService>*>(iface)->fbthrift_execute_decorators_after_sum(*ctx, result);
+  }
+  virtual void fbthrift_execute_decorators_before_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/);
+  virtual void fbthrift_execute_decorators_after_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/);
+  static void fbthrift_invoke_decorator_after_withStruct(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type result) {
+    static_cast<ServiceHandler<::cpp2::DecoratedService>*>(iface)->fbthrift_execute_decorators_after_withStruct(*ctx, result);
+  }
+  virtual void fbthrift_execute_decorators_before_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/);
+  virtual void fbthrift_execute_decorators_after_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/);
+  static void fbthrift_invoke_decorator_after_multiParam(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type result) {
+    static_cast<ServiceHandler<::cpp2::DecoratedService>*>(iface)->fbthrift_execute_decorators_after_multiParam(*ctx, result);
+  }
   virtual void fbthrift_execute_decorators_before_echoInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/);
-  virtual void fbthrift_execute_decorators_after_echoInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const EchoInteractionIf& /*interaction*/);
+  virtual void fbthrift_execute_decorators_after_echoInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/);
+  static void fbthrift_invoke_decorator_after_echoInteraction(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::DecoratedService>*>(iface)->fbthrift_execute_decorators_after_echoInteraction(*ctx);
+  }
  private:
   ServiceMethodDecoratorList<::cpp2::DecoratedService> fbthrift_methodDecorators_;
   friend void decorate(ServiceHandler<::cpp2::DecoratedService>&, ServiceMethodDecoratorList<::cpp2::DecoratedService>);
+};
+
+template <>
+class ServiceMethodDecorator<::cpp2::DecoratedService> : public ServiceMethodDecoratorBase {
+ public:
+  virtual ~ServiceMethodDecorator() = default;
+  virtual void before_createLegacyPerforms(BeforeParams /*beforeParams*/) {}
+  virtual void after_createLegacyPerforms(AfterParams /*afterParams*/) {}
+  virtual void before_noop(BeforeParams /*beforeParams*/) {}
+  virtual void after_noop(AfterParams /*afterParams*/) {}
+  virtual void before_echo(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/) {}
+  virtual void after_echo(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) {}
+  virtual void before_increment(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/) {}
+  virtual void after_increment(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) {}
+  virtual void before_sum(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::int64_t>>::type /*p_nums*/) {}
+  virtual void after_sum(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) {}
+  virtual void before_withStruct(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/) {}
+  virtual void after_withStruct(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) {}
+  virtual void before_multiParam(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/) {}
+  virtual void after_multiParam(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) {}
+  virtual void before_echoInteraction(BeforeParams /*beforeParams*/) {}
+  virtual void after_echoInteraction(AfterParams /*afterParams*/) {}
+  // BEGIN interaction LegacyPerforms methods
+  virtual void before_LegacyPerforms_perform(BeforeParams /*beforeParams*/) {}
+  virtual void after_LegacyPerforms_perform(AfterParams /*afterParams*/) {}
+  // END interaction LegacyPerforms methods
+  // BEGIN interaction EchoInteraction methods
+  virtual void before_EchoInteraction_interactionEcho(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/) {}
+  virtual void after_EchoInteraction_interactionEcho(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) {}
+  // END interaction EchoInteraction methods
 };
 
 void decorate(ServiceHandler<::cpp2::DecoratedService>& handler, ServiceMethodDecoratorList<::cpp2::DecoratedService> decorators);
@@ -741,18 +764,39 @@ class ServiceHandler<::cpp2::UndecoratedService> : public apache::thrift::Server
 
   virtual void fbthrift_execute_decorators_before_noop(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_noop(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_before_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_text*/) {}
-  virtual void fbthrift_execute_decorators_after_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) {}
-  virtual void fbthrift_execute_decorators_before_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_num*/) {}
-  virtual void fbthrift_execute_decorators_after_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/) {}
-  virtual void fbthrift_execute_decorators_before_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::int64_t>& /*p_nums*/) {}
-  virtual void fbthrift_execute_decorators_after_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/) {}
-  virtual void fbthrift_execute_decorators_before_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Request& /*p_request*/) {}
-  virtual void fbthrift_execute_decorators_after_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/) {}
-  virtual void fbthrift_execute_decorators_before_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) {}
-  virtual void fbthrift_execute_decorators_after_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/) {}
-  virtual void fbthrift_execute_decorators_before_adaptedRequest(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::AdaptedRequest& /*p_request*/) {}
-  virtual void fbthrift_execute_decorators_after_adaptedRequest(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/) {}
+  static void fbthrift_invoke_decorator_after_noop(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::UndecoratedService>*>(iface)->fbthrift_execute_decorators_after_noop(*ctx);
+  }
+  virtual void fbthrift_execute_decorators_before_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/) {}
+  virtual void fbthrift_execute_decorators_after_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_echo(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::string>::type result) {
+    static_cast<ServiceHandler<::cpp2::UndecoratedService>*>(iface)->fbthrift_execute_decorators_after_echo(*ctx, result);
+  }
+  virtual void fbthrift_execute_decorators_before_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/) {}
+  virtual void fbthrift_execute_decorators_after_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_increment(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type result) {
+    static_cast<ServiceHandler<::cpp2::UndecoratedService>*>(iface)->fbthrift_execute_decorators_after_increment(*ctx, result);
+  }
+  virtual void fbthrift_execute_decorators_before_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::int64_t>>::type /*p_nums*/) {}
+  virtual void fbthrift_execute_decorators_after_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_sum(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type result) {
+    static_cast<ServiceHandler<::cpp2::UndecoratedService>*>(iface)->fbthrift_execute_decorators_after_sum(*ctx, result);
+  }
+  virtual void fbthrift_execute_decorators_before_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/) {}
+  virtual void fbthrift_execute_decorators_after_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_withStruct(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type result) {
+    static_cast<ServiceHandler<::cpp2::UndecoratedService>*>(iface)->fbthrift_execute_decorators_after_withStruct(*ctx, result);
+  }
+  virtual void fbthrift_execute_decorators_before_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/) {}
+  virtual void fbthrift_execute_decorators_after_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_multiParam(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type result) {
+    static_cast<ServiceHandler<::cpp2::UndecoratedService>*>(iface)->fbthrift_execute_decorators_after_multiParam(*ctx, result);
+  }
+  virtual void fbthrift_execute_decorators_before_adaptedRequest(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::cpp2::AdaptedRequest>::type /*p_request*/) {}
+  virtual void fbthrift_execute_decorators_after_adaptedRequest(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_adaptedRequest(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type result) {
+    static_cast<ServiceHandler<::cpp2::UndecoratedService>*>(iface)->fbthrift_execute_decorators_after_adaptedRequest(*ctx, result);
+  }
 };
 
 namespace detail {
@@ -1075,31 +1119,6 @@ class DecoratedService_ExtendsUndecoratedServiceServiceInfoHolder : public apach
 } // namespace cpp2
 
 namespace apache::thrift {
-
-template <>
-class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsUndecoratedService> : public ServiceMethodDecoratorBase {
- public:
-  virtual ~ServiceMethodDecorator() = default;
-  // BEGIN inherited methods from ::cpp2::DecoratedService_ExtendsUndecoratedService
-  virtual void before_noop(BeforeParams /*beforeParams*/) {}
-  virtual void after_noop(AfterParams /*afterParams*/) {}
-  virtual void before_echo(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/) {}
-  virtual void after_echo(AfterParams /*afterParams*/, const ::std::string& /*result*/) {}
-  virtual void before_increment(BeforeParams /*beforeParams*/, ::std::int64_t /*p_num*/) {}
-  virtual void after_increment(AfterParams /*afterParams*/, ::std::int64_t /*result*/) {}
-  virtual void before_sum(BeforeParams /*beforeParams*/, const ::std::vector<::std::int64_t>& /*p_nums*/) {}
-  virtual void after_sum(AfterParams /*afterParams*/, ::std::int64_t /*result*/) {}
-  virtual void before_withStruct(BeforeParams /*beforeParams*/, const ::cpp2::Request& /*p_request*/) {}
-  virtual void after_withStruct(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
-  virtual void before_multiParam(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) {}
-  virtual void after_multiParam(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
-  virtual void before_adaptedRequest(BeforeParams /*beforeParams*/, const ::cpp2::AdaptedRequest& /*p_request*/) {}
-  virtual void after_adaptedRequest(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
-  // END inherited methods from ::cpp2::DecoratedService_ExtendsUndecoratedService
-  virtual void before_extension(BeforeParams /*beforeParams*/) {}
-  virtual void after_extension(AfterParams /*afterParams*/) {}
-};
-
 template <>
 class ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService> : virtual public ::cpp2::UndecoratedServiceSvIf {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::cpp2::DecoratedService_ExtendsUndecoratedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
@@ -1130,24 +1149,51 @@ class ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService> : virtu
   std::vector<std::reference_wrapper<ServiceMethodDecoratorBase>> fbthrift_getDecorators() override;
   void fbthrift_execute_decorators_before_noop(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override;
   void fbthrift_execute_decorators_after_noop(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override;
-  void fbthrift_execute_decorators_before_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_text*/) override;
-  void fbthrift_execute_decorators_after_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) override;
-  void fbthrift_execute_decorators_before_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_num*/) override;
-  void fbthrift_execute_decorators_after_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/) override;
-  void fbthrift_execute_decorators_before_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::int64_t>& /*p_nums*/) override;
-  void fbthrift_execute_decorators_after_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/) override;
-  void fbthrift_execute_decorators_before_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Request& /*p_request*/) override;
-  void fbthrift_execute_decorators_after_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/) override;
-  void fbthrift_execute_decorators_before_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) override;
-  void fbthrift_execute_decorators_after_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/) override;
-  void fbthrift_execute_decorators_before_adaptedRequest(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::AdaptedRequest& /*p_request*/) override;
-  void fbthrift_execute_decorators_after_adaptedRequest(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/) override;
+  void fbthrift_execute_decorators_before_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/) override;
+  void fbthrift_execute_decorators_after_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) override;
+  void fbthrift_execute_decorators_before_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/) override;
+  void fbthrift_execute_decorators_after_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) override;
+  void fbthrift_execute_decorators_before_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::int64_t>>::type /*p_nums*/) override;
+  void fbthrift_execute_decorators_after_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) override;
+  void fbthrift_execute_decorators_before_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/) override;
+  void fbthrift_execute_decorators_after_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) override;
+  void fbthrift_execute_decorators_before_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/) override;
+  void fbthrift_execute_decorators_after_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) override;
+  void fbthrift_execute_decorators_before_adaptedRequest(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::cpp2::AdaptedRequest>::type /*p_request*/) override;
+  void fbthrift_execute_decorators_after_adaptedRequest(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) override;
 
   virtual void fbthrift_execute_decorators_before_extension(apache::thrift::Cpp2RequestContext& /*requestCtx*/);
   virtual void fbthrift_execute_decorators_after_extension(apache::thrift::Cpp2RequestContext& /*requestCtx*/);
+  static void fbthrift_invoke_decorator_after_extension(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>*>(iface)->fbthrift_execute_decorators_after_extension(*ctx);
+  }
  private:
   ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService> fbthrift_methodDecorators_;
   friend void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>&, ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService>);
+};
+
+template <>
+class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsUndecoratedService> : public ServiceMethodDecoratorBase {
+ public:
+  virtual ~ServiceMethodDecorator() = default;
+  // BEGIN inherited methods from ::cpp2::DecoratedService_ExtendsUndecoratedService
+  virtual void before_noop(BeforeParams /*beforeParams*/) {}
+  virtual void after_noop(AfterParams /*afterParams*/) {}
+  virtual void before_echo(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/) {}
+  virtual void after_echo(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) {}
+  virtual void before_increment(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/) {}
+  virtual void after_increment(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) {}
+  virtual void before_sum(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::int64_t>>::type /*p_nums*/) {}
+  virtual void after_sum(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) {}
+  virtual void before_withStruct(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/) {}
+  virtual void after_withStruct(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) {}
+  virtual void before_multiParam(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/) {}
+  virtual void after_multiParam(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) {}
+  virtual void before_adaptedRequest(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::cpp2::AdaptedRequest>::type /*p_request*/) {}
+  virtual void after_adaptedRequest(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) {}
+  // END inherited methods from ::cpp2::DecoratedService_ExtendsUndecoratedService
+  virtual void before_extension(BeforeParams /*beforeParams*/) {}
+  virtual void after_extension(AfterParams /*afterParams*/) {}
 };
 
 void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>& handler, ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService> decorators);
@@ -1245,33 +1291,6 @@ class DecoratedService_ExtendsDecoratedServiceServiceInfoHolder : public apache:
 } // namespace cpp2
 
 namespace apache::thrift {
-
-template <>
-class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsDecoratedService> : public ServiceMethodDecoratorBase {
- public:
-  virtual ~ServiceMethodDecorator() = default;
-  // BEGIN inherited methods from ::cpp2::DecoratedService_ExtendsDecoratedService
-  virtual void before_createLegacyPerforms(BeforeParams /*beforeParams*/) {}
-  virtual void after_createLegacyPerforms(AfterParams /*afterParams*/, const LegacyPerformsIf& /*interaction*/) {}
-  virtual void before_noop(BeforeParams /*beforeParams*/) {}
-  virtual void after_noop(AfterParams /*afterParams*/) {}
-  virtual void before_echo(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/) {}
-  virtual void after_echo(AfterParams /*afterParams*/, const ::std::string& /*result*/) {}
-  virtual void before_increment(BeforeParams /*beforeParams*/, ::std::int64_t /*p_num*/) {}
-  virtual void after_increment(AfterParams /*afterParams*/, ::std::int64_t /*result*/) {}
-  virtual void before_sum(BeforeParams /*beforeParams*/, const ::std::vector<::std::int64_t>& /*p_nums*/) {}
-  virtual void after_sum(AfterParams /*afterParams*/, ::std::int64_t /*result*/) {}
-  virtual void before_withStruct(BeforeParams /*beforeParams*/, const ::cpp2::Request& /*p_request*/) {}
-  virtual void after_withStruct(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
-  virtual void before_multiParam(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) {}
-  virtual void after_multiParam(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
-  virtual void before_echoInteraction(BeforeParams /*beforeParams*/) {}
-  virtual void after_echoInteraction(AfterParams /*afterParams*/, const EchoInteractionIf& /*interaction*/) {}
-  // END inherited methods from ::cpp2::DecoratedService_ExtendsDecoratedService
-  virtual void before_extension(BeforeParams /*beforeParams*/) {}
-  virtual void after_extension(AfterParams /*afterParams*/) {}
-};
-
 template <>
 class ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService> : virtual public ::cpp2::DecoratedServiceSvIf {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::cpp2::DecoratedService_ExtendsDecoratedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
@@ -1301,27 +1320,56 @@ class ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService> : virtual
  public:
   std::vector<std::reference_wrapper<ServiceMethodDecoratorBase>> fbthrift_getDecorators() override;
   void fbthrift_execute_decorators_before_createLegacyPerforms(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override;
-  void fbthrift_execute_decorators_after_createLegacyPerforms(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const LegacyPerformsIf& /*interaction*/) override;
+  void fbthrift_execute_decorators_after_createLegacyPerforms(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override;
   void fbthrift_execute_decorators_before_noop(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override;
   void fbthrift_execute_decorators_after_noop(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override;
-  void fbthrift_execute_decorators_before_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_text*/) override;
-  void fbthrift_execute_decorators_after_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) override;
-  void fbthrift_execute_decorators_before_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_num*/) override;
-  void fbthrift_execute_decorators_after_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/) override;
-  void fbthrift_execute_decorators_before_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::int64_t>& /*p_nums*/) override;
-  void fbthrift_execute_decorators_after_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/) override;
-  void fbthrift_execute_decorators_before_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Request& /*p_request*/) override;
-  void fbthrift_execute_decorators_after_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/) override;
-  void fbthrift_execute_decorators_before_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) override;
-  void fbthrift_execute_decorators_after_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/) override;
+  void fbthrift_execute_decorators_before_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/) override;
+  void fbthrift_execute_decorators_after_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) override;
+  void fbthrift_execute_decorators_before_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/) override;
+  void fbthrift_execute_decorators_after_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) override;
+  void fbthrift_execute_decorators_before_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::int64_t>>::type /*p_nums*/) override;
+  void fbthrift_execute_decorators_after_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) override;
+  void fbthrift_execute_decorators_before_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/) override;
+  void fbthrift_execute_decorators_after_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) override;
+  void fbthrift_execute_decorators_before_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/) override;
+  void fbthrift_execute_decorators_after_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) override;
   void fbthrift_execute_decorators_before_echoInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override;
-  void fbthrift_execute_decorators_after_echoInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const EchoInteractionIf& /*interaction*/) override;
+  void fbthrift_execute_decorators_after_echoInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override;
 
   virtual void fbthrift_execute_decorators_before_extension(apache::thrift::Cpp2RequestContext& /*requestCtx*/);
   virtual void fbthrift_execute_decorators_after_extension(apache::thrift::Cpp2RequestContext& /*requestCtx*/);
+  static void fbthrift_invoke_decorator_after_extension(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>*>(iface)->fbthrift_execute_decorators_after_extension(*ctx);
+  }
  private:
   ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsDecoratedService> fbthrift_methodDecorators_;
   friend void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>&, ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsDecoratedService>);
+};
+
+template <>
+class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsDecoratedService> : public ServiceMethodDecoratorBase {
+ public:
+  virtual ~ServiceMethodDecorator() = default;
+  // BEGIN inherited methods from ::cpp2::DecoratedService_ExtendsDecoratedService
+  virtual void before_createLegacyPerforms(BeforeParams /*beforeParams*/) {}
+  virtual void after_createLegacyPerforms(AfterParams /*afterParams*/) {}
+  virtual void before_noop(BeforeParams /*beforeParams*/) {}
+  virtual void after_noop(AfterParams /*afterParams*/) {}
+  virtual void before_echo(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/) {}
+  virtual void after_echo(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) {}
+  virtual void before_increment(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/) {}
+  virtual void after_increment(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) {}
+  virtual void before_sum(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::int64_t>>::type /*p_nums*/) {}
+  virtual void after_sum(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) {}
+  virtual void before_withStruct(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/) {}
+  virtual void after_withStruct(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) {}
+  virtual void before_multiParam(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/) {}
+  virtual void after_multiParam(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) {}
+  virtual void before_echoInteraction(BeforeParams /*beforeParams*/) {}
+  virtual void after_echoInteraction(AfterParams /*afterParams*/) {}
+  // END inherited methods from ::cpp2::DecoratedService_ExtendsDecoratedService
+  virtual void before_extension(BeforeParams /*beforeParams*/) {}
+  virtual void after_extension(AfterParams /*afterParams*/) {}
 };
 
 void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>& handler, ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsDecoratedService> decorators);
@@ -1447,24 +1495,27 @@ class ServiceHandler<::cpp2::UndecoratedService_ExtendsDecoratedService> : virtu
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_extension{apache::thrift::detail::si::InvocationType::AsyncTm};
  public:
   void fbthrift_execute_decorators_before_createLegacyPerforms(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
-  void fbthrift_execute_decorators_after_createLegacyPerforms(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const LegacyPerformsIf& /*interaction*/) override {}
+  void fbthrift_execute_decorators_after_createLegacyPerforms(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
   void fbthrift_execute_decorators_before_noop(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
   void fbthrift_execute_decorators_after_noop(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
-  void fbthrift_execute_decorators_before_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_text*/) override {}
-  void fbthrift_execute_decorators_after_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) override {}
-  void fbthrift_execute_decorators_before_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_num*/) override {}
-  void fbthrift_execute_decorators_after_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/) override {}
-  void fbthrift_execute_decorators_before_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::int64_t>& /*p_nums*/) override {}
-  void fbthrift_execute_decorators_after_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/) override {}
-  void fbthrift_execute_decorators_before_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Request& /*p_request*/) override {}
-  void fbthrift_execute_decorators_after_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/) override {}
-  void fbthrift_execute_decorators_before_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) override {}
-  void fbthrift_execute_decorators_after_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/) override {}
+  void fbthrift_execute_decorators_before_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/) override {}
+  void fbthrift_execute_decorators_after_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) override {}
+  void fbthrift_execute_decorators_before_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/) override {}
+  void fbthrift_execute_decorators_after_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) override {}
+  void fbthrift_execute_decorators_before_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::int64_t>>::type /*p_nums*/) override {}
+  void fbthrift_execute_decorators_after_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) override {}
+  void fbthrift_execute_decorators_before_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/) override {}
+  void fbthrift_execute_decorators_after_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) override {}
+  void fbthrift_execute_decorators_before_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/) override {}
+  void fbthrift_execute_decorators_after_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) override {}
   void fbthrift_execute_decorators_before_echoInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
-  void fbthrift_execute_decorators_after_echoInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const EchoInteractionIf& /*interaction*/) override {}
+  void fbthrift_execute_decorators_after_echoInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override {}
 
   virtual void fbthrift_execute_decorators_before_extension(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_extension(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_extension(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::UndecoratedService_ExtendsDecoratedService>*>(iface)->fbthrift_execute_decorators_after_extension(*ctx);
+  }
 };
 
 namespace detail {
@@ -1560,37 +1611,6 @@ class DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceServiceI
 } // namespace cpp2
 
 namespace apache::thrift {
-
-template <>
-class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService> : public ServiceMethodDecoratorBase {
- public:
-  virtual ~ServiceMethodDecorator() = default;
-  // BEGIN inherited methods from ::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService
-  // BEGIN inherited methods from ::cpp2::UndecoratedService_ExtendsDecoratedService
-  virtual void before_createLegacyPerforms(BeforeParams /*beforeParams*/) {}
-  virtual void after_createLegacyPerforms(AfterParams /*afterParams*/, const LegacyPerformsIf& /*interaction*/) {}
-  virtual void before_noop(BeforeParams /*beforeParams*/) {}
-  virtual void after_noop(AfterParams /*afterParams*/) {}
-  virtual void before_echo(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/) {}
-  virtual void after_echo(AfterParams /*afterParams*/, const ::std::string& /*result*/) {}
-  virtual void before_increment(BeforeParams /*beforeParams*/, ::std::int64_t /*p_num*/) {}
-  virtual void after_increment(AfterParams /*afterParams*/, ::std::int64_t /*result*/) {}
-  virtual void before_sum(BeforeParams /*beforeParams*/, const ::std::vector<::std::int64_t>& /*p_nums*/) {}
-  virtual void after_sum(AfterParams /*afterParams*/, ::std::int64_t /*result*/) {}
-  virtual void before_withStruct(BeforeParams /*beforeParams*/, const ::cpp2::Request& /*p_request*/) {}
-  virtual void after_withStruct(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
-  virtual void before_multiParam(BeforeParams /*beforeParams*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) {}
-  virtual void after_multiParam(AfterParams /*afterParams*/, const ::cpp2::Response& /*result*/) {}
-  virtual void before_echoInteraction(BeforeParams /*beforeParams*/) {}
-  virtual void after_echoInteraction(AfterParams /*afterParams*/, const EchoInteractionIf& /*interaction*/) {}
-  // END inherited methods from ::cpp2::UndecoratedService_ExtendsDecoratedService
-  virtual void before_extension(BeforeParams /*beforeParams*/) {}
-  virtual void after_extension(AfterParams /*afterParams*/) {}
-  // END inherited methods from ::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService
-  virtual void before_secondExtension(BeforeParams /*beforeParams*/, const ::std::string& /*p_input*/) {}
-  virtual void after_secondExtension(AfterParams /*afterParams*/, const ::std::string& /*result*/) {}
-};
-
 template <>
 class ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService> : virtual public ::cpp2::UndecoratedService_ExtendsDecoratedServiceSvIf {
   static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
@@ -1620,29 +1640,62 @@ class ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsD
  public:
   std::vector<std::reference_wrapper<ServiceMethodDecoratorBase>> fbthrift_getDecorators() override;
   void fbthrift_execute_decorators_before_createLegacyPerforms(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override;
-  void fbthrift_execute_decorators_after_createLegacyPerforms(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const LegacyPerformsIf& /*interaction*/) override;
+  void fbthrift_execute_decorators_after_createLegacyPerforms(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override;
   void fbthrift_execute_decorators_before_noop(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override;
   void fbthrift_execute_decorators_after_noop(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override;
-  void fbthrift_execute_decorators_before_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_text*/) override;
-  void fbthrift_execute_decorators_after_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) override;
-  void fbthrift_execute_decorators_before_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*p_num*/) override;
-  void fbthrift_execute_decorators_after_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/) override;
-  void fbthrift_execute_decorators_before_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::vector<::std::int64_t>& /*p_nums*/) override;
-  void fbthrift_execute_decorators_after_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, ::std::int64_t /*result*/) override;
-  void fbthrift_execute_decorators_before_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Request& /*p_request*/) override;
-  void fbthrift_execute_decorators_after_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/) override;
-  void fbthrift_execute_decorators_before_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_text*/, ::std::int64_t /*p_num*/, const ::cpp2::Request& /*p_request*/) override;
-  void fbthrift_execute_decorators_after_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::Response& /*result*/) override;
+  void fbthrift_execute_decorators_before_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/) override;
+  void fbthrift_execute_decorators_after_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) override;
+  void fbthrift_execute_decorators_before_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/) override;
+  void fbthrift_execute_decorators_after_increment(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) override;
+  void fbthrift_execute_decorators_before_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::int64_t>>::type /*p_nums*/) override;
+  void fbthrift_execute_decorators_after_sum(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) override;
+  void fbthrift_execute_decorators_before_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/) override;
+  void fbthrift_execute_decorators_after_withStruct(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) override;
+  void fbthrift_execute_decorators_before_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/) override;
+  void fbthrift_execute_decorators_after_multiParam(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) override;
   void fbthrift_execute_decorators_before_echoInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override;
-  void fbthrift_execute_decorators_after_echoInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const EchoInteractionIf& /*interaction*/) override;
+  void fbthrift_execute_decorators_after_echoInteraction(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override;
   void fbthrift_execute_decorators_before_extension(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override;
   void fbthrift_execute_decorators_after_extension(apache::thrift::Cpp2RequestContext& /*requestCtx*/) override;
 
-  virtual void fbthrift_execute_decorators_before_secondExtension(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*p_input*/);
-  virtual void fbthrift_execute_decorators_after_secondExtension(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/);
+  virtual void fbthrift_execute_decorators_before_secondExtension(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_input*/);
+  virtual void fbthrift_execute_decorators_after_secondExtension(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/);
+  static void fbthrift_invoke_decorator_after_secondExtension(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::std::string>::type result) {
+    static_cast<ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>*>(iface)->fbthrift_execute_decorators_after_secondExtension(*ctx, result);
+  }
  private:
   ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService> fbthrift_methodDecorators_;
   friend void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>&, ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>);
+};
+
+template <>
+class ServiceMethodDecorator<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService> : public ServiceMethodDecoratorBase {
+ public:
+  virtual ~ServiceMethodDecorator() = default;
+  // BEGIN inherited methods from ::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService
+  // BEGIN inherited methods from ::cpp2::UndecoratedService_ExtendsDecoratedService
+  virtual void before_createLegacyPerforms(BeforeParams /*beforeParams*/) {}
+  virtual void after_createLegacyPerforms(AfterParams /*afterParams*/) {}
+  virtual void before_noop(BeforeParams /*beforeParams*/) {}
+  virtual void after_noop(AfterParams /*afterParams*/) {}
+  virtual void before_echo(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/) {}
+  virtual void after_echo(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) {}
+  virtual void before_increment(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/) {}
+  virtual void after_increment(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) {}
+  virtual void before_sum(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::std::vector<::std::int64_t>>::type /*p_nums*/) {}
+  virtual void after_sum(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type /*result*/) {}
+  virtual void before_withStruct(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/) {}
+  virtual void after_withStruct(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) {}
+  virtual void before_multiParam(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_text*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_num*/, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type /*p_request*/) {}
+  virtual void after_multiParam(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type /*result*/) {}
+  virtual void before_echoInteraction(BeforeParams /*beforeParams*/) {}
+  virtual void after_echoInteraction(AfterParams /*afterParams*/) {}
+  // END inherited methods from ::cpp2::UndecoratedService_ExtendsDecoratedService
+  virtual void before_extension(BeforeParams /*beforeParams*/) {}
+  virtual void after_extension(AfterParams /*afterParams*/) {}
+  // END inherited methods from ::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService
+  virtual void before_secondExtension(BeforeParams /*beforeParams*/, apache::thrift::detail::DecoratorArgType<::std::string>::type /*p_input*/) {}
+  virtual void after_secondExtension(AfterParams /*afterParams*/, apache::thrift::detail::DecoratorReturnType<::std::string>::type /*result*/) {}
 };
 
 void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>& handler, ServiceMethodDecoratorList<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService> decorators);

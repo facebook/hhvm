@@ -104,7 +104,10 @@ void BoxServiceAsyncProcessor::executeRequest_getABoxSession(
       /* .definingServiceName =*/ "BoxService",
       /* .methodName =*/ "getABoxSession",
       /* .qualifiedMethodName =*/ "BoxService.getABoxSession"};
-  auto callback =
+  apache::thrift::HandlerCallback<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf, std::unique_ptr<::cpp2::ShouldBeBoxed>>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::BoxService>::fbthrift_invoke_decorator_after_getABoxSession};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::BoxService>::BoxedInteractionIf, std::unique_ptr<::cpp2::ShouldBeBoxed>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -119,7 +122,8 @@ void BoxServiceAsyncProcessor::executeRequest_getABoxSession(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
-          std::move(tile));
+          std::move(tile),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_getABoxSession(*serverRequest.requestContext(), *args.uarg_req);
 
@@ -279,7 +283,8 @@ void BoxServiceAsyncProcessor::executeRequest_BoxedInteraction_getABox(
       /* .definingServiceName =*/ "BoxService",
       /* .methodName =*/ "BoxedInteraction.getABox",
       /* .qualifiedMethodName =*/ "BoxService.BoxedInteraction.getABox"};
-  auto callback =
+  auto decoratorCallback = apache::thrift::HandlerCallback<std::unique_ptr<::cpp2::ShouldBeBoxed>>::DecoratorAfterCallback::noop();
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::ShouldBeBoxed>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -294,7 +299,8 @@ void BoxServiceAsyncProcessor::executeRequest_BoxedInteraction_getABox(
           requestPileNotification,
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()),
-          std::move(tile));
+          std::move(tile),
+          std::move(decoratorCallback));
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;

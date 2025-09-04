@@ -73,10 +73,16 @@ class ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService> : public ap
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_echo_2{apache::thrift::detail::si::InvocationType::AsyncTm};
  public:
 
-  virtual void fbthrift_execute_decorators_before_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::EchoRequest& /*p_request*/) {}
-  virtual void fbthrift_execute_decorators_after_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::EchoResponse& /*result*/) {}
-  virtual void fbthrift_execute_decorators_before_echo_2(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::EchoRequest& /*p_request*/) {}
-  virtual void fbthrift_execute_decorators_after_echo_2(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::cpp2::EchoResponse& /*result*/) {}
+  virtual void fbthrift_execute_decorators_before_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::cpp2::EchoRequest>::type /*p_request*/) {}
+  virtual void fbthrift_execute_decorators_after_echo(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::EchoResponse>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_echo(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::cpp2::EchoResponse>::type result) {
+    static_cast<ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>*>(iface)->fbthrift_execute_decorators_after_echo(*ctx, result);
+  }
+  virtual void fbthrift_execute_decorators_before_echo_2(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::cpp2::EchoRequest>::type /*p_request*/) {}
+  virtual void fbthrift_execute_decorators_after_echo_2(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::cpp2::EchoResponse>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_echo_2(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::cpp2::EchoResponse>::type result) {
+    static_cast<ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>*>(iface)->fbthrift_execute_decorators_after_echo_2(*ctx, result);
+  }
 };
 
 namespace detail {

@@ -182,7 +182,10 @@ void SimpleServiceAsyncProcessor::executeRequest_get_five(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "get_five",
       /* .qualifiedMethodName =*/ "SimpleService.get_five"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_get_five};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -196,7 +199,9 @@ void SimpleServiceAsyncProcessor::executeRequest_get_five(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_get_five(*serverRequest.requestContext());
 
@@ -347,7 +352,10 @@ void SimpleServiceAsyncProcessor::executeRequest_add_five(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "add_five",
       /* .qualifiedMethodName =*/ "SimpleService.add_five"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_add_five};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -361,7 +369,9 @@ void SimpleServiceAsyncProcessor::executeRequest_add_five(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_add_five(*serverRequest.requestContext(), args.uarg_num);
 
@@ -509,7 +519,10 @@ void SimpleServiceAsyncProcessor::executeRequest_do_nothing(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "do_nothing",
       /* .qualifiedMethodName =*/ "SimpleService.do_nothing"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_do_nothing};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -523,7 +536,9 @@ void SimpleServiceAsyncProcessor::executeRequest_do_nothing(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_do_nothing(*serverRequest.requestContext());
 
@@ -674,7 +689,10 @@ void SimpleServiceAsyncProcessor::executeRequest_concat(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "concat",
       /* .qualifiedMethodName =*/ "SimpleService.concat"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_concat};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -688,7 +706,9 @@ void SimpleServiceAsyncProcessor::executeRequest_concat(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_concat(*serverRequest.requestContext(), *args.uarg_first, *args.uarg_second);
 
@@ -839,7 +859,10 @@ void SimpleServiceAsyncProcessor::executeRequest_get_value(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "get_value",
       /* .qualifiedMethodName =*/ "SimpleService.get_value"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_get_value};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -853,7 +876,9 @@ void SimpleServiceAsyncProcessor::executeRequest_get_value(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_get_value(*serverRequest.requestContext(), *args.uarg_simple_struct);
 
@@ -1004,7 +1029,10 @@ void SimpleServiceAsyncProcessor::executeRequest_negate(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "negate",
       /* .qualifiedMethodName =*/ "SimpleService.negate"};
-  auto callback =
+  apache::thrift::HandlerCallback<bool>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_negate};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<bool>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1018,7 +1046,9 @@ void SimpleServiceAsyncProcessor::executeRequest_negate(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_negate(*serverRequest.requestContext(), args.uarg_input);
 
@@ -1169,7 +1199,10 @@ void SimpleServiceAsyncProcessor::executeRequest_tiny(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "tiny",
       /* .qualifiedMethodName =*/ "SimpleService.tiny"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int8_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_tiny};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int8_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1183,7 +1216,9 @@ void SimpleServiceAsyncProcessor::executeRequest_tiny(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_tiny(*serverRequest.requestContext(), args.uarg_input);
 
@@ -1334,7 +1369,10 @@ void SimpleServiceAsyncProcessor::executeRequest_small(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "small",
       /* .qualifiedMethodName =*/ "SimpleService.small"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int16_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_small};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int16_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1348,7 +1386,9 @@ void SimpleServiceAsyncProcessor::executeRequest_small(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_small(*serverRequest.requestContext(), args.uarg_input);
 
@@ -1499,7 +1539,10 @@ void SimpleServiceAsyncProcessor::executeRequest_big(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "big",
       /* .qualifiedMethodName =*/ "SimpleService.big"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int64_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_big};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int64_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1513,7 +1556,9 @@ void SimpleServiceAsyncProcessor::executeRequest_big(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_big(*serverRequest.requestContext(), args.uarg_input);
 
@@ -1664,7 +1709,10 @@ void SimpleServiceAsyncProcessor::executeRequest_two(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "two",
       /* .qualifiedMethodName =*/ "SimpleService.two"};
-  auto callback =
+  apache::thrift::HandlerCallback<double>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_two};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<double>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1678,7 +1726,9 @@ void SimpleServiceAsyncProcessor::executeRequest_two(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_two(*serverRequest.requestContext(), args.uarg_input);
 
@@ -1826,7 +1876,10 @@ void SimpleServiceAsyncProcessor::executeRequest_expected_exception(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "expected_exception",
       /* .qualifiedMethodName =*/ "SimpleService.expected_exception"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_expected_exception};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1840,7 +1893,9 @@ void SimpleServiceAsyncProcessor::executeRequest_expected_exception(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_expected_exception(*serverRequest.requestContext());
 
@@ -2003,7 +2058,10 @@ void SimpleServiceAsyncProcessor::executeRequest_unexpected_exception(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "unexpected_exception",
       /* .qualifiedMethodName =*/ "SimpleService.unexpected_exception"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_unexpected_exception};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2017,7 +2075,9 @@ void SimpleServiceAsyncProcessor::executeRequest_unexpected_exception(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_unexpected_exception(*serverRequest.requestContext());
 
@@ -2168,7 +2228,10 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i16_list(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "sum_i16_list",
       /* .qualifiedMethodName =*/ "SimpleService.sum_i16_list"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_sum_i16_list};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2182,7 +2245,9 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i16_list(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_sum_i16_list(*serverRequest.requestContext(), *args.uarg_numbers);
 
@@ -2333,7 +2398,10 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i32_list(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "sum_i32_list",
       /* .qualifiedMethodName =*/ "SimpleService.sum_i32_list"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_sum_i32_list};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2347,7 +2415,9 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i32_list(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_sum_i32_list(*serverRequest.requestContext(), *args.uarg_numbers);
 
@@ -2498,7 +2568,10 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i64_list(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "sum_i64_list",
       /* .qualifiedMethodName =*/ "SimpleService.sum_i64_list"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_sum_i64_list};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2512,7 +2585,9 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i64_list(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_sum_i64_list(*serverRequest.requestContext(), *args.uarg_numbers);
 
@@ -2663,7 +2738,10 @@ void SimpleServiceAsyncProcessor::executeRequest_concat_many(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "concat_many",
       /* .qualifiedMethodName =*/ "SimpleService.concat_many"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_concat_many};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2677,7 +2755,9 @@ void SimpleServiceAsyncProcessor::executeRequest_concat_many(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_concat_many(*serverRequest.requestContext(), *args.uarg_words);
 
@@ -2828,7 +2908,10 @@ void SimpleServiceAsyncProcessor::executeRequest_count_structs(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "count_structs",
       /* .qualifiedMethodName =*/ "SimpleService.count_structs"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_count_structs};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2842,7 +2925,9 @@ void SimpleServiceAsyncProcessor::executeRequest_count_structs(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_count_structs(*serverRequest.requestContext(), *args.uarg_items);
 
@@ -2993,7 +3078,10 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_set(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "sum_set",
       /* .qualifiedMethodName =*/ "SimpleService.sum_set"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_sum_set};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3007,7 +3095,9 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_set(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_sum_set(*serverRequest.requestContext(), *args.uarg_numbers);
 
@@ -3161,7 +3251,10 @@ void SimpleServiceAsyncProcessor::executeRequest_contains_word(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "contains_word",
       /* .qualifiedMethodName =*/ "SimpleService.contains_word"};
-  auto callback =
+  apache::thrift::HandlerCallback<bool>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_contains_word};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<bool>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3175,7 +3268,9 @@ void SimpleServiceAsyncProcessor::executeRequest_contains_word(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_contains_word(*serverRequest.requestContext(), *args.uarg_words, *args.uarg_word);
 
@@ -3329,7 +3424,10 @@ void SimpleServiceAsyncProcessor::executeRequest_get_map_value(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "get_map_value",
       /* .qualifiedMethodName =*/ "SimpleService.get_map_value"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_get_map_value};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3343,7 +3441,9 @@ void SimpleServiceAsyncProcessor::executeRequest_get_map_value(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_get_map_value(*serverRequest.requestContext(), *args.uarg_words, *args.uarg_key);
 
@@ -3494,7 +3594,10 @@ void SimpleServiceAsyncProcessor::executeRequest_map_length(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "map_length",
       /* .qualifiedMethodName =*/ "SimpleService.map_length"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int16_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_map_length};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int16_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3508,7 +3611,9 @@ void SimpleServiceAsyncProcessor::executeRequest_map_length(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_map_length(*serverRequest.requestContext(), *args.uarg_items);
 
@@ -3659,7 +3764,10 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_map_values(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "sum_map_values",
       /* .qualifiedMethodName =*/ "SimpleService.sum_map_values"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int16_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_sum_map_values};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int16_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3673,7 +3781,9 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_map_values(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_sum_map_values(*serverRequest.requestContext(), *args.uarg_items);
 
@@ -3824,7 +3934,10 @@ void SimpleServiceAsyncProcessor::executeRequest_complex_sum_i32(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "complex_sum_i32",
       /* .qualifiedMethodName =*/ "SimpleService.complex_sum_i32"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_complex_sum_i32};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3838,7 +3951,9 @@ void SimpleServiceAsyncProcessor::executeRequest_complex_sum_i32(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_complex_sum_i32(*serverRequest.requestContext(), *args.uarg_counter);
 
@@ -3989,7 +4104,10 @@ void SimpleServiceAsyncProcessor::executeRequest_repeat_name(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "repeat_name",
       /* .qualifiedMethodName =*/ "SimpleService.repeat_name"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_repeat_name};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -4003,7 +4121,9 @@ void SimpleServiceAsyncProcessor::executeRequest_repeat_name(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_repeat_name(*serverRequest.requestContext(), *args.uarg_counter);
 
@@ -4151,7 +4271,10 @@ void SimpleServiceAsyncProcessor::executeRequest_get_struct(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "get_struct",
       /* .qualifiedMethodName =*/ "SimpleService.get_struct"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::py3::simple::SimpleStruct>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_get_struct};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::py3::simple::SimpleStruct>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -4165,7 +4288,9 @@ void SimpleServiceAsyncProcessor::executeRequest_get_struct(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_get_struct(*serverRequest.requestContext());
 
@@ -4316,7 +4441,10 @@ void SimpleServiceAsyncProcessor::executeRequest_fib(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "fib",
       /* .qualifiedMethodName =*/ "SimpleService.fib"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::std::int32_t>>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_fib};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::std::int32_t>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -4330,7 +4458,9 @@ void SimpleServiceAsyncProcessor::executeRequest_fib(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_fib(*serverRequest.requestContext(), args.uarg_n);
 
@@ -4481,7 +4611,10 @@ void SimpleServiceAsyncProcessor::executeRequest_unique_words(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "unique_words",
       /* .qualifiedMethodName =*/ "SimpleService.unique_words"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::std::string>>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_unique_words};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::set<::std::string>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -4495,7 +4628,9 @@ void SimpleServiceAsyncProcessor::executeRequest_unique_words(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_unique_words(*serverRequest.requestContext(), *args.uarg_words);
 
@@ -4646,7 +4781,10 @@ void SimpleServiceAsyncProcessor::executeRequest_words_count(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "words_count",
       /* .qualifiedMethodName =*/ "SimpleService.words_count"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::string, ::std::int16_t>>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_words_count};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::std::string, ::std::int16_t>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -4660,7 +4798,9 @@ void SimpleServiceAsyncProcessor::executeRequest_words_count(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_words_count(*serverRequest.requestContext(), *args.uarg_words);
 
@@ -4811,7 +4951,10 @@ void SimpleServiceAsyncProcessor::executeRequest_set_enum(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "set_enum",
       /* .qualifiedMethodName =*/ "SimpleService.set_enum"};
-  auto callback =
+  apache::thrift::HandlerCallback<::py3::simple::AnEnum>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_set_enum};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::py3::simple::AnEnum>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -4825,7 +4968,9 @@ void SimpleServiceAsyncProcessor::executeRequest_set_enum(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_set_enum(*serverRequest.requestContext(), args.uarg_in_enum);
 
@@ -4979,7 +5124,10 @@ void SimpleServiceAsyncProcessor::executeRequest_list_of_lists(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "list_of_lists",
       /* .qualifiedMethodName =*/ "SimpleService.list_of_lists"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::std::vector<::std::int32_t>>>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_list_of_lists};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::std::vector<::std::int32_t>>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -4993,7 +5141,9 @@ void SimpleServiceAsyncProcessor::executeRequest_list_of_lists(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_list_of_lists(*serverRequest.requestContext(), args.uarg_num_lists, args.uarg_num_items);
 
@@ -5144,7 +5294,10 @@ void SimpleServiceAsyncProcessor::executeRequest_word_character_frequency(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "word_character_frequency",
       /* .qualifiedMethodName =*/ "SimpleService.word_character_frequency"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_word_character_frequency};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -5158,7 +5311,9 @@ void SimpleServiceAsyncProcessor::executeRequest_word_character_frequency(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_word_character_frequency(*serverRequest.requestContext(), *args.uarg_sentence);
 
@@ -5309,7 +5464,10 @@ void SimpleServiceAsyncProcessor::executeRequest_list_of_sets(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "list_of_sets",
       /* .qualifiedMethodName =*/ "SimpleService.list_of_sets"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::std::set<::std::string>>>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_list_of_sets};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::std::set<::std::string>>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -5323,7 +5481,9 @@ void SimpleServiceAsyncProcessor::executeRequest_list_of_sets(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_list_of_sets(*serverRequest.requestContext(), *args.uarg_some_words);
 
@@ -5474,7 +5634,10 @@ void SimpleServiceAsyncProcessor::executeRequest_nested_map_argument(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "nested_map_argument",
       /* .qualifiedMethodName =*/ "SimpleService.nested_map_argument"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_nested_map_argument};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -5488,7 +5651,9 @@ void SimpleServiceAsyncProcessor::executeRequest_nested_map_argument(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_nested_map_argument(*serverRequest.requestContext(), *args.uarg_struct_map);
 
@@ -5639,7 +5804,10 @@ void SimpleServiceAsyncProcessor::executeRequest_make_sentence(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "make_sentence",
       /* .qualifiedMethodName =*/ "SimpleService.make_sentence"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_make_sentence};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -5653,7 +5821,9 @@ void SimpleServiceAsyncProcessor::executeRequest_make_sentence(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_make_sentence(*serverRequest.requestContext(), *args.uarg_word_chars);
 
@@ -5804,7 +5974,10 @@ void SimpleServiceAsyncProcessor::executeRequest_get_union(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "get_union",
       /* .qualifiedMethodName =*/ "SimpleService.get_union"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::std::int32_t>>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_get_union};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::set<::std::int32_t>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -5818,7 +5991,9 @@ void SimpleServiceAsyncProcessor::executeRequest_get_union(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_get_union(*serverRequest.requestContext(), *args.uarg_sets);
 
@@ -5969,7 +6144,10 @@ void SimpleServiceAsyncProcessor::executeRequest_get_keys(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "get_keys",
       /* .qualifiedMethodName =*/ "SimpleService.get_keys"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::std::string>>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_get_keys};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::set<::std::string>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -5983,7 +6161,9 @@ void SimpleServiceAsyncProcessor::executeRequest_get_keys(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_get_keys(*serverRequest.requestContext(), *args.uarg_string_map);
 
@@ -6134,7 +6314,10 @@ void SimpleServiceAsyncProcessor::executeRequest_lookup_double(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "lookup_double",
       /* .qualifiedMethodName =*/ "SimpleService.lookup_double"};
-  auto callback =
+  apache::thrift::HandlerCallback<double>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_lookup_double};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<double>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -6148,7 +6331,9 @@ void SimpleServiceAsyncProcessor::executeRequest_lookup_double(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_lookup_double(*serverRequest.requestContext(), args.uarg_key);
 
@@ -6299,7 +6484,10 @@ void SimpleServiceAsyncProcessor::executeRequest_retrieve_binary(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "retrieve_binary",
       /* .qualifiedMethodName =*/ "SimpleService.retrieve_binary"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_retrieve_binary};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -6313,7 +6501,9 @@ void SimpleServiceAsyncProcessor::executeRequest_retrieve_binary(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_retrieve_binary(*serverRequest.requestContext(), *args.uarg_something);
 
@@ -6464,7 +6654,10 @@ void SimpleServiceAsyncProcessor::executeRequest_contain_binary(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "contain_binary",
       /* .qualifiedMethodName =*/ "SimpleService.contain_binary"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::std::string>>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_contain_binary};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::set<::std::string>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -6478,7 +6671,9 @@ void SimpleServiceAsyncProcessor::executeRequest_contain_binary(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_contain_binary(*serverRequest.requestContext(), *args.uarg_binaries);
 
@@ -6629,7 +6824,10 @@ void SimpleServiceAsyncProcessor::executeRequest_contain_enum(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "contain_enum",
       /* .qualifiedMethodName =*/ "SimpleService.contain_enum"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::py3::simple::AnEnum>>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_contain_enum};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::vector<::py3::simple::AnEnum>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -6643,7 +6841,9 @@ void SimpleServiceAsyncProcessor::executeRequest_contain_enum(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_contain_enum(*serverRequest.requestContext(), *args.uarg_the_enum);
 
@@ -6794,7 +6994,10 @@ void SimpleServiceAsyncProcessor::executeRequest_get_binary_union_struct(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "get_binary_union_struct",
       /* .qualifiedMethodName =*/ "SimpleService.get_binary_union_struct"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::py3::simple::BinaryUnionStruct>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_get_binary_union_struct};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::py3::simple::BinaryUnionStruct>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -6808,7 +7011,9 @@ void SimpleServiceAsyncProcessor::executeRequest_get_binary_union_struct(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_get_binary_union_struct(*serverRequest.requestContext(), *args.uarg_u);
 
@@ -6956,7 +7161,10 @@ void SimpleServiceAsyncProcessor::executeRequest_get_struct_hidden(
       /* .definingServiceName =*/ "SimpleService",
       /* .methodName =*/ "get_struct_hidden",
       /* .qualifiedMethodName =*/ "SimpleService.get_struct_hidden"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::py3::simple::SimpleStruct>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fbthrift_invoke_decorator_after_get_struct_hidden};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::py3::simple::SimpleStruct>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -6970,7 +7178,9 @@ void SimpleServiceAsyncProcessor::executeRequest_get_struct_hidden(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_get_struct_hidden(*serverRequest.requestContext());
 

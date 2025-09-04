@@ -105,7 +105,10 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey0(
       /* .definingServiceName =*/ "DbMixedStackArguments",
       /* .methodName =*/ "getDataByKey0",
       /* .qualifiedMethodName =*/ "DbMixedStackArguments.getDataByKey0"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>::fbthrift_invoke_decorator_after_getDataByKey0};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -119,7 +122,9 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey0(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_getDataByKey0(*serverRequest.requestContext(), *args.uarg_key);
 
@@ -270,7 +275,10 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey1(
       /* .definingServiceName =*/ "DbMixedStackArguments",
       /* .methodName =*/ "getDataByKey1",
       /* .qualifiedMethodName =*/ "DbMixedStackArguments.getDataByKey1"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>::fbthrift_invoke_decorator_after_getDataByKey1};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -284,7 +292,9 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey1(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_getDataByKey1(*serverRequest.requestContext(), *args.uarg_key);
 

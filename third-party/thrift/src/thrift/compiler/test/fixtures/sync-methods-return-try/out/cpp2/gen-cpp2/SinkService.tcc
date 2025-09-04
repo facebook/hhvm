@@ -140,7 +140,10 @@ void SinkServiceAsyncProcessor::executeRequest_method(
       /* .definingServiceName =*/ "SinkService",
       /* .methodName =*/ "method",
       /* .qualifiedMethodName =*/ "SinkService.method"};
-  auto callback =
+  apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::SinkService>::fbthrift_invoke_decorator_after_method};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -154,7 +157,9 @@ void SinkServiceAsyncProcessor::executeRequest_method(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_method(*serverRequest.requestContext());
 
@@ -313,7 +318,10 @@ void SinkServiceAsyncProcessor::executeRequest_methodAndReponse(
       /* .definingServiceName =*/ "SinkService",
       /* .methodName =*/ "methodAndReponse",
       /* .qualifiedMethodName =*/ "SinkService.methodAndReponse"};
-  auto callback =
+  apache::thrift::HandlerCallback<::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::SinkService>::fbthrift_invoke_decorator_after_methodAndReponse};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -327,7 +335,9 @@ void SinkServiceAsyncProcessor::executeRequest_methodAndReponse(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_methodAndReponse(*serverRequest.requestContext());
 
@@ -488,7 +498,10 @@ void SinkServiceAsyncProcessor::executeRequest_methodThrow(
       /* .definingServiceName =*/ "SinkService",
       /* .methodName =*/ "methodThrow",
       /* .qualifiedMethodName =*/ "SinkService.methodThrow"};
-  auto callback =
+  apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::SinkService>::fbthrift_invoke_decorator_after_methodThrow};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -502,7 +515,9 @@ void SinkServiceAsyncProcessor::executeRequest_methodThrow(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_methodThrow(*serverRequest.requestContext());
 
@@ -679,7 +694,10 @@ void SinkServiceAsyncProcessor::executeRequest_methodSinkThrow(
       /* .definingServiceName =*/ "SinkService",
       /* .methodName =*/ "methodSinkThrow",
       /* .qualifiedMethodName =*/ "SinkService.methodSinkThrow"};
-  auto callback =
+  apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::SinkService>::fbthrift_invoke_decorator_after_methodSinkThrow};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -693,7 +711,9 @@ void SinkServiceAsyncProcessor::executeRequest_methodSinkThrow(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_methodSinkThrow(*serverRequest.requestContext());
 
@@ -852,7 +872,10 @@ void SinkServiceAsyncProcessor::executeRequest_methodFinalThrow(
       /* .definingServiceName =*/ "SinkService",
       /* .methodName =*/ "methodFinalThrow",
       /* .qualifiedMethodName =*/ "SinkService.methodFinalThrow"};
-  auto callback =
+  apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::SinkService>::fbthrift_invoke_decorator_after_methodFinalThrow};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -866,7 +889,9 @@ void SinkServiceAsyncProcessor::executeRequest_methodFinalThrow(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_methodFinalThrow(*serverRequest.requestContext());
 
@@ -1025,7 +1050,10 @@ void SinkServiceAsyncProcessor::executeRequest_methodBothThrow(
       /* .definingServiceName =*/ "SinkService",
       /* .methodName =*/ "methodBothThrow",
       /* .qualifiedMethodName =*/ "SinkService.methodBothThrow"};
-  auto callback =
+  apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::SinkService>::fbthrift_invoke_decorator_after_methodBothThrow};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1039,7 +1067,9 @@ void SinkServiceAsyncProcessor::executeRequest_methodBothThrow(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_methodBothThrow(*serverRequest.requestContext());
 
@@ -1200,7 +1230,10 @@ void SinkServiceAsyncProcessor::executeRequest_methodFast(
       /* .definingServiceName =*/ "SinkService",
       /* .methodName =*/ "methodFast",
       /* .qualifiedMethodName =*/ "SinkService.methodFast"};
-  auto callback =
+  apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::SinkService>::fbthrift_invoke_decorator_after_methodFast};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1214,7 +1247,9 @@ void SinkServiceAsyncProcessor::executeRequest_methodFast(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_methodFast(*serverRequest.requestContext());
 

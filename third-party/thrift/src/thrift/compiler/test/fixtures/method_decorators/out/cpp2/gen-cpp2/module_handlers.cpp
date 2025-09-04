@@ -38,7 +38,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_decorators_after_createLegacyPerforms(
-  apache::thrift::Cpp2RequestContext& requestCtx, const LegacyPerformsIf& interaction) {
+  apache::thrift::Cpp2RequestContext& requestCtx) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_createLegacyPerforms(std::move(afterParams));
@@ -62,7 +62,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_decorators_before_echo(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::std::string& p_text) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::std::string>::type p_text) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_echo(std::move(beforeParams), p_text);
@@ -70,7 +70,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_decorators_after_echo(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::std::string& result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::std::string>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_echo(std::move(afterParams), result);
@@ -78,7 +78,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_decorators_before_increment(
-  apache::thrift::Cpp2RequestContext& requestCtx, ::std::int64_t p_num) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type p_num) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_increment(std::move(beforeParams), p_num);
@@ -86,7 +86,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_decorators_after_increment(
-  apache::thrift::Cpp2RequestContext& requestCtx, ::std::int64_t result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_increment(std::move(afterParams), result);
@@ -94,7 +94,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_decorators_before_sum(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::std::vector<::std::int64_t>& p_nums) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::std::vector<::std::int64_t>>::type p_nums) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_sum(std::move(beforeParams), p_nums);
@@ -102,7 +102,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_decorators_after_sum(
-  apache::thrift::Cpp2RequestContext& requestCtx, ::std::int64_t result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_sum(std::move(afterParams), result);
@@ -110,7 +110,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_decorators_before_withStruct(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::cpp2::Request& p_request) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type p_request) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_withStruct(std::move(beforeParams), p_request);
@@ -118,7 +118,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_decorators_after_withStruct(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::cpp2::Response& result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_withStruct(std::move(afterParams), result);
@@ -126,7 +126,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_decorators_before_multiParam(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::std::string& p_text, ::std::int64_t p_num, const ::cpp2::Request& p_request) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::std::string>::type p_text, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type p_num, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type p_request) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_multiParam(std::move(beforeParams), p_text, p_num, p_request);
@@ -134,7 +134,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_decorators_after_multiParam(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::cpp2::Response& result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_multiParam(std::move(afterParams), result);
@@ -150,7 +150,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService>::fbthrift_execute_decorators_after_echoInteraction(
-  apache::thrift::Cpp2RequestContext& requestCtx, const EchoInteractionIf& interaction) {
+  apache::thrift::Cpp2RequestContext& requestCtx) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_echoInteraction(std::move(afterParams));
@@ -2924,7 +2924,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>::fbthrift_execute_decorators_before_echo(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::std::string& p_text) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::std::string>::type p_text) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_echo(std::move(beforeParams), p_text);
@@ -2932,7 +2932,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>::fbthrift_execute_decorators_after_echo(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::std::string& result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::std::string>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_echo(std::move(afterParams), result);
@@ -2940,7 +2940,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>::fbthrift_execute_decorators_before_increment(
-  apache::thrift::Cpp2RequestContext& requestCtx, ::std::int64_t p_num) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type p_num) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_increment(std::move(beforeParams), p_num);
@@ -2948,7 +2948,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>::fbthrift_execute_decorators_after_increment(
-  apache::thrift::Cpp2RequestContext& requestCtx, ::std::int64_t result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_increment(std::move(afterParams), result);
@@ -2956,7 +2956,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>::fbthrift_execute_decorators_before_sum(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::std::vector<::std::int64_t>& p_nums) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::std::vector<::std::int64_t>>::type p_nums) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_sum(std::move(beforeParams), p_nums);
@@ -2964,7 +2964,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>::fbthrift_execute_decorators_after_sum(
-  apache::thrift::Cpp2RequestContext& requestCtx, ::std::int64_t result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_sum(std::move(afterParams), result);
@@ -2972,7 +2972,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>::fbthrift_execute_decorators_before_withStruct(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::cpp2::Request& p_request) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type p_request) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_withStruct(std::move(beforeParams), p_request);
@@ -2980,7 +2980,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>::fbthrift_execute_decorators_after_withStruct(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::cpp2::Response& result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_withStruct(std::move(afterParams), result);
@@ -2988,7 +2988,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>::fbthrift_execute_decorators_before_multiParam(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::std::string& p_text, ::std::int64_t p_num, const ::cpp2::Request& p_request) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::std::string>::type p_text, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type p_num, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type p_request) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_multiParam(std::move(beforeParams), p_text, p_num, p_request);
@@ -2996,7 +2996,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>::fbthrift_execute_decorators_after_multiParam(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::cpp2::Response& result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_multiParam(std::move(afterParams), result);
@@ -3004,7 +3004,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>::fbthrift_execute_decorators_before_adaptedRequest(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::cpp2::AdaptedRequest& p_request) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::cpp2::AdaptedRequest>::type p_request) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_adaptedRequest(std::move(beforeParams), p_request);
@@ -3012,7 +3012,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>::fbthrift_execute_decorators_after_adaptedRequest(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::cpp2::Response& result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_adaptedRequest(std::move(afterParams), result);
@@ -3293,7 +3293,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedSer
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_after_createLegacyPerforms(
-  apache::thrift::Cpp2RequestContext& requestCtx, const LegacyPerformsIf& interaction) {
+  apache::thrift::Cpp2RequestContext& requestCtx) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_createLegacyPerforms(std::move(afterParams));
@@ -3317,7 +3317,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedSer
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_before_echo(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::std::string& p_text) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::std::string>::type p_text) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_echo(std::move(beforeParams), p_text);
@@ -3325,7 +3325,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedSer
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_after_echo(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::std::string& result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::std::string>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_echo(std::move(afterParams), result);
@@ -3333,7 +3333,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedSer
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_before_increment(
-  apache::thrift::Cpp2RequestContext& requestCtx, ::std::int64_t p_num) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type p_num) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_increment(std::move(beforeParams), p_num);
@@ -3341,7 +3341,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedSer
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_after_increment(
-  apache::thrift::Cpp2RequestContext& requestCtx, ::std::int64_t result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_increment(std::move(afterParams), result);
@@ -3349,7 +3349,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedSer
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_before_sum(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::std::vector<::std::int64_t>& p_nums) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::std::vector<::std::int64_t>>::type p_nums) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_sum(std::move(beforeParams), p_nums);
@@ -3357,7 +3357,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedSer
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_after_sum(
-  apache::thrift::Cpp2RequestContext& requestCtx, ::std::int64_t result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_sum(std::move(afterParams), result);
@@ -3365,7 +3365,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedSer
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_before_withStruct(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::cpp2::Request& p_request) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type p_request) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_withStruct(std::move(beforeParams), p_request);
@@ -3373,7 +3373,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedSer
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_after_withStruct(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::cpp2::Response& result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_withStruct(std::move(afterParams), result);
@@ -3381,7 +3381,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedSer
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_before_multiParam(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::std::string& p_text, ::std::int64_t p_num, const ::cpp2::Request& p_request) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::std::string>::type p_text, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type p_num, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type p_request) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_multiParam(std::move(beforeParams), p_text, p_num, p_request);
@@ -3389,7 +3389,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedSer
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_after_multiParam(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::cpp2::Response& result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_multiParam(std::move(afterParams), result);
@@ -3405,7 +3405,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedSer
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_after_echoInteraction(
-  apache::thrift::Cpp2RequestContext& requestCtx, const EchoInteractionIf& interaction) {
+  apache::thrift::Cpp2RequestContext& requestCtx) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_echoInteraction(std::move(afterParams));
@@ -3919,7 +3919,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_after_createLegacyPerforms(
-  apache::thrift::Cpp2RequestContext& requestCtx, const LegacyPerformsIf& interaction) {
+  apache::thrift::Cpp2RequestContext& requestCtx) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_createLegacyPerforms(std::move(afterParams));
@@ -3943,7 +3943,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_before_echo(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::std::string& p_text) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::std::string>::type p_text) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_echo(std::move(beforeParams), p_text);
@@ -3951,7 +3951,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_after_echo(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::std::string& result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::std::string>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_echo(std::move(afterParams), result);
@@ -3959,7 +3959,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_before_increment(
-  apache::thrift::Cpp2RequestContext& requestCtx, ::std::int64_t p_num) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type p_num) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_increment(std::move(beforeParams), p_num);
@@ -3967,7 +3967,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_after_increment(
-  apache::thrift::Cpp2RequestContext& requestCtx, ::std::int64_t result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_increment(std::move(afterParams), result);
@@ -3975,7 +3975,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_before_sum(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::std::vector<::std::int64_t>& p_nums) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::std::vector<::std::int64_t>>::type p_nums) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_sum(std::move(beforeParams), p_nums);
@@ -3983,7 +3983,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_after_sum(
-  apache::thrift::Cpp2RequestContext& requestCtx, ::std::int64_t result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::std::int64_t>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_sum(std::move(afterParams), result);
@@ -3991,7 +3991,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_before_withStruct(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::cpp2::Request& p_request) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type p_request) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_withStruct(std::move(beforeParams), p_request);
@@ -3999,7 +3999,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_after_withStruct(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::cpp2::Response& result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_withStruct(std::move(afterParams), result);
@@ -4007,7 +4007,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_before_multiParam(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::std::string& p_text, ::std::int64_t p_num, const ::cpp2::Request& p_request) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::std::string>::type p_text, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type p_num, apache::thrift::detail::DecoratorArgType<::cpp2::Request>::type p_request) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_multiParam(std::move(beforeParams), p_text, p_num, p_request);
@@ -4015,7 +4015,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_after_multiParam(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::cpp2::Response& result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::cpp2::Response>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_multiParam(std::move(afterParams), result);
@@ -4031,7 +4031,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_after_echoInteraction(
-  apache::thrift::Cpp2RequestContext& requestCtx, const EchoInteractionIf& interaction) {
+  apache::thrift::Cpp2RequestContext& requestCtx) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_echoInteraction(std::move(afterParams));
@@ -4057,7 +4057,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_before_secondExtension(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::std::string& p_input) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorArgType<::std::string>::type p_input) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::BeforeParams beforeParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->before_secondExtension(std::move(beforeParams), p_input);
@@ -4065,7 +4065,7 @@ void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedS
 }
 
 void apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::fbthrift_execute_decorators_after_secondExtension(
-  apache::thrift::Cpp2RequestContext& requestCtx, const ::std::string& result) {
+  apache::thrift::Cpp2RequestContext& requestCtx, apache::thrift::detail::DecoratorReturnType<::std::string>::type result) {
   std::for_each(fbthrift_methodDecorators_.begin(), fbthrift_methodDecorators_.end(), [&](auto& decorator) {
     ServiceMethodDecoratorBase::AfterParams afterParams{detail::Cpp2RequestContextUnsafeAPI(requestCtx).getDecoratorDataMutable()};
     decorator->after_secondExtension(std::move(afterParams), result);

@@ -77,8 +77,14 @@ class ServiceHandler<::cpp2::BiDiService> : public apache::thrift::ServerInterfa
 
   virtual void fbthrift_execute_decorators_before_simple(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_simple(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_simple(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::BiDiService>*>(iface)->fbthrift_execute_decorators_after_simple(*ctx);
+  }
   virtual void fbthrift_execute_decorators_before_response(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_response(apache::thrift::Cpp2RequestContext& /*requestCtx*/, const ::std::string& /*result*/) {}
+  virtual void fbthrift_execute_decorators_after_response(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType</* TODO (@sazonovk) */>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_response(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType</* TODO (@sazonovk) */>::type result) {
+    static_cast<ServiceHandler<::cpp2::BiDiService>*>(iface)->fbthrift_execute_decorators_after_response(*ctx, result);
+  }
 };
 
 namespace detail {

@@ -154,7 +154,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_get(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "get",
       /* .qualifiedMethodName =*/ "service_with_special_names.get"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_get};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -168,7 +171,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_get(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_get(*serverRequest.requestContext());
 
@@ -316,7 +321,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_getter(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "getter",
       /* .qualifiedMethodName =*/ "service_with_special_names.getter"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_getter};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -330,7 +338,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_getter(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_getter(*serverRequest.requestContext());
 
@@ -478,7 +488,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_lists(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "lists",
       /* .qualifiedMethodName =*/ "service_with_special_names.lists"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_lists};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -492,7 +505,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_lists(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_lists(*serverRequest.requestContext());
 
@@ -640,7 +655,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_maps(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "maps",
       /* .qualifiedMethodName =*/ "service_with_special_names.maps"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_maps};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -654,7 +672,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_maps(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_maps(*serverRequest.requestContext());
 
@@ -802,7 +822,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_name(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "name",
       /* .qualifiedMethodName =*/ "service_with_special_names.name"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_name};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -816,7 +839,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_name(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_name(*serverRequest.requestContext());
 
@@ -964,7 +989,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_name_to_value(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "name_to_value",
       /* .qualifiedMethodName =*/ "service_with_special_names.name_to_value"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_name_to_value};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -978,7 +1006,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_name_to_value(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_name_to_value(*serverRequest.requestContext());
 
@@ -1126,7 +1156,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_names(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "names",
       /* .qualifiedMethodName =*/ "service_with_special_names.names"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_names};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1140,7 +1173,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_names(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_names(*serverRequest.requestContext());
 
@@ -1288,7 +1323,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_prefix_tree(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "prefix_tree",
       /* .qualifiedMethodName =*/ "service_with_special_names.prefix_tree"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_prefix_tree};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1302,7 +1340,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_prefix_tree(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_prefix_tree(*serverRequest.requestContext());
 
@@ -1450,7 +1490,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_sets(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "sets",
       /* .qualifiedMethodName =*/ "service_with_special_names.sets"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_sets};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1464,7 +1507,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_sets(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_sets(*serverRequest.requestContext());
 
@@ -1612,7 +1657,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_setter(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "setter",
       /* .qualifiedMethodName =*/ "service_with_special_names.setter"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_setter};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1626,7 +1674,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_setter(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_setter(*serverRequest.requestContext());
 
@@ -1774,7 +1824,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_str(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "str",
       /* .qualifiedMethodName =*/ "service_with_special_names.str"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_str};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1788,7 +1841,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_str(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_str(*serverRequest.requestContext());
 
@@ -1936,7 +1991,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_strings(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "strings",
       /* .qualifiedMethodName =*/ "service_with_special_names.strings"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_strings};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1950,7 +2008,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_strings(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_strings(*serverRequest.requestContext());
 
@@ -2098,7 +2158,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_type(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "type",
       /* .qualifiedMethodName =*/ "service_with_special_names.type"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_type};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2112,7 +2175,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_type(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_type(*serverRequest.requestContext());
 
@@ -2260,7 +2325,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_value(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "value",
       /* .qualifiedMethodName =*/ "service_with_special_names.value"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_value};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2274,7 +2342,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_value(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_value(*serverRequest.requestContext());
 
@@ -2422,7 +2492,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_value_to_name(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "value_to_name",
       /* .qualifiedMethodName =*/ "service_with_special_names.value_to_name"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_value_to_name};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2436,7 +2509,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_value_to_name(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_value_to_name(*serverRequest.requestContext());
 
@@ -2584,7 +2659,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_values(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "values",
       /* .qualifiedMethodName =*/ "service_with_special_names.values"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_values};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2598,7 +2676,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_values(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_values(*serverRequest.requestContext());
 
@@ -2746,7 +2826,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_id(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "id",
       /* .qualifiedMethodName =*/ "service_with_special_names.id"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_id};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2760,7 +2843,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_id(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_id(*serverRequest.requestContext());
 
@@ -2908,7 +2993,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_ids(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "ids",
       /* .qualifiedMethodName =*/ "service_with_special_names.ids"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_ids};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -2922,7 +3010,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_ids(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_ids(*serverRequest.requestContext());
 
@@ -3070,7 +3160,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptor(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "descriptor",
       /* .qualifiedMethodName =*/ "service_with_special_names.descriptor"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_descriptor};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3084,7 +3177,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptor(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_descriptor(*serverRequest.requestContext());
 
@@ -3232,7 +3327,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptors(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "descriptors",
       /* .qualifiedMethodName =*/ "service_with_special_names.descriptors"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_descriptors};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3246,7 +3344,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptors(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_descriptors(*serverRequest.requestContext());
 
@@ -3394,7 +3494,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_key(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "key",
       /* .qualifiedMethodName =*/ "service_with_special_names.key"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_key};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3408,7 +3511,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_key(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_key(*serverRequest.requestContext());
 
@@ -3556,7 +3661,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_keys(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "keys",
       /* .qualifiedMethodName =*/ "service_with_special_names.keys"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_keys};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3570,7 +3678,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_keys(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_keys(*serverRequest.requestContext());
 
@@ -3718,7 +3828,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotation(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "annotation",
       /* .qualifiedMethodName =*/ "service_with_special_names.annotation"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_annotation};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3732,7 +3845,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotation(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_annotation(*serverRequest.requestContext());
 
@@ -3880,7 +3995,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotations(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "annotations",
       /* .qualifiedMethodName =*/ "service_with_special_names.annotations"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_annotations};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -3894,7 +4012,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotations(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_annotations(*serverRequest.requestContext());
 
@@ -4042,7 +4162,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_member(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "member",
       /* .qualifiedMethodName =*/ "service_with_special_names.member"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_member};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -4056,7 +4179,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_member(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_member(*serverRequest.requestContext());
 
@@ -4204,7 +4329,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_members(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "members",
       /* .qualifiedMethodName =*/ "service_with_special_names.members"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_members};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -4218,7 +4346,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_members(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_members(*serverRequest.requestContext());
 
@@ -4366,7 +4496,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_field(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "field",
       /* .qualifiedMethodName =*/ "service_with_special_names.field"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_field};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -4380,7 +4513,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_field(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_field(*serverRequest.requestContext());
 
@@ -4528,7 +4663,10 @@ void service_with_special_namesAsyncProcessor::executeRequest_fields(
       /* .definingServiceName =*/ "service_with_special_names",
       /* .methodName =*/ "fields",
       /* .qualifiedMethodName =*/ "service_with_special_names.fields"};
-  auto callback =
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fbthrift_invoke_decorator_after_fields};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -4542,7 +4680,9 @@ void service_with_special_namesAsyncProcessor::executeRequest_fields(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_fields(*serverRequest.requestContext());
 

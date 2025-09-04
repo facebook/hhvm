@@ -144,7 +144,10 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_returnstream(
       /* .definingServiceName =*/ "PubSubStreamingService",
       /* .methodName =*/ "returnstream",
       /* .qualifiedMethodName =*/ "PubSubStreamingService.returnstream"};
-  auto callback =
+  apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::cpp2::StreamItem>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::fbthrift_invoke_decorator_after_returnstream};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2::StreamItem>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -158,7 +161,9 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_returnstream(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_returnstream(*serverRequest.requestContext(), *args.uarg_from, *args.uarg_to);
 
@@ -311,7 +316,10 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_streamthrows(
       /* .definingServiceName =*/ "PubSubStreamingService",
       /* .methodName =*/ "streamthrows",
       /* .qualifiedMethodName =*/ "PubSubStreamingService.streamthrows"};
-  auto callback =
+  apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::cpp2::StreamItem>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::fbthrift_invoke_decorator_after_streamthrows};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2::StreamItem>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -325,7 +333,9 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_streamthrows(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_streamthrows(*serverRequest.requestContext(), *args.uarg_foo);
 
@@ -478,7 +488,10 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows(
       /* .definingServiceName =*/ "PubSubStreamingService",
       /* .methodName =*/ "servicethrows",
       /* .qualifiedMethodName =*/ "PubSubStreamingService.servicethrows"};
-  auto callback =
+  apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::cpp2::StreamItem>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::fbthrift_invoke_decorator_after_servicethrows};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2::StreamItem>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -492,7 +505,9 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_servicethrows(*serverRequest.requestContext(), *args.uarg_foo);
 
@@ -663,7 +678,10 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows2(
       /* .definingServiceName =*/ "PubSubStreamingService",
       /* .methodName =*/ "servicethrows2",
       /* .qualifiedMethodName =*/ "PubSubStreamingService.servicethrows2"};
-  auto callback =
+  apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::cpp2::StreamItem>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::fbthrift_invoke_decorator_after_servicethrows2};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2::StreamItem>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -677,7 +695,9 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows2(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_servicethrows2(*serverRequest.requestContext(), *args.uarg_foo);
 
@@ -848,7 +868,10 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_boththrows(
       /* .definingServiceName =*/ "PubSubStreamingService",
       /* .methodName =*/ "boththrows",
       /* .qualifiedMethodName =*/ "PubSubStreamingService.boththrows"};
-  auto callback =
+  apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::cpp2::StreamItem>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::fbthrift_invoke_decorator_after_boththrows};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<::cpp2::StreamItem>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -862,7 +885,9 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_boththrows(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_boththrows(*serverRequest.requestContext(), *args.uarg_foo);
 
@@ -1033,7 +1058,10 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamstrea
       /* .definingServiceName =*/ "PubSubStreamingService",
       /* .methodName =*/ "responseandstreamstreamthrows",
       /* .qualifiedMethodName =*/ "PubSubStreamingService.responseandstreamstreamthrows"};
-  auto callback =
+  apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::fbthrift_invoke_decorator_after_responseandstreamstreamthrows};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1047,7 +1075,9 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamstrea
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_responseandstreamstreamthrows(*serverRequest.requestContext(), args.uarg_foo);
 
@@ -1202,7 +1232,10 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamservi
       /* .definingServiceName =*/ "PubSubStreamingService",
       /* .methodName =*/ "responseandstreamservicethrows",
       /* .qualifiedMethodName =*/ "PubSubStreamingService.responseandstreamservicethrows"};
-  auto callback =
+  apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::fbthrift_invoke_decorator_after_responseandstreamservicethrows};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1216,7 +1249,9 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamservi
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_responseandstreamservicethrows(*serverRequest.requestContext(), args.uarg_foo);
 
@@ -1389,7 +1424,10 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreambotht
       /* .definingServiceName =*/ "PubSubStreamingService",
       /* .methodName =*/ "responseandstreamboththrows",
       /* .qualifiedMethodName =*/ "PubSubStreamingService.responseandstreamboththrows"};
-  auto callback =
+  apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::fbthrift_invoke_decorator_after_responseandstreamboththrows};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -1403,7 +1441,9 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreambotht
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_responseandstreamboththrows(*serverRequest.requestContext(), args.uarg_foo);
 

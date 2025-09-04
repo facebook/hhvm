@@ -105,7 +105,10 @@ void HeaderClientMethodsAnnotationOnServiceAsyncProcessor::executeRequest_echo(
       /* .definingServiceName =*/ "HeaderClientMethodsAnnotationOnService",
       /* .methodName =*/ "echo",
       /* .qualifiedMethodName =*/ "HeaderClientMethodsAnnotationOnService.echo"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::cpp2::EchoResponse>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>::fbthrift_invoke_decorator_after_echo};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::EchoResponse>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -119,7 +122,9 @@ void HeaderClientMethodsAnnotationOnServiceAsyncProcessor::executeRequest_echo(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_echo(*serverRequest.requestContext(), *args.uarg_request);
 
@@ -270,7 +275,10 @@ void HeaderClientMethodsAnnotationOnServiceAsyncProcessor::executeRequest_echo_2
       /* .definingServiceName =*/ "HeaderClientMethodsAnnotationOnService",
       /* .methodName =*/ "echo_2",
       /* .qualifiedMethodName =*/ "HeaderClientMethodsAnnotationOnService.echo_2"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::cpp2::EchoResponse>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>::fbthrift_invoke_decorator_after_echo_2};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::EchoResponse>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -284,7 +292,9 @@ void HeaderClientMethodsAnnotationOnServiceAsyncProcessor::executeRequest_echo_2
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_echo_2(*serverRequest.requestContext(), *args.uarg_request);
 

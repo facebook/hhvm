@@ -23,11 +23,7 @@
 }}
 {{#let export partial param_type |param|}}
 {{#pragma ignore-newlines}}
-{{#if param.type.resolves_to_complex_return?}}{{!
-}}const {{param.type.cpp_type}}&
-{{#else}}
-{{param.type.cpp_type}}
-{{/if param.type.resolves_to_complex_return?}}
+apache::thrift::detail::DecoratorArgType<{{param.type.cpp_type}}>::type
 {{/let partial}}
 
 {{!
@@ -47,62 +43,28 @@ p_{{param.cpp_name}}
 {{/let partial}}
 
 {{!
-  return_param_type - Decorators after_* methods have const-ref access to the method
-  return type.
+  after_param_unused - Decorators after_* methods have const-ref access
+  to the method return type. For interactions, sinks and streams, we only give
+  const ref access to the first response type. If the first response type is
+  void, then there are no additional parameters
 }}
-{{#let export partial return_param_type |function|}}
+{{#let export partial after_param_unused |service function|}}
 {{#pragma ignore-newlines}}
 {{#if function.return_type.void?}}
 {{#else}}
-{{#if function.return_type.resolves_to_complex_return?}}
-const {{function.return_type.cpp_standard_type}}&
-{{#else}}
-{{function.return_type.cpp_standard_type}}
-{{/if function.return_type.resolves_to_complex_return?}}
+, apache::thrift::detail::DecoratorReturnType<{{function.cpp_return_type}}>::type /*result*/
 {{/if function.return_type.void?}}
 {{/let partial}}
 
 {{!
-  after_params_unused - Decorators after_* methods have const-ref access
-  to the method return type. If the return type is an interaction, we also have
-  a const-ref access to the returned interaction
+  after_params - Same as above, but we don't comment out the param
 }}
-{{#let export partial after_params_unused |function| captures |return_param_type|}}
+{{#let export partial after_param |service function|}}
 {{#pragma ignore-newlines}}
-{{#if function.creates_interaction?}}{{! For interactions we have a const-ref to the interaction and the return type if non-void}}
-, const {{function.created_interaction}}If& /*interaction*/
 {{#if function.return_type.void?}}
 {{#else}}
-, {{#partial return_param_type function=function}} /*result*/
+, apache::thrift::detail::DecoratorReturnType<{{function.cpp_return_type}}>::type result
 {{/if function.return_type.void?}}
-{{#else}}{{! Otherwise just const-ref access to the return type return type if non-void}}
-{{#if function.return_type.void?}}
-{{#else}}
-, {{#partial return_param_type function=function}} /*result*/
-{{/if function.return_type.void?}}
-{{/if function.creates_interaction?}}
-{{/let partial}}
-
-{{!
-  after_params - Decorators after_* methods have const-ref access
-  to the method return type. If the return type is an interaction, we also have
-  a const-ref access to the returned interaction. This one doesn't have the
-  param commented out.
-}}
-{{#let export partial after_params |function| captures |return_param_type|}}
-{{#pragma ignore-newlines}}
-{{#if function.creates_interaction?}}{{! For interactions we have a const-ref to the interaction and the return type if non-void}}
-, const {{function.created_interaction}}If& interaction
-{{#if function.return_type.void?}}
-{{#else}}
-, {{#partial return_param_type function=function}} result
-{{/if function.return_type.void?}}
-{{#else}}{{! Otherwise just const-ref access to the return type return type if non-void}}
-{{#if function.return_type.void?}}
-{{#else}}
-, {{#partial return_param_type function=function}} result
-{{/if function.return_type.void?}}
-{{/if function.creates_interaction?}}
 {{/let partial}}
 
 {{!
@@ -121,4 +83,18 @@ const {{function.return_type.cpp_standard_type}}&
 , args.uarg_{{param.cpp_name}}
 {{/if param.type.resolves_to_complex_return?}}
 {{/each}}
+{{/let partial}}
+
+{{!
+  after_invocation_args - args passed to the decorator after_* function.
+  There are four cases. The complexity comes from the fact that a function
+  can have function.return_type.void? even when it creates an inteaction or
+  is a sink or stream. Return type refers to the response type in that case.
+}}
+{{#let export partial after_invocation_args |function|}}
+{{#pragma ignore-newlines}}
+{{#if function.return_type.void?}}
+{{#else}}
+, result
+{{/if function.return_type.void?}}
 {{/let partial}}

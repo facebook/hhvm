@@ -71,6 +71,9 @@ class ServiceHandler<::cpp2::MyNode> : virtual public ::cpp2::MyRootSvIf {
 
   virtual void fbthrift_execute_decorators_before_do_mid(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
   virtual void fbthrift_execute_decorators_after_do_mid(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_do_mid(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::MyNode>*>(iface)->fbthrift_execute_decorators_after_do_mid(*ctx);
+  }
 };
 
 namespace detail {

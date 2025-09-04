@@ -100,7 +100,10 @@ void MyServicePrioChildAsyncProcessor::executeRequest_pang(
       /* .definingServiceName =*/ "MyServicePrioChild",
       /* .methodName =*/ "pang",
       /* .qualifiedMethodName =*/ "MyServicePrioChild.pang"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>::fbthrift_invoke_decorator_after_pang};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -114,7 +117,9 @@ void MyServicePrioChildAsyncProcessor::executeRequest_pang(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_pang(*serverRequest.requestContext());
 

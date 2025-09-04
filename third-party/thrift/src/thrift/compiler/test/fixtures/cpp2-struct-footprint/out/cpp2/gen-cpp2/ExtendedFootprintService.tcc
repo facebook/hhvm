@@ -100,7 +100,10 @@ void ExtendedFootprintServiceAsyncProcessor::executeRequest_getComplexMap(
       /* .definingServiceName =*/ "ExtendedFootprintService",
       /* .methodName =*/ "getComplexMap",
       /* .qualifiedMethodName =*/ "ExtendedFootprintService.getComplexMap"};
-  auto callback =
+  apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService>::fbthrift_invoke_decorator_after_getComplexMap};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>>>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -114,7 +117,9 @@ void ExtendedFootprintServiceAsyncProcessor::executeRequest_getComplexMap(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_getComplexMap(*serverRequest.requestContext());
 

@@ -18,6 +18,7 @@
 
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/async/processor/HandlerCallbackBase.h>
+
 #include <thrift/lib/cpp2/util/IntrusiveSharedPtr.h>
 
 namespace apache::thrift {
@@ -25,7 +26,23 @@ namespace apache::thrift {
 namespace detail {
 template <typename T>
 struct HandlerCallbackHelper;
-}
+
+template <typename T>
+struct IsUniquePtr {
+  using inner_type = T;
+  constexpr static bool value = false;
+};
+
+template <typename T>
+struct IsUniquePtr<std::unique_ptr<T>> {
+  using inner_type = T;
+  constexpr static bool value = true;
+};
+
+template <typename T>
+concept ResponseIsUniquePtr = IsUniquePtr<T>::value;
+
+} // namespace detail
 
 template <class T>
 class HandlerCallback;
@@ -40,11 +57,14 @@ class HandlerCallback : public HandlerCallbackBase {
   using Helper = apache::thrift::detail::HandlerCallbackHelper<T>;
   using InnerType = typename Helper::InnerType;
   using InputType = typename Helper::InputType;
+
+ protected:
   using cob_ptr = typename Helper::CobPtr;
 
  public:
   using Ptr = HandlerCallbackPtr<T>;
   using ResultType = std::decay_t<typename Helper::InputType>;
+  using DecoratorAfterCallback = typename Helper::DecoratorAfterCallback;
 
  private:
   Ptr sharedFromThis() {
@@ -55,7 +75,8 @@ class HandlerCallback : public HandlerCallbackBase {
   }
 
  public:
-  HandlerCallback() : cp_(nullptr) {}
+  HandlerCallback()
+      : cp_(nullptr), decoratorCallback_(DecoratorAfterCallback::noop()) {}
 
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
@@ -67,7 +88,9 @@ class HandlerCallback : public HandlerCallbackBase {
       folly::EventBase* eb,
       concurrency::ThreadManager* tm,
       Cpp2RequestContext* reqCtx,
-      TilePtr&& interaction = {});
+      TilePtr&& interaction = {},
+      DecoratorAfterCallback&& decoratorCallback =
+          DecoratorAfterCallback::noop());
 
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
@@ -82,7 +105,9 @@ class HandlerCallback : public HandlerCallbackBase {
       RequestCompletionCallback* notifyRequestPile,
       RequestCompletionCallback* notifyConcurrencyController,
       ServerRequestData requestData,
-      TilePtr&& interaction = {});
+      TilePtr&& interaction = {},
+      DecoratorAfterCallback&& decoratorCallback =
+          DecoratorAfterCallback::noop());
 
 #if FOLLY_HAS_COROUTINES
   static folly::coro::Task<void> doInvokeServiceInterceptorsOnResponse(
@@ -99,6 +124,7 @@ class HandlerCallback : public HandlerCallbackBase {
 #endif
 
   void result(InnerType r) {
+    decoratorCallback_.invoke(getRequestContext(), r);
 #if FOLLY_HAS_COROUTINES
     if (!shouldProcessServiceInterceptorsOnResponse()) {
       // Some service code (especially unit tests) assume that doResult() is
@@ -124,15 +150,23 @@ class HandlerCallback : public HandlerCallbackBase {
   virtual void doResult(InputType r);
 
   cob_ptr cp_;
+
+ private:
+  DecoratorAfterCallback decoratorCallback_;
 };
 
 template <>
 class HandlerCallback<void> : public HandlerCallbackBase {
+ protected:
+  using HandlerCallbackBase::exnw_ptr;
+  using HandlerCallbackBase::MethodNameInfo;
   using cob_ptr = SerializedResponse (*)(ContextStack*);
 
  public:
   using Ptr = HandlerCallbackPtr<void>;
   using ResultType = void;
+
+  using DecoratorAfterCallback = detail::DecoratorAfterCallbackNoResult;
 
  private:
   Ptr sharedFromThis() {
@@ -143,7 +177,8 @@ class HandlerCallback<void> : public HandlerCallbackBase {
   }
 
  public:
-  HandlerCallback() : cp_(nullptr) {}
+  HandlerCallback()
+      : cp_(nullptr), decoratorCallback_(DecoratorAfterCallback::noop()) {}
 
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
@@ -155,7 +190,9 @@ class HandlerCallback<void> : public HandlerCallbackBase {
       folly::EventBase* eb,
       concurrency::ThreadManager* tm,
       Cpp2RequestContext* reqCtx,
-      TilePtr&& interaction = {});
+      TilePtr&& interaction = {},
+      DecoratorAfterCallback&& decoratorCallback =
+          DecoratorAfterCallback::noop());
 
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
@@ -170,7 +207,9 @@ class HandlerCallback<void> : public HandlerCallbackBase {
       RequestCompletionCallback* notifyRequestPile,
       RequestCompletionCallback* notifyConcurrencyController,
       ServerRequestData requestData,
-      TilePtr&& interaction = {});
+      TilePtr&& interaction = {},
+      DecoratorAfterCallback&& decoratorCallback =
+          DecoratorAfterCallback::noop());
 
 #if FOLLY_HAS_COROUTINES
   folly::coro::Task<void> doInvokeServiceInterceptorsOnResponse(Ptr callback) {
@@ -186,6 +225,7 @@ class HandlerCallback<void> : public HandlerCallbackBase {
 #endif // FOLLY_HAS_COROUTINES
 
   void done() {
+    decoratorCallback_.invoke(getRequestContext());
 #if FOLLY_HAS_COROUTINES
     if (!shouldProcessServiceInterceptorsOnResponse()) {
       // Some service code (especially unit tests) assume that doResult() is
@@ -208,6 +248,9 @@ class HandlerCallback<void> : public HandlerCallbackBase {
   virtual void doDone();
 
   cob_ptr cp_;
+
+ private:
+  DecoratorAfterCallback decoratorCallback_;
 };
 
 template <typename InteractionIf, typename Response>
@@ -221,12 +264,143 @@ struct TileAndResponse<InteractionIf, void> {
 };
 
 template <typename InteractionIf, typename Response>
+struct InteractionInnerResponseHelper {
+  using DecoratorArgType = typename detail::DecoratorArgType<Response>::type;
+
+  static constexpr DecoratorArgType extractInnerResponse(
+      const TileAndResponse<InteractionIf, Response>& result) {
+    return result.response;
+  }
+};
+
+template <typename InteractionIf, typename Response>
+struct InteractionInnerResponseHelper<
+    InteractionIf,
+    std::unique_ptr<Response>> {
+  using DecoratorArgType = typename detail::DecoratorArgType<Response>::type;
+
+  static constexpr DecoratorArgType extractInnerResponse(
+      const TileAndResponse<InteractionIf, std::unique_ptr<Response>>& result) {
+    return *result.response;
+  }
+};
+
+template <typename InteractionIf>
+struct InteractionInnerResponseHelper<InteractionIf, void> {
+  using DecoratorArgType = void;
+};
+
+template <typename InteractionIf, typename Response, typename StreamItem>
+struct InteractionInnerResponseHelper<
+    InteractionIf,
+    ResponseAndServerStream<Response, StreamItem>> {
+  using DecoratorArgType = typename detail::DecoratorArgType<Response>::type;
+
+  static constexpr DecoratorArgType extractInnerResponse(
+      const TileAndResponse<
+          InteractionIf,
+          ResponseAndServerStream<Response, StreamItem>>& result) {
+    return result.response.response;
+  }
+};
+
+template <typename InteractionIf, typename Response, typename StreamItem>
+struct InteractionInnerResponseHelper<
+    InteractionIf,
+    ResponseAndServerStream<std::unique_ptr<Response>, StreamItem>> {
+  using DecoratorArgType = typename detail::DecoratorArgType<Response>::type;
+
+  static constexpr DecoratorArgType extractInnerResponse(
+      const TileAndResponse<
+          InteractionIf,
+          ResponseAndServerStream<std::unique_ptr<Response>, StreamItem>>&
+          result) {
+    return *result.response.response;
+  }
+};
+
+template <typename InteractionIf, typename StreamItem>
+struct InteractionInnerResponseHelper<InteractionIf, ServerStream<StreamItem>> {
+  using DecoratorArgType = void;
+};
+
+template <
+    typename InteractionIf,
+    typename Response,
+    typename SinkElement,
+    typename FinalResponse>
+struct InteractionInnerResponseHelper<
+    InteractionIf,
+    ResponseAndSinkConsumer<Response, SinkElement, FinalResponse>> {
+  using DecoratorArgType = typename detail::DecoratorArgType<Response>::type;
+
+  static constexpr DecoratorArgType extractInnerResponse(
+      const TileAndResponse<
+          InteractionIf,
+          ResponseAndSinkConsumer<Response, SinkElement, FinalResponse>>&
+          result) {
+    return result.response.response;
+  }
+};
+
+template <
+    typename InteractionIf,
+    typename Response,
+    typename SinkElement,
+    typename FinalResponse>
+struct InteractionInnerResponseHelper<
+    InteractionIf,
+    ResponseAndSinkConsumer<
+        std::unique_ptr<Response>,
+        SinkElement,
+        FinalResponse>> {
+  using DecoratorArgType = typename detail::DecoratorArgType<Response>::type;
+
+  static constexpr DecoratorArgType extractInnerResponse(
+      const TileAndResponse<
+          InteractionIf,
+          ResponseAndSinkConsumer<Response, SinkElement, FinalResponse>>&
+          result) {
+    return *result.response.response;
+  }
+};
+
+template <typename InteractionIf, typename SinkElement, typename FinalResponse>
+struct InteractionInnerResponseHelper<
+    InteractionIf,
+    SinkConsumer<SinkElement, FinalResponse>> {
+  using DecoratorArgType = void;
+};
+
+template <typename InteractionIf, typename Response>
 class HandlerCallback<TileAndResponse<InteractionIf, Response>> final
     : public HandlerCallback<Response> {
+  using cob_ptr = typename HandlerCallback<Response>::cob_ptr;
+  using exnw_ptr = HandlerCallbackBase::exnw_ptr;
+  using MethodNameInfo = HandlerCallbackBase::MethodNameInfo;
+  using InnerResponseHelper =
+      InteractionInnerResponseHelper<InteractionIf, Response>;
+
  public:
   using Ptr = HandlerCallbackPtr<TileAndResponse<InteractionIf, Response>>;
 
+  struct DecoratorAfterCallback
+      : public detail::DecoratorAfterCallbackWithResult<
+            DecoratorAfterCallback,
+            const TileAndResponse<InteractionIf, Response>&,
+            typename InnerResponseHelper::DecoratorArgType> {
+    using ArgType = typename InnerResponseHelper::DecoratorArgType;
+    static constexpr ArgType extractDecoratorArg(
+        const TileAndResponse<InteractionIf, Response>& result) {
+      if constexpr (!std::is_void_v<ArgType>) {
+        return InnerResponseHelper::extractInnerResponse(result);
+      }
+    }
+  };
+
   void result(TileAndResponse<InteractionIf, Response>&& r) {
+    decoratorCallback_.invoke(
+        HandlerCallback<Response>::getRequestContext(), r);
     if (this->fulfillTilePromise(std::move(r.tile))) {
       if constexpr (!std::is_void_v<Response>) {
         HandlerCallback<Response>::result(std::move(r.response));
@@ -243,13 +417,76 @@ class HandlerCallback<TileAndResponse<InteractionIf, Response>> final
     }
   }
 
-  using HandlerCallback<Response>::HandlerCallback;
+  HandlerCallback() : HandlerCallback<Response>() {}
+
+  HandlerCallback(
+      ResponseChannelRequest::UniquePtr req,
+      ContextStack::UniquePtr ctx,
+      MethodNameInfo methodNameInfo,
+      cob_ptr cp,
+      exnw_ptr ewp,
+      int32_t protoSeqId,
+      folly::EventBase* eb,
+      concurrency::ThreadManager* tm,
+      Cpp2RequestContext* reqCtx,
+      TilePtr&& interaction = {},
+      DecoratorAfterCallback&& decoratorCallback =
+          DecoratorAfterCallback::noop())
+      : HandlerCallback<Response>(
+            std::move(req),
+            std::move(ctx),
+            std::move(methodNameInfo),
+            std::move(cp),
+            std::move(ewp),
+            protoSeqId,
+            eb,
+            tm,
+            reqCtx,
+            std::move(interaction),
+            HandlerCallback<Response>::DecoratorAfterCallback::noop()),
+        decoratorCallback_(std::move(decoratorCallback)) {}
+
+  HandlerCallback(
+      ResponseChannelRequest::UniquePtr req,
+      ContextStack::UniquePtr ctx,
+      MethodNameInfo methodNameInfo,
+      cob_ptr cp,
+      exnw_ptr ewp,
+      int32_t protoSeqId,
+      folly::EventBase* eb,
+      folly::Executor::KeepAlive<> executor,
+      Cpp2RequestContext* reqCtx,
+      RequestCompletionCallback* notifyRequestPile,
+      RequestCompletionCallback* notifyConcurrencyController,
+      ServerRequestData requestData,
+      TilePtr&& interaction = {},
+      DecoratorAfterCallback&& decoratorCallback =
+          DecoratorAfterCallback::noop())
+      : HandlerCallback<Response>(
+            std::move(req),
+            std::move(ctx),
+            std::move(methodNameInfo),
+            std::move(cp),
+            std::move(ewp),
+            protoSeqId,
+            eb,
+            std::move(executor),
+            reqCtx,
+            notifyRequestPile,
+            notifyConcurrencyController,
+            std::move(requestData),
+            std::move(interaction),
+            HandlerCallback<Response>::DecoratorAfterCallback::noop()),
+        decoratorCallback_(std::move(decoratorCallback)) {}
 
   ~HandlerCallback() override {
     if (this->interaction_) {
       this->breakTilePromise();
     }
   }
+
+ private:
+  DecoratorAfterCallback decoratorCallback_;
 };
 
 ////
@@ -267,7 +504,8 @@ HandlerCallback<T>::HandlerCallback(
     folly::EventBase* eb,
     concurrency::ThreadManager* tm,
     Cpp2RequestContext* reqCtx,
-    TilePtr&& interaction)
+    TilePtr&& interaction,
+    DecoratorAfterCallback&& decoratorCallback)
     : HandlerCallbackBase(
           std::move(req),
           std::move(ctx),
@@ -277,7 +515,8 @@ HandlerCallback<T>::HandlerCallback(
           tm,
           reqCtx,
           std::move(interaction)),
-      cp_(cp) {
+      cp_(cp),
+      decoratorCallback_(std::move(decoratorCallback)) {
   this->protoSeqId_ = protoSeqId;
 }
 
@@ -295,7 +534,8 @@ HandlerCallback<T>::HandlerCallback(
     RequestCompletionCallback* notifyRequestPile,
     RequestCompletionCallback* notifyConcurrencyController,
     ServerRequestData requestData,
-    TilePtr&& interaction)
+    TilePtr&& interaction,
+    DecoratorAfterCallback&& decoratorCallback)
     : HandlerCallbackBase(
           std::move(req),
           std::move(ctx),
@@ -308,7 +548,8 @@ HandlerCallback<T>::HandlerCallback(
           notifyConcurrencyController,
           std::move(requestData),
           std::move(interaction)),
-      cp_(cp) {
+      cp_(cp),
+      decoratorCallback_(std::move(decoratorCallback)) {
   this->protoSeqId_ = protoSeqId;
 }
 
@@ -342,9 +583,6 @@ void HandlerCallback<T>::doResult(InputType r) {
 }
 
 namespace detail {
-
-// template that typedefs type to its argument, unless the argument is a
-// unique_ptr<S>, in which case it typedefs type to S.
 template <class S>
 struct inner_type {
   using type = S;
@@ -364,6 +602,17 @@ struct HandlerCallbackHelper {
       CobPtr cob, ContextStack* ctx, folly::Executor*, InputType input) {
     return cob(ctx, input);
   }
+
+  using DecoratorArgType = typename detail::DecoratorArgType<InnerType>::type;
+  struct DecoratorAfterCallback : public DecoratorAfterCallbackWithResult<
+                                      DecoratorAfterCallback,
+                                      DecoratorArgType,
+                                      DecoratorArgType> {
+    static constexpr DecoratorArgType extractDecoratorArg(
+        DecoratorArgType result) {
+      return result;
+    }
+  };
 };
 
 template <typename StreamInputType>
@@ -381,11 +630,38 @@ struct HandlerCallbackHelperServerStream {
 template <typename Response, typename StreamItem>
 struct HandlerCallbackHelper<ResponseAndServerStream<Response, StreamItem>>
     : public HandlerCallbackHelperServerStream<
-          ResponseAndServerStream<Response, StreamItem>> {};
+          ResponseAndServerStream<Response, StreamItem>> {
+  struct DecoratorAfterCallback
+      : public DecoratorAfterCallbackWithResult<
+            DecoratorAfterCallback,
+            const ResponseAndServerStream<Response, StreamItem>&,
+            typename DecoratorArgType<
+                typename inner_type<Response>::type>::type> {
+    using ArgType =
+        typename DecoratorArgType<typename inner_type<Response>::type>::type;
+
+    template <typename InnerResponseType>
+    static constexpr ArgType extractDecoratorArg(
+        const ResponseAndServerStream<InnerResponseType, StreamItem>& result) {
+      return result.response;
+    }
+
+    template <ResponseIsUniquePtr InnerResponseType>
+    static constexpr ArgType extractDecoratorArg(
+        const ResponseAndServerStream<InnerResponseType, StreamItem>& result) {
+      return *result.response;
+    }
+  };
+};
 
 template <typename StreamItem>
 struct HandlerCallbackHelper<ServerStream<StreamItem>>
-    : public HandlerCallbackHelperServerStream<ServerStream<StreamItem>> {};
+    : public HandlerCallbackHelperServerStream<ServerStream<StreamItem>> {
+  struct DecoratorAfterCallback : public DecoratorAfterCallbackWithResult<
+                                      DecoratorAfterCallback,
+                                      const ServerStream<StreamItem>&,
+                                      void> {};
+};
 
 template <typename SinkInputType>
 struct HandlerCallbackHelperSink {
@@ -404,12 +680,47 @@ template <typename Response, typename SinkElement, typename FinalResponse>
 struct HandlerCallbackHelper<
     ResponseAndSinkConsumer<Response, SinkElement, FinalResponse>>
     : public HandlerCallbackHelperSink<
-          ResponseAndSinkConsumer<Response, SinkElement, FinalResponse>> {};
+          ResponseAndSinkConsumer<Response, SinkElement, FinalResponse>> {
+  struct DecoratorAfterCallback
+      : public DecoratorAfterCallbackWithResult<
+            DecoratorAfterCallback,
+            const ResponseAndSinkConsumer<
+                Response,
+                SinkElement,
+                FinalResponse>&,
+            typename DecoratorArgType<
+                typename inner_type<Response>::type>::type> {
+    using ArgType =
+        typename DecoratorArgType<typename inner_type<Response>::type>::type;
+
+    template <typename InnerResponseType>
+    static constexpr ArgType extractDecoratorArg(const ResponseAndSinkConsumer<
+                                                 InnerResponseType,
+                                                 SinkElement,
+                                                 FinalResponse>& result) {
+      return result.response;
+    }
+
+    template <ResponseIsUniquePtr InnerResponseType>
+    static constexpr ArgType extractDecoratorArg(const ResponseAndSinkConsumer<
+                                                 InnerResponseType,
+                                                 SinkElement,
+                                                 FinalResponse>& result) {
+      return *result.response;
+    }
+  };
+};
 
 template <typename SinkElement, typename FinalResponse>
 struct HandlerCallbackHelper<SinkConsumer<SinkElement, FinalResponse>>
     : public HandlerCallbackHelperSink<
-          SinkConsumer<SinkElement, FinalResponse>> {};
+          SinkConsumer<SinkElement, FinalResponse>> {
+  struct DecoratorAfterCallback
+      : public DecoratorAfterCallbackWithResult<
+            DecoratorAfterCallback,
+            const SinkConsumer<SinkElement, FinalResponse>&,
+            void> {};
+};
 
 } // namespace detail
 

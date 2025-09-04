@@ -100,7 +100,10 @@ void MyLeafAsyncProcessor::executeRequest_do_leaf(
       /* .definingServiceName =*/ "MyLeaf",
       /* .methodName =*/ "do_leaf",
       /* .qualifiedMethodName =*/ "MyLeaf.do_leaf"};
-  auto callback =
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::MyLeaf>::fbthrift_invoke_decorator_after_do_leaf};
+ auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
@@ -114,7 +117,9 @@ void MyLeafAsyncProcessor::executeRequest_do_leaf(
           serverRequest.requestContext(),
           requestPileNotification,
           concurrencyControllerNotification,
-          std::move(serverRequest.requestData()));
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
 
   iface_->fbthrift_execute_decorators_before_do_leaf(*serverRequest.requestContext());
 

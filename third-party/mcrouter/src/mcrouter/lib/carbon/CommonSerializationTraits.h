@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <deque>
 #include <map>
 #include <set>
 #include <string>
@@ -148,6 +149,36 @@ struct SerializationTraits<std::vector<T>> {
   }
 
   static auto end(const std::vector<T>& vec) -> decltype(vec.end()) {
+    return vec.end();
+  }
+};
+
+template <class T>
+struct SerializationTraits<std::deque<T>> {
+  static constexpr carbon::FieldType kWireType = carbon::FieldType::List;
+
+  using inner_type = T;
+
+  static size_t size(const std::deque<T>& vec) {
+    return vec.size();
+  }
+
+  static bool emplace(std::deque<T>& vec, T&& t) {
+    vec.emplace_back(std::move(t));
+    return true;
+  }
+
+  static void clear(std::deque<T>& vec) {
+    vec.clear();
+  }
+
+  static void reserve(std::deque<T>&, size_t) {}
+
+  static auto begin(const std::deque<T>& vec) -> decltype(vec.begin()) {
+    return vec.begin();
+  }
+
+  static auto end(const std::deque<T>& vec) -> decltype(vec.end()) {
     return vec.end();
   }
 };

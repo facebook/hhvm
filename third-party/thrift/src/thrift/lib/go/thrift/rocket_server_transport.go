@@ -119,9 +119,6 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 				err = tlsConn.HandshakeContext(ctx)
 				if err != nil {
 					r.log("thrift: error performing TLS handshake with %s: %s\n", conn.RemoteAddr(), err)
-					// TODO: remove ConnRejected in the next diff
-					// Notify observer that connection was rejected due to handshake failure
-					r.observer.ConnRejected()
 					// Notify observer that connection was dropped due to handshake failure
 					r.observer.ConnDropped()
 					// Handshake failed, we cannot proceed with this connection - close it and return.

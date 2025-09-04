@@ -35,7 +35,6 @@ func newNoopServerObserver() ServerObserver {
 
 // Connection lifecycle events
 func (*noopServerObserver) ConnDropped()  {}
-func (*noopServerObserver) ConnRejected() {}
 func (*noopServerObserver) ConnAccepted() {}
 
 // Request processing events

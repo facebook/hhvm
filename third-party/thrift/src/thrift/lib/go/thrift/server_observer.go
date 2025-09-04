@@ -23,7 +23,6 @@ import "time"
 type ServerObserver interface {
 	// Connection lifecycle events
 	ConnDropped()  // server-initiated connection close
-	ConnRejected() // connection refused due to limits or overload
 	ConnAccepted() // new connection successfully accepted
 
 	// Request processing events

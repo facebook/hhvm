@@ -6,6 +6,21 @@
 /// Error definitions for `SinkService`.
 pub mod sink_service {
 
+    pub trait AsInitialException {
+        fn as_initial_exception(&self) -> ::std::option::Option<&crate::types::InitialException>;
+    }
+
+    impl AsInitialException for ::anyhow::Error {
+        fn as_initial_exception(&self) -> ::std::option::Option<&crate::types::InitialException> {
+            for cause in self.chain() {
+                if let ::std::option::Option::Some(MethodThrowError::ex(e)) = cause.downcast_ref::<MethodThrowError>() {
+                    return ::std::option::Option::Some(e);
+                }
+            }
+            ::std::option::Option::None
+        }
+    }
+
     pub type MethodError = ::fbthrift::NonthrowingFunctionError;
 
 

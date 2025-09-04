@@ -18,13 +18,13 @@ package thrift
 
 import "time"
 
-// Compile time interface check - ensure noopServerObserver implements ServerObserver
-var _ ServerObserver = (*noopServerObserver)(nil)
-
 // noopServerObserver is a no-op implementation of ServerObserver
 // This serves as the default observer when no other implementation is provided
 type noopServerObserver struct {
 }
+
+// Compile time interface check - ensure noopServerObserver implements ServerObserver
+var _ ServerObserver = (*noopServerObserver)(nil)
 
 // newNoopServerObserver creates a new noopServerObserver
 func newNoopServerObserver() ServerObserver {

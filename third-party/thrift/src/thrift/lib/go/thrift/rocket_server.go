@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"time"
 
 	"github.com/jjeffcaii/reactor-go/scheduler"
 	rsocket "github.com/rsocket/rsocket-go"
@@ -163,6 +164,8 @@ func (s *rocketServerSocket) metadataPush(msg payload.Payload) {
 }
 
 func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
+	requestReceivedTime := time.Now()
+
 	request, err := rocket.DecodeRequestPayload(msg)
 	if err != nil {
 		return mono.Error(err)
@@ -180,6 +183,12 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 		s.stats.SchedulingWorkCount.Decr()
 		s.stats.WorkingCount.Incr()
 		defer s.stats.WorkingCount.Decr()
+
+		// Track process delay from request received to processing start
+		processStartTime := time.Now()
+		processDelay := processStartTime.Sub(requestReceivedTime)
+		s.observer.ProcessDelay(processDelay)
+
 		if err := process(ctx, s.proc, protocol, s.pstats); err != nil {
 			return nil, err
 		}
@@ -197,6 +206,8 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 }
 
 func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
+	requestReceivedTime := time.Now()
+
 	request, err := rocket.DecodeRequestPayload(msg)
 	if err != nil {
 		s.log("rocketServer fireAndForget decode request payload error: %v", err)
@@ -210,6 +221,11 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 
 	// Notify observer that request was received
 	s.observer.ReceivedRequest()
+
+	// Track process delay from request received to processing start
+	processStartTime := time.Now()
+	processDelay := processStartTime.Sub(requestReceivedTime)
+	s.observer.ProcessDelay(processDelay)
 
 	// TODO: support pipelining
 	if err := process(s.ctx, s.proc, protocol, s.pstats); err != nil {

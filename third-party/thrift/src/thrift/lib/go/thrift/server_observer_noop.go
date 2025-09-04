@@ -49,6 +49,5 @@ func (*noopServerObserver) SentReply()           {}
 func (*noopServerObserver) ActiveRequests(_ int) {}
 
 // Timing metrics
-func (*noopServerObserver) ProcessDelay(_ time.Duration)             {}
-func (*noopServerObserver) ProcessTime(_ time.Duration)              {}
-func (*noopServerObserver) SocketSuccessProcessTime(_ time.Duration) {}
+func (*noopServerObserver) ProcessDelay(_ time.Duration) {}
+func (*noopServerObserver) ProcessTime(_ time.Duration)  {}

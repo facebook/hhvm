@@ -37,7 +37,6 @@ type ServerObserver interface {
 	ActiveRequests(numRequests int) // current count of processing requests
 
 	// Timing metrics
-	ProcessDelay(delay time.Duration)                // time from request received to handler start
-	ProcessTime(duration time.Duration)              // time spent in handler execution
-	SocketSuccessProcessTime(duration time.Duration) // time from connection accept to first request completion
+	ProcessDelay(delay time.Duration)   // time from request received to handler start
+	ProcessTime(duration time.Duration) // time spent in handler execution
 }

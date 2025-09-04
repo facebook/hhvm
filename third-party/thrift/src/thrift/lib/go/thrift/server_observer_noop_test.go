@@ -42,5 +42,4 @@ func TestNoopServerObserver(t *testing.T) {
 	observer.ActiveRequests(10)
 	observer.ConnAccepted()
 	observer.ProcessTime(200 * time.Millisecond)
-	observer.SocketSuccessProcessTime(150 * time.Millisecond)
 }

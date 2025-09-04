@@ -31,7 +31,6 @@ type ServerObserver interface {
 	DeclaredException()             // handler returned declared error type
 	UndeclaredException()           // handler returned unexpected error or panic
 	ServerOverloaded()              // request rejected due to load shedding
-	QueueTimeout()                  // request timeout before processing began
 	ReceivedRequest()               // complete request received and parsed
 	SentReply()                     // response successfully written to connection
 	ActiveRequests(numRequests int) // current count of processing requests

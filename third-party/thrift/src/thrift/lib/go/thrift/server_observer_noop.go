@@ -43,7 +43,6 @@ func (*noopServerObserver) TaskTimeout()         {}
 func (*noopServerObserver) DeclaredException()   {}
 func (*noopServerObserver) UndeclaredException() {}
 func (*noopServerObserver) ServerOverloaded()    {}
-func (*noopServerObserver) QueueTimeout()        {}
 func (*noopServerObserver) ReceivedRequest()     {}
 func (*noopServerObserver) SentReply()           {}
 func (*noopServerObserver) ActiveRequests(_ int) {}

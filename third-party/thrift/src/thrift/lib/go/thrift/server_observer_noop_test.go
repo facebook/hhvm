@@ -36,7 +36,6 @@ func TestNoopServerObserver(t *testing.T) {
 	observer.DeclaredException()
 	observer.UndeclaredException()
 	observer.ServerOverloaded()
-	observer.QueueTimeout()
 	observer.ReceivedRequest()
 	observer.SentReply()
 	observer.ActiveRequests(10)

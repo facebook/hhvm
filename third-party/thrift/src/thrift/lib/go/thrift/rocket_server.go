@@ -189,11 +189,26 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 		processDelay := processStartTime.Sub(requestReceivedTime)
 		s.observer.ProcessDelay(processDelay)
 
+		// Track actual handler execution time
 		if err := process(ctx, s.proc, protocol, s.pstats); err != nil {
 			return nil, err
 		}
+
 		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats)))
-		return rocket.EncodeResponsePayload(protocol.name, protocol.messageType, protocol.getRequestHeaders(), request.GetCompressionForResponse(), protocol.Bytes())
+
+		payload, err := rocket.EncodeResponsePayload(
+			protocol.name,
+			protocol.messageType,
+			protocol.getRequestHeaders(),
+			request.GetCompressionForResponse(),
+			protocol.Bytes(),
+		)
+
+		// Track actual handler execution time
+		processTime := time.Since(processStartTime)
+		s.observer.ProcessTime(processTime)
+
+		return payload, err
 	}
 	if s.pipeliningEnabled {
 		return mono.FromFunc(workItem)
@@ -232,6 +247,10 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 		s.log("rocketServer fireAndForget process error: %v", err)
 		return
 	}
+
+	// Track actual handler execution time
+	processTime := time.Since(processStartTime)
+	s.observer.ProcessTime(processTime)
 }
 
 func newProtocolBufferFromRequest(request *rocket.RequestPayload) (*protocolBuffer, error) {

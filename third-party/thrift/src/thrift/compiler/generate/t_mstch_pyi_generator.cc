@@ -573,8 +573,6 @@ class t_mstch_pyi_generator : public t_mstch_generator {
  private:
   std::filesystem::path root_path_;
 
-  bool should_resolve_typedefs() const override { return true; }
-
   void create_factories();
   void generate_init_files();
   void generate_constants();

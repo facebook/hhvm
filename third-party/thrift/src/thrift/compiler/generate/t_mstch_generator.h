@@ -64,11 +64,6 @@ class t_mstch_generator : public t_whisker_generator {
 
   whisker::map::raw globals() const override;
 
-  /**
-   * If true, typedefs will be automatically resolved to their underlying type.
-   */
-  virtual bool should_resolve_typedefs() const { return false; }
-
   using t_whisker_generator::render;
   /**
    * Render the mstch template with name `template_name` in the given context.
@@ -96,30 +91,6 @@ class t_mstch_generator : public t_whisker_generator {
       const std::filesystem::path& path);
 
   /**
-   * Render the mstch template with name `template_name` in the context of the
-   * given Thrift AST and write to a path under the output directory. Same as
-   * calling `dump` and `render` and `write_output` in succession.
-   */
-  template <typename T>
-  void render_to_file(
-      const T& obj,
-      const std::string& template_name,
-      const std::filesystem::path& path) {
-    render_to_file(dump(obj), template_name, path);
-  }
-
-  template <typename T>
-  void render_to_file(
-      const T& obj,
-      const mstch::map& extra_context,
-      const std::string& template_name,
-      const std::filesystem::path& path) {
-    mstch::map result = this->dump(obj);
-    result.insert(extra_context.begin(), extra_context.end());
-    this->render_to_file(result, template_name, path);
-  }
-
-  /**
    * Render the mstch template with name `template_name` with the given context.
    * This writes to a path under the output directory.
    */
@@ -128,81 +99,6 @@ class t_mstch_generator : public t_whisker_generator {
       const std::string& template_name,
       const std::filesystem::path& path) {
     write_output(path, render(template_name, context));
-  }
-
-  /**
-   * Dump map of command line flags passed to generator
-   */
-  mstch::map dump_options();
-
-  /**
-   * Subclasses should call the dump functions to convert elements
-   * of the Thrift AST into maps that can be passed into mstch.
-   */
-  mstch::map dump(const t_program&);
-  mstch::map dump(const t_structured&, bool shallow = false);
-  mstch::map dump(const t_field&, int32_t index = 0);
-  mstch::map dump(const t_type&);
-  mstch::map dump(const t_enum&);
-  mstch::map dump(const t_enum_value&);
-  mstch::map dump(const t_service&);
-  mstch::map dump(const t_function&);
-  mstch::map dump(const t_typedef&);
-  mstch::map dump(const t_const&);
-  mstch::map dump(const t_const_value&);
-  mstch::map dump(const std::map<t_const_value*, t_const_value*>::value_type&);
-
-  mstch::map dump(const std::string&);
-
-  /**
-   * Subclasses should override these functions to extend the behavior of
-   * the dump functions. These will be passed the map after the default
-   * dump has run, and can modify the maps in whichever ways necessary.
-   */
-  virtual mstch::map extend_program(const t_program&);
-  virtual mstch::map extend_struct(const t_structured&);
-  virtual mstch::map extend_field(const t_field&);
-  virtual mstch::map extend_type(const t_type&);
-  virtual mstch::map extend_enum(const t_enum&);
-  virtual mstch::map extend_enum_value(const t_enum_value&);
-  virtual mstch::map extend_service(const t_service&);
-  virtual mstch::map extend_function(const t_function&);
-  virtual mstch::map extend_typedef(const t_typedef&);
-  virtual mstch::map extend_const(const t_const&);
-  virtual mstch::map extend_const_value(const t_const_value&);
-  virtual mstch::map extend_const_value_map_elem(
-      const std::map<t_const_value*, t_const_value*>::value_type&);
-
-  template <typename element>
-  mstch::map dump_elem(const element& elem, int32_t /*index*/) {
-    return dump(elem);
-  }
-
-  mstch::map dump_elem(const t_field& elem, int32_t index) {
-    return dump(elem, index);
-  }
-
-  template <typename container>
-  mstch::array dump_elems(const container& elems) {
-    using T = typename container::value_type;
-    mstch::array result;
-    int32_t index = 0;
-    for (auto itr = elems.begin(); itr != elems.end(); ++itr) {
-      auto map =
-          dump_elem(*as_const_pointer<std::remove_pointer_t<T>>(*itr), index);
-      result.push_back(map);
-      ++index;
-    }
-    add_first_last(result);
-    return result;
-  }
-
-  void add_first_last(mstch::array& elems) {
-    for (auto itr = elems.begin(); itr != elems.end(); ++itr) {
-      std::get<mstch::map>(*itr).emplace("first?", itr == elems.begin());
-      std::get<mstch::map>(*itr).emplace(
-          "last?", std::next(itr) == elems.end());
-    }
   }
 
   // DEPRECATED: use has_compiler_option() instead
@@ -214,21 +110,6 @@ class t_mstch_generator : public t_whisker_generator {
 
  private:
   strictness_options strictness() const final;
-
-  /**
-   * For every key in the map, prepends a prefix to that key for mstch.
-   */
-  static mstch::map prepend_prefix(const std::string& prefix, mstch::map map);
-
-  template <typename T>
-  static const T* as_const_pointer(const T* x) {
-    return x;
-  }
-
-  template <typename T>
-  static const T* as_const_pointer(const T& x) {
-    return std::addressof(x);
-  }
 
  protected:
   mstch_context mstch_context_;

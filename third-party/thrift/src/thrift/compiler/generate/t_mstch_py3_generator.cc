@@ -1510,7 +1510,6 @@ class t_mstch_py3_generator : public t_mstch_generator {
   enum class FileType { CBindingsFile, TypesFile, NotTypesFile };
 
  private:
-  bool should_resolve_typedefs() const override { return true; }
   void set_mstch_factories();
   void generate_init_files();
   void generate_file(

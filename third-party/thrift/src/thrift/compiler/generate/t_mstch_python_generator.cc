@@ -1392,7 +1392,6 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
   }
 
  protected:
-  bool should_resolve_typedefs() const override { return true; }
   void set_mstch_factories();
   void generate_file(
       const std::string& template_name,

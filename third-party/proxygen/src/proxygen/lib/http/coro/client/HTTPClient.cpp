@@ -69,13 +69,19 @@ void getConnParamsImpl(HTTPCoroConnector::ConnectionParams* connParams,
     if (secureTransportImpl == SecureTransportImpl::TLS) {
       connParams->sslContext = HTTPCoroConnector::makeSSLContext(tlsParams);
     } else {
+      HTTPCoroConnector::FizzContextAndVerifier fizzContextAndVerifier;
+
       // This can throw
-      baseParams->fizzContextAndVerifier =
-          HTTPCoroConnector::makeFizzClientContextAndVerifier(tlsParams);
-      if (HTTPClient::getDefaultCertVerifier()) {
-        baseParams->fizzContextAndVerifier.fizzCertVerifier =
-            HTTPClient::getDefaultCertVerifier();
+      if (auto verifier = HTTPClient::getDefaultCertVerifier()) {
+        fizzContextAndVerifier.fizzContext =
+            HTTPCoroConnector::makeFizzClientContext(tlsParams);
+        fizzContextAndVerifier.fizzCertVerifier = verifier;
+      } else {
+        fizzContextAndVerifier =
+            HTTPCoroConnector::makeFizzClientContextAndVerifier(tlsParams);
       }
+
+      baseParams->fizzContextAndVerifier = std::move(fizzContextAndVerifier);
     }
     baseParams->serverName = sni.str();
   }

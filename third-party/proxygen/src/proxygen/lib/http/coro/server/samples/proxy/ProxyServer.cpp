@@ -36,7 +36,7 @@ static HTTPCoroSessionPool& getPool(folly::EventBase* evb) {
   if (FLAGS_backend_tls) {
     static auto connParams = HTTPCoroConnector::defaultConnectionParams();
     connParams.fizzContextAndVerifier =
-        HTTPCoroConnector::makeFizzClientContext(
+        HTTPCoroConnector::makeFizzClientContextAndVerifier(
             HTTPCoroConnector::defaultTLSParams());
     static HTTPCoroSessionPool pool(evb,
                                     FLAGS_backend_server,

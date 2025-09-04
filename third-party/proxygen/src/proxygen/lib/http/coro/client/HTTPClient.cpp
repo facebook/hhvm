@@ -71,7 +71,7 @@ void getConnParamsImpl(HTTPCoroConnector::ConnectionParams* connParams,
     } else {
       // This can throw
       baseParams->fizzContextAndVerifier =
-          HTTPCoroConnector::makeFizzClientContext(tlsParams);
+          HTTPCoroConnector::makeFizzClientContextAndVerifier(tlsParams);
       if (HTTPClient::getDefaultCertVerifier()) {
         baseParams->fizzContextAndVerifier.fizzCertVerifier =
             HTTPClient::getDefaultCertVerifier();

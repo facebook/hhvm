@@ -694,7 +694,7 @@ std::shared_ptr<folly::SSLContext> HTTPCoroConnector::makeSSLContext(
 }
 
 HTTPCoroConnector::FizzContextAndVerifier
-HTTPCoroConnector::makeFizzClientContext(const TLSParams& params) {
+HTTPCoroConnector::makeFizzClientContextAndVerifier(const TLSParams& params) {
   FizzContextAndVerifier fizzCtx;
   auto fizzContext = std::make_shared<fizz::client::FizzClientContext>();
 

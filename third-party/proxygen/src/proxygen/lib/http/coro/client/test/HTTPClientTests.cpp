@@ -1710,8 +1710,9 @@ TEST_P(HTTPClientConnectionCacheTests, GetPoolWithConnParams) {
    * dummy value because why not?
    */
   HTTPCoroConnector::ConnectionParams other{};
-  other.fizzContextAndVerifier = HTTPCoroConnector::makeFizzClientContext(
-      HTTPCoroConnector::defaultTLSParams());
+  other.fizzContextAndVerifier =
+      HTTPCoroConnector::makeFizzClientContextAndVerifier(
+          HTTPCoroConnector::defaultTLSParams());
   connCache_.setConnParams(other);
 
   auto& pool1 = connCache_.getPool(
@@ -1726,16 +1727,18 @@ TEST_P(HTTPClientConnectionCacheTests, GetPoolWithConnParams) {
   // passing in the additional ConnectionParams* argument should retrieve a
   // different pool
   HTTPCoroConnector::ConnectionParams connParams{};
-  connParams.fizzContextAndVerifier = HTTPCoroConnector::makeFizzClientContext(
-      HTTPCoroConnector::defaultTLSParams());
+  connParams.fizzContextAndVerifier =
+      HTTPCoroConnector::makeFizzClientContextAndVerifier(
+          HTTPCoroConnector::defaultTLSParams());
   auto& pool3 =
       connCache_.getPool("foo.com", "1.2.3.4", 443, true, &connParams);
   EXPECT_NE(&pool1, &pool3);
 
   // since we're hashing the addresses of the members of fizzContextAndVerifier,
   // creating a new one should yet again retrieve a different pool
-  connParams.fizzContextAndVerifier = HTTPCoroConnector::makeFizzClientContext(
-      HTTPCoroConnector::defaultTLSParams());
+  connParams.fizzContextAndVerifier =
+      HTTPCoroConnector::makeFizzClientContextAndVerifier(
+          HTTPCoroConnector::defaultTLSParams());
   auto& pool4 =
       connCache_.getPool("foo.com", "1.2.3.4", 443, true, &connParams);
   EXPECT_NE(&pool3, &pool4);

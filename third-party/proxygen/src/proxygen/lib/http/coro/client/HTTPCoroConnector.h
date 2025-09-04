@@ -90,6 +90,10 @@ class HTTPCoroConnector {
   // Helpers to make a Fizz or SSL context
   static FizzContextAndVerifier makeFizzClientContextAndVerifier(
       const TLSParams& params);
+  static std::shared_ptr<const fizz::client::FizzClientContext>
+  makeFizzClientContext(const TLSParams& params);
+  static std::shared_ptr<const fizz::CertificateVerifier> makeFizzCertVerifier(
+      const TLSParams& params);
 
   static std::shared_ptr<folly::SSLContext> makeSSLContext(
       const TLSParams& params);

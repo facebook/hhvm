@@ -693,9 +693,8 @@ std::shared_ptr<folly::SSLContext> HTTPCoroConnector::makeSSLContext(
   return sslContext;
 }
 
-HTTPCoroConnector::FizzContextAndVerifier
-HTTPCoroConnector::makeFizzClientContextAndVerifier(const TLSParams& params) {
-  FizzContextAndVerifier fizzCtx;
+std::shared_ptr<const fizz::client::FizzClientContext>
+HTTPCoroConnector::makeFizzClientContext(const TLSParams& params) {
   auto fizzContext = std::make_shared<fizz::client::FizzClientContext>();
 
   std::string certData;
@@ -718,13 +717,24 @@ HTTPCoroConnector::makeFizzClientContextAndVerifier(const TLSParams& params) {
   fizzContext->setSendEarlyData(params.earlyData);
   fizzContext->setPskCache(params.pskCache ? params.pskCache
                                            : std::make_shared<BasicPskCache>());
+  return fizzContext;
+}
 
+std::shared_ptr<const fizz::CertificateVerifier>
+HTTPCoroConnector::makeFizzCertVerifier(const TLSParams& params) {
+  std::shared_ptr<const fizz::CertificateVerifier> fizzCertVerifier;
   if (params.caPaths.size() > 0) {
-    fizzCtx.fizzCertVerifier =
-        fizz::DefaultCertificateVerifier::createFromCAFiles(
-            fizz::VerificationContext::Client, params.caPaths);
+    fizzCertVerifier = fizz::DefaultCertificateVerifier::createFromCAFiles(
+        fizz::VerificationContext::Client, params.caPaths);
   }
-  fizzCtx.fizzContext = std::move(fizzContext);
+  return fizzCertVerifier;
+}
+
+HTTPCoroConnector::FizzContextAndVerifier
+HTTPCoroConnector::makeFizzClientContextAndVerifier(const TLSParams& params) {
+  FizzContextAndVerifier fizzCtx;
+  fizzCtx.fizzContext = makeFizzClientContext(params);
+  fizzCtx.fizzCertVerifier = makeFizzCertVerifier(params);
   return fizzCtx;
 }
 

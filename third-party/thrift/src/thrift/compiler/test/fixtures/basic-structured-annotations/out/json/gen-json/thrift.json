@@ -8,7 +8,7 @@
   },
   "enumerations" : {
     "RpcPriority" : {
-      "lineno" : 222,
+      "lineno" : 225,
       "constants" : {
         "HIGH_IMPORTANT" : 0,
         "HIGH" : 1,
@@ -18,11 +18,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 222,
+          "line" : 225,
           "column" : 1
         },
         "end" : {
-          "line" : 228,
+          "line" : 231,
           "column" : 2
         }
       }
@@ -317,7 +317,10 @@
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
-        "scope.Definition" : {  }
+        "scope.Enum" : {  },
+        "scope.Service" : {  },
+        "scope.Structured" : {  },
+        "scope.Typedef" : {  }
       },
       "fields" : {
         "value" : {
@@ -326,11 +329,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 212,
+              "line" : 215,
               "column" : 3
             },
             "end" : {
-              "line" : 212,
+              "line" : 215,
               "column" : 19
             }
           }
@@ -342,13 +345,13 @@
           "column" : 1
         },
         "end" : {
-          "line" : 213,
+          "line" : 216,
           "column" : 2
         }
       }
     },
     "Priority" : {
-      "lineno" : 218,
+      "lineno" : 221,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -361,11 +364,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 220,
+              "line" : 223,
               "column" : 3
             },
             "end" : {
-              "line" : 220,
+              "line" : 223,
               "column" : 24
             }
           }
@@ -373,17 +376,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 218,
+          "line" : 221,
           "column" : 1
         },
         "end" : {
-          "line" : 221,
+          "line" : 224,
           "column" : 2
         }
       }
     },
     "DeprecatedUnvalidatedAnnotations" : {
-      "lineno" : 233,
+      "lineno" : 236,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -396,11 +399,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 235,
+              "line" : 238,
               "column" : 3
             },
             "end" : {
-              "line" : 235,
+              "line" : 238,
               "column" : 32
             }
           }
@@ -408,42 +411,21 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 233,
+          "line" : 236,
           "column" : 1
         },
         "end" : {
-          "line" : 236,
+          "line" : 239,
           "column" : 2
         }
       }
     },
     "AllowReservedIdentifier" : {
-      "lineno" : 248,
-      "is_exception" : false,
-      "is_union" : false,
-      "structured_annotations" : {
-        "scope.Definition" : {  }
-      },
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 248,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 249,
-          "column" : 34
-        }
-      }
-    },
-    "AllowReservedFilename" : {
       "lineno" : 251,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
-        "scope.Program" : {  }
+        "scope.Definition" : {  }
       },
       "fields" : {
 
@@ -455,12 +437,33 @@
         },
         "end" : {
           "line" : 252,
+          "column" : 34
+        }
+      }
+    },
+    "AllowReservedFilename" : {
+      "lineno" : 254,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Program" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 254,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 255,
           "column" : 32
         }
       }
     },
     "RuntimeAnnotation" : {
-      "lineno" : 258,
+      "lineno" : 261,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -471,17 +474,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 258,
+          "line" : 261,
           "column" : 1
         },
         "end" : {
-          "line" : 259,
+          "line" : 262,
           "column" : 28
         }
       }
     },
     "AllowLegacyTypedefUri" : {
-      "lineno" : 284,
+      "lineno" : 287,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -492,17 +495,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 284,
+          "line" : 287,
           "column" : 1
         },
         "end" : {
-          "line" : 285,
+          "line" : 288,
           "column" : 32
         }
       }
     },
     "AllowUnsafeOptionalCustomDefaultValue" : {
-      "lineno" : 309,
+      "lineno" : 312,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -513,17 +516,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 309,
+          "line" : 312,
           "column" : 1
         },
         "end" : {
-          "line" : 310,
+          "line" : 313,
           "column" : 48
         }
       }
     },
     "AllowUnsafeUnionFieldCustomDefaultValue" : {
-      "lineno" : 329,
+      "lineno" : 332,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -534,17 +537,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 329,
+          "line" : 332,
           "column" : 1
         },
         "end" : {
-          "line" : 330,
+          "line" : 333,
           "column" : 50
         }
       }
     },
     "AllowUnsafeRequiredFieldQualifier" : {
-      "lineno" : 345,
+      "lineno" : 348,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -555,11 +558,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 345,
+          "line" : 348,
           "column" : 1
         },
         "end" : {
-          "line" : 346,
+          "line" : 349,
           "column" : 44
         }
       }

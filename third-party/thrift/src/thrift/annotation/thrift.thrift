@@ -207,7 +207,10 @@ struct Serial {}
 /**
  * Changes the URI of this definition away from the default-generated one.
  */
-@scope.Definition
+@scope.Enum
+@scope.Service
+@scope.Structured
+@scope.Typedef // Compiler validates this is only allowed with @AllowLegacyTypedefUri
 struct Uri {
   1: string value;
 }
@@ -259,7 +262,7 @@ struct AllowReservedFilename {}
 struct RuntimeAnnotation {}
 
 /**
- * Allows the Thrift compiler to add a URI to the target typedef. 
+ * Allows the Thrift compiler to add a URI to the target typedef.
  *
  * Use of this annotation is strongly DISCOURAGED, and is provided for
  * backwards-compatibility purposes only.

@@ -643,6 +643,31 @@ class t_mstch_rust_generator : public t_mstch_generator {
  private:
   void set_mstch_factories();
   rust_codegen_options options_;
+  whisker::map::raw globals() const override {
+    whisker::map::raw globals = t_mstch_generator::globals();
+    globals["rust_annotation_name"] = whisker::dsl::make_function(
+        "rust_annotation_name",
+        [](whisker::dsl::function::context ctx) -> whisker::object {
+          ctx.declare_named_arguments({});
+          ctx.declare_arity(1);
+          return whisker::make::string(boost::algorithm::replace_all_copy(
+              ctx.argument<whisker::string>(0), ".", "_"));
+        });
+    globals["rust_quote"] = whisker::dsl::make_function(
+        "rust_quote",
+        [](whisker::dsl::function::context ctx) -> whisker::object {
+          ctx.declare_named_arguments({"escape_backslashes"});
+          ctx.declare_arity(1);
+          std::optional<bool> escape_backslashes = ctx.named_argument<bool>(
+              "escape_backslashes",
+              whisker::dsl::function::context::named_argument_presence::
+                  optional);
+          return whisker::make::string(quote(
+              ctx.argument<whisker::string>(0),
+              escape_backslashes.value_or(false)));
+        });
+    return globals;
+  }
 };
 
 class rust_mstch_program : public mstch_program {
@@ -2421,26 +2446,6 @@ class rust_mstch_typedef : public mstch_typedef {
   const t_const* adapter_annotation_;
 };
 
-class rust_mstch_deprecated_annotation : public mstch_deprecated_annotation {
- public:
-  rust_mstch_deprecated_annotation(
-      const t_annotation* a, mstch_context& ctx, mstch_element_position pos)
-      : mstch_deprecated_annotation(a, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"annotation:rust_name",
-             &rust_mstch_deprecated_annotation::rust_name},
-            {"annotation:rust_value",
-             &rust_mstch_deprecated_annotation::rust_value},
-        });
-  }
-  mstch::node rust_name() {
-    return boost::algorithm::replace_all_copy(key_, ".", "_");
-  }
-  mstch::node rust_value() { return quote(val_.value, true); }
-};
-
 mstch::node rust_mstch_service::rust_functions() {
   return make_mstch_array(
       service_->get_functions(),
@@ -2642,7 +2647,6 @@ void t_mstch_rust_generator::set_mstch_factories() {
   mstch_context_.add<rust_mstch_field>(&options_);
   mstch_context_.add<rust_mstch_enum>(&options_);
   mstch_context_.add<rust_mstch_enum_value>();
-  mstch_context_.add<rust_mstch_deprecated_annotation>();
   mstch_context_.add<rust_mstch_const>(&options_);
 }
 

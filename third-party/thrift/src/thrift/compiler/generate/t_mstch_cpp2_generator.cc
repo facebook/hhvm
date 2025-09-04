@@ -369,6 +369,27 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     cpp_context_->register_visitors(visitor);
   }
 
+  whisker::map::raw globals() const override {
+    whisker::map::raw globals = t_mstch_generator::globals();
+    globals["cpp_fatal_string_id"] = whisker::dsl::make_function(
+        "cpp_fatal_string_id",
+        [](whisker::dsl::function::context ctx) -> whisker::object {
+          ctx.declare_named_arguments({});
+          ctx.declare_arity(1);
+          return whisker::make::string(
+              get_fatal_string_short_id(ctx.argument<whisker::string>(0)));
+        });
+    globals["cpp_render_fatal"] = whisker::dsl::make_function(
+        "cpp_render_fatal",
+        [](whisker::dsl::function::context ctx) -> whisker::object {
+          ctx.declare_named_arguments({});
+          ctx.declare_arity(1);
+          return whisker::make::string(
+              render_fatal_string(ctx.argument<whisker::string>(0)));
+        });
+    return globals;
+  }
+
   prototype<t_program>::ptr make_prototype_for_program(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_program(proto);
@@ -2515,23 +2536,6 @@ class cpp_mstch_const_value : public mstch_const_value {
   }
 };
 
-class cpp_mstch_deprecated_annotation : public mstch_deprecated_annotation {
- public:
-  cpp_mstch_deprecated_annotation(
-      const t_annotation* a, mstch_context& ctx, mstch_element_position pos)
-      : mstch_deprecated_annotation(a, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"annotation:safe_key", &cpp_mstch_deprecated_annotation::safe_key},
-            {"annotation:fatal_string",
-             &cpp_mstch_deprecated_annotation::fatal_string},
-        });
-  }
-  mstch::node safe_key() { return get_fatal_string_short_id(key_); }
-  mstch::node fatal_string() { return render_fatal_string(val_.value); }
-};
-
 void t_mstch_cpp2_generator::generate_program() {
   const auto* program = get_program();
   set_mstch_factories();
@@ -2563,7 +2567,6 @@ void t_mstch_cpp2_generator::set_mstch_factories() {
   mstch_context_.add<cpp_mstch_field>(cpp_context_);
   mstch_context_.add<cpp_mstch_const>(cpp_context_);
   mstch_context_.add<cpp_mstch_const_value>();
-  mstch_context_.add<cpp_mstch_deprecated_annotation>();
 }
 
 void t_mstch_cpp2_generator::generate_constants(const t_program* program) {

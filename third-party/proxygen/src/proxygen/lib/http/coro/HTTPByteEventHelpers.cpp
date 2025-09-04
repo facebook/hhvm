@@ -82,6 +82,8 @@ void AsyncSocketByteEventObserver::byteEvent(
     folly::AsyncSocket* /* socket */,
     const folly::AsyncSocketObserverInterface::ByteEvent& event) noexcept {
   size_t nEvents = 0;
+  // Note: if there are other observers on this socket that register for TX or
+  // ACK events, this observer will also fire, even if it did _not_ register.
   XLOG(DBG5) << "byteEvent type=" << uint32_t(event.type)
              << " off=" << event.offset;
   if (event.type ==
@@ -90,12 +92,10 @@ void AsyncSocketByteEventObserver::byteEvent(
   } else if (event.type ==
              folly::AsyncSocketObserverInterface::ByteEvent::Type::TX) {
     maxTransportTxOffset_ = event.offset;
-    XCHECK_LE(maxTransportTxOffset_, maxTransportWriteOffset_);
     nEvents = PendingByteEvent::fireEvents(txEvents_, event.offset);
   } else if (event.type ==
              folly::AsyncSocketObserverInterface::ByteEvent::Type::ACK) {
     maxTransportAckOffset_ = event.offset;
-    XCHECK_LE(maxTransportAckOffset_, maxTransportWriteOffset_);
     nEvents = PendingByteEvent::fireEvents(ackEvents_, event.offset);
   }
   decRef(nEvents);
@@ -116,7 +116,7 @@ void AsyncSocketByteEventObserver::scheduleOrFireTxAckEvent(
     txEvents_.emplace_back(maxTransportWriteOffset_,
                            std::move(event),
                            regAndEvent.registration.callback);
-    if (maxTransportTxOffset_ == maxTransportWriteOffset_) {
+    if (maxTransportTxOffset_ >= maxTransportWriteOffset_) {
       auto nEvents =
           PendingByteEvent::fireEvents(txEvents_, maxTransportTxOffset_);
       XCHECK_EQ(nEvents, 1u);
@@ -134,7 +134,7 @@ void AsyncSocketByteEventObserver::scheduleOrFireTxAckEvent(
     ackEvents_.emplace_back(maxTransportWriteOffset_,
                             std::move(regAndEvent.byteEvent),
                             regAndEvent.registration.callback);
-    if (maxTransportAckOffset_ == maxTransportWriteOffset_) {
+    if (maxTransportAckOffset_ >= maxTransportWriteOffset_) {
       auto nEvents =
           PendingByteEvent::fireEvents(ackEvents_, maxTransportAckOffset_);
       XCHECK_EQ(nEvents, 1u);

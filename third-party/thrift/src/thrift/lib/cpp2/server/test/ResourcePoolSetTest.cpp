@@ -56,7 +56,7 @@ TEST(
     testThriftServer_whenResourcePoolsSuppliedButNotAsyncPool_expectDefaultSyncAndAsyncPoolsCreated) {
   auto handler = std::make_shared<TestHandler>();
   auto server = std::make_shared<ScopedServerInterfaceThread>(
-      handler, "::1", 9988, [](ThriftServer& server) {
+      handler, "::1", 0, [](ThriftServer& server) {
         // Set up thrift server with 2 RPs none of them is "default"
         {
           server.requireResourcePools();

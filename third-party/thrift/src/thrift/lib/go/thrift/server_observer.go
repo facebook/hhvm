@@ -38,8 +38,6 @@ type ServerObserver interface {
 
 	// Timing metrics
 	ProcessDelay(delay time.Duration)                // time from request received to handler start
-	WriteDelay(delay time.Duration)                  // time from response ready to socket write start
-	WriteTime(duration time.Duration)                // time spent writing response bytes to socket
 	ProcessTime(duration time.Duration)              // time spent in handler execution
 	SocketSuccessProcessTime(duration time.Duration) // time from connection accept to first request completion
 }

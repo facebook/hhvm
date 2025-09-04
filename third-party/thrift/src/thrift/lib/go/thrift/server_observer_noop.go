@@ -50,7 +50,5 @@ func (*noopServerObserver) ActiveRequests(_ int) {}
 
 // Timing metrics
 func (*noopServerObserver) ProcessDelay(_ time.Duration)             {}
-func (*noopServerObserver) WriteDelay(_ time.Duration)               {}
-func (*noopServerObserver) WriteTime(_ time.Duration)                {}
 func (*noopServerObserver) ProcessTime(_ time.Duration)              {}
 func (*noopServerObserver) SocketSuccessProcessTime(_ time.Duration) {}

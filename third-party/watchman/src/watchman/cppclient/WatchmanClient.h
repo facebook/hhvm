@@ -214,7 +214,7 @@ struct WatchmanClient {
       WatchPathPtr path,
       folly::Executor* executor,
       SubscriptionCallback&& callback,
-      std::string subscriptionName = std::string{});
+      std::string subscriptionName);
 
   /**
    * As-per subscribe above but automatically creates a WatchPath from a string.
@@ -225,7 +225,7 @@ struct WatchmanClient {
       std::string_view path,
       folly::Executor* executor,
       SubscriptionCallback&& callback,
-      std::string subscriptionName = std::string{});
+      std::string subscriptionName);
 
   /**
    * Returns a future which completes when all outstanding Watchman updates have

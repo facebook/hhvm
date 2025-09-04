@@ -70,7 +70,8 @@ int main(int argc, char** argv) {
                         cv.notify_all();
                       }
                     }
-                  })
+                  },
+                  "cppclient-integration")
                  .wait()
                  .value();
 
@@ -146,7 +147,8 @@ int main(int argc, char** argv) {
   if (flush_res.find("no_sync_needed") == flush_res.items().end() ||
       !flush_res.find("no_sync_needed")->second.isArray() ||
       !(flush_res.find("no_sync_needed")->second.size() == 1) ||
-      !(flush_res.find("no_sync_needed")->second[0] == "sub1")) {
+      !(flush_res.find("no_sync_needed")->second[0] ==
+        "cppclient-integration")) {
     LOG(ERROR) << "FAIL: unexpected flush result " << toJson(flush_res);
     return 1;
   }
@@ -174,7 +176,8 @@ int main(int argc, char** argv) {
            LOG(INFO) << "Expected subcription error caught";
            subErrorCallbackTrigger.setValue();
          }
-       })
+       },
+       "cppclient-integration")
       .wait()
       .value();
   c.getConnection().forceEOF();

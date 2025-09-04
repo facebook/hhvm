@@ -454,18 +454,15 @@ void cgLdClsCtxCns(IRLS& env, const IRInstruction* inst) {
 
   if (debug) {
     // Lets assert that the slot we are loading is context constant
-    auto const type = v.makeReg();
     auto const sf = v.makeReg();
     auto const kindAddr = cnsVec[slot * sizeof(Class::Const) +
                                  offsetof(Class::Const, val) +
                                  offsetof(TypedValue, m_auxFlags) +
                                  offsetof(AuxFlagsUnion, u_constModifierFlags) +
                                  offsetof(ConstModifierFlags, kind)];
-
-    v << loadzbq{kindAddr, type};
-    v << testqi{static_cast<int32_t>(ConstModifierFlags::Kind::Context), type, sf};
+    v << cmpbim{static_cast<int8_t>(ConstModifierFlags::Kind::Context), kindAddr, sf};
     unlikelyIfThen(
-      v, vcold(env), CC_Z, sf,
+      v, vcold(env), CC_NZ, sf,
       [&] (Vout& v) { v << trap{TRAP_REASON, Fixup::none()}; }
     );
     // Lets assert that the upper bits are zero

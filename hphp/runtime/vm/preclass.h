@@ -52,6 +52,14 @@ namespace Native { struct NativeDataInfo; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * On ARM not all builtin function pointers are 8 byte aligned. So we can't use
+ * PackedPtr for them.
+ * We can also not always use SmallPtr because in devbuilds the function pointers
+ * are sometimes > 4 GB.
+ * So we use FullPtr in devbuilds and SmallPtr otherwise.
+ */
+
 #ifdef FULLPTR_FOR_BUILTINS
 using BuiltinCtorFunction = FullPtr<ObjectData*(Class*)>;
 using BuiltinDtorFunction = FullPtr<void(ObjectData*, const Class*)>;

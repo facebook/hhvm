@@ -41,7 +41,7 @@ func main() {
 
 type rpcClientConformanceTester struct {
 	port        int
-	client      rpc.RPCConformanceServiceClientInterface
+	client      rpc.RPCConformanceServiceClient
 	instruction *rpc.ClientInstruction
 }
 
@@ -51,7 +51,7 @@ func newRPCClientConformanceTester(port int) *rpcClientConformanceTester {
 	}
 }
 
-func (t *rpcClientConformanceTester) getClient() (rpc.RPCConformanceServiceClientInterface, error) {
+func (t *rpcClientConformanceTester) getClient() (rpc.RPCConformanceServiceClient, error) {
 	addr := fmt.Sprintf("localhost:%d", t.port)
 	channel, err := thrift.NewClient(
 		thrift.WithRocket(),

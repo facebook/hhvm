@@ -66,7 +66,7 @@ func createTestHeaderServer(handler thrifttest.ThriftTest) (context.CancelFunc, 
 // connectTestHeaderServer Create a client and connect to a test server
 func connectTestHeaderServer(
 	addr net.Addr,
-) (thrifttest.ThriftTestClientInterface, error) {
+) (thrifttest.ThriftTestClient, error) {
 	channel, err := thrift.NewClient(
 		thrift.WithUpgradeToRocket(),
 		thrift.WithDialer(func() (net.Conn, error) {

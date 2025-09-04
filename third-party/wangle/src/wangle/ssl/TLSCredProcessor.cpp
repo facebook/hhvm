@@ -140,8 +140,6 @@ void TLSCredProcessor::certFileUpdated() noexcept {
       }
     } else {
       if (!folly::readFile(fileName.c_str(), jsonData)) {
-        LOG(WARNING) << "Failed to read " << fileName
-                     << "; Ticket seeds are unavailable.";
         return folly::none;
       }
     }

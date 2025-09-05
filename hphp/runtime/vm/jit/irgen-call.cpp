@@ -2334,33 +2334,26 @@ Type callReturnType(const Func* callee, bool mayIntercept) {
   return typeFromRAT(callee->repoReturnType(), callee->cls()) & TInitCell;
 }
 
-Type callOutType(const Func* callee, uint32_t index, bool mayIntercept) {
+Type callOutType(const Func* callee, uint32_t inOutIdx, bool mayIntercept) {
   assertx(callee->takesInOutParams());
-  assertx(index < callee->numInOutParams());
+  assertx(inOutIdx < callee->numInOutParams());
 
   // Don't make any assumptions about functions which can be intercepted. The
   // interception functions can return arbitrary types.
   if (mayIntercept && callee->isInterceptable()) return TInitCell;
 
-  if (callee->isCPPBuiltin()) {
-    uint32_t param_idx = 0;
-    for (; param_idx < callee->numParams(); param_idx++) {
-      if (!callee->isInOut(param_idx)) continue;
-      if (!index) break;
-      index--;
-    }
-    assertx(!index);
-    // If the function is builtin, use the builtin's return type, then take into
-    // account coercion failures.
-    return builtinOutType(callee, param_idx);
-  }
+  // Type based on function signature.
+  auto const returnTy = typeFromFuncOut(callee, inOutIdx);
 
-  auto const ty = typeFromRAT(callee->repoReturnType(), callee->cls());
-  if (ty <= TVec) {
-    auto const off = callee->numInOutParams() - index - 1;
+  // Type based on HHBBC analysis.
+  auto const hhbbcTy = [&] {
+    auto const ty = typeFromRAT(callee->repoReturnType(), callee->cls());
+    if (!(ty <= TVec)) return TInitCell;
+    auto const off = callee->numInOutParams() - inOutIdx - 1;
     return arrLikeElemType(ty, Type::cns(off + 1), callee->cls()).first;
-  }
-  return TInitCell;
+  }();
+
+  return returnTy & hhbbcTy;
 }
 
 Type awaitedCallReturnType(const Func* callee, bool mayIntercept) {

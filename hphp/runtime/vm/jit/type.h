@@ -831,6 +831,7 @@ Type typeFromPropTC(const HPHP::TypeIntersectionConstraint& tc,
                     bool isSProp);
 Type typeFromFuncParam(const Func* func, uint32_t paramId);
 Type typeFromFuncReturn(const Func* func);
+Type typeFromFuncOut(const Func* func, uint32_t inOutIdx);
 Type typeFromSBProfType(const SBProfType&);
 
 ///////////////////////////////////////////////////////////////////////////////

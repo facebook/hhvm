@@ -1183,6 +1183,23 @@ Type typeFromFuncReturn(const Func* func) {
   return rt;
 }
 
+Type typeFromFuncOut(const Func* func, uint32_t inOutIdx) {
+  uint32_t paramId = 0;
+  for (; paramId < func->numNonVariadicParams(); paramId++) {
+    if (!func->isInOut(paramId)) continue;
+    if (!inOutIdx) break;
+    inOutIdx--;
+  }
+  assertx(!inOutIdx);
+
+  auto const getThisType = [&] {
+    return func->cls() ? Type::SubObj(func->cls()) : TBottom;
+  };
+
+  auto const& tcs = func->params()[paramId].typeConstraints;
+  return typeFromTCImpl(tcs, getThisType, func->cls(), true) & TInitCell;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 Type typeFromSBProfType(const SBProfType& ty) {

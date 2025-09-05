@@ -1589,7 +1589,7 @@ SSATmp* builtinCall(IRGS& env,
     for (auto i = uint32_t{0}; i < params.size(); ++i) {
       if (!params[i].isInOut) continue;
       auto ty = [&] () -> Optional<Type> {
-        auto const r = builtinOutType(callee, i);
+        auto const r = callOutType(callee, idx, false /* mayIntercept */);
         if (r.isKnownDataType()) return r;
         return {};
       }();
@@ -1740,66 +1740,6 @@ void emitNativeImpl(IRGS& env) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-Type builtinOutType(const Func* builtin, uint32_t i) {
-  assertx(builtin->isCPPBuiltin());
-  assertx(builtin->isInOut(i));
-
-  auto const& pinfo = builtin->params()[i];
-  auto const& tc = pinfo.typeConstraints.main();
-  auto const dt = tc.isUnresolved() ? KindOfObject : tc.underlyingDataType();
-  if (dt) {
-    const auto ty = Type{*dt};
-    return tc.isNullable() ? ty | TInitNull : ty;
-  }
-
-  if (tc.isSoft() || tc.isMixed()) return TInitCell;
-
-  auto ty = [&] () -> Type {
-    switch (tc.metaType()) {
-    case AnnotMetaType::Precise:
-    case AnnotMetaType::SubObject:
-      return TInitCell;
-    case AnnotMetaType::Mixed:
-      return TInitCell;
-    case AnnotMetaType::Callable:
-      return TInitCell;
-    case AnnotMetaType::Number:
-      return TInt | TDbl;
-    case AnnotMetaType::ArrayKey:
-      return TInt | TStr;
-    case AnnotMetaType::This:
-      return TObj;
-    case AnnotMetaType::VecOrDict:
-      return TVec|TDict;
-    case AnnotMetaType::ArrayLike:
-      return TArrLike;
-    case AnnotMetaType::Classname:
-      if (!Cfg::Eval::ClassPassesClassname) {
-        return TStr;
-      }
-      return TStr | TCls | TLazyCls;
-    case AnnotMetaType::Class:
-      // TODO(T199611023) add more levels
-      if (Cfg::Eval::ClassTypeLevel > 0) {
-        return TCls | TLazyCls;
-      }
-      return TStr | TCls | TLazyCls;
-    case AnnotMetaType::ClassOrClassname:
-      return TStr | TCls | TLazyCls;
-    case AnnotMetaType::Nonnull:
-    case AnnotMetaType::NoReturn:
-    case AnnotMetaType::Nothing:
-      return TInitCell;
-    case AnnotMetaType::Unresolved:
-      // FIXME(T116301380): native builtins don't resolve properly
-      return TObj;
-    }
-    not_reached();
-  }();
-
-  return tc.isNullable() ? ty | TInitNull : ty;
-}
 
 Type builtinReturnType(const Func* builtin) {
   // Why do we recalculate the type here than just using HHBBC's inferred type?

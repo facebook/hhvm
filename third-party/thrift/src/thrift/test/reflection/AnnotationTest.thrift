@@ -51,11 +51,15 @@ struct MyStruct {
 
 @Doc{text = "I am a union"}
 union MyUnion {
+  @Oncall{name = "union_field"}
+  @Sensitive
   1: string stringValue;
   2: i32 intValue;
 }
 
 @Doc{text = "I am an exception"}
 exception MyException {
+  @Oncall{name = "exception_field"}
+  @Doc{text = "Error message"}
   1: string message;
 }

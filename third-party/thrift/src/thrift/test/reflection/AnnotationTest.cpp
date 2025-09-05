@@ -91,4 +91,61 @@ TEST(AnnotationTest, GetExceptionAnnotationValue) {
   EXPECT_FALSE((get_struct_annotation<Oncall, MyException>()));
 }
 
+TEST(AnnotationTest, GetUnionFieldAnnotationValue) {
+  Oncall expected;
+  expected.name() = "union_field";
+
+  // Checking whether a union field has a given annotation. If so, use it.
+  if (auto* oncall =
+          get_field_annotation<Oncall, MyUnion, ident::stringValue>()) {
+    EXPECT_EQ(*oncall, expected);
+  } else {
+    ADD_FAILURE();
+  }
+
+  // `Oncall` annotation exists on MyUnion.stringValue
+  EXPECT_TRUE((get_field_annotation<Oncall, MyUnion, ident::stringValue>()));
+
+  // `Sensitive` annotation exists on MyUnion.stringValue
+  EXPECT_TRUE((get_field_annotation<Sensitive, MyUnion, ident::stringValue>()));
+
+  // `Doc` annotation does not exist on MyUnion.stringValue
+  EXPECT_FALSE((get_field_annotation<Doc, MyUnion, ident::stringValue>()));
+
+  // `Oncall` annotation does not exist on MyUnion.intValue
+  EXPECT_FALSE((get_field_annotation<Oncall, MyUnion, ident::intValue>()));
+}
+
+TEST(AnnotationTest, GetExceptionFieldAnnotationValue) {
+  Oncall oncallExpected;
+  oncallExpected.name() = "exception_field";
+
+  Doc docExpected;
+  docExpected.text() = "Error message";
+
+  // Checking whether an exception field has a given annotation. If so, use it.
+  if (auto* oncall =
+          get_field_annotation<Oncall, MyException, ident::message>()) {
+    EXPECT_EQ(*oncall, oncallExpected);
+  } else {
+    ADD_FAILURE();
+  }
+
+  if (auto* doc = get_field_annotation<Doc, MyException, ident::message>()) {
+    EXPECT_EQ(*doc, docExpected);
+  } else {
+    ADD_FAILURE();
+  }
+
+  // `Oncall` annotation exists on MyException.message
+  EXPECT_TRUE((get_field_annotation<Oncall, MyException, ident::message>()));
+
+  // `Doc` annotation exists on MyException.message
+  EXPECT_TRUE((get_field_annotation<Doc, MyException, ident::message>()));
+
+  // `Sensitive` annotation does not exist on MyException.message
+  EXPECT_FALSE(
+      (get_field_annotation<Sensitive, MyException, ident::message>()));
+}
+
 } // namespace apache::thrift::test

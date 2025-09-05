@@ -117,15 +117,15 @@ class RocketClientTest : public testing::Test {
 // increased drastically.
 TEST_F(RocketClientTest, KeepAliveWatcherLargeRequestTest) {
   // Increase this if test is flaky.
-  size_t payloadSize = /*8MB*/ 8000000;
-  metadata_.keepAliveTimeoutMs() = 100;
+  size_t payloadSize = /*20MB*/ 20 * 1024 * 1024;
+  metadata_.keepAliveTimeoutMs() = 50;
 
   auto testInterface = std::make_shared<TestInterface>();
   ScopedServerInterfaceThread runner(testInterface);
 
   auto client = runner.newStickyClient<apache::thrift::Client<TestService>>(
       nullptr, [&](auto socket) {
-        // Set send buffer size to minimum to similate slow network.
+        // Set send buffer size to minimum to simulate slow network.
         assert(socket->setSendBufSize(1) == 0);
         return makeChannelWithMetadata(std::move(socket));
       });
@@ -237,15 +237,15 @@ TEST_F(RocketClientTest, KeepAliveWatcherLargeResponseTest) {
 // between eventbases.
 TEST_F(RocketClientTest, KeepAliveEvbDetachAttachTest) {
   // Increase this if test is flaky.
-  size_t payloadSize = /*8MB*/ 8000000;
-  metadata_.keepAliveTimeoutMs() = 100;
+  size_t payloadSize = /*20MB*/ 20 * 1024 * 1024;
+  metadata_.keepAliveTimeoutMs() = 50;
 
   auto testInterface = std::make_shared<TestInterface>();
   ScopedServerInterfaceThread runner(testInterface);
 
   auto client = runner.newStickyClient<apache::thrift::Client<TestService>>(
       nullptr, [&](auto socket) {
-        // Set send buffer size to minimum to similate slow network.
+        // Set send buffer size to minimum to simulate slow network.
         assert(socket->setSendBufSize(1) == 0);
         // KeepAlive will be created and started here.
         auto channel = makeChannelWithMetadata(std::move(socket));

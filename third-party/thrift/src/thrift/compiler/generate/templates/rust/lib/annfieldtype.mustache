@@ -14,25 +14,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#type:numeric_or_void?}}::{{field:type_rust}}{{/type:numeric_or_void?}}{{!
-}}{{#type:string?}}::std::string::String{{/type:string?}}{{!
-}}{{#type:binary?}}::{{field:type_rust}}{{/type:binary?}}{{!
-}}{{#type:structured}}{{!
-    }}{{#struct:has_adapter?}}{{!
-        }}{{struct:package}}::unadapted::{{struct:rust_name}}{{!
-    }}{{/struct:has_adapter?}}{{!
-    }}{{^struct:has_adapter?}}{{!
-        }}{{struct:package}}::{{struct:rust_name}}{{!
-    }}{{/struct:has_adapter?}}{{!
-}}{{/type:structured}}{{!
-}}{{#type:enum}}{{enum:package}}::{{enum:rust_name}}{{/type:enum}}{{!
-}}{{#type:list?}}
-    }}::std::vec::Vec{{> lib/type_generics}}{{!
-}}{{/type:list?}}{{!
-}}{{#type:set?}}{{!
-    }}::{{field:type_rust}}{{> lib/type_generics}}{{!
-}}{{/type:set?}}{{!
-}}{{#type:map?}}{{!
-    }}::{{field:type_rust}}{{> lib/type_generics}}{{!
-}}{{/type:map?}}{{!
-}}
+}}{{#pragma ignore-newlines}}
+{{#if (not (string.empty? field:type_rust))}}::{{field:type_rust}}
+{{#else if type:string?}}::std::string::String
+{{#else if type:structured?}}{{#type:structured}}{{struct:package}}{{#if struct:has_adapter?}}::unadapted{{/if}}::{{struct:rust_name}}{{/type:structured}}
+{{#else if type:enum}}{{#type:enum}}{{enum:package}}::{{enum:rust_name}}{{/type:enum}}
+{{#else if type:list?}}::std::vec::Vec
+{{/if (not (string.empty? field:type_rust))}}
+{{#if type:container?}}{{> lib/type_generics}}{{/if}}

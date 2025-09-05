@@ -14,16 +14,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}
-{{#field:type}}{{!
-}}{{#type:numeric_or_void?}}True{{/type:numeric_or_void?}}{{!
-}}{{#type:enum?}}False{{/type:enum?}}{{!
-}}{{#type:binary?}}True{{/type:binary?}}{{!
-}}{{#type:iobuf?}}{{^type:binary?}}True{{/type:binary?}}{{/type:iobuf?}}{{!
-}}{{#type:string?}}False{{/type:string?}}{{!
-}}{{#type:structured?}}False{{/type:structured?}}{{!
-}}{{#type:list?}}False{{/type:list?}}{{!
-}}{{#type:set?}}False{{/type:set?}}{{!
-}}{{#type:map?}}False{{/type:map?}}{{!
-}}{{#type:void?}}False{{/type:void?}}{{!
-}}{{/field:type}}{{^field:type}}False{{/field:type}}
+}}{{#pragma ignore-newlines}}
+{{#field:type}}
+{{#if type:string?}}False
+{{#else if (or type:primitive? type:iobuf?)}}True
+{{#else}}False
+{{/if type:string?}}
+{{/field:type}}
+{{^field:type}}False{{/field:type}}

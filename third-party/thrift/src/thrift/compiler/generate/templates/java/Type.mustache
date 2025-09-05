@@ -14,24 +14,15 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#type:javaType}}{{!
-  }}{{type:javaType}}{{!
-}}{{/type:javaType}}{{!
-}}{{^type:javaType}}{{!
-  }}{{#type:typedef?}}{{!
-    }}{{#type:typedef_type}}{{> Type}}{{/type:typedef_type}}{{!
-  }}{{/type:typedef?}}{{!
-  }}{{^type:typedef?}}{{!
-    }}{{#type:void?}}void{{/type:void?}}{{!
-    }}{{#type:bool?}}boolean{{/type:bool?}}{{!
-    }}{{#type:byte?}}byte{{/type:byte?}}{{!
-    }}{{#type:i16?}}short{{/type:i16?}}{{!
-    }}{{#type:i32?}}int{{/type:i32?}}{{!
-    }}{{#type:i64?}}long{{/type:i64?}}{{!
-    }}{{#type:double?}}double{{/type:double?}}{{!
-    }}{{#type:float?}}float{{/type:float?}}{{!
-    }}{{^type:numeric_or_void?}}{{^type:typedef?}}{{!
-        }}{{> BoxedType}}{{!
-    }}{{/type:typedef?}}{{/type:numeric_or_void?}}{{!
-  }}{{/type:typedef?}}{{!
-}}{{/type:javaType}}
+}}{{#pragma ignore-newlines}}
+{{#if (not (string.empty? type:javaType))}}{{type:javaType}}
+{{#else if type:void?}}void
+{{#else if type:bool?}}boolean
+{{#else if type:byte?}}byte
+{{#else if type:i16?}}short
+{{#else if type:i32?}}int
+{{#else if type:i64?}}long
+{{#else if type:double?}}double
+{{#else if type:float?}}float
+{{#else}}{{> BoxedType}}
+{{/if (not (string.empty? type:javaType))}}

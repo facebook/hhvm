@@ -18,46 +18,22 @@
   If we ever add a type here which may not have a Send or Sync impl, the
   unsafe impls in structimpl.mustache need to be revisited.
   ====
-}}{{#type:numeric_or_void?}}{{!
-    }}{{#type:rust}}::{{type:rust}}{{/type:rust}}{{!
-    }}{{^type:rust}}{{!
-        }}{{#type:void?}}(){{/type:void?}}{{!
-        }}{{#type:bool?}}::std::primitive::bool{{/type:bool?}}{{!
-        }}{{#type:byte?}}::std::primitive::i8{{/type:byte?}}{{!
-        }}{{#type:i16?}}::std::primitive::i16{{/type:i16?}}{{!
-        }}{{#type:i32?}}::std::primitive::i32{{/type:i32?}}{{!
-        }}{{#type:i64?}}::std::primitive::i64{{/type:i64?}}{{!
-        }}{{#type:double?}}::std::primitive::f64{{/type:double?}}{{!
-        }}{{#type:float?}}::std::primitive::f32{{/type:float?}}{{!
-    }}{{/type:rust}}{{!
-}}{{/type:numeric_or_void?}}{{!
-}}{{#type:string?}}::std::string::String{{/type:string?}}{{!
-}}{{#type:binary?}}{{!
-    }}{{#type:rust}}::{{type:rust}}{{/type:rust}}{{!
-    }}{{^type:rust}}::std::vec::Vec<::std::primitive::u8>{{/type:rust}}{{!
-}}{{/type:binary?}}{{!
-}}{{#type:structured}}{{!
-    }}{{#struct:has_adapter?}}{{!
-        }}{{struct:package}}::unadapted::{{struct:rust_name}}{{!
-    }}{{/struct:has_adapter?}}{{!
-    }}{{^struct:has_adapter?}}{{!
-        }}{{struct:package}}::{{struct:rust_name}}{{!
-    }}{{/struct:has_adapter?}}{{!
-}}{{/type:structured}}{{!
-}}{{#type:enum}}{{!
-    }}{{enum:package}}::{{enum:rust_name}}{{!
-}}{{/type:enum}}{{!
-}}{{#type:list?}}{{!
-    }}::std::vec::Vec{{> lib/type_generics}}{{!
-}}{{/type:list?}}{{!
-}}{{#type:set?}}{{!
-    }}{{#type:rust}}::{{type:rust}}{{/type:rust}}{{!
-    }}{{^type:rust}}::std::collections::BTreeSet{{/type:rust}}{{!
-    }}{{> lib/type_generics}}{{!
-}}{{/type:set?}}{{!
-}}{{#type:map?}}{{!
-    }}{{#type:rust}}::{{type:rust}}{{/type:rust}}{{!
-    }}{{^type:rust}}::std::collections::BTreeMap{{/type:rust}}{{!
-    }}{{> lib/type_generics}}{{!
-}}{{/type:map?}}{{!
-}}
+}}{{#pragma ignore-newlines}}
+{{#if (not (string.empty? type:rust))}}::{{type:rust}}
+{{#else if type:void?}}()
+{{#else if type:bool?}}::std::primitive::bool
+{{#else if type:byte?}}::std::primitive::i8
+{{#else if type:i16?}}::std::primitive::i16
+{{#else if type:i32?}}::std::primitive::i32
+{{#else if type:i64?}}::std::primitive::i64
+{{#else if type:double?}}::std::primitive::f64
+{{#else if type:float?}}::std::primitive::f32
+{{#else if type:string?}}::std::string::String
+{{#else if type:binary?}}::std::vec::Vec<::std::primitive::u8>
+{{#else if type:structured?}}{{#type:structured}}{{struct:package}}{{#if struct:has_adapter?}}::unadapted{{/if}}::{{struct:rust_name}}{{/type:structured}}
+{{#else if type:enum}}{{#type:enum}}{{enum:package}}::{{enum:rust_name}}{{/type:enum}}
+{{#else if type:list?}}::std::vec::Vec
+{{#else if type:set?}}::std::collections::BTreeSet
+{{#else if type:map?}}::std::collections::BTreeMap
+{{/if (not (string.empty? type:rust))}}
+{{#if type:container?}}{{> lib/type_generics}}{{/if}}

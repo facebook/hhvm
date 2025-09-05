@@ -631,7 +631,6 @@ class mstch_type : public mstch_base {
         this,
         {
             {"type:self", &mstch_type::self},
-            {"type:numeric_or_void?", &mstch_type::is_numeric_or_void},
             {"type:structured", &mstch_type::get_structured},
             {"type:enum", &mstch_type::get_enum},
             {"type:list_elem_type", &mstch_type::get_list_type},
@@ -645,12 +644,6 @@ class mstch_type : public mstch_base {
 
   whisker::object self() { return make_self(*type_); }
 
-  mstch::node is_numeric_or_void() {
-    return resolved_type_->is_void() || resolved_type_->is_bool() ||
-        resolved_type_->is_byte() || resolved_type_->is_i16() ||
-        resolved_type_->is_i32() || resolved_type_->is_i64() ||
-        resolved_type_->is_double() || resolved_type_->is_float();
-  }
   virtual std::string get_type_namespace(const t_program*) { return ""; }
   mstch::node get_structured();
   mstch::node get_enum();

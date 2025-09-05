@@ -25,6 +25,7 @@ const (
 	MISSING_RESULT                 = 5
 	INTERNAL_ERROR                 = 6
 	PROTOCOL_ERROR                 = 7
+	LOADSHEDDING                   = 8
 )
 
 // ApplicationExceptionIf is an application level Thrift exception

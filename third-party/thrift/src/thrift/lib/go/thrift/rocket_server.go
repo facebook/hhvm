@@ -47,6 +47,7 @@ type rocketServer struct {
 	stats                   *stats.ServerStats
 	pstats                  map[string]*stats.TimingSeries
 	observer                ServerObserver
+	maxRequests             int64
 	totalActiveRequestCount atomic.Int64
 }
 
@@ -63,9 +64,10 @@ func newRocketServer(proc Processor, listener net.Listener, opts *serverOptions)
 		pipeliningEnabled: opts.pipeliningEnabled,
 		numWorkers:        opts.numWorkers,
 
-		pstats:   opts.processorStats,
-		stats:    opts.serverStats,
-		observer: opts.serverObserver,
+		pstats:      opts.processorStats,
+		stats:       opts.serverStats,
+		observer:    opts.serverObserver,
+		maxRequests: opts.maxRequests,
 	}
 }
 
@@ -82,9 +84,10 @@ func newUpgradeToRocketServer(proc Processor, listener net.Listener, opts *serve
 		pipeliningEnabled: opts.pipeliningEnabled,
 		numWorkers:        opts.numWorkers,
 
-		pstats:   opts.processorStats,
-		stats:    opts.serverStats,
-		observer: opts.serverObserver,
+		pstats:      opts.processorStats,
+		stats:       opts.serverStats,
+		observer:    opts.serverObserver,
+		maxRequests: opts.maxRequests,
 	}
 }
 
@@ -119,7 +122,17 @@ func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload,
 		return nil, err
 	}
 	sendingSocket.MetadataPush(serverMetadataPush)
-	socket := newRocketServerSocket(ctx, s.proc, s.pipeliningEnabled, s.log, s.stats, s.pstats, s.observer, &s.totalActiveRequestCount)
+	socket := newRocketServerSocket(
+		ctx,
+		s.proc,
+		s.pipeliningEnabled,
+		s.log,
+		s.stats,
+		s.pstats,
+		s.observer,
+		s.maxRequests,
+		&s.totalActiveRequestCount,
+	)
 	return rsocket.NewAbstractSocket(
 		rsocket.MetadataPush(socket.metadataPush),
 		rsocket.RequestResponse(socket.requestResonse),
@@ -135,6 +148,7 @@ type rocketServerSocket struct {
 	stats                   *stats.ServerStats
 	pstats                  map[string]*stats.TimingSeries
 	observer                ServerObserver
+	maxRequests             int64
 	totalActiveRequestCount *atomic.Int64
 }
 
@@ -146,6 +160,7 @@ func newRocketServerSocket(
 	stats *stats.ServerStats,
 	pstats map[string]*stats.TimingSeries,
 	observer ServerObserver,
+	maxRequests int64,
 	totalActiveRequestCount *atomic.Int64,
 ) *rocketServerSocket {
 	return &rocketServerSocket{
@@ -156,6 +171,7 @@ func newRocketServerSocket(
 		stats:                   stats,
 		pstats:                  pstats,
 		observer:                observer,
+		maxRequests:             maxRequests,
 		totalActiveRequestCount: totalActiveRequestCount,
 	}
 }
@@ -172,6 +188,19 @@ func (s *rocketServerSocket) incrementActiveRequests() {
 func (s *rocketServerSocket) decrementActiveRequests() {
 	current := s.totalActiveRequestCount.Add(-1)
 	s.observer.ActiveRequests(int(current))
+}
+
+// isOverloaded checks if adding one more request would exceed the configured maxRequests limit
+// Returns true if the server should reject new requests due to high load
+//
+// TODO: align with C++ implementation
+func (s *rocketServerSocket) isOverloaded() bool {
+	// If maxRequests is 0 (default), overload protection is disabled
+	if s.maxRequests == 0 {
+		return false
+	}
+	countWithNewRequest := int64(s.totalActiveRequestCount.Load()) + 1
+	return countWithNewRequest > s.maxRequests
 }
 
 func (s *rocketServerSocket) metadataPush(msg payload.Payload) {
@@ -200,6 +229,10 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 
 	// Notify observer that request was received
 	s.observer.ReceivedRequest()
+
+	if s.isOverloaded() {
+		return mono.Error(loadSheddingError)
+	}
 
 	s.stats.SchedulingWorkCount.Incr()
 	workItem := func(ctx context.Context) (payload.Payload, error) {
@@ -275,14 +308,19 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	// Notify observer that request was received
 	s.observer.ReceivedRequest()
 
-	// Track process delay from request received to processing start
-	processStartTime := time.Now()
-	processDelay := processStartTime.Sub(requestReceivedTime)
-	s.observer.ProcessDelay(processDelay)
+	if s.isOverloaded() {
+		s.log("rocketServer fireAndForget: dropping request due to server overload")
+		return
+	}
 
 	// Increment active requests when processing starts
 	s.incrementActiveRequests()
 	defer s.decrementActiveRequests()
+
+	// Track process delay from request received to processing start
+	processStartTime := time.Now()
+	processDelay := processStartTime.Sub(requestReceivedTime)
+	s.observer.ProcessDelay(processDelay)
 
 	// TODO: support pipelining
 	if err := process(s.ctx, s.proc, protocol, s.pstats); err != nil {

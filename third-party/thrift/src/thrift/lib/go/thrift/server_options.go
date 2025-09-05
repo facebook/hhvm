@@ -49,6 +49,7 @@ type serverOptions struct {
 	serverStats       *stats.ServerStats
 	processorStats    map[string]*stats.TimingSeries
 	serverObserver    ServerObserver
+	maxRequests       int64
 }
 
 func defaultServerOptions() *serverOptions {
@@ -61,6 +62,7 @@ func defaultServerOptions() *serverOptions {
 		processorStats:    make(map[string]*stats.TimingSeries),
 		serverStats:       stats.NewServerStats(stats.NewTimingConfig(defaultStatsPeriod), defaultStatsPeriod),
 		serverObserver:    newNoopServerObserver(),
+		maxRequests:       0, // disable
 	}
 }
 
@@ -127,6 +129,14 @@ func WithProcessorStats(processorStats map[string]*stats.TimingSeries) ServerOpt
 func WithServerObserver(serverObserver ServerObserver) ServerOption {
 	return func(server *serverOptions) {
 		server.serverObserver = serverObserver
+	}
+}
+
+// WithMaxRequests sets the maximum number of active requests before server rejects new ones.
+// A value of 0 disables overload protection (default behavior).
+func WithMaxRequests(maxRequests int64) ServerOption {
+	return func(server *serverOptions) {
+		server.maxRequests = maxRequests
 	}
 }
 

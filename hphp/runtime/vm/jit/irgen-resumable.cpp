@@ -190,9 +190,9 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
     auto const createNewAFWH = [&]{
       if (isInlining(env)) gen(env, StFrameFunc, FuncData { func }, fp(env));
       auto const wh = lowPri ?
-        gen(env, CreateAFWHL, fp(env), cns(env, func->numSlotsInFrame()), 
+        gen(env, CreateAFWHL, fp(env), cns(env, func->numSlotsInFrame()),
             resumeAddr(), suspendOff) :
-        gen(env, CreateAFWH, fp(env), cns(env, func->numSlotsInFrame()), 
+        gen(env, CreateAFWH, fp(env), cns(env, func->numSlotsInFrame()),
             resumeAddr(), suspendOff, child);
       // Constructing a waithandle teleports locals and iterators to the heap,
       // kill them here to improve alias analysis.
@@ -423,16 +423,18 @@ Type awaitedTypeFromSSATmp(const SSATmp* awaitable) {
   if (inst->is(Call)) {
     return (inst->src(2)->hasConstVal(TFunc) &&
             !inst->extra<Call>()->asyncEagerReturn)
-      ? awaitedCallReturnType(inst->src(2)->funcVal()) : TInitCell;
+      ? awaitedCallReturnType(inst->src(2)->funcVal(), true /* mayIntercept */)
+      : TInitCell;
   }
   if (inst->is(CallFuncEntry)) {
     auto const extra = inst->extra<CallFuncEntry>();
     return (inst->src(2)->hasConstVal(TFunc) &&
             !extra->asyncEagerReturn())
-      ? awaitedCallReturnType(inst->src(2)->funcVal()) : TInitCell;
+      ? awaitedCallReturnType(inst->src(2)->funcVal(), true /* mayIntercept */)
+      : TInitCell;
   }
   if (inst->is(CreateAFWH) || inst->is(CreateAFWHL)) {
-    return awaitedCallReturnType(inst->func());
+    return awaitedCallReturnType(inst->func(), false /* mayIntercept */);
   }
   if (inst->is(DefLabel)) {
     auto ty = TBottom;

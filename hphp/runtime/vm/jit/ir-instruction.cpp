@@ -436,22 +436,27 @@ Type callReturn(const IRInstruction* inst) {
       auto const extra = inst->extra<Call>();
       if (extra->asyncEagerReturn) return TInitCell;
       if (extra->formingRegion) return TInitCell;
-      return inst->src(2)->hasConstVal(TFunc)
-        ? irgen::callReturnType(inst->src(2)->funcVal()) : TInitCell;
+      if (!inst->src(2)->hasConstVal(TFunc)) return TInitCell;
+
+      auto const callee = inst->src(2)->funcVal();
+      return irgen::callReturnType(callee, true /* mayIntercept */);
     }
     case CallFuncEntry: {
       auto const extra = inst->extra<CallFuncEntry>();
       if (extra->asyncEagerReturn()) return TInitCell;
       if (extra->formingRegion) return TInitCell;
+
       // In general, the callee prototype and actual called function may differ in
       // cases where we call `CallFuncEntry` with an override, so we can't rely
       // on the type in the compile-time data and must inspect the argument.
-      return inst->src(2)->hasConstVal(TFunc)
-        ? irgen::callReturnType(inst->src(2)->funcVal()) : TInitCell;
+      if (!inst->src(2)->hasConstVal(TFunc)) return TInitCell;
+
+      auto const callee = inst->src(2)->funcVal();
+      return irgen::callReturnType(callee, true /* mayIntercept */);
     }
     case InlineSideExit: {
       auto const extra = inst->extra<InlineSideExit>();
-      return irgen::callReturnType(extra->callee);
+      return irgen::callReturnType(extra->callee, false /* mayIntercept */);
     }
     default:
       not_reached();

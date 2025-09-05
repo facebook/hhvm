@@ -317,52 +317,54 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     setFrameCtx(inst->src(0), inst->src(1));
     break;
 
-  case Call:
-    {
-      assertx(cur().checkMInstrStateDead());
-      auto const extra = inst->extra<Call>();
-      // Remove tracked state for the slots for args and the actrec.
-      uint32_t numCells = kNumActRecCells + extra->numInputs();
-      for (auto i = uint32_t{0}; i < numCells; ++i) {
-        setValue(stk(extra->spOffset + i), nullptr);
-      }
-      // Mark out parameter locations as being at least InitCell
-      auto const callee = inst->src(2)->hasConstVal(TFunc)
-        ? inst->src(2)->funcVal() : nullptr;
-      auto const base = extra->spOffset + numCells;
-      for (auto i = uint32_t{0}; i < extra->numOut; ++i) {
-        auto const ty = callee && callee->takesInOutParams()
-          ? irgen::callOutType(callee, i)
-          : TInitCell;
-        setType(stk(base + i), ty);
-      }
-      // We consider popping an ActRec and args to be synced to memory.
-      assertx(cur().bcSPOff == inst->marker().bcSPOff());
-      assertx(cur().bcSPOff.offset >= numCells);
-      cur().bcSPOff -= numCells;
+  case Call: {
+    assertx(cur().checkMInstrStateDead());
+    auto const extra = inst->extra<Call>();
+    // Remove tracked state for the slots for args and the actrec.
+    uint32_t numCells = kNumActRecCells + extra->numInputs();
+    for (auto i = uint32_t{0}; i < numCells; ++i) {
+      setValue(stk(extra->spOffset + i), nullptr);
     }
+    // Mark out parameter locations as being at least InitCell
+    auto const callee = inst->src(2)->hasConstVal(TFunc)
+      ? inst->src(2)->funcVal() : nullptr;
+    auto const base = extra->spOffset + numCells;
+    for (auto i = uint32_t{0}; i < extra->numOut; ++i) {
+      auto const ty = callee && callee->takesInOutParams()
+        ? irgen::callOutType(callee, i, true /* mayIntercept */)
+        : TInitCell;
+      setType(stk(base + i), ty);
+    }
+    // We consider popping an ActRec and args to be synced to memory.
+    assertx(cur().bcSPOff == inst->marker().bcSPOff());
+    assertx(cur().bcSPOff.offset >= numCells);
+    cur().bcSPOff -= numCells;
     break;
+  }
 
   case CallFuncEntry: {
-      assertx(cur().checkMInstrStateDead());
-      auto const extra = inst->extra<CallFuncEntry>();
-      auto const calleePrototype = extra->calleePrototype;
-      // Remove tracked state for the slots for argc and the actrec.
-      uint32_t numCells = kNumActRecCells + calleePrototype->numFuncEntryInputs();
-      for (auto i = uint32_t{0}; i < numCells; ++i) {
-        setValue(stk(extra->spOffset + i), nullptr);
-      }
-      // Set the type of out parameter locations.
-      auto const base = extra->spOffset + numCells;
-      for (auto i = uint32_t{0}; i < calleePrototype->numInOutParams(); ++i) {
-        setType(stk(base + i), irgen::callOutType(calleePrototype, i));
-      }
-      // We consider popping an ActRec and args to be synced to memory.
-      assertx(cur().bcSPOff == inst->marker().bcSPOff());
-      assertx(cur().bcSPOff.offset >= numCells);
-      cur().bcSPOff -= numCells;
+    assertx(cur().checkMInstrStateDead());
+    auto const extra = inst->extra<CallFuncEntry>();
+    auto const calleePrototype = extra->calleePrototype;
+    // Remove tracked state for the slots for argc and the actrec.
+    uint32_t numCells = kNumActRecCells + calleePrototype->numFuncEntryInputs();
+    for (auto i = uint32_t{0}; i < numCells; ++i) {
+      setValue(stk(extra->spOffset + i), nullptr);
     }
+    // Set the type of out parameter locations.
+    auto const base = extra->spOffset + numCells;
+    for (auto i = uint32_t{0}; i < calleePrototype->numInOutParams(); ++i) {
+      setType(
+        stk(base + i),
+        irgen::callOutType(calleePrototype, i, true /* mayIntercept */)
+      );
+    }
+    // We consider popping an ActRec and args to be synced to memory.
+    assertx(cur().bcSPOff == inst->marker().bcSPOff());
+    assertx(cur().bcSPOff.offset >= numCells);
+    cur().bcSPOff -= numCells;
     break;
+  }
 
   case ContEnter:
     assertx(cur().checkMInstrStateDead());
@@ -1023,7 +1025,7 @@ void FrameStateMgr::trackEnterInlineFrame(const IRInstruction* inst) {
   if (callee->isCPPBuiltin()) {
     auto const inout = callee->numInOutParams();
     for (auto i = uint32_t{0}; i < inout; ++i) {
-      auto const type = irgen::callOutType(callee, i);
+      auto const type = irgen::callOutType(callee, i, false /* mayIntercept */);
       setType(stk(extra->spOffset + kNumActRecCells + i), type);
     }
   }
@@ -1082,7 +1084,8 @@ void FrameStateMgr::trackInlineSideExit(const IRInstruction* inst) {
   // left is to set the type of out parameter locations.
   auto const base = arOffset + kNumActRecCells;
   for (auto i = uint32_t{0}; i < callee->numInOutParams(); ++i) {
-    setType(stk(base + i), irgen::callOutType(callee, i));
+    auto const type = irgen::callOutType(callee, i, false /* mayIntercept */);
+    setType(stk(base + i), type);
   }
 
   assertx(cur().bcSPOff == base.to<SBInvOffset>(irSPOff()));

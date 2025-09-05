@@ -492,10 +492,11 @@ void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
     implInlineReturn(env);
     for (int32_t idx = 0; idx < nret - 1; ++idx) {
       auto const off = offsetFromIRSP(env, BCSPRelOffset{idx});
-      auto const type = callOutType(callee, idx);
+      auto const type = callOutType(callee, idx, false /* mayIntercept */);
       gen(env, AssertStk, type, IRSPRelOffsetData{off}, sp(env));
     }
-    push(env, gen(env, AssertType, callReturnType(callee), ret));
+    auto const type = callReturnType(callee, false /* mayIntercept */);
+    push(env, gen(env, AssertType, type, ret));
     return;
   }
 
@@ -512,16 +513,18 @@ void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
     if (nret > 1) {
       for (int32_t idx = nret - 2; idx >= 0; --idx) {
         auto const val = retVals[idx];
-        push(env, gen(env, AssertType, callOutType(callee, idx), val));
+        auto const type = callOutType(callee, idx, false /* mayIntercept */);
+        push(env, gen(env, AssertType, type, val));
       }
     }
-    push(env, gen(env, AssertType, callReturnType(callee), retVals.back()));
+    auto const type = callReturnType(callee, false /* mayIntercept */);
+    push(env, gen(env, AssertType, type, retVals.back()));
     return;
   }
 
   assertx(nret == 1);
-  auto const retVal =
-    gen(env, AssertType, awaitedCallReturnType(callee), retVals.back());
+  auto const type = awaitedCallReturnType(callee, false /* mayIntercept */);
+  auto const retVal = gen(env, AssertType, type, retVals.back());
   if (frame.asyncEagerOffset == kInvalidOffset) {
     // Async eager return was not requested. Box the returned value and
     // continue execution at the next opcode.

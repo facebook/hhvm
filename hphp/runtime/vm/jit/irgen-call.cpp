@@ -349,7 +349,9 @@ void handleCallReturn(IRGS& env, const Func* callee, SSATmp* retVal,
       gen(env, JmpZero, taken, tst);
     },
     [&] {
-      auto const ty = callee ? awaitedCallReturnType(callee) : TInitCell;
+      auto const ty = callee
+        ? awaitedCallReturnType(callee, true /* mayIntercept */)
+        : TInitCell;
       push(env, gen(env, AssertType, ty, retVal));
       auto const absAEOffset = bcOff(env) + asyncEagerOffset;
       if (unlikely) {
@@ -361,7 +363,9 @@ void handleCallReturn(IRGS& env, const Func* callee, SSATmp* retVal,
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-      auto const ty = callee ? callReturnType(callee) : TInitCell;
+      auto const ty = callee
+        ? callReturnType(callee, true /* mayIntercept */)
+        : TInitCell;
       push(env, gen(env, AssertType, ty, retVal));
       if (unlikely) {
         gen(env, Jmp, makeExit(env, nextSrcKey(env)));
@@ -641,7 +645,9 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
         constParamCacheLink(env, callee, objOrClass, asyncEagerReturn);
       assertx(link.isNormal());
       auto const data = TVInRDSHandleData { link.handle(), asyncEagerReturn };
-      auto const retType = asyncEagerReturn ? TInitCell : callReturnType(callee);
+      auto const retType = asyncEagerReturn
+        ? TInitCell
+        : callReturnType(callee, true /* mayIntercept */);
       auto const res = cond(
         env,
         [&] (Block* taken) {
@@ -2305,10 +2311,10 @@ void emitFCallClsMethodSD(IRGS& env, FCallArgs fca, const StringData* clsHint,
 
 //////////////////////////////////////////////////////////////////////
 
-Type callReturnType(const Func* callee) {
+Type callReturnType(const Func* callee, bool mayIntercept) {
   // Don't make any assumptions about functions which can be intercepted. The
   // interception functions can return arbitrary types.
-  if (callee->isInterceptable()) return TInitCell;
+  if (mayIntercept && callee->isInterceptable()) return TInitCell;
 
   if (callee->isCPPBuiltin()) {
     // If the function is builtin, use the builtin's return type, then take into
@@ -2328,13 +2334,13 @@ Type callReturnType(const Func* callee) {
   return typeFromRAT(callee->repoReturnType(), callee->cls()) & TInitCell;
 }
 
-Type callOutType(const Func* callee, uint32_t index) {
+Type callOutType(const Func* callee, uint32_t index, bool mayIntercept) {
   assertx(callee->takesInOutParams());
   assertx(index < callee->numInOutParams());
 
   // Don't make any assumptions about functions which can be intercepted. The
   // interception functions can return arbitrary types.
-  if (callee->isInterceptable()) return TInitCell;
+  if (mayIntercept && callee->isInterceptable()) return TInitCell;
 
   if (callee->isCPPBuiltin()) {
     uint32_t param_idx = 0;
@@ -2357,10 +2363,10 @@ Type callOutType(const Func* callee, uint32_t index) {
   return TInitCell;
 }
 
-Type awaitedCallReturnType(const Func* callee) {
+Type awaitedCallReturnType(const Func* callee, bool mayIntercept) {
   // Don't make any assumptions about functions which can be intercepted. The
   // interception functions can return arbitrary types.
-  if (callee->isInterceptable()) return TInitCell;
+  if (mayIntercept && callee->isInterceptable()) return TInitCell;
 
   return typeFromRAT(callee->repoAwaitedReturnType(), callee->cls());
 }

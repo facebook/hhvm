@@ -1712,7 +1712,8 @@ void emitNativeImpl(IRGS& env) {
     }
     gen(env, NativeImpl, fp(env), sp(env));
     if (eagerSync) gen(env, StVMRegState, cns(env, VMRegState::DIRTY));
-    auto const retVal = gen(env, LdRetVal, callReturnType(callee), fp(env));
+    auto const retTy = callReturnType(callee, false /* mayIntercept */);
+    auto const retVal = gen(env, LdRetVal, retTy, fp(env));
     auto const spAdjust = offsetToReturnSlot(env);
     auto const data = RetCtrlData { spAdjust, false, AuxUnion{0} };
     gen(env, RetCtrl, data, sp(env), fp(env), retVal);

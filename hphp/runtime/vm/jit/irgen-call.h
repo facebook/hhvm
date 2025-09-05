@@ -48,9 +48,9 @@ struct IRGS;
  */
 void emitLockObjOnFrameUnwind(IRGS& env, PC pc);
 
-Type callReturnType(const Func* callee);
-Type awaitedCallReturnType(const Func* callee);
-Type callOutType(const Func* callee, uint32_t index);
+Type callReturnType(const Func* callee, bool mayIntercept);
+Type awaitedCallReturnType(const Func* callee, bool mayIntercept);
+Type callOutType(const Func* callee, uint32_t index, bool mayIntercept);
 
 /*
  * Emits instructions to check and enforce module boundary violations

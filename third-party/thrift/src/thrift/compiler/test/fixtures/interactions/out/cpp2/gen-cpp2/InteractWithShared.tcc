@@ -120,7 +120,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_do_some_similar_things(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_do_some_similar_things.
   iface_->fbthrift_execute_decorators_before_do_some_similar_things(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -291,7 +291,9 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_frobnicate(
       /* .definingServiceName =*/ "InteractWithShared",
       /* .methodName =*/ "MyInteraction.frobnicate",
       /* .qualifiedMethodName =*/ "InteractWithShared.MyInteraction.frobnicate"};
-  auto decoratorCallback = apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback::noop();
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<InteractWithShared>::fbthrift_invoke_decorator_after_MyInteraction_frobnicate};
  auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -309,6 +311,8 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_frobnicate(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
+  // Execute method decorator before_MyInteraction_frobnicate.
+  iface_->fbthrift_execute_decorators_before_MyInteraction_frobnicate(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -466,7 +470,10 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_ping(
       /* .definingServiceName =*/ "InteractWithShared",
       /* .methodName =*/ "MyInteraction.ping",
       /* .qualifiedMethodName =*/ "InteractWithShared.MyInteraction.ping"};
-  auto decoratorCallback = apache::thrift::HandlerCallbackOneWay::DecoratorAfterCallback::noop();
+  apache::thrift::HandlerCallbackOneWay::DecoratorAfterCallback decoratorCallback{
+    // apache::thrift::detail::TileInternalAPI(iface).getDecoratorIface(),
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<InteractWithShared>::fbthrift_invoke_decorator_after_MyInteraction_ping};
   auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
       apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
       std::move(ctxStack),
@@ -480,6 +487,8 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_ping(
       std::move(serverRequest.requestData()),
       std::move(tile), 
       std::move(decoratorCallback));
+  // Execute method decorator before_MyInteraction_ping.
+  iface_->fbthrift_execute_decorators_before_MyInteraction_ping(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -599,7 +608,9 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_truthify(
       /* .definingServiceName =*/ "InteractWithShared",
       /* .methodName =*/ "MyInteraction.truthify",
       /* .qualifiedMethodName =*/ "InteractWithShared.MyInteraction.truthify"};
-  auto decoratorCallback = apache::thrift::HandlerCallback<::apache::thrift::ServerStream<bool>>::DecoratorAfterCallback::noop();
+  apache::thrift::HandlerCallback<::apache::thrift::ServerStream<bool>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<InteractWithShared>::fbthrift_invoke_decorator_after_MyInteraction_truthify};
  auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<bool>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -617,6 +628,8 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_truthify(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
+  // Execute method decorator before_MyInteraction_truthify.
+  iface_->fbthrift_execute_decorators_before_MyInteraction_truthify(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -765,7 +778,9 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_encode(
       /* .definingServiceName =*/ "InteractWithShared",
       /* .methodName =*/ "MyInteraction.encode",
       /* .qualifiedMethodName =*/ "InteractWithShared.MyInteraction.encode"};
-  auto decoratorCallback = apache::thrift::HandlerCallback<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::DecoratorAfterCallback::noop();
+  apache::thrift::HandlerCallback<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<InteractWithShared>::fbthrift_invoke_decorator_after_MyInteraction_encode};
  auto callback =
       apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -783,6 +798,8 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_encode(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
+  // Execute method decorator before_MyInteraction_encode.
+  iface_->fbthrift_execute_decorators_before_MyInteraction_encode(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -955,7 +972,9 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_init(
       /* .definingServiceName =*/ "InteractWithShared",
       /* .methodName =*/ "SharedInteraction.init",
       /* .qualifiedMethodName =*/ "InteractWithShared.SharedInteraction.init"};
-  auto decoratorCallback = apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback::noop();
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<InteractWithShared>::fbthrift_invoke_decorator_after_SharedInteraction_init};
  auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -973,6 +992,8 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_init(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
+  // Execute method decorator before_SharedInteraction_init.
+  iface_->fbthrift_execute_decorators_before_SharedInteraction_init(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1119,7 +1140,9 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_do_somet
       /* .definingServiceName =*/ "InteractWithShared",
       /* .methodName =*/ "SharedInteraction.do_something",
       /* .qualifiedMethodName =*/ "InteractWithShared.SharedInteraction.do_something"};
-  auto decoratorCallback = apache::thrift::HandlerCallback<std::unique_ptr<::thrift::shared_interactions::DoSomethingResult>>::DecoratorAfterCallback::noop();
+  apache::thrift::HandlerCallback<std::unique_ptr<::thrift::shared_interactions::DoSomethingResult>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<InteractWithShared>::fbthrift_invoke_decorator_after_SharedInteraction_do_something};
  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::thrift::shared_interactions::DoSomethingResult>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -1137,6 +1160,8 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_do_somet
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
+  // Execute method decorator before_SharedInteraction_do_something.
+  iface_->fbthrift_execute_decorators_before_SharedInteraction_do_something(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -1283,7 +1308,9 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_tear_dow
       /* .definingServiceName =*/ "InteractWithShared",
       /* .methodName =*/ "SharedInteraction.tear_down",
       /* .qualifiedMethodName =*/ "InteractWithShared.SharedInteraction.tear_down"};
-  auto decoratorCallback = apache::thrift::HandlerCallback<void>::DecoratorAfterCallback::noop();
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<InteractWithShared>::fbthrift_invoke_decorator_after_SharedInteraction_tear_down};
  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -1301,6 +1328,8 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_tear_dow
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
+  // Execute method decorator before_SharedInteraction_tear_down.
+  iface_->fbthrift_execute_decorators_before_SharedInteraction_tear_down(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;

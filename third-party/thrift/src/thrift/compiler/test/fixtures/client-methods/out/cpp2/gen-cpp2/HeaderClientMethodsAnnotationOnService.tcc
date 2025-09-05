@@ -125,7 +125,7 @@ void HeaderClientMethodsAnnotationOnServiceAsyncProcessor::executeRequest_echo(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_echo.
   iface_->fbthrift_execute_decorators_before_echo(*serverRequest.requestContext(), *args.uarg_request);
 
   const auto makeExecuteHandler = [&] {
@@ -295,7 +295,7 @@ void HeaderClientMethodsAnnotationOnServiceAsyncProcessor::executeRequest_echo_2
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_echo_2.
   iface_->fbthrift_execute_decorators_before_echo_2(*serverRequest.requestContext(), *args.uarg_request);
 
   const auto makeExecuteHandler = [&] {

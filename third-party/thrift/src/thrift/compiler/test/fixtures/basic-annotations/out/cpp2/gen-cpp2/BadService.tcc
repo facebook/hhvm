@@ -120,7 +120,7 @@ void GoodServiceAsyncProcessor::executeRequest_bar(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_bar.
   iface_->fbthrift_execute_decorators_before_bar(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -279,7 +279,9 @@ void GoodServiceAsyncProcessor::executeRequest_BadInteraction_foo(
       /* .definingServiceName =*/ "BadService",
       /* .methodName =*/ "BadInteraction.foo",
       /* .qualifiedMethodName =*/ "BadService.BadInteraction.foo"};
-  auto decoratorCallback = apache::thrift::HandlerCallback<void>::DecoratorAfterCallback::noop();
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<GoodService>::fbthrift_invoke_decorator_after_BadInteraction_foo};
  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -297,6 +299,8 @@ void GoodServiceAsyncProcessor::executeRequest_BadInteraction_foo(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
+  // Execute method decorator before_BadInteraction_foo.
+  iface_->fbthrift_execute_decorators_before_BadInteraction_foo(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;

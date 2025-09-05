@@ -174,7 +174,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_get(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_get.
   iface_->fbthrift_execute_decorators_before_get(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -341,7 +341,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_getter(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_getter.
   iface_->fbthrift_execute_decorators_before_getter(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -508,7 +508,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_lists(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_lists.
   iface_->fbthrift_execute_decorators_before_lists(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -675,7 +675,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_maps(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_maps.
   iface_->fbthrift_execute_decorators_before_maps(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -842,7 +842,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_name(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_name.
   iface_->fbthrift_execute_decorators_before_name(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1009,7 +1009,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_name_to_value(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_name_to_value.
   iface_->fbthrift_execute_decorators_before_name_to_value(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1176,7 +1176,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_names(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_names.
   iface_->fbthrift_execute_decorators_before_names(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1343,7 +1343,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_prefix_tree(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_prefix_tree.
   iface_->fbthrift_execute_decorators_before_prefix_tree(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1510,7 +1510,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_sets(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_sets.
   iface_->fbthrift_execute_decorators_before_sets(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1677,7 +1677,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_setter(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_setter.
   iface_->fbthrift_execute_decorators_before_setter(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1844,7 +1844,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_str(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_str.
   iface_->fbthrift_execute_decorators_before_str(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -2011,7 +2011,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_strings(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_strings.
   iface_->fbthrift_execute_decorators_before_strings(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -2178,7 +2178,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_type(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_type.
   iface_->fbthrift_execute_decorators_before_type(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -2345,7 +2345,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_value(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_value.
   iface_->fbthrift_execute_decorators_before_value(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -2512,7 +2512,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_value_to_name(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_value_to_name.
   iface_->fbthrift_execute_decorators_before_value_to_name(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -2679,7 +2679,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_values(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_values.
   iface_->fbthrift_execute_decorators_before_values(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -2846,7 +2846,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_id(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_id.
   iface_->fbthrift_execute_decorators_before_id(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -3013,7 +3013,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_ids(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_ids.
   iface_->fbthrift_execute_decorators_before_ids(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -3180,7 +3180,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptor(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_descriptor.
   iface_->fbthrift_execute_decorators_before_descriptor(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -3347,7 +3347,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptors(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_descriptors.
   iface_->fbthrift_execute_decorators_before_descriptors(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -3514,7 +3514,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_key(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_key.
   iface_->fbthrift_execute_decorators_before_key(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -3681,7 +3681,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_keys(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_keys.
   iface_->fbthrift_execute_decorators_before_keys(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -3848,7 +3848,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotation(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_annotation.
   iface_->fbthrift_execute_decorators_before_annotation(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -4015,7 +4015,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotations(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_annotations.
   iface_->fbthrift_execute_decorators_before_annotations(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -4182,7 +4182,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_member(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_member.
   iface_->fbthrift_execute_decorators_before_member(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -4349,7 +4349,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_members(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_members.
   iface_->fbthrift_execute_decorators_before_members(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -4516,7 +4516,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_field(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_field.
   iface_->fbthrift_execute_decorators_before_field(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -4683,7 +4683,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_fields(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_fields.
   iface_->fbthrift_execute_decorators_before_fields(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {

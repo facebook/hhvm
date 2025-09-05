@@ -122,7 +122,7 @@ void AdapterServiceAsyncProcessor::executeRequest_count(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_count.
   iface_->fbthrift_execute_decorators_before_count(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -292,7 +292,7 @@ void AdapterServiceAsyncProcessor::executeRequest_adaptedTypes(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_adaptedTypes.
   iface_->fbthrift_execute_decorators_before_adaptedTypes(*serverRequest.requestContext(), *args.uarg_arg);
 
   const auto makeExecuteHandler = [&] {

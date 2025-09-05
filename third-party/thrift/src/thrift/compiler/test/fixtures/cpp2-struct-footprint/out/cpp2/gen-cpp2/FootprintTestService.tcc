@@ -162,7 +162,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_processIOBuf(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_processIOBuf.
   iface_->fbthrift_execute_decorators_before_processIOBuf(*serverRequest.requestContext(), *args.uarg_buf, *args.uarg_ptr, args.uarg_alias);
 
   const auto makeExecuteHandler = [&] {
@@ -326,7 +326,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getStruct(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_getStruct.
   iface_->fbthrift_execute_decorators_before_getStruct(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -496,7 +496,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_setStruct(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_setStruct.
   iface_->fbthrift_execute_decorators_before_setStruct(*serverRequest.requestContext(), *args.uarg_input);
 
   const auto makeExecuteHandler = [&] {
@@ -663,7 +663,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_setStructList(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_setStructList.
   iface_->fbthrift_execute_decorators_before_setStructList(*serverRequest.requestContext(), *args.uarg_items);
 
   const auto makeExecuteHandler = [&] {
@@ -827,7 +827,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getStructList(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_getStructList.
   iface_->fbthrift_execute_decorators_before_getStructList(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -994,7 +994,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getNestedContainer(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_getNestedContainer.
   iface_->fbthrift_execute_decorators_before_getNestedContainer(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1161,7 +1161,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getTypedefStruct(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_getTypedefStruct.
   iface_->fbthrift_execute_decorators_before_getTypedefStruct(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1328,7 +1328,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getTypedefList(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_getTypedefList.
   iface_->fbthrift_execute_decorators_before_getTypedefList(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1495,7 +1495,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getUnion(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_getUnion.
   iface_->fbthrift_execute_decorators_before_getUnion(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1663,7 +1663,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getCalculator(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_getCalculator.
   iface_->fbthrift_execute_decorators_before_getCalculator(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1827,7 +1827,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_streamStructs(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_streamStructs.
   iface_->fbthrift_execute_decorators_before_streamStructs(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {
@@ -1999,7 +1999,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_streamWithSinkInitial(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_streamWithSinkInitial.
   iface_->fbthrift_execute_decorators_before_streamWithSinkInitial(*serverRequest.requestContext(), args.uarg_input);
 
   const auto makeExecuteHandler = [&] {
@@ -2173,7 +2173,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_streamWithSinkException(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_streamWithSinkException.
   iface_->fbthrift_execute_decorators_before_streamWithSinkException(*serverRequest.requestContext(), args.uarg_input);
 
   const auto makeExecuteHandler = [&] {
@@ -2360,7 +2360,9 @@ void FootprintTestServiceAsyncProcessor::executeRequest_Calculator_add(
       /* .definingServiceName =*/ "FootprintTestService",
       /* .methodName =*/ "Calculator.add",
       /* .qualifiedMethodName =*/ "FootprintTestService.Calculator.add"};
-  auto decoratorCallback = apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback::noop();
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<FootprintTestService>::fbthrift_invoke_decorator_after_Calculator_add};
  auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -2378,6 +2380,8 @@ void FootprintTestServiceAsyncProcessor::executeRequest_Calculator_add(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
+  // Execute method decorator before_Calculator_add.
+  iface_->fbthrift_execute_decorators_before_Calculator_add(*serverRequest.requestContext(), args.uarg_a, args.uarg_b);
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;

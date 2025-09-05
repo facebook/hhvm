@@ -114,7 +114,9 @@ void InteractLocallyAsyncProcessor::executeRequest_SharedInteraction_init(
       /* .definingServiceName =*/ "InteractLocally",
       /* .methodName =*/ "SharedInteraction.init",
       /* .qualifiedMethodName =*/ "InteractLocally.SharedInteraction.init"};
-  auto decoratorCallback = apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback::noop();
+  apache::thrift::HandlerCallback<::std::int32_t>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<InteractLocally>::fbthrift_invoke_decorator_after_SharedInteraction_init};
  auto callback =
       apache::thrift::HandlerCallbackPtr<::std::int32_t>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -132,6 +134,8 @@ void InteractLocallyAsyncProcessor::executeRequest_SharedInteraction_init(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
+  // Execute method decorator before_SharedInteraction_init.
+  iface_->fbthrift_execute_decorators_before_SharedInteraction_init(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -278,7 +282,9 @@ void InteractLocallyAsyncProcessor::executeRequest_SharedInteraction_do_somethin
       /* .definingServiceName =*/ "InteractLocally",
       /* .methodName =*/ "SharedInteraction.do_something",
       /* .qualifiedMethodName =*/ "InteractLocally.SharedInteraction.do_something"};
-  auto decoratorCallback = apache::thrift::HandlerCallback<std::unique_ptr<::thrift::shared_interactions::DoSomethingResult>>::DecoratorAfterCallback::noop();
+  apache::thrift::HandlerCallback<std::unique_ptr<::thrift::shared_interactions::DoSomethingResult>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<InteractLocally>::fbthrift_invoke_decorator_after_SharedInteraction_do_something};
  auto callback =
       apache::thrift::HandlerCallbackPtr<std::unique_ptr<::thrift::shared_interactions::DoSomethingResult>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -296,6 +302,8 @@ void InteractLocallyAsyncProcessor::executeRequest_SharedInteraction_do_somethin
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
+  // Execute method decorator before_SharedInteraction_do_something.
+  iface_->fbthrift_execute_decorators_before_SharedInteraction_do_something(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
@@ -442,7 +450,9 @@ void InteractLocallyAsyncProcessor::executeRequest_SharedInteraction_tear_down(
       /* .definingServiceName =*/ "InteractLocally",
       /* .methodName =*/ "SharedInteraction.tear_down",
       /* .qualifiedMethodName =*/ "InteractLocally.SharedInteraction.tear_down"};
-  auto decoratorCallback = apache::thrift::HandlerCallback<void>::DecoratorAfterCallback::noop();
+  apache::thrift::HandlerCallback<void>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<InteractLocally>::fbthrift_invoke_decorator_after_SharedInteraction_tear_down};
  auto callback =
       apache::thrift::HandlerCallbackPtr<void>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -460,6 +470,8 @@ void InteractLocallyAsyncProcessor::executeRequest_SharedInteraction_tear_down(
           std::move(serverRequest.requestData()),
           std::move(tile),
           std::move(decoratorCallback));
+  // Execute method decorator before_SharedInteraction_tear_down.
+  iface_->fbthrift_execute_decorators_before_SharedInteraction_tear_down(*serverRequest.requestContext());
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;

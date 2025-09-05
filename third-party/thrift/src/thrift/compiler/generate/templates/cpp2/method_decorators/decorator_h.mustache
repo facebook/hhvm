@@ -41,6 +41,10 @@
   for interactions that are associated with a given t_service.
 }}
 {{#let partial decorator_interaction_functions |service| captures |params|}}
+{{#if (object.eq? service.extends null)}}
+{{#else}}{{! We need to recursively include the interactions of any parent services}}
+{{#partial decorator_interaction_functions service=service.extends}}
+{{/if (object.eq? service.extends null)}}
 {{#each service.interactions as |interaction|}}
   // BEGIN interaction {{interaction.name}} methods
 {{#each interaction.functions as |function|}}
@@ -77,7 +81,11 @@ class ServiceMethodDecorator<{{service.qualified_name}}> : public ServiceMethodD
 {{#each service.functions as |function|}}
   void fbthrift_execute_decorators_before_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#each function.params.fields as |param|}}, {{#partial params.param_type param=param}} /*{{#partial params.param_name param=param}}*/{{/each}}) override {}
   void fbthrift_execute_decorators_after_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#partial params.after_param_unused service=service function=function}}) override {}
-{{/each}}{{! Interaction methods are deliberately omitted here - they need to exist on the interaction but require some additional plumbing that isn't implemented yet}}
+{{/each}}
+{{#each service.interactions as |interaction|}}{{#each interaction.functions as |function|}}
+  void fbthrift_execute_decorators_before_{{interaction.name}}_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#each function.params.fields as |param|}}, {{#partial params.param_type param=param}} /*{{#partial params.param_name param=param}}*/{{/each}}) override {}
+  void fbthrift_execute_decorators_after_{{interaction.name}}_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#partial params.after_param_unused service=service function=function}}) override {}
+{{/each}}{{/each}}
 {{/let partial}}
 
 {{!
@@ -94,7 +102,11 @@ class ServiceMethodDecorator<{{service.qualified_name}}> : public ServiceMethodD
 {{#each service.functions as |function|}}
   void fbthrift_execute_decorators_before_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#each function.params.fields as |param|}}, {{#partial params.param_type param=param}} /*{{#partial params.param_name param=param}}*/{{/each}}) override;
   void fbthrift_execute_decorators_after_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#partial params.after_param_unused service=service function=function}}) override;
-{{/each}}{{! Interaction methods are deliberately omitted here - they need to exist on the interaction but require some additional plumbing that isn't implemented yet}}
+{{/each}}
+{{#each service.interactions as |interaction|}}{{#each interaction.functions as |function|}}
+  void fbthrift_execute_decorators_before_{{interaction.name}}_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#each function.params.fields as |param|}}, {{#partial params.param_type param=param}} /*{{#partial params.param_name param=param}}*/{{/each}}) override;
+  void fbthrift_execute_decorators_after_{{interaction.name}}_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#partial params.after_param_unused service=service function=function}}) override;
+{{/each}}{{/each}}
 {{/let partial}}
 
 {{!
@@ -113,7 +125,14 @@ class ServiceMethodDecorator<{{service.qualified_name}}> : public ServiceMethodD
   static void fbthrift_invoke_decorator_after_{{function.cpp_name}}(void* iface, apache::thrift::Cpp2RequestContext* ctx{{#partial params.after_param service=service function=function}}) {
     static_cast<ServiceHandler<{{service.qualified_name}}>*>(iface)->fbthrift_execute_decorators_after_{{function.cpp_name}}(*ctx{{#partial params.after_invocation_args function=function}});
   }
-{{/each}}{{! Interaction methods are deliberately omitted here - they need to exist on the interaction but require some additional plumbing that isn't implemented yet}}
+{{/each}}
+{{#each service.interactions as |interaction|}}{{#each interaction.functions as |function|}}
+  virtual void fbthrift_execute_decorators_before_{{interaction.name}}_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#each function.params.fields as |param|}}, {{#partial params.param_type param=param}} /*{{#partial params.param_name param=param}}*/{{/each}});
+  virtual void fbthrift_execute_decorators_after_{{interaction.name}}_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#partial params.after_param_unused service=service function=function}});
+  static void fbthrift_invoke_decorator_after_{{interaction.name}}_{{function.cpp_name}}(void* iface, apache::thrift::Cpp2RequestContext* ctx{{#partial params.after_param service=service function=function}}) {
+    static_cast<ServiceHandler<{{service.qualified_name}}>*>(iface)->fbthrift_execute_decorators_after_{{interaction.name}}_{{function.cpp_name}}(*ctx{{#partial params.after_invocation_args function=function}});
+  }
+{{/each}}{{/each}}
  private:
   ServiceMethodDecoratorList<{{service.qualified_name}}> fbthrift_methodDecorators_;
   friend void decorate(ServiceHandler<{{service.qualified_name}}>&, ServiceMethodDecoratorList<{{service.qualified_name}}>);
@@ -125,7 +144,14 @@ class ServiceMethodDecorator<{{service.qualified_name}}> : public ServiceMethodD
   static void fbthrift_invoke_decorator_after_{{function.cpp_name}}(void* iface, apache::thrift::Cpp2RequestContext* ctx{{#partial params.after_param service=service function=function}}) {
     static_cast<ServiceHandler<{{service.qualified_name}}>*>(iface)->fbthrift_execute_decorators_after_{{function.cpp_name}}(*ctx{{#partial params.after_invocation_args function=function}});
   }
-{{/each}}{{! Interaction methods are deliberately omitted here - they need to exist on the interaction but require some additional plumbing that isn't implemented yet}}
+{{/each}}
+{{#each service.interactions as |interaction|}}{{#each interaction.functions as |function|}}
+  virtual void fbthrift_execute_decorators_before_{{interaction.name}}_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#each function.params.fields as |param|}}, {{#partial params.param_type param=param}} /*{{#partial params.param_name param=param}}*/{{/each}}) {}
+  virtual void fbthrift_execute_decorators_after_{{interaction.name}}_{{function.cpp_name}}(apache::thrift::Cpp2RequestContext& /*requestCtx*/{{#partial params.after_param_unused service=service function=function}}) {}
+  static void fbthrift_invoke_decorator_after_{{interaction.name}}_{{function.cpp_name}}(void* iface, apache::thrift::Cpp2RequestContext* ctx{{#partial params.after_param service=service function=function}}) {
+    static_cast<ServiceHandler<{{service.qualified_name}}>*>(iface)->fbthrift_execute_decorators_after_{{interaction.name}}_{{function.cpp_name}}(*ctx{{#partial params.after_invocation_args function=function}});
+  }
+{{/each}}{{/each}}
 {{/if service.cpp_requires_method_decorator?}}
 {{/if service.interaction?}}
 {{/let partial}}

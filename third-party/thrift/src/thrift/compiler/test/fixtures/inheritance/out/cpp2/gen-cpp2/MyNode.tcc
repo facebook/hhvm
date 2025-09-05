@@ -120,7 +120,7 @@ void MyNodeAsyncProcessor::executeRequest_do_mid(
           std::move(serverRequest.requestData()),
           apache::thrift::TilePtr(),
           std::move(decoratorCallback));
-
+  // Execute method decorator before_do_mid.
   iface_->fbthrift_execute_decorators_before_do_mid(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {

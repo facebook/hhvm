@@ -123,7 +123,7 @@ void SimpleSinkAsyncProcessor::executeRequest_simple(
           concurrencyControllerNotification,
           std::move(serverRequest.requestData()), apache::thrift::TilePtr()
     , std::move(decoratorCallback));
-
+  // Execute method decorator before_simple.
   iface_->__fbthrift_execute_decorators_before_simple(*serverRequest.requestContext());
 
   const auto makeExecuteHandler = [&] {

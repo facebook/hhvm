@@ -11,11 +11,13 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include <sys/socket.h>
 
 #include <folly/SharedMutex.h>
+#include <folly/SocketAddress.h>
 #include <folly/io/async/VirtualEventBase.h>
 #include <wangle/ssl/TLSTicketKeySeeds.h>
 
@@ -279,6 +281,8 @@ class AsyncMcServer {
   bool virtualEventBaseEnabled() const {
     return virtualEventBaseMode_;
   }
+
+  std::unordered_set<folly::SocketAddress> getAddresses() const;
 
  private:
   std::unique_ptr<folly::ScopedEventBaseThread> auxiliaryEvbThread_;

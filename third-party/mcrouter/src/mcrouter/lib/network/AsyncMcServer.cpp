@@ -400,6 +400,10 @@ class McServerThread {
     initFn_ = std::move(fn);
   }
 
+  std::vector<folly::SocketAddress> getAddresses() const {
+    return socket_->getAddresses();
+  }
+
  private:
   class AcceptCallback : public folly::AsyncServerSocket::AcceptCallback {
    public:
@@ -978,6 +982,15 @@ void AsyncMcServer::startPollingTicketKeySeeds() {
         setTicketKeySeeds(std::move(updatedSeeds));
         VLOG(0) << "Updated TLSTicketKeySeeds";
       });
+}
+
+std::unordered_set<folly::SocketAddress> AsyncMcServer::getAddresses() const {
+  std::unordered_set<folly::SocketAddress> res;
+  for (const auto& t : threads_) {
+    auto vec = t->getAddresses();
+    res.insert(vec.begin(), vec.end());
+  }
+  return res;
 }
 
 } // namespace memcache

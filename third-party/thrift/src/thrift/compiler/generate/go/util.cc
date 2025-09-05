@@ -274,8 +274,8 @@ void codegen_data::compute_thrift_metadata_types() {
         }
       }
       if (func.stream() != nullptr) {
-        auto type = func.stream()->elem_type().get_type();
-        add_to_thrift_metadata_types(type, visited_type_names);
+        add_to_thrift_metadata_types(
+            func.stream()->elem_type().get_type(), visited_type_names);
         if (func.stream()->exceptions() != nullptr) {
           for (const auto& exception :
                func.stream()->exceptions()->get_members()) {

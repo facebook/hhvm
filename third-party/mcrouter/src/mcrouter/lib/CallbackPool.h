@@ -34,13 +34,13 @@ class CallbackPool {
   /**
    * Callback function for this CallbackPool.
    */
-  typedef std::function<void(Args...)> OnUpdateFunc;
+  using OnUpdateFunc = std::function<void(Args...)>;
 
   /**
    * Callback handle for this CallbackPool. Once it is destroyed corresponding
    * callback will be unsubscribed.
    */
-  typedef std::unique_ptr<CallbackHandleImpl> CallbackHandle;
+  using CallbackHandle = std::unique_ptr<CallbackHandleImpl>;
 
   CallbackPool();
 

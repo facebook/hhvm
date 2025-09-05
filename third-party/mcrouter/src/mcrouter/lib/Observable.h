@@ -31,15 +31,15 @@ class Observable {
    * @param oldData - value before update
    * @param newData - value after update
    */
-  typedef typename CallbackPool<const Data&, const Data&>::OnUpdateFunc
-      OnUpdateOldNew;
+  using OnUpdateOldNew =
+      typename CallbackPool<const Data&, const Data&>::OnUpdateFunc;
 
   /**
    * Callback handle for this Observable. Once it is destroyed corresponding
    * callback will be unsubscribed.
    */
-  typedef typename CallbackPool<const Data&, const Data&>::CallbackHandle
-      CallbackHandle;
+  using CallbackHandle =
+      typename CallbackPool<const Data&, const Data&>::CallbackHandle;
 
   explicit Observable(Data data = Data());
 

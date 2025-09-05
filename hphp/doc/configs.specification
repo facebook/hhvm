@@ -335,6 +335,16 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Sample rate for Autoload & Facts API latency logging
 
 - std::string Autoload.Query = "", UNKNOWN, repooptionsflag(Autoload)|lookuppath(Query)
+- bool Autoload.UseEden = false, UNKNOWN, repooptionsflag(Autoload)|lookuppath(UseEden)
+- std::vector<std::string> Autoload.IncludePaths = {}, UNKNOWN, repooptionsflag(Autoload)|lookuppath(IncludePaths)
+- std::vector<std::string> Autoload.ExcludePaths = {}, UNKNOWN, repooptionsflag(Autoload)|lookuppath(ExcludePaths)
+- std::vector<std::string> Autoload.FileExtensions = {}, UNKNOWN, repooptionsflag(Autoload)|lookuppath(FileExtensions)
+
+  Eden does not support the same query syntax as Watchman, so we need to migrate to using
+  a few vectors of strings.  For backwards compatibility, we'll generate a watchman query
+  using these strings.  If both forms of configuration are specified, IncludePaths,
+  ExcludePaths, and FileExtensions will be used instead of Query.
+
 - std::string Autoload.TrustedDBPath = "", UNKNOWN, repooptionsflag(Autoload)|lookuppath(TrustedDBPath)
 - std::vector<std::string> Autoload.IndexedMethodAttributes = {}, UNKNOWN, repooptionsflag(Autoload)|lookuppath(IndexedMethodAttributes)
 - std::vector<std::string> Autoload.RepoBuildSearchDirs = {}, UNKNOWN, repooptionsflag(Autoload)|lookuppath(RepoBuildSearchDirs)

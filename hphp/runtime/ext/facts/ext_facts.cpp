@@ -120,6 +120,36 @@ SQLiteKey getDBKey(const fs::path& root, const RepoOptions& repoOptions) {
   return SQLiteKey::readWrite(dbPath);
 }
 
+namespace {
+
+folly::dynamic make_list(const std::vector<std::string>& values) {
+  if (values.size() == 1) {
+    return folly::dynamic(values.front());
+  } else {
+    folly::dynamic list = folly::dynamic::array();
+    for (const auto& value : values) {
+      list.push_back(value);
+    }
+    return list;
+  }
+}
+
+folly::dynamic anyof(
+    const std::string& key,
+    const std::vector<std::string>& values) {
+  if (values.size() == 1) {
+    return folly::dynamic::array(key, values.front());
+  } else {
+    folly::dynamic list = folly::dynamic::array("anyof");
+    for (const auto& value : values) {
+      list.push_back(folly::dynamic::array(key, value));
+    }
+    return list;
+  }
+}
+
+} // namespace
+
 /**
  * List of options making a SqliteAutoloadMap unique
  */
@@ -128,6 +158,29 @@ struct SqliteAutoloadMapKey {
     auto root = repoOptions.dir();
 
     auto queryExpr = [&]() -> folly::dynamic {
+      auto const includedPaths = repoOptions.flags().autoloadIncludePaths();
+      auto const excludedPaths = repoOptions.flags().autoloadExcludePaths();
+      auto const extensions = repoOptions.flags().autoloadFileExtensions();
+
+      if (!extensions.empty() && !includedPaths.empty()) {
+        folly::dynamic expression = folly::dynamic::array("allof");
+        expression.push_back(folly::dynamic::array("type", "f"));
+
+        expression.push_back(anyof("suffix", extensions));
+        expression.push_back(anyof("dirname", includedPaths));
+        if (!excludedPaths.empty()) {
+          expression.push_back(
+              folly::dynamic::array("not", anyof("dirname", excludedPaths)));
+        }
+
+        folly::dynamic query = folly::dynamic::object;
+        query.insert("expression", expression);
+        query.insert("suffix", make_list(extensions));
+
+        XLOGF(INFO, "Constructed Watchman Query: {}", folly::toJson(query));
+        return query;
+      }
+
       auto const cached = repoOptions.flags().autoloadQueryObj();
       if (cached.isObject())
         return cached;

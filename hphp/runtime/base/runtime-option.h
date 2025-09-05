@@ -119,6 +119,10 @@ SECTIONS_FOR_REPOOPTIONSFLAGS()
   void initAliasedNamespaces(hackc::NativeEnv&) const;
 
   std::string autoloadQuery() const { return Query; }
+  std::vector<std::string> autoloadIncludePaths() const { return IncludePaths; }
+  std::vector<std::string> autoloadExcludePaths() const { return ExcludePaths; }
+  std::vector<std::string> autoloadFileExtensions() const { return FileExtensions; }
+  bool autoloadUseEden() const { return UseEden; }
   folly::dynamic autoloadQueryObj() const { return m_cachedQuery; }
   std::string trustedDBPath() const { return TrustedDBPath; }
   const std::vector<std::string>& autoloadRepoBuildSearchDirs() const {

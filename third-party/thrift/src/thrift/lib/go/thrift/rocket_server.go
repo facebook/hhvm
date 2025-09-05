@@ -237,6 +237,11 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 		processTime := time.Since(processStartTime)
 		s.observer.ProcessTime(processTime)
 
+		// Notify observer that reply was sent
+		if err == nil {
+			s.observer.SentReply()
+		}
+
 		return payload, err
 	}
 	if s.pipeliningEnabled {

@@ -231,6 +231,9 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 	s.observer.ReceivedRequest()
 
 	if s.isOverloaded() {
+		// Track connection drops and server overload events when rejecting requests
+		s.observer.ConnDropped()
+		s.observer.ServerOverloaded()
 		return mono.Error(loadSheddingError)
 	}
 
@@ -309,6 +312,9 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	s.observer.ReceivedRequest()
 
 	if s.isOverloaded() {
+		// Track connection drops and server overload events when rejecting requests
+		s.observer.ConnDropped()
+		s.observer.ServerOverloaded()
 		s.log("rocketServer fireAndForget: dropping request due to server overload")
 		return
 	}

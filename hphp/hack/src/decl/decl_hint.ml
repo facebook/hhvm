@@ -268,7 +268,7 @@ and hint_ p env = function
             ~is_memoized:false
             ~variadic;
         (* TODO *)
-        ft_cross_package = None;
+        ft_require_package = None;
         ft_instantiated = List.is_empty ft_tparams;
       }
   | Happly (id, argl) ->

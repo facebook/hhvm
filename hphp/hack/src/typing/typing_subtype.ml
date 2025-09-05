@@ -1750,7 +1750,8 @@ end = struct
     else
       valid env
 
-  and cross_package_subtype (c_sub : string option) (c_super : string option) =
+  and require_package_subtype (c_sub : string option) (c_super : string option)
+      =
     match (c_sub, c_super) with
     | (Some s, Some t) -> String.equal s t
     | (Some _, None) -> false
@@ -1851,9 +1852,9 @@ end = struct
     and package_err =
       if
         not
-          (cross_package_subtype
-             ft_sub.ft_cross_package
-             ft_super.ft_cross_package)
+          (require_package_subtype
+             ft_sub.ft_require_package
+             ft_super.ft_require_package)
       then
         Error
           (Option.map
@@ -1870,7 +1871,7 @@ end = struct
                               [
                                 ( p_sub,
                                   print_cross_pkg_reason
-                                    ft_sub.ft_cross_package
+                                    ft_sub.ft_require_package
                                     true );
                               ];
                           reason_super =
@@ -1878,7 +1879,7 @@ end = struct
                               [
                                 ( p_super,
                                   print_cross_pkg_reason
-                                    ft_super.ft_cross_package
+                                    ft_super.ft_require_package
                                     false );
                               ];
                         }))

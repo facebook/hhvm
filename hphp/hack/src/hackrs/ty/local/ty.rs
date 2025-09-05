@@ -484,7 +484,7 @@ impl<'a, R: Reason> ToOxidizedByRef<'a> for FunType<R> {
             }),
             ret: &*arena.alloc(ret.to_oxidized_by_ref(arena)),
             flags: flags.clone(),
-            cross_package: None,
+            require_package: None,
             instantiated: true,
         }
     }

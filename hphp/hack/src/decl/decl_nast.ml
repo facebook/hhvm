@@ -101,8 +101,8 @@ let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
             ft_ret = ret_ty;
             ft_flags;
             (* TODO: handle const attribute *)
-            (* Lambdas cannot be cross package *)
-            ft_cross_package = None;
+            (* Lambdas cannot be require package *)
+            ft_require_package = None;
             ft_instantiated;
           } )
   in

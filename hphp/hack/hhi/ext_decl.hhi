@@ -174,7 +174,7 @@ namespace HH {
     ?'is_soft_return_type' => bool,
     ?'params' => vec<ExtDeclMethodParam>,
     ?'implicit_params' => string,
-    ?'cross_package' => string,
+    ?'require_package' => string,
     ?'is_return_disposable' => bool,
     ?'is_coroutine' => bool,
     ?'is_async' => bool,

@@ -297,7 +297,7 @@ impl<'a, R: Reason> ToOxidizedByRef<'a> for FunType<R, Ty<R>> {
             implicit_params: self.implicit_params.to_oxidized_by_ref(arena),
             ret: self.ret.to_oxidized_by_ref(arena),
             flags: self.flags,
-            cross_package: self.cross_package.to_oxidized_by_ref(arena),
+            require_package: self.require_package.to_oxidized_by_ref(arena),
             instantiated: self.instantiated,
         })
     }

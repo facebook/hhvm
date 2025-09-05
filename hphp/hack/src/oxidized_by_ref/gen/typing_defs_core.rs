@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ea4feed2e0a855dce869541100ddea0d>>
+// @generated SignedSource<<0ae2e3b93050ba244e8118bd52d53a61>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -60,7 +60,7 @@ impl<'a> TrivialDrop for CeVisibility<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(CeVisibility<'arena>);
 
 #[rust_to_ocaml(attr = "deriving (eq, hash, ord, (show { with_path = false }))")]
-pub type CrossPackageDecl<'a> = Option<&'a str>;
+pub type RequirePackageDecl<'a> = Option<&'a str>;
 
 pub use oxidized::typing_defs_core::ValKind;
 
@@ -469,7 +469,7 @@ pub struct FunType<'a> {
     pub ret: &'a Ty<'a>,
     pub flags: typing_defs_flags::fun::Fun,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub cross_package: CrossPackageDecl<'a>,
+    pub require_package: RequirePackageDecl<'a>,
     pub instantiated: bool,
 }
 impl<'a> TrivialDrop for FunType<'a> {}

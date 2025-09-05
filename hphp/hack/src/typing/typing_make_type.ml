@@ -294,6 +294,6 @@ let default_construct (type ph) r : ph ty =
               ~is_memoized:false
               ~variadic:false;
           ft_ret = void r;
-          ft_cross_package = None;
+          ft_require_package = None;
           ft_instantiated = true;
         } )

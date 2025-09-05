@@ -23,7 +23,7 @@ type ce_visibility =
     }
 [@@deriving eq, ord, show]
 
-type cross_package_decl = string option [@@deriving eq, ord]
+type require_package_decl = string option [@@deriving eq, ord]
 
 (* All the possible types, reason is a trace of why a type
    was inferred in a certain way.
@@ -200,7 +200,7 @@ type 'ty fun_type = {
   ft_implicit_params: 'ty fun_implicit_params;
   ft_ret: 'ty;  (** Carries through the sync/async information from the aast *)
   ft_flags: Typing_defs_flags.Fun.t;
-  ft_cross_package: cross_package_decl;
+  ft_require_package: require_package_decl;
   ft_instantiated: bool;
 }
 [@@deriving hash, show, map]

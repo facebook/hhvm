@@ -276,7 +276,7 @@ impl<R: Reason> From<&obr::typing_defs::FunType<'_>> for ty::FunType<R, Ty<R>> {
             implicit_params: ft.implicit_params.into(),
             ret: ft.ret.into(),
             flags: ft.flags,
-            cross_package: ft.cross_package.as_ref().map(|s| (*s).into()),
+            require_package: ft.require_package.as_ref().map(|s| (*s).into()),
             instantiated: ft.instantiated,
         }
     }

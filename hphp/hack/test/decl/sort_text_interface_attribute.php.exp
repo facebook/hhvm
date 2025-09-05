@@ -23,7 +23,7 @@
                   is_function_pointer = false; returns_readonly = false;
                   readonly_this = false; support_dynamic_type = false;
                   is_memoized = false; variadic = false };
-                ft_cross_package = None; ft_instantiated = true }));
+                ft_require_package = None; ft_instantiated = true }));
           sm_visibility = Public; sm_deprecated = None;
           sm_flags =
           { Shallow_decl_defs.MethodFlags.abstract = true; final = false;
@@ -45,7 +45,7 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_cross_package = None; ft_instantiated = true }));
+                 ft_require_package = None; ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = true; final = false;
@@ -82,7 +82,7 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_cross_package = None; ft_instantiated = true }));
+                 ft_require_package = None; ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = true; final = false;
@@ -104,7 +104,7 @@
                     is_function_pointer = false; returns_readonly = false;
                     readonly_this = false; support_dynamic_type = false;
                     is_memoized = false; variadic = false };
-                  ft_cross_package = None; ft_instantiated = true }));
+                  ft_require_package = None; ft_instantiated = true }));
             sm_visibility = Public; sm_deprecated = None;
             sm_flags =
             { Shallow_decl_defs.MethodFlags.abstract = true; final = false;
@@ -144,7 +144,7 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_cross_package = None; ft_instantiated = true }));
+                 ft_require_package = None; ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
@@ -166,7 +166,7 @@
                     is_function_pointer = false; returns_readonly = false;
                     readonly_this = false; support_dynamic_type = false;
                     is_memoized = false; variadic = false };
-                  ft_cross_package = None; ft_instantiated = true }));
+                  ft_require_package = None; ft_instantiated = true }));
             sm_visibility = Public; sm_deprecated = None;
             sm_flags =
             { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
@@ -206,7 +206,7 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_cross_package = None; ft_instantiated = true }));
+                 ft_require_package = None; ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
@@ -228,7 +228,7 @@
                     is_function_pointer = false; returns_readonly = false;
                     readonly_this = false; support_dynamic_type = false;
                     is_memoized = false; variadic = false };
-                  ft_cross_package = None; ft_instantiated = true }));
+                  ft_require_package = None; ft_instantiated = true }));
             sm_visibility = Public; sm_deprecated = None;
             sm_flags =
             { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
@@ -252,7 +252,7 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_cross_package = None; ft_instantiated = true }));
+                 ft_require_package = None; ft_instantiated = true }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;

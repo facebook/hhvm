@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0ebf9597250dca5c07dee76f3c37ad87>>
+// @generated SignedSource<<b47f8b3d2fe0d574a850e1fc05428dfb>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -53,7 +53,7 @@ pub enum CeVisibility {
 }
 
 #[rust_to_ocaml(attr = "deriving (eq, hash, ord, (show { with_path = false }))")]
-pub type CrossPackageDecl = Option<String>;
+pub type RequirePackageDecl = Option<String>;
 
 #[derive(
     Clone,
@@ -498,7 +498,7 @@ pub struct FunType {
     /// Carries through the sync/async information from the aast
     pub ret: Ty,
     pub flags: typing_defs_flags::fun::Fun,
-    pub cross_package: CrossPackageDecl,
+    pub require_package: RequirePackageDecl,
     pub instantiated: bool,
 }
 

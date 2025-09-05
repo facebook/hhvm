@@ -80,7 +80,7 @@ const StaticString s_includes("includes");
 const StaticString s_tparams("tparams");
 const StaticString s_params("params");
 const StaticString s_implicit_params("implicit_params");
-const StaticString s_cross_package("cross_package");
+const StaticString s_require_package("require_package");
 const StaticString s_constraints("constraints");
 const StaticString s_reified("reified");
 const StaticString s_signature_type("signature_type");
@@ -425,7 +425,7 @@ Array populateSignature(const rust::Vec<hackc::ExtDeclSignature>& sigs) {
         populateTypeConstraints);
     maybeSet(info, sig.params, s_params, populateMethodParams);
     maybeSet(info, sig.implicit_params, s_implicit_params, rustToString);
-    maybeSet(info, sig.cross_package, s_cross_package, rustToString);
+    maybeSet(info, sig.require_package, s_require_package, rustToString);
     maybeSetBool(info, sig.return_disposable, s_is_return_disposable);
     maybeSetBool(info, sig.is_coroutine, s_is_coroutine);
     maybeSetBool(info, sig.is_async, s_is_async);

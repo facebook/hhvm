@@ -273,7 +273,7 @@ impl<R: Reason> ToOxidized for FunType<R, Ty<R>> {
             implicit_params: self.implicit_params.to_oxidized(),
             ret: self.ret.to_oxidized(),
             flags: self.flags,
-            cross_package: self.cross_package.to_oxidized(),
+            require_package: self.require_package.to_oxidized(),
             instantiated: self.instantiated,
         }
     }

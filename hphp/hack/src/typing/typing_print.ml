@@ -283,7 +283,7 @@ module Full = struct
       ft_implicit_params;
       ft_ret;
       ft_flags;
-      ft_cross_package = _;
+      ft_require_package = _;
       ft_instantiated = _;
     } =
       ft

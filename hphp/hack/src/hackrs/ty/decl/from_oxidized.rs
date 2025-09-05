@@ -293,7 +293,7 @@ impl<R: Reason> From<o::typing_defs::FunType> for ty::FunType<R, Ty<R>> {
             implicit_params: ft.implicit_params.into(),
             ret: ft.ret.into(),
             flags: ft.flags,
-            cross_package: ft.cross_package.map(|s| s.into()),
+            require_package: ft.require_package.map(|s| s.into()),
             instantiated: ft.instantiated,
         }
     }

@@ -1397,14 +1397,14 @@ module Fun_id : sig
 end = struct
   let validate
       (use_pos, name)
-      cross_package
+      require_package
       { fe_pos = def_pos; fe_deprecated; fe_module; fe_internal; fe_package; _ }
       env =
     let other_errs =
       List.filter_opt
         [
           TVis.check_deprecated ~use_pos ~def_pos env fe_deprecated;
-          TVis.check_cross_package ~use_pos ~def_pos env cross_package;
+          TVis.check_cross_package ~use_pos ~def_pos env require_package;
         ]
     and access_errs =
       TVis.check_top_level_access
@@ -1540,7 +1540,7 @@ end = struct
     }
 
   let synth_help localize_with reason fun_ty ty_args fun_id decl_entry env =
-    let () = validate fun_id fun_ty.ft_cross_package decl_entry env in
+    let () = validate fun_id fun_ty.ft_require_package decl_entry env in
     let { fe_pos; fe_support_dynamic_type; _ } = decl_entry in
     let fun_ty =
       Typing_enforceability.compute_enforced_and_pessimize_fun_type
@@ -2825,7 +2825,7 @@ end = struct
                 { capability = CapDefaults (Pos_or_decl.of_raw_pos p) };
               ft_ret;
               ft_flags;
-              ft_cross_package = None;
+              ft_require_package = None;
               ft_instantiated = true;
             } ) )
 
@@ -3775,7 +3775,7 @@ end = struct
               ft_implicit_params = fty.ft_implicit_params;
               ft_ret = fty.ft_ret;
               ft_flags = fty.ft_flags;
-              ft_cross_package = fty.ft_cross_package;
+              ft_require_package = fty.ft_require_package;
               ft_instantiated = fty.ft_instantiated;
             }
           in
@@ -6579,7 +6579,7 @@ end = struct
                ~use_pos:p
                ~def_pos
                env
-               ft.ft_cross_package);
+               ft.ft_require_package);
 
           (* This creates type variables for non-denotable type parameters on constructors.
            * These are notably different from the tparams on the class, which are handled
@@ -13383,7 +13383,7 @@ end = struct
                      ~use_pos:p
                      ~def_pos
                      env
-                     ft.ft_cross_package);
+                     ft.ft_require_package);
 
                 let ((env, ty_err_opt1), explicit_targs) =
                   Phase.localize_targs

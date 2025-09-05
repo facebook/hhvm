@@ -1184,7 +1184,7 @@ struct Attributes {
     no_support_dynamic_type: bool,
     no_auto_likes: bool,
     safe_global_variable: bool,
-    cross_package: Option<String>,
+    require_package: Option<String>,
     sort_text: Option<String>,
     dynamically_referenced: bool,
     needs_concrete: bool,
@@ -1615,7 +1615,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             no_support_dynamic_type: false,
             no_auto_likes: false,
             safe_global_variable: false,
-            cross_package: None,
+            require_package: None,
             sort_text: None,
             dynamically_referenced: false,
             needs_concrete: false,
@@ -1694,13 +1694,13 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                     // CrossPackage is a Package V1 feature to be deprecated
                     // after Package V2 rollout (T203287767)
                     "__CrossPackage" => {
-                        attributes.cross_package = attribute
+                        attributes.require_package = attribute
                             .string_literal_param
                             .as_ref()
                             .map(|(_, x)| Self::str_from_utf8(x).into_owned());
                     }
                     "__RequirePackage" => {
-                        attributes.cross_package = attribute
+                        attributes.require_package = attribute
                             .string_literal_param
                             .as_ref()
                             .map(|(_, x)| Self::str_from_utf8(x).into_owned());
@@ -1912,7 +1912,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             flags |= FunTypeFlags::VARIADIC
         }
 
-        let cross_package = attributes.cross_package;
+        let require_package = attributes.require_package;
 
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(header.type_params);
@@ -1936,7 +1936,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             implicit_params,
             ret: type_,
             flags,
-            cross_package,
+            require_package,
             instantiated: true,
         };
 
@@ -6050,7 +6050,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             implicit_params,
             ret: pess_return_type,
             flags,
-            cross_package: None,
+            require_package: None,
             instantiated,
         });
 

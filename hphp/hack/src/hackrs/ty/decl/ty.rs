@@ -612,7 +612,7 @@ pub struct FunType<R: Reason, TY> {
     /// Carries through the sync/async information from the aast
     pub ret: TY,
     pub flags: typing_defs_flags::FunTypeFlags,
-    pub cross_package: Option<Symbol>,
+    pub require_package: Option<Symbol>,
     pub instantiated: bool,
 }
 

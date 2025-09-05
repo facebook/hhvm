@@ -744,7 +744,7 @@ and obj_get_concrete_class_with_member_info
           ~use_pos:id_pos
           ~def_pos:mem_pos
           env
-          ft.ft_cross_package
+          ft.ft_require_package
       in
       let should_wrap =
         TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
@@ -911,7 +911,7 @@ and obj_get_concrete_class_without_member_info
           { capability = CapTy (MakeType.intersection Reason.none []) };
         ft_ret = MakeType.void Reason.none;
         ft_flags = Typing_defs_flags.Fun.default;
-        ft_cross_package = None;
+        ft_require_package = None;
         ft_instantiated = true;
       }
     in

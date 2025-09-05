@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0dae867d8dd6a7dc67f66bb3a04b5c8a>>
+// @generated SignedSource<<8e8789cc5b84309ff211aaec5c5af994>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -556,7 +556,7 @@ impl<'a> Node<'a> for FunType<'a> {
                 implicit_params: ref __binding_3,
                 ret: ref __binding_4,
                 flags: ref __binding_5,
-                cross_package: ref __binding_6,
+                require_package: ref __binding_6,
                 instantiated: ref __binding_7,
             } => {
                 {

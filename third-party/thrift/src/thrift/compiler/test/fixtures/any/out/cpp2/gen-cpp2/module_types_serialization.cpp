@@ -16,29 +16,32 @@ namespace facebook::thrift::compiler::test::fixtures::any {
 //
 // To include in statically-linked libraries, link whole (e.g. --whole-archive)
 // `module_sinit.cpp`.
+inline folly::once_flag __fbthrift_once_flag_in_static_init_MyStruct;
 void __fbthrift_static_init_MyStruct() {
-  [[maybe_unused]] static bool init = (
+  folly::call_once(__fbthrift_once_flag_in_static_init_MyStruct,
     apache::thrift::conformance::detail::registerGeneratedStruct<
         MyStruct,
         apache::thrift::conformance::StandardProtocol::Compact,
-        apache::thrift::conformance::StandardProtocol::Binary>(),
-    false);
+        apache::thrift::conformance::StandardProtocol::Binary>
+  );
 }
+inline folly::once_flag __fbthrift_once_flag_in_static_init_MyUnion;
 void __fbthrift_static_init_MyUnion() {
-  [[maybe_unused]] static bool init = (
+  folly::call_once(__fbthrift_once_flag_in_static_init_MyUnion,
     apache::thrift::conformance::detail::registerGeneratedStruct<
         MyUnion,
         apache::thrift::conformance::StandardProtocol::Compact,
-        apache::thrift::conformance::StandardProtocol::Binary>(),
-    false);
+        apache::thrift::conformance::StandardProtocol::Binary>
+  );
 }
+inline folly::once_flag __fbthrift_once_flag_in_static_init_MyException;
 void __fbthrift_static_init_MyException() {
-  [[maybe_unused]] static bool init = (
+  folly::call_once(__fbthrift_once_flag_in_static_init_MyException,
     apache::thrift::conformance::detail::registerGeneratedStruct<
         MyException,
         apache::thrift::conformance::StandardProtocol::Compact,
-        apache::thrift::conformance::StandardProtocol::Binary>(),
-    false);
+        apache::thrift::conformance::StandardProtocol::Binary>
+  );
 }
 } // namespace facebook::thrift::compiler::test::fixtures::any
 

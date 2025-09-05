@@ -16,13 +16,14 @@ namespace facebook::thrift::test {
 //
 // To include in statically-linked libraries, link whole (e.g. --whole-archive)
 // `module_sinit.cpp`.
+inline folly::once_flag __fbthrift_once_flag_in_static_init_CustomException;
 void __fbthrift_static_init_CustomException() {
-  [[maybe_unused]] static bool init = (
+  folly::call_once(__fbthrift_once_flag_in_static_init_CustomException,
     apache::thrift::conformance::detail::registerGeneratedStruct<
         CustomException,
         apache::thrift::conformance::StandardProtocol::Compact,
-        apache::thrift::conformance::StandardProtocol::Binary>(),
-    false);
+        apache::thrift::conformance::StandardProtocol::Binary>
+  );
 }
 } // namespace facebook::thrift::test
 

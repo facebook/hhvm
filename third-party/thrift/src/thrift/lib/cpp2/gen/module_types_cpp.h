@@ -31,6 +31,7 @@
 #include <folly/lang/Align.h>
 #include <folly/lang/Exception.h>
 #include <folly/synchronization/AtomicUtil.h>
+#include <folly/synchronization/CallOnce.h>
 
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/Thrift.h>

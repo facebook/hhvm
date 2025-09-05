@@ -395,7 +395,7 @@ void HQUpstreamSession::cleanupUnboundPushStreams(
   for (auto& it : streamIdToPushId_) {
     auto streamId = it.first;
     auto pushId = it.second;
-    if (!ingressPushStreams_.count(pushId)) {
+    if (!ingressPushStreams_.contains(pushId)) {
       streamsToCleanup.push_back(streamId);
     }
   }

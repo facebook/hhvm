@@ -105,11 +105,10 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 {{#program:structs_and_typedefs}}
-{{^is_struct?}}
+{{#if self.typedef?}}
 {{> common/typedef_docblock }}
 using {{typedef:name}} = {{typedef:cpp_type}};
-{{/is_struct?}}
-{{#is_struct?}}
+{{#else}}
 
 {{#struct:extra_namespace}}
 namespace {{struct:extra_namespace}} {
@@ -377,7 +376,7 @@ using {{struct:cpp_name}} = {{struct:cpp_underlying_type}};
 {{/struct:dependent_direct_adapter?}}
 {{/struct:is_directly_adapted?}}
 
-{{/is_struct?}}
+{{/if self.typedef?}}
 {{/program:structs_and_typedefs}}
 
 } // namespace {{program:qualified_namespace}}

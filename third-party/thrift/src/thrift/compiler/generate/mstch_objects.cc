@@ -60,10 +60,6 @@ std::string mstch_base::get_option(const std::string& option) const {
   return {};
 }
 
-mstch::node mstch_base::is_struct() {
-  return dynamic_cast<mstch_struct*>(this) != nullptr;
-}
-
 mstch_factories::mstch_factories() {
   add<mstch_program>();
   add<mstch_type>();

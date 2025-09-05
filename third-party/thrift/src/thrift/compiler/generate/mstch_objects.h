@@ -274,14 +274,12 @@ class mstch_base : public mstch::object {
         {
             {"first?", &mstch_base::first},
             {"last?", &mstch_base::last},
-            {"is_struct?", &mstch_base::is_struct},
         });
   }
   virtual ~mstch_base() = default;
 
   mstch::node first() { return pos_.first; }
   mstch::node last() { return pos_.last; }
-  mstch::node is_struct();
 
   mstch::node structured_annotations(const t_named* annotated) {
     return make_mstch_array(
@@ -412,6 +410,7 @@ class mstch_program : public mstch_base {
     register_methods(
         this,
         {
+            {"self", &mstch_program::self},
             {"program:self", &mstch_program::self},
             {"program:structs", &mstch_program::structs},
             {"program:enums", &mstch_program::enums},
@@ -454,6 +453,7 @@ class mstch_service : public mstch_base {
     register_methods(
         this,
         {
+            {"self", &mstch_service::self},
             {"service:self", &mstch_service::self},
             {"service:functions", &mstch_service::functions},
             {"service:functions?", &mstch_service::has_functions},
@@ -560,6 +560,7 @@ class mstch_function : public mstch_base {
     register_methods(
         this,
         {
+            {"self", &mstch_function::self},
             {"function:self", &mstch_function::self},
             {"function:return_type", &mstch_function::return_type},
             {"function:exceptions", &mstch_function::exceptions},
@@ -630,6 +631,7 @@ class mstch_type : public mstch_base {
     register_methods(
         this,
         {
+            {"self", &mstch_type::self},
             {"type:self", &mstch_type::self},
             {"type:structured", &mstch_type::get_structured},
             {"type:enum", &mstch_type::get_enum},
@@ -669,6 +671,7 @@ class mstch_typedef : public mstch_base {
     register_methods(
         this,
         {
+            {"self", &mstch_typedef::self},
             {"typedef:self", &mstch_typedef::self},
             {"typedef:type", &mstch_typedef::type},
             {"typedef:structured_annotations",
@@ -696,6 +699,7 @@ class mstch_struct : public mstch_base {
     register_methods(
         this,
         {
+            {"self", &mstch_struct::self},
             {"struct:self", &mstch_struct::self},
             // In mstch, exceptions are bound as "struct:*" and "struct:self"
             // defaults to the t_structured prototype. This provides a way to
@@ -759,6 +763,7 @@ class mstch_field : public mstch_base {
     register_methods(
         this,
         {
+            {"self", &mstch_field::self},
             {"field:self", &mstch_field::self},
             {"field:value", &mstch_field::value},
             {"field:type", &mstch_field::type},
@@ -789,6 +794,7 @@ class mstch_enum : public mstch_base {
     register_methods(
         this,
         {
+            {"self", &mstch_enum::self},
             {"enum:self", &mstch_enum::self},
             {"enum:values", &mstch_enum::values},
             {"enum:structured_annotations",
@@ -816,6 +822,7 @@ class mstch_enum_value : public mstch_base {
     register_methods(
         this,
         {
+            {"self", &mstch_enum_value::self},
             {"enum_value:self", &mstch_enum_value::self},
         });
   }
@@ -844,6 +851,7 @@ class mstch_const : public mstch_base {
     register_methods(
         this,
         {
+            {"self", &mstch_const::self},
             {"constant:self", &mstch_const::self},
             {"constant:index", &mstch_const::index},
             {"constant:type", &mstch_const::type},
@@ -886,6 +894,7 @@ class mstch_const_value : public mstch_base {
     register_methods(
         this,
         {
+            {"self", &mstch_const_value::self},
             {"value:self", &mstch_const_value::self},
             {"value:enum_value", &mstch_const_value::enum_value},
             {"value:list_elements", &mstch_const_value::list_elems},

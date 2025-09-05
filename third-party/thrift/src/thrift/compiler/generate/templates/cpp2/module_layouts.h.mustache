@@ -25,14 +25,14 @@
 {{/program:thrift_includes}}
 namespace apache { namespace thrift { namespace frozen {
 
-{{#program:structs_and_typedefs}}{{#is_struct?}}
-{{#struct:cpp_frozen2_exclude?}}
+{{#program:structs_and_typedefs}}
+{{#if (and (not self.typedef?) struct:cpp_frozen2_exclude?)}}
 FROZEN_EXCLUDE_TYPE({{struct:cpp_fullname}})
-{{/struct:cpp_frozen2_exclude?}}
-{{/is_struct?}}{{/program:structs_and_typedefs}}
+{{/if (and (not self.typedef?) struct:cpp_frozen2_exclude?)}}
+{{/program:structs_and_typedefs}}
 
-{{#program:structs_and_typedefs}}{{#is_struct?}}
-{{^struct:cpp_frozen2_exclude?}}
+{{#program:structs_and_typedefs}}
+{{#if (not (or self.typedef? struct:cpp_frozen2_exclude?))}}
 {{^struct:union?}}
 FROZEN_TYPE({{struct:cpp_fullname}},{{!
 }}{{#struct:fields}}
@@ -73,7 +73,7 @@ FROZEN_TYPE({{struct:cpp_fullname}},{{!
 }}{{/struct:fields}}));
 {{/struct:union?}}
 
-{{/struct:cpp_frozen2_exclude?}}
-{{/is_struct?}}{{/program:structs_and_typedefs}}
+{{/if (not (or self.typedef? struct:cpp_frozen2_exclude?))}}
+{{/program:structs_and_typedefs}}
 }}} // apache::thrift::frozen
 {{!}}

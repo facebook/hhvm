@@ -20,8 +20,8 @@
 
 namespace apache { namespace thrift { namespace frozen {
 
-{{#program:structs_and_typedefs}}{{#is_struct?}}
-{{^struct:cpp_frozen2_exclude?}}
+{{#program:structs_and_typedefs}}
+{{#if (not (or self.typedef? struct:cpp_frozen2_exclude?))}}
 {{^struct:union?}}
 FROZEN_CTOR({{struct:cpp_fullname}},{{!
 }}{{#struct:fields}}
@@ -88,8 +88,8 @@ FROZEN_CLEAR({{struct:cpp_fullname}},{{!
   FROZEN_CLEAR_FIELD({{field:cpp_name}}){{!
 }}{{/struct:fields}})
 {{/struct:union?}}
-{{/struct:cpp_frozen2_exclude?}}
-{{/is_struct?}}{{/program:structs_and_typedefs}}
+{{/if (not (or self.typedef? struct:cpp_frozen2_exclude?))}}
+{{/program:structs_and_typedefs}}
 
 }}} // apache::thrift::frozen
 {{!}}

@@ -935,6 +935,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       size_t active = call_mallctl("stats.active");
       size_t mapped = call_mallctl("stats.mapped");
       auto const low_mapped = alloc::getLowMapped();
+      auto const mid_mapped = alloc::getMidMapped();
 
       std::ostringstream stats;
       stats << "<jemalloc-stats>" << endl;
@@ -942,6 +943,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       stats << "  <active>" << active << "</active>" << endl;
       stats << "  <mapped>" << mapped << "</mapped>" << endl;
       stats << "  <low_mapped>" << low_mapped << "</low_mapped>" << endl;
+      stats << "  <mid_mapped>" << mid_mapped << "</low_mapped>" << endl;
       stats << "</jemalloc-stats>" << endl;
       transport->sendString(stats.str());
       break;

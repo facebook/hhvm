@@ -85,6 +85,7 @@ namespace {
 ServiceData::CounterCallback s_counters(
   [](std::map<std::string, int64_t>& counters) {
     counters["mem.low-mapped"] = alloc::getLowMapped();
+    counters["mem.mid-mapped"] = alloc::getMidMapped();
     // this isn't really a counter, but whatever. we need a way for callers
     // to query if this build is limited by lowptr memory or not
     counters["mem.use-low-ptr"] = use_lowptr ? 1 : 0;

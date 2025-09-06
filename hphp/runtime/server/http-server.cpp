@@ -248,6 +248,7 @@ HttpServer::HttpServer() {
       if (uptime > Cfg::GC::MemTrackStart && uptime < Cfg::GC::MemTrackEnd) {
         counters["windowed_rss"] = ProcStatus::adjustedRssKb();
         counters["windowed_low_mem"] = alloc::getLowMapped();
+        counters["windowed_mid_mem"] = alloc::getMidMapped();
         counters["windowed_units"] = MemoryStats::Count(AllocKind::Unit);
         counters["windowed_classes"] = MemoryStats::Count(AllocKind::Class);
         counters["windowed_funcs"] = MemoryStats::Count(AllocKind::Func);
@@ -287,6 +288,7 @@ void HttpServer::onServerShutdown() {
       auto record = StructuredLogEntry{};
       record.setInt("uptime", HHVM_FN(server_uptime)());
       record.setInt("low_mapped", alloc::getLowMapped());
+      record.setInt("mid_mapped", alloc::getMidMapped());
       StructuredLog::log("hhvm_emergency_restart", record);
     }
   }

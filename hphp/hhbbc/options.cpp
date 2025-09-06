@@ -51,6 +51,7 @@ void update_memory_stats(const char* what, const char* when,
 
   auto const usage = Process::GetMemUsageMb();
   auto const lowMemUsage = alloc::getLowMapped() / 1024 / 1024;
+  auto const midMemUsage = alloc::getMidMapped() / 1024 / 1024;
   auto const sstringUsage =
     MemoryStats::TotalSize(AllocKind::StaticString) / 1024 / 1024;
 
@@ -69,8 +70,8 @@ void update_memory_stats(const char* what, const char* when,
 
   if (Trace::moduleEnabledRelease(Trace::hhbbc_mem, 1)) {
     Trace::ftraceRelease(
-      "RSS at {}: {} Mb [{} Mb low-mem, {} Mb sstrings]\n",
-      phase, usage, lowMemUsage, sstringUsage
+      "RSS at {}: {} Mb [{} Mb low-mem, {} Mb mid-mem, {} Mb sstrings]\n",
+      phase, usage, lowMemUsage, midMemUsage, sstringUsage
     );
   }
 }

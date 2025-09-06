@@ -72,6 +72,15 @@ size_t getLowMapped() {
   return low_mapped;
 }
 
+size_t getMidMapped() {
+#if USE_JEMALLOC
+  // The mid range [4G, 32G)
+  return alloc::getRange(alloc::AddrRangeClass::Mid).used();
+#else
+  return 0;
+#endif
+}
+
 RangeState::RangeState(uintptr_t lowAddr, uintptr_t highAddr, Reserved)
   : low_use(lowAddr)
   , low_map(lowAddr)

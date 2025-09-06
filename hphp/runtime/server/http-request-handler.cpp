@@ -566,6 +566,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     entry->setInt("rss", ProcStatus::adjustedRssKb());
     if (use_lowptr) {
       entry->setInt("low_mem", alloc::getLowMapped());
+      entry->setInt("mid_mem", alloc::getMidMapped());
     }
   }
   HardwareCounter::UpdateServiceData(transport->getCpuTime(),

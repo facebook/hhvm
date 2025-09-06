@@ -328,6 +328,7 @@ static_assert(sizeof(RangeState) <= 64, "");
 RangeState& getRange(AddrRangeClass rc);
 
 size_t getLowMapped();
+size_t getMidMapped();
 
 }
 

@@ -769,7 +769,6 @@ class EnumNode final : folly::MoveOnly,
   /**
    * A mapping of enum name to its i32 value.
    */
-  // TODO: these can also have annotations
   class Value : detail::WithName, detail::WithAnnotations {
    public:
     Value(

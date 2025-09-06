@@ -51,10 +51,10 @@ func errorType(err error) string {
 	return et[len(et)-1]
 }
 
-func getProcessorFunction(processor Processor, messageType types.MessageType, name string) (types.ProcessorFunction, types.ApplicationExceptionIf) {
+func getProcessorFunction(processor Processor, messageType types.MessageType, name string) (types.ProcessorFunction, error) {
 	if messageType != types.CALL && messageType != types.ONEWAY {
 		// case one: invalid message type
-		return nil, types.NewApplicationException(types.UNKNOWN_METHOD, fmt.Sprintf("unexpected message type: %d", messageType))
+		return nil, fmt.Errorf("unexpected message type: %d", messageType)
 	}
 	pmap := processor.ProcessorFunctionMap()
 	if pmap != nil {
@@ -62,7 +62,7 @@ func getProcessorFunction(processor Processor, messageType types.MessageType, na
 			return pf, nil
 		}
 	}
-	return nil, types.NewApplicationException(types.UNKNOWN_METHOD, fmt.Sprintf("no such function: %q", name))
+	return nil, fmt.Errorf("no such function: %q", name)
 }
 
 func skipMessage(protocol Protocol) error {
@@ -116,7 +116,12 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 		return readErr
 	}
 	var argStruct types.Struct
-	pfunc, appException := getProcessorFunction(processor, messageType, name)
+	var appException types.ApplicationExceptionIf
+
+	pfunc, pfuncErr := getProcessorFunction(processor, messageType, name)
+	if pfuncErr != nil {
+		appException = NewApplicationException(types.UNKNOWN_METHOD, pfuncErr.Error())
+	}
 
 	// Step 1b: finish reading the message.
 	if pfunc == nil {

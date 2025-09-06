@@ -22,7 +22,7 @@
 #include <limits>
 #include <string>
 
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
 
 namespace HPHP { namespace alloc {
 
@@ -157,4 +157,4 @@ DefaultArena* next_extra_arena(int node);
 
 }
 
-#endif // USE_JEMALLOC_EXTENT_HOOKS
+#endif // USE_JEMALLOC

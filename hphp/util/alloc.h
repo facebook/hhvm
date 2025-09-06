@@ -128,8 +128,6 @@ void shutdown_slab_managers();
 
 void setup_auto_arenas(PageSpec);
 
-#if USE_JEMALLOC_EXTENT_HOOKS
-
 // Explicit per-thread tcache for high arena.
 extern __thread int high_arena_tcache;
 
@@ -141,8 +139,6 @@ void setup_jemalloc_metadata_extent_hook(bool enable, bool enable_numa_arena,
 void arenas_thread_init();
 void arenas_thread_flush();
 void arenas_thread_exit();
-
-#endif // USE_JEMALLOC_EXTENT_HOOKS
 
 #endif // USE_JEMALLOC
 
@@ -284,7 +280,7 @@ void* mallocx_on_node(size_t size, int node, size_t align);
 // given flags. When not using event hooks, fallback version is used. `fallback`
 // can be empty, in which case generic malloc/free will be used when not using
 // extent hooks. These functions will crash with 0-sized alloc/deallocs.
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
 #define DEF_ALLOC_FUNCS(prefix, flag, fallback)                 \
   inline void* prefix##_malloc(size_t size) {                   \
     assert(size != 0);                                          \
@@ -320,17 +316,13 @@ void* mallocx_on_node(size_t size, int node, size_t align);
   }
 #endif
 
-#if USE_JEMALLOC_EXTENT_HOOKS
 #define HIGH_ARENA_FLAGS (high_arena_flags | MALLOCX_TCACHE(high_arena_tcache))
-#else
-#define HIGH_ARENA_FLAGS 0
-#endif
 
 DEF_ALLOC_FUNCS(vm, HIGH_ARENA_FLAGS, )
 DEF_ALLOC_FUNCS(vm_cold, high_cold_arena_flags, )
 
 // Allocations that are guaranteed to live below kUncountedMaxAddr when
-// USE_JEMALLOC_EXTENT_HOOKS. This provides a new way to check for countedness
+// USE_JEMALLOC. This provides a new way to check for countedness
 // for arrays and strings.
 DEF_ALLOC_FUNCS(uncounted, HIGH_ARENA_FLAGS, )
 

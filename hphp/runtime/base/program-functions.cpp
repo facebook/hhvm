@@ -988,8 +988,7 @@ hugifyText(char* from, char* to) {
 }
 
 static void pagein_self(void) {
-#if defined(USE_JEMALLOC) && (JEMALLOC_VERSION_MAJOR >= 5)
-  // jemalloc 5 has background threads, which handle purging asynchronously.
+#if defined(USE_JEMALLOC)
   bool background_threads = false;
   if (mallctlRead<bool, true>("background_thread", &background_threads)) {
     background_threads = false;
@@ -2020,7 +2019,7 @@ static int execute_program_impl(int argc, char** argv) {
                              inherited_fds);
   }
 
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
   if (Cfg::Server::Mode) {
     purge_all();
     setup_auto_arenas({Cfg::Eval::Num1GPagesForA0, Cfg::Eval::Num2MPagesForA0});
@@ -2513,7 +2512,7 @@ static void update_constants_and_options() {
 
 void hphp_thread_init(bool skipExtensions /* = false */) {
   init_current_pthread_stack_limits();
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
   arenas_thread_init();
 #endif
   rds::threadInit();
@@ -2544,7 +2543,7 @@ void hphp_thread_exit(bool skipExtensions /* = false */) {
   if (!skipExtensions) ExtensionRegistry::threadShutdown();
   if (!g_context.isNull()) g_context.destroy();
   rds::threadExit();
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
   arenas_thread_exit();
 #endif
 }
@@ -2722,7 +2721,7 @@ void hphp_process_init(bool skipExtensions) {
         Cfg::Jit::WorkerThreadsForSerdes : Process::GetCPUCount();
 
     auto const deserialize = [&] (auto const& f) {
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
       auto const numArenas =
         std::min(Cfg::Jit::WorkerArenas,
                  std::max(Cfg::Jit::WorkerThreads, numWorkers));

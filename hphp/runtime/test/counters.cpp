@@ -332,7 +332,7 @@ TEST(COUNTERS, build_age) {
     EXPECT_LE(age, end - ts);
 }
 
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
 TEST(COUNTERS, alloc_arena_usage) {
   #define C(which) \
   { \

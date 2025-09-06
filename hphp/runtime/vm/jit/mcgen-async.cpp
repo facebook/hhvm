@@ -563,7 +563,7 @@ struct AsyncTranslationWorker
 
   void onThreadEnter() override {
     folly::setThreadName("asyncjitworker");
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
     if (auto arena = next_extra_arena(s_numaNode)) {
       arena->bindCurrentThread();
     }

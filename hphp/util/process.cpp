@@ -440,7 +440,6 @@ void ProcStatus::update() {
     }
 #ifdef USE_JEMALLOC
     mallctl_epoch();
-#if USE_JEMALLOC_EXTENT_HOOKS
     size_t unused = 0;
     // Various arenas where range of hugetlb pages can be reserved but only
     // partially used.
@@ -454,7 +453,6 @@ void ProcStatus::update() {
       if (arena) unused += arena->retained();
     }
     updateUnused(unused >> 10); // convert to kB
-#endif
 #endif
   }
 }

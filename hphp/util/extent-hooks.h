@@ -22,7 +22,7 @@
 #include <array>
 #include <atomic>
 
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
 
 /*
  * Recent versions of jemalloc (specifically, jemalloc 5.x here) allow us to
@@ -169,4 +169,4 @@ struct RangeFallbackExtentAllocator {
 
 }
 
-#endif // USE_JEMALLOC_EXTENT_HOOKS
+#endif // USE_JEMALLOC

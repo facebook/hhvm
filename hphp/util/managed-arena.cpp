@@ -20,7 +20,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/service-data.h"
 
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
 
 namespace HPHP::alloc {
 
@@ -139,8 +139,6 @@ void ManagedArena<ExtentAllocator>::updateHook() {
                 &hooks_ptr, sizeof(hooks_ptr))) {
       throw std::runtime_error{command};
     }
-#if (JEMALLOC_VERSION_MAJOR > 5) || \
-  ((JEMALLOC_VERSION_MAJOR == 5) && (JEMALLOC_VERSION_MINOR >= 1))
     // Avoid asking excessive memory through the hook, in order to make better
     // use of preallocated pages.
     std::snprintf(command, sizeof(command),
@@ -150,7 +148,6 @@ void ManagedArena<ExtentAllocator>::updateHook() {
       throw std::runtime_error{command};
     }
   }
-#endif
 }
 
 template void ManagedArena<MultiRangeExtentAllocator>::create();

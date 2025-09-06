@@ -1424,7 +1424,7 @@ void RuntimeOption::Load(
       low_2m_pages(Cfg::Eval::MaxLowMemHugePages);
       high_2m_pages(Cfg::Eval::MaxHighArenaHugePages);
     }
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
     g_useTHPUponHugeTLBFailure =
       Config::GetBool(ini, config, "Eval.UseTHPUponHugeTLBFailure",
                       g_useTHPUponHugeTLBFailure);

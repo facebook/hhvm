@@ -23,7 +23,7 @@
 #include <functional>
 #include <utility>
 
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
 
 namespace HPHP {
 

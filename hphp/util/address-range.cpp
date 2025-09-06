@@ -57,17 +57,12 @@ void RangeState::reserve() {
 
 size_t getLowMapped() {
   size_t low_mapped = 0;
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
   // The low range [1G, 4G) is divided into two ranges, and shared by 3
   // arenas.
   low_mapped += alloc::getRange(alloc::AddrRangeClass::VeryLow).used();
   low_mapped += alloc::getRange(alloc::AddrRangeClass::Low).used();
   low_mapped += alloc::getRange(alloc::AddrRangeClass::LowEmergency).used();
-#elif USE_JEMALLOC
-  mallctlRead<size_t, true>(
-    folly::sformat("stats.arenas.{}.mapped", low_arena).c_str(),
-    &low_mapped
-  );
 #endif
   return low_mapped;
 }

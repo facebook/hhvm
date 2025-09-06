@@ -116,7 +116,7 @@ CodeCache::CodeCache() {
     return;
   }
 
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
   // When we have a low arena, TC must fit below lowArenaMinAddr(). If it
   // doesn't, we shrink things to make it so.
   auto const lowArenaStart = lowArenaMinAddr();

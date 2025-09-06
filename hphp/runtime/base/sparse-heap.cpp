@@ -49,11 +49,7 @@ void SparseHeap::reset() {
         if (size) local_sized_free(ptr, size);
       } else {
 #ifdef USE_JEMALLOC
-#if JEMALLOC_VERSION_MAJOR >= 4
         sdallocx(ptr, size, 0);
-#else
-        dallocx(ptr, 0);
-#endif
 #else
         free(ptr);
         MemoryManager::g_threadDeallocated += size;
@@ -178,11 +174,7 @@ void SparseHeap::freeBig(void* ptr, MemoryUsageStats& stats) {
     local_sized_free(ptr, cap);
   } else {
     assertx(nallocx(cap, 0) == sallocx(ptr, 0));
-#if JEMALLOC_VERSION_MAJOR >= 4
     sdallocx(ptr, cap, 0);
-#else
-    dallocx(ptr, 0);
-#endif
   }
 #else
   MemoryManager::g_threadDeallocated += cap;

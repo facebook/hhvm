@@ -66,7 +66,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #endif
 
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/managed-arena.h"
 #endif
@@ -766,7 +766,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
     if (strncmp(cmd.c_str(), "hugepage", 9) == 0) {
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
       std::string msg =
         folly::sformat("{} 1G huge pages active\n", num_1g_pages());
       if (auto a = alloc::lowArena()) {

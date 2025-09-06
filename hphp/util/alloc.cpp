@@ -45,9 +45,7 @@ HHVM_ATTRIBUTE_WEAK uintptr_t tc_start_address() {
 void flush_thread_caches() {
 #ifdef USE_JEMALLOC
   mallctlCall<true>("thread.tcache.flush");
-#if USE_JEMALLOC_EXTENT_HOOKS
   arenas_thread_flush();
-#endif
 #endif
 }
 
@@ -143,7 +141,6 @@ int high_arena_flags = 0;
 int high_cold_arena_flags = 0;
 __thread int local_arena_flags = 0;
 
-#if USE_JEMALLOC_EXTENT_HOOKS
 // Keep track of the size of recently freed memory that might be in the high1g
 // arena when it is disabled, so that we know when to reenable it.
 std::atomic_uint g_highArenaRecentlyFreed;
@@ -155,7 +152,6 @@ alloc::BumpFileMapper* cold_file_mapper = nullptr;
 // #define MALLOCX_TCACHE_NONE MALLOCX_TCACHE(-1)
 __thread int high_arena_tcache = -1;
 __thread int local_arena_tcache = -1;
-#endif
 
 static unsigned base_arena;
 
@@ -191,7 +187,6 @@ void* mallocx_on_node(size_t size, int node, size_t align) {
 
 #endif // HAVE_NUMA
 
-#if USE_JEMALLOC_EXTENT_HOOKS
 using namespace alloc;
 static NEVER_INLINE
 RangeMapper* getMapperChain(RangeState& range, unsigned n1GPages,
@@ -465,8 +460,6 @@ void arenas_thread_exit() {
   }
 }
 
-#endif // USE_JEMALLOC_EXTENT_HOOKS
-
 std::vector<SlabManager*> s_slab_managers;
 
 void setup_local_arenas(PageSpec spec, unsigned slabs) {
@@ -487,7 +480,6 @@ void setup_local_arenas(PageSpec spec, unsigned slabs) {
     }
   }
 
-#if USE_JEMALLOC_EXTENT_HOOKS
 #ifdef __x86_64__
   spec.n1GPages = std::min(spec.n1GPages, get_huge1g_info().nr_hugepages);
   spec.n2MPages = std::min(spec.n2MPages, get_huge2m_info().nr_hugepages);
@@ -541,18 +533,13 @@ void setup_local_arenas(PageSpec spec, unsigned slabs) {
     if (totalSlabSize == reserveSize) continue;
     g_local_arenas[i] = arena;
   }
-#endif
 }
 
 unsigned get_local_arena(uint32_t node) {
-#if USE_JEMALLOC_EXTENT_HOOKS
   if (node >= g_local_arenas.size()) return 0;
   auto const arena = g_local_arenas[node];
   if (arena == nullptr) return 0;
   return arena->id();
-#else
-  return 0;
-#endif
 }
 
 SlabManager* get_local_slab_manager(uint32_t node) {
@@ -606,26 +593,6 @@ struct JEMallocInitializer {
 
     init_numa();
 #ifdef USE_JEMALLOC
-#if !USE_JEMALLOC_EXTENT_HOOKS
-    // Create the legacy low arena that uses brk() instead of mmap().  When
-    // using newer versions of jemalloc, we use extent hooks to get more
-    // control.  If the mallctl fails, it will always_assert in mallctlHelper.
-    if (mallctlRead<unsigned, true>("arenas.create", &low_arena)) {
-      return;
-    }
-    char buf[32];
-    snprintf(buf, sizeof(buf), "arena.%u.dss", low_arena);
-    if (mallctlWrite<const char*, true>(buf, "primary") != 0) {
-      // Error; bail out.
-      return;
-    }
-    low_arena_flags = MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
-    lower_arena = low_arena;
-    lower_arena_flags = low_arena_flags;
-    small_arena = low_arena;
-    small_arena_flags = low_arena_flags;
-
-#else // USE_JEMALLOC_EXTENT_HOOKS
     unsigned low_1g_pages = 0;
     if (char* buffer = getenv("HHVM_LOW_1G_PAGE")) {
       if (!sscanf(buffer, "%u", &low_1g_pages)) {
@@ -721,7 +688,7 @@ struct JEMallocInitializer {
     setup_high_arena({high_1g_pages, high_2m_pages});
     // Make sure high/low arenas are available to the current thread.
     arenas_thread_init();
-#endif
+
     // Initialize global mibs
     init_mallctl_mibs();
 #endif
@@ -740,20 +707,20 @@ struct JEMallocInitializer {
 static JEMallocInitializer initJEMalloc MAX_CONSTRUCTOR_PRIORITY;
 
 void low_2m_pages(uint32_t pages) {
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
   pages -= allocate2MPagesToRange(AddrRangeClass::VeryLow, pages);
   allocate2MPagesToRange(AddrRangeClass::Low, pages);
 #endif
 }
 
 void high_2m_pages(uint32_t pages) {
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
   allocate2MPagesToRange(AddrRangeClass::Uncounted, pages);
 #endif
 }
 
 void enable_high_cold_file() {
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
   if (cold_file_mapper) {
     cold_file_mapper->enable();
   }
@@ -761,7 +728,7 @@ void enable_high_cold_file() {
 }
 
 void set_cold_file_dir(const char* dir) {
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
   if (cold_file_mapper) {
     cold_file_mapper->setDirectory(dir);
   }
@@ -782,16 +749,12 @@ SwappableReadonlyArena* get_swappable_readonly_arena() {
 
 extern "C" {
   const char* malloc_conf = "narenas:8,lg_tcache_max:16"
-#if (JEMALLOC_VERSION_MAJOR == 5 && JEMALLOC_VERSION_MINOR >= 3) || \
-    (JEMALLOC_VERSION_MAJOR > 5) // requires jemalloc >= 5.3
-#if (JEMALLOC_VERSION_NREV >= 211)
+#if (JEMALLOC_VERSION_MAJOR == 5 && JEMALLOC_VERSION_MINOR == 3 && JEMALLOC_VERSION_NREV >= 211) || \
+    (JEMALLOC_VERSION_MAJOR == 5 && JEMALLOC_VERSION_MINOR > 3) || \
+    (JEMALLOC_VERSION_MAJOR > 5)
     ",experimental_tcache_gc:false"
 #endif
-#endif
-#if (JEMALLOC_VERSION_MAJOR == 5 && JEMALLOC_VERSION_MINOR >= 1) || \
-    (JEMALLOC_VERSION_MAJOR > 5) // requires jemalloc >= 5.1
     ",metadata_thp:disabled,bin_shards:1-256:16|320-14336:4|4096-4096:16"
-#endif
 #if (ENABLE_HHPROF && !__aarch64__)
     ",prof:true,prof_active:false,prof_thread_active_init:false"
 #endif

@@ -35,7 +35,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
 
 namespace HPHP {
 

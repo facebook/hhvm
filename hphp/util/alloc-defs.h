@@ -34,11 +34,8 @@
 
 #ifdef USE_JEMALLOC
 #include <jemalloc/jemalloc.h>
-#if (JEMALLOC_VERSION_MAJOR < 5)
-#  error "jemalloc 5 is required"
-#endif
-#if defined(__linux__) && !defined(USE_JEMALLOC_EXTENT_HOOKS) && defined(HHVM_FACEBOOK)
-#  define USE_JEMALLOC_EXTENT_HOOKS 1
+#if JEMALLOC_VERSION_MAJOR < 5 || (JEMALLOC_VERSION_MAJOR == 5 && JEMALLOC_VERSION_MINOR < 3)
+#  error "jemalloc 5.3 is required"
 #endif
 #endif
 
@@ -55,7 +52,7 @@ constexpr bool use_jemalloc =
 // static/uncounted strings/arrays have addresses lower than kUncountedMaxAddr,
 // and all counted HeapObjects have higher addresses.
 constexpr bool addr_encodes_persistency =
-#if USE_JEMALLOC_EXTENT_HOOKS && defined(__x86_64__) && defined(__linux__)
+#if USE_JEMALLOC && defined(__x86_64__) && defined(__linux__)
   true
 #else
   false

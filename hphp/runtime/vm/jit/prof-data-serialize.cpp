@@ -72,7 +72,7 @@
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
 #include "hphp/util/managed-arena.h"
 #endif
 #include "hphp/util/numa.h"
@@ -1022,7 +1022,7 @@ void merge_loaded_units(int numWorkers) {
         spec,
         [&] {
           ProfileNonVMThread nonVM;
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
           if (auto arena = next_extra_arena(spec.numaNode)) {
             arena->bindCurrentThread();
           }
@@ -1179,7 +1179,7 @@ void merge_and_enqueue_for_jit(const std::string& root, int numWorkers) {
         spec,
         [&] {
           ProfileNonVMThread nonVM;
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
           if (auto arena = next_extra_arena(spec.numaNode)) {
             arena->bindCurrentThread();
           }
@@ -2516,7 +2516,7 @@ std::string deserializeSBProfData(const std::string& root,
     auto const profFileName = !filename.empty() ?
       filename : RuntimeOption::EvalSBSerdesFile;
 
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
     // TODO: add additional param like WorkerArenas
     setup_extra_arenas(numWorkers);
 #endif

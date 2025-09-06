@@ -47,7 +47,7 @@
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
 #include "hphp/util/managed-arena.h"
 #endif
 #include "hphp/util/roar.h"
@@ -216,7 +216,7 @@ struct TranslateWorker : JobQueueWorker<tc::FuncMetaInfo*, void*, true, true> {
 
   void onThreadEnter() override {
     folly::setThreadName("jitworker");
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
     if (auto arena = next_extra_arena(s_numaNode)) {
       arena->bindCurrentThread();
     }

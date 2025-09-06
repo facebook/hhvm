@@ -20,7 +20,7 @@
 #include "hphp/util/managed-arena.h"
 #include <folly/portability/SysMman.h>
 
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
 
 namespace HPHP::alloc {
 

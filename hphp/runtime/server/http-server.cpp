@@ -279,7 +279,7 @@ void HttpServer::onServerShutdown() {
   SparseHeap::PrepareToStop();
 #ifdef USE_JEMALLOC
   shutdown_slab_managers();
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
   if (HPHP::alloc::BumpEmergencyMapper::
       s_emergencyFlag.load(std::memory_order_acquire)) {
     // Server is shutting down when it almost exhausted low memory.

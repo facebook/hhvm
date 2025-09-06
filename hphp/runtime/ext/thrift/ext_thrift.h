@@ -116,9 +116,9 @@ Object HHVM_FUNCTION(
 // Helper functions for compact serialization and deserialization
 
 Object compact_deserialize_from_string(
-    const String& serialized, 
-    const String& thrift_typename, 
-    int64_t options = 0);
+    const String& serialized,
+    const String& thrift_typename,
+    int64_t options = 0, int64_t version = 2);
 
 String compact_serialize_to_string(
                    const Object& thrift_struct,

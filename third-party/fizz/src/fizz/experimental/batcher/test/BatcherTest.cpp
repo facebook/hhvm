@@ -8,6 +8,7 @@
 
 #include <fizz/backend/openssl/certificate/OpenSSLPeerCertImpl.h>
 #include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl.h>
+#include <fizz/crypto/Utils.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/experimental/batcher/Batcher.h>
 #include <fizz/experimental/client/BatchSignaturePeerCert.h>
@@ -87,6 +88,7 @@ TEST(BatchSignatureTest, TestSynchronizedBatcherSingleThread) {
 
 TEST(BatchSignatureTest, TestSynchronizedBatcherMultiThread) {
   useMockRandom();
+  CryptoUtils::init();
 
   size_t numMsgThreshold = 3;
   std::vector<folly::ssl::X509UniquePtr> certs;
@@ -122,6 +124,7 @@ TEST(BatchSignatureTest, TestSynchronizedBatcherMultiThread) {
 }
 
 TEST(BatchSignatureTest, TestSynchronizedBatcherWithSelfCertP256) {
+  CryptoUtils::init();
   size_t numMsgThreshold = 3;
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kP256Certificate));
@@ -169,6 +172,7 @@ TEST(BatchSignatureTest, TestSynchronizedBatcherWithSelfCertP256) {
 
 TEST(BatchSignatureTest, TestThreadLocalBatcher) {
   useMockRandom();
+  CryptoUtils::init();
 
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kRSACertificate));
@@ -206,6 +210,7 @@ TEST(BatchSignatureTest, TestThreadLocalBatcher) {
 }
 
 TEST(BatchSignatureTest, TestThreadLocalBatcherWithSelfCertP256) {
+  CryptoUtils::init();
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kP256Certificate));
   auto certificate =

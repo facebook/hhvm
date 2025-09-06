@@ -64,22 +64,37 @@ struct Former {
   void countPredsHelper(TransID tid) {
     assertx(!m_visited.contains(tid));
 
-    m_visited.insert(tid);
-    m_visiting.insert(tid);
+    std::vector<TransID> stack;
+    stack.push_back(tid);
 
-    auto const arcs = m_cfg.outArcs(tid);
+    while (!stack.empty()) {
+      TransID node = stack.back();
+      stack.pop_back();
 
-    for (auto const arc : arcs) {
-      auto const dst = arc->dst();
+      // New node never seen before.
+      if (!m_visited.contains(node) && !m_visiting.contains(node)) {
+        m_visiting.insert(node);
+        m_visited.insert(node);
+        // Push node back onto the stack so we know when we're done visiting all
+        // it's descendents.  This is needed to detect backedges.
+        stack.push_back(node);
 
-      if (m_visiting.contains(dst)) continue; // backedge
-      m_pendingPreds[dst]++;
-      if (!m_visited.contains(dst)) {
-        countPredsHelper(dst);
+        auto const outArcs = m_cfg.outArcs(node);
+        for (auto const arc : outArcs | std::views::reverse) {
+          auto const dst = arc->dst();
+          if (m_visiting.contains(dst)) continue; // backedge
+          m_pendingPreds[dst]++;
+          if (!m_visited.contains(dst)) {
+            stack.push_back(dst);
+          }
+        }
+
+      } else if (m_visiting.contains(node)) {
+        // We were already visiting this node, so now we're done visiting its
+        // descendents.
+        m_visiting.erase(node);
       }
     }
-
-    m_visiting.erase(tid);
   }
 
   void countPreds(TransID head) {

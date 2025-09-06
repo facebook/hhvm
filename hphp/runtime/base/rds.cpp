@@ -255,7 +255,7 @@ Optional<Handle> findFreeBlock(FreeLists& lists, size_t size,
 // 's_persistent_free_lists' yet.
 NEVER_INLINE void addNewPersistentChunk(size_t size) {
   assertx(size > 0 && size < kMaxHandle && size % 4096 == 0);
-  auto const raw = static_cast<char*>(lower_malloc(size));
+  auto const raw = static_cast<char*>(small_malloc(size));
   auto const addr = reinterpret_cast<uintptr_t>(raw);
   memset(raw, 0, size);
 #if !RDS_FIXED_PERSISTENT_BASE

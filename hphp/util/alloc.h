@@ -102,18 +102,18 @@ uintptr_t tc_start_address();
 // arenas are served using default malloc(), and no assumption about the
 // resulting address range can be made.
 
+extern unsigned small_arena;
 extern unsigned low_arena;
 extern unsigned lower_arena;
-extern unsigned low_cold_arena;
 extern unsigned high_arena;
 extern unsigned high_cold_arena;
 extern __thread unsigned local_arena;
 
+extern int small_arena_flags;
 extern int low_arena_flags;
 extern int lower_arena_flags;
-extern int low_cold_arena_flags;
-extern int high_cold_arena_flags;
 extern int high_arena_flags;
+extern int high_cold_arena_flags;
 extern __thread int local_arena_flags;
 
 struct PageSpec {
@@ -380,10 +380,10 @@ inline void low_sized_free(void* ptr, size_t size) {
 #endif
 }
 
-// lower arena and low_cold arena alias low arena when extent hooks are not
+// lower arena and mid arena alias low arena when extent hooks are not
 // used.
 DEF_ALLOC_FUNCS(lower, lower_arena_flags, low_)
-DEF_ALLOC_FUNCS(low_cold, low_cold_arena_flags, low_)
+DEF_ALLOC_FUNCS(small, small_arena_flags, low_)
 
 #undef DEF_ALLOC_FUNCS
 
@@ -433,8 +433,8 @@ template<typename T> using LowAllocator =
   WrapAllocator<low_malloc, low_sized_free, T>;
 template<typename T> using LowerAllocator =
   WrapAllocator<lower_malloc, lower_sized_free, T>;
-template<typename T> using LowColdAllocator =
-  WrapAllocator<low_cold_malloc, low_cold_sized_free, T>;
+template<typename T> using SmallAllocator =
+  WrapAllocator<small_malloc, small_sized_free, T>;
 template<typename T> using VMAllocator =
   WrapAllocator<vm_malloc, vm_sized_free, T>;
 template<typename T> using VMColdAllocator =

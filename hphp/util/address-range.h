@@ -24,7 +24,40 @@
 namespace HPHP {
 
 // Address ranges for managed arenas.
-
+//
+// Depending if we are running in LowPtr, PackedPtr or FullPtr mode we allocate
+// memory differently. We have 3 main arenas Lower, Low and Small. The number in
+// the table is which chunk we allocate memory from first.
+//
+// LowPtr mode
+// --------------------------------------------------------------------------
+// Start Addr                           Lower       Low         Small
+// --------------------------------------------------------------------------
+// 1 GB                                 1           2           1
+// 2 GB                                 2           1           2
+// 4 GB - Emergency                     3           3           3
+// 4 GB
+// --------------------------------------------------------------------------
+//
+// PackedPtr mode                       Lower       Low         Small
+// --------------------------------------------------------------------------
+// 1 GB                                 1           2           1
+// 4 GB - Emergency - Small             3           3           2
+// 4 GB - Emergency                     4           4           3
+// 4 GB                                 2           1
+// 32 GB
+// --------------------------------------------------------------------------
+//
+// FullPtr mode
+// --------------------------------------------------------------------------
+// Start Addr                           Lower       Low         Small
+// --------------------------------------------------------------------------
+// 1 GB                                 1           2           1
+// 2 GB                                 2           1           2
+// 64 GB - Emergency                    3           3           3
+// 64 GB
+// --------------------------------------------------------------------------
+//
 // Low arenas are in [lowArenaMinAddr(), 4G), and high arena are in
 // [4G, kUncountedMaxAddr).
 // LOW_PTR builds won't work if low arena overflows. High arena overflow would
@@ -34,18 +67,34 @@ namespace HPHP {
 // avoid having ifdefs everywhere.
 extern uintptr_t lowArenaMinAddr();
 
-constexpr uintptr_t kLowArenaMaxAddr =
-#ifdef USE_LOWPTR
-  1ull << 32;
-#else
-  64ull << 30;
-#endif
 constexpr size_t kLowEmergencySize = 128 << 20;
+
+#ifdef USE_LOWPTR
+#ifdef USE_PACKEDPTR
+constexpr uintptr_t kLowArenaMaxAddr = 1ull << 32;
+constexpr uintptr_t kLowSmallArenaSize = 512 << 20;
+constexpr uintptr_t kVeryLowArenaMaxAddr = kLowArenaMaxAddr -
+  kLowEmergencySize -
+  kLowSmallArenaSize;
+constexpr uintptr_t kMidArenaMaxAddr = 32ull << 30;
+#else
+constexpr uintptr_t kLowArenaMaxAddr = 1ull << 32;
+constexpr uintptr_t kVeryLowArenaMaxAddr = 2ull << 30;
+constexpr uintptr_t kMidArenaMaxAddr = kLowArenaMaxAddr;
+#endif
+#else
+constexpr uintptr_t kLowArenaMaxAddr = 64ull << 30;
+constexpr uintptr_t kVeryLowArenaMaxAddr = 2ull << 30;
+constexpr uintptr_t kMidArenaMaxAddr = kLowArenaMaxAddr;
+#endif
+
 constexpr unsigned kUncountedMaxShift = 38;
 constexpr uintptr_t kUncountedMaxAddr = 1ull << kUncountedMaxShift;
 constexpr size_t kHighColdCap = 4ull << 30;
 constexpr uintptr_t kHighArenaMaxAddr = kUncountedMaxAddr - kHighColdCap;
-constexpr size_t kHighArenaMaxCap = kHighArenaMaxAddr - kLowArenaMaxAddr;
+constexpr uintptr_t kHighArenaMinAddr = kMidArenaMaxAddr;
+
+constexpr size_t kHighArenaMaxCap = kHighArenaMaxAddr - kHighArenaMinAddr;
 
 // Arenas for request heap starts at kLocalArenaMinAddr.
 constexpr uintptr_t kLocalArenaMinAddr = 1ull << 40;
@@ -57,17 +106,18 @@ constexpr uintptr_t kDebugAddr = 3ull << 39;
 inline bool is_low_mem(void* m) {
   assertx(use_lowptr);
   auto const i = reinterpret_cast<uintptr_t>(m);
-  return i < kLowArenaMaxAddr;
+  return i < kHighArenaMinAddr;
 }
 
 namespace alloc {
 
 // List of address ranges ManagedArena can manage.
 enum AddrRangeClass : uint32_t {
-  VeryLow = 0,                     // below 2G, 31-bit address
-  Low,                             // [2G,  kLowArenaMaxAddr - kLowEmergencySize)
-  LowEmergency,                    // below kLowArenaMaxAddr
-  Uncounted,                       // [kLowArenaMaxAddr, kHighArenaMaxAddr)
+  VeryLow = 0,                     // [.., kVeryLowArenaMaxAddr)
+  Low,                             // [kVeryLowArenaMaxAddr, kLowArenaMaxAddr - kLowEmergencySize)
+  LowEmergency,                    // [kLowArenaMaxAddr - kLowEmergencySize, kLowArenaMaxAddr)
+  Mid,                             // [kLowArenaMaxAddr, kMidArenaMaxAddr) (Only exists in USE_PACKEDPTR builds)
+  Uncounted,                       // [kMidArenaMaxAddr, kHighArenaMaxAddr)
   UncountedCold,                   // [kHighArenaMaxAddr, kUncountedMaxAddr)
   Global,                          // [kArena0Base, ...)
   NumRangeClasses,

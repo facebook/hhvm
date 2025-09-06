@@ -94,9 +94,9 @@ using LowArena = RangeArena;
 using HighArena = RangeArena;
 static_assert(alignof(RangeArena) <= 64, "");
 using RangeArenaStorage = std::aligned_storage<sizeof(RangeArena), 64>::type;
+extern RangeArenaStorage g_smallArena;
 extern RangeArenaStorage g_lowerArena;
 extern RangeArenaStorage g_lowArena;
-extern RangeArenaStorage g_lowColdArena;
 extern RangeArenaStorage g_highArena;
 extern RangeArenaStorage g_coldArena;
 

@@ -129,18 +129,18 @@ void* mallocx_on_node(size_t size, int node, size_t align) {
 #endif
 
 #ifdef USE_JEMALLOC
+unsigned small_arena = 0;
 unsigned low_arena = 0;
 unsigned lower_arena = 0;
-unsigned low_cold_arena = 0;
 unsigned high_arena = 0;
 unsigned high_cold_arena = 0;
 __thread unsigned local_arena = 0;
 
+int small_arena_flags = 0;
 int low_arena_flags = 0;
 int lower_arena_flags = 0;
-int low_cold_arena_flags = 0;
-int high_cold_arena_flags = 0;
 int high_arena_flags = 0;
+int high_cold_arena_flags = 0;
 __thread int local_arena_flags = 0;
 
 #if USE_JEMALLOC_EXTENT_HOOKS
@@ -257,51 +257,68 @@ void setup_low_arena(PageSpec s) {
   auto& veryLowRange = getRange(AddrRangeClass::VeryLow);
   auto& lowRange = getRange(AddrRangeClass::Low);
   auto& emergencyRange = getRange(AddrRangeClass::LowEmergency);
+  auto veryLowMapperNumHugePages = std::min(
+    s.n1GPages,
+    (uint32_t)(veryLowRange.capacity() / size1g));
+  auto lowMapperNumHugePages = std::min(
+    s.n1GPages - veryLowMapperNumHugePages,
+    (uint32_t)(lowRange.capacity() / size1g));
   auto veryLowMapper =
     getMapperChain(veryLowRange,
-                   (s.n1GPages != 0) ? 1 : 0,
+                   veryLowMapperNumHugePages,
                    true, s.n2MPages,    // 2M
                    true,                // 4K
                    numa_node_set, 0);
   auto lowMapper =
     getMapperChain(lowRange,
-                   (s.n1GPages > 1) ? (s.n1GPages - 1) : 0,
+                   lowMapperNumHugePages,
                    true, 0,             // 2M
                    true,                // 4K
                    numa_node_set, 1);
+#ifdef USE_PACKEDPTR
+  auto& midRange = getRange(AddrRangeClass::Mid);
+  auto midMapperNumHugePages = s.n1GPages -
+    veryLowMapperNumHugePages -
+    lowMapperNumHugePages;
+  auto midMapper =
+    getMapperChain(midRange,
+                   midMapperNumHugePages,
+                   true, 0,             // 2M
+                   true,                // 4K
+                   numa_node_set, 0);
+#endif
   auto emergencyMapper =
     new BumpEmergencyMapper([]{ kill(getpid(), SIGTERM);}, emergencyRange);
   veryLowRange.setLowMapper(veryLowMapper);
   lowRange.setLowMapper(lowMapper);
   emergencyRange.setLowMapper(emergencyMapper);
 
-  auto veryLowColdMapper =
-    new BumpNormalMapper<Direction::HighToLow>(veryLowRange, 0, numa_node_set);
-  auto lowColdMapper =
-    new BumpNormalMapper<Direction::HighToLow>(lowRange, 0, numa_node_set);
-  veryLowRange.setHighMapper(veryLowColdMapper);
-  lowRange.setHighMapper(lowColdMapper);
+  auto ma = LowArena::CreateAt(&g_lowerArena);
+  ma->appendMapper(veryLowMapper);
+#ifdef USE_PACKEDPTR
+  ma->appendMapper(midMapper);
+#endif
+  ma->appendMapper(lowMapper);
+  ma->appendMapper(emergencyMapper);
+  lower_arena = ma->id();
+  lower_arena_flags = MALLOCX_ARENA(lower_arena) | MALLOCX_TCACHE_NONE;
 
-  auto ma = LowArena::CreateAt(&g_lowArena);
+  ma = LowArena::CreateAt(&g_lowArena);
+#ifdef USE_PACKEDPTR
+  ma->appendMapper(midMapper);
+#endif
   ma->appendMapper(lowMapper);
   ma->appendMapper(veryLowMapper);
   ma->appendMapper(emergencyMapper);
   low_arena = ma->id();
   low_arena_flags = MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
 
-  ma = LowArena::CreateAt(&g_lowerArena);
+  ma = LowArena::CreateAt(&g_smallArena);
   ma->appendMapper(veryLowMapper);
   ma->appendMapper(lowMapper);
   ma->appendMapper(emergencyMapper);
-  lower_arena = ma->id();
-  lower_arena_flags = MALLOCX_ARENA(lower_arena) | MALLOCX_TCACHE_NONE;
-
-  ma = LowArena::CreateAt(&g_lowColdArena);
-  ma->appendMapper(lowColdMapper);
-  ma->appendMapper(veryLowColdMapper);
-  ma->appendMapper(emergencyMapper);
-  low_cold_arena = ma->id();
-  low_cold_arena_flags = MALLOCX_ARENA(low_cold_arena) | MALLOCX_TCACHE_NONE;
+  small_arena = ma->id();
+  small_arena_flags = MALLOCX_ARENA(small_arena) | MALLOCX_TCACHE_NONE;
 }
 
 void setup_high_arena(PageSpec s) {
@@ -605,8 +622,8 @@ struct JEMallocInitializer {
     low_arena_flags = MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
     lower_arena = low_arena;
     lower_arena_flags = low_arena_flags;
-    low_cold_arena = low_arena;
-    low_cold_arena_flags = low_arena_flags;
+    small_arena = low_arena;
+    small_arena_flags = low_arena_flags;
 
 #else // USE_JEMALLOC_EXTENT_HOOKS
     unsigned low_1g_pages = 0;

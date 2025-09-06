@@ -617,7 +617,7 @@ UnionConstraint::allocObjects(UnionClassList objects) {
     }
   }
 
-  auto tc = static_new<const UnionClassList>(std::move(objects));
+  auto tc = new(lower_malloc(sizeof(UnionClassList))) UnionClassList(std::move(objects));
   wlock->table.insert(tc);
   return tc;
 }

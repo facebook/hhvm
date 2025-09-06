@@ -444,13 +444,6 @@ template<typename T> using APCAllocator =
 template<typename T> using LocalAllocator =
   WrapAllocator<local_malloc, local_sized_free, T>;
 
-
-template<typename T, typename... Args>
-inline PackedPtr<T> static_new(Args&&... args) {
-  void* p = lower_malloc(sizeof(T));
-  return new (p) T(std::forward<Args>(args)...);
-}
-
 using SwappableReadonlyArena = ReadOnlyArena<VMColdAllocator<char>, false, 8>;
 void setup_swappable_readonly_arena(uint32_t chunk_size);
 SwappableReadonlyArena* get_swappable_readonly_arena();

@@ -37,9 +37,11 @@
 #include <thrift/compiler/parse/parser.h>
 #include <thrift/compiler/sema/sema.h>
 #include <thrift/compiler/source_location.h>
+#include <thrift/conformance/if/bundled_conformance_if.h>
 #include <thrift/lib/thrift/bundled_lib_thrift.h>
 
 using apache::thrift::detail::bundled_annotation_files;
+using apache::thrift::detail::bundled_conformance_if_files;
 using apache::thrift::detail::bundled_lib_thrift_files;
 
 namespace apache::thrift::compiler {
@@ -1018,7 +1020,9 @@ std::unique_ptr<t_program_bundle> parse_ast(
         ? std::optional<std::string_view>(path)
         : std::nullopt;
     for (const auto& annotation_files :
-         {bundled_annotation_files(), bundled_lib_thrift_files()}) {
+         {bundled_annotation_files(),
+          bundled_lib_thrift_files(),
+          bundled_conformance_if_files()}) {
       for (const auto& [annot_path, content] : annotation_files) {
         auto found_or_error = sm.find_include_file(
             annot_path, params.incl_searchpath, parent_path);

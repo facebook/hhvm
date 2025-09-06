@@ -26,6 +26,9 @@
 #include <thrift/test/gen-cpp2/UseOpEncode_types.h>
 #include <thrift/test/gen-cpp2/schema_types.h>
 
+#include <thrift/annotation/gen-cpp2/cpp_types.h>
+#include <thrift/conformance/if/gen-cpp2/any_types.h>
+#include <thrift/lib/thrift/gen-cpp2/any_types.h>
 #include <thrift/test/gen-cpp2/schema_constants.h>
 #include <thrift/test/gen-cpp2/schema_handlers.h>
 
@@ -260,6 +263,24 @@ TEST_F(SchemaTest, getSyntaxGraphNode) {
   const auto& sgNode = registry.getSyntaxGraphNode(tsNodeRef->asStruct());
 
   EXPECT_EQ(getSyntaxGraphDefinitionNodeByUri(uri), &sgNode);
+}
+
+TEST_F(SchemaTest, BundledSchema) {
+  EXPECT_EQ(
+      SchemaRegistry::get()
+          .getDefinitionNode<facebook::thrift::annotation::cpp::Type>()
+          .name(),
+      "Type");
+  EXPECT_EQ(
+      SchemaRegistry::get()
+          .getDefinitionNode<apache::thrift::type::Any>()
+          .name(),
+      "AnyStruct");
+  EXPECT_EQ(
+      SchemaRegistry::get()
+          .getDefinitionNode<apache::thrift::conformance::Any>()
+          .name(),
+      "Any");
 }
 
 } // namespace apache::thrift::test

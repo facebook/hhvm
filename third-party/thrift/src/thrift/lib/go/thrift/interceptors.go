@@ -29,18 +29,24 @@ func ChainInterceptors(interceptors ...Interceptor) Interceptor {
 	n := len(interceptors)
 	switch n {
 	case 0:
-		return func(ctx context.Context, name string, pf types.ProcessorFunction,
-			args types.Struct) (types.WritableStruct, types.ApplicationExceptionIf) {
-
+		return func(
+			ctx context.Context,
+			name string,
+			pf types.ProcessorFunction,
+			args types.Struct,
+		) (types.WritableStruct, types.ApplicationExceptionIf) {
 			return pf.RunContext(ctx, args)
 		}
 	case 1:
 		return interceptors[0]
 	}
 
-	return func(ctx context.Context, name string, pf types.ProcessorFunction,
-		args types.Struct) (types.WritableStruct, types.ApplicationExceptionIf) {
-
+	return func(
+		ctx context.Context,
+		name string,
+		pf types.ProcessorFunction,
+		args types.Struct,
+	) (types.WritableStruct, types.ApplicationExceptionIf) {
 		handler := &chainHandler{
 			last:         n - 1,
 			name:         name,

@@ -668,6 +668,18 @@ class t_mstch_rust_generator : public t_mstch_generator {
         });
     return globals;
   }
+
+  prototype<t_named>::ptr make_prototype_for_named(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_named(proto);
+    auto def = whisker::dsl::prototype_builder<h_named>::extends(base);
+    def.property("rust_name", [](const t_named& self) {
+      return named_rust_name(&self);
+    });
+    def.property(
+        "docs", [](const t_named& self) { return quoted_rust_doc(&self); });
+    return std::move(def).make();
+  }
 };
 
 class rust_mstch_program : public mstch_program {
@@ -706,7 +718,6 @@ class rust_mstch_program : public mstch_program {
              &rust_mstch_program::rust_nonstandard_types},
             {"program:nonstandardFields",
              &rust_mstch_program::rust_nonstandard_fields},
-            {"program:docs", &rust_mstch_program::rust_docs},
             {"program:types_include_srcs",
              &rust_mstch_program::rust_types_include_srcs},
             {"program:clients_include_srcs",
@@ -868,7 +879,6 @@ class rust_mstch_program : public mstch_program {
     return make_mstch_fields(
         std::vector<const t_field*>(fields.begin(), fields.end()));
   }
-  mstch::node rust_docs() { return quoted_rust_doc(program_); }
   mstch::node rust_types_include_srcs() { return options_.types_include_srcs; }
   mstch::node rust_clients_include_srcs() {
     return options_.clients_include_srcs;
@@ -1220,8 +1230,7 @@ class rust_mstch_service : public mstch_service {
     }
     register_methods(
         this,
-        {{"service:rust_name", &rust_mstch_service::rust_name},
-         {"service:rustFunctions", &rust_mstch_service::rust_functions},
+        {{"service:rustFunctions", &rust_mstch_service::rust_functions},
          {"service:rust_exceptions", &rust_mstch_service::rust_all_exceptions},
          {"service:client_package", &rust_mstch_service::rust_client_package},
          {"service:server_package", &rust_mstch_service::rust_server_package},
@@ -1231,10 +1240,8 @@ class rust_mstch_service : public mstch_service {
          {"service:requestContext?", &rust_mstch_service::rust_request_context},
          {"service:extendedClients",
           &rust_mstch_service::rust_extended_clients},
-         {"service:docs", &rust_mstch_service::rust_doc},
          {"service:program_name", &rust_mstch_service::program_name}});
   }
-  mstch::node rust_name() { return named_rust_name(service_); }
   mstch::node rust_functions();
   mstch::node rust_client_package() {
     return get_client_import_name(service_->program(), options_);
@@ -1283,7 +1290,6 @@ class rust_mstch_service : public mstch_service {
   mstch::node program_name() { return service_->program()->name(); }
 
   mstch::node rust_all_exceptions();
-  mstch::node rust_doc() { return quoted_rust_doc(service_); }
 
  private:
   std::unordered_multiset<std::string> function_upcamel_names_;
@@ -1315,8 +1321,7 @@ class rust_mstch_function : public mstch_function {
         function_upcamel_names_(function_upcamel_names) {
     register_methods(
         this,
-        {{"function:rust_name", &rust_mstch_function::rust_name},
-         {"function:upcamel", &rust_mstch_function::rust_upcamel},
+        {{"function:upcamel", &rust_mstch_function::rust_upcamel},
          {"function:index", &rust_mstch_function::rust_index},
          {"function:uniqueExceptions",
           &rust_mstch_function::rust_unique_exceptions},
@@ -1329,7 +1334,6 @@ class rust_mstch_function : public mstch_function {
          {"function:args_by_name", &rust_mstch_function::rust_args_by_name},
          {"function:returns_by_name",
           &rust_mstch_function::rust_returns_by_name},
-         {"function:docs", &rust_mstch_function::rust_doc},
          {"function:interaction_name",
           &rust_mstch_function::rust_interaction_name},
          {"function:void_or_void_stream?",
@@ -1337,7 +1341,6 @@ class rust_mstch_function : public mstch_function {
          {"function:enable_anyhow_to_application_exn",
           &rust_mstch_function::rust_anyhow_to_application_exn}});
   }
-  mstch::node rust_name() { return named_rust_name(function_); }
   mstch::node rust_upcamel() {
     auto upcamel_name = camelcase(function_->name());
     if (function_upcamel_names_.count(upcamel_name) > 1) {
@@ -1466,7 +1469,6 @@ class rust_mstch_function : public mstch_function {
     return array;
   }
 
-  mstch::node rust_doc() { return quoted_rust_doc(function_); }
   mstch::node rust_interaction_name() {
     const auto& interaction = function_->interaction();
     return interaction ? interaction->name() : function_->return_type()->name();
@@ -1531,7 +1533,6 @@ class rust_mstch_struct : public mstch_struct {
             {"struct:copy?", &rust_mstch_struct::rust_is_copy},
             {"struct:exhaustive?", &rust_mstch_struct::rust_is_exhaustive},
             {"struct:fields_by_name", &rust_mstch_struct::rust_fields_by_name},
-            {"struct:docs", &rust_mstch_struct::rust_doc},
             {"struct:derive", &rust_mstch_struct::rust_derive},
             {"struct:has_exception_message?",
              &rust_mstch_struct::has_exception_message},
@@ -1585,7 +1586,6 @@ class rust_mstch_struct : public mstch_struct {
     });
     return make_mstch_fields(fields);
   }
-  mstch::node rust_doc() { return quoted_rust_doc(struct_); }
   mstch::node rust_derive() {
     if (auto annotation = find_structured_derive_annotation(*struct_)) {
       // Always replace `crate::` with the package name of where this
@@ -1660,22 +1660,6 @@ class rust_mstch_struct : public mstch_struct {
   const t_const* adapter_annotation_;
 };
 
-class rust_mstch_enum_value : public mstch_enum_value {
- public:
-  rust_mstch_enum_value(
-      const t_enum_value* ev, mstch_context& ctx, mstch_element_position pos)
-      : mstch_enum_value(ev, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"enum_value:rust_name", &rust_mstch_enum_value::rust_name},
-            {"enum_value:docs", &rust_mstch_enum_value::rust_doc},
-        });
-  }
-  mstch::node rust_name() { return named_rust_name(enum_value_); }
-  mstch::node rust_doc() { return quoted_rust_doc(enum_value_); }
-};
-
 class rust_mstch_enum : public mstch_enum {
  public:
   rust_mstch_enum(
@@ -1691,7 +1675,6 @@ class rust_mstch_enum : public mstch_enum {
             {"enum:package", &rust_mstch_enum::rust_package},
             {"enum:variants_by_name", &rust_mstch_enum::variants_by_name},
             {"enum:variants_by_number", &rust_mstch_enum::variants_by_number},
-            {"enum:docs", &rust_mstch_enum::rust_doc},
             {"enum:serde?", &rust_mstch_enum::rust_serde},
             {"enum:derive", &rust_mstch_enum::rust_derive},
         });
@@ -1747,7 +1730,6 @@ class rust_mstch_enum : public mstch_enum {
     });
     return make_mstch_enum_values(variants);
   }
-  mstch::node rust_doc() { return quoted_rust_doc(enum_); }
   mstch::node rust_serde() { return rust_serde_enabled(options_, *enum_); }
 
  private:
@@ -2129,19 +2111,16 @@ class mstch_rust_struct_field : public mstch_base {
         this,
         {
             {"field:self", &mstch_rust_struct_field::self},
-            {"field:rust_name", &mstch_rust_struct_field::rust_name},
             {"field:explicit_value", &mstch_rust_struct_field::explicit_value},
             {"field:default", &mstch_rust_struct_field::rust_default},
             {"field:type", &mstch_rust_struct_field::type},
             {"field:box?", &mstch_rust_struct_field::is_boxed},
             {"field:arc?", &mstch_rust_struct_field::is_arc},
             {"field:docs?", &mstch_rust_struct_field::rust_has_docs},
-            {"field:docs", &mstch_rust_struct_field::rust_docs},
             {"field:has_adapter?", &mstch_rust_struct_field::has_adapter},
         });
   }
   whisker::object self() { return make_self(*field_); }
-  mstch::node rust_name() { return named_rust_name(field_); }
   mstch::node explicit_value() {
     if (explicit_value_) {
       auto type = field_->get_type();
@@ -2164,7 +2143,6 @@ class mstch_rust_struct_field : public mstch_base {
   mstch::node is_boxed() { return field_kind(*field_) == FieldKind::Box; }
   mstch::node is_arc() { return field_kind(*field_) == FieldKind::Arc; }
   mstch::node rust_has_docs() { return field_->has_doc(); }
-  mstch::node rust_docs() { return quoted_rust_doc(field_); }
   mstch::node has_adapter() {
     return adapter_node(
         adapter_annotation_,
@@ -2250,13 +2228,10 @@ class rust_mstch_const : public mstch_const {
     register_methods(
         this,
         {
-            {"constant:rust_name", &rust_mstch_const::rust_name},
             {"constant:lazy?", &rust_mstch_const::rust_lazy},
             {"constant:rust", &rust_mstch_const::rust_typed_value},
-            {"constant:docs", &rust_mstch_const::rust_docs},
         });
   }
-  mstch::node rust_name() { return named_rust_name(const_); }
   mstch::node rust_lazy() {
     if (type_has_transitive_adapter(const_->type(), true)) {
       return true;
@@ -2271,7 +2246,6 @@ class rust_mstch_const : public mstch_const {
     return std::make_shared<mstch_rust_value>(
         const_->value(), const_->type(), depth, context_, pos_, options_);
   }
-  mstch::node rust_docs() { return quoted_rust_doc(const_); }
 
  private:
   const rust_codegen_options& options_;
@@ -2290,13 +2264,11 @@ class rust_mstch_field : public mstch_field {
     register_methods(
         this,
         {
-            {"field:rust_name", &rust_mstch_field::rust_name},
             {"field:primitive?", &rust_mstch_field::rust_primitive},
             {"field:rename?", &rust_mstch_field::rust_rename},
             {"field:default", &rust_mstch_field::rust_default},
             {"field:box?", &rust_mstch_field::rust_is_boxed},
             {"field:arc?", &rust_mstch_field::rust_is_arc},
-            {"field:docs", &rust_mstch_field::rust_docs},
             {"field:type_annotation?", &rust_mstch_field::rust_type_annotation},
             {"field:type_nonstandard?",
              &rust_mstch_field::rust_type_nonstandard},
@@ -2317,7 +2289,6 @@ class rust_mstch_field : public mstch_field {
     }
     return rust_type;
   }
-  mstch::node rust_name() { return named_rust_name(field_); }
   mstch::node rust_primitive() {
     auto type = field_->get_type();
     return type->is_bool() || type->is_any_int() || type->is_floating_point();
@@ -2335,7 +2306,6 @@ class rust_mstch_field : public mstch_field {
   }
   mstch::node rust_is_boxed() { return field_kind(*field_) == FieldKind::Box; }
   mstch::node rust_is_arc() { return field_kind(*field_) == FieldKind::Arc; }
-  mstch::node rust_docs() { return quoted_rust_doc(field_); }
   mstch::node has_adapter() {
     return adapter_node(
         adapter_annotation_,
@@ -2373,7 +2343,6 @@ class rust_mstch_typedef : public mstch_typedef {
             {"typedef:copy?", &rust_mstch_typedef::rust_copy},
             {"typedef:rust_type", &rust_mstch_typedef::rust_type},
             {"typedef:nonstandard?", &rust_mstch_typedef::rust_nonstandard},
-            {"typedef:docs", &rust_mstch_typedef::rust_docs},
             {"typedef:serde?", &rust_mstch_typedef::rust_serde},
             {"typedef:has_adapter?", &rust_mstch_typedef::has_adapter},
             {"typedef:constructor?", &rust_mstch_typedef::constructor},
@@ -2426,7 +2395,6 @@ class rust_mstch_typedef : public mstch_typedef {
     }
     return rust_type.find("::") != std::string::npos;
   }
-  mstch::node rust_docs() { return quoted_rust_doc(typedef_); }
   mstch::node rust_serde() { return rust_serde_enabled(options_, *typedef_); }
   mstch::node has_adapter() {
     return adapter_node(
@@ -2644,7 +2612,6 @@ void t_mstch_rust_generator::set_mstch_factories() {
   mstch_context_.add<rust_mstch_struct>(&options_);
   mstch_context_.add<rust_mstch_field>(&options_);
   mstch_context_.add<rust_mstch_enum>(&options_);
-  mstch_context_.add<rust_mstch_enum_value>();
   mstch_context_.add<rust_mstch_const>(&options_);
 }
 

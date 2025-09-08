@@ -79,9 +79,6 @@ type GetEntityClient interface {
     MyMethodWithConflictingParamAccessors(ctx context.Context, setFoo bool, foo string) (error)
 }
 
-// Temporary alias while we are migrating
-type GetEntityClientInterface = GetEntityClient
-
 type getEntityClientImpl struct {
     ch thrift.RequestChannel
 }

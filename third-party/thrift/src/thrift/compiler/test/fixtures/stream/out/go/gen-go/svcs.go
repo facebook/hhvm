@@ -42,9 +42,6 @@ type PubSubStreamingServiceClient interface {
     ReturnstreamFast(ctx context.Context, i32From int32, i32To int32) (<-chan int32 /* elem stream */, <-chan error /* stream err */, error)
 }
 
-// Temporary alias while we are migrating
-type PubSubStreamingServiceClientInterface = PubSubStreamingServiceClient
-
 type pubSubStreamingServiceClientImpl struct {
     ch thrift.RequestChannel
 }

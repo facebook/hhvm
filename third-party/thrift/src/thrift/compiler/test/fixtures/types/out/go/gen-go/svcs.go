@@ -39,9 +39,6 @@ type SomeServiceClient interface {
     BinaryKeyedMap(ctx context.Context, r []int64) (map[*TBinary]int64, error)
 }
 
-// Temporary alias while we are migrating
-type SomeServiceClientInterface = SomeServiceClient
-
 type someServiceClientImpl struct {
     ch thrift.RequestChannel
 }

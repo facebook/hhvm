@@ -41,9 +41,6 @@ type RaiserClient interface {
     Get500(ctx context.Context) (string, error)
 }
 
-// Temporary alias while we are migrating
-type RaiserClientInterface = RaiserClient
-
 type raiserClientImpl struct {
     ch thrift.RequestChannel
 }

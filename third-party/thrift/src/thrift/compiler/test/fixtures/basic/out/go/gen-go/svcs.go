@@ -35,9 +35,6 @@ type FooServiceClient interface {
     SimpleRPC(ctx context.Context) (error)
 }
 
-// Temporary alias while we are migrating
-type FooServiceClientInterface = FooServiceClient
-
 type fooServiceClientImpl struct {
     ch thrift.RequestChannel
 }
@@ -173,9 +170,6 @@ type FB303ServiceClient interface {
     io.Closer
     SimpleRPC(ctx context.Context, intParameter int32) (*ReservedKeyword, error)
 }
-
-// Temporary alias while we are migrating
-type FB303ServiceClientInterface = FB303ServiceClient
 
 type fB303ServiceClientImpl struct {
     ch thrift.RequestChannel
@@ -333,9 +327,6 @@ type MyServiceClient interface {
     InvalidReturnForHack(ctx context.Context) ([]float32, error)
     RpcSkippedCodegen(ctx context.Context) (error)
 }
-
-// Temporary alias while we are migrating
-type MyServiceClientInterface = MyServiceClient
 
 type myServiceClientImpl struct {
     ch thrift.RequestChannel
@@ -1069,9 +1060,6 @@ type DbMixedStackArgumentsClient interface {
     GetDataByKey0(ctx context.Context, key string) ([]byte, error)
     GetDataByKey1(ctx context.Context, key string) ([]byte, error)
 }
-
-// Temporary alias while we are migrating
-type DbMixedStackArgumentsClientInterface = DbMixedStackArgumentsClient
 
 type dbMixedStackArgumentsClientImpl struct {
     ch thrift.RequestChannel

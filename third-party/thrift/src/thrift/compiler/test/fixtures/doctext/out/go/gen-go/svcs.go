@@ -40,9 +40,6 @@ type CClient interface {
     Thing(ctx context.Context, a int32, b string, c []int32) (string, error)
 }
 
-// Temporary alias while we are migrating
-type CClientInterface = CClient
-
 type cClientImpl struct {
     ch thrift.RequestChannel
 }

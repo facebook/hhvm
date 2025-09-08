@@ -35,9 +35,6 @@ type MyRootClient interface {
     DoRoot(ctx context.Context) (error)
 }
 
-// Temporary alias while we are migrating
-type MyRootClientInterface = MyRootClient
-
 type myRootClientImpl struct {
     ch thrift.RequestChannel
 }
@@ -180,9 +177,6 @@ type MyNodeClient interface {
     DoMid(ctx context.Context) (error)
 }
 
-// Temporary alias while we are migrating
-type MyNodeClientInterface = MyNodeClient
-
 type myNodeClientImpl struct {
     // Inherited/extended service
     MyRootClient
@@ -300,9 +294,6 @@ type MyLeafClient interface {
 
     DoLeaf(ctx context.Context) (error)
 }
-
-// Temporary alias while we are migrating
-type MyLeafClientInterface = MyLeafClient
 
 type myLeafClientImpl struct {
     // Inherited/extended service

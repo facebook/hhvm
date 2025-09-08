@@ -35,9 +35,6 @@ type ServiceClient interface {
     Func(ctx context.Context, arg1 StringWithAdapter_7208, arg2 StringWithCppAdapter, arg3 *Foo) (MyI32_4873, error)
 }
 
-// Temporary alias while we are migrating
-type ServiceClientInterface = ServiceClient
-
 type serviceClientImpl struct {
     ch thrift.RequestChannel
 }
@@ -180,9 +177,6 @@ type AdapterServiceClient interface {
     Count(ctx context.Context) (*CountingStruct, error)
     AdaptedTypes(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error)
 }
-
-// Temporary alias while we are migrating
-type AdapterServiceClientInterface = AdapterServiceClient
 
 type adapterServiceClientImpl struct {
     ch thrift.RequestChannel

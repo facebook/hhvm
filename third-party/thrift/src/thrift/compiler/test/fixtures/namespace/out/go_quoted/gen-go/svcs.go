@@ -35,9 +35,6 @@ type TestServiceClient interface {
     Init(ctx context.Context, int1 int64) (int64, error)
 }
 
-// Temporary alias while we are migrating
-type TestServiceClientInterface = TestServiceClient
-
 type testServiceClientImpl struct {
     ch thrift.RequestChannel
 }

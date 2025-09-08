@@ -43,9 +43,6 @@ type FinderClient interface {
     PreviousPlate(ctx context.Context, plate Plate) (Plate, error)
 }
 
-// Temporary alias while we are migrating
-type FinderClientInterface = FinderClient
-
 type finderClientImpl struct {
     ch thrift.RequestChannel
 }

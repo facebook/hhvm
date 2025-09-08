@@ -43,9 +43,6 @@ type NestedContainersClient interface {
     Turtles(ctx context.Context, foo [][]map[int32]map[int32][]int32) (error)
 }
 
-// Temporary alias while we are migrating
-type NestedContainersClientInterface = NestedContainersClient
-
 type nestedContainersClientImpl struct {
     ch thrift.RequestChannel
 }

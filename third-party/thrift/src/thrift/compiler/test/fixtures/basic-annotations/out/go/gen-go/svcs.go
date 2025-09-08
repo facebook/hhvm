@@ -34,9 +34,6 @@ type BadInteractionClient interface {
     Foo(ctx context.Context) (error)
 }
 
-// Temporary alias while we are migrating
-type BadInteractionClientInterface = BadInteractionClient
-
 type badInteractionClientImpl struct {
     ch thrift.RequestChannel
 }
@@ -88,9 +85,6 @@ type MyServiceClient interface {
     LobDataById(ctx context.Context, id int64, data string) (error)
     GoDoNothing(ctx context.Context) (error)
 }
-
-// Temporary alias while we are migrating
-type MyServiceClientInterface = MyServiceClient
 
 type myServiceClientImpl struct {
     ch thrift.RequestChannel
@@ -635,9 +629,6 @@ type MyServicePrioParentClient interface {
     Pong(ctx context.Context) (error)
 }
 
-// Temporary alias while we are migrating
-type MyServicePrioParentClientInterface = MyServicePrioParentClient
-
 type myServicePrioParentClientImpl struct {
     ch thrift.RequestChannel
 }
@@ -845,9 +836,6 @@ type MyServicePrioChildClient interface {
     Pang(ctx context.Context) (error)
 }
 
-// Temporary alias while we are migrating
-type MyServicePrioChildClientInterface = MyServicePrioChildClient
-
 type myServicePrioChildClientImpl struct {
     // Inherited/extended service
     MyServicePrioParentClient
@@ -959,9 +947,6 @@ type BadServiceClient interface {
     io.Closer
     Bar(ctx context.Context) (int32, error)
 }
-
-// Temporary alias while we are migrating
-type BadServiceClientInterface = BadServiceClient
 
 type badServiceClientImpl struct {
     ch thrift.RequestChannel
@@ -1103,9 +1088,6 @@ type FooBarBazServiceClient interface {
     BarNonStructured(ctx context.Context) (error)
     Baz(ctx context.Context) (error)
 }
-
-// Temporary alias while we are migrating
-type FooBarBazServiceClientInterface = FooBarBazServiceClient
 
 type fooBarBazServiceClientImpl struct {
     ch thrift.RequestChannel

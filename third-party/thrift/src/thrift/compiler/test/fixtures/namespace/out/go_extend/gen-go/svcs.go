@@ -43,9 +43,6 @@ type ExtendTestServiceClient interface {
     Check(ctx context.Context, struct1 *test0.HsFoo) (bool, error)
 }
 
-// Temporary alias while we are migrating
-type ExtendTestServiceClientInterface = ExtendTestServiceClient
-
 type extendTestServiceClientImpl struct {
     // Inherited/extended service
     test0.HsTestServiceClient

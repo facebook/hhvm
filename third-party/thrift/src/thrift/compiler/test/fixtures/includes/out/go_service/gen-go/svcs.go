@@ -41,9 +41,6 @@ type MyServiceClient interface {
     HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) (error)
 }
 
-// Temporary alias while we are migrating
-type MyServiceClientInterface = MyServiceClient
-
 type myServiceClientImpl struct {
     ch thrift.RequestChannel
 }

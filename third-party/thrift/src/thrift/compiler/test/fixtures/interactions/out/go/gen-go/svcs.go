@@ -39,9 +39,6 @@ type MyInteractionClient interface {
     Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error)
 }
 
-// Temporary alias while we are migrating
-type MyInteractionClientInterface = MyInteractionClient
-
 type myInteractionClientImpl struct {
     ch thrift.RequestChannel
 }
@@ -144,9 +141,6 @@ type MyInteractionFastClient interface {
     Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error)
 }
 
-// Temporary alias while we are migrating
-type MyInteractionFastClientInterface = MyInteractionFastClient
-
 type myInteractionFastClientImpl struct {
     ch thrift.RequestChannel
 }
@@ -246,9 +240,6 @@ type SerialInteractionClient interface {
     Frobnicate(ctx context.Context) (error)
 }
 
-// Temporary alias while we are migrating
-type SerialInteractionClientInterface = SerialInteractionClient
-
 type serialInteractionClientImpl struct {
     ch thrift.RequestChannel
 }
@@ -287,9 +278,6 @@ type BoxedInteractionClient interface {
     io.Closer
     GetABox(ctx context.Context) (*ShouldBeBoxed, error)
 }
-
-// Temporary alias while we are migrating
-type BoxedInteractionClientInterface = BoxedInteractionClient
 
 type boxedInteractionClientImpl struct {
     ch thrift.RequestChannel
@@ -330,9 +318,6 @@ type MyServiceClient interface {
     io.Closer
     Foo(ctx context.Context) (error)
 }
-
-// Temporary alias while we are migrating
-type MyServiceClientInterface = MyServiceClient
 
 type myServiceClientImpl struct {
     ch thrift.RequestChannel
@@ -470,9 +455,6 @@ type FactoriesClient interface {
     Foo(ctx context.Context) (error)
 }
 
-// Temporary alias while we are migrating
-type FactoriesClientInterface = FactoriesClient
-
 type factoriesClientImpl struct {
     ch thrift.RequestChannel
 }
@@ -608,9 +590,6 @@ type PerformClient interface {
     io.Closer
     Foo(ctx context.Context) (error)
 }
-
-// Temporary alias while we are migrating
-type PerformClientInterface = PerformClient
 
 type performClientImpl struct {
     ch thrift.RequestChannel
@@ -748,9 +727,6 @@ type InteractWithSharedClient interface {
     DoSomeSimilarThings(ctx context.Context) (*shared.DoSomethingResult, error)
 }
 
-// Temporary alias while we are migrating
-type InteractWithSharedClientInterface = InteractWithSharedClient
-
 type interactWithSharedClientImpl struct {
     ch thrift.RequestChannel
 }
@@ -885,9 +861,6 @@ type BoxService interface {
 type BoxServiceClient interface {
     io.Closer
 }
-
-// Temporary alias while we are migrating
-type BoxServiceClientInterface = BoxServiceClient
 
 type boxServiceClientImpl struct {
     ch thrift.RequestChannel

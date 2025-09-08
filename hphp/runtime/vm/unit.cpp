@@ -396,6 +396,10 @@ void Unit::merge() {
                       m_fatalInfo->m_fatalLoc);
   }
 
+  if (Cfg::Eval::PackageV2 && m_softDeployedRepoOnly) {
+    raise_warning("File %s is soft-deployed, but its unit was merged", filepath()->data());
+  }
+
   if (mergeState == MergeState::Unmerged) {
     SimpleLock lock(unitInitLock);
     initialMerge();

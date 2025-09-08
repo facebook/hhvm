@@ -258,6 +258,8 @@ struct UnitEmitter {
 
   const PackageInfo& getPackageInfo() const;
 
+  const StringData* getPackageOverride() const;
+
 private:
   void calculateEntryPointId();
 

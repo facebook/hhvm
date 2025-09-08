@@ -771,6 +771,7 @@ struct Unit {
   LSString moduleName;
   LSString extName;
   PackageInfo packageInfo;
+  bool softDeployed;
 
   template <typename SerDe> void serde(SerDe& sd);
 };

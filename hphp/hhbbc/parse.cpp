@@ -1126,6 +1126,7 @@ ParsedUnit parse_unit(const UnitEmitter& ue) {
   ret.unit->fileAttributes = ue.m_fileAttributes;
   ret.unit->moduleName     = ue.m_moduleName;
   ret.unit->packageInfo    = ue.m_packageInfo;
+  ret.unit->softDeployed   = ue.m_softDeployedRepoOnly;
 
   ret.unit->extName        = [&]{
     if (ue.m_extension) {

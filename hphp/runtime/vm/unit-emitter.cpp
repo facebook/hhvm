@@ -560,6 +560,18 @@ const PackageInfo& UnitEmitter::getPackageInfo() const {
   return m_packageInfo;
 }
 
+const StaticString
+  s_PackageOverride("__PackageOverride");
+
+const StringData* UnitEmitter::getPackageOverride() const {
+  auto const attr = m_fileAttributes.find(s_PackageOverride.get());
+  if (attr != m_fileAttributes.end()) {
+    assertx(tvIsVec(attr->second) && val(attr->second).parr->size() == 1);
+    return tvAssertStringLike(val(attr->second).parr->at(int64_t(0)));
+  }
+  return nullptr;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Initialization and execution.
 

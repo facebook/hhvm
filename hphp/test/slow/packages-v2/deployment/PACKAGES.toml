@@ -1,10 +1,9 @@
 [packages]
 
 [packages.softprod]
-include_paths=["//softprod"]
+include_paths=["//softprod/"]
 
 [packages.prod]
-#include_paths=["//prod/", "//basic-1.php", "//basic-2.php", "//basic-3.php"]
 include_paths=["//prod/", "//"]
 soft_includes=["softprod"]
 

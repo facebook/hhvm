@@ -1277,7 +1277,11 @@ std::unique_ptr<UnitEmitter> emit_unit(Index& index, php::Unit& unit) {
   ue->m_metaData = unit.metaData;
   ue->m_fileAttributes = unit.fileAttributes;
   ue->m_moduleName = unit.moduleName;
-  ue->m_softDeployedRepoOnly = unit.packageInfo.isModuleSoftDeployed(unit.moduleName);
+  if (Cfg::Eval::PackageV2) {
+    ue->m_softDeployedRepoOnly = unit.softDeployed;
+  } else {
+    ue->m_softDeployedRepoOnly = unit.packageInfo.isModuleSoftDeployed(unit.moduleName);
+  }
 
   if (unit.fatalInfo) {
     // We should have dealt with verifier failures long ago.

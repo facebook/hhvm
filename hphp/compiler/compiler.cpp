@@ -1178,6 +1178,31 @@ bool process(CompilerOptions &po) {
     }
   }
 
+  auto const buildMode = packageV2BuildMode();
+  assertx((Cfg::Eval::PackageV2 && buildMode != PackageV2BuildMode::packageV2Disabled) ||
+          (!Cfg::Eval::PackageV2 && buildMode == PackageV2BuildMode::packageV2Disabled));
+  auto const& packageInfo = RepoOptions::forFile(po.inputDir.c_str()).packageInfo();
+
+  auto deployedByPackageV2 = [&](const StringData* filepath, const StringData* packageOverride) {
+    if (isPackageV2Enabled(buildMode) && !Cfg::Eval::ActiveDeployment.empty()) {
+      if (packageOverride) {
+        auto const activeDeployment =
+          packageInfo.deployments().find(Cfg::Eval::ActiveDeployment);
+        return activeDeployment->second.getDeployKind(packageOverride->data());
+      }
+      // match file with the include_path declarations and return
+      // if most precise one that matches belongs to the active deployment
+      auto file = filepath->slice();
+      for (auto const& it : pathsInDeployment) {
+        if (file.size() >= it.first.size() &&
+            std::equal(it.first.begin(), it.first.end(), file.begin())) {
+          return it.second;
+        }
+      }
+    }
+    return DeployKind::NotDeployed;
+  };
+
   Optional<RepoAutoloadMapBuilder> autoload;
   Optional<RepoFileBuilder> repo;
   std::atomic<uint32_t> nextSn{0};
@@ -1188,6 +1213,12 @@ bool process(CompilerOptions &po) {
   auto const emitUnit = [&] (std::unique_ptr<UnitEmitter> ue) {
     assertx(ue);
     if (Option::NoOutputHHBC) return;
+
+    if (Cfg::Eval::PackageV2) {
+      auto const deployed =
+        deployedByPackageV2(ue->m_filepath, ue->getPackageOverride());
+      ue->m_softDeployedRepoOnly = deployed == DeployKind::Soft;
+    }
 
     assertx(Option::GenerateBinaryHHBC ||
             Option::GenerateTextHHBC ||
@@ -1363,37 +1394,6 @@ bool process(CompilerOptions &po) {
     std::vector<FileInBuildReason> reasons;
     Package::ParseMetaItemsToSkipSet itemsToSkip;
 
-    auto const buildMode = packageV2BuildMode();
-    assertx((Cfg::Eval::PackageV2 && buildMode != PackageV2BuildMode::packageV2Disabled) ||
-            (!Cfg::Eval::PackageV2 && buildMode == PackageV2BuildMode::packageV2Disabled));
-
-    auto deployedByPackageV2 = [&](const Package::ParseMeta& p) {
-      if (isPackageV2Enabled(buildMode) && !Cfg::Eval::ActiveDeployment.empty()) {
-        // emit should never be invoked on files excluded from the build
-        // with --exclude-file or --exclude-pattern
-        auto file = p.m_filepath->toCppString();
-        always_assert(!Option::PackageExcludeFiles.count(file) &&
-          !Option::IsFileExcluded(file, Option::PackageExcludePatterns));
-
-        if (p.m_packageOverride) {
-          auto const& packageInfo =
-           RepoOptions::forFile(po.inputDir.c_str()).packageInfo();
-          auto const activeDeployment =
-            packageInfo.deployments().find(Cfg::Eval::ActiveDeployment);
-          return activeDeployment->second.getDeployKind(p.m_packageOverride->data());
-        }
-        // match file with the include_path declarations and return
-        // if most precise one that matches belongs to the active deployment
-        for (auto const& it : pathsInDeployment) {
-          if (file.size() >= it.first.size() &&
-              std::equal(it.first.begin(), it.first.end(), file.begin())) {
-            return it.second;
-          }
-        }
-      }
-      return DeployKind::NotDeployed;
-    };
-
     auto const includeInBuildReason = [&] (const Package::ParseMeta& p) {
       if (Cfg::Eval::ActiveDeployment.empty()) {
         if (emitPass == EmitPass::SymbolRefsOnDemandFiles) {
@@ -1405,7 +1405,13 @@ bool process(CompilerOptions &po) {
 
       if (Cfg::Eval::PackageV2) {
         assertx(!(Cfg::Eval::ActiveDeployment.empty()));
-        auto const deployed = deployedByPackageV2(p);
+        // emit should never be invoked on files excluded from the build
+        // with --exclude-file or --exclude-pattern
+        auto const filepath = p.m_filepath;
+        auto file = filepath->toCppString();
+        always_assert(!Option::PackageExcludeFiles.count(file) &&
+          !Option::IsFileExcluded(file, Option::PackageExcludePatterns));
+        auto const deployed = deployedByPackageV2(filepath, p.m_packageOverride);
         if (emitPass == EmitPass::SymbolRefsOnDemandFiles)  {
           if (deployed != DeployKind::NotDeployed) {
             return FileInBuildReason::fromSymbolRefsAndPackageV2;

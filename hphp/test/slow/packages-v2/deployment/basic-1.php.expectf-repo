@@ -4,7 +4,11 @@ f [fromPackageV2] basic-3.php
 f [fromPackageV2] basic-4.php
 f [fromPackageV2] prod/foo.inc.php
 f [fromPackageV2] prod/internal_prod/zap.inc.php
+f [fromPackageV2Soft] prod/qux.inc.php
 f [fromPackageV2Soft] softprod/quz.inc.php
 I am foo in prod/
 
-Fatal error: Call to undefined function bar() in %s/deployment/basic-1.php on line 6
+Warning: File %s/deployment/softprod/quz.inc.php is soft-deployed, but its unit was merged in %s/deployment/basic-1.php on line 7
+I am in softprod
+
+Fatal error: Call to undefined function bar() in %s/deployment/basic-1.php on line 11

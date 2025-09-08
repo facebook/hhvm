@@ -416,7 +416,10 @@ Type newColReturn(const IRInstruction* inst) {
 
 Type builtinReturn(const IRInstruction* inst) {
   assertx(inst->is(CallBuiltin));
-  return irgen::builtinReturnType(inst->extra<CallBuiltin>()->callee);
+  // FIXME: this should be callReturnType, but irgen-builtin.cpp uses type
+  // information to determine the ABI and it breaks if the type gets better
+  // return irgen::callReturnType(inst->extra<CallBuiltin>()->callee, false);
+  return typeFromFuncReturn(inst->extra<CallBuiltin>()->callee, true);
 }
 
 Type callReturn(const IRInstruction* inst) {

@@ -1741,29 +1741,6 @@ void emitNativeImpl(IRGS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-Type builtinReturnType(const Func* builtin) {
-  // Why do we recalculate the type here than just using HHBBC's inferred type?
-  // Unlike for regular PHP functions, we have access to all the same
-  // information that HHBBC does, and the JIT type-system is slightly more
-  // expressive. So, by doing it ourself, we can derive a slightly more precise
-  // type.
-  assertx(builtin->isCPPBuiltin());
-
-  // NB: It is *not* safe to be pessimistic here and return TCell (or any other
-  // approximation). The builtin's return type inferred here is used to control
-  // code-gen when lowering the builtin call to vasm and must be no more general
-  // than the HNI declaration (if present).
-  auto type = typeFromFuncReturn(builtin);
-
-  // Allow builtins to return bespoke array likes if the flag is set.
-  assertx(!type.arrSpec().vanilla());
-  if (!allowBespokeArrayLikes()) type = type.narrowToVanilla();
-
-  return type;
-}
-
-/////////////////////////////////////////////////////////////////////
-
 namespace {
 
 void implVecIdx(IRGS& env, SSATmp* loaded_collection_vec) {

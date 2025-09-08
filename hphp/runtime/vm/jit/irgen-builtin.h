@@ -34,11 +34,6 @@ struct IRGS;
 
 SSATmp* optimizedCallIsObject(IRGS&, SSATmp*);
 
-// The builtin's inferred return type (without taking into account coercion
-// failures). Appropriate for CallBuiltin. For regular PHP calls to a builtin,
-// use callReturnType() instead.
-Type builtinReturnType(const Func* builtin);
-
 //////////////////////////////////////////////////////////////////////
 
 }}}

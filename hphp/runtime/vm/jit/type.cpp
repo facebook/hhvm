@@ -1108,7 +1108,7 @@ Type typeFromTCImpl(const HPHP::TypeIntersectionConstraint& tcs,
     return TCell;
   };
 
-  auto type =  TCell;
+  auto type = TCell;
   for (auto const& tc : tcs.range()) {
     if (!tc.isCheckable() || tc.isSoft()) continue;
     auto ty = TBottom;
@@ -1126,6 +1126,9 @@ Type typeFromTCImpl(const HPHP::TypeIntersectionConstraint& tcs,
     if (nullable) ty |= TInitNull;
     type &= ty;
   }
+
+  assertx(!type.arrSpec().vanilla());
+  if (!allowBespokeArrayLikes()) type = type.narrowToVanilla();
   return type;
 }
 
@@ -1161,25 +1164,26 @@ Type typeFromFuncParam(const Func* func, uint32_t paramId) {
   return typeFromTCImpl(tcs, getThisType, func->cls());
 }
 
-Type typeFromFuncReturn(const Func* func) {
-  // Assert this here since we're modifying the behaviour of
-  // typeFromTCImpl below which should only be done for builtins
-  assertx(func->isCPPBuiltin());
-  auto const& tc = func->returnTypeConstraints();
+Type typeFromFuncReturn(const Func* func, bool pessimizeForBuiltin) {
   auto const getThisType = [&] {
     return func->cls() ? Type::SubObj(func->cls()) : TBottom;
   };
-  auto const rt = typeFromTCImpl(tc, getThisType, func->cls(), true) & TInitCell;
 
-  if (func->hasUntrustedReturnType()) return rt | TInitNull;
+  auto const& tcs = func->returnTypeConstraints();
+  auto const rt =
+    typeFromTCImpl(tcs, getThisType, func->cls(), true) & TInitCell;
 
-  // if the type is {T | InitNull}, return InitCell
-  if (rt.maybe(TInitNull) && rt > TInitNull) {
-    return TInitCell;
+  if (func->hasUntrustedReturnType()) {
+    assertx(func->isCPPBuiltin());
+    return rt | TInitNull;
   }
-  if (rt == TBottom) {
-    return TInitNull;
+
+  if (pessimizeForBuiltin) {
+    assertx(func->isCPPBuiltin());
+    if (rt.maybe(TInitNull) && rt > TInitNull) return TInitCell;
+    if (rt == TBottom) return TInitNull;
   }
+
   return rt;
 }
 

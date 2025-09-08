@@ -16,6 +16,9 @@
 #include "hphp/runtime/vm/jit/irgen-call.h"
 
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/ext/asio/ext_async-generator.h"
+#include "hphp/runtime/ext/asio/ext_wait-handle.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -2316,22 +2319,28 @@ Type callReturnType(const Func* callee, bool mayIntercept) {
   // interception functions can return arbitrary types.
   if (mayIntercept && callee->isInterceptable()) return TInitCell;
 
-  if (callee->isCPPBuiltin()) {
-    // If the function is builtin, use the builtin's return type, then take into
-    // account coercion failures.
-    return builtinReturnType(callee);
-  }
-
-  if (callee->takesInOutParams()) {
-    auto const ty = typeFromRAT(callee->repoReturnType(), callee->cls());
-    if (ty <= TVec) {
-      return arrLikeElemType(ty, Type::cns(0), callee->cls()).first;
+  // Type based on function signature.
+  auto const returnTy = [&] {
+    if (callee->isGenerator()) {
+      return callee->isAsync()
+        ? Type::ExactObj(AsyncGenerator::classof())
+        : Type::ExactObj(Generator::classof());
     }
-    return TInitCell;
-  }
+    if (callee->isAsync()) {
+      return Type::SubObj(c_Awaitable::classof());
+    }
+    return typeFromFuncReturn(callee);
+  }();
 
-  // Otherwise use HHBBC's analysis if present
-  return typeFromRAT(callee->repoReturnType(), callee->cls()) & TInitCell;
+  // Type based on HHBBC analysis.
+  auto const hhbbcTy = [&] {
+    auto const ty = typeFromRAT(callee->repoReturnType(), callee->cls());
+    if (!callee->takesInOutParams()) return ty & TInitCell;
+    if (!(ty <= TVec)) return TInitCell;
+    return arrLikeElemType(ty, Type::cns(0), callee->cls()).first;
+  }();
+
+  return returnTy & hhbbcTy;
 }
 
 Type callOutType(const Func* callee, uint32_t inOutIdx, bool mayIntercept) {
@@ -2361,7 +2370,17 @@ Type awaitedCallReturnType(const Func* callee, bool mayIntercept) {
   // interception functions can return arbitrary types.
   if (mayIntercept && callee->isInterceptable()) return TInitCell;
 
-  return typeFromRAT(callee->repoAwaitedReturnType(), callee->cls());
+  // Type based on function signature.
+  auto const returnTy = [&] {
+    if (!callee->isAsyncFunction()) return TInitCell;
+    return typeFromFuncReturn(callee);
+  }();
+
+  // Type based on HHBBC analysis.
+  auto const hhbbcTy =
+    typeFromRAT(callee->repoAwaitedReturnType(), callee->cls());
+
+  return returnTy & hhbbcTy;
 }
 
 //////////////////////////////////////////////////////////////////////

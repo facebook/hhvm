@@ -21,8 +21,11 @@ import (
 	"crypto/rand"
 	"crypto/tls"
 	"fmt"
+	"math"
 	"net"
 	"os"
+	"runtime"
+	"strconv"
 	"sync"
 	"testing"
 	"time"
@@ -526,6 +529,90 @@ func TestGoroutinePerRequest(t *testing.T) {
 	t.Run("NewServer/Rocket", func(t *testing.T) {
 		runTestFunc(t, TransportIDRocket)
 	})
+}
+
+func TestLeadHeader(t *testing.T) {
+	listener, err := net.Listen("tcp", "[::]:0")
+	require.NoError(t, err)
+	addr := listener.Addr()
+	t.Logf("Server listening on %v", addr)
+
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+	server := NewServer(processor, listener, TransportIDRocket, WithNumWorkers(GoroutinePerRequest))
+
+	serverCtx, serverCancel := context.WithCancel(context.Background())
+	var serverEG errgroup.Group
+	serverEG.Go(func() error {
+		return server.ServeContext(serverCtx)
+	})
+
+	channel, err := NewClient(
+		WithRocket(),
+		WithIoTimeout(5*time.Second),
+		WithDialer(func() (net.Conn, error) {
+			return net.DialTimeout(addr.Network(), addr.String(), 5*time.Second)
+		}),
+	)
+	require.NoError(t, err)
+	client := dummyif.NewDummyChannelClient(channel)
+
+	minLoadHeader := int64(math.MaxInt64)
+	maxLoadHeader := int64(math.MinInt64)
+	var minMaxLock sync.Mutex
+	const concurrentCalls = 100
+
+	makeRequest := func() {
+		ctx := NewResponseHeadersContext(context.Background())
+		err := client.Sleep(ctx, 10 /* ms */)
+		assert.NoError(t, err)
+		responseHeaders := ResponseHeadersFromContext(ctx)
+		assert.Contains(t, responseHeaders, "load")
+		loadStr := responseHeaders["load"]
+		loadVal, err := strconv.ParseInt(loadStr, 10, 64)
+		assert.NoError(t, err)
+		minMaxLock.Lock()
+		minLoadHeader = min(minLoadHeader, loadVal)
+		maxLoadHeader = max(maxLoadHeader, loadVal)
+		minMaxLock.Unlock()
+	}
+	// Make one standalone request to get the "min" baseline
+	makeRequest()
+
+	var clientsWG sync.WaitGroup
+	for range concurrentCalls {
+		clientsWG.Go(makeRequest)
+	}
+	clientsWG.Wait()
+
+	err = client.Close()
+	require.NoError(t, err)
+
+	// The core assertion of this test!!!
+	// now let's reason a bit about the range we should have seen in load headers
+	// given the default implementation.  The default impl is:
+	// 1000 * number of concurrent requests / number of cores
+	// (the devisor allows machines of variable compute capacity to have comparable
+	//  numbers).
+	// thus we should expect min to be zero.
+	// we should expect max to be close to:
+	// (numberOfCallers / numCPU) * 1000
+	//
+	// We will only hit this theoretical max for the test if all callers
+	// happend to be sleeping at the same time.  highly likely, but not
+	// guaranteed.  Let's verify that we get to at least 50% of the
+	// expected max.
+	expectedMin := int64(math.Round(1000*float64(1)) / float64(runtime.NumCPU()))
+	expectedMax := (1000 * float64(concurrentCalls)) / float64(runtime.NumCPU())
+
+	assert.Equal(t, expectedMin, minLoadHeader)
+	assert.Greater(t, float64(maxLoadHeader), expectedMax*0.5)
+	assert.GreaterOrEqual(t, expectedMax, float64(maxLoadHeader))
+	assert.Less(t, minLoadHeader, maxLoadHeader)
+
+	// Shut down server.
+	serverCancel()
+	err = serverEG.Wait()
+	require.ErrorIs(t, err, context.Canceled)
 }
 
 func TestServerObserverDefaultNotNil(t *testing.T) {

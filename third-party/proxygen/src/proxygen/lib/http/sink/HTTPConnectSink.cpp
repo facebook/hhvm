@@ -35,6 +35,9 @@ void HTTPConnectSink::sendBody(std::unique_ptr<folly::IOBuf> body) {
   DestructorCheck::Safety safety(*this);
   resetIdleTimeout();
   ++outstandingWrites_;
+  if (stats_ && body) {
+    stats_->addEgressBodyBytes(body->computeChainDataLength());
+  }
   sock_->writeChain(this, std::move(body));
   if (safety.destroyed()) {
     return;
@@ -128,6 +131,9 @@ void HTTPConnectSink::readDataAvailable(size_t readSize) noexcept {
     // guaranteed to find a non-empty buffer.
     while (readBuf_.front()->length() == 0) {
       readBuf_.pop_front();
+    }
+    if (stats_) {
+      stats_->addIngressBodyBytes(readBuf_.front()->length());
     }
     handler_->onBody(readBuf_.pop_front());
   }

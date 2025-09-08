@@ -7,6 +7,7 @@
  */
 
 #pragma once
+#include "proxygen/facebook/revproxy/pools/Pool.h"
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
@@ -27,14 +28,30 @@ class HTTPConnectSink
 
  public:
   explicit HTTPConnectSink(folly::AsyncTransport::UniquePtr socket,
-                           HTTPTransactionHandler* handler)
+                           HTTPTransactionHandler* handler,
+                           std::shared_ptr<Pool> pool = nullptr)
       : sock_(std::move(socket)), handler_(handler) {
     CHECK(sock_);
     sock_->getLocalAddress(&localAddress_);
     sock_->getPeerAddress(&peerAddress_);
+
+    if (pool) {
+      stats_ = pool->getConnectionStats();
+    }
+    if (stats_) {
+      stats_->recordConnectionOpen();
+      stats_->recordTcpConnectionOpen();
+      stats_->recordRequest();
+      stats_->recordResponse(200);
+    }
   }
 
-  ~HTTPConnectSink() override = default;
+  ~HTTPConnectSink() override {
+    if (stats_) {
+      stats_->recordDuration(millisecondsSince(connStart_).count());
+      stats_->recordConnectionClose();
+    }
+  }
 
   [[nodiscard]] folly::Optional<HTTPCodec::StreamID> getStreamID()
       const override {
@@ -197,6 +214,8 @@ class HTTPConnectSink
   folly::SocketAddress peerAddress_;
   folly::SocketAddress localAddress_;
   wangle::TransportInfo transportInfo_;
+  ConnectionStats* stats_ = nullptr;
+  const TimePoint connStart_{getCurrentTime()};
 
   /** Chain of ingress IOBufs */
   folly::IOBufQueue readBuf_{folly::IOBufQueue::cacheChainLength()};

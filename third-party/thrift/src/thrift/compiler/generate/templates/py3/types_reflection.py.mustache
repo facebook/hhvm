@@ -63,9 +63,9 @@ def get_reflection__{{struct:name}}() -> __StructSpec:
     spec: __StructSpec = __StructSpec._fbthrift_create(
         name="{{struct:name}}",
         kind=__StructType.{{!
-            }}{{#struct:exception?}}EXCEPTION{{/struct:exception?}}{{!
-            }}{{#struct:union?}}UNION{{/struct:union?}}{{!
-            }}{{#struct:plain?}}STRUCT{{/struct:plain?}},
+            }}{{#if struct:exception?}}EXCEPTION{{!
+            }}{{#else if struct:union?}}UNION{{!
+            }}{{#else}}STRUCT{{/if struct:exception?}},
         annotations={
             {{#each struct:unstructured_annotations as |annotation|}}
             {{> common/annotation }}

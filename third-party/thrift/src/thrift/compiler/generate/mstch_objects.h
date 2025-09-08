@@ -705,8 +705,6 @@ class mstch_struct : public mstch_base {
             {"struct:fields", &mstch_struct::fields},
             {"struct:fields_in_serialization_order",
              &mstch_struct::fields_in_serialization_order},
-            {"struct:exception?", &mstch_struct::is_exception},
-            {"struct:plain?", &mstch_struct::is_plain},
             {"struct:structured_annotations",
              &mstch_struct::structured_annotations},
         });
@@ -722,10 +720,6 @@ class mstch_struct : public mstch_base {
     throw whisker::eval_error("exception:self used on non-exception node");
   }
   mstch::node fields();
-  mstch::node is_exception() { return struct_->is<t_exception>(); }
-  mstch::node is_plain() {
-    return !struct_->is<t_exception>() && !struct_->is<t_union>();
-  }
   mstch::node structured_annotations() {
     return mstch_base::structured_annotations(struct_);
   }

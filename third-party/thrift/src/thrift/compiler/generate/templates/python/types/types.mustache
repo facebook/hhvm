@@ -93,12 +93,12 @@ class {{> structs/unadapted_name}}{{!
         {{/struct:fields_ordered_by_id}}
     ){{!
     }}{{#python.enable_abstract_types?}}{{!
-    }}{{^struct:plain?}}{{!
+    }}{{#if (or struct:union? struct:exception?)}}{{!
     }}
 
     _fbthrift_abstract_base_class = _fbthrift_abstract_types.{{struct:py_name}}
     {{!
-    }}{{/struct:plain?}}{{!
+    }}{{/if (or struct:union? struct:exception?)}}{{!
     }}{{/python.enable_abstract_types?}}
 
 

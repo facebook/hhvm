@@ -84,12 +84,13 @@ class {{> structs/unadapted_name}}({{!
         }}{{#struct:fields_ordered_by_id}}{{> types/init_and_call_arg_types}}{{/struct:fields_ordered_by_id}}
     ) -> None: ...
 
-    {{#struct:plain?}}
+    {{#if struct:struct?}}
+    {{! If this structured is specifically a *struct*}}
     def __call__(
         self,{{#struct:fields?}} *{{/struct:fields?}}{{!
         }}{{#struct:fields_ordered_by_id}}{{> types/init_and_call_arg_types}}{{/struct:fields_ordered_by_id}}
     ) -> _typing.Self: ...
-    {{/struct:plain?}}
+    {{/if struct:struct?}}
     {{#struct:union?}}
 
 {{#python.generate_immutable_types?}}

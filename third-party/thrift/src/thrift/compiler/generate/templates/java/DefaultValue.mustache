@@ -92,16 +92,14 @@
     Struct Constants
   }}{{#type:structured?}}{{!
     }}{{#type:structured}}{{!
-      }}{{#value:referenceable?}}{{!
+      }}{{#if value:referenceable?}}{{!
         }}{{#value:owning_const}}{{!
           }}{{#constant:program}}{{!
             }}{{program:javaPackage}}.Constants.{{constant:javaCapitalName}}{{!
           }}{{/constant:program}}{{!
         }}{{/value:owning_const}}{{!
-      }}{{/value:referenceable?}}{{!
-      }}{{^value:referenceable?}}{{!
-        }}{{#struct:plain?}}{{> ConstantStruct}}{{/struct:plain?}}{{!
-        }}{{#struct:union?}}{{> ConstantUnion}}{{/struct:union?}}{{!
-      }}{{/value:referenceable?}}{{!
+      }}{{#else if struct:union?}}{{> ConstantUnion}}{{!
+      }}{{#else}}{{> ConstantStruct}}{{!
+      }}{{/if value:referenceable?}}{{!
     }}{{/type:structured}}{{!
   }}{{/type:structured?}}

@@ -62,18 +62,8 @@
       {{/struct:fields}}
     },
     {{/struct:fields?}}
-    {{#struct:plain?}}
-    "is_exception" : false,
-    "is_union" : false,
-    {{/struct:plain?}}
-    {{#struct:exception?}}
-    "is_exception" : true,
-    "is_union" : false,
-    {{/struct:exception?}}
-    {{#struct:union?}}
-    "is_exception" : false,
-    "is_union" : true,
-    {{/struct:union?}}
+    "is_exception" : {{struct:exception?}},
+    "is_union" : {{struct:union?}},
     "lineno" : {{struct:lineno}}
   }{{^last?}},{{/last?}}
 {{/program:structs}}

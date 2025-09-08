@@ -211,6 +211,16 @@ class t_mstch_java_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
+  prototype<t_enum_value>::ptr make_prototype_for_enum_value(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_enum_value(proto);
+    auto def = whisker::dsl::prototype_builder<h_enum_value>::extends(base);
+    def.property("javaConstantName", [](const t_enum_value& self) {
+      return java::mangle_java_constant_name(self.name());
+    });
+    return std::move(def).make();
+  }
+
   /*
    * Generate multiple Java items according to the given template. Writes
    * output to package_dir underneath the global output directory.
@@ -1218,25 +1228,6 @@ class mstch_java_enum : public mstch_enum {
   }
 };
 
-class mstch_java_enum_value : public mstch_enum_value {
- public:
-  mstch_java_enum_value(
-      const t_enum_value* ev, mstch_context& ctx, mstch_element_position pos)
-      : mstch_enum_value(ev, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"enum_value:javaConstantName",
-             &mstch_java_enum_value::java_constant_name},
-            {"enum_value:ordinal", &mstch_java_enum_value::ordinal},
-        });
-  }
-  mstch::node java_constant_name() {
-    return java::mangle_java_constant_name(enum_value_->name());
-  }
-  mstch::node ordinal() { return pos_.index; }
-};
-
 class mstch_java_const : public mstch_const {
  public:
   mstch_java_const(
@@ -1540,7 +1531,6 @@ void t_mstch_java_generator::set_mstch_factories() {
   mstch_context_.add<mstch_java_struct>();
   mstch_context_.add<mstch_java_field>();
   mstch_context_.add<mstch_java_enum>();
-  mstch_context_.add<mstch_java_enum_value>();
   mstch_context_.add<mstch_java_const>();
   mstch_context_.add<mstch_java_const_value>();
 }

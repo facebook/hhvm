@@ -199,7 +199,7 @@ class _fbthrift_MyService_interactFast_result(metaclass=_fbthrift_python_mutable
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -219,7 +219,7 @@ class _fbthrift_MyService_serialize_result(metaclass=_fbthrift_python_mutable_ty
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -235,7 +235,7 @@ class _fbthrift_MyService_serialize_result_stream_elem(metaclass=_fbthrift_pytho
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -257,7 +257,7 @@ class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_mutab
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -299,7 +299,7 @@ class _fbthrift_MyInteraction_truthify_result_stream_elem(metaclass=_fbthrift_py
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -359,7 +359,7 @@ class _fbthrift_MyInteraction_encode_result_sink_final(metaclass=_fbthrift_pytho
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -381,7 +381,7 @@ class _fbthrift_MyInteractionFast_frobnicate_result(metaclass=_fbthrift_python_m
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -412,7 +412,7 @@ class _fbthrift_MyInteractionFast_truthify_result_stream_elem(metaclass=_fbthrif
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -472,7 +472,7 @@ class _fbthrift_MyInteractionFast_encode_result_sink_final(metaclass=_fbthrift_p
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -537,7 +537,7 @@ class _fbthrift_Factories_interactFast_result(metaclass=_fbthrift_python_mutable
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -557,7 +557,7 @@ class _fbthrift_Factories_serialize_result(metaclass=_fbthrift_python_mutable_ty
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -573,7 +573,7 @@ class _fbthrift_Factories_serialize_result_stream_elem(metaclass=_fbthrift_pytho
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -595,7 +595,7 @@ class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_mutab
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -637,7 +637,7 @@ class _fbthrift_MyInteraction_truthify_result_stream_elem(metaclass=_fbthrift_py
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -697,7 +697,7 @@ class _fbthrift_MyInteraction_encode_result_sink_final(metaclass=_fbthrift_pytho
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -719,7 +719,7 @@ class _fbthrift_MyInteractionFast_frobnicate_result(metaclass=_fbthrift_python_m
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -750,7 +750,7 @@ class _fbthrift_MyInteractionFast_truthify_result_stream_elem(metaclass=_fbthrif
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -810,7 +810,7 @@ class _fbthrift_MyInteractionFast_encode_result_sink_final(metaclass=_fbthrift_p
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -856,7 +856,7 @@ class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_mutab
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -898,7 +898,7 @@ class _fbthrift_MyInteraction_truthify_result_stream_elem(metaclass=_fbthrift_py
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -958,7 +958,7 @@ class _fbthrift_MyInteraction_encode_result_sink_final(metaclass=_fbthrift_pytho
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -980,7 +980,7 @@ class _fbthrift_MyInteractionFast_frobnicate_result(metaclass=_fbthrift_python_m
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1011,7 +1011,7 @@ class _fbthrift_MyInteractionFast_truthify_result_stream_elem(metaclass=_fbthrif
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1071,7 +1071,7 @@ class _fbthrift_MyInteractionFast_encode_result_sink_final(metaclass=_fbthrift_p
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1127,7 +1127,7 @@ class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_mutab
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1169,7 +1169,7 @@ class _fbthrift_MyInteraction_truthify_result_stream_elem(metaclass=_fbthrift_py
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1229,7 +1229,7 @@ class _fbthrift_MyInteraction_encode_result_sink_final(metaclass=_fbthrift_pytho
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1251,7 +1251,7 @@ class _fbthrift_SharedInteraction_init_result(metaclass=_fbthrift_python_mutable
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 

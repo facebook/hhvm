@@ -884,7 +884,7 @@ class _fbthrift_MyService_hasDataById_result(metaclass=_fbthrift_python_mutable_
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1026,7 +1026,7 @@ class _fbthrift_DbMixedStackArguments_getDataByKey0_result(metaclass=_fbthrift_p
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1057,7 +1057,7 @@ class _fbthrift_DbMixedStackArguments_getDataByKey1_result(metaclass=_fbthrift_p
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 

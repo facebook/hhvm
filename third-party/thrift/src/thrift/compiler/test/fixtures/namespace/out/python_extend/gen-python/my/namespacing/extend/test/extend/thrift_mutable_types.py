@@ -58,7 +58,7 @@ class _fbthrift_ExtendTestService_check_result(metaclass=_fbthrift_python_mutabl
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 

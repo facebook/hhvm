@@ -15,10 +15,7 @@
   limitations under the License.
 
 }}{{#pragma ignore-newlines}}
-{{#field:type}}
 {{#if type:string?}}False
 {{#else if (or type:primitive? type:iobuf?)}}True
 {{#else}}False
 {{/if type:string?}}
-{{/field:type}}
-{{^field:type}}False{{/field:type}}

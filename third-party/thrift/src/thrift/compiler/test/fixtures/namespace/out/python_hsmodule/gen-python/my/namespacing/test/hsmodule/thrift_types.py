@@ -119,7 +119,7 @@ class _fbthrift_HsTestService_init_result(metaclass=_fbthrift_python_types.Struc
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 

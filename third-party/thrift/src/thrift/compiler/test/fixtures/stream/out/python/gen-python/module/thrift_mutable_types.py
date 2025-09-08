@@ -215,7 +215,7 @@ class _fbthrift_PubSubStreamingService_returnstream_result_stream_elem(metaclass
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -252,7 +252,7 @@ class _fbthrift_PubSubStreamingService_streamthrows_result_stream_elem(metaclass
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -311,7 +311,7 @@ class _fbthrift_PubSubStreamingService_servicethrows_result_stream_elem(metaclas
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -370,7 +370,7 @@ class _fbthrift_PubSubStreamingService_servicethrows2_result_stream_elem(metacla
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -418,7 +418,7 @@ class _fbthrift_PubSubStreamingService_boththrows_result_stream_elem(metaclass=_
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -460,7 +460,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result(meta
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -476,7 +476,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stre
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -518,7 +518,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result(met
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -545,7 +545,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result_str
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -576,7 +576,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result(metacl
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -603,7 +603,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -662,7 +662,7 @@ class _fbthrift_PubSubStreamingService_returnstreamFast_result_stream_elem(metac
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 

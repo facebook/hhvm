@@ -113,7 +113,7 @@ class _fbthrift_TestService_init_result(metaclass=_fbthrift_python_mutable_types
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 

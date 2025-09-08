@@ -1423,7 +1423,7 @@ class _fbthrift_SimpleService_get_five_result(metaclass=_fbthrift_python_types.S
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1454,7 +1454,7 @@ class _fbthrift_SimpleService_add_five_result(metaclass=_fbthrift_python_types.S
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1537,7 +1537,7 @@ class _fbthrift_SimpleService_get_value_result(metaclass=_fbthrift_python_types.
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1568,7 +1568,7 @@ class _fbthrift_SimpleService_negate_result(metaclass=_fbthrift_python_types.Str
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1599,7 +1599,7 @@ class _fbthrift_SimpleService_tiny_result(metaclass=_fbthrift_python_types.Struc
             _fbthrift_python_types.typeinfo_byte,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1630,7 +1630,7 @@ class _fbthrift_SimpleService_small_result(metaclass=_fbthrift_python_types.Stru
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1661,7 +1661,7 @@ class _fbthrift_SimpleService_big_result(metaclass=_fbthrift_python_types.Struct
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1692,7 +1692,7 @@ class _fbthrift_SimpleService_two_result(metaclass=_fbthrift_python_types.Struct
             _fbthrift_python_types.typeinfo_double,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1733,7 +1733,7 @@ class _fbthrift_SimpleService_unexpected_exception_result(metaclass=_fbthrift_py
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1764,7 +1764,7 @@ class _fbthrift_SimpleService_sum_i16_list_result(metaclass=_fbthrift_python_typ
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1795,7 +1795,7 @@ class _fbthrift_SimpleService_sum_i32_list_result(metaclass=_fbthrift_python_typ
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1826,7 +1826,7 @@ class _fbthrift_SimpleService_sum_i64_list_result(metaclass=_fbthrift_python_typ
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1888,7 +1888,7 @@ class _fbthrift_SimpleService_count_structs_result(metaclass=_fbthrift_python_ty
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1919,7 +1919,7 @@ class _fbthrift_SimpleService_sum_set_result(metaclass=_fbthrift_python_types.St
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -1961,7 +1961,7 @@ class _fbthrift_SimpleService_contains_word_result(metaclass=_fbthrift_python_ty
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -2034,7 +2034,7 @@ class _fbthrift_SimpleService_map_length_result(metaclass=_fbthrift_python_types
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -2065,7 +2065,7 @@ class _fbthrift_SimpleService_sum_map_values_result(metaclass=_fbthrift_python_t
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -2096,7 +2096,7 @@ class _fbthrift_SimpleService_complex_sum_i32_result(metaclass=_fbthrift_python_
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -2406,7 +2406,7 @@ class _fbthrift_SimpleService_nested_map_argument_result(metaclass=_fbthrift_pyt
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -2530,7 +2530,7 @@ class _fbthrift_SimpleService_lookup_double_result(metaclass=_fbthrift_python_ty
             _fbthrift_python_types.typeinfo_double,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -2561,7 +2561,7 @@ class _fbthrift_SimpleService_retrieve_binary_result(metaclass=_fbthrift_python_
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -2696,7 +2696,7 @@ class _fbthrift_DerivedService_get_six_result(metaclass=_fbthrift_python_types.S
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 
@@ -2718,7 +2718,7 @@ class _fbthrift_RederivedService_get_seven_result(metaclass=_fbthrift_python_typ
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
-            False, # field type is primitive
+            True, # field type is primitive
         ),
     )
 

@@ -132,7 +132,7 @@ class _fbthrift_MyService_adapted_return_result(metaclass=_fbthrift_python_mutab
             "success", # name
             lambda: _fbthrift_python_types.AdaptedTypeInfo(_fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(_fbthrift__b__thrift_mutable_types._fbthrift_unadapted_B), one.AdapterOne, lambda: None),  # typeinfo
             None,  # default value
-            None,  # adapter info
+            (one.AdapterOne, lambda: None),  # adapter info
             False, # field type is primitive
         ),
     )

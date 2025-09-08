@@ -29,8 +29,8 @@ class {{> types/function_args_type}}(metaclass={{> types/struct_metaclass}}):
             "{{field:py_name}}",  # python name (from @python.Name annotation)
             {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
-            {{> fields/adapter_info }},  # adapter info
-            {{> fields/is_primitive }}, # field type is primitive
+            {{> common/adapter_info }},  # adapter info
+            {{#field:type}}{{> types/is_primitive }}{{/field:type}}, # field type is primitive
             {{field:idl_type}}, # IDL type (see BaseTypeEnum)
         ),
         {{/function:args}}
@@ -49,8 +49,8 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass={{> types/st
             "success", # name
             {{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }},  # typeinfo
             None,  # default value
-            {{> fields/adapter_info }},  # adapter info
-            {{> fields/is_primitive }}, # field type is primitive
+            {{> common/adapter_info}},  # adapter info
+            {{> types/is_primitive }}, # field type is primitive
         ),
         {{/type:void?}}
         {{/function:regular_response_type}}
@@ -62,8 +62,8 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass={{> types/st
             "{{> fields/exception_field_name}}",  # python name (from @python.Name annotation)
             {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
-            {{> fields/adapter_info }},  # adapter info
-            {{> fields/is_primitive }}, # field type is primitive
+            {{> common/adapter_info }},  # adapter info
+            {{#field:type}}{{> types/is_primitive }}{{/field:type}}, # field type is primitive
             {{field:idl_type}}, # IDL type (see BaseTypeEnum)
         ),
         {{/function:exceptions}}
@@ -83,8 +83,8 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem(metaclass=
             "success", # name
             {{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }},  # typeinfo
             None,  # default value
-            {{> fields/adapter_info }},  # adapter info
-            {{> fields/is_primitive }}, # field type is primitive
+            {{> common/adapter_info}},  # adapter info
+            {{> types/is_primitive }}, # field type is primitive
         ),
         {{/function:stream_elem_type}}
         {{#function:stream_exceptions}}
@@ -95,8 +95,8 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem(metaclass=
             "{{> fields/exception_field_name}}",  # python name (from @python.Name annotation)
             {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
-            {{> fields/adapter_info }},  # adapter info
-            {{> fields/is_primitive }}, # field type is primitive
+            {{> common/adapter_info }},  # adapter info
+            {{#field:type}}{{> types/is_primitive }}{{/field:type}}, # field type is primitive
             {{field:idl_type}}, # IDL type (see BaseTypeEnum)
         ),
         {{/function:stream_exceptions}}
@@ -116,8 +116,8 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{
             "success", # name
             {{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }},  # typeinfo
             None,  # default value
-            {{> fields/adapter_info }},  # adapter info
-            {{> fields/is_primitive }}, # field type is primitive
+            {{> common/adapter_info}},  # adapter info
+            {{> types/is_primitive }}, # field type is primitive
         ),
         {{/function:sink_elem_type}}
         {{#function:sink_exceptions}}
@@ -128,8 +128,8 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{
             "{{> fields/exception_field_name}}",  # python name (from @python.Name annotation)
             {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
-            {{> fields/adapter_info }},  # adapter info
-            {{> fields/is_primitive }}, # field type is primitive
+            {{> common/adapter_info }},  # adapter info
+            {{#field:type}}{{> types/is_primitive }}{{/field:type}}, # field type is primitive
             {{field:idl_type}}, # IDL type (see BaseTypeEnum)
         ),
         {{/function:sink_exceptions}}
@@ -172,8 +172,8 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_final(metaclass={
             "success", # name
             {{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }},  # typeinfo
             None,  # default value
-            {{> fields/adapter_info }},  # adapter info
-            {{> fields/is_primitive }}, # field type is primitive
+            {{> common/adapter_info}},  # adapter info
+            {{> types/is_primitive }}, # field type is primitive
         ),
         {{/function:sink_final_response_type}}
         {{#function:sink_final_response_exceptions}}
@@ -184,8 +184,8 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_final(metaclass={
             "{{> fields/exception_field_name}}",  # python name (from @python.Name annotation)
             {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
-            {{> fields/adapter_info }},  # adapter info
-            {{> fields/is_primitive }}, # field type is primitive
+            {{> common/adapter_info }},  # adapter info
+            {{#field:type}}{{> types/is_primitive }}{{/field:type}}, # field type is primitive
             {{field:idl_type}}, # IDL type (see BaseTypeEnum)
         ),
         {{/function:sink_final_response_exceptions}}

@@ -1,0 +1,11 @@
+(3,32)-(3,32) A right parenthesis `)` is expected here.
+(3,32)-(3,40) A type specifier is expected here.
+(3,41)-(3,45) Encountered unexpected token `bool`.
+(3,46)-(3,46) A variable name is expected here.
+(3,52)-(3,52) A left brace `{` is expected here.
+(3,54)-(3,54) An expression is expected here.
+(3,56)-(3,56) A semicolon `;` is expected here.
+(3,57)-(3,57) An expression is expected here.
+(3,59)-(3,59) An expression is expected here.
+(3,59)-(3,66) Cannot use collection initialization for non-collection class.
+(3,66)-(4,1) A semicolon `;` is expected here.

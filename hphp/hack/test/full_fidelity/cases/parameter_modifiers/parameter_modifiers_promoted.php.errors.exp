@@ -1,0 +1,4 @@
+(4,38)-(4,44) A type specifier is expected here.
+(4,45)-(4,48) Encountered unexpected token `int`.
+(8,38)-(8,45) A type specifier is expected here.
+(8,46)-(8,49) Encountered unexpected token `int`.

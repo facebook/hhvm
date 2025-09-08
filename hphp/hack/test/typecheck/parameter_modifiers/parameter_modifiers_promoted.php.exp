@@ -1,0 +1,4 @@
+ERROR: File "parameter_modifiers_promoted.php", line 4, characters 38-43:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_promoted.php", line 4, characters 38-43:
+Encountered unexpected text `public`, was expecting a type hint. (Parsing[1002])

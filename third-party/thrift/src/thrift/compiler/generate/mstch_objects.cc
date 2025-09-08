@@ -276,24 +276,6 @@ mstch::node mstch_struct::fields() {
   return make_mstch_fields(struct_->get_members());
 }
 
-const std::vector<const t_field*>& mstch_struct::get_members_in_key_order() {
-  if (struct_->fields().size() == fields_in_key_order_.size()) {
-    // Already reordered.
-    return fields_in_key_order_;
-  }
-
-  fields_in_key_order_ = struct_->fields().copy();
-  // Sort by increasing key.
-  std::sort(
-      fields_in_key_order_.begin(),
-      fields_in_key_order_.end(),
-      [](const auto* lhs, const auto* rhs) {
-        return lhs->get_key() < rhs->get_key();
-      });
-
-  return fields_in_key_order_;
-}
-
 mstch::node mstch_function::return_type() {
   const t_type* type = function_->return_type().get_type();
   // Override the return type for compatibility with old codegen.

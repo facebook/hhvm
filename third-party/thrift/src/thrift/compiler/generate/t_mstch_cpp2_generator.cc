@@ -2020,7 +2020,7 @@ class cpp_mstch_struct : public mstch_struct {
   }
 
   mstch::node fields_in_key_order() {
-    return make_mstch_fields(get_members_in_key_order());
+    return make_mstch_fields(struct_->fields_id_order());
   }
 
   mstch::node any() {

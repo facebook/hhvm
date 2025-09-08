@@ -302,6 +302,12 @@ prototype<t_structured>::ptr t_whisker_generator::make_prototype_for_structured(
   auto def = prototype_builder<h_structured>::extends(proto.of<t_type>());
   def.property("fields", mem_fn(&t_structured::fields, proto.of<t_field>()));
   def.property("fields?", mem_fn(&t_structured::has_fields));
+  def.property(
+      "fields_in_serialization_order", [&proto](const t_structured& self) {
+        return self.has_structured_annotation(kSerializeInFieldIdOrderUri)
+            ? to_array(self.fields_id_order(), proto.of<t_field>())
+            : to_array(self.fields(), proto.of<t_field>());
+      });
   return std::move(def).make();
 }
 

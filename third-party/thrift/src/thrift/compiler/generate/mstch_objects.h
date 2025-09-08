@@ -724,12 +724,9 @@ class mstch_struct : public mstch_base {
     return mstch_base::structured_annotations(struct_);
   }
 
-  // Returns the struct members ordered by the key.
-  const std::vector<const t_field*>& get_members_in_key_order();
-
   field_range get_members_in_serialization_order() {
     if (struct_->has_structured_annotation(kSerializeInFieldIdOrderUri)) {
-      return get_members_in_key_order();
+      return struct_->fields_id_order();
     }
 
     return struct_->get_members();
@@ -741,7 +738,6 @@ class mstch_struct : public mstch_base {
 
  protected:
   const t_structured* struct_;
-  std::vector<const t_field*> fields_in_key_order_;
 };
 
 class mstch_field : public mstch_base {

@@ -149,6 +149,7 @@ class ParallelConcurrencyController : public ParallelConcurrencyControllerBase {
  private:
   folly::Executor& executor_;
 
+ protected:
   void scheduleOnExecutor() override;
 };
 

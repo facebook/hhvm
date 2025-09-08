@@ -22,7 +22,7 @@ namespace {
  */
 class RandomNumberGenerator {
  public:
-  typedef size_t result_type;
+  using result_type = size_t;
 
   static constexpr size_t min() {
     return 0;

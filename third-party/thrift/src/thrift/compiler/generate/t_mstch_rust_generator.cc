@@ -669,6 +669,27 @@ class t_mstch_rust_generator : public t_mstch_generator {
     return globals;
   }
 
+  prototype<t_enum>::ptr make_prototype_for_enum(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_enum(proto);
+    auto def = whisker::dsl::prototype_builder<h_enum>::extends(base);
+    def.property("variants_by_name", [&proto](const t_enum& self) {
+      std::vector<const t_enum_value*> variants = self.values().copy();
+      std::sort(variants.begin(), variants.end(), [](auto a, auto b) {
+        return a->name() < b->name();
+      });
+      return to_array(std::move(variants), proto.of<t_enum_value>());
+    });
+    def.property("variants_by_number", [&proto](const t_enum& self) {
+      std::vector<const t_enum_value*> variants = self.values().copy();
+      std::sort(variants.begin(), variants.end(), [](auto a, auto b) {
+        return a->get_value() < b->get_value();
+      });
+      return to_array(std::move(variants), proto.of<t_enum_value>());
+    });
+    return std::move(def).make();
+  }
+
   prototype<t_named>::ptr make_prototype_for_named(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_named(proto);
@@ -1673,8 +1694,6 @@ class rust_mstch_enum : public mstch_enum {
         {
             {"enum:rust_name", &rust_mstch_enum::rust_name},
             {"enum:package", &rust_mstch_enum::rust_package},
-            {"enum:variants_by_name", &rust_mstch_enum::variants_by_name},
-            {"enum:variants_by_number", &rust_mstch_enum::variants_by_number},
             {"enum:serde?", &rust_mstch_enum::rust_serde},
             {"enum:derive", &rust_mstch_enum::rust_derive},
         });
@@ -1715,20 +1734,6 @@ class rust_mstch_enum : public mstch_enum {
   mstch::node rust_name() { return type_rust_name(enum_); }
   mstch::node rust_package() {
     return get_types_import_name(enum_->program(), options_);
-  }
-  mstch::node variants_by_name() {
-    std::vector<t_enum_value*> variants = enum_->get_enum_values();
-    std::sort(variants.begin(), variants.end(), [](auto a, auto b) {
-      return a->name() < b->name();
-    });
-    return make_mstch_enum_values(variants);
-  }
-  mstch::node variants_by_number() {
-    std::vector<t_enum_value*> variants = enum_->get_enum_values();
-    std::sort(variants.begin(), variants.end(), [](auto a, auto b) {
-      return a->get_value() < b->get_value();
-    });
-    return make_mstch_enum_values(variants);
   }
   mstch::node rust_serde() { return rust_serde_enabled(options_, *enum_); }
 

@@ -24,7 +24,6 @@
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 
 #include <thrift/test/gen-cpp2/GetterSetterTest_types.h>
-#include <thrift/test/gen-cpp2/GetterSetterTest_types_custom_protocol.h>
 
 using namespace thrift::test::getter_setter::cpp2;
 

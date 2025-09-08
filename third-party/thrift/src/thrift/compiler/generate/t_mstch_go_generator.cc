@@ -219,21 +219,6 @@ class mstch_go_enum : public mstch_enum {
   go::codegen_data& data_;
 };
 
-class mstch_go_enum_value : public mstch_enum_value {
- public:
-  mstch_go_enum_value(
-      const t_enum_value* v,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      go::codegen_data* data)
-      : mstch_enum_value(v, ctx, pos), data_(*data) {
-    (void)data_;
-  }
-
- private:
-  go::codegen_data& data_;
-};
-
 class mstch_go_const : public mstch_const {
  public:
   mstch_go_const(
@@ -881,7 +866,6 @@ void t_mstch_go_generator::set_mstch_factories() {
   mstch_context_.add<mstch_go_struct>(&data_);
   mstch_context_.add<mstch_go_field>(&data_);
   mstch_context_.add<mstch_go_enum>(&data_);
-  mstch_context_.add<mstch_go_enum_value>(&data_);
   mstch_context_.add<mstch_go_const>(&data_);
   mstch_context_.add<mstch_go_const_value>(&data_);
 }

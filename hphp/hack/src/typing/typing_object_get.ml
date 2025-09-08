@@ -54,7 +54,7 @@ type obj_get_args = {
   seen: SSet.t;
 }
 
-let log_obj_get env helper id_pos ty this_ty =
+let log_obj_get env helper id ty this_ty =
   let (fn_name, ty_name) =
     match helper with
     | `concrete -> ("obj_get_concrete_ty", "concrete_ty")
@@ -63,11 +63,12 @@ let log_obj_get env helper id_pos ty this_ty =
   Typing_log.(
     log_with_level env "obj_get" ~level:2 (fun () ->
         log_types
-          (Pos_or_decl.of_raw_pos id_pos)
+          (Pos_or_decl.of_raw_pos (fst id))
           env
           [
             Log_head
-              (fn_name, [Log_type (ty_name, ty); Log_type ("this_ty", this_ty)]);
+              ( fn_name ^ " (member_id: " ^ snd id ^ ")",
+                [Log_type (ty_name, ty); Log_type ("this_ty", this_ty)] );
           ]))
 
 let mk_ety_env class_info paraml this_ty =
@@ -420,7 +421,7 @@ let rec this_appears_covariantly ~contra env ty =
     bounds, or a Tunion. *)
 let rec obj_get_concrete_ty
     args env concrete_ty ((id_pos, id_str) as id) on_error : internal_result =
-  log_obj_get env `concrete id_pos concrete_ty args.this_ty;
+  log_obj_get env `concrete id concrete_ty args.this_ty;
   let dflt_rval_mismatch =
     Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty
   and dflt_lval_mismatch = Ok concrete_ty in
@@ -1082,7 +1083,7 @@ and nullable_obj_get
  *)
 and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
     internal_result =
-  log_obj_get env `inner id_pos receiver_ty args.this_ty;
+  log_obj_get env `inner id receiver_ty args.this_ty;
   let (env, ety1') = Env.expand_type env receiver_ty in
   let was_var = is_tyvar ety1' in
   let dflt_rval_mismatch =
@@ -1362,7 +1363,11 @@ let obj_get_with_mismatches_helper
         log_types
           (Pos_or_decl.of_raw_pos obj_pos)
           env
-          [Log_head ("obj_get", [Log_type ("receiver_ty", receiver_ty)])]));
+          [
+            Log_head
+              ( "obj_get (member_id: " ^ snd member_id ^ ")",
+                [Log_type ("receiver_ty", receiver_ty)] );
+          ]));
   let ((env, e1), receiver_ty) =
     if is_method then
       Typing_solver.expand_type_and_solve

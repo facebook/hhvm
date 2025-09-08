@@ -412,6 +412,13 @@ DynamicPatch& DynamicMapPatch::patchByKeyImpl(Value k, SubPatch&& p) {
     return patch.emplace(std::move(k), std::forward<SubPatch>(p)).first->second;
   }
 }
+
+template DynamicPatch& DynamicMapPatch::patchByKeyImpl(
+    Value k, const DynamicPatch& p);
+
+template DynamicPatch& DynamicMapPatch::patchByKeyImpl(
+    Value k, DynamicPatch&& p);
+
 Object DynamicMapPatch::toObject() && {
   Object ret;
   if (assign_) {

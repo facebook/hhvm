@@ -830,6 +830,12 @@ class DynamicMapPatch {
   std::optional<detail::Value::Type> valueType_;
 };
 
+extern template DynamicPatch& DynamicMapPatch::patchByKeyImpl(
+    Value k, const DynamicPatch& p);
+
+extern template DynamicPatch& DynamicMapPatch::patchByKeyImpl(
+    Value k, DynamicPatch&& p);
+
 template <bool IsUnion>
 class DynamicStructurePatch {
  public:

@@ -583,6 +583,9 @@ prototype<t_program>::ptr t_whisker_generator::make_prototype_for_program(
       "structured_definitions",
       mem_fn(&t_program::structured_definitions, proto.of<t_structured>()));
   def.property("services", mem_fn(&t_program::services, proto.of<t_service>()));
+  def.property(
+      "interactions",
+      mem_fn(&t_program::interactions, proto.of<t_interaction>()));
   def.property("typedefs", mem_fn(&t_program::typedefs, proto.of<t_typedef>()));
   def.property("enums", mem_fn(&t_program::enums, proto.of<t_enum>()));
   def.property("consts", mem_fn(&t_program::consts, proto.of<t_const>()));

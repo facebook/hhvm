@@ -578,6 +578,21 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
+  prototype<t_interaction>::ptr make_prototype_for_interaction(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_interaction(proto);
+    auto def = whisker::dsl::prototype_builder<h_interaction>::extends(base);
+    def.property("event_base?", [](const t_interaction& self) {
+      return self.has_unstructured_annotation("process_in_event_base") ||
+          self.has_structured_annotation(kCppProcessInEbThreadUri);
+    });
+    def.property("serial?", [](const t_interaction& self) {
+      return self.has_unstructured_annotation("serial") ||
+          self.has_structured_annotation(kSerialUri);
+    });
+    return std::move(def).make();
+  }
+
   std::unordered_map<std::string, int> get_client_name_to_split_count() const;
 
   std::shared_ptr<cpp2_generator_context> cpp_context_;

@@ -59,7 +59,6 @@ class t_interface : public t_type {
   }
 
   bool is_interaction() const;
-  bool is_serial_interaction() const;
 };
 
 } // namespace apache::thrift::compiler

@@ -455,6 +455,11 @@ class mstch_service : public mstch_base {
         {
             {"self", &mstch_service::self},
             {"service:self", &mstch_service::self},
+            // In mstch, interactions are bound as "service:*" and
+            // "service:self" defaults to the t_service prototype. This provides
+            // a way to access the interaction Whisker prototype from mstch
+            {"interaction:self", &mstch_service::self_interaction},
+
             {"service:functions", &mstch_service::functions},
             {"service:functions?", &mstch_service::has_functions},
             {"service:extends", &mstch_service::extends},
@@ -468,15 +473,6 @@ class mstch_service : public mstch_base {
             {"service:structured_annotations",
              &mstch_service::structured_annotations},
         });
-
-    if (service_->is_interaction()) {
-      register_methods(
-          this,
-          {
-              {"interaction:serial?", &mstch_service::is_serial_interaction},
-              {"interaction:eb?", &mstch_service::is_event_base_interaction},
-          });
-    }
 
     // Collect performed interactions and cache them.
     std::set<const t_interaction*> seen;
@@ -494,6 +490,13 @@ class mstch_service : public mstch_base {
   virtual std::string get_service_namespace(const t_program*) { return {}; }
 
   whisker::object self() { return make_self(*service_); }
+  whisker::object self_interaction() {
+    if (const t_interaction* ex = service_->try_as<t_interaction>()) {
+      return make_self<t_interaction>(*ex);
+    }
+
+    throw whisker::eval_error("interaction:self used on non-interaction node");
+  }
   mstch::node has_functions() { return !get_functions().empty(); }
   mstch::node has_extends() { return service_->extends() != nullptr; }
   mstch::node functions();
@@ -523,13 +526,6 @@ class mstch_service : public mstch_base {
     return mstch_base::structured_annotations(service_);
   }
   mstch::node is_interaction() { return service_->is_interaction(); }
-  mstch::node is_serial_interaction() {
-    return service_->is_serial_interaction();
-  }
-  mstch::node is_event_base_interaction() {
-    return service_->has_unstructured_annotation("process_in_event_base") ||
-        service_->has_structured_annotation(kCppProcessInEbThreadUri);
-  }
 
   ~mstch_service() override = default;
 

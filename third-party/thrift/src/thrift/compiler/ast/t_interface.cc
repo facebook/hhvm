@@ -39,14 +39,6 @@ bool t_interface::is_interaction() const {
   return dynamic_cast<const t_interaction*>(this) != nullptr;
 }
 
-bool t_interface::is_serial_interaction() const {
-  if (dynamic_cast<const t_interaction*>(this)) {
-    return has_unstructured_annotation("serial") ||
-        has_structured_annotation(kSerialUri);
-  }
-  return false;
-}
-
 t_interface::~t_interface() = default;
 
 } // namespace apache::thrift::compiler

@@ -5297,6 +5297,10 @@ void t_hack_generator::_generate_php_struct_definition(
 
   if (tstruct->is<t_union>()) {
     indent(out) << "use \\ThriftUnionSerializationTrait;\n\n";
+    if (tstruct->has_structured_annotation(
+            kHackMigrationBlockingLegacyJSONSerialization)) {
+      indent(out) << "use \\ThriftLegacyJSONSerializationTrait;\n\n";
+    }
   } else {
     indent(out) << "use \\ThriftSerializationTrait;\n\n";
   }

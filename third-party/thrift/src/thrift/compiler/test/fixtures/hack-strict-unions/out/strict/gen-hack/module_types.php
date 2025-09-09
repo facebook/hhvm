@@ -22,6 +22,8 @@ enum PrimitiveEnum: int {
 class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStrictUnion<PrimitiveEnum> {
   use \ThriftUnionSerializationTrait;
 
+  use \ThriftLegacyJSONSerializationTrait;
+
   const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'i64_',

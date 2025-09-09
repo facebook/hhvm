@@ -59,7 +59,7 @@ static const std::string chloPsk =
 static const std::string encodedShlo =
     "03039f2bfbe752cb49bc82303dd32a80cf60483a38e44bfb695ebd0280bcc1c70c5b00130100002e00330024001d00208db235a330ee184b953a981ecfb23b05380768ed12050ec2f0ec62b74ef8f835002b00020304";
 
-static const std::string encodedEoed = "";
+static const std::string encodedEoed;
 
 static const std::string encodedEncryptedExtensions =
     "001c000a00140012001d0017001800190100010101020103010400000000";

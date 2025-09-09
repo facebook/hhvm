@@ -32,6 +32,7 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h" namespace "::a
         SINGLE_REQUEST_NO_RESPONSE = 1
         SINGLE_REQUEST_STREAMING_RESPONSE = 4
         SINK = 6
+        BIDIRECTIONAL_STREAM = 7
 
 cdef extern from "thrift/lib/cpp2/util/MethodMetadata.h" namespace "::apache::thrift":
     cpdef enum class FunctionQualifier:

@@ -20,7 +20,7 @@ from folly.async_generator cimport cAsyncGenerator
 from folly.coro cimport cFollyCoroTask
 from folly.iobuf cimport cIOBuf
 from thrift.python.protocol cimport Protocol
-from thrift.python.streaming.stream cimport ClientBufferedStream
+from thrift.python.streaming.stream cimport ClientBufferedStream, cIOBufClientBufferedStream
 
 cdef extern from "folly/OperationCancelled.h":
     cdef cppclass cFollyOperationCancelled "folly::OperationCancelled"
@@ -99,7 +99,7 @@ cdef class BidirectionalStream:
     @staticmethod
     cdef _fbthrift_create(
         unique_ptr[cIOBufClientSink]&& client_sink,
-        ClientBufferedStream stream,
+        unique_ptr[cIOBufClientBufferedStream] stream,
         sink_elem_cls,
         stream_elem_cls,
         Protocol protocol,
@@ -117,7 +117,7 @@ cdef class ResponseAndBidirectionalStream:
     cdef _fbthrift_create(
         object response,
         unique_ptr[cIOBufClientSink]&& client_sink,
-        ClientBufferedStream stream,
+        unique_ptr[cIOBufClientBufferedStream] stream,
         response_cls,
         sink_elem_cls,
         stream_elem_cls,

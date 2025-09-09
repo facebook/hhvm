@@ -52,6 +52,8 @@ from thrift.python.streaming.python_user_exception cimport (
     extractPyUserExceptionIOBuf,
     PythonUserException,
 )
+from thrift.python.streaming.stream cimport cIOBufClientBufferedStream
+
 
 
 cdef class ClientSink:
@@ -108,7 +110,7 @@ cdef class BidirectionalStream:
     @staticmethod
     cdef _fbthrift_create(
         unique_ptr[cIOBufClientSink]&& client_sink,
-        ClientBufferedStream stream,
+        unique_ptr[cIOBufClientBufferedStream] stream,
         sink_elem_cls,
         stream_elem_cls,
         Protocol protocol,
@@ -120,7 +122,11 @@ cdef class BidirectionalStream:
             None,  # BidirectionalStream sink doesn't return a final response
             protocol,
         )
-        inst._stream = stream
+        inst._stream = ClientBufferedStream._fbthrift_create(
+            cmove(stream),
+            stream_elem_cls,
+            protocol,
+        )
         inst._sink_elem_cls = sink_elem_cls
         inst._stream_elem_cls = stream_elem_cls
         return inst
@@ -142,7 +148,7 @@ cdef class ResponseAndBidirectionalStream:
     cdef _fbthrift_create(
         object response,
         unique_ptr[cIOBufClientSink]&& client_sink,
-        ClientBufferedStream stream,
+        unique_ptr[cIOBufClientBufferedStream] stream,
         response_cls,
         sink_elem_cls,
         stream_elem_cls,
@@ -156,7 +162,11 @@ cdef class ResponseAndBidirectionalStream:
             None,  # BidirectionalStream sink doesn't return a final response
             protocol,
         )
-        inst._stream = stream
+        inst._stream = ClientBufferedStream._fbthrift_create(
+            cmove(stream),
+            stream_elem_cls,
+            protocol,
+        )
         inst._response_cls = response_cls
         inst._sink_elem_cls = sink_elem_cls
         inst._stream_elem_cls = stream_elem_cls

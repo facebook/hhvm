@@ -36,7 +36,7 @@ from thrift.python.mutable_serializer import (
     serialize_iobuf as serialize_iobuf_mutable,
     deserialize as deserialize_mutable,
 )
-from thrift.python.streaming.sink cimport ClientSink
+from thrift.python.streaming.sink cimport ClientSink, BidirectionalStream
 from thrift.python.streaming.stream cimport ClientBufferedStream
 from thrift.python.common cimport cRpcOptions, RpcOptions
 
@@ -254,20 +254,30 @@ cdef void _async_client_send_request_callback(
     response_iobuf = folly.iobuf.from_unique_ptr(cmove(resp.buf.value()))
     py_sink_or_stream = None
     if isinstance(response_cls, tuple):
-        response_cls, streaming_elem_cls, *final_resp_cls = response_cls
-        if streaming_elem_cls._fbthrift__rpc_kind == RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE:
-            # Note: final_resp_cls is empty [] because stream doesn't have final response
+        # Second element of tuple indicates type of streaming: stream, sink or bidirectional stream
+        rpc_kind = response_cls[1]._fbthrift__rpc_kind
+        if rpc_kind == RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE:
+            response_cls, streaming_elem_cls = response_cls
             py_sink_or_stream = ClientBufferedStream._fbthrift_create(
                 cmove(resp.stream),
                 streaming_elem_cls,
                 protocol,
             )
-        elif streaming_elem_cls._fbthrift__rpc_kind == RpcKind.SINK:
-            assert len(final_resp_cls) == 1
+        elif rpc_kind == RpcKind.SINK:
+            response_cls, sink_elem_cls, final_resp_cls = response_cls
             py_sink_or_stream = ClientSink._fbthrift_create(
                 cmove(resp.sink),
+                sink_elem_cls,
+                final_resp_cls,
+                protocol,
+            )
+        elif rpc_kind == RpcKind.BIDIRECTIONAL_STREAM:
+            response_cls, sink_elem_cls, streaming_elem_cls = response_cls
+            py_sink_or_stream = BidirectionalStream._fbthrift_create(
+                cmove(resp.sink),
+                cmove(resp.stream),
+                sink_elem_cls,
                 streaming_elem_cls,
-                final_resp_cls[0],
                 protocol,
             )
     try:
@@ -276,7 +286,7 @@ cdef void _async_client_send_request_callback(
             if not is_mutable_types
             else deserialize_mutable(response_cls, response_iobuf, protocol=protocol)
         )
-        
+
         pyfuture.set_result(
             py_resp if py_sink_or_stream is None else (py_resp, py_sink_or_stream)
         )

@@ -7207,6 +7207,13 @@ end = struct
     | (_, Tprim Tnull)
       when Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->
       got_dynamic env
+    | (r_sub, Tprim Tstring) ->
+      let tk = MakeType.int (Reason.idx (cia.cia_index_pos, r_sub)) in
+      let tv = MakeType.string (Reason.witness cia.cia_expr_pos) in
+      let (env, tv) = maybe_pessimise_type env tv in
+      simplify_key tk env
+      &&& simplify_default ~subtype_env cia.cia_write tv
+      &&& simplify_val ty_sub
     | (r_sub, Tunion ty_subs) ->
       Common.simplify_union_l
         ~subtype_env

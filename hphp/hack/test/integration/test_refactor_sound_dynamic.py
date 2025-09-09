@@ -13,7 +13,6 @@ class TestRenameSoundDynamic(common_tests.CommonTests):
         with open(os.path.join(self.test_driver.repo_dir, ".hhconfig"), "w") as f:
             f.write(
                 """
-enable_sound_dynamic_type = true
 """
             )
 

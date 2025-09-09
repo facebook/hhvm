@@ -241,10 +241,7 @@ let method_def ~is_disposable env cls m =
    * (Even constructors must be treated as SDT because they can be called
    * through a classname cast to dynamic).
    *)
-  let sdt_method =
-    TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))
-    && Env.get_support_dynamic_type env
-  in
+  let sdt_method = Env.get_support_dynamic_type env in
   (* Does the body of the method need to be checked again under
    * dynamic assumptions? Note that if there are generic parameters
    * then the check would be done under different assumptions for
@@ -1323,9 +1320,15 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
         | None -> (env, None)
         | Some
             ExpectedTy.
-              { pos = p; reason = ur; ty = cty; coerce; ignore_readonly } ->
+              {
+                pos = p;
+                reason = ur;
+                ty = cty;
+                is_dynamic_aware;
+                ignore_readonly;
+              } ->
           Typing_coercion.coerce_type
-            ~coerce
+            ~is_dynamic_aware
             ~ignore_readonly
             p
             ur
@@ -1372,8 +1375,7 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
   (* if the class implements dynamic, then check that the type of the property
    * is enforceable (for writing) and coerces to dynamic (for reading) *)
   if
-    TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))
-    && Cls.get_support_dynamic_type cls
+    Cls.get_support_dynamic_type cls
     && not (Aast.equal_visibility cv.cv_visibility Private)
   then (
     let env_with_require_dynamic =
@@ -1437,10 +1439,7 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
 let check_generic_class_with_SupportDynamicType env c tc parents =
   let (pc, c_name) = c.c_name in
   let check_support_dynamic_type = Cls.get_support_dynamic_type tc in
-  if
-    TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))
-    && check_support_dynamic_type
-  then (
+  if check_support_dynamic_type then (
     let dynamic_ty =
       MakeType.supportdyn_mixed (Reason.dynamic_coercion (Reason.witness pc))
     in
@@ -1510,51 +1509,47 @@ let check_generic_class_with_SupportDynamicType env c tc parents =
     it too.
     The opposite is also true, but not checked here. *)
 let check_SupportDynamicType env c tc =
-  if TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))
-  then
-    let support_dynamic_type = Cls.get_support_dynamic_type tc in
-    let error_parent_support_dynamic_type parent child_support_dyn =
-      Typing_error_utils.add_typing_error
-        ~env
-        Typing_error.(
-          primary
-          @@ Primary.Parent_support_dynamic_type
-               {
-                 pos = fst c.c_name;
-                 child_name = snd c.c_name;
-                 child_kind = c.c_kind;
-                 parent_name = Cls.name parent;
-                 parent_kind = Cls.kind parent;
-                 child_support_dyn;
-               })
-    in
-    match c.c_kind with
-    | Ast_defs.(Cenum | Cenum_class _) ->
-      (* Avoid parent SDT check on things that cannot be SDT themselves *)
-      ()
-    | Ast_defs.Cclass _
-    | Ast_defs.Cinterface
-    | Ast_defs.Ctrait ->
-      List.iter (Cls.all_ancestor_names tc) ~f:(fun name ->
-          match Env.get_class env name with
-          | Decl_entry.Found parent_type -> begin
-            match Cls.kind parent_type with
-            | Ast_defs.Cclass _
-            | Ast_defs.Cinterface ->
-              (* ensure that we implement dynamic if we are a subclass/subinterface of a class/interface
-               * that implements dynamic.  Upward well-formedness checks are performed in Typing_extends *)
-              if
-                Cls.get_support_dynamic_type parent_type
-                && not support_dynamic_type
-              then
-                error_parent_support_dynamic_type
-                  parent_type
-                  support_dynamic_type
-            | Ast_defs.(Cenum | Cenum_class _ | Ctrait) -> ()
-          end
-          | Decl_entry.DoesNotExist
-          | Decl_entry.NotYetAvailable ->
-            ())
+  let support_dynamic_type = Cls.get_support_dynamic_type tc in
+  let error_parent_support_dynamic_type parent child_support_dyn =
+    Typing_error_utils.add_typing_error
+      ~env
+      Typing_error.(
+        primary
+        @@ Primary.Parent_support_dynamic_type
+             {
+               pos = fst c.c_name;
+               child_name = snd c.c_name;
+               child_kind = c.c_kind;
+               parent_name = Cls.name parent;
+               parent_kind = Cls.kind parent;
+               child_support_dyn;
+             })
+  in
+  match c.c_kind with
+  | Ast_defs.(Cenum | Cenum_class _) ->
+    (* Avoid parent SDT check on things that cannot be SDT themselves *)
+    ()
+  | Ast_defs.Cclass _
+  | Ast_defs.Cinterface
+  | Ast_defs.Ctrait ->
+    List.iter (Cls.all_ancestor_names tc) ~f:(fun name ->
+        match Env.get_class env name with
+        | Decl_entry.Found parent_type -> begin
+          match Cls.kind parent_type with
+          | Ast_defs.Cclass _
+          | Ast_defs.Cinterface ->
+            (* ensure that we implement dynamic if we are a subclass/subinterface of a class/interface
+             * that implements dynamic.  Upward well-formedness checks are performed in Typing_extends *)
+            if
+              Cls.get_support_dynamic_type parent_type
+              && not support_dynamic_type
+            then
+              error_parent_support_dynamic_type parent_type support_dynamic_type
+          | Ast_defs.(Cenum | Cenum_class _ | Ctrait) -> ()
+        end
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          ())
 
 (** Check methods with <<__Override>> have a corresponding overridden method. *)
 let check_override_has_parent (c : ('a, 'b) class_) (tc : Cls.t) ~env : unit =

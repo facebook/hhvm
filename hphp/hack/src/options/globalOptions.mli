@@ -172,8 +172,6 @@ type t = {
   tco_typecheck_sample_rate: float;
       (** Type check this proportion of all files. Default is 1.0.
         DO NOT set to any other value except for testing purposes. *)
-  tco_enable_sound_dynamic: bool;
-      (** Experimental implementation of a "sound" dynamic type *)
   tco_pessimise_builtins: bool;
       (** Under sound dynamic, introduce like-types for built-in operations e.g. on Vector.
          This is done anyway if everything_sdt=true *)
@@ -363,7 +361,6 @@ val set :
   ?tco_error_php_lambdas:bool ->
   ?tco_disallow_discarded_nullable_awaitables:bool ->
   ?tco_typecheck_sample_rate:float ->
-  ?tco_enable_sound_dynamic:bool ->
   ?tco_pessimise_builtins:bool ->
   ?tco_enable_no_auto_dynamic:bool ->
   ?tco_skip_check_under_dynamic:bool ->

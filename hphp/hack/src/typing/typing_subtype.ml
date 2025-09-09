@@ -227,11 +227,9 @@ module Subtype_env = struct
         (** If require_completeness is not set, maintain a visited goal set *)
     visited_internal: VisitedGoalsInternal.t;
     no_top_bottom: bool;
-    coerce: TL.coercion_direction option;
-        (** Coerce indicates whether subtyping should allow
-          coercion to or from dynamic. For coercion to dynamic, types that implement
-          dynamic are considered sub-types of dynamic. For coercion from dynamic,
-          dynamic is treated as a sub-type of all types. *)
+    is_dynamic_aware: bool;
+        (** is_dynamic_aware indicates whether subtyping should allow
+          types that implement dynamic are considered sub-types of dynamic. *)
     on_error: Typing_error.Reasons_callback.t option;
     tparam_constraints: (Pos_or_decl.t * Typing_defs.pos_id) list;
         (** This is used for better error reporting to flag violated
@@ -264,24 +262,14 @@ module Subtype_env = struct
 
   let set_visited_internal t visited_internal = { t with visited_internal }
 
-  let coercing_from_dynamic se =
-    match se.coerce with
-    | Some TL.CoerceFromDynamic -> true
-    | _ -> false
-
-  let coercing_to_dynamic se =
-    match se.coerce with
-    | Some TL.CoerceToDynamic -> true
-    | _ -> false
-
-  let set_coercing_to_dynamic se = { se with coerce = Some TL.CoerceToDynamic }
+  let set_is_dynamic_aware t is_dynamic_aware = { t with is_dynamic_aware }
 
   let create
       ?(require_soundness = true)
       ?(require_completeness = false)
       ?(ignore_readonly = false)
       ?(no_top_bottom = false)
-      ?(coerce = None)
+      ?(is_dynamic_aware = false)
       ?(is_coeffect = false)
       ?(in_transitive_closure = false)
       ?(ignore_likes = false)
@@ -296,7 +284,7 @@ module Subtype_env = struct
       visited = VisitedGoals.empty;
       visited_internal = VisitedGoalsInternal.empty;
       no_top_bottom;
-      coerce;
+      is_dynamic_aware;
       is_coeffect;
       on_error;
       tparam_constraints = [];
@@ -664,19 +652,19 @@ module Sd = struct
    * transform it first into supportdyn<mixed>,
    * as t <:D dynamic iff t <: supportdyn<mixed>.
    *)
-  let transform_dynamic_upper_bound ~coerce env ty =
+  let transform_dynamic_upper_bound ~is_dynamic_aware env ty =
     if Tast.is_under_dynamic_assumptions env.checked then
       ty
     else
-      match (coerce, get_node ty) with
-      | (Some TL.CoerceToDynamic, Tdynamic) ->
+      match (is_dynamic_aware, get_node ty) with
+      | (true, Tdynamic) ->
         let r = get_reason ty in
         MakeType.supportdyn_mixed r
-      | (Some TL.CoerceToDynamic, _) -> ty
+      | (true, _) -> ty
       | _ -> ty
 end
 
-let mk_issubtype_prop ~sub_supportdyn ~coerce env ty1 ty2 =
+let mk_issubtype_prop ~sub_supportdyn ~is_dynamic_aware env ty1 ty2 =
   let (env, ty1) =
     match sub_supportdyn with
     | None -> (env, ty1)
@@ -695,13 +683,13 @@ let mk_issubtype_prop ~sub_supportdyn ~coerce env ty1 ty2 =
   match ty2 with
   | LoclType ty2 ->
     (* TODO akenn: somehow we lose this environment *)
-    let (env, coerce, ty2) =
+    let (env, is_dynamic_aware, ty2) =
       (* If we are in dynamic-aware subtyping mode, that fact will be lost when ty2
          ends up on the upper bound of a type variable. Here we find if ty2 contains
          dynamic and replace it with supportdyn<mixed> which is equivalent, but does not
          require dynamic-aware subtyping mode to be a supertype of types that support dynamic. *)
-      match coerce with
-      | Some TL.CoerceToDynamic ->
+      match is_dynamic_aware with
+      | true ->
         let (env, ty_opt) =
           Typing_dynamic_utils.try_strip_dynamic
             ~do_not_solve_likes:true
@@ -713,14 +701,14 @@ let mk_issubtype_prop ~sub_supportdyn ~coerce env ty1 ty2 =
           | Some non_dyn_ty ->
             let r = get_reason ty2 in
             ( env,
-              None,
+              false,
               MakeType.union r [non_dyn_ty; MakeType.supportdyn_mixed r] )
-          | None -> (env, coerce, ty2)
+          | None -> (env, is_dynamic_aware, ty2)
         end
-      | _ -> (env, coerce, ty2)
+      | _ -> (env, is_dynamic_aware, ty2)
     in
-    (env, TL.IsSubtype (coerce, ty1, LoclType ty2))
-  | _ -> (env, TL.IsSubtype (coerce, ty1, ty2))
+    (env, TL.IsSubtype (is_dynamic_aware, ty1, LoclType ty2))
+  | _ -> (env, TL.IsSubtype (is_dynamic_aware, ty1, ty2))
 
 (* All of our constraints have a type with additional context to support <:D *)
 type lhs = {
@@ -815,10 +803,9 @@ end = struct
     let function_name subtype_env ~sub_supportdyn ~super_like ~super_supportdyn
         =
       "Typing_subtype.Subtype.simplify"
-      ^ (match subtype_env.Subtype_env.coerce with
-        | None -> ""
-        | Some TL.CoerceToDynamic -> " <:D"
-        | Some TL.CoerceFromDynamic -> " D<:")
+      ^ (match subtype_env.Subtype_env.is_dynamic_aware with
+        | false -> ""
+        | true -> " <:D")
       ^
       let flag str = function
         | true -> str
@@ -1027,8 +1014,8 @@ end = struct
     let (env, ty_sub) = Env.expand_type env ty_sub in
     match deref ty_sub with
     | (_, Tvar _) -> begin
-      match (subtype_env.Subtype_env.coerce, get_node ty_super) with
-      | (Some TL.CoerceToDynamic, Tdynamic) ->
+      match (subtype_env.Subtype_env.is_dynamic_aware, get_node ty_super) with
+      | (true, Tdynamic) ->
         let r = get_reason ty_super in
         let ty_super = MakeType.supportdyn_mixed r in
         default_subtype_inner
@@ -1038,14 +1025,14 @@ end = struct
           ~lhs:{ sub_supportdyn; ty_sub }
           ~rhs:{ super_like; super_supportdyn; ty_super }
           env
-      | (Some cd, _) ->
+      | (true, _) ->
         mk_issubtype_prop
           ~sub_supportdyn
-          ~coerce:(Some cd)
+          ~is_dynamic_aware:true
           env
           (LoclType ty_sub)
           (LoclType ty_super)
-      | (None, _) ->
+      | (false, _) ->
         default_subtype_inner
           ~subtype_env
           ~this_ty
@@ -1068,7 +1055,7 @@ end = struct
       if subtype_env.Subtype_env.no_top_bottom then
         mk_issubtype_prop
           ~sub_supportdyn
-          ~coerce:subtype_env.Subtype_env.coerce
+          ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
           env
           (LoclType ty_sub)
           (LoclType ty_super)
@@ -1152,7 +1139,7 @@ end = struct
           | _ ->
             mk_issubtype_prop
               ~sub_supportdyn
-              ~coerce:subtype_env.Subtype_env.coerce
+              ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
               env
               (LoclType lty_sub)
               (LoclType ty_super))
@@ -1190,7 +1177,7 @@ end = struct
     | (_, Tgeneric _) when subtype_env.Subtype_env.require_completeness ->
       mk_issubtype_prop
         ~sub_supportdyn
-        ~coerce:subtype_env.Subtype_env.coerce
+        ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
         env
         (LoclType lty_sub)
         (LoclType ty_super)
@@ -1238,8 +1225,6 @@ end = struct
             env
         end)
     end
-    | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
-      valid env
     | (_, Taccess _) -> invalid ~fail env
     | (r, Tnewtype (n, _tyl, ty)) ->
       let mk_prop ~subtype_env ~this_ty ~lhs ~rhs env =
@@ -1333,10 +1318,7 @@ end = struct
         simplify_subtype_of_dynamic env ||| finish
     in
     let stripped_dynamic =
-      if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-        Typing_dynamic_utils.try_strip_dynamic_from_union env lty_supers
-      else
-        None
+      Typing_dynamic_utils.try_strip_dynamic_from_union env lty_supers
     in
     match stripped_dynamic with
     | Some (ty_dynamic, tyl) ->
@@ -1458,7 +1440,8 @@ end = struct
             | Some ty ->
               let simplify_pushed_like env =
                 simplify
-                  ~subtype_env:(Subtype_env.set_coercing_to_dynamic subtype_env)
+                  ~subtype_env:
+                    (Subtype_env.set_is_dynamic_aware subtype_env true)
                   ~this_ty
                   ~lhs:{ sub_supportdyn = None; ty_sub = ty }
                   ~rhs:
@@ -2194,10 +2177,8 @@ end = struct
            * subtype of the dynamic type itself
            *)
           match get_node ty_sub with
-          | Tdynamic
-            when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
-                 && for_override ->
-            Subtype_env.set_coercing_to_dynamic subtype_env
+          | Tdynamic when for_override ->
+            Subtype_env.set_is_dynamic_aware subtype_env true
           | _ -> subtype_env
         in
         (* Construct the contravariant subtype proposition *)
@@ -2327,9 +2308,7 @@ end = struct
     if check_return then
       let ty_super = Sd.liken ~super_like env ft_super.ft_ret in
       let subtype_env =
-        if
-          TypecheckerOptions.enable_sound_dynamic env.genv.tcopt && for_override
-        then
+        if for_override then
           (* When overriding in Sound Dynamic, we allow t to override dynamic if
            * t is a dynamic-aware subtype of dynamic. We also allow Awaitable<t>
            * to override Awaitable<dynamic> and and Awaitable<t> to
@@ -2337,11 +2316,11 @@ end = struct
            *)
           let (_, ty_super) = Typing_dynamic_utils.strip_dynamic env ty_super in
           match get_node ty_super with
-          | Tdynamic -> Subtype_env.set_coercing_to_dynamic subtype_env
+          | Tdynamic -> Subtype_env.set_is_dynamic_aware subtype_env true
           | Tclass ((_, class_name), _, [ty])
             when String.equal class_name SN.Classes.cAwaitable && is_dynamic ty
             ->
-            Subtype_env.set_coercing_to_dynamic subtype_env
+            Subtype_env.set_is_dynamic_aware subtype_env true
           | _ -> subtype_env
         else
           subtype_env
@@ -2377,34 +2356,7 @@ end = struct
       (r_sub, children_tyl)
       (r_super, super_tyl)
       env =
-    let simplify_subtype_help reify_kind ~sub_supportdyn ty_sub ty_super env =
-      (* When doing coercions from dynamic we treat dynamic as a bottom type. This is generally
-         correct, except for the case when the generic isn't erased. When a generic is
-         reified it is enforced as if it is it's own separate class in the runtime. i.e.
-         In the code:
-
-           class Box<reify T> {}
-           function box_int(): Box<int> { return new Box<~int>(); }
-
-         If is enforced like:
-           class Box<reify T> {}
-           class Box_int extends Box<int> {}
-           class Box_like_int extends Box<~int> {}
-
-           function box_int(): Box_int { return new Box_like_int(); }
-
-         Thus we cannot push the like type to the outside of generic like we can
-         we erased generics.
-      *)
-      let subtype_env =
-        if
-          (not Aast.(equal_reify_kind reify_kind Erased))
-          && Subtype_env.coercing_from_dynamic subtype_env
-        then
-          Subtype_env.{ subtype_env with coerce = None }
-        else
-          subtype_env
-      in
+    let simplify_subtype_help ~sub_supportdyn ty_sub ty_super env =
       simplify
         ~subtype_env
         ~this_ty:None
@@ -2418,11 +2370,9 @@ end = struct
     | (_, [], _)
     | (_, _, []) ->
       valid env
-    | ( (variance, reify_kind) :: variance_reifiedl,
+    | ( (variance, _reify_kind) :: variance_reifiedl,
         child :: childrenl,
         super :: superl ) ->
-      let simplify_subtype_help = simplify_subtype_help reify_kind in
-
       let prop env =
         match variance with
         | Ast_defs.Covariant ->
@@ -2767,7 +2717,7 @@ end = struct
       if subtype_env.Subtype_env.require_soundness then
         mk_issubtype_prop
           ~sub_supportdyn
-          ~coerce:subtype_env.Subtype_env.coerce
+          ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
           env
           (LoclType lty_sub)
           (LoclType lty_super)
@@ -3284,19 +3234,10 @@ end = struct
         ~lhs:{ sub_supportdyn; ty_sub }
         ~rhs:{ super_like; super_supportdyn = false; ty_super }
         env
-    | ((_, Tdynamic), (_, Tvar _))
-      when Subtype_env.coercing_from_dynamic subtype_env ->
-      default_subtype
-        ~subtype_env
-        ~this_ty
-        ~fail
-        ~lhs:{ sub_supportdyn; ty_sub }
-        ~rhs:{ super_like; super_supportdyn = false; ty_super }
-        env
     (* We want to treat nullable as a union with the same rule as above.
-     * This is only needed for Tvar on right; other cases are dealt with specially as
-     * derived rules.
-     *)
+       * This is only needed for Tvar on right; other cases are dealt with specially as
+       * derived rules.
+    *)
     | ((r, Toption t), (_r_super, Tvar _var_super)) ->
       let (env, t) = Env.expand_type env t in
       (match get_node t with
@@ -3307,7 +3248,7 @@ end = struct
       | Tnonnull ->
         mk_issubtype_prop
           ~sub_supportdyn
-          ~coerce:subtype_env.Subtype_env.coerce
+          ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
           env
           (LoclType ty_sub)
           (LoclType ty_super)
@@ -3369,15 +3310,15 @@ end = struct
           when ty_equal simplified_sub_ty (MakeType.nothing Reason.none) ->
           valid env
         | _ ->
-          (match subtype_env.Subtype_env.coerce with
-          | Some cd ->
+          (match subtype_env.Subtype_env.is_dynamic_aware with
+          | true ->
             mk_issubtype_prop
               ~sub_supportdyn
-              ~coerce:(Some cd)
+              ~is_dynamic_aware:true
               env
               (LoclType ty_sub)
               (LoclType ty_super)
-          | None ->
+          | false ->
             if super_like then
               let (env, ty_sub) =
                 Typing_dynamic.strip_covariant_like env ty_sub
@@ -3391,7 +3332,7 @@ end = struct
             else
               mk_issubtype_prop
                 ~sub_supportdyn
-                ~coerce:subtype_env.Subtype_env.coerce
+                ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
                 env
                 (LoclType ty_sub)
                 (LoclType ty_super))
@@ -3484,7 +3425,7 @@ end = struct
       when subtype_env.Subtype_env.require_completeness ->
       mk_issubtype_prop
         ~sub_supportdyn
-        ~coerce:subtype_env.Subtype_env.coerce
+        ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
         env
         (LoclType ty_sub)
         (LoclType ty_super)
@@ -3532,18 +3473,15 @@ end = struct
       ->
       mk_issubtype_prop
         ~sub_supportdyn
-        ~coerce:subtype_env.Subtype_env.coerce
+        ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
         env
         (LoclType ty_sub)
         (LoclType ty_super)
     | ((_, Tany _), (_, Tunion [])) -> valid env
-    | ((_, Tdynamic), (_, Tunion []))
-      when Subtype_env.coercing_from_dynamic subtype_env ->
-      valid env
     | ((_, Tvar _), (_, Tunion [])) ->
       mk_issubtype_prop
         ~sub_supportdyn
-        ~coerce:subtype_env.Subtype_env.coerce
+        ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
         env
         (LoclType ty_sub)
         (LoclType ty_super)
@@ -3569,10 +3507,10 @@ end = struct
           (sub_supportdyn, ty_subs)
           rhs
           env
-      | (_, Tvar _) when Option.is_some subtype_env.Subtype_env.coerce ->
+      | (_, Tvar _) when subtype_env.is_dynamic_aware ->
         mk_issubtype_prop
           ~sub_supportdyn
-          ~coerce:subtype_env.Subtype_env.coerce
+          ~is_dynamic_aware:subtype_env.is_dynamic_aware
           env
           (LoclType ty_sub)
           (LoclType ty_super)
@@ -3606,14 +3544,14 @@ end = struct
           | _ ->
             mk_issubtype_prop
               ~sub_supportdyn
-              ~coerce:subtype_env.Subtype_env.coerce
+              ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
               env
               (LoclType ty_sub)
               (LoclType ty_super))
       | (_, Tgeneric _) when subtype_env.Subtype_env.require_completeness ->
         mk_issubtype_prop
           ~sub_supportdyn
-          ~coerce:subtype_env.Subtype_env.coerce
+          ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
           env
           (LoclType ty_sub)
           (LoclType ty_super)
@@ -4024,7 +3962,7 @@ end = struct
       when subtype_env.Subtype_env.require_completeness ->
       mk_issubtype_prop
         ~sub_supportdyn
-        ~coerce:subtype_env.Subtype_env.coerce
+        ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
         env
         (LoclType ty_sub)
         (LoclType ty_super)
@@ -4151,9 +4089,8 @@ end = struct
         env
     (* -- C-Dynamic-R ------------------------------------------------------- *)
     | (_, (r_dynamic, Tdynamic))
-      when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
-           && (Subtype_env.coercing_to_dynamic subtype_env
-              || Tast.is_under_dynamic_assumptions env.checked) -> begin
+      when subtype_env.is_dynamic_aware
+           || Tast.is_under_dynamic_assumptions env.checked -> begin
       let dyn =
         lazy
           (Pretty.describe_ty_super ~is_coeffect:false env (LoclType ty_super))
@@ -4578,7 +4515,7 @@ end = struct
     | (_, (_, Tany _)) when subtype_env.Subtype_env.no_top_bottom ->
       mk_issubtype_prop
         ~sub_supportdyn
-        ~coerce:subtype_env.Subtype_env.coerce
+        ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
         env
         (LoclType ty_sub)
         (LoclType ty_super)
@@ -5041,7 +4978,7 @@ end = struct
           ~rhs:{ super_like; super_supportdyn = true; ty_super = lty_inner }
           env
         &&& simplify
-              ~subtype_env:(Subtype_env.set_coercing_to_dynamic subtype_env)
+              ~subtype_env:(Subtype_env.set_is_dynamic_aware subtype_env true)
               ~this_ty
               ~lhs:{ sub_supportdyn; ty_sub }
               ~rhs:
@@ -5370,7 +5307,7 @@ end = struct
       | (_, Tvar _) ->
         mk_issubtype_prop
           ~sub_supportdyn
-          ~coerce:subtype_env.Subtype_env.coerce
+          ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
           env
           (LoclType ty_sub)
           (LoclType ty_super)
@@ -5767,48 +5704,45 @@ end = struct
       ~subtype_env
       ~this_ty
       (sub_supportdyn, ty_sub)
-      ({ destructure = { d_required; d_optional; d_variadic; _ }; _ } as rhs)
+      { destructure = { d_required; d_optional; d_variadic; _ }; _ }
       env =
-    if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
-      List.fold d_required ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-          res
-          &&& Subtype.(
-                simplify
-                  ~subtype_env
-                  ~this_ty
-                  ~lhs:{ sub_supportdyn; ty_sub }
-                  ~rhs:
-                    {
-                      super_like = false;
-                      super_supportdyn = false;
-                      ty_super = ty_dest;
-                    }))
-      &&& fun env ->
-      List.fold d_optional ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-          res
-          &&& Subtype.(
-                simplify
-                  ~subtype_env
-                  ~this_ty
-                  ~lhs:{ sub_supportdyn; ty_sub }
-                  ~rhs:
-                    {
-                      super_like = false;
-                      super_supportdyn = false;
-                      ty_super = ty_dest;
-                    }))
-      &&& fun env ->
-      Option.value_map ~default:(env, TL.valid) d_variadic ~f:(fun vty ->
-          Subtype.(
-            simplify
-              ~subtype_env
-              ~this_ty
-              ~lhs:{ sub_supportdyn; ty_sub }
-              ~rhs:
-                { super_like = false; super_supportdyn = false; ty_super = vty }
-              env))
-    else
-      destructure_array ~subtype_env ~this_ty (sub_supportdyn, ty_sub) rhs env
+    List.fold d_required ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+        res
+        &&& Subtype.(
+              simplify
+                ~subtype_env
+                ~this_ty
+                ~lhs:{ sub_supportdyn; ty_sub }
+                ~rhs:
+                  {
+                    super_like = false;
+                    super_supportdyn = false;
+                    ty_super = ty_dest;
+                  }))
+    &&& fun env ->
+    List.fold d_optional ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+        res
+        &&& Subtype.(
+              simplify
+                ~subtype_env
+                ~this_ty
+                ~lhs:{ sub_supportdyn; ty_sub }
+                ~rhs:
+                  {
+                    super_like = false;
+                    super_supportdyn = false;
+                    ty_super = ty_dest;
+                  }))
+    &&& fun env ->
+    Option.value_map ~default:(env, TL.valid) d_variadic ~f:(fun vty ->
+        Subtype.(
+          simplify
+            ~subtype_env
+            ~this_ty
+            ~lhs:{ sub_supportdyn; ty_sub }
+            ~rhs:
+              { super_like = false; super_supportdyn = false; ty_super = vty }
+            env))
 
   let destructure_tuple
       ~subtype_env
@@ -6010,7 +5944,7 @@ end = struct
       | ((_, Tvar _), _) ->
         mk_issubtype_prop
           ~sub_supportdyn
-          ~coerce:subtype_env.Subtype_env.coerce
+          ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
           env
           (LoclType ty_sub)
           (ConstraintType
@@ -6293,12 +6227,7 @@ end = struct
     in
     let simplify_key tk env =
       let tk =
-        if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-          Typing_make_type.locl_like
-            (Reason.dynamic_coercion (get_reason tk))
-            tk
-        else
-          tk
+        Typing_make_type.locl_like (Reason.dynamic_coercion (get_reason tk)) tk
       in
       simplify_default ~subtype_env can_index.ci_key tk env
     in
@@ -6476,19 +6405,10 @@ end = struct
         (MakeType.dynamic reason_super)
         can_index.ci_val
         env
-      &&& (if
-           Typing_env_types.(
-             TypecheckerOptions.enable_sound_dynamic env.genv.tcopt)
-          then
-            let coerce_to_dynamic =
-              { subtype_env with coerce = Some Typing_logic.CoerceToDynamic }
-            in
-            simplify_default
-              ~subtype_env:coerce_to_dynamic
-              can_index.ci_key
-              (MakeType.dynamic (get_reason ty_sub))
-          else
-            valid)
+      &&& simplify_default
+            ~subtype_env:{ subtype_env with is_dynamic_aware = true }
+            can_index.ci_key
+            (MakeType.dynamic (get_reason ty_sub))
       |> likely_solvable
     in
     let is_nullable =
@@ -6499,14 +6419,12 @@ end = struct
     | (_, Tvar _) ->
       mk_issubtype_prop
         ~sub_supportdyn
-        ~coerce:subtype_env.Subtype_env.coerce
+        ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
         env
         (LoclType ty_sub)
         (ConstraintType
            (mk_constraint_type (reason_super, Tcan_index can_index)))
       |> likely_unsolvable
-    | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
-      valid env |> likely_solvable
     | (_r_sub, Tdynamic) -> got_dynamic env
     | (_r_sub, Tclass ((_, cn), _, _))
       when String.equal cn SN.Collections.cAnyArray
@@ -6514,7 +6432,6 @@ end = struct
       got_dynamic env
     | (_r_sub, _)
       when Option.is_some sub_supportdyn
-           && TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
            && Tast.is_under_dynamic_assumptions env.checked ->
       got_dynamic env
     | (r_sub, Tclass ((_, n), _, targs))
@@ -7003,12 +6920,7 @@ end = struct
     in
     let simplify_key tk env =
       let tk =
-        if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-          Typing_make_type.locl_like
-            (Reason.dynamic_coercion (get_reason tk))
-            tk
-        else
-          tk
+        Typing_make_type.locl_like (Reason.dynamic_coercion (get_reason tk)) tk
       in
       simplify_default ~subtype_env cia.cia_key tk env
     in
@@ -7031,7 +6943,7 @@ end = struct
     | (_, Tvar _) ->
       mk_issubtype_prop
         ~sub_supportdyn
-        ~coerce:subtype_env.Subtype_env.coerce
+        ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
         env
         (LoclType ty_sub)
         (ConstraintType
@@ -7406,8 +7318,6 @@ end = struct
         simplify ~subtype_env ~this_ty ~lhs ~rhs
       in
       match deref lty_sub with
-      | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
-        valid env
       | (_, Tdynamic) ->
         subtype_with_dynamic
           ~subtype_env
@@ -7417,7 +7327,6 @@ end = struct
           env
       | _
         when Option.is_some sub_supportdyn
-             && TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
              && Tast.is_under_dynamic_assumptions env.checked ->
         subtype_with_dynamic
           ~subtype_env
@@ -7462,7 +7371,7 @@ end = struct
         else
           mk_issubtype_prop
             ~sub_supportdyn
-            ~coerce:subtype_env.Subtype_env.coerce
+            ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
             env
             (LoclType lty_sub)
             (ConstraintType (mk_constraint_type (r, Tcan_traverse ct)))
@@ -7741,7 +7650,7 @@ end = struct
     | (_, Tvar _) ->
       mk_issubtype_prop
         ~sub_supportdyn
-        ~coerce:subtype_env.Subtype_env.coerce
+        ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
         env
         (LoclType ty_sub)
         htmty
@@ -7972,7 +7881,7 @@ end = struct
     | (_, Tvar _) ->
       mk_issubtype_prop
         ~sub_supportdyn
-        ~coerce:subtype_env.Subtype_env.coerce
+        ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
         env
         (LoclType ty_sub)
         ity_super
@@ -8240,7 +8149,7 @@ end = struct
       let ity_super = ConstraintType cty_super in
       mk_issubtype_prop
         ~sub_supportdyn
-        ~coerce:subtype_env.Subtype_env.coerce
+        ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
         env
         (LoclType ty_sub)
         ity_super
@@ -8384,7 +8293,7 @@ end = struct
     | Tvar _ ->
       mk_issubtype_prop
         ~sub_supportdyn
-        ~coerce:subtype_env.Subtype_env.coerce
+        ~is_dynamic_aware:subtype_env.Subtype_env.is_dynamic_aware
         env
         (LoclType ty_sub)
         ty_super
@@ -8966,8 +8875,6 @@ end = struct
             ~mk_prop:mk_prop_newtype
             (sub_supportdyn, r_newtype, nm, ty_newtype)
             rhs
-    | (_, Tdynamic) when Subtype_env.coercing_from_dynamic subtype_env ->
-      valid env
     | ( _,
         ( Tany _ | Tdynamic | Tprim _ | Tneg _ | Tnonnull | Tfun _ | Ttuple _
         | Tshape _ | Tvec_or_dict _ | Taccess _ | Tclass _ | Tlabel _
@@ -9082,7 +8989,7 @@ and Subtype_ask : sig
   val is_sub_type_alt_i :
     require_completeness:bool ->
     no_top_bottom:bool ->
-    coerce:TL.coercion_direction option ->
+    is_dynamic_aware:bool ->
     sub_supportdyn:Reason.t option ->
     Typing_env_types.env ->
     Typing_defs.internal_type ->
@@ -9091,7 +8998,7 @@ and Subtype_ask : sig
 
   val is_sub_type_for_union_i :
     Typing_env_types.env ->
-    ?coerce:TL.coercion_direction option ->
+    ?is_dynamic_aware:bool ->
     Typing_defs.internal_type ->
     Typing_defs.internal_type ->
     bool
@@ -9105,7 +9012,7 @@ end = struct
   let is_sub_type_alt_i
       ~require_completeness
       ~no_top_bottom
-      ~coerce
+      ~is_dynamic_aware
       ~sub_supportdyn
       env
       ity_sub
@@ -9119,7 +9026,7 @@ end = struct
       Subtype_env.create
         ~require_completeness
         ~no_top_bottom
-        ~coerce
+        ~is_dynamic_aware
         ~class_sub_classname:(should_cls_sub_cn env)
         ~log_level:3
         None
@@ -9143,12 +9050,12 @@ end = struct
     else
       None
 
-  let is_sub_type_for_union_i env ?(coerce = None) ty1 ty2 =
+  let is_sub_type_for_union_i env ?(is_dynamic_aware = false) ty1 ty2 =
     let ( = ) = Option.equal Bool.equal in
     is_sub_type_alt_i
       ~require_completeness:false
       ~no_top_bottom:true
-      ~coerce
+      ~is_dynamic_aware
       ~sub_supportdyn:None
       env
       ty1
@@ -9161,7 +9068,7 @@ end = struct
     (* TODO(T121047839): Should this set a dedicated ignore_generic_param flag instead? *)
       ~require_completeness:true
       ~no_top_bottom:true
-      ~coerce:None
+      ~is_dynamic_aware:false
       ~sub_supportdyn:None
       env
       ty1
@@ -9318,7 +9225,7 @@ and Subtype_trans : sig
     Typing_env_types.env * Typing_error.t option
 end = struct
   let add_non_subtype_constraint
-      ~coerce
+      ~is_dynamic_aware
       (env, prop)
       (r_sub, var_sub)
       cty_super
@@ -9348,7 +9255,7 @@ end = struct
     in
     let subtype_env =
       Subtype_env.create
-        ~coerce
+        ~is_dynamic_aware
         ~log_level:2
         ~in_transitive_closure:true
         ~class_sub_classname:(should_cls_sub_cn env)
@@ -9403,12 +9310,14 @@ end = struct
      * in tyl we have ty_sub <: ty.
   *)
   let add_tyvar_upper_bound_and_close
-      ~coerce
+      ~is_dynamic_aware
       (env, prop)
       (r_sub, var)
       ty_super
       (on_error : Typing_error.Reasons_callback.t option) =
-    let ty_super = Sd.transform_dynamic_upper_bound ~coerce env ty_super in
+    let ty_super =
+      Sd.transform_dynamic_upper_bound ~is_dynamic_aware env ty_super
+    in
     let upper_bounds_before = Env.get_tyvar_upper_bounds env var in
     (* If the type is already in the upper bounds of the type variable,
      * then we already know that this subtype assertion is valid
@@ -9440,7 +9349,7 @@ end = struct
       in
       let subtype_env =
         Subtype_env.create
-          ~coerce
+          ~is_dynamic_aware
           ~log_level:2
           ~in_transitive_closure:true
           ~class_sub_classname:(should_cls_sub_cn env)
@@ -9496,7 +9405,7 @@ end = struct
    * simplify_subtype to produce a subtype proposition.
    *)
   let add_tyvar_lower_bound_and_close
-      ~coerce
+      ~is_dynamic_aware
       (env, prop)
       (r_sup, var)
       ty_sub
@@ -9526,7 +9435,7 @@ end = struct
     let upper_bounds = Env.get_tyvar_upper_bounds env var in
     let subtype_env =
       Subtype_env.create
-        ~coerce
+        ~is_dynamic_aware
         ~log_level:2
         ~in_transitive_closure:true
         ~class_sub_classname:(should_cls_sub_cn env)
@@ -9580,66 +9489,82 @@ end = struct
   *)
   let simplify_disj env disj =
     (* even if sub_ty is not a supertype of super_ty, still consider super_ty redunant *)
-    let additional_heuristic ~coerce env _sub_ty super_ty =
-      let nonnull =
-        if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
-          MakeType.supportdyn_nonnull Reason.none
-        else
-          MakeType.nonnull Reason.none
-      in
+    let additional_heuristic ~is_dynamic_aware env _sub_ty super_ty =
+      let nonnull = MakeType.supportdyn_nonnull Reason.none in
       Subtype_ask.is_sub_type_for_union_i
-        ~coerce
+        ~is_dynamic_aware
         env
         (LoclType nonnull)
         super_ty
     in
-    let rec add_new_bound ~is_lower ~coerce ~constr ty bounds =
+    let rec add_new_bound ~is_lower ~is_dynamic_aware ~constr ty bounds =
       match bounds with
       | [] -> [(is_lower, ty, constr)]
       | ((is_lower', bound_ty, _) as b) :: bounds ->
         if is_lower && is_lower' then
-          if Subtype_ask.is_sub_type_for_union_i ~coerce env bound_ty ty then
-            b :: bounds
-          else if Subtype_ask.is_sub_type_for_union_i ~coerce env ty bound_ty
+          if
+            Subtype_ask.is_sub_type_for_union_i
+              ~is_dynamic_aware
+              env
+              bound_ty
+              ty
           then
-            add_new_bound ~is_lower ~coerce ~constr ty bounds
-          else if additional_heuristic ~coerce env bound_ty ty then
             b :: bounds
-          else if additional_heuristic ~coerce env ty bound_ty then
-            add_new_bound ~is_lower ~coerce ~constr ty bounds
+          else if
+            Subtype_ask.is_sub_type_for_union_i
+              ~is_dynamic_aware
+              env
+              ty
+              bound_ty
+          then
+            add_new_bound ~is_lower ~is_dynamic_aware ~constr ty bounds
+          else if additional_heuristic ~is_dynamic_aware env bound_ty ty then
+            b :: bounds
+          else if additional_heuristic ~is_dynamic_aware env ty bound_ty then
+            add_new_bound ~is_lower ~is_dynamic_aware ~constr ty bounds
           else
-            b :: add_new_bound ~is_lower ~coerce ~constr ty bounds
+            b :: add_new_bound ~is_lower ~is_dynamic_aware ~constr ty bounds
         else if
           (not is_lower)
           && (not is_lower')
-          && Subtype_ask.is_sub_type_for_union_i ~coerce env ty bound_ty
+          && Subtype_ask.is_sub_type_for_union_i
+               ~is_dynamic_aware
+               env
+               ty
+               bound_ty
         then
           b :: bounds
         else if
           (not is_lower)
           && (not is_lower')
-          && Subtype_ask.is_sub_type_for_union_i ~coerce env bound_ty ty
+          && Subtype_ask.is_sub_type_for_union_i
+               ~is_dynamic_aware
+               env
+               bound_ty
+               ty
         then
-          add_new_bound ~is_lower ~coerce ~constr ty bounds
+          add_new_bound ~is_lower ~is_dynamic_aware ~constr ty bounds
         else
-          b :: add_new_bound ~is_lower ~coerce ~constr ty bounds
+          b :: add_new_bound ~is_lower ~is_dynamic_aware ~constr ty bounds
     in
     (* Map a type variable to a list of lower and upper bound types. For any two types
        t1 and t2 both lower or upper in the list, it is not the case that t1 <: t2 or t2 <: t1.
     *)
     let bound_map = ref Tvid.Map.empty in
-    let process_bound ~is_lower ~coerce ~constr ty var =
+    let process_bound ~is_lower ~is_dynamic_aware ~constr ty var =
       let ty =
         match ty with
         | LoclType ty when not is_lower ->
-          LoclType (Sd.transform_dynamic_upper_bound ~coerce env ty)
+          LoclType (Sd.transform_dynamic_upper_bound ~is_dynamic_aware env ty)
         | _ -> ty
       in
       match Tvid.Map.find_opt var !bound_map with
       | None ->
         bound_map := Tvid.Map.add var [(is_lower, ty, constr)] !bound_map
       | Some bounds ->
-        let new_bounds = add_new_bound ~is_lower ~coerce ~constr ty bounds in
+        let new_bounds =
+          add_new_bound ~is_lower ~is_dynamic_aware ~constr ty bounds
+        in
         bound_map := Tvid.Map.add var new_bounds !bound_map
     in
     let rec fill_bound_map disj =
@@ -9649,15 +9574,25 @@ end = struct
         (match d with
         | TL.Conj _ -> d :: fill_bound_map disj
         | TL.Disj (_, props) -> fill_bound_map (props @ disj)
-        | TL.IsSubtype (coerce, ty_sub, ty_super) ->
+        | TL.IsSubtype (is_dynamic_aware, ty_sub, ty_super) ->
           (match get_tyvar_opt ty_super with
           | Some var_super ->
-            process_bound ~is_lower:true ~coerce ~constr:d ty_sub var_super;
+            process_bound
+              ~is_lower:true
+              ~is_dynamic_aware
+              ~constr:d
+              ty_sub
+              var_super;
             fill_bound_map disj
           | None ->
             (match get_tyvar_opt ty_sub with
             | Some var_sub ->
-              process_bound ~is_lower:false ~coerce ~constr:d ty_super var_sub;
+              process_bound
+                ~is_lower:false
+                ~is_dynamic_aware
+                ~constr:d
+                ty_super
+                var_sub;
               fill_bound_map disj
             | None -> d :: fill_bound_map disj)))
     in
@@ -9722,7 +9657,7 @@ end = struct
     | TL.IsSubtype (coerce, ty_sub, ty_super) ->
       tell_cstr env (coerce, ty_sub, ty_super) on_error
 
-  and tell_cstr env (coerce, ty_sub, ty_super) on_error =
+  and tell_cstr env (is_dynamic_aware, ty_sub, ty_super) on_error =
     let (env, ty_sub) = Env.expand_internal_type env ty_sub in
     let (env, ty_super) = Env.expand_internal_type env ty_super in
 
@@ -9733,7 +9668,7 @@ end = struct
       | (Tvar var_sub, Tvar var_super) ->
         let (env, prop1) =
           add_tyvar_upper_bound_and_close
-            ~coerce
+            ~is_dynamic_aware
             (valid env)
             (get_reason lty_sub, var_sub)
             lty_super
@@ -9741,7 +9676,7 @@ end = struct
         in
         let (env, prop2) =
           add_tyvar_lower_bound_and_close
-            ~coerce
+            ~is_dynamic_aware
             (valid env)
             (get_reason lty_super, var_super)
             lty_sub
@@ -9759,7 +9694,7 @@ end = struct
       | (Tvar var, _) ->
         let (env, prop) =
           add_tyvar_upper_bound_and_close
-            ~coerce
+            ~is_dynamic_aware
             (valid env)
             (get_reason lty_sub, var)
             lty_super
@@ -9769,14 +9704,14 @@ end = struct
       | (_, Tvar var) ->
         let (env, prop) =
           add_tyvar_lower_bound_and_close
-            ~coerce
+            ~is_dynamic_aware
             (valid env)
             (get_reason lty_super, var)
             lty_sub
             on_error
         in
         tell ty_sub ty_super env prop on_error
-      | _ -> (env, None, [TL.IsSubtype (coerce, ty_sub, ty_super)])
+      | _ -> (env, None, [TL.IsSubtype (is_dynamic_aware, ty_sub, ty_super)])
     end
     (* [constraint_type]s are only valid on the rhs *)
     | (LoclType lty_sub, ConstraintType cstr) -> begin
@@ -9784,17 +9719,17 @@ end = struct
       | Tvar var ->
         let (env, prop) =
           add_non_subtype_constraint
-            ~coerce
+            ~is_dynamic_aware
             (valid env)
             (get_reason lty_sub, var)
             cstr
             on_error
         in
         tell ty_sub ty_super env prop on_error
-      | _ -> (env, None, [TL.IsSubtype (coerce, ty_sub, ty_super)])
+      | _ -> (env, None, [TL.IsSubtype (is_dynamic_aware, ty_sub, ty_super)])
     end
     | (ConstraintType _, (LoclType _ | ConstraintType _)) ->
-      (env, None, [TL.IsSubtype (coerce, ty_sub, ty_super)])
+      (env, None, [TL.IsSubtype (is_dynamic_aware, ty_sub, ty_super)])
 
   and tell_all ty_sub ty_super env ~ty_errs ~remain props on_error =
     match props with
@@ -9837,18 +9772,9 @@ end
 
 and Subtype_tell : sig
   (** Entry point asserting top-level subtype constraints and all implied constraints *)
-  val sub_type_inner :
-    Typing_env_types.env ->
-    subtype_env:Subtype_env.t ->
-    sub_supportdyn:Reason.t option ->
-    this_ty:Typing_defs.locl_ty option ->
-    Typing_defs.internal_type ->
-    Typing_defs.internal_type ->
-    Typing_env_types.env * Typing_error.t option
-
   val sub_type :
     env ->
-    ?coerce:Typing_logic.coercion_direction option ->
+    ?is_dynamic_aware:bool ->
     ?is_coeffect:bool ->
     ?ignore_readonly:bool ->
     ?class_sub_classname:bool ->
@@ -9915,10 +9841,9 @@ end = struct
         ~function_name:
           ("Typing_subtype.Subtype_tell.sub_type_inner"
           ^
-          match subtype_env.Subtype_env.coerce with
-          | Some TL.CoerceToDynamic -> " (dynamic aware)"
-          | Some TL.CoerceFromDynamic -> " (treat dynamic as bottom)"
-          | None -> "")
+          match subtype_env.Subtype_env.is_dynamic_aware with
+          | true -> " (dynamic aware)"
+          | false -> "")
         env
         ity_sub
         ity_super
@@ -9936,7 +9861,7 @@ end = struct
       Subtype_env.create
         ~log_level:2
         ~is_coeffect
-        ~coerce:None
+        ~is_dynamic_aware:false
         ~class_sub_classname:(should_cls_sub_cn env)
         on_error
     in
@@ -9964,7 +9889,7 @@ end = struct
 
   let sub_type
       env
-      ?(coerce = None)
+      ?(is_dynamic_aware = false)
       ?(is_coeffect = false)
       ?(ignore_readonly = false)
       ?(class_sub_classname = should_cls_sub_cn env)
@@ -9975,7 +9900,7 @@ end = struct
       Subtype_env.create
         ~log_level:2
         ~is_coeffect
-        ~coerce
+        ~is_dynamic_aware
         ~class_sub_classname
         on_error
     in
@@ -10216,14 +10141,17 @@ include Subtype_tell
 
 (* -- add_constraint(s) entry point ----------------------------------------- *)
 let decompose_subtype_add_bound
-    ~coerce (env : env) (ty_sub : locl_ty) (ty_super : locl_ty) : env =
+    ~is_dynamic_aware (env : env) (ty_sub : locl_ty) (ty_super : locl_ty) : env
+    =
   let (env, ty_super) = Env.expand_type env ty_super in
   let (env, ty_sub) = Env.expand_type env ty_sub in
   match (get_node ty_sub, get_node ty_super) with
   | (_, Tany _) -> env
   (* name_sub <: ty_super so add an upper bound on name_sub *)
   | (Tgeneric name_sub, _) when not (phys_equal ty_sub ty_super) ->
-    let ty_super = Sd.transform_dynamic_upper_bound ~coerce env ty_super in
+    let ty_super =
+      Sd.transform_dynamic_upper_bound ~is_dynamic_aware env ty_super
+    in
     (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
        but the add_upper_bound call must be adapted *)
     let tys = Env.get_upper_bounds env name_sub in
@@ -10250,7 +10178,7 @@ let decompose_subtype_add_bound
         ty_sub
   | (_, _) -> env
 
-let decompose_subtype_add_bound ~coerce env ty_sub ty_super =
+let decompose_subtype_add_bound ~is_dynamic_aware env ty_sub ty_super =
   let (env, ty_sub) = Env.expand_type env ty_sub in
   let (env, ty_super) = Env.expand_type env ty_super in
   if Logging.should_log_subtype env ~level:2 ty_sub ty_super then
@@ -10260,9 +10188,10 @@ let decompose_subtype_add_bound ~coerce env ty_sub ty_super =
       env
       ty_sub
       ty_super
-    @@ fun () -> decompose_subtype_add_bound ~coerce env ty_sub ty_super
+    @@ fun () ->
+    decompose_subtype_add_bound ~is_dynamic_aware env ty_sub ty_super
   else
-    decompose_subtype_add_bound ~coerce env ty_sub ty_super
+    decompose_subtype_add_bound ~is_dynamic_aware env ty_sub ty_super
 
 let rec decompose_subtype_add_prop env prop =
   match prop with
@@ -10279,8 +10208,8 @@ let rec decompose_subtype_add_prop env prop =
       env
       prop;
     env
-  | TL.IsSubtype (coerce, LoclType ty1, LoclType ty2) ->
-    decompose_subtype_add_bound ~coerce env ty1 ty2
+  | TL.IsSubtype (is_dynamic_aware, LoclType ty1, LoclType ty2) ->
+    decompose_subtype_add_bound ~is_dynamic_aware env ty1 ty2
   | TL.IsSubtype _ ->
     (* Subtyping queries between locl types are not creating
        constraint types only if require_soundness is unset.
@@ -10291,14 +10220,16 @@ let rec decompose_subtype_add_prop env prop =
       ^ "propositions involving locl types only.")
 
 let decompose_subtype_add_bound_err
-    ~coerce (env : env) (ty_sub : locl_ty) (ty_super : locl_ty) =
+    ~is_dynamic_aware (env : env) (ty_sub : locl_ty) (ty_super : locl_ty) =
   let (env, ty_super) = Env.expand_type env ty_super in
   let (env, ty_sub) = Env.expand_type env ty_sub in
   match (get_node ty_sub, get_node ty_super) with
   | (_, Tany _) -> (env, None)
   (* name_sub <: ty_super so add an upper bound on name_sub *)
   | (Tgeneric name_sub, _) when not (phys_equal ty_sub ty_super) ->
-    let ty_super = Sd.transform_dynamic_upper_bound ~coerce env ty_super in
+    let ty_super =
+      Sd.transform_dynamic_upper_bound ~is_dynamic_aware env ty_super
+    in
     let tys = Env.get_upper_bounds env name_sub in
     (* Don't add the same type twice! *)
     if Typing_set.mem ty_super tys then
@@ -10352,8 +10283,8 @@ let rec decompose_subtype_add_prop_err env prop =
       env
       prop;
     (env, None)
-  | TL.IsSubtype (coerce, LoclType ty1, LoclType ty2) ->
-    decompose_subtype_add_bound_err ~coerce env ty1 ty2
+  | TL.IsSubtype (is_dynamic_aware, LoclType ty1, LoclType ty2) ->
+    decompose_subtype_add_bound_err ~is_dynamic_aware env ty1 ty2
   | TL.IsSubtype _ ->
     (* Subtyping queries between locl types are not creating
        constraint types only if require_soundness is unset.
@@ -10701,46 +10632,6 @@ let apply_where_constraints pos def_pos tparams where_constraints ~env =
             { default with tp_constraints })),
     err_opt )
 
-(* -- sub_type_with_dynamic_as_bottom entry point --------------------------- *)
-let sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error =
-  let old_env = env in
-  let subtype_env =
-    Subtype_env.create
-      ~coerce:(Some TL.CoerceFromDynamic)
-      ~log_level:2
-      ~class_sub_classname:(should_cls_sub_cn env)
-      on_error
-  in
-  let (env, ty_err) =
-    Subtype_tell.sub_type_inner
-      env
-      ~subtype_env
-      ~sub_supportdyn:None
-      ~this_ty:None
-      (LoclType ty_sub)
-      (LoclType ty_super)
-  in
-
-  ( (if Option.is_some ty_err then
-      old_env
-    else
-      env),
-    ty_err )
-
-let sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error =
-  let (env, ty_sub) = Env.expand_type env ty_sub in
-  let (env, ty_super) = Env.expand_type env ty_super in
-  if Logging.should_log_subtype env ~level:1 ty_sub ty_super then
-    Logging.log_subtype
-      ~this_ty:None
-      ~function_name:"Typing_subtype.sub_type_with_dynamic_as_bottom"
-      env
-      ty_sub
-      ty_super
-    @@ fun () -> sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error
-  else
-    sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error
-
 (* -- subtype_funs entry point ---------------------------------------------- *)
 let subtype_funs
     ~(check_return : bool)
@@ -10753,7 +10644,7 @@ let subtype_funs
     env =
   (* This is used for checking subtyping of function types for method override
    * (see Typing_subtype_method) so types are fully-explicit and therefore we
-   * permit subtyping to dynamic when --enable-sound-dynamic-type is true
+   * permit subtyping to dynamic
    *)
   let old_env = env in
   let (env, prop) =
@@ -10761,7 +10652,7 @@ let subtype_funs
       ~subtype_env:
         (Subtype_env.create
            ~log_level:2
-           ~coerce:None
+           ~is_dynamic_aware:false
            ~class_sub_classname:(should_cls_sub_cn env)
            on_error)
       ~check_return
@@ -10794,7 +10685,7 @@ let is_sub_type env ty1 ty2 =
   Subtype_ask.is_sub_type_alt_i
     ~require_completeness:false
     ~no_top_bottom:false
-    ~coerce:None
+    ~is_dynamic_aware:false
     ~sub_supportdyn:None
     env
     (LoclType ty1)
@@ -10807,7 +10698,7 @@ let is_dynamic_aware_sub_type env ty1 ty2 =
   Subtype_ask.is_sub_type_alt_i
     ~require_completeness:false
     ~no_top_bottom:false
-    ~coerce:(Some TL.CoerceToDynamic)
+    ~is_dynamic_aware:true
     ~sub_supportdyn:None
     env
     (LoclType ty1)
@@ -10815,12 +10706,12 @@ let is_dynamic_aware_sub_type env ty1 ty2 =
   = Some true
 
 (* -- is_sub_type_for_union entry point ------------------------------------- *)
-let is_sub_type_for_union_help env ?(coerce = None) ty1 ty2 =
+let is_sub_type_for_union_help env ?(is_dynamic_aware = false) ty1 ty2 =
   let ( = ) = Option.equal Bool.equal in
   Subtype_ask.is_sub_type_alt_i
     ~require_completeness:false
     ~no_top_bottom:true
-    ~coerce
+    ~is_dynamic_aware
     ~sub_supportdyn:None
     env
     (LoclType ty1)
@@ -10828,11 +10719,11 @@ let is_sub_type_for_union_help env ?(coerce = None) ty1 ty2 =
   = Some true
 
 let is_sub_type_for_union env ty1 ty2 =
-  is_sub_type_for_union_help ~coerce:None env ty1 ty2
+  is_sub_type_for_union_help ~is_dynamic_aware:false env ty1 ty2
 
 (* Entry point *)
 let is_sub_type_for_union_i env ty1 ty2 =
-  Subtype_ask.is_sub_type_for_union_i ~coerce:None env ty1 ty2
+  Subtype_ask.is_sub_type_for_union_i ~is_dynamic_aware:false env ty1 ty2
 
 (* -- is_sub_type_ignore_generic_params entry point ------------------------- *)
 let is_sub_type_ignore_generic_params env ty1 ty2 =
@@ -10841,7 +10732,7 @@ let is_sub_type_ignore_generic_params env ty1 ty2 =
   (* TODO(T121047839): Should this set a dedicated ignore_generic_param flag instead? *)
     ~require_completeness:true
     ~no_top_bottom:true
-    ~coerce:None
+    ~is_dynamic_aware:false
     ~sub_supportdyn:None
     env
     (LoclType ty1)
@@ -10853,7 +10744,7 @@ let is_sub_type_opt_ignore_generic_params env ty1 ty2 =
   (* TODO(T121047839): Should this set a dedicated ignore_generic_param flag instead? *)
     ~require_completeness:true
     ~no_top_bottom:true
-    ~coerce:None
+    ~is_dynamic_aware:false
     ~sub_supportdyn:None
     env
     (LoclType ty1)
@@ -10865,7 +10756,7 @@ let can_sub_type env ty1 ty2 =
   Subtype_ask.is_sub_type_alt_i
     ~require_completeness:false
     ~no_top_bottom:true
-    ~coerce:None
+    ~is_dynamic_aware:false
     ~sub_supportdyn:None
     env
     (LoclType ty1)
@@ -11078,7 +10969,6 @@ let instantiate_fun_type pos fun_ty ~env =
 let set_fun_refs () =
   TUtils.sub_type_ref := sub_type;
   TUtils.sub_type_i_ref := sub_type_i;
-  TUtils.sub_type_with_dynamic_as_bottom_ref := sub_type_with_dynamic_as_bottom;
   TUtils.add_constraint_ref := add_constraint;
   TUtils.is_sub_type_ref := is_sub_type;
   TUtils.is_sub_type_for_union_ref := is_sub_type_for_union;

@@ -1,5 +1,5 @@
 <?hh
-
+<<__SupportDynamicType>>
 class TestClass { // 2. Rename TestClass
   const CONSTANT = 5;
   const string STR_CONSTANT = "hello";

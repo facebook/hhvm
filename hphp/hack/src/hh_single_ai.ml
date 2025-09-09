@@ -115,7 +115,6 @@ let parse_options () =
       ~allowed_fixme_codes_strict:
         (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
       ~tco_check_xhp_attribute:false
-      ~tco_enable_sound_dynamic:sound_dynamic
       GlobalOptions.default
   in
   Errors.allowed_fixme_codes_strict :=
@@ -309,7 +308,6 @@ let main_hack ({ tcopt; _ } as opts) (sharedmem_config : SharedMem.config) :
           let files = opts.files in
           let hh_config_options =
             [
-              Printf.sprintf "enable_sound_dynamic_type=%b" sound_dynamic;
               Printf.sprintf "everything_sdt=%b" sound_dynamic;
               "disable_xhp_element_mangling=false";
               "disable_xhp_children_declarations=false";

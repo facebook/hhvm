@@ -19,7 +19,6 @@ class TestSafeRenameSoundDynamic(common_tests.CommonTestDriver):
             f.write(
                 """
 enable_experimental_stx_features = {"like_type_hints": "Unstable"}
-enable_sound_dynamic_type = true
 union_intersection_type_hints = true
 everything_sdt = true
 """

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6bc389d20bc8e873f9638bba54f1df3e>>
+// @generated SignedSource<<105d0752d4a5b5678f2b6fa8c9865e55>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -274,8 +274,6 @@ pub struct GlobalOptions {
     /// Type check this proportion of all files. Default is 1.0.
     /// DO NOT set to any other value except for testing purposes.
     pub tco_typecheck_sample_rate: f64,
-    /// Experimental implementation of a "sound" dynamic type
-    pub tco_enable_sound_dynamic: bool,
     /// Under sound dynamic, introduce like-types for built-in operations e.g. on Vector.
     /// This is done anyway if everything_sdt=true
     pub tco_pessimise_builtins: bool,

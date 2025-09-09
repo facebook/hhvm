@@ -108,10 +108,7 @@ let do_with_field_expr
 
 let mixed_for_refinement env r ty =
   let mixed = MakeType.mixed r in
-  if
-    TUtils.is_supportdyn env ty
-    && TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
-  then
+  if TUtils.is_supportdyn env ty then
     MakeType.supportdyn r mixed
   else
     mixed
@@ -386,10 +383,7 @@ let idx_without_default env ~expr_pos ~shape_pos shape_ty field_name =
     in
     let nullable_super_shape = mk (Reason.none, Toption fake_super_shape_ty) in
     let super_shape =
-      if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
-        MakeType.locl_like (Reason.witness shape_pos) nullable_super_shape
-      else
-        nullable_super_shape
+      MakeType.locl_like (Reason.witness shape_pos) nullable_super_shape
     in
     let (env, ty_err_opt) =
       Typing_coercion.coerce_type

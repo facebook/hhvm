@@ -10,20 +10,15 @@
 open Hh_prelude
 open Typing_defs
 
-type coercion_direction =
-  | CoerceToDynamic
-  | CoerceFromDynamic
-[@@deriving show, eq]
-
 (* See comment in .mli file *)
 type subtype_prop =
-  | IsSubtype of coercion_direction option * internal_type * internal_type
+  | IsSubtype of bool * internal_type * internal_type
   | Conj of subtype_prop list
   | Disj of Typing_error.t option * subtype_prop list
 [@@deriving show]
 
 let rec print print_ty = function
-  | IsSubtype (_coercion_direction, sub, super) ->
+  | IsSubtype (_is_dynamic_aware, sub, super) ->
     Printf.sprintf "%s <: %s" (print_ty sub) (print_ty super)
   | Conj [] -> "true"
   | Conj l -> String.concat ~sep:" & " @@ List.map l ~f:(print print_ty)
@@ -32,8 +27,8 @@ let rec print print_ty = function
 
 let rec equal_subtype_prop p1 p2 =
   match (p1, p2) with
-  | (IsSubtype (c1, ty1, ty1'), IsSubtype (c2, ty2, ty2')) ->
-    Option.equal equal_coercion_direction c1 c2
+  | (IsSubtype (da1, ty1, ty1'), IsSubtype (da2, ty2, ty2')) ->
+    Bool.equal da1 da2
     && equal_internal_type ty1 ty2
     && equal_internal_type ty1' ty2'
   | (Conj ps1, Conj ps2)

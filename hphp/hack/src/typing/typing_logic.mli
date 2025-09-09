@@ -9,14 +9,9 @@
 
 open Typing_defs
 
-type coercion_direction =
-  | CoerceToDynamic
-  | CoerceFromDynamic
-[@@deriving show, eq]
-
 (* Logical proposition about types *)
 type subtype_prop =
-  | IsSubtype of coercion_direction option * internal_type * internal_type
+  | IsSubtype of bool * internal_type * internal_type
       (** IsSubtype(Some cd, ty1, ty2), if ty1 is a subtype of ty2 while potentially
           coercing to or from dynamic (depending on cd), written ty1 ~> ty2.
           IsSubtype(None, ty1, ty2) if ty1 is a subtype of ty2, written ty1 <: ty2

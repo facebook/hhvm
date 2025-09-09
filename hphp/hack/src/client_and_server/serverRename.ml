@@ -383,21 +383,17 @@ let get_deprecated_wrapper_patch
 let method_might_support_dynamic ctx ~class_name ~method_name =
   let open Option.Monad_infix in
   let module Class = Folded_class in
-  let sd_enabled =
-    TypecheckerOptions.enable_sound_dynamic @@ Provider_context.get_tcopt ctx
-  in
-  (not sd_enabled)
-  || Decl_provider.get_class ctx @@ Utils.add_ns class_name
-     |> Decl_entry.to_option
-     >>= (fun class_ ->
-           Option.first_some
-             (Class.get_smethod class_ method_name)
-             (Class.get_method class_ method_name))
-     >>| (fun elt ->
-           let flags = elt.Typing_defs.ce_flags in
-           Typing_defs_flags.ClassElt.(
-             is_dynamicallycallable flags || supports_dynamic_type flags))
-     |> Option.value ~default:true
+  Decl_provider.get_class ctx @@ Utils.add_ns class_name
+  |> Decl_entry.to_option
+  >>= (fun class_ ->
+        Option.first_some
+          (Class.get_smethod class_ method_name)
+          (Class.get_method class_ method_name))
+  >>| (fun elt ->
+        let flags = elt.Typing_defs.ce_flags in
+        Typing_defs_flags.ClassElt.(
+          is_dynamicallycallable flags || supports_dynamic_type flags))
+  |> Option.value ~default:true
 
 let go
     ctx

@@ -112,10 +112,7 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
   in
   let env = Env.load_cross_packages_from_attr env f.f_user_attributes in
   (* Is sound dynamic enabled, and the function marked <<__SupportDynamicType>> explicitly or implicitly? *)
-  let sdt_function =
-    TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))
-    && Env.get_support_dynamic_type env
-  in
+  let sdt_function = Env.get_support_dynamic_type env in
   List.iter ~f:(Typing_error_utils.add_typing_error ~env)
   @@ Typing_type_wellformedness.fun_def env fd;
   Env.make_depend_on_current_module env;

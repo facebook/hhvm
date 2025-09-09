@@ -1049,12 +1049,12 @@ class CommonTests(BarebonesTests):
         with open(os.path.join(self.test_driver.repo_dir, "foo_4.php"), "w") as f:
             f.write(
                 """<?hh
-
+            <<__SupportDynamicType>>
             class Bar extends Foo {
                 public function f(): void {}
                 public function g(): void {}
             }
-
+            <<__SupportDynamicType>>
             class Baz extends Bar {
                 public function g(): void {
                     $this->f();
@@ -1068,9 +1068,9 @@ class CommonTests(BarebonesTests):
             ["Rewrote 1 file."],
             [
                 '[{{"filename":"{root}foo_4.php","patches":['
-                '{{"char_start":74,"char_end":75,"line":4,"col_start":33,"col_end":33,"patch_type":"replace","replacement":"wat"}},'
-                '{{"char_start":254,"char_end":255,"line":10,"col_start":28,"col_end":28,"patch_type":"replace","replacement":"wat"}},'
-                '{{"char_start":42,"char_end":42,"line":4,"col_start":1,"col_end":1,"patch_type":"insert","replacement":"\\n                <<__Deprecated(\\"Use `wat` instead\\")>>\\n                public function f(): void {{\\n                  $this->wat();\\n                }}\\n"}}'
+                '{{"char_start":110,"char_end":111,"line":4,"col_start":33,"col_end":33,"patch_type":"replace","replacement":"wat"}},'
+                '{{"char_start":326,"char_end":327,"line":10,"col_start":28,"col_end":28,"patch_type":"replace","replacement":"wat"}},'
+                '{{"char_start":78,"char_end":78,"line":4,"col_start":1,"col_end":1,"patch_type":"insert","replacement":"\\n                <<__Deprecated(\\"Use `wat` instead\\")>>\\n                public function f(): void {{\\n                  $this->wat();\\n                }}\\n"}}'
                 "]}}]"
             ],
             options=["--refactor", "Method", "Bar::f", "Bar::wat"],
@@ -1079,9 +1079,9 @@ class CommonTests(BarebonesTests):
             ["Rewrote 1 file."],
             [
                 '[{{"filename":"{root}foo_4.php","patches":['
-                '{{"char_start":270,"char_end":271,"line":10,"col_start":33,"col_end":33,"patch_type":"replace","replacement":"overrideMe"}},'
-                '{{"char_start":366,"char_end":367,"line":14,"col_start":33,"col_end":33,"patch_type":"replace","replacement":"overrideMe"}},'
-                '{{"char_start":238,"char_end":238,"line":10,"col_start":1,"col_end":1,"patch_type":"insert","replacement":"\\n                <<__Deprecated(\\"Use `overrideMe` instead\\")>>\\n                public function g(): void {{\\n                  $this->overrideMe();\\n                }}\\n"}}'
+                '{{"char_start":306,"char_end":307,"line":10,"col_start":33,"col_end":33,"patch_type":"replace","replacement":"overrideMe"}},'
+                '{{"char_start":438,"char_end":439,"line":14,"col_start":33,"col_end":33,"patch_type":"replace","replacement":"overrideMe"}},'
+                '{{"char_start":274,"char_end":274,"line":10,"col_start":1,"col_end":1,"patch_type":"insert","replacement":"\\n                <<__Deprecated(\\"Use `overrideMe` instead\\")>>\\n                public function g(): void {{\\n                  $this->overrideMe();\\n                }}\\n"}}'
                 "]}}]"
             ],
             options=["--refactor", "Method", "Bar::g", "Bar::overrideMe"],
@@ -1092,7 +1092,7 @@ class CommonTests(BarebonesTests):
             self.assertEqual(
                 out,
                 """<?hh
-
+            <<__SupportDynamicType>>
             class Bar extends Foo {
 
                 <<__Deprecated("Use `wat` instead")>>
@@ -1107,7 +1107,7 @@ class CommonTests(BarebonesTests):
                 }
                 public function overrideMe(): void {}
             }
-
+            <<__SupportDynamicType>>
             class Baz extends Bar {
                 public function overrideMe(): void {
                     $this->wat();

@@ -602,13 +602,8 @@ let rec array_get
       | Tvar _ when TUtils.is_tyvar_error env ty1 ->
         let (env, ty) = err_witness env expr_pos in
         (env, (ty, dflt_arr_res, Ok ty2))
-      | Tdynamic
-        when Typing_env_types.(
-               TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) ->
-        got_dynamic ()
-      | Tdynamic
-      | Tany _ ->
-        (env, (ty1, dflt_arr_res, Ok ty2))
+      | Tdynamic -> got_dynamic ()
+      | Tany _ -> (env, (ty1, dflt_arr_res, Ok ty2))
       | Tprim Tstring ->
         let ty = MakeType.string (Reason.witness expr_pos) in
         let (_, p2, _) = e2 in
@@ -1117,11 +1112,7 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
             (env, ty_mismatch)
         in
         (env, (ty1, Ok ty1, err_res))
-      | (_, Tdynamic)
-        when Typing_env_types.(
-               TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) ->
-        got_dynamic ()
-      | (_, Tdynamic) -> (env, (ty1, Ok ty1, Ok ty2))
+      | (_, Tdynamic) -> got_dynamic ()
       | (_, Tprim Tnull)
         when Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->
         got_dynamic ()
@@ -1462,11 +1453,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
         let (env, ty) = Env.fresh_type_error env expr_pos in
         let (env, ty) = maybe_make_supportdyn r env ~supportdyn ty in
         (env, (ty, Ok ty, Ok tkey, Ok ty2))
-      | Tdynamic
-        when Typing_env_types.(
-               TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) ->
-        got_dynamic ()
-      | Tdynamic -> (env, (ety1, Ok ety1, Ok tkey, Ok ty2))
+      | Tdynamic -> got_dynamic ()
       | Tany _ -> (env, (ety1, Ok ety1, Ok tkey, Ok ty2))
       | Tprim Tnull
         when Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->

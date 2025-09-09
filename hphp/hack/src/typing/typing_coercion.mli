@@ -8,7 +8,7 @@
 
 val coerce_type :
   ?coerce_for_op:bool ->
-  ?coerce:Typing_logic.coercion_direction option ->
+  ?is_dynamic_aware:bool ->
   ?ignore_readonly:bool ->
   Pos.t ->
   Typing_defs.Reason.ureason ->
@@ -30,10 +30,3 @@ val coerce_type_like_strip :
   * (Typing_defs.locl_ty * Typing_defs.locl_ty) option
   * bool
   * Typing_defs.locl_ty
-
-val try_coerce :
-  ?coerce:Typing_logic.coercion_direction option ->
-  Typing_env_types.env ->
-  Typing_defs.locl_ty ->
-  Typing_defs.locl_ty ->
-  Typing_env_types.env option

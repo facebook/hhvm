@@ -686,7 +686,6 @@ let check_compatible_sound_dynamic_attributes
     env member_name member_kind parent_class_elt class_elt on_error =
   if
     (not (MemberKind.is_constructor member_kind))
-    && TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))
     && get_ce_support_dynamic_type parent_class_elt
     && not (get_ce_support_dynamic_type class_elt)
   then
@@ -898,7 +897,7 @@ let maybe_poison_ancestors
         (* We need that the enforced child type is a subtype of the enforced parent type *)
         let sub1 =
           Phase.is_sub_type_decl
-            ~coerce:(Some Typing_logic.CoerceToDynamic)
+            ~is_dynamic_aware:true
             tmp_env
             enforced_declared_ty
             enforced_parent_ty
@@ -906,7 +905,7 @@ let maybe_poison_ancestors
         (* But also the original child type should be a subtype of the enforced parent type *)
         let sub2 =
           Phase.is_sub_type_decl
-            ~coerce:(Some Typing_logic.CoerceToDynamic)
+            ~is_dynamic_aware:true
             tmp_env
             declared_return_ty
             enforced_parent_ty
@@ -1407,8 +1406,7 @@ let check_inherited_member_is_dynamically_callable
     (member_kind, member_name, parent_class_elt) =
   let (inheriting_class_pos, inheriting_class) = inheriting_class in
   if
-    TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))
-    && Cls.get_support_dynamic_type inheriting_class
+    Cls.get_support_dynamic_type inheriting_class
     && not (Cls.get_support_dynamic_type parent_class)
     (* TODO: ideally refactor so the last test is not systematically performed on all methods *)
   then

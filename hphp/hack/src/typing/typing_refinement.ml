@@ -375,7 +375,7 @@ module Uninstantiated_typing_logic = struct
       let ty1 = instantiate_ty map pos ty1 in
       let ty2 = instantiate_ty map pos ty2 in
       TL.IsSubtype
-        (None, Typing_defs_core.LoclType ty1, Typing_defs_core.LoclType ty2)
+        (false, Typing_defs_core.LoclType ty1, Typing_defs_core.LoclType ty2)
     | Conj (p1, p2) ->
       TL.conj (instantiate_prop map pos p1) (instantiate_prop map pos p2)
     | Disj (p1, p2) ->
@@ -879,7 +879,7 @@ and split_ty
           in
           let variants = variant :: variants in
           let mk_subtype_prop sub super =
-            Typing_logic.IsSubtype (None, LoclType sub, LoclType super)
+            Typing_logic.IsSubtype (false, LoclType sub, LoclType super)
           in
           let where_constraint_to_prop env (left, ck, right) =
             let ((env, _err), local_left) = localize env left in

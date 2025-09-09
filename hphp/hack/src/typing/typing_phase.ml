@@ -422,12 +422,7 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
     let (env, ft) = localize_ft ~ety_env ~def_pos:pos env ft in
     (env, mk (r, Tfun ft))
   | Tapply ((_, x), [arg]) when String.equal x SN.HH.FIXME.tPoisonMarker ->
-    let decl_ty =
-      if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
-        mk (get_reason dty, Tlike arg)
-      else
-        arg
-    in
+    let decl_ty = mk (get_reason dty, Tlike arg) in
     localize ~ety_env env decl_ty
   | Twildcard -> begin
     match ety_env.wildcard_action with
@@ -1661,12 +1656,12 @@ let sub_type_decl env ty1 ty2 on_error =
   in
   (env, ty_err_opt)
 
-let is_sub_type_decl ?coerce env ty1 ty2 =
+let is_sub_type_decl ?is_dynamic_aware env ty1 ty2 =
   let ((env, e1), ty1) = localize_no_subst env ~ignore_errors:true ty1 in
   let ((env, e2), ty2) = localize_no_subst env ~ignore_errors:true ty2 in
   let (_env, e3) =
     TUtils.sub_type
-      ?coerce
+      ?is_dynamic_aware
       env
       ty1
       ty2

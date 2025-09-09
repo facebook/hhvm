@@ -11,12 +11,12 @@ module ExpectedTy : sig
     pos: Pos.t;
     reason: Typing_reason.ureason;
     ty: Typing_defs.locl_ty;
-    coerce: Typing_logic.coercion_direction option;
+    is_dynamic_aware: bool;
     ignore_readonly: bool;
   }
 
   val make :
-    ?coerce:Typing_logic.coercion_direction option ->
+    ?is_dynamic_aware:bool ->
     ?ignore_readonly:bool ->
     Pos.t ->
     Typing_reason.ureason ->

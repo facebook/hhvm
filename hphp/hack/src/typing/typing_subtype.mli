@@ -28,10 +28,8 @@ val can_sub_type : env -> locl_ty -> locl_ty -> bool
  * Note that the [on_error] callback must prefix this list with a top-level
  * position and message identifying the primary source of the error (e.g.
  * an expression or statement).
- * If the optional [coerce] argument indicates whether subtyping should allow
- * coercion to or from dynamic. For coercion to dynamic, types that implement
- * dynamic are considered sub-types of dynamic. For coercion from dynamic,
- * dynamic is treated as a sub-type of all types.
+ * If the optional [is_dynamic_aware] argument indicates whether subtyping should allow
+ * types that implement * dynamic are considered sub-types of dynamic.
  * Similarly, the optional [class_sub_classname] argument indicates whether
  * class<T> and classname<T> are distinct types, meaning the rewrite rules for
  * class<T> <: U are not enabled when it is false. This is useful for preventing
@@ -39,7 +37,7 @@ val can_sub_type : env -> locl_ty -> locl_ty -> bool
  *)
 val sub_type :
   env ->
-  ?coerce:Typing_logic.coercion_direction option ->
+  ?is_dynamic_aware:bool ->
   ?is_coeffect:bool ->
   ?ignore_readonly:bool ->
   ?class_sub_classname:bool ->
@@ -57,13 +55,6 @@ val sub_type_or_fail :
   locl_ty ->
   locl_ty ->
   Typing_error.Error.t option ->
-  env * Typing_error.t option
-
-val sub_type_with_dynamic_as_bottom :
-  env ->
-  locl_ty ->
-  locl_ty ->
-  Typing_error.Reasons_callback.t option ->
   env * Typing_error.t option
 
 val sub_type_i :

@@ -175,7 +175,6 @@ end = struct
       ~return_from_async ~this_class (ctx : ContextAccess.t) (ty : decl_ty) :
       enf =
     let tcopt = ContextAccess.get_tcopt ctx in
-    let enable_sound_dynamic = TypecheckerOptions.enable_sound_dynamic tcopt in
     let tc_enforced =
       TypecheckerOptions.(
         experimental_feature_enabled
@@ -202,8 +201,7 @@ end = struct
       end
       (* Look through supportdyn, just as we look through ~ *)
       | Tapply ((_, name), [ty])
-        when String.equal name Naming_special_names.Classes.cSupportDyn
-             && enable_sound_dynamic ->
+        when String.equal name Naming_special_names.Classes.cSupportDyn ->
         enforcement ~is_dynamic_enforceable ctx visited ty
       | Tapply ((_, name), tyl) ->
         (* Cyclic type definition error will be produced elsewhere *)
@@ -327,11 +325,6 @@ end = struct
                      (ContextAccess.get_tparams cls)
                      ~f:(fun targ tparam ->
                        match get_node targ with
-                       | Tdynamic
-                       (* We accept the inner type being dynamic regardless of reification *)
-                       | Tlike _
-                         when not enable_sound_dynamic ->
-                         true
                        | _ ->
                          (match tparam.tp_reified with
                          | Aast.Erased -> false
@@ -372,15 +365,13 @@ end = struct
         | None -> unenforced Reason.PRtypeconst
         | Some ty -> enforcement ~is_dynamic_enforceable ctx visited ty)
       | Taccess _ -> unenforced Reason.PRtypeconst
-      | Tlike ty when enable_sound_dynamic ->
-        enforcement ~is_dynamic_enforceable ctx visited ty
-      | Tlike _ -> unenforced Reason.PRdynamic
+      | Tlike ty -> enforcement ~is_dynamic_enforceable ctx visited ty
       | Tprim Aast.(Tvoid | Tnoreturn) -> unenforced Reason.PRvoid_or_noreturn
       | Tprim _ -> Enforced ty
       | Tany _ -> Enforced ty
       | Tnonnull -> Enforced ty
       | Tdynamic ->
-        if (not enable_sound_dynamic) || is_dynamic_enforceable then
+        if is_dynamic_enforceable then
           Enforced ty
         else
           unenforced Reason.PRdynamic

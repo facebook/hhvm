@@ -430,7 +430,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?tco_disallow_discarded_nullable_awaitables:
       (bool_opt "disallow_discarded_nullable_awaitables" config)
     ?tco_typecheck_sample_rate:(float_opt "typecheck_sample_rate" config)
-    ?tco_enable_sound_dynamic:(bool_opt "enable_sound_dynamic_type" config)
     ?tco_pessimise_builtins:(bool_opt "pessimise_builtins" config)
     ?tco_enable_no_auto_dynamic:(bool_opt "enable_no_auto_dynamic" config)
     ?tco_skip_check_under_dynamic:(bool_opt "skip_check_under_dynamic" config)

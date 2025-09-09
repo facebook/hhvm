@@ -215,26 +215,23 @@ let make_return_type
              * Now since int <:D (~E & arraykey) it suffices to treat
              * the return type as fully enforced.
              *)
-            if not (TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) then
-              Unenforced
+            let enforced_type =
+              Typing_partial_enforcement.get_enforced_type
+                env
+                (Env.get_self_class env |> Decl_entry.to_option)
+                dty
+            in
+            let is_sub_type =
+              Typing_phase.is_sub_type_decl
+                ~is_dynamic_aware:true
+                env
+                enforced_type
+                dty
+            in
+            if is_sub_type then
+              Enforced
             else
-              let enforced_type =
-                Typing_partial_enforcement.get_enforced_type
-                  env
-                  (Env.get_self_class env |> Decl_entry.to_option)
-                  dty
-              in
-              let is_sub_type =
-                Typing_phase.is_sub_type_decl
-                  ~coerce:(Some Typing_logic.CoerceToDynamic)
-                  env
-                  enforced_type
-                  dty
-              in
-              if is_sub_type then
-                Enforced
-              else
-                Unenforced
+              Unenforced
           | Enforced -> Enforced
         in
         let ((env, ty_err_opt), ty) = Typing_phase.localize ~ety_env env dty in
@@ -371,15 +368,12 @@ let rec remove_like_for_return env ty =
 
 let fun_implicit_return env pos ret =
   let (env, ret) =
-    if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-      (* Under sound dynamic, void <D: dynamic, which means that it void <D: ~T for any T.
-       * However, for ergonomic reasons, it should not be the case that a function
-       * erroring about a missing `return` statement would stop if the return type were
-       * pessimised. This preserves the behavior that a function explicitly returning dynamic
-       * can have an implicit return, while requiring an explicit return for like types. *)
-      remove_like_for_return env ret
-    else
-      (env, ret)
+    (* Under sound dynamic, void <D: dynamic, which means that it void <D: ~T for any T.
+     * However, for ergonomic reasons, it should not be the case that a function
+     * erroring about a missing `return` statement would stop if the return type were
+     * pessimised. This preserves the behavior that a function explicitly returning dynamic
+     * can have an implicit return, while requiring an explicit return for like types. *)
+    remove_like_for_return env ret
   in
   let ret_pos = Some (Typing_defs_core.get_pos ret) in
 

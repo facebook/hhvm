@@ -939,7 +939,6 @@ let parse_options () =
       ~tco_disallow_discarded_nullable_awaitables:
         !disallow_discarded_nullable_awaitables
       ~glean_reponame:!glean_reponame
-      ~tco_enable_sound_dynamic:true
       ~tco_skip_check_under_dynamic:!skip_check_under_dynamic
       ~tco_global_access_check_enabled:!enable_global_access_check
       ~tco_enable_strict_string_concat_interp:
@@ -1194,13 +1193,7 @@ let compute_tasts ?(drop_fixmed = true) ctx files_info interesting_files :
             let tast =
               Typing_toplevel.nast_to_tast ~do_tast_checks:true ctx nast
             in
-            if
-              TypecheckerOptions.enable_sound_dynamic
-                (Provider_context.get_tcopt ctx)
-            then
-              List.concat (Tast_with_dynamic.all tast)
-            else
-              tast.Tast_with_dynamic.under_normal_assumptions)
+            List.concat (Tast_with_dynamic.all tast))
       in
       tasts)
 

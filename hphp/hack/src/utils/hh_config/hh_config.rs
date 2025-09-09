@@ -408,10 +408,6 @@ impl HhConfig {
                 .tco_disallow_discarded_nullable_awaitables,
             tco_typecheck_sample_rate: hhconfig
                 .get_float_or("typecheck_sample_rate", default.tco_typecheck_sample_rate)?,
-            tco_enable_sound_dynamic: hhconfig.get_bool_or(
-                "enable_sound_dynamic_type",
-                default.tco_enable_sound_dynamic,
-            )?,
             tco_pessimise_builtins: hhconfig
                 .get_bool_or("pessimise_builtins", default.tco_pessimise_builtins)?,
             tco_enable_no_auto_dynamic: hhconfig

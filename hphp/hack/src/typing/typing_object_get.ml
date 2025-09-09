@@ -447,12 +447,7 @@ let rec obj_get_concrete_ty
       paraml
       on_error
   | (_, Tdynamic) ->
-    let err_opt =
-      if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
-        sound_dynamic_err_opt args env id read_context
-      else
-        None
-    in
+    let err_opt = sound_dynamic_err_opt args env id read_context in
     let ty = MakeType.dynamic (Reason.dynamic_prop id_pos) in
     (env, err_opt, (ty, []), dflt_lval_mismatch, dflt_rval_mismatch)
   | (_, Tany _) ->
@@ -747,10 +742,7 @@ and obj_get_concrete_class_with_member_info
           env
           ft.ft_require_package
       in
-      let should_wrap =
-        TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
-        && get_ce_support_dynamic_type member_info
-      in
+      let should_wrap = get_ce_support_dynamic_type member_info in
       let (ft_ty1, lval_mismatch) =
         let lval_mismatch =
           if should_wrap then
@@ -1479,11 +1471,7 @@ let obj_get_with_mismatches
       env
       receiver_ty
   in
-  if
-    Option.is_none ty_err_opt0
-    || (not is_method)
-    || not (TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env))
-  then
+  if Option.is_none ty_err_opt0 || not is_method then
     ((env0, ty_err_opt0), (fty0, tal0), lval_err_opt0, rval_err_opt0)
   else
     (* Under Sound Dynamic, we might be calling through a receiver whose like-type

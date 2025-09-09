@@ -1970,11 +1970,6 @@ let constraints_for_type ~hide_internals env ty =
 
 let classish_kind c_kind final = ErrorString.classish_kind c_kind final
 
-let coercion_direction cd =
-  match cd with
-  | CoerceToDynamic -> "to"
-  | CoerceFromDynamic -> "from"
-
 let subtype_prop env prop =
   let rec subtype_prop = function
     | Conj [] -> "TRUE"
@@ -1983,9 +1978,8 @@ let subtype_prop env prop =
     | Disj (_, []) -> "FALSE"
     | Disj (_, ps) ->
       "(" ^ String.concat ~sep:" || " (List.map ~f:subtype_prop ps) ^ ")"
-    | IsSubtype (None, ty1, ty2) -> debug_i env ty1 ^ " <: " ^ debug_i env ty2
-    | IsSubtype (Some cd, ty1, ty2) ->
-      debug_i env ty1 ^ " " ^ coercion_direction cd ^ "~> " ^ debug_i env ty2
+    | IsSubtype (false, ty1, ty2) -> debug_i env ty1 ^ " <: " ^ debug_i env ty2
+    | IsSubtype (true, ty1, ty2) -> debug_i env ty1 ^ " <D: " ^ debug_i env ty2
   in
   let p_str = subtype_prop prop in
   p_str

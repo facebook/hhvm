@@ -99,10 +99,6 @@ let enum_check_const ty_exp env cc t =
  *)
 let enum_class_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error
     =
-  let sd env =
-    (* Allow pessimised enum class types when sound dynamic is enabled *)
-    TypecheckerOptions.enable_sound_dynamic (Typing_env.get_tcopt env)
-  in
   let ty_arraykey =
     MakeType.arraykey (Reason.implicit_upper_bound (pos, "arraykey"))
   in
@@ -144,8 +140,8 @@ let enum_class_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error
       check_if_case_type env ty;
       List.for_all ~f:is_valid_base (lty :: ltys)
     | Tclass (_, _, ltys) -> List.for_all ~f:is_valid_base ltys
-    | Tunion [ty1; ty2] when is_dynamic ty1 && sd env -> is_valid_base ty2
-    | Tunion [ty1; ty2] when is_dynamic ty2 && sd env -> is_valid_base ty1
+    | Tunion [ty1; ty2] when is_dynamic ty1 -> is_valid_base ty2
+    | Tunion [ty1; ty2] when is_dynamic ty2 -> is_valid_base ty1
     | Tshape { s_fields = shapemap; _ } ->
       TShapeMap.for_all (fun _name sfty -> is_valid_base sfty.sft_ty) shapemap
     | Tany _
@@ -224,7 +220,7 @@ let check_cyclic_constraint env (p, enum_name) constraint_ty =
 
 (** Check an enum declaration of the form
 
-     enum class E : <ty_exp> 
+     enum class E : <ty_exp>
 
   Also that each type constant is of type `ty_exp`. *)
 let enum_class_check

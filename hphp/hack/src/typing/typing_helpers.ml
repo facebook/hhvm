@@ -31,7 +31,7 @@ module ExpectedTy : sig
     pos: Pos.t;
     reason: Typing_reason.ureason;
     ty: locl_ty;
-    coerce: Typing_logic.coercion_direction option;
+    is_dynamic_aware: bool;
     ignore_readonly: bool;
   }
   [@@deriving show]
@@ -39,7 +39,7 @@ module ExpectedTy : sig
   [@@@warning "+32"]
 
   val make :
-    ?coerce:Typing_logic.coercion_direction option ->
+    ?is_dynamic_aware:bool ->
     ?ignore_readonly:bool ->
     Pos.t ->
     Typing_reason.ureason ->
@@ -53,13 +53,14 @@ end = struct
     pos: Pos.t;
     reason: Typing_reason.ureason;
     ty: locl_ty;
-    coerce: Typing_logic.coercion_direction option;
+    is_dynamic_aware: bool;
     ignore_readonly: bool;
   }
   [@@deriving show]
 
-  let make ?(coerce = None) ?(ignore_readonly = false) pos reason ty =
-    { pos; reason; ty; coerce; ignore_readonly }
+  let make ?(is_dynamic_aware = false) ?(ignore_readonly = false) pos reason ty
+      =
+    { pos; reason; ty; is_dynamic_aware; ignore_readonly }
 end
 
 let decl_error_to_typing_error decl_error =
@@ -176,11 +177,7 @@ let refine_and_simplify_intersection
     ~hint_first env ~is_class ?(ty_is_supportdyn = false) reason ty hint_ty =
   let intersect ~hint_first ~is_class env r ty hint_ty =
     let (env, hint_ty) =
-      if
-        is_class
-        && TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
-        && (ty_is_supportdyn || Utils.is_supportdyn env ty)
-      then
+      if is_class && (ty_is_supportdyn || Utils.is_supportdyn env ty) then
         Utils.make_supportdyn reason env hint_ty
       else
         (env, hint_ty)
@@ -221,16 +218,9 @@ let refine_and_simplify_intersection
       (env, MakeType.locl_like reason intersection_ty)
   in
   match Typing_dynamic_utils.try_strip_dynamic env ty with
-  | (env, Some ty)
-    when TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) ->
-    like_type_simplify env ty hint_ty ~is_class
+  | (env, Some ty) -> like_type_simplify env ty hint_ty ~is_class
   | (env, _) -> intersect ~hint_first ~is_class env reason ty hint_ty
 
 let make_simplify_typed_expr env p ty te =
-  let (env, ty) =
-    if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
-      Typing_dynamic_utils.recompose_like_type env ty
-    else
-      (env, ty)
-  in
+  let (env, ty) = Typing_dynamic_utils.recompose_like_type env ty in
   (env, Tast.make_typed_expr p ty te)

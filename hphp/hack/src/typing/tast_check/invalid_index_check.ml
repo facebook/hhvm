@@ -37,25 +37,18 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
   let type_index ?(is_covariant_index = false) env ty_have ty_expect reason =
     let Equal = Tast_env.eq_typing_env in
     let got_error =
-      if
-        Typing_env_types.(
-          TypecheckerOptions.enable_sound_dynamic env.genv.tcopt)
-      then
-        let (_env, ty_err_opt) =
-          Typing_coercion.coerce_type
-            ~coerce_for_op:true
-            index_pos
-            reason
-            env
-            ty_have
-            ty_expect
-            Enforced
-            Typing_error.Callback.index_type_mismatch
-        in
-        Option.is_some ty_err_opt
-      else
-        Option.is_none
-          (Typing_coercion.try_coerce ~coerce:None env ty_have ty_expect)
+      let (_env, ty_err_opt) =
+        Typing_coercion.coerce_type
+          ~coerce_for_op:true
+          index_pos
+          reason
+          env
+          ty_have
+          ty_expect
+          Enforced
+          Typing_error.Callback.index_type_mismatch
+      in
+      Option.is_some ty_err_opt
     in
     if not got_error then
       Ok ()

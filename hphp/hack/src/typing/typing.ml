@@ -257,7 +257,7 @@ end = struct
       else
         let (env, ty_opt) = Typing_dynamic_utils.try_strip_dynamic env ty in
         match ty_opt with
-        | Some stripped_ty ->
+        | Some stripped_ty -> begin
           (* We've got a type ty = ~stripped_ty so under Sound Dynamic we need to
            * account for like-pushing: the rule (shown here for vec)
            *     t <:D dynamic
@@ -266,30 +266,24 @@ end = struct
            * So if expected type is ~vec<t> then we can actually ask for vec<~t>
            * which is more generous.
            *)
-          if TCO.enable_sound_dynamic env.genv.tcopt then begin
-            let (env, opt_ty) =
-              if
-                (not strip_supportdyn)
-                && TCO.enable_sound_dynamic (Env.get_tcopt env)
-                && pessimisable_builtin
-              then
-                (env, None)
-              else
-                Typing_dynamic.try_push_like env stripped_ty
-            in
-            match opt_ty with
-            | None -> aux ~under_supportdyn env stripped_ty
-            | Some rty ->
-              (* We can only apply like-pushing if the type actually supports dynamic.
-               * We know this if we've gone under a supportdyn, *OR* if the type is
-               * known to be a dynamic-aware subtype of dynamic.
-               *)
-              if under_supportdyn || TUtils.is_supportdyn env rty then
-                aux ~under_supportdyn:true env rty
-              else
-                (env, None)
-          end else
-            aux ~under_supportdyn env stripped_ty
+          let (env, opt_ty) =
+            if (not strip_supportdyn) && pessimisable_builtin then
+              (env, None)
+            else
+              Typing_dynamic.try_push_like env stripped_ty
+          in
+          match opt_ty with
+          | None -> aux ~under_supportdyn env stripped_ty
+          | Some rty ->
+            (* We can only apply like-pushing if the type actually supports dynamic.
+             * We know this if we've gone under a supportdyn, *OR* if the type is
+             * known to be a dynamic-aware subtype of dynamic.
+             *)
+            if under_supportdyn || TUtils.is_supportdyn env rty then
+              aux ~under_supportdyn:true env rty
+            else
+              (env, None)
+        end
         | None -> begin
           match get_node ty with
           | Tunion [ty] -> aux ~under_supportdyn env ty
@@ -509,12 +503,12 @@ let check_expected_ty_res
     ~(coerce_for_op : bool)
     (env : env)
     (inferred_ty : locl_ty)
-    (ExpectedTy.{ pos = p; reason = ur; ty; coerce; ignore_readonly } :
+    (ExpectedTy.{ pos = p; reason = ur; ty; is_dynamic_aware; ignore_readonly } :
       ExpectedTy.t) : (env, env) result =
   let (env, ty_err_opt) =
     Typing_coercion.coerce_type
       ~coerce_for_op
-      ~coerce
+      ~is_dynamic_aware
       ~ignore_readonly
       p
       ur
@@ -534,7 +528,8 @@ let check_expected_ty_res
     (inferred_ty : locl_ty)
     (expected_ty : ExpectedTy.t) : (env, env) result =
   if Log.should_log_check_expected_ty env then
-    let ExpectedTy.{ pos; ty; reason = _; coerce = _; ignore_readonly = _ } =
+    let ExpectedTy.
+          { pos; ty; reason = _; is_dynamic_aware = _; ignore_readonly = _ } =
       expected_ty
     in
     Log.log_check_expected_ty env pos ~message ~inferred_ty ~ty @@ fun () ->
@@ -773,12 +768,7 @@ let do_hh_expect ~equivalent env use_pos explicit_targs p tys =
     in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     let right_expected_ty =
-      if TCO.enable_sound_dynamic (Env.get_tcopt env) then
-        MakeType.locl_like
-          (Reason.enforceable (get_pos expected_ty))
-          expected_ty
-      else
-        expected_ty
+      MakeType.locl_like (Reason.enforceable (get_pos expected_ty)) expected_ty
     in
     (match tys with
     | [expr_ty] ->
@@ -1564,9 +1554,7 @@ end = struct
     in
     let ty =
       Typing_dynamic.maybe_wrap_with_supportdyn
-        ~should_wrap:
-          (TCO.enable_sound_dynamic (Env.get_tcopt env)
-          && fe_support_dynamic_type)
+        ~should_wrap:fe_support_dynamic_type
         reason
         fun_ty
     in
@@ -1972,7 +1960,7 @@ let check_argument_type_against_parameter_type_helper
     | None -> param_ty
   in
   Typing_coercion.coerce_type
-    ~coerce:None
+    ~is_dynamic_aware:false
     ~ignore_readonly
     pos
     Reason.URparam
@@ -2449,7 +2437,7 @@ let refine_and_simplify_intersection
     in
     let stripped_ty =
       match stripped_ty_opt with
-      | Some ty when TCO.enable_sound_dynamic (Env.get_tcopt env) -> ty
+      | Some ty -> ty
       | _ -> ty
     in
     class_for_refinement env p reason ivar_pos stripped_ty hint_ty
@@ -2830,11 +2818,11 @@ end = struct
             } ) )
 
   let coerce_nonlike_and_like
-      ~coerce_for_op ~coerce env pos reason ty ety ety_like =
+      ~coerce_for_op ~is_dynamic_aware env pos reason ty ety ety_like =
     let (env1, err1) =
       Typing_coercion.coerce_type
         ~coerce_for_op
-        ~coerce
+        ~is_dynamic_aware
         pos
         reason
         env
@@ -2851,7 +2839,7 @@ end = struct
         let (env2, err2) =
           Typing_coercion.coerce_type
             ~coerce_for_op
-            ~coerce
+            ~is_dynamic_aware
             pos
             reason
             env
@@ -3092,10 +3080,7 @@ end = struct
            *   There is a runtime-enforced bound (because it does no harm to allow dynamic)
            *)
           let (env, like_ty) =
-            if
-              TCO.enable_sound_dynamic (Env.get_tcopt env)
-              && (explicit || do_pessimise_builtin || Option.is_some bound)
-            then
+            if explicit || do_pessimise_builtin || Option.is_some bound then
               Typing_array_access.pessimise_type env ety
             else
               (env, ety)
@@ -3174,10 +3159,12 @@ end = struct
              * If that fails, we try it against a pessimised type argument.
              *)
             match expected_with_implicit_like with
-            | Some ExpectedTy.{ pos; reason; ty = ety_like; coerce; _ } ->
+            | Some
+                ExpectedTy.{ pos; reason; ty = ety_like; is_dynamic_aware; _ }
+              ->
               coerce_nonlike_and_like
                 ~coerce_for_op
-                ~coerce
+                ~is_dynamic_aware
                 env
                 pos
                 reason
@@ -3206,7 +3193,7 @@ end = struct
             let (env, ty_err_opt) =
               Typing_coercion.coerce_type
                 ~coerce_for_op
-                ~coerce:None
+                ~is_dynamic_aware:false
                 use_pos
                 reason
                 env
@@ -3781,7 +3768,7 @@ end = struct
           in
           let ty =
             Typing_dynamic.maybe_wrap_with_supportdyn
-              ~should_wrap:(TCO.enable_sound_dynamic (Env.get_tcopt env))
+              ~should_wrap:true
               reason
               caller
           in
@@ -4339,7 +4326,7 @@ end = struct
         ty
     (* Dynamic static method invocation or property access. `$y = "bar"; Foo::$y()` is interpreted as `Foo::bar()` *)
     | Class_get (cid, CGexpr m, prop_or_method) ->
-      let (env, _tal, te, cty) = Class_id.class_expr env [] cid in
+      let (env, _tal, te, _cty) = Class_id.class_expr env [] cid in
       (* Match Obj_get dynamic instance property access behavior *)
       let (env, tm, _) =
         expr
@@ -4355,15 +4342,7 @@ end = struct
           env
           m
       in
-      let (env, ty) =
-        if
-          TUtils.is_dynamic env cty
-          || TCO.enable_sound_dynamic (Env.get_tcopt env)
-        then
-          (env, MakeType.dynamic (Reason.witness p))
-        else
-          Env.fresh_type_error env p
-      in
+      let (env, ty) = (env, MakeType.dynamic (Reason.witness p)) in
       let env = might_throw ~join_pos:p env in
       make_result env p (Aast.Class_get (te, Aast.CGexpr tm, prop_or_method)) ty
     (* Fake member property access. For example:
@@ -4525,7 +4504,7 @@ end = struct
       let (env, ty_err_opt) =
         (* Under Sound Dynamic, check that e1 supports dynamic *)
         Typing_coercion.coerce_type
-          ~coerce:(Some Typing_logic.CoerceToDynamic)
+          ~is_dynamic_aware:true
           p
           Reason.URdynamic_prop
           env
@@ -4796,13 +4775,9 @@ end = struct
       let (_, env, hint_ty) = Typing_utils.strip_supportdyn env hint_ty in
       let ((env, ty_err_opt2), hint_ty) =
         if Typing_defs.is_dynamic hint_ty then
-          let enable_sound_dynamic = TCO.enable_sound_dynamic env.genv.tcopt in
           let (env, ty_err_opt) =
-            if enable_sound_dynamic then
-              TUtils.supports_dynamic env expr_ty
-              @@ Some (Typing_error.Reasons_callback.unify_error_at p)
-            else
-              (env, None)
+            TUtils.supports_dynamic env expr_ty
+            @@ Some (Typing_error.Reasons_callback.unify_error_at p)
           in
           let (env, locl) = make_a_local_of ~include_this:true env e in
           let env =
@@ -4816,7 +4791,11 @@ end = struct
                   (* If the typed local variable will have its type replaced by dynamic,
                      we need to check that the bound isn't violated. *)
                   let (env, err) =
-                    SubType.sub_type ~coerce:None env hint_ty bound_ty
+                    SubType.sub_type
+                      ~is_dynamic_aware:false
+                      env
+                      hint_ty
+                      bound_ty
                     @@ Some (Typing_error.Reasons_callback.unify_error_at p)
                   in
                   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err;
@@ -6613,9 +6592,8 @@ end = struct
           in
           Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt2;
           let should_wrap =
-            TCO.enable_sound_dynamic (Env.get_tcopt env)
-            && (Typing_defs_flags.ClassElt.supports_dynamic_type ce_flags
-               || Cls.get_support_dynamic_type class_)
+            Typing_defs_flags.ClassElt.supports_dynamic_type ce_flags
+            || Cls.get_support_dynamic_type class_
           in
           let fty =
             Typing_dynamic.maybe_wrap_with_supportdyn
@@ -6733,8 +6711,7 @@ end = struct
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       let (env, efty_opt) = Typing_dynamic_utils.try_strip_dynamic env efty in
       match efty_opt with
-      | Some ty
-        when TCO.enable_sound_dynamic (Env.get_tcopt env) && is_fun_type ty ->
+      | Some ty when is_fun_type ty ->
         call
           ~expected
           ~nullsafe
@@ -6750,7 +6727,7 @@ end = struct
           unpacked_element
       | _ ->
         (match deref efty with
-        | (r, Tdynamic) when TCO.enable_sound_dynamic (Env.get_tcopt env) ->
+        | (r, Tdynamic) ->
           let ty = MakeType.dynamic (Reason.dynamic_call expr_pos) in
           let el =
             (* Need to check that the type of the unpacked_element can be,
@@ -6764,11 +6741,7 @@ end = struct
               unpacked_element
           in
           let expected_arg_ty =
-            ExpectedTy.make
-              ~coerce:(Some Typing_logic.CoerceToDynamic)
-              expr_pos
-              Reason.URparam
-              ty
+            ExpectedTy.make ~is_dynamic_aware:true expr_pos Reason.URparam ty
           in
           let ((env, e1), tel) =
             List.map_env_ty_err_opt
@@ -6813,11 +6786,7 @@ end = struct
                     (env, (fun e -> Aast_defs.Anamed (name, e)), te, ty)
                 in
                 let (env, ty_err_opt) =
-                  SubType.sub_type
-                    ~coerce:(Some Typing_logic.CoerceToDynamic)
-                    env
-                    e_ty
-                    ty
+                  SubType.sub_type ~is_dynamic_aware:true env e_ty ty
                   @@ Some
                        (Typing_error.Reasons_callback.unify_error_at expr_pos)
                 in
@@ -6831,7 +6800,7 @@ end = struct
           let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
           Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
           (env, (tel, None, ty, should_forget_fakes))
-        | (r, ((Tprim Tnull | Tdynamic | Tany _ | Tunion [] | Tvar _) as ty))
+        | (r, ((Tprim Tnull | Tany _ | Tunion [] | Tvar _) as ty))
           when match ty with
                | Tprim Tnull -> Option.is_some nullsafe
                | Tvar _ -> TUtils.is_tyvar_error env efty
@@ -7705,11 +7674,7 @@ end = struct
 
   and upcast env p expr_ty hint_ty =
     let (env, ty_err_opt) =
-      SubType.sub_type
-        ~coerce:(Some Typing_logic.CoerceToDynamic)
-        env
-        expr_ty
-        hint_ty
+      SubType.sub_type ~is_dynamic_aware:true env expr_ty hint_ty
       @@ Some (Typing_error.Reasons_callback.unify_error_at p)
     in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
@@ -7742,7 +7707,7 @@ end = struct
         | _ -> env)
       | Typing_logic.Conj props ->
         List.fold props ~init:env ~f:update_env_with_assumptions
-      | Typing_logic.IsSubtype (None, LoclType ty_sub, LoclType ty_super) ->
+      | Typing_logic.IsSubtype (false, LoclType ty_sub, LoclType ty_super) ->
         SubType.add_constraint env Ast_defs.Constraint_as ty_sub ty_super
         @@ Some (Typing_error.Reasons_callback.unify_error_at p)
       | Typing_logic.IsSubtype _ ->
@@ -8612,9 +8577,7 @@ end = struct
             let ty =
               let reason = Reason.localize reason in
               Typing_dynamic.maybe_wrap_with_supportdyn
-                ~should_wrap:
-                  (get_ce_support_dynamic_type class_elt
-                  && TCO.enable_sound_dynamic env.genv.tcopt)
+                ~should_wrap:(get_ce_support_dynamic_type class_elt)
                 reason
                 fun_ty
             in
@@ -9047,9 +9010,7 @@ end = struct
           let ty =
             let reason = Reason.localize reason in
             Typing_dynamic.maybe_wrap_with_supportdyn
-              ~should_wrap:
-                (get_ce_support_dynamic_type class_elt
-                && TCO.enable_sound_dynamic env.genv.tcopt)
+              ~should_wrap:(get_ce_support_dynamic_type class_elt)
               reason
               fun_ty
           in
@@ -10080,10 +10041,7 @@ end = struct
              * If t is not enforced, then the parameter is assumed to have type u|t when checking the body,
              * as though the default expression had been assigned conditionally to the parameter.
              *)
-            let support_dynamic =
-              TCO.enable_sound_dynamic (Env.get_tcopt env)
-              && Env.get_support_dynamic_type env
-            in
+            let support_dynamic = Env.get_support_dynamic_type env in
             let like_ty1 =
               if support_dynamic && not no_auto_likes then
                 TUtils.make_like env ty1
@@ -10167,9 +10125,7 @@ end = struct
         let reason = Reason.pessimised_inout (get_pos ty1) in
         begin
           match enforced with
-          | Enforced
-            when TCO.enable_sound_dynamic env.genv.tcopt
-                 && Env.get_support_dynamic_type env ->
+          | Enforced when Env.get_support_dynamic_type env ->
             Some (TUtils.make_like ~reason env ty1)
           | _ ->
             (* In implicit SD mode, all inout parameters are pessimised, unless marked <<__NoAutoLikes>> *)
@@ -10699,7 +10655,7 @@ end = struct
       then (
         let (env, ty_err_opt) =
           SubType.sub_type
-            ~coerce:(Some Typing_logic.CoerceToDynamic)
+            ~is_dynamic_aware:true
             env
             hret
             (MakeType.dynamic
@@ -11602,12 +11558,7 @@ end = struct
                      })
           in
           let ty_nothing = MakeType.nothing Reason.none in
-          let (env, ty) =
-            if TCO.enable_sound_dynamic (Env.get_tcopt env) then
-              (env, MakeType.dynamic r)
-            else
-              Env.fresh_type_error env p
-          in
+          let (env, ty) = (env, MakeType.dynamic r) in
           let ty_expect = MakeType.classname Reason.none [ty_nothing] in
           ( (env, Option.merge ty_err1 ty_err2 ~f:Typing_error.both),
             (ty, Error (base_ty, ty_expect)) )
@@ -13421,9 +13372,7 @@ end = struct
                   ty_err_opt2;
                 let fty =
                   Typing_dynamic.maybe_wrap_with_supportdyn
-                    ~should_wrap:
-                      (get_ce_support_dynamic_type ce
-                      && TCO.enable_sound_dynamic env.genv.tcopt)
+                    ~should_wrap:(get_ce_support_dynamic_type ce)
                     (Reason.localize r)
                     ft
                 in

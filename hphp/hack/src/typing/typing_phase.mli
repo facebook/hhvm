@@ -174,11 +174,7 @@ val sub_type_decl :
 
 (** Are two decl types definitely subtypes of each other? *)
 val is_sub_type_decl :
-  ?coerce:Typing_logic.coercion_direction option ->
-  env ->
-  decl_ty ->
-  decl_ty ->
-  bool
+  ?is_dynamic_aware:bool -> env -> decl_ty -> decl_ty -> bool
 
 (** Add some [as] or [super] constraint to the environment.
   Raise an error if any inconsistency is detected. *)

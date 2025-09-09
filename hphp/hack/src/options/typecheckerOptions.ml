@@ -152,8 +152,6 @@ let disallow_discarded_nullable_awaitables t =
 
 let is_systemlib t = t.GlobalOptions.po.ParserOptions.is_systemlib
 
-let enable_sound_dynamic t = t.GlobalOptions.tco_enable_sound_dynamic
-
 let enable_no_auto_dynamic t = t.GlobalOptions.tco_enable_no_auto_dynamic
 
 let skip_check_under_dynamic t = t.GlobalOptions.tco_skip_check_under_dynamic
@@ -210,8 +208,7 @@ let everything_sdt t = t.GlobalOptions.po.ParserOptions.everything_sdt
 let implicit_inherit_sdt t = t.GlobalOptions.tco_implicit_inherit_sdt
 
 let pessimise_builtins t =
-  enable_sound_dynamic t
-  && (everything_sdt t || t.GlobalOptions.tco_pessimise_builtins)
+  everything_sdt t || t.GlobalOptions.tco_pessimise_builtins
 
 let explicit_consistent_constructors t =
   t.GlobalOptions.tco_explicit_consistent_constructors

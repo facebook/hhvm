@@ -272,7 +272,6 @@ let parse_options () =
         |> GlobalOptions.with_saved_state_manifold_api_key
              !saved_state_manifold_api_key)
       ~tco_check_xhp_attribute:!check_xhp_attribute
-      ~tco_enable_sound_dynamic:true
       ~allowed_fixme_codes_strict:
         (Option.value allowed_fixme_codes_strict ~default:ISet.empty)
       ~glean_reponame:!glean_reponame

@@ -29,7 +29,7 @@ val expand_typedef : expand_typedef
 
 type sub_type =
   Typing_env_types.env ->
-  ?coerce:Typing_logic.coercion_direction option ->
+  ?is_dynamic_aware:bool ->
   ?is_coeffect:bool ->
   ?ignore_readonly:bool ->
   ?class_sub_classname:bool ->
@@ -53,17 +53,6 @@ type sub_type_i =
 val sub_type_i_ref : sub_type_i ref
 
 val sub_type_i : sub_type_i
-
-type sub_type_with_dynamic_as_bottom =
-  Typing_env_types.env ->
-  Typing_defs.locl_ty ->
-  Typing_defs.locl_ty ->
-  Typing_error.Reasons_callback.t option ->
-  Typing_env_types.env * Typing_error.t option
-
-val sub_type_with_dynamic_as_bottom_ref : sub_type_with_dynamic_as_bottom ref
-
-val sub_type_with_dynamic_as_bottom : sub_type_with_dynamic_as_bottom
 
 type is_sub_type_type =
   Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> bool

@@ -93,7 +93,6 @@ impl Default for GlobalOptions {
             symbol_write_reindexed_out: None,
             symbol_write_sym_hash_out: false,
             tco_typecheck_sample_rate: 1.0,
-            tco_enable_sound_dynamic: false,
             tco_pessimise_builtins: false,
             tco_enable_no_auto_dynamic: false,
             tco_skip_check_under_dynamic: false,

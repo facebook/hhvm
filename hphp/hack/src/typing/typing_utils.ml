@@ -48,7 +48,7 @@ let expand_typedef x = !expand_typedef_ref x
 
 type sub_type =
   env ->
-  ?coerce:Typing_logic.coercion_direction option ->
+  ?is_dynamic_aware:bool ->
   ?is_coeffect:bool ->
   ?ignore_readonly:bool ->
   ?class_sub_classname:bool ->
@@ -72,19 +72,6 @@ type sub_type_i =
 let (sub_type_i_ref : sub_type_i ref) = ref (not_implemented "sub_type_i")
 
 let sub_type_i env ?(is_coeffect = false) x = !sub_type_i_ref env ~is_coeffect x
-
-type sub_type_with_dynamic_as_bottom =
-  env ->
-  locl_ty ->
-  locl_ty ->
-  Typing_error.Reasons_callback.t option ->
-  env * Typing_error.t option
-
-let (sub_type_with_dynamic_as_bottom_ref : sub_type_with_dynamic_as_bottom ref)
-    =
-  ref (not_implemented "sub_type_with_dynamic_as_bottom")
-
-let sub_type_with_dynamic_as_bottom x = !sub_type_with_dynamic_as_bottom_ref x
 
 type is_sub_type_type = env -> locl_ty -> locl_ty -> bool
 
@@ -955,10 +942,7 @@ let make_like ?reason env ty =
 
 let make_like_if_enforced env et_enforced et_type =
   match et_enforced with
-  | Enforced
-    when TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
-         && Env.get_support_dynamic_type env ->
-    make_like env et_type
+  | Enforced when Env.get_support_dynamic_type env -> make_like env et_type
   | _ -> et_type
 
 let rec is_capability ty =

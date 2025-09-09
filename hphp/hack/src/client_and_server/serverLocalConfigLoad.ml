@@ -109,6 +109,7 @@ let default =
     hack_warnings = true;
     warnings_default_all = false;
     warnings_in_sandcastle = true;
+    package_config_strict_validation = true;
   }
 
 let system_config_path =
@@ -852,6 +853,12 @@ let load_
       ~default:default.warnings_in_sandcastle
       config
   in
+  let package_config_strict_validation =
+    bool_
+      "package_config_strict_validation"
+      ~default:default.package_config_strict_validation
+      config
+  in
   {
     saved_state =
       {
@@ -964,6 +971,7 @@ let load_
     hack_warnings;
     warnings_default_all;
     warnings_in_sandcastle;
+    package_config_strict_validation;
   }
 
 let load :

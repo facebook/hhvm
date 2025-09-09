@@ -329,4 +329,6 @@ type t = {
       (** If true, `hh` is equivalent to `hh -Wall`, i.e. warnings are shown.
         Otherwise, `hh` is equivalent to `hh -Wnone`, i.e. warnings are not shown. *)
   warnings_in_sandcastle: bool;
+  package_config_strict_validation: bool;
+      (** POC: @fzn, if true, `hh` fatals if paths specified in PACAKGES.toml `include_paths` do not exists *)
 }

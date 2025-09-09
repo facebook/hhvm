@@ -84,7 +84,6 @@ using mstch_typedef_factory = mstch_factory<t_typedef>;
 using mstch_struct_factory = mstch_factory<t_structured>;
 using mstch_field_factory = mstch_factory<t_field>;
 using mstch_enum_factory = mstch_factory<t_enum>;
-using mstch_enum_value_factory = mstch_factory<t_enum_value>;
 using mstch_const_factory =
     mstch_factory<t_const, const t_const*, const t_type*, const t_field*>;
 using mstch_const_value_factory =
@@ -113,7 +112,6 @@ class mstch_factories {
   std::unique_ptr<mstch_struct_factory> struct_factory;
   std::unique_ptr<mstch_field_factory> field_factory;
   std::unique_ptr<mstch_enum_factory> enum_factory;
-  std::unique_ptr<mstch_enum_value_factory> enum_value_factory;
   std::unique_ptr<mstch_const_factory> const_factory;
   std::unique_ptr<mstch_const_value_factory> const_value_factory;
   std::unique_ptr<mstch_const_map_element_factory> const_map_element_factory;
@@ -184,7 +182,6 @@ class mstch_factories {
   auto& get(t_structured*) { return struct_factory; }
   auto& get(t_field*) { return field_factory; }
   auto& get(t_enum*) { return enum_factory; }
-  auto& get(t_enum_value*) { return enum_value_factory; }
   auto& get(t_const*) { return const_factory; }
   auto& get(t_const_value*) { return const_value_factory; }
   auto& get(std::pair<t_const_value*, t_const_value*>*) {
@@ -324,11 +321,6 @@ class mstch_base : public mstch::object {
           containing_service);
     }
     return make_mstch_array(container, *context_.service_factory);
-  }
-
-  template <typename C, typename... Args>
-  mstch::array make_mstch_enum_values(const C& container, const Args&... args) {
-    return make_mstch_array(container, *context_.enum_value_factory, args...);
   }
 
   template <typename C, typename... Args>
@@ -782,40 +774,18 @@ class mstch_enum : public mstch_base {
         {
             {"self", &mstch_enum::self},
             {"enum:self", &mstch_enum::self},
-            {"enum:values", &mstch_enum::values},
             {"enum:structured_annotations",
              &mstch_enum::structured_annotations},
         });
   }
 
   whisker::object self() { return make_self(*enum_); }
-  mstch::node values();
   mstch::node structured_annotations() {
     return mstch_base::structured_annotations(enum_);
   }
 
  protected:
   const t_enum* enum_;
-};
-
-class mstch_enum_value : public mstch_base {
- public:
-  using ast_type = t_enum_value;
-
-  mstch_enum_value(
-      const t_enum_value* ev, mstch_context& ctx, mstch_element_position pos)
-      : mstch_base(ctx, pos), enum_value_(ev) {
-    register_methods(
-        this,
-        {
-            {"self", &mstch_enum_value::self},
-            {"enum_value:self", &mstch_enum_value::self},
-        });
-  }
-  whisker::object self() { return make_self(*enum_value_); }
-
- protected:
-  const t_enum_value* enum_value_;
 };
 
 class mstch_const : public mstch_base {
@@ -882,7 +852,6 @@ class mstch_const_value : public mstch_base {
         {
             {"self", &mstch_const_value::self},
             {"value:self", &mstch_const_value::self},
-            {"value:enum_value", &mstch_const_value::enum_value},
             {"value:list_elements", &mstch_const_value::list_elems},
             {"value:map_elements", &mstch_const_value::map_elems},
             {"value:const_struct", &mstch_const_value::const_struct},
@@ -895,7 +864,6 @@ class mstch_const_value : public mstch_base {
   }
 
   whisker::object self() { return make_self(*const_value_); }
-  mstch::node enum_value();
   mstch::node list_elems();
   mstch::node map_elems();
   mstch::node const_struct();

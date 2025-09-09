@@ -69,15 +69,10 @@ mstch_factories::mstch_factories() {
   add<mstch_struct>();
   add<mstch_field>();
   add<mstch_enum>();
-  add<mstch_enum_value>();
   add<mstch_const>();
   add<mstch_const_value>();
   add<mstch_const_map_element>();
   add<mstch_structured_annotation>();
-}
-
-mstch::node mstch_enum::values() {
-  return make_mstch_enum_values(enum_->get_enum_values());
 }
 
 mstch::node mstch_type::get_structured() {
@@ -175,14 +170,6 @@ mstch::node mstch_const_map_element::element_key() {
 mstch::node mstch_const_map_element::element_value() {
   return context_.const_value_factory->make_mstch_object(
       element_.second, context_, pos_, current_const_, expected_types_.second);
-}
-
-mstch::node mstch_const_value::enum_value() {
-  if (const_value_->get_enum_value() != nullptr) {
-    return context_.enum_value_factory->make_mstch_object(
-        const_value_->get_enum_value(), context_, pos_);
-  }
-  return mstch::node();
 }
 
 mstch::node mstch_const_value::list_elems() {

@@ -2294,18 +2294,17 @@ class cpp_mstch_field : public mstch_field {
     return field_->get_type()->has_unstructured_annotation(
         {"cpp.noncopyable", "cpp2.noncopyable"});
   }
-  mstch::node enum_has_value() {
+  whisker::object enum_has_value() {
     if (auto enm = field_->get_type()->try_as<t_enum>()) {
       const auto* const_value = field_->get_value();
       using cv = t_const_value::t_const_value_kind;
       if (const_value->kind() == cv::CV_INTEGER) {
         if (auto* enum_value = enm->find_value(const_value->get_integer())) {
-          return context_.enum_value_factory->make_mstch_object(
-              enum_value, context_, pos_);
+          return make_self<t_enum_value>(*enum_value);
         }
       }
     }
-    return mstch::node();
+    return whisker::make::null;
   }
   mstch::node serialization_prev_field_key() {
     const cpp2_field_generator_context* field_context =

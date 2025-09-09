@@ -18,22 +18,22 @@
 {{#program:enums}}
   "{{enum:name}}" : {
     "name" : "{{enum:name}}",
-    {{#enum:values}}
+    {{#each (array.enumerate enum:values with_first=true with_last=true) as |index enum_value first? last?|}}
     {{#if first?}}
     {{! Before the first entry, open the object}}
     "constants" : {
     {{/if first?}}
-      "{{enum_value:name}}" : {
-        "name" : "{{enum_value:name}}",
-        {{#enum_value:docs?}}
-        "docstring" : {{enum_value:docstring}},
-        {{/enum_value:docs?}}
-        "lineno" : {{enum_value:lineno}},
-        "value" : {{enum_value:value}}
+      "{{enum_value.name}}" : {
+        "name" : "{{enum_value.name}}",
+        {{#enum_value.docs?}}
+        "docstring" : {{enum_value.docstring}},
+        {{/enum_value.docs?}}
+        "lineno" : {{enum_value.lineno}},
+        "value" : {{enum_value.value}}
       }{{#if (not last?)}},{{#else}}
     {{! After the last entry, close the object on a new line}}
     },{{/if (not last?)}}
-    {{/enum:values}}
+    {{/each}}
     {{#enum:docs?}}
     "docstring" : {{enum:docstring}},
     {{/enum:docs?}}

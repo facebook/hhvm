@@ -26,14 +26,13 @@ import org.apache.thrift.protocol.TProtocol;
 @SwiftGenerated
 public {{#enum:skipEnumNameMap?}}class{{/enum:skipEnumNameMap?}}{{^enum:skipEnumNameMap?}}enum{{/enum:skipEnumNameMap?}} {{enum:javaCapitalName}}{{#enum:skipEnumNameMap?}} extends IntEnum{{/enum:skipEnumNameMap?}} implements com.facebook.thrift.enums.BaseEnum, com.facebook.thrift.payload.ThriftSerializable {
 {{^enum:skipEnumNameMap?}}
-{{#enum:values}}
-    {{enum_value:javaConstantName}}({{enum_value:value}}){{^last?}},{{/last?}}{{#last?}};{{/last?}}
-{{/enum:values}}
+{{#each (array.enumerate enum:values with_last=true) as |index enum_value last?|}}
+    {{enum_value.javaConstantName}}({{enum_value.value}}){{#if last?}};{{#else}},{{/if}}
+{{#else}}
 {{! semicolon here is required for Java Enum definition, see Java Language Spec
     section 8.9.1 https://docs.oracle.com/javase/specs/jls/se8/html/jls-8.html#jls-8.9.1}}
-{{^enum:values}}
     ;
-{{/enum:values}}
+{{/each}}
 {{/enum:skipEnumNameMap?}}
 
     private final int value;

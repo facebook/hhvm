@@ -439,7 +439,7 @@ prototype<t_const>::ptr t_whisker_generator::make_prototype_for_const(
 
 prototype<t_const_value>::ptr
 t_whisker_generator::make_prototype_for_const_value(
-    const prototype_database&) const {
+    const prototype_database& proto) const {
   prototype_builder<h_const_value> def;
   using cv = t_const_value::t_const_value_kind;
   def.property("bool?", [](const t_const_value& self) {
@@ -500,6 +500,9 @@ t_whisker_generator::make_prototype_for_const_value(
   });
   def.property("bool_value", [](const t_const_value& self) {
     return self.kind() == cv::CV_BOOL ? w::boolean(self.get_bool()) : w::null;
+  });
+  def.property("enum_value", [&proto](const t_const_value& self) {
+    return proto.create_nullable<t_enum_value>(self.get_enum_value());
   });
   def.property("string_value", [](const t_const_value& self) {
     return self.kind() == cv::CV_STRING

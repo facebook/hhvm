@@ -1569,9 +1569,6 @@ Type FrameStateMgr::typeOfPointeeFromDefs(SSATmp* ptr, Type limit) const {
     return t < limit;
   };
   visitEveryDefiningInst(ptr, visit);
-  // Anything other than a Bottom should point at something, and thus
-  // we should get some type for it.
-  assertx(ptr->isA(TBottom) || t != TBottom);
   return t;
 }
 

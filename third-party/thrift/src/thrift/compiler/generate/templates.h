@@ -20,10 +20,19 @@
 
 namespace apache::thrift::compiler {
 
+// Total number of templates
 extern const std::size_t templates_size;
+
+// Lengths of each template's name, e.g. `lang/xyz.mustache` -> 17
 extern const std::size_t templates_name_sizes[];
+
+// Names of each template, e.g. `lang/xyz.mustache`
 extern const char* const templates_name_datas[];
+
+// Lengths of each template's content, e.g. `...` -> 3
 extern const std::size_t templates_content_sizes[];
+
+// Raw string content of each template, e.g. `...`
 extern const char* const templates_content_datas[];
 
 } // namespace apache::thrift::compiler

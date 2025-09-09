@@ -60,6 +60,11 @@ class ConcurrencyControllerInterface : public RequestCompletionCallback {
   // in RequestPileInterface returns a successful result).
   virtual void onEnqueued() = 0;
 
+  using ServerRequestLoggingFunction =
+      std::function<void(const ServerRequest&)>;
+  virtual void setOnExpireFunction(ServerRequestLoggingFunction&&) {}
+  virtual void setOnExecuteFunction(ServerRequestLoggingFunction&&) {}
+
   using UserData = intptr_t;
 
   // Stops the concurrency controller. Stops dispatching new requests. This is

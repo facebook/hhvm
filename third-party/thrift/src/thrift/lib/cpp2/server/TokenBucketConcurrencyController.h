@@ -161,14 +161,11 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase,
     pendingDequeueOps_--;
   }
 
-  using ServerRequestLoggingFunction =
-      std::function<void(const ServerRequest&)>;
-
-  void setOnExpireFunction(ServerRequestLoggingFunction fn) {
+  void setOnExpireFunction(ServerRequestLoggingFunction&& fn) override {
     onExpireFunction_ = std::move(fn);
   }
 
-  void setOnExecuteFunction(ServerRequestLoggingFunction fn) {
+  void setOnExecuteFunction(ServerRequestLoggingFunction&& fn) override {
     onExecuteFunction_ = std::move(fn);
   }
 

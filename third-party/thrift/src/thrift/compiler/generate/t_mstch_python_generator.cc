@@ -1078,7 +1078,7 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_named(proto);
     auto def = whisker::dsl::prototype_builder<h_named>::extends(base);
 
-    def.property("py_name", &python::get_py3_name<t_named>);
+    def.property("py_name", &python::get_py3_name);
     def.property("has_adapter?", [](const t_named& self) {
       return find_structured_adapter_annotation(self) != nullptr;
     });

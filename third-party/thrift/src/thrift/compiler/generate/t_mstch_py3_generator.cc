@@ -587,18 +587,15 @@ class py3_mstch_function : public mstch_function {
  public:
   py3_mstch_function(
       const t_function* f, mstch_context& ctx, mstch_element_position pos)
-      : mstch_function(f, ctx, pos), cppName_(cpp2::get_name(f)) {
+      : mstch_function(f, ctx, pos) {
     register_methods(
         this,
         {
             {"function:eb", &py3_mstch_function::event_based},
             {"function:stack_arguments?", &py3_mstch_function::stack_arguments},
-            {"function:cppName", &py3_mstch_function::cppName},
             {"function:modulePath", &py3_mstch_function::modulePath},
         });
   }
-
-  mstch::node cppName() { return cppName_; }
 
   mstch::node event_based() {
     return function_->get_unstructured_annotation("thread") == "eb" ||
@@ -616,9 +613,6 @@ class py3_mstch_function : public mstch_function {
         "_{}",
         fmt::join(get_type_py3_namespace(function_->program(), "types"), "_"));
   }
-
- protected:
-  const std::string cppName_;
 };
 
 class py3_mstch_type : public mstch_type {
@@ -1030,13 +1024,10 @@ class py3_mstch_field : public mstch_field {
   };
   py3_mstch_field(
       const t_field* field, mstch_context& ctx, mstch_element_position pos)
-      : mstch_field(field, ctx, pos),
-        pyName_(python::get_py3_name(*field)),
-        cppName_(cpp2::get_name(field)) {
+      : mstch_field(field, ctx, pos) {
     register_methods(
         this,
         {
-            {"field:py_name", &py3_mstch_field::pyName},
             {"field:reference?", &py3_mstch_field::isRef},
             {"field:unique_ref?", &py3_mstch_field::isUniqueRef},
             {"field:shared_ref?", &py3_mstch_field::isSharedRef},
@@ -1049,9 +1040,6 @@ class py3_mstch_field : public mstch_field {
             {"field:user_default_value", &py3_mstch_field::user_default_value},
             {"field:PEP484Optional?", &py3_mstch_field::isPEP484Optional},
             {"field:isset?", &py3_mstch_field::isSet},
-            {"field:cppName", &py3_mstch_field::cppName},
-            {"field:hasModifiedName?", &py3_mstch_field::hasModifiedName},
-            {"field:hasPyName?", &py3_mstch_field::hasPyName},
             {"field:boxed_ref?", &py3_mstch_field::boxed_ref},
         });
   }
@@ -1082,11 +1070,6 @@ class py3_mstch_field : public mstch_field {
     return (ref_type == RefType::NotRef || ref_type == RefType::IOBuf) &&
         field_->get_req() != t_field::e_req::required;
   }
-
-  mstch::node pyName() { return pyName_; }
-  mstch::node cppName() { return cppName_; }
-  mstch::node hasModifiedName() { return pyName_ != cppName_; }
-  mstch::node hasPyName() { return pyName_ != field_->name(); }
 
   bool has_default_value() {
     return !is_ref() &&
@@ -1158,8 +1141,6 @@ class py3_mstch_field : public mstch_field {
 
   RefType ref_type_{RefType::NotRef};
   bool ref_type_cached_ = false;
-  const std::string pyName_;
-  const std::string cppName_;
 };
 
 class py3_mstch_enum : public mstch_enum {
@@ -1181,29 +1162,6 @@ class py3_mstch_enum : public mstch_enum {
   }
 
   mstch::node cpp_name() { return cpp2::get_name(enum_); }
-};
-
-class py3_mstch_enum_value : public mstch_enum_value {
- public:
-  py3_mstch_enum_value(
-      const t_enum_value* ev, mstch_context& ctx, mstch_element_position pos)
-      : mstch_enum_value(ev, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"enum_value:py_name", &py3_mstch_enum_value::pyName},
-            {"enum_value:cppName", &py3_mstch_enum_value::cppName},
-            {"enum_value:hasPyName?", &py3_mstch_enum_value::hasPyName},
-        });
-  }
-
-  mstch::node pyName() { return python::get_py3_name(*enum_value_); }
-
-  mstch::node cppName() { return cpp2::get_name(enum_value_); }
-
-  mstch::node hasPyName() {
-    return python::get_py3_name(*enum_value_) != enum_value_->name();
-  }
 };
 
 class py3_mstch_const_value : public mstch_const_value {
@@ -1537,6 +1495,29 @@ class t_mstch_py3_generator : public t_mstch_generator {
         });
     return globals;
   }
+
+  prototype<t_field>::ptr make_prototype_for_field(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_field(proto);
+    auto def = whisker::dsl::prototype_builder<h_field>::extends(base);
+    def.property("hasModifiedName?", [](const t_field& self) {
+      return python::get_py3_name(self) != cpp2::get_name(&self);
+    });
+    return std::move(def).make();
+  }
+
+  prototype<t_named>::ptr make_prototype_for_named(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_named(proto);
+    auto def = whisker::dsl::prototype_builder<h_named>::extends(base);
+    def.property("py_name", &python::get_py3_name);
+    def.property("hasPyName?", [](const t_named& self) {
+      return python::get_py3_name(self) != self.name();
+    });
+    def.property(
+        "cppName", [](const t_named& self) { return cpp2::get_name(&self); });
+    return std::move(def).make();
+  }
 };
 
 py3_mstch_type::cached_properties& py3_mstch_type::get_cached_props(
@@ -1579,7 +1560,6 @@ void t_mstch_py3_generator::set_mstch_factories() {
   mstch_context_.add<py3_mstch_struct>();
   mstch_context_.add<py3_mstch_field>();
   mstch_context_.add<py3_mstch_enum>();
-  mstch_context_.add<py3_mstch_enum_value>();
   mstch_context_.add<py3_mstch_const_value>();
 }
 

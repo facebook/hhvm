@@ -32,7 +32,7 @@ type Interceptor func(
 	ctx context.Context,
 	methodName string,
 	pfunc types.ProcessorFunction,
-	args types.Struct,
+	args types.ReadableStruct,
 ) (types.WritableStruct, types.ApplicationExceptionIf)
 
 type interceptorProcessor struct {
@@ -80,6 +80,6 @@ type interceptorProcessorFunction struct {
 	methodName  string
 }
 
-func (pf *interceptorProcessorFunction) RunContext(ctx context.Context, args types.Struct) (types.WritableStruct, types.ApplicationExceptionIf) {
+func (pf *interceptorProcessorFunction) RunContext(ctx context.Context, args types.ReadableStruct) (types.WritableStruct, types.ApplicationExceptionIf) {
 	return pf.interceptor(ctx, pf.methodName, pf.ProcessorFunction, args)
 }

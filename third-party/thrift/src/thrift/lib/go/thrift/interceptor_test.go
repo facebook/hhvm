@@ -30,7 +30,7 @@ func dummyInterceptor(
 	ctx context.Context,
 	methodName string,
 	pfunc types.ProcessorFunction,
-	args types.Struct,
+	args types.ReadableStruct,
 ) (types.WritableStruct, types.ApplicationExceptionIf) {
 	if methodName == "Echo" {
 		if echoArg, ok := args.(*dummyif.DummyEchoArgsDeprecated); ok {

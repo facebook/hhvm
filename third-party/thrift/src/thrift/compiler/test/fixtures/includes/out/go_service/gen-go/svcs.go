@@ -175,7 +175,7 @@ func (p *procFuncMyServiceQuery) Write(seqId int32, result thrift.WritableStruct
     return err
 }
 
-func (p *procFuncMyServiceQuery) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncMyServiceQuery) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     args := reqStruct.(*reqMyServiceQuery)
     result := newRespMyServiceQuery()
     err := p.handler.Query(ctx, args.S, args.I)
@@ -226,7 +226,7 @@ func (p *procFuncMyServiceHasArgDocs) Write(seqId int32, result thrift.WritableS
     return err
 }
 
-func (p *procFuncMyServiceHasArgDocs) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncMyServiceHasArgDocs) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     args := reqStruct.(*reqMyServiceHasArgDocs)
     result := newRespMyServiceHasArgDocs()
     err := p.handler.HasArgDocs(ctx, args.S, args.I)

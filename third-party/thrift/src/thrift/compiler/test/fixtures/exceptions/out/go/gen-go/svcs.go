@@ -201,7 +201,7 @@ func (p *procFuncRaiserDoBland) Write(seqId int32, result thrift.WritableStruct,
     return err
 }
 
-func (p *procFuncRaiserDoBland) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncRaiserDoBland) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespRaiserDoBland()
     err := p.handler.DoBland(ctx)
     if err != nil {
@@ -263,7 +263,7 @@ func (p *procFuncRaiserDoRaise) Write(seqId int32, result thrift.WritableStruct,
     return err
 }
 
-func (p *procFuncRaiserDoRaise) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncRaiserDoRaise) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespRaiserDoRaise()
     err := p.handler.DoRaise(ctx)
     if err != nil {
@@ -325,7 +325,7 @@ func (p *procFuncRaiserGet200) Write(seqId int32, result thrift.WritableStruct, 
     return err
 }
 
-func (p *procFuncRaiserGet200) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncRaiserGet200) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespRaiserGet200()
     retval, err := p.handler.Get200(ctx)
     if err != nil {
@@ -388,7 +388,7 @@ func (p *procFuncRaiserGet500) Write(seqId int32, result thrift.WritableStruct, 
     return err
 }
 
-func (p *procFuncRaiserGet500) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncRaiserGet500) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     result := newRespRaiserGet500()
     retval, err := p.handler.Get500(ctx)
     if err != nil {

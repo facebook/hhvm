@@ -140,7 +140,7 @@ func (p *{{> svc/proc_func_name}}) Write(seqId int32, result thrift.WritableStru
     return err
 }
 
-func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
     {{#function:params.fields?}}
     args := reqStruct.(*req{{service:go_name}}{{function:go_name}})
     {{/function:params.fields?}}

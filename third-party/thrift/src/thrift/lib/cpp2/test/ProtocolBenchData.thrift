@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+package "meta.com/thrift/test/benchmark"
+
 namespace cpp2 thrift.benchmark
 
 cpp_include "folly/sorted_vector_types.h"

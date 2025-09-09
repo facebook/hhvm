@@ -231,7 +231,7 @@ func (r *rsocketClient) RequestStream(
 		for {
 			streamPayload, streamErr := recvStreamNext(streamCtx, streamPayloadChan, streamErrChan)
 			if streamErr != nil {
-				onStreamErrorFn(err)
+				onStreamErrorFn(streamErr)
 				return
 			} else if streamPayload != nil {
 				streamResponse, err := rocket.DecodeStreamPayload(streamPayload)

@@ -222,10 +222,14 @@ func (p *rocketClient) SendRequestStream(
 		return err
 	}
 
+	var cancelFunc context.CancelFunc
 	if p.ioTimeout > 0 {
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, p.ioTimeout)
-		defer cancel()
+		ctx, cancelFunc = context.WithTimeout(ctx, p.ioTimeout)
+		defer func() {
+			if cancelFunc != nil {
+				cancelFunc()
+			}
+		}()
 	}
 
 	err = p.client.SendSetup(ctx)
@@ -257,6 +261,8 @@ func (p *rocketClient) SendRequestStream(
 	if err != nil {
 		return err
 	}
+	// Do not cancel the context to allow streaming to continue
+	cancelFunc = nil
 	return nil
 }
 

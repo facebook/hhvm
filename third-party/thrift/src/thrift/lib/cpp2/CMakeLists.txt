@@ -350,6 +350,7 @@ add_library(
   transport/rocket/server/RocketServerFrameContext.cpp
   transport/rocket/server/RocketSinkClientCallback.cpp
   transport/rocket/server/RocketStreamClientCallback.cpp
+  transport/rocket/server/RocketBiDiClientCallback.cpp
   transport/rocket/server/RocketThriftRequests.cpp
   transport/rocket/server/ThriftRocketServerHandler.cpp
   util/Checksum.cpp

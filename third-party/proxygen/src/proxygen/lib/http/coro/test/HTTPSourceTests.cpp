@@ -774,21 +774,14 @@ TEST_F(BodyEventQueueTest, TestCancelReadHeaders) {
 
 CO_TEST_F_X(BodyEventQueueTest, TestMatchingContentLength) {
   EXPECT_CALL(source_, readHeaderEvent())
-      .WillOnce(folly::coro::gmock_helpers::CoInvoke(
-          []() -> folly::coro::Task<HTTPHeaderEvent> {
-            co_return HTTPHeaderEvent(
-                std::make_unique<HTTPMessage>(getResponse(200, 50)), false);
-          }));
+      .WillOnce(Return(folly::coro::makeTask<HTTPHeaderEvent>(HTTPHeaderEvent(
+          std::make_unique<HTTPMessage>(getResponse(200, 50)), false))));
 
   EXPECT_CALL(source_, readBodyEvent(_))
-      .WillOnce(folly::coro::gmock_helpers::CoInvoke(
-          [](uint32_t) -> folly::coro::Task<HTTPBodyEvent> {
-            co_return HTTPBodyEvent(makeBuf(25), false);
-          }))
-      .WillOnce(folly::coro::gmock_helpers::CoInvoke(
-          [](uint32_t) -> folly::coro::Task<HTTPBodyEvent> {
-            co_return HTTPBodyEvent(makeBuf(25), true);
-          }));
+      .WillOnce(Return(folly::coro::makeTask<HTTPBodyEvent>(
+          HTTPBodyEvent(makeBuf(25), false))))
+      .WillOnce(Return(folly::coro::makeTask<HTTPBodyEvent>(
+          HTTPBodyEvent(makeBuf(25), true))));
 
   EXPECT_CALL(queue_, contentLengthMismatch()).Times(0);
 
@@ -801,17 +794,12 @@ CO_TEST_F_X(BodyEventQueueTest, TestMatchingContentLength) {
 
 CO_TEST_F_X(BodyEventQueueTest, TestMismatchedContentLengthOverExpected) {
   EXPECT_CALL(source_, readHeaderEvent())
-      .WillOnce(folly::coro::gmock_helpers::CoInvoke(
-          []() -> folly::coro::Task<HTTPHeaderEvent> {
-            co_return HTTPHeaderEvent(
-                std::make_unique<HTTPMessage>(getResponse(200, 50)), false);
-          }));
+      .WillOnce(Return(folly::coro::makeTask<HTTPHeaderEvent>(HTTPHeaderEvent(
+          std::make_unique<HTTPMessage>(getResponse(200, 50)), false))));
 
   EXPECT_CALL(source_, readBodyEvent(_))
-      .WillOnce(folly::coro::gmock_helpers::CoInvoke(
-          [](uint32_t) -> folly::coro::Task<HTTPBodyEvent> {
-            co_return HTTPBodyEvent(makeBuf(75), true);
-          }));
+      .WillOnce(Return(folly::coro::makeTask<HTTPBodyEvent>(
+          HTTPBodyEvent(makeBuf(75), true))));
 
   EXPECT_CALL(queue_, contentLengthMismatch()).Times(1);
 
@@ -822,17 +810,12 @@ CO_TEST_F_X(BodyEventQueueTest, TestMismatchedContentLengthOverExpected) {
 
 CO_TEST_F_X(BodyEventQueueTest, TestMismatchedContentLengthUnderExpected) {
   EXPECT_CALL(source_, readHeaderEvent())
-      .WillOnce(folly::coro::gmock_helpers::CoInvoke(
-          []() -> folly::coro::Task<HTTPHeaderEvent> {
-            co_return HTTPHeaderEvent(
-                std::make_unique<HTTPMessage>(getResponse(200, 50)), false);
-          }));
+      .WillOnce(Return(folly::coro::makeTask<HTTPHeaderEvent>(HTTPHeaderEvent(
+          std::make_unique<HTTPMessage>(getResponse(200, 50)), false))));
 
   EXPECT_CALL(source_, readBodyEvent(_))
-      .WillOnce(folly::coro::gmock_helpers::CoInvoke(
-          [](uint32_t) -> folly::coro::Task<HTTPBodyEvent> {
-            co_return HTTPBodyEvent(makeBuf(25), true);
-          }));
+      .WillOnce(Return(folly::coro::makeTask<HTTPBodyEvent>(
+          HTTPBodyEvent(makeBuf(25), true))));
 
   EXPECT_CALL(queue_, contentLengthMismatch()).Times(1);
 
@@ -843,11 +826,8 @@ CO_TEST_F_X(BodyEventQueueTest, TestMismatchedContentLengthUnderExpected) {
 
 CO_TEST_F_X(BodyEventQueueTest, TestSkipValidationOn304EmptyBody) {
   EXPECT_CALL(source_, readHeaderEvent())
-      .WillOnce(folly::coro::gmock_helpers::CoInvoke(
-          []() -> folly::coro::Task<HTTPHeaderEvent> {
-            co_return HTTPHeaderEvent(
-                std::make_unique<HTTPMessage>(getResponse(304, 10)), true);
-          }));
+      .WillOnce(Return(folly::coro::makeTask<HTTPHeaderEvent>(HTTPHeaderEvent(
+          std::make_unique<HTTPMessage>(getResponse(304, 10)), true))));
 
   EXPECT_CALL(queue_, contentLengthMismatch()).Times(0);
 
@@ -857,18 +837,13 @@ CO_TEST_F_X(BodyEventQueueTest, TestSkipValidationOn304EmptyBody) {
 
 CO_TEST_F_X(BodyEventQueueTest, TestInvalidBodyLength) {
   EXPECT_CALL(source_, readHeaderEvent())
-      .WillOnce(folly::coro::gmock_helpers::CoInvoke(
-          []() -> folly::coro::Task<HTTPHeaderEvent> {
-            co_return HTTPHeaderEvent(std::make_unique<HTTPMessage>(
-                                          getResponseWithInvalidBodyLength()),
-                                      false);
-          }));
+      .WillOnce(Return(folly::coro::makeTask<HTTPHeaderEvent>(HTTPHeaderEvent(
+          std::make_unique<HTTPMessage>(getResponseWithInvalidBodyLength()),
+          false))));
 
   EXPECT_CALL(source_, readBodyEvent(_))
-      .WillOnce(folly::coro::gmock_helpers::CoInvoke(
-          [](uint32_t) -> folly::coro::Task<HTTPBodyEvent> {
-            co_return HTTPBodyEvent(makeBuf(25), true);
-          }));
+      .WillOnce(Return(folly::coro::makeTask<HTTPBodyEvent>(
+          HTTPBodyEvent(makeBuf(25), true))));
 
   EXPECT_CALL(queue_, contentLengthMismatch()).Times(0);
 
@@ -880,11 +855,10 @@ CO_TEST_F_X(BodyEventQueueTest, TestInvalidBodyLength) {
 TEST_F(BodyEventQueueTest, TestCancelReadHeadersWithError) {
   auto coro = [this]() -> folly::coro::Task<void> {
     EXPECT_CALL(source_, readHeaderEvent())
-        .WillOnce(folly::coro::gmock_helpers::CoInvoke(
-            []() -> folly::coro::Task<HTTPHeaderEvent> {
-              co_yield folly::coro::co_error(
-                  HTTPError(HTTPErrorCode::CORO_CANCELLED, ""));
-            }));
+        .WillOnce(Return(folly::coro::makeErrorTask<HTTPHeaderEvent>(
+            folly::make_exception_wrapper<HTTPError>(
+                HTTPErrorCode::CORO_CANCELLED, ""))));
+
     auto res = co_await co_awaitTry(queue_.readHeaderEvent());
     EXPECT_TRUE(res.hasException());
     EXPECT_EQ(getHTTPError(res).code, HTTPErrorCode::CORO_CANCELLED);
@@ -913,11 +887,9 @@ TEST_F(BodyEventQueueTest, TestCancelReadBody) {
 TEST_F(BodyEventQueueTest, TestCancelReadBodyWithError) {
   auto coro = [this]() -> folly::coro::Task<void> {
     EXPECT_CALL(source_, readBodyEvent(_))
-        .WillOnce(folly::coro::gmock_helpers::CoInvoke(
-            [](uint32_t) -> folly::coro::Task<HTTPBodyEvent> {
-              co_yield folly::coro::co_error(
-                  HTTPError(HTTPErrorCode::CORO_CANCELLED, ""));
-            }));
+        .WillOnce(Return(folly::coro::makeErrorTask<HTTPBodyEvent>(
+            folly::make_exception_wrapper<HTTPError>(
+                HTTPErrorCode::CORO_CANCELLED, ""))));
     auto res = co_await co_awaitTry(queue_.readBodyEvent());
     EXPECT_TRUE(res.hasException());
     EXPECT_EQ(getHTTPError(res).code, HTTPErrorCode::CORO_CANCELLED);
@@ -928,10 +900,8 @@ TEST_F(BodyEventQueueTest, TestCancelReadBodyWithError) {
 TEST_F(BodyEventQueueTest, TestCancelReadBodyAwaitingBuffer) {
   auto coro = [this]() -> folly::coro::Task<void> {
     EXPECT_CALL(source_, readBodyEvent(_))
-        .WillOnce(folly::coro::gmock_helpers::CoInvoke(
-            [](uint32_t) -> folly::coro::Task<HTTPBodyEvent> {
-              co_return HTTPBodyEvent(makeBuf(100), false);
-            }));
+        .WillOnce(Return(folly::coro::makeTask<HTTPBodyEvent>(
+            HTTPBodyEvent(makeBuf(100), false))));
     EXPECT_CALL(source_, stopReading(_));
     auto res = co_await co_awaitTry(queue_.readBodyEvent(100));
     EXPECT_FALSE(res.hasException());

@@ -175,7 +175,10 @@ struct HTTPCoroSession::StreamState {
     priority_ = priority;
   }
 
-  void initIngressPush(HTTPCodec::StreamID assocStreamID);
+  void initIngressPush(HTTPCodec::StreamID assocStreamID) {
+    parent = assocStreamID;
+    markEgressComplete();
+  }
 
   void streamSourceActive() {
     // Called when the streamSource is handed outside the class for reading
@@ -232,7 +235,14 @@ struct HTTPCoroSession::StreamState {
   bool isEgressComplete() const {
     return egressComplete_;
   }
-  bool isDetachable() const;
+
+  bool isDetachable() const {
+    // streamSourceComplete -> external source reader finished or stopReading
+    // egressComplete -> we have egressed a FIN, RST or received a RST
+    // egressCoroComplete -> internal coroutine producing stream egress
+    // terminated
+    return (streamSourceComplete_ && egressComplete_ && egressCoroComplete_);
+  }
 
   uint64_t observedBodyLength() const {
     return bodyEventQueue_.observedBodyLength();
@@ -262,7 +272,12 @@ struct HTTPCoroSession::StreamState {
     cs.egress.requestCancellation();
   }
 
-  folly::coro::Task<HTTPHeaderEvent> nextHeaderEvent();
+  folly::coro::Task<HTTPHeaderEvent> nextHeaderEvent() {
+    // TODO: do we want to throttle reading response headers on buffer space
+    auto headerEvent = co_await co_nothrow(bodyEventQueue_.readHeaderEvent());
+    egressStarted_ = headerEvent.isFinal();
+    co_return headerEvent;
+  }
 
   folly::coro::Task<HTTPBodyEventQueue::ReadBodyResult> nextBodyEvent() {
     return bodyEventQueue_.readBodyEvent();
@@ -272,9 +287,36 @@ struct HTTPCoroSession::StreamState {
     bodyEventQueue_.stopReading(error);
   }
 
-  std::pair<HTTPBodyEvent, bool> nextEgressEvent(uint32_t maxToSend);
+  std::pair<HTTPBodyEvent, bool> nextEgressEvent(uint32_t maxToSend) {
+    bool flowControlBlocked = false;
+    maxToSend = std::min(maxToSend, sendWindow_.getNonNegativeSize());
+    HTTPBodyEvent bodyEvent(bodyEventQueue_.dequeueBodyEvent(maxToSend));
+    if (bodyEvent.eventType == HTTPBodyEvent::BODY) {
+      auto length = bodyEvent.event.body.chainLength();
+      XLOG(DBG4) << "Sending body length=" << length << " id=" << getID()
+                 << " eom=" << uint32_t(bodyEvent.eom);
+      if (length == 0 && !bodyEvent.eom) {
+        flowControlBlocked = true;
+      } else {
+        XCHECK(sendWindow_.reserve(length));
+      }
+    }
+    XCHECK(!bodyEvent.eom || bodyEventQueue_.empty())
+        << "stream returned EOM with pending events";
+    if (bodyEvent.eom) {
+      markEgressComplete();
+    }
+    return {std::move(bodyEvent), flowControlBlocked};
+  }
 
-  folly::Expected<bool, folly::Unit> onWindowUpdate(uint32_t amount);
+  folly::Expected<bool, folly::Unit> onWindowUpdate(uint32_t amount) {
+    auto wasBlocked = (sendWindow_.getSize() <= 0);
+    if (!sendWindow_.free(amount)) {
+      return folly::makeUnexpected(folly::Unit());
+    }
+    auto isBlocked = (sendWindow_.getSize() <= 0);
+    return wasBlocked && !isBlocked && !bodyEventQueue_.empty();
+  }
 
   void setSendWindow(uint32_t capacity) {
     sendWindow_.setCapacity(capacity);
@@ -284,7 +326,18 @@ struct HTTPCoroSession::StreamState {
     return sendWindow_.getSize() <= 0;
   }
 
-  void resetStream(const HTTPError& error);
+  void resetStream(const HTTPError& err) {
+    markEgressComplete();
+    if (!bodyEventQueue_.empty()) {
+      XLOG(DBG4) << "Discarding pending egress on reset for stream=" << getID();
+      bodyEventQueue_.clear(err);
+    }
+    cs.egress.requestCancellation();
+    if (streamSourceComplete_) {
+      cs.ingress.requestCancellation();
+    }
+    deferredStopSending_ = false;
+  }
 
   bool isStateReset() const {
     return isBodyQueueEmpty() && cs.egress.isCancellationRequested();
@@ -748,12 +801,6 @@ void HTTPCoroSession::onMessageBegin(HTTPCodec::StreamID streamID,
                             readResponse(stream, handleRequest(stream))))
         .start();
   }
-}
-
-void HTTPCoroSession::StreamState::initIngressPush(
-    HTTPCodec::StreamID assocStreamID) {
-  parent = assocStreamID;
-  markEgressComplete();
 }
 
 void HTTPUniplexTransportSession::onPushMessageBegin(
@@ -1400,16 +1447,6 @@ bool HTTPQuicCoroSession::getCurrentTransportInfoImpl(
   return false;
 }
 
-folly::Expected<bool, folly::Unit> HTTPCoroSession::StreamState::onWindowUpdate(
-    uint32_t amount) {
-  auto wasBlocked = (sendWindow_.getSize() <= 0);
-  if (!sendWindow_.free(amount)) {
-    return folly::makeUnexpected(folly::Unit());
-  }
-  auto isBlocked = (sendWindow_.getSize() <= 0);
-  return wasBlocked && !isBlocked && !bodyEventQueue_.empty();
-}
-
 void HTTPUniplexTransportSession::onWindowUpdate(HTTPCodec::StreamID streamID,
                                                  uint32_t amount) {
   // for freeing up send window, either connection or stream
@@ -1678,14 +1715,6 @@ folly::coro::Task<HTTPSourceHolder> HTTPCoroSession::handleRequest(
     }
   }
   co_return responseSource;
-}
-
-folly::coro::Task<HTTPHeaderEvent>
-HTTPCoroSession::StreamState::nextHeaderEvent() {
-  // TODO: do we want to throttle reading response headers on buffer space
-  auto headerEvent = co_await co_nothrow(bodyEventQueue_.readHeaderEvent());
-  egressStarted_ = headerEvent.isFinal();
-  co_return headerEvent;
 }
 
 folly::coro::Task<void> HTTPCoroSession::readResponse(
@@ -2225,19 +2254,6 @@ folly::coro::Task<void> HTTPCoroSession::transferRequestBody(
   checkForDetach(stream);
 }
 
-void HTTPCoroSession::StreamState::resetStream(const HTTPError& err) {
-  markEgressComplete();
-  if (!bodyEventQueue_.empty()) {
-    XLOG(DBG4) << "Discarding pending egress on reset for stream=" << getID();
-    bodyEventQueue_.clear(err);
-  }
-  cs.egress.requestCancellation();
-  if (streamSourceComplete_) {
-    cs.ingress.requestCancellation();
-  }
-  deferredStopSending_ = false;
-}
-
 void HTTPCoroSession::egressResetStream(HTTPCodec::StreamID id,
                                         StreamState* stream,
                                         HTTPErrorCode error,
@@ -2325,13 +2341,6 @@ void HTTPCoroSession::resetStreamState(StreamState& stream,
   if (!signaled) {
     writeEvent_.signal();
   }
-}
-
-bool HTTPCoroSession::StreamState::isDetachable() const {
-  // streamSourceComplete -> external source reader finished or stopReading
-  // egressComplete -> we have egressed a FIN, RST or received a RST
-  // egressCoroComplete -> internal coroutine producing stream egress terminated
-  return (streamSourceComplete_ && egressComplete_ && egressCoroComplete_);
 }
 
 bool HTTPCoroSession::checkForDetach(StreamState& stream) {
@@ -3363,29 +3372,6 @@ void HTTPQuicCoroSession::registerControlDeliveryCallback(quic::StreamId id) {
                                            totalStreamLength - 1,
                                            &deliveryCallback_);
   }
-}
-
-std::pair<HTTPBodyEvent, bool> HTTPCoroSession::StreamState::nextEgressEvent(
-    uint32_t maxToSend) {
-  bool flowControlBlocked = false;
-  maxToSend = std::min(maxToSend, sendWindow_.getNonNegativeSize());
-  HTTPBodyEvent bodyEvent(bodyEventQueue_.dequeueBodyEvent(maxToSend));
-  if (bodyEvent.eventType == HTTPBodyEvent::BODY) {
-    auto length = bodyEvent.event.body.chainLength();
-    XLOG(DBG4) << "Sending body length=" << length << " id=" << getID()
-               << " eom=" << uint32_t(bodyEvent.eom);
-    if (length == 0 && !bodyEvent.eom) {
-      flowControlBlocked = true;
-    } else {
-      XCHECK(sendWindow_.reserve(length));
-    }
-  }
-  XCHECK(!bodyEvent.eom || bodyEventQueue_.empty())
-      << "stream returned EOM with pending events";
-  if (bodyEvent.eom) {
-    markEgressComplete();
-  }
-  return {std::move(bodyEvent), flowControlBlocked};
 }
 
 size_t HTTPUniplexTransportSession::addStreamBodyDataToWriteBuf(uint32_t max) {

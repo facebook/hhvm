@@ -446,7 +446,9 @@ final class ThriftContextPropState {
     if ($user_ids is null) {
       return null;
     }
-    return ($user_ids->fb_user_id as int);
+
+    $fb_user_id = $user_ids->fb_user_id ?? 0;
+    return ($fb_user_id as int);
   }
 
   public readonly function getIGUserId()[leak_safe]: ?int {
@@ -457,7 +459,8 @@ final class ThriftContextPropState {
     if ($user_ids is null) {
       return null;
     }
-    return ($user_ids->ig_user_id as int);
+    $ig_user_id = $user_ids->ig_user_id ?? 0;
+    return ($ig_user_id as int);
   }
 
   // user id setters

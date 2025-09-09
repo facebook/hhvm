@@ -59,8 +59,8 @@ final class ThriftContextPropStateTest extends WWWTest {
     // 0 is different from null
     $tcps->setUserIds(ContextProp\UserIds::withDefaultValues());
     expect($tcps->getUserIds())->toNotBeNull();
-    expect($tcps->getUserIds()?->fb_user_id)->toEqual(0);
-    expect($tcps->getUserIds()?->ig_user_id)->toEqual(0);
+    expect($tcps->getUserIds()?->fb_user_id)->toBeNull();
+    expect($tcps->getUserIds()?->ig_user_id)->toBeNull();
 
     // override existing value
     $tcps->setUserIds(new ContextProp\UserIds(1, 2));
@@ -75,7 +75,7 @@ final class ThriftContextPropStateTest extends WWWTest {
     $tcps->setFBUserId(3);
     expect($tcps->getUserIds()?->fb_user_id)->toEqual(3);
     expect($tcps->getFBUserId())->toEqual(3);
-    expect($tcps->getUserIds()?->ig_user_id)->toEqual(0);
+    expect($tcps->getUserIds()?->ig_user_id)->toBeNull();
 
     // set IG Id only
     $tcps->setIGUserId(4);

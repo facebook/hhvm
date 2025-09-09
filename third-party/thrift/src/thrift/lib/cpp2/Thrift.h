@@ -55,6 +55,13 @@ struct at_impl<folly::tag_t<Args...>, Ord> {
 template <class List, FieldOrdinal Ord>
 using at = typename at_impl<List, Ord>::type;
 
+template <typename T, typename TagList>
+inline constexpr bool contains_v = false;
+
+template <typename T, typename... Types>
+inline constexpr bool contains_v<T, folly::tag_t<Types...>> =
+    folly::is_one_of_v<T, Types...>;
+
 } // namespace detail
 
 template <typename Tag>
@@ -135,6 +142,23 @@ struct struct_private_access {
   template <typename T>
   static const folly::StringPiece __fbthrift_get_class_name() {
     return T::__fbthrift_get_class_name();
+  }
+
+  template <typename T, typename Annotation, typename = void>
+  struct __fbthrift_has_struct_annotation_impl : std::false_type {};
+
+  template <typename T, typename Annotation>
+  struct __fbthrift_has_struct_annotation_impl<
+      T,
+      Annotation,
+      folly::void_t<typename T::__fbthrift_struct_annotations>>
+      : std::bool_constant<
+            contains_v<Annotation, typename T::__fbthrift_struct_annotations>> {
+  };
+
+  template <typename T, typename Annotation>
+  static constexpr bool __fbthrift_has_struct_annotation() {
+    return __fbthrift_has_struct_annotation_impl<T, Annotation>::value;
   }
 
   template <typename T>

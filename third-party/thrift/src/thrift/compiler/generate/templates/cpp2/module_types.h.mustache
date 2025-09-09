@@ -133,6 +133,19 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "{{program:name}}";
   }
+{{#struct:has_struct_runtime_annotation?}}
+{{#struct:structured_runtime_annotations}}
+{{#structured_annotation:const_struct?}}
+  using __fbthrift_struct_annotations = folly::tag_t<
+{{#structured_annotation:const}}
+{{#constant:type}}
+    {{type:cpp_fullname}}{{^last?}}, {{/last?}}
+{{/constant:type}}
+{{/structured_annotation:const}}
+  >;
+{{/structured_annotation:const_struct?}}
+{{/struct:structured_runtime_annotations}}
+{{/struct:has_struct_runtime_annotation?}}
 {{> module_types_h/reflection}}
 
   void __fbthrift_clear();

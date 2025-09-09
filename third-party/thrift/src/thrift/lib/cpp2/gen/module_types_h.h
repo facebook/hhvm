@@ -370,4 +370,19 @@ const Annotation* get_struct_annotation() {
 
   return ret;
 }
+
+/// Check if a struct has a specific annotation at compile time, for example:
+///
+/// * has_struct_annotation<EventDef, MyStruct>() == true
+///   // Returns true if MyStruct has an EventDef annotation
+///
+template <typename Annotation, typename Struct>
+constexpr bool has_struct_annotation() {
+  static_assert(
+      decltype(detail::st::struct_private_access::
+                   __fbthrift_cpp2_is_runtime_annotation<Annotation>())::value,
+      "Annotation is not annotated with @thrift.RuntimeAnnotation.");
+  return detail::st::struct_private_access::
+      __fbthrift_has_struct_annotation<Struct, Annotation>();
+}
 } // namespace apache::thrift

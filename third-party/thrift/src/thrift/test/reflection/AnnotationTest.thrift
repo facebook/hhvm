@@ -41,7 +41,11 @@ struct Sensitive {}
 @scope.Field
 struct Other {}
 
+@scope.Struct
+struct NonRuntime {}
+
 @Doc{text = "I am a struct"}
+@NonRuntime{}
 struct MyStruct {
   @Oncall{name = "thrift"}
   @Sensitive
@@ -62,4 +66,8 @@ exception MyException {
   @Oncall{name = "exception_field"}
   @Doc{text = "Error message"}
   1: string message;
+}
+
+struct NoAnnotationsStruct {
+  1: string field;
 }

@@ -4182,6 +4182,12 @@ void t_hack_generator::generate_php_union_methods(
     indent(out) << "public function get_" << fieldName << "()[]: ?" << typehint
                 << " {\n";
     indent_up();
+    indent(out) << "$this->logIncorrectFieldAccessed(\n";
+    indent_up();
+    indent(out) << "$this->_type,\n";
+    indent(out) << enumName << "::" << fieldName << ",\n";
+    indent_down();
+    indent(out) << ");\n";
     indent(out) << "return $this->" << fieldName << ";\n";
     indent_down();
     indent(out) << "}\n\n";

@@ -237,6 +237,10 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
   }
 
   public function get_int_value()[]: ?int {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      TestUnionEnum::int_value,
+    );
     return $this->int_value;
   }
 
@@ -257,6 +261,10 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
   }
 
   public function get_str_value()[]: ?string {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      TestUnionEnum::str_value,
+    );
     return $this->str_value;
   }
 
@@ -277,6 +285,10 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
   }
 
   public function get_double_value()[]: ?float {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      TestUnionEnum::double_value,
+    );
     return $this->double_value;
   }
 
@@ -297,6 +309,10 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
   }
 
   public function get_list_of_strings()[]: ?Vector<string> {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      TestUnionEnum::list_of_strings,
+    );
     return $this->list_of_strings;
   }
 
@@ -317,6 +333,10 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
   }
 
   public function get_map_of_string_to_ints()[]: ?Map<string, int> {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      TestUnionEnum::map_of_string_to_ints,
+    );
     return $this->map_of_string_to_ints;
   }
 
@@ -337,6 +357,10 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
   }
 
   public function get_struct_foo()[]: ?Foo {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      TestUnionEnum::struct_foo,
+    );
     return $this->struct_foo;
   }
 

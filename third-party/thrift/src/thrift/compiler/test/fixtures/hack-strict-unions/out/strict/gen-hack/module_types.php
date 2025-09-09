@@ -169,6 +169,10 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
   }
 
   public function get_i64_()[]: ?\TimestampToTimeAdapter::THackType {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      PrimitiveEnum::i64_,
+    );
     return $this->i64_;
   }
 
@@ -189,6 +193,10 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
   }
 
   public function get_string_()[]: ?string {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      PrimitiveEnum::string_,
+    );
     return $this->string_;
   }
 
@@ -209,6 +217,10 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
   }
 
   public function get_float5_()[]: ?float {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      PrimitiveEnum::float5_,
+    );
     return $this->float5_;
   }
 
@@ -229,6 +241,10 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
   }
 
   public function get_float4_()[]: ?float {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      PrimitiveEnum::float4_,
+    );
     return $this->float4_;
   }
 
@@ -249,6 +265,10 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
   }
 
   public function get_float3_()[]: ?float {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      PrimitiveEnum::float3_,
+    );
     return $this->float3_;
   }
 

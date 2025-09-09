@@ -245,6 +245,10 @@ class MyUnion implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftUn
   }
 
   public function get_union_annotated_field()[]: ?\MyFieldWrapper<int, MyUnion> {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      MyUnionEnum::union_annotated_field,
+    );
     return $this->union_annotated_field;
   }
 
@@ -265,6 +269,10 @@ class MyUnion implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftUn
   }
 
   public function get_union_adapted_type()[]: ?\AdapterTestIntToString::THackType {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      MyUnionEnum::union_adapted_type,
+    );
     return $this->union_adapted_type;
   }
 

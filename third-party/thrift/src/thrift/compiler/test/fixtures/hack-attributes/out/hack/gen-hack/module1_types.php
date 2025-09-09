@@ -575,6 +575,10 @@ class UnionTesting implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   }
 
   public function get_foo()[]: ?string {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \test\fixtures\jsenum\UnionTestingEnum::foo,
+    );
     return $this->foo;
   }
 
@@ -595,6 +599,10 @@ class UnionTesting implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   }
 
   public function get_bar()[]: ?int {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \test\fixtures\jsenum\UnionTestingEnum::bar,
+    );
     return $this->bar;
   }
 
@@ -764,6 +772,10 @@ class UnionTestingStructured implements \IThriftSyncStruct, \IThriftStructMetada
   }
 
   public function get_foo()[]: ?string {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \test\fixtures\jsenum\UnionTestingStructuredEnum::foo,
+    );
     return $this->foo;
   }
 
@@ -784,6 +796,10 @@ class UnionTestingStructured implements \IThriftSyncStruct, \IThriftStructMetada
   }
 
   public function get_bar()[]: ?int {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \test\fixtures\jsenum\UnionTestingStructuredEnum::bar,
+    );
     return $this->bar;
   }
 

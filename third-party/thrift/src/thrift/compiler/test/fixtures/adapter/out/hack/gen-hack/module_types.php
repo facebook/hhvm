@@ -1934,6 +1934,10 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
   }
 
   public function get_intField()[]: ?\Adapter1::THackType {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\BazEnum::intField,
+    );
     return $this->intField;
   }
 
@@ -1954,6 +1958,10 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
   }
 
   public function get_setField()[]: ?\facebook\thrift\test\SetWithAdapter {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\BazEnum::setField,
+    );
     return $this->setField;
   }
 
@@ -1974,6 +1982,10 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
   }
 
   public function get_mapField()[]: ?\Adapter3::THackType {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\BazEnum::mapField,
+    );
     return $this->mapField;
   }
 
@@ -1994,6 +2006,10 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
   }
 
   public function get_binaryField()[]: ?\Adapter1::THackType {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\BazEnum::binaryField,
+    );
     return $this->binaryField;
   }
 
@@ -2014,6 +2030,10 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
   }
 
   public function get_longField()[]: ?\facebook\thrift\test\MyI64 {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\BazEnum::longField,
+    );
     return $this->longField;
   }
 
@@ -6622,6 +6642,10 @@ class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   }
 
   public function get_delay()[]: ?\facebook\thrift\test\DurationMs {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\AdaptTestUnionEnum::delay,
+    );
     return $this->delay;
   }
 
@@ -6642,6 +6666,10 @@ class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   }
 
   public function get_custom()[]: ?\facebook\thrift\test\CustomProtocolType {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\AdaptTestUnionEnum::custom,
+    );
     return $this->custom;
   }
 

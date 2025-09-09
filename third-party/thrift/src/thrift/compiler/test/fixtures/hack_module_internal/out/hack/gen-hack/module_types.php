@@ -260,6 +260,10 @@ class FooUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUn
   }
 
   public function get_int_field()[]: ?int {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \hack\fixtures\FooUnionEnum::int_field,
+    );
     return $this->int_field;
   }
 
@@ -280,6 +284,10 @@ class FooUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUn
   }
 
   public function get_str_field()[]: ?string {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \hack\fixtures\FooUnionEnum::str_field,
+    );
     return $this->str_field;
   }
 

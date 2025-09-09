@@ -133,7 +133,8 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
           signal_log_in_psp(
             SignalDynamicLoggerDataset::SHARED_DATASET_AVOID,
             SignalDynamicLoggerProject::THRIFT_UNION_READ,
-            $object_class_name." has ".$num_field_count." fields set",
+            $object_class_name,
+            (string)$num_field_count,
           );
           CategorizedOBC::typedGet(ODSCategoryID::ODS_THRIFT)
             ->bumpEntityKeySampled(
@@ -239,18 +240,32 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
     if (
       $extended_thrift_union || $incorrect_field_set || $num_field_count > 1
     ) {
-      $key = $object_class_name.
-        " ".
-        ($num_field_count > 1 ? "- has ".$num_field_count." set. " : "").
-        ($incorrect_field_set ? "- has values set without setter. " : "").
-        ($extended_thrift_union ? "- extends a thrift union class. " : "");
       HH\Coeffects\fb\backdoor_from_pure__DO_NOT_USE(
         ()[defaults] ==> {
-          signal_log_in_psp(
-            SignalDynamicLoggerDataset::SHARED_DATASET_AVOID,
-            SignalDynamicLoggerProject::THRIFT_UNION_WRITE,
-            $key,
-          );
+          if ($num_field_count > 1) {
+            signal_log_in_psp(
+              SignalDynamicLoggerDataset::SHARED_DATASET_AVOID,
+              SignalDynamicLoggerProject::THRIFT_UNION_WRITE,
+              $object_class_name,
+              (string)$num_field_count,
+            );
+          }
+
+          if ($incorrect_field_set) {
+            signal_log_in_psp(
+              SignalDynamicLoggerDataset::SHARED_DATASET_AVOID,
+              SignalDynamicLoggerProject::THRIFT_UNION_INCORRECT_FIELD_SET,
+              $object_class_name,
+            );
+          }
+
+          if ($extended_thrift_union) {
+            signal_log_in_psp(
+              SignalDynamicLoggerDataset::SHARED_DATASET_AVOID,
+              SignalDynamicLoggerProject::THRIFT_UNION_EXTENDED_THRIFT_UNION,
+              $object_class_name,
+            );
+          }
 
           if ($num_field_count > 1) {
             CategorizedOBC::typedGet(ODSCategoryID::ODS_THRIFT)
@@ -267,5 +282,30 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
       );
     }
     return $xfer;
+  }
+
+  private function logIncorrectFieldAccessed(
+    arraykey $expected_field,
+    arraykey $actual_field,
+  )[]: void {
+    if ($expected_field !== $actual_field) {
+      HH\Coeffects\fb\backdoor_from_pure__DO_NOT_USE(
+        ()[defaults] ==> {
+          if (coinflip(100)) {
+            signal_log_in_psp(
+              SignalDynamicLoggerDataset::SHARED_DATASET_AVOID,
+              SignalDynamicLoggerProject::THRIFT_UNION_INCORRECT_FIELD_ACCESS,
+              nameof static,
+              Str\format(
+                "Expected: %s, Actual: %s",
+                (string)$expected_field,
+                (string)$actual_field,
+              ),
+            );
+          }
+        },
+        'Operational logging of class and field counts',
+      );
+    }
   }
 }

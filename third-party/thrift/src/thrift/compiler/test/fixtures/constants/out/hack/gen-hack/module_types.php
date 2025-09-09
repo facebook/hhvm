@@ -1045,6 +1045,10 @@ class union1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnio
   }
 
   public function get_i()[]: ?int {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      union1Enum::i,
+    );
     return $this->i;
   }
 
@@ -1065,6 +1069,10 @@ class union1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnio
   }
 
   public function get_d()[]: ?float {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      union1Enum::d,
+    );
     return $this->d;
   }
 
@@ -1269,6 +1277,10 @@ class union2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnio
   }
 
   public function get_i()[]: ?int {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      union2Enum::i,
+    );
     return $this->i;
   }
 
@@ -1289,6 +1301,10 @@ class union2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnio
   }
 
   public function get_d()[]: ?float {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      union2Enum::d,
+    );
     return $this->d;
   }
 
@@ -1309,6 +1325,10 @@ class union2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnio
   }
 
   public function get_s()[]: ?struct1 {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      union2Enum::s,
+    );
     return $this->s;
   }
 
@@ -1329,6 +1349,10 @@ class union2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnio
   }
 
   public function get_u()[]: ?union1 {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      union2Enum::u,
+    );
     return $this->u;
   }
 

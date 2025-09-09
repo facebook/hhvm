@@ -861,6 +861,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function get_myEnum()[]: ?\test\fixtures\basic\MyEnum {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \test\fixtures\basic\MyUnionEnum::myEnum,
+    );
     return $this->myEnum;
   }
 
@@ -881,6 +885,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function get_myStruct()[]: ?\test\fixtures\basic\MyStruct {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \test\fixtures\basic\MyUnionEnum::myStruct,
+    );
     return $this->myStruct;
   }
 
@@ -901,6 +909,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function get_myDataItem()[]: ?\test\fixtures\basic\MyDataItem {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \test\fixtures\basic\MyUnionEnum::myDataItem,
+    );
     return $this->myDataItem;
   }
 
@@ -1658,6 +1670,10 @@ class MyRenamedUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   }
 
   public function get_reserved_field()[]: ?int {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \test\fixtures\basic\MyRenamedUnionEnum::reserved_field,
+    );
     return $this->reserved_field;
   }
 

@@ -511,6 +511,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function get_bool_field()[]: ?bool {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\terse_write\MyUnionEnum::bool_field,
+    );
     return $this->bool_field;
   }
 
@@ -531,6 +535,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function get_byte_field()[]: ?int {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\terse_write\MyUnionEnum::byte_field,
+    );
     return $this->byte_field;
   }
 
@@ -551,6 +559,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function get_short_field()[]: ?int {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\terse_write\MyUnionEnum::short_field,
+    );
     return $this->short_field;
   }
 
@@ -571,6 +583,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function get_int_field()[]: ?int {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\terse_write\MyUnionEnum::int_field,
+    );
     return $this->int_field;
   }
 
@@ -591,6 +607,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function get_long_field()[]: ?int {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\terse_write\MyUnionEnum::long_field,
+    );
     return $this->long_field;
   }
 
@@ -611,6 +631,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function get_float_field()[]: ?float {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\terse_write\MyUnionEnum::float_field,
+    );
     return $this->float_field;
   }
 
@@ -631,6 +655,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function get_double_field()[]: ?float {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\terse_write\MyUnionEnum::double_field,
+    );
     return $this->double_field;
   }
 
@@ -651,6 +679,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function get_string_field()[]: ?string {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\terse_write\MyUnionEnum::string_field,
+    );
     return $this->string_field;
   }
 
@@ -671,6 +703,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function get_binary_field()[]: ?string {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\terse_write\MyUnionEnum::binary_field,
+    );
     return $this->binary_field;
   }
 
@@ -691,6 +727,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function get_enum_field()[]: ?\facebook\thrift\test\terse_write\MyEnum {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\terse_write\MyUnionEnum::enum_field,
+    );
     return $this->enum_field;
   }
 
@@ -711,6 +751,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function get_list_field()[]: ?Vector<int> {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\terse_write\MyUnionEnum::list_field,
+    );
     return $this->list_field;
   }
 
@@ -731,6 +775,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function get_set_field()[]: ?Set<int> {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\terse_write\MyUnionEnum::set_field,
+    );
     return $this->set_field;
   }
 
@@ -751,6 +799,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function get_map_field()[]: ?Map<int, int> {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\terse_write\MyUnionEnum::map_field,
+    );
     return $this->map_field;
   }
 
@@ -771,6 +823,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function get_struct_field()[]: ?\facebook\thrift\test\terse_write\MyStruct {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \facebook\thrift\test\terse_write\MyUnionEnum::struct_field,
+    );
     return $this->struct_field;
   }
 

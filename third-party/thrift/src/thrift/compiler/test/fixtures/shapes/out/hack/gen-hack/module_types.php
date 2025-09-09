@@ -143,6 +143,10 @@ class Union implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion
   }
 
   public function get_intValue()[]: ?int {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \test\fixtures\UnionEnum::intValue,
+    );
     return $this->intValue;
   }
 
@@ -163,6 +167,10 @@ class Union implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion
   }
 
   public function get_stringValue()[]: ?string {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \test\fixtures\UnionEnum::stringValue,
+    );
     return $this->stringValue;
   }
 

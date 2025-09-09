@@ -1121,6 +1121,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function get_first()[]: ?string {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \test\fixtures\basic-structured-annotations\MyUnionEnum::first,
+    );
     return $this->first;
   }
 
@@ -1141,6 +1145,10 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   }
 
   public function get_second()[]: ?int {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      \test\fixtures\basic-structured-annotations\MyUnionEnum::second,
+    );
     return $this->second;
   }
 

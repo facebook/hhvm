@@ -233,6 +233,10 @@ class U implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<UEn
   }
 
   public function get_i()[]: ?int {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      UEnum::i,
+    );
     return $this->i;
   }
 
@@ -253,6 +257,10 @@ class U implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<UEn
   }
 
   public function get_s()[]: ?string {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      UEnum::s,
+    );
     return $this->s;
   }
 

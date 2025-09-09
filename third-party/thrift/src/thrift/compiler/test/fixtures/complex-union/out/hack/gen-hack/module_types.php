@@ -210,6 +210,10 @@ class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   }
 
   public function get_intValue()[]: ?int {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      ComplexUnionEnum::intValue,
+    );
     return $this->intValue;
   }
 
@@ -230,6 +234,10 @@ class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   }
 
   public function get_stringValue()[]: ?string {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      ComplexUnionEnum::stringValue,
+    );
     return $this->stringValue;
   }
 
@@ -250,6 +258,10 @@ class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   }
 
   public function get_intListValue()[]: ?Vector<int> {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      ComplexUnionEnum::intListValue,
+    );
     return $this->intListValue;
   }
 
@@ -270,6 +282,10 @@ class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   }
 
   public function get_stringListValue()[]: ?Vector<string> {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      ComplexUnionEnum::stringListValue,
+    );
     return $this->stringListValue;
   }
 
@@ -290,6 +306,10 @@ class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   }
 
   public function get_typedefValue()[]: ?Map<int, string> {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      ComplexUnionEnum::typedefValue,
+    );
     return $this->typedefValue;
   }
 
@@ -310,6 +330,10 @@ class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   }
 
   public function get_stringRef()[]: ?string {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      ComplexUnionEnum::stringRef,
+    );
     return $this->stringRef;
   }
 
@@ -627,6 +651,10 @@ class ListUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftP
   }
 
   public function get_intListValue()[]: ?Vector<int> {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      ListUnionEnum::intListValue,
+    );
     return $this->intListValue;
   }
 
@@ -647,6 +675,10 @@ class ListUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftP
   }
 
   public function get_stringListValue()[]: ?Vector<string> {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      ListUnionEnum::stringListValue,
+    );
     return $this->stringListValue;
   }
 
@@ -856,6 +888,10 @@ class DataUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftP
   }
 
   public function get_binaryData()[]: ?string {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      DataUnionEnum::binaryData,
+    );
     return $this->binaryData;
   }
 
@@ -876,6 +912,10 @@ class DataUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftP
   }
 
   public function get_stringData()[]: ?string {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      DataUnionEnum::stringData,
+    );
     return $this->stringData;
   }
 
@@ -1247,6 +1287,10 @@ class ValUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftPr
   }
 
   public function get_v1()[]: ?Val {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      ValUnionEnum::v1,
+    );
     return $this->v1;
   }
 
@@ -1267,6 +1311,10 @@ class ValUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftPr
   }
 
   public function get_v2()[]: ?Val {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      ValUnionEnum::v2,
+    );
     return $this->v2;
   }
 
@@ -1459,6 +1507,10 @@ class VirtualComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata,
   }
 
   public function get_thingOne()[]: ?string {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      VirtualComplexUnionEnum::thingOne,
+    );
     return $this->thingOne;
   }
 
@@ -1479,6 +1531,10 @@ class VirtualComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata,
   }
 
   public function get_thingTwo()[]: ?string {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      VirtualComplexUnionEnum::thingTwo,
+    );
     return $this->thingTwo;
   }
 
@@ -1731,6 +1787,10 @@ class NonCopyableUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \I
   }
 
   public function get_s()[]: ?NonCopyableStruct {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      NonCopyableUnionEnum::s,
+    );
     return $this->s;
   }
 

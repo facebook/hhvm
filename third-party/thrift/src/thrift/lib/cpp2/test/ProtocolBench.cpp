@@ -26,10 +26,6 @@
 #include <folly/init/Init.h>
 #include <folly/portability/GFlags.h>
 
-#include <vector>
-
-using namespace std;
-using namespace folly;
 using namespace apache::thrift;
 using namespace thrift::benchmark;
 
@@ -74,17 +70,17 @@ template <
     typename Struct,
     typename Counter>
 void writeBench(size_t iters, Counter&&) {
-  BenchmarkSuspender susp;
+  folly::BenchmarkSuspender susp;
   auto strct = create<Struct>();
   protocol::Object obj;
   if constexpr (kSerializerMethod == SerializerMethod::Object) {
-    IOBufQueue q;
+    folly::IOBufQueue q;
     Serializer::serialize(strct, &q);
     obj = protocol::parseObject<GetReader<Serializer>>(*q.move());
   }
   susp.dismiss();
 
-  IOBufQueue q;
+  folly::IOBufQueue q;
   while (iters--) {
     if constexpr (kSerializerMethod == SerializerMethod::Object) {
       protocol::serializeObject<GetWriter<Serializer>>(obj, q);
@@ -110,9 +106,9 @@ template <
     typename Struct,
     typename Counter>
 void readBench(size_t iters, Counter&& counter) {
-  BenchmarkSuspender susp;
+  folly::BenchmarkSuspender susp;
   auto strct = create<Struct>();
-  IOBufQueue q;
+  folly::IOBufQueue q;
   Serializer::serialize(strct, &q);
   auto buf = q.move();
   // coalesce the IOBuf chain to test fast path
@@ -234,7 +230,7 @@ OpEncodeX(OpEncode, Compact)
 
 int main(int argc, char** argv) {
   folly::Init init(&argc, &argv);
-  runBenchmarks();
+  folly::runBenchmarks();
   return 0;
 }
 // clang-format on

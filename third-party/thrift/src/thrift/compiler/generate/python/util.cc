@@ -92,6 +92,10 @@ std::unordered_set<const t_program*> needed_includes_by_patch(
   std::unordered_set<const t_type*> seen;
   const_ast_visitor visitor;
   visitor.add_root_definition_visitor([&](const t_named& def) {
+    if (!dynamic_cast<const t_structured*>(&def)) {
+      // On the top level, we only generate patch for structured.
+      return;
+    }
     if (auto type = dynamic_cast<const t_type*>(&def)) {
       get_needed_includes_by_patch_impl(root, *type, seen, programs);
     }

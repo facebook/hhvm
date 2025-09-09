@@ -37,6 +37,3 @@ import apache.thrift.type.type.thrift_types as _fbthrift__apache__thrift__type__
 import apache.thrift.type.gen_safe_patch_type.thrift_types as _fbthrift_safe_patch_types
 
 
-import apache.thrift.type.type_rep.thrift_types as _fbthrift__apache__thrift__type__type_rep__thrift_types
-import apache.thrift.type.type_rep.thrift_patch
-

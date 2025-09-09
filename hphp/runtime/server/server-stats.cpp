@@ -754,7 +754,6 @@ void ServerStatsHelper::logTime(const std::string& prefix,
 
 void ServerStatsHelper::logTime(const std::string& prefix,
                                 const int64_t& start, const int64_t& end) {
-  assert(start >= 0 && end >= 0 && end >= start);
   ServerStats::Log(prefix + m_section, end - start);
 }
 

@@ -1307,6 +1307,21 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<java__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(java__types::Adapter {
+                        adapterClassName: "com.facebook.thrift.my.Adapter1".to_owned(),
+                        typeClassName: "com.facebook.thrift.my.AdaptedI32_5137_1".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <java__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
+                }
             },
             2 => {
 
@@ -1347,6 +1362,21 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<java__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(java__types::Adapter {
+                        adapterClassName: "com.facebook.thrift.my.Adapter1".to_owned(),
+                        typeClassName: "com.facebook.thrift.my.AdaptedI32_5137_1".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <java__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
+                }
             },
             3 => {
 
@@ -1386,6 +1416,21 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<java__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(java__types::Adapter {
+                        adapterClassName: "com.facebook.thrift.my.Adapter1".to_owned(),
+                        typeClassName: "com.facebook.thrift.my.AdaptedI32_5137_1".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <java__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             4 => {
@@ -1431,6 +1476,21 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<java__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(java__types::Adapter {
+                        adapterClassName: "com.facebook.thrift.my.Adapter3".to_owned(),
+                        typeClassName: "com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <java__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
+                }
             },
             7 => {
 
@@ -1471,6 +1531,21 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<java__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(java__types::Adapter {
+                        adapterClassName: "com.facebook.thrift.my.Adapter3".to_owned(),
+                        typeClassName: "com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <java__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
+                }
             },
             8 => {
 
@@ -1510,6 +1585,21 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<java__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(java__types::Adapter {
+                        adapterClassName: "com.facebook.thrift.my.Adapter3".to_owned(),
+                        typeClassName: "com.facebook.thrift.my.AdaptedBinary_5673_3".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <java__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             9 => {
@@ -1557,6 +1647,21 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<java__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(java__types::Adapter {
+                        adapterClassName: "com.facebook.thrift.my.Adapter2".to_owned(),
+                        typeClassName: "com.facebook.thrift.my.AdaptedMyI64_2".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <java__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             11 => {
@@ -1845,6 +1950,21 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<java__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(java__types::Adapter {
+                        adapterClassName: "com.facebook.thrift.my.Adapter1".to_owned(),
+                        typeClassName: "com.facebook.thrift.my.AdaptedI32_5137_1".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <java__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
+                }
             },
             4 => {
             },
@@ -1887,6 +2007,21 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<java__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(java__types::Adapter {
+                        adapterClassName: "com.facebook.thrift.my.Adapter3".to_owned(),
+                        typeClassName: "com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <java__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
+                }
             },
             8 => {
 
@@ -1926,6 +2061,21 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<java__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(java__types::Adapter {
+                        adapterClassName: "com.facebook.thrift.my.Adapter1".to_owned(),
+                        typeClassName: "com.facebook.thrift.my.AdaptedBinary_5673_1".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <java__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             9 => {
@@ -2782,6 +2932,21 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<java__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(java__types::Adapter {
+                        adapterClassName: "com.facebook.thrift.my.Adapter1".to_owned(),
+                        typeClassName: "com.facebook.thrift.my.AdaptedI32_1".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <java__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
+                }
             },
             2 => {
 
@@ -2860,6 +3025,21 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<java__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(java__types::Adapter {
+                        adapterClassName: "com.facebook.thrift.my.Adapter1".to_owned(),
+                        typeClassName: "com.facebook.thrift.my.AdaptedI32_1".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <java__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             4 => {

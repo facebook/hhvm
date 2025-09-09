@@ -101,7 +101,7 @@ oprot.writeI32(_iter0);
 
           _chain.postRead(_data);
 
-          reactor.core.publisher.Mono<Integer> _delegateResponse =
+          reactor.core.publisher.Mono<com.facebook.thrift.my.AdaptedI32_1> _delegateResponse =
             _delegate
               .func(arg1, arg2, arg3)
               .doFirst(() -> com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext()));

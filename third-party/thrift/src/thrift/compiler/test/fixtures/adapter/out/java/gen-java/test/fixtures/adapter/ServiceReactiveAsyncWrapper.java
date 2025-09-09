@@ -28,12 +28,12 @@ public class ServiceReactiveAsyncWrapper
   }
 
   @java.lang.Override
-  public com.google.common.util.concurrent.ListenableFuture<Integer> func(final String arg1, final String arg2, final test.fixtures.adapter.Foo arg3) {
+  public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.my.AdaptedI32_1> func(final String arg1, final String arg2, final test.fixtures.adapter.Foo arg3) {
       return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.func(arg1, arg2, arg3));
   }
 
   @java.lang.Override
-  public com.google.common.util.concurrent.ListenableFuture<Integer> func(
+  public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.my.AdaptedI32_1> func(
     final String arg1,
     final String arg2,
     final test.fixtures.adapter.Foo arg3,
@@ -42,7 +42,7 @@ public class ServiceReactiveAsyncWrapper
   }
 
   @java.lang.Override
-  public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<Integer>> funcWrapper(
+  public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<com.facebook.thrift.my.AdaptedI32_1>> funcWrapper(
     final String arg1,
     final String arg2,
     final test.fixtures.adapter.Foo arg3,

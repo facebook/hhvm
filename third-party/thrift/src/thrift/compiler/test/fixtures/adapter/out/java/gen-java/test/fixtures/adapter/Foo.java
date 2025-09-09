@@ -26,17 +26,17 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 public final class Foo implements com.facebook.thrift.payload.ThriftSerializable {
     @ThriftConstructor
     public Foo(
-        @com.facebook.swift.codec.ThriftField(value=1, name="intField", requiredness=Requiredness.NONE) final int intField,
-        @com.facebook.swift.codec.ThriftField(value=2, name="optionalIntField", requiredness=Requiredness.OPTIONAL) final Integer optionalIntField,
-        @com.facebook.swift.codec.ThriftField(value=3, name="intFieldWithDefault", requiredness=Requiredness.NONE) final int intFieldWithDefault,
-        @com.facebook.swift.codec.ThriftField(value=4, name="setField", requiredness=Requiredness.NONE) final Set<String> setField,
-        @com.facebook.swift.codec.ThriftField(value=5, name="optionalSetField", requiredness=Requiredness.OPTIONAL) final Set<String> optionalSetField,
-        @com.facebook.swift.codec.ThriftField(value=6, name="mapField", requiredness=Requiredness.NONE) final Map<String, List<String>> mapField,
-        @com.facebook.swift.codec.ThriftField(value=7, name="optionalMapField", requiredness=Requiredness.OPTIONAL) final Map<String, List<String>> optionalMapField,
-        @com.facebook.swift.codec.ThriftField(value=8, name="binaryField", requiredness=Requiredness.NONE) final byte[] binaryField,
-        @com.facebook.swift.codec.ThriftField(value=9, name="longField", requiredness=Requiredness.NONE) final long longField,
-        @com.facebook.swift.codec.ThriftField(value=10, name="adaptedLongField", requiredness=Requiredness.NONE) final long adaptedLongField,
-        @com.facebook.swift.codec.ThriftField(value=11, name="doubleAdaptedField", requiredness=Requiredness.NONE) final long doubleAdaptedField,
+        @com.facebook.swift.codec.ThriftField(value=1, name="intField", requiredness=Requiredness.NONE) final com.facebook.thrift.my.AdaptedI32_5137_1 intField,
+        @com.facebook.swift.codec.ThriftField(value=2, name="optionalIntField", requiredness=Requiredness.OPTIONAL) final com.facebook.thrift.my.AdaptedI32_5137_1 optionalIntField,
+        @com.facebook.swift.codec.ThriftField(value=3, name="intFieldWithDefault", requiredness=Requiredness.NONE) final com.facebook.thrift.my.AdaptedI32_5137_1 intFieldWithDefault,
+        @com.facebook.swift.codec.ThriftField(value=4, name="setField", requiredness=Requiredness.NONE) final com.facebook.thrift.my.AdaptedSet_2 setField,
+        @com.facebook.swift.codec.ThriftField(value=5, name="optionalSetField", requiredness=Requiredness.OPTIONAL) final com.facebook.thrift.my.AdaptedSet_2 optionalSetField,
+        @com.facebook.swift.codec.ThriftField(value=6, name="mapField", requiredness=Requiredness.NONE) final com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3 mapField,
+        @com.facebook.swift.codec.ThriftField(value=7, name="optionalMapField", requiredness=Requiredness.OPTIONAL) final com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3 optionalMapField,
+        @com.facebook.swift.codec.ThriftField(value=8, name="binaryField", requiredness=Requiredness.NONE) final com.facebook.thrift.my.AdaptedBinary_5673_3 binaryField,
+        @com.facebook.swift.codec.ThriftField(value=9, name="longField", requiredness=Requiredness.NONE) final com.facebook.thrift.my.AdaptedI64_1 longField,
+        @com.facebook.swift.codec.ThriftField(value=10, name="adaptedLongField", requiredness=Requiredness.NONE) final com.facebook.thrift.my.AdaptedMyI64_2 adaptedLongField,
+        @com.facebook.swift.codec.ThriftField(value=11, name="doubleAdaptedField", requiredness=Requiredness.NONE) final com.facebook.thrift.my.AdaptedI64_1 doubleAdaptedField,
         @com.facebook.swift.codec.ThriftField(value=12, name="adapted_list", requiredness=Requiredness.NONE) final List<Integer> adaptedList,
         @com.facebook.swift.codec.ThriftField(value=13, name="adapted_set", requiredness=Requiredness.NONE) final Set<Integer> adaptedSet,
         @com.facebook.swift.codec.ThriftField(value=14, name="adapted_map", requiredness=Requiredness.NONE) final Map<String, Integer> adaptedMap,
@@ -61,17 +61,17 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
     
     @ThriftConstructor
     protected Foo() {
-      this.intField = 0;
+      this.intField = null;
       this.optionalIntField = null;
-      this.intFieldWithDefault = 13;
+      this.intFieldWithDefault = _intFieldWithDefault_Adapter.fromThrift(13);
       this.setField = null;
       this.optionalSetField = null;
       this.mapField = null;
       this.optionalMapField = null;
       this.binaryField = null;
-      this.longField = 0L;
-      this.adaptedLongField = 0L;
-      this.doubleAdaptedField = 0L;
+      this.longField = null;
+      this.adaptedLongField = null;
+      this.doubleAdaptedField = null;
       this.adaptedList = null;
       this.adaptedSet = null;
       this.adaptedMap = null;
@@ -87,98 +87,98 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
     }
 
     public static class Builder {
-        private int intField = 0;
-        private Integer optionalIntField = null;
-        private int intFieldWithDefault = 13;
-        private Set<String> setField = null;
-        private Set<String> optionalSetField = null;
-        private Map<String, List<String>> mapField = null;
-        private Map<String, List<String>> optionalMapField = null;
-        private byte[] binaryField = null;
-        private long longField = 0L;
-        private long adaptedLongField = 0L;
-        private long doubleAdaptedField = 0L;
+        private com.facebook.thrift.my.AdaptedI32_5137_1 intField = null;
+        private com.facebook.thrift.my.AdaptedI32_5137_1 optionalIntField = null;
+        private com.facebook.thrift.my.AdaptedI32_5137_1 intFieldWithDefault = _intFieldWithDefault_Adapter.fromThrift(13);
+        private com.facebook.thrift.my.AdaptedSet_2 setField = null;
+        private com.facebook.thrift.my.AdaptedSet_2 optionalSetField = null;
+        private com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3 mapField = null;
+        private com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3 optionalMapField = null;
+        private com.facebook.thrift.my.AdaptedBinary_5673_3 binaryField = null;
+        private com.facebook.thrift.my.AdaptedI64_1 longField = null;
+        private com.facebook.thrift.my.AdaptedMyI64_2 adaptedLongField = null;
+        private com.facebook.thrift.my.AdaptedI64_1 doubleAdaptedField = null;
         private List<Integer> adaptedList = null;
         private Set<Integer> adaptedSet = null;
         private Map<String, Integer> adaptedMap = null;
         private List<List<Map<Integer, Integer>>> adaptedListNested = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="intField", requiredness=Requiredness.NONE)    public Builder setIntField(int intField) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="intField", requiredness=Requiredness.NONE)    public Builder setIntField(com.facebook.thrift.my.AdaptedI32_5137_1 intField) {
             this.intField = intField;
             return this;
         }
     
-        public int getIntField() { return intField; }
+        public com.facebook.thrift.my.AdaptedI32_5137_1 getIntField() { return intField; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="optionalIntField", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalIntField(Integer optionalIntField) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="optionalIntField", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalIntField(com.facebook.thrift.my.AdaptedI32_5137_1 optionalIntField) {
             this.optionalIntField = optionalIntField;
             return this;
         }
     
-        public Integer getOptionalIntField() { return optionalIntField; }
+        public com.facebook.thrift.my.AdaptedI32_5137_1 getOptionalIntField() { return optionalIntField; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="intFieldWithDefault", requiredness=Requiredness.NONE)    public Builder setIntFieldWithDefault(int intFieldWithDefault) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="intFieldWithDefault", requiredness=Requiredness.NONE)    public Builder setIntFieldWithDefault(com.facebook.thrift.my.AdaptedI32_5137_1 intFieldWithDefault) {
             this.intFieldWithDefault = intFieldWithDefault;
             return this;
         }
     
-        public int getIntFieldWithDefault() { return intFieldWithDefault; }
+        public com.facebook.thrift.my.AdaptedI32_5137_1 getIntFieldWithDefault() { return intFieldWithDefault; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="setField", requiredness=Requiredness.NONE)    public Builder setSetField(Set<String> setField) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="setField", requiredness=Requiredness.NONE)    public Builder setSetField(com.facebook.thrift.my.AdaptedSet_2 setField) {
             this.setField = setField;
             return this;
         }
     
-        public Set<String> getSetField() { return setField; }
+        public com.facebook.thrift.my.AdaptedSet_2 getSetField() { return setField; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="optionalSetField", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalSetField(Set<String> optionalSetField) {
+            @com.facebook.swift.codec.ThriftField(value=5, name="optionalSetField", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalSetField(com.facebook.thrift.my.AdaptedSet_2 optionalSetField) {
             this.optionalSetField = optionalSetField;
             return this;
         }
     
-        public Set<String> getOptionalSetField() { return optionalSetField; }
+        public com.facebook.thrift.my.AdaptedSet_2 getOptionalSetField() { return optionalSetField; }
     
-            @com.facebook.swift.codec.ThriftField(value=6, name="mapField", requiredness=Requiredness.NONE)    public Builder setMapField(Map<String, List<String>> mapField) {
+            @com.facebook.swift.codec.ThriftField(value=6, name="mapField", requiredness=Requiredness.NONE)    public Builder setMapField(com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3 mapField) {
             this.mapField = mapField;
             return this;
         }
     
-        public Map<String, List<String>> getMapField() { return mapField; }
+        public com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3 getMapField() { return mapField; }
     
-            @com.facebook.swift.codec.ThriftField(value=7, name="optionalMapField", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalMapField(Map<String, List<String>> optionalMapField) {
+            @com.facebook.swift.codec.ThriftField(value=7, name="optionalMapField", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalMapField(com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3 optionalMapField) {
             this.optionalMapField = optionalMapField;
             return this;
         }
     
-        public Map<String, List<String>> getOptionalMapField() { return optionalMapField; }
+        public com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3 getOptionalMapField() { return optionalMapField; }
     
-            @com.facebook.swift.codec.ThriftField(value=8, name="binaryField", requiredness=Requiredness.NONE)    public Builder setBinaryField(byte[] binaryField) {
+            @com.facebook.swift.codec.ThriftField(value=8, name="binaryField", requiredness=Requiredness.NONE)    public Builder setBinaryField(com.facebook.thrift.my.AdaptedBinary_5673_3 binaryField) {
             this.binaryField = binaryField;
             return this;
         }
     
-        public byte[] getBinaryField() { return binaryField; }
+        public com.facebook.thrift.my.AdaptedBinary_5673_3 getBinaryField() { return binaryField; }
     
-            @com.facebook.swift.codec.ThriftField(value=9, name="longField", requiredness=Requiredness.NONE)    public Builder setLongField(long longField) {
+            @com.facebook.swift.codec.ThriftField(value=9, name="longField", requiredness=Requiredness.NONE)    public Builder setLongField(com.facebook.thrift.my.AdaptedI64_1 longField) {
             this.longField = longField;
             return this;
         }
     
-        public long getLongField() { return longField; }
+        public com.facebook.thrift.my.AdaptedI64_1 getLongField() { return longField; }
     
-            @com.facebook.swift.codec.ThriftField(value=10, name="adaptedLongField", requiredness=Requiredness.NONE)    public Builder setAdaptedLongField(long adaptedLongField) {
+            @com.facebook.swift.codec.ThriftField(value=10, name="adaptedLongField", requiredness=Requiredness.NONE)    public Builder setAdaptedLongField(com.facebook.thrift.my.AdaptedMyI64_2 adaptedLongField) {
             this.adaptedLongField = adaptedLongField;
             return this;
         }
     
-        public long getAdaptedLongField() { return adaptedLongField; }
+        public com.facebook.thrift.my.AdaptedMyI64_2 getAdaptedLongField() { return adaptedLongField; }
     
-            @com.facebook.swift.codec.ThriftField(value=11, name="doubleAdaptedField", requiredness=Requiredness.NONE)    public Builder setDoubleAdaptedField(long doubleAdaptedField) {
+            @com.facebook.swift.codec.ThriftField(value=11, name="doubleAdaptedField", requiredness=Requiredness.NONE)    public Builder setDoubleAdaptedField(com.facebook.thrift.my.AdaptedI64_1 doubleAdaptedField) {
             this.doubleAdaptedField = doubleAdaptedField;
             return this;
         }
     
-        public long getDoubleAdaptedField() { return doubleAdaptedField; }
+        public com.facebook.thrift.my.AdaptedI64_1 getDoubleAdaptedField() { return doubleAdaptedField; }
     
             @com.facebook.swift.codec.ThriftField(value=12, name="adapted_list", requiredness=Requiredness.NONE)    public Builder setAdaptedList(List<Integer> adaptedList) {
             this.adaptedList = adaptedList;
@@ -250,41 +250,61 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
         }
     }
     
+            private static final com.facebook.thrift.adapter.TypeAdapter<Integer, com.facebook.thrift.my.AdaptedI32_5137_1> _intField_Adapter = new com.facebook.thrift.my.Adapter1();
+    
+            private static final com.facebook.thrift.adapter.TypeAdapter<Integer, com.facebook.thrift.my.AdaptedI32_5137_1> _optionalIntField_Adapter = new com.facebook.thrift.my.Adapter1();
+    
+            private static final com.facebook.thrift.adapter.TypeAdapter<Integer, com.facebook.thrift.my.AdaptedI32_5137_1> _intFieldWithDefault_Adapter = new com.facebook.thrift.my.Adapter1();
+    private static final com.facebook.thrift.adapter.TypeAdapter<Set<String>, com.facebook.thrift.my.AdaptedSet_2> __SetWithAdapter_Adapter = new com.facebook.thrift.my.Adapter2();
+    
+            private static final com.facebook.thrift.adapter.TypeAdapter<Map<String, com.facebook.thrift.my.AdaptedList_2>, com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3> _mapField_Adapter = new com.facebook.thrift.my.Adapter3();
+    private static final com.facebook.thrift.adapter.TypeAdapter<List<com.facebook.thrift.my.AdaptedString_1>, com.facebook.thrift.my.AdaptedList_2> __ListWithElemAdapter_withAdapter_2312_Adapter = new com.facebook.thrift.my.Adapter2();
+    private static final com.facebook.thrift.adapter.TypeAdapter<List<com.facebook.thrift.my.AdaptedString_1>, com.facebook.thrift.my.AdaptedList_2> __ListWithElemAdapter_withAdapter_Adapter = new com.facebook.thrift.my.Adapter2();
+    private static final com.facebook.thrift.adapter.TypeAdapter<String, com.facebook.thrift.my.AdaptedString_1> __StringWithAdapter_Adapter = new com.facebook.thrift.my.Adapter1();
+    
+            private static final com.facebook.thrift.adapter.TypeAdapter<Map<String, com.facebook.thrift.my.AdaptedList_2>, com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3> _optionalMapField_Adapter = new com.facebook.thrift.my.Adapter3();
+    
+            private static final com.facebook.thrift.adapter.TypeAdapter<io.netty.buffer.ByteBuf, com.facebook.thrift.my.AdaptedBinary_5673_3> _binaryField_Adapter = new com.facebook.thrift.my.Adapter3();
+    private static final com.facebook.thrift.adapter.TypeAdapter<Long, com.facebook.thrift.my.AdaptedI64_1> __MyI64_Adapter = new com.facebook.thrift.my.Adapter1();
+    
+            private static final com.facebook.thrift.adapter.TypeAdapter<com.facebook.thrift.my.AdaptedI64_1, com.facebook.thrift.my.AdaptedMyI64_2> _adaptedLongField_Adapter = new com.facebook.thrift.my.Adapter2();
+    private static final com.facebook.thrift.adapter.TypeAdapter<Long, com.facebook.thrift.my.AdaptedI64_1> __DoubleTypedefI64_Adapter = new com.facebook.thrift.my.Adapter1();
+
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("Foo");
-    private final int intField;
+    private final com.facebook.thrift.my.AdaptedI32_5137_1 intField;
     public static final int _INTFIELD = 1;
     private static final TField INT_FIELD_FIELD_DESC = new TField("intField", TType.I32, (short)1);
-        private final Integer optionalIntField;
+        private final com.facebook.thrift.my.AdaptedI32_5137_1 optionalIntField;
     public static final int _OPTIONALINTFIELD = 2;
     private static final TField OPTIONAL_INT_FIELD_FIELD_DESC = new TField("optionalIntField", TType.I32, (short)2);
-        private final int intFieldWithDefault;
+        private final com.facebook.thrift.my.AdaptedI32_5137_1 intFieldWithDefault;
     public static final int _INTFIELDWITHDEFAULT = 3;
     private static final TField INT_FIELD_WITH_DEFAULT_FIELD_DESC = new TField("intFieldWithDefault", TType.I32, (short)3);
-        private final Set<String> setField;
+        private final com.facebook.thrift.my.AdaptedSet_2 setField;
     public static final int _SETFIELD = 4;
     private static final TField SET_FIELD_FIELD_DESC = new TField("setField", TType.SET, (short)4);
-        private final Set<String> optionalSetField;
+        private final com.facebook.thrift.my.AdaptedSet_2 optionalSetField;
     public static final int _OPTIONALSETFIELD = 5;
     private static final TField OPTIONAL_SET_FIELD_FIELD_DESC = new TField("optionalSetField", TType.SET, (short)5);
-        private final Map<String, List<String>> mapField;
+        private final com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3 mapField;
     public static final int _MAPFIELD = 6;
     private static final TField MAP_FIELD_FIELD_DESC = new TField("mapField", TType.MAP, (short)6);
-        private final Map<String, List<String>> optionalMapField;
+        private final com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3 optionalMapField;
     public static final int _OPTIONALMAPFIELD = 7;
     private static final TField OPTIONAL_MAP_FIELD_FIELD_DESC = new TField("optionalMapField", TType.MAP, (short)7);
-        private final byte[] binaryField;
+        private final com.facebook.thrift.my.AdaptedBinary_5673_3 binaryField;
     public static final int _BINARYFIELD = 8;
     private static final TField BINARY_FIELD_FIELD_DESC = new TField("binaryField", TType.STRING, (short)8);
-        private final long longField;
+        private final com.facebook.thrift.my.AdaptedI64_1 longField;
     public static final int _LONGFIELD = 9;
     private static final TField LONG_FIELD_FIELD_DESC = new TField("longField", TType.I64, (short)9);
-        private final long adaptedLongField;
+        private final com.facebook.thrift.my.AdaptedMyI64_2 adaptedLongField;
     public static final int _ADAPTEDLONGFIELD = 10;
     private static final TField ADAPTED_LONG_FIELD_FIELD_DESC = new TField("adaptedLongField", TType.I64, (short)10);
-        private final long doubleAdaptedField;
+        private final com.facebook.thrift.my.AdaptedI64_1 doubleAdaptedField;
     public static final int _DOUBLEADAPTEDFIELD = 11;
     private static final TField DOUBLE_ADAPTED_FIELD_FIELD_DESC = new TField("doubleAdaptedField", TType.I64, (short)11);
         private final List<Integer> adaptedList;
@@ -352,57 +372,57 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
     
     
     @com.facebook.swift.codec.ThriftField(value=1, name="intField", requiredness=Requiredness.NONE)
-    public int getIntField() { return intField; }
+    public com.facebook.thrift.my.AdaptedI32_5137_1 getIntField() { return intField; }
 
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="optionalIntField", requiredness=Requiredness.OPTIONAL)
-    public Integer getOptionalIntField() { return optionalIntField; }
+    public com.facebook.thrift.my.AdaptedI32_5137_1 getOptionalIntField() { return optionalIntField; }
 
     
     
     @com.facebook.swift.codec.ThriftField(value=3, name="intFieldWithDefault", requiredness=Requiredness.NONE)
-    public int getIntFieldWithDefault() { return intFieldWithDefault; }
+    public com.facebook.thrift.my.AdaptedI32_5137_1 getIntFieldWithDefault() { return intFieldWithDefault; }
 
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="setField", requiredness=Requiredness.NONE)
-    public Set<String> getSetField() { return setField; }
+    public com.facebook.thrift.my.AdaptedSet_2 getSetField() { return setField; }
 
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="optionalSetField", requiredness=Requiredness.OPTIONAL)
-    public Set<String> getOptionalSetField() { return optionalSetField; }
+    public com.facebook.thrift.my.AdaptedSet_2 getOptionalSetField() { return optionalSetField; }
 
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="mapField", requiredness=Requiredness.NONE)
-    public Map<String, List<String>> getMapField() { return mapField; }
+    public com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3 getMapField() { return mapField; }
 
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=7, name="optionalMapField", requiredness=Requiredness.OPTIONAL)
-    public Map<String, List<String>> getOptionalMapField() { return optionalMapField; }
+    public com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3 getOptionalMapField() { return optionalMapField; }
 
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="binaryField", requiredness=Requiredness.NONE)
-    public byte[] getBinaryField() { return binaryField; }
+    public com.facebook.thrift.my.AdaptedBinary_5673_3 getBinaryField() { return binaryField; }
 
     
     
     @com.facebook.swift.codec.ThriftField(value=9, name="longField", requiredness=Requiredness.NONE)
-    public long getLongField() { return longField; }
+    public com.facebook.thrift.my.AdaptedI64_1 getLongField() { return longField; }
 
     
     
     @com.facebook.swift.codec.ThriftField(value=10, name="adaptedLongField", requiredness=Requiredness.NONE)
-    public long getAdaptedLongField() { return adaptedLongField; }
+    public com.facebook.thrift.my.AdaptedMyI64_2 getAdaptedLongField() { return adaptedLongField; }
 
     
     
     @com.facebook.swift.codec.ThriftField(value=11, name="doubleAdaptedField", requiredness=Requiredness.NONE)
-    public long getDoubleAdaptedField() { return doubleAdaptedField; }
+    public com.facebook.thrift.my.AdaptedI64_1 getDoubleAdaptedField() { return doubleAdaptedField; }
 
     
     @Nullable
@@ -457,17 +477,17 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
         Foo other = (Foo)o;
     
         return
-            Objects.equals(intField, other.intField) &&
-            Objects.equals(optionalIntField, other.optionalIntField) &&
-            Objects.equals(intFieldWithDefault, other.intFieldWithDefault) &&
-            Objects.equals(setField, other.setField) &&
-            Objects.equals(optionalSetField, other.optionalSetField) &&
-            Objects.equals(mapField, other.mapField) &&
-            Objects.equals(optionalMapField, other.optionalMapField) &&
-            Arrays.equals(binaryField, other.binaryField) &&
-            Objects.equals(longField, other.longField) &&
-            Objects.equals(adaptedLongField, other.adaptedLongField) &&
-            Objects.equals(doubleAdaptedField, other.doubleAdaptedField) &&
+            _intField_Adapter.equals(intField, other.intField) &&
+            _optionalIntField_Adapter.equals(optionalIntField, other.optionalIntField) &&
+            _intFieldWithDefault_Adapter.equals(intFieldWithDefault, other.intFieldWithDefault) &&
+            __SetWithAdapter_Adapter.equals(setField, other.setField) && 
+            __SetWithAdapter_Adapter.equals(optionalSetField, other.optionalSetField) && 
+            _mapField_Adapter.equals(mapField, other.mapField) &&
+            _optionalMapField_Adapter.equals(optionalMapField, other.optionalMapField) &&
+            _binaryField_Adapter.equals(binaryField, other.binaryField) &&
+            __MyI64_Adapter.equals(longField, other.longField) && 
+            _adaptedLongField_Adapter.equals(adaptedLongField, other.adaptedLongField) &&
+            __DoubleTypedefI64_Adapter.equals(doubleAdaptedField, other.doubleAdaptedField) && 
             Objects.equals(adaptedList, other.adaptedList) &&
             Objects.equals(adaptedSet, other.adaptedSet) &&
             Objects.equals(adaptedMap, other.adaptedMap) &&
@@ -512,7 +532,7 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
         case _INTFIELD:
           if (__field.type == TType.I32) {
             int intField = oprot.readI32();
-            builder.setIntField(intField);
+            builder.setIntField(_intField_Adapter.fromThrift(intField));
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
@@ -520,7 +540,7 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
         case _OPTIONALINTFIELD:
           if (__field.type == TType.I32) {
             Integer  optionalIntField = oprot.readI32();
-            builder.setOptionalIntField(optionalIntField);
+            builder.setOptionalIntField(_optionalIntField_Adapter.fromThrift(optionalIntField));
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
@@ -528,7 +548,7 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
         case _INTFIELDWITHDEFAULT:
           if (__field.type == TType.I32) {
             int intFieldWithDefault = oprot.readI32();
-            builder.setIntFieldWithDefault(intFieldWithDefault);
+            builder.setIntFieldWithDefault(_intFieldWithDefault_Adapter.fromThrift(intFieldWithDefault));
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
@@ -546,7 +566,7 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
                 }
                 oprot.readSetEnd();
                 }
-            builder.setSetField(setField);
+            builder.setSetField(__SetWithAdapter_Adapter.fromThrift(setField));
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
@@ -564,81 +584,81 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
                 }
                 oprot.readSetEnd();
                 }
-            builder.setOptionalSetField(optionalSetField);
+            builder.setOptionalSetField(__SetWithAdapter_Adapter.fromThrift(optionalSetField));
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
           break;
         case _MAPFIELD:
           if (__field.type == TType.MAP) {
-            Map<String, List<String>> mapField;
+            Map<String, com.facebook.thrift.my.AdaptedList_2> mapField;
                 {
                 TMap _map = oprot.readMapBegin();
-                mapField = new HashMap<String, List<String>>(Math.max(0, _map.size));
+                mapField = new HashMap<String, com.facebook.thrift.my.AdaptedList_2>(Math.max(0, _map.size));
                 for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
                     
                     String _key1 = oprot.readString();
-                    List<String> _value1;
+                    List<com.facebook.thrift.my.AdaptedString_1> _value1;
                                 {
                                 TList _list1 = oprot.readListBegin();
-                                _value1 = new ArrayList<String>(Math.max(0, _list1.size));
+                                _value1 = new ArrayList<com.facebook.thrift.my.AdaptedString_1>(Math.max(0, _list1.size));
                                 for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
                                     
                                     
                                     String _value2 = oprot.readString();
                                     
                                     
-                                    _value1.add(_value2);
+                                    _value1.add(__StringWithAdapter_Adapter.fromThrift(_value2));
                                     
                                 }
                                 oprot.readListEnd();
                                 }
-                    mapField.put(_key1, _value1);
+                    mapField.put(_key1, __ListWithElemAdapter_withAdapter_2312_Adapter.fromThrift(_value1));
                 }
                 }
                 oprot.readMapEnd();
-            builder.setMapField(mapField);
+            builder.setMapField(_mapField_Adapter.fromThrift(mapField));
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
           break;
         case _OPTIONALMAPFIELD:
           if (__field.type == TType.MAP) {
-            Map<String, List<String>> optionalMapField;
+            Map<String, com.facebook.thrift.my.AdaptedList_2> optionalMapField;
                 {
                 TMap _map = oprot.readMapBegin();
-                optionalMapField = new HashMap<String, List<String>>(Math.max(0, _map.size));
+                optionalMapField = new HashMap<String, com.facebook.thrift.my.AdaptedList_2>(Math.max(0, _map.size));
                 for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
                     
                     String _key1 = oprot.readString();
-                    List<String> _value1;
+                    List<com.facebook.thrift.my.AdaptedString_1> _value1;
                                 {
                                 TList _list1 = oprot.readListBegin();
-                                _value1 = new ArrayList<String>(Math.max(0, _list1.size));
+                                _value1 = new ArrayList<com.facebook.thrift.my.AdaptedString_1>(Math.max(0, _list1.size));
                                 for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
                                     
                                     
                                     String _value2 = oprot.readString();
                                     
                                     
-                                    _value1.add(_value2);
+                                    _value1.add(__StringWithAdapter_Adapter.fromThrift(_value2));
                                     
                                 }
                                 oprot.readListEnd();
                                 }
-                    optionalMapField.put(_key1, _value1);
+                    optionalMapField.put(_key1, __ListWithElemAdapter_withAdapter_2312_Adapter.fromThrift(_value1));
                 }
                 }
                 oprot.readMapEnd();
-            builder.setOptionalMapField(optionalMapField);
+            builder.setOptionalMapField(_optionalMapField_Adapter.fromThrift(optionalMapField));
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
           break;
         case _BINARYFIELD:
           if (__field.type == TType.STRING) {
-            byte[] binaryField = oprot.readBinary().array();
-            builder.setBinaryField(binaryField);
+            io.netty.buffer.ByteBuf binaryField = org.apache.thrift.protocol.TProtocolUtil.readBinaryAsByteBuf(oprot);
+            builder.setBinaryField(_binaryField_Adapter.fromThrift(binaryField));
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
@@ -646,7 +666,7 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
         case _LONGFIELD:
           if (__field.type == TType.I64) {
             long longField = oprot.readI64();
-            builder.setLongField(longField);
+            builder.setLongField(__MyI64_Adapter.fromThrift(longField));
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
@@ -654,7 +674,7 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
         case _ADAPTEDLONGFIELD:
           if (__field.type == TType.I64) {
             long adaptedLongField = oprot.readI64();
-            builder.setAdaptedLongField(adaptedLongField);
+            builder.setAdaptedLongField(_adaptedLongField_Adapter.fromThrift(__MyI64_Adapter.fromThrift(adaptedLongField)));
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
@@ -662,7 +682,7 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
         case _DOUBLEADAPTEDFIELD:
           if (__field.type == TType.I64) {
             long doubleAdaptedField = oprot.readI64();
-            builder.setDoubleAdaptedField(doubleAdaptedField);
+            builder.setDoubleAdaptedField(__DoubleTypedefI64_Adapter.fromThrift(doubleAdaptedField));
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
@@ -783,17 +803,25 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
 
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      oprot.writeFieldBegin(INT_FIELD_FIELD_DESC);
-      oprot.writeI32(this.intField);
-      oprot.writeFieldEnd();
-      if (optionalIntField != null) {
-        oprot.writeFieldBegin(OPTIONAL_INT_FIELD_FIELD_DESC);
-        oprot.writeI32(this.optionalIntField);
+      Integer intField = _intField_Adapter.toThrift(this.intField);
+      if (intField != null) {
+        oprot.writeFieldBegin(INT_FIELD_FIELD_DESC);
+        oprot.writeI32(intField);
         oprot.writeFieldEnd();
       }
-      oprot.writeFieldBegin(INT_FIELD_WITH_DEFAULT_FIELD_DESC);
-      oprot.writeI32(this.intFieldWithDefault);
-      oprot.writeFieldEnd();
+      Integer optionalIntField = _optionalIntField_Adapter.toThrift(this.optionalIntField);
+      if (optionalIntField != null) {
+        oprot.writeFieldBegin(OPTIONAL_INT_FIELD_FIELD_DESC);
+        oprot.writeI32(optionalIntField);
+        oprot.writeFieldEnd();
+      }
+      Integer intFieldWithDefault = _intFieldWithDefault_Adapter.toThrift(this.intFieldWithDefault);
+      if (intFieldWithDefault != null) {
+        oprot.writeFieldBegin(INT_FIELD_WITH_DEFAULT_FIELD_DESC);
+        oprot.writeI32(intFieldWithDefault);
+        oprot.writeFieldEnd();
+      }
+      Set<String> setField = __SetWithAdapter_Adapter.toThrift(this.setField);
       if (setField != null) {
         oprot.writeFieldBegin(SET_FIELD_FIELD_DESC);
         Set<String> _iter0 = setField;
@@ -804,6 +832,7 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
             oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
+      Set<String> optionalSetField = __SetWithAdapter_Adapter.toThrift(this.optionalSetField);
       if (optionalSetField != null) {
         oprot.writeFieldBegin(OPTIONAL_SET_FIELD_FIELD_DESC);
         Set<String>  _iter0 = optionalSetField;
@@ -814,50 +843,64 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
             oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
+      Map<String, com.facebook.thrift.my.AdaptedList_2> mapField = _mapField_Adapter.toThrift(this.mapField);
       if (mapField != null) {
         oprot.writeFieldBegin(MAP_FIELD_FIELD_DESC);
-        Map<String, List<String>> _iter0 = mapField;
+        Map<String, com.facebook.thrift.my.AdaptedList_2> _iter0 = mapField;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
-            for (Map.Entry<String, List<String>> _iter1 : _iter0.entrySet()) {
+            for (Map.Entry<String, com.facebook.thrift.my.AdaptedList_2> _iter1 : _iter0.entrySet()) {
               oprot.writeString(_iter1.getKey());
-              oprot.writeListBegin(new TList(TType.STRING, _iter1.getValue().size()));
-            for (String _iter2 : _iter1.getValue()) {
-              oprot.writeString(_iter2);
+              List<com.facebook.thrift.my.AdaptedString_1> _iter2 = __ListWithElemAdapter_withAdapter_2312_Adapter.toThrift(_iter1.getValue());
+        oprot.writeListBegin(new TList(TType.STRING, _iter2.size()));
+            for (com.facebook.thrift.my.AdaptedString_1 _iter3 : _iter2) {
+              oprot.writeString(__StringWithAdapter_Adapter.toThrift(_iter3));
             }
             oprot.writeListEnd();
             }
             oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
+      Map<String, com.facebook.thrift.my.AdaptedList_2> optionalMapField = _optionalMapField_Adapter.toThrift(this.optionalMapField);
       if (optionalMapField != null) {
         oprot.writeFieldBegin(OPTIONAL_MAP_FIELD_FIELD_DESC);
-        Map<String, List<String>>  _iter0 = optionalMapField;
+        Map<String, com.facebook.thrift.my.AdaptedList_2>  _iter0 = optionalMapField;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
-            for (Map.Entry<String, List<String>> _iter1 : _iter0.entrySet()) {
+            for (Map.Entry<String, com.facebook.thrift.my.AdaptedList_2> _iter1 : _iter0.entrySet()) {
               oprot.writeString(_iter1.getKey());
-              oprot.writeListBegin(new TList(TType.STRING, _iter1.getValue().size()));
-            for (String _iter2 : _iter1.getValue()) {
-              oprot.writeString(_iter2);
+              List<com.facebook.thrift.my.AdaptedString_1> _iter2 = __ListWithElemAdapter_withAdapter_2312_Adapter.toThrift(_iter1.getValue());
+        oprot.writeListBegin(new TList(TType.STRING, _iter2.size()));
+            for (com.facebook.thrift.my.AdaptedString_1 _iter3 : _iter2) {
+              oprot.writeString(__StringWithAdapter_Adapter.toThrift(_iter3));
             }
             oprot.writeListEnd();
             }
             oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
+      io.netty.buffer.ByteBuf binaryField = _binaryField_Adapter.toThrift(this.binaryField);
       if (binaryField != null) {
         oprot.writeFieldBegin(BINARY_FIELD_FIELD_DESC);
-        oprot.writeBinary(java.nio.ByteBuffer.wrap(this.binaryField));
+        org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, binaryField);
         oprot.writeFieldEnd();
       }
-      oprot.writeFieldBegin(LONG_FIELD_FIELD_DESC);
-      oprot.writeI64(this.longField);
-      oprot.writeFieldEnd();
-      oprot.writeFieldBegin(ADAPTED_LONG_FIELD_FIELD_DESC);
-      oprot.writeI64(this.adaptedLongField);
-      oprot.writeFieldEnd();
-      oprot.writeFieldBegin(DOUBLE_ADAPTED_FIELD_FIELD_DESC);
-      oprot.writeI64(this.doubleAdaptedField);
-      oprot.writeFieldEnd();
+      Long longField = __MyI64_Adapter.toThrift(this.longField);
+      if (longField != null) {
+        oprot.writeFieldBegin(LONG_FIELD_FIELD_DESC);
+        oprot.writeI64(longField);
+        oprot.writeFieldEnd();
+      }
+      Long adaptedLongField = __MyI64_Adapter.toThrift(_adaptedLongField_Adapter.toThrift(this.adaptedLongField));
+      if (adaptedLongField != null) {
+        oprot.writeFieldBegin(ADAPTED_LONG_FIELD_FIELD_DESC);
+        oprot.writeI64(adaptedLongField);
+        oprot.writeFieldEnd();
+      }
+      Long doubleAdaptedField = __DoubleTypedefI64_Adapter.toThrift(this.doubleAdaptedField);
+      if (doubleAdaptedField != null) {
+        oprot.writeFieldBegin(DOUBLE_ADAPTED_FIELD_FIELD_DESC);
+        oprot.writeI64(doubleAdaptedField);
+        oprot.writeFieldEnd();
+      }
       if (adaptedList != null) {
         oprot.writeFieldBegin(ADAPTED_LIST_FIELD_DESC);
         List<Integer> _iter0 = adaptedList;

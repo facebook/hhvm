@@ -77,7 +77,7 @@ public class ServiceReactiveClient
         {
           oprot.writeFieldBegin(_func_ARG1_FIELD_DESC);
 
-          String _iter0 = arg1;
+          com.facebook.thrift.my.AdaptedString_1 _iter0 = arg1;
 
           oprot.writeString(arg1);
           oprot.writeFieldEnd();
@@ -112,7 +112,7 @@ public class ServiceReactiveClient
   private static final com.facebook.thrift.payload.Reader _func_READER = Readers.i32Reader();
 
   @java.lang.Override
-  public reactor.core.publisher.Mono<com.facebook.thrift.client.ResponseWrapper<Integer>> funcWrapper(final String arg1, final String arg2, final test.fixtures.adapter.Foo arg3,  final com.facebook.thrift.client.RpcOptions rpcOptions) {
+  public reactor.core.publisher.Mono<com.facebook.thrift.client.ResponseWrapper<com.facebook.thrift.my.AdaptedI32_1>> funcWrapper(final String arg1, final String arg2, final test.fixtures.adapter.Foo arg3,  final com.facebook.thrift.client.RpcOptions rpcOptions) {
     return _rpcClient
       .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
@@ -122,7 +122,7 @@ public class ServiceReactiveClient
                 .setProtocol(_protocolId)
                 .build();
 
-            com.facebook.thrift.payload.ClientRequestPayload<Integer> _crp =
+            com.facebook.thrift.payload.ClientRequestPayload<com.facebook.thrift.my.AdaptedI32_1> _crp =
                 com.facebook.thrift.payload.ClientRequestPayload.create(
                     "Service",
                     _createfuncWriter(arg1, arg2, arg3),
@@ -137,12 +137,12 @@ public class ServiceReactiveClient
   }
 
   @java.lang.Override
-  public reactor.core.publisher.Mono<Integer> func(final String arg1, final String arg2, final test.fixtures.adapter.Foo arg3,  final com.facebook.thrift.client.RpcOptions rpcOptions) {
+  public reactor.core.publisher.Mono<com.facebook.thrift.my.AdaptedI32_1> func(final String arg1, final String arg2, final test.fixtures.adapter.Foo arg3,  final com.facebook.thrift.client.RpcOptions rpcOptions) {
     return funcWrapper(arg1, arg2, arg3,  rpcOptions).map(_p -> _p.getData());
   }
 
   @java.lang.Override
-  public reactor.core.publisher.Mono<Integer> func(final String arg1, final String arg2, final test.fixtures.adapter.Foo arg3) {
+  public reactor.core.publisher.Mono<com.facebook.thrift.my.AdaptedI32_1> func(final String arg1, final String arg2, final test.fixtures.adapter.Foo arg3) {
     return func(arg1, arg2, arg3,  com.facebook.thrift.client.RpcOptions.EMPTY);
   }
 

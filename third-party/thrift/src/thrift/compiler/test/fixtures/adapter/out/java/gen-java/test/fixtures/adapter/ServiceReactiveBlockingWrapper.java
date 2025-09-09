@@ -42,7 +42,7 @@ public class ServiceReactiveBlockingWrapper
   }
 
   @java.lang.Override
-  public com.facebook.thrift.client.ResponseWrapper<Integer> funcWrapper(
+  public com.facebook.thrift.client.ResponseWrapper<com.facebook.thrift.my.AdaptedI32_1> funcWrapper(
     final String arg1,
     final String arg2,
     final test.fixtures.adapter.Foo arg3,

@@ -25,8 +25,8 @@ public class ServiceBlockingReactiveWrapper
     }
 
     @java.lang.Override
-    public reactor.core.publisher.Mono<Integer> func(final String arg1, final String arg2, final test.fixtures.adapter.Foo arg3) {
-        reactor.core.publisher.Mono<Integer> _m = reactor.core.publisher.Mono.create(_sink -> {
+    public reactor.core.publisher.Mono<com.facebook.thrift.my.AdaptedI32_1> func(final String arg1, final String arg2, final test.fixtures.adapter.Foo arg3) {
+        reactor.core.publisher.Mono<com.facebook.thrift.my.AdaptedI32_1> _m = reactor.core.publisher.Mono.create(_sink -> {
             try {
                 reactor.util.context.ContextView _contextView = _sink.contextView();
                 com.facebook.nifty.core.RequestContext

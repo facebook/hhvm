@@ -16,6 +16,8 @@
 
 }}{{#pragma ignore-newlines}}
 {{#if (not (string.empty? type:javaType))}}{{type:javaType}}
+{{! Recurse through every layer of typedef, as one may override javaType}}
+{{#else if type:typedef?}}{{#type:typedef_type}}{{> Type}}{{/type:typedef_type}}
 {{#else if type:void?}}void
 {{#else if type:bool?}}boolean
 {{#else if type:byte?}}byte

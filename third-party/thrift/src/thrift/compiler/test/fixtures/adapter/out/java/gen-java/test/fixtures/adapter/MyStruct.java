@@ -27,7 +27,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     @ThriftConstructor
     public MyStruct(
         @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.NONE) final int field,
-        @com.facebook.swift.codec.ThriftField(value=2, name="set_string", requiredness=Requiredness.NONE) final Set<String> setString
+        @com.facebook.swift.codec.ThriftField(value=2, name="set_string", requiredness=Requiredness.NONE) final com.facebook.thrift.my.AdaptedSet_2 setString
     ) {
         this.field = field;
         this.setString = setString;
@@ -49,7 +49,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
 
     public static class Builder {
         private int field = 0;
-        private Set<String> setString = null;
+        private com.facebook.thrift.my.AdaptedSet_2 setString = null;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.NONE)    public Builder setField(int field) {
             this.field = field;
@@ -58,12 +58,12 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public int getField() { return field; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="set_string", requiredness=Requiredness.NONE)    public Builder setSetString(Set<String> setString) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="set_string", requiredness=Requiredness.NONE)    public Builder setSetString(com.facebook.thrift.my.AdaptedSet_2 setString) {
             this.setString = setString;
             return this;
         }
     
-        public Set<String> getSetString() { return setString; }
+        public com.facebook.thrift.my.AdaptedSet_2 getSetString() { return setString; }
     
         public Builder() { }
         public Builder(MyStruct other) {
@@ -80,7 +80,8 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             return result;
         }
     }
-    
+    private static final com.facebook.thrift.adapter.TypeAdapter<Set<String>, com.facebook.thrift.my.AdaptedSet_2> __SetWithAdapter_Adapter = new com.facebook.thrift.my.Adapter2();
+
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -88,7 +89,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     private final int field;
     public static final int _FIELD = 1;
     private static final TField FIELD_FIELD_DESC = new TField("field", TType.I32, (short)1);
-        private final Set<String> setString;
+        private final com.facebook.thrift.my.AdaptedSet_2 setString;
     public static final int _SET_STRING = 2;
     private static final TField SET_STRING_FIELD_DESC = new TField("set_string", TType.SET, (short)2);
     static {
@@ -110,7 +111,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="set_string", requiredness=Requiredness.NONE)
-    public Set<String> getSetString() { return setString; }
+    public com.facebook.thrift.my.AdaptedSet_2 getSetString() { return setString; }
 
     @java.lang.Override
     public String toString() {
@@ -133,7 +134,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         return
             Objects.equals(field, other.field) &&
-            Objects.equals(setString, other.setString) &&
+            __SetWithAdapter_Adapter.equals(setString, other.setString) && 
             true;
     }
 
@@ -179,7 +180,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
                 }
                 oprot.readSetEnd();
                 }
-            builder.setSetString(setString);
+            builder.setSetString(__SetWithAdapter_Adapter.fromThrift(setString));
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
@@ -199,6 +200,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.writeFieldBegin(FIELD_FIELD_DESC);
       oprot.writeI32(this.field);
       oprot.writeFieldEnd();
+      Set<String> setString = __SetWithAdapter_Adapter.toThrift(this.setString);
       if (setString != null) {
         oprot.writeFieldBegin(SET_STRING_FIELD_DESC);
         Set<String> _iter0 = setString;

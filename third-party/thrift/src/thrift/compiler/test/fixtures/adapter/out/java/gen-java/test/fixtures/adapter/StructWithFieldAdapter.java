@@ -26,9 +26,9 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 public final class StructWithFieldAdapter implements com.facebook.thrift.payload.ThriftSerializable {
     @ThriftConstructor
     public StructWithFieldAdapter(
-        @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.NONE) final int field,
+        @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.NONE) final com.facebook.thrift.my.AdaptedI32_1 field,
         @com.facebook.swift.codec.ThriftField(value=2, name="shared_field", requiredness=Requiredness.NONE) final int sharedField,
-        @com.facebook.swift.codec.ThriftField(value=3, name="opt_shared_field", requiredness=Requiredness.OPTIONAL) final Integer optSharedField,
+        @com.facebook.swift.codec.ThriftField(value=3, name="opt_shared_field", requiredness=Requiredness.OPTIONAL) final com.facebook.thrift.my.AdaptedI32_1 optSharedField,
         @com.facebook.swift.codec.ThriftField(value=4, name="opt_boxed_field", requiredness=Requiredness.OPTIONAL) final Integer optBoxedField
     ) {
         this.field = field;
@@ -39,7 +39,7 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
     
     @ThriftConstructor
     protected StructWithFieldAdapter() {
-      this.field = 0;
+      this.field = null;
       this.sharedField = 0;
       this.optSharedField = null;
       this.optBoxedField = null;
@@ -54,17 +54,17 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
     }
 
     public static class Builder {
-        private int field = 0;
+        private com.facebook.thrift.my.AdaptedI32_1 field = null;
         private int sharedField = 0;
-        private Integer optSharedField = null;
+        private com.facebook.thrift.my.AdaptedI32_1 optSharedField = null;
         private Integer optBoxedField = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.NONE)    public Builder setField(int field) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.NONE)    public Builder setField(com.facebook.thrift.my.AdaptedI32_1 field) {
             this.field = field;
             return this;
         }
     
-        public int getField() { return field; }
+        public com.facebook.thrift.my.AdaptedI32_1 getField() { return field; }
     
             @com.facebook.swift.codec.ThriftField(value=2, name="shared_field", requiredness=Requiredness.NONE)    public Builder setSharedField(int sharedField) {
             this.sharedField = sharedField;
@@ -73,12 +73,12 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
     
         public int getSharedField() { return sharedField; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="opt_shared_field", requiredness=Requiredness.OPTIONAL)    public Builder setOptSharedField(Integer optSharedField) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="opt_shared_field", requiredness=Requiredness.OPTIONAL)    public Builder setOptSharedField(com.facebook.thrift.my.AdaptedI32_1 optSharedField) {
             this.optSharedField = optSharedField;
             return this;
         }
     
-        public Integer getOptSharedField() { return optSharedField; }
+        public com.facebook.thrift.my.AdaptedI32_1 getOptSharedField() { return optSharedField; }
     
             @com.facebook.swift.codec.ThriftField(value=4, name="opt_boxed_field", requiredness=Requiredness.OPTIONAL)    public Builder setOptBoxedField(Integer optBoxedField) {
             this.optBoxedField = optBoxedField;
@@ -107,17 +107,21 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
         }
     }
     
+            private static final com.facebook.thrift.adapter.TypeAdapter<Integer, com.facebook.thrift.my.AdaptedI32_1> _field_Adapter = new com.facebook.thrift.my.Adapter1();
+    
+            private static final com.facebook.thrift.adapter.TypeAdapter<Integer, com.facebook.thrift.my.AdaptedI32_1> _optSharedField_Adapter = new com.facebook.thrift.my.Adapter1();
+
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("StructWithFieldAdapter");
-    private final int field;
+    private final com.facebook.thrift.my.AdaptedI32_1 field;
     public static final int _FIELD = 1;
     private static final TField FIELD_FIELD_DESC = new TField("field", TType.I32, (short)1);
         private final int sharedField;
     public static final int _SHARED_FIELD = 2;
     private static final TField SHARED_FIELD_FIELD_DESC = new TField("shared_field", TType.I32, (short)2);
-        private final Integer optSharedField;
+        private final com.facebook.thrift.my.AdaptedI32_1 optSharedField;
     public static final int _OPT_SHARED_FIELD = 3;
     private static final TField OPT_SHARED_FIELD_FIELD_DESC = new TField("opt_shared_field", TType.I32, (short)3);
         private final Integer optBoxedField;
@@ -143,7 +147,7 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
     
     
     @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.NONE)
-    public int getField() { return field; }
+    public com.facebook.thrift.my.AdaptedI32_1 getField() { return field; }
 
     
     
@@ -153,7 +157,7 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="opt_shared_field", requiredness=Requiredness.OPTIONAL)
-    public Integer getOptSharedField() { return optSharedField; }
+    public com.facebook.thrift.my.AdaptedI32_1 getOptSharedField() { return optSharedField; }
 
     
     @Nullable
@@ -182,9 +186,9 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
         StructWithFieldAdapter other = (StructWithFieldAdapter)o;
     
         return
-            Objects.equals(field, other.field) &&
+            _field_Adapter.equals(field, other.field) &&
             Objects.equals(sharedField, other.sharedField) &&
-            Objects.equals(optSharedField, other.optSharedField) &&
+            _optSharedField_Adapter.equals(optSharedField, other.optSharedField) &&
             Objects.equals(optBoxedField, other.optBoxedField) &&
             true;
     }
@@ -215,7 +219,7 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
         case _FIELD:
           if (__field.type == TType.I32) {
             int field = oprot.readI32();
-            builder.setField(field);
+            builder.setField(_field_Adapter.fromThrift(field));
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
@@ -231,7 +235,7 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
         case _OPT_SHARED_FIELD:
           if (__field.type == TType.I32) {
             Integer  optSharedField = oprot.readI32();
-            builder.setOptSharedField(optSharedField);
+            builder.setOptSharedField(_optSharedField_Adapter.fromThrift(optSharedField));
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
@@ -256,15 +260,19 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
 
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      oprot.writeFieldBegin(FIELD_FIELD_DESC);
-      oprot.writeI32(this.field);
-      oprot.writeFieldEnd();
+      Integer field = _field_Adapter.toThrift(this.field);
+      if (field != null) {
+        oprot.writeFieldBegin(FIELD_FIELD_DESC);
+        oprot.writeI32(field);
+        oprot.writeFieldEnd();
+      }
       oprot.writeFieldBegin(SHARED_FIELD_FIELD_DESC);
       oprot.writeI32(this.sharedField);
       oprot.writeFieldEnd();
+      Integer optSharedField = _optSharedField_Adapter.toThrift(this.optSharedField);
       if (optSharedField != null) {
         oprot.writeFieldBegin(OPT_SHARED_FIELD_FIELD_DESC);
-        oprot.writeI32(this.optSharedField);
+        oprot.writeI32(optSharedField);
         oprot.writeFieldEnd();
       }
       if (optBoxedField != null) {

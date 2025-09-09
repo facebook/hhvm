@@ -121,6 +121,21 @@ var (
                                     },
                             },
                         },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "java.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "adapterClassName":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("com.facebook.thrift.my.Adapter2"),
+                                    },
+                                "typeClassName":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("com.facebook.thrift.my.AdaptedSet_2"),
+                                    },
+                            },
+                        },
                     },
                 },
         }
@@ -168,6 +183,21 @@ var (
                                 "name":
                                     &metadata.ThriftConstValue{
                                         CvString: thrift.Pointerize("::my::Adapter1"),
+                                    },
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "java.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "adapterClassName":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("com.facebook.thrift.my.Adapter1"),
+                                    },
+                                "typeClassName":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("com.facebook.thrift.my.AdaptedString_1"),
                                     },
                             },
                         },
@@ -242,6 +272,21 @@ var (
                                 "name":
                                     &metadata.ThriftConstValue{
                                         CvString: thrift.Pointerize("::my::Adapter2"),
+                                    },
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "java.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "adapterClassName":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("com.facebook.thrift.my.Adapter2"),
+                                    },
+                                "typeClassName":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("com.facebook.thrift.my.AdaptedList_2"),
                                     },
                             },
                         },
@@ -350,6 +395,21 @@ var (
                                 "name":
                                     &metadata.ThriftConstValue{
                                         CvString: thrift.Pointerize("::my::Adapter1"),
+                                    },
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "java.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "adapterClassName":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("com.facebook.thrift.my.Adapter1"),
+                                    },
+                                "typeClassName":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("com.facebook.thrift.my.AdaptedI64_1"),
                                     },
                             },
                         },
@@ -523,6 +583,21 @@ var (
                                 "name":
                                     &metadata.ThriftConstValue{
                                         CvString: thrift.Pointerize("::my::Adapter1"),
+                                    },
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "java.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "adapterClassName":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("com.facebook.thrift.my.Adapter1"),
+                                    },
+                                "typeClassName":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("com.facebook.thrift.my.AdaptedFoo_1"),
                                     },
                             },
                         },
@@ -1359,6 +1434,21 @@ var (
                                 "name":
                                     &metadata.ThriftConstValue{
                                         CvString: thrift.Pointerize("::my::Adapter1"),
+                                    },
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "java.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "adapterClassName":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("com.facebook.thrift.my.Adapter1"),
+                                    },
+                                "typeClassName":
+                                    &metadata.ThriftConstValue{
+                                        CvString: thrift.Pointerize("com.facebook.thrift.my.AdaptedI32_1"),
                                     },
                             },
                         },

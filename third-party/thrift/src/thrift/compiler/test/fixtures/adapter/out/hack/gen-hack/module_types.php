@@ -1124,6 +1124,12 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
                 "name" => "::my::Adapter1",
               )
             ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.my.Adapter1",
+                "typeClassName" => "com.facebook.thrift.my.AdaptedI32_5137_1",
+              )
+            ),
           ],
           'type' => dict[
             '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
@@ -1149,6 +1155,12 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
                 "name" => "::my::Adapter1",
               )
             ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.my.Adapter1",
+                "typeClassName" => "com.facebook.thrift.my.AdaptedI32_5137_1",
+              )
+            ),
           ],
           'type' => dict[
             '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
@@ -1172,6 +1184,12 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
             '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
+              )
+            ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.my.Adapter1",
+                "typeClassName" => "com.facebook.thrift.my.AdaptedI32_5137_1",
               )
             ),
           ],
@@ -1204,6 +1222,12 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
                 "name" => "::my::Adapter2",
               )
             ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.my.Adapter2",
+                "typeClassName" => "com.facebook.thrift.my.AdaptedSet_2",
+              )
+            ),
           ],
         ),
         'optionalSetField' => shape(
@@ -1228,6 +1252,12 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
                 "name" => "::my::Adapter2",
               )
             ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.my.Adapter2",
+                "typeClassName" => "com.facebook.thrift.my.AdaptedSet_2",
+              )
+            ),
           ],
         ),
         'mapField' => shape(
@@ -1245,6 +1275,12 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
             '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter3",
+              )
+            ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.my.Adapter3",
+                "typeClassName" => "com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3",
               )
             ),
           ],
@@ -1272,6 +1308,12 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
                 "name" => "::my::Adapter3",
               )
             ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.my.Adapter3",
+                "typeClassName" => "com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3",
+              )
+            ),
           ],
           'type' => dict[
             '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
@@ -1297,6 +1339,12 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
                 "name" => "::my::Adapter3",
               )
             ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.my.Adapter3",
+                "typeClassName" => "com.facebook.thrift.my.AdaptedBinary_5673_3",
+              )
+            ),
           ],
           'type' => dict[
             '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
@@ -1320,6 +1368,12 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
             '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
+              )
+            ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.my.Adapter1",
+                "typeClassName" => "com.facebook.thrift.my.AdaptedI64_1",
               )
             ),
             '\facebook\thrift\test\MyAnnotation' => \facebook\thrift\test\MyAnnotation::fromShape(
@@ -1348,6 +1402,12 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
                 "name" => "::my::Adapter2",
               )
             ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.my.Adapter2",
+                "typeClassName" => "com.facebook.thrift.my.AdaptedMyI64_2",
+              )
+            ),
           ],
           'type' => dict[
             '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
@@ -1362,6 +1422,12 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
             '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
+              )
+            ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.my.Adapter1",
+                "typeClassName" => "com.facebook.thrift.my.AdaptedI64_1",
               )
             ),
             '\facebook\thrift\test\MyAnnotation' => \facebook\thrift\test\MyAnnotation::fromShape(
@@ -2171,6 +2237,12 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
                 "name" => "::my::Adapter1",
               )
             ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.my.Adapter1",
+                "typeClassName" => "com.facebook.thrift.my.AdaptedI32_5137_1",
+              )
+            ),
           ],
           'type' => dict[
             '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
@@ -2201,6 +2273,12 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
                 "name" => "::my::Adapter2",
               )
             ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.my.Adapter2",
+                "typeClassName" => "com.facebook.thrift.my.AdaptedSet_2",
+              )
+            ),
           ],
         ),
         'mapField' => shape(
@@ -2218,6 +2296,12 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
             '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter3",
+              )
+            ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.my.Adapter3",
+                "typeClassName" => "com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3",
               )
             ),
           ],
@@ -2245,6 +2329,12 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
                 "name" => "::my::Adapter1",
               )
             ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.my.Adapter1",
+                "typeClassName" => "com.facebook.thrift.my.AdaptedBinary_5673_1",
+              )
+            ),
           ],
           'type' => dict[
             '\facebook\thrift\annotation\AllowLegacyTypedefUri' => \facebook\thrift\annotation\AllowLegacyTypedefUri::fromShape(
@@ -2268,6 +2358,12 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
             '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
+              )
+            ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.my.Adapter1",
+                "typeClassName" => "com.facebook.thrift.my.AdaptedI64_1",
               )
             ),
             '\facebook\thrift\test\MyAnnotation' => \facebook\thrift\test\MyAnnotation::fromShape(
@@ -3430,6 +3526,12 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftStructMetada
                 "name" => "::my::Adapter1<>",
               )
             ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.my.Adapter1",
+                "typeClassName" => "com.facebook.thrift.my.AdaptedI32_1",
+              )
+            ),
           ],
           'type' => dict[],
         ),
@@ -3467,6 +3569,12 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftStructMetada
             '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1<>",
+              )
+            ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.my.Adapter1",
+                "typeClassName" => "com.facebook.thrift.my.AdaptedI32_1",
               )
             ),
           ],
@@ -4299,6 +4407,12 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
             '\facebook\thrift\annotation\rust\Adapter' => \facebook\thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter2",
+              )
+            ),
+            '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
+              shape(
+                "adapterClassName" => "com.facebook.thrift.my.Adapter2",
+                "typeClassName" => "com.facebook.thrift.my.AdaptedSet_2",
               )
             ),
           ],

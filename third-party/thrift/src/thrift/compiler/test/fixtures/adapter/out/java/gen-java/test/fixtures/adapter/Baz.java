@@ -21,6 +21,17 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 @ThriftUnion("Baz")
 public final class Baz implements com.facebook.thrift.payload.ThriftSerializable {
     
+            private static final com.facebook.thrift.adapter.TypeAdapter<Integer, com.facebook.thrift.my.AdaptedI32_5137_1> _intField_Adapter = new com.facebook.thrift.my.Adapter1();
+    private static final com.facebook.thrift.adapter.TypeAdapter<Set<String>, com.facebook.thrift.my.AdaptedSet_2> __SetWithAdapter_Adapter = new com.facebook.thrift.my.Adapter2();
+    
+            private static final com.facebook.thrift.adapter.TypeAdapter<Map<String, com.facebook.thrift.my.AdaptedList_2>, com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3> _mapField_Adapter = new com.facebook.thrift.my.Adapter3();
+    private static final com.facebook.thrift.adapter.TypeAdapter<List<com.facebook.thrift.my.AdaptedString_1>, com.facebook.thrift.my.AdaptedList_2> __ListWithElemAdapter_withAdapter_2312_Adapter = new com.facebook.thrift.my.Adapter2();
+    private static final com.facebook.thrift.adapter.TypeAdapter<List<com.facebook.thrift.my.AdaptedString_1>, com.facebook.thrift.my.AdaptedList_2> __ListWithElemAdapter_withAdapter_Adapter = new com.facebook.thrift.my.Adapter2();
+    private static final com.facebook.thrift.adapter.TypeAdapter<String, com.facebook.thrift.my.AdaptedString_1> __StringWithAdapter_Adapter = new com.facebook.thrift.my.Adapter1();
+    
+            private static final com.facebook.thrift.adapter.TypeAdapter<io.netty.buffer.ByteBuf, com.facebook.thrift.my.AdaptedBinary_5673_1> _binaryField_Adapter = new com.facebook.thrift.my.Adapter1();
+    private static final com.facebook.thrift.adapter.TypeAdapter<Long, com.facebook.thrift.my.AdaptedI64_1> __MyI64_Adapter = new com.facebook.thrift.my.Adapter1();
+
     private static final boolean allowNullFieldValues =
         System.getProperty("thrift.union.allow-null-field-values", "false").equalsIgnoreCase("true");
 
@@ -90,23 +101,23 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
             switch(_id) {
                 case 1:
                     _u.id = _id;
-                    _u.value = (int) _field;
+                    _u.value = (com.facebook.thrift.my.AdaptedI32_5137_1) _field;
                     return _u;
                 case 4:
                     _u.id = _id;
-                    _u.value = (Set<String>) _field;
+                    _u.value = (com.facebook.thrift.my.AdaptedSet_2) _field;
                     return _u;
                 case 6:
                     _u.id = _id;
-                    _u.value = (Map<String, List<String>>) _field;
+                    _u.value = (com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3) _field;
                     return _u;
                 case 8:
                     _u.id = _id;
-                    _u.value = (byte[]) _field;
+                    _u.value = (com.facebook.thrift.my.AdaptedBinary_5673_1) _field;
                     return _u;
                 case 9:
                     _u.id = _id;
-                    _u.value = (long) _field;
+                    _u.value = (com.facebook.thrift.my.AdaptedI64_1) _field;
                     return _u;
                 default:
                 throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
@@ -122,14 +133,14 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
     
     @ThriftConstructor
     @Deprecated
-    public Baz(final int intField) {
+    public Baz(final com.facebook.thrift.my.AdaptedI32_5137_1 intField) {
         this.value = intField;
         this.id = 1;
     }
     
     @ThriftConstructor
     @Deprecated
-    public Baz(final Set<String> setField) {
+    public Baz(final com.facebook.thrift.my.AdaptedSet_2 setField) {
         if (!Baz.allowNullFieldValues && setField == null) {
             throw new TProtocolException("Cannot initialize Union field 'Baz.setField' with null value!");
         }
@@ -139,7 +150,7 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
     
     @ThriftConstructor
     @Deprecated
-    public Baz(final Map<String, List<String>> mapField) {
+    public Baz(final com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3 mapField) {
         if (!Baz.allowNullFieldValues && mapField == null) {
             throw new TProtocolException("Cannot initialize Union field 'Baz.mapField' with null value!");
         }
@@ -149,7 +160,7 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
     
     @ThriftConstructor
     @Deprecated
-    public Baz(final byte[] binaryField) {
+    public Baz(final com.facebook.thrift.my.AdaptedBinary_5673_1 binaryField) {
         if (!Baz.allowNullFieldValues && binaryField == null) {
             throw new TProtocolException("Cannot initialize Union field 'Baz.binaryField' with null value!");
         }
@@ -159,19 +170,19 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
     
     @ThriftConstructor
     @Deprecated
-    public Baz(final long longField) {
+    public Baz(final com.facebook.thrift.my.AdaptedI64_1 longField) {
         this.value = longField;
         this.id = 9;
     }
     
-    public static Baz fromIntField(final int intField) {
+    public static Baz fromIntField(final com.facebook.thrift.my.AdaptedI32_5137_1 intField) {
         Baz res = new Baz();
         res.value = intField;
         res.id = 1;
         return res;
     }
     
-    public static Baz fromSetField(final Set<String> setField) {
+    public static Baz fromSetField(final com.facebook.thrift.my.AdaptedSet_2 setField) {
         Baz res = new Baz();
         if (!Baz.allowNullFieldValues && setField == null) {
             throw new TProtocolException("Cannot initialize Union field 'Baz.setField' with null value!");
@@ -181,7 +192,7 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
         return res;
     }
     
-    public static Baz fromMapField(final Map<String, List<String>> mapField) {
+    public static Baz fromMapField(final com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3 mapField) {
         Baz res = new Baz();
         if (!Baz.allowNullFieldValues && mapField == null) {
             throw new TProtocolException("Cannot initialize Union field 'Baz.mapField' with null value!");
@@ -191,7 +202,7 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
         return res;
     }
     
-    public static Baz fromBinaryField(final byte[] binaryField) {
+    public static Baz fromBinaryField(final com.facebook.thrift.my.AdaptedBinary_5673_1 binaryField) {
         Baz res = new Baz();
         if (!Baz.allowNullFieldValues && binaryField == null) {
             throw new TProtocolException("Cannot initialize Union field 'Baz.binaryField' with null value!");
@@ -201,7 +212,7 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
         return res;
     }
     
-    public static Baz fromLongField(final long longField) {
+    public static Baz fromLongField(final com.facebook.thrift.my.AdaptedI64_1 longField) {
         Baz res = new Baz();
         res.value = longField;
         res.id = 9;
@@ -211,11 +222,11 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
     
 
     @com.facebook.swift.codec.ThriftField(value=1, name="intField", requiredness=Requiredness.NONE)
-    public int getIntField() {
+    public com.facebook.thrift.my.AdaptedI32_5137_1 getIntField() {
         if (this.id != 1) {
             throw new IllegalStateException("Not a intField element!");
         }
-        return (int) value;
+        return (com.facebook.thrift.my.AdaptedI32_5137_1) value;
     }
 
     public boolean isSetIntField() {
@@ -223,11 +234,11 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
     }
 
     @com.facebook.swift.codec.ThriftField(value=4, name="setField", requiredness=Requiredness.NONE)
-    public Set<String> getSetField() {
+    public com.facebook.thrift.my.AdaptedSet_2 getSetField() {
         if (this.id != 4) {
             throw new IllegalStateException("Not a setField element!");
         }
-        return (Set<String>) value;
+        return (com.facebook.thrift.my.AdaptedSet_2) value;
     }
 
     public boolean isSetSetField() {
@@ -235,11 +246,11 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
     }
 
     @com.facebook.swift.codec.ThriftField(value=6, name="mapField", requiredness=Requiredness.NONE)
-    public Map<String, List<String>> getMapField() {
+    public com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3 getMapField() {
         if (this.id != 6) {
             throw new IllegalStateException("Not a mapField element!");
         }
-        return (Map<String, List<String>>) value;
+        return (com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3) value;
     }
 
     public boolean isSetMapField() {
@@ -247,11 +258,11 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
     }
 
     @com.facebook.swift.codec.ThriftField(value=8, name="binaryField", requiredness=Requiredness.NONE)
-    public byte[] getBinaryField() {
+    public com.facebook.thrift.my.AdaptedBinary_5673_1 getBinaryField() {
         if (this.id != 8) {
             throw new IllegalStateException("Not a binaryField element!");
         }
-        return (byte[]) value;
+        return (com.facebook.thrift.my.AdaptedBinary_5673_1) value;
     }
 
     public boolean isSetBinaryField() {
@@ -259,11 +270,11 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
     }
 
     @com.facebook.swift.codec.ThriftField(value=9, name="longField", requiredness=Requiredness.NONE)
-    public long getLongField() {
+    public com.facebook.thrift.my.AdaptedI64_1 getLongField() {
         if (this.id != 9) {
             throw new IllegalStateException("Not a longField element!");
         }
-        return (long) value;
+        return (com.facebook.thrift.my.AdaptedI64_1) value;
     }
 
     public boolean isSetLongField() {
@@ -361,11 +372,11 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
         return acceptor.accept(this);
         }
 
-        T visitIntField(int intField);
-        T visitSetField(Set<String> setField);
-        T visitMapField(Map<String, List<String>> mapField);
-        T visitBinaryField(byte[] binaryField);
-        T visitLongField(long longField);
+        T visitIntField(com.facebook.thrift.my.AdaptedI32_5137_1 intField);
+        T visitSetField(com.facebook.thrift.my.AdaptedSet_2 setField);
+        T visitMapField(com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3 mapField);
+        T visitBinaryField(com.facebook.thrift.my.AdaptedBinary_5673_1 binaryField);
+        T visitLongField(com.facebook.thrift.my.AdaptedI64_1 longField);
     }
 
     public void write0(TProtocol oprot) throws TException {
@@ -380,51 +391,64 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
       oprot.writeStructBegin(STRUCT_DESC);
       switch (this.id) {
       case _INTFIELD: {
-        oprot.writeFieldBegin(INT_FIELD_FIELD_DESC);
-        int intField = (int)this.value;
-        oprot.writeI32(intField);
-        oprot.writeFieldEnd();
+        Integer intField = _intField_Adapter.toThrift((com.facebook.thrift.my.AdaptedI32_5137_1)this.value);
+        if (intField != null) {
+          oprot.writeFieldBegin(INT_FIELD_FIELD_DESC);
+          oprot.writeI32(intField);
+          oprot.writeFieldEnd();
+        }
         break;
       }
       case _SETFIELD: {
-        oprot.writeFieldBegin(SET_FIELD_FIELD_DESC);
-        Set<String> _iter0 = (Set<String>)this.value;
-        oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
+        Set<String> setField = __SetWithAdapter_Adapter.toThrift((com.facebook.thrift.my.AdaptedSet_2)this.value);
+        if (setField != null) {
+          oprot.writeFieldBegin(SET_FIELD_FIELD_DESC);
+          Set<String> _iter0 = setField;
+          oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
             for (String _iter1 : _iter0) {
               oprot.writeString(_iter1);
             }
             oprot.writeSetEnd();
-        oprot.writeFieldEnd();
+          oprot.writeFieldEnd();
+        }
         break;
       }
       case _MAPFIELD: {
-        oprot.writeFieldBegin(MAP_FIELD_FIELD_DESC);
-        Map<String, List<String>> _iter0 = (Map<String, List<String>>)this.value;
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
-            for (Map.Entry<String, List<String>> _iter1 : _iter0.entrySet()) {
+        Map<String, com.facebook.thrift.my.AdaptedList_2> mapField = _mapField_Adapter.toThrift((com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3)this.value);
+        if (mapField != null) {
+          oprot.writeFieldBegin(MAP_FIELD_FIELD_DESC);
+          Map<String, com.facebook.thrift.my.AdaptedList_2> _iter0 = mapField;
+          oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
+            for (Map.Entry<String, com.facebook.thrift.my.AdaptedList_2> _iter1 : _iter0.entrySet()) {
               oprot.writeString(_iter1.getKey());
-              oprot.writeListBegin(new TList(TType.STRING, _iter1.getValue().size()));
-            for (String _iter2 : _iter1.getValue()) {
-              oprot.writeString(_iter2);
+              List<com.facebook.thrift.my.AdaptedString_1> _iter2 = __ListWithElemAdapter_withAdapter_2312_Adapter.toThrift(_iter1.getValue());
+        oprot.writeListBegin(new TList(TType.STRING, _iter2.size()));
+            for (com.facebook.thrift.my.AdaptedString_1 _iter3 : _iter2) {
+              oprot.writeString(__StringWithAdapter_Adapter.toThrift(_iter3));
             }
             oprot.writeListEnd();
             }
             oprot.writeMapEnd();
-        oprot.writeFieldEnd();
+          oprot.writeFieldEnd();
+        }
         break;
       }
       case _BINARYFIELD: {
-        oprot.writeFieldBegin(BINARY_FIELD_FIELD_DESC);
-        byte[] binaryField = (byte[])this.value;
-        oprot.writeBinary(java.nio.ByteBuffer.wrap(binaryField));
-        oprot.writeFieldEnd();
+        io.netty.buffer.ByteBuf binaryField = _binaryField_Adapter.toThrift((com.facebook.thrift.my.AdaptedBinary_5673_1)this.value);
+        if (binaryField != null) {
+          oprot.writeFieldBegin(BINARY_FIELD_FIELD_DESC);
+          org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, binaryField);
+          oprot.writeFieldEnd();
+        }
         break;
       }
       case _LONGFIELD: {
-        oprot.writeFieldBegin(LONG_FIELD_FIELD_DESC);
-        long longField = (long)this.value;
-        oprot.writeI64(longField);
-        oprot.writeFieldEnd();
+        Long longField = __MyI64_Adapter.toThrift((com.facebook.thrift.my.AdaptedI64_1)this.value);
+        if (longField != null) {
+          oprot.writeFieldBegin(LONG_FIELD_FIELD_DESC);
+          oprot.writeI64(longField);
+          oprot.writeFieldEnd();
+        }
         break;
       }
       default:
@@ -450,7 +474,7 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
           case _INTFIELD:
             if (__field.type == INT_FIELD_FIELD_DESC.type) {
               int intField = oprot.readI32();
-              res.value = intField;
+              res.value = _intField_Adapter.fromThrift(intField);
             }
             break;
           case _SETFIELD:
@@ -466,50 +490,50 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
                 }
                 oprot.readSetEnd();
                 }
-              res.value = setField;
+              res.value = __SetWithAdapter_Adapter.fromThrift(setField);
             }
             break;
           case _MAPFIELD:
             if (__field.type == MAP_FIELD_FIELD_DESC.type) {
-              Map<String, List<String>> mapField;
+              Map<String, com.facebook.thrift.my.AdaptedList_2> mapField;
                 {
                 TMap _map = oprot.readMapBegin();
-                mapField = new HashMap<String, List<String>>(Math.max(0, _map.size));
+                mapField = new HashMap<String, com.facebook.thrift.my.AdaptedList_2>(Math.max(0, _map.size));
                 for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
                     
                     String _key1 = oprot.readString();
-                    List<String> _value1;
+                    List<com.facebook.thrift.my.AdaptedString_1> _value1;
                                 {
                                 TList _list1 = oprot.readListBegin();
-                                _value1 = new ArrayList<String>(Math.max(0, _list1.size));
+                                _value1 = new ArrayList<com.facebook.thrift.my.AdaptedString_1>(Math.max(0, _list1.size));
                                 for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
                                     
                                     
                                     String _value2 = oprot.readString();
                                     
                                     
-                                    _value1.add(_value2);
+                                    _value1.add(__StringWithAdapter_Adapter.fromThrift(_value2));
                                     
                                 }
                                 oprot.readListEnd();
                                 }
-                    mapField.put(_key1, _value1);
+                    mapField.put(_key1, __ListWithElemAdapter_withAdapter_2312_Adapter.fromThrift(_value1));
                 }
                 }
                 oprot.readMapEnd();
-              res.value = mapField;
+              res.value = _mapField_Adapter.fromThrift(mapField);
             }
             break;
           case _BINARYFIELD:
             if (__field.type == BINARY_FIELD_FIELD_DESC.type) {
-              byte[] binaryField = oprot.readBinary().array();
-              res.value = binaryField;
+              io.netty.buffer.ByteBuf binaryField = org.apache.thrift.protocol.TProtocolUtil.readBinaryAsByteBuf(oprot);
+              res.value = _binaryField_Adapter.fromThrift(binaryField);
             }
             break;
           case _LONGFIELD:
             if (__field.type == LONG_FIELD_FIELD_DESC.type) {
               long longField = oprot.readI64();
-              res.value = longField;
+              res.value = __MyI64_Adapter.fromThrift(longField);
             }
             break;
           default:

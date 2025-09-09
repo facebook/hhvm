@@ -66,12 +66,12 @@ public interface Service extends java.io.Closeable, com.facebook.thrift.util.Blo
         @java.lang.Override void close();
 
         @ThriftMethod(value = "func")
-        ListenableFuture<Integer> func(
+        ListenableFuture<com.facebook.thrift.my.AdaptedI32_1> func(
             @com.facebook.swift.codec.ThriftField(value=1, name="arg1", requiredness=Requiredness.NONE) final String arg1,
             @com.facebook.swift.codec.ThriftField(value=2, name="arg2", requiredness=Requiredness.NONE) final String arg2,
             @com.facebook.swift.codec.ThriftField(value=3, name="arg3", requiredness=Requiredness.NONE) final test.fixtures.adapter.Foo arg3);
 
-        default ListenableFuture<Integer> func(
+        default ListenableFuture<com.facebook.thrift.my.AdaptedI32_1> func(
             @com.facebook.swift.codec.ThriftField(value=1, name="arg1", requiredness=Requiredness.NONE) final String arg1,
             @com.facebook.swift.codec.ThriftField(value=2, name="arg2", requiredness=Requiredness.NONE) final String arg2,
             @com.facebook.swift.codec.ThriftField(value=3, name="arg3", requiredness=Requiredness.NONE) final test.fixtures.adapter.Foo arg3,
@@ -79,7 +79,7 @@ public interface Service extends java.io.Closeable, com.facebook.thrift.util.Blo
             throw new UnsupportedOperationException();
         }
 
-        default ListenableFuture<ResponseWrapper<Integer>> funcWrapper(
+        default ListenableFuture<ResponseWrapper<com.facebook.thrift.my.AdaptedI32_1>> funcWrapper(
             @com.facebook.swift.codec.ThriftField(value=1, name="arg1", requiredness=Requiredness.NONE) final String arg1,
             @com.facebook.swift.codec.ThriftField(value=2, name="arg2", requiredness=Requiredness.NONE) final String arg2,
             @com.facebook.swift.codec.ThriftField(value=3, name="arg3", requiredness=Requiredness.NONE) final test.fixtures.adapter.Foo arg3,
@@ -103,7 +103,7 @@ public interface Service extends java.io.Closeable, com.facebook.thrift.util.Blo
         throw new UnsupportedOperationException();
     }
 
-    default ResponseWrapper<Integer> funcWrapper(
+    default ResponseWrapper<com.facebook.thrift.my.AdaptedI32_1> funcWrapper(
         @com.facebook.swift.codec.ThriftField(value=1, name="arg1", requiredness=Requiredness.NONE) final String arg1,
         @com.facebook.swift.codec.ThriftField(value=2, name="arg2", requiredness=Requiredness.NONE) final String arg2,
         @com.facebook.swift.codec.ThriftField(value=3, name="arg3", requiredness=Requiredness.NONE) final test.fixtures.adapter.Foo arg3,
@@ -132,13 +132,13 @@ public interface Service extends java.io.Closeable, com.facebook.thrift.util.Blo
         }
 
         @ThriftMethod(value = "func")
-        reactor.core.publisher.Mono<Integer> func(final String arg1, final String arg2, final test.fixtures.adapter.Foo arg3);
+        reactor.core.publisher.Mono<com.facebook.thrift.my.AdaptedI32_1> func(final String arg1, final String arg2, final test.fixtures.adapter.Foo arg3);
 
-        default reactor.core.publisher.Mono<Integer> func(final String arg1, final String arg2, final test.fixtures.adapter.Foo arg3, RpcOptions rpcOptions) {
+        default reactor.core.publisher.Mono<com.facebook.thrift.my.AdaptedI32_1> func(final String arg1, final String arg2, final test.fixtures.adapter.Foo arg3, RpcOptions rpcOptions) {
             throw new UnsupportedOperationException();
         }
 
-        default reactor.core.publisher.Mono<ResponseWrapper<Integer>> funcWrapper(final String arg1, final String arg2, final test.fixtures.adapter.Foo arg3, RpcOptions rpcOptions) {
+        default reactor.core.publisher.Mono<ResponseWrapper<com.facebook.thrift.my.AdaptedI32_1>> funcWrapper(final String arg1, final String arg2, final test.fixtures.adapter.Foo arg3, RpcOptions rpcOptions) {
             throw new UnsupportedOperationException();
         }
 

@@ -393,16 +393,16 @@ prototype<t_field>::ptr t_whisker_generator::make_prototype_for_field(
   def.property("default_value", [&](const t_field& self) {
     return proto.create_nullable<t_const_value>(self.get_default_value());
   });
-  def.property("unqualified?", [&](const t_field& self) {
+  def.property("unqualified?", [](const t_field& self) {
     return self.qualifier() == t_field_qualifier::none;
   });
-  def.property("required?", [&](const t_field& self) {
+  def.property("required?", [](const t_field& self) {
     return self.qualifier() == t_field_qualifier::required;
   });
-  def.property("optional?", [&](const t_field& self) {
+  def.property("optional?", [](const t_field& self) {
     return self.qualifier() == t_field_qualifier::optional;
   });
-  def.property("terse?", [&](const t_field& self) {
+  def.property("terse?", [](const t_field& self) {
     return self.qualifier() == t_field_qualifier::terse;
   });
   return std::move(def).make();
@@ -671,12 +671,18 @@ prototype<t_include>::ptr t_whisker_generator::make_prototype_for_include(
 prototype<t_sink>::ptr t_whisker_generator::make_prototype_for_sink(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_sink>::extends(proto.of<t_node>());
-  def.property("exceptions", [proto](const t_sink& self) {
+  def.property("elem_type", [&proto](const t_sink& self) {
+    return resolve_derived_t_type(proto, self.elem_type().deref());
+  });
+  def.property("exceptions", [&proto](const t_sink& self) {
     return to_array(get_elems(self.sink_exceptions()), proto.of<t_field>());
   });
-  def.property("final_response_exceptions", [proto](const t_sink& self) {
+  def.property("final_response_exceptions", [&proto](const t_sink& self) {
     return to_array(
         get_elems(self.final_response_exceptions()), proto.of<t_field>());
+  });
+  def.property("final_response_type", [&proto](const t_sink& self) {
+    return resolve_derived_t_type(proto, self.final_response_type().deref());
   });
   return std::move(def).make();
 }
@@ -684,7 +690,10 @@ prototype<t_sink>::ptr t_whisker_generator::make_prototype_for_sink(
 prototype<t_stream>::ptr t_whisker_generator::make_prototype_for_stream(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_stream>::extends(proto.of<t_node>());
-  def.property("exceptions", [proto](const t_stream& self) {
+  def.property("elem_type", [&proto](const t_stream& self) {
+    return resolve_derived_t_type(proto, self.elem_type().deref());
+  });
+  def.property("exceptions", [&proto](const t_stream& self) {
     return to_array(get_elems(self.exceptions()), proto.of<t_field>());
   });
   return std::move(def).make();
@@ -695,6 +704,9 @@ prototype<t_function>::ptr t_whisker_generator::make_prototype_for_function(
   auto def = prototype_builder<h_function>::extends(proto.of<t_named>());
 
   def.property("params", mem_fn(&t_function::params, proto.of<t_paramlist>()));
+  def.property("exceptions", [&proto](const t_function& self) {
+    return to_array(get_elems(self.exceptions()), proto.of<t_field>());
+  });
   def.property("sink", mem_fn(&t_function::sink, proto.of<t_sink>()));
   def.property("stream", mem_fn(&t_function::stream, proto.of<t_stream>()));
 
@@ -775,17 +787,19 @@ prototype<t_interface>::ptr t_whisker_generator::make_prototype_for_interface(
   def.property(
       "functions", mem_fn(&t_interface::functions, proto.of<t_function>()));
   def.property("interaction?", mem_fn(&t_interface::is_interaction));
+  return std::move(def).make();
+}
 
-  // This property retrieves the interactions of on this interface alone
-  def.property("interactions", [&proto](const t_interface& interface) {
-    if (interface.is_interaction()) {
-      // Interactions cannot contain other interactions
-      return whisker::array::of({});
-    }
+prototype<t_service>::ptr t_whisker_generator::make_prototype_for_service(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_service>::extends(proto.of<t_interface>());
 
+  def.property("extends", mem_fn(&t_service::extends, proto.of<t_service>()));
+  def.property("interactions", [&proto](const t_service& self) {
+    // This property retrieves the interactions initiated by this service alone
     std::vector<const t_interaction*> interactions;
-    interactions.reserve(interface.functions().size());
-    for (const auto& function : interface.functions()) {
+    interactions.reserve(self.functions().size());
+    for (const auto& function : self.functions()) {
       if (const auto& interaction = function.interaction()) {
         auto* ptr = &interaction->as<t_interaction>();
         if (std::find(interactions.begin(), interactions.end(), ptr) !=
@@ -795,23 +809,8 @@ prototype<t_interface>::ptr t_whisker_generator::make_prototype_for_interface(
         interactions.push_back(ptr);
       }
     }
-
-    whisker::array::raw refs;
-    refs.reserve(interactions.size());
-    for (const auto* interaction : interactions) {
-      refs.emplace_back(proto.create<t_interaction>(*interaction));
-    }
-    return whisker::array::of(std::move(refs));
+    return to_array(interactions, proto.of<t_interaction>());
   });
-  return std::move(def).make();
-}
-
-prototype<t_service>::ptr t_whisker_generator::make_prototype_for_service(
-    const prototype_database& proto) const {
-  auto def = prototype_builder<h_service>::extends(proto.of<t_interface>());
-
-  def.property("extends", mem_fn(&t_service::extends, proto.of<t_service>()));
-
   def.property("user_type_footprint", [&](const t_service& service) {
     return build_user_type_footprint(service, proto);
   });

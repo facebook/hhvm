@@ -104,7 +104,81 @@ cdef class ClientSink:
             return await future
 
 
-# a helper to deserialize a response struct when 
+cdef class BidirectionalStream:
+    @staticmethod
+    cdef _fbthrift_create(
+        unique_ptr[cIOBufClientSink]&& client_sink,
+        ClientBufferedStream stream,
+        sink_elem_cls,
+        stream_elem_cls,
+        Protocol protocol,
+    ):
+        inst = <BidirectionalStream>BidirectionalStream.__new__(BidirectionalStream)
+        inst._sink = ClientSink._fbthrift_create(
+            cmove(client_sink),
+            sink_elem_cls,
+            None,  # BidirectionalStream sink doesn't return a final response
+            protocol,
+        )
+        inst._stream = stream
+        inst._sink_elem_cls = sink_elem_cls
+        inst._stream_elem_cls = stream_elem_cls
+        return inst
+
+    def __init__(self):
+        raise RuntimeError("Do not instantiate BidirectionalStream from Python")
+
+    @property
+    def sink(self):
+        return self._sink
+
+    @property
+    def stream(self):
+        return self._stream
+
+
+cdef class ResponseAndBidirectionalStream:
+    @staticmethod
+    cdef _fbthrift_create(
+        object response,
+        unique_ptr[cIOBufClientSink]&& client_sink,
+        ClientBufferedStream stream,
+        response_cls,
+        sink_elem_cls,
+        stream_elem_cls,
+        Protocol protocol,
+    ):
+        inst = <ResponseAndBidirectionalStream>ResponseAndBidirectionalStream.__new__(ResponseAndBidirectionalStream)
+        inst._response = response
+        inst._sink = ClientSink._fbthrift_create(
+            cmove(client_sink),
+            sink_elem_cls,
+            None,  # BidirectionalStream sink doesn't return a final response
+            protocol,
+        )
+        inst._stream = stream
+        inst._response_cls = response_cls
+        inst._sink_elem_cls = sink_elem_cls
+        inst._stream_elem_cls = stream_elem_cls
+        return inst
+
+    def __init__(self):
+        raise RuntimeError("Do not instantiate ResponseAndBidirectionalStream from Python")
+
+    @property
+    def response(self):
+        return self._response
+
+    @property
+    def sink(self):
+        return self._sink
+
+    @property
+    def stream(self):
+        return self._stream
+
+
+# a helper to deserialize a response struct when
 # we don't know whether it's immutable or mutable
 cdef deserialize_buf(resp_class, buf, protocol):
     if issubclass(resp_class, Struct):
@@ -127,7 +201,7 @@ cdef raise_first_exception_field(response_struct):
     # this is legitimate return for void function
     return None
 
-                
+
 
 cdef void sink_final_resp_callback(
     cFollyTry[unique_ptr[cIOBuf]]&& res,
@@ -154,7 +228,7 @@ cdef void sink_final_resp_callback(
         res_buf = iobuf_from_unique_ptr(cmove(res.value()))
 
         final_resp = deserialize_buf(final_resp_cls, res_buf, protocol)
-        
+
         if final_resp.success is not None:
             future.set_result(final_resp.success)
             return
@@ -196,7 +270,7 @@ async def invokeCallbackWithGenerator(
 
     try:
         gen = invoke_cpp_iobuf_gen()
-        final_resp_iobuf = await sink_callback(gen) 
+        final_resp_iobuf = await sink_callback(gen)
         assert isinstance(final_resp_iobuf, IOBuf), f"Expected IOBuf, got {type(final_resp_iobuf)}"
         promise.complete(final_resp_iobuf)
     except PythonUserException as pyex:
@@ -211,7 +285,7 @@ async def invokeCallbackWithGenerator(
         msg = f"Application was cancelled on the server with message: {str(ex)}"
         promise.error_ta(
             cTApplicationException(
-                cTApplicationExceptionType__UNKNOWN, 
+                cTApplicationExceptionType__UNKNOWN,
                 msg.encode('UTF-8'),
             )
         )
@@ -227,7 +301,7 @@ async def invokeCallbackWithGenerator(
 
 
 cdef class ServerSinkGenerator:
-    cdef cIOBufSinkGenerator _cpp_gen 
+    cdef cIOBufSinkGenerator _cpp_gen
     cdef cFollyExecutor* _executor
 
     @staticmethod

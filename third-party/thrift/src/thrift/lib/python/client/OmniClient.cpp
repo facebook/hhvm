@@ -301,6 +301,10 @@ folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
           } else if (rpcKind == RpcKind::SINK) {
             resp.sink = extractClientSink(
                 state, apache::thrift::protocol::PROTOCOL_TYPES(protocol));
+          } else if (rpcKind == RpcKind::BIDIRECTIONAL_STREAM) {
+            resp.stream = extractClientStream(state);
+            resp.sink = extractClientSink(
+                state, apache::thrift::protocol::PROTOCOL_TYPES(protocol));
           }
 
         } else if (state.messageType() == MessageType::T_EXCEPTION) {
@@ -440,8 +444,14 @@ void OmniClient::sendImpl(
       break;
     }
     case RpcKind::BIDIRECTIONAL_STREAM:
-      callback->onResponseError(std::runtime_error(
-          "Bi-directional streams are not supported in OmniClient yet"));
+      channel_->sendRequestAsync<RpcKind::BIDIRECTIONAL_STREAM>(
+          std::move(rpcOptions),
+          apache::thrift::MethodMetadata(metadata),
+          std::move(serializedRequest),
+          std::move(header),
+          createBiDiClientCallback(toRequestClientCallbackPtr(
+              std::move(callback), std::move(callbackContext))),
+          nullptr);
       break;
   }
 }

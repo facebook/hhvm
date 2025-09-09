@@ -16,6 +16,8 @@
 
 from typing import AsyncGenerator, Generic, TypeVar
 
+from thrift.python.streaming.stream import ClientBufferedStream
+
 TChunk = TypeVar("TChunk")
 TFinalResponse = TypeVar("TFinalResponse")
 
@@ -24,3 +26,18 @@ class ClientSink(Generic[TChunk, TFinalResponse]):
     async def sink(
         self, gen: AsyncGenerator[TChunk, None]
     ) -> Generic[TFinalResponse]: ...
+
+TSinkChunk = TypeVar("TSinkChunk")
+TStreamChunk = TypeVar("TStreamChunk")
+TResponse = TypeVar("TResponse")
+
+class BidirectionalStream(Generic[TSinkChunk, TStreamChunk]):
+    sink: ClientSink[TSinkChunk, None]
+    stream: ClientBufferedStream[TStreamChunk]
+    def __init__(self) -> None: ...
+
+class ResponseAndBidirectionalStream(Generic[TResponse, TSinkChunk, TStreamChunk]):
+    response: TResponse
+    sink: ClientSink[TSinkChunk, None]
+    stream: ClientBufferedStream[TStreamChunk]
+    def __init__(self) -> None: ...

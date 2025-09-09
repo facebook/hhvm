@@ -28,10 +28,10 @@
 #include <folly/Traits.h>
 #include <folly/container/F14Map.h>
 #include <folly/container/Reserve.h>
+#include <folly/detail/StaticSingletonManager.h>
 #include <folly/lang/Align.h>
 #include <folly/lang/Exception.h>
 #include <folly/synchronization/AtomicUtil.h>
-#include <folly/synchronization/CallOnce.h>
 
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/Thrift.h>

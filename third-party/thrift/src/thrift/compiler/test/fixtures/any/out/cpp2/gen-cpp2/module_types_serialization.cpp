@@ -16,32 +16,41 @@ namespace facebook::thrift::compiler::test::fixtures::any {
 //
 // To include in statically-linked libraries, link whole (e.g. --whole-archive)
 // `module_sinit.cpp`.
-inline folly::once_flag __fbthrift_once_flag_in_static_init_MyStruct;
 void __fbthrift_static_init_MyStruct() {
-  folly::call_once(__fbthrift_once_flag_in_static_init_MyStruct,
-    apache::thrift::conformance::detail::registerGeneratedStruct<
-        MyStruct,
-        apache::thrift::conformance::StandardProtocol::Compact,
-        apache::thrift::conformance::StandardProtocol::Binary>
-  );
+
+  class Tag {};
+  if (folly::detail::createGlobal<std::atomic<bool>, Tag>().exchange(true)) {
+    return;
+  }
+
+  apache::thrift::conformance::detail::registerGeneratedStruct<
+      MyStruct,
+      apache::thrift::conformance::StandardProtocol::Compact,
+      apache::thrift::conformance::StandardProtocol::Binary>();
 }
-inline folly::once_flag __fbthrift_once_flag_in_static_init_MyUnion;
 void __fbthrift_static_init_MyUnion() {
-  folly::call_once(__fbthrift_once_flag_in_static_init_MyUnion,
-    apache::thrift::conformance::detail::registerGeneratedStruct<
-        MyUnion,
-        apache::thrift::conformance::StandardProtocol::Compact,
-        apache::thrift::conformance::StandardProtocol::Binary>
-  );
+
+  class Tag {};
+  if (folly::detail::createGlobal<std::atomic<bool>, Tag>().exchange(true)) {
+    return;
+  }
+
+  apache::thrift::conformance::detail::registerGeneratedStruct<
+      MyUnion,
+      apache::thrift::conformance::StandardProtocol::Compact,
+      apache::thrift::conformance::StandardProtocol::Binary>();
 }
-inline folly::once_flag __fbthrift_once_flag_in_static_init_MyException;
 void __fbthrift_static_init_MyException() {
-  folly::call_once(__fbthrift_once_flag_in_static_init_MyException,
-    apache::thrift::conformance::detail::registerGeneratedStruct<
-        MyException,
-        apache::thrift::conformance::StandardProtocol::Compact,
-        apache::thrift::conformance::StandardProtocol::Binary>
-  );
+
+  class Tag {};
+  if (folly::detail::createGlobal<std::atomic<bool>, Tag>().exchange(true)) {
+    return;
+  }
+
+  apache::thrift::conformance::detail::registerGeneratedStruct<
+      MyException,
+      apache::thrift::conformance::StandardProtocol::Compact,
+      apache::thrift::conformance::StandardProtocol::Binary>();
 }
 } // namespace facebook::thrift::compiler::test::fixtures::any
 

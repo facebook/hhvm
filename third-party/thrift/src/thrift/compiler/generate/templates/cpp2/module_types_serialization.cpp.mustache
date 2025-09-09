@@ -36,22 +36,26 @@ namespace {{program:qualified_namespace}} {
 // `{{program:name}}_sinit.cpp`.
 {{#program:split_structs}}
 {{#struct:any?}}
-{{!
-If module_sinit.cpp is compiled into multiple dynamically-linked libraries.
-When dynamically loading those libraries, this function might be invoked
-multiple times. We leverage once_flag to avoid duplicated registration.
-}}
-inline folly::once_flag __fbthrift_once_flag_in_static_init_{{struct:cpp_underlying_name}};
 void __fbthrift_static_init_{{struct:cpp_underlying_name}}() {
-  folly::call_once(__fbthrift_once_flag_in_static_init_{{struct:cpp_underlying_name}},
-    apache::thrift::conformance::detail::registerGeneratedStruct<
-        {{struct:cpp_underlying_name}},
+  {{!
+  module_sinit.cpp might be compiled into multiple dynamically-linked libraries.
+  When dynamically loading those libraries, this function might be invoked
+  multiple times. We need to ensure this function is only performed once.
+  }}
+
+  class Tag {};
+  if (folly::detail::createGlobal<std::atomic<bool>, Tag>().exchange(true)) {
+    {{! Not the first time when this function is invoked, skip. }}
+    return;
+  }
+
+  apache::thrift::conformance::detail::registerGeneratedStruct<
+      {{struct:cpp_underlying_name}},
 {{#if (has_compiler_option? "json")}}
-        apache::thrift::conformance::StandardProtocol::SimpleJson,
+      apache::thrift::conformance::StandardProtocol::SimpleJson,
 {{/if (has_compiler_option? "json")}}
-        apache::thrift::conformance::StandardProtocol::Compact,
-        apache::thrift::conformance::StandardProtocol::Binary>
-  );
+      apache::thrift::conformance::StandardProtocol::Compact,
+      apache::thrift::conformance::StandardProtocol::Binary>();
 }
 {{/struct:any?}}
 {{/program:split_structs}}

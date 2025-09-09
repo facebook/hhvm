@@ -12701,7 +12701,14 @@ end = struct
                 (Some (Typing_error.Reasons_callback.unify_error_at p))
             in
             Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-            (env, (val_ty, None, None, None))
+            ( env,
+              ( (if Option.is_none ty_err_opt then
+                  val_ty
+                else
+                  ty1),
+                None,
+                None,
+                None ) )
           ) else
             Typing_array_access.assign_array_get
               ~array_pos:p1

@@ -1,6 +1,0 @@
-ERROR: File "tuple_update_hard.php", line 11, characters 3-12:
-Typing error (Typing[4110])
-  File "tuple_update_hard.php", line 11, characters 3-12:
-  Expected an array that can be updated
-  File "tuple_update_hard.php", line 5, characters 38-38:
-  But got `dynamic` because the type of this property is implicitly a like-type due to unenforced generic parameter

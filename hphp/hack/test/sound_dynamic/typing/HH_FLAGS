@@ -4,3 +4,4 @@
 --config enable_no_auto_dynamic=true
 --config everything_sdt=false
 --config constraint_array_index=true
+--config constraint_array_index_assign=true

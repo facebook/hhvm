@@ -1,6 +1,0 @@
-ERROR: File "constraints_stack_overflow.php", line 17, characters 5-30:
-Typing error (Typing[4110])
-  File "constraints_stack_overflow.php", line 17, characters 5-30:
-  Expected an array that can be updated
-  File "constraints_stack_overflow.php", line 7, characters 11-22:
-  But got `dynamic` because the type of this property is implicitly a like-type due to unenforced generic type arguments

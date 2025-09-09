@@ -6939,6 +6939,16 @@ end = struct
     let mk_prop ~subtype_env ~this_ty ~lhs ~rhs =
       simplify ~subtype_env ~this_ty ~lhs ~rhs
     in
+    let supports_dynamic ty env =
+      let r = get_reason ty in
+      simplify_default ~subtype_env ty (MakeType.supportdyn_mixed r) env
+    in
+    let got_dynamic env =
+      let tv = MakeType.dynamic (get_reason ty_sub) in
+      supports_dynamic cia.cia_key env
+      &&& supports_dynamic cia.cia_write
+      &&& simplify_val tv
+    in
     match deref ty_sub with
     | (_, Tvar _) ->
       mk_issubtype_prop
@@ -7071,6 +7081,10 @@ end = struct
                 } )
         in
         simplify_val ty env)
+    | (_, Tclass ((_, n), _, _))
+      when String.equal n SN.Collections.cAnyArray
+           && Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->
+      got_dynamic env
     | (r_sub, Tclass ((_, n), _, _))
       when String.equal n SN.Collections.cKeyedContainer
            || String.equal n SN.Collections.cAnyArray
@@ -7188,6 +7202,11 @@ end = struct
           ~lhs:{ sub_supportdyn; ty_sub = ty }
           ~rhs
           env
+    | (_, Tdynamic) -> got_dynamic env
+    | (_, Tany _) -> simplify_val ty_sub env
+    | (_, Tprim Tnull)
+      when Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->
+      got_dynamic env
     | (r_sub, Tunion ty_subs) ->
       Common.simplify_union_l
         ~subtype_env

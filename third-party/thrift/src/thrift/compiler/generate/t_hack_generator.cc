@@ -131,6 +131,8 @@ class t_hack_generator : public t_concat_generator {
     strict_unions_ = option_is_specified(options, "strict_unions");
     protected_unions_ =
         option_is_specified(options, "protected_unions") || strict_unions_;
+    legacy_union_json_serialization_ =
+        option_is_specified(options, "legacy_union_json_serialization");
     mangled_services_ = option_is_set(options, "mangledsvcs", false);
     typedef_ = option_is_specified(options, "typedef");
     server_stream_ = option_is_specified(options, "server_stream");
@@ -1141,6 +1143,11 @@ class t_hack_generator : public t_concat_generator {
    * Setting this also implies protected_unions_
    */
   bool strict_unions_;
+
+  /**
+   * Preserve original union json serialization behavior with fb_json_encode
+   */
+  bool legacy_union_json_serialization_;
 
   /**
    * Whether to generate array sets or Set objects
@@ -5304,7 +5311,8 @@ void t_hack_generator::_generate_php_struct_definition(
   if (tstruct->is<t_union>()) {
     indent(out) << "use \\ThriftUnionSerializationTrait;\n\n";
     if (tstruct->has_structured_annotation(
-            kHackMigrationBlockingLegacyJSONSerialization)) {
+            kHackMigrationBlockingLegacyJSONSerialization) ||
+        legacy_union_json_serialization_) {
       indent(out) << "use \\ThriftLegacyJSONSerializationTrait;\n\n";
     }
   } else {
@@ -7648,6 +7656,8 @@ THRIFT_REGISTER_GENERATOR(
     "    shapes           Generate Shape definitions for structs\n"
     "    protected_unions Generate protected members for thrift unions\n"
     "    strict_unions    Only allow single set field for thrift unions\n"
+    "    legacy_union_json_serialization Preserve existing json serialization \n"
+    "                                       for thrift unions\n"
     "    shape_arraykeys  When generating Shape definition for structs:\n"
     "                        replace array<string, TValue> with "
     "array<arraykey, TValue>\n"

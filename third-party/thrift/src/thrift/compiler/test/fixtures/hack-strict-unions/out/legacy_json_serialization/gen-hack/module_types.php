@@ -19,7 +19,7 @@ enum PrimitiveEnum: int {
  * Original thrift union:-
  * Primitive
  */
-class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStrictUnion<PrimitiveEnum> {
+class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<PrimitiveEnum> {
   use \ThriftUnionSerializationTrait;
 
   use \ThriftLegacyJSONSerializationTrait;
@@ -73,46 +73,50 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
    * Original thrift field:-
    * 1: i64 i64_
    */
-  protected ?\TimestampToTimeAdapter::THackType $i64_;
+  public ?\TimestampToTimeAdapter::THackType $i64_;
   /**
    * Original thrift field:-
    * 2: string string_
    */
-  protected ?string $string_;
+  public ?string $string_;
   /**
    * Original thrift field:-
    * 5: float float5_
    */
-  protected ?float $float5_;
+  public ?float $float5_;
   /**
    * Original thrift field:-
    * 4: float float4_
    */
-  protected ?float $float4_;
+  public ?float $float4_;
   /**
    * Original thrift field:-
    * 3: float float3_
    */
-  protected ?float $float3_;
+  public ?float $float3_;
   protected PrimitiveEnum $_type = PrimitiveEnum::_EMPTY_;
 
   public function __construct(?\TimestampToTimeAdapter::THackType $i64_ = null, ?string $string_ = null, ?float $float5_ = null, ?float $float4_ = null, ?float $float3_ = null)[] {
     $this->_type = PrimitiveEnum::_EMPTY_;
+    if ($i64_ !== null) {
+      $this->i64_ = $i64_;
+      $this->_type = PrimitiveEnum::i64_;
+    }
+    if ($string_ !== null) {
+      $this->string_ = $string_;
+      $this->_type = PrimitiveEnum::string_;
+    }
+    if ($float5_ !== null) {
+      $this->float5_ = $float5_ ?? 20.0;
+      $this->_type = PrimitiveEnum::float5_;
+    }
+    if ($float4_ !== null) {
+      $this->float4_ = $float4_ ?? 30.0;
+      $this->_type = PrimitiveEnum::float4_;
+    }
     if ($float3_ !== null) {
       $this->float3_ = $float3_ ?? 50.0;
       $this->_type = PrimitiveEnum::float3_;
-    } else if ($float4_ !== null) {
-      $this->float4_ = $float4_ ?? 30.0;
-      $this->_type = PrimitiveEnum::float4_;
-    } else if ($float5_ !== null) {
-      $this->float5_ = $float5_ ?? 20.0;
-      $this->_type = PrimitiveEnum::float5_;
-    } else if ($string_ !== null) {
-      $this->string_ = $string_;
-      $this->_type = PrimitiveEnum::string_;
-    } else if ($i64_ !== null) {
-      $this->i64_ = $i64_;
-      $this->_type = PrimitiveEnum::i64_;
     }
   }
 
@@ -397,8 +401,10 @@ enum OtherPrimitiveEnum: int {
  * Original thrift union:-
  * OtherPrimitive
  */
-class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftStrictUnion<OtherPrimitiveEnum> {
+class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<OtherPrimitiveEnum> {
   use \ThriftUnionSerializationTrait;
+
+  use \ThriftLegacyJSONSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
@@ -449,46 +455,50 @@ class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
    * Original thrift field:-
    * 1: i64 i64_
    */
-  protected ?\TimestampToTimeAdapter::THackType $i64_;
+  public ?\TimestampToTimeAdapter::THackType $i64_;
   /**
    * Original thrift field:-
    * 2: string string_
    */
-  protected ?string $string_;
+  public ?string $string_;
   /**
    * Original thrift field:-
    * 5: float float5_
    */
-  protected ?float $float5_;
+  public ?float $float5_;
   /**
    * Original thrift field:-
    * 4: float float4_
    */
-  protected ?float $float4_;
+  public ?float $float4_;
   /**
    * Original thrift field:-
    * 3: float float3_
    */
-  protected ?float $float3_;
+  public ?float $float3_;
   protected OtherPrimitiveEnum $_type = OtherPrimitiveEnum::_EMPTY_;
 
   public function __construct(?\TimestampToTimeAdapter::THackType $i64_ = null, ?string $string_ = null, ?float $float5_ = null, ?float $float4_ = null, ?float $float3_ = null)[] {
     $this->_type = OtherPrimitiveEnum::_EMPTY_;
+    if ($i64_ !== null) {
+      $this->i64_ = $i64_;
+      $this->_type = OtherPrimitiveEnum::i64_;
+    }
+    if ($string_ !== null) {
+      $this->string_ = $string_;
+      $this->_type = OtherPrimitiveEnum::string_;
+    }
+    if ($float5_ !== null) {
+      $this->float5_ = $float5_ ?? 20.0;
+      $this->_type = OtherPrimitiveEnum::float5_;
+    }
+    if ($float4_ !== null) {
+      $this->float4_ = $float4_ ?? 30.0;
+      $this->_type = OtherPrimitiveEnum::float4_;
+    }
     if ($float3_ !== null) {
       $this->float3_ = $float3_ ?? 50.0;
       $this->_type = OtherPrimitiveEnum::float3_;
-    } else if ($float4_ !== null) {
-      $this->float4_ = $float4_ ?? 30.0;
-      $this->_type = OtherPrimitiveEnum::float4_;
-    } else if ($float5_ !== null) {
-      $this->float5_ = $float5_ ?? 20.0;
-      $this->_type = OtherPrimitiveEnum::float5_;
-    } else if ($string_ !== null) {
-      $this->string_ = $string_;
-      $this->_type = OtherPrimitiveEnum::string_;
-    } else if ($i64_ !== null) {
-      $this->i64_ = $i64_;
-      $this->_type = OtherPrimitiveEnum::i64_;
     }
   }
 

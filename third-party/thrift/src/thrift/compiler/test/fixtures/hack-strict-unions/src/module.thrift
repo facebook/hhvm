@@ -26,3 +26,12 @@ union Primitive {
   4: float float4_ = 30;
   3: float float3_ = 50;
 }
+
+union OtherPrimitive {
+  @hack.Adapter{name = '\\TimestampToTimeAdapter'}
+  1: i64 i64_;
+  2: string string_;
+  5: float float5_ = 20;
+  4: float float4_ = 30;
+  3: float float3_ = 50;
+}

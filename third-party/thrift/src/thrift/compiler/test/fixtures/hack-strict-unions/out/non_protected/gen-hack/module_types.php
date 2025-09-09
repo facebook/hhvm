@@ -388,3 +388,374 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
 
 }
 
+enum OtherPrimitiveEnum: int {
+  _EMPTY_ = 0;
+  i64_ = 1;
+  string_ = 2;
+  float5_ = 5;
+  float4_ = 4;
+  float3_ = 3;
+}
+
+/**
+ * Original thrift union:-
+ * OtherPrimitive
+ */
+class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<OtherPrimitiveEnum> {
+  use \ThriftUnionSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'i64_',
+      'union' => true,
+      'adapter' => \TimestampToTimeAdapter::class,
+      'type' => \TType::I64,
+    ),
+    2 => shape(
+      'var' => 'string_',
+      'union' => true,
+      'type' => \TType::STRING,
+    ),
+    5 => shape(
+      'var' => 'float5_',
+      'union' => true,
+      'type' => \TType::FLOAT,
+    ),
+    4 => shape(
+      'var' => 'float4_',
+      'union' => true,
+      'type' => \TType::FLOAT,
+    ),
+    3 => shape(
+      'var' => 'float3_',
+      'union' => true,
+      'type' => \TType::FLOAT,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'i64_' => 1,
+    'string_' => 2,
+    'float5_' => 5,
+    'float4_' => 4,
+    'float3_' => 3,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'i64_' => ?\TimestampToTimeAdapter::THackType,
+    ?'string_' => ?string,
+    ?'float5_' => ?float,
+    ?'float4_' => ?float,
+    ?'float3_' => ?float,
+  );
+
+  const int STRUCTURAL_ID = 6436806283605753098;
+  /**
+   * Original thrift field:-
+   * 1: i64 i64_
+   */
+  public ?\TimestampToTimeAdapter::THackType $i64_;
+  /**
+   * Original thrift field:-
+   * 2: string string_
+   */
+  public ?string $string_;
+  /**
+   * Original thrift field:-
+   * 5: float float5_
+   */
+  public ?float $float5_;
+  /**
+   * Original thrift field:-
+   * 4: float float4_
+   */
+  public ?float $float4_;
+  /**
+   * Original thrift field:-
+   * 3: float float3_
+   */
+  public ?float $float3_;
+  protected OtherPrimitiveEnum $_type = OtherPrimitiveEnum::_EMPTY_;
+
+  public function __construct(?\TimestampToTimeAdapter::THackType $i64_ = null, ?string $string_ = null, ?float $float5_ = null, ?float $float4_ = null, ?float $float3_ = null)[] {
+    $this->_type = OtherPrimitiveEnum::_EMPTY_;
+    if ($i64_ !== null) {
+      $this->i64_ = $i64_;
+      $this->_type = OtherPrimitiveEnum::i64_;
+    }
+    if ($string_ !== null) {
+      $this->string_ = $string_;
+      $this->_type = OtherPrimitiveEnum::string_;
+    }
+    if ($float5_ !== null) {
+      $this->float5_ = $float5_ ?? 20.0;
+      $this->_type = OtherPrimitiveEnum::float5_;
+    }
+    if ($float4_ !== null) {
+      $this->float4_ = $float4_ ?? 30.0;
+      $this->_type = OtherPrimitiveEnum::float4_;
+    }
+    if ($float3_ !== null) {
+      $this->float3_ = $float3_ ?? 50.0;
+      $this->_type = OtherPrimitiveEnum::float3_;
+    }
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'i64_'),
+      Shapes::idx($shape, 'string_'),
+      Shapes::idx($shape, 'float5_'),
+      Shapes::idx($shape, 'float4_'),
+      Shapes::idx($shape, 'float3_'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'OtherPrimitive';
+  }
+
+  public function getType()[]: OtherPrimitiveEnum {
+    return $this->_type;
+  }
+
+  public function reset()[write_props]: void {
+    switch ($this->_type) {
+      case OtherPrimitiveEnum::i64_:
+        $this->i64_ = null;
+        break;
+      case OtherPrimitiveEnum::string_:
+        $this->string_ = null;
+        break;
+      case OtherPrimitiveEnum::float5_:
+        $this->float5_ = null;
+        break;
+      case OtherPrimitiveEnum::float4_:
+        $this->float4_ = null;
+        break;
+      case OtherPrimitiveEnum::float3_:
+        $this->float3_ = null;
+        break;
+      case OtherPrimitiveEnum::_EMPTY_:
+        break;
+    }
+    $this->_type = OtherPrimitiveEnum::_EMPTY_;
+  }
+
+  public function set_i64_(\TimestampToTimeAdapter::THackType $i64_)[write_props]: this {
+    $this->reset();
+    $this->_type = OtherPrimitiveEnum::i64_;
+    $this->i64_ = $i64_;
+    return $this;
+  }
+
+  public function get_i64_()[]: ?\TimestampToTimeAdapter::THackType {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      OtherPrimitiveEnum::i64_,
+    );
+    return $this->i64_;
+  }
+
+  public function getx_i64_()[]: \TimestampToTimeAdapter::THackType {
+    invariant(
+      $this->_type === OtherPrimitiveEnum::i64_,
+      'get_i64_ called on an instance of OtherPrimitive whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->i64_ as nonnull;
+  }
+
+  public function set_string_(string $string_)[write_props]: this {
+    $this->reset();
+    $this->_type = OtherPrimitiveEnum::string_;
+    $this->string_ = $string_;
+    return $this;
+  }
+
+  public function get_string_()[]: ?string {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      OtherPrimitiveEnum::string_,
+    );
+    return $this->string_;
+  }
+
+  public function getx_string_()[]: string {
+    invariant(
+      $this->_type === OtherPrimitiveEnum::string_,
+      'get_string_ called on an instance of OtherPrimitive whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->string_ as nonnull;
+  }
+
+  public function set_float5_(float $float5_)[write_props]: this {
+    $this->reset();
+    $this->_type = OtherPrimitiveEnum::float5_;
+    $this->float5_ = $float5_;
+    return $this;
+  }
+
+  public function get_float5_()[]: ?float {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      OtherPrimitiveEnum::float5_,
+    );
+    return $this->float5_;
+  }
+
+  public function getx_float5_()[]: float {
+    invariant(
+      $this->_type === OtherPrimitiveEnum::float5_,
+      'get_float5_ called on an instance of OtherPrimitive whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->float5_ as nonnull;
+  }
+
+  public function set_float4_(float $float4_)[write_props]: this {
+    $this->reset();
+    $this->_type = OtherPrimitiveEnum::float4_;
+    $this->float4_ = $float4_;
+    return $this;
+  }
+
+  public function get_float4_()[]: ?float {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      OtherPrimitiveEnum::float4_,
+    );
+    return $this->float4_;
+  }
+
+  public function getx_float4_()[]: float {
+    invariant(
+      $this->_type === OtherPrimitiveEnum::float4_,
+      'get_float4_ called on an instance of OtherPrimitive whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->float4_ as nonnull;
+  }
+
+  public function set_float3_(float $float3_)[write_props]: this {
+    $this->reset();
+    $this->_type = OtherPrimitiveEnum::float3_;
+    $this->float3_ = $float3_;
+    return $this;
+  }
+
+  public function get_float3_()[]: ?float {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      OtherPrimitiveEnum::float3_,
+    );
+    return $this->float3_;
+  }
+
+  public function getx_float3_()[]: float {
+    invariant(
+      $this->_type === OtherPrimitiveEnum::float3_,
+      'get_float3_ called on an instance of OtherPrimitive whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->float3_ as nonnull;
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.OtherPrimitive",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "i64_",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "string_",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 5,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_FLOAT_TYPE,
+                )
+              ),
+              "name" => "float5_",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 4,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_FLOAT_TYPE,
+                )
+              ),
+              "name" => "float4_",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_FLOAT_TYPE,
+                )
+              ),
+              "name" => "float3_",
+            )
+          ),
+        ],
+        "is_union" => true,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+        'i64_' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\hack\Adapter' => \facebook\thrift\annotation\hack\Adapter::fromShape(
+              shape(
+                "name" => "\\TimestampToTimeAdapter",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  private static function __hackAdapterTypeChecks()[]: void {
+    \ThriftUtil::requireSameType<\TimestampToTimeAdapter::TThriftType, int>();
+  }
+
+}
+

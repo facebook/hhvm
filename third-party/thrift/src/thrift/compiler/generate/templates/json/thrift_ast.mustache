@@ -57,9 +57,9 @@
         "name": "{{constant:name}}",
         "type": "{{value:type_name}}",
         "value": {{value:string_value_any}},{{!
-        }}{{#value:docs?}}
-        "docstring": {{value:docstring}},{{/value:docs?}}
-        "lineno": {{value:lineno}}
+        }}{{#constant:docs?}}
+        "docstring": {{constant:docstring}},{{/constant:docs?}}
+        "lineno": {{constant:lineno}}
       }{{/constant:value}}{{/constant:type}}{{^last?}},{{/last?}}
       {{/program:constants}}
   },{{/program:constants?}}{{!

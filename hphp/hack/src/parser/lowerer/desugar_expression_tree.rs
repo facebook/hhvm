@@ -1520,7 +1520,7 @@ impl RewriteState {
                 }
                 let desugar_expr = v_meth_call(et::SPLICE, args, &pos);
                 let virtual_spliced_expr = temp_variable.clone();
-                let temp_lid = temp_variable.2.as_lvar_into().unwrap().1;
+                let temp_lid = Some(temp_variable.2.as_lvar_into().unwrap().1);
                 let virtual_expr = Expr(
                     (),
                     pos,

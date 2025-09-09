@@ -46,7 +46,7 @@
                                                     { extract_client_type = false; 
                                                       contains_await = false; 
                                                       macro_variables = None; 
-                                                      temp_lid = $0splice0;
+                                                      temp_lid = (Some $0splice0);
                                                       spliced_expr =
                                                       ((), [4:22-36],
                                                        (Call
@@ -129,7 +129,7 @@
                                                                     { extract_client_type = true; 
                                                                     contains_await = false; 
                                                                     macro_variables = None; 
-                                                                    temp_lid = $0splice0; 
+                                                                    temp_lid = (Some $0splice0); 
                                                                     spliced_expr = ((), [4:22-36], (Lvar ([4:22-36], $0splice0))) })))))] }; 
                                                                     f_fun_kind = FSync; 
                                                                     f_user_attributes = []; 

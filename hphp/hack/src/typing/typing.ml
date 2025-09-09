@@ -5156,7 +5156,7 @@ end = struct
      contains_await = _;
      macro_variables = _;
      spliced_expr = _;
-     temp_lid = v;
+     temp_lid = Some v;
     } ->
       let local = Typing_env.get_local env v in
       (match local.Typing_local_types.macro_splice_vars with

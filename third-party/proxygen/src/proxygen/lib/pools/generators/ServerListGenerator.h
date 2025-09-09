@@ -9,9 +9,7 @@
 #pragma once
 
 #include <chrono>
-#include <map>
-#include <set>
-#include <string>
+#include <utility>
 #include <vector>
 
 #include <folly/SocketAddress.h>
@@ -19,6 +17,7 @@
 #include <glog/logging.h>
 
 #include <proxygen/lib/pools/generators/MemberGroupConfig.h>
+#include <proxygen/lib/pools/generators/ServerConfig.h>
 
 namespace proxygen {
 
@@ -31,48 +30,20 @@ namespace proxygen {
  */
 class ServerListGenerator {
  public:
-  struct ServerConfig {
-    ServerConfig(const std::string& name, const folly::SocketAddress& address)
-        : name(name), address(address) {
-    }
-
-    ServerConfig(const std::string& name,
-                 const folly::SocketAddress& address,
-                 const std::map<std::string, std::string>& properties)
-        : name(name), address(address), properties(properties) {
-    }
-
-    std::string name;
-    folly::SocketAddress address;
-    // A field for other addresses that alias the same server.
-    // For example a server may have a v4 and a v6 address.
-    // Most vector implementations start with a cap of 0 so minimal memory
-    // would be used when unused and is why this is still separated from
-    // the above preferred address.
-    std::vector<folly::SocketAddress> altAddresses;
-    std::map<std::string, std::string> properties;
-    // Optional parameter. It's only set if a server belongs to a group, which
-    // is configured in Pool Config.
-    MemberGroupId groupId_{kInvalidPoolMemberGroupId};
-
-    bool operator==(const ServerConfig& other) const {
-      return name == other.name && address == other.address &&
-             altAddresses == other.altAddresses &&
-             properties == other.properties && groupId_ == other.groupId_;
-    }
-
-    bool operator<(const ServerConfig& other) const {
-      return address < other.address;
-    }
-  };
-
   /**
    * Handle that can be used to stop any request in progress
    **/
   class Generator {
    public:
-    virtual ~Generator() {
-    }
+    Generator() = default;
+
+    Generator(const Generator&) = default;
+    Generator& operator=(const Generator&) = default;
+
+    Generator(Generator&&) = default;
+    Generator& operator=(Generator&&) = default;
+
+    virtual ~Generator() = default;
 
     virtual void cancelServerListRequest() = 0;
   };
@@ -81,6 +52,12 @@ class ServerListGenerator {
    public:
     Callback() : gen_(nullptr) {
     }
+
+    Callback(const Callback&) = default;
+    Callback& operator=(const Callback&) = default;
+
+    Callback(Callback&&) = default;
+    Callback& operator=(Callback&&) = default;
 
     virtual ~Callback() {
       // An act of gentlemen
@@ -109,7 +86,7 @@ class ServerListGenerator {
      */
     void serverListError(std::exception_ptr error) noexcept {
       resetGenerator();
-      onServerListError(error);
+      onServerListError(std::move(error));
     }
 
     virtual void onServerListError(std::exception_ptr error) noexcept = 0;
@@ -162,6 +139,13 @@ class ServerListGenerator {
       : eventBase_(base) {
   }
 
+  // Forbidden copy constructor and assignment operator
+  ServerListGenerator(ServerListGenerator const&) = delete;
+  ServerListGenerator& operator=(ServerListGenerator const&) = delete;
+
+  ServerListGenerator(ServerListGenerator&&) = default;
+  ServerListGenerator& operator=(ServerListGenerator&&) = default;
+
   virtual ~ServerListGenerator() {
     detachEventBase();
   }
@@ -204,7 +188,7 @@ class ServerListGenerator {
     groupId_ = serverGroupId;
   }
 
-  MemberGroupId getGroupId() const {
+  [[nodiscard]] MemberGroupId getGroupId() const {
     return groupId_;
   }
 
@@ -217,44 +201,38 @@ class ServerListGenerator {
    * different ways.
    */
   MemberGroupId groupId_{kInvalidPoolMemberGroupId};
-
- private:
-  // Forbidden copy constructor and assignment operator
-  ServerListGenerator(ServerListGenerator const&) = delete;
-  ServerListGenerator& operator=(ServerListGenerator const&) = delete;
 };
 
-using ServerConfigList = std::vector<ServerListGenerator::ServerConfig>;
+using ServerConfigList = std::vector<ServerConfig>;
 
 // A default ServerListGenerator::Callback interface for consumers that
 // simply want the call status and result returned directly.
 class ServerListCallback : public ServerListGenerator::Callback {
  public:
-  enum StatusEnum {
+  enum StatusEnum : std::uint8_t {
     NOT_FINISHED,
     SUCCESS,
     ERROR,
     CANCELLED,
   };
 
-  explicit ServerListCallback() : status(NOT_FINISHED) {
-  }
+  explicit ServerListCallback() = default;
 
-  void onServerListAvailable(std::vector<ServerListGenerator::ServerConfig>&&
-                                 results) noexcept override {
+  void onServerListAvailable(
+      std::vector<ServerConfig>&& results) noexcept override {
     servers.swap(results);
     status = SUCCESS;
   }
   void onServerListError(std::exception_ptr error) noexcept override {
-    errorPtr = error;
+    errorPtr = std::move(error);
     status = ERROR;
   }
   virtual void serverListRequestCancelled() {
     status = CANCELLED;
   }
 
-  StatusEnum status;
-  std::vector<ServerListGenerator::ServerConfig> servers;
+  StatusEnum status{NOT_FINISHED};
+  std::vector<ServerConfig> servers;
   std::exception_ptr errorPtr;
 };
 

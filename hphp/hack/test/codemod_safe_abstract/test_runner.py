@@ -45,10 +45,9 @@ def main():
         description="Test runner for codemod safe abstract orchestrator"
     )
     parser.add_argument("config_filename", help="Config filename (e.g., .hhconfig)")
-    parser.add_argument("orchestrator_binary", help="Path to the orchestrator binary")
-    parser.add_argument("codemod_binary", help="Path to the codemod binary")
-    parser.add_argument("hh_distc_binary", help="Path to the hh_distc binary")
-    parser.add_argument("worker_binary", help="Path to the worker binary")
+    parser.add_argument(
+        "orchestrator_command", help="command to orchestrate the codemod"
+    )
 
     args = parser.parse_args()
 
@@ -100,8 +99,7 @@ def main():
             sys.exit(1)
         initial_commit = initial_commit_stdout.strip()
 
-        # Construct the full command with all required binaries
-        cmd = f"{args.orchestrator_binary} --codemod-safe-abstract {args.codemod_binary} --hh_distc {args.hh_distc_binary} --worker {args.worker_binary} --root {working_dir}"
+        cmd = f"{args.orchestrator_command} --root {working_dir}"
         stdout, stderr, returncode = run_command(cmd, cwd=working_dir)
 
         # Always try to show the diff first, as the orchestrator may return non-zero even on success

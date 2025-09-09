@@ -12,7 +12,9 @@
 #include <folly/Optional.h>
 #include <folly/Range.h>
 #include <atomic>
+#include <functional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace facebook {
@@ -59,6 +61,7 @@ class ConnectionContextBase {
   bool isIdentityClientCert = false;
   std::string endpointVersion;
   std::optional<size_t> certCacheSize;
+  std::unordered_map<std::string, std::function<std::string()>> loggingFuncs_;
 };
 
 class ExponentialMovingAverage {

@@ -194,6 +194,7 @@ folly::SemiFuture<DbQueryResult> Connection::querySemiFuture(
     throw db::InvalidConnectionException("null connection supplied");
   }
   conn->mergePersistentQueryAttributes(options.getAttributes());
+  conn->connection_context_->loggingFuncs_ = options.stealLoggingFuncs();
   auto op = beginQuery(std::move(conn), std::move(query));
   op->setAttributes(std::move(options.getAttributes()));
   checkForQueryTimeoutOverride(*op, options.getQueryTimeout());
@@ -212,6 +213,7 @@ folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
     throw db::InvalidConnectionException("null connection supplied");
   }
   conn->mergePersistentQueryAttributes(options.getAttributes());
+  conn->connection_context_->loggingFuncs_ = options.stealLoggingFuncs();
   auto op = beginMultiQuery(std::move(conn), std::move(args));
   op->setAttributes(std::move(options.getAttributes()));
   checkForQueryTimeoutOverride(*op, options.getQueryTimeout());
@@ -230,6 +232,7 @@ folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
     throw db::InvalidConnectionException("null connection supplied");
   }
   conn->mergePersistentQueryAttributes(options.getAttributes());
+  conn->connection_context_->loggingFuncs_ = options.stealLoggingFuncs();
   auto op = beginMultiQuery(std::move(conn), std::move(args));
   op->setAttributes(std::move(options.getAttributes()));
   checkForQueryTimeoutOverride(*op, options.getQueryTimeout());

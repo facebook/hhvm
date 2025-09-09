@@ -82,9 +82,11 @@
 
 #include <mysql.h>
 
+#include <functional>
 #include <optional>
 #include <string>
 #include <tuple>
+#include <unordered_map>
 
 #include "squangle/base/Base.h"
 #include "squangle/mysql_client/InternalConnection.h"
@@ -133,9 +135,27 @@ class QueryOptions {
     return queryTimeoutOverride_;
   }
 
+  void setLoggingFunction(
+      const std::string& name,
+      std::function<std::string()> func) {
+    if (func == nullptr) {
+      loggingFuncs_.erase(name);
+    } else {
+      loggingFuncs_[name] = std::move(func);
+    }
+  }
+
+  std::unordered_map<std::string, std::function<std::string()>>
+  stealLoggingFuncs() {
+    std::unordered_map<std::string, std::function<std::string()>> funcs;
+    std::swap(funcs, loggingFuncs_);
+    return funcs;
+  }
+
  protected:
   QueryAttributes attributes_;
   std::optional<Duration> queryTimeoutOverride_;
+  std::unordered_map<std::string, std::function<std::string()>> loggingFuncs_;
 };
 
 class Query {

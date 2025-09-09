@@ -62,6 +62,8 @@ std::string mstch_base::get_option(const std::string& option) const {
 
 mstch_factories::mstch_factories() {
   add<mstch_program>();
+  add<mstch_service>();
+  add<mstch_function>();
   add<mstch_type>();
   add<mstch_typedef>();
   add<mstch_struct>();

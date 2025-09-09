@@ -25,13 +25,6 @@
 namespace apache::thrift::compiler {
 namespace {
 
-struct json_codegen_data {
-  // The current program being generated
-  const t_program* current_program;
-  std::string compiler_path;
-  source_manager* sm;
-};
-
 std::string get_filepath(
     const t_node& node, source_manager& sm, std::string compiler_path) {
   std::string path = sm.resolve_location(node.src_range().begin).file_name();
@@ -54,7 +47,15 @@ class t_json_experimental_generator : public t_mstch_generator {
 
  private:
   void set_mstch_factories();
-  json_codegen_data data_;
+
+  whisker::map::raw globals() const override {
+    whisker::map::raw globals = t_mstch_generator::globals();
+    // To allow rendering a brace not surrounded by whitespace, without
+    // interfering with the `{{` `}}` used by the mustache syntax.
+    globals["open_object"] = whisker::make::string("{");
+    globals["close_object"] = whisker::make::string("}");
+    return globals;
+  }
 
   prototype<t_named>::ptr make_prototype_for_named(
       const prototype_database& proto) const override {
@@ -62,6 +63,27 @@ class t_json_experimental_generator : public t_mstch_generator {
     auto def = whisker::dsl::prototype_builder<h_named>::extends(base);
     def.property("docstring", [](const t_named& self) {
       return json_quote_ascii(self.doc());
+    });
+    return std::move(def).make();
+  }
+
+  prototype<t_node>::ptr make_prototype_for_node(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_node(proto);
+    auto def = whisker::dsl::prototype_builder<h_node>::extends(base);
+    def.property("path", [this](const t_node& node) {
+      return get_filepath(
+          node, source_mgr_, std::filesystem::current_path().generic_string());
+    });
+    return std::move(def).make();
+  }
+
+  prototype<t_type>::ptr make_prototype_for_type(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_type(proto);
+    auto def = whisker::dsl::prototype_builder<h_type>::extends(base);
+    def.property("external?", [this](const t_type& self) {
+      return self.program() != get_program();
     });
     return std::move(def).make();
   }
@@ -86,11 +108,6 @@ class json_experimental_program : public mstch_program {
             {"program:normalized_include_prefix",
              &json_experimental_program::include_prefix},
         });
-
-    // To allow rendering a brace not surrounded by whitespace, without
-    // interfering with the `{{` `}}` used by the mustache syntax.
-    register_method("open_object", [] { return mstch::node("{"); });
-    register_method("close_object", [] { return mstch::node("}"); });
   }
 
   mstch::node get_py_namespace() { return program_->get_namespace("py"); }
@@ -158,134 +175,6 @@ class json_experimental_program : public mstch_program {
   }
 };
 
-class json_experimental_service : public mstch_service {
- public:
-  json_experimental_service(
-      const t_service* s,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      json_codegen_data d)
-      : mstch_service(s, ctx, pos), data_(d) {
-    register_methods(
-        this,
-        {
-            {"service:path", &json_experimental_service::path},
-        });
-  }
-  mstch::node path() {
-    return compiler::get_filepath(*service_, *data_.sm, data_.compiler_path);
-  }
-
- private:
-  json_codegen_data data_;
-};
-
-class json_experimental_function : public mstch_function {
- public:
-  json_experimental_function(
-      const t_function* f,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      source_manager* sm)
-      : mstch_function(f, ctx, pos), source_mgr_(*sm) {}
-
- private:
-  source_manager& source_mgr_;
-};
-
-class json_experimental_struct : public mstch_struct {
- public:
-  json_experimental_struct(
-      const t_structured* s,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      source_manager* sm)
-      : mstch_struct(s, ctx, pos), source_mgr_(*sm) {}
-
- private:
-  source_manager& source_mgr_;
-};
-
-class json_experimental_type : public mstch_type {
- public:
-  json_experimental_type(
-      const t_type* t,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      json_codegen_data d)
-      : mstch_type(t, ctx, pos), data_(d) {
-    register_methods(
-        this,
-        {
-            {"type:external?", &json_experimental_type::is_external},
-            {"type:path", &json_experimental_type::path},
-        });
-  }
-
-  mstch::node path() {
-    return compiler::get_filepath(*type_, *data_.sm, data_.compiler_path);
-  }
-  mstch::node is_external() {
-    return data_.current_program != type_->program();
-  }
-
- private:
-  json_codegen_data data_;
-};
-
-class json_experimental_field : public mstch_field {
- public:
-  json_experimental_field(
-      const t_field* f,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      source_manager* sm)
-      : mstch_field(f, ctx, pos), source_mgr_(*sm) {}
-
- private:
-  source_manager& source_mgr_;
-};
-
-class json_experimental_typedef : public mstch_typedef {
- public:
-  json_experimental_typedef(
-      const t_typedef* t,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      source_manager* sm)
-      : mstch_typedef(t, ctx, pos), source_mgr_(*sm) {
-    register_methods(
-        this,
-        {
-            {"typedef:exception?", &json_experimental_typedef::is_exception},
-        });
-  }
-  mstch::node is_exception() { return typedef_->is<t_exception>(); }
-
- private:
-  source_manager& source_mgr_;
-};
-
-class json_experimental_enum : public mstch_enum {
- public:
-  json_experimental_enum(
-      const t_enum* e,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      source_manager* sm)
-      : mstch_enum(e, ctx, pos), source_mgr_(*sm) {
-    register_methods(
-        this,
-        {
-            {"enum:empty?", &json_experimental_enum::is_empty},
-        });
-  }
-  mstch::node is_empty() { return enum_->get_enum_values().empty(); }
-
- private:
-  source_manager& source_mgr_;
-};
-
 class json_experimental_const_value : public mstch_const_value {
  public:
   json_experimental_const_value(
@@ -293,10 +182,8 @@ class json_experimental_const_value : public mstch_const_value {
       mstch_context& ctx,
       mstch_element_position pos,
       const t_const* current_const,
-      const t_type* expected_type,
-      source_manager* sm)
-      : mstch_const_value(cv, ctx, pos, current_const, expected_type),
-        source_mgr_(*sm) {
+      const t_type* expected_type)
+      : mstch_const_value(cv, ctx, pos, current_const, expected_type) {
     register_methods(
         this,
         {
@@ -328,17 +215,11 @@ class json_experimental_const_value : public mstch_const_value {
     return current_const_->type()->get_true_type()->get_scoped_name();
   }
   mstch::node string_value_any() { return to_json(const_value_); }
-
- private:
-  source_manager& source_mgr_;
 };
 
 void t_json_experimental_generator::generate_program() {
   out_dir_base_ = "gen-json_experimental";
   const auto* program = get_program();
-  data_.current_program = program;
-  data_.compiler_path = std::filesystem::current_path().generic_string();
-  data_.sm = &source_mgr_;
   set_mstch_factories();
   auto mstch_program = mstch_context_.program_factory->make_mstch_object(
       program, mstch_context_);
@@ -347,14 +228,7 @@ void t_json_experimental_generator::generate_program() {
 
 void t_json_experimental_generator::set_mstch_factories() {
   mstch_context_.add<json_experimental_program>();
-  mstch_context_.add<json_experimental_service>(data_);
-  mstch_context_.add<json_experimental_function>(&source_mgr_);
-  mstch_context_.add<json_experimental_struct>(&source_mgr_);
-  mstch_context_.add<json_experimental_field>(&source_mgr_);
-  mstch_context_.add<json_experimental_enum>(&source_mgr_);
-  mstch_context_.add<json_experimental_const_value>(&source_mgr_);
-  mstch_context_.add<json_experimental_typedef>(&source_mgr_);
-  mstch_context_.add<json_experimental_type>(data_);
+  mstch_context_.add<json_experimental_const_value>();
 }
 
 THRIFT_REGISTER_GENERATOR(json_experimental, "JSON_EXPERIMENTAL", "");

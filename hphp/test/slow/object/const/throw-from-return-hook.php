@@ -1,8 +1,9 @@
 <?hh
 
-<<__Const>>
 class C {
+  <<__Const>>
   public int $i = 0;
+  <<__Const>>
   public vec $v = vec[1];
 
   public static ?C $c = null;
@@ -47,12 +48,14 @@ function test() :mixed{
     echo $e->getMessage() . "\n";
   }
 
+ /* TODO(nzthomas) Restore this when we support const objects
   try {
     $c->lol = 'whut';
     echo "FAIL: wrote to dynamic property\n";
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";
   }
+  */
 
   echo "-- at the end --\n";
   var_dump($c);

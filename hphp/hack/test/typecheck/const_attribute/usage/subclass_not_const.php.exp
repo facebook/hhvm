@@ -1,1 +1,4 @@
-No errors
+ERROR: File "subclass_not_const.php", line 3, characters 1-22:
+Classes, interfaces, traits and enums may not be declared `__Const` (Parsing[1002])
+ERROR: File "subclass_not_const.php", line 6, characters 1-32:
+Classes, interfaces, traits and enums may not be declared `__Const` (Parsing[1002])

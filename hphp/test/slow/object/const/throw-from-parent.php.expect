@@ -50,7 +50,6 @@ Cannot modify const property ci of class D after construction
 Cannot modify const property di of class D after construction
 Cannot modify const property cv of class D after construction
 Cannot modify const property dv of class D after construction
-Class D does not allow use of dynamic (non-declared) properties
 -- at the end --
 object(D) (4) {
   ["di"]=>

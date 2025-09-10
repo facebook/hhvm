@@ -1,7 +1,7 @@
 <?hh
 
-<<__Const>>
 class C {
+  <<__Const>>
   public int $ci = 0;
 
   public function __construct() {

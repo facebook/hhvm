@@ -19,7 +19,6 @@ object(C) (2) {
 }
 Cannot modify const property i of class C after construction
 Cannot modify const property v of class C after construction
-Class C does not allow use of dynamic (non-declared) properties
 -- at the end --
 object(C) (2) {
   ["i"]=>

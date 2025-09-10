@@ -4073,14 +4073,24 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.errors
                     .push(make_error_from_node(node, errors::interface_implements))
             };
-            if self.attr_spec_contains_const(&cd.attribute)
-                && (is_token_kind(&cd.keyword, TokenKind::Interface)
-                    || is_token_kind(&cd.keyword, TokenKind::Trait))
-            {
-                self.errors.push(make_error_from_node(
-                    node,
-                    errors::no_const_interfaces_traits_enums,
-                ))
+            if self.attr_spec_contains_const(&cd.attribute) {
+                if is_token_kind(&cd.keyword, TokenKind::Class)
+                    && list_contains_predicate(|x| x.is_abstract(), &cd.modifiers)
+                    && list_contains_predicate(|x| x.is_final(), &cd.modifiers)
+                {
+                    self.errors.push(make_error_from_node(
+                        node,
+                        errors::no_const_abstract_final_class,
+                    ))
+                } else if is_token_kind(&cd.keyword, TokenKind::Class)
+                    || is_token_kind(&cd.keyword, TokenKind::Interface)
+                    || is_token_kind(&cd.keyword, TokenKind::Trait)
+                {
+                    self.errors.push(make_error_from_node(
+                        node,
+                        errors::no_const_interfaces_traits_enums_classes,
+                    ))
+                }
             }
 
             if self.attr_spec_contains_const(&cd.attribute)
@@ -5096,7 +5106,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             if self.attr_spec_contains_const(attrs) {
                 self.errors.push(make_error_from_node(
                     node,
-                    errors::no_const_interfaces_traits_enums,
+                    errors::no_const_interfaces_traits_enums_classes,
                 ))
             }
             self.invalid_modifier_errors("Enums", node, |kind| {

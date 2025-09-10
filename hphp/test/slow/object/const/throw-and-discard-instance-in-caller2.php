@@ -5,8 +5,8 @@ function throw_exception() {
   throw new Exception('sneaky');
 }
 
-<<__Const>>
 class C {
+  <<__Const>>
   public int $i = 0;
   public static ?C $c = null;
 

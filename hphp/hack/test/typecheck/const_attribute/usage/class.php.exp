@@ -1,2 +1,8 @@
+ERROR: File "class.php", line 3, characters 1-29:
+Classes, interfaces, traits and enums may not be declared `__Const` (Parsing[1002])
+ERROR: File "class.php", line 6, characters 1-39:
+Classes, interfaces, traits and enums may not be declared `__Const` (Parsing[1002])
+ERROR: File "class.php", line 9, characters 1-33:
+Classes, interfaces, traits and enums may not be declared `__Const` (Parsing[1002])
 ERROR: File "class.php", line 12, characters 1-49:
 Cannot apply `__Const` attribute to an abstract final class (Parsing[1002])

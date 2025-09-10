@@ -1,2 +1,4 @@
 ERROR: File "single_const_attribute_class.php", line 4, characters 19-19:
 Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])
+ERROR: File "single_const_attribute_class.php", line 4, characters 1-22:
+Classes, interfaces, traits and enums may not be declared `__Const` (Parsing[1002])

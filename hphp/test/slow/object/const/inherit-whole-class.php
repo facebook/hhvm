@@ -1,8 +1,9 @@
 <?hh
 
-<<__Const>>
 class C {
+  <<__Const>>
   public int $ci = 0;
+  <<__Const>>
   public vec $cv = vec[1];
 }
 

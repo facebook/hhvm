@@ -1,8 +1,7 @@
 <?hh
 
-<<__Const>>
 class C {
-  public function __construct(public int $i, public int $j)[] {}
+  public function __construct(<<__Const>> public int $i, <<__Const>> public int $j)[] {}
 }
 
 <<__EntryPoint>>

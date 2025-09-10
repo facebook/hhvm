@@ -14,7 +14,7 @@
           sp_type = (Rhint ([5:10-13]), (Tprim Tint));
           sp_visibility = Public;
           sp_flags =
-          { Shallow_decl_defs.PropFlags.abstract = false; const = true;
+          { Shallow_decl_defs.PropFlags.abstract = false; const = false;
             lateinit = false; lsb = false; needs_init = true;
             php_std_lib = false; readonly = false;
             safe_global_variable = false; no_auto_likes = false }

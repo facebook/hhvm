@@ -1,1 +1,1 @@
-Class C does not allow use of dynamic (non-declared) properties
+const properties do not prevent class from having dynamic props

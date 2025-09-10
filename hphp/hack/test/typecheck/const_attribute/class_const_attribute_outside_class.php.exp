@@ -1,2 +1,2 @@
-ERROR: File "class_const_attribute_outside_class.php", line 17, characters 23-37:
-Cannot mutate a `__Const` property (Typing[4196])
+ERROR: File "class_const_attribute_outside_class.php", line 3, characters 1-125:
+Classes, interfaces, traits and enums may not be declared `__Const` (Parsing[1002])

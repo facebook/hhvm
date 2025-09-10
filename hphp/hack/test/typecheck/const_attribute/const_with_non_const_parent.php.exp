@@ -1,2 +1,4 @@
+ERROR: File "const_with_non_const_parent.php", line 5, characters 1-32:
+Classes, interfaces, traits and enums may not be declared `__Const` (Parsing[1002])
 ERROR: File "const_with_non_const_parent.php", line 5, characters 19-19:
 A `__Const` class may only extend other `__Const` classes (Typing[4197])

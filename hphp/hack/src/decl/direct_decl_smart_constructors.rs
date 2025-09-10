@@ -4616,14 +4616,6 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
 
         props.extend(xhp_props);
 
-        if class_attributes.const_ {
-            for prop in props.iter_mut() {
-                if !prop.flags.contains(PropFlags::CONST) {
-                    prop.flags |= PropFlags::CONST;
-                }
-            }
-        }
-
         let extends = extends
             .into_iter()
             .filter_map(|node| self.node_to_ty(node))

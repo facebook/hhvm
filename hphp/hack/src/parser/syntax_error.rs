@@ -565,8 +565,8 @@ pub const no_legacy_soft_typehints: Error = Cow::Borrowed(
 );
 pub const outside_dollar_str_interp: Error =
     Cow::Borrowed("The `${x}` syntax is disallowed in Hack. Use `{$x}` instead.");
-pub const no_const_interfaces_traits_enums: Error =
-    Cow::Borrowed("Interfaces, traits and enums may not be declared `__Const`");
+pub const no_const_interfaces_traits_enums_classes: Error =
+    Cow::Borrowed("Classes, interfaces, traits and enums may not be declared `__Const`");
 pub const no_const_late_init_props: Error =
     Cow::Borrowed("`__Const` properties may not also be `__LateInit`");
 pub const no_const_abstract_final_class: Error =

@@ -4,3 +4,5 @@ ERROR: File "const_attribute.php", line 16, characters 7-7:
 Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])
 ERROR: File "const_attribute.php", line 25, characters 7-7:
 Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])
+ERROR: File "const_attribute.php", line 3, characters 1-147:
+Classes, interfaces, traits and enums may not be declared `__Const` (Parsing[1002])

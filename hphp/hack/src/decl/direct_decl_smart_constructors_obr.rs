@@ -4814,17 +4814,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
 
         props.extend(xhp_props);
 
-        if class_attributes.const_ {
-            for prop in props.iter_mut() {
-                if !prop.flags.contains(PropFlags::CONST) {
-                    *prop = self.alloc(ShallowProp {
-                        flags: prop.flags | PropFlags::CONST,
-                        ..**prop
-                    })
-                }
-            }
-        }
-
         let uses = uses.into_bump_slice();
         let xhp_attr_uses = xhp_attr_uses.into_bump_slice();
         let xhp_enum_values = xhp_enum_values;

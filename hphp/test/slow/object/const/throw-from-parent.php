@@ -1,8 +1,9 @@
 <?hh
 
-<<__Const>>
 class C {
+  <<__Const>>
   public int $ci = 0;
+  <<__Const>>
   public vec $cv = vec[1];
 
   public function __construct() {
@@ -15,9 +16,10 @@ class C {
   }
 }
 
-<<__Const>>
 class D extends C {
+  <<__Const>>
   public int $di = 4;
+  <<__Const>> 
   public vec $dv = vec[5];
 
   public function __construct() {
@@ -65,12 +67,14 @@ function test() :mixed{
     echo $e->getMessage() . "\n";
   }
 
+  /* TODO(nzthomas) restore after we support const objects
   try {
     $d->lol = 'whut';
     echo "FAIL: wrote to dynamic property\n";
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";
   }
+  */
 
   echo "-- at the end --\n";
   var_dump($d);

@@ -1,8 +1,7 @@
 <?hh
 
-<<__Const>>
 class C {
-  public function __construct(public int $i)[] {}
+  public function __construct(<<__Const>> public int $i)[] {}
   public function __wakeup(): void {
     $this->i++;
   }

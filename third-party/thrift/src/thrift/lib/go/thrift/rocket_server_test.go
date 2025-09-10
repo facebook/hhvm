@@ -38,7 +38,7 @@ type testServerConfig struct {
 
 type testHarness struct {
 	server       Server
-	client       dummyif.DummyClientInterface
+	client       dummyif.DummyClient
 	serverCtx    context.Context
 	serverCancel context.CancelFunc
 	serverEG     *errgroup.Group
@@ -99,7 +99,7 @@ type concurrentRequestResult struct {
 }
 
 // executeConcurrentRequests tests server behavior under concurrent load
-func executeConcurrentRequests(client dummyif.DummyClientInterface, numRequests int, sleepDuration int64) *concurrentRequestResult {
+func executeConcurrentRequests(client dummyif.DummyClient, numRequests int, sleepDuration int64) *concurrentRequestResult {
 	var wg sync.WaitGroup
 	results := make([]error, numRequests)
 

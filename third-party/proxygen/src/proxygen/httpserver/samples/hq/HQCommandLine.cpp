@@ -154,6 +154,7 @@ DEFINE_bool(read_ecn,
             false,
             "Whether to read and echo ecn marking from ingress packets");
 DEFINE_uint32(dscp, 0, "DSCP value to use for outgoing packets");
+DEFINE_uint32(client_cid_length, 0, "Client Connection ID length in bytes");
 
 namespace quic::samples {
 
@@ -323,6 +324,10 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
 
   hqParams.transportSettings.dscpValue = FLAGS_dscp;
   hqParams.transportSettings.disableMigration = false;
+  if (hqUberParams.mode == HQMode::CLIENT) {
+    boost::get<HQToolClientParams>(hqUberParams.params).clientCidLength =
+        FLAGS_client_cid_length;
+  }
 
   hqParams.transportSettings.advertisedExtendedAckFeatures =
       FLAGS_advertise_extended_ack_features;

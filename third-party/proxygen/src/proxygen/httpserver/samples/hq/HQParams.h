@@ -90,6 +90,10 @@ struct HQServerParams : public HQBaseParams {
   folly::Optional<int64_t> rateLimitPerThread;
 };
 
+struct HQClientParams : public HQBaseParams {
+  uint8_t clientCidLength{0};
+};
+
 struct HQInvalidParam {
   std::string name;
   std::string value;

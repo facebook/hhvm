@@ -291,7 +291,10 @@ void HQClient::initializeQuicClient() {
   }
 
   auto client = std::make_shared<quic::QuicClientTransport>(
-      qEvb_, std::move(sock), std::move(handshakeContextBuilder).build());
+      qEvb_,
+      std::move(sock),
+      std::move(handshakeContextBuilder).build(),
+      params_.clientCidLength);
   client->setPacingTimer(pacingTimer_);
   client->setHostname(params_.host);
   client->addNewPeerAddress(params_.remoteAddress.value());

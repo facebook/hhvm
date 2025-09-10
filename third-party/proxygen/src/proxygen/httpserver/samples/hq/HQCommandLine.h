@@ -18,7 +18,7 @@ enum class HQMode { INVALID, CLIENT, SERVER };
 
 std::ostream& operator<<(std::ostream& o, const HQMode& m);
 
-struct HQToolClientParams : public HQBaseParams {
+struct HQToolClientParams : public HQClientParams {
   std::string outdir;
   bool logResponse;
   bool logResponseHeaders;

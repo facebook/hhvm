@@ -38,11 +38,7 @@
 namespace {
 static const uint16_t kMaxReadsPerLoop = 16;
 
-#ifndef CLANG_LAZY_INIT_TEST
-#define CLANG_LAZY_INIT_TEST
-#endif
-
-CLANG_LAZY_INIT_TEST static const std::string kQUICProtocolName("QUIC");
+constexpr std::string_view kQuicProtocolName = "QUIC";
 constexpr uint64_t kMaxQuarterStreamId = (1ull << 60) - 1;
 
 using namespace proxygen::HTTP3;
@@ -563,7 +559,7 @@ bool HQSession::getCurrentTransportInfoWithoutUpdate(
     wangle::TransportInfo* tinfo) const {
   tinfo->validTcpinfo = true;
   tinfo->appProtocol = std::make_shared<std::string>(alpn_);
-  tinfo->securityType = kQUICProtocolName;
+  tinfo->securityType = kQuicProtocolName;
   tinfo->protocolInfo = quicInfo_;
   if (sock_) {
     auto quicInfo = sock_->getTransportInfo();

@@ -268,15 +268,10 @@ final class ThriftContextPropState {
           OncallShortName\qf_capacity_eng,
         )
       ) {
-        call_defaults_from_zoned_shallow(
-          ()[defaults] ==> {
-            FBLogger('viewer_context_module.fbs', 'get_user_id_hack')->debug(
-              '%s called on %s, replacing with zero',
-              __FUNCTION__,
-              nameof FBFreeBasicServicesViewerContext,
-            );
-          },
-          'temporary debug logging with no user data to remove this hack',
+        FBLogger('viewer_context_module.fbs', 'get_user_id_hack')->debug(
+          '%s called on %s, replacing with zero',
+          __FUNCTION__,
+          nameof FBFreeBasicServicesViewerContext,
         );
       } else {
         call_defaults_from_zoned_shallow(

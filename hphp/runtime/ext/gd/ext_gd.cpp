@@ -1543,8 +1543,28 @@ static int heif_seek(int64_t position, void* userdata) {
 }
 
 static heif_reader_grow_status heif_wait_for_file_size(
-    int64_t /*targetSize*/,
-    void* /*userdata*/) {
+    int64_t targetSize,
+    void* userdata) {
+  const auto currentPos = heif_get_position(userdata);
+  if (targetSize <= currentPos) {
+    return heif_reader_grow_status_size_reached;
+  }
+
+  auto stream = static_cast<File*>(userdata);
+  if (!stream->seek(0, SEEK_END)) {
+    return heif_reader_grow_status_error;
+  }
+  const auto fileSize = stream->tell();
+  if (fileSize < 0) {
+    return heif_reader_grow_status_error;
+  }
+  // Restore current position
+  if (!stream->seek(currentPos, SEEK_SET)) {
+    return heif_reader_grow_status_error;
+  }
+  if (targetSize > fileSize) {
+    return heif_reader_grow_status_size_beyond_eof;
+  }
   return heif_reader_grow_status_size_reached;
 }
 

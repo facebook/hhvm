@@ -219,7 +219,7 @@ class RootRoute {
     if (!rh.empty()) {
       return routeToAll(rh, req);
     }
-    return createReply<Request>(ErrorReply);
+    return createReply<Request>(ErrorReply, "RootRoute: No rh found");
   }
 
   template <class Request>

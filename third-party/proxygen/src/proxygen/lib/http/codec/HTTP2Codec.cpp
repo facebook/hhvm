@@ -574,13 +574,13 @@ HTTP2Codec::parseHeadersDecodeFrames(
   auto g = folly::makeGuard([this] { curHeaderBlock_.move(); });
   // Check decoding error
   if (decodeInfo_.decodeError != HPACK::DecodeError::NONE) {
-    static const std::string decodeErrorMessage =
+    constexpr std::string_view kDecodeErrorMessage =
         "Failed decoding header block for stream=";
     // Avoid logging header blocks that have failed decoding due to being
     // excessively large.
     if (decodeInfo_.decodeError != HPACK::DecodeError::HEADERS_TOO_LARGE) {
       goawayErrorMessage_ =
-          folly::to<std::string>(decodeErrorMessage,
+          folly::to<std::string>(kDecodeErrorMessage,
                                  curHeader_.stream,
                                  ": decompression error=",
                                  uint32_t(decodeInfo_.decodeError));
@@ -589,7 +589,7 @@ HTTP2Codec::parseHeadersDecodeFrames(
       VLOG(3) << IOBufPrinter::printHexFolly(curHeaderBlock_.front(), true);
     } else {
       goawayErrorMessage_ = folly::to<std::string>(
-          decodeErrorMessage, curHeader_.stream, ": headers too large");
+          kDecodeErrorMessage, curHeader_.stream, ": headers too large");
       if (debugLevel_ > 0 && msg) {
         LOG(ERROR) << "HPACK Headers too large"
                    << CodecUtil::debugString(*msg, debugLevel_)

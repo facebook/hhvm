@@ -556,6 +556,16 @@ TEST_P(HTTPDownstreamSessionTest, SimpleByteEvents) {
   EXPECT_CALL(mockByteEventCallback, onByteEvent(_))
       .Times(expectedEvents)
       .WillRepeatedly(Invoke([this, id](HTTPByteEvent event) {
+        // Validate streamOffset field
+        EXPECT_GT(event.streamOffset, event.bodyOffset);
+        if (isHQ()) {
+          // For HTTP/3, streamOffset should equal transportOffset
+          EXPECT_EQ(event.streamOffset, event.transportOffset)
+              << "HTTP/3 streamOffset should equal transportOffset";
+        } else {
+          EXPECT_LE(event.streamOffset, event.transportOffset);
+        }
+
         if (event.type == HTTPByteEvent::Type::TRANSPORT_WRITE &&
             event.fieldSectionInfo) {
           EXPECT_EQ(event.fieldSectionInfo->type,

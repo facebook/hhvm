@@ -151,6 +151,7 @@ void AsyncSocketByteEventObserver::scheduleOrFireTxAckEvent(
 void AsyncSocketByteEventObserver::registerByteEvents(
     uint64_t streamID,
     uint64_t sessionByteOffset,
+    uint64_t streamOffset,
     const folly::Optional<HTTPByteEvent::FieldSectionInfo>& fsInfo,
     uint64_t bodyOffset,
     std::vector<HTTPByteEventRegistration>&& registrations,
@@ -165,6 +166,7 @@ void AsyncSocketByteEventObserver::registerByteEvents(
     ev.streamID = reg.streamID ? *reg.streamID : streamID;
     ev.bodyOffset = bodyOffset;
     ev.transportOffset = sessionByteOffset;
+    ev.streamOffset = streamOffset;
     ev.eom = eom;
     if (reg.events & uint8_t(HTTPByteEvent::Type::TRANSPORT_WRITE)) {
       ev.type = HTTPByteEvent::Type::TRANSPORT_WRITE;

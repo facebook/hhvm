@@ -60,6 +60,7 @@ struct HTTPByteEvent {
   folly::Optional<FieldSectionInfo> fieldSectionInfo;
   uint64_t bodyOffset{0};      // body offset of the last byte of event
   uint64_t transportOffset{0}; // transport offset of the last byte of event
+  uint64_t streamOffset{0};    // stream offset of the last byte of event
 
   bool eom{false};
   Type type;

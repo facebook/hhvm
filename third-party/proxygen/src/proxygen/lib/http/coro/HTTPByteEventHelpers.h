@@ -189,6 +189,7 @@ class AsyncSocketByteEventObserver
   void registerByteEvents(
       uint64_t streamID,
       uint64_t sessionByteOffset,
+      uint64_t streamOffset,
       const folly::Optional<HTTPByteEvent::FieldSectionInfo>& fsInfo,
       uint64_t bodyOffset,
       std::vector<HTTPByteEventRegistration>&& registrations,

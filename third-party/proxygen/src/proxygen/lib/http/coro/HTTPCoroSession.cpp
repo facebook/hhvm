@@ -104,6 +104,7 @@ struct HTTPCoroSession::StreamState {
   folly::IOBufQueue* writeBuf_{nullptr};
   folly::IOBufQueue hqWriteBuf_{folly::IOBufQueue::cacheChainLength()};
   HTTPPriority priority_;
+  uint64_t streamOffset_{0}; // total bytes including codec framing overhead
 
  public:
   HTTPStreamSource streamSource;
@@ -173,6 +174,14 @@ struct HTTPCoroSession::StreamState {
 
   void setPriority(HTTPPriority priority) {
     priority_ = priority;
+  }
+
+  uint64_t getStreamOffset() const {
+    return streamOffset_;
+  }
+
+  void addToStreamOffset(uint64_t bytes) {
+    streamOffset_ += bytes;
   }
 
   void initIngressPush(HTTPCodec::StreamID assocStreamID) {
@@ -1805,12 +1814,13 @@ HTTPCoroSession::ResponseState HTTPCoroSession::processResponseHeaderEvent(
                          *headerEvent->headers,
                          headerEvent->eom,
                          &size);
+  stream.addToStreamOffset(size.compressed);
   HTTPByteEvent::FieldSectionInfo fsInfo = {
       HTTPByteEvent::FieldSectionInfo::Type::HEADERS,
       headerEvent->isFinal(),
       size};
   registerByteEvents(stream.getID(),
-                     folly::none,
+                     stream.getStreamOffset(),
                      fsInfo,
                      /*bodyOffset=*/0,
                      std::move(headerEvent->byteEventRegistrations),
@@ -1902,14 +1912,20 @@ folly::coro::Task<void> HTTPCoroSession::transferBody(
 
 void HTTPUniplexTransportSession::registerByteEvents(
     HTTPCodec::StreamID id,
-    folly::Optional<uint64_t> /*streamByteOffset*/, // quic only
+    folly::Optional<uint64_t> streamByteOffset, // stream codec bytes
     folly::Optional<HTTPByteEvent::FieldSectionInfo> fsInfo,
     uint64_t bodyOffset,
     std::vector<HTTPByteEventRegistration>&& regs,
     bool eom) {
+  XCHECK(streamByteOffset) << "streamByteOffset required for uniplex";
   auto sessionByteOffset = sessionBytesScheduled_ + writeBuf_.chainLength();
-  byteEventObserver_.registerByteEvents(
-      id, sessionByteOffset, fsInfo, bodyOffset, std::move(regs), eom);
+  byteEventObserver_.registerByteEvents(id,
+                                        sessionByteOffset,
+                                        *streamByteOffset,
+                                        fsInfo,
+                                        bodyOffset,
+                                        std::move(regs),
+                                        eom);
 }
 
 void HTTPQuicCoroSession::registerByteEvents(
@@ -1945,6 +1961,7 @@ void HTTPQuicCoroSession::registerByteEvents(
     httpByteEvent.fieldSectionInfo = fsInfo;
     httpByteEvent.bodyOffset = bodyOffset;
     httpByteEvent.transportOffset = *streamByteOffset;
+    httpByteEvent.streamOffset = *streamByteOffset; // same as transportOffset
     httpByteEvent.eom = eom;
     for (auto eventType : HTTPByteEvent::kByteEventTypes) {
       httpByteEvent.type = eventType;
@@ -2190,11 +2207,12 @@ folly::Expected<HTTPSourceHolder, HTTPError> HTTPCoroSession::sendRequestImpl(
   bool eom = !bodySource.readable();
   HTTPHeaderSize size;
   codec_->generateHeader(stream->getWriteBuf(), streamID, headers, eom, &size);
+  stream->addToStreamOffset(size.compressed);
   XLOG(DBG6) << "Done generating headers sess=" << *this << " id=" << streamID;
   HTTPByteEvent::FieldSectionInfo fsInfo = {
       HTTPByteEvent::FieldSectionInfo::Type::HEADERS, true, size};
   registerByteEvents(stream->getID(),
-                     folly::none,
+                     stream->getStreamOffset(),
                      fsInfo,
                      /*bodyOffset=*/0,
                      std::move(byteEventRegistrations),
@@ -3425,7 +3443,9 @@ size_t HTTPUniplexTransportSession::addStreamBodyDataToWriteBuf(uint32_t max) {
           }
           if (length == 0) {
             XCHECK(bodyEvent.eom);
-            bytesWritten += codec_->generateEOM(writeBuf_, streamId);
+            auto eomBytes = codec_->generateEOM(writeBuf_, streamId);
+            bytesWritten += eomBytes;
+            stream->addToStreamOffset(eomBytes);
           } else {
             auto genBytes = codec_->generateBody(writeBuf_,
                                                  streamId,
@@ -3435,6 +3455,7 @@ size_t HTTPUniplexTransportSession::addStreamBodyDataToWriteBuf(uint32_t max) {
             XCHECK_GT(genBytes, 0ul);
             fcBytesWritten += length;
             bytesWritten += genBytes;
+            stream->addToStreamOffset(genBytes);
           }
           SESS_STATS(recordPendingBufferedWriteBytes,
                      -static_cast<int64_t>(length));
@@ -3455,6 +3476,7 @@ size_t HTTPUniplexTransportSession::addStreamBodyDataToWriteBuf(uint32_t max) {
           auto sz = codec_->generateTrailers(
               writeBuf_, streamId, *bodyEvent.event.trailers);
           bytesWritten += sz;
+          stream->addToStreamOffset(sz);
           // Compression info not available for trailers
           fieldSectionInfo.emplace<HTTPByteEvent::FieldSectionInfo>(
               {HTTPByteEvent::FieldSectionInfo::Type::TRAILERS,
@@ -3464,8 +3486,10 @@ size_t HTTPUniplexTransportSession::addStreamBodyDataToWriteBuf(uint32_t max) {
           break;
         }
         case HTTPBodyEvent::PADDING: {
-          bytesWritten += codec_->generatePadding(
+          size_t genBytes = codec_->generatePadding(
               writeBuf_, streamId, bodyEvent.event.paddingSize);
+          bytesWritten += genBytes;
+          stream->addToStreamOffset(genBytes);
           break;
         }
         case HTTPBodyEvent::PUSH_PROMISE: {
@@ -3473,11 +3497,12 @@ size_t HTTPUniplexTransportSession::addStreamBodyDataToWriteBuf(uint32_t max) {
           bytesWritten += sz.compressed;
           fieldSectionInfo.emplace<HTTPByteEvent::FieldSectionInfo>(
               {HTTPByteEvent::FieldSectionInfo::Type::PUSH_PROMISE, true, sz});
+          stream->addToStreamOffset(sz.compressed);
           break;
         }
       }
       registerByteEvents(streamId,
-                         folly::none,
+                         stream->getStreamOffset(),
                          fieldSectionInfo,
                          stream->observedBodyLength(),
                          std::move(bodyEvent.byteEventRegistrations),

@@ -228,17 +228,14 @@ EncodeError StructuredHeadersEncoder::encodeIdentifier(
 // was involved in the error
 EncodeError StructuredHeadersEncoder::handleEncodeError(
     EncodeError err, const std::string& culprit) {
-
-  LOG_EVERY_N(ERROR, 1000)
-      << "Error message: " << encodeErrorDescription.at(err)
-      << " .The culprit was: " << culprit;
+  LOG_EVERY_N(ERROR, 1000) << "Error message: " << encodeErrToString(err)
+                           << ", culprit: " << culprit;
   return err;
 }
 
 // Used to print more general error messages (eg: empty data structure)
 EncodeError StructuredHeadersEncoder::handleEncodeError(EncodeError err) {
-  LOG_EVERY_N(ERROR, 1000) << "Error message: "
-                           << encodeErrorDescription.at(err);
+  LOG_EVERY_N(ERROR, 1000) << "Error message: " << encodeErrToString(err);
   return err;
 }
 

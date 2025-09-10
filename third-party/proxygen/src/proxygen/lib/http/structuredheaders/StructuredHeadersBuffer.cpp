@@ -21,7 +21,6 @@ namespace proxygen {
 using namespace StructuredHeaders;
 
 DecodeError StructuredHeadersBuffer::parseItem(StructuredHeaderItem& result) {
-
   removeOptionalWhitespace();
 
   if (isEmpty()) {
@@ -123,7 +122,6 @@ DecodeError StructuredHeadersBuffer::parseBoolean(
 
 DecodeError StructuredHeadersBuffer::parseBinaryContent(
     StructuredHeaderItem& result) {
-
   std::string outputString;
   if (isEmpty()) {
     return handleDecodeError(DecodeError::UNEXPECTED_END_OF_BUFFER);
@@ -164,7 +162,6 @@ DecodeError StructuredHeadersBuffer::parseBinaryContent(
 
 DecodeError StructuredHeadersBuffer::parseIdentifier(
     StructuredHeaderItem& result) {
-
   std::string outputString;
 
   auto err = parseIdentifier(outputString);
@@ -179,7 +176,6 @@ DecodeError StructuredHeadersBuffer::parseIdentifier(
 }
 
 DecodeError StructuredHeadersBuffer::parseIdentifier(std::string& result) {
-
   if (isEmpty()) {
     return handleDecodeError(DecodeError::UNEXPECTED_END_OF_BUFFER);
   }
@@ -203,7 +199,6 @@ DecodeError StructuredHeadersBuffer::parseIdentifier(std::string& result) {
 
 DecodeError StructuredHeadersBuffer::parseInteger(
     const std::string& input, StructuredHeaderItem& result) {
-
   try {
     result.value = boost::lexical_cast<int64_t>(input);
     result.tag = StructuredHeaderItem::Type::INT64;
@@ -215,7 +210,6 @@ DecodeError StructuredHeadersBuffer::parseInteger(
 
 DecodeError StructuredHeadersBuffer::parseFloat(const std::string& input,
                                                 StructuredHeaderItem& result) {
-
   try {
     result.value = boost::lexical_cast<double>(input);
     result.tag = StructuredHeaderItem::Type::DOUBLE;
@@ -226,7 +220,6 @@ DecodeError StructuredHeadersBuffer::parseFloat(const std::string& input,
 }
 
 DecodeError StructuredHeadersBuffer::parseString(StructuredHeaderItem& result) {
-
   std::string outputString;
 
   if (isEmpty()) {
@@ -278,7 +271,6 @@ DecodeError StructuredHeadersBuffer::removeOptionalWhitespace() {
 
 DecodeError StructuredHeadersBuffer::removeSymbol(const std::string& symbol,
                                                   bool strict) {
-
   if (content_.startsWith(symbol)) {
     content_.advance(symbol.length());
     return DecodeError::OK;
@@ -293,7 +285,7 @@ DecodeError StructuredHeadersBuffer::removeSymbol(const std::string& symbol,
 
 DecodeError StructuredHeadersBuffer::handleDecodeError(const DecodeError& err) {
   LOG_EVERY_N(ERROR, 1000)
-      << "Error message: " << decodeErrorDescription.at(err)
+      << "Error message: " << decodeErrToString(err)
       << ". Number of characters parsed before error:" << getNumCharsParsed()
       << ". Header Content:" << originalContent_.str();
   return err;

@@ -240,6 +240,7 @@ add_library(
     http/session/SimpleController.cpp
     http/sink/HTTPTransactionSink.cpp
     http/structuredheaders/StructuredHeadersBuffer.cpp
+    http/structuredheaders/StructuredHeadersConstants.cpp
     http/structuredheaders/StructuredHeadersDecoder.cpp
     http/structuredheaders/StructuredHeadersEncoder.cpp
     http/structuredheaders/StructuredHeadersUtilities.cpp

@@ -90,28 +90,7 @@ enum class EncodeError : uint8_t {
   ENCODING_NULL_ITEM = 5
 };
 
-#ifndef CLANG_LAZY_INIT_TEST
-#define CLANG_LAZY_INIT_TEST
-#endif
-
-CLANG_LAZY_INIT_TEST static const std::map<DecodeError, std::string>
-    decodeErrorDescription{
-        {DecodeError::OK, "No error"},
-        {DecodeError::VALUE_TOO_LONG, "Numeric value is too long"},
-        {DecodeError::INVALID_CHARACTER, "Invalid character"},
-        {DecodeError::UNDECODEABLE_BINARY_CONTENT,
-         "Undecodable binary content"},
-        {DecodeError::UNEXPECTED_END_OF_BUFFER, "Unexpected end of buffer"},
-        {DecodeError::UNPARSEABLE_NUMERIC_TYPE, "Unparseable numeric type"},
-        {DecodeError::DUPLICATE_KEY, "Duplicate key found"}};
-
-CLANG_LAZY_INIT_TEST static const std::map<EncodeError, std::string>
-    encodeErrorDescription{
-        {EncodeError::OK, "No error"},
-        {EncodeError::EMPTY_DATA_STRUCTURE, "Empty data structure"},
-        {EncodeError::BAD_IDENTIFIER, "Bad identifier"},
-        {EncodeError::BAD_STRING, "Bad string"},
-        {EncodeError::ITEM_TYPE_MISMATCH, "Item type mismatch"},
-        {EncodeError::ENCODING_NULL_ITEM, "Tried to encode null item"}};
+std::string_view decodeErrToString(DecodeError err);
+std::string_view encodeErrToString(EncodeError err);
 
 } // namespace proxygen::StructuredHeaders

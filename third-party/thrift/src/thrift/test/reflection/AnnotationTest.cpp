@@ -51,6 +51,17 @@ TEST(AnnotationTest, GetStructAnnotationValue) {
   // `Doc` annotation exists on MyStruct
   EXPECT_TRUE((get_struct_annotation<Doc, MyStruct>()));
 
+  // `ExtraAnnotation` also exists on MyStruct
+  EXPECT_TRUE((get_struct_annotation<ExtraAnnotation, MyStruct>()));
+
+  // Verify we can get the ExtraAnnotation instance
+  if (auto* extra = get_struct_annotation<ExtraAnnotation, MyStruct>()) {
+    // ExtraAnnotation is an empty struct, so just verify it exists
+    EXPECT_NE(extra, nullptr);
+  } else {
+    ADD_FAILURE();
+  }
+
   // `Oncall` annotation does not exist on MyStruct
   EXPECT_FALSE((get_struct_annotation<Oncall, MyStruct>()));
 }
@@ -148,23 +159,27 @@ TEST(AnnotationTest, GetExceptionFieldAnnotationValue) {
       (get_field_annotation<Sensitive, MyException, ident::message>()));
 }
 TEST(AnnotationTest, HasStructAnnotation) {
-  // Test MyStruct annotations
+  // Test MyStruct annotations - should have both Doc and ExtraAnnotation
   EXPECT_TRUE((has_struct_annotation<Doc, MyStruct>()));
+  EXPECT_TRUE((has_struct_annotation<ExtraAnnotation, MyStruct>()));
   EXPECT_FALSE((has_struct_annotation<Oncall, MyStruct>()));
   EXPECT_FALSE((has_struct_annotation<Sensitive, MyStruct>()));
 
   // Test MyUnion annotations
   EXPECT_TRUE((has_struct_annotation<Doc, MyUnion>()));
+  EXPECT_FALSE((has_struct_annotation<ExtraAnnotation, MyUnion>()));
   EXPECT_FALSE((has_struct_annotation<Oncall, MyUnion>()));
   EXPECT_FALSE((has_struct_annotation<Sensitive, MyUnion>()));
 
   // Test MyException annotations
   EXPECT_TRUE((has_struct_annotation<Doc, MyException>()));
+  EXPECT_FALSE((has_struct_annotation<ExtraAnnotation, MyException>()));
   EXPECT_FALSE((has_struct_annotation<Oncall, MyException>()));
   EXPECT_FALSE((has_struct_annotation<Sensitive, MyException>()));
 
   // Test NoAnnotationsStruct annotations
   EXPECT_FALSE((has_struct_annotation<Doc, NoAnnotationsStruct>()));
+  EXPECT_FALSE((has_struct_annotation<ExtraAnnotation, NoAnnotationsStruct>()));
   EXPECT_FALSE((has_struct_annotation<Oncall, NoAnnotationsStruct>()));
   EXPECT_FALSE((has_struct_annotation<Sensitive, NoAnnotationsStruct>()));
 }

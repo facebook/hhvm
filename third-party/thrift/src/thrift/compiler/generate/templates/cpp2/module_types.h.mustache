@@ -134,17 +134,17 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
     return "{{program:name}}";
   }
 {{#struct:has_struct_runtime_annotation?}}
+  using __fbthrift_struct_annotations = folly::tag_t<
 {{#struct:structured_runtime_annotations}}
 {{#structured_annotation:const_struct?}}
-  using __fbthrift_struct_annotations = folly::tag_t<
 {{#structured_annotation:const}}
 {{#constant:type}}
     {{type:cpp_fullname}}{{^last?}}, {{/last?}}
 {{/constant:type}}
 {{/structured_annotation:const}}
-  >;
 {{/structured_annotation:const_struct?}}
 {{/struct:structured_runtime_annotations}}
+  >;
 {{/struct:has_struct_runtime_annotation?}}
 {{> module_types_h/reflection}}
 

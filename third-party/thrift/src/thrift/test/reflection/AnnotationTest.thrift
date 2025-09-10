@@ -35,6 +35,10 @@ struct Doc {
 }
 
 @thrift.RuntimeAnnotation
+@scope.Struct
+struct ExtraAnnotation {}
+
+@thrift.RuntimeAnnotation
 @scope.Field
 struct Sensitive {}
 
@@ -46,6 +50,7 @@ struct NonRuntime {}
 
 @Doc{text = "I am a struct"}
 @NonRuntime{}
+@ExtraAnnotation{}
 struct MyStruct {
   @Oncall{name = "thrift"}
   @Sensitive

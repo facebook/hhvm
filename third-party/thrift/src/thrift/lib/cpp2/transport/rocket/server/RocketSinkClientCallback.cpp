@@ -41,7 +41,7 @@ namespace apache::thrift::rocket {
 
 // RocketSinkClientCallback methods
 RocketSinkClientCallback::RocketSinkClientCallback(
-    StreamId streamId, RocketServerConnection& connection)
+    StreamId streamId, RocketServerConnection& connection, uint32_t /*ignored*/)
     : streamId_(streamId), connection_(connection) {}
 
 bool RocketSinkClientCallback::onFirstResponse(

@@ -864,6 +864,50 @@ bool ThriftServerRequestSink::sendSinkThriftResponse(
 }
 #endif
 
+void ThriftServerRequestBiDi::sendSerializedError(
+    ResponseRpcMetadata&& metadata,
+    std::unique_ptr<folly::IOBuf> exbuf) noexcept {
+  if (auto responseRpcError = processFirstResponse(
+          metadata, exbuf, getProtoId(), version_, getCompressionConfig())) {
+    auto ex = makeRocketException(
+        *responseRpcError, *context_.connection().getPayloadSerializer());
+    handleStreamError(std::move(ex), clientCallback_);
+    return;
+  }
+  std::exchange(clientCallback_, nullptr)
+      ->onFirstResponseError(folly::make_exception_wrapper<
+                             thrift::detail::EncodedFirstResponseError>(
+          FirstResponsePayload(std::move(exbuf), std::move(metadata))));
+}
+
+bool ThriftServerRequestBiDi::sendBiDiThriftResponse(
+    ResponseRpcMetadata&& metadata,
+    std::unique_ptr<folly::IOBuf> data,
+    BiDiServerCallbackPtr serverCallback) noexcept {
+  if (!serverCallback) {
+    sendSerializedError(std::move(metadata), std::move(data));
+    return false;
+  }
+
+  if (auto responseRpcError = processFirstResponse(
+          metadata, data, getProtoId(), version_, getCompressionConfig())) {
+    auto ex = makeRocketException(
+        *responseRpcError, *context_.connection().getPayloadSerializer());
+    handleStreamError(std::move(ex), clientCallback_);
+    return false;
+  }
+
+  context_.unsetMarkRequestComplete();
+  serverCallback->resetClientCallback(*clientCallback_);
+
+  DCHECK(getRequestContext()->getHeader()->fds.empty()); // No FDs for bidi
+
+  return clientCallback_->onFirstResponse(
+      FirstResponsePayload{std::move(data), std::move(metadata)},
+      nullptr, /* evb */
+      serverCallback.release());
+}
+
 void ThriftServerRequestSink::closeConnection(
     folly::exception_wrapper ew) noexcept {
   context_.connection().close(std::move(ew));

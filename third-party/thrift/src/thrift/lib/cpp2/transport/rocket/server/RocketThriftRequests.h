@@ -26,7 +26,10 @@
 #include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
 #include <thrift/lib/cpp2/transport/core/ThriftRequest.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
+#include <thrift/lib/cpp2/transport/rocket/server/RocketBiDiClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerFrameContext.h>
+#include <thrift/lib/cpp2/transport/rocket/server/RocketSinkClientCallback.h>
+#include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
 
 namespace folly {
 class EventBase;
@@ -289,6 +292,76 @@ class ThriftServerRequestSink final : public RocketThriftRequest {
   RocketSinkClientCallback* clientCallback_;
 
   const std::shared_ptr<AsyncProcessor> cpp2Processor_;
+};
+
+class ThriftServerRequestBiDi final : public RocketThriftRequest {
+ public:
+  ThriftServerRequestBiDi(
+      ColocatedConstructionParams colocationParams,
+      folly::EventBase& evb,
+      server::ServerConfigs& serverConfigs,
+      RequestRpcMetadata&& metadata,
+      Cpp2ConnContext& connContext,
+      std::shared_ptr<folly::RequestContext> requestContext,
+      RequestsRegistry& reqRegistry,
+      rocket::Payload&& debugPayload,
+      RocketServerFrameContext&& context,
+      int32_t version,
+      RocketBiDiClientCallback* clientCallback,
+      std::shared_ptr<AsyncProcessor> asyncProcessor)
+      : RocketThriftRequest(
+            serverConfigs,
+            std::move(metadata),
+            connContext,
+            std::move(colocationParams.data),
+            evb,
+            std::move(context)),
+        version_(version),
+        clientCallback_(clientCallback),
+        asyncProcessor_(std::move(asyncProcessor)) {
+    new (colocationParams.debugStubToInit) RequestsRegistry::DebugStub(
+        reqRegistry,
+        *this,
+        *getRequestContext(),
+        std::move(requestContext),
+        getProtoId(),
+        std::move(debugPayload),
+        stateMachine_);
+    if (auto compressionConfig = getCompressionConfig()) {
+      clientCallback_->setCompressionConfig(*compressionConfig);
+    }
+    scheduleTimeouts();
+  }
+
+  bool includeEnvelope() const override { return true; }
+
+  // Should not be called
+  void sendThriftResponse(
+      ResponseRpcMetadata&&,
+      std::unique_ptr<folly::IOBuf>,
+      apache::thrift::MessageChannel::SendCallbackPtr) noexcept override {
+    LOG(FATAL) << "sendThriftResponse should not be called for BidiStream";
+  }
+
+  void sendThriftException(
+      ResponseRpcMetadata&& metadata,
+      std::unique_ptr<folly::IOBuf> data,
+      apache::thrift::MessageChannel::SendCallbackPtr) noexcept override {
+    sendSerializedError(std::move(metadata), std::move(data));
+  }
+
+  void sendSerializedError(
+      ResponseRpcMetadata&&, std::unique_ptr<folly::IOBuf>) noexcept override;
+
+  bool sendBiDiThriftResponse(
+      ResponseRpcMetadata&&,
+      std::unique_ptr<folly::IOBuf>,
+      BiDiServerCallbackPtr) noexcept override;
+
+ private:
+  const int32_t version_;
+  RocketBiDiClientCallback* clientCallback_{nullptr};
+  std::shared_ptr<AsyncProcessor> asyncProcessor_;
 };
 
 namespace detail {

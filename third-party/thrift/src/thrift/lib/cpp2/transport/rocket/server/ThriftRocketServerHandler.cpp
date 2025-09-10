@@ -458,22 +458,40 @@ void ThriftRocketServerHandler::handleRequestStreamFrame(
 void ThriftRocketServerHandler::handleRequestChannelFrame(
     RequestChannelFrame&& frame,
     RocketServerFrameContext&& context,
-    RocketSinkClientCallback* clientCallback) {
+    ChannelRequestCallbackFactory clientCallback) {
   auto makeRequestSink = [&](RequestRpcMetadata&& md,
                              rocket::Payload&& debugPayload,
-                             std::shared_ptr<folly::RequestContext> ctx) {
-    return RequestsRegistry::makeRequest<ThriftServerRequestSink>(
-        *eventBase_,
-        *serverConfigs_,
-        std::move(md),
-        connContext_,
-        std::move(ctx),
-        *requestsRegistry_,
-        std::move(debugPayload),
-        std::move(context),
-        version_,
-        clientCallback,
-        processor_);
+                             std::shared_ptr<folly::RequestContext> ctx)
+      -> ThriftRequestCoreUniquePtr {
+    if (md.kind() == RpcKind::SINK) {
+      return RequestsRegistry::makeRequest<ThriftServerRequestSink>(
+          *eventBase_,
+          *serverConfigs_,
+          std::move(md),
+          connContext_,
+          std::move(ctx),
+          *requestsRegistry_,
+          std::move(debugPayload),
+          std::move(context),
+          version_,
+          clientCallback.create<RocketSinkClientCallback>(),
+          processor_);
+    } else if (md.kind() == RpcKind::BIDIRECTIONAL_STREAM) {
+      return RequestsRegistry::makeRequest<ThriftServerRequestBiDi>(
+          *eventBase_,
+          *serverConfigs_,
+          std::move(md),
+          connContext_,
+          std::move(ctx),
+          *requestsRegistry_,
+          std::move(debugPayload),
+          std::move(context),
+          version_,
+          clientCallback.create<RocketBiDiClientCallback>(),
+          processor_);
+    } else {
+      LOG(FATAL) << "Invalid request kind: " << static_cast<int>(*md.kind());
+    }
   };
 
   handleRequestCommon(
@@ -574,6 +592,13 @@ void ThriftRocketServerHandler::handleRequestCommon(
           tryFds.exception().what().toStdString());
       return;
     }
+  }
+
+  // We use the same request kind for bidi and sink so need to deserialize
+  // metadata to distinguish them.
+  if (metadata.kind() == RpcKind::BIDIRECTIONAL_STREAM &&
+      expectedKind == RpcKind::SINK) {
+    expectedKind = RpcKind::BIDIRECTIONAL_STREAM;
   }
 
   if (!isMetadataValid(metadata, expectedKind)) {

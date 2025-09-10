@@ -33,6 +33,9 @@ class SetupFrame;
 
 class RocketServerConnection;
 class RocketServerFrameContext;
+class RocketBiDiClientCallback;
+
+struct ChannelRequestCallbackFactory;
 
 class RocketServerHandler {
  public:
@@ -54,8 +57,7 @@ class RocketServerHandler {
   virtual void handleRequestChannelFrame(
       RequestChannelFrame&&,
       RocketServerFrameContext&& context,
-      // TODO current only Sink are supported by using channel
-      RocketSinkClientCallback*) = 0;
+      ChannelRequestCallbackFactory) = 0;
 
   virtual void requestComplete() {}
 

@@ -32,7 +32,9 @@ namespace apache::thrift::rocket {
 class RocketSinkClientCallback final : public SinkClientCallback {
  public:
   explicit RocketSinkClientCallback(
-      StreamId streamId, RocketServerConnection& connection);
+      StreamId streamId,
+      RocketServerConnection& connection,
+      uint32_t /*ignored*/ = 0);
   ~RocketSinkClientCallback() override = default;
   bool onFirstResponse(
       FirstResponsePayload&&, folly::EventBase*, SinkServerCallback*) override;

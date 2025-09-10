@@ -94,7 +94,7 @@ class ThriftRocketServerHandler : public RocketServerHandler {
   void handleRequestChannelFrame(
       RequestChannelFrame&& frame,
       RocketServerFrameContext&& context,
-      RocketSinkClientCallback* clientCallback) final;
+      ChannelRequestCallbackFactory clientCallback) final;
   void connectionClosing() final;
 
   apache::thrift::server::TServerObserver::SamplingStatus shouldSample(

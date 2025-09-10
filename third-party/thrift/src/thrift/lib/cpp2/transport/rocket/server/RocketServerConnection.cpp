@@ -45,6 +45,7 @@
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
+#include <thrift/lib/cpp2/transport/rocket/server/RocketBiDiClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnectionPlugins.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerFrameContext.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerHandler.h>
@@ -144,17 +145,19 @@ RocketServerConnection::createStreamClientCallback(
   return cbPtr;
 }
 
-RocketSinkClientCallback* FOLLY_NULLABLE
-RocketServerConnection::createSinkClientCallback(
-    StreamId streamId, RocketServerConnection& connection) {
+std::optional<ChannelRequestCallbackFactory>
+RocketServerConnection::createChannelClientCallback(
+    StreamId streamId,
+    RocketServerConnection& connection,
+    uint32_t initialRequestN) {
   auto [it, inserted] = streams_.try_emplace(streamId);
   if (!inserted) {
-    return nullptr;
+    return std::nullopt;
   }
-  auto cb = std::make_unique<RocketSinkClientCallback>(streamId, connection);
-  auto cbPtr = cb.get();
-  it->second = std::move(cb);
-  return cbPtr;
+
+  it->second = std::unique_ptr<RocketSinkClientCallback>();
+  return ChannelRequestCallbackFactory{
+      it->second, streamId, connection, initialRequestN};
 }
 
 void RocketServerConnection::flushWrites(
@@ -357,6 +360,20 @@ void RocketServerConnection::closeIfNeeded() {
           bool state = callback->onSinkError(TApplicationException(
               TApplicationException::TApplicationExceptionType::INTERRUPTION));
           DCHECK(state) << "onSinkError called after sink complete!";
+        },
+        [](const std::unique_ptr<RocketBiDiClientCallback>& callback) {
+          if (callback->isSinkOpen()) {
+            // NOTE that we can receive connection closure AFTER we already
+            // cancelled the sink
+            callback->onSinkError(TApplicationException(
+                TApplicationException::TApplicationExceptionType::
+                    INTERRUPTION));
+          }
+          if (callback->isStreamOpen()) {
+            // NOTE that we can receive connection closure AFTER we already
+            // cancelled the sink
+            callback->onStreamCancel();
+          }
         });
     requestComplete();
   }
@@ -471,6 +488,16 @@ void RocketServerConnection::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
                   flags,
                   std::move(cursor),
                   *clientCallback);
+            },
+            [&](const std::unique_ptr<RocketBiDiClientCallback>&
+                    clientCallback) {
+              handleBiDiFrame(
+                  std::move(frame),
+                  streamId,
+                  frameType,
+                  flags,
+                  std::move(cursor),
+                  *clientCallback);
             });
       }
     }
@@ -552,7 +579,12 @@ void RocketServerConnection::handleUntrackedFrame(
                                              ->headersPayloadContent()
                                              .value_or({})));
                 },
-                [&](const std::unique_ptr<RocketSinkClientCallback>&) {});
+                [&](const std::unique_ptr<RocketSinkClientCallback>&) {
+                  // do nothing, headers push is not supported for sinks
+                },
+                [&](const std::unique_ptr<RocketBiDiClientCallback>&) {
+                  // do nothing, headers push is not supported for bidi
+                });
           }
           break;
         }
@@ -702,8 +734,8 @@ void RocketServerConnection::handleSinkFrame(
       }
 
       if (complete) {
-        // it is possible final repsonse(error) sent from serverCallback,
-        // serverCallback may be already destoryed.
+        // it is possible final response(error) sent from serverCallback,
+        // serverCallback may be already destroyed.
         if (streams_.find(streamId) != streams_.end()) {
           notViolateContract = clientCallback.onSinkComplete();
         }
@@ -760,6 +792,146 @@ void RocketServerConnection::handleSinkFrame(
               "Received unhandleable frame type ({}) for sink (id {})",
               static_cast<uint8_t>(frameType),
               static_cast<uint32_t>(streamId))));
+  }
+}
+
+void RocketServerConnection::handleBiDiFrame(
+    std::unique_ptr<folly::IOBuf> frame,
+    StreamId streamId,
+    FrameType frameType,
+    Flags flags,
+    folly::io::Cursor cursor,
+    RocketBiDiClientCallback& clientCallback) {
+  if (!clientCallback.serverCallbackReady()) {
+    // early cancellation
+    if (frameType == FrameType::ERROR) {
+      ErrorFrame errorFrame{std::move(frame)};
+      if (errorFrame.errorCode() == ErrorCode::CANCELED) {
+        clientCallback.cancelEarly();
+        return;
+      }
+    }
+    // unexpected frame
+    close(folly::make_exception_wrapper<RocketException>(
+        ErrorCode::INVALID,
+        fmt::format(
+            "Received unexpected early frame, stream id ({}) type ({})",
+            static_cast<uint32_t>(streamId),
+            static_cast<uint8_t>(frameType))));
+    return;
+  }
+
+  auto getErrorFromPayload = [](folly::Try<StreamPayload>& payload)
+      -> std::optional<folly::exception_wrapper> {
+    if (payload.hasException()) {
+      return payload.exception();
+    }
+
+    if (auto metadata = payload->metadata.payloadMetadata()) {
+      if (metadata->getType() == PayloadMetadata::Type::exceptionMetadata) {
+        return apache::thrift::detail::EncodedStreamError(std::move(*payload));
+      }
+    }
+
+    return std::nullopt;
+  };
+
+  auto dcheckFDPassingIsNotSupported = [](folly::Try<StreamPayload>& payload) {
+    // As noted in `RocketClient::handleSinkResponse`, bidi streams
+    // currently lack the codegen to be able to support FD passing.
+    DCHECK(
+        !payload->metadata.fdMetadata().has_value() ||
+        payload->metadata.fdMetadata()->numFds().value_or(0) == 0)
+        << "FD passing is not implemented for bidi streams";
+  };
+
+  auto handlePayloadFrame = [&](PayloadFrame&& payloadFrame) {
+    const bool next = payloadFrame.hasNext();
+    const bool complete = payloadFrame.hasComplete();
+
+    if (auto fullPayload = bufferOrGetFullPayload(std::move(payloadFrame))) {
+      if (next) {
+        auto streamPayload = getPayloadSerializer()->unpack<StreamPayload>(
+            std::move(*fullPayload), decodeMetadataUsingBinary_.value());
+
+        dcheckFDPassingIsNotSupported(streamPayload);
+
+        if (auto error = getErrorFromPayload(streamPayload)) {
+          if (clientCallback.isSinkOpen()) {
+            std::ignore = clientCallback.onSinkError(std::move(*error));
+          }
+        } else {
+          if (clientCallback.isSinkOpen()) {
+            std::ignore = clientCallback.onSinkNext(std::move(*streamPayload));
+          }
+        }
+      }
+
+      if (complete) {
+        if (clientCallback.isSinkOpen()) {
+          std::ignore = clientCallback.onSinkComplete();
+        }
+      }
+    }
+  };
+
+  auto handleErrorFrame = [&](ErrorFrame&& errorFrame) {
+    auto ew = [&] {
+      if (errorFrame.errorCode() == ErrorCode::CANCELED) {
+        return folly::make_exception_wrapper<TApplicationException>(
+            TApplicationException::TApplicationExceptionType::INTERRUPTION);
+      } else {
+        return folly::make_exception_wrapper<RocketException>(
+            errorFrame.errorCode(), std::move(errorFrame.payload()).data());
+      }
+    }();
+
+    if (clientCallback.isSinkOpen()) {
+      std::ignore = clientCallback.onSinkError(std::move(ew));
+    }
+  };
+
+  auto handleRequestNFrame = [&](RequestNFrame&& requestNFrame) {
+    if (clientCallback.isStreamOpen()) {
+      clientCallback.onStreamRequestN(requestNFrame.requestN());
+    }
+  };
+
+  auto handleCancelFrame = [&]() { clientCallback.onStreamCancel(); };
+
+  switch (frameType) {
+    case FrameType::PAYLOAD: {
+      handlePayloadFrame(
+          PayloadFrame{streamId, flags, cursor, std::move(frame)});
+    } break;
+    case FrameType::ERROR: {
+      handleErrorFrame(ErrorFrame(std::move(frame)));
+    } break;
+    case FrameType::REQUEST_N: {
+      handleRequestNFrame(RequestNFrame{streamId, flags, cursor});
+    } break;
+    case FrameType::CANCEL: {
+      handleCancelFrame();
+    } break;
+    case FrameType::EXT: {
+      ExtFrame extFrame(streamId, flags, cursor, std::move(frame));
+      if (!extFrame.hasIgnore()) {
+        close(folly::make_exception_wrapper<RocketException>(
+            ErrorCode::INVALID,
+            fmt::format(
+                "Received unsupported EXT frame type ({}) for stream (id {})",
+                static_cast<uint32_t>(extFrame.extFrameType()),
+                static_cast<uint32_t>(streamId))));
+      }
+    } break;
+    default: {
+      close(folly::make_exception_wrapper<RocketException>(
+          ErrorCode::INVALID,
+          fmt::format(
+              "Received unsupported frame type ({}) for bidi stream (id {})",
+              static_cast<uint8_t>(frameType),
+              static_cast<uint32_t>(streamId))));
+    }
   }
 }
 

@@ -49,6 +49,7 @@
 #include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/test/Util.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
+#include <thrift/lib/cpp2/transport/rocket/server/RocketBiDiClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerFrameContext.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerHandler.h>
@@ -491,7 +492,8 @@ class RocketTestServer::RocketTestServerHandler : public RocketServerHandler {
   void handleRequestChannelFrame(
       RequestChannelFrame&&,
       RocketServerFrameContext&&,
-      RocketSinkClientCallback* clientCallback) final {
+      ChannelRequestCallbackFactory factory) final {
+    auto clientCallback = factory.create<RocketSinkClientCallback>();
     apache::thrift::detail::SinkConsumerImpl impl{
         [](folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&> asyncGen)
             -> folly::coro::Task<folly::Try<StreamPayload>> {

@@ -64,6 +64,43 @@ class RocketStreamClientCallback;
 
 namespace rocket {
 
+using ClientCallbackUniquePtr = std::variant<
+    std::unique_ptr<RocketStreamClientCallback>,
+    std::unique_ptr<RocketSinkClientCallback>,
+    std::unique_ptr<RocketBiDiClientCallback>>;
+using ClientCallbackPtr = std::variant<
+    RocketStreamClientCallback*,
+    RocketSinkClientCallback*,
+    RocketBiDiClientCallback*>;
+
+// We don't know if a channel request will be a sink or bidi stream until
+// later, so return a factory object instead.
+struct ChannelRequestCallbackFactory {
+  ChannelRequestCallbackFactory(
+      ClientCallbackUniquePtr& callback,
+      StreamId streamId,
+      RocketServerConnection& connection,
+      uint32_t initialRequestN)
+      : callback_(&callback),
+        streamId_(streamId),
+        connection_(&connection),
+        initialRequestN_(initialRequestN) {}
+
+  template <typename T>
+  T* create() {
+    auto ret = std::make_unique<T>(streamId_, *connection_, initialRequestN_);
+    auto ptr = ret.get();
+    *callback_ = std::move(ret);
+    return ptr;
+  }
+
+ private:
+  ClientCallbackUniquePtr* callback_;
+  StreamId streamId_;
+  RocketServerConnection* connection_;
+  uint32_t initialRequestN_;
+};
+
 class RocketServerConnection final
     : public ManagedConnectionIf,
       private folly::AsyncTransport::WriteCallback,
@@ -112,8 +149,10 @@ class RocketServerConnection final
       uint32_t initialRequestN);
 
   // does not create callback and returns nullptr if streamId is already in use
-  RocketSinkClientCallback* FOLLY_NULLABLE createSinkClientCallback(
-      StreamId streamId, RocketServerConnection& connection);
+  std::optional<ChannelRequestCallbackFactory> createChannelClientCallback(
+      StreamId streamId,
+      RocketServerConnection& connection,
+      uint32_t initialRequestN);
 
   // Parser callbacks
   void handleFrame(std::unique_ptr<folly::IOBuf> frame);
@@ -381,11 +420,6 @@ class RocketServerConnection final
   ConnectionState state_{ConnectionState::ALIVE};
   std::optional<DrainCompleteCode> drainCompleteCode_;
 
-  using ClientCallbackUniquePtr = std::variant<
-      std::unique_ptr<RocketStreamClientCallback>,
-      std::unique_ptr<RocketSinkClientCallback>>;
-  using ClientCallbackPtr =
-      std::variant<RocketStreamClientCallback*, RocketSinkClientCallback*>;
   folly::F14FastMap<StreamId, ClientCallbackUniquePtr> streams_;
   const std::chrono::milliseconds streamStarvationTimeout_;
   const size_t egressBufferBackpressureThreshold_;
@@ -604,6 +638,13 @@ class RocketServerConnection final
       Flags flags,
       folly::io::Cursor cursor,
       RocketSinkClientCallback& clientCallback);
+  void handleBiDiFrame(
+      std::unique_ptr<folly::IOBuf> frame,
+      StreamId streamId,
+      FrameType frameType,
+      Flags flags,
+      folly::io::Cursor cursor,
+      RocketBiDiClientCallback& clientCallback);
   template <typename RequestFrame>
   void handleRequestFrame(RequestFrame&& frame) {
     auto streamId = frame.streamId();

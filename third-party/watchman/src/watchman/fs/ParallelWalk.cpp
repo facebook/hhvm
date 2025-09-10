@@ -221,7 +221,7 @@ void readDirTask(
       if (!context->rootStat ||
           isOnSameMount(*context->rootStat, entry.stat, subdirPath.c_str())) {
         size_t sizeHint = entry.stat.size / kApproximateSizePerEntry;
-        subdirsToRead.push_back(std::make_pair(subdirPath, sizeHint));
+        subdirsToRead.emplace_back(subdirPath, sizeHint);
       }
     }
   }

@@ -302,7 +302,7 @@ const pair<uint8_t, uint8_t>& HTTPMessage::getHTTPVersion() const {
 }
 
 int HTTPMessage::processMaxForwards() {
-  static const std::string kMaxForwards = "Max-Forwards";
+  constexpr std::string_view kMaxForwards = "Max-Forwards";
   if (getMethod() == HTTPMethod::TRACE || getMethod() == HTTPMethod::OPTIONS) {
     const string& value = headers_.getSingleOrEmpty(kMaxForwards);
     if (value.length() > 0) {

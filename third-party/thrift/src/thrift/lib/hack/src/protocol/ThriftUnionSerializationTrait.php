@@ -291,7 +291,7 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
     if ($expected_field !== $actual_field) {
       HH\Coeffects\fb\backdoor_from_pure__DO_NOT_USE(
         ()[defaults] ==> {
-          if (coinflip(100)) {
+          if (JustKnobs::eval('thrift/hack:log_incorrect_union_field_access')) {
             signal_log_in_psp(
               SignalDynamicLoggerDataset::SHARED_DATASET_AVOID,
               SignalDynamicLoggerProject::THRIFT_UNION_INCORRECT_FIELD_ACCESS,

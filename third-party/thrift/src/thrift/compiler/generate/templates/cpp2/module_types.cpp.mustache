@@ -256,7 +256,7 @@ const TypeInfo TypeToInfo<
 {{/if (has_compiler_option? "tablebased")}}
 namespace apache::thrift::detail::annotation {
 {{#program:split_structs}}
-{{#struct:has_field_with_runtime_annotation?}}
+{{#struct:fields_with_runtime_annotation?}}
 template<> const std::vector<std::any>& field_annotation_values<{{struct:cpp_fullname}}>(FieldId id) {
   switch (static_cast<int16_t>(id)) {
 {{#struct:fields}}
@@ -281,7 +281,7 @@ template<> const std::vector<std::any>& field_annotation_values<{{struct:cpp_ful
 
   folly::assume_unreachable();
 }
-{{/struct:has_field_with_runtime_annotation?}}
+{{/struct:fields_with_runtime_annotation?}}
 {{#struct:has_struct_runtime_annotation?}}
 template<> const std::vector<std::any>& struct_annotation_values<{{struct:cpp_fullname}}>() {
   static const folly::Indestructible<std::vector<std::any>> ret = [] {

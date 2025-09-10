@@ -1220,6 +1220,14 @@ class MyStruct final  {
   using __fbthrift_struct_annotations = folly::tag_t<
     ::test::fixtures::basic-structured-annotations::runtime_annotation
   >;
+  using __fbthrift_list_of_field_with_annotation = folly::tag_t<
+    ::apache::thrift::type::field_id<1>
+  >;
+  using __fbthrift_field_annotations = folly::tag_t<
+    folly::tag_t<
+      ::test::fixtures::basic-structured-annotations::runtime_annotation
+    >
+  >;
   static constexpr std::size_t __fbthrift_num_fields = 4;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4};

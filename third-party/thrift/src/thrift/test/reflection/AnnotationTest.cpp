@@ -184,4 +184,31 @@ TEST(AnnotationTest, HasStructAnnotation) {
   EXPECT_FALSE((has_struct_annotation<Sensitive, NoAnnotationsStruct>()));
 }
 
+TEST(AnnotationTest, HasFieldAnnotation) {
+  // Test MyStruct field annotations
+  EXPECT_TRUE((has_field_annotation<Oncall, MyStruct, ident::field>()));
+  EXPECT_TRUE((has_field_annotation<Sensitive, MyStruct, ident::field>()));
+  EXPECT_FALSE((has_field_annotation<Doc, MyStruct, ident::field>()));
+
+  // Test MyUnion field annotations
+  EXPECT_TRUE((has_field_annotation<Oncall, MyUnion, ident::stringValue>()));
+  EXPECT_TRUE((has_field_annotation<Sensitive, MyUnion, ident::stringValue>()));
+  EXPECT_FALSE((has_field_annotation<Doc, MyUnion, ident::stringValue>()));
+  EXPECT_FALSE((has_field_annotation<Oncall, MyUnion, ident::intValue>()));
+
+  // Test MyException field annotations
+  EXPECT_TRUE((has_field_annotation<Oncall, MyException, ident::message>()));
+  EXPECT_TRUE((has_field_annotation<Doc, MyException, ident::message>()));
+  EXPECT_FALSE(
+      (has_field_annotation<Sensitive, MyException, ident::message>()));
+
+  // Test NoAnnotationsStruct field annotations (no annotations)
+  EXPECT_FALSE(
+      (has_field_annotation<Doc, NoAnnotationsStruct, ident::field>()));
+  EXPECT_FALSE(
+      (has_field_annotation<Oncall, NoAnnotationsStruct, ident::field>()));
+  EXPECT_FALSE(
+      (has_field_annotation<Sensitive, NoAnnotationsStruct, ident::field>()));
+}
+
 } // namespace apache::thrift::test

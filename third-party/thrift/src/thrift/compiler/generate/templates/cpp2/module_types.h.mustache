@@ -59,10 +59,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR({{field:cpp_name}});
 
 namespace apache::thrift::detail::annotation {
 {{#program:structs}}
-{{#struct:has_field_with_runtime_annotation?}}
+{{#struct:fields_with_runtime_annotation?}}
 template<>
 const std::vector<std::any>& field_annotation_values<{{struct:cpp_fullname}}>(FieldId);
-{{/struct:has_field_with_runtime_annotation?}}
+{{/struct:fields_with_runtime_annotation?}}
 {{#struct:has_struct_runtime_annotation?}}
 template<>
 const std::vector<std::any>& struct_annotation_values<{{struct:cpp_fullname}}>();
@@ -146,6 +146,22 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
 {{/struct:structured_runtime_annotations}}
   >;
 {{/struct:has_struct_runtime_annotation?}}
+{{#struct:fields_with_runtime_annotation?}}
+  using __fbthrift_list_of_field_with_annotation = folly::tag_t<
+{{#struct:fields_with_runtime_annotation}}
+    ::apache::thrift::type::field_id<{{field:id}}>{{^last?}}, {{/last?}}
+{{/struct:fields_with_runtime_annotation}}
+  >;
+  using __fbthrift_field_annotations = folly::tag_t<
+{{#struct:fields_with_runtime_annotation}}
+    folly::tag_t<
+{{#field:structured_runtime_annotations}}{{#structured_annotation:const}}{{#constant:type}}
+      {{type:cpp_fullname}}{{^last?}},{{/last?}}
+{{/constant:type}}{{/structured_annotation:const}}{{/field:structured_runtime_annotations}}
+    >{{^last?}},{{/last?}}
+{{/struct:fields_with_runtime_annotation}}
+  >;
+{{/struct:fields_with_runtime_annotation?}}
 {{> module_types_h/reflection}}
 
   void __fbthrift_clear();

@@ -18,6 +18,7 @@
 #include <thrift/compiler/generate/mstch_objects.h>
 
 #include <fmt/core.h>
+#include <thrift/compiler/ast/uri.h>
 
 namespace apache::thrift::compiler {
 

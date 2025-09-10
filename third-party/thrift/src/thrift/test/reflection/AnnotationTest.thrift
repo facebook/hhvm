@@ -16,6 +16,7 @@
 
 include "thrift/annotation/scope.thrift"
 include "thrift/annotation/thrift.thrift"
+include "thrift/annotation/cpp.thrift"
 
 package "apache.org/thrift/test"
 
@@ -56,6 +57,9 @@ struct MyStruct {
   @Sensitive
   @Other
   1: string field;
+  @Sensitive
+  @cpp.Type{name = "std::int32_t"}
+  2: i32 field2;
 }
 
 @Doc{text = "I am a union"}

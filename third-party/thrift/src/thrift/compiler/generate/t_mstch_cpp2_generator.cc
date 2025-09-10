@@ -1536,8 +1536,10 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::cpp_frozen2_exclude},
             {"struct:has_non_optional_and_non_terse_field?",
              &cpp_mstch_struct::has_non_optional_and_non_terse_field},
-            {"struct:has_field_with_runtime_annotation?",
-             &cpp_mstch_struct::has_field_with_runtime_annotation},
+            {"struct:fields_with_runtime_annotation?",
+             &cpp_mstch_struct::has_fields_with_runtime_annotation},
+            {"struct:fields_with_runtime_annotation",
+             &cpp_mstch_struct::fields_with_runtime_annotation},
             {"struct:has_struct_runtime_annotation?",
              &cpp_mstch_struct::has_struct_runtime_annotation},
             {"struct:structured_runtime_annotations",
@@ -1866,9 +1868,32 @@ class cpp_mstch_struct : public mstch_struct {
               field.get_req() != t_field::e_req::terse;
         });
   }
-  mstch::node has_field_with_runtime_annotation() {
+  mstch::node has_fields_with_runtime_annotation() {
     const auto& fields = struct_->fields();
     return std::any_of(fields.begin(), fields.end(), has_runtime_annotation);
+  }
+
+  mstch::node fields_with_runtime_annotation() {
+    return make_mstch_fields(get_fields_with_runtime_annotation());
+  }
+
+  const std::vector<const t_field*>& get_fields_with_runtime_annotation() {
+    static std::unordered_map<const t_structured*, std::vector<const t_field*>>
+        cache;
+
+    auto it = cache.find(struct_);
+    if (it != cache.end()) {
+      return it->second;
+    }
+
+    std::vector<const t_field*> result;
+    for (const auto* field : struct_->get_members()) {
+      if (has_runtime_annotation(*field)) {
+        result.push_back(field);
+      }
+    }
+
+    return cache.emplace(struct_, std::move(result)).first->second;
   }
 
   mstch::node has_struct_runtime_annotation() {
@@ -2148,6 +2173,8 @@ class cpp_mstch_field : public mstch_field {
              &cpp_mstch_field::cpp_has_runtime_annotation},
             {"field:use_op_encode?", &cpp_mstch_field::use_op_encode},
             {"field:fill?", &cpp_mstch_field::fill},
+            {"field:structured_runtime_annotations",
+             &cpp_mstch_field::structured_runtime_annotations},
         });
   }
   mstch::node name_hash() {
@@ -2416,6 +2443,18 @@ class cpp_mstch_field : public mstch_field {
     return (field_->qualifier() == t_field_qualifier::none ||
             field_->qualifier() == t_field_qualifier::required) &&
         !std::get<bool>(deprecated_terse_writes());
+  }
+
+  mstch::node structured_runtime_annotations() {
+    std::vector<const t_const*> runtime_annotations;
+    for (const auto& annotation : field_->structured_annotations()) {
+      if (is_runtime_annotation(*annotation.type())) {
+        runtime_annotations.push_back(&annotation);
+      }
+    }
+
+    return make_mstch_array(
+        runtime_annotations, *context_.structured_annotation_factory);
   }
 
  private:

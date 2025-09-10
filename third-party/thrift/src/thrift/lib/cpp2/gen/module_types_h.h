@@ -385,4 +385,27 @@ constexpr bool has_struct_annotation() {
   return detail::st::struct_private_access::
       __fbthrift_has_struct_annotation<Struct, Annotation>();
 }
+
+/// Check if a field has a specific annotation at compile time, for example:
+///
+/// * has_field_annotation<EventDef, MyStruct, ident::field>() == true
+///   // Returns true if field in MyStruct has an EventDef annotation
+///
+template <
+    typename Annotation,
+    typename Struct,
+    typename Id,
+    typename FieldId = op::get_field_id<Struct, Id>>
+constexpr bool has_field_annotation() {
+  static_assert(
+      decltype(detail::st::struct_private_access::
+                   __fbthrift_cpp2_is_runtime_annotation<Annotation>())::value,
+      "Annotation is not annotated with @thrift.RuntimeAnnotation.");
+  static_assert(
+      op::get_ordinal<Struct, Id>::value != static_cast<FieldOrdinal>(0),
+      "Id not found in Struct.");
+
+  return detail::st::struct_private_access::
+      __fbthrift_has_field_annotation<Struct, FieldId, Annotation>();
+}
 } // namespace apache::thrift

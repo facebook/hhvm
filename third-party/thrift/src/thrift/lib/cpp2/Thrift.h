@@ -162,6 +162,52 @@ struct struct_private_access {
   }
 
   template <typename T>
+  static constexpr const FieldId* __fbthrift_list_of_field_with_annotation() {
+    return T::__fbthrift_list_of_field_with_annotation;
+  }
+
+  template <typename T, typename Annotation, std::size_t Index, typename = void>
+  struct __fbthrift_check_field_annotation : std::false_type {};
+
+  template <typename T, typename Annotation, std::size_t Index>
+      struct __fbthrift_check_field_annotation < T,
+      Annotation, Index,
+      std::enable_if_t<Index<
+          folly::type_list_size_v<typename T::__fbthrift_field_annotations>>> {
+    static constexpr bool value = contains_v<
+        Annotation,
+        folly::type_list_element_t<
+            Index,
+            typename T::__fbthrift_field_annotations>>;
+  };
+
+  template <typename T, typename FieldId, typename Annotation, typename = void>
+  struct __fbthrift_has_field_annotation_impl : std::false_type {};
+
+  template <typename T, typename FieldId, typename Annotation>
+  struct __fbthrift_has_field_annotation_impl<
+      T,
+      FieldId,
+      Annotation,
+      folly::void_t<
+          typename T::__fbthrift_list_of_field_with_annotation,
+          typename T::__fbthrift_field_annotations>> {
+    static_assert(type::is_field_id_v<FieldId>, "FieldId must be a field_id");
+
+    static constexpr std::size_t field_index = folly::type_list_find_v<
+        FieldId,
+        typename T::__fbthrift_list_of_field_with_annotation>;
+
+    static constexpr bool value =
+        __fbthrift_check_field_annotation<T, Annotation, field_index>::value;
+  };
+
+  template <typename T, typename FieldId, typename Annotation>
+  static constexpr bool __fbthrift_has_field_annotation() {
+    return __fbthrift_has_field_annotation_impl<T, FieldId, Annotation>::value;
+  }
+
+  template <typename T>
   static constexpr ExceptionSafety __fbthrift_cpp2_gen_exception_safety() {
     return T::__fbthrift_cpp2_gen_exception_safety;
   }

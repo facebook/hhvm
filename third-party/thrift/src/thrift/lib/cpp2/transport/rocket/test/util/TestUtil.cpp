@@ -56,6 +56,8 @@ std::unique_ptr<ThriftServer> TestSetup::createServer(
 
   server->setInterface(processorFactory);
 
+  server->disableInfoLogging();
+
   auto eventHandler = std::make_shared<TestEventHandler>();
   server->setServerEventHandler(eventHandler);
   server->setup();

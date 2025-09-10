@@ -40,6 +40,7 @@ StreamPayload makeSinkPayload();
 class CompletionSignal {
  public:
   folly::coro::Task<void> waitForDone() { co_return co_await done_; }
+  void post() { done_.post(); }
 
  protected:
   folly::coro::Baton done_;
@@ -86,6 +87,64 @@ struct SimpleStateBase {
 
   static inline constexpr auto red_ = "\x1b[31m";
   static inline constexpr auto reset_ = "\x1b[0m";
+};
+
+// How to use ManagedStateBase
+// 1. construct an instance of DestructionGuard on every method of
+// BiDi{Client|Server}Callback.
+// 2. std::ignore the result returned by the delegate callback.
+// 3. return isAlive() from all the methods that return bool.
+// 4. call firstResponseReceived() onFirstResponse
+// 5. call closeSink on sink complete or error, call closeStream on stream
+// complete or error.
+template <typename T>
+class ManagedStateBase {
+ public:
+  struct DestructionGuard {
+    explicit DestructionGuard(T* self) : self_(self) { self_->depth_++; }
+    ~DestructionGuard() {
+      self_->depth_--;
+      if (self_->depth_ == 0 && !self_->isSinkOpen() &&
+          !self_->isStreamOpen()) {
+        delete self_;
+      }
+    }
+    T* self_;
+  };
+
+  bool isAlive() const { return sinkOpen_ || streamOpen_; }
+  bool isTerminal() const { return !isAlive(); }
+
+  bool isSinkOpen() const { return sinkOpen_; }
+  bool isStreamOpen() const { return streamOpen_; }
+
+  void closeSink() {
+    sinkOpen_ = false;
+    if (isTerminal()) {
+      LOG(INFO) << name_ << " closed sink and reached terminal state";
+    }
+  }
+
+  void closeStream() {
+    streamOpen_ = false;
+    if (isTerminal()) {
+      LOG(INFO) << name_ << " closed stream and reached terminal state";
+    }
+  }
+
+  void firstResponseReceived() {
+    sinkOpen_ = true;
+    streamOpen_ = true;
+  }
+
+ protected:
+  explicit ManagedStateBase(const std::string& name) : name_(name) {}
+
+  const std::string name_;
+  bool sinkOpen_{false};
+  bool streamOpen_{false};
+  size_t depth_{0};
+  friend struct DestructionGuard;
 };
 
 } // namespace apache::thrift::detail::test

@@ -26,9 +26,9 @@ namespace apache::thrift::detail::test {
 // When sink completes it completes the stream.
 // When stream gets cancelled it cancels the sink.
 // It deletes itself when it reaches a terminal state.
-class EchoServer : public BiDiServerCallback, public SimpleStateBase {
+class BiDiEchoServer : public BiDiServerCallback, public SimpleStateBase {
  public:
-  EchoServer() : SimpleStateBase("Server") {}
+  BiDiEchoServer() : SimpleStateBase("Server") {}
 
   void resetClientCallback(BiDiClientCallback& clientCallback) override {
     clientCallback_ = &clientCallback;

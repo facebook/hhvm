@@ -18,7 +18,7 @@
 
 namespace apache::thrift::detail::test {
 
-inline std::unique_ptr<folly::IOBuf> makePayload(const std::string& s) {
+std::unique_ptr<folly::IOBuf> makePayload(const std::string& s) {
   folly::IOBufQueue q;
   CompactProtocolWriter writer;
   writer.setOutput(&q);
@@ -31,7 +31,7 @@ inline std::unique_ptr<folly::IOBuf> makePayload(const std::string& s) {
   return q.move();
 }
 
-inline std::unique_ptr<folly::IOBuf> makeRequest(const std::string& method) {
+std::unique_ptr<folly::IOBuf> makeRequest(const std::string& method) {
   folly::IOBufQueue q;
   CompactProtocolWriter writer;
   writer.setOutput(&q);
@@ -43,7 +43,7 @@ inline std::unique_ptr<folly::IOBuf> makeRequest(const std::string& method) {
   return q.move();
 }
 
-inline std::unique_ptr<folly::IOBuf> makeResponse(const std::string& s) {
+std::unique_ptr<folly::IOBuf> makeResponse(const std::string& s) {
   folly::IOBufQueue q;
   CompactProtocolWriter writer;
   writer.setOutput(&q);

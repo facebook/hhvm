@@ -379,8 +379,6 @@ module UserAttributes = struct
 
   let uaNoFlatten = "__NoFlatten"
 
-  let uaCrossPackage = "__CrossPackage"
-
   let uaRequirePackage = "__RequirePackage"
 
   (* <<__SafeForGlobalAccessCheck>> marks global variables as safe from mutations.
@@ -819,19 +817,11 @@ module UserAttributes = struct
               doc =
                 "Instead of throwing an exception upon a module boundary violation at this symbol, logs a warning instead.";
             } );
-          ( uaCrossPackage,
-            {
-              contexts = [fn; mthd];
-              autocomplete = true;
-              doc =
-                "Enables access to elements from other package(s), requires `<<file:__EnableUnstableFeatures('package')>>`";
-            } );
           ( uaRequirePackage,
             {
               contexts = [fn; mthd];
               autocomplete = true;
-              doc =
-                "Enables access to elements from other package(s), requires `<<file:__EnableUnstableFeatures('require_package')>>`";
+              doc = "Enables access to elements from other package(s).";
             } );
           ( uaStrictSwitch,
             {

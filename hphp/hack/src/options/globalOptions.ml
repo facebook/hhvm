@@ -181,13 +181,13 @@ type t = {
   warnings_in_sandcastle: bool;
   tco_strict_switch: bool;
   tco_allowed_files_for_ignore_readonly: string list;
-  tco_package_v2_exclude_patterns: string list;
-  tco_package_v2_allow_typedef_violations: bool;
-  tco_package_v2_allow_classconst_violations: bool;
-  tco_package_v2_allow_reifiable_tconst_violations: bool;
-  tco_package_v2_allow_all_tconst_violations: bool;
-  tco_package_v2_allow_reified_generics_violations: bool;
-  tco_package_v2_allow_all_generics_violations: bool;
+  tco_package_exclude_patterns: string list;
+  tco_package_allow_typedef_violations: bool;
+  tco_package_allow_classconst_violations: bool;
+  tco_package_allow_reifiable_tconst_violations: bool;
+  tco_package_allow_all_tconst_violations: bool;
+  tco_package_allow_reified_generics_violations: bool;
+  tco_package_allow_all_generics_violations: bool;
   re_no_cache: bool;
   hh_distc_should_disable_trace_store: bool;
   hh_distc_exponential_backoff_num_retries: int;
@@ -302,14 +302,14 @@ let default =
     warnings_in_sandcastle = true;
     tco_strict_switch = false;
     tco_allowed_files_for_ignore_readonly = [];
-    tco_package_v2_exclude_patterns =
+    tco_package_exclude_patterns =
       [{|.*/__tests__/.*|}; {|.*/flib/intern/makehaste/.*|}];
-    tco_package_v2_allow_typedef_violations = true;
-    tco_package_v2_allow_classconst_violations = true;
-    tco_package_v2_allow_reifiable_tconst_violations = true;
-    tco_package_v2_allow_all_tconst_violations = true;
-    tco_package_v2_allow_reified_generics_violations = true;
-    tco_package_v2_allow_all_generics_violations = true;
+    tco_package_allow_typedef_violations = true;
+    tco_package_allow_classconst_violations = true;
+    tco_package_allow_reifiable_tconst_violations = true;
+    tco_package_allow_all_tconst_violations = true;
+    tco_package_allow_reified_generics_violations = true;
+    tco_package_allow_all_generics_violations = true;
     re_no_cache = false;
     hh_distc_should_disable_trace_store = false;
     hh_distc_exponential_backoff_num_retries = 10;
@@ -422,13 +422,13 @@ let set
     ?warnings_in_sandcastle
     ?tco_strict_switch
     ?tco_allowed_files_for_ignore_readonly
-    ?tco_package_v2_exclude_patterns
-    ?tco_package_v2_allow_typedef_violations
-    ?tco_package_v2_allow_classconst_violations
-    ?tco_package_v2_allow_reifiable_tconst_violations
-    ?tco_package_v2_allow_all_tconst_violations
-    ?tco_package_v2_allow_reified_generics_violations
-    ?tco_package_v2_allow_all_generics_violations
+    ?tco_package_exclude_patterns
+    ?tco_package_allow_typedef_violations
+    ?tco_package_allow_classconst_violations
+    ?tco_package_allow_reifiable_tconst_violations
+    ?tco_package_allow_all_tconst_violations
+    ?tco_package_allow_reified_generics_violations
+    ?tco_package_allow_all_generics_violations
     ?re_no_cache
     ?hh_distc_should_disable_trace_store
     ?hh_distc_exponential_backoff_num_retries
@@ -702,34 +702,32 @@ let set
       setting
         tco_allowed_files_for_ignore_readonly
         options.tco_allowed_files_for_ignore_readonly;
-    tco_package_v2_exclude_patterns =
+    tco_package_exclude_patterns =
+      setting tco_package_exclude_patterns options.tco_package_exclude_patterns;
+    tco_package_allow_typedef_violations =
       setting
-        tco_package_v2_exclude_patterns
-        options.tco_package_v2_exclude_patterns;
-    tco_package_v2_allow_typedef_violations =
+        tco_package_allow_typedef_violations
+        options.tco_package_allow_typedef_violations;
+    tco_package_allow_classconst_violations =
       setting
-        tco_package_v2_allow_typedef_violations
-        options.tco_package_v2_allow_typedef_violations;
-    tco_package_v2_allow_classconst_violations =
+        tco_package_allow_classconst_violations
+        options.tco_package_allow_classconst_violations;
+    tco_package_allow_reifiable_tconst_violations =
       setting
-        tco_package_v2_allow_classconst_violations
-        options.tco_package_v2_allow_classconst_violations;
-    tco_package_v2_allow_reifiable_tconst_violations =
+        tco_package_allow_reifiable_tconst_violations
+        options.tco_package_allow_reifiable_tconst_violations;
+    tco_package_allow_all_tconst_violations =
       setting
-        tco_package_v2_allow_reifiable_tconst_violations
-        options.tco_package_v2_allow_reifiable_tconst_violations;
-    tco_package_v2_allow_all_tconst_violations =
+        tco_package_allow_all_tconst_violations
+        options.tco_package_allow_all_tconst_violations;
+    tco_package_allow_reified_generics_violations =
       setting
-        tco_package_v2_allow_all_tconst_violations
-        options.tco_package_v2_allow_all_tconst_violations;
-    tco_package_v2_allow_reified_generics_violations =
+        tco_package_allow_reified_generics_violations
+        options.tco_package_allow_reified_generics_violations;
+    tco_package_allow_all_generics_violations =
       setting
-        tco_package_v2_allow_reified_generics_violations
-        options.tco_package_v2_allow_reified_generics_violations;
-    tco_package_v2_allow_all_generics_violations =
-      setting
-        tco_package_v2_allow_all_generics_violations
-        options.tco_package_v2_allow_all_generics_violations;
+        tco_package_allow_all_generics_violations
+        options.tco_package_allow_all_generics_violations;
     re_no_cache = setting re_no_cache options.re_no_cache;
     hh_distc_should_disable_trace_store =
       setting

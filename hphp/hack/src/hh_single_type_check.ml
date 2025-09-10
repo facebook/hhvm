@@ -903,10 +903,9 @@ let parse_options () =
         disable_hh_ignore_error = !disable_hh_ignore_error;
         allowed_decl_fixme_codes =
           Option.value !allowed_decl_fixme_codes ~default:ISet.empty;
-        package_v2 = default.package_v2;
         package_info = default.package_info;
-        package_v2_support_multifile_tests =
-          default.package_v2_support_multifile_tests;
+        package_support_multifile_tests =
+          default.package_support_multifile_tests;
         enable_class_pointer_hint = !enable_class_pointer_hint;
         disallow_non_annotated_memoize = !disallow_non_annotated_memoize;
         treat_non_annotated_memoize_as_kbic =
@@ -2478,14 +2477,10 @@ let decl_and_run_mode
     match packages_config_path with
     | None -> PackageInfo.empty
     | Some pkgs_config_relpath ->
-      let info =
-        PackageConfig.load_and_parse
-          ~package_v2:(TypecheckerOptions.package_v2 tcopt)
-          ~strict:false
-          ~pkgs_config_abs_path:
-            Relative_path.(to_absolute @@ from_root ~suffix:pkgs_config_relpath)
-      in
-      info
+      PackageConfig.load_and_parse
+        ~strict:false
+        ~pkgs_config_abs_path:
+          Relative_path.(to_absolute @@ from_root ~suffix:pkgs_config_relpath)
   in
   let tcopt = TypecheckerOptions.set_package_info tcopt package_info in
   let popt = tcopt.GlobalOptions.po in

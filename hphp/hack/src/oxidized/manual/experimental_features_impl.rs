@@ -31,7 +31,6 @@ impl FeatureName {
             RequireConstraint => Unstable,
             NewtypeSuperBounds => Unstable,
             Package => OngoingRelease,
-            RequirePackage => Unstable,
             CaseTypes => Preview,
             CaseTypeWhereClauses => Preview,
             ModuleLevelTraits => OngoingRelease,

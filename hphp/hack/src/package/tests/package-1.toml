@@ -1,14 +1,11 @@
 [packages]
 
 [packages.foo]
-uses = ["a.*"]
 
 [packages.bar]
-uses = ["b.*"]
 includes = ["foo"]
 
 [packages.baz]
-uses = ["x.*", "y.*"]
 includes = ["foo", "bar"]
 
 [deployments]

@@ -54,51 +54,47 @@ struct SymbolRefEdge {
   const StringData* to;
 };
 
-enum class PackageV2BuildMode {
+enum class BuildMode {
   symbolRefsOnly,
   packagesOnly,
-  packagesAndSymbolRefs,
-  packageV2Disabled
+  packagesAndSymbolRefs
 };
 
-inline PackageV2BuildMode packageV2BuildMode() {
-  if (!Cfg::Eval::PackageV2) {
-    return PackageV2BuildMode::packageV2Disabled;
-  } else if (Cfg::Eval::ActiveDeployment.empty()) {
-    return PackageV2BuildMode::symbolRefsOnly;
+inline BuildMode buildMode() {
+  if (Cfg::Eval::ActiveDeployment.empty()) {
+    return BuildMode::symbolRefsOnly;
   } else if (Option::ForceEnableSymbolRefs) {
-    return PackageV2BuildMode::packagesAndSymbolRefs;
+    return BuildMode::packagesAndSymbolRefs;
   } else {
-    return PackageV2BuildMode::packagesOnly;
+    return BuildMode::packagesOnly;
   }
 }
 
-inline bool isSymbolRefsEnabled (PackageV2BuildMode mode) {
+inline bool isSymbolRefsEnabled (BuildMode mode) {
   return
-    mode == PackageV2BuildMode::symbolRefsOnly ||
-    mode == PackageV2BuildMode::packagesAndSymbolRefs;
+    mode == BuildMode::symbolRefsOnly ||
+    mode == BuildMode::packagesAndSymbolRefs;
 }
 
-inline bool isPackageV2Enabled (PackageV2BuildMode mode) {
+inline bool isPackagesEnabled (BuildMode mode) {
   return
-    mode == PackageV2BuildMode::packagesOnly ||
-    mode == PackageV2BuildMode::packagesAndSymbolRefs;
+    mode == BuildMode::packagesOnly ||
+    mode == BuildMode::packagesAndSymbolRefs;
 }
 
 enum class EmitPass {
   IncludeDirFiles,
   SymbolRefsOnDemandFiles,
-  PackageV2RulesOnly,
+  PackageRulesOnly,
 };
 
 enum class FileInBuildReason {
   notIncluded,
   fromIncludeDir,
   fromSymbolRefs,
-  fromPackageV1,
-  fromPackageV2,
-  fromPackageV2Soft,
-  fromSymbolRefsAndPackageV2,
+  fromPackages,
+  fromPackagesSoft,
+  fromSymbolRefsAndPackages,
   noFilepath,
   unknownFile,
 };
@@ -407,11 +403,8 @@ private:
                     const Package::EmitInfo&, bool, bool);
   folly::coro::Task<void> emitAll(const EmitCallback&, const UnitIndex&,
                                   const std::filesystem::path&,
-                                  const std::filesystem::path&);
-  folly::coro::Task<void> emitAllPackageV2(const EmitCallback&, const UnitIndex&,
-                                           const std::filesystem::path&,
-                                           const std::filesystem::path&,
-                                           bool);
+                                  const std::filesystem::path&,
+                                  bool);
 
 
   folly::coro::Task<EmitInfo>

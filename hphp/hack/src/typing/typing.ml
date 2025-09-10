@@ -11356,14 +11356,12 @@ end = struct
         | Decl_entry.Found class_ ->
           (if not is_attribute_param then
             let should_check_package_boundary =
-              if not (Env.package_v2 env) then
-                `No
-              else if
+              if
                 inside_nameof || is_attribute || is_catch || is_function_pointer
               then
                 `No
               else if is_const then begin
-                if Env.package_v2_allow_classconst_violations env then
+                if Env.package_allow_classconst_violations env then
                   `No
                 else
                   `Yes "class"

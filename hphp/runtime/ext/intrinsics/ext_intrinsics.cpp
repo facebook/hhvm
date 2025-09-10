@@ -420,17 +420,6 @@ Array HHVM_FUNCTION(debug_file_deps) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool HHVM_FUNCTION(is_module_in_deployment, StringArg module,
-                                            StringArg deployment) {
-  auto const& packageInfo = g_context->getPackageInfo();
-  auto const it =
-    packageInfo.deployments().find(deployment.get()->toCppString());
-  if (it == end(packageInfo.deployments())) return false;
-  return packageInfo.moduleInDeployment(module.get(), it->second, DeployKind::HardOrSoft);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 void HHVM_FUNCTION(check_for_stuck_treadmill) {
   Treadmill::checkForStuckTreadmill();
 }
@@ -524,8 +513,6 @@ static struct IntrinsicsExtension final : Extension {
 
     HHVM_FALIAS(__hhvm_intrinsics\\debug_get_bytecode, debug_get_bytecode);
     HHVM_FALIAS(__hhvm_intrinsics\\debug_file_deps, debug_file_deps);
-
-    HHVM_FALIAS(__hhvm_intrinsics\\is_module_in_deployment, is_module_in_deployment);
 
     HHVM_FALIAS(__hhvm_intrinsics\\check_for_stuck_treadmill, check_for_stuck_treadmill);
 

@@ -704,16 +704,6 @@ void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key) {
   throwInvalidArrayKeyException(&key, ad);
 }
 
-bool callViolatesDeploymentBoundaryHelper(const Func* symbol) {
-  return Cfg::Eval::EnforceDeployment &&
-    g_context->getPackageInfo().violatesDeploymentBoundary(*symbol);
-}
-
-bool callViolatesDeploymentBoundaryHelper(const Class* symbol) {
-  return Cfg::Eval::EnforceDeployment &&
-    g_context->getPackageInfo().violatesDeploymentBoundary(*symbol);
-}
-
 static ServiceData::ExportedCounter* s_staticAnalysisErrors =
   ServiceData::createCounter("vm.static_analysis_errors");
 

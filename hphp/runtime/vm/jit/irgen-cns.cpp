@@ -72,9 +72,9 @@ void exactClsCns(IRGS& env,
                 const StringData* cnsNameStr,
                 const StringData* clsNameStr) {
   auto const clsCnsName = ClsCnsName { clsNameStr, cnsNameStr };
-  // If we passed in a Class*, this means we have better information 
-  // about what the Class* must be since this information is local and 
-  // comes from inspecting the top of the stack to see if we have an 
+  // If we passed in a Class*, this means we have better information
+  // about what the Class* must be since this information is local and
+  // comes from inspecting the top of the stack to see if we have an
   // exact type.
   auto const lookup = [&]() {
     if (cls != nullptr) {
@@ -85,15 +85,13 @@ void exactClsCns(IRGS& env,
   }();
 
   if (lookup.cls &&
-      (will_symbol_raise_module_boundary_violation(lookup.cls, curFunc(env))
-      || env.unit.packageInfo().violatesDeploymentBoundary(*lookup.cls))) {
+      will_symbol_raise_module_boundary_violation(lookup.cls, curFunc(env))) {
     auto const cns = gen(env, InitClsCns, TInitCell, clsCnsName);
     pushIncRef(env, cns);
     return;
   }
 
-
-  // If we can't prove we know the Class* at jit-time, we need to 
+  // If we can't prove we know the Class* at jit-time, we need to
   // load the constant out of out RDS.
   auto const getCnsWithType = [&](jit::Type ty) {
     auto const cns = cond(
@@ -155,20 +153,20 @@ void exactClsCns(IRGS& env,
     case Class::ClassLookupResult::Maybe: {
       // TODO: Remove after fixing modules
       // I believe the above case where we push a literal is broken, in
-      // sandbox mode since when we push a constant, we just trust 
+      // sandbox mode since when we push a constant, we just trust
       // that the class doesn't violate the module boundary.
       // This was probably fine so far, since in sandbox mode, we usually
-      // don't know the exact Class*, especially one that is in a different 
+      // don't know the exact Class*, especially one that is in a different
       // file/module. Therefore, in practice we probably always do a InitClsCns
       // before accessing a constant. That is about to change as sandbox
       // mode becomes more performant, and we emit cheap runtime-checks
-      // and if our runtime Class* matches the jit-time Class*, we may 
+      // and if our runtime Class* matches the jit-time Class*, we may
       // be able to push the literal directly, without doing the boundary
       // check in InitClsCns.
       if (Cfg::Eval::EnforceModules) return getCnsWithType(TInitCell);
 
       // If we have a Class* at jit-time, but cannot trust it, we can emit
-      // a check to confirm the runtime Class* matches and then use the 
+      // a check to confirm the runtime Class* matches and then use the
       // constant we burned in at jit-time.
       Slot ignore;
       if (auto const tv = lookup.cls->cnsNameToTV(cnsNameStr, ignore)) {

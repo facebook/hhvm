@@ -1787,7 +1787,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsInitData:
   case UnwindCheckSideExit:
   case CallViolatesModuleBoundary:
-  case CallViolatesDeploymentBoundary:
   case LdCns:
   case LdFuncVecLen:
   case LdClsMethod:
@@ -1872,7 +1871,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdCoeffectFunParamNaive:
   case RaiseModuleBoundaryViolation:
   case RaiseModulePropertyViolation:
-  case RaiseDeploymentBoundaryViolation:
     return may_load_store(AEmpty, AEmpty);
 
   case StaticAnalysisError:

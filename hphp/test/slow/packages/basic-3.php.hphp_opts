@@ -1,2 +1,0 @@
--vRuntime.Eval.ActiveDeployment="my-prod"
---inputs=__DIR__/MODULES.inc.php

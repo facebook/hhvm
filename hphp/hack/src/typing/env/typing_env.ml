@@ -655,10 +655,6 @@ module M = struct
 
   let get_internal env = env.genv.this_internal
 
-  let get_package_for_module env md =
-    let info = get_tcopt env |> TypecheckerOptions.package_info in
-    PackageInfo.get_package_for_module info md
-
   let get_package_by_name env pkg_name =
     let info = get_tcopt env |> TypecheckerOptions.package_info in
     PackageInfo.get_package info pkg_name
@@ -667,39 +663,35 @@ module M = struct
 
   let check_packages env = TypecheckerOptions.check_packages @@ get_tcopt env
 
-  let package_v2 env = TypecheckerOptions.package_v2 @@ get_tcopt env
+  let package_allow_typedef_violations env =
+    TypecheckerOptions.package_allow_typedef_violations @@ get_tcopt env
 
-  let package_v2_allow_typedef_violations env =
-    TypecheckerOptions.package_v2_allow_typedef_violations @@ get_tcopt env
+  let package_allow_classconst_violations env =
+    TypecheckerOptions.package_allow_classconst_violations @@ get_tcopt env
 
-  let package_v2_allow_classconst_violations env =
-    TypecheckerOptions.package_v2_allow_classconst_violations @@ get_tcopt env
-
-  let package_v2_allow_reifiable_tconst_violations env =
-    TypecheckerOptions.package_v2_allow_reifiable_tconst_violations
+  let package_allow_reifiable_tconst_violations env =
+    TypecheckerOptions.package_allow_reifiable_tconst_violations
     @@ get_tcopt env
 
-  let package_v2_allow_all_tconst_violations env =
-    TypecheckerOptions.package_v2_allow_all_tconst_violations @@ get_tcopt env
+  let package_allow_all_tconst_violations env =
+    TypecheckerOptions.package_allow_all_tconst_violations @@ get_tcopt env
 
-  let package_v2_allow_reified_generics_violations env =
-    TypecheckerOptions.package_v2_allow_reified_generics_violations
+  let package_allow_reified_generics_violations env =
+    TypecheckerOptions.package_allow_reified_generics_violations
     @@ get_tcopt env
 
-  let package_v2_allow_all_generics_violations env =
-    TypecheckerOptions.package_v2_allow_all_generics_violations @@ get_tcopt env
+  let package_allow_all_generics_violations env =
+    TypecheckerOptions.package_allow_all_generics_violations @@ get_tcopt env
 
   let load_packages env packages =
     { env with loaded_packages = SSet.union env.loaded_packages packages }
 
   let load_cross_packages_from_attr env attr =
-    let cross_package_attr =
-      if package_v2 env then
+    match
+      Naming_attributes.find
         Naming_special_names.UserAttributes.uaRequirePackage
-      else
-        Naming_special_names.UserAttributes.uaCrossPackage
-    in
-    match Naming_attributes.find cross_package_attr attr with
+        attr
+    with
     | Some attr ->
       let pkgs_to_load =
         List.fold

@@ -314,11 +314,6 @@ handleStaticCall(const Class* cls, const StringData* name,
         // If we raised a warning, do not cache/smash the func
         return func;
       }
-      if (Cfg::Eval::EnforceDeployment &&
-          g_context->getPackageInfo().violatesDeploymentBoundary(*func)) {
-        // If we raised an exception, do not cache/smash the func.
-        return func;
-      }
       mce = Entry { cls, func };
       rds::initHandle(mceHandle);
       if (mcePrime != 0x1) {
@@ -348,11 +343,6 @@ handleStaticCall(const Class* cls, const StringData* name,
     if (Module::warningsEnabled(func) &&
         will_symbol_raise_module_boundary_violation(func, &callCtx)) {
       // If we raised a warning, do not cache the func
-      return func;
-    }
-    if (Cfg::Eval::EnforceDeployment &&
-        g_context->getPackageInfo().violatesDeploymentBoundary(*cls)) {
-      // If we raised an exception, do not cache the func.
       return func;
     }
     mce = Entry { cls, func };

@@ -12,7 +12,6 @@
   * while `hh_single_type_check` with `strict=false` to avoid false positves in
   * the test suite.
   *)
-val load_and_parse :
-  package_v2:bool -> strict:bool -> pkgs_config_abs_path:string -> PackageInfo.t
+val load_and_parse : strict:bool -> pkgs_config_abs_path:string -> PackageInfo.t
 
 val repo_config_path : Relative_path.t

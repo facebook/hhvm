@@ -18852,20 +18852,6 @@ ClsConstLookupResult Index::lookup_class_constant(Context ctx,
 
       // Fully resolved constant with a known value
       auto mightThrow = bool(ci->cls->attrs & AttrInternal);
-      // The following mightThrow check is only useful to support soft package
-      // logging in the legacy PackageV1 package system.  It is thus disabled if
-      // PackageV2 is set.
-      if (!mightThrow && !Cfg::Eval::PackageV2) {
-        auto const unit = lookup_class_unit(*ci->cls);
-        auto const moduleName = unit->moduleName;
-        auto const packageInfo = unit->packageInfo;
-        if (auto const activeDeployment = packageInfo.getActiveDeployment()) {
-          if (!packageInfo.moduleInDeployment(
-                moduleName, *activeDeployment, DeployKind::Hard)) {
-            mightThrow = true;
-          }
-        }
-      }
       return R{ from_cell(*cns.val), TriBool::Yes, mightThrow };
     }();
     ITRACE(4, "-> {}\n", show(r));
@@ -24459,20 +24445,6 @@ AnalysisIndex::lookup_class_constant(const Type& cls,
         // to register a dependency on the constant because the value
         // will never change.
         auto mightThrow = bool(cinfo->cls->attrs & AttrInternal);
-        // The following mightThrow check is only useful to support soft package
-        // logging in the legacy PackageV1 package system.  It is thus disabled if
-        // PackageV2 is set.
-        if (!mightThrow && !Cfg::Eval::PackageV2) {
-          auto const& unit = lookup_class_unit(*cinfo->cls);
-          auto const moduleName = unit.moduleName;
-          auto const packageInfo = unit.packageInfo;
-          if (auto const activeDeployment = packageInfo.getActiveDeployment()) {
-            if (!packageInfo.moduleInDeployment(
-                  moduleName, *activeDeployment, DeployKind::Hard)) {
-              mightThrow = true;
-            }
-          }
-        }
         return R{ from_cell(*cns.val), TriBool::Yes, mightThrow };
       }
 

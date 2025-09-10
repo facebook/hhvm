@@ -148,7 +148,7 @@ let check_internal_access ~in_signature env target pos decl_pos =
   in
   Option.map ~f:Typing_error.modules module_err_opt
 
-let check_package_v2_access
+let check_package_access
     ~should_check_package_boundary env use_pos def_pos target_package target_id
     =
   match should_check_package_boundary with
@@ -159,7 +159,7 @@ let check_package_v2_access
     in
     begin
       match
-        Typing_packages.can_access_by_package_v2_rules
+        Typing_packages.can_access_by_package_rules
           ~env
           ~target_package_membership:target_package
           ~target_pos:def_pos
@@ -225,57 +225,6 @@ let check_package_v2_access
                   target_symbol_spec;
                 }))
     end
-
-let check_package_v1_access env use_pos def_pos target_module =
-  match
-    Typing_packages.can_access_by_package_v1_rules
-      ~env
-      ~current_module:(Env.get_current_module env)
-      ~target_module
-  with
-  | `Yes -> None
-  | `PackageNotSatisfied
-      Typing_packages.
-        {
-          current_module_pos;
-          current_package_pos;
-          current_package_name;
-          target_package_name;
-        } ->
-    Some
-      (Typing_error.modules
-         (Module_cross_pkg_access
-            {
-              pos = use_pos;
-              decl_pos = def_pos;
-              module_pos = current_module_pos;
-              package_pos = current_package_pos;
-              current_module_opt = Env.get_current_module env;
-              target_module_opt = target_module;
-              current_package_opt = current_package_name;
-              target_package_opt = target_package_name;
-            }))
-  | `PackageSoftIncludes
-      Typing_packages.
-        {
-          current_module_pos;
-          current_package_pos;
-          current_package_name;
-          target_package_name;
-        } ->
-    Some
-      (Typing_error.modules
-         (Module_soft_included_access
-            {
-              pos = use_pos;
-              decl_pos = def_pos;
-              module_pos = current_module_pos;
-              package_pos = current_package_pos;
-              current_module_opt = Env.get_current_module env;
-              target_module_opt = target_module;
-              current_package_opt = current_package_name;
-              target_package_opt = target_package_name;
-            }))
 
 let is_visible_for_obj ~is_method ~is_receiver_interface env vis =
   let member_ty =
@@ -416,16 +365,13 @@ let check_top_level_access
   in
   let package_error =
     if Env.check_packages env then
-      if Env.package_v2 env then
-        check_package_v2_access
-          ~should_check_package_boundary
-          env
-          use_pos
-          def_pos
-          target_package
-          target_id
-      else
-        check_package_v1_access env use_pos def_pos target_module
+      check_package_access
+        ~should_check_package_boundary
+        env
+        use_pos
+        def_pos
+        target_package
+        target_id
     else
       None
   in
@@ -479,48 +425,26 @@ let check_class_access ~is_method ~use_pos ~def_pos env (vis, lsb) cid class_ =
 let check_cross_package ~use_pos ~def_pos env (cross_package : string option) =
   match cross_package with
   | Some target ->
-    (* Convert None to the "default" module for packages *)
-    let current_module =
-      match Env.get_current_module env with
-      | None -> Some Naming_special_names.Modules.default
-      | x -> x
-    in
-    let is_package_v2 = TypecheckerOptions.package_v2 @@ Env.get_tcopt env in
     let current_pkg =
-      if not is_package_v2 then
-        Option.bind ~f:(Env.get_package_for_module env) current_module
-      else
-        Env.get_current_package_membership env
-        |> Option.bind ~f:(function
-               | Aast_defs.PackageConfigAssignment pkg_name
-               | Aast_defs.PackageOverride (_, pkg_name)
-               -> Env.get_package_by_name env pkg_name)
+      Env.get_current_package_membership env
+      |> Option.bind ~f:(function
+             | Aast_defs.PackageConfigAssignment pkg_name
+             | Aast_defs.PackageOverride (_, pkg_name)
+             -> Env.get_package_by_name env pkg_name)
     in
     let target_pkg = Env.get_package_by_name env target in
     (match Typing_packages.get_package_violation env current_pkg target_pkg with
     | Some _ ->
-      if is_package_v2 then
-        Some
-          (Typing_error.package
-             (Cross_pkg_access_with_requirepackage
-                {
-                  pos = use_pos;
-                  decl_pos = def_pos;
-                  current_package_opt =
-                    Option.map ~f:Package.get_package_name current_pkg;
-                  target_package_opt = cross_package;
-                }))
-      else
-        Some
-          (Typing_error.modules
-             (Module_cross_pkg_call
-                {
-                  pos = use_pos;
-                  decl_pos = def_pos;
-                  current_package_opt =
-                    Option.map ~f:Package.get_package_name current_pkg;
-                  target_package_opt = cross_package;
-                }))
+      Some
+        (Typing_error.package
+           (Cross_pkg_access_with_requirepackage
+              {
+                pos = use_pos;
+                decl_pos = def_pos;
+                current_package_opt =
+                  Option.map ~f:Package.get_package_name current_pkg;
+                target_package_opt = cross_package;
+              }))
     | _ -> None)
   | None -> None
 

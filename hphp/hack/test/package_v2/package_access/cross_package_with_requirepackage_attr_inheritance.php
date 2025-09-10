@@ -1,7 +1,6 @@
 //// a.php
 <?hh
 // package pkg1
-<<file: __EnableUnstableFeatures('require_package')>>
 
 interface IA {
   <<__RequirePackage("pkg2")>>
@@ -40,7 +39,6 @@ class F implements IA  {
 <?hh
 // package pkg2
 <<file: __PackageOverride('pkg2')>>
-<<file: __EnableUnstableFeatures('require_package')>>
 
 // package pkg2 includes pkg1, so this is okay
 class D extends A {

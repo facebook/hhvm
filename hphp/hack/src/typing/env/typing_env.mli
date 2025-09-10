@@ -599,8 +599,6 @@ val is_consistent : env -> bool
 
 val mark_inconsistent : env -> env
 
-val get_package_for_module : env -> string -> Package.t option
-
 val get_package_by_name : env -> string -> Package.t option
 
 val load_packages : env -> SSet.t -> env
@@ -613,19 +611,17 @@ val is_package_loaded : env -> string -> bool
 
 val check_packages : env -> bool
 
-val package_v2 : env -> bool
+val package_allow_typedef_violations : env -> bool
 
-val package_v2_allow_typedef_violations : env -> bool
+val package_allow_classconst_violations : env -> bool
 
-val package_v2_allow_classconst_violations : env -> bool
+val package_allow_reifiable_tconst_violations : env -> bool
 
-val package_v2_allow_reifiable_tconst_violations : env -> bool
+val package_allow_all_tconst_violations : env -> bool
 
-val package_v2_allow_all_tconst_violations : env -> bool
+val package_allow_reified_generics_violations : env -> bool
 
-val package_v2_allow_reified_generics_violations : env -> bool
-
-val package_v2_allow_all_generics_violations : env -> bool
+val package_allow_all_generics_violations : env -> bool
 
 (** Remove solved variable from environment by replacing it by its binding. *)
 val remove_var :

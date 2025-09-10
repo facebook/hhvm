@@ -19,8 +19,7 @@ type t = {
   stack_size: int;
   deregister_php_stdlib: bool;
   package_info: PackageInfo.t;
-  package_v2: bool;
-  package_v2_support_multifile_tests: bool;
+  package_support_multifile_tests: bool;
   enable_class_pointer_hint: bool;
   disallow_non_annotated_memoize: bool;
   treat_non_annotated_memoize_as_kbic: bool;
@@ -42,8 +41,7 @@ let from_parser_options (popt : ParserOptions.t) =
     stack_size = popt.stack_size;
     deregister_php_stdlib = popt.deregister_php_stdlib;
     package_info = popt.package_info;
-    package_v2 = popt.package_v2;
-    package_v2_support_multifile_tests = popt.package_v2_support_multifile_tests;
+    package_support_multifile_tests = popt.package_support_multifile_tests;
     enable_class_pointer_hint = popt.enable_class_pointer_hint;
     disallow_non_annotated_memoize = popt.disallow_non_annotated_memoize;
     treat_non_annotated_memoize_as_kbic =

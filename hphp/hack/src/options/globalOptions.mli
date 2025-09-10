@@ -251,28 +251,28 @@ type t = {
   tco_strict_switch: bool;
       (** Enable strict case checking in switch statements *)
   tco_allowed_files_for_ignore_readonly: string list;
-  tco_package_v2_exclude_patterns: string list;
+  tco_package_exclude_patterns: string list;
       (** Patterns for files excluded from the package boundary check. *)
-  tco_package_v2_allow_typedef_violations: bool;
-      (** Option for package v2 to bypass package boundary violation errors on typedefs to unblock V1 of
+  tco_package_allow_typedef_violations: bool;
+      (** Option for package support to bypass package boundary violation errors on typedefs to unblock V1 of
           intern-prod separation *)
-  tco_package_v2_allow_classconst_violations: bool;
-      (** Option for package v2 to bypass package boundary violation errors on ::class during
+  tco_package_allow_classconst_violations: bool;
+      (** Option for package support to bypass package boundary violation errors on ::class during
           the ::class to nameof migration to unblock V1 of intern-prod separation *)
-  tco_package_v2_allow_reifiable_tconst_violations: bool;
-      (** Option for package v2 to bypass package boundary violation errors on definitions of
+  tco_package_allow_reifiable_tconst_violations: bool;
+      (** Option for package support to bypass package boundary violation errors on definitions of
           reifiable abstract type constants to unblock V1 of intern-prod separation *)
-  tco_package_v2_allow_all_tconst_violations: bool;
-      (** Option for package v2 to bypass package boundary violation errors on definitions of
+  tco_package_allow_all_tconst_violations: bool;
+      (** Option for package support to bypass package boundary violation errors on definitions of
           all type constants to unblock V1 of intern-prod separation. This flag controls the
           superset of violations controlled by `tco_package_v2_allow_reifiable_tconst_violations`
           and will be switched off as a step further in tightening the packgage boundary endforcement. *)
-  tco_package_v2_allow_reified_generics_violations: bool;
-      (** Option for package v2 to bypass package boundary violation errors on reified generics
+  tco_package_allow_reified_generics_violations: bool;
+      (** Option for package support to bypass package boundary violation errors on reified generics
           to unblock V1 of intern-prod separation. This flag controls the
           superset of violations controlled by `tco_package_v2_allow_reified_generics_violations`
           and will be switched off as a step further in tightening the packgage boundary endforcement. *)
-  tco_package_v2_allow_all_generics_violations: bool;
+  tco_package_allow_all_generics_violations: bool;
       (** Option for package v2 to bypass package boundary violation errors on all generics
           to unblock V1 of intern-prod separation.  *)
   re_no_cache: bool;
@@ -400,13 +400,13 @@ val set :
   ?warnings_in_sandcastle:bool ->
   ?tco_strict_switch:bool ->
   ?tco_allowed_files_for_ignore_readonly:string list ->
-  ?tco_package_v2_exclude_patterns:string list ->
-  ?tco_package_v2_allow_typedef_violations:bool ->
-  ?tco_package_v2_allow_classconst_violations:bool ->
-  ?tco_package_v2_allow_reifiable_tconst_violations:bool ->
-  ?tco_package_v2_allow_all_tconst_violations:bool ->
-  ?tco_package_v2_allow_reified_generics_violations:bool ->
-  ?tco_package_v2_allow_all_generics_violations:bool ->
+  ?tco_package_exclude_patterns:string list ->
+  ?tco_package_allow_typedef_violations:bool ->
+  ?tco_package_allow_classconst_violations:bool ->
+  ?tco_package_allow_reifiable_tconst_violations:bool ->
+  ?tco_package_allow_all_tconst_violations:bool ->
+  ?tco_package_allow_reified_generics_violations:bool ->
+  ?tco_package_allow_all_generics_violations:bool ->
   ?re_no_cache:bool ->
   ?hh_distc_should_disable_trace_store:bool ->
   ?hh_distc_exponential_backoff_num_retries:int ->

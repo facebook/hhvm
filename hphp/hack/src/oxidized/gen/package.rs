@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ed09ae9467901d717cdc3e600b72373f>>
+// @generated SignedSource<<685e676b00eb59d4fe5eacd727dda997>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -58,7 +58,6 @@ pub struct PosId(pub pos::Pos, pub String);
 #[repr(C)]
 pub struct Package {
     pub name: PosId,
-    pub uses: Vec<PosId>,
     pub includes: Vec<PosId>,
     pub soft_includes: Vec<PosId>,
     pub include_paths: Vec<PosId>,

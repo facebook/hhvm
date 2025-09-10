@@ -11,8 +11,6 @@ includes=["prod"]
 
 [deployments.my-prod]
 packages = ["prod"]
-domains = ['www\.my-prod\.com']
 
 [deployments.my-intern]
 packages = ["intern", "prod"]
-domains = ['www\.my-intern\.com']

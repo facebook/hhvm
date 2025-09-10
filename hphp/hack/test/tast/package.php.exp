@@ -1,5 +1,5 @@
 Errors:
-  [3:64-69] Unbound name: `foo` (a package)
+  [3:27-32] Unbound name: `foo` (a package)
   [6:16-19] Unbound name: `foo` (a package)
 [(Fun
     { fd_namespace =
@@ -7,9 +7,7 @@ Errors:
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
       fd_file_attributes =
-      [{ fa_user_attributes =
-         [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((string), [3:33-42], (String "package"))] };
-           { ua_name = ([3:46-63], "__PackageOverride"); ua_params = [((string), [3:64-69], (String "foo"))] }];
+      [{ fa_user_attributes = [{ ua_name = ([3:9-26], "__PackageOverride"); ua_params = [((string), [3:27-32], (String "foo"))] }];
          fa_namespace =
          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -25,4 +23,4 @@ Errors:
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:10-14], "__SupportDynamicType"); ua_params = [] }]; 
         f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
-      fd_package = (Some (PackageOverride ([3:64-69], "foo"))) })
+      fd_package = (Some (PackageOverride ([3:27-32], "foo"))) })

@@ -1321,25 +1321,6 @@ void fcallFuncStr(IRGS& env, const FCallArgs& fca) {
 
 } // namespace
 
-void emitDeploymentBoundaryCheck(IRGS& env, SSATmp* symbol) {
-  if (!Cfg::Eval::EnforceDeployment) return;
-  auto const caller = curFunc(env);
-  if (env.unit.packageInfo().violatesDeploymentBoundary(*caller)) return;
-  ifThen(
-    env,
-    [&] (Block* taken) {
-      auto violate =
-        gen(env, CallViolatesDeploymentBoundary, FuncData { caller }, symbol);
-      gen(env, JmpNZero, taken, violate);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      auto const data = OptClassAndFuncData { curClass(env), caller };
-      gen(env, RaiseDeploymentBoundaryViolation, data, symbol);
-    }
-  );
-}
-
 template <typename T>
 void emitModuleBoundaryCheckKnownImpl(IRGS& env, const T* symbol) {
   auto const caller = curFunc(env);
@@ -1349,13 +1330,6 @@ void emitModuleBoundaryCheckKnownImpl(IRGS& env, const T* symbol) {
   if (symbol->isInternal()) {
     gen(env,
         RaiseModuleBoundaryViolation,
-        OptClassAndFuncData { curClass(env), caller },
-        cns(env, symbol));
-  }
-  if (env.unit.packageInfo().violatesDeploymentBoundary(*caller)) return;
-  if (env.unit.packageInfo().violatesDeploymentBoundary(*symbol)) {
-    gen(env,
-        RaiseDeploymentBoundaryViolation,
         OptClassAndFuncData { curClass(env), caller },
         cns(env, symbol));
   }
@@ -1395,7 +1369,7 @@ void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) 
       emitModuleBoundaryCheckKnown(env, symbol->clsVal());
     }
   } else {
-    ifThenElse(
+    ifElse(
       env,
       [&] (Block* skip) {
         auto const data = AttrData { AttrInternal };
@@ -1415,14 +1389,9 @@ void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) 
             hint(env, Block::Hint::Unlikely);
             auto const data = OptClassAndFuncData { curClass(env), caller };
             gen(env, RaiseModuleBoundaryViolation, data, symbol);
-            emitDeploymentBoundaryCheck(env, symbol);
           }
         );
-      },
-      [&] {
-        emitDeploymentBoundaryCheck(env, symbol);
-      }
-    );
+      });
   }
 }
 
@@ -2056,7 +2025,6 @@ resolveClsMethodDSlow(IRGS& env, const StringData* className,
                        LdClsCached,
                        LdClsFallbackData::Fatal(),
                        cns(env, className));
-  emitDeploymentBoundaryCheck(env, cls);
   return std::pair(cls, func);
 }
 
@@ -2076,7 +2044,6 @@ void emitResolveClsMethodD(IRGS& env, const StringData* className,
     auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, true);
     // Confirm the class is resolvable
     // Elided at simplify step since class is trusted
-    emitDeploymentBoundaryCheck(env, cns(env, cls));
     if (func) {
       checkClsMethodAndLdCtx(env, cls, func, className);
       // For clsmeth, we want to return the class user gave,
@@ -2120,7 +2087,6 @@ void emitResolveRClsMethodD(IRGS& env, const StringData* className,
   if (cls) {
     auto const callCtx = MemberLookupContext(curClass(env), curFunc(env));
     auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, true);
-    emitDeploymentBoundaryCheck(env, cns(env, cls));
     if (func) {
       checkClsMethodAndLdCtx(env, cls, func, className);
 

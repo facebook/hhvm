@@ -361,11 +361,10 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
            usable. *)
         consider_unspecified_experimental_features_released =
           Option.is_none experimental_features;
-        package_v2 = bool_opt "package_v2" config >?? po_opt.package_v2;
         package_info = po_opt.package_info;
-        package_v2_support_multifile_tests =
-          bool_opt "package_v2_support_multifile_tests" config
-          >?? po_opt.package_v2;
+        package_support_multifile_tests =
+          bool_opt "package_support_multifile_tests" config
+          >?? po_opt.package_support_multifile_tests;
         enable_class_pointer_hint =
           bool_opt "enable_class_pointer_hint" config
           >?? po_opt.enable_class_pointer_hint;
@@ -472,20 +471,20 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?tco_strict_switch:(bool_opt "strict_switch" config)
     ?tco_allowed_files_for_ignore_readonly:
       (string_list_opt "allowed_files_for_ignore_readonly" config)
-    ?tco_package_v2_allow_typedef_violations:
-      (bool_opt "package_v2_allow_typedef_violations" config)
-    ?tco_package_v2_allow_classconst_violations:
-      (bool_opt "package_v2_allow_classconst_violations" config)
-    ?tco_package_v2_allow_reifiable_tconst_violations:
-      (bool_opt "package_v2_allow_reifiable_tconst_violations" config)
-    ?tco_package_v2_allow_reified_generics_violations:
-      (bool_opt "package_v2_allow_reified_generics_violations" config)
-    ?tco_package_v2_allow_all_tconst_violations:
-      (bool_opt "package_v2_allow_all_tconst_violations" config)
-    ?tco_package_v2_allow_all_generics_violations:
-      (bool_opt "package_v2_allow_all_generics_violations" config)
-    ?tco_package_v2_exclude_patterns:
-      (string_list_opt "package_v2_exclude_patterns" config)
+    ?tco_package_allow_typedef_violations:
+      (bool_opt "package_allow_typedef_violations" config)
+    ?tco_package_allow_classconst_violations:
+      (bool_opt "package_allow_classconst_violations" config)
+    ?tco_package_allow_reifiable_tconst_violations:
+      (bool_opt "package_allow_reifiable_tconst_violations" config)
+    ?tco_package_allow_reified_generics_violations:
+      (bool_opt "package_allow_reified_generics_violations" config)
+    ?tco_package_allow_all_tconst_violations:
+      (bool_opt "package_allow_all_tconst_violations" config)
+    ?tco_package_allow_all_generics_violations:
+      (bool_opt "package_allow_all_generics_violations" config)
+    ?tco_package_exclude_patterns:
+      (string_list_opt "package_exclude_patterns" config)
     ?tco_extended_reasons:(reasons_config_opt config)
     ?tco_disable_physical_equality:(bool_opt "disable_physical_equality" config)
     ?re_no_cache:(bool_opt "re_no_cache" config)
@@ -581,9 +580,7 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
   in
   Hh_logger.log "Parsing and loading packages config at %s" pkgs_config_abs_path;
   let package_info =
-    let package_v2 = bool_ "package_v2" ~default:false config in
     PackageConfig.load_and_parse
-      ~package_v2
       ~strict:local_config.ServerLocalConfig.package_config_strict_validation
       ~pkgs_config_abs_path
   in

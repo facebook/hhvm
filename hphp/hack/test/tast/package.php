@@ -1,6 +1,6 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('package'),  __PackageOverride('foo')>>
+<<file: __PackageOverride('foo')>>
 
 function test(): void {
   $_ = package foo;

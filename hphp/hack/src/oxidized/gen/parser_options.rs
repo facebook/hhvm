@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<08917bebe4e5c17ffecab014126fb576>>
+// @generated SignedSource<<571c89b715822b4d4284ab5581783972>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -105,13 +105,11 @@ pub struct ParserOptions {
     /// testing and tools that don't read .hhconfig (e.g., like hh_single_type_check and hh_parse). It should
     /// be false for hh_server.
     pub consider_unspecified_experimental_features_released: bool,
-    /// Whether PackageV2 is enabled.
-    pub package_v2: bool,
     /// Information used to determine which package a file belongs to during typechecking.
     pub package_info: package_info::PackageInfo,
-    /// Option for the package v2 to strip the multifile filename mangling used in Hack tests.
+    /// Option to strip the multifile filename mangling used in Hack tests.  Used in Packages tests.
     /// Should be set to true only by the unit tests in the Hack test suite
-    pub package_v2_support_multifile_tests: bool,
+    pub package_support_multifile_tests: bool,
     /// When false, type hint class<T> (Hclass_ptr) becomes decl ty classname<T> (Tnewtype).
     /// When true, it becomes decl ty class<T> (Tclass_ptr). This option is similar to the
     /// interpret_soft_types_as_like_types switch.

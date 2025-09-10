@@ -23,7 +23,7 @@ pub struct PackageInfo {
 }
 
 impl PackageInfo {
-    fn from_text(package_v2: bool, strict: bool, packages_toml: &str) -> Result<PackageInfo> {
+    fn from_text(strict: bool, packages_toml: &str) -> Result<PackageInfo> {
         let mut errors = vec![];
 
         // read the PACKAGES.toml file
@@ -82,7 +82,7 @@ impl PackageInfo {
             }
         }
 
-        config.check_config(package_v2, &mut errors);
+        config.check_config(&mut errors);
 
         Ok(Self {
             packages: config.packages,
@@ -92,12 +92,12 @@ impl PackageInfo {
         })
     }
 
-    pub fn from_text_strict(package_v2: bool, packages_toml: &str) -> Result<PackageInfo> {
-        PackageInfo::from_text(package_v2, true, packages_toml)
+    pub fn from_text_strict(packages_toml: &str) -> Result<PackageInfo> {
+        PackageInfo::from_text(true, packages_toml)
     }
 
-    pub fn from_text_non_strict(package_v2: bool, packages_toml: &str) -> Result<PackageInfo> {
-        PackageInfo::from_text(package_v2, false, packages_toml)
+    pub fn from_text_non_strict(packages_toml: &str) -> Result<PackageInfo> {
+        PackageInfo::from_text(false, packages_toml)
     }
 
     pub fn packages(&self) -> &PackageMap {
@@ -147,34 +147,18 @@ mod test {
     #[test]
     fn test_parsing_basic_file() {
         let test_path = SRCDIR.as_path().join("tests/package-1.toml");
-        let info = PackageInfo::from_text(false, true, test_path.to_str().unwrap()).unwrap();
+        let info = PackageInfo::from_text(true, test_path.to_str().unwrap()).unwrap();
         assert!(info.errors.is_empty());
 
         let foo = &info.packages()["foo"];
-        assert_eq!(foo.uses.as_ref().unwrap()[0].get_ref(), "a.*");
         assert!(foo.includes.is_none());
-        assert_eq!(
-            info.line_number(foo.uses.as_ref().unwrap()[0].span().start),
-            4
-        );
 
         let bar = &info.packages()["bar"];
-        assert_eq!(bar.uses.as_ref().unwrap()[0].get_ref(), "b.*");
         assert_eq!(bar.includes.as_ref().unwrap()[0].get_ref(), "foo");
 
         let baz = &info.packages()["baz"];
-        assert_eq!(baz.uses.as_ref().unwrap()[0].get_ref(), "x.*");
-        assert_eq!(baz.uses.as_ref().unwrap()[1].get_ref(), "y.*");
         assert_eq!(baz.includes.as_ref().unwrap()[0].get_ref(), "foo");
         assert_eq!(baz.includes.as_ref().unwrap()[1].get_ref(), "bar");
-        assert_eq!(
-            info.line_number(baz.uses.as_ref().unwrap()[0].span().start),
-            11
-        );
-        assert_eq!(
-            info.line_number(baz.uses.as_ref().unwrap()[1].span().start),
-            11
-        );
 
         let my_prod = &info.deployments().unwrap()["my-prod"];
         assert_eq!(my_prod.packages.as_ref().unwrap()[0].get_ref(), "foo");
@@ -190,40 +174,18 @@ mod test {
     }
 
     #[test]
-    fn test_multiline_uses() {
-        let test_path = SRCDIR.as_path().join("tests/package-2.toml");
-        let info = PackageInfo::from_text(false, true, test_path.to_str().unwrap()).unwrap();
-        assert!(info.errors.is_empty());
-
-        let foo = &info.packages()["foo"];
-        let foo_uses = &foo.uses.as_ref().unwrap();
-        assert_eq!(foo_uses[0].get_ref(), "a.*");
-        assert_eq!(foo_uses[1].get_ref(), "b.*");
-        assert_eq!(info.line_number(foo_uses[0].span().start), 7);
-        assert_eq!(info.line_number(foo_uses[1].span().start), 9);
-
-        let foo_includes = &foo.includes.as_ref().unwrap();
-        assert_eq!(foo_includes[0].get_ref(), "bar");
-        assert_eq!(info.line_number(foo_includes[0].span().start), 12);
-    }
-
-    #[test]
     fn test_config_errors1() {
         let test_path = SRCDIR.as_path().join("tests/package-3.toml");
-        let info = PackageInfo::from_text(false, true, test_path.to_str().unwrap()).unwrap();
-        assert_eq!(info.errors.len(), 3);
+        let info = PackageInfo::from_text(true, test_path.to_str().unwrap()).unwrap();
+        assert_eq!(info.errors.len(), 2);
         assert_eq!(info.errors[0].msg(), "Undefined package: baz");
         assert_eq!(info.errors[1].msg(), "Undefined package: baz");
-        assert_eq!(
-            info.errors[2].msg(),
-            "This module can only be used in one package: b.*"
-        );
     }
 
     #[test]
     fn test_config_errors2() {
         let test_path = SRCDIR.as_path().join("tests/package-4.toml");
-        let info = PackageInfo::from_text(true, true, test_path.to_str().unwrap()).unwrap();
+        let info = PackageInfo::from_text(true, test_path.to_str().unwrap()).unwrap();
         let errors = info
             .errors
             .iter()
@@ -254,7 +216,7 @@ mod test {
     #[test]
     fn test_config_internprod() {
         let test_path = SRCDIR.as_path().join("tests/package-internprod.toml");
-        let info = PackageInfo::from_text(true, true, test_path.to_str().unwrap()).unwrap();
+        let info = PackageInfo::from_text(true, test_path.to_str().unwrap()).unwrap();
         let errors = info
             .errors
             .iter()
@@ -276,7 +238,7 @@ mod test {
     #[test]
     fn test_soft() {
         let test_path = SRCDIR.as_path().join("tests/package-5.toml");
-        let info = PackageInfo::from_text(false, true, test_path.to_str().unwrap()).unwrap();
+        let info = PackageInfo::from_text(true, test_path.to_str().unwrap()).unwrap();
         let c = &info.packages()["c"];
         let errors = info
             .errors
@@ -286,6 +248,7 @@ mod test {
         assert_eq!(
             errors,
             [
+                String::from("a must include all nested included packages. Missing c"),
                 String::from("f must soft-deploy all nested soft-included packages. Missing b"),
                 String::from("g must deploy all nested included packages. Missing c"),
             ]
@@ -304,7 +267,7 @@ mod test {
     #[test]
     fn test_include_paths1() {
         let test_path = SRCDIR.as_path().join("tests/package-6.toml");
-        let info = PackageInfo::from_text(true, true, test_path.to_str().unwrap()).unwrap();
+        let info = PackageInfo::from_text(true, test_path.to_str().unwrap()).unwrap();
         let included_dirs = info.packages()["foo"].include_paths.as_ref().unwrap();
         assert_eq!(included_dirs.len(), 2);
         assert!(
@@ -322,7 +285,7 @@ mod test {
     #[test]
     fn test_include_paths_error() {
         let test_path = SRCDIR.as_path().join("tests/package-6.toml");
-        let info = PackageInfo::from_text(true, true, test_path.to_str().unwrap()).unwrap();
+        let info = PackageInfo::from_text(true, test_path.to_str().unwrap()).unwrap();
 
         let errors = info.errors.iter().map(|e| e.msg()).collect::<Vec<_>>();
 
@@ -350,7 +313,7 @@ mod test {
     #[test]
     fn test_include_paths_non_strict() {
         let test_path = SRCDIR.as_path().join("tests/package-6.toml");
-        let info = PackageInfo::from_text(true, false, test_path.to_str().unwrap()).unwrap();
+        let info = PackageInfo::from_text(false, test_path.to_str().unwrap()).unwrap();
         let errors = info.errors.iter().map(|e| e.msg()).collect::<Vec<_>>();
         assert!(errors.len() == 3);
         // with non-strict PackageInfo parsing only "malformed path" errors should be generated
@@ -362,7 +325,7 @@ mod test {
     #[test]
     fn test_include_paths_error_2() {
         let test_path = SRCDIR.as_path().join("tests/package-7.toml");
-        let info = PackageInfo::from_text(true, false, test_path.to_str().unwrap()).unwrap();
+        let info = PackageInfo::from_text(false, test_path.to_str().unwrap()).unwrap();
         let errors = info.errors.iter().map(|e| e.msg()).collect::<Vec<_>>();
         let expected = [
             String::from(
@@ -377,31 +340,9 @@ mod test {
     }
 
     #[test]
-    fn test_uses_in_package_v2() {
-        let test_path = SRCDIR.as_path().join("tests/package-1.toml");
-        let info = PackageInfo::from_text(true, false, test_path.to_str().unwrap()).unwrap();
-        let errors = info.errors.iter().map(|e| e.msg()).collect::<Vec<_>>();
-        let expected = [String::from(
-            "The `uses` field is not supported by PackageV2 in package foo",
-        )];
-        assert!(errors[0] == expected[0]);
-    }
-
-    #[test]
-    fn test_include_path_in_package_v1() {
-        let test_path = SRCDIR.as_path().join("tests/package-6.toml");
-        let info = PackageInfo::from_text(false, false, test_path.to_str().unwrap()).unwrap();
-        let errors = info.errors.iter().map(|e| e.msg()).collect::<Vec<_>>();
-        let expected = [String::from(
-            "The `include_paths` field is not supported by PackageV1 in package bar",
-        )];
-        assert!(errors[4] == expected[0]);
-    }
-
-    #[test]
     fn test_include_paths_is_reverse_sorted_in_package_v2() {
         let test_path = SRCDIR.as_path().join("tests/package-8.toml");
-        let info = PackageInfo::from_text(true, false, test_path.to_str().unwrap()).unwrap();
+        let info = PackageInfo::from_text(false, test_path.to_str().unwrap()).unwrap();
         let baz = &info.packages()["baz"];
         let include_paths = &baz.include_paths.as_ref().unwrap();
         assert!(include_paths[0].get_ref().ends_with("longest/"));
@@ -412,7 +353,7 @@ mod test {
     #[test]
     fn test_no_duplicate_include_paths() {
         let test_path = SRCDIR.as_path().join("tests/package-9.toml");
-        let info = PackageInfo::from_text(true, false, test_path.to_str().unwrap()).unwrap();
+        let info = PackageInfo::from_text(false, test_path.to_str().unwrap()).unwrap();
         let errors = info.errors.iter().map(|e| e.msg()).collect::<Vec<_>>();
         let expected = [
             String::from("This include_path can only be used in one package: path/to/longest/"),

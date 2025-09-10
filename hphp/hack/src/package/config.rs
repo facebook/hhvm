@@ -21,18 +21,7 @@ pub struct Config {
     pub deployments: Option<DeploymentMap>,
 }
 impl Config {
-    pub fn check_config(&self, package_v2: bool, errors: &mut Vec<Error>) {
-        let check_package_v2_fields =
-            |errors: &mut Vec<Error>, package_name: &Spanned<String>, package: &Package| {
-                if !package_v2 {
-                    if package.include_paths.is_some() {
-                        errors.push(Error::include_path_in_package_v1(package_name));
-                    }
-                } else if package.uses.is_some() {
-                    errors.push(Error::uses_in_package_v2(package_name));
-                }
-            };
-
+    pub fn check_config(&self, errors: &mut Vec<Error>) {
         let check_packages_are_defined =
             |errors: &mut Vec<Error>, pkgs: &Option<NameSet>, soft_pkgs: &Option<NameSet>| {
                 if let Some(packages) = pkgs {
@@ -47,18 +36,6 @@ impl Config {
                         if !self.packages.contains_key(package) {
                             errors.push(Error::undefined_package(package))
                         }
-                    })
-                }
-            };
-        let mut used_globs = NameSet::default();
-        let mut check_each_glob_is_used_once =
-            |errors: &mut Vec<Error>, globs: &Option<NameSet>| {
-                if let Some(l) = globs {
-                    l.iter().for_each(|glob| {
-                        if used_globs.contains(glob) {
-                            errors.push(Error::duplicate_use(glob))
-                        }
-                        used_globs.insert(glob.clone());
                     })
                 }
             };
@@ -130,12 +107,8 @@ impl Config {
             };
         for (package_name, package) in self.packages.iter() {
             check_packages_are_defined(errors, &package.includes, &package.soft_includes);
-            check_each_glob_is_used_once(errors, &package.uses);
             check_each_include_path_is_used_once(errors, &package.include_paths);
-            check_package_v2_fields(errors, package_name, package);
-            if package_v2 {
-                check_package_includes_are_transitively_closed(errors, package_name, package);
-            }
+            check_package_includes_are_transitively_closed(errors, package_name, package);
         }
         if let Some(deployments) = &self.deployments {
             for (positioned_name, deployment) in deployments.iter() {

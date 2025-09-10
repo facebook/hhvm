@@ -4,32 +4,23 @@
 [packages]
 
 [packages.foo]
-uses = ["a.*"]
-
-[packages.bar]
-uses = ["b.*"]
-includes = ["foo"]
+include_paths = ["//main.php"]
 
 [packages.default]
-uses = ["*"]
+include_paths = ["//"]
 
 [deployments]
 
 [deployments.my-prod]
 packages = ["foo", "default"]
-domains = [{DOMAIN_REGEXP}]
 
-
-// FILE: module_page.php
-
-new module a {}
 
 // FILE: main.php
 
-module a;
-
 <<__EntryPoint>>
 function main(): void {
+  // no active deployment is set, so package_exists only checks
+  // if the package is defined in the PACKAGES.toml file
   var_dump(package_exists('foo'));
   var_dump(package_exists('bar'));
 }

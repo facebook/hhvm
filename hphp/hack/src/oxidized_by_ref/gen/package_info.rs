@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<782c94a4ee3b0accf9dc7d5d59ead3f7>>
+// @generated SignedSource<<55eaa6a443d615be3ceca4fa9939e287>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -38,8 +38,6 @@ use crate::*;
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C)]
 pub struct PackageInfo<'a> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub glob_to_package: s_map::SMap<'a, &'a package::Package<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub existing_packages: s_map::SMap<'a, &'a package::Package<'a>>,
 }

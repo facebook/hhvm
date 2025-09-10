@@ -21,7 +21,6 @@ pub struct NameSet(IndexSet<Spanned<String>>);
 
 #[derive(Debug, Deserialize, Clone, PartialEq, Eq)]
 pub struct Package {
-    pub uses: Option<NameSet>,
     pub includes: Option<NameSet>,
     pub soft_includes: Option<NameSet>,
     pub include_paths: Option<NameSet>,

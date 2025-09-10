@@ -1259,11 +1259,10 @@ let localize_targ ?tparam ~check_type_integrity env hint =
           not @@ Aast.is_erased tparam.tp_reified)
     in
     let should_check_package_boundary =
-      if
-        in_reified && not (Env.package_v2_allow_reified_generics_violations env)
+      if in_reified && not (Env.package_allow_reified_generics_violations env)
       then
         `Yes "reified generic"
-      else if not (Env.package_v2_allow_all_generics_violations env) then
+      else if not (Env.package_allow_all_generics_violations env) then
         `Yes "generic"
       else
         `No

@@ -1,7 +1,7 @@
 [packages]
 
 [packages.default]
-uses = ["*"]
+include_path = [ "//" ]
 
 [deployments]
 

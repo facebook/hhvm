@@ -304,7 +304,6 @@ bool canDCE(const IRInstruction& inst) {
   case LdImplicitContextMemoKey:
   case LdMemoAgnosticIC:
   case CallViolatesModuleBoundary:
-  case CallViolatesDeploymentBoundary:
     assertx(!inst.isControlFlow());
     return true;
 
@@ -554,7 +553,6 @@ bool canDCE(const IRInstruction& inst) {
   case RaiseStrToClassNotice:
   case RaiseModuleBoundaryViolation:
   case RaiseModulePropertyViolation:
-  case RaiseDeploymentBoundaryViolation:
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
   case CheckClsRGSoft:

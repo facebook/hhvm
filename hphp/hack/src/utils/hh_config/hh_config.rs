@@ -85,11 +85,7 @@ impl HhConfig {
     fn get_package_info(root: impl AsRef<Path>, hhconfig: &ConfigFile) -> PackageInfo {
         let package_config_pathbuf =
             Self::get_repo_packages_config_path(hhconfig, PACKAGE_FILE_PATH_RELATIVE_TO_ROOT);
-        let package_v2 = hhconfig
-            .get_bool_or("package_v2", GlobalOptions::default().po.package_v2)
-            .unwrap_or(GlobalOptions::default().po.package_v2);
         PackageInfo::from_text_strict(
-            package_v2,
             root.as_ref()
                 .join(package_config_pathbuf)
                 .to_str()
@@ -290,13 +286,12 @@ impl HhConfig {
             // If there was no experimental features status list in configuration, consider all
             // existing experimental features to be released and hence usable.
             consider_unspecified_experimental_features_released: experimental_features.is_none(),
-            package_v2: hhconfig.get_bool_or("package_v2", default.package_v2)?,
             // If there are errors, ignore them for the tcopt, the parser errors will be caught and
             // sent separately.
             package_info: package_info.try_into().unwrap_or_default(),
-            package_v2_support_multifile_tests: hhconfig.get_bool_or(
-                "package_v2_support_multifile_tests",
-                default.package_v2_support_multifile_tests,
+            package_support_multifile_tests: hhconfig.get_bool_or(
+                "package_support_multifile_tests",
+                default.package_support_multifile_tests,
             )?,
             enable_class_pointer_hint: hhconfig.get_bool_or(
                 "enable_class_pointer_hint",
@@ -528,33 +523,33 @@ impl HhConfig {
             warnings_in_sandcastle: hhconfig
                 .get_bool_or("warnings_in_sandcastle", default.warnings_in_sandcastle)?,
             tco_strict_switch: hhconfig.get_bool_or("strict_switch", default.tco_strict_switch)?,
-            tco_package_v2_allow_typedef_violations: hhconfig.get_bool_or(
-                "package_v2_allow_typedef_violations",
-                default.tco_package_v2_allow_typedef_violations,
+            tco_package_allow_typedef_violations: hhconfig.get_bool_or(
+                "package_allow_typedef_violations",
+                default.tco_package_allow_typedef_violations,
             )?,
-            tco_package_v2_allow_classconst_violations: hhconfig.get_bool_or(
-                "package_v2_allow_classconst_violations",
-                default.tco_package_v2_allow_classconst_violations,
+            tco_package_allow_classconst_violations: hhconfig.get_bool_or(
+                "package_allow_classconst_violations",
+                default.tco_package_allow_classconst_violations,
             )?,
-            tco_package_v2_allow_reifiable_tconst_violations: hhconfig.get_bool_or(
-                "package_v2_allow_reifiable_tconst_violations",
-                default.tco_package_v2_allow_reifiable_tconst_violations,
+            tco_package_allow_reifiable_tconst_violations: hhconfig.get_bool_or(
+                "package_allow_reifiable_tconst_violations",
+                default.tco_package_allow_reifiable_tconst_violations,
             )?,
-            tco_package_v2_allow_all_tconst_violations: hhconfig.get_bool_or(
-                "package_v2_allow_all_tconst_violations",
-                default.tco_package_v2_allow_all_tconst_violations,
+            tco_package_allow_all_tconst_violations: hhconfig.get_bool_or(
+                "package_allow_all_tconst_violations",
+                default.tco_package_allow_all_tconst_violations,
             )?,
-            tco_package_v2_allow_reified_generics_violations: hhconfig.get_bool_or(
-                "package_v2_allow_reified_generics_violations",
-                default.tco_package_v2_allow_reified_generics_violations,
+            tco_package_allow_reified_generics_violations: hhconfig.get_bool_or(
+                "package_allow_reified_generics_violations",
+                default.tco_package_allow_reified_generics_violations,
             )?,
-            tco_package_v2_allow_all_generics_violations: hhconfig.get_bool_or(
-                "package_v2_allow_all_generics_violations",
-                default.tco_package_v2_allow_all_generics_violations,
+            tco_package_allow_all_generics_violations: hhconfig.get_bool_or(
+                "package_allow_all_generics_violations",
+                default.tco_package_allow_all_generics_violations,
             )?,
-            tco_package_v2_exclude_patterns: hhconfig
-                .get_str("package_v2_exclude_patterns")
-                .map_or(default.tco_package_v2_exclude_patterns, parse_svec),
+            tco_package_exclude_patterns: hhconfig
+                .get_str("package_exclude_patterns")
+                .map_or(default.tco_package_exclude_patterns, parse_svec),
             re_no_cache: hhconfig.get_bool_or("re_no_cache", default.re_no_cache)?,
             hh_distc_should_disable_trace_store: hhconfig.get_bool_or(
                 "hh_distc_should_disable_trace_store",

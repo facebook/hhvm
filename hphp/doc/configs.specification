@@ -546,13 +546,9 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Constants from traits behave like constants from interfaces (error on conflict)
 
-- bool Eval.PackageV2 = false, UNKNOWN, globaldata|compileroption(PackageV2)
-
-  Enable support for the PackageV2 package specification.
-
 - std::string Eval.ActiveDeployment = "", UNKNOWN, globaldata|compileroption(ActiveDeployment)
 
-  Describes the active deployment for selecting the set of packages
+  Sets the active deployment, which selects the set of packages loaded in the repo.
   Value is only read in repo authoritative or cli mode.
 
 - std::string Eval.PackagesTomlFileName, fzn, globaldata|compileroption(PackagesTomlFileName)
@@ -1227,10 +1223,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   0 - Nothing
   1 - Warn
   2 - Throw exception
-
-- bool Eval.EnforceDeployment = false, UNKNOWN, postprocess
-
-  Enforce deployment boundaries.
 
 - uint32_t Eval.DeploymentViolationWarningSampleRate = 1, UNKNOWN
 

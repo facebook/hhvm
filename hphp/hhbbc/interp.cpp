@@ -2305,19 +2305,8 @@ void in(ISS& env, const bc::CGetS& op) {
 
 namespace {
 
-bool is_module_outside_active_deployment(const php::Unit& unit) {
-  auto const moduleName = unit.moduleName;
-  auto const& packageInfo = unit.packageInfo;
-  if (auto const activeDeployment = packageInfo.getActiveDeployment()) {
-    return !packageInfo.moduleInDeployment(
-      moduleName, *activeDeployment, DeployKind::Hard);
-  }
-  return false;
-}
-
 bool module_check_always_passes(ISS& env, const php::Class& cls) {
   auto const unit = env.index.lookup_class_unit(cls);
-  if (is_module_outside_active_deployment(*unit)) return false;
   if (!(cls.attrs & AttrInternal)) return true;
   return unit->moduleName == env.index.lookup_func_unit(*env.ctx.func)->moduleName;
 }

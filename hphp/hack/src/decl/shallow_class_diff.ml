@@ -500,17 +500,12 @@ let remove_members_except_to_string sc =
    There are certainly opportunities for us to be cleverer about some kinds of
    changes, but any kind of cleverness in reducing fanout must be implemented
    with great care. *)
-let normalize sc ~same_package =
-  let id sc = sc in
+let normalize sc =
   sc
   |> remove_consistent_construct_attribute
   |> remove_members_except_to_string
   |> Decl_pos_utils.NormalizeSig.shallow_class
-  |>
-  if same_package then
-    remove_modules_if_public
-  else
-    id
+  |> remove_modules_if_public
 
 let type_name ty =
   let (_, (_, name), tparams) = Decl_utils.unwrap_class_type ty in
@@ -777,22 +772,8 @@ let diff_class_shells (c1 : shallow_class) (c2 : shallow_class) :
     enum_type_change = diff_enum_type_options c1.sc_enum_type c2.sc_enum_type;
   }
 
-let same_package
-    (info : PackageInfo.t) (c1 : shallow_class) (c2 : shallow_class) : bool =
-  let get_package_for_module info sc_module =
-    match sc_module with
-    | Some (_, name) -> PackageInfo.get_package_for_module info name
-    | None -> None
-  in
-  let p1 = get_package_for_module info c1.sc_module in
-  let p2 = get_package_for_module info c2.sc_module in
-  Option.equal Package.equal p1 p2
-
-let diff_class (info : PackageInfo.t) (c1 : shallow_class) (c2 : shallow_class)
-    : ClassDiff.t option =
-  let same_package = same_package info c1 c2 in
-  let class_shell1 = normalize c1 ~same_package
-  and class_shell2 = normalize c2 ~same_package in
+let diff_class (c1 : shallow_class) (c2 : shallow_class) : ClassDiff.t option =
+  let class_shell1 = normalize c1 and class_shell2 = normalize c2 in
   let member_diff = diff_class_members c1 c2 in
   if not (equal_shallow_class class_shell1 class_shell2) then
     Some

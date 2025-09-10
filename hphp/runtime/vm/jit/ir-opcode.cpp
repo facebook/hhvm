@@ -429,7 +429,6 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseCoeffectsCallViolation:
   case RaiseCoeffectsFunParamCoeffectRulesViolation:
   case RaiseCoeffectsFunParamTypeViolation:
-  case RaiseDeploymentBoundaryViolation:
   case RaiseError:
   case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseForbiddenDynCall:
@@ -551,7 +550,6 @@ bool opcodeMayRaise(Opcode opc) {
   case BespokeIterGetVal:
   case BespokeIterLastPos:
   case BespokeSetPos:
-  case CallViolatesDeploymentBoundary:
   case CallViolatesModuleBoundary:
   case Ceil:
   case CheckArrayCOW:

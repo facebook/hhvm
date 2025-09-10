@@ -69,11 +69,10 @@ type t = {
           default to OngoingRelease if this is true. Otherwise they will default to Unstable. This should be true for
           testing and tools that don't read .hhconfig (e.g., like hh_single_type_check and hh_parse). It should
           be false for hh_server. *)
-  package_v2: bool;  (** Whether PackageV2 is enabled. *)
   package_info: PackageInfo.t;
       (** Information used to determine which package a file belongs to during typechecking. *)
-  package_v2_support_multifile_tests: bool;
-      (** Option for the package v2 to strip the multifile filename mangling used in Hack tests.
+  package_support_multifile_tests: bool;
+      (** Option to strip the multifile filename mangling used in Hack tests.  Used in Packages tests.
           Should be set to true only by the unit tests in the Hack test suite *)
   enable_class_pointer_hint: bool;
       (** When false, type hint class<T> (Hclass_ptr) becomes decl ty classname<T> (Tnewtype).

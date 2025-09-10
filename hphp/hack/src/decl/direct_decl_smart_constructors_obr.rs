@@ -157,22 +157,18 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         let path = source_text.source_text().file_path();
         let prefix = path.prefix();
         let path = bump::String::from_str_in(path.path_str(), arena).into_bump_str();
-        let package = if opts.package_v2 {
-            match opts
-                .package_info
-                .get_package_for_file(opts.package_v2_support_multifile_tests, path)
-            {
-                Some(s) => {
-                    let package_name = bump::String::from_str_in(s, arena).into_bump_str();
-                    let package: &PackageMembership = arena.alloc(
-                        PackageMembership::PackageConfigAssignment(String::from(package_name)),
-                    );
-                    Some(package)
-                }
-                None => None,
+        let package = match opts
+            .package_info
+            .get_package_for_file(opts.package_support_multifile_tests, path)
+        {
+            Some(s) => {
+                let package_name = bump::String::from_str_in(s, arena).into_bump_str();
+                let package: &PackageMembership = arena.alloc(
+                    PackageMembership::PackageConfigAssignment(String::from(package_name)),
+                );
+                Some(package)
             }
-        } else {
-            None
+            None => None,
         };
         let filename = RelativePath::make(prefix, path);
         Self {

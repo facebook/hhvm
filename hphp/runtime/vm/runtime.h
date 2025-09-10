@@ -96,9 +96,6 @@ void raiseModulePropertyViolation(const Class* cls,
                                   const StringData* callerModule,
                                   bool is_static);
 
-void raiseDeploymentBoundaryViolation(const Func* callee);
-void raiseDeploymentBoundaryViolation(const Class* cls);
-
 /**
  * We enter this function if a class is loaded from a string and missing
  * AttrDynamicallyReferenced. This attr is set by hackc if the

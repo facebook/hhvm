@@ -146,22 +146,16 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
         let source_text = IndexedSourceText::new(src.clone());
         let path = source_text.source_text().file_path();
         let path = path.path_str();
-        let package = if opts.package_v2 {
-            match opts
-                .package_info
-                .get_package_for_file(opts.package_v2_support_multifile_tests, path)
-            {
-                Some(package_name) => {
-                    let package: nast::PackageMembership =
-                        nast::PackageMembership::PackageConfigAssignment(String::from(
-                            package_name,
-                        ));
-                    Some(package)
-                }
-                None => None,
+        let package = match opts
+            .package_info
+            .get_package_for_file(opts.package_support_multifile_tests, path)
+        {
+            Some(package_name) => {
+                let package: nast::PackageMembership =
+                    nast::PackageMembership::PackageConfigAssignment(String::from(package_name));
+                Some(package)
             }
-        } else {
-            None
+            None => None,
         };
         let filename = source_text.source_text().file_path_rc();
         Self {

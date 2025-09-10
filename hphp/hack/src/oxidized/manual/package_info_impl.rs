@@ -72,7 +72,6 @@ pub fn package_info_to_vec(
 
             Package {
                 name: convert(name),
-                uses: convert_many(&package.uses),
                 includes: convert_many(&package.includes),
                 soft_includes: convert_many(&package.soft_includes),
                 include_paths: convert_many(&package.include_paths),
@@ -88,10 +87,6 @@ impl TryFrom<package::PackageInfo> for PackageInfo {
         let result = package_info_to_vec("PACKAGES.toml", info);
         match result {
             Ok(packages) => Ok(PackageInfo {
-                glob_to_package: packages
-                    .iter()
-                    .flat_map(|package| package.uses.iter().map(|u| (u.1.clone(), package.clone())))
-                    .collect(),
                 existing_packages: packages
                     .into_iter()
                     .map(|package| (package.name.1.clone(), package))

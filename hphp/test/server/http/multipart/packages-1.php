@@ -4,25 +4,24 @@
 [packages]
 
 [packages.foo]
-uses = ["a.*"]
+include_paths = ["//a.php"]
 
 // FILE: PACKAGES.toml VERSION: 1
 [packages]
 
 [packages.foo]
-uses = ["a.*"]
+include_paths = ["//a.php"]
 
 [packages.bar]
-uses = ["b.*"]
 includes = ["foo"]
 
 // FILE: a.php
 
-function foo() :mixed{ return 1; }
+function foo(): mixed { return 1; }
 
 // FILE: a.php VERSION: 1
 
-function foo() :mixed{ return 2; }
+function foo(): mixed { return 2; }
 
 // FILE: main.php
 

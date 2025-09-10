@@ -294,35 +294,32 @@ let hack_warnings t = t.GlobalOptions.hack_warnings
 
 let check_packages t = t.GlobalOptions.tco_check_packages
 
-let package_v2 t = t.GlobalOptions.po.ParserOptions.package_v2
-
 let set_package_info t package_info =
   let popt = { t.GlobalOptions.po with ParserOptions.package_info } in
   { t with GlobalOptions.po = popt }
 
-let package_v2_support_multifile_tests t =
-  t.GlobalOptions.po.ParserOptions.package_v2_support_multifile_tests
+let package_support_multifile_tests t =
+  t.GlobalOptions.po.ParserOptions.package_support_multifile_tests
 
-let package_v2_allow_typedef_violations t =
-  t.GlobalOptions.tco_package_v2_allow_typedef_violations
+let package_allow_typedef_violations t =
+  t.GlobalOptions.tco_package_allow_typedef_violations
 
-let package_v2_allow_classconst_violations t =
-  t.GlobalOptions.tco_package_v2_allow_classconst_violations
+let package_allow_classconst_violations t =
+  t.GlobalOptions.tco_package_allow_classconst_violations
 
-let package_v2_allow_reifiable_tconst_violations t =
-  t.GlobalOptions.tco_package_v2_allow_reifiable_tconst_violations
+let package_allow_reifiable_tconst_violations t =
+  t.GlobalOptions.tco_package_allow_reifiable_tconst_violations
 
-let package_v2_allow_all_tconst_violations t =
-  t.GlobalOptions.tco_package_v2_allow_all_tconst_violations
+let package_allow_all_tconst_violations t =
+  t.GlobalOptions.tco_package_allow_all_tconst_violations
 
-let package_v2_allow_reified_generics_violations t =
-  t.GlobalOptions.tco_package_v2_allow_reified_generics_violations
+let package_allow_reified_generics_violations t =
+  t.GlobalOptions.tco_package_allow_reified_generics_violations
 
-let package_v2_allow_all_generics_violations t =
-  t.GlobalOptions.tco_package_v2_allow_all_generics_violations
+let package_allow_all_generics_violations t =
+  t.GlobalOptions.tco_package_allow_all_generics_violations
 
-let package_v2_exclude_patterns t =
-  t.GlobalOptions.tco_package_v2_exclude_patterns
+let package_exclude_patterns t = t.GlobalOptions.tco_package_exclude_patterns
 
 let class_sub_classname t = t.GlobalOptions.class_sub_classname
 

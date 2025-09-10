@@ -19,8 +19,7 @@ type t = {
   stack_size: int;  (** Stack size to for the parallel workers *)
   deregister_php_stdlib: bool;
   package_info: PackageInfo.t;
-  package_v2: bool;
-  package_v2_support_multifile_tests: bool;
+  package_support_multifile_tests: bool;
   enable_class_pointer_hint: bool;
   disallow_non_annotated_memoize: bool;
   treat_non_annotated_memoize_as_kbic: bool;

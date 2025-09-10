@@ -461,15 +461,6 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
     return false;
   }
 
-  // Deployment violation may raise raise warning or throw an exception
-  auto const& packageInfo = funcUnit->packageInfo;
-  if (auto const activeDeployment = packageInfo.getActiveDeployment()) {
-    if (!packageInfo.moduleInDeployment(
-          funcUnit->moduleName, *activeDeployment, DeployKind::Hard)) {
-      return false;
-    }
-  }
-
   // We only fold functions when numRets == 1
   if (func->hasInOutArgs) return false;
 

@@ -241,7 +241,6 @@ let invalidate_decls_upon_change
     match new_decls_to_diff with
     | None -> n_classes
     | Some Direct_decl_parser.{ pfh_decls; _ } ->
-      let package_info = Provider_context.get_package_info ctx in
       n_classes
       |> SSet.filter (fun name ->
              let prev_sc =
@@ -258,8 +257,7 @@ let invalidate_decls_upon_change
              in
              match (prev_sc, new_sc) with
              | (Some prev_sc, Some new_sc) ->
-               Shallow_class_diff.diff_class package_info prev_sc new_sc
-               |> Option.is_some
+               Shallow_class_diff.diff_class prev_sc new_sc |> Option.is_some
              | _ -> true)
   in
 

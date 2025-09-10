@@ -15,7 +15,6 @@ module VersionedSSet = Decl_compare.VersionedSSet
 module Dep = Typing_deps.Dep
 
 let diff_class_in_changed_file
-    (package_info : PackageInfo.t)
     (old_classes : shallow_class option SMap.t)
     (new_classes : shallow_class option SMap.t)
     (class_name : string) : ClassDiff.t option =
@@ -23,7 +22,7 @@ let diff_class_in_changed_file
   let new_class_opt = SMap.find new_classes class_name in
   match (old_class_opt, new_class_opt) with
   | (Some old_class, Some new_class) ->
-    Shallow_class_diff.diff_class package_info old_class new_class
+    Shallow_class_diff.diff_class old_class new_class
   | (None, None) -> Some (Major_change (MajorChange.Unknown Neither_found))
   | (None, Some _) ->
     Some (Major_change (MajorChange.Unknown Old_decl_not_found))
@@ -50,11 +49,8 @@ let compute_class_diffs
     SSet.fold kept ~init:SMap.empty ~f:(fun name acc ->
         SMap.add acc ~key:name ~data:(Decl_provider.get_shallow_class ctx name))
   in
-  let package_info = Provider_context.get_package_info ctx in
   SSet.fold kept ~init:acc ~f:(fun cid acc ->
-      let diff =
-        diff_class_in_changed_file package_info old_classes new_classes cid
-      in
+      let diff = diff_class_in_changed_file old_classes new_classes cid in
       match diff with
       | Some diff -> (cid, diff) :: acc
       | None -> acc)

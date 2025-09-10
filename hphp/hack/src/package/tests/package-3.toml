@@ -3,7 +3,5 @@
 [packages.foo]
 includes = ["baz"]
 soft_includes=["baz"]
-uses = ["b.*"]
 
 [packages.bar]
-uses = ["b.*"]

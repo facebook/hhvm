@@ -22,7 +22,6 @@ mod ffi {
         package: Package,
     }
     struct Package {
-        uses: Vec<String>,
         includes: Vec<String>,
         soft_includes: Vec<String>,
         include_paths: Vec<String>,
@@ -37,13 +36,13 @@ mod ffi {
         domains: Vec<String>,
     }
     extern "Rust" {
-        pub fn package_info(package_v2: bool, packages_toml: &CxxString) -> PackageInfo;
+        pub fn package_info(packages_toml: &CxxString) -> PackageInfo;
     }
 }
 
-pub fn package_info(package_v2: bool, packages_toml: &CxxString) -> ffi::PackageInfo {
+pub fn package_info(packages_toml: &CxxString) -> ffi::PackageInfo {
     // HHVM should not perform validation of include_paths, so invoking from_text_non_strict
-    let s = package::PackageInfo::from_text_non_strict(package_v2, &packages_toml.to_string());
+    let s = package::PackageInfo::from_text_non_strict(&packages_toml.to_string());
     match s {
         Ok(info) => {
             let convert = |v: Option<&package::NameSet>| {
@@ -55,7 +54,6 @@ pub fn package_info(package_v2: bool, packages_toml: &CxxString) -> ffi::Package
                 .iter()
                 .map(|(name, package)| {
                     let package_ffi = ffi::Package {
-                        uses: convert(package.uses.as_ref()),
                         includes: convert(package.includes.as_ref()),
                         soft_includes: convert(package.soft_includes.as_ref()),
                         include_paths: convert(package.include_paths.as_ref()),

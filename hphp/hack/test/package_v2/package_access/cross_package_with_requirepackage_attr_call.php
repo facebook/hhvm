@@ -2,7 +2,6 @@
 <?hh
 // package pkg2
 <<file: __PackageOverride('pkg2')>>
-<<file: __EnableUnstableFeatures('require_package')>>
 
 class A {
   public function test() : void {

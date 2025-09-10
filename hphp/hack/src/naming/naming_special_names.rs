@@ -324,8 +324,6 @@ pub mod user_attributes {
 
     pub const IGNORE_COEFFECT_LOCAL_ERRORS: &str = "__IgnoreCoeffectLocalErrors";
 
-    pub const CROSS_PACKAGE: &str = "__CrossPackage";
-
     pub const MODULE_LEVEL_TRAIT: &str = "__ModuleLevelTrait";
 
     pub const STRICT_SWITCH: &str = "__StrictSwitch";
@@ -373,10 +371,6 @@ pub mod user_attributes {
 
     pub fn is_soft(name: &str) -> bool {
         name == SOFT
-    }
-
-    pub fn is_cross_package(name: &str) -> bool {
-        name == CROSS_PACKAGE
     }
 
     pub fn is_package_override(name: &str) -> bool {

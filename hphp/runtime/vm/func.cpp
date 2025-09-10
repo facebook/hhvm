@@ -986,14 +986,6 @@ void handleModuleBoundaryViolation(const Func* callee, const Func* caller) {
   if (will_symbol_raise_module_boundary_violation(callee, caller)) {
     raiseModuleBoundaryViolation(nullptr, callee, caller->moduleName());
   }
-
-  if (!Cfg::Eval::EnforceDeployment) return;
-  auto const& packageInfo = g_context->getPackageInfo();
-  if (caller->moduleName() != callee->moduleName() &&
-      !packageInfo.violatesDeploymentBoundary(caller->moduleName()) &&
-      packageInfo.violatesDeploymentBoundary(*callee)) {
-    raiseDeploymentBoundaryViolation(callee);
-  }
 }
 } // namespace
 

@@ -11,8 +11,6 @@ val empty : t
 
 val from_packages : Package.t list -> t
 
-val get_package_for_module : t -> string -> Package.t option
-
 val get_package : t -> string -> Package.t option
 
 val package_exists : t -> string -> bool

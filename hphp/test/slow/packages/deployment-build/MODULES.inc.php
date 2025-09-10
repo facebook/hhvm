@@ -1,3 +1,0 @@
-<?hh
-
-new module prod {}

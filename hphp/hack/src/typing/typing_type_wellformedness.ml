@@ -447,13 +447,13 @@ let typeconsts env tcs cls_name =
   in
   let f tconst =
     let should_check_package_boundary =
-      if not @@ Env.package_v2_allow_all_tconst_violations env.tenv then
+      if not @@ Env.package_allow_all_tconst_violations env.tenv then
         `Yes "type constant"
       else
         match get_class_const tconst.c_tconst_name with
         | `Found ttc when Option.is_none ttc.ttc_reifiable -> `No
         | `Found _ ->
-          if Env.package_v2_allow_reifiable_tconst_violations env.tenv then
+          if Env.package_allow_reifiable_tconst_violations env.tenv then
             `No
           else
             `Yes "reifiable type constant"
@@ -637,7 +637,7 @@ let typedef tenv (t : (_, _) typedef) =
        references. *)
     | SimpleTypeDef { tvh_vis = Transparent; tvh_hint } ->
       let should_check_package_boundary =
-        if Env.package_v2_allow_typedef_violations tenv then
+        if Env.package_allow_typedef_violations tenv then
           `No
         else
           `Yes "transparent type alias"

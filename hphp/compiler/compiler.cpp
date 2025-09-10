@@ -1115,16 +1115,12 @@ bool process(CompilerOptions &po) {
     );
   }
 
-  /** For PackageV1, many files will be in the same module, so we precompute
-    * the set of the modules in the current deployment
-    */
-  hphp_fast_set<const StringData*> moduleInDeployment;
-
-  /** For PackageV2, we store all the paths listed in include_paths clauses
+  /** To efficiently query which package contains a given file, we preprocess the 
+    * packages definition.  All the paths listed in include_paths clauses,
     * together with a boolean recording if files under that path are included
-    * in the active deployment or not.  The list of paths is stored in
-    * anti-lexicographic order so a simple linear search returns the most
-    * precise path that includes a given file.
+    * in the active deployment or not, are stored in the pathsInDeployment list.  
+    * The list of paths is stored in anti-lexicographic order so a simple linear 
+    * search returns the most precise path that includes a given file.
     */
   std::vector<std::pair<std::string, DeployKind>> pathsInDeployment;
 
@@ -1142,49 +1138,26 @@ bool process(CompilerOptions &po) {
       return false;
     }
 
-    if (Cfg::Eval::PackageV2) {
-      // PackageV2: precompute a sorted mapping (include_paths -> in_active_deployment)
-      for (auto const& it : packageInfo.packages()) {
-        auto const deployKind =
-          activeDeployment->second.getDeployKind(it.first);
-        for (auto ip : it.second.m_include_paths) {
-          pathsInDeployment.push_back(std::pair(ip, deployKind));
-        }
-      }
-      std::sort(pathsInDeployment.begin(), pathsInDeployment.end(), std::greater());
-      // files that do not have a __PackageOverride and do not match an
-      // include_path belong to the default package, which is always included
-      // in the active deployment
-      pathsInDeployment.push_back(std::pair(Cfg::Server::SourceRoot + po.inputDir, DeployKind::Hard));
-    } else {
-      // PackageV1: precompute the set of modules in the current deployment
-      moduleInDeployment.reserve(index->modules.size());
-      for (auto const& [module, _] : index->modules) {
-        assertx(!moduleInDeployment.contains(module));
-        if (packageInfo.moduleInDeployment(module,
-                                           activeDeployment->second,
-                                           DeployKind::HardOrSoft)) {
-          moduleInDeployment.insert(module);
-        }
-      }
-      // Check for the default module separately since there is no module
-      // declaration for the default module.
-      static auto const defaultModule = makeStaticString(Module::DEFAULT);
-      if (packageInfo.moduleInDeployment(defaultModule,
-                                         activeDeployment->second,
-                                         DeployKind::HardOrSoft)) {
-        moduleInDeployment.insert(defaultModule);
+    // Precompute a sorted mapping (include_paths -> in_active_deployment)
+    for (auto const& it : packageInfo.packages()) {
+      auto const deployKind =
+        activeDeployment->second.getDeployKind(it.first);
+      for (const auto& ip : it.second.m_include_paths) {
+        pathsInDeployment.push_back(std::pair(ip, deployKind));
       }
     }
+    std::sort(pathsInDeployment.begin(), pathsInDeployment.end(), std::greater());
+    // Files that do not have a __PackageOverride and do not match an
+    // include_path belong to the default package, which is always included
+    // in the active deployment
+    pathsInDeployment.push_back(std::pair(Cfg::Server::SourceRoot + po.inputDir, DeployKind::Hard));
   }
 
-  auto const buildMode = packageV2BuildMode();
-  assertx((Cfg::Eval::PackageV2 && buildMode != PackageV2BuildMode::packageV2Disabled) ||
-          (!Cfg::Eval::PackageV2 && buildMode == PackageV2BuildMode::packageV2Disabled));
+  auto const mode = buildMode();
   auto const& packageInfo = RepoOptions::forFile(po.inputDir.c_str()).packageInfo();
 
-  auto deployedByPackageV2 = [&](const StringData* filepath, const StringData* packageOverride) {
-    if (isPackageV2Enabled(buildMode) && !Cfg::Eval::ActiveDeployment.empty()) {
+  auto deployedByPackages = [&](const StringData* filepath, const StringData* packageOverride) {
+    if (isPackagesEnabled(mode) && !Cfg::Eval::ActiveDeployment.empty()) {
       if (packageOverride) {
         auto const activeDeployment =
           packageInfo.deployments().find(Cfg::Eval::ActiveDeployment);
@@ -1214,12 +1187,10 @@ bool process(CompilerOptions &po) {
     assertx(ue);
     if (Option::NoOutputHHBC) return;
 
-    if (Cfg::Eval::PackageV2) {
-      auto const deployed =
-        deployedByPackageV2(ue->m_filepath, ue->getPackageOverride());
-      ue->m_softDeployedRepoOnly = deployed == DeployKind::Soft;
-    }
-
+    auto const deployed =
+      deployedByPackages(ue->m_filepath, ue->getPackageOverride());
+    ue->m_softDeployedRepoOnly = deployed == DeployKind::Soft;
+  
     assertx(Option::GenerateBinaryHHBC ||
             Option::GenerateTextHHBC ||
             Option::GenerateHhasHHBC);
@@ -1402,57 +1373,34 @@ bool process(CompilerOptions &po) {
           return FileInBuildReason::fromIncludeDir;
         }
       }
-
-      if (Cfg::Eval::PackageV2) {
-        assertx(!(Cfg::Eval::ActiveDeployment.empty()));
-        // emit should never be invoked on files excluded from the build
-        // with --exclude-file or --exclude-pattern
-        auto const filepath = p.m_filepath;
-        auto file = filepath->toCppString();
-        always_assert(!Option::PackageExcludeFiles.count(file) &&
-          !Option::IsFileExcluded(file, Option::PackageExcludePatterns));
-        auto const deployed = deployedByPackageV2(filepath, p.m_packageOverride);
-        if (emitPass == EmitPass::SymbolRefsOnDemandFiles)  {
-          if (deployed != DeployKind::NotDeployed) {
-            return FileInBuildReason::fromSymbolRefsAndPackageV2;
-          } else {
-            return FileInBuildReason::fromSymbolRefs;
-          }
-        }
+      
+      auto const deployed = deployedByPackages(p.m_filepath, p.m_packageOverride);
+      if (emitPass == EmitPass::SymbolRefsOnDemandFiles)  {
         if (deployed != DeployKind::NotDeployed) {
-          if (emitPass == EmitPass::IncludeDirFiles) {
-            return FileInBuildReason::fromSymbolRefsAndPackageV2;
-          } else {
-            // Only consider soft-include when a build is fully
-            // defined by packages
-            return deployed == DeployKind::Soft
-              ? FileInBuildReason::fromPackageV2Soft
-              : FileInBuildReason::fromPackageV2;
-          }
-        } else if (emitPass == EmitPass::PackageV2RulesOnly) {
-          return FileInBuildReason::notIncluded;
+          return FileInBuildReason::fromSymbolRefsAndPackages;
         } else {
-          return FileInBuildReason::fromIncludeDir;
+          return FileInBuildReason::fromSymbolRefs;
         }
       }
 
-      // PackagesV1 legacy code
-      // Remark: files included both by PackageV1 and SymbolRefs are
-      // tagged `fromSymbolRefs` only
-      assertx(!Cfg::Eval::PackageV2);
+      if (deployed != DeployKind::NotDeployed) {
+        if (emitPass == EmitPass::IncludeDirFiles) {
+          return FileInBuildReason::fromSymbolRefsAndPackages;
+        } else {
+           return deployed == DeployKind::Soft
+              ? FileInBuildReason::fromPackagesSoft
+              : FileInBuildReason::fromPackages;
+        }
+      }
 
-      // If the unit defines any modules, then it is always included
-      if (!p.m_definitions.m_modules.empty()) {
-        return FileInBuildReason::fromPackageV1;
+      else if (emitPass == EmitPass::PackageRulesOnly) {
+        return FileInBuildReason::notIncluded;
+      } else {
+        return FileInBuildReason::fromIncludeDir;
       }
-      if (emitPass == EmitPass::SymbolRefsOnDemandFiles) {
-        return FileInBuildReason::fromSymbolRefs;
-      }
-      if (Cfg::Eval::ActiveDeployment.empty() ||
-          (p.m_module_use && moduleInDeployment.contains(p.m_module_use))) {
-        return FileInBuildReason::fromPackageV1;
-      }
-      return FileInBuildReason::notIncluded;
+
+      // unreachable
+      always_assert(false);
     };
 
     if (Cfg::Eval::UseHHBBC) {

@@ -5902,15 +5902,10 @@ fn get_current_package<'a>(env: &mut Env<'a>, node: S<'a>) -> Option<PackageMemb
     let span = p_pos(node, env);
     let filepath = span.filename().path_str();
     let parser_options = env.parser_options;
-
-    let package = if parser_options.package_v2 {
-        parser_options
-            .package_info
-            .get_package_for_file(parser_options.package_v2_support_multifile_tests, filepath)
-            .map(|p| PackageMembership::PackageConfigAssignment(String::from(p)))
-    } else {
-        None
-    };
+    let package = parser_options
+        .package_info
+        .get_package_for_file(parser_options.package_support_multifile_tests, filepath)
+        .map(|p| PackageMembership::PackageConfigAssignment(String::from(p)));
     env.package = package.clone();
     package
 }

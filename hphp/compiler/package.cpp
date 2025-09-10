@@ -1410,16 +1410,10 @@ coro::Task<bool> Package::emit(const UnitIndex& index,
     auto task = localCallback(std::move(localUEs));
     tasks.emplace_back(co_withExecutor(m_executor.sticky(), std::move(task)));
   }
-  if (Cfg::Eval::PackageV2) {
-    tasks.emplace_back(
-      co_withExecutor(m_executor.sticky(),
-        emitAllPackageV2(callback, index, edgesPath, filesInBuildPath, logPackageBuildDrift))
-    );
-  } else {
-    tasks.emplace_back(
-      co_withExecutor(m_executor.sticky(), emitAll(callback, index, edgesPath, filesInBuildPath))
-    );
-  }
+  tasks.emplace_back(
+    co_withExecutor(m_executor.sticky(),
+      emitAll(callback, index, edgesPath, filesInBuildPath, logPackageBuildDrift))
+  );
   co_await coro::collectAllRange(std::move(tasks));
   co_return !m_failed.load();
 }
@@ -1487,13 +1481,11 @@ const char* show(FileInBuildReason r) {
       return "fromIncludedDir";
     case FileInBuildReason::fromSymbolRefs:
       return "fromSymbolRefs";
-    case FileInBuildReason::fromPackageV1:
-      return "fromPackageV1";
-    case FileInBuildReason::fromPackageV2:
+    case FileInBuildReason::fromPackages:
       return "fromPackageV2";
-    case FileInBuildReason::fromPackageV2Soft:
+    case FileInBuildReason::fromPackagesSoft:
       return "fromPackageV2Soft";
-    case FileInBuildReason::fromSymbolRefsAndPackageV2:
+    case FileInBuildReason::fromSymbolRefsAndPackages:
       return "fromSymbolRefsAndPackageV2";
     case FileInBuildReason::notIncluded:
       return "notIncluded";
@@ -1522,7 +1514,7 @@ void saveFilesInBuild(const std::vector<FileInBuildInfo>& files_in_build,
 void logPackageDrift(const std::vector<FileInBuildInfo>& files_in_build) {
   StructuredLogEntry ent;
   for (auto const& file : files_in_build) {
-    if (file.m_reason != FileInBuildReason::fromSymbolRefsAndPackageV2) {
+    if (file.m_reason != FileInBuildReason::fromSymbolRefsAndPackages) {
       ent.setStr("filepath", file.m_file->data());
       ent.setStr("reason", show(file.m_reason));
       ent.force_init = true;
@@ -1548,80 +1540,6 @@ void saveBuildInfo(const std::vector<SymbolRefEdge>& edges,
 }
 }
 
-// The actual emit loop for SymbolRefs and PackageV1 builds.
-// Find the initial set of inputs (from configuration), emit them,
-// enumerate on-demand files from symbol refs,
-// then repeat the process until we have no new files to emit.
-coro::Task<void>
-Package::emitAll(const EmitCallback& callback, const UnitIndex& index,
-                 const std::filesystem::path& edgesPath,
-                 const std::filesystem::path& filesInBuildPath) {
-  auto const logEdges = !edgesPath.native().empty();
-  auto const logFiles = !filesInBuildPath.native().empty();
-
-  // Find the initial set of groups
-  auto input_groups = co_await groupAll(m_directories, true, true);
-
-  // Select the files specified as inputs, collect ondemand file names.
-  std::vector<SymbolRefEdge> edges;
-  std::vector<FileInBuildInfo> files_in_build;
-  EmitInfo info;
-
-  {
-    Timer timer{Timer::WallTime, "emitting inputs"};
-    info = co_await emitGroups(
-      std::move(input_groups), callback, index, EmitPass::IncludeDirFiles, logFiles);
-    if (logEdges) {
-      edges.insert(
-        edges.end(), info.m_ondemand.m_edges.begin(), info.m_ondemand.m_edges.end()
-      );
-    }
-    if (logFiles) {
-      files_in_build.insert(
-        files_in_build.end(), info.m_files_in_build.begin(), info.m_files_in_build.end()
-      );
-    }
-    m_inputMicros = std::chrono::microseconds{timer.getMicroSeconds()};
-  }
-
-  if (info.m_ondemand.m_files.empty()) {
-    if (logFiles) {
-      saveFilesInBuild(files_in_build, filesInBuildPath);
-    }
-    co_return;
-  }
-
-  Timer timer{Timer::WallTime, "emitting on-demand"};
-  // We have ondemand files, so keep emitting until a fix point.
-  do {
-    Groups ondemand_groups;
-    groupFiles(ondemand_groups, std::move(info.m_ondemand.m_files));
-    info = co_await emitGroups(
-      std::move(ondemand_groups), callback, index, EmitPass::SymbolRefsOnDemandFiles, logFiles);
-    if (logEdges) {
-      edges.insert(
-        edges.end(), info.m_ondemand.m_edges.begin(), info.m_ondemand.m_edges.end()
-      );
-    }
-    if (logFiles) {
-      files_in_build.insert(
-        files_in_build.end(), info.m_files_in_build.begin(), info.m_files_in_build.end()
-      );
-    }
-  } while (!info.m_ondemand.m_files.empty());
-  m_ondemandMicros = std::chrono::microseconds{timer.getMicroSeconds()};
-
-  // Save edge and file list to a text file, if requested
-  if (logEdges) {
-    saveSymbolRefEdges(std::move(edges), edgesPath);
-  }
-  if (logFiles) {
-    saveFilesInBuild(files_in_build, filesInBuildPath);
-  }
-
-  co_return;
-}
-
 void Package::logBuildInfo(std::vector<SymbolRefEdge>& edges,
                            std::vector<FileInBuildInfo>& files_in_build,
                            const Package::EmitInfo& info,
@@ -1638,17 +1556,22 @@ void Package::logBuildInfo(std::vector<SymbolRefEdge>& edges,
   }
 }
 
-// The actual emit loop once PackageV2 are enable.  It supports building with
+// The actual emit loop for SymbolRefs and Package builds
+// It supports building with
 // - SymbolRefs only
 // - PackageV2 only
 // - SymbolRefs U Package2
-// It follows the overall strategy of emitAll, but it ensures that PackageV2
-// builds include all files with __PackageOverride annotations in directories
-// excluded with --exclude-dirs (eg. files pulled into prod from flib/intern).
+// When building with SymbolRefs only, it finds the initial set of inputs
+// (from configuration), emit them, enumerate on-demand files from symbol refs,
+// then repeat the process until we have no new files to emit.
+// When an ActiveDeployment is set, it also ensures that all files with
+// __PackageOverride annotations in directories excluded with --exclude-dirs
+// (eg. files pulled into prod from flib/intern) are included in the build.
 // Files excluded with --exclude-file and --exclude-pattern are never included
-// in the build (eg files in __tests__/ direcories).
+// in the build (eg files in __tests__/ direcories): these two configuration option
+// override both SymbolRefs and Package rules.
 coro::Task<void>
-Package::emitAllPackageV2(const EmitCallback& callback, const UnitIndex& index,
+Package::emitAll(const EmitCallback& callback, const UnitIndex& index,
                  const std::filesystem::path& edgesPath,
                  const std::filesystem::path& filesInBuildPath,
                  bool logPackageBuildDrift) {
@@ -1668,9 +1591,7 @@ Package::emitAllPackageV2(const EmitCallback& callback, const UnitIndex& index,
   //   - if a file is pulled both by symbolrefs and packages, the duplicate
   //     is discarded by the `emitRemoteUnit` callback
 
-  assertx(Cfg::Eval::PackageV2);
-  const PackageV2BuildMode buildMode = packageV2BuildMode();
-  assertx(buildMode != PackageV2BuildMode::packageV2Disabled);
+  const BuildMode mode = buildMode();
 
   // Emit files specified as inputs, collect ondemand file names.
   // - If building with PackageV2 only, then --excluded-dirs are not
@@ -1678,7 +1599,7 @@ Package::emitAllPackageV2(const EmitCallback& callback, const UnitIndex& index,
   // - If building with SymbolRefs, then Package check are skipped as
   //   all SymbolRefs files must be in the build.
   auto input_groups =
-    co_await groupAll(m_directories, true, isSymbolRefsEnabled(buildMode));
+    co_await groupAll(m_directories, true, isSymbolRefsEnabled(mode));
 
   std::vector<SymbolRefEdge> edges;
   std::vector<FileInBuildInfo> files_in_build;
@@ -1688,8 +1609,8 @@ Package::emitAllPackageV2(const EmitCallback& callback, const UnitIndex& index,
     Timer timer{Timer::WallTime, "emitting inputs"};
     info = co_await emitGroups(
       std::move(input_groups), callback, index,
-      buildMode == PackageV2BuildMode::packagesOnly ?
-        EmitPass::PackageV2RulesOnly : EmitPass::IncludeDirFiles,
+      mode == BuildMode::packagesOnly ?
+        EmitPass::PackageRulesOnly : EmitPass::IncludeDirFiles,
       logFiles);
     logBuildInfo(edges, files_in_build, info, logEdges, logFiles);
     m_inputMicros = std::chrono::microseconds{timer.getMicroSeconds()};
@@ -1699,8 +1620,8 @@ Package::emitAllPackageV2(const EmitCallback& callback, const UnitIndex& index,
   // - building with SymbolRefs only and there no ondemand files, or
   // - building with PackageV2 only
   if ((info.m_ondemand.m_files.empty() &&
-       buildMode == PackageV2BuildMode::symbolRefsOnly) ||
-      buildMode == PackageV2BuildMode::packagesOnly) {
+       mode == BuildMode::symbolRefsOnly) ||
+      mode == BuildMode::packagesOnly) {
 
     // Before returning, save build information to text files and/or scuba
     saveBuildInfo(std::move(edges), edgesPath,
@@ -1732,7 +1653,7 @@ Package::emitAllPackageV2(const EmitCallback& callback, const UnitIndex& index,
   // skipped with --exclude-dirs.  This step is not needed if building
   // only with Packages, as in that case excluded-dirs were handled in
   // the first pass
-  if (buildMode == PackageV2BuildMode::packagesAndSymbolRefs) {
+  if (mode == BuildMode::packagesAndSymbolRefs) {
     Timer timer{Timer::WallTime, "emitting filtered files included by package rules"};
 
     // Excluded dirs must be scanned for __PackageOverride only if they are
@@ -1755,7 +1676,7 @@ Package::emitAllPackageV2(const EmitCallback& callback, const UnitIndex& index,
       co_await groupAll(excluded_dirs, true, false, /* failHard */ false);
     info = co_await emitGroups(
       std::move(filtered_groups), callback, index,
-      EmitPass::PackageV2RulesOnly,
+      EmitPass::PackageRulesOnly,
       logFiles);
     m_filteredPackageMicros = std::chrono::microseconds{timer.getMicroSeconds()};
     logBuildInfo(edges, files_in_build, info, false, logFiles);

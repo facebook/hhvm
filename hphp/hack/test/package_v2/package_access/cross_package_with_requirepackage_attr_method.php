@@ -11,7 +11,7 @@ function pkg3_call(): void {}
 //// a.php
 <?hh
 // package pkg1
-<<file: __EnableUnstableFeatures('require_package')>>
+
 class A {
   <<__RequirePackage("pkg3")>>
   public function foo(): void {

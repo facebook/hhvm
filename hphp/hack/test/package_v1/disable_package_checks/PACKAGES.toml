@@ -1,7 +1,0 @@
-[packages]
-
-[packages.pkg1]
-uses=["a"]
-
-[packages.pkg2]
-uses=["b"]

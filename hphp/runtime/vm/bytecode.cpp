@@ -947,31 +947,12 @@ void checkModuleBoundaryViolation(const Class* ctx, const Func& callee) {
   if (will_symbol_raise_module_boundary_violation(&callee, caller)) {
     raiseModuleBoundaryViolation(ctx, &callee, caller->moduleName());
   }
-
-  if (!Cfg::Eval::EnforceDeployment) return;
-  auto const& packageInfo = g_context->getPackageInfo();
-  // Only check deployment boundary violation for toplevel function calls
-  // since class method calls will be handled at the class level.
-  if (!ctx &&
-      caller->moduleName() != callee.moduleName() &&
-      !packageInfo.violatesDeploymentBoundary(caller->moduleName()) &&
-      packageInfo.violatesDeploymentBoundary(callee)) {
-    raiseDeploymentBoundaryViolation(&callee);
-  }
 }
 
 void checkModuleBoundaryViolation(const Class& cls) {
   auto const caller = vmfp()->func();
   if (will_symbol_raise_module_boundary_violation(&cls, caller)) {
     raiseModuleBoundaryViolation(&cls, caller->moduleName());
-  }
-
-  if (!Cfg::Eval::EnforceDeployment) return;
-  auto const& packageInfo = g_context->getPackageInfo();
-  if (caller->moduleName() != cls.moduleName() &&
-      !packageInfo.violatesDeploymentBoundary(caller->moduleName()) &&
-      packageInfo.violatesDeploymentBoundary(cls)) {
-    raiseDeploymentBoundaryViolation(&cls);
   }
 }
 

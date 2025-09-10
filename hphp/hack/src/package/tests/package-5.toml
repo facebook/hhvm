@@ -1,17 +1,16 @@
 [packages]
 
 [packages.a]
-uses = ["a.*"]
 includes = ["b"]
 
 [packages.b]
-uses = ["b.*"]
 includes = ["c"]
 
 [packages.c]
-uses = [".*"]
 includes = []
 soft_includes=["b"]
+
+[deployments]
 
 [deployments.d] # no error
 packages=["c"]

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<105d0752d4a5b5678f2b6fa8c9865e55>>
+// @generated SignedSource<<67bed5c61f90dacf9891bf4faa28fa4c>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -357,29 +357,29 @@ pub struct GlobalOptions {
     pub tco_strict_switch: bool,
     pub tco_allowed_files_for_ignore_readonly: Vec<String>,
     /// Patterns for files excluded from the package boundary check.
-    pub tco_package_v2_exclude_patterns: Vec<String>,
-    /// Option for package v2 to bypass package boundary violation errors on typedefs to unblock V1 of
+    pub tco_package_exclude_patterns: Vec<String>,
+    /// Option for package support to bypass package boundary violation errors on typedefs to unblock V1 of
     /// intern-prod separation
-    pub tco_package_v2_allow_typedef_violations: bool,
-    /// Option for package v2 to bypass package boundary violation errors on ::class during
+    pub tco_package_allow_typedef_violations: bool,
+    /// Option for package support to bypass package boundary violation errors on ::class during
     /// the ::class to nameof migration to unblock V1 of intern-prod separation
-    pub tco_package_v2_allow_classconst_violations: bool,
-    /// Option for package v2 to bypass package boundary violation errors on definitions of
+    pub tco_package_allow_classconst_violations: bool,
+    /// Option for package support to bypass package boundary violation errors on definitions of
     /// reifiable abstract type constants to unblock V1 of intern-prod separation
-    pub tco_package_v2_allow_reifiable_tconst_violations: bool,
-    /// Option for package v2 to bypass package boundary violation errors on definitions of
+    pub tco_package_allow_reifiable_tconst_violations: bool,
+    /// Option for package support to bypass package boundary violation errors on definitions of
     /// all type constants to unblock V1 of intern-prod separation. This flag controls the
     /// superset of violations controlled by `tco_package_v2_allow_reifiable_tconst_violations`
     /// and will be switched off as a step further in tightening the packgage boundary endforcement.
-    pub tco_package_v2_allow_all_tconst_violations: bool,
-    /// Option for package v2 to bypass package boundary violation errors on reified generics
+    pub tco_package_allow_all_tconst_violations: bool,
+    /// Option for package support to bypass package boundary violation errors on reified generics
     /// to unblock V1 of intern-prod separation. This flag controls the
     /// superset of violations controlled by `tco_package_v2_allow_reified_generics_violations`
     /// and will be switched off as a step further in tightening the packgage boundary endforcement.
-    pub tco_package_v2_allow_reified_generics_violations: bool,
+    pub tco_package_allow_reified_generics_violations: bool,
     /// Option for package v2 to bypass package boundary violation errors on all generics
     /// to unblock V1 of intern-prod separation.
-    pub tco_package_v2_allow_all_generics_violations: bool,
+    pub tco_package_allow_all_generics_violations: bool,
     /// Disable RE cache when calling hh_distc. Useful for performance testing.
     /// Corresponds to the `--no-cache` options of hh_distc.
     pub re_no_cache: bool,

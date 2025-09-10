@@ -268,29 +268,6 @@ void cgRaiseModulePropertyViolation(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(vmain(env), env, target, kVoidDest, SyncOptions::Sync, args);
 }
 
-void cgRaiseDeploymentBoundaryViolation(IRLS& env, const IRInstruction* inst) {
-  auto const target = [&]() -> CallSpec {
-    if (inst->src(0)->isA(TFunc)) {
-      using Fn = void(*)(const Func*);
-      return CallSpec::direct(
-        static_cast<Fn>(raiseDeploymentBoundaryViolation)
-      );
-    };
-    assertx(inst->src(0)->isA(TCls));
-    using Fn = void(*)(const Class*);
-    return CallSpec::direct(
-        static_cast<Fn>(raiseDeploymentBoundaryViolation)
-      );
-  }();
-  cgCallHelper(
-    vmain(env),
-    env,
-    target,
-    kVoidDest,
-    SyncOptions::Sync,
-    argGroup(env, inst).ssa(0)
-  );
-}
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPL_OPCODE_CALL(InitThrowableFileAndLine)

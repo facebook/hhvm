@@ -19,7 +19,6 @@ type pos_id = Pos.t * string [@@deriving eq, show]
 
 type t = {
   name: pos_id;
-  uses: pos_id list;
   includes: pos_id list;
   soft_includes: pos_id list;
   include_paths: pos_id list;

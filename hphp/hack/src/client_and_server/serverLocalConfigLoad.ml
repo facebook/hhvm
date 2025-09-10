@@ -109,7 +109,7 @@ let default =
     hack_warnings = true;
     warnings_default_all = false;
     warnings_in_sandcastle = true;
-    package_config_strict_validation = true;
+    package_config_strict_validation = false;
   }
 
 let system_config_path =

@@ -41,7 +41,7 @@ TEST(FieldRefConstPropagation, Unqualified) {
   const auto cmsg_cref = std::as_const(foo).msg();
 
   auto& c1 = msg_ref->at(0);
-  auto& c2 = cmsg_ref->at(0); // Only for this case we should have lint warning
+  auto& c2 = cmsg_ref->at(0);
   auto& c3 = msg_cref->at(0);
   auto& c4 = cmsg_cref->at(0);
 
@@ -51,7 +51,7 @@ TEST(FieldRefConstPropagation, Unqualified) {
   EXPECT_EQ(c4, '1');
 
   static_assert(!std::is_const_v<std::remove_reference_t<decltype(c1)>>);
-  static_assert(!std::is_const_v<std::remove_reference_t<decltype(c2)>>);
+  static_assert(std::is_const_v<std::remove_reference_t<decltype(c2)>>);
   static_assert(std::is_const_v<std::remove_reference_t<decltype(c3)>>);
   static_assert(std::is_const_v<std::remove_reference_t<decltype(c4)>>);
 }
@@ -73,7 +73,7 @@ TEST(FieldRefConstPropagation, Optional) {
   const auto cmsg_cref = std::as_const(foo).msg();
 
   auto& c1 = msg_ref->at(0);
-  auto& c2 = cmsg_ref->at(0); // Only for this case we should have lint warning
+  auto& c2 = cmsg_ref->at(0);
   auto& c3 = msg_cref->at(0);
   auto& c4 = cmsg_cref->at(0);
 
@@ -83,7 +83,7 @@ TEST(FieldRefConstPropagation, Optional) {
   EXPECT_EQ(c4, '1');
 
   static_assert(!std::is_const_v<std::remove_reference_t<decltype(c1)>>);
-  static_assert(!std::is_const_v<std::remove_reference_t<decltype(c2)>>);
+  static_assert(std::is_const_v<std::remove_reference_t<decltype(c2)>>);
   static_assert(std::is_const_v<std::remove_reference_t<decltype(c3)>>);
   static_assert(std::is_const_v<std::remove_reference_t<decltype(c4)>>);
 }
@@ -105,7 +105,7 @@ TEST(FieldRefConstPropagation, Required) {
   const auto cmsg_cref = std::as_const(foo).msg();
 
   auto& c1 = msg_ref->at(0);
-  auto& c2 = cmsg_ref->at(0); // Only for this case we should have lint warning
+  auto& c2 = cmsg_ref->at(0);
   auto& c3 = msg_cref->at(0);
   auto& c4 = cmsg_cref->at(0);
 
@@ -115,7 +115,7 @@ TEST(FieldRefConstPropagation, Required) {
   EXPECT_EQ(c4, '1');
 
   static_assert(!std::is_const_v<std::remove_reference_t<decltype(c1)>>);
-  static_assert(!std::is_const_v<std::remove_reference_t<decltype(c2)>>);
+  static_assert(std::is_const_v<std::remove_reference_t<decltype(c2)>>);
   static_assert(std::is_const_v<std::remove_reference_t<decltype(c3)>>);
   static_assert(std::is_const_v<std::remove_reference_t<decltype(c4)>>);
 }
@@ -137,7 +137,7 @@ TEST(FieldRefConstPropagation, Boxed) {
   const auto cmsg_cref = std::as_const(foo).msg();
 
   auto& c1 = msg_ref->at(0);
-  auto& c2 = cmsg_ref->at(0); // Only for this case we should have lint warning
+  auto& c2 = cmsg_ref->at(0);
   auto& c3 = msg_cref->at(0);
   auto& c4 = cmsg_cref->at(0);
 
@@ -147,7 +147,7 @@ TEST(FieldRefConstPropagation, Boxed) {
   EXPECT_EQ(c4, '1');
 
   static_assert(!std::is_const_v<std::remove_reference_t<decltype(c1)>>);
-  static_assert(!std::is_const_v<std::remove_reference_t<decltype(c2)>>);
+  static_assert(std::is_const_v<std::remove_reference_t<decltype(c2)>>);
   static_assert(std::is_const_v<std::remove_reference_t<decltype(c3)>>);
   static_assert(std::is_const_v<std::remove_reference_t<decltype(c4)>>);
 }
@@ -169,7 +169,7 @@ TEST(FieldRefConstPropagation, TerseWrite) {
   const auto cmsg_cref = std::as_const(foo).msg();
 
   auto& c1 = msg_ref->at(0);
-  auto& c2 = cmsg_ref->at(0); // Only for this case we should have lint warning
+  auto& c2 = cmsg_ref->at(0);
   auto& c3 = msg_cref->at(0);
   auto& c4 = cmsg_cref->at(0);
 
@@ -179,7 +179,7 @@ TEST(FieldRefConstPropagation, TerseWrite) {
   EXPECT_EQ(c4, '1');
 
   static_assert(!std::is_const_v<std::remove_reference_t<decltype(c1)>>);
-  static_assert(!std::is_const_v<std::remove_reference_t<decltype(c2)>>);
+  static_assert(std::is_const_v<std::remove_reference_t<decltype(c2)>>);
   static_assert(std::is_const_v<std::remove_reference_t<decltype(c3)>>);
   static_assert(std::is_const_v<std::remove_reference_t<decltype(c4)>>);
 }
@@ -201,7 +201,7 @@ TEST(FieldRefConstPropagation, Union) {
   const auto cmsg_cref = std::as_const(foo).msg();
 
   auto& c1 = msg_ref->at(0);
-  auto& c2 = cmsg_ref->at(0); // Only for this case we should have lint warning
+  auto& c2 = cmsg_ref->at(0);
   auto& c3 = msg_cref->at(0);
   auto& c4 = cmsg_cref->at(0);
 
@@ -211,7 +211,7 @@ TEST(FieldRefConstPropagation, Union) {
   EXPECT_EQ(c4, '1');
 
   static_assert(!std::is_const_v<std::remove_reference_t<decltype(c1)>>);
-  static_assert(!std::is_const_v<std::remove_reference_t<decltype(c2)>>);
+  static_assert(std::is_const_v<std::remove_reference_t<decltype(c2)>>);
   static_assert(std::is_const_v<std::remove_reference_t<decltype(c3)>>);
   static_assert(std::is_const_v<std::remove_reference_t<decltype(c4)>>);
 }

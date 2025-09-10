@@ -665,7 +665,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   patch_type& patchImpl();
 
   template <typename Id, typename U>
-  decltype(auto) getRawPatch(U&& patch) const {
+  static decltype(auto) getRawPatch(U&& patch) {
     // Field Ids must always be used to access patch(Prior).
     return *patch->get(get_field_id<T, Id>{});
   }

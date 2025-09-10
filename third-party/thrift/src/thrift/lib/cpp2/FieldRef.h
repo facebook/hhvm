@@ -168,21 +168,8 @@ class field_ref {
     return static_cast<reference_type>(value_);
   }
 
-  template <typename U = value_type>
-  [[deprecated(
-      "Please use `foo.value().bar()` instead of `foo->bar()` "
-      "since const is not propagated correctly in `operator->` API")]] FOLLY_ERASE
-      apache::thrift::detail::EnableIfNonConst<U>*
-      operator->() const noexcept {
-    return &value_;
-  }
-
   /// Returns a pointer to the value.
-  template <typename U = value_type>
-  FOLLY_ERASE apache::thrift::detail::EnableIfConst<U>* operator->()
-      const noexcept {
-    return &value_;
-  }
+  FOLLY_ERASE const value_type* operator->() const noexcept { return &value_; }
 
   /// Returns a pointer to the value.
   FOLLY_ERASE value_type* operator->() noexcept { return &value_; }
@@ -479,18 +466,7 @@ class optional_field_ref {
 
   FOLLY_ERASE reference_type operator*() const { return value(); }
 
-  template <typename U = value_type>
-  [[deprecated(
-      "Please use `foo.value().bar()` instead of `foo->bar()` "
-      "since const is not propagated correctly in `operator->` API")]] FOLLY_ERASE
-      apache::thrift::detail::EnableIfNonConst<U>*
-      operator->() const {
-    throw_if_unset();
-    return &value_;
-  }
-
-  template <typename U = value_type>
-  FOLLY_ERASE apache::thrift::detail::EnableIfConst<U>* operator->() const {
+  FOLLY_ERASE const value_type* operator->() const {
     throw_if_unset();
     return &value_;
   }
@@ -803,18 +779,7 @@ class optional_boxed_field_ref {
 
   FOLLY_ERASE reference_type operator*() const { return value(); }
 
-  template <typename U = value_type>
-  [[deprecated(
-      "Please use `foo.value().bar()` instead of `foo->bar()` "
-      "since const is not propagated correctly in `operator->` API")]] FOLLY_ERASE
-      apache::thrift::detail::EnableIfNonConst<U>*
-      operator->() const {
-    throw_if_unset();
-    return &*value_;
-  }
-
-  template <typename U = value_type>
-  FOLLY_ERASE apache::thrift::detail::EnableIfConst<U>* operator->() const {
+  FOLLY_ERASE const value_type* operator->() const {
     throw_if_unset();
     return &*value_;
   }
@@ -1098,19 +1063,8 @@ class intern_boxed_field_ref {
   FOLLY_ERASE reference_type operator*() { return value(); }
   FOLLY_ERASE reference_type operator*() const { return value(); }
 
-  template <typename U = value_type>
-  [[deprecated(
-      "Please use `foo.value().bar()` instead of `foo->bar()` "
-      "since const is not propagated correctly in `operator->` API")]] FOLLY_ERASE
-      apache::thrift::detail::EnableIfNonConst<U>*
-      operator->() {
-    return &value_.mut();
-  }
-
-  template <typename U = value_type>
-  FOLLY_ERASE apache::thrift::detail::EnableIfConst<U>* operator->() const {
-    return &value_.value();
-  }
+  FOLLY_ERASE const value_type* operator->() const { return &value(); }
+  FOLLY_ERASE value_type* operator->() { return &value(); }
 
   template <typename... Args>
   FOLLY_ERASE value_type& emplace(Args&&... args) {
@@ -1314,19 +1268,8 @@ class terse_intern_boxed_field_ref {
   FOLLY_ERASE reference_type operator*() { return value(); }
   FOLLY_ERASE reference_type operator*() const { return value(); }
 
-  template <typename U = value_type>
-  [[deprecated(
-      "Please use `foo.value().bar()` instead of `foo->bar()` "
-      "since const is not propagated correctly in `operator->` API")]] FOLLY_ERASE
-      apache::thrift::detail::EnableIfNonConst<U>*
-      operator->() {
-    return &value_.mut();
-  }
-
-  template <typename U = value_type>
-  FOLLY_ERASE apache::thrift::detail::EnableIfConst<U>* operator->() const {
-    return &value_.value();
-  }
+  FOLLY_ERASE const value_type* operator->() const { return &value(); }
+  FOLLY_ERASE value_type* operator->() { return &value(); }
 
   template <typename... Args>
   FOLLY_ERASE value_type& emplace(Args&&... args) {
@@ -1686,21 +1629,7 @@ class required_field_ref {
     return static_cast<reference_type>(value_);
   }
 
-  template <typename U = value_type>
-  [[deprecated(
-      "Please use `foo.value().bar()` instead of `foo->bar()` "
-      "since const is not propagated correctly in `operator->` API")]] FOLLY_ERASE
-      apache::thrift::detail::EnableIfNonConst<U>*
-      operator->() const noexcept {
-    return &value_;
-  }
-
-  template <typename U = value_type>
-  FOLLY_ERASE apache::thrift::detail::EnableIfConst<U>* operator->()
-      const noexcept {
-    return &value_;
-  }
-
+  FOLLY_ERASE const value_type* operator->() const noexcept { return &value_; }
   FOLLY_ERASE value_type* operator->() noexcept { return &value_; }
 
   FOLLY_ERASE reference_type ensure() noexcept {
@@ -1939,18 +1868,7 @@ class union_field_ref {
 
   FOLLY_ERASE reference_type operator*() const { return value(); }
 
-  template <typename U = value_type>
-  [[deprecated(
-      "Please use `foo.value().bar()` instead of `foo->bar()` "
-      "since const is not propagated correctly in `operator->` API")]] FOLLY_ERASE
-      apache::thrift::detail::EnableIfNonConst<U>*
-      operator->() const {
-    throw_if_unset();
-    return &get_value();
-  }
-
-  template <typename U = value_type>
-  FOLLY_ERASE apache::thrift::detail::EnableIfConst<U>* operator->() const {
+  FOLLY_ERASE const value_type* operator->() const {
     throw_if_unset();
     return &get_value();
   }
@@ -2199,21 +2117,7 @@ class terse_field_ref {
     return static_cast<reference_type>(value_);
   }
 
-  template <typename U = value_type>
-  [[deprecated(
-      "Please use `foo.value().bar()` instead of `foo->bar()` "
-      "since const is not propagated correctly in `operator->` API")]] FOLLY_ERASE
-      apache::thrift::detail::EnableIfNonConst<U>*
-      operator->() const noexcept {
-    return &value_;
-  }
-
-  template <typename U = value_type>
-  FOLLY_ERASE apache::thrift::detail::EnableIfConst<U>* operator->()
-      const noexcept {
-    return &value_;
-  }
-
+  FOLLY_ERASE const value_type* operator->() const noexcept { return &value_; }
   FOLLY_ERASE value_type* operator->() noexcept { return &value_; }
 
   template <typename Index>

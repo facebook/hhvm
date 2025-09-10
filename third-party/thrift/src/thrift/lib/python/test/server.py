@@ -19,6 +19,8 @@
 from __future__ import annotations
 
 import asyncio
+import gc
+import threading
 import unittest
 from typing import Optional, Sequence
 
@@ -168,3 +170,21 @@ class ServicesTests(unittest.TestCase):
         loop.run_until_complete(coro)
         self.assertTrue(handler.on_start_serving)
         self.assertTrue(handler.on_stop_requested)
+
+    def test_threaded_destruction(self) -> None:
+        handler = Handler()
+
+        async def inner(handler: Handler) -> None:
+            loop = asyncio.get_event_loop()
+            await self.get_address(loop, handler)
+
+        server_runner = threading.Thread(
+            target=lambda handler: asyncio.run(inner(handler)),
+            args=(handler,),
+        )
+        server_runner.start()
+        server_runner.join()
+        self.assertTrue(handler.on_start_serving)
+        self.assertTrue(handler.on_stop_requested)
+        del server_runner
+        gc.collect()

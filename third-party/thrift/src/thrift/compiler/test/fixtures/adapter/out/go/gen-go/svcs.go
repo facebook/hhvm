@@ -134,7 +134,7 @@ func (p *procFuncServiceFunc) Write(seqId int32, result thrift.WritableStruct, e
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -290,7 +290,7 @@ func (p *procFuncAdapterServiceCount) Write(seqId int32, result thrift.WritableS
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -341,7 +341,7 @@ func (p *procFuncAdapterServiceAdaptedTypes) Write(seqId int32, result thrift.Wr
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 

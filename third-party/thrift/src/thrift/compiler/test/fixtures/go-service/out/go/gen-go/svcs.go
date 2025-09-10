@@ -524,7 +524,7 @@ func (p *procFuncGetEntityGetEntity) Write(seqId int32, result thrift.WritableSt
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -576,7 +576,7 @@ func (p *procFuncGetEntityGetBool) Write(seqId int32, result thrift.WritableStru
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -627,7 +627,7 @@ func (p *procFuncGetEntityGetByte) Write(seqId int32, result thrift.WritableStru
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -678,7 +678,7 @@ func (p *procFuncGetEntityGetI16) Write(seqId int32, result thrift.WritableStruc
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -729,7 +729,7 @@ func (p *procFuncGetEntityGetI32) Write(seqId int32, result thrift.WritableStruc
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -780,7 +780,7 @@ func (p *procFuncGetEntityGetI64) Write(seqId int32, result thrift.WritableStruc
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -831,7 +831,7 @@ func (p *procFuncGetEntityGetDouble) Write(seqId int32, result thrift.WritableSt
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -882,7 +882,7 @@ func (p *procFuncGetEntityGetString) Write(seqId int32, result thrift.WritableSt
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -933,7 +933,7 @@ func (p *procFuncGetEntityGetBinary) Write(seqId int32, result thrift.WritableSt
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -984,7 +984,7 @@ func (p *procFuncGetEntityGetMap) Write(seqId int32, result thrift.WritableStruc
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -1035,7 +1035,7 @@ func (p *procFuncGetEntityGetSet) Write(seqId int32, result thrift.WritableStruc
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -1086,7 +1086,7 @@ func (p *procFuncGetEntityGetList) Write(seqId int32, result thrift.WritableStru
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -1137,7 +1137,7 @@ func (p *procFuncGetEntityGetLegacyStuff) Write(seqId int32, result thrift.Writa
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -1189,7 +1189,7 @@ func (p *procFuncGetEntityGetCtxCollision) Write(seqId int32, result thrift.Writ
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -1241,7 +1241,7 @@ func (p *procFuncGetEntityGetCtx1Collision) Write(seqId int32, result thrift.Wri
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -1293,7 +1293,7 @@ func (p *procFuncGetEntityGetContextCollision) Write(seqId int32, result thrift.
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -1345,7 +1345,7 @@ func (p *procFuncGetEntityGetOutCollision) Write(seqId int32, result thrift.Writ
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -1397,7 +1397,7 @@ func (p *procFuncGetEntityGetOut1Collision) Write(seqId int32, result thrift.Wri
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -1449,7 +1449,7 @@ func (p *procFuncGetEntityGetInCollision) Write(seqId int32, result thrift.Writa
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -1501,7 +1501,7 @@ func (p *procFuncGetEntityGetIn1Collision) Write(seqId int32, result thrift.Writ
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -1553,7 +1553,7 @@ func (p *procFuncGetEntityGetErrCollision) Write(seqId int32, result thrift.Writ
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -1605,7 +1605,7 @@ func (p *procFuncGetEntityGetErr1Collision) Write(seqId int32, result thrift.Wri
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -1657,7 +1657,7 @@ func (p *procFuncGetEntityMyMethodWithConflictingParamAccessors) Write(seqId int
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 

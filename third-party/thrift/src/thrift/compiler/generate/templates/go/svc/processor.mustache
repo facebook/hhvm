@@ -121,7 +121,7 @@ func (p *{{> svc/proc_func_name}}) Write(seqId int32, result thrift.WritableStru
             {{field:go_name}}: v,
         }
     {{/function:exceptions}}
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 

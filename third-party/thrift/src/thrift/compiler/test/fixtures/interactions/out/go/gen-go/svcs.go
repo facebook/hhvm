@@ -415,7 +415,7 @@ func (p *procFuncMyServiceFoo) Write(seqId int32, result thrift.WritableStruct, 
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -551,7 +551,7 @@ func (p *procFuncFactoriesFoo) Write(seqId int32, result thrift.WritableStruct, 
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -687,7 +687,7 @@ func (p *procFuncPerformFoo) Write(seqId int32, result thrift.WritableStruct, en
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -823,7 +823,7 @@ func (p *procFuncInteractWithSharedDoSomeSimilarThings) Write(seqId int32, resul
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 

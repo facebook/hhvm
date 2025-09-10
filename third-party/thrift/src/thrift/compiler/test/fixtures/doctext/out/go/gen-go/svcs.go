@@ -208,7 +208,7 @@ func (p *procFuncCF) Write(seqId int32, result thrift.WritableStruct, encoder th
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -262,7 +262,7 @@ func (p *procFuncCThing) Write(seqId int32, result thrift.WritableStruct, encode
         result = &respCThing{
             Bang: v,
         }
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 

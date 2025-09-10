@@ -156,7 +156,7 @@ func (p *procFuncMyServiceQuery) Write(seqId int32, result thrift.WritableStruct
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -207,7 +207,7 @@ func (p *procFuncMyServiceHasArgDocs) Write(seqId int32, result thrift.WritableS
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 

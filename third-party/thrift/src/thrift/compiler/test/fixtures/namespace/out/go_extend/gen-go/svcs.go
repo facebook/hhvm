@@ -116,7 +116,7 @@ func (p *procFuncExtendTestServiceCheck) Write(seqId int32, result thrift.Writab
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 

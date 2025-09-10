@@ -182,7 +182,7 @@ func (p *procFuncRaiserDoBland) Write(seqId int32, result thrift.WritableStruct,
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -244,7 +244,7 @@ func (p *procFuncRaiserDoRaise) Write(seqId int32, result thrift.WritableStruct,
         result = &respRaiserDoRaise{
             S: v,
         }
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -306,7 +306,7 @@ func (p *procFuncRaiserGet200) Write(seqId int32, result thrift.WritableStruct, 
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -369,7 +369,7 @@ func (p *procFuncRaiserGet500) Write(seqId int32, result thrift.WritableStruct, 
         result = &respRaiserGet500{
             S: v,
         }
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 

@@ -275,7 +275,7 @@ func (p *procFuncMyServicePing) Write(seqId int32, result thrift.WritableStruct,
         result = &respMyServicePing{
             MyExcept: v,
         }
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -331,7 +331,7 @@ func (p *procFuncMyServiceGetRandomData) Write(seqId int32, result thrift.Writab
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -382,7 +382,7 @@ func (p *procFuncMyServiceHasDataById) Write(seqId int32, result thrift.Writable
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -434,7 +434,7 @@ func (p *procFuncMyServiceGoGetDataById) Write(seqId int32, result thrift.Writab
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -486,7 +486,7 @@ func (p *procFuncMyServicePutDataById) Write(seqId int32, result thrift.Writable
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -537,7 +537,7 @@ func (p *procFuncMyServiceLobDataById) Write(seqId int32, result thrift.Writable
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -587,7 +587,7 @@ func (p *procFuncMyServiceGoDoNothing) Write(seqId int32, result thrift.Writable
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -740,7 +740,7 @@ func (p *procFuncMyServicePrioParentPing) Write(seqId int32, result thrift.Writa
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -790,7 +790,7 @@ func (p *procFuncMyServicePrioParentPong) Write(seqId int32, result thrift.Writa
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -908,7 +908,7 @@ func (p *procFuncMyServicePrioChildPang) Write(seqId int32, result thrift.Writab
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -1044,7 +1044,7 @@ func (p *procFuncBadServiceBar) Write(seqId int32, result thrift.WritableStruct,
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -1215,7 +1215,7 @@ func (p *procFuncFooBarBazServiceFooStructured) Write(seqId int32, result thrift
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -1265,7 +1265,7 @@ func (p *procFuncFooBarBazServiceBarNonStructured) Write(seqId int32, result thr
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -1315,7 +1315,7 @@ func (p *procFuncFooBarBazServiceBaz) Write(seqId int32, result thrift.WritableS
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 

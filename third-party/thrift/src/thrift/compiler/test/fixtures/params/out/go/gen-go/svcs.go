@@ -204,7 +204,7 @@ func (p *procFuncNestedContainersMapList) Write(seqId int32, result thrift.Writa
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -255,7 +255,7 @@ func (p *procFuncNestedContainersMapSet) Write(seqId int32, result thrift.Writab
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -306,7 +306,7 @@ func (p *procFuncNestedContainersListMap) Write(seqId int32, result thrift.Writa
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -357,7 +357,7 @@ func (p *procFuncNestedContainersListSet) Write(seqId int32, result thrift.Writa
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -408,7 +408,7 @@ func (p *procFuncNestedContainersTurtles) Write(seqId int32, result thrift.Writa
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 

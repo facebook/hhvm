@@ -172,7 +172,7 @@ func (p *procFuncFinderByPlate) Write(seqId int32, result thrift.WritableStruct,
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -224,7 +224,7 @@ func (p *procFuncFinderAliasByPlate) Write(seqId int32, result thrift.WritableSt
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
@@ -276,7 +276,7 @@ func (p *procFuncFinderPreviousPlate) Write(seqId int32, result thrift.WritableS
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
-    case thrift.ApplicationExceptionIf:
+    case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 

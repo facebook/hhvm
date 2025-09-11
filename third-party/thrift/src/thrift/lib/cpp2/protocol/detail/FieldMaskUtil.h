@@ -67,10 +67,10 @@ bool validate_mask(MaskRef ref) {
 }
 
 template <typename Tag>
-bool is_compatible_with(const Mask&);
+bool is_compatible_with(const Mask& mask);
 
 template <typename Tag>
-bool is_compatible_with_impl(Tag, const Mask&) {
+bool is_compatible_with_impl(Tag /*unused*/, const Mask& /*unused*/) {
   return false;
 }
 template <typename T>
@@ -107,30 +107,31 @@ inline bool is_compatible_with_any(const Mask& mask) {
 }
 
 template <typename T>
-bool is_compatible_with_impl(type::struct_t<T>, const Mask& mask) {
+bool is_compatible_with_impl(type::struct_t<T> /*unused*/, const Mask& mask) {
   return is_compatible_with_structured<T>(mask);
 }
 
 inline bool is_compatible_with_impl(
-    type::struct_t<type::AnyStruct>, const Mask& mask) {
+    type::struct_t<type::AnyStruct> /*unused*/, const Mask& mask) {
   return is_compatible_with_any(mask);
 }
 
 inline bool is_compatible_with_impl(
     type::adapted<
         apache::thrift::InlineAdapter<::apache::thrift::type::AnyData>,
-        type::struct_t<type::AnyStruct>>,
+        type::struct_t<type::AnyStruct>> /*unused*/,
     const Mask& mask) {
   return is_compatible_with_any(mask);
 }
 
 template <typename T>
-bool is_compatible_with_impl(type::union_t<T>, const Mask& mask) {
+bool is_compatible_with_impl(type::union_t<T> /*unused*/, const Mask& mask) {
   return is_compatible_with_structured<T>(mask);
 }
 
 template <typename Key, typename Value>
-bool is_compatible_with_impl(type::map<Key, Value>, const Mask& mask) {
+bool is_compatible_with_impl(
+    type::map<Key, Value> /*unused*/, const Mask& mask) {
   // Map mask is compatible only if all nested masks are compatible with
   // `Value`.
   if (const auto* m = getIntegerMapMask(mask)) {
@@ -147,7 +148,8 @@ bool is_compatible_with_impl(type::map<Key, Value>, const Mask& mask) {
 }
 
 template <typename Tag, typename T>
-bool is_compatible_with_impl(type::cpp_type<T, Tag>, const Mask& mask) {
+bool is_compatible_with_impl(
+    type::cpp_type<T, Tag> /*unused*/, const Mask& mask) {
   return is_compatible_with<Tag>(mask);
 }
 

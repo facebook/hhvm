@@ -1554,6 +1554,8 @@ class rust_mstch_struct : public mstch_struct {
             {"struct:copy?", &rust_mstch_struct::rust_is_copy},
             {"struct:exhaustive?", &rust_mstch_struct::rust_is_exhaustive},
             {"struct:fields_by_name", &rust_mstch_struct::rust_fields_by_name},
+            {"struct:fields_reversed",
+             &rust_mstch_struct::rust_fields_reversed},
             {"struct:derive", &rust_mstch_struct::rust_derive},
             {"struct:has_exception_message?",
              &rust_mstch_struct::has_exception_message},
@@ -1605,6 +1607,11 @@ class rust_mstch_struct : public mstch_struct {
     std::sort(fields.begin(), fields.end(), [](auto a, auto b) {
       return a->name() < b->name();
     });
+    return make_mstch_fields(fields);
+  }
+  mstch::node rust_fields_reversed() {
+    auto fields = struct_->fields().copy();
+    std::reverse(fields.begin(), fields.end());
     return make_mstch_fields(fields);
   }
   mstch::node rust_derive() {

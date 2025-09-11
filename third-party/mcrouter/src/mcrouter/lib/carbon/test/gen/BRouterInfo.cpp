@@ -166,8 +166,6 @@ namespace carbon {
 namespace test {
 namespace B {
 
-constexpr const char* BRouterInfo::name;
-
 /* static */ BRouterInfo::RouteHandleFactoryMap
 BRouterInfo::buildRouteMap() {
   RouteHandleFactoryMap map{

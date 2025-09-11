@@ -167,8 +167,6 @@ extern template class ExtraRouteHandleProviderIf<hellogoodbye::HelloGoodbyeRoute
 
 namespace hellogoodbye {
 
-constexpr const char* HelloGoodbyeRouterInfo::name;
-
 /* static */ HelloGoodbyeRouterInfo::RouteHandleFactoryMap
 HelloGoodbyeRouterInfo::buildRouteMap() {
   RouteHandleFactoryMap map{

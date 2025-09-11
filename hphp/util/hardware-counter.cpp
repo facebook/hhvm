@@ -188,6 +188,11 @@ struct HardwareCounterImpl {
      */
     if (inited) return;
     inited = true;
+    prev_value = 0;
+    prev_values[0] = 0;
+    prev_values[1] = 0;
+    prev_values[2] = 0;
+
     m_fd = syscall(__NR_perf_event_open, &pe, 0, -1, -1, 0);
     if (m_fd < 0) {
       Logger::FWarning("HardwareCounter: perf_event_open failed with: {}",
@@ -228,27 +233,39 @@ struct HardwareCounterImpl {
 
   int64_t read() {
     uint64_t values[3];
+    int64_t result = 0;
+
     if (auto const width = readRaw(values)) {
-      values[0] -= reset_values[0];
-      values[1] -= reset_values[1];
-      values[2] -= reset_values[2];
+      uint64_t delta_value = values[0] - prev_values[0];
+      uint64_t delta_time_enabled = values[1] - prev_values[1];
+      uint64_t delta_time_running = values[2] - prev_values[2];
+
       if (width < 64) {
         auto const mask = (1uLL << width) - 1;
         values[0] &= mask;
-        if (values[0] > (mask >> 1)) return extra;
+        if (values[0] > (mask >> 1)) result = 0;
       } else if (values[0] > std::numeric_limits<int64_t>::max()) {
-        return extra;
+        result = 0;
+      } else if (delta_time_running == 0 || delta_time_enabled == 0){
+        result = prev_value;
+      } else if (delta_time_enabled == delta_time_running) {
+        result = prev_value + delta_value;
+      } else {
+        int64_t value = (double)delta_value * delta_time_enabled / delta_time_running;
+        result = prev_value + value;
       }
-      if (values[1] == values[2]) {
-        return values[0] + extra;
+
+      if (width >= 64) {
+        // If we have all 3 values, then remember them for the next time
+        // This will ensure we have monotonically increasing values
+        prev_values[0] = values[0];
+        prev_values[1] = values[1];
+        prev_values[2] = values[2];
+        prev_value = result;
       }
-      if (!values[2]) {
-        return extra;
-      }
-      int64_t value = (double)values[0] * values[1] / values[2];
-      return value + extra;
     }
-    return 0;
+
+    return result + extra;
   }
 
   void incCount(int64_t amount) {
@@ -349,12 +366,18 @@ struct HardwareCounterImpl {
         m_err = -1;
         return;
       }
+
+      uint64_t reset_values[3];
       if (!readRaw(reset_values, true)) {
         Logger::FWarning("perf_event failed to reset with: {}",
                          folly::errnoStr(errno));
         m_err = -1;
         return;
       }
+      prev_value = 0;
+      prev_values[0] = reset_values[0];
+      prev_values[1] = reset_values[1];
+      prev_values[2] = reset_values[2];
     }
   }
 
@@ -386,7 +409,9 @@ private:
   ServiceData::ExportedTimeSeries* m_timeSeries;
   ServiceData::ExportedTimeSeries* m_timeSeriesNonPsp;
   struct perf_event_attr pe{};
-  uint64_t reset_values[3];
+  uint64_t prev_values[3];
+  uint64_t prev_value;
+
   uint64_t extra{0};
   perf_event_mmap_page* m_meta{};
 

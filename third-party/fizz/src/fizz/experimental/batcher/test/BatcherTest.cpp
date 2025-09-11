@@ -104,13 +104,13 @@ TEST(BatchSignatureTest, TestSynchronizedBatcherMultiThread) {
   results.resize(numMsgThreshold);
   for (size_t i = 0; i < numMsgThreshold; i++) {
     auto& result = results[i];
-    threads.emplace_back(std::thread([=, &result]() {
+    threads.emplace_back([=, &result]() {
       auto futureTree = batcher->addMessageAndSign(
           folly::range(folly::StringPiece("Message")));
       auto signedTree = std::move(futureTree.future_).get();
       auto rootValue = signedTree.tree_->getRootValue();
       result = rootValue->moveToFbString();
-    }));
+    });
   }
   for (auto& t : threads) {
     t.join();
@@ -142,7 +142,7 @@ TEST(BatchSignatureTest, TestSynchronizedBatcherWithSelfCertP256) {
         std::make_shared<BatchSignatureAsyncSelfCert<Sha256>>(batcher);
     auto& result = results[i];
     // create thread to generate signature
-    threads.emplace_back(std::thread([=, &result]() {
+    threads.emplace_back([=, &result]() {
       auto signature =
           std::dynamic_pointer_cast<AsyncSelfCert>(batchCert)->signFuture(
               SignatureScheme::ecdsa_secp256r1_sha256_batch,
@@ -150,7 +150,7 @@ TEST(BatchSignatureTest, TestSynchronizedBatcherWithSelfCertP256) {
               folly::IOBuf::copyBuffer(
                   folly::StringPiece("Message" + std::to_string(i))));
       result = (*std::move(signature).get())->moveToFbString();
-    }));
+    });
   }
   for (auto& t : threads) {
     t.join();
@@ -184,7 +184,7 @@ TEST(BatchSignatureTest, TestThreadLocalBatcher) {
 
   std::vector<std::thread> threads;
   for (size_t i = 0; i < 3; i++) {
-    threads.emplace_back(std::thread([=]() {
+    threads.emplace_back([=]() {
       auto batchResult1 = batcher->addMessageAndSign(
           folly::range(folly::StringPiece("Message1")));
       EXPECT_EQ(batchResult1.index_, 0);
@@ -202,7 +202,7 @@ TEST(BatchSignatureTest, TestThreadLocalBatcher) {
       EXPECT_EQ(
           folly::hexlify(rootValue1->to<std::string>()),
           "66d793b168a6f5c84a0e3edd033df7b4676a4ef32917819562cada78b7a4fcff");
-    }));
+    });
   }
   for (auto& t : threads) {
     t.join();
@@ -232,7 +232,7 @@ TEST(BatchSignatureTest, TestThreadLocalBatcherWithSelfCertP256) {
         std::make_shared<BatchSignatureAsyncSelfCert<Sha256>>(batcher);
     auto batchCert3 =
         std::make_shared<BatchSignatureAsyncSelfCert<Sha256>>(batcher);
-    threads.emplace_back(std::thread([=, &result1, &result2, &result3]() {
+    threads.emplace_back([=, &result1, &result2, &result3]() {
       auto signature1 = std::dynamic_pointer_cast<AsyncSelfCert>(batchCert1)
                             ->signFuture(
                                 SignatureScheme::ecdsa_secp256r1_sha256_batch,
@@ -254,7 +254,7 @@ TEST(BatchSignatureTest, TestThreadLocalBatcherWithSelfCertP256) {
       result1 = (*std::move(signature1).get())->moveToFbString();
       result2 = (*std::move(signature2).get())->moveToFbString();
       result3 = (*std::move(signature3).get())->moveToFbString();
-    }));
+    });
   }
   for (auto& t : threads) {
     t.join();

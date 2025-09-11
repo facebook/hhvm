@@ -111,18 +111,19 @@ SinkConsumer<int32_t, bool> TestSinkService::unSubscribedSink() {
 
 folly::SemiFuture<SinkConsumer<int32_t, bool>>
 TestSinkService::semifuture_unSubscribedSinkSlowReturn() {
-  return folly::futures::sleep(std::chrono::seconds(1)).deferValue([=](auto&&) {
-    activeSinks_++;
-    return SinkConsumer<int32_t, bool>{
-        [g = folly::makeGuard([this]() { activeSinks_--; })](
-            folly::coro::AsyncGenerator<int32_t&&> gen) mutable
-        -> folly::coro::Task<bool> {
-          co_await gen.next();
-          co_return true;
-        },
-        10 /* buffer size */
-    };
-  });
+  return folly::futures::sleep(std::chrono::seconds(1))
+      .deferValue([=, this](auto&&) {
+        activeSinks_++;
+        return SinkConsumer<int32_t, bool>{
+            [g = folly::makeGuard([this]() { activeSinks_--; })](
+                folly::coro::AsyncGenerator<int32_t&&> gen) mutable
+            -> folly::coro::Task<bool> {
+              co_await gen.next();
+              co_return true;
+            },
+            10 /* buffer size */
+        };
+      });
 }
 
 bool TestSinkService::isSinkUnSubscribed() {

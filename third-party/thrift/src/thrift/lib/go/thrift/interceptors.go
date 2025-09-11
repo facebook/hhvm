@@ -48,7 +48,6 @@ func ChainInterceptors(interceptors ...Interceptor) Interceptor {
 		args types.ReadableStruct,
 	) (types.WritableStruct, types.ApplicationExceptionIf) {
 		handler := &chainHandler{
-			last:         n - 1,
 			name:         name,
 			origHandler:  pf,
 			interceptors: interceptors,
@@ -61,7 +60,6 @@ func ChainInterceptors(interceptors ...Interceptor) Interceptor {
 // interface and executes the interceptors in the list in order.
 type chainHandler struct {
 	curI         int
-	last         int
 	name         string
 	origHandler  types.ProcessorFunction
 	interceptors []Interceptor
@@ -78,7 +76,7 @@ func (ch *chainHandler) Write(_ int32, _ types.WritableStruct, _ types.Encoder) 
 }
 
 func (ch *chainHandler) RunContext(ctx context.Context, args types.ReadableStruct) (types.WritableStruct, types.ApplicationExceptionIf) {
-	if ch.curI == ch.last {
+	if ch.curI == len(ch.interceptors)-1 {
 		return ch.origHandler.RunContext(ctx, args)
 	}
 	ch.curI++

@@ -1,7 +1,5 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('require_package')>>
-
 class C {
   <<__RequirePackage("foo")>>
   function f(): void {}

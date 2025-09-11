@@ -50,9 +50,9 @@ void EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::gen(Thr
     enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 {{#enum:structured_annotations}}
-{{#structured_annotation:const_struct?}}
+{{#constant:type.self.structured?}}
   enum_metadata.structured_annotations()->push_back({{> metadata/const_struct}});
-{{/structured_annotation:const_struct?}}
+{{/constant:type.self.structured?}}
 {{/enum:structured_annotations}}
 }
 {{/program:enums}}
@@ -85,9 +85,9 @@ StructMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
   }
 {{/struct:fields?}}
 {{#struct:structured_annotations}}
-{{#structured_annotation:const_struct?}}
+{{#constant:type.self.structured?}}
   {{struct:metadata_name}}.structured_annotations()->push_back({{> metadata/const_struct}});
-{{/structured_annotation:const_struct?}}
+{{/constant:type.self.structured?}}
 {{/struct:structured_annotations}}
   return res.first->second;
 }
@@ -119,9 +119,9 @@ void ExceptionMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
   }
 {{/struct:fields?}}
 {{#struct:structured_annotations}}
-{{#structured_annotation:const_struct?}}
+{{#constant:type.self.structured?}}
   {{struct:metadata_name}}.structured_annotations()->push_back({{> metadata/const_struct}});
-{{/structured_annotation:const_struct?}}
+{{/constant:type.self.structured?}}
 {{/struct:structured_annotations}}
 }
 {{/struct:exception?}}
@@ -150,9 +150,9 @@ void ServiceMetadata<::{{> service_common/service_class_name}}>::gen_{{function:
 {{/function:exceptions}}
   func.is_oneway() = {{function:oneway?}};
 {{#function:structured_annotations}}
-{{#structured_annotation:const_struct?}}
+{{#constant:type.self.structured?}}
   func.structured_annotations()->push_back({{> metadata/const_struct}});
-{{/structured_annotation:const_struct?}}
+{{/constant:type.self.structured?}}
 {{/function:structured_annotations}}
   service.functions()->push_back(std::move(func));
 }
@@ -194,9 +194,9 @@ const ThriftServiceContextRef* ServiceMetadata<::{{> service_common/service_clas
 {{/service:extends}}
 {{/service:extends?}}
 {{#service:structured_annotations}}
-{{#structured_annotation:const_struct?}}
+{{#constant:type.self.structured?}}
   {{service:metadata_name}}.structured_annotations()->push_back({{> metadata/const_struct}});
-{{/structured_annotation:const_struct?}}
+{{/constant:type.self.structured?}}
 {{/service:structured_annotations}}
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("{{program:name}}.{{service:name}}", std::move({{service:metadata_name}}));

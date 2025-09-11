@@ -73,7 +73,6 @@ mstch_factories::mstch_factories() {
   add<mstch_const>();
   add<mstch_const_value>();
   add<mstch_const_map_element>();
-  add<mstch_structured_annotation>();
 }
 
 mstch::node mstch_type::get_structured() {

@@ -45,9 +45,9 @@ def _fbthrift_gen_metadata_{{#struct:exception?}}exception{{/struct:exception?}}
         {{#struct:fields_ordered_by_id}}
         _fbthrift_metadata.ThriftField(id={{field:id}}, type={{#field:type}}{{> metadata/thrift_type }}{{/field:type}}, name="{{field:name}}", is_optional={{#field:optional?}}True{{/field:optional?}}{{^field:optional?}}False{{/field:optional?}}, structured_annotations=[
             {{#field:structured_annotations}}
-            {{#structured_annotation:const_struct?}}{{#structured_annotation:const}}{{#constant:value}}
+            {{#constant:type.self.structured?}}{{#constant:value}}
             {{> metadata/const_struct }},
-            {{/constant:value}}{{/structured_annotation:const}}{{/structured_annotation:const_struct?}}
+            {{/constant:value}}{{/constant:type.self.structured?}}
             {{/field:structured_annotations}}
         ]),
         {{/struct:fields_ordered_by_id}}
@@ -60,9 +60,9 @@ def _fbthrift_gen_metadata_{{#struct:exception?}}exception{{/struct:exception?}}
     {{/struct:exception?}}
         structured_annotations=[
             {{#struct:structured_annotations}}
-            {{#structured_annotation:const_struct?}}{{#structured_annotation:const}}{{#constant:value}}
+            {{#constant:type.self.structured?}}{{#constant:value}}
             {{> metadata/const_struct }},
-            {{/constant:value}}{{/structured_annotation:const}}{{/structured_annotation:const_struct?}}
+            {{/constant:value}}{{/constant:type.self.structured?}}
             {{/struct:structured_annotations}}
         ])
     new_struct = metadata_struct({{#struct:exception?}}exceptions{{/struct:exception?}}{{^struct:exception?}}structs{{/struct:exception?}}=struct_dict)

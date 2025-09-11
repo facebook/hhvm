@@ -15,6 +15,6 @@
   limitations under the License.
 
 }}{ {{field:id}}, "{{field:name}}", {{field:optional?}}, {{#field:type}}{{> metadata/type_gen}}{{/field:type}}, {{!
-}}std::vector<ThriftConstStruct>{ {{#field:structured_annotations}}{{#structured_annotation:const_struct?}}{{!
+}}std::vector<ThriftConstStruct>{ {{#field:structured_annotations}}{{#constant:type.self.structured?}}{{!
 }}{{> metadata/const_struct}}, {{!
-}}{{/structured_annotation:const_struct?}}{{/field:structured_annotations}}}},
+}}{{/constant:type.self.structured?}}{{/field:structured_annotations}}}},

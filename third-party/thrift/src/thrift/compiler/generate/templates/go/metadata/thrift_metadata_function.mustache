@@ -40,11 +40,9 @@
     {{#if (not (array.empty? function:structured_annotations))}}
     StructuredAnnotations: []*{{program:metadata_qualifier}}ThriftConstStruct{
         {{#function:structured_annotations}}
-        {{#structured_annotation:const}}
         {{#constant:value}}
         {{> metadata/thrift_metadata_const_struct}}
         {{/constant:value}}
-        {{/structured_annotation:const}}
         {{/function:structured_annotations}}
     },
     {{/if (not (array.empty? function:structured_annotations))}}

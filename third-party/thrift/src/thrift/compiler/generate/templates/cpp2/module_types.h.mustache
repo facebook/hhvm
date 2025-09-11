@@ -136,13 +136,11 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
 {{#struct:has_struct_runtime_annotation?}}
   using __fbthrift_struct_annotations = folly::tag_t<
 {{#struct:structured_runtime_annotations}}
-{{#structured_annotation:const_struct?}}
-{{#structured_annotation:const}}
+{{#constant:type.self.structured?}}
 {{#constant:type}}
     {{type:cpp_fullname}}{{^last?}}, {{/last?}}
 {{/constant:type}}
-{{/structured_annotation:const}}
-{{/structured_annotation:const_struct?}}
+{{/constant:type.self.structured?}}
 {{/struct:structured_runtime_annotations}}
   >;
 {{/struct:has_struct_runtime_annotation?}}
@@ -155,9 +153,9 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
   using __fbthrift_field_annotations = folly::tag_t<
 {{#struct:fields_with_runtime_annotation}}
     folly::tag_t<
-{{#field:structured_runtime_annotations}}{{#structured_annotation:const}}{{#constant:type}}
+{{#field:structured_runtime_annotations}}{{#constant:type}}
       {{type:cpp_fullname}}{{^last?}},{{/last?}}
-{{/constant:type}}{{/structured_annotation:const}}{{/field:structured_runtime_annotations}}
+{{/constant:type}}{{/field:structured_runtime_annotations}}
     >{{^last?}},{{/last?}}
 {{/struct:fields_with_runtime_annotation}}
   >;

@@ -92,14 +92,7 @@ using mstch_const_map_element_factory = mstch_factory<
     std::pair<t_const_value*, t_const_value*>,
     const t_const*,
     const std::pair<const t_type*, const t_type*>&>;
-using mstch_structured_annotation_factory = mstch_factory<t_const>;
 using mstch_stream_factory = mstch_factory<t_stream>;
-
-namespace detail {
-// Structured annotations don't have a separate AST node type yet so use a
-// tag type to distinguish it from t_const.
-struct structured_annotation_tag {};
-} // namespace detail
 
 class mstch_factories {
  public:
@@ -115,8 +108,6 @@ class mstch_factories {
   std::unique_ptr<mstch_const_factory> const_factory;
   std::unique_ptr<mstch_const_value_factory> const_value_factory;
   std::unique_ptr<mstch_const_map_element_factory> const_map_element_factory;
-  std::unique_ptr<mstch_structured_annotation_factory>
-      structured_annotation_factory;
 
   mstch_factories();
 
@@ -186,9 +177,6 @@ class mstch_factories {
   auto& get(t_const_value*) { return const_value_factory; }
   auto& get(std::pair<t_const_value*, t_const_value*>*) {
     return const_map_element_factory;
-  }
-  auto& get(detail::structured_annotation_tag*) {
-    return structured_annotation_factory;
   }
 
   template <typename MstchType, typename Node, typename... Args, typename Data>
@@ -278,10 +266,39 @@ class mstch_base : public mstch::object {
   mstch::node first() { return pos_.first; }
   mstch::node last() { return pos_.last; }
 
+  mstch::node structured_annotations(
+      const std::vector<const t_const*>& annotations) {
+    mstch::array a;
+    size_t i = 0;
+    for (const t_const* annotation : annotations) {
+      mstch_element_position pos(i, annotations.size());
+      a.emplace_back(context_.const_factory->make_mstch_object(
+          annotation,
+          context_,
+          pos,
+          annotation,
+          annotation->type()->get_true_type(),
+          nullptr));
+      ++i;
+    }
+    return a;
+  }
+
   mstch::node structured_annotations(const t_named* annotated) {
-    return make_mstch_array(
-        annotated->structured_annotations(),
-        *context_.structured_annotation_factory);
+    mstch::array a;
+    size_t i = 0;
+    for (const t_const& annotation : annotated->structured_annotations()) {
+      mstch_element_position pos(i, annotated->structured_annotations().size());
+      a.emplace_back(context_.const_factory->make_mstch_object(
+          &annotation,
+          context_,
+          pos,
+          &annotation,
+          annotation.type()->get_true_type(),
+          nullptr));
+      ++i;
+    }
+    return a;
   }
 
   template <typename T>
@@ -909,39 +926,6 @@ class mstch_const_map_element : public mstch_base {
   const std::pair<t_const_value*, t_const_value*> element_;
   const t_const* current_const_;
   const std::pair<const t_type*, const t_type*> expected_types_;
-};
-
-class mstch_structured_annotation : public mstch_base {
- public:
-  using ast_type = detail::structured_annotation_tag;
-
-  mstch_structured_annotation(
-      const t_const* c, mstch_context& ctx, mstch_element_position pos)
-      : mstch_base(ctx, pos), const_(*c) {
-    register_methods(
-        this,
-        {{"structured_annotation:const",
-          &mstch_structured_annotation::constant},
-         {"structured_annotation:const_struct?",
-          &mstch_structured_annotation::is_const_struct}});
-  }
-  mstch::node constant() {
-    return context_.const_factory->make_mstch_object(
-        &const_,
-        context_,
-        pos_,
-        &const_,
-        const_.type()->get_true_type(),
-        nullptr);
-  }
-
-  mstch::node is_const_struct() {
-    return const_.type()->get_true_type()->is<t_struct>() ||
-        const_.type()->get_true_type()->is<t_union>();
-  }
-
- protected:
-  const t_const& const_;
 };
 
 } // namespace apache::thrift::compiler

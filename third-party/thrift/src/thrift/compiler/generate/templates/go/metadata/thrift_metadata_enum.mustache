@@ -29,11 +29,9 @@
     {{#if (not (array.empty? enum:structured_annotations))}}
     StructuredAnnotations: []*{{program:metadata_qualifier}}ThriftConstStruct{
         {{#enum:structured_annotations}}
-        {{#structured_annotation:const}}
         {{#constant:value}}
         {{> metadata/thrift_metadata_const_struct}}
         {{/constant:value}}
-        {{/structured_annotation:const}}
         {{/enum:structured_annotations}}
     },
     {{/if (not (array.empty? enum:structured_annotations))}}

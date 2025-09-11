@@ -15,9 +15,9 @@
   limitations under the License.
 
 }}
-{{#structured_annotation:const_struct?}}{{#structured_annotation:const}}{{#constant:value}}
+{{#constant:type.self.structured?}}{{#constant:value}}
   "{{value:qualified_name}}" : {
     "type" : {{#constant:type}}{{> type}}{{/constant:type}},
     "value" : {{value:string_value_any}}
   }{{^last?}},{{/last?}}
-{{/constant:value}}{{/structured_annotation:const}}{{/structured_annotation:const_struct?}}
+{{/constant:value}}{{/constant:type.self.structured?}}

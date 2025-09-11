@@ -20,9 +20,9 @@
 {{> metadata/func_field_name}}.is_optional() = false;
 {{#field:structured_annotations}}
 {{> metadata/func_field_name}}.structured_annotations() = {
-{{#structured_annotation:const_struct?}}
+{{#constant:type.self.structured?}}
     {{> metadata/const_struct}},
-{{/structured_annotation:const_struct?}}
+{{/constant:type.self.structured?}}
 };
 {{/field:structured_annotations}}
 {{#field:type}}

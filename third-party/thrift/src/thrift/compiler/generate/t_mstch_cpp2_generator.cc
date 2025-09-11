@@ -1916,8 +1916,7 @@ class cpp_mstch_struct : public mstch_struct {
       }
     }
 
-    return make_mstch_array(
-        runtime_annotations, *context_.structured_annotation_factory);
+    return mstch_base::structured_annotations(runtime_annotations);
   }
 
   mstch::node extra_namespace() {
@@ -2461,8 +2460,7 @@ class cpp_mstch_field : public mstch_field {
       }
     }
 
-    return make_mstch_array(
-        runtime_annotations, *context_.structured_annotation_factory);
+    return mstch_base::structured_annotations(runtime_annotations);
   }
 
  private:

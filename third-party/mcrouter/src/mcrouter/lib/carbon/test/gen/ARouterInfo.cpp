@@ -166,6 +166,8 @@ namespace carbon {
 namespace test {
 namespace A {
 
+constexpr const char* ARouterInfo::name;
+
 /* static */ ARouterInfo::RouteHandleFactoryMap
 ARouterInfo::buildRouteMap() {
   RouteHandleFactoryMap map{

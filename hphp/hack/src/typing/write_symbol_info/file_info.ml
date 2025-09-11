@@ -211,8 +211,8 @@ let create ctx Indexable.{ path; fanout } ~gen_sym_hash ~root_path ~hhi_path =
   let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
   let path_str =
     Relative_path.to_absolute_with_prefix
-      ~www:(Path.make root_path)
-      ~hhi:(Path.make hhi_path)
+      ~www:(Path.make_unsafe root_path)
+      ~hhi:(Path.make_unsafe hhi_path)
       path
   in
   let source_text = Ast_provider.compute_source_text ~entry in

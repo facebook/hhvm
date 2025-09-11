@@ -224,7 +224,7 @@ ServerStream<int32_t> TestStreamMultiPublisherService::range(
     getAsyncScope()->add(co_withExecutor(
         getEventBase(),
         folly::coro::co_invoke(
-            [=, ew = std::move(ew)]() mutable -> folly::coro::Task<void> {
+            [=, this, ew = std::move(ew)]() mutable -> folly::coro::Task<void> {
               for (int i = from; i <= to; i++) {
                 if (waitForCancellation && i == from + 1) {
                   co_await *waitForCancellation_;
@@ -297,7 +297,7 @@ ServerStream<int32_t> TestStreamMultiPublisherWithHeaderService::range(
     getAsyncScope()->add(co_withExecutor(
         getEventBase(),
         folly::coro::co_invoke(
-            [=, ew = std::move(ew)]() mutable -> folly::coro::Task<void> {
+            [=, this, ew = std::move(ew)]() mutable -> folly::coro::Task<void> {
               for (int i = from; i <= to; i++) {
                 if (waitForCancellation && i == from + 1) {
                   co_await *waitForCancellation_;

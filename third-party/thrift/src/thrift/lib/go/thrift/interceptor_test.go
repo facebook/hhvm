@@ -123,15 +123,43 @@ func TestChainInterceptors(t *testing.T) {
 		return pfunc.RunContext(ctx, args)
 	}
 
-	chainedInterceptor := ChainInterceptors(dummyInterceptor1, dummyInterceptor2, dummyInterceptor3)
-	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
-	derivedProc := WrapInterceptor(chainedInterceptor, processor)
-	pFunc := derivedProc.ProcessorFunctionMap()["Echo"]
-	arg := dummyif.DummyEchoArgsDeprecated{
-		Value: "hello",
-	}
-	resp, err := pFunc.RunContext(context.Background(), &arg)
-	echoResp := resp.(*dummyif.DummyEchoResultDeprecated)
-	require.NoError(t, err)
-	require.Equal(t, "hello-intercepted3-intercepted2-intercepted1", *echoResp.Success)
+	t.Run("three interceptors", func(t *testing.T) {
+		chainedInterceptor := ChainInterceptors(dummyInterceptor1, dummyInterceptor2, dummyInterceptor3)
+		processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+		derivedProc := WrapInterceptor(chainedInterceptor, processor)
+		pFunc := derivedProc.ProcessorFunctionMap()["Echo"]
+		arg := dummyif.DummyEchoArgsDeprecated{
+			Value: "hello",
+		}
+		resp, err := pFunc.RunContext(context.Background(), &arg)
+		echoResp := resp.(*dummyif.DummyEchoResultDeprecated)
+		require.NoError(t, err)
+		require.Equal(t, "hello-intercepted3-intercepted2-intercepted1", *echoResp.Success)
+	})
+	t.Run("one interceptor", func(t *testing.T) {
+		chainedInterceptor := ChainInterceptors(dummyInterceptor1)
+		processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+		derivedProc := WrapInterceptor(chainedInterceptor, processor)
+		pFunc := derivedProc.ProcessorFunctionMap()["Echo"]
+		arg := dummyif.DummyEchoArgsDeprecated{
+			Value: "hello",
+		}
+		resp, err := pFunc.RunContext(context.Background(), &arg)
+		echoResp := resp.(*dummyif.DummyEchoResultDeprecated)
+		require.NoError(t, err)
+		require.Equal(t, "hello-intercepted1", *echoResp.Success)
+	})
+	t.Run("zero interceptors", func(t *testing.T) {
+		chainedInterceptor := ChainInterceptors( /* zero */ )
+		processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+		derivedProc := WrapInterceptor(chainedInterceptor, processor)
+		pFunc := derivedProc.ProcessorFunctionMap()["Echo"]
+		arg := dummyif.DummyEchoArgsDeprecated{
+			Value: "hello",
+		}
+		resp, err := pFunc.RunContext(context.Background(), &arg)
+		echoResp := resp.(*dummyif.DummyEchoResultDeprecated)
+		require.NoError(t, err)
+		require.Equal(t, "hello", *echoResp.Success)
+	})
 }

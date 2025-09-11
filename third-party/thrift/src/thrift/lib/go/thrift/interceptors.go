@@ -26,28 +26,17 @@ import (
 // the interceptors present in its arguments. Execution happens in order of
 // appearance.
 func ChainInterceptors(interceptors ...Interceptor) Interceptor {
-	n := len(interceptors)
-	switch n {
-	case 0:
-		return func(
-			ctx context.Context,
-			name string,
-			pf types.ProcessorFunction,
-			args types.ReadableStruct,
-		) (types.WritableStruct, types.ApplicationExceptionIf) {
-			return pf.RunContext(ctx, args)
-		}
-	case 1:
-		return interceptors[0]
-	}
-
 	return func(
 		ctx context.Context,
 		name string,
 		pf types.ProcessorFunction,
 		args types.ReadableStruct,
 	) (types.WritableStruct, types.ApplicationExceptionIf) {
+		if len(interceptors) == 0 {
+			return pf.RunContext(ctx, args)
+		}
 		handler := &chainHandler{
+			curI:         0,
 			name:         name,
 			origHandler:  pf,
 			interceptors: interceptors,

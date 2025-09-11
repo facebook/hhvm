@@ -18,46 +18,60 @@
 
 Used to turn a type into a thrift metadata ThriftType struct
 
-}}{{#if (and python.emit_typedef_metadata? type:typedef?)}}
-_fbthrift_metadata.ThriftType(t_typedef={{!
-    }}_fbthrift_metadata.ThriftTypedefType(name="{{type:program.name}}.{{type:name}}", {{!
-    }}underlyingType={{#type:typedef_type}}{{> metadata/thrift_type }}{{/type:typedef_type}}, {{!
-    }}structured_annotations=[])){{!
-}}{{#else}}{{!
-    }}{{#type:bool?}}_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BOOL_TYPE){{/type:bool?}}{{!
-    }}{{#type:byte?}}_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BYTE_TYPE){{/type:byte?}}{{!
-    }}{{#type:i16?}}_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I16_TYPE){{/type:i16?}}{{!
-    }}{{#type:i32?}}_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE){{/type:i32?}}{{!
-    }}{{#type:i64?}}_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I64_TYPE){{/type:i64?}}{{!
-    }}{{#type:float?}}_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_FLOAT_TYPE){{/type:float?}}{{!
-    }}{{#type:double?}}_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_DOUBLE_TYPE){{/type:double?}}{{!
-    }}{{#type:string?}}_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE){{/type:string?}}{{!
-    }}{{#type:binary?}}_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BINARY_TYPE){{/type:binary?}}{{!
-    }}{{#type:void?}}_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_VOID_TYPE){{/type:void?}}{{!
-    }}{{#type:structured}}{{!
-        }}{{#struct:union?}}{{!
-            }}_fbthrift_metadata.ThriftType(t_union=_fbthrift_metadata.ThriftUnionType({{!
-            }}name="{{type:program.name}}.{{> structs/unadapted_name}}")){{!
-        }}{{/struct:union?}}{{!
-        }}{{^struct:union?}}{{!
-            }}_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType({{!
-            }}name="{{type:program.name}}.{{> structs/unadapted_name}}")){{!
-        }}{{/struct:union?}}{{!
-    }}{{/type:structured}}{{!
-    }}{{#type:list?}}{{!
-        }}_fbthrift_metadata.ThriftType(t_list=_fbthrift_metadata.ThriftListType({{!
-        }}valueType={{#type:list_elem_type}}{{> metadata/thrift_type }}{{/type:list_elem_type}})){{!
-    }}{{/type:list?}}{{!
-    }}{{#type:set?}}{{!
-        }}_fbthrift_metadata.ThriftType(t_set=_fbthrift_metadata.ThriftSetType({{!
-        }}valueType={{#type:set_elem_type}}{{> metadata/thrift_type }}{{/type:set_elem_type}})){{!
-    }}{{/type:set?}}{{!
-    }}{{#type:map?}}{{!
-        }}_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType({{!
-        }}keyType={{#type:key_type}}{{> metadata/thrift_type }}{{/type:key_type}},{{!
-        }}valueType={{#type:value_type}}{{> metadata/thrift_type }}{{/type:value_type}})){{!
-    }}{{/type:map?}}{{!
-    }}{{#type:enum}}{{!
-    }}_fbthrift_metadata.ThriftType(t_enum=_fbthrift_metadata.ThriftEnumType({{!
-    }}name="{{type:program.name}}.{{enum:name}}")){{!
-}}{{/type:enum}}{{/if (and python.emit_typedef_metadata? type:typedef?)}}
+}}{{#pragma ignore-newlines}}
+{{#if type:primitive?}}
+_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.
+  {{#if type:bool?}}
+THRIFT_BOOL_TYPE
+  {{#else if type:byte?}}
+THRIFT_BYTE_TYPE
+  {{#else if type:i16?}}
+THRIFT_I16_TYPE
+  {{#else if type:i32?}}
+THRIFT_I32_TYPE
+  {{#else if type:i64?}}
+THRIFT_I64_TYPE
+  {{#else if type:float?}}
+THRIFT_FLOAT_TYPE
+  {{#else if type:double?}}
+THRIFT_DOUBLE_TYPE
+  {{#else if type:string?}}
+THRIFT_STRING_TYPE
+  {{#else if type:binary?}}
+THRIFT_BINARY_TYPE
+  {{#else if type:void?}}
+THRIFT_VOID_TYPE
+  {{/if type:bool?}}
+)
+
+{{#else if type:structured?}}
+{{#type:structured}}
+_fbthrift_metadata.ThriftType(
+  {{#if struct:union?}}
+t_union=_fbthrift_metadata.ThriftUnionType
+  {{#else}}
+t_struct=_fbthrift_metadata.ThriftStructType
+  {{/if struct:union?}}
+(name="{{type:program.name}}.{{> structs/unadapted_name}}"))
+{{/type:structured}}
+
+{{#else if type:list?}}
+_fbthrift_metadata.ThriftType(t_list=_fbthrift_metadata.ThriftListType(
+valueType={{#type:list_elem_type}}{{> metadata/thrift_type }}{{/type:list_elem_type}}))
+
+{{#else if type:set?}}
+_fbthrift_metadata.ThriftType(t_set=_fbthrift_metadata.ThriftSetType(
+valueType={{#type:set_elem_type}}{{> metadata/thrift_type }}{{/type:set_elem_type}}))
+
+{{#else if type:map?}}
+_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(
+keyType={{#type:key_type}}{{> metadata/thrift_type }}{{/type:key_type}},
+valueType={{#type:value_type}}{{> metadata/thrift_type }}{{/type:value_type}}))
+
+{{#else if type:enum?}}
+{{#type:enum}}
+_fbthrift_metadata.ThriftType(t_enum=_fbthrift_metadata.ThriftEnumType(
+name="{{type:program.name}}.{{enum:name}}"))
+{{/type:enum}}
+
+{{/if type:primitive?}}

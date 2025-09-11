@@ -1301,12 +1301,6 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
         whisker::native_handle<python_generator_context>>
         ctx;
 
-    ctx.property("emit_typedef_metadata?", [](const python_generator_context&) {
-      // DO_BEFORE(hchok,20250915): Remove this property and update
-      // metadata/thrift_type template depending on whether we decide to start
-      // emitting metadata about typedefs or only the resolved type
-      return false;
-    });
     ctx.property(
         "is_types_file?", mem_fn(&python_generator_context::is_types_file));
     ctx.property(

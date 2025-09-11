@@ -16,9 +16,10 @@ namespace facebook::thrift::test {
 //
 // To include in statically-linked libraries, link whole (e.g. --whole-archive)
 // `module_sinit.cpp`.
+class __fbthrift_static_init_CustomException_Tag {};
 void __fbthrift_static_init_CustomException() {
 
-  class Tag {};
+  using Tag = __fbthrift_static_init_CustomException_Tag;
   if (folly::detail::createGlobal<std::atomic<bool>, Tag>().exchange(true)) {
     return;
   }

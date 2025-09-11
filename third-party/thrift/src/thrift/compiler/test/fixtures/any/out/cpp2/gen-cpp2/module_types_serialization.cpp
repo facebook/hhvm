@@ -16,9 +16,10 @@ namespace facebook::thrift::compiler::test::fixtures::any {
 //
 // To include in statically-linked libraries, link whole (e.g. --whole-archive)
 // `module_sinit.cpp`.
+class __fbthrift_static_init_MyStruct_Tag {};
 void __fbthrift_static_init_MyStruct() {
 
-  class Tag {};
+  using Tag = __fbthrift_static_init_MyStruct_Tag;
   if (folly::detail::createGlobal<std::atomic<bool>, Tag>().exchange(true)) {
     return;
   }
@@ -28,9 +29,10 @@ void __fbthrift_static_init_MyStruct() {
       apache::thrift::conformance::StandardProtocol::Compact,
       apache::thrift::conformance::StandardProtocol::Binary>();
 }
+class __fbthrift_static_init_MyUnion_Tag {};
 void __fbthrift_static_init_MyUnion() {
 
-  class Tag {};
+  using Tag = __fbthrift_static_init_MyUnion_Tag;
   if (folly::detail::createGlobal<std::atomic<bool>, Tag>().exchange(true)) {
     return;
   }
@@ -40,9 +42,10 @@ void __fbthrift_static_init_MyUnion() {
       apache::thrift::conformance::StandardProtocol::Compact,
       apache::thrift::conformance::StandardProtocol::Binary>();
 }
+class __fbthrift_static_init_MyException_Tag {};
 void __fbthrift_static_init_MyException() {
 
-  class Tag {};
+  using Tag = __fbthrift_static_init_MyException_Tag;
   if (folly::detail::createGlobal<std::atomic<bool>, Tag>().exchange(true)) {
     return;
   }

@@ -36,6 +36,7 @@ namespace {{program:qualified_namespace}} {
 // `{{program:name}}_sinit.cpp`.
 {{#program:split_structs}}
 {{#struct:any?}}
+class __fbthrift_static_init_{{struct:cpp_underlying_name}}_Tag {};
 void __fbthrift_static_init_{{struct:cpp_underlying_name}}() {
   {{!
   module_sinit.cpp might be compiled into multiple dynamically-linked libraries.
@@ -43,7 +44,7 @@ void __fbthrift_static_init_{{struct:cpp_underlying_name}}() {
   multiple times. We need to ensure this function is only performed once.
   }}
 
-  class Tag {};
+  using Tag = __fbthrift_static_init_{{struct:cpp_underlying_name}}_Tag;
   if (folly::detail::createGlobal<std::atomic<bool>, Tag>().exchange(true)) {
     {{! Not the first time when this function is invoked, skip. }}
     return;

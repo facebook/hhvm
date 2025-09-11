@@ -47,7 +47,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::detail::MyStru
     field.structured_annotations() = f.structured_annotations;
     module_MyStruct.fields()->push_back(std::move(field));
   }
-  module_MyStruct.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct_ref());
+  module_MyStruct.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

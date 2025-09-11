@@ -138,7 +138,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_f([[maybe
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_numbers([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "numbers";
-  auto func_ret_type = std::make_unique<Stream>(std::make_unique<Typedef>("module.number", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("rust.NewType", {  }).cv_struct_ref(),  }));
+  auto func_ret_type = std::make_unique<Stream>(std::make_unique<Typedef>("module.number", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("rust.NewType", {  }).cv_struct(),  }));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));

@@ -47,7 +47,7 @@ StructMetadata<::cpp2::Default>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_Default.fields()->push_back(std::move(field));
   }
-  module_Default.structured_annotations()->push_back(*cvStruct("cpp.PackIsset", {  }).cv_struct_ref());
+  module_Default.structured_annotations()->push_back(*cvStruct("cpp.PackIsset", {  }).cv_struct());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -71,7 +71,7 @@ StructMetadata<::cpp2::NonAtomic>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_NonAtomic.fields()->push_back(std::move(field));
   }
-  module_NonAtomic.structured_annotations()->push_back(*cvStruct("cpp.PackIsset", { {"atomic", cvBool(false) } }).cv_struct_ref());
+  module_NonAtomic.structured_annotations()->push_back(*cvStruct("cpp.PackIsset", { {"atomic", cvBool(false) } }).cv_struct());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -95,7 +95,7 @@ StructMetadata<::cpp2::Atomic>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_Atomic.fields()->push_back(std::move(field));
   }
-  module_Atomic.structured_annotations()->push_back(*cvStruct("cpp.PackIsset", { {"atomic", cvBool(true) } }).cv_struct_ref());
+  module_Atomic.structured_annotations()->push_back(*cvStruct("cpp.PackIsset", { {"atomic", cvBool(true) } }).cv_struct());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -119,7 +119,7 @@ StructMetadata<::cpp2::AtomicFoo>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_AtomicFoo.fields()->push_back(std::move(field));
   }
-  module_AtomicFoo.structured_annotations()->push_back(*cvStruct("cpp.PackIsset", { {"atomic", cvBool(true) } }).cv_struct_ref());
+  module_AtomicFoo.structured_annotations()->push_back(*cvStruct("cpp.PackIsset", { {"atomic", cvBool(true) } }).cv_struct());
   return res.first->second;
 }
 

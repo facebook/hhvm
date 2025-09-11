@@ -93,8 +93,8 @@ StructMetadata<::apache::thrift::test::EmptiableTerseStruct>::gen(ThriftMetadata
     field.structured_annotations() = f.structured_annotations;
     simple_EmptiableTerseStruct.fields()->push_back(std::move(field));
   }
-  simple_EmptiableTerseStruct.structured_annotations()->push_back(*cvStruct("thrift.Experimental", {  }).cv_struct_ref());
-  simple_EmptiableTerseStruct.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct_ref());
+  simple_EmptiableTerseStruct.structured_annotations()->push_back(*cvStruct("thrift.Experimental", {  }).cv_struct());
+  simple_EmptiableTerseStruct.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

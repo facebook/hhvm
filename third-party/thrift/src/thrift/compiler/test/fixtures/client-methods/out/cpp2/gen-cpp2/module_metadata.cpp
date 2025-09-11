@@ -127,7 +127,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_HeaderClientMethodsAnnotationOnService.structured_annotations()->push_back(*cvStruct("cpp.GenerateDeprecatedHeaderClientMethods", {  }).cv_struct_ref());
+  module_HeaderClientMethodsAnnotationOnService.structured_annotations()->push_back(*cvStruct("cpp.GenerateDeprecatedHeaderClientMethods", {  }).cv_struct());
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.HeaderClientMethodsAnnotationOnService", std::move(module_HeaderClientMethodsAnnotationOnService));
   context.service_name() = "module.HeaderClientMethodsAnnotationOnService";
@@ -149,7 +149,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethod
   module_HeaderClientMethodsAnnotationOnFunction_echo_request_1_type->writeAndGenType(*module_HeaderClientMethodsAnnotationOnFunction_echo_request_1.type(), metadata);
   func.arguments()->push_back(std::move(module_HeaderClientMethodsAnnotationOnFunction_echo_request_1));
   func.is_oneway() = false;
-  func.structured_annotations()->push_back(*cvStruct("cpp.GenerateDeprecatedHeaderClientMethods", {  }).cv_struct_ref());
+  func.structured_annotations()->push_back(*cvStruct("cpp.GenerateDeprecatedHeaderClientMethods", {  }).cv_struct());
   service.functions()->push_back(std::move(func));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::gen_echo_2([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {

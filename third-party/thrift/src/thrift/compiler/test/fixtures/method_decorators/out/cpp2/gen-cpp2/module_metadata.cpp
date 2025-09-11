@@ -70,7 +70,7 @@ StructMetadata<::cpp2::detail::AdaptedRequest>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_AdaptedRequest.fields()->push_back(std::move(field));
   }
-  module_AdaptedRequest.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::AdaptedStruct<MyAdapter>") } }).cv_struct_ref());
+  module_AdaptedRequest.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::AdaptedStruct<MyAdapter>") } }).cv_struct());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -231,7 +231,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_DecoratedService.structured_annotations()->push_back(*cvStruct("cpp.GenerateServiceMethodDecorator", {  }).cv_struct_ref());
+  module_DecoratedService.structured_annotations()->push_back(*cvStruct("cpp.GenerateServiceMethodDecorator", {  }).cv_struct());
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.DecoratedService", std::move(module_DecoratedService));
   context.service_name() = "module.DecoratedService";
@@ -422,7 +422,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   services.emplace_back();
   module_DecoratedService_ExtendsUndecoratedService.parent() = "module.UndecoratedService";
   ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::genRecurse(metadata, services);
-  module_DecoratedService_ExtendsUndecoratedService.structured_annotations()->push_back(*cvStruct("cpp.GenerateServiceMethodDecorator", {  }).cv_struct_ref());
+  module_DecoratedService_ExtendsUndecoratedService.structured_annotations()->push_back(*cvStruct("cpp.GenerateServiceMethodDecorator", {  }).cv_struct());
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.DecoratedService_ExtendsUndecoratedService", std::move(module_DecoratedService_ExtendsUndecoratedService));
   context.service_name() = "module.DecoratedService_ExtendsUndecoratedService";
@@ -464,7 +464,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   services.emplace_back();
   module_DecoratedService_ExtendsDecoratedService.parent() = "module.DecoratedService";
   ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::genRecurse(metadata, services);
-  module_DecoratedService_ExtendsDecoratedService.structured_annotations()->push_back(*cvStruct("cpp.GenerateServiceMethodDecorator", {  }).cv_struct_ref());
+  module_DecoratedService_ExtendsDecoratedService.structured_annotations()->push_back(*cvStruct("cpp.GenerateServiceMethodDecorator", {  }).cv_struct());
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.DecoratedService_ExtendsDecoratedService", std::move(module_DecoratedService_ExtendsDecoratedService));
   context.service_name() = "module.DecoratedService_ExtendsDecoratedService";
@@ -554,7 +554,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   services.emplace_back();
   module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService.parent() = "module.UndecoratedService_ExtendsDecoratedService";
   ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService_ExtendsDecoratedService>>::genRecurse(metadata, services);
-  module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService.structured_annotations()->push_back(*cvStruct("cpp.GenerateServiceMethodDecorator", {  }).cv_struct_ref());
+  module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService.structured_annotations()->push_back(*cvStruct("cpp.GenerateServiceMethodDecorator", {  }).cv_struct());
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService", std::move(module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService));
   context.service_name() = "module.DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService";

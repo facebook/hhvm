@@ -71,7 +71,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_g
   module_MyService_getDataById_id_1_type->writeAndGenType(*module_MyService_getDataById_id_1.type(), metadata);
   func.arguments()->push_back(std::move(module_MyService_getDataById_id_1));
   func.is_oneway() = false;
-  func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct_ref());
+  func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct());
   service.functions()->push_back(std::move(func));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_putDataById([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {

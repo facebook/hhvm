@@ -47,7 +47,7 @@ StructMetadata<::cpp2::Foo>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_Foo.fields()->push_back(std::move(field));
   }
-  module_Foo.structured_annotations()->push_back(*cvStruct("thrift.SerializeInFieldIdOrder", {  }).cv_struct_ref());
+  module_Foo.structured_annotations()->push_back(*cvStruct("thrift.SerializeInFieldIdOrder", {  }).cv_struct());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

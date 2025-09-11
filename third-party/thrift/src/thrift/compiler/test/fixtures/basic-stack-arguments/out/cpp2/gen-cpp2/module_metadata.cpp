@@ -183,7 +183,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServiceFast>>::g
   module_MyServiceFast_hasDataById_id_1_type->writeAndGenType(*module_MyServiceFast_hasDataById_id_1.type(), metadata);
   func.arguments()->push_back(std::move(module_MyServiceFast_hasDataById_id_1));
   func.is_oneway() = false;
-  func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct_ref());
+  func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct());
   service.functions()->push_back(std::move(func));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServiceFast>>::gen_getDataById([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
@@ -199,7 +199,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServiceFast>>::g
   module_MyServiceFast_getDataById_id_1_type->writeAndGenType(*module_MyServiceFast_getDataById_id_1.type(), metadata);
   func.arguments()->push_back(std::move(module_MyServiceFast_getDataById_id_1));
   func.is_oneway() = false;
-  func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct_ref());
+  func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct());
   service.functions()->push_back(std::move(func));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServiceFast>>::gen_putDataById([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
@@ -222,7 +222,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServiceFast>>::g
   module_MyServiceFast_putDataById_data_2_type->writeAndGenType(*module_MyServiceFast_putDataById_data_2.type(), metadata);
   func.arguments()->push_back(std::move(module_MyServiceFast_putDataById_data_2));
   func.is_oneway() = false;
-  func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct_ref());
+  func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct());
   service.functions()->push_back(std::move(func));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServiceFast>>::gen_lobDataById([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
@@ -245,7 +245,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServiceFast>>::g
   module_MyServiceFast_lobDataById_data_2_type->writeAndGenType(*module_MyServiceFast_lobDataById_data_2.type(), metadata);
   func.arguments()->push_back(std::move(module_MyServiceFast_lobDataById_data_2));
   func.is_oneway() = true;
-  func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct_ref());
+  func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct());
   service.functions()->push_back(std::move(func));
 }
 

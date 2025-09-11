@@ -60,7 +60,7 @@ void EnumMetadata<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>::gen(
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
     enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
-  enum_metadata.structured_annotations()->push_back(*cvStruct("java.UseIntrinsicDefault", {  }).cv_struct_ref());
+  enum_metadata.structured_annotations()->push_back(*cvStruct("java.UseIntrinsicDefault", {  }).cv_struct());
 }
 void EnumMetadata<::test::fixtures::enumstrict::MyBigEnum>::gen(ThriftMetadata& metadata) {
   auto res = metadata.enums()->emplace("module.MyBigEnum", ::apache::thrift::metadata::ThriftEnum{});

@@ -387,7 +387,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct_ref());
+  func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct());
   service.functions()->push_back(std::move(func));
 }
 

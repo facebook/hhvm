@@ -315,7 +315,7 @@ StructMetadata<::test_cpp2::cpp_reflection::struct4>::gen(ThriftMetadata& metada
   module_struct4.is_union() = false;
   static const auto* const
   module_struct4_fields = new std::array<EncodedThriftField, 4>{ {
-    { 1, "field0", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "field1", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "field2", false, std::make_unique<Enum<::test_cpp2::cpp_reflection::enum1>>("module.enum1"), std::vector<ThriftConstStruct>{ }},    { 6, "field3", false, std::make_unique<Struct<::test_cpp2::cpp_reflection::structA>>("module.structA"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct_ref(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct_ref(), }},  }};
+    { 1, "field0", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "field1", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "field2", false, std::make_unique<Enum<::test_cpp2::cpp_reflection::enum1>>("module.enum1"), std::vector<ThriftConstStruct>{ }},    { 6, "field3", false, std::make_unique<Struct<::test_cpp2::cpp_reflection::structA>>("module.structA"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},  }};
   for (const auto& f : *module_struct4_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;

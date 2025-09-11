@@ -36,7 +36,7 @@ void EnumMetadata<::cpp2::YourEnum>::gen(ThriftMetadata& metadata) {
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
     enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
-  enum_metadata.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourEnum") } }).cv_struct_ref());
+  enum_metadata.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourEnum") } }).cv_struct());
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -71,8 +71,8 @@ StructMetadata<::cpp2::detail::YourUnion>::gen(ThriftMetadata& metadata) {
   ::apache::thrift::metadata::ThriftStruct& module_MyUnion = res.first->second;
   module_MyUnion.name() = "module.MyUnion";
   module_MyUnion.is_union() = true;
-  module_MyUnion.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::StaticCast") } }).cv_struct_ref());
-  module_MyUnion.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourUnion") } }).cv_struct_ref());
+  module_MyUnion.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::StaticCast") } }).cv_struct());
+  module_MyUnion.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourUnion") } }).cv_struct());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -84,8 +84,8 @@ StructMetadata<::cpp2::detail::YourException>::gen(ThriftMetadata& metadata) {
   ::apache::thrift::metadata::ThriftStruct& module_MyException = res.first->second;
   module_MyException.name() = "module.MyException";
   module_MyException.is_union() = false;
-  module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourException") } }).cv_struct_ref());
-  module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::StaticCast") } }).cv_struct_ref());
+  module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourException") } }).cv_struct());
+  module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::StaticCast") } }).cv_struct());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -99,7 +99,7 @@ StructMetadata<::cpp2::detail::YourStruct>::gen(ThriftMetadata& metadata) {
   module_MyStruct.is_union() = false;
   static const auto* const
   module_MyStruct_fields = new std::array<EncodedThriftField, 9>{ {
-    { 2, "major", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Name", { {"value", cvString("majorVer") } }).cv_struct_ref(), *cvStruct("go.Name", { {"name", cvString("MajorVer") } }).cv_struct_ref(), }},    { 1, "abstract", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("go.Name", { {"name", cvString("AbstractName") } }).cv_struct_ref(), *cvStruct("go.Tag", { {"tag", cvString("tag:\"some_abstract\"") } }).cv_struct_ref(), }},    { 3, "annotation_with_quote", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("go.Tag", { {"tag", cvString("tag:\"somevalue\"") } }).cv_struct_ref(), }},    { 4, "class_", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 5, "annotation_with_trailing_comma", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 6, "empty_annotations", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 7, "my_enum", false, std::make_unique<Enum<::cpp2::YourEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{ }},    { 8, "cpp_type_annotation", false, std::make_unique<Typedef>("module.list_string_6884", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("std::deque<std::string>") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 9, "my_union", false, std::make_unique<Union<::cpp2::detail::YourUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{ }},  }};
+    { 2, "major", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Name", { {"value", cvString("majorVer") } }).cv_struct(), *cvStruct("go.Name", { {"name", cvString("MajorVer") } }).cv_struct(), }},    { 1, "abstract", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("go.Name", { {"name", cvString("AbstractName") } }).cv_struct(), *cvStruct("go.Tag", { {"tag", cvString("tag:\"some_abstract\"") } }).cv_struct(), }},    { 3, "annotation_with_quote", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("go.Tag", { {"tag", cvString("tag:\"somevalue\"") } }).cv_struct(), }},    { 4, "class_", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 5, "annotation_with_trailing_comma", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 6, "empty_annotations", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 7, "my_enum", false, std::make_unique<Enum<::cpp2::YourEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{ }},    { 8, "cpp_type_annotation", false, std::make_unique<Typedef>("module.list_string_6884", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("std::deque<std::string>") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 9, "my_union", false, std::make_unique<Union<::cpp2::detail::YourUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_MyStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -109,9 +109,9 @@ StructMetadata<::cpp2::detail::YourStruct>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_MyStruct.fields()->push_back(std::move(field));
   }
-  module_MyStruct.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourStruct") } }).cv_struct_ref());
-  module_MyStruct.structured_annotations()->push_back(*cvStruct("hack.Attributes", { {"attributes", cvList({ cvString("\\SomeClass(\\AnotherClass::class)") }) } }).cv_struct_ref());
-  module_MyStruct.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::StaticCast") } }).cv_struct_ref());
+  module_MyStruct.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourStruct") } }).cv_struct());
+  module_MyStruct.structured_annotations()->push_back(*cvStruct("hack.Attributes", { {"attributes", cvList({ cvString("\\SomeClass(\\AnotherClass::class)") }) } }).cv_struct());
+  module_MyStruct.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::StaticCast") } }).cv_struct());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -125,7 +125,7 @@ StructMetadata<::cpp2::SecretStruct>::gen(ThriftMetadata& metadata) {
   module_SecretStruct.is_union() = false;
   static const auto* const
   module_SecretStruct_fields = new std::array<EncodedThriftField, 2>{ {
-    { 1, "id", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "password", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.DeprecatedUnvalidatedAnnotations", { {"items", cvMap({ cvPair(cvString("java.sensitive"), cvString("1")) }) } }).cv_struct_ref(), }},  }};
+    { 1, "id", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "password", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.DeprecatedUnvalidatedAnnotations", { {"items", cvMap({ cvPair(cvString("java.sensitive"), cvString("1")) }) } }).cv_struct(), }},  }};
   for (const auto& f : *module_SecretStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -145,8 +145,8 @@ void ExceptionMetadata<::cpp2::detail::YourException>::gen(ThriftMetadata& metad
   }
   ::apache::thrift::metadata::ThriftException& module_MyException = res.first->second;
   module_MyException.name() = "module.MyException";
-  module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourException") } }).cv_struct_ref());
-  module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::StaticCast") } }).cv_struct_ref());
+  module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourException") } }).cv_struct());
+  module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::StaticCast") } }).cv_struct());
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_ping([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
@@ -200,7 +200,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_g
   module_MyService_getDataById_id_1_type->writeAndGenType(*module_MyService_getDataById_id_1.type(), metadata);
   func.arguments()->push_back(std::move(module_MyService_getDataById_id_1));
   func.is_oneway() = false;
-  func.structured_annotations()->push_back(*cvStruct("go.Name", { {"name", cvString("GoGetDataById") } }).cv_struct_ref());
+  func.structured_annotations()->push_back(*cvStruct("go.Name", { {"name", cvString("GoGetDataById") } }).cv_struct());
   service.functions()->push_back(std::move(func));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_putDataById([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
@@ -220,7 +220,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_p
   module_MyService_putDataById_data_2.name() = "data";
   module_MyService_putDataById_data_2.is_optional() = false;
   module_MyService_putDataById_data_2.structured_annotations() = {
-      *cvStruct("module.MyStructNestedAnnotation", { {"name", cvString("argument") } }).cv_struct_ref(),
+      *cvStruct("module.MyStructNestedAnnotation", { {"name", cvString("argument") } }).cv_struct(),
   };
   auto module_MyService_putDataById_data_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_MyService_putDataById_data_2_type->writeAndGenType(*module_MyService_putDataById_data_2.type(), metadata);
@@ -256,8 +256,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_c
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  func.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("cppDoNothing") } }).cv_struct_ref());
-  func.structured_annotations()->push_back(*cvStruct("go.Name", { {"name", cvString("GoDoNothing") } }).cv_struct_ref());
+  func.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("cppDoNothing") } }).cv_struct());
+  func.structured_annotations()->push_back(*cvStruct("go.Name", { {"name", cvString("GoDoNothing") } }).cv_struct());
   service.functions()->push_back(std::move(func));
 }
 
@@ -303,7 +303,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParen
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  func.structured_annotations()->push_back(*cvStruct("thrift.Priority", { {"level", cvInteger(2) } }).cv_struct_ref());
+  func.structured_annotations()->push_back(*cvStruct("thrift.Priority", { {"level", cvInteger(2) } }).cv_struct());
   service.functions()->push_back(std::move(func));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>>::gen_pong([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
@@ -312,7 +312,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParen
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  func.structured_annotations()->push_back(*cvStruct("thrift.Priority", { {"level", cvInteger(0) } }).cv_struct_ref());
+  func.structured_annotations()->push_back(*cvStruct("thrift.Priority", { {"level", cvInteger(0) } }).cv_struct());
   service.functions()->push_back(std::move(func));
 }
 
@@ -353,7 +353,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  func.structured_annotations()->push_back(*cvStruct("thrift.Priority", { {"level", cvInteger(4) } }).cv_struct_ref());
+  func.structured_annotations()->push_back(*cvStruct("thrift.Priority", { {"level", cvInteger(4) } }).cv_struct());
   service.functions()->push_back(std::move(func));
 }
 
@@ -420,7 +420,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_BadService.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("GoodService") } }).cv_struct_ref());
+  module_BadService.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("GoodService") } }).cv_struct());
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.BadService", std::move(module_BadService));
   context.service_name() = "module.BadService";
@@ -435,7 +435,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  func.structured_annotations()->push_back(*cvStruct("go.Name", { {"name", cvString("FooStructured") } }).cv_struct_ref());
+  func.structured_annotations()->push_back(*cvStruct("go.Name", { {"name", cvString("FooStructured") } }).cv_struct());
   service.functions()->push_back(std::move(func));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::gen_bar([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
@@ -444,7 +444,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  func.structured_annotations()->push_back(*cvStruct("go.Name", { {"name", cvString("BarNonStructured") } }).cv_struct_ref());
+  func.structured_annotations()->push_back(*cvStruct("go.Name", { {"name", cvString("BarNonStructured") } }).cv_struct());
   service.functions()->push_back(std::move(func));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::gen_baz([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {

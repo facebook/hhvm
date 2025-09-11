@@ -279,7 +279,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingSer
   module_PubSubStreamingService_returnstreamFast_i32_to_2_type->writeAndGenType(*module_PubSubStreamingService_returnstreamFast_i32_to_2.type(), metadata);
   func.arguments()->push_back(std::move(module_PubSubStreamingService_returnstreamFast_i32_to_2));
   func.is_oneway() = false;
-  func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct_ref());
+  func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct());
   service.functions()->push_back(std::move(func));
 }
 

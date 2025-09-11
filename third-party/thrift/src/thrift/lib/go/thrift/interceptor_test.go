@@ -78,3 +78,60 @@ func TestInterceptorRunContext(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "hello-intercepted", *echoResp.Success)
 }
+
+func TestChainInterceptors(t *testing.T) {
+	dummyInterceptor1 := func(
+		ctx context.Context,
+		methodName string,
+		pfunc types.ProcessorFunction,
+		args types.ReadableStruct,
+	) (types.WritableStruct, types.ApplicationExceptionIf) {
+		if methodName == "Echo" {
+			ws, ae := pfunc.RunContext(ctx, args)
+			echoResp := ws.(*dummyif.DummyEchoResultDeprecated)
+			echoResp.Success = Pointerize(*echoResp.Success + "-intercepted1")
+			return ws, ae
+		}
+		return pfunc.RunContext(ctx, args)
+	}
+	dummyInterceptor2 := func(
+		ctx context.Context,
+		methodName string,
+		pfunc types.ProcessorFunction,
+		args types.ReadableStruct,
+	) (types.WritableStruct, types.ApplicationExceptionIf) {
+		if methodName == "Echo" {
+			ws, ae := pfunc.RunContext(ctx, args)
+			echoResp := ws.(*dummyif.DummyEchoResultDeprecated)
+			echoResp.Success = Pointerize(*echoResp.Success + "-intercepted2")
+			return ws, ae
+		}
+		return pfunc.RunContext(ctx, args)
+	}
+	dummyInterceptor3 := func(
+		ctx context.Context,
+		methodName string,
+		pfunc types.ProcessorFunction,
+		args types.ReadableStruct,
+	) (types.WritableStruct, types.ApplicationExceptionIf) {
+		if methodName == "Echo" {
+			ws, ae := pfunc.RunContext(ctx, args)
+			echoResp := ws.(*dummyif.DummyEchoResultDeprecated)
+			echoResp.Success = Pointerize(*echoResp.Success + "-intercepted3")
+			return ws, ae
+		}
+		return pfunc.RunContext(ctx, args)
+	}
+
+	chainedInterceptor := ChainInterceptors(dummyInterceptor1, dummyInterceptor2, dummyInterceptor3)
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+	derivedProc := WrapInterceptor(chainedInterceptor, processor)
+	pFunc := derivedProc.ProcessorFunctionMap()["Echo"]
+	arg := dummyif.DummyEchoArgsDeprecated{
+		Value: "hello",
+	}
+	resp, err := pFunc.RunContext(context.Background(), &arg)
+	echoResp := resp.(*dummyif.DummyEchoResultDeprecated)
+	require.NoError(t, err)
+	require.Equal(t, "hello-intercepted3-intercepted2-intercepted1", *echoResp.Success)
+}

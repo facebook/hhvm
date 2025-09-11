@@ -14,35 +14,23 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
+}}{{#pragma ignore-newlines}}
+{{#if (not (or value:container? type:structured?))}}
 
-Base Types:
+{{! Base Types: }}
+{{#if value:string?}}
+apache::thrift::StringTraits<{{type:cpp_standard_type}}>::fromStringLiteral({{> common/const_value}})
+{{#else}}
+{{> common/const_value}}
+{{/if value:string?}}
 
-}}{{^value:container?}}{{!
-  }}{{^type:structured?}}{{!
-    }}{{#value:string?}}{{!
-      }}apache::thrift::StringTraits<{{type:cpp_standard_type}}>::fromStringLiteral({{> common/const_value}}){{!
-    }}{{/value:string?}}{{!
-    }}{{^value:string?}}{{> common/const_value}}{{/value:string?}}{{!
-  }}{{/type:structured?}}{{!
-}}{{/value:container?}}{{!
-Reference other constants:
-}}{{#type:resolves_to_container_or_struct?}}{{!
-  }}{{#value:enable_referencing?}}{{!
-    }}{{#value:referenceable?}}{{!
-      }}{{#value:owning_const}}{{!
-        }}{{#constant:program}}{{!
-          }}::{{program:qualified_namespace}}::{{program:name}}_constants::{{constant:name}}(){{!
-        }}{{/constant:program}}{{!
-      }}{{/value:owning_const}}{{!
-    }}{{/value:referenceable?}}{{!
-  }}{{/value:enable_referencing?}}{{!
-}}{{/type:resolves_to_container_or_struct?}}{{!
-}}{{^value:enable_referencing?}}{{!
-  }}{{> common/iterate_const_values_non_referenceable}}{{!
-}}{{/value:enable_referencing?}}{{!
-}}{{#value:enable_referencing?}}{{!
-  }}{{^value:referenceable?}}{{!
-    }}{{> common/iterate_const_values_non_referenceable}}{{!
-  }}{{/value:referenceable?}}{{!
-}}{{/value:enable_referencing?}}
+{{! Reference other constants: }}
+{{#else if (and cpp_enable_const_referencing? value:referenceable?)}}
+{{!}}{{#value:owning_const}}{{#constant:program}}
+{{!  }}::{{program:qualified_namespace}}::{{program:name}}_constants::{{constant:name}}()
+{{!}}{{/constant:program}}{{/value:owning_const}}
+
+{{#else}}
+{{!}}{{> common/iterate_const_values_non_referenceable}}
+
+{{/if (not (or value:container? type:structured?))}}

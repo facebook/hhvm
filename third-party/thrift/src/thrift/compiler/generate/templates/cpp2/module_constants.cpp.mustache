@@ -30,7 +30,8 @@ namespace {{program:name}}_constants {
 
 {{#program:constants}}{{#constant:type}}{{#constant:value}}
 {{#constant:outline_init?}}
-  {{#value:enable_referencing}}
+  {{! Enable constant referencing within this lexical scope (through to /constant:outline_init?) }}
+  {{#let cpp_enable_const_referencing? = true}}
 {{constant:cpp_type}} const& {{constant:name}}() {
 {{^constant:cpp_adapter}}
   static folly::Indestructible<{{type:cpp_type}}> const instance{ {{> common/iterate_const_values_adapted}} };
@@ -43,7 +44,6 @@ namespace {{program:name}}_constants {
 {{/constant:cpp_adapter}}
   return *instance;
 }
-  {{/value:enable_referencing}}
 {{/constant:outline_init?}}
 {{^constant:outline_init?}}{{#constant:generated?}}{{#type:binary?}}
 ::std::string_view {{constant:name}}() {

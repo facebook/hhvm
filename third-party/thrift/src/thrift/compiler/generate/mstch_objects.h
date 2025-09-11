@@ -858,8 +858,6 @@ class mstch_const_value : public mstch_base {
             {"value:const_struct_type", &mstch_const_value::const_struct_type},
             {"value:referenceable?", &mstch_const_value::referenceable},
             {"value:owning_const", &mstch_const_value::owning_const},
-            {"value:enable_referencing",
-             &mstch_const_value::enable_referencing},
         });
   }
 
@@ -872,9 +870,6 @@ class mstch_const_value : public mstch_base {
         current_const_ != const_value_->get_owner() && same_type_as_expected();
   }
   mstch::node owning_const();
-  mstch::node enable_referencing() {
-    return mstch::map{{"value:enable_referencing?", true}};
-  }
   mstch::node const_struct_type();
 
  protected:
@@ -884,13 +879,6 @@ class mstch_const_value : public mstch_base {
   const cv type_;
 
   virtual bool same_type_as_expected() const { return false; }
-
-  bool is_empty_container() const {
-    return (const_value_->kind() == cv::CV_MAP &&
-            const_value_->get_map().empty()) ||
-        (const_value_->kind() == cv::CV_LIST &&
-         const_value_->get_list().empty());
-  }
 };
 
 class mstch_const_map_element : public mstch_base {

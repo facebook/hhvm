@@ -342,7 +342,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
         "program:autogen_path",
         "service:autogen_path",
         "field:fatal_annotations?",
-        "value:enable_referencing?",
     };
     return opts;
   }
@@ -384,6 +383,15 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
 
   whisker::map::raw globals() const override {
     whisker::map::raw globals = t_mstch_generator::globals();
+    // Provide global default for cpp_enable_const_referencing?, templates may
+    // override this in a restricted scope
+    // Controls whether consts in Thrift files, which in turn reference other
+    // consts, will be emitted with all dependency const values inlined OR
+    // as a reference to the code-gen for the dependency const.
+    // e.g. const i32 MyInt = 5; const list<i32> MyList = [MyInt];
+    // Const referencing controls whether `MyList`'s generated code emits a call
+    // to `MyInt`'s accessor, or just inlines the value `5`.
+    globals["cpp_enable_const_referencing?"] = whisker::make::false_;
     globals["cpp_fatal_string_id"] = whisker::dsl::make_function(
         "cpp_fatal_string_id",
         [](whisker::dsl::function::context ctx) -> whisker::object {
@@ -2619,6 +2627,13 @@ class cpp_mstch_const_value : public mstch_const_value {
   bool same_type_as_expected() const override {
     return const_value_->get_owner() &&
         same_types(expected_type_, const_value_->get_owner()->type());
+  }
+
+  bool is_empty_container() const {
+    return (const_value_->kind() == cv::CV_MAP &&
+            const_value_->get_map().empty()) ||
+        (const_value_->kind() == cv::CV_LIST &&
+         const_value_->get_list().empty());
   }
 };
 

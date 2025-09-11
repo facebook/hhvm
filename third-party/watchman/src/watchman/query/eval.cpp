@@ -253,8 +253,11 @@ static void execute_common(
 
     const auto& [samplingRate, eventCount] =
         getLogEventCounters(LogEventType::QueryExecuteType);
-    // Log if override set, or if we have hit the sample rate
-    if (sample->will_log || eventCount == samplingRate) {
+    // Log if override set, or if we have hit the sample rate,
+    // or if the query used the changes_since_mergebase_with generator
+    if (sample->will_log || eventCount == samplingRate ||
+        (!ctx->generatorType.empty() &&
+         ctx->generatorType == "scm_files_changed_since_mergebase_with")) {
       addRootMetadataToEvent(root_metadata, *queryExecute);
       queryExecute->event_count = eventCount != samplingRate ? 0 : eventCount;
       queryExecute->fresh_instance = res->isFreshInstance;
@@ -267,6 +270,14 @@ static void execute_common(
           ctx->edenChangedFilesDurationUs.load(std::memory_order_relaxed);
       queryExecute->eden_file_properties_duration_us =
           ctx->edenFilePropertiesDurationUs.load(std::memory_order_relaxed);
+      queryExecute->scm_files_changed_since_mergebase_with_duration_us =
+          ctx->scmFilesChangedSinceMergebaseWithDurationUs.load(
+              std::memory_order_relaxed);
+      queryExecute->generation_duration_ms =
+          ctx->generationDuration.load().count();
+      if (!ctx->generatorType.empty()) {
+        queryExecute->generator = ctx->generatorType;
+      }
 
       if (ctx->query->query_spec) {
         queryExecute->query = ctx->query->query_spec->toString();
@@ -364,6 +375,7 @@ QueryResult w_query_execute(
           // available. The changed files list will be relative to the prior
           // clock as if scm-aware queries were not being used at all, to ensure
           // clients have all changed files they need.
+          queryExecute.saved_state_missing = true;
           resultClock.savedStateCommitId = w_string();
           modifiedMergebase = std::nullopt;
         }
@@ -378,14 +390,18 @@ QueryResult w_query_execute(
                         const Query* q,
                         const std::shared_ptr<Root>& r,
                         QueryContext* c) {
+          c->generationStarted();
+          c->generatorType = "scm_files_changed_since_mergebase_with";
           auto position = c->clockAtStartOfQuery.position();
+          folly::stop_watch<std::chrono::microseconds> timer;
           auto changedFiles =
               root->view()->getSCM()->getFilesChangedSinceMergeBaseWith(
                   modifiedMergebase ? modifiedMergebase->piece()
                                     : w_string_piece{},
                   position.toClockString(),
                   requestId);
-
+          c->scmFilesChangedSinceMergebaseWithDurationUs.store(
+              timer.elapsed().count(), std::memory_order_relaxed);
           ClockStamp clock{position.ticks, ::time(nullptr)};
           for (const auto& path : changedFiles) {
             auto fullPath = w_string::pathCat({r->root_path, path});

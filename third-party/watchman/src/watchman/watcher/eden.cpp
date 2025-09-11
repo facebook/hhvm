@@ -779,6 +779,7 @@ class EdenView final : public QueryableView {
 
   void timeGenerator(const Query* /*query*/, QueryContext* ctx) const override {
     ctx->generationStarted();
+    ctx->generatorType = "eden_time";
 
     if (ctx->since.is_timestamp()) {
       throw QueryExecError(
@@ -937,6 +938,7 @@ class EdenView final : public QueryableView {
   /** Walks files that match the supplied set of paths */
   void pathGenerator(const Query* query, QueryContext* ctx) const override {
     ctx->generationStarted();
+    ctx->generatorType = "eden_path";
     // If the query is anchored to a relative_root, use that that
     // avoid sucking down a massive list of files from eden
     auto rel = computeRelativePathPiece(ctx);
@@ -986,6 +988,7 @@ class EdenView final : public QueryableView {
     }
 
     ctx->generationStarted();
+    ctx->generatorType = "eden_glob";
     // If the query is anchored to a relative_root, use that that
     // avoid sucking down a massive list of files from eden
     auto rel = computeRelativePathPiece(ctx);
@@ -1008,6 +1011,7 @@ class EdenView final : public QueryableView {
 
   void allFilesGenerator(const Query*, QueryContext* ctx) const override {
     ctx->generationStarted();
+    ctx->generatorType = "eden_all_files";
     std::string relative_root;
     std::vector<std::string> globPatterns;
     bool includeDir = true;

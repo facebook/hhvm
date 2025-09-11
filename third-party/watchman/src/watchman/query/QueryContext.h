@@ -46,6 +46,8 @@ struct QueryContext : QueryContextBase {
   std::atomic<int64_t> edenGlobFilesDurationUs{0};
   std::atomic<int64_t> edenChangedFilesDurationUs{0};
   std::atomic<int64_t> edenFilePropertiesDurationUs{0};
+  std::atomic<int64_t> scmFilesChangedSinceMergebaseWithDurationUs{0};
+  std::string generatorType;
 
   void generationStarted() {
     viewLockWaitDuration = stopWatch.lap();

@@ -195,6 +195,7 @@ struct QueryExecute : public WatchmanEvent {
   int64_t num_special_files = 0;
   std::string special_files;
   bool fresh_instance = false;
+  bool saved_state_missing = false;
   int64_t deduped = 0;
   int64_t results = 0;
   int64_t walked = 0;
@@ -202,6 +203,9 @@ struct QueryExecute : public WatchmanEvent {
   int64_t eden_glob_files_duration_us = 0;
   int64_t eden_changed_files_duration_us = 0;
   int64_t eden_file_properties_duration_us = 0;
+  int64_t scm_files_changed_since_mergebase_with_duration_us = 0;
+  std::string generator;
+  int64_t generation_duration_ms = 0;
 
   void populate(DynamicEvent& event) const override {
     WatchmanEvent::populate(event);
@@ -229,6 +233,20 @@ struct QueryExecute : public WatchmanEvent {
     if (eden_file_properties_duration_us != 0) {
       event.addInt(
           "eden_file_properties_duration_us", eden_file_properties_duration_us);
+    }
+    if (scm_files_changed_since_mergebase_with_duration_us != 0) {
+      event.addInt(
+          "scm_files_changed_since_mergebase_with_duration_us",
+          scm_files_changed_since_mergebase_with_duration_us);
+    }
+    if (!generator.empty()) {
+      event.addString("generator", generator);
+    }
+    if (generation_duration_ms != 0) {
+      event.addInt("generation_duration_ms", generation_duration_ms);
+    }
+    if (saved_state_missing) {
+      event.addBool("saved_state_missing", saved_state_missing);
     }
   }
 

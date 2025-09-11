@@ -68,6 +68,9 @@ void report_resolution_mismatch(
               includes.begin(), includes.end(), [&](const t_include* incl) {
                 return incl->get_program() == mismatch.global_node->program();
               });
+          if (target_include == includes.end()) {
+            return;
+          }
           if (!(*target_include)->alias().has_value()) {
             use_alias = true;
             ctx.report(

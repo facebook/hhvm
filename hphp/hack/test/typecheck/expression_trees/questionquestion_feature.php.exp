@@ -1,2 +1,0 @@
-ERROR: File "questionquestion_feature.php", line 8, characters 5-12:
-Cannot use unstable feature: `expression_tree_coalesce_operator` (Parsing[1002])

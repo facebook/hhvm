@@ -55,8 +55,8 @@ impl FeatureName {
             PolymorphicFunctionHints => OngoingRelease,
             ProtectedInternal => OngoingRelease,
             PolymorphicLambda => OngoingRelease,
-            ExpressionTreeCoalesceOperator => Preview,
-            ExpressionTreeNullsafeObjGet => Preview,
+            ExpressionTreeCoalesceOperator => OngoingRelease,
+            ExpressionTreeNullsafeObjGet => OngoingRelease,
             NamedParameters => Unstable,
             NamedParametersUse => Unstable,
         }

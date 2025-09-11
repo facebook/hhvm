@@ -102,6 +102,18 @@ class ServerSinkBridge : public TwoWayBridge<
 
   void close();
 
+  // Helper methods to encapsulate ContextStack usage
+  void notifySinkSubscribe();
+  void notifySinkNext();
+  void notifySinkFinally(details::SINK_ENDING_TYPES endingType);
+  void notifySinkError(
+      const folly::exception_wrapper& exception,
+      details::SINK_ENDING_TYPES endingType =
+          details::SINK_ENDING_TYPES::ERROR);
+  void notifySinkCredit(uint64_t credits);
+  void notifySinkConsumed();
+  void notifySinkCancel();
+
   SinkConsumerImpl consumer_;
   folly::Executor::KeepAlive<folly::EventBase> evb_;
   SinkClientCallback* clientCallback_;

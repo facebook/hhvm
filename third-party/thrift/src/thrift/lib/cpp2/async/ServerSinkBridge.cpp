@@ -55,19 +55,14 @@ ServerSinkBridge::Ptr ServerSinkBridge::create(
 
 // SinkServerCallback method
 bool ServerSinkBridge::onSinkNext(StreamPayload&& payload) {
-  if (const auto& contextStack = consumer_.contextStack) {
-    contextStack->onSinkNext();
-  }
+  notifySinkNext();
   clientPush(folly::Try<StreamPayload>(std::move(payload)));
   return true;
 }
 
 void ServerSinkBridge::onSinkError(folly::exception_wrapper ew) {
   using apache::thrift::detail::EncodedError;
-  if (const auto& contextStack = consumer_.contextStack) {
-    contextStack->handleSinkError(ew);
-    contextStack->onSinkFinally(details::SINK_ENDING_TYPES::ERROR);
-  }
+  notifySinkError(ew);
   auto rex = ew.get_exception<rocket::RocketException>();
   auto payload = rex
       ? folly::Try<StreamPayload>(EncodedError(rex->moveErrorData()))
@@ -108,14 +103,7 @@ void ServerSinkBridge::consume() {
 
 folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&>
 ServerSinkBridge::makeGenerator() {
-  if (const auto& contextStack = consumer_.contextStack) {
-    StreamEventHandler::StreamContext streamCtx;
-    if (interaction_.hasTile()) {
-      streamCtx.interactionCreationTime =
-          interaction_.getInteractionCreationTime();
-    }
-    contextStack->onSinkSubscribe(std::move(streamCtx));
-  }
+  notifySinkSubscribe();
 
   uint64_t counter = 0;
   while (true) {
@@ -123,9 +111,7 @@ ServerSinkBridge::makeGenerator() {
     if (serverWait(&consumer)) {
       folly::CancellationCallback cb{
           co_await folly::coro::co_current_cancellation_token, [&]() {
-            if (const auto& contextStack = consumer_.contextStack) {
-              contextStack->onSinkCancel();
-            }
+            notifySinkCancel();
             serverClose();
           }};
       co_await consumer.wait();
@@ -145,9 +131,7 @@ ServerSinkBridge::makeGenerator() {
       }
 
       co_yield std::move(payload);
-      if (const auto& contextStack = consumer_.contextStack) {
-        contextStack->onSinkConsumed();
-      }
+      notifySinkConsumed();
       counter++;
       if (counter > consumer_.bufferSize / 2) {
         serverPush(counter);
@@ -173,17 +157,12 @@ void ServerSinkBridge::processClientMessages() {
           [&](folly::Try<StreamPayload>& payload) {
             terminated = true;
             if (payload.hasValue()) {
-              if (const auto& contextStack = consumer_.contextStack) {
-                contextStack->onSinkFinally(
-                    details::SINK_ENDING_TYPES::COMPLETE);
-              }
+              notifySinkFinally(details::SINK_ENDING_TYPES::COMPLETE);
               clientCallback_->onFinalResponse(std::move(payload).value());
             } else {
-              if (const auto& contextStack = consumer_.contextStack) {
-                contextStack->handleSinkError(payload.exception());
-                contextStack->onSinkFinally(
-                    details::SINK_ENDING_TYPES::COMPLETE_WITH_ERROR);
-              }
+              notifySinkError(
+                  payload.exception(),
+                  details::SINK_ENDING_TYPES::COMPLETE_WITH_ERROR);
               clientCallback_->onFinalResponseError(
                   std::move(payload).exception());
             }
@@ -197,9 +176,7 @@ void ServerSinkBridge::processClientMessages() {
   } while (!clientWait(this));
 
   if (!sinkComplete_ && credits > 0) {
-    if (const auto& contextStack = consumer_.contextStack) {
-      contextStack->onSinkCredit(credits);
-    }
+    notifySinkCredit(credits);
     std::ignore = clientCallback_->onSinkRequestN(credits);
   }
 }
@@ -208,6 +185,58 @@ void ServerSinkBridge::close() {
   clientClose();
   clientCallback_ = nullptr;
   Ptr(this);
+}
+
+// Helper methods to encapsulate ContextStack usage
+void ServerSinkBridge::notifySinkSubscribe() {
+  if (const auto& contextStack = consumer_.contextStack) {
+    StreamEventHandler::StreamContext streamCtx;
+    if (interaction_.hasTile()) {
+      streamCtx.interactionCreationTime =
+          interaction_.getInteractionCreationTime();
+    }
+    contextStack->onSinkSubscribe(std::move(streamCtx));
+  }
+}
+
+void ServerSinkBridge::notifySinkNext() {
+  if (const auto& contextStack = consumer_.contextStack) {
+    contextStack->onSinkNext();
+  }
+}
+
+void ServerSinkBridge::notifySinkFinally(
+    details::SINK_ENDING_TYPES endingType) {
+  if (const auto& contextStack = consumer_.contextStack) {
+    contextStack->onSinkFinally(endingType);
+  }
+}
+
+void ServerSinkBridge::notifySinkError(
+    const folly::exception_wrapper& exception,
+    details::SINK_ENDING_TYPES endingType) {
+  if (const auto& contextStack = consumer_.contextStack) {
+    contextStack->handleSinkError(exception);
+    contextStack->onSinkFinally(endingType);
+  }
+}
+
+void ServerSinkBridge::notifySinkCredit(uint64_t credits) {
+  if (const auto& contextStack = consumer_.contextStack) {
+    contextStack->onSinkCredit(credits);
+  }
+}
+
+void ServerSinkBridge::notifySinkConsumed() {
+  if (const auto& contextStack = consumer_.contextStack) {
+    contextStack->onSinkConsumed();
+  }
+}
+
+void ServerSinkBridge::notifySinkCancel() {
+  if (const auto& contextStack = consumer_.contextStack) {
+    contextStack->onSinkCancel();
+  }
 }
 
 } // namespace apache::thrift::detail

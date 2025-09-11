@@ -25,8 +25,7 @@ folly::coro::Task<> ServerGeneratorStreamBridge::fromAsyncGeneratorImpl(
     StreamElementEncoder<T>* encode,
     folly::coro::AsyncGenerator<
         std::conditional_t<WithHeader, MessageVariant<T>, T>&&> gen,
-    TileStreamGuard interaction,
-    std::shared_ptr<ContextStack> contextStack) {
+    TileStreamGuard interaction) {
   class ReadyCallback final : public QueueConsumer {
    public:
     void consume() override { baton.post(); }
@@ -43,14 +42,7 @@ folly::coro::Task<> ServerGeneratorStreamBridge::fromAsyncGeneratorImpl(
     stream->serverClose();
   };
 
-  if (contextStack) {
-    StreamEventHandler::StreamContext streamCtx;
-    if (interaction.hasTile()) {
-      streamCtx.interactionCreationTime =
-          interaction.getInteractionCreationTime();
-    }
-    contextStack->onStreamSubscribe(std::move(streamCtx));
-  }
+  stream->notifyStreamSubscribe(interaction);
 
   // ensure the generator is destroyed before the interaction TimeStreamGuard
   auto gen_ = std::move(gen);
@@ -70,28 +62,19 @@ folly::coro::Task<> ServerGeneratorStreamBridge::fromAsyncGeneratorImpl(
         queue.pop();
         switch (next) {
           case detail::StreamControl::CANCEL:
-            if (contextStack) {
-              contextStack->onStreamFinally(
-                  details::STREAM_ENDING_TYPES::CANCEL);
-            }
+            stream->notifyStreamFinally(stream->cancelSource_);
             co_return;
           case detail::StreamControl::PAUSE:
-            if (contextStack) {
-              contextStack->onStreamPause(
-                  details::STREAM_PAUSE_REASON::EXPLICIT_PAUSE);
-            }
+            stream->notifyStreamPause(
+                details::STREAM_PAUSE_REASON::EXPLICIT_PAUSE);
             pauseStream = true;
             break;
           case detail::StreamControl::RESUME:
-            if (contextStack) {
-              contextStack->onStreamResumeReceive();
-            }
+            stream->notifyStreamResumeReceive();
             pauseStream = false;
             break;
           default:
-            if (contextStack) {
-              contextStack->onStreamCredit(next);
-            }
+            stream->notifyStreamCredit(next);
             credits += next;
             break;
         }
@@ -106,22 +89,13 @@ folly::coro::Task<> ServerGeneratorStreamBridge::fromAsyncGeneratorImpl(
         co_await folly::coro::co_awaitTry(folly::coro::co_withCancellation(
             stream->cancelSource_.getToken(), gen_.next()));
     if (next.hasException()) {
-      if (contextStack) {
-        if (stream->cancelSource_.isCancellationRequested()) {
-          contextStack->onStreamFinally(details::STREAM_ENDING_TYPES::CANCEL);
-        } else {
-          contextStack->handleStreamErrorWrapped(next.exception());
-          contextStack->onStreamFinally(details::STREAM_ENDING_TYPES::ERROR);
-        }
-      }
+      stream->notifyStreamFinally(stream->cancelSource_, next.exception());
       stream->publish((*encode)(std::move(next.exception())));
       co_return;
     }
     if (!next->has_value()) {
       stream->publish({});
-      if (contextStack) {
-        contextStack->onStreamFinally(details::STREAM_ENDING_TYPES::COMPLETE);
-      }
+      stream->notifyStreamFinally(stream->cancelSource_);
       co_return;
     }
 
@@ -139,11 +113,9 @@ folly::coro::Task<> ServerGeneratorStreamBridge::fromAsyncGeneratorImpl(
       --credits;
     }
 
-    if (contextStack) {
-      contextStack->onStreamNext();
-      if (credits == 0) {
-        contextStack->onStreamPause(details::STREAM_PAUSE_REASON::NO_CREDITS);
-      }
+    stream->notifyStreamNext();
+    if (credits == 0) {
+      stream->notifyStreamPause(details::STREAM_PAUSE_REASON::NO_CREDITS);
     }
   }
 }
@@ -171,14 +143,14 @@ ServerStreamFn<T> ServerGeneratorStreamBridge::fromAsyncGenerator(
         callback->setContextStack(contextStack);
       }
 
-      auto stream = new ServerGeneratorStreamBridge(callback, clientEb);
+      auto stream = new ServerGeneratorStreamBridge(
+          callback, clientEb, std::move(contextStack));
       auto streamPtr = stream->copy();
       fromAsyncGeneratorImpl<WithHeader>(
           std::move(streamPtr),
           encode,
           std::move(gen),
-          TileStreamGuard::transferFrom(std::move(interaction)),
-          std::move(contextStack))
+          TileStreamGuard::transferFrom(std::move(interaction)))
           .scheduleOn(std::move(serverExecutor))
           .start([sp = stream->copy()](folly::Try<folly::Unit> t) {
             if (t.hasException()) {

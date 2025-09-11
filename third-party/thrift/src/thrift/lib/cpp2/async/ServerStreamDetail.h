@@ -38,7 +38,11 @@ struct ServerStreamFactory {
       FirstResponsePayload&& payload,
       StreamClientCallback* cb,
       folly::EventBase* eb) {
-    fn_(std::move(payload), cb, eb, std::move(interaction_), contextStack_);
+    fn_(std::move(payload),
+        cb,
+        eb,
+        std::move(interaction_),
+        std::move(contextStack_));
   }
 
   explicit operator bool() { return !!fn_; }

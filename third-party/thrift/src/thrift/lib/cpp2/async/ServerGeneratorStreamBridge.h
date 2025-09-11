@@ -77,8 +77,7 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
       StreamElementEncoder<T>* encode,
       folly::coro::AsyncGenerator<
           std::conditional_t<WithHeader, MessageVariant<T>, T>&&> gen,
-      TileStreamGuard,
-      std::shared_ptr<ContextStack> contextStack);
+      TileStreamGuard interaction);
 
  public:
   template <bool WithHeader, typename T>
@@ -101,7 +100,9 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
 
  private:
   ServerGeneratorStreamBridge(
-      StreamClientCallback* clientCallback, folly::EventBase* clientEb);
+      StreamClientCallback* clientCallback,
+      folly::EventBase* clientEb,
+      std::shared_ptr<ContextStack> contextStack = nullptr);
 
   bool onStreamRequestN(uint64_t credits) override;
 
@@ -115,8 +116,20 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
 
   void processPayloads();
 
+  // Helper methods to encapsulate ContextStack usage
+  void notifyStreamSubscribe(const TileStreamGuard& interaction);
+  void notifyStreamFinally(
+      folly::CancellationSource& cancelSource,
+      const folly::exception_wrapper& exception = {});
+  void notifyStreamPause(details::STREAM_PAUSE_REASON reason);
+  void notifyStreamResumeReceive();
+  void notifyStreamCredit(int64_t credits);
+  void notifyStreamNext();
+  void notifyStreamError(const folly::exception_wrapper& exception);
+
   StreamClientCallback* streamClientCallback_;
   folly::EventBase* clientEventBase_;
+  std::shared_ptr<ContextStack> contextStack_;
 #if FOLLY_HAS_COROUTINES
   folly::CancellationSource cancelSource_;
 #endif

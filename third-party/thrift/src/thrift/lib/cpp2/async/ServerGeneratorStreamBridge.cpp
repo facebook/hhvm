@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <thrift/lib/cpp/StreamEventHandler.h>
 #include <thrift/lib/cpp2/async/ServerGeneratorStreamBridge.h>
 
 namespace apache::thrift::detail {
@@ -27,8 +28,12 @@ template class TwoWayBridge<
     ServerGeneratorStreamBridge>;
 
 ServerGeneratorStreamBridge::ServerGeneratorStreamBridge(
-    StreamClientCallback* clientCallback, folly::EventBase* clientEb)
-    : streamClientCallback_(clientCallback), clientEventBase_(clientEb) {}
+    StreamClientCallback* clientCallback,
+    folly::EventBase* clientEb,
+    std::shared_ptr<ContextStack> contextStack)
+    : streamClientCallback_(clientCallback),
+      clientEventBase_(clientEb),
+      contextStack_(std::move(contextStack)) {}
 
 ServerGeneratorStreamBridge::~ServerGeneratorStreamBridge() {}
 
@@ -126,4 +131,65 @@ void ServerGeneratorStreamBridge::processPayloads() {
 void ServerGeneratorStreamBridge::close() {
   serverClose();
 }
+
+// Helper methods to encapsulate ContextStack usage
+void ServerGeneratorStreamBridge::notifyStreamSubscribe(
+    const TileStreamGuard& interaction) {
+  if (contextStack_) {
+    StreamEventHandler::StreamContext streamCtx;
+    if (interaction.hasTile()) {
+      streamCtx.interactionCreationTime =
+          interaction.getInteractionCreationTime();
+    }
+    contextStack_->onStreamSubscribe(std::move(streamCtx));
+  }
+}
+
+void ServerGeneratorStreamBridge::notifyStreamFinally(
+    folly::CancellationSource& cancelSource,
+    const folly::exception_wrapper& exception) {
+  if (contextStack_) {
+    if (cancelSource.isCancellationRequested()) {
+      contextStack_->onStreamFinally(details::STREAM_ENDING_TYPES::CANCEL);
+    } else if (exception) {
+      contextStack_->handleStreamErrorWrapped(exception);
+      contextStack_->onStreamFinally(details::STREAM_ENDING_TYPES::ERROR);
+    } else {
+      contextStack_->onStreamFinally(details::STREAM_ENDING_TYPES::COMPLETE);
+    }
+  }
+}
+
+void ServerGeneratorStreamBridge::notifyStreamPause(
+    details::STREAM_PAUSE_REASON reason) {
+  if (contextStack_) {
+    contextStack_->onStreamPause(reason);
+  }
+}
+
+void ServerGeneratorStreamBridge::notifyStreamResumeReceive() {
+  if (contextStack_) {
+    contextStack_->onStreamResumeReceive();
+  }
+}
+
+void ServerGeneratorStreamBridge::notifyStreamCredit(int64_t credits) {
+  if (contextStack_) {
+    contextStack_->onStreamCredit(credits);
+  }
+}
+
+void ServerGeneratorStreamBridge::notifyStreamNext() {
+  if (contextStack_) {
+    contextStack_->onStreamNext();
+  }
+}
+
+void ServerGeneratorStreamBridge::notifyStreamError(
+    const folly::exception_wrapper& exception) {
+  if (contextStack_) {
+    contextStack_->handleStreamErrorWrapped(exception);
+  }
+}
+
 } // namespace apache::thrift::detail

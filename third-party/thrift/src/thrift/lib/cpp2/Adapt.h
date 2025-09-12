@@ -167,7 +167,7 @@ constexpr if_field_adapter<Adapter, FieldId, ThriftT, Struct> fromThriftField(
 // Adapter::fromThriftField is unavailable.
 template <typename Adapter, int16_t FieldId, typename ThriftT, typename Struct>
 constexpr if_not_field_adapter<Adapter, ThriftT, Struct> fromThriftField(
-    ThriftT&& value, Struct&) {
+    ThriftT&& value, Struct& /*unused*/) {
   return Adapter::fromThrift(std::forward<ThriftT>(value));
 }
 
@@ -203,7 +203,7 @@ construct(AdaptedT& field, Struct& object) {
 }
 template <typename Adapter, int16_t FieldId, typename AdaptedT, typename Struct>
 constexpr if_not_ctor_adapter<Adapter, AdaptedT, FieldContext<Struct, FieldId>>
-construct(AdaptedT&, Struct&) {}
+construct(AdaptedT& /*unused*/, Struct& /*unused*/) {}
 
 // Clear op based on the adapter, with a fallback to calling the default
 // constructor and Adapter::construct for context population.
@@ -220,7 +220,8 @@ constexpr if_not_clear_adapter<Adapter, AdaptedT> clear(AdaptedT& field) {
 // Clear op based on the field adapter, with a fallback to calling the default
 // constructor and Adapter::construct for context population.
 template <typename Adapter, int16_t FieldId, typename AdaptedT, typename Struct>
-constexpr if_clear_adapter<Adapter, AdaptedT> clear(AdaptedT& field, Struct&) {
+constexpr if_clear_adapter<Adapter, AdaptedT> clear(
+    AdaptedT& field, Struct& /*unused*/) {
   Adapter::clear(field);
 }
 
@@ -516,7 +517,10 @@ template <
     typename FallbackF,
     typename = void>
 struct adapter_serialized_size {
-  uint32_t operator()(Protocol&, const AdaptedT&, FallbackF f) { return f(); }
+  uint32_t operator()(
+      Protocol& /*unused*/, const AdaptedT& /*unused*/, FallbackF f) {
+    return f();
+  }
 };
 
 template <typename Tag, typename Adapter, typename AdaptedT, typename Protocol>
@@ -539,37 +543,38 @@ struct adapter_serialized_size<
     Protocol,
     FallbackF,
     folly::void_t<serialized_size_type<Tag, Adapter, AdaptedT, Protocol>>> {
-  uint32_t operator()(Protocol& prot, const AdaptedT& val, FallbackF) {
+  uint32_t operator()(
+      Protocol& prot, const AdaptedT& val, FallbackF /*unused*/) {
     return Adapter::template serializedSize<ZeroCopy, Tag>(prot, val);
   }
 };
 
 template <typename Protocol>
-uint32_t serializedSizeFixed(Protocol& protocol, bool) {
+uint32_t serializedSizeFixed(Protocol& protocol, bool /*unused*/) {
   return protocol.serializedSizeBool();
 }
 template <typename Protocol>
-uint32_t serializedSizeFixed(Protocol& protocol, int8_t) {
+uint32_t serializedSizeFixed(Protocol& protocol, int8_t /*unused*/) {
   return protocol.serializedSizeByte();
 }
 template <typename Protocol>
-uint32_t serializedSizeFixed(Protocol& protocol, int16_t) {
+uint32_t serializedSizeFixed(Protocol& protocol, int16_t /*unused*/) {
   return protocol.serializedSizeI16();
 }
 template <typename Protocol>
-uint32_t serializedSizeFixed(Protocol& protocol, int32_t) {
+uint32_t serializedSizeFixed(Protocol& protocol, int32_t /*unused*/) {
   return protocol.serializedSizeI32();
 }
 template <typename Protocol>
-uint32_t serializedSizeFixed(Protocol& protocol, int64_t) {
+uint32_t serializedSizeFixed(Protocol& protocol, int64_t /*unused*/) {
   return protocol.serializedSizeI64();
 }
 template <typename Protocol>
-uint32_t serializedSizeFixed(Protocol& protocol, double) {
+uint32_t serializedSizeFixed(Protocol& protocol, double /*unused*/) {
   return protocol.serializedSizeDouble();
 }
 template <typename Protocol>
-uint32_t serializedSizeFixed(Protocol& protocol, float) {
+uint32_t serializedSizeFixed(Protocol& protocol, float /*unused*/) {
   return protocol.serializedSizeFloat();
 }
 
@@ -596,7 +601,8 @@ struct adapter_serialized_size<
             Protocol> &&
         std::is_arithmetic_v<decltype(Adapter::toThrift(
             std::declval<AdaptedT&>()))>>> {
-  uint32_t operator()(Protocol& prot, const AdaptedT&, FallbackF) {
+  uint32_t operator()(
+      Protocol& prot, const AdaptedT& /*unused*/, FallbackF /*unused*/) {
     return serializedSizeFixed(
         prot, decltype(Adapter::toThrift(std::declval<AdaptedT&>()))(0));
   }

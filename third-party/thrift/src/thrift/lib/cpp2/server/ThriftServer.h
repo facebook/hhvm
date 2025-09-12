@@ -923,9 +923,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
   bool infoLoggingEnabled_{true};
 
-  // Cpp2 ProcessorFactory.
-  std::shared_ptr<apache::thrift::AsyncProcessorFactory> cpp2Pfac_;
-
   ServerInterface* applicationServerInterface_{};
 
   // Explicitly set monitoring service interface handler
@@ -944,6 +941,17 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   std::vector<std::shared_ptr<server::TServerEventHandler>> eventHandlers_;
 
   GetHeaderHandlerFunc getHeaderHandler_;
+
+  // Cpp2 ProcessorFactory.
+  // NOTE: cpp2Pfac_ should destruct before the above
+  // shared_ptr<TServerEventHandler> fields. In particular,
+  // PythonServerEventHandler could own the reference to
+  // folly::python::NotificationQueueAsyncioExecutor, thus expecting all other
+  // reference to the executor to be released before PythonServerEventHandler
+  // destructs. Meanwhile, the cpp2Pfac_ here could hold a reference (e.g.,
+  // PythonAsyncProcessorFactory.create in
+  // thrift/lib/python/server/python_async_processor.pyx)
+  std::shared_ptr<apache::thrift::AsyncProcessorFactory> cpp2Pfac_;
 
   // TODO: T176242251 we use unique_ptr and just pass raw pointer / reference in
   // rocket's stack. If the object is owned by ThriftServer, then we know it

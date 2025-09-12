@@ -1052,6 +1052,4 @@ apache::thrift::ServiceRequestInfoMap service3ServiceInfoHolder::staticRequestIn
 } // namespace test_cpp2::cpp_reflection
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::service3, false>::bundle)() =
-    nullptr;
 }

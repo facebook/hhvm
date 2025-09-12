@@ -402,6 +402,4 @@ apache::thrift::ServiceRequestInfoMap DbMixedStackArgumentsServiceInfoHolder::st
 } // namespace test::fixtures::basic
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::DbMixedStackArguments, false>::bundle)() =
-    nullptr;
 }

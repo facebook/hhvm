@@ -1205,27 +1205,27 @@ unsigned long CppRef::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::some::ns::ModuleA, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 5609679411807694836;
   static constexpr ::std::string_view definitionKey = {"\xf1\x1f\x2f\xea\x5e\x01\x63\x67\x15\x7a\xa4\x2a\xa5\xb1\x96\xc0", 16};
 };
 template <> struct TSchemaAssociation<::some::ns::ModuleB, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 5609679411807694836;
   static constexpr ::std::string_view definitionKey = {"\xa2\xb6\x58\x4e\x00\x0a\x62\xa6\xd5\xe5\xc3\x1b\xdb\xc5\x81\x8a", 16};
 };
 template <> struct TSchemaAssociation<::some::ns::detail::DirectlyAdapted, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 5609679411807694836;
   static constexpr ::std::string_view definitionKey = {"\x94\x77\xc1\xa8\x6d\xc9\x4c\x4c\x0f\xdd\xa3\x7b\xfb\x75\x87\x50", 16};
 };
 template <> struct TSchemaAssociation<::some::ns::CppRef, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 5609679411807694836;
   static constexpr ::std::string_view definitionKey = {"\xe8\x74\x50\xef\xb1\xf8\xda\xe8\xa7\xa4\xbc\x98\x15\xa1\x87\xe9", 16};
 };
 template <> struct TSchemaAssociation<::some::ns::EnumB, true> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 5609679411807694836;
   static constexpr ::std::string_view definitionKey = {"\x94\xc4\x67\xd5\xf0\xa3\x64\xac\xee\x74\x9b\x9b\xef\x25\xed\xa3", 16};
 };

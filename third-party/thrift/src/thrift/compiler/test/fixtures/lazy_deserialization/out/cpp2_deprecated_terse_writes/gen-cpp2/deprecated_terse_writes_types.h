@@ -1361,22 +1361,22 @@ unsigned long TerseOptionalLazyFoo::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::apache::thrift::test::TerseFoo, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 6897497332085164669;
   static constexpr ::std::string_view definitionKey = {"\xce\x08\x54\x11\x9d\xda\x21\x5d\xbb\x75\xb8\x72\x07\x3e\xe2\xf1", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::TerseLazyFoo, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 6897497332085164669;
   static constexpr ::std::string_view definitionKey = {"\xd7\x62\x4c\x86\x12\xba\x4d\x1a\x8c\xfe\x79\xfa\xaf\x75\xcb\xdb", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::TerseOptionalFoo, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 6897497332085164669;
   static constexpr ::std::string_view definitionKey = {"\xac\x8b\xce\x7d\x0a\xaf\x1d\x4a\x99\xf2\x8f\x1d\x97\xd0\x8b\x6e", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::TerseOptionalLazyFoo, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 6897497332085164669;
   static constexpr ::std::string_view definitionKey = {"\x65\x1d\xcb\xfc\xcb\x5c\x94\x96\x2f\x4d\xeb\x40\xf3\xff\xfa\x7c", 16};
 };

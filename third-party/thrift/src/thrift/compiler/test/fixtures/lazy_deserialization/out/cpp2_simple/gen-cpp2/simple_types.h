@@ -2959,47 +2959,47 @@ unsigned long Empty::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::apache::thrift::test::Foo, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -200190150207549803;
   static constexpr ::std::string_view definitionKey = {"\x20\x01\x97\x65\xe5\x07\x0c\xf2\x5e\x0e\xb1\x98\x17\x56\xc4\xcf", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::LazyFoo, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -200190150207549803;
   static constexpr ::std::string_view definitionKey = {"\xb3\xc6\x6d\x6c\x5c\x92\x70\x44\xc6\x91\x8b\xa3\x13\xd2\x61\xf7", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::OptionalFoo, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -200190150207549803;
   static constexpr ::std::string_view definitionKey = {"\x4f\x37\xe1\xca\x1a\xe2\x30\xc2\xd0\x60\xa0\x38\x30\xe5\x7a\xcc", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::OptionalLazyFoo, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -200190150207549803;
   static constexpr ::std::string_view definitionKey = {"\xc6\xac\xe2\xe9\x27\x86\xc9\xf6\x9f\x62\xdd\xbf\xb3\x4c\xdf\xa7", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::OptionalBoxedLazyFoo, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -200190150207549803;
   static constexpr ::std::string_view definitionKey = {"\x0d\x4a\xc8\x44\xa2\x33\x88\x3f\x61\xfc\x44\xcd\x99\x24\x1e\x48", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::LazyCppRef, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -200190150207549803;
   static constexpr ::std::string_view definitionKey = {"\x82\x1b\x10\xbf\xf7\xd7\x5f\xfa\x59\x5b\x64\x67\xe3\x6a\x97\x69", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::IndexedFoo, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -200190150207549803;
   static constexpr ::std::string_view definitionKey = {"\x87\x1a\xef\xa8\x58\xc5\xb2\x39\x32\xf2\x05\x61\x87\xb2\x74\xcb", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::OptionalIndexedFoo, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -200190150207549803;
   static constexpr ::std::string_view definitionKey = {"\xce\xad\x71\xbd\x2c\xaf\x41\x3d\x66\xc3\x96\x5d\xc1\xf3\xc8\x06", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::Empty, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -200190150207549803;
   static constexpr ::std::string_view definitionKey = {"\x06\x90\x46\xa0\xd3\x6d\x15\x0c\x9e\x59\x63\xc0\xd3\x62\xa9\x3e", 16};
 };

@@ -279,7 +279,7 @@ void decorate(ServiceHandler<::cpp2::DecoratedService>& handler, ServiceMethodDe
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::DecoratedService, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -7896720196583643065;
   static constexpr ::std::string_view definitionKey = {"\xd1\x44\x52\x11\x2f\xc7\x1d\x23\xd8\x24\x12\xd8\xd4\x37\xdf\xe7", 16};
 };
@@ -811,7 +811,7 @@ class ServiceHandler<::cpp2::UndecoratedService> : public apache::thrift::Server
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::UndecoratedService, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -7896720196583643065;
   static constexpr ::std::string_view definitionKey = {"\x8d\xfa\xf4\xc5\x87\xb9\x4e\xf1\x30\x60\xe6\xb9\x4e\xe2\x55\x98", 16};
 };
@@ -1210,7 +1210,7 @@ void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::DecoratedService_ExtendsUndecoratedService, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -7896720196583643065;
   static constexpr ::std::string_view definitionKey = {"\x00\xf8\x19\x31\x00\xa6\xc2\xc8\xf4\x48\x29\xb0\x5c\xc1\x03\x9d", 16};
 };
@@ -1398,7 +1398,7 @@ void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>& 
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::DecoratedService_ExtendsDecoratedService, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -7896720196583643065;
   static constexpr ::std::string_view definitionKey = {"\xbe\x01\xa1\x22\xd0\x33\xd3\xa3\x12\xe6\x3f\x43\x70\xda\x3d\x4c", 16};
 };
@@ -1546,7 +1546,7 @@ class ServiceHandler<::cpp2::UndecoratedService_ExtendsDecoratedService> : virtu
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::UndecoratedService_ExtendsDecoratedService, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -7896720196583643065;
   static constexpr ::std::string_view definitionKey = {"\x44\x7c\x5c\x76\x45\x8e\xab\x3c\x6d\xe7\x3a\xfb\xd5\x12\xfc\x27", 16};
 };
@@ -1740,7 +1740,7 @@ void decorate(ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -7896720196583643065;
   static constexpr ::std::string_view definitionKey = {"\xa3\x0c\xe2\xd7\x03\x5d\xc4\x45\x5f\xca\x1c\xe1\x14\xd7\x4c\x9b", 16};
 };

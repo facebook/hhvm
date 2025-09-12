@@ -168,35 +168,15 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures:
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::runtime_annotation, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::structured_annotation_inline, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::structured_annotation_with_default, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::structured_annotation_recursive, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::structured_annotation_forward, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::structured_annotation_nested, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::MyStruct, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::MyException, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::MyUnion, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic-structured-annotations::MyEnum, true>::bundle)() =
-    nullptr;
 
 } // namespace detail
 } // namespace apache::thrift

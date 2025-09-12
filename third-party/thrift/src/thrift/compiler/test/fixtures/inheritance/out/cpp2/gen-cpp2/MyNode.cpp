@@ -239,6 +239,4 @@ apache::thrift::ServiceRequestInfoMap MyNodeServiceInfoHolder::staticRequestInfo
 } // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::MyNode, false>::bundle)() =
-    nullptr;
 }

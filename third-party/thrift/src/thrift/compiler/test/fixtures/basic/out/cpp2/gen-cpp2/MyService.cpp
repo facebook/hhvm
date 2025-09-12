@@ -1705,6 +1705,4 @@ apache::thrift::ServiceRequestInfoMap MyServiceServiceInfoHolder::staticRequestI
 } // namespace test::fixtures::basic
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::basic::MyService, false>::bundle)() =
-    nullptr;
 }

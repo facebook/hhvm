@@ -19,7 +19,11 @@
 {{#let export partial declaration |node|}}
 template <> struct TSchemaAssociation<{{node.cpp_qualified_underlying_name}}, {{node.enum?}}> {
   {{! This is a pointer to the generated schema bundle constant's accessor, to defer initialization of the data until we know it will be accessed. }}
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+{{#if node.program.schema_name}}
+  static ::folly::Range<const ::std::string_view*> bundle();
+{{#else}}
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+{{/if node.program.schema_name}}
   static constexpr int64_t programId = {{node.program.definition_key.buffer}};
   static constexpr ::std::string_view definitionKey = {"{{node.definition_key.buffer}}", {{node.definition_key.length}}};
 };
@@ -27,10 +31,9 @@ template <> struct TSchemaAssociation<{{node.cpp_qualified_underlying_name}}, {{
 
 {{! Definition of `TSchemaAssociation` for the passed-in definition, the t_type `node`. }}
 {{#let export partial definition |node|}}
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<{{node.cpp_qualified_underlying_name}}, {{node.enum?}}>::bundle)() =
-  {{#if node.program.schema_name}}
-    &::{{node.program.cpp_qualified_namespace}}::{{node.program.name}}_constants::{{node.program.schema_name}}_includes;
-  {{#else}}
-    nullptr;
-  {{/if node.program.schema_name}}
+{{#if node.program.schema_name}}
+::folly::Range<const ::std::string_view*> TSchemaAssociation<{{node.cpp_qualified_underlying_name}}, {{node.enum?}}>::bundle() {
+    return ::{{node.program.cpp_qualified_namespace}}::{{node.program.name}}_constants::{{node.program.schema_name}}_includes();
+}
+{{/if node.program.schema_name}}
 {{/let partial}}

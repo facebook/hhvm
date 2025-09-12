@@ -878,22 +878,22 @@ unsigned long FieldsInjectedWithIncludedStruct::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::Fields, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 3380809768853499127;
   static constexpr ::std::string_view definitionKey = {"\xd9\xfa\xa6\x42\xc2\x97\xef\xd7\xfc\xde\xb7\x26\x79\xad\xb1\x8f", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::FieldsInjectedToEmptyStruct, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 3380809768853499127;
   static constexpr ::std::string_view definitionKey = {"\x6c\x11\xa0\x4f\xbd\x5e\x18\x01\x02\x61\x49\xc0\xac\x5f\xad\x53", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::FieldsInjectedToStruct, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 3380809768853499127;
   static constexpr ::std::string_view definitionKey = {"\x4a\x82\x8f\x14\x9d\x0b\x93\x16\x0f\x00\x20\x5e\xb0\x6b\x7e\x88", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::FieldsInjectedWithIncludedStruct, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 3380809768853499127;
   static constexpr ::std::string_view definitionKey = {"\xf2\x83\x60\x77\xff\xdf\x2c\x98\xc1\x92\x4b\x2e\xad\x43\xc3\xfb", 16};
 };

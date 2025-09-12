@@ -574,6 +574,7 @@ apache::thrift::ServiceRequestInfoMap PrimitivesServiceServiceInfoHolder::static
 } // namespace facebook::thrift::test
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::PrimitivesService, false>::bundle)() =
-    &::facebook::thrift::test::module_constants::_fbthrift_schema_bc0984a218954d47_includes;
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::PrimitivesService, false>::bundle() {
+    return ::facebook::thrift::test::module_constants::_fbthrift_schema_bc0984a218954d47_includes();
+}
 }

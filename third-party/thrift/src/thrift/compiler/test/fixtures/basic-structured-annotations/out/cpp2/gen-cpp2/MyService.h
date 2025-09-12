@@ -93,7 +93,7 @@ class ServiceHandler<::test::fixtures::basic-structured-annotations::MyService> 
 
 namespace detail {
 template <> struct TSchemaAssociation<::test::fixtures::basic-structured-annotations::MyService, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 2611009038593588256;
   static constexpr ::std::string_view definitionKey = {"\xc8\x2a\xeb\x8a\x75\x70\x9a\xe9\x31\x21\x27\x31\x60\xce\xcf\x00", 16};
 };

@@ -86,17 +86,9 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::FieldsInj
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Fields, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::FieldsInjectedToEmptyStruct, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::FieldsInjectedToStruct, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::FieldsInjectedWithIncludedStruct, false>::bundle)() =
-    nullptr;
 
 } // namespace detail
 } // namespace apache::thrift

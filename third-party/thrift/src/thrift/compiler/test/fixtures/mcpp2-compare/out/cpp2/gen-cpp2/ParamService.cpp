@@ -4412,6 +4412,4 @@ apache::thrift::ServiceRequestInfoMap ParamServiceServiceInfoHolder::staticReque
 } // namespace some::valid::ns
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::ParamService, false>::bundle)() =
-    nullptr;
 }

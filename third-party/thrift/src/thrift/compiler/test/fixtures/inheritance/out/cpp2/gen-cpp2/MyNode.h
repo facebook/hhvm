@@ -78,7 +78,7 @@ class ServiceHandler<::cpp2::MyNode> : virtual public ::cpp2::MyRootSvIf {
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::MyNode, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 8628767142313694045;
   static constexpr ::std::string_view definitionKey = {"\x3c\x44\xbd\xeb\x29\x4d\x61\xa3\xe4\xa3\x85\xc2\x8e\x5b\xd1\xe6", 16};
 };

@@ -617,17 +617,17 @@ template <> struct TEnumTraits<::facebook::thrift::compiler::test::fixtures::any
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -5500604698416141242;
   static constexpr ::std::string_view definitionKey = {"\x47\xdd\x18\x44\x60\x75\x98\xca\xae\xdf\xe2\xbc\x9b\x62\x26\x84", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::any::MyUnion, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -5500604698416141242;
   static constexpr ::std::string_view definitionKey = {"\x2a\x25\x68\xcd\xd8\xea\x3b\x40\x52\x2d\xc7\x2f\x38\x8e\x51\xe6", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::any::MyException, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -5500604698416141242;
   static constexpr ::std::string_view definitionKey = {"\x05\x72\x41\x4a\x09\xab\x9c\xfa\xb3\x0a\x4e\xd0\x10\xc8\x6c\xe4", 16};
 };

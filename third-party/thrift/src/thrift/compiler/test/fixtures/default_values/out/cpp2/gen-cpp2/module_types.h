@@ -1065,17 +1065,17 @@ unsigned long StructWithCustomDefaultValues::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 6296185559367434976;
   static constexpr ::std::string_view definitionKey = {"\x4b\x28\xe6\xb1\xc3\x3b\xe1\xfd\x90\x8a\xd2\x29\xc6\xe9\x4d\xad", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 6296185559367434976;
   static constexpr ::std::string_view definitionKey = {"\x46\x57\x61\x05\xad\x36\x12\xc9\x89\xb3\xcf\x94\xfb\xb1\xf7\x4a", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 6296185559367434976;
   static constexpr ::std::string_view definitionKey = {"\x7f\x8a\x3f\x87\x74\xe4\xf6\x8a\x92\x77\xb1\xb0\x2e\x59\xfe\x74", 16};
 };

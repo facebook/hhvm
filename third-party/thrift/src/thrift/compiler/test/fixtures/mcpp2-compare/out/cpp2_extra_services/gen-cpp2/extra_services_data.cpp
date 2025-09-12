@@ -76,8 +76,6 @@ THRIFT_DATA_MEMBER const std::array<int, 13> TStructDataStorage<::extra::svc::co
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::extra::svc::containerStruct2, false>::bundle)() =
-    nullptr;
 
 } // namespace detail
 } // namespace apache::thrift

@@ -118,14 +118,8 @@ THRIFT_DATA_MEMBER const std::array<int, 19> TStructDataStorage<::cpp2::containe
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::SmallStruct, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::containerStruct, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::MyEnumA, true>::bundle)() =
-    nullptr;
 
 } // namespace detail
 } // namespace apache::thrift

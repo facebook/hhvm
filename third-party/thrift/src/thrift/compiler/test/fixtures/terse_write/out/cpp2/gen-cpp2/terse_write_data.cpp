@@ -340,29 +340,13 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::MyStruct, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::MyUnion, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::MyStructWithCustomDefault, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::StructLevelTerseStruct, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::FieldLevelTerseStruct, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::AdaptedFields, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::TerseException, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::test::terse_write::MyEnum, true>::bundle)() =
-    nullptr;
 
 } // namespace detail
 } // namespace apache::thrift

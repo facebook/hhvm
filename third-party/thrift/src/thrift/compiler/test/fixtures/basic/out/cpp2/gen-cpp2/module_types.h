@@ -2676,52 +2676,52 @@ template <> struct TEnumTraits<::test::fixtures::basic::UnionToBeRenamed::Type> 
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::test::fixtures::basic::MyStruct, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 8924281123066096965;
   static constexpr ::std::string_view definitionKey = {"\xb7\xd9\x76\x56\xc1\x86\x98\x45\x62\x6d\xcd\x66\xe0\x1f\x59\x1c", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::basic::Containers, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 8924281123066096965;
   static constexpr ::std::string_view definitionKey = {"\xc9\x37\x30\x18\x5d\x57\x66\xed\x23\x3f\xb3\x97\x5c\x86\x56\x51", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::basic::MyDataItem, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 8924281123066096965;
   static constexpr ::std::string_view definitionKey = {"\xab\x25\xf9\x42\x08\x66\x47\xc2\xe0\x48\xec\x07\x9a\x7b\x40\x6a", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::basic::MyUnion, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 8924281123066096965;
   static constexpr ::std::string_view definitionKey = {"\x64\x9d\x59\xb9\xd5\xee\x2e\x37\x0e\x47\x7c\xd3\xb8\x89\x3a\xbc", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::basic::MyException, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 8924281123066096965;
   static constexpr ::std::string_view definitionKey = {"\x5c\x62\xfd\x94\x7d\x11\xaa\xeb\xf4\x37\x85\x57\x47\x66\x6c\x96", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::basic::MyExceptionWithMessage, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 8924281123066096965;
   static constexpr ::std::string_view definitionKey = {"\xb5\x32\x27\xe1\xf6\xd8\x8e\x1b\x71\x83\xbb\x81\x0f\x21\x68\xf2", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::basic::ReservedKeyword, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 8924281123066096965;
   static constexpr ::std::string_view definitionKey = {"\x56\xcf\xff\xaf\x39\xa3\xe0\x72\x10\xfd\x15\xfe\x99\x2f\x5e\xb6", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::basic::UnionToBeRenamed, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 8924281123066096965;
   static constexpr ::std::string_view definitionKey = {"\x79\x92\x1f\x65\x61\x51\xc8\xf1\x99\xbc\xa6\x1d\x7c\x2d\xa8\x72", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::basic::MyEnum, true> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 8924281123066096965;
   static constexpr ::std::string_view definitionKey = {"\xa1\xee\x42\xe3\x27\x3f\x38\x85\xa3\x61\x17\x67\x36\x8b\xe9\x26", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::basic::HackEnum, true> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 8924281123066096965;
   static constexpr ::std::string_view definitionKey = {"\x01\x86\x5f\xc3\xcf\x44\x6a\xa7\xd0\xe4\x50\xae\xb0\x46\x29\xb3", 16};
 };

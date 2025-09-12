@@ -124,7 +124,7 @@ class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface 
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::A, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -7283581240934668548;
   static constexpr ::std::string_view definitionKey = {"\x17\xa8\x53\xd5\x98\xc7\x14\x67\xf7\x7b\x70\xbf\xfd\x06\xcf\xce", 16};
 };
@@ -339,7 +339,7 @@ class ServiceHandler<::cpp2::B> : virtual public ::cpp2::ASvIf {
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::B, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -7283581240934668548;
   static constexpr ::std::string_view definitionKey = {"\x46\x40\x1e\x86\xac\xfc\xa8\x93\xd7\xb5\xb9\xbe\x1e\x1b\x5d\x4d", 16};
 };
@@ -573,7 +573,7 @@ class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface 
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::C, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -7283581240934668548;
   static constexpr ::std::string_view definitionKey = {"\x33\xd4\xc1\x6b\x55\x68\xb4\x68\x3d\x36\x71\xe1\x99\x01\xf4\x09", 16};
 };

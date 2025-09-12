@@ -1354,27 +1354,27 @@ unsigned long OpEncodeStruct::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::facebook::thrift::test::Foo, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 8840219393166623658;
   static constexpr ::std::string_view definitionKey = {"\xd5\x22\x84\x89\x30\xe3\xef\x02\xe3\xbe\x95\x20\x40\x9b\x6c\x6b", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::Bar, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 8840219393166623658;
   static constexpr ::std::string_view definitionKey = {"\xd5\x95\x63\xd0\xe2\xe0\xdc\xdc\x92\x6b\x79\x33\x02\xbf\x2b\x60", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::Baz, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 8840219393166623658;
   static constexpr ::std::string_view definitionKey = {"\xb5\x8d\xe8\x52\x3e\x8b\x79\x7f\x48\xc4\x8d\x55\x5e\x92\xe9\x5f", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::OpEncodeStruct, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 8840219393166623658;
   static constexpr ::std::string_view definitionKey = {"\x83\x4e\x4b\x71\xa9\x0a\x0a\xac\x20\x1c\xea\x52\x33\x42\x98\x83", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::Enum, true> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 8840219393166623658;
   static constexpr ::std::string_view definitionKey = {"\x49\x39\x8e\x60\xa2\x63\xbb\xc0\xe1\x9b\x7f\x70\xfa\xe2\x46\x9c", 16};
 };

@@ -66,32 +66,14 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures:
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::enums::SomeStruct, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::enums::MyStruct, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::enums::Metasyntactic, true>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::enums::MyEnum1, true>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::enums::MyEnum2, true>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::enums::MyEnum3, true>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::enums::MyEnum4, true>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::enums::MyBitmaskEnum1, true>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::enums::MyBitmaskEnum2, true>::bundle)() =
-    nullptr;
 
 } // namespace detail
 } // namespace apache::thrift

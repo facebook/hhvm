@@ -362,50 +362,20 @@ THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::py3::simple::Ad
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::SimpleException, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::OptionalRefStruct, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::SimpleStruct, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::HiddenTypeFieldsStruct, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::detail::AdaptedUnion, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::HiddenException, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::ComplexStruct, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::BinaryUnion, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::BinaryUnionStruct, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::CustomFields, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::CustomTypedefFields, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::AdaptedTypedefFields, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::AnEnum, true>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::AnEnumRenamed, true>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::Flags, true>::bundle)() =
-    nullptr;
 
 } // namespace detail
 } // namespace apache::thrift

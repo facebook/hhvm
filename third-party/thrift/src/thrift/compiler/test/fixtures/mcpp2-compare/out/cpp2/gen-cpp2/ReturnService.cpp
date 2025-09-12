@@ -2670,6 +2670,4 @@ apache::thrift::ServiceRequestInfoMap ReturnServiceServiceInfoHolder::staticRequ
 } // namespace some::valid::ns
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::some::valid::ns::ReturnService, false>::bundle)() =
-    nullptr;
 }

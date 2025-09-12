@@ -480,7 +480,7 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
 
 namespace detail {
 template <> struct TSchemaAssociation<::test_cpp2::cpp_reflection::service_with_special_names, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -5817357428381503798;
   static constexpr ::std::string_view definitionKey = {"\xda\xb0\x97\xda\x9e\x15\x21\x4d\x51\x5d\x8f\x3a\x53\x97\xf7\x83", 16};
 };

@@ -1706,8 +1706,6 @@ std::unique_ptr<apache::thrift::Tile> DecoratedServiceAsyncProcessor::createInte
 }} // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::DecoratedService, false>::bundle)() =
-    nullptr;
 }
 
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::cpp2::UndecoratedService>::getProcessor() {
@@ -2917,8 +2915,6 @@ apache::thrift::ServiceRequestInfoMap UndecoratedServiceServiceInfoHolder::stati
 } // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::UndecoratedService, false>::bundle)() =
-    nullptr;
 }
 
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>::getProcessor() {
@@ -3294,8 +3290,6 @@ apache::thrift::ServiceRequestInfoMap DecoratedService_ExtendsUndecoratedService
 } // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::DecoratedService_ExtendsUndecoratedService, false>::bundle)() =
-    nullptr;
 }
 
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>::getProcessor() {
@@ -3719,8 +3713,6 @@ apache::thrift::ServiceRequestInfoMap DecoratedService_ExtendsDecoratedServiceSe
 } // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::DecoratedService_ExtendsDecoratedService, false>::bundle)() =
-    nullptr;
 }
 
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::cpp2::UndecoratedService_ExtendsDecoratedService>::getProcessor() {
@@ -3952,8 +3944,6 @@ apache::thrift::ServiceRequestInfoMap UndecoratedService_ExtendsDecoratedService
 } // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::UndecoratedService_ExtendsDecoratedService, false>::bundle)() =
-    nullptr;
 }
 
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::getProcessor() {
@@ -4395,7 +4385,5 @@ apache::thrift::ServiceRequestInfoMap DecoratedService_ExtendsUndecoratedService
 } // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService, false>::bundle)() =
-    nullptr;
 }
 

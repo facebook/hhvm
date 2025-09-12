@@ -80,7 +80,7 @@ class ServiceHandler<::cpp2::MyServicePrioChild> : virtual public ::cpp2::MyServ
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::MyServicePrioChild, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -2278009136013983862;
   static constexpr ::std::string_view definitionKey = {"\xd1\x42\x45\x21\x83\xa1\xb3\x07\x12\xba\xf6\x0c\xe0\x07\xc8\x7f", 16};
 };

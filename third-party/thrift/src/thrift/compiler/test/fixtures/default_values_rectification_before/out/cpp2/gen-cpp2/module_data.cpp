@@ -66,11 +66,7 @@ THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::facebook::thrif
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct, false>::bundle)() =
-    nullptr;
 
 } // namespace detail
 } // namespace apache::thrift

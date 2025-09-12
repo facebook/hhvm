@@ -309,12 +309,12 @@ unsigned long CustomException::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::facebook::thrift::test::CustomException, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -4897237288056697529;
   static constexpr ::std::string_view definitionKey = {"\x34\x87\x8d\x8a\xb8\xbf\xb0\x8e\x22\xcc\xa5\xdc\x7e\xd7\x27\x7c", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::Result, true> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -4897237288056697529;
   static constexpr ::std::string_view definitionKey = {"\x90\x81\x31\x92\x8f\x71\xb3\x1a\x8d\xcb\x1a\x91\x4e\xb0\x83\xa8", 16};
 };

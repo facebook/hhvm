@@ -180,26 +180,12 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures:
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::TemplateLists, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::TemplateSets, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::TemplateMaps, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::TWrapped, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::IndirectionA, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::IndirectionB, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::fixtures::python_capi::IndirectionC, false>::bundle)() =
-    nullptr;
 
 } // namespace detail
 } // namespace apache::thrift

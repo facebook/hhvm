@@ -102,7 +102,7 @@ class ServiceHandler<::cpp2::FooBarBazService> : public apache::thrift::ServerIn
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::FooBarBazService, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -2278009136013983862;
   static constexpr ::std::string_view definitionKey = {"\x52\x5b\x9b\xd0\x41\xeb\x66\x8b\x08\x61\x4e\x33\x84\x52\xef\x91", 16};
 };

@@ -238,6 +238,4 @@ apache::thrift::ServiceRequestInfoMap RederivedServiceServiceInfoHolder::staticR
 } // namespace py3::simple
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::py3::simple::RederivedService, false>::bundle)() =
-    nullptr;
 }

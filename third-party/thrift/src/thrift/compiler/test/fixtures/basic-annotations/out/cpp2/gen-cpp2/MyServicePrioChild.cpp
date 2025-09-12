@@ -239,6 +239,4 @@ apache::thrift::ServiceRequestInfoMap MyServicePrioChildServiceInfoHolder::stati
 } // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::MyServicePrioChild, false>::bundle)() =
-    nullptr;
 }

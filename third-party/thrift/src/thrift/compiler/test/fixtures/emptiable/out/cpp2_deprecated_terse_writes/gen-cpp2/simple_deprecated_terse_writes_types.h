@@ -1943,22 +1943,22 @@ unsigned long NotEmptiableStruct::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::apache::thrift::test::MyStruct, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -160936135513114776;
   static constexpr ::std::string_view definitionKey = {"\xd7\xfa\xf7\x94\xc4\x22\x78\xeb\xde\xa3\x98\x2a\xc6\xea\x2a\x52", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::EmptiableStruct, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -160936135513114776;
   static constexpr ::std::string_view definitionKey = {"\xc0\xff\xb4\x79\xe0\xe2\x06\x0e\x7f\x7d\xcd\x20\x95\xb8\x9d\x8e", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::NotEmptiableStruct, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -160936135513114776;
   static constexpr ::std::string_view definitionKey = {"\x6a\x46\x12\xf9\xa9\x67\x84\xc7\x2a\xb7\x01\x54\x62\x39\x16\x6c", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::MyEnum, true> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -160936135513114776;
   static constexpr ::std::string_view definitionKey = {"\x08\x7b\x64\xe1\x1f\xac\x11\x70\x36\xfb\x5d\x93\x8c\x17\xe7\xc5", 16};
 };

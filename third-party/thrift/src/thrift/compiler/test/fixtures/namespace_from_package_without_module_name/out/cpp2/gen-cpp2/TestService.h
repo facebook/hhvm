@@ -76,7 +76,7 @@ class ServiceHandler<::test::namespace_from_package_without_module_name::TestSer
 
 namespace detail {
 template <> struct TSchemaAssociation<::test::namespace_from_package_without_module_name::TestService, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -3315706113137741452;
   static constexpr ::std::string_view definitionKey = {"\xf0\xe3\x68\x4d\x9b\xeb\x52\x71\x51\x4a\x8e\x32\xbb\x98\x9d\xf7", 16};
 };

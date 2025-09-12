@@ -150,7 +150,7 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service2> : public apache::thr
 
 namespace detail {
 template <> struct TSchemaAssociation<::test_cpp2::cpp_reflection::service2, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 8811943787698819311;
   static constexpr ::std::string_view definitionKey = {"\x0d\x22\xf7\xc7\x45\xba\xbe\x70\x33\x18\x66\x7d\xc5\xd3\x4b\x67", 16};
 };

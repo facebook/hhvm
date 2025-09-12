@@ -92,7 +92,7 @@ class ServiceHandler<::apache::thrift::fixtures::types::SomeService> : public ap
 
 namespace detail {
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::SomeService, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\xb7\xa3\xc6\x01\x74\x50\x57\x4a\x92\x90\xb3\x66\x0a\x78\xe3\xa2", 16};
 };

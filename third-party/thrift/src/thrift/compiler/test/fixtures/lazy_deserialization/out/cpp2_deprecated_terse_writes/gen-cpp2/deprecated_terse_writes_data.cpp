@@ -118,17 +118,9 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::apache::thrift:
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::TerseFoo, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::TerseLazyFoo, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::TerseOptionalFoo, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::apache::thrift::test::TerseOptionalLazyFoo, false>::bundle)() =
-    nullptr;
 
 } // namespace detail
 } // namespace apache::thrift

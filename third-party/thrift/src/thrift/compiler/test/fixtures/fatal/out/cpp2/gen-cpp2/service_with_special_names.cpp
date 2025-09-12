@@ -4610,6 +4610,4 @@ apache::thrift::ServiceRequestInfoMap service_with_special_namesServiceInfoHolde
 } // namespace test_cpp2::cpp_reflection
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test_cpp2::cpp_reflection::service_with_special_names, false>::bundle)() =
-    nullptr;
 }

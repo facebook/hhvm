@@ -154,7 +154,7 @@ class ServiceHandler<::cpp2::SinkService> : public apache::thrift::ServerInterfa
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::SinkService, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 6375583463617712746;
   static constexpr ::std::string_view definitionKey = {"\x54\xf9\xfd\x63\x56\xb0\x57\x39\x39\xed\xda\xe3\xd2\xd8\xfb\x99", 16};
 };

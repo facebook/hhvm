@@ -2336,6 +2336,4 @@ std::unique_ptr<apache::thrift::Tile> FootprintTestServiceAsyncProcessor::create
 }} // namespace cpp2_struct_footprint
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2_struct_footprint::FootprintTestService, false>::bundle)() =
-    nullptr;
 }

@@ -526,6 +526,4 @@ std::unique_ptr<apache::thrift::Tile> InteractLocallyAsyncProcessor::createInter
 }} // namespace thrift::shared_interactions
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::thrift::shared_interactions::InteractLocally, false>::bundle)() =
-    nullptr;
 }

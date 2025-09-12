@@ -240,6 +240,4 @@ apache::thrift::ServiceRequestInfoMap ExtendedFootprintServiceServiceInfoHolder:
 } // namespace cpp2_struct_footprint
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2_struct_footprint::ExtendedFootprintService, false>::bundle)() =
-    nullptr;
 }

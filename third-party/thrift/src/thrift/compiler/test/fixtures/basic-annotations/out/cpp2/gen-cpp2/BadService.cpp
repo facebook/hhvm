@@ -404,6 +404,4 @@ std::unique_ptr<apache::thrift::Tile> GoodServiceAsyncProcessor::createInteracti
 }} // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::GoodService, false>::bundle)() =
-    nullptr;
 }

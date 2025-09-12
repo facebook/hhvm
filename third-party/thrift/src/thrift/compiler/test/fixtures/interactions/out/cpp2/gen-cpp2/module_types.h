@@ -358,12 +358,12 @@ unsigned long ShouldBeBoxed::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::CustomException, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 5169293820847068718;
   static constexpr ::std::string_view definitionKey = {"\x93\x11\x69\xd0\x56\x09\x8a\x12\xeb\xee\x82\x2e\x41\x61\x05\x94", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::ShouldBeBoxed, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 5169293820847068718;
   static constexpr ::std::string_view definitionKey = {"\x37\x4c\x5d\x7f\xeb\xbe\x5a\x2b\x2f\xdf\xe1\x4c\x51\x5e\x18\xd1", 16};
 };

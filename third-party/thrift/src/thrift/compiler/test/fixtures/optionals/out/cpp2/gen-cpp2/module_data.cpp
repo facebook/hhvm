@@ -120,17 +120,9 @@ THRIFT_DATA_MEMBER const std::array<int, 10> TStructDataStorage<::cpp2::Person>:
 
 namespace detail {
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Color, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Vehicle, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Person, false>::bundle)() =
-    nullptr;
 
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::Animal, true>::bundle)() =
-    nullptr;
 
 } // namespace detail
 } // namespace apache::thrift

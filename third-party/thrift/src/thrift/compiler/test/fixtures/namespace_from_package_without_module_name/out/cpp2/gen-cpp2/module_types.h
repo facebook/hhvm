@@ -182,7 +182,7 @@ unsigned long Foo::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::test::namespace_from_package_without_module_name::Foo, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -3315706113137741452;
   static constexpr ::std::string_view definitionKey = {"\xf3\x8a\x78\x0f\x10\x74\xce\x15\xc9\x0e\x86\x4a\x74\x27\xa2\x2a", 16};
 };

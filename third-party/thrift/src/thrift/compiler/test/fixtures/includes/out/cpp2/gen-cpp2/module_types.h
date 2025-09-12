@@ -304,7 +304,7 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::MyStruct, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = -2720716125495948740;
   static constexpr ::std::string_view definitionKey = {"\x35\x23\x28\x4d\x4f\x59\x24\x96\xe8\xb4\x63\xb3\xf7\x4b\x5c\xb2", 16};
 };

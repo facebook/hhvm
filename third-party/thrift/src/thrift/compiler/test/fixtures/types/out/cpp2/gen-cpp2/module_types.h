@@ -6890,192 +6890,192 @@ unsigned long StructWithDoubleUnderscores::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::empty_struct, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x53\x63\xc0\xc9\x9f\x4e\xc4\xf3\x1a\x9e\x2b\x5e\x8c\x40\x16\xe7", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::decorated_struct, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x31\xa9\x27\x6f\x8d\xfa\x6a\xfa\x44\x3d\x02\x4f\xfd\x76\x46\x60", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::ContainerStruct, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x75\xdf\xe5\x5d\xbf\x18\x46\x4e\x4d\x9d\x28\x94\x3e\x69\x7c\x0d", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::CppTypeStruct, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\xfb\xe9\x50\xda\x2f\xec\xa9\x59\xe5\xe3\xa9\x52\x93\x89\x41\xe6", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::VirtualStruct, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x39\x6e\xa3\xba\x35\xa7\xcd\x05\x34\xd2\x4b\x91\xf2\xee\xfd\xd3", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x13\xd7\x38\xcd\x28\xd8\x44\x7b\xc3\x0a\xde\x6d\x52\x9c\xa8\xdc", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::TrivialNumeric, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x21\x36\xcc\xf1\x83\xbb\xca\xd7\x93\x61\x18\x88\x0f\x5f\xaf\xd6", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::TrivialNestedWithDefault, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x21\x04\x4a\xd4\xd9\xfc\x53\x05\xbb\x9e\x01\xa3\x89\xf2\xdc\x75", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::ComplexString, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x4a\xdc\x1e\xdc\x80\x5e\x2e\x7f\x58\x61\x94\x26\x09\xe3\xb3\x44", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::ComplexNestedWithDefault, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x6d\x9b\x13\xd0\xcc\x7e\x0c\x01\xba\x96\x73\x9c\x05\xc3\x28\x41", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::MinPadding, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\xf4\x04\xc5\x61\xf9\x59\x32\xfe\x70\xdf\xe4\xbf\xd5\xbc\x1e\xfd", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::MinPaddingWithCustomType, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\xae\x23\xd7\x5d\x5a\xc1\xb6\x05\x2c\x8a\x62\x35\xb3\xb9\x88\xab", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::MyStruct, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\xa4\x6a\x65\xaa\xe4\x53\xfc\x8a\x8f\x5e\x9d\x64\xd1\xc3\x8a\xfa", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::MyDataItem, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x37\xb2\xd3\xd3\x25\x97\x22\x37\x40\x50\x31\x8f\x2b\x42\x6e\x40", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::Renamed, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x78\x84\x14\x2c\x55\xa2\xdc\x60\x31\x05\xa1\xcb\x7a\x68\x19\x9b", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::AnnotatedTypes, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\xac\xe7\x2d\xb1\xf5\x22\x6d\x39\x6e\x0b\x32\x6d\xd9\xea\x62\x12", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::ForwardUsageRoot, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\xbb\xfd\xff\x8e\xfb\x20\x42\x71\xe0\x20\x42\xa5\x47\x1d\xc1\x01", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::ForwardUsageStruct, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x1a\x70\xa9\x86\x70\xc1\xd4\xb7\x0b\xa0\x71\x25\xfc\xd3\x56\x2a", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::ForwardUsageByRef, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x0f\x41\x79\x1c\x8d\xc7\xf9\x34\x79\xc0\x7c\x6d\xa6\xb3\x5b\x54", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::IncompleteMap, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\xe5\x63\xb6\xce\x75\x2f\x65\x81\x65\x3c\x0e\x14\x9c\xec\xa6\x01", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::IncompleteMapDep, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\xdd\xa8\xcb\xf8\x34\x4f\x91\x5d\x1b\x21\x61\x41\x5f\x21\xf6\x7e", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::CompleteMap, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\xeb\xc6\x3f\x35\xcf\x39\x95\x72\x12\x83\x25\x94\x40\x4d\x28\x0c", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::CompleteMapDep, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x3b\xa1\xaa\x84\xdd\x91\x76\x2b\x73\x3f\xc6\xd6\x06\x90\x46\x68", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::IncompleteList, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x16\x28\x2f\x96\xc1\xc1\xd1\x34\x11\x2b\x7c\x13\x53\x16\x5a\x70", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::IncompleteListDep, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\xcc\xa0\xc8\xf8\xdd\xc6\x27\x96\xff\x94\x6f\x3c\x5f\x90\xb3\x4b", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::CompleteList, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\xe1\xda\x77\xf8\x82\x7d\x06\xaf\x77\x3d\x5a\x7a\xa4\xfb\x0b\xba", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::CompleteListDep, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x5d\x6a\x51\xd1\x69\x6e\x18\xe8\x37\xe7\x51\xf7\x5e\x1a\xda\xe2", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::AdaptedList, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x0e\x1b\xa2\xba\xb2\x43\x45\x7d\xcc\xa6\x35\xa9\xef\xb7\x8a\x4b", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::detail::AdaptedListDep, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\xcd\xbe\x4d\x0d\xd9\x82\xd6\xc6\xe4\x45\x01\x29\x3f\x07\xe1\xf6", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::DependentAdaptedList, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x27\x0e\xf2\x90\x1e\xc7\x19\x80\x4f\xfc\x47\x8e\x67\xf3\x66\x5f", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x8c\x2e\x80\xbe\x5f\xfa\x8a\x5e\xdc\xd5\x88\x28\xc5\xc1\x2c\x1c", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::AllocatorAware, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\xa3\x8e\xa4\xdb\x4e\x1f\xc7\xd9\x3a\xfe\x25\x2b\xe5\x24\x5a\xf4", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::AllocatorAware2, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x00\xc4\x1d\xb4\x71\x2a\xbb\xaf\x5b\xda\xbd\xb0\x75\x2f\x59\xc0", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::TypedefStruct, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x3f\xf9\x5e\x56\x4d\x4f\x9b\x34\x73\xeb\x2a\x1b\x56\x8f\x06\x54", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::StructWithDoubleUnderscores, false> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x71\xc8\x66\x62\xf4\x17\xcb\x1d\x18\x82\x66\xd6\xe1\x5c\x46\xae", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::has_bitwise_ops, true> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\xc8\xa7\x93\x5d\x3b\xe6\x28\x4e\x8f\xa6\xdc\xb9\xca\x4b\x40\x6a", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::is_unscoped, true> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x61\xf2\xea\x8a\xa4\xe6\x5b\x85\x2f\x4f\x25\x77\x5c\x08\x89\x4f", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::MyForwardRefEnum, true> {
-  static ::folly::Range<const ::std::string_view*>(*bundle)();
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
   static constexpr int64_t programId = 7104950197475503333;
   static constexpr ::std::string_view definitionKey = {"\x6d\xff\xa7\x4f\x3f\x28\x4c\x19\x2d\xe1\xbd\xe4\x83\xcd\x00\x5c", 16};
 };

@@ -393,6 +393,4 @@ std::unique_ptr<apache::thrift::Tile> BoxServiceAsyncProcessor::createInteractio
 }} // namespace cpp2
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::cpp2::BoxService, false>::bundle)() =
-    nullptr;
 }

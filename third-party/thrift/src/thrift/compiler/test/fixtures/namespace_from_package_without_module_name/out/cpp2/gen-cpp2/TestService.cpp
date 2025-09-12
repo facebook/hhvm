@@ -236,6 +236,4 @@ apache::thrift::ServiceRequestInfoMap TestServiceServiceInfoHolder::staticReques
 } // namespace test::namespace_from_package_without_module_name
 
 namespace apache::thrift::detail {
-::folly::Range<const ::std::string_view*>(*TSchemaAssociation<::test::namespace_from_package_without_module_name::TestService, false>::bundle)() =
-    nullptr;
 }

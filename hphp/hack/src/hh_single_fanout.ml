@@ -338,7 +338,8 @@ end = struct
 end
 
 let make_nast ctx (filename : Relative_path.t) : Nast.program =
-  Ast_provider.get_ast ~full:true ctx filename |> Naming.program ctx
+  let ast = Ast_provider.get_ast ~full:true ctx filename in
+  Naming.program ctx ast
 
 let make_dep_to_symbol_map ctx options (files : Relative_path.Set.t) :
     _ Typing_deps.Dep.variant Typing_deps.DepMap.t =

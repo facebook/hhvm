@@ -40,8 +40,13 @@ let handler =
         ()
       | (_, _, Obj_get (_, (_, pos, Lvar (lvar_pos, lvar_lid)), _, _)) ->
         let lvar_name = Local_id.get_name lvar_lid in
+        let custom_err_config =
+          let tcopt = Tast_env.get_tcopt env in
+          TypecheckerOptions.custom_error_config tcopt
+        in
         Errors.add_error
-          Naming_error.(
-            to_user_error @@ Lvar_in_obj_get { pos; lvar_pos; lvar_name })
+          (Naming_error_utils.to_user_error
+             (Naming_error.Lvar_in_obj_get { pos; lvar_pos; lvar_name })
+             custom_err_config)
       | _ -> ()
   end

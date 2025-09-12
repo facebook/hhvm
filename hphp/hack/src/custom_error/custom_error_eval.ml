@@ -90,7 +90,7 @@ let match_exists patt ~matches ~scruts ~env =
 (* -- Member not found pattern helpers -------------------------------------- *)
 
 let matches_static_pattern patt_is_static ~scrut ~env =
-  let open Patt_error in
+  let open Patt_typing_error in
   match patt_is_static with
   | None -> Match.matched env (* No static pattern means match any *)
   | Some Static_only ->
@@ -103,7 +103,7 @@ let matches_static_pattern patt_is_static ~scrut ~env =
     | `static -> Match.no_match)
 
 let matches_member_kind_instance patt_kind ~scrut ~env =
-  let open Patt_error in
+  let open Patt_typing_error in
   let scrut_kind_matches = function
     | Any_member_kind -> true
     | Method_only ->
@@ -124,7 +124,7 @@ let matches_member_kind_instance patt_kind ~scrut ~env =
     Match.no_match
 
 let matches_member_kind_static patt_kind ~scrut ~env =
-  let open Patt_error in
+  let open Patt_typing_error in
   let scrut_kind_matches = function
     | Any_member_kind -> true
     | Method_only ->
@@ -378,10 +378,10 @@ let matches_locl_ty ?(env = Env.empty) t ~scrut =
   in
   aux t scrut ~env
 
-(* -- Errors ---------------------------------------------------------------- *)
+(* -- Typing errors --------------------------------------------------------- *)
 
-let matches_error ?(env = Env.empty) t ~scrut =
-  let open Patt_error in
+let matches_typing_error t ~scrut ~env =
+  let open Patt_typing_error in
   (* -- Top-level typing errors --------------------------------------------- *)
   let rec aux t err ~env =
     match (t, err) with
@@ -411,7 +411,7 @@ let matches_error ?(env = Env.empty) t ~scrut =
     | (Apply _, _)
     | (Apply_reasons _, _) ->
       Match.no_match
-    | (Invalid { errs; _ }, _) -> Match.match_err errs
+    | (Invalid_typing { errs; _ }, _) -> Match.match_err errs
   (* -- Primary errors ------------------------------------------------------ *)
   and aux_primary t err_prim ~env =
     match (t, err_prim) with
@@ -491,6 +491,43 @@ let matches_error ?(env = Env.empty) t ~scrut =
   in
   aux t scrut ~env
 
+(* -- Naming errors --------------------------------------------------------- *)
+
+let matches_name_context patt_name_context ~scrut ~env =
+  let open Patt_naming_error in
+  match patt_name_context with
+  | Any_name_context -> Match.matched env
+  | One_of_name_context ctxts
+    when List.mem ctxts scrut ~equal:Name_context.equal ->
+    Match.matched env
+  | _ -> Match.no_match
+
+let matches_naming_error t ~scrut ~env =
+  let open Patt_naming_error in
+  match (t, scrut) with
+  | ( Unbound_name { patt_name_context; patt_name },
+      Naming_error.Unbound_name { pos; name; kind } ) ->
+    Match.(
+      matches_name_context patt_name_context ~scrut:kind ~env >>= fun env ->
+      let pos_or_decl = Pos_or_decl.of_raw_pos pos in
+      let scrut = (pos_or_decl, name) in
+      matches_name patt_name ~scrut ~env)
+  | _ -> Match.no_match
+
+(* -- Top level error matches ----------------------------------------------- *)
+
+type phase_error =
+  | Typing_phase of Typing_error.t
+  | Naming_phase of Naming_error.t
+
+let matches_error ?(env = Env.empty) t ~scrut =
+  match (t, scrut) with
+  | (Patt_error.Typing patt_typing_error, Typing_phase scrut) ->
+    matches_typing_error patt_typing_error ~scrut ~env
+  | (Patt_error.Naming patt_naming_error, Naming_phase scrut) ->
+    matches_naming_error patt_naming_error ~scrut ~env
+  | _ -> Match.no_match
+
 let eval_error_message Error_message.{ message } ~env =
   let open Error_message in
   let f t =
@@ -502,13 +539,31 @@ let eval_error_message Error_message.{ message } ~env =
   in
   List.map ~f message
 
-let eval_custom_error
-    Custom_error.
-      { patt = Error_v1 patt; error_message = Message_v1 error_message; _ }
-    ~err =
-  match matches_error patt ~scrut:err with
+let eval_custom_error_v1 patt_typing_err error_message ~err =
+  match matches_typing_error patt_typing_err ~scrut:err ~env:Env.empty with
   | Match.Matched env -> Some (eval_error_message error_message ~env)
   | _ -> None
 
-let eval Custom_error_config.{ valid; _ } ~err =
+let eval_custom_error_v2 patt_err error_message ~err =
+  match matches_error patt_err ~scrut:err with
+  | Match.Matched env -> Some (eval_error_message error_message ~env)
+  | _ -> None
+
+let eval_custom_error
+    Custom_error.{ patt; error_message = Message_v1 error_message; _ }
+    ~(err : phase_error) =
+  match (patt, err) with
+  | (Error_v1 patt, Typing_phase err) ->
+    eval_custom_error_v1 patt error_message ~err
+  | (Error_v1 _, _) ->
+    (* Version 1 only supports typing errors *)
+    None
+  | (Error_v2 patt, _) -> eval_custom_error_v2 patt error_message ~err
+
+let eval_naming_error Custom_error_config.{ valid; _ } ~(err : Naming_error.t) =
+  let err = Naming_phase err in
+  List.filter_map ~f:(eval_custom_error ~err) valid
+
+let eval_typing_error Custom_error_config.{ valid; _ } ~(err : Typing_error.t) =
+  let err = Typing_phase err in
   List.filter_map ~f:(eval_custom_error ~err) valid

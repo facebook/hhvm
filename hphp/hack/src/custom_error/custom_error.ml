@@ -6,7 +6,10 @@
  *
  *)
 
-type versioned_patt_error = Error_v1 of Patt_error.t [@@deriving eq, show]
+type versioned_patt_error =
+  | Error_v1 of Patt_typing_error.t
+  | Error_v2 of Patt_error.t
+[@@deriving eq, show]
 
 type versioned_error_message = Message_v1 of Error_message.t
 [@@deriving eq, show]

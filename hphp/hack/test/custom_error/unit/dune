@@ -5,6 +5,7 @@
    custom_error_types
    custom_error_eval
    errors
+   naming_error
    typing_defs_core
    typing_error
    heap_libc

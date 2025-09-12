@@ -5436,7 +5436,7 @@ end = struct
     in
     let custom_msgs =
       List.map ~f:(render_custom_error ~env)
-      @@ Custom_error_eval.eval custom_err_config ~err:t
+      @@ Custom_error_eval.eval_typing_error custom_err_config ~err:t
     in
     let function_pos = Typing_env_types.(env.genv.function_pos) in
     Eval_result.map ~f:(make_error ~custom_msgs ~function_pos) result

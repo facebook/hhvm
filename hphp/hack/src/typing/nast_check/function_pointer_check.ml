@@ -15,7 +15,7 @@ type env = {
   is_trait: bool;
 }
 
-let handler =
+let handler custom_err_config =
   object
     inherit [env] Stateful_aast_visitor.default_nast_visitor_with_state
 
@@ -47,29 +47,31 @@ let handler =
         | Aast.FunctionPointer (Aast.FP_id (pos, name), _) ->
           if Naming_special_names.SpecialFunctions.is_special_function name then
             Errors.add_error
-              Naming_error.(to_user_error @@ Invalid_fun_pointer { pos; name })
+              (Naming_error_utils.to_user_error
+                 (Naming_error.Invalid_fun_pointer { pos; name })
+                 custom_err_config)
         | Aast.FunctionPointer
             (Aast.FP_class_const ((_, p, Aast.CIself), (_, meth_name)), _) ->
           if not env.in_final_class then
             if env.is_trait then
               Errors.add_error
-                Naming_error.(
-                  to_user_error
-                  @@ Self_in_non_final_function_pointer
-                       { pos = p; class_name = None; meth_name })
+                (Naming_error_utils.to_user_error
+                   (Naming_error.Self_in_non_final_function_pointer
+                      { pos = p; class_name = None; meth_name })
+                   custom_err_config)
             else
               Errors.add_error
-                Naming_error.(
-                  to_user_error
-                  @@ Self_in_non_final_function_pointer
-                       { pos = p; class_name = env.class_name; meth_name })
+                (Naming_error_utils.to_user_error
+                   (Naming_error.Self_in_non_final_function_pointer
+                      { pos = p; class_name = env.class_name; meth_name })
+                   custom_err_config)
         | Aast.FunctionPointer
             (Aast.FP_class_const ((_, p, Aast.CIparent), (_, meth_name)), _) ->
           Errors.add_error
-            Naming_error.(
-              to_user_error
-              @@ Parent_in_function_pointer
-                   { pos = p; parent_name = env.parent_name; meth_name })
+            (Naming_error_utils.to_user_error
+               (Naming_error.Parent_in_function_pointer
+                  { pos = p; parent_name = env.parent_name; meth_name })
+               custom_err_config)
         | _ -> ()
       in
       env

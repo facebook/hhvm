@@ -47,11 +47,15 @@ let handler =
         | Decl_entry.NotYetAvailable ->
           ()
         | Decl_entry.DoesNotExist ->
+          let custom_err_config =
+            let tcopt = Tast_env.get_tcopt env in
+            TypecheckerOptions.custom_error_config tcopt
+          in
           Errors.add_error
-            Naming_error.(
-              to_user_error
-              @@ Unbound_name
-                   { pos = p; name; kind = Name_context.ClassContext })
+            (Naming_error_utils.to_user_error
+               (Naming_error.Unbound_name
+                  { pos = p; name; kind = Name_context.ClassContext })
+               custom_err_config)
       end
       | _ -> ()
   end

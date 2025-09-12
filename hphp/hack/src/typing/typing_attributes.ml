@@ -87,11 +87,14 @@ let check_implements
             (fun name -> name)
         in
 
+        let custom_err_config =
+          TypecheckerOptions.custom_error_config (Typing_env.get_tcopt env)
+        in
         Errors.add_error
-          Naming_error.(
-            to_user_error
-            @@ Unbound_attribute_name
-                 { pos = attr_pos; attr_name; closest_attr_name })
+          (Naming_error_utils.to_user_error
+             (Naming_error.Unbound_attribute_name
+                { pos = attr_pos; attr_name; closest_attr_name })
+             custom_err_config)
     in
 
     env
@@ -144,11 +147,14 @@ let check_implements
       (* A retry will happen. Don't emit error to avoid error-based backtracking *)
       env
     | _ ->
+      let custom_err_config =
+        TypecheckerOptions.custom_error_config (Typing_env.get_tcopt env)
+      in
       Errors.add_error
-        Naming_error.(
-          to_user_error
-          @@ Unbound_attribute_name
-               { pos = attr_pos; attr_name; closest_attr_name = None });
+        (Naming_error_utils.to_user_error
+           (Naming_error.Unbound_attribute_name
+              { pos = attr_pos; attr_name; closest_attr_name = None })
+           custom_err_config);
       env
 
 let check_def env check_new_object (kind : attribute_interface_name) attributes

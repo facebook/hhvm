@@ -6,14 +6,33 @@
   (pps ppx_deriving.std)))
 
 (library
+ (name name_context)
+ (wrapped false)
+ (modules name_context)
+ (preprocess
+  (pps ppx_compare ppx_deriving.std))
+)
+
+(library
+ (name naming_error_utils)
+ (wrapped false)
+ (modules naming_error_utils)
+ (libraries naming_error custom_error_eval)
+ (preprocess
+  (pps ppx_compare ppx_deriving.std))
+)
+
+
+(library
  (name naming_error)
  (wrapped false)
- (modules naming_error name_context)
+ (modules naming_error )
  (libraries
    ast
    pos
    pos_or_decl
    error_codes
+   name_context
    user_error))
 
 (library
@@ -126,7 +145,7 @@
 (library
  (name naming_captures)
  (modules naming_captures)
- (libraries nast naming_error)
+ (libraries nast naming_error naming_error_utils)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -195,6 +214,7 @@
   naming_captures
   naming_elaborate_namespaces_endo
   naming_error
+  naming_error_utils
   nast_check_error
   naming_table
   naming_global

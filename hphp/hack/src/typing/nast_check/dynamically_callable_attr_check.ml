@@ -31,7 +31,7 @@ let handler =
   object
     inherit Nast_visitor.handler_base
 
-    method! at_method_ _ m =
+    method! at_method_ env m =
       let (pos, _) = m.m_name in
       let vis = m.m_visibility in
       let attr = m.m_user_attributes in
@@ -56,11 +56,12 @@ let handler =
           | Internal -> Naming_error.Vinternal
           | ProtectedInternal -> Naming_error.Vprotected_internal
         in
+        let custom_err_config = Nast_check_env.get_custom_error_config env in
         Errors.add_error
-          Naming_error.(
-            to_user_error
-            @@ Illegal_use_of_dynamically_callable
-                 { attr_pos = p; meth_pos = pos; vis });
+          (Naming_error_utils.to_user_error
+             (Naming_error.Illegal_use_of_dynamically_callable
+                { attr_pos = p; meth_pos = pos; vis })
+             custom_err_config);
         check_reified_callable p
       | _ -> ()
 

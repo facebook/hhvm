@@ -31,7 +31,7 @@ let test_instance_method_pattern () =
 
   let patt =
     Custom_error.Error_v1
-      Patt_error.(
+      Patt_typing_error.(
         Primary
           (Member_not_found
              {
@@ -52,7 +52,7 @@ let test_instance_method_pattern () =
     Custom_error_config.{ valid = [custom_err]; invalid = [] }
   in
 
-  let result = Eval.eval custom_config ~err in
+  let result = Eval.eval_typing_error custom_config ~err in
   Printf.printf
     "Test result: %s\n"
     (match result with

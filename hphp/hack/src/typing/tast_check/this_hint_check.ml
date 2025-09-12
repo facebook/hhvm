@@ -16,8 +16,14 @@ let handler =
         match Tast_env.get_self_id env with
         | Some _ -> ()
         | None ->
+          let custom_err_config =
+            let tcopt = Tast_env.get_tcopt env in
+            TypecheckerOptions.custom_error_config tcopt
+          in
           Errors.add_error
-            Naming_error.(to_user_error @@ This_hint_outside_class pos)
+            (Naming_error_utils.to_user_error
+               (Naming_error.This_hint_outside_class pos)
+               custom_err_config)
       in
       match hint with
       | Aast.Hthis -> report_error_if_outside_class env

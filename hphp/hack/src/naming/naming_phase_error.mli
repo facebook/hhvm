@@ -30,6 +30,6 @@ val invalid_expr : ('ex, 'en) Aast.expr -> ('ex, 'en) Aast.expr
 
 val add : agg -> t -> agg
 
-val emit : agg -> unit
+val emit : agg -> custom_err_config:Custom_error_config.t -> unit
 
 val empty : agg

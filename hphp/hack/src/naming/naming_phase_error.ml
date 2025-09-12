@@ -90,27 +90,21 @@ let emit
       malformed_accesses;
       experimental_features;
       parsing;
-    } =
-  List.iter
-    ~f:(fun err -> Errors.add_error @@ Naming_error.to_user_error err)
-    naming;
-  List.iter
-    ~f:(fun err -> Errors.add_error @@ Nast_check_error.to_user_error err)
-    nast_check;
-  List.iter
-    ~f:(fun pos ->
-      Errors.internal_error pos "Unexpected hint not present on legacy AST")
-    unexpected_hints;
-  List.iter
-    ~f:(fun pos ->
+    }
+    ~custom_err_config =
+  List.iter naming ~f:(fun err ->
+      Errors.add_error (Naming_error_utils.to_user_error err custom_err_config));
+  List.iter nast_check ~f:(fun err ->
+      Errors.add_error (Nast_check_error.to_user_error err));
+  List.iter unexpected_hints ~f:(fun pos ->
+      Errors.internal_error pos "Unexpected hint not present on legacy AST");
+  List.iter malformed_accesses ~f:(fun pos ->
       Errors.internal_error
         pos
-        "Malformed hint: expected Haccess (Happly ...) from ast_to_nast")
-    malformed_accesses;
-  List.iter ~f:emit_experimental_feature experimental_features;
-  List.iter
-    ~f:(fun err -> Errors.add_error @@ Parsing_error.to_user_error err)
-    parsing
+        "Malformed hint: expected Haccess (Happly ...) from ast_to_nast");
+  List.iter experimental_features ~f:emit_experimental_feature;
+  List.iter parsing ~f:(fun err ->
+      Errors.add_error @@ Parsing_error.to_user_error err)
 
 (* Helper for constructing expression to be substituted for invalid expressions
    TODO[mjt] this probably belongs with the AAST defs

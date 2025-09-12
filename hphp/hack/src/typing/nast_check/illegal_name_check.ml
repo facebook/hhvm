@@ -24,19 +24,23 @@ let is_magic =
   (fun (_, s) -> Stdlib.Hashtbl.mem h s)
 
 (* Class consts and typeconsts cannot be named "class" *)
-let error_if_is_named_class (pos, name) =
+let error_if_is_named_class (pos, name) custom_err_config =
   if String.equal (String.lowercase name) "class" then
     Errors.add_error
-      Naming_error.(to_user_error @@ Illegal_member_variable_class pos)
+      (Naming_error_utils.to_user_error
+         (Naming_error.Illegal_member_variable_class pos)
+         custom_err_config)
 
 let handler =
   object
     inherit Nast_visitor.handler_base
 
-    method! at_class_ _ c =
+    method! at_class_ env c =
+      let custom_err_config = Nast_check_env.get_custom_error_config env in
       List.iter c.c_typeconsts ~f:(fun tc ->
-          error_if_is_named_class tc.c_tconst_name);
-      List.iter c.c_consts ~f:(fun cc -> error_if_is_named_class cc.cc_id)
+          error_if_is_named_class tc.c_tconst_name custom_err_config);
+      List.iter c.c_consts ~f:(fun cc ->
+          error_if_is_named_class cc.cc_id custom_err_config)
 
     method! at_expr env (_, _, e) =
       let func_name =
@@ -46,13 +50,17 @@ let handler =
       in
       match e with
       | Id (pos, const) ->
+        let custom_err_config = Nast_check_env.get_custom_error_config env in
         let ck = env.classish_kind in
         if not (SN.PseudoConsts.is_pseudo_const const) then
           ()
         else if
           String.equal const SN.PseudoConsts.g__CLASS__ && Option.is_none ck
         then
-          Errors.add_error Naming_error.(to_user_error @@ Illegal_CLASS pos)
+          Errors.add_error
+            (Naming_error_utils.to_user_error
+               (Naming_error.Illegal_CLASS pos)
+               custom_err_config)
         else if
           String.equal const SN.PseudoConsts.g__TRAIT__
           && not
@@ -61,7 +69,10 @@ let handler =
                   ck
                   (Some Ast_defs.Ctrait))
         then
-          Errors.add_error Naming_error.(to_user_error @@ Illegal_TRAIT pos)
+          Errors.add_error
+            (Naming_error_utils.to_user_error
+               (Naming_error.Illegal_TRAIT pos)
+               custom_err_config)
       | Class_const ((_, _, CIexpr (_, _, Id (_, "parent"))), (_, m_name))
         when Option.equal String.equal func_name (Some m_name) ->
         ()

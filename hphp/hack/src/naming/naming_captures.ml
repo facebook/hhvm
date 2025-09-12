@@ -60,7 +60,7 @@ let vars = ref empty
    }
 
    In this example, only $c is free. *)
-let visitor =
+let visitor custom_err_config =
   object
     inherit [_] Aast.endo as super
 
@@ -139,7 +139,10 @@ let visitor =
                 Naming_special_names.SpecialIdents.this
             then (
               Errors.add_error
-                Naming_error.(to_user_error @@ This_as_lexical_variable p);
+                Naming_error_utils.(
+                  to_user_error
+                    (Naming_error.This_as_lexical_variable p)
+                    custom_err_config);
               false
             ) else
               true)
@@ -181,20 +184,36 @@ let elab f elem =
   vars := empty;
   elem
 
-let elab_fun_def elem = elab visitor#on_fun_def elem
+let elab_fun_def elem ~custom_err_config =
+  let visitor = visitor custom_err_config in
+  elab visitor#on_fun_def elem
 
-let elab_typedef elem = elab visitor#on_typedef elem
+let elab_typedef elem ~custom_err_config =
+  let visitor = visitor custom_err_config in
+  elab visitor#on_typedef elem
 
-let elab_stmt elem = elab visitor#on_stmt elem
+let elab_stmt elem ~custom_err_config =
+  let visitor = visitor custom_err_config in
+  elab visitor#on_stmt elem
 
-let elab_module_def elem = elab visitor#on_module_def elem
+let elab_module_def elem ~custom_err_config =
+  let visitor = visitor custom_err_config in
+  elab visitor#on_module_def elem
 
-let elab_gconst elem = elab visitor#on_gconst elem
+let elab_gconst elem ~custom_err_config =
+  let visitor = visitor custom_err_config in
+  elab visitor#on_gconst elem
 
-let elab_class elem = elab visitor#on_class_ elem
+let elab_class elem ~custom_err_config =
+  let visitor = visitor custom_err_config in
+  elab visitor#on_class_ elem
 
-let elab_program elem = elab visitor#on_program elem
+let elab_program elem ~custom_err_config =
+  let visitor = visitor custom_err_config in
+  elab visitor#on_program elem
 
-let populate_fun_def (fd : Nast.fun_def) : Nast.fun_def = elab_fun_def fd
+let populate_fun_def (fd : Nast.fun_def) ~custom_err_config : Nast.fun_def =
+  elab_fun_def fd ~custom_err_config
 
-let populate_class_ (c : Nast.class_) : Nast.class_ = elab_class c
+let populate_class_ (c : Nast.class_) ~custom_err_config : Nast.class_ =
+  elab_class c ~custom_err_config

@@ -53,10 +53,12 @@ let visitor ctx =
   Nast_visitor.iter_with handlers
 
 let stateful_visitor ctx =
+  let tcopt = Provider_context.get_tcopt ctx in
+  let custom_err_config = TypecheckerOptions.custom_error_config tcopt in
   Stateful_aast_visitor.checker
     (Stateful_aast_visitor.combine_visitors
        (Unbound_name_check.handler ctx)
-       Function_pointer_check.handler)
+       (Function_pointer_check.handler custom_err_config))
 
 let program ctx p =
   let () = (visitor ctx)#go ctx p in

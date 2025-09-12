@@ -17,13 +17,14 @@ let get_pos name =
   | Ast_defs.SFclass_const (_, (pos, _)) ->
     pos
 
-let error_if_duplicate_names fdl =
+let error_if_duplicate_names fdl custom_err_config =
   let _ =
     List.fold_left fdl ~init:ShapeSet.empty ~f:(fun seen (name, _) ->
         if ShapeSet.mem name seen then
           Errors.add_error
-            Naming_error.(
-              to_user_error @@ Field_name_already_bound (get_pos name));
+            (Naming_error_utils.to_user_error
+               (Naming_error.Field_name_already_bound (get_pos name))
+               custom_err_config);
         ShapeSet.add name seen)
   in
   ()
@@ -32,8 +33,10 @@ let handler =
   object
     inherit Nast_visitor.handler_base
 
-    method! at_expr _ expr =
+    method! at_expr env expr =
       match expr with
-      | (_, _, Shape fdl) -> error_if_duplicate_names fdl
+      | (_, _, Shape fdl) ->
+        let custom_err_config = Nast_check_env.get_custom_error_config env in
+        error_if_duplicate_names fdl custom_err_config
       | _ -> ()
   end

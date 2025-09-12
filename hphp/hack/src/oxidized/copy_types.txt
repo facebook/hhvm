@@ -92,11 +92,11 @@ name_context::NameContext
 package::PackageRelationship
 patt_binding_ty::PattBindingTy
 patt_locl_ty::Prim
-patt_error::Callback
-patt_error::MemberKindPattern
-patt_error::ReasonsCallback
-patt_error::StaticPattern
-patt_error::VisibilityPattern
+patt_typing_error::MemberKindPattern
+patt_typing_error::StaticPattern
+patt_typing_error::VisibilityPattern
+patt_typing_error::Callback
+patt_typing_error::ReasonsCallback
 file_info::Mode
 file_info::NameType
 file_info::SiKind

@@ -30,6 +30,10 @@ type env = {
 
 let get_tcopt env = Provider_context.get_tcopt env.ctx
 
+let get_custom_error_config env =
+  let tcopt = get_tcopt env in
+  TypecheckerOptions.custom_error_config tcopt
+
 let fun_env env f = { env with function_kind = Some f.f_fun_kind }
 
 let fun_def_env env fd =

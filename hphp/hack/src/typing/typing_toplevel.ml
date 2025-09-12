@@ -41,9 +41,13 @@ let check_if_this_def_is_the_winner ctx name_type (pos, name) : bool =
     match Decl_provider.is_this_def_the_winner ctx name_type (pos, name) with
     | Decl_provider.Winner -> true
     | Decl_provider.Loser_to prev_pos ->
+      let custom_err_config =
+        Provider_context.get_tcopt ctx |> TCO.custom_error_config
+      in
       Errors.add_error
-        Naming_error.(
-          to_user_error @@ Error_name_already_bound { name; pos; prev_pos });
+        (Naming_error_utils.to_user_error
+           (Naming_error.Error_name_already_bound { name; pos; prev_pos })
+           custom_err_config);
       false
     | Decl_provider.Not_found ->
       (* This is impossible! The fact that we have an AST def for [name] implies
@@ -370,15 +374,21 @@ let gconst_def ctx cst =
       in
       (te, (env, ty_err_opt))
     | (None, _) ->
-      if
-        (not (is_literal_with_trivially_inferable_type value))
-        && not (Env.is_hhi env)
+      (if
+       (not (is_literal_with_trivially_inferable_type value))
+       && not (Env.is_hhi env)
       then
+        let custom_err_config =
+          Provider_context.get_tcopt ctx |> TCO.custom_error_config
+        in
         Errors.add_error
-          Naming_error.(to_user_error @@ Missing_typehint (fst cst.cst_name));
+          (Naming_error_utils.to_user_error
+             (Naming_error.Missing_typehint (fst cst.cst_name))
+             custom_err_config));
       let (env, te, _value_type) = Typing.expr_with_pure_coeffects env value in
       (te, (env, None))
   in
+
   Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
   {
     Aast.cst_annotation = Env.save (Env.get_tpenv env) env;

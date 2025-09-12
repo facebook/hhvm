@@ -353,3 +353,5 @@ val derive_instantiation :
 val add_typing_error : Typing_error.t -> env:env -> unit
 
 val add_warning : env -> ('x, 'a) Typing_warning.t -> unit
+
+val get_tcopt : env -> TypecheckerOptions.t

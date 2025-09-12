@@ -1121,13 +1121,19 @@ let class_const_def ~in_enum_class c cls env cc =
         | CCAbstract _
           when (not (is_enum_or_enum_class c.c_kind))
                && TCO.require_types_class_consts tcopt > 0 ->
+          let custom_err_config = TCO.custom_error_config tcopt in
           Errors.add_error
-            Naming_error.(to_user_error @@ Missing_typehint (fst id))
+            (Naming_error_utils.to_user_error
+               (Naming_error.Missing_typehint (fst id))
+               custom_err_config)
         | _
           when (not (is_enum_or_enum_class c.c_kind))
                && TCO.require_types_class_consts tcopt > 1 ->
+          let custom_err_config = TCO.custom_error_config tcopt in
           Errors.add_error
-            Naming_error.(to_user_error @@ Missing_typehint (fst id))
+            (Naming_error_utils.to_user_error
+               (Naming_error.Missing_typehint (fst id))
+               custom_err_config)
         | CCAbstract None -> ()
         | CCAbstract (Some e (* default *))
         | CCConcrete e ->
@@ -1136,8 +1142,11 @@ let class_const_def ~in_enum_class c cls env cc =
             && (not (is_enum_or_enum_class c.c_kind))
             && not (Env.is_hhi env)
           then
+            let custom_err_config = TCO.custom_error_config tcopt in
             Errors.add_error
-              Naming_error.(to_user_error @@ Missing_typehint (fst id))
+              (Naming_error_utils.to_user_error
+                 (Naming_error.Missing_typehint (fst id))
+                 custom_err_config)
       end;
       let (env, ty) = Env.fresh_type env (fst id) in
       (env, ty, None, Unenforced)
@@ -1363,9 +1372,11 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
       | ProtectedInternal -> Naming_error.Vprotected_internal
     in
     let (pos, prop_name) = cv.cv_id in
+    let custom_err_config = TCO.custom_error_config tcopt in
     Errors.add_error
-      Naming_error.(
-        to_user_error @@ Prop_without_typehint { vis; pos; prop_name }));
+      (Naming_error_utils.to_user_error
+         (Naming_error.Prop_without_typehint { vis; pos; prop_name })
+         custom_err_config));
 
   let ((cv_type_ty, _) as cv_type) =
     match expected with

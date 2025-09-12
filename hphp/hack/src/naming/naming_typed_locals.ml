@@ -83,7 +83,7 @@ let join2 error_map env1 env2 =
   in
   ({ locals; assigned_ids; declared_ids }, error_map)
 
-let join envs before_env =
+let join envs before_env custom_err_config =
   let (env, error_map) =
     List.fold_right
       envs
@@ -93,10 +93,11 @@ let join envs before_env =
   Map.iter
     (fun id (id_pos, def_pos) ->
       Errors.add_error
-        Naming_error.(
+        Naming_error_utils.(
           to_user_error
-            (Illegal_typed_local
-               { join = true; id_pos; id_name = Local_id.to_string id; def_pos })))
+            (Naming_error.Illegal_typed_local
+               { join = true; id_pos; id_name = Local_id.to_string id; def_pos })
+            custom_err_config))
     error_map;
   {
     env with
@@ -128,7 +129,7 @@ let check_assign_expr on_expr env (((), _pos, expr_) as expr) =
   | Assign (lhs, _, _) -> check_assign_lval on_expr env lhs
   | _ -> env
 
-let rec check_stmt on_expr env (id_pos, stmt_) =
+let rec check_stmt on_expr env (id_pos, stmt_) custom_err_config =
   let check_block = check_block on_expr in
   match stmt_ with
   | Declare_local (id, _hint, init) ->
@@ -141,57 +142,68 @@ let rec check_stmt on_expr env (id_pos, stmt_) =
       env
     | Some def_pos ->
       Errors.add_error
-        Naming_error.(
+        Naming_error_utils.(
           to_user_error
-            (Illegal_typed_local
-               {
-                 join = false;
-                 id_pos;
-                 id_name = Local_id.to_string name;
-                 def_pos;
-               }));
+            Naming_error.(
+              Illegal_typed_local
+                {
+                  join = false;
+                  id_pos;
+                  id_name = Local_id.to_string name;
+                  def_pos;
+                })
+            custom_err_config);
       env)
   | Expr expr -> check_assign_expr on_expr env expr
   | If (cond, then_block, else_block) ->
     on_expr env cond;
     let new_env = { empty with locals = env.locals } in
-    let then_env = check_block new_env then_block in
-    let else_env = check_block new_env else_block in
-    join [then_env; else_env] env
+    let then_env = check_block new_env then_block custom_err_config in
+    let else_env = check_block new_env else_block custom_err_config in
+    join [then_env; else_env] env custom_err_config
   | For (init_exprs, cond, update_exprs, body) ->
     let env =
       List.fold_left init_exprs ~init:env ~f:(check_assign_expr on_expr)
     in
     Option.iter ~f:(on_expr env) cond;
-    let env = check_block env body in
-    List.fold_left update_exprs ~init:env ~f:(check_assign_expr on_expr)
+    let env = check_block env body custom_err_config in
+    List.fold_left update_exprs ~init:env ~f:(fun x ->
+        check_assign_expr on_expr x)
   | Switch (expr, cases, default) ->
     on_expr env expr;
     let new_env = { empty with locals = env.locals } in
-    let envs = List.map ~f:(check_case on_expr new_env) cases in
+    let envs =
+      List.map
+        ~f:(fun x -> check_case on_expr new_env x custom_err_config)
+        cases
+    in
     let default_env =
       match default with
       | None -> empty
-      | Some (_, block) -> check_block new_env block
+      | Some (_, block) -> check_block new_env block custom_err_config
     in
-    join (envs @ [default_env]) env
+    join (envs @ [default_env]) env custom_err_config
   | Match { sm_expr; sm_arms } ->
     on_expr env sm_expr;
     let new_env = { empty with locals = env.locals } in
-    let envs = List.map ~f:(check_stmt_match_arm on_expr new_env) sm_arms in
-    join envs env
+    let envs =
+      List.map
+        ~f:(fun x -> check_stmt_match_arm on_expr new_env x custom_err_config)
+        sm_arms
+    in
+    join envs env custom_err_config
   | Do (block, cond) ->
-    let env = check_block env block in
+    let env = check_block env block custom_err_config in
     on_expr env cond;
     env
   | While (cond, block) ->
     on_expr env cond;
-    check_block env block
+    check_block env block custom_err_config
   | Awaitall (inits, block) ->
     List.iter ~f:(fun (_, e) -> on_expr env e) inits;
-    check_block env block
-  | Block (_, block) -> check_block env block
-  | Concurrent block -> check_block env block
+    check_block env block custom_err_config
+  | Block (_, block) -> check_block env block custom_err_config
+  | Concurrent block -> check_block env block custom_err_config
   | Return (Some expr)
   | Throw expr ->
     on_expr env expr;
@@ -208,11 +220,11 @@ let rec check_stmt on_expr env (id_pos, stmt_) =
         let env = check_assign_lval on_expr env e1 in
         check_assign_lval on_expr env e2
     in
-    check_block env block
+    check_block env block custom_err_config
   | Try (try_block, catches, finally_block) ->
-    let env = check_block env try_block in
-    let env = check_catches on_expr env catches in
-    let env = check_block env finally_block in
+    let env = check_block env try_block custom_err_config in
+    let env = check_catches on_expr env catches custom_err_config in
+    let env = check_block env finally_block custom_err_config in
     env
   | Using
       {
@@ -222,7 +234,7 @@ let rec check_stmt on_expr env (id_pos, stmt_) =
         us_block = block;
       } ->
     let env = List.fold_left exprs ~init:env ~f:(check_assign_expr on_expr) in
-    check_block env block
+    check_block env block custom_err_config
   | Return None
   | Fallthrough
   | Break
@@ -232,12 +244,12 @@ let rec check_stmt on_expr env (id_pos, stmt_) =
   | Markup _ ->
     env
 
-and check_block on_expr env block =
+and check_block on_expr env block custom_err_config =
   match block with
   | [] -> env
   | stmt :: stmts ->
-    let env = check_stmt on_expr env stmt in
-    let env = check_block on_expr env stmts in
+    let env = check_stmt on_expr env stmt custom_err_config in
+    let env = check_block on_expr env stmts custom_err_config in
     env
 
 and check_catch on_expr env (_cn, (pos, name), block) =
@@ -250,21 +262,26 @@ and check_catch on_expr env (_cn, (pos, name), block) =
   in
   check_block on_expr env block
 
-and check_catches on_expr env catches =
+and check_catches on_expr env catches custom_err_config =
   let new_env = { empty with locals = env.locals } in
-  let envs = List.map ~f:(check_catch on_expr new_env) catches in
-  join envs env
+  let envs =
+    List.map
+      ~f:(fun x -> check_catch on_expr new_env x custom_err_config)
+      catches
+  in
+  join envs env custom_err_config
 
-and check_case on_expr env (expr, block) =
+and check_case on_expr env (expr, block) custom_err_config =
   on_expr env expr;
-  check_block on_expr env block
+  check_block on_expr env block custom_err_config
 
-and check_stmt_match_arm on_expr env { sma_pat = _; sma_body } =
-  check_block on_expr env sma_body
+and check_stmt_match_arm on_expr env { sma_pat = _; sma_body } custom_err_config
+    =
+  check_block on_expr env sma_body custom_err_config
 
 let ignorefn f x y = ignore (f x y)
 
-let visitor =
+let visitor custom_error_config =
   object (s)
     inherit [_] Aast.endo as super
 
@@ -273,11 +290,15 @@ let visitor =
     method on_'en (_ : typed_local_env) () = ()
 
     method! on_stmt env stmt =
-      let _env = check_stmt (ignorefn super#on_expr) env stmt in
+      let _env =
+        check_stmt (ignorefn super#on_expr) env stmt custom_error_config
+      in
       stmt
 
     method! on_block env block =
-      let _env = check_block (ignorefn super#on_expr) env block in
+      let _env =
+        check_block (ignorefn super#on_expr) env block custom_error_config
+      in
       block
 
     method! on_fun_ env fun_ =
@@ -287,7 +308,13 @@ let visitor =
             let env = add_local env local_id param.param_pos in
             add_assigned_id env local_id)
       in
-      let _env = check_block (ignorefn super#on_expr) env fun_.f_body.fb_ast in
+      let _env =
+        check_block
+          (ignorefn super#on_expr)
+          env
+          fun_.f_body.fb_ast
+          custom_error_config
+      in
       fun_
 
     method! on_efun env efun =
@@ -307,15 +334,27 @@ let visitor =
             add_assigned_id env local_id)
       in
       let _env =
-        check_block (ignorefn super#on_expr) env method_.m_body.fb_ast
+        check_block
+          (ignorefn super#on_expr)
+          env
+          method_.m_body.fb_ast
+          custom_error_config
       in
       method_
   end
 
-let elab_fun_def elem = visitor#on_fun_def empty elem
+let elab_fun_def elem ~custom_err_config =
+  let visitor = visitor custom_err_config in
+  visitor#on_fun_def empty elem
 
-let elab_class elem = visitor#on_class_ empty elem
+let elab_class elem ~custom_err_config =
+  let visitor = visitor custom_err_config in
+  visitor#on_class_ empty elem
 
-let elab_program elem = visitor#on_program empty elem
+let elab_program elem ~custom_err_config =
+  let visitor = visitor custom_err_config in
+  visitor#on_program empty elem
 
-let elab_stmt elem = visitor#on_stmt empty elem
+let elab_stmt elem ~custom_err_config =
+  let visitor = visitor custom_err_config in
+  visitor#on_stmt empty elem

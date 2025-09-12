@@ -47,7 +47,7 @@ let add_indirection_between () =
     ("patt_locl_ty", "PattLoclTy", "Shape");
     ("patt_locl_ty", "PattLoclTy", "Params");
     ("patt_locl_ty", "ShapeField", "PattLoclTy");
-    ("patt_error", "PattError", "Secondary");
+    ("patt_typing_error", "PattTypingError", "Secondary");
     ("typing_defs_core", "TypePredicate", "TypePredicate_");
   ]
   @

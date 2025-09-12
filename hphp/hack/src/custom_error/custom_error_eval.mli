@@ -15,7 +15,12 @@ module Value : sig
   [@@deriving compare, sexp]
 end
 
-val eval :
+val eval_typing_error :
   Custom_error_config.t ->
   err:Typing_error.t ->
+  (string, Value.t) Base.Either.t list list
+
+val eval_naming_error :
+  Custom_error_config.t ->
+  err:Naming_error.t ->
   (string, Value.t) Base.Either.t list list

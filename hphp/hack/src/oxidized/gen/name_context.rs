@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5288606cd3d0faa530080d6ce7b190a5>>
+// @generated SignedSource<<f0575ea17a4b4bf6cfe68cfc128b942f>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -37,6 +37,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (compare, eq, show)")]
 #[repr(u8)]
 pub enum NameContext {
     FunctionNamespace,

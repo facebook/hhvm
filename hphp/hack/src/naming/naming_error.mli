@@ -6,10 +6,6 @@
  *
  *)
 
-module Error_code : sig
-  type t
-end
-
 type visibility =
   | Vprivate
   | Vpublic
@@ -264,5 +260,3 @@ type t =
       param_pos: Pos.t;
       param_name: string;
     }
-
-val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t

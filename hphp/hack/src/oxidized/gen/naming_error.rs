@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<96c7d02508e04022bc914a2927c9bc42>>
+// @generated SignedSource<<185a65dd88cf546da34034832828aa94>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -17,7 +17,6 @@ use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
-pub use crate::error_codes::Naming as Error_code;
 #[allow(unused_imports)]
 use crate::*;
 

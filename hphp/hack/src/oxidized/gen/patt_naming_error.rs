@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fa89b612a2473248716f5d83e69bd1bc>>
+// @generated SignedSource<<22fa2c7b043d68792cecf9cffb0690f1>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -35,11 +35,11 @@ use crate::*;
 )]
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
-pub enum VersionedPattError {
-    #[rust_to_ocaml(name = "Error_v1")]
-    ErrorV1(patt_typing_error::PattTypingError),
-    #[rust_to_ocaml(name = "Error_v2")]
-    ErrorV2(patt_error::PattError),
+pub enum PattNameContext {
+    #[rust_to_ocaml(name = "Any_name_context")]
+    AnyNameContext,
+    #[rust_to_ocaml(name = "One_of_name_context")]
+    OneOfNameContext(Vec<name_context::NameContext>),
 }
 
 #[derive(
@@ -59,30 +59,16 @@ pub enum VersionedPattError {
 )]
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
-pub enum VersionedErrorMessage {
-    #[rust_to_ocaml(name = "Message_v1")]
-    MessageV1(error_message::ErrorMessage),
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(attr = "deriving (eq, show)")]
-#[repr(C)]
-pub struct CustomError {
-    pub name: String,
-    pub patt: VersionedPattError,
-    pub error_message: VersionedErrorMessage,
+pub enum PattNamingError {
+    #[rust_to_ocaml(prefix = "patt_")]
+    #[rust_to_ocaml(name = "Unbound_name")]
+    UnboundName {
+        name_context: PattNameContext,
+        name: patt_name::PattName,
+    },
+    #[rust_to_ocaml(name = "Invalid_naming")]
+    InvalidNaming {
+        errs: Vec<validation_err::ValidationErr>,
+        patt: Box<PattNamingError>,
+    },
 }

@@ -125,9 +125,9 @@ oxidized::user_error::Severity
 oxidized::xhp_attribute::Tag
 oxidized::xhp_attribute::XhpAttribute
 oxidized::patt_binding_ty::PattBindingTy
-oxidized::patt_error::Callback
-oxidized::patt_error::MemberKindPattern
-oxidized::patt_error::ReasonsCallback
-oxidized::patt_error::StaticPattern
-oxidized::patt_error::VisibilityPattern
+oxidized::patt_typing_error::Callback
+oxidized::patt_typing_error::MemberKindPattern
+oxidized::patt_typing_error::ReasonsCallback
+oxidized::patt_typing_error::StaticPattern
+oxidized::patt_typing_error::VisibilityPattern
 oxidized::patt_locl_ty::Prim

@@ -9,6 +9,8 @@
    error_message
    patt_binding_ty
    patt_error
+   patt_naming_error
+   patt_typing_error
    patt_locl_ty
    patt_name
    patt_string
@@ -18,6 +20,7 @@
  (libraries
   core_kernel
   relative_path
+  name_context
   )
  (foreign_archives custom_error_config_ffi))
 
@@ -45,4 +48,4 @@
  (preprocess
   (pps ppx_compare ppx_sexp_conv))
  (modules custom_error_eval)
- (libraries core_kernel custom_error_types typing_defs_core typing_defs typing_error))
+ (libraries core_kernel custom_error_types typing_defs_core typing_defs typing_error name_context naming_error))

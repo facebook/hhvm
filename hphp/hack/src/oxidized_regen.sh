@@ -126,6 +126,8 @@ run_hh_oxidize \
   hphp/hack/src/custom_error/custom_error_config.ml                            \
   hphp/hack/src/custom_error/error_message.ml                                 \
   hphp/hack/src/custom_error/patt_binding_ty.ml                               \
+  hphp/hack/src/custom_error/patt_naming_error.ml                             \
+  hphp/hack/src/custom_error/patt_typing_error.ml                             \
   hphp/hack/src/custom_error/patt_error.ml                                    \
   hphp/hack/src/custom_error/patt_locl_ty.ml                                  \
   hphp/hack/src/custom_error/patt_name.ml                                     \
@@ -234,6 +236,8 @@ run_hh_oxidize \
   hphp/hack/src/custom_error/custom_error_config.ml                           \
   hphp/hack/src/custom_error/error_message.ml                                 \
   hphp/hack/src/custom_error/patt_binding_ty.ml                               \
+  hphp/hack/src/custom_error/patt_naming_error.ml                             \
+  hphp/hack/src/custom_error/patt_typing_error.ml                             \
   hphp/hack/src/custom_error/patt_error.ml                                    \
   hphp/hack/src/custom_error/patt_locl_ty.ml                                  \
   hphp/hack/src/custom_error/patt_name.ml                                     \

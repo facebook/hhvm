@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<95b3b17e2ea2159f1f9fa5223bcf74e7>>
+// @generated SignedSource<<7e2aafeff2a80fbcbc41ff9c2b78b2fc>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -25,7 +25,9 @@ pub mod patt_binding_ty;
 pub mod patt_error;
 pub mod patt_locl_ty;
 pub mod patt_name;
+pub mod patt_naming_error;
 pub mod patt_string;
+pub mod patt_typing_error;
 pub mod patt_var;
 pub mod pos_or_decl;
 pub mod prim_defs;

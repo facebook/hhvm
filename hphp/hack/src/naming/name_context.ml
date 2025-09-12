@@ -16,6 +16,7 @@ type t =
      traits. *)
   | TraitContext
   | ClassContext
+[@@deriving compare, eq, show]
 
 let to_string = function
   | FunctionNamespace -> "function"

@@ -17,7 +17,7 @@ let mk_ty ty_ = Ty.mk (Typing_reason.none, ty_)
 (* Pattern match over a `Violated_constraint` error matching exactly the tparam
    name for which the constraint is violated *)
 let test_patt_string_exactly _ =
-  let open Patt_error in
+  let open Patt_typing_error in
   let open Patt_locl_ty in
   let name = "Tviolated" in
   let pod_none = Pos_or_decl.none in
@@ -60,7 +60,7 @@ let test_patt_string_exactly _ =
   let open Core in
   assert_equal
     ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
-    (Eval.eval custom_config ~err)
+    (Eval.eval_typing_error custom_config ~err)
     [[Either.First "Ok"]]
 
 (* Pattern match over the [tysub] contained in a `Violated_constraint` error;
@@ -68,7 +68,7 @@ let test_patt_string_exactly _ =
    have exactly one type param. The type param must be a shape containing
    a field name "a" which can be of any type *)
 let test_patt_tysub _ =
-  let open Patt_error in
+  let open Patt_typing_error in
   let open Patt_locl_ty in
   let param_name = "Tviolated" in
   let class_name = "Classy" in
@@ -163,7 +163,7 @@ let test_patt_tysub _ =
   let open Core in
   assert_equal
     ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
-    (Eval.eval custom_config ~err)
+    (Eval.eval_typing_error custom_config ~err)
     [Either.[First "Ok:"; Second (Eval.Value.Ty (mk_ty Ty.Tdynamic))]]
 
 (* Pattern match over the [tysub] contained in a `Violated_constraint` error;
@@ -172,7 +172,7 @@ let test_patt_tysub _ =
    arraykey (which we bind to `x`) or a shape with a field named `a` (whose
    type we bind to `x`) *)
 let test_patt_tysub_or_pattern _ =
-  let open Patt_error in
+  let open Patt_typing_error in
   let open Patt_locl_ty in
   let param_name = "Tviolated" in
   let class_name = "Classy" in
@@ -272,7 +272,7 @@ let test_patt_tysub_or_pattern _ =
   let open Core in
   assert_equal
     ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
-    (Eval.eval custom_config ~err)
+    (Eval.eval_typing_error custom_config ~err)
     [Either.[First "Ok:"; Second (Eval.Value.Ty (mk_ty Ty.Tdynamic))]]
 
 let test_namespace _ =
@@ -301,7 +301,7 @@ let test_namespace _ =
   in
   let patt =
     Custom_error.Error_v1
-      Patt_error.(
+      Patt_typing_error.(
         Apply_reasons
           {
             patt_rsns_cb = Any_reasons_callback;
@@ -337,7 +337,7 @@ let test_namespace _ =
   let open Core in
   assert_equal
     ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
-    (Eval.eval custom_config ~err)
+    (Eval.eval_typing_error custom_config ~err)
     [Either.[First "Ok"]]
 
 (* ============================================================================ *)
@@ -366,7 +366,7 @@ let test_member_not_found_instance_method_pattern _ =
 
   let patt =
     Custom_error.Error_v1
-      Patt_error.(
+      Patt_typing_error.(
         Primary
           (Member_not_found
              {
@@ -390,7 +390,7 @@ let test_member_not_found_instance_method_pattern _ =
   let open Core in
   assert_equal
     ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
-    (Eval.eval custom_config ~err)
+    (Eval.eval_typing_error custom_config ~err)
     [[Either.First "Instance method not found in class"]]
 
 (* Test instance property pattern matching *)
@@ -415,7 +415,7 @@ let test_member_not_found_instance_property_pattern _ =
 
   let patt =
     Custom_error.Error_v1
-      Patt_error.(
+      Patt_typing_error.(
         Primary
           (Member_not_found
              {
@@ -439,7 +439,7 @@ let test_member_not_found_instance_property_pattern _ =
   let open Core in
   assert_equal
     ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
-    (Eval.eval custom_config ~err)
+    (Eval.eval_typing_error custom_config ~err)
     [[Either.First "Instance property not found in class"]]
 
 (* Test static method pattern matching *)
@@ -464,7 +464,7 @@ let test_member_not_found_static_method_pattern _ =
 
   let patt =
     Custom_error.Error_v1
-      Patt_error.(
+      Patt_typing_error.(
         Primary
           (Member_not_found
              {
@@ -488,7 +488,7 @@ let test_member_not_found_static_method_pattern _ =
   let open Core in
   assert_equal
     ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
-    (Eval.eval custom_config ~err)
+    (Eval.eval_typing_error custom_config ~err)
     [[Either.First "Static method not found in class"]]
 
 (* Test class constant pattern matching *)
@@ -513,7 +513,7 @@ let test_member_not_found_class_constant_pattern _ =
 
   let patt =
     Custom_error.Error_v1
-      Patt_error.(
+      Patt_typing_error.(
         Primary
           (Member_not_found
              {
@@ -537,7 +537,7 @@ let test_member_not_found_class_constant_pattern _ =
   let open Core in
   assert_equal
     ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
-    (Eval.eval custom_config ~err)
+    (Eval.eval_typing_error custom_config ~err)
     [[Either.First "Class constant not found"]]
 
 (* Test class variable (static property) pattern matching *)
@@ -562,7 +562,7 @@ let test_member_not_found_static_property_pattern _ =
 
   let patt =
     Custom_error.Error_v1
-      Patt_error.(
+      Patt_typing_error.(
         Primary
           (Member_not_found
              {
@@ -586,7 +586,7 @@ let test_member_not_found_static_property_pattern _ =
   let open Core in
   assert_equal
     ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
-    (Eval.eval custom_config ~err)
+    (Eval.eval_typing_error custom_config ~err)
     [[Either.First "Static property not found"]]
 
 (* Test class typeconst pattern matching *)
@@ -611,7 +611,7 @@ let test_member_not_found_class_typeconst_pattern _ =
 
   let patt =
     Custom_error.Error_v1
-      Patt_error.(
+      Patt_typing_error.(
         Primary
           (Member_not_found
              {
@@ -635,7 +635,7 @@ let test_member_not_found_class_typeconst_pattern _ =
   let open Core in
   assert_equal
     ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
-    (Eval.eval custom_config ~err)
+    (Eval.eval_typing_error custom_config ~err)
     [[Either.First "Type constant not found"]]
 
 (* Test wildcard pattern matching - Any_member_kind *)
@@ -660,7 +660,7 @@ let test_member_wildcard_patterns _ =
 
   let patt =
     Custom_error.Error_v1
-      Patt_error.(
+      Patt_typing_error.(
         Primary
           (Member_not_found
              {
@@ -684,7 +684,7 @@ let test_member_wildcard_patterns _ =
   let open Core in
   assert_equal
     ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
-    (Eval.eval custom_config ~err)
+    (Eval.eval_typing_error custom_config ~err)
     [[Either.First "Any member not found"]]
 
 (* Test string pattern matching with regex-like patterns *)
@@ -709,7 +709,7 @@ let test_member_name_patterns _ =
 
   let patt =
     Custom_error.Error_v1
-      Patt_error.(
+      Patt_typing_error.(
         Primary
           (Member_not_found
              {
@@ -733,7 +733,7 @@ let test_member_name_patterns _ =
   let open Core in
   assert_equal
     ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
-    (Eval.eval custom_config ~err)
+    (Eval.eval_typing_error custom_config ~err)
     [[Either.First "Render method not found in test class"]]
 
 (* Test pattern specificity - specific patterns should match before general ones *)
@@ -759,7 +759,7 @@ let test_member_pattern_specificity _ =
   (* Specific pattern should match first *)
   let specific_patt =
     Custom_error.Error_v1
-      Patt_error.(
+      Patt_typing_error.(
         Primary
           (Member_not_found
              {
@@ -774,7 +774,7 @@ let test_member_pattern_specificity _ =
   (* General pattern *)
   let general_patt =
     Custom_error.Error_v1
-      Patt_error.(
+      Patt_typing_error.(
         Primary
           (Member_not_found
              {
@@ -816,7 +816,7 @@ let test_member_pattern_specificity _ =
   (* First (more specific) pattern should match *)
   assert_equal
     ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
-    (Eval.eval custom_config ~err)
+    (Eval.eval_typing_error custom_config ~err)
     [
       [Either.First "Specific method error"];
       [Either.First "General method error"];
@@ -845,7 +845,7 @@ let test_member_pattern_no_match _ =
   (* Pattern that shouldn't match - expecting static but got instance *)
   let patt =
     Custom_error.Error_v1
-      Patt_error.(
+      Patt_typing_error.(
         Primary
           (Member_not_found
              {
@@ -869,7 +869,7 @@ let test_member_pattern_no_match _ =
   (* Should return empty list since pattern doesn't match *)
   assert_equal
     ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
-    (Eval.eval custom_config ~err)
+    (Eval.eval_typing_error custom_config ~err)
     []
 
 (* Test complex string patterns with OR logic *)
@@ -894,7 +894,7 @@ let test_member_complex_string_patterns _ =
 
   let patt =
     Custom_error.Error_v1
-      Patt_error.(
+      Patt_typing_error.(
         Primary
           (Member_not_found
              {
@@ -928,10 +928,116 @@ let test_member_complex_string_patterns _ =
   let open Core in
   assert_equal
     ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
-    (Eval.eval custom_config ~err)
+    (Eval.eval_typing_error custom_config ~err)
     [[Either.First "React render method not found"]]
 
-(* Test suite *)
+(* ~~ Naming errors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
+let test_unbound_name_any_context _ =
+  let name = "foo" in
+  let err =
+    Naming_error.Unbound_name
+      { pos = Pos.none; name; kind = Name_context.FunctionNamespace }
+  in
+
+  let patt_namespace = Patt_name.Root in
+  let patt_name =
+    Patt_name.Name { patt_namespace; patt_name = Patt_string.Exactly name }
+  in
+  let patt =
+    Custom_error.Error_v2
+      (Patt_error.Naming
+         Patt_naming_error.(
+           Unbound_name { patt_name; patt_name_context = Any_name_context }))
+  in
+  let msg_str = "foo doesn't exist" in
+  let error_message =
+    Custom_error.Message_v1 Error_message.{ message = [Lit msg_str] }
+  in
+  let custom_err = Custom_error.{ name = "test"; patt; error_message } in
+  let custom_config =
+    Custom_error_config.{ valid = [custom_err]; invalid = [] }
+  in
+  let open Core in
+  assert_equal
+    ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
+    (Eval.eval_naming_error custom_config ~err)
+    [[Either.First msg_str]]
+
+let test_unbound_name_function_context_good _ =
+  let name = "foo" in
+  let err =
+    Naming_error.Unbound_name
+      { pos = Pos.none; name; kind = Name_context.FunctionNamespace }
+  in
+
+  let patt_namespace = Patt_name.Root in
+  let patt_name =
+    Patt_name.Name { patt_namespace; patt_name = Patt_string.Exactly name }
+  in
+  let patt =
+    Custom_error.Error_v2
+      (Patt_error.Naming
+         Patt_naming_error.(
+           Unbound_name
+             {
+               patt_name;
+               patt_name_context =
+                 One_of_name_context [Name_context.FunctionNamespace];
+             }))
+  in
+  let msg_str = "foo doesn't exist" in
+  let error_message =
+    Custom_error.Message_v1 Error_message.{ message = [Lit msg_str] }
+  in
+  let custom_err = Custom_error.{ name = "test"; patt; error_message } in
+  let custom_config =
+    Custom_error_config.{ valid = [custom_err]; invalid = [] }
+  in
+  let open Core in
+  assert_equal
+    ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
+    (Eval.eval_naming_error custom_config ~err)
+    [[Either.First msg_str]]
+
+let test_unbound_name_function_context_bad _ =
+  let name = "foo" in
+  let err =
+    Naming_error.Unbound_name
+      { pos = Pos.none; name; kind = Name_context.FunctionNamespace }
+  in
+
+  let patt_namespace = Patt_name.Root in
+  let patt_name =
+    Patt_name.Name { patt_namespace; patt_name = Patt_string.Exactly name }
+  in
+  let patt =
+    Custom_error.Error_v2
+      (Patt_error.Naming
+         Patt_naming_error.(
+           Unbound_name
+             {
+               patt_name;
+               patt_name_context =
+                 One_of_name_context [Name_context.TypeNamespace];
+             }))
+  in
+  let msg_str = "foo doesn't exist" in
+  let error_message =
+    Custom_error.Message_v1 Error_message.{ message = [Lit msg_str] }
+  in
+  let custom_err = Custom_error.{ name = "test"; patt; error_message } in
+  let custom_config =
+    Custom_error_config.{ valid = [custom_err]; invalid = [] }
+  in
+  let open Core in
+  assert_equal
+    ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
+    (Eval.eval_naming_error custom_config ~err)
+    (* NoMatch *)
+    []
+
+(* ~~ Test suite ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 let tests =
   [
     "test_patt_string_exactly" >:: test_patt_string_exactly;
@@ -956,6 +1062,11 @@ let tests =
     "test_member_pattern_no_match" >:: test_member_pattern_no_match;
     "test_member_complex_string_patterns"
     >:: test_member_complex_string_patterns;
+    "test_unbound_name_any_context" >:: test_unbound_name_any_context;
+    "test_unbound_name_function_context_good"
+    >:: test_unbound_name_function_context_good;
+    "test_unbound_name_function_context_bad"
+    >:: test_unbound_name_function_context_bad;
   ]
 
 let () = "custom_error_unit_tests" >::: tests |> run_test_tt_main

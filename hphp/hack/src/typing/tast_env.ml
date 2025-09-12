@@ -405,3 +405,7 @@ let derive_instantiation env =
 let add_typing_error = Typing_error_utils.add_typing_error
 
 let add_warning = Typing_warning_utils.add
+
+let get_tcopt env =
+  let open Typing_env_types in
+  env.genv.tcopt

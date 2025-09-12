@@ -120,7 +120,10 @@ let calc_errors_and_tast ctx ?(drop_fixmed = true) fn ~full_ast :
       let module_tasts = calc_tast check_module modules in
       (* For now we only want to elaborate/validate top-level statements to
          generate errors but not typecheck *)
-      let _stmts = stmts |> List.map ~f:snd |> Naming.fun_def_of_stmts ctx in
+      let (_ : Nast.fun_def option) =
+        let stmts = List.map stmts ~f:snd in
+        Naming.fun_def_of_stmts ctx stmts
+      in
       { Tast.fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts })
 
 let calc_errors_and_tast_for

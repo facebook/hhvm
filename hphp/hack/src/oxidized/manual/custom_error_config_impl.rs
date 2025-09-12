@@ -20,11 +20,7 @@ use crate::custom_error_config::CustomErrorConfig;
 use crate::error_message::Elem;
 use crate::error_message::ErrorMessage;
 use crate::patt_binding_ty::PattBindingTy;
-use crate::patt_error::Callback;
 use crate::patt_error::PattError;
-use crate::patt_error::Primary;
-use crate::patt_error::ReasonsCallback;
-use crate::patt_error::Secondary;
 use crate::patt_locl_ty::Params;
 use crate::patt_locl_ty::PattLoclTy;
 use crate::patt_locl_ty::Prim;
@@ -33,7 +29,14 @@ use crate::patt_locl_ty::ShapeFields;
 use crate::patt_locl_ty::ShapeLabel;
 use crate::patt_name::Namespace;
 use crate::patt_name::PattName;
+use crate::patt_naming_error::PattNameContext;
+use crate::patt_naming_error::PattNamingError;
 use crate::patt_string::PattString;
+use crate::patt_typing_error::Callback;
+use crate::patt_typing_error::PattTypingError;
+use crate::patt_typing_error::Primary;
+use crate::patt_typing_error::ReasonsCallback;
+use crate::patt_typing_error::Secondary;
 use crate::validation_err::ValidationErr;
 
 impl CustomErrorConfig {
@@ -142,7 +145,8 @@ impl Validatable for VersionedErrorMessage {
 impl Validatable for VersionedPattError {
     fn validate(&mut self, env: &mut ValidationEnv) -> bool {
         match self {
-            Self::ErrorV1(msg) => msg.validate(env),
+            Self::ErrorV1(patt_typing_error) => patt_typing_error.validate(env),
+            Self::ErrorV2(patt_error) => patt_error.validate(env),
         }
     }
 }
@@ -154,11 +158,36 @@ impl Validatable for CustomError {
 }
 
 // -- Error patterns -----------------------------------------------------------
-
 impl Validatable for PattError {
     fn validate(&mut self, env: &mut ValidationEnv) -> bool {
         match self {
-            Self::Invalid { .. } => false,
+            Self::Typing(typing) => typing.validate(env),
+            Self::Naming(naming) => naming.validate(env),
+        }
+    }
+}
+
+impl Validatable for PattNamingError {
+    fn validate(&mut self, env: &mut ValidationEnv) -> bool {
+        match self {
+            Self::InvalidNaming { .. } => false,
+            Self::UnboundName { name_context, name } => {
+                name_context.validate(env) && name.validate(env)
+            }
+        }
+    }
+}
+
+impl Validatable for PattNameContext {
+    fn validate(&mut self, _env: &mut ValidationEnv) -> bool {
+        true
+    }
+}
+
+impl Validatable for PattTypingError {
+    fn validate(&mut self, env: &mut ValidationEnv) -> bool {
+        match self {
+            Self::InvalidTyping { .. } => false,
             Self::Primary(prim) => prim.validate(env),
             Self::Apply { cb, err } => cb.validate(env) && err.validate(env),
             Self::ApplyReasons { rsns_cb, secondary } => {
@@ -182,14 +211,14 @@ impl Validatable for PattError {
     }
 }
 
-impl Invalidatable for PattError {
+impl Invalidatable for PattTypingError {
     fn invalidate(&mut self, errs_in: &[ValidationErr]) {
         if !errs_in.is_empty() {
             match self {
-                Self::Invalid { errs, .. } => errs.extend(errs_in.to_vec()),
+                Self::InvalidTyping { errs, .. } => errs.extend(errs_in.to_vec()),
                 _ => {
-                    let patt = std::mem::replace(self, PattError::Primary(Primary::AnyPrim));
-                    *self = PattError::Invalid {
+                    let patt = std::mem::replace(self, PattTypingError::Primary(Primary::AnyPrim));
+                    *self = PattTypingError::InvalidTyping {
                         errs: errs_in.to_vec(),
                         patt: Box::new(patt),
                     };

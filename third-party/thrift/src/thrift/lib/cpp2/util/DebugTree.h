@@ -62,7 +62,7 @@ struct DebugTree {
 //
 // The default interface is
 //
-//   debugTree(value, TypeFinder, TypeRef);
+//   debugTree(value, TypeRef);
 //
 // If schema does not match the data (e.g., out-dated), we will still try to
 // return what we have (e.g., if we can't get field name, we might still return
@@ -70,218 +70,166 @@ struct DebugTree {
 //
 // The result is printable, so that users can write
 //
-//   LOG(INFO) << debugTree(value, typeFinder, typeRef);
+//   LOG(INFO) << debugTree(value, typeRef);
 //
 template <class T>
-scope debugTree(
-    const T& t, const TypeFinder& finder, const OptionalTypeRef& ref) {
-  return DebugTree<T>{}(t, finder, ref);
+scope debugTree(const T& t, const OptionalTypeRef& ref) {
+  return DebugTree<T>{}(t, ref);
 }
 
 template <class T>
-scope debugTree(const T& t, const TypeFinder& finder, const Uri& uri) {
-  return debugTree(t, finder, finder.findType(uri));
+scope debugTree(const T& t, const Uri& uri) {
+  return debugTree(t, TypeFinder::findType(uri));
 }
 
 template <class T>
-scope debugTree(const T& t, const TypeFinder& finder, const type::Type& type) {
-  return debugTree(t, finder, finder.findTypeInAny(type));
-}
-
-template <class T>
-scope debugTree(const T& t, const TypeFinder& finder) {
-  return debugTree(t, finder, OptionalTypeRef{});
-}
-
-template <class T, class... Args>
-scope debugTree(const T& t, const syntax_graph::SyntaxGraph&, Args&&... args) {
-  return debugTree(t, TypeFinder{}, std::forward<Args>(args)...);
+scope debugTree(const T& t, const type::Type& type) {
+  return debugTree(t, TypeFinder::findTypeInAny(type));
 }
 
 template <class T>
 scope debugTree(const T& t) {
-  DebugTree<T> impl;
-  if constexpr (__FBTHRIFT_IS_VALID(impl, impl(t))) {
-    return impl(t);
-  }
-  return impl(t, TypeFinder{}, OptionalTypeRef{});
+  return debugTree(t, OptionalTypeRef{});
 }
 
 template <>
 struct DebugTree<bool> {
-  scope operator()(bool b, const TypeFinder&, const OptionalTypeRef&) {
+  scope operator()(bool b, const OptionalTypeRef&) {
     return scope::make_root("{}", b ? "true" : "false");
   }
 };
 
 template <class T>
 struct DebugTree<T, std::enable_if_t<std::is_arithmetic_v<T>>> {
-  scope operator()(T v, const TypeFinder&, const OptionalTypeRef&) {
+  scope operator()(T v, const OptionalTypeRef&) {
     return scope::make_root("{}", v);
   }
 };
 
 template <>
 struct DebugTree<std::string> {
-  scope operator()(
-      const std::string& buf, const TypeFinder&, const OptionalTypeRef&);
+  scope operator()(const std::string& buf, const OptionalTypeRef&);
 };
 
 template <>
 struct DebugTree<folly::IOBuf> {
-  scope operator()(
-      const folly::IOBuf& buf, const TypeFinder&, const OptionalTypeRef&);
+  scope operator()(const folly::IOBuf& buf, const OptionalTypeRef&);
 };
 
 template <>
 struct DebugTree<protocol::ValueList> {
-  scope operator()(
-      const protocol::ValueList&, const TypeFinder&, const OptionalTypeRef&);
+  scope operator()(const protocol::ValueList&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<protocol::ValueSet> {
-  scope operator()(
-      const protocol::ValueSet&, const TypeFinder&, const OptionalTypeRef&);
+  scope operator()(const protocol::ValueSet&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<protocol::ValueMap> {
-  scope operator()(
-      const protocol::ValueMap&, const TypeFinder&, const OptionalTypeRef&);
+  scope operator()(const protocol::ValueMap&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<protocol::Value> {
-  scope operator()(
-      const protocol::Value&, const TypeFinder&, const OptionalTypeRef&);
+  scope operator()(const protocol::Value&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<protocol::Object> {
-  scope operator()(
-      const protocol::Object&, const TypeFinder&, const OptionalTypeRef&);
+  scope operator()(const protocol::Object&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<type::AnyStruct> {
-  scope operator()(
-      const type::AnyStruct&, const TypeFinder&, const OptionalTypeRef&);
+  scope operator()(const type::AnyStruct&, const OptionalTypeRef&);
 };
 
 template <>
 struct DebugTree<op::BoolPatch> {
-  scope operator()(
-      const op::BoolPatch&, const TypeFinder&, const OptionalTypeRef&);
+  scope operator()(const op::BoolPatch&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<op::BytePatch> {
-  scope operator()(
-      const op::BytePatch&, const TypeFinder&, const OptionalTypeRef&);
+  scope operator()(const op::BytePatch&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<op::I16Patch> {
-  scope operator()(
-      const op::I16Patch&, const TypeFinder&, const OptionalTypeRef&);
+  scope operator()(const op::I16Patch&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<op::I32Patch> {
-  scope operator()(
-      const op::I32Patch&, const TypeFinder&, const OptionalTypeRef&);
+  scope operator()(const op::I32Patch&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<op::I64Patch> {
-  scope operator()(
-      const op::I64Patch&, const TypeFinder&, const OptionalTypeRef&);
+  scope operator()(const op::I64Patch&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<op::FloatPatch> {
-  scope operator()(
-      const op::FloatPatch&, const TypeFinder&, const OptionalTypeRef&);
+  scope operator()(const op::FloatPatch&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<op::DoublePatch> {
-  scope operator()(
-      const op::DoublePatch&, const TypeFinder&, const OptionalTypeRef&);
+  scope operator()(const op::DoublePatch&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<op::StringPatch> {
-  scope operator()(
-      const op::StringPatch&, const TypeFinder&, const OptionalTypeRef&);
+  scope operator()(const op::StringPatch&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<op::BinaryPatch> {
-  scope operator()(
-      const op::BinaryPatch&, const TypeFinder&, const OptionalTypeRef&);
+  scope operator()(const op::BinaryPatch&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<protocol::DynamicListPatch> {
-  scope operator()(
-      const protocol::DynamicListPatch&,
-      const TypeFinder&,
-      const OptionalTypeRef&);
+  scope operator()(const protocol::DynamicListPatch&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<protocol::DynamicSetPatch> {
-  scope operator()(
-      const protocol::DynamicSetPatch&,
-      const TypeFinder&,
-      const OptionalTypeRef&);
+  scope operator()(const protocol::DynamicSetPatch&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<protocol::DynamicMapPatch> {
-  scope operator()(
-      const protocol::DynamicMapPatch&,
-      const TypeFinder&,
-      const OptionalTypeRef&);
+  scope operator()(const protocol::DynamicMapPatch&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<protocol::DynamicStructPatch> {
-  scope operator()(
-      const protocol::DynamicStructPatch&,
-      const TypeFinder&,
-      const OptionalTypeRef&);
+  scope operator()(const protocol::DynamicStructPatch&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<protocol::DynamicUnionPatch> {
-  scope operator()(
-      const protocol::DynamicUnionPatch&,
-      const TypeFinder&,
-      const OptionalTypeRef&);
+  scope operator()(const protocol::DynamicUnionPatch&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<protocol::DynamicUnknownPatch> {
   scope operator()(
-      const protocol::DynamicUnknownPatch&,
-      const TypeFinder&,
-      const OptionalTypeRef&);
+      const protocol::DynamicUnknownPatch&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<op::AnyPatch> {
-  scope operator()(
-      const op::AnyPatch&, const TypeFinder&, const OptionalTypeRef&);
+  scope operator()(const op::AnyPatch&, const OptionalTypeRef&);
 };
 template <>
 struct DebugTree<protocol::DynamicPatch> {
-  scope operator()(
-      const protocol::DynamicPatch&, const TypeFinder&, const OptionalTypeRef&);
+  scope operator()(const protocol::DynamicPatch&, const OptionalTypeRef&);
 };
 template <class T>
 struct DebugTree<T, std::enable_if_t<op::is_patch_v<T>>> {
-  scope operator()(const T& t, const TypeFinder& finder, OptionalTypeRef ref) {
+  scope operator()(const T& t, OptionalTypeRef ref) {
     auto patch = protocol::DynamicPatch::fromObject(t.toObject());
     if (!ref) {
-      ref = finder.findType(Uri{apache::thrift::uri<typename T::value_type>()});
+      ref = TypeFinder::findType(
+          Uri{apache::thrift::uri<typename T::value_type>()});
     }
-    return debugTree(patch, finder, ref);
+    return debugTree(patch, ref);
   }
-  scope operator()(const T& t) { return debugTree(t, TypeFinder{}); }
 };
 template <class T>
 struct DebugTree<T, std::enable_if_t<is_thrift_class_v<T>>> {
-  scope operator()(const T& t, const TypeFinder& finder, OptionalTypeRef ref) {
+  scope operator()(const T& t, OptionalTypeRef ref) {
     auto value = protocol::asValueStruct<type::infer_tag<T>>(t);
     if (!ref) {
-      ref = finder.findType(Uri{apache::thrift::uri<T>()});
+      ref = TypeFinder::findType(Uri{apache::thrift::uri<T>()});
     }
-    return debugTree(value, finder, ref);
+    return debugTree(value, ref);
   }
-  scope operator()(const T& t) { return debugTree(t, TypeFinder{}); }
 };
 
 } // namespace apache::thrift::detail

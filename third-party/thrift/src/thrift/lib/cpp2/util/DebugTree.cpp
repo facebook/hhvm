@@ -163,9 +163,7 @@ std::string escape_unprintable(std::string_view s) {
 }
 
 std::optional<scope> ifDynamicPatch(
-    const protocol::Object& object,
-    const TypeFinder& finder,
-    const OptionalTypeRef& ref) {
+    const protocol::Object& object, const OptionalTypeRef& ref) {
   if (!ref) {
     return {};
   }
@@ -189,12 +187,12 @@ std::optional<scope> ifDynamicPatch(
     protocol::DynamicPatch patch;
     patch.decode<CompactProtocolReader>(object.at(FieldId{2}).as_binary());
     Uri origUri = Uri{protocol::detail::fromSafePatchUri(std::string(uri))};
-    return debugTree(patch, finder, origUri);
+    return debugTree(patch, origUri);
   }
 
   auto patch = protocol::DynamicPatch::fromObject(object);
   Uri origUri = Uri{protocol::fromPatchUri(std::string(uri))};
-  return debugTree(patch, finder, origUri);
+  return debugTree(patch, origUri);
 }
 } // namespace
 
@@ -233,7 +231,7 @@ OptionalTypeRef TypeFinder::findTypeInAny(const type::Type& type) {
 }
 
 scope DebugTree<std::string>::operator()(
-    const std::string& buf, const TypeFinder&, const OptionalTypeRef&) {
+    const std::string& buf, const OptionalTypeRef&) {
   if (buf.empty()) {
     return scope::make_root("\"\"");
   }
@@ -241,49 +239,41 @@ scope DebugTree<std::string>::operator()(
 }
 
 scope DebugTree<folly::IOBuf>::operator()(
-    const folly::IOBuf& buf,
-    const TypeFinder& finder,
-    const OptionalTypeRef& type) {
-  return debugTree(buf.toString(), finder, type);
+    const folly::IOBuf& buf, const OptionalTypeRef& type) {
+  return debugTree(buf.toString(), type);
 }
 
 scope DebugTree<protocol::ValueList>::operator()(
-    const protocol::ValueList& v,
-    const TypeFinder& finder,
-    const OptionalTypeRef& typeref) {
+    const protocol::ValueList& v, const OptionalTypeRef& typeref) {
   auto node = scope::make_root("<List>");
   for (auto& i : v) {
-    node.make_child() = debugTree(i, finder, getListElem(typeref));
+    node.make_child() = debugTree(i, getListElem(typeref));
   }
   return node;
 }
 
 scope DebugTree<protocol::ValueSet>::operator()(
-    const protocol::ValueSet& set,
-    const TypeFinder& finder,
-    const OptionalTypeRef& typeref) {
+    const protocol::ValueSet& set, const OptionalTypeRef& typeref) {
   using ValueRef = std::reference_wrapper<const protocol::Value>;
   std::set<ValueRef, std::less<>> sorted(set.begin(), set.end());
   auto node = scope::make_root("<Set>");
   for (const auto& i : sorted) {
-    node.make_child() = debugTree(i.get(), finder, getSetElem(typeref));
+    node.make_child() = debugTree(i.get(), getSetElem(typeref));
   }
   return node;
 }
 
 scope DebugTree<protocol::ValueMap>::operator()(
-    const protocol::ValueMap& map,
-    const TypeFinder& finder,
-    const OptionalTypeRef& typeref) {
+    const protocol::ValueMap& map, const OptionalTypeRef& typeref) {
   using ValueRef = std::reference_wrapper<const protocol::Value>;
   std::map<ValueRef, ValueRef, std::less<>> sorted(map.begin(), map.end());
   std::size_t i = 0;
   auto node = scope::make_root("<Map>");
   for (const auto& [k, v] : sorted) {
     node.make_child("Key #{}", i).make_child() =
-        debugTree(k.get(), finder, getMapKey(typeref));
+        debugTree(k.get(), getMapKey(typeref));
     node.make_child("Value #{}", i).make_child() =
-        debugTree(v.get(), finder, getMapValue(typeref));
+        debugTree(v.get(), getMapValue(typeref));
     i += 1;
   }
 
@@ -291,13 +281,11 @@ scope DebugTree<protocol::ValueMap>::operator()(
 }
 
 scope DebugTree<protocol::Value>::operator()(
-    const protocol::Value& value,
-    const TypeFinder& finder,
-    const OptionalTypeRef& typeref) {
+    const protocol::Value& value, const OptionalTypeRef& typeref) {
   auto v = scope::make_root("<EMPTY PROTOCOL::VALUE>");
   op::for_each_field_id<protocol::detail::detail::Value>([&](auto ord) {
     if (auto p = op::get<decltype(ord)>(value.toThrift())) {
-      v = debugTree(*p, finder, typeref);
+      v = debugTree(*p, typeref);
     }
   });
   return v;
@@ -327,14 +315,12 @@ std::string formatDefinition(const DefinitionNode& definition) {
 } // namespace
 
 scope DebugTree<protocol::Object>::operator()(
-    const protocol::Object& object,
-    const TypeFinder& finder,
-    const OptionalTypeRef& type) {
+    const protocol::Object& object, const OptionalTypeRef& type) {
   if (auto any = ifAny(object, type)) {
-    return debugTree(*any, finder);
+    return debugTree(*any);
   }
 
-  if (auto ret = ifDynamicPatch(object, finder, type)) {
+  if (auto ret = ifDynamicPatch(object, type)) {
     return std::move(*ret);
   }
 
@@ -350,8 +336,7 @@ scope DebugTree<protocol::Object>::operator()(
       "{}", node ? formatDefinition(node->definition()) : "<UNKNOWN STRUCT>");
   for (auto id : ids) {
     auto next = scope::make_root("{}", getFieldName(node, id));
-    next.make_child() =
-        debugTree(object.at(id), finder, getFieldType(node, id));
+    next.make_child() = debugTree(object.at(id), getFieldType(node, id));
     ret.make_child() = std::move(next);
   }
 
@@ -359,9 +344,7 @@ scope DebugTree<protocol::Object>::operator()(
 }
 
 scope DebugTree<type::AnyStruct>::operator()(
-    const type::AnyStruct& any,
-    const TypeFinder& finder,
-    const OptionalTypeRef&) {
+    const type::AnyStruct& any, const OptionalTypeRef&) {
   if (any == type::AnyStruct{}) {
     return scope::make_root("<Maybe Empty Thrift.Any>");
   }
@@ -376,11 +359,9 @@ scope DebugTree<type::AnyStruct>::operator()(
   try {
     // NOLINTNEXTLINE(facebook-hte-DetailCall)
     auto value = protocol::detail::parseValueFromAny(any);
-    ret.make_child() =
-        debugTree(value, finder, finder.findTypeInAny(*any.type()));
+    ret.make_child() = debugTree(value, TypeFinder::findTypeInAny(*any.type()));
   } catch (std::exception&) {
-    ret.make_child() =
-        debugTree(*any.data(), finder, TypeRef::of(Primitive::BINARY));
+    ret.make_child() = debugTree(*any.data(), TypeRef::of(Primitive::BINARY));
   }
   return ret;
 }
@@ -433,7 +414,7 @@ struct BasePatchVisitor {
 
   template <class T>
   void addOp(std::string name, const T& data) {
-    addOp(std::move(name), debugTree(data, finder, typeRef));
+    addOp(std::move(name), debugTree(data, typeRef));
   }
 
   template <class T>
@@ -463,7 +444,6 @@ struct BasePatchVisitor {
     return root;
   }
 
-  const TypeFinder& finder;
   const OptionalTypeRef& typeRef;
   std::vector<PatchOperation> ops = {};
 };
@@ -476,31 +456,26 @@ struct BaseStructuredPatchVisitor : BasePatchVisitor {
   }
   void patchIfSet(FieldId id, const protocol::DynamicPatch& patch) {
     auto node = toNode(id);
-    node.make_child() = debugTree(patch, finder, getFieldType(typeRef, id));
+    node.make_child() = debugTree(patch, getFieldType(typeRef, id));
     addCombinableOp("patch", toValue(id), std::move(node));
   }
 };
 } // namespace
 
 scope DebugTree<op::BoolPatch>::operator()(
-    const op::BoolPatch& patch,
-    const TypeFinder& finder,
-    const OptionalTypeRef& typeRef) {
+    const op::BoolPatch& patch, const OptionalTypeRef& typeRef) {
   struct Visitor : BasePatchVisitor {
     void invert() { addOp(__func__); }
   };
 
-  Visitor v{finder, typeRef};
+  Visitor v{typeRef};
   patch.customVisit(v);
   return v.finalize("BoolPatch");
 }
 
 template <class Patch>
 static scope debugTreeForNumericPatch(
-    const Patch& patch,
-    const TypeFinder& finder,
-    const OptionalTypeRef& typeRef,
-    std::string name) {
+    const Patch& patch, const OptionalTypeRef& typeRef, std::string name) {
   struct Visitor : BasePatchVisitor {
     void add(typename Patch::value_type t) {
       if (t != 0) {
@@ -509,54 +484,39 @@ static scope debugTreeForNumericPatch(
     }
   };
 
-  Visitor v{finder, typeRef};
+  Visitor v{typeRef};
   patch.customVisit(v);
   return v.finalize(std::move(name));
 }
 
 scope DebugTree<op::BytePatch>::operator()(
-    const op::BytePatch& patch,
-    const TypeFinder& finder,
-    const OptionalTypeRef& type) {
-  return debugTreeForNumericPatch(patch, finder, type, "BytePatch");
+    const op::BytePatch& patch, const OptionalTypeRef& type) {
+  return debugTreeForNumericPatch(patch, type, "BytePatch");
 }
 scope DebugTree<op::I16Patch>::operator()(
-    const op::I16Patch& patch,
-    const TypeFinder& finder,
-    const OptionalTypeRef& type) {
-  return debugTreeForNumericPatch(patch, finder, type, "I16Patch");
+    const op::I16Patch& patch, const OptionalTypeRef& type) {
+  return debugTreeForNumericPatch(patch, type, "I16Patch");
 }
 scope DebugTree<op::I32Patch>::operator()(
-    const op::I32Patch& patch,
-    const TypeFinder& finder,
-    const OptionalTypeRef& type) {
-  return debugTreeForNumericPatch(patch, finder, type, "I32Patch");
+    const op::I32Patch& patch, const OptionalTypeRef& type) {
+  return debugTreeForNumericPatch(patch, type, "I32Patch");
 }
 scope DebugTree<op::I64Patch>::operator()(
-    const op::I64Patch& patch,
-    const TypeFinder& finder,
-    const OptionalTypeRef& type) {
-  return debugTreeForNumericPatch(patch, finder, type, "I64Patch");
+    const op::I64Patch& patch, const OptionalTypeRef& type) {
+  return debugTreeForNumericPatch(patch, type, "I64Patch");
 }
 scope DebugTree<op::FloatPatch>::operator()(
-    const op::FloatPatch& patch,
-    const TypeFinder& finder,
-    const OptionalTypeRef& type) {
-  return debugTreeForNumericPatch(patch, finder, type, "FloatPatch");
+    const op::FloatPatch& patch, const OptionalTypeRef& type) {
+  return debugTreeForNumericPatch(patch, type, "FloatPatch");
 }
 scope DebugTree<op::DoublePatch>::operator()(
-    const op::DoublePatch& patch,
-    const TypeFinder& finder,
-    const OptionalTypeRef& type) {
-  return debugTreeForNumericPatch(patch, finder, type, "DoublePatch");
+    const op::DoublePatch& patch, const OptionalTypeRef& type) {
+  return debugTreeForNumericPatch(patch, type, "DoublePatch");
 }
 
 template <class Patch>
 static scope debugTreeForStringPatch(
-    const Patch& patch,
-    const TypeFinder& finder,
-    const OptionalTypeRef& typeref,
-    std::string name) {
+    const Patch& patch, const OptionalTypeRef& typeref, std::string name) {
   struct Visitor : BasePatchVisitor {
     void prepend(const std::string& s) { addOpIfNotEmpty(__func__, s); }
     void append(const std::string& s) { addOpIfNotEmpty(__func__, s); }
@@ -564,43 +524,35 @@ static scope debugTreeForStringPatch(
     void append(const folly::IOBuf& s) { addOpIfNotEmpty(__func__, s); }
   };
 
-  Visitor v{finder, typeref};
+  Visitor v{typeref};
   patch.customVisit(v);
   return v.finalize(std::move(name));
 }
 
 scope DebugTree<op::StringPatch>::operator()(
-    const op::StringPatch& patch,
-    const TypeFinder& finder,
-    const OptionalTypeRef& type) {
-  return debugTreeForStringPatch(patch, finder, type, "StringPatch");
+    const op::StringPatch& patch, const OptionalTypeRef& type) {
+  return debugTreeForStringPatch(patch, type, "StringPatch");
 }
 scope DebugTree<op::BinaryPatch>::operator()(
-    const op::BinaryPatch& patch,
-    const TypeFinder& finder,
-    const OptionalTypeRef& type) {
-  return debugTreeForStringPatch(patch, finder, type, "BinaryPatch");
+    const op::BinaryPatch& patch, const OptionalTypeRef& type) {
+  return debugTreeForStringPatch(patch, type, "BinaryPatch");
 }
 
 scope DebugTree<protocol::DynamicListPatch>::operator()(
-    const protocol::DynamicListPatch& patch,
-    const TypeFinder& finder,
-    const OptionalTypeRef& listType) {
+    const protocol::DynamicListPatch& patch, const OptionalTypeRef& listType) {
   struct Visitor : BasePatchVisitor {
     void push_back(const protocol::Value& v) {
-      addOp("push_back", debugTree(v, finder, getListElem(typeRef)));
+      addOp("push_back", debugTree(v, getListElem(typeRef)));
     }
   };
 
-  Visitor v{finder, listType};
+  Visitor v{listType};
   patch.customVisit(v);
   return v.finalize("<ListPatch>");
 }
 
 scope DebugTree<protocol::DynamicSetPatch>::operator()(
-    const protocol::DynamicSetPatch& patch,
-    const TypeFinder& finder,
-    const OptionalTypeRef& setType) {
+    const protocol::DynamicSetPatch& patch, const OptionalTypeRef& setType) {
   struct Visitor : BasePatchVisitor {
     void addMulti(const protocol::ValueSet& set) {
       addOpIfNotEmpty(__func__, set);
@@ -610,15 +562,13 @@ scope DebugTree<protocol::DynamicSetPatch>::operator()(
     }
   };
 
-  Visitor v{finder, setType};
+  Visitor v{setType};
   patch.customVisit(v);
   return v.finalize("<SetPatch>");
 }
 
 scope DebugTree<protocol::DynamicMapPatch>::operator()(
-    const protocol::DynamicMapPatch& patch,
-    const TypeFinder& finder,
-    const OptionalTypeRef& mapType) {
+    const protocol::DynamicMapPatch& patch, const OptionalTypeRef& mapType) {
   struct Visitor : BasePatchVisitor {
     void tryPutMulti(const protocol::ValueMap& map) {
       addOpIfNotEmpty(__func__, map);
@@ -629,10 +579,10 @@ scope DebugTree<protocol::DynamicMapPatch>::operator()(
       }
       if (auto mapKey = getMapKey(typeRef)) {
         auto type = TypeRef::of(syntax_graph::Set::of(*mapKey));
-        addOp(__func__, debugTree(set, finder, type));
+        addOp(__func__, debugTree(set, type));
         return;
       }
-      addOp(__func__, debugTree(set, finder));
+      addOp(__func__, debugTree(set));
     }
     void putMulti(const protocol::ValueMap& map) {
       addOpIfNotEmpty(__func__, map);
@@ -640,13 +590,13 @@ scope DebugTree<protocol::DynamicMapPatch>::operator()(
     void patchByKey(
         const protocol::Value& k, const protocol::DynamicPatch& patch) {
       auto root = scope::make_root("KeyAndSubPatch");
-      root.make_child() = debugTree(k, finder, getMapKey(typeRef));
-      root.make_child() = debugTree(patch, finder, getMapValue(typeRef));
+      root.make_child() = debugTree(k, getMapKey(typeRef));
+      root.make_child() = debugTree(patch, getMapValue(typeRef));
       addCombinableOp("patch", k, std::move(root));
     }
   };
 
-  Visitor v{finder, mapType};
+  Visitor v{mapType};
   patch.customVisit(v);
   return v.finalize("<MapPatch>");
 }
@@ -654,7 +604,6 @@ scope DebugTree<protocol::DynamicMapPatch>::operator()(
 template <bool IsUnion>
 static scope debugTreeForDynamicStructurePatch(
     const protocol::DynamicStructurePatch<IsUnion>& patch,
-    const TypeFinder& finder,
     const OptionalTypeRef& type) {
   struct Visitor : BaseStructuredPatchVisitor {
     void remove(FieldId id) {
@@ -663,7 +612,7 @@ static scope debugTreeForDynamicStructurePatch(
     void ensure(FieldId id, const protocol::Value& v) {
       std::string op = IsUnion ? "ensureUnion" : "ensure";
       auto node = toNode(id);
-      node.make_child() = debugTree(v, finder, getFieldType(typeRef, id));
+      node.make_child() = debugTree(v, getFieldType(typeRef, id));
       addCombinableOp(op, toValue(id), std::move(node));
     }
   };
@@ -674,29 +623,23 @@ static scope debugTreeForDynamicStructurePatch(
     name = formatDefinition(typeName, p->definition());
   }
 
-  Visitor v{finder, type};
+  Visitor v{type};
   patch.customVisit(v);
   return v.finalize(std::move(name));
 }
 
 scope DebugTree<protocol::DynamicStructPatch>::operator()(
-    const protocol::DynamicStructPatch& patch,
-    const TypeFinder& finder,
-    const OptionalTypeRef& type) {
-  return debugTreeForDynamicStructurePatch(patch, finder, type);
+    const protocol::DynamicStructPatch& patch, const OptionalTypeRef& type) {
+  return debugTreeForDynamicStructurePatch(patch, type);
 }
 
 scope DebugTree<protocol::DynamicUnionPatch>::operator()(
-    const protocol::DynamicUnionPatch& patch,
-    const TypeFinder& finder,
-    const OptionalTypeRef& type) {
-  return debugTreeForDynamicStructurePatch(patch, finder, type);
+    const protocol::DynamicUnionPatch& patch, const OptionalTypeRef& type) {
+  return debugTreeForDynamicStructurePatch(patch, type);
 }
 
 scope DebugTree<protocol::DynamicUnknownPatch>::operator()(
-    const protocol::DynamicUnknownPatch& patch,
-    const TypeFinder& finder,
-    const OptionalTypeRef& type) {
+    const protocol::DynamicUnknownPatch& patch, const OptionalTypeRef& type) {
   struct Visitor : BaseStructuredPatchVisitor {
     void removeMulti(const protocol::ValueSet& set) {
       if (set.empty()) {
@@ -708,25 +651,23 @@ scope DebugTree<protocol::DynamicUnknownPatch>::operator()(
       }
       protocol::Value v;
       v.emplace_set(set);
-      addOp(__func__, debugTree(v, finder, elem));
+      addOp(__func__, debugTree(v, elem));
     }
   };
 
-  Visitor v{finder, type};
+  Visitor v{type};
   patch.customVisit(v);
   return v.finalize("UnknownPatch");
 }
 
 scope DebugTree<op::AnyPatch>::operator()(
-    const op::AnyPatch& patch,
-    const TypeFinder& finder,
-    const OptionalTypeRef& typeref) {
+    const op::AnyPatch& patch, const OptionalTypeRef& typeref) {
   struct Visitor : BasePatchVisitor {
     void ensureAny(const type::AnyStruct& any) { addOp("ensure", any); }
     void patchIfTypeIs(
         const type::Type& type, const protocol::DynamicPatch& patch) {
       auto node = scope::make_root("{}", "type: " + type.debugString());
-      node.make_child() = debugTree(patch, finder, finder.findTypeInAny(type));
+      node.make_child() = debugTree(patch, TypeFinder::findTypeInAny(type));
       addCombinableOp(
           "patchIfTypeIs",
           protocol::asValueStruct<type::infer_tag<type::Type>>(type),
@@ -734,16 +675,14 @@ scope DebugTree<op::AnyPatch>::operator()(
     }
   };
 
-  Visitor v{finder, typeref};
+  Visitor v{typeref};
   patch.customVisit(v);
   return v.finalize("AnyPatch");
 }
 
 scope DebugTree<protocol::DynamicPatch>::operator()(
-    const protocol::DynamicPatch& patch,
-    const TypeFinder& finder,
-    const OptionalTypeRef& type) {
+    const protocol::DynamicPatch& patch, const OptionalTypeRef& type) {
   return patch.visitPatch(
-      [&](const auto& patch) { return debugTree(patch, finder, type); });
+      [&](const auto& patch) { return debugTree(patch, type); });
 }
 } // namespace apache::thrift::detail

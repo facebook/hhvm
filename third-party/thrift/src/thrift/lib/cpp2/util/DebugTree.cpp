@@ -196,19 +196,23 @@ std::optional<scope> ifDynamicPatch(
 }
 } // namespace
 
+OptionalTypeRef TypeFinder::findType(const syntax_graph::DefinitionNode& node) {
+  OptionalTypeRef ret;
+  node.visit([&](auto& syntaxGraphDef) {
+    if constexpr (__FBTHRIFT_IS_VALID(
+                      syntaxGraphDef, TypeRef::of(syntaxGraphDef))) {
+      ret = TypeRef::of(syntaxGraphDef);
+    }
+  });
+  return ret;
+}
+
 OptionalTypeRef TypeFinder::findType(const Uri& uri) {
   OptionalTypeRef ret;
   if (auto typeSystemDefinitionRef =
           SchemaRegistry::get().getTypeSystemDefinitionRefByUri(uri.uri)) {
     typeSystemDefinitionRef->visit([&](auto& typeSystemDef) {
-      SchemaRegistry::get()
-          .getSyntaxGraphNode(typeSystemDef)
-          .visit([&](auto& syntaxGraphDef) {
-            if constexpr (__FBTHRIFT_IS_VALID(
-                              syntaxGraphDef, TypeRef::of(syntaxGraphDef))) {
-              ret = TypeRef::of(syntaxGraphDef);
-            }
-          });
+      ret = findType(SchemaRegistry::get().getSyntaxGraphNode(typeSystemDef));
     });
   }
   return ret;

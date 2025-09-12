@@ -16,6 +16,7 @@
 
 #include <gtest/gtest.h>
 #include <folly/String.h>
+#include <thrift/lib/cpp2/util/test/gen-cpp2/DebugTreeNoUri_types.h>
 #include <thrift/lib/cpp2/util/test/gen-cpp2/gen_patch_DebugTree_types.h>
 
 namespace apache::thrift::detail {
@@ -638,6 +639,18 @@ TEST(DebugTreeTest, SafePatch) {
       ╰─ I32Patch
          ╰─ add
             ╰─ 10
+)");
+}
+
+TEST(DebugTreeTest, NoUri) {
+  cpp2::NoUri obj;
+  obj.foo() = 42;
+
+  EXPECT_EQ(
+      to_string(debugTree(obj)),
+      R"(<Struct: NoUri (DebugTreeNoUri.thrift)>
+╰─ foo
+   ╰─ 42
 )");
 }
 

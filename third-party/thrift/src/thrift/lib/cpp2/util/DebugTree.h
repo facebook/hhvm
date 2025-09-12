@@ -48,6 +48,7 @@ struct Uri {
 class TypeFinder {
  public:
   static OptionalTypeRef findType(const Uri& uri);
+  static OptionalTypeRef findType(const syntax_graph::DefinitionNode&);
   static OptionalTypeRef findTypeInAny(const type::Type& type);
 };
 
@@ -216,7 +217,7 @@ struct DebugTree<T, std::enable_if_t<op::is_patch_v<T>>> {
     auto patch = protocol::DynamicPatch::fromObject(t.toObject());
     if (!ref) {
       ref = TypeFinder::findType(
-          Uri{apache::thrift::uri<typename T::value_type>()});
+          SchemaRegistry::get().getDefinitionNode<typename T::value_type>());
     }
     return debugTree(patch, ref);
   }
@@ -226,7 +227,7 @@ struct DebugTree<T, std::enable_if_t<is_thrift_class_v<T>>> {
   scope operator()(const T& t, OptionalTypeRef ref) {
     auto value = protocol::asValueStruct<type::infer_tag<T>>(t);
     if (!ref) {
-      ref = TypeFinder::findType(Uri{apache::thrift::uri<T>()});
+      ref = TypeFinder::findType(SchemaRegistry::get().getDefinitionNode<T>());
     }
     return debugTree(value, ref);
   }

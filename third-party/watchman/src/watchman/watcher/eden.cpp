@@ -959,9 +959,9 @@ class EdenView final : public QueryableView {
       // to a simple * wildcard.
       auto glob = path.depth == -1 ? "**/*" : "*";
 
-      globStrings.emplace_back(std::string{
+      globStrings.emplace_back(
           w_string::pathCat({rel, escapeGlobSpecialChars(path.name), glob})
-              .view()});
+              .view());
     }
     executeGlobBasedQuery(globStrings, ctx, /*includeDotfiles=*/true);
 
@@ -971,8 +971,8 @@ class EdenView final : public QueryableView {
     // TODO(zeyi): replace this with builtin path generator inside EdenFS
     globStrings.clear();
     for (auto& path : *query->paths) {
-      globStrings.emplace_back(std::string{
-          w_string::pathCat({rel, escapeGlobSpecialChars(path.name)}).view()});
+      globStrings.emplace_back(
+          w_string::pathCat({rel, escapeGlobSpecialChars(path.name)}).view());
     }
 
     executeGlobBasedQuery(
@@ -995,8 +995,7 @@ class EdenView final : public QueryableView {
 
     std::vector<std::string> globStrings;
     for (auto& glob : query->glob_tree->unparse()) {
-      globStrings.emplace_back(
-          std::string{w_string::pathCat({rel, glob}).view()});
+      globStrings.emplace_back(w_string::pathCat({rel, glob}).view());
     }
 
     // More glob flags/functionality:

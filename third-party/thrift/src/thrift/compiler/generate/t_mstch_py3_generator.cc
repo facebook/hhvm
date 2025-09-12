@@ -47,7 +47,7 @@ std::vector<t_function*> lifecycleFunctions() {
 mstch::array create_string_array(const std::vector<std::string>& values) {
   mstch::array mstch_array;
   for (auto it = values.begin(); it != values.end(); ++it) {
-    mstch_array.push_back(mstch::map{
+    mstch_array.emplace_back(mstch::map{
         {"value", *it},
         {"first?", it == values.begin()},
         {"last?", std::next(it) == values.end()},
@@ -258,7 +258,7 @@ class py3_mstch_program : public mstch_program {
     mstch::array a;
     if (program_->language_includes().count("cpp")) {
       for (const auto& include : program_->language_includes().at("cpp")) {
-        a.push_back(include);
+        a.emplace_back(include);
       }
     }
     return a;
@@ -307,7 +307,7 @@ class py3_mstch_program : public mstch_program {
   mstch::node includeNamespaces() {
     mstch::array mstch_array;
     for (const auto& kvp : includeNamespaces_) {
-      mstch_array.push_back(mstch::map{
+      mstch_array.emplace_back(mstch::map{
           {"includeNamespace", create_string_array(kvp.second.ns)},
           {"hasServices?", kvp.second.hasServices},
           {"hasTypes?", kvp.second.hasTypes}});

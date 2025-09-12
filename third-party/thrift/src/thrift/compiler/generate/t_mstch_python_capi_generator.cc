@@ -349,7 +349,7 @@ class python_capi_mstch_program : public mstch_program {
         });
     mstch::array a;
     for (const auto& it : namespaces) {
-      a.push_back(mstch::map{{"header_include", it->include_prefix}});
+      a.emplace_back(mstch::map{{"header_include", it->include_prefix}});
     }
     return a;
   }
@@ -500,7 +500,7 @@ class python_capi_mstch_struct : public mstch_struct {
         });
     mstch::array a;
     for (size_t i = 0; i < index_keys.size(); ++i) {
-      a.push_back(mstch::map{
+      a.emplace_back(mstch::map{
           {"tuple:index", index_keys[i].first},
           {"tuple:comma", std::string_view(i == 0 ? "" : ", ")}});
     }

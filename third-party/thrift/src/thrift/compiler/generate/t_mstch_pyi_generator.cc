@@ -56,7 +56,7 @@ const std::unordered_set<std::string> kKeywords = {
 mstch::array create_string_array(const std::vector<std::string>& values) {
   mstch::array mstch_array;
   for (auto it = values.begin(); it != values.end(); ++it) {
-    mstch_array.push_back(mstch::map{
+    mstch_array.emplace_back(mstch::map{
         {"value", *it},
         {"first?", it == values.begin()},
         {"last?", std::next(it) == values.end()},
@@ -249,7 +249,7 @@ class pyi_mstch_program : public mstch_program {
   mstch::node get_import_modules() {
     mstch::array mstch_array;
     for (const auto& module : this->import_modules_) {
-      mstch_array.push_back(module);
+      mstch_array.emplace_back(module);
     }
     return mstch_array;
   }
@@ -512,7 +512,7 @@ class pyi_mstch_service : public mstch_service {
   mstch::node get_program_import_modules() {
     mstch::array mstch_array;
     for (const auto& module : this->program_import_modules_) {
-      mstch_array.push_back(module);
+      mstch_array.emplace_back(module);
     }
     return mstch_array;
   }

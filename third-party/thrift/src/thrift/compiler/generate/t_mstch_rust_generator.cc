@@ -334,7 +334,7 @@ void parse_include_srcs(
   std::string::size_type pos = 0;
   while (pos != std::string::npos && pos < paths.size()) {
     std::string::size_type next_pos = paths.find(':', pos);
-    elements.push_back(paths.substr(pos, next_pos - pos));
+    elements.emplace_back(paths.substr(pos, next_pos - pos));
     pos = ((next_pos == std::string::npos) ? next_pos : next_pos + 1);
   }
 }
@@ -589,7 +589,7 @@ mstch::node structured_annotations_node(
           annotation_type, context, pos);
     }
 
-    annotations.push_back(mstch::map{
+    annotations.emplace_back(mstch::map{
         {"structured_annotation:direct", direct_annotation},
         {"structured_annotation:transitive?", transitive},
     });
@@ -794,7 +794,7 @@ class rust_mstch_program : public mstch_program {
           mangle_crate_name(crate->dependency_path[0]);
       dependency["dependency:name_unmangled"] = crate->dependency_path[0];
       dependency["dependency:label"] = crate->label;
-      direct_dependencies.push_back(std::move(dependency));
+      direct_dependencies.emplace_back(std::move(dependency));
     }
     return direct_dependencies;
   }
@@ -848,7 +848,7 @@ class rust_mstch_program : public mstch_program {
   mstch::node rust_includes() {
     mstch::array includes;
     for (auto* program : program_->get_includes_for_codegen()) {
-      includes.push_back(
+      includes.emplace_back(
           context_.program_factory->make_mstch_object(program, context_, pos_));
     }
     return includes;
@@ -927,7 +927,7 @@ class rust_mstch_program : public mstch_program {
       for (const t_field& field : strct->fields()) {
         if (node_has_adapter(field) ||
             type_has_transitive_adapter(field.get_type(), true)) {
-          strcts.push_back(context_.struct_factory->make_mstch_object(
+          strcts.emplace_back(context_.struct_factory->make_mstch_object(
               strct, context_, pos_));
           break;
         }
@@ -952,7 +952,7 @@ class rust_mstch_program : public mstch_program {
 
     for (const t_structured* strct : program_->structs_and_unions()) {
       if (node_has_adapter(*strct)) {
-        strcts.push_back(
+        strcts.emplace_back(
             context_.struct_factory->make_mstch_object(strct, context_, pos_));
       }
     }
@@ -981,14 +981,14 @@ class rust_mstch_program : public mstch_program {
 
     for (const t_structured* strct : program_->structs_and_unions()) {
       if (node_has_adapter(*strct)) {
-        types_with_direct_adapters.push_back(
+        types_with_direct_adapters.emplace_back(
             context_.type_factory->make_mstch_object(strct, context_, pos_));
       }
     }
 
     for (const t_typedef* t : program_->typedefs()) {
       if (node_has_adapter(*t)) {
-        types_with_direct_adapters.push_back(
+        types_with_direct_adapters.emplace_back(
             context_.type_factory->make_mstch_object(t, context_, pos_));
       }
     }
@@ -1010,7 +1010,7 @@ class rust_mstch_program : public mstch_program {
 
     for (const t_const* c : program_->consts()) {
       if (type_has_transitive_adapter(c->type(), true)) {
-        consts.push_back(c->name());
+        consts.emplace_back(c->name());
       }
     }
 
@@ -1302,7 +1302,7 @@ class rust_mstch_service : public mstch_service {
       node["extendedService:asRefImpl"] = as_ref_impl;
       node["extendedService:service"] =
           make_mstch_extended_service_cached(parent_service);
-      extended_services.push_back(node);
+      extended_services.emplace_back(node);
       as_ref_impl = "self.parent.as_ref()";
       service = parent_service;
     }
@@ -1485,7 +1485,7 @@ class rust_mstch_function : public mstch_function {
     std::sort(returns.begin(), returns.end());
     auto array = mstch::array();
     for (const std::string& ret : returns) {
-      array.push_back(ret);
+      array.emplace_back(ret);
     }
     return array;
   }
@@ -1927,7 +1927,7 @@ class mstch_rust_value : public mstch_base {
 
     mstch::array elements;
     for (auto elem : const_value_->get_list()) {
-      elements.push_back(std::make_shared<mstch_rust_value>(
+      elements.emplace_back(std::make_shared<mstch_rust_value>(
           elem, elem_type, depth_ + 1, context_, pos_, options_));
     }
     return elements;
@@ -2183,7 +2183,7 @@ mstch::node mstch_rust_value::map_entries() {
 
   mstch::array entries;
   for (auto entry : const_value_->get_map()) {
-    entries.push_back(std::make_shared<mstch_rust_map_entry>(
+    entries.emplace_back(std::make_shared<mstch_rust_map_entry>(
         entry.first,
         key_type,
         entry.second,
@@ -2213,7 +2213,7 @@ mstch::node mstch_rust_value::struct_fields() {
   mstch::array fields;
   for (auto&& field : struct_type->fields()) {
     auto explicit_value = map_entries[field.name()];
-    fields.push_back(std::make_shared<mstch_rust_struct_field>(
+    fields.emplace_back(std::make_shared<mstch_rust_struct_field>(
         &field, explicit_value, depth_ + 1, context_, pos_, options_));
   }
   return fields;
@@ -2468,11 +2468,11 @@ mstch::node rust_mstch_service::rust_all_exceptions() {
       mstch::map inner;
       inner["rust_exception_function:function"] = std::move(functions[i]);
       inner["rust_exception_function:field"] = std::move(fields[i]);
-      function_data.push_back(std::move(inner));
+      function_data.emplace_back(std::move(inner));
     }
 
     data["rust_exception:functions"] = std::move(function_data);
-    output.push_back(data);
+    output.emplace_back(data);
   }
 
   return output;

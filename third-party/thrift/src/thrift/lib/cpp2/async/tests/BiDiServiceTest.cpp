@@ -23,6 +23,8 @@
 #include <thrift/lib/cpp2/async/tests/util/BiDiEchoServer.h>
 #include <thrift/lib/cpp2/async/tests/util/BiDiFiniteClient.h>
 #include <thrift/lib/cpp2/async/tests/util/BiDiFiniteServer.h>
+#include <thrift/lib/cpp2/async/tests/util/BiDiSimplifiedEchoClient.h>
+#include <thrift/lib/cpp2/async/tests/util/BiDiSimplifiedEchoServer.h>
 #include <thrift/lib/cpp2/async/tests/util/BiDiTestUtil.h>
 #include <thrift/lib/cpp2/async/tests/util/Util.h>
 #include <thrift/lib/cpp2/server/ServerFlags.h>
@@ -35,6 +37,8 @@ using EchoServer = BiDiEchoServer;
 using ConfigurableServer = BiDiConfigurableServer;
 using FiniteServer = BiDiFiniteServer;
 using FiniteClient = BiDiFiniteClient;
+using SimplifiedEchoClient = BiDiSimplifiedEchoClient;
+using SimplifiedEchoServer = BiDiSimplifiedEchoServer;
 
 struct TestHandler : public AsyncProcessorFactory {
   using ServerCallbackFactory = std::function<BiDiServerCallbackPtr()>;
@@ -277,4 +281,194 @@ TEST_F(LowLevelBiDiServiceTest, StreamGetsCancelledThenSinkGetsCancelled) {
       });
 }
 
+TEST_F(LowLevelBiDiServiceTest, BothSinkAndStreamGetCancelledOnRequestN) {
+  class CustomClient : public BiDiSimplifiedEchoClient {
+   public:
+    explicit CustomClient(std::shared_ptr<CompletionSignal> done)
+        : BiDiSimplifiedEchoClient(3, std::move(done)) {}
+
+    bool onSinkRequestN(uint64_t n) override {
+      DestructionGuard dg(this);
+      LOG(INFO) << "Client received sink requestN " << n
+                << " and will cancel stream";
+      if (isStreamOpen()) {
+        closeStream();
+        std::ignore = serverCallback_->onStreamCancel();
+      }
+      return isAlive();
+    }
+  };
+
+  class CustomServer : public BiDiSimplifiedEchoServer {
+    bool onStreamRequestN(uint64_t n) override {
+      DestructionGuard dg(this);
+      LOG(INFO) << "Server received stream requestN " << n
+                << " and will cancel sink";
+      if (isSinkOpen()) {
+        std::ignore = clientCallback_->onSinkRequestN(n);
+        closeSink();
+        std::ignore = clientCallback_->onSinkCancel();
+      }
+      return isAlive();
+    }
+  };
+
+  test(
+      [](auto done) { return new CustomClient(std::move(done)); },
+      [] { return new CustomServer(); });
+}
+
+TEST_F(LowLevelBiDiServiceTest, BothSinkAndStreamGetCancelledAfterOnePayload) {
+  class CustomClient : public BiDiSimplifiedEchoClient {
+   public:
+    explicit CustomClient(std::shared_ptr<CompletionSignal> done)
+        : BiDiSimplifiedEchoClient(3, std::move(done)) {}
+
+    bool onStreamNext(StreamPayload&&) override {
+      DestructionGuard dg(this);
+      LOG(INFO) << "Client received stream chunk #" << chunksReceived_++;
+
+      if (isSinkOpen()) {
+        std::ignore = serverCallback_->onSinkNext(makeSinkPayload());
+      }
+
+      closeStream();
+      std::ignore = serverCallback_->onStreamCancel();
+
+      return isAlive();
+    }
+  };
+
+  class CustomServer : public BiDiSimplifiedEchoServer {
+    bool onSinkNext(StreamPayload&&) override {
+      DestructionGuard dg(this);
+      LOG(INFO) << "Server received sink chunk #" << chunksReceived_++;
+
+      if (isStreamOpen()) {
+        std::ignore = clientCallback_->onStreamNext(makeStreamPayload());
+      }
+
+      closeSink();
+      std::ignore = clientCallback_->onSinkCancel();
+
+      return isAlive();
+    }
+  };
+
+  test(
+      [](auto done) { return new CustomClient(std::move(done)); },
+      [] { return new CustomServer(); });
+}
+
+TEST_F(LowLevelBiDiServiceTest, BothSidesError) {
+  class CustomClient : public BiDiSimplifiedEchoClient {
+   public:
+    explicit CustomClient(std::shared_ptr<CompletionSignal> done)
+        : BiDiSimplifiedEchoClient(3, std::move(done)) {}
+    bool onFirstResponse(
+        FirstResponsePayload&&,
+        folly::EventBase*,
+        BiDiServerCallback* serverCallback) override {
+      DestructionGuard dg(this);
+      firstResponseReceived();
+      serverCallback_ = serverCallback;
+      LOG(INFO) << "Client received initial response";
+
+      closeSink();
+      std::ignore = serverCallback_->onSinkError(
+          folly::make_exception_wrapper<std::runtime_error>("error"));
+      return isAlive();
+    }
+  };
+
+  test(
+      [](auto done) { return new CustomClient(std::move(done)); },
+      [] { return new BiDiSimplifiedEchoServer(); });
+}
+
+//
+// First response error tests
+//
+struct TestHandlerThatReturnsError : public AsyncProcessorFactory {
+  struct TestAsyncProcessorThatReturnsError : public AsyncProcessor {
+    void processSerializedCompressedRequestWithMetadata(
+        ResponseChannelRequest::UniquePtr,
+        SerializedCompressedRequest&&,
+        const MethodMetadata&,
+        protocol::PROTOCOL_TYPES,
+        Cpp2RequestContext*,
+        folly::EventBase*,
+        concurrency::ThreadManager*) override {
+      LOG(FATAL)
+          << "processSerializedCompressedRequestWithMetadata shouldn't be called in the test";
+    }
+
+    void executeRequest(
+        ServerRequest&& request,
+        const AsyncProcessorFactory::MethodMetadata& /* methodMetadata */)
+        override {
+      auto req = std::move(request.request());
+      LOG(INFO) << "Server sends first response error";
+      req->sendErrorWrapped(
+          folly::make_exception_wrapper<TApplicationException>(
+              "first response error"),
+          "");
+    }
+
+    void processInteraction(ServerRequest&&) override { std::terminate(); }
+  };
+
+  std::unique_ptr<AsyncProcessor> getProcessor() override {
+    return std::make_unique<TestAsyncProcessorThatReturnsError>();
+  }
+
+  std::vector<ServiceHandlerBase*> getServiceHandlers() override { return {}; }
+
+  CreateMethodMetadataResult createMethodMetadata() override {
+    WildcardMethodMetadataMap wildcardMap;
+    wildcardMap.wildcardMetadata = std::make_shared<WildcardMethodMetadata>(
+        AsyncProcessorFactory::MethodMetadata::ExecutorType::EVB);
+    wildcardMap.knownMethods = {};
+    return wildcardMap;
+  }
+};
+
+struct FirstResponseErrorBiDiTest : public AsyncTestSetup<
+                                        TestHandlerThatReturnsError,
+                                        Client<TestSinkService>> {
+  using ClientCallbackFactory = std::function<BiDiClientCallback*(
+      std::shared_ptr<CompletionSignal> done)>;
+
+  void SetUp() override {
+    FLAGS_thrift_allow_resource_pools_for_wildcards = true;
+    AsyncTestSetup::SetUp();
+  }
+
+  void test(ClientCallbackFactory clientCallbackFactory) {
+    DCHECK(clientCallbackFactory);
+    connectToServer(
+        [clientCallbackFactory = std::move(clientCallbackFactory)](
+            Client<TestSinkService>& client) -> folly::coro::Task<void> {
+          DCHECK(clientCallbackFactory);
+          auto completion = std::make_shared<CompletionSignal>();
+          auto clientCallback = clientCallbackFactory(completion);
+          DCHECK(clientCallback);
+          auto* channel = client.getChannel();
+          channel->sendRequestBiDi(
+              RpcOptions{}
+                  .setTimeout(std::chrono::milliseconds(1000))
+                  .setChunkBufferSize(7),
+              "test",
+              SerializedRequest{makeRequest("test")},
+              std::make_shared<transport::THeader>(),
+              clientCallback,
+              nullptr);
+          co_await completion->waitForDone();
+        });
+  }
+};
+
+TEST_F(FirstResponseErrorBiDiTest, FirstResponseError) {
+  test([](auto completion) { return new SimplifiedEchoClient(3, completion); });
+}
 } // namespace apache::thrift

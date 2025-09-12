@@ -25,6 +25,7 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include <thrift/common/BaseType.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/uri.h>
@@ -34,6 +35,8 @@
 #include <thrift/compiler/generate/t_mstch_generator.h>
 #include <thrift/compiler/sema/ast_validator.h>
 #include <thrift/compiler/whisker/mstch_compat.h>
+
+using ::apache::thrift::type::BaseType;
 
 namespace apache::thrift::compiler {
 
@@ -270,41 +273,6 @@ bool field_has_invariant_type(const t_field* field) {
  * element types, etc.).
  */
 int field_idl_type(const t_field& field) {
-  // Copied from 'thrift/lib/cpp2/type/BaseType.h' for now,
-  // DO_BEFORE(hchok,20250930): it should be moved to a common place where
-  // both runtime and compiler can include.
-  enum class BaseType {
-    Void = 0,
-
-    // Integer types.
-    Bool = 1,
-    Byte = 2,
-    I16 = 3,
-    I32 = 4,
-    I64 = 5,
-
-    // Floating point types.
-    Float = 6,
-    Double = 7,
-
-    // String types.
-    String = 8,
-    Binary = 9,
-
-    // Enum type class.
-    Enum = 10,
-
-    // Structured type classes.
-    Struct = 11,
-    Union = 12,
-    Exception = 13,
-
-    // Container type classes.
-    List = 14,
-    Set = 15,
-    Map = 16
-  };
-
   // Mapping from compiler implementation details to a public enum `BaseType`
   BaseType idl_type = std::invoke(
       [](const t_type* true_type) -> BaseType {
@@ -348,7 +316,7 @@ int field_idl_type(const t_field& field) {
             "Mapping Error: Failed to map type '{}' to 'BaseType'",
             true_type->get_full_name()));
       },
-      field.get_type()->get_true_type());
+      field.type()->get_true_type());
 
   return static_cast<std::underlying_type_t<BaseType>>(idl_type);
 }

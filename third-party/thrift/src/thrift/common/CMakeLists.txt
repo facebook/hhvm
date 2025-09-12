@@ -22,6 +22,12 @@ add_library(
   universal_name.cc
 )
 
+install(
+  DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
+  DESTINATION ${INCLUDE_INSTALL_DIR}/thrift/common
+  FILES_MATCHING PATTERN "*.h" PATTERN "*.tcc"
+)
+
 target_link_libraries(
   common
   Boost::boost

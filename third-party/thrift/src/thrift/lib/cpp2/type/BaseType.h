@@ -21,42 +21,11 @@
 #include <type_traits>
 
 #include <folly/lang/Exception.h>
+#include <thrift/common/BaseType.h>
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 
 namespace apache::thrift::type {
-
-enum class BaseType {
-  Void = 0,
-
-  // Integer types.
-  Bool = 1,
-  Byte = 2,
-  I16 = 3,
-  I32 = 4,
-  I64 = 5,
-
-  // Floating point types.
-  Float = 6,
-  Double = 7,
-
-  // String types.
-  String = 8,
-  Binary = 9,
-
-  // Enum type class.
-  Enum = 10,
-
-  // Structured type classes.
-  Struct = 11,
-  Union = 12,
-  Exception = 13,
-
-  // Container type classes.
-  List = 14,
-  Set = 15,
-  Map = 16
-};
 
 std::string_view getBaseTypeName(BaseType type) noexcept;
 

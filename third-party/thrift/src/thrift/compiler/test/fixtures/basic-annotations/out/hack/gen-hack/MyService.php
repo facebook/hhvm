@@ -265,9 +265,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(MyService_ping_args::class, $input, 'ping', $handler_ctx);
     $result = MyService_ping_result::withDefaultValues();
     try {
+      $args = $this->readHelper(MyService_ping_args::class, $input, 'ping', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'ping', $args);
       await $this->handler->ping();
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
@@ -285,9 +285,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_getRandomData(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getRandomData');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(MyService_getRandomData_args::class, $input, 'getRandomData', $handler_ctx);
     $result = MyService_getRandomData_result::withDefaultValues();
     try {
+      $args = $this->readHelper(MyService_getRandomData_args::class, $input, 'getRandomData', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'getRandomData', $args);
       $result->success = await $this->handler->getRandomData();
       $this->eventHandler_->postExec($handler_ctx, 'getRandomData', $result);
@@ -301,9 +301,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_hasDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('hasDataById');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(MyService_hasDataById_args::class, $input, 'hasDataById', $handler_ctx);
     $result = MyService_hasDataById_result::withDefaultValues();
     try {
+      $args = $this->readHelper(MyService_hasDataById_args::class, $input, 'hasDataById', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'hasDataById', $args);
       $result->success = await $this->handler->hasDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'hasDataById', $result);
@@ -317,9 +317,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_getDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getDataById');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(MyService_getDataById_args::class, $input, 'getDataById', $handler_ctx);
     $result = MyService_getDataById_result::withDefaultValues();
     try {
+      $args = $this->readHelper(MyService_getDataById_args::class, $input, 'getDataById', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'getDataById', $args);
       $result->success = await $this->handler->getDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'getDataById', $result);
@@ -333,9 +333,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_putDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('putDataById');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(MyService_putDataById_args::class, $input, 'putDataById', $handler_ctx);
     $result = MyService_putDataById_result::withDefaultValues();
     try {
+      $args = $this->readHelper(MyService_putDataById_args::class, $input, 'putDataById', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'putDataById', $args);
       await $this->handler->putDataById($args->id, $args->data);
       $this->eventHandler_->postExec($handler_ctx, 'putDataById', $result);
@@ -349,8 +349,8 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_lobDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('lobDataById');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(MyService_lobDataById_args::class, $input, 'lobDataById', $handler_ctx);
     try {
+      $args = $this->readHelper(MyService_lobDataById_args::class, $input, 'lobDataById', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'lobDataById', $args);
       await $this->handler->lobDataById($args->id, $args->data);
     } catch (\Exception $ex) {
@@ -363,9 +363,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_doNothing(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('doNothing');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(MyService_doNothing_args::class, $input, 'doNothing', $handler_ctx);
     $result = MyService_doNothing_result::withDefaultValues();
     try {
+      $args = $this->readHelper(MyService_doNothing_args::class, $input, 'doNothing', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'doNothing', $args);
       await $this->handler->doNothing();
       $this->eventHandler_->postExec($handler_ctx, 'doNothing', $result);

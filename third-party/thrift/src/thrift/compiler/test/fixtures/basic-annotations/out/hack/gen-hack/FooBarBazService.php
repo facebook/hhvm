@@ -138,9 +138,9 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
   protected async function process_foo(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('foo');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(FooBarBazService_foo_args::class, $input, 'foo', $handler_ctx);
     $result = FooBarBazService_foo_result::withDefaultValues();
     try {
+      $args = $this->readHelper(FooBarBazService_foo_args::class, $input, 'foo', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'foo', $args);
       await $this->handler->foo();
       $this->eventHandler_->postExec($handler_ctx, 'foo', $result);
@@ -154,9 +154,9 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
   protected async function process_bar(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('bar');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(FooBarBazService_bar_args::class, $input, 'bar', $handler_ctx);
     $result = FooBarBazService_bar_result::withDefaultValues();
     try {
+      $args = $this->readHelper(FooBarBazService_bar_args::class, $input, 'bar', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'bar', $args);
       await $this->handler->bar();
       $this->eventHandler_->postExec($handler_ctx, 'bar', $result);
@@ -170,9 +170,9 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
   protected async function process_baz(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('baz');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(FooBarBazService_baz_args::class, $input, 'baz', $handler_ctx);
     $result = FooBarBazService_baz_result::withDefaultValues();
     try {
+      $args = $this->readHelper(FooBarBazService_baz_args::class, $input, 'baz', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'baz', $args);
       await $this->handler->baz();
       $this->eventHandler_->postExec($handler_ctx, 'baz', $result);

@@ -161,9 +161,9 @@ abstract class BadServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_bar(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('bar');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(BadService_bar_args::class, $input, 'bar', $handler_ctx);
     $result = BadService_bar_result::withDefaultValues();
     try {
+      $args = $this->readHelper(BadService_bar_args::class, $input, 'bar', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'BadService', 'bar', $args);
       $result->success = await $this->handler->bar();
       $this->eventHandler_->postExec($handler_ctx, 'bar', $result);

@@ -121,9 +121,9 @@ abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProce
   protected async function process_getDataByKey0(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getDataByKey0');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args::class, $input, 'getDataByKey0', $handler_ctx);
     $result = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::withDefaultValues();
     try {
+      $args = $this->readHelper(\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args::class, $input, 'getDataByKey0', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\DbMixedStackArguments', 'getDataByKey0', $args);
       $result->success = await $this->handler->getDataByKey0($args->key);
       $this->eventHandler_->postExec($handler_ctx, 'getDataByKey0', $result);
@@ -137,9 +137,9 @@ abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProce
   protected async function process_getDataByKey1(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getDataByKey1');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args::class, $input, 'getDataByKey1', $handler_ctx);
     $result = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::withDefaultValues();
     try {
+      $args = $this->readHelper(\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args::class, $input, 'getDataByKey1', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\DbMixedStackArguments', 'getDataByKey1', $args);
       $result->success = await $this->handler->getDataByKey1($args->key);
       $this->eventHandler_->postExec($handler_ctx, 'getDataByKey1', $result);

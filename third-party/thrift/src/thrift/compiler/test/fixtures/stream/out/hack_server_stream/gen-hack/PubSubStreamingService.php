@@ -380,9 +380,9 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
   protected async function process_returnstream(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('returnstream');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(PubSubStreamingService_returnstream_args::class, $input, 'returnstream', $handler_ctx);
     $result = PubSubStreamingService_returnstream_FirstResponse::withDefaultValues();
     try {
+      $args = $this->readHelper(PubSubStreamingService_returnstream_args::class, $input, 'returnstream', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'returnstream', $args);
       $response_and_stream = await $this->handler->returnstream($args->i32_from, $args->i32_to);
       $this->eventHandler_->postExec($handler_ctx, 'returnstream', $result);
@@ -399,9 +399,9 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
   protected async function process_streamthrows(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('streamthrows');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(PubSubStreamingService_streamthrows_args::class, $input, 'streamthrows', $handler_ctx);
     $result = PubSubStreamingService_streamthrows_FirstResponse::withDefaultValues();
     try {
+      $args = $this->readHelper(PubSubStreamingService_streamthrows_args::class, $input, 'streamthrows', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'streamthrows', $args);
       $response_and_stream = await $this->handler->streamthrows($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'streamthrows', $result);
@@ -418,9 +418,9 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
   protected async function process_servicethrows(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('servicethrows');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(PubSubStreamingService_servicethrows_args::class, $input, 'servicethrows', $handler_ctx);
     $result = PubSubStreamingService_servicethrows_FirstResponse::withDefaultValues();
     try {
+      $args = $this->readHelper(PubSubStreamingService_servicethrows_args::class, $input, 'servicethrows', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'servicethrows', $args);
       $response_and_stream = await $this->handler->servicethrows($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'servicethrows', $result);
@@ -441,9 +441,9 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
   protected async function process_servicethrows2(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('servicethrows2');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(PubSubStreamingService_servicethrows2_args::class, $input, 'servicethrows2', $handler_ctx);
     $result = PubSubStreamingService_servicethrows2_FirstResponse::withDefaultValues();
     try {
+      $args = $this->readHelper(PubSubStreamingService_servicethrows2_args::class, $input, 'servicethrows2', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'servicethrows2', $args);
       $response_and_stream = await $this->handler->servicethrows2($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'servicethrows2', $result);
@@ -464,9 +464,9 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
   protected async function process_boththrows(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('boththrows');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(PubSubStreamingService_boththrows_args::class, $input, 'boththrows', $handler_ctx);
     $result = PubSubStreamingService_boththrows_FirstResponse::withDefaultValues();
     try {
+      $args = $this->readHelper(PubSubStreamingService_boththrows_args::class, $input, 'boththrows', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'boththrows', $args);
       $response_and_stream = await $this->handler->boththrows($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'boththrows', $result);
@@ -487,9 +487,9 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
   protected async function process_responseandstreamstreamthrows(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('responseandstreamstreamthrows');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(PubSubStreamingService_responseandstreamstreamthrows_args::class, $input, 'responseandstreamstreamthrows', $handler_ctx);
     $result = PubSubStreamingService_responseandstreamstreamthrows_FirstResponse::withDefaultValues();
     try {
+      $args = $this->readHelper(PubSubStreamingService_responseandstreamstreamthrows_args::class, $input, 'responseandstreamstreamthrows', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'responseandstreamstreamthrows', $args);
       $response_and_stream = await $this->handler->responseandstreamstreamthrows($args->foo);
       $result->success = $response_and_stream->response;
@@ -507,9 +507,9 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
   protected async function process_responseandstreamservicethrows(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('responseandstreamservicethrows');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(PubSubStreamingService_responseandstreamservicethrows_args::class, $input, 'responseandstreamservicethrows', $handler_ctx);
     $result = PubSubStreamingService_responseandstreamservicethrows_FirstResponse::withDefaultValues();
     try {
+      $args = $this->readHelper(PubSubStreamingService_responseandstreamservicethrows_args::class, $input, 'responseandstreamservicethrows', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'responseandstreamservicethrows', $args);
       $response_and_stream = await $this->handler->responseandstreamservicethrows($args->foo);
       $result->success = $response_and_stream->response;
@@ -531,9 +531,9 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
   protected async function process_responseandstreamboththrows(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('responseandstreamboththrows');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(PubSubStreamingService_responseandstreamboththrows_args::class, $input, 'responseandstreamboththrows', $handler_ctx);
     $result = PubSubStreamingService_responseandstreamboththrows_FirstResponse::withDefaultValues();
     try {
+      $args = $this->readHelper(PubSubStreamingService_responseandstreamboththrows_args::class, $input, 'responseandstreamboththrows', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'responseandstreamboththrows', $args);
       $response_and_stream = await $this->handler->responseandstreamboththrows($args->foo);
       $result->success = $response_and_stream->response;
@@ -555,9 +555,9 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
   protected async function process_returnstreamFast(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('returnstreamFast');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(PubSubStreamingService_returnstreamFast_args::class, $input, 'returnstreamFast', $handler_ctx);
     $result = PubSubStreamingService_returnstreamFast_FirstResponse::withDefaultValues();
     try {
+      $args = $this->readHelper(PubSubStreamingService_returnstreamFast_args::class, $input, 'returnstreamFast', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'PubSubStreamingService', 'returnstreamFast', $args);
       $response_and_stream = await $this->handler->returnstreamFast($args->i32_from, $args->i32_to);
       $this->eventHandler_->postExec($handler_ctx, 'returnstreamFast', $result);

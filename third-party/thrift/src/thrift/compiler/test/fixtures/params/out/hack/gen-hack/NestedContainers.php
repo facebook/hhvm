@@ -212,9 +212,9 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
   protected async function process_mapList(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('mapList');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(NestedContainers_mapList_args::class, $input, 'mapList', $handler_ctx);
     $result = NestedContainers_mapList_result::withDefaultValues();
     try {
+      $args = $this->readHelper(NestedContainers_mapList_args::class, $input, 'mapList', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'mapList', $args);
       await $this->handler->mapList($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'mapList', $result);
@@ -228,9 +228,9 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
   protected async function process_mapSet(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('mapSet');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(NestedContainers_mapSet_args::class, $input, 'mapSet', $handler_ctx);
     $result = NestedContainers_mapSet_result::withDefaultValues();
     try {
+      $args = $this->readHelper(NestedContainers_mapSet_args::class, $input, 'mapSet', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'mapSet', $args);
       await $this->handler->mapSet($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'mapSet', $result);
@@ -244,9 +244,9 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
   protected async function process_listMap(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('listMap');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(NestedContainers_listMap_args::class, $input, 'listMap', $handler_ctx);
     $result = NestedContainers_listMap_result::withDefaultValues();
     try {
+      $args = $this->readHelper(NestedContainers_listMap_args::class, $input, 'listMap', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'listMap', $args);
       await $this->handler->listMap($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'listMap', $result);
@@ -260,9 +260,9 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
   protected async function process_listSet(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('listSet');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(NestedContainers_listSet_args::class, $input, 'listSet', $handler_ctx);
     $result = NestedContainers_listSet_result::withDefaultValues();
     try {
+      $args = $this->readHelper(NestedContainers_listSet_args::class, $input, 'listSet', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'listSet', $args);
       await $this->handler->listSet($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'listSet', $result);
@@ -276,9 +276,9 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
   protected async function process_turtles(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('turtles');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(NestedContainers_turtles_args::class, $input, 'turtles', $handler_ctx);
     $result = NestedContainers_turtles_result::withDefaultValues();
     try {
+      $args = $this->readHelper(NestedContainers_turtles_args::class, $input, 'turtles', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'turtles', $args);
       await $this->handler->turtles($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'turtles', $result);

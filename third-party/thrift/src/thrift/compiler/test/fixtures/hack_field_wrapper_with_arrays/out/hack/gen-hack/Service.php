@@ -90,9 +90,9 @@ abstract class ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_func(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('func');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(Service_func_args::class, $input, 'func', $handler_ctx);
     $result = Service_func_result::withDefaultValues();
     try {
+      $args = $this->readHelper(Service_func_args::class, $input, 'func', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'Service', 'func', $args);
       $result->success = await $this->handler->func($args->arg1, $args->arg2);
       $this->eventHandler_->postExec($handler_ctx, 'func', $result);

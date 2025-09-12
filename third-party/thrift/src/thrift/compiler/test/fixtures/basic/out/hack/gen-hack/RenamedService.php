@@ -90,9 +90,9 @@ abstract class RenamedServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_simple_rpc(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('simple_rpc');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(\test\fixtures\basic\RenamedService_simple_rpc_args::class, $input, 'simple_rpc', $handler_ctx);
     $result = \test\fixtures\basic\RenamedService_simple_rpc_result::withDefaultValues();
     try {
+      $args = $this->readHelper(\test\fixtures\basic\RenamedService_simple_rpc_args::class, $input, 'simple_rpc', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\RenamedService', 'simple_rpc', $args);
       await $this->handler->simple_rpc();
       $this->eventHandler_->postExec($handler_ctx, 'simple_rpc', $result);

@@ -159,9 +159,9 @@ abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_func(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('func');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(Service1_func_args::class, $input, 'func', $handler_ctx);
     $result = Service1_func_result::withDefaultValues();
     try {
+      $args = $this->readHelper(Service1_func_args::class, $input, 'func', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'Service1', 'func', $args);
       $result->success = await $this->handler->func($args->arg1, $args->arg2);
       $this->eventHandler_->postExec($handler_ctx, 'func', $result);
@@ -175,9 +175,9 @@ abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_func1(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('func1');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(Service1_func1_args::class, $input, 'func1', $handler_ctx);
     $result = Service1_func1_result::withDefaultValues();
     try {
+      $args = $this->readHelper(Service1_func1_args::class, $input, 'func1', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'Service1', 'func1', $args);
       $result->success = await $this->handler->func1($args->arg1, $args->arg2);
       $this->eventHandler_->postExec($handler_ctx, 'func1', $result);
@@ -191,9 +191,9 @@ abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_func2(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('func2');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(Service1_func2_args::class, $input, 'func2', $handler_ctx);
     $result = Service1_func2_result::withDefaultValues();
     try {
+      $args = $this->readHelper(Service1_func2_args::class, $input, 'func2', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'Service1', 'func2', $args);
       $result->success = await $this->handler->func2($args->arg1, $args->arg2);
       $this->eventHandler_->postExec($handler_ctx, 'func2', $result);

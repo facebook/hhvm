@@ -94,9 +94,9 @@ abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackService
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(\hack_ns2\TestService_ping_args::class, $input, 'ping', $handler_ctx);
     $result = \hack_ns2\TestService_ping_result::withDefaultValues();
     try {
+      $args = $this->readHelper(\hack_ns2\TestService_ping_args::class, $input, 'ping', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\hack_ns2\TestService', 'ping', $args);
       $result->success = await $this->handler->ping($args->str_arg);
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);

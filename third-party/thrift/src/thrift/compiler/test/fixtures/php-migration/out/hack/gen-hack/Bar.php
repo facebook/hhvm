@@ -129,9 +129,9 @@ abstract class BarAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_baz(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('baz');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(Bar_baz_args::class, $input, 'baz', $handler_ctx);
     $result = Bar_baz_result::withDefaultValues();
     try {
+      $args = $this->readHelper(Bar_baz_args::class, $input, 'baz', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'Bar', 'baz', $args);
       $result->success = await $this->handler->baz($args->a, $args->b, $args->c, $args->d, $args->e);
       $this->eventHandler_->postExec($handler_ctx, 'baz', $result);

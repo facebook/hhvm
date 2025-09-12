@@ -86,9 +86,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_second(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('second');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(MyService_second_args::class, $input, 'second', $handler_ctx);
     $result = MyService_second_result::withDefaultValues();
     try {
+      $args = $this->readHelper(MyService_second_args::class, $input, 'second', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'second', $args);
       $result->success = await $this->handler->second($args->count);
       $this->eventHandler_->postExec($handler_ctx, 'second', $result);

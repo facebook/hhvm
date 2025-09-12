@@ -92,9 +92,9 @@ abstract class FB303ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_renamed_rpc(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('renamed_rpc');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(\test\fixtures\basic\FB303Service_renamed_rpc_args::class, $input, 'renamed_rpc', $handler_ctx);
     $result = \test\fixtures\basic\FB303Service_renamed_rpc_result::withDefaultValues();
     try {
+      $args = $this->readHelper(\test\fixtures\basic\FB303Service_renamed_rpc_args::class, $input, 'renamed_rpc', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\FB303Service', 'renamed_rpc', $args);
       $result->success = await $this->handler->renamed_rpc($args->int_parameter);
       $this->eventHandler_->postExec($handler_ctx, 'renamed_rpc', $result);

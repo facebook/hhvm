@@ -5821,9 +5821,6 @@ void t_hack_generator::generate_process_function(
              << fn_name << "');\n"
              << indent() << "$reply_type = \\TMessageType::REPLY;\n";
 
-  f_service_ << indent() << "$args = $this->readHelper(" << argsname
-             << "::class, $input, '" << fn_name << "', $handler_ctx);\n";
-
   // Declare result for non oneway function
   if (tfunction->qualifier() != t_function_qualifier::oneway) {
     f_service_ << indent() << "$result = " << resultname
@@ -5833,6 +5830,8 @@ void t_hack_generator::generate_process_function(
   // Try block for a function with exceptions
   f_service_ << indent() << "try {\n";
   indent_up();
+  f_service_ << indent() << "$args = $this->readHelper(" << argsname
+             << "::class, $input, '" << fn_name << "', $handler_ctx);\n";
 
   // Generate the function call
   indent(f_service_) << "$this->eventHandler_->preExec($handler_ctx, '"

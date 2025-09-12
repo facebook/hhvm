@@ -91,9 +91,9 @@ abstract class TestServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_init(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('init');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(\test\namespace_from_package_without_module_name\TestService_init_args::class, $input, 'init', $handler_ctx);
     $result = \test\namespace_from_package_without_module_name\TestService_init_result::withDefaultValues();
     try {
+      $args = $this->readHelper(\test\namespace_from_package_without_module_name\TestService_init_args::class, $input, 'init', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\namespace_from_package_without_module_name\TestService', 'init', $args);
       $result->success = await $this->handler->init($args->int1);
       $this->eventHandler_->postExec($handler_ctx, 'init', $result);

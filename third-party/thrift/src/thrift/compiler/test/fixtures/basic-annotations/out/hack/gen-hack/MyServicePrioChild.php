@@ -84,9 +84,9 @@ abstract class MyServicePrioChildAsyncProcessorBase extends MyServicePrioParentA
   protected async function process_pang(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('pang');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(MyServicePrioChild_pang_args::class, $input, 'pang', $handler_ctx);
     $result = MyServicePrioChild_pang_result::withDefaultValues();
     try {
+      $args = $this->readHelper(MyServicePrioChild_pang_args::class, $input, 'pang', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'MyServicePrioChild', 'pang', $args);
       await $this->handler->pang();
       $this->eventHandler_->postExec($handler_ctx, 'pang', $result);

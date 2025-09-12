@@ -299,9 +299,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(\test\fixtures\basic\MyService_ping_args::class, $input, 'ping', $handler_ctx);
     $result = \test\fixtures\basic\MyService_ping_result::withDefaultValues();
     try {
+      $args = $this->readHelper(\test\fixtures\basic\MyService_ping_args::class, $input, 'ping', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'ping', $args);
       await $this->handler->ping();
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
@@ -315,9 +315,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_getRandomData(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getRandomData');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(\test\fixtures\basic\MyService_getRandomData_args::class, $input, 'getRandomData', $handler_ctx);
     $result = \test\fixtures\basic\MyService_getRandomData_result::withDefaultValues();
     try {
+      $args = $this->readHelper(\test\fixtures\basic\MyService_getRandomData_args::class, $input, 'getRandomData', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'getRandomData', $args);
       $result->success = await $this->handler->getRandomData();
       $this->eventHandler_->postExec($handler_ctx, 'getRandomData', $result);
@@ -331,9 +331,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_sink(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('sink');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(\test\fixtures\basic\MyService_sink_args::class, $input, 'sink', $handler_ctx);
     $result = \test\fixtures\basic\MyService_sink_result::withDefaultValues();
     try {
+      $args = $this->readHelper(\test\fixtures\basic\MyService_sink_args::class, $input, 'sink', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'sink', $args);
       await $this->handler->sink($args->sink);
       $this->eventHandler_->postExec($handler_ctx, 'sink', $result);
@@ -347,9 +347,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_putDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('putDataById');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(\test\fixtures\basic\MyService_putDataById_args::class, $input, 'putDataById', $handler_ctx);
     $result = \test\fixtures\basic\MyService_putDataById_result::withDefaultValues();
     try {
+      $args = $this->readHelper(\test\fixtures\basic\MyService_putDataById_args::class, $input, 'putDataById', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'putDataById', $args);
       await $this->handler->putDataById($args->id, $args->data);
       $this->eventHandler_->postExec($handler_ctx, 'putDataById', $result);
@@ -363,9 +363,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_hasDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('hasDataById');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(\test\fixtures\basic\MyService_hasDataById_args::class, $input, 'hasDataById', $handler_ctx);
     $result = \test\fixtures\basic\MyService_hasDataById_result::withDefaultValues();
     try {
+      $args = $this->readHelper(\test\fixtures\basic\MyService_hasDataById_args::class, $input, 'hasDataById', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'hasDataById', $args);
       $result->success = await $this->handler->hasDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'hasDataById', $result);
@@ -379,9 +379,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_getDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getDataById');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(\test\fixtures\basic\MyService_getDataById_args::class, $input, 'getDataById', $handler_ctx);
     $result = \test\fixtures\basic\MyService_getDataById_result::withDefaultValues();
     try {
+      $args = $this->readHelper(\test\fixtures\basic\MyService_getDataById_args::class, $input, 'getDataById', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'getDataById', $args);
       $result->success = await $this->handler->getDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'getDataById', $result);
@@ -395,9 +395,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_deleteDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('deleteDataById');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(\test\fixtures\basic\MyService_deleteDataById_args::class, $input, 'deleteDataById', $handler_ctx);
     $result = \test\fixtures\basic\MyService_deleteDataById_result::withDefaultValues();
     try {
+      $args = $this->readHelper(\test\fixtures\basic\MyService_deleteDataById_args::class, $input, 'deleteDataById', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'deleteDataById', $args);
       await $this->handler->deleteDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'deleteDataById', $result);
@@ -411,8 +411,8 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_lobDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('lobDataById');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(\test\fixtures\basic\MyService_lobDataById_args::class, $input, 'lobDataById', $handler_ctx);
     try {
+      $args = $this->readHelper(\test\fixtures\basic\MyService_lobDataById_args::class, $input, 'lobDataById', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'lobDataById', $args);
       await $this->handler->lobDataById($args->id, $args->data);
     } catch (\Exception $ex) {

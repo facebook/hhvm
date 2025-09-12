@@ -111,9 +111,9 @@ abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcess
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(MyServicePrioParent_ping_args::class, $input, 'ping', $handler_ctx);
     $result = MyServicePrioParent_ping_result::withDefaultValues();
     try {
+      $args = $this->readHelper(MyServicePrioParent_ping_args::class, $input, 'ping', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'MyServicePrioParent', 'ping', $args);
       await $this->handler->ping();
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
@@ -127,9 +127,9 @@ abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcess
   protected async function process_pong(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('pong');
     $reply_type = \TMessageType::REPLY;
-    $args = $this->readHelper(MyServicePrioParent_pong_args::class, $input, 'pong', $handler_ctx);
     $result = MyServicePrioParent_pong_result::withDefaultValues();
     try {
+      $args = $this->readHelper(MyServicePrioParent_pong_args::class, $input, 'pong', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, 'MyServicePrioParent', 'pong', $args);
       await $this->handler->pong();
       $this->eventHandler_->postExec($handler_ctx, 'pong', $result);

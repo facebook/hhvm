@@ -168,7 +168,7 @@ void HTTPStreamSourceUpstreamSink::sendAbort() {
 
 void HTTPStreamSourceUpstreamSink::sendHeadersWithOptionalEOM(
     const HTTPMessage& headers, bool eom) {
-  egressHeaders_ = {&headers, eom};
+  egressHeaders_ = {.msg = &headers, .eom = eom};
   // the session will only invoke ::readBodyEvent on egressSource_
   egressSource_.validateHeadersAndSkip(*egressHeaders_.msg, egressHeaders_.eom);
 }

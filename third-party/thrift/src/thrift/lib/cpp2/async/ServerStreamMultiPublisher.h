@@ -41,7 +41,7 @@ class ServerStreamMultiPublisher {
       : encodeToStreams_(std::make_shared<EncodeToStreams>()) {}
 
   void next(ConditionalPayload payload) {
-    encodeToStreams_->withRLock([=, payload = std::move(payload)](
+    encodeToStreams_->withRLock([=, this, payload = std::move(payload)](
                                     const auto& map) {
       auto remaining = map.size();
       for (auto& [encode, streams] : map) {

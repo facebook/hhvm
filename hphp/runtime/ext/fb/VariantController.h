@@ -380,6 +380,16 @@ struct VariantControllerImpl {
       RuntimeStruct::registerRuntimeStruct(stableIdentifier, fields);
     return runtimeStruct;
   }
+
+  template<typename StableIdentifierCB>
+  static StructHandle registerStruct(
+      StableIdentifierCB&& stableIdentifierCb,
+      const std::vector<std::pair<size_t, StringType>>& fields) {
+    auto const stableIdentifier = stableIdentifierCb();
+    auto const runtimeStruct =
+      RuntimeStruct::registerRuntimeStruct(stableIdentifier, fields);
+    return runtimeStruct;
+  }
 };
 
 using VariantController =

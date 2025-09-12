@@ -5,6 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/extra_services_types.tcc"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/extra_services_constants.h"
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/extra_services_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>

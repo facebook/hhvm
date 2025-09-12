@@ -5,6 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_types.tcc"
+#include "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_constants.h"
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>

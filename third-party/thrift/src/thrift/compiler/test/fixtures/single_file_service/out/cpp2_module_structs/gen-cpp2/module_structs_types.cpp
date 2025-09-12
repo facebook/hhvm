@@ -5,6 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_structs_types.tcc"
+#include "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_structs_constants.h"
 #include "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_structs_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>

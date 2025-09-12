@@ -5,6 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_deprecated_terse_writes_types.tcc"
+#include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_deprecated_terse_writes_constants.h"
 #include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_deprecated_terse_writes_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>

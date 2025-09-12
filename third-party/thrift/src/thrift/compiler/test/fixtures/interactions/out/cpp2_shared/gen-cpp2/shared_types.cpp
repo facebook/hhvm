@@ -5,6 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types.tcc"
+#include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_constants.h"
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>

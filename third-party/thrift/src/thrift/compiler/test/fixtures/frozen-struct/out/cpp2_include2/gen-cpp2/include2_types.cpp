@@ -5,6 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_types.tcc"
+#include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_constants.h"
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>

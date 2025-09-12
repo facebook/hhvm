@@ -5,6 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_no_uri_types.tcc"
+#include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_no_uri_constants.h"
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_no_uri_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>

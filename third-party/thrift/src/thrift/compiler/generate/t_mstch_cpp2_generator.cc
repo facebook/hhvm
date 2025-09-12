@@ -383,15 +383,18 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
 
   whisker::map::raw globals() const override {
     whisker::map::raw globals = t_mstch_generator::globals();
-    // Provide global default for cpp_enable_const_referencing?, templates may
-    // override this in a restricted scope
-    // Controls whether consts in Thrift files, which in turn reference other
-    // consts, will be emitted with all dependency const values inlined OR
-    // as a reference to the code-gen for the dependency const.
-    // e.g. const i32 MyInt = 5; const list<i32> MyList = [MyInt];
-    // Const referencing controls whether `MyList`'s generated code emits a call
-    // to `MyInt`'s accessor, or just inlines the value `5`.
-    globals["cpp_enable_const_referencing?"] = whisker::make::false_;
+    // Provide global default for cpp_enable_same_program_const_referencing?
+    // Only the template for module_types.h overrides this, setting it to FALSE
+    // Controls whether references to consts in the current Thrift file can be
+    // emitted as references, or must be inlined. By default, we can emit all
+    // const usage as references.
+    // module_types.h is an exception, because module_constants.h (where const
+    // accessors are declared) depends on module_types.h, so module_types.h
+    // cannot include module_constants.h without a circular dependency.
+    // This restriction only applies within the same program - module_types.h
+    // CAN include and reference consts from other programs.
+    globals["cpp_enable_same_program_const_referencing?"] =
+        whisker::make::true_;
     globals["cpp_fatal_string_id"] = whisker::dsl::make_function(
         "cpp_fatal_string_id",
         [](whisker::dsl::function::context ctx) -> whisker::object {
@@ -597,6 +600,16 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     def.property("serial?", [](const t_interaction& self) {
       return self.has_unstructured_annotation("serial") ||
           self.has_structured_annotation(kSerialUri);
+    });
+    return std::move(def).make();
+  }
+
+  prototype<t_const>::ptr make_prototype_for_const(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_const(proto);
+    auto def = whisker::dsl::prototype_builder<h_const>::extends(base);
+    def.property("external?", [this](const t_const& self) {
+      return self.program() != program_;
     });
     return std::move(def).make();
   }

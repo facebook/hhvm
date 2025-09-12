@@ -5,6 +5,7 @@
  *  @generated @nocommit
  */
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_types.tcc"
+#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_constants.h"
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_data.h"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>

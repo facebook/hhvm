@@ -24,8 +24,11 @@ apache::thrift::StringTraits<{{type:cpp_standard_type}}>::fromStringLiteral({{> 
 {{> common/const_value}}
 {{/if value:string?}}
 
-{{! Reference other constants: }}
-{{#else if (and cpp_enable_const_referencing? value:referenceable?)}}
+{{! Reference other constants:
+  This is allowed when a value is considered referenceable AND the const to be
+  referenced is defined in an external program (i.e. external? is true), or same
+  program const referencing is enabled in the current context. }}
+{{#else if (and value:referenceable? (or cpp_enable_same_program_const_referencing? value:owning_const.constant:external?))}}
 {{!}}{{#value:owning_const}}{{#constant:program}}
 {{!  }}::{{program:qualified_namespace}}::{{program:name}}_constants::{{constant:name}}()
 {{!}}{{/constant:program}}{{/value:owning_const}}

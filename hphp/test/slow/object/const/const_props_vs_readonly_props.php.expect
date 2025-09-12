@@ -1,0 +1,4 @@
+Property static_foo of class R must be mutable.
+Property a of class R is readonly, but isn't enclosed in a readonly expression.
+A::incr() modifies the instance, but the caller has a readonly instance
+Cannot modify const property i of class C after construction

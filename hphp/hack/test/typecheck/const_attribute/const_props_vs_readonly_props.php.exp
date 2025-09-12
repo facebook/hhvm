@@ -1,0 +1,12 @@
+ERROR: File "const_props_vs_readonly_props.php", line 28, characters 3-16:
+This value is readonly, its properties cannot be modified (Typing[4409])
+ERROR: File "const_props_vs_readonly_props.php", line 29, characters 7-7:
+This property returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
+  File "const_props_vs_readonly_props.php", line 16, characters 47-47:
+  The property is defined here.
+ERROR: File "const_props_vs_readonly_props.php", line 31, characters 3-4:
+This expression is readonly, so it can only call readonly methods (Typing[4413])
+  File "const_props_vs_readonly_props.php", line 5, characters 19-22:
+  This method is not readonly
+ERROR: File "const_props_vs_readonly_props.php", line 43, characters 7-7:
+Cannot mutate a `__Const` property (Typing[4196])

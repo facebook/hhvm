@@ -84,9 +84,13 @@ struct SharedPtr {
   3: optional i32 field3;
 }
 
+typedef list<MyDef> MyDefList
+typedef set<MyDef> MyDefSet
+typedef map<i32, MyDef> MyDefMap
+
 struct StructWithTypedef {
   1: MyDef field;
-  2: list<MyDef> list_field;
-  3: set<MyDef> set_field;
-  4: map<i32, MyDef> map_field;
+  2: MyDefList list_field;
+  3: MyDefSet set_field;
+  4: MyDefMap map_field;
 }

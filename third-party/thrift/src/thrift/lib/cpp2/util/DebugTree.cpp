@@ -59,8 +59,8 @@ OptionalTypeRef getFieldType(const StructuredNode* node, FieldId id) {
 // Return the element type in a list typeref.
 // * If typeref is not list, returns nullopt.
 OptionalTypeRef getListElem(const OptionalTypeRef& typeref) {
-  if (typeref && typeref->isList()) {
-    return typeref->asList().elementType().trueType();
+  if (typeref && typeref->trueType().isList()) {
+    return typeref->trueType().asList().elementType().trueType();
   }
 
   return {};
@@ -69,8 +69,8 @@ OptionalTypeRef getListElem(const OptionalTypeRef& typeref) {
 // Return the element type in a set typeref.
 // * If typeref is not set, returns nullptr.
 OptionalTypeRef getSetElem(const OptionalTypeRef& typeref) {
-  if (typeref && typeref->isSet()) {
-    return typeref->asSet().elementType().trueType();
+  if (typeref && typeref->trueType().isSet()) {
+    return typeref->trueType().asSet().elementType().trueType();
   }
 
   return {};
@@ -79,8 +79,8 @@ OptionalTypeRef getSetElem(const OptionalTypeRef& typeref) {
 // Return the key type in a map typeref.
 // * If typeref is not map, returns nullptr.
 OptionalTypeRef getMapKey(const OptionalTypeRef& typeref) {
-  if (typeref && typeref->isMap()) {
-    return typeref->asMap().keyType().trueType();
+  if (typeref && typeref->trueType().isMap()) {
+    return typeref->trueType().asMap().keyType().trueType();
   }
 
   return {};
@@ -89,8 +89,8 @@ OptionalTypeRef getMapKey(const OptionalTypeRef& typeref) {
 // Return the value type in a map typeref.
 // * If typeref is not map, returns nullptr.
 OptionalTypeRef getMapValue(const OptionalTypeRef& typeref) {
-  if (typeref && typeref->isMap()) {
-    return typeref->asMap().valueType().trueType();
+  if (typeref && typeref->trueType().isMap()) {
+    return typeref->trueType().asMap().valueType().trueType();
   }
 
   return {};

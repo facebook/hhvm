@@ -222,6 +222,8 @@ class t_const_value {
 
   const t_enum_value* get_enum_value() const { return enum_val_; }
 
+  bool is_enum_value() const { return enum_val_ != nullptr; }
+
   void set_ref_range(source_range rng) { ref_range_ = rng; }
   source_range ref_range() const { return ref_range_; }
 

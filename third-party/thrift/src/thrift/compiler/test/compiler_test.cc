@@ -3282,3 +3282,27 @@ TEST(CompilerTest, implicit_scope_addition_with_multiple_includes) {
   )";
   check_compile(name_contents_map, "main/foo.thrift");
 }
+
+TEST(CompilerTest, unscoped_enum_values) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["other/foo.thrift"] = R"(
+    enum OtherThings {
+      BAR = 1,
+      BAZ = 2,
+    }
+  )";
+
+  name_contents_map["foo.thrift"] = R"(
+    include "other/foo.thrift"
+
+    enum Things {
+      BAR = 11,
+      BAZ = 12,
+    }
+
+    struct Bar {
+      1: i32 this_val = BAR; # expected-warning@10#original[BAR]#replacement[Things.BAR]@25: Using an enum value without the enum name is deprecated. Use a fully qualified name [unscoped_enum_value]
+    }
+  )";
+  check_compile(name_contents_map, "foo.thrift");
+}

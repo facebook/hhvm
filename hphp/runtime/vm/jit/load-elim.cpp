@@ -649,6 +649,8 @@ void handle_call_effects(Local& env,
                     env.global.ainfo.all_fmeta    |
                     env.global.ainfo.all_local    |
                     env.global.ainfo.all_iter     |
+                    env.global.ainfo.all_elemIs   |
+                    env.global.ainfo.all_elemSs   |
                     env.global.ainfo.all_closureArg;
   env.state.avail &= keep;
 

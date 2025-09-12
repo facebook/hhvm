@@ -174,9 +174,9 @@ jit::vector<AliasClass> backtrace_locals(const IRInstruction& inst) {
 /*
  * Modify a GeneralEffects to take potential VM re-entry into account.  This
  * affects may-load, may-store, and kills information for the instruction.  The
- * GeneralEffects should already contain AHeapAny in both loads and stores if
- * it affects those locations for reasons other than re-entry, but does not
- * need to if it doesn't.
+ * GeneralEffects should already contain AHeapAny in loads and APropAny in
+ * stores if it affects those locations for reasons other than re-entry, but
+ * does not need to if it doesn't.
  *
  * For loads, we need to take into account any locals potentially accessed by
  * debug_backtrace().
@@ -231,7 +231,7 @@ GeneralEffects may_reenter(const IRInstruction& inst, const GeneralEffects& x) {
 
   return GeneralEffects {
     x.loads | AHeapAny | ARdsAny | AVMRegAny | AVMRegState,
-    x.stores | AHeapAny | ARdsAny | AVMRegAny,
+    x.stores | APropAny | ARdsAny | AVMRegAny,
     x.moves,
     new_kills,
     x.inout,
@@ -283,7 +283,7 @@ GeneralEffects may_load_store_move_kill(AliasClass loads,
 GeneralEffects interp_one_effects(const IRInstruction& inst) {
   auto const extra  = inst.extra<InterpOne>();
   auto loads  = AHeapAny | AStackAny | ALocalAny | ARdsAny | livefp(inst);
-  auto stores = AHeapAny | AStackAny | ARdsAny | AVMRegAny | AVMRegState;
+  auto stores = APropAny | AStackAny | ARdsAny | AVMRegAny | AVMRegState;
   if (extra->smashesAllLocals) {
     stores = stores | ALocalAny;
   } else {
@@ -393,7 +393,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ReturnHook:
     return may_load_store_kill(
       AHeapAny | AFFunc { inst.src(0) } | AFMeta { inst.src(0) },
-      AHeapAny,
+      APropAny,
       *AStackAny
         .precise_union(ALocalAny)
         ->precise_union(AMIStateAny)
@@ -409,7 +409,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SuspendHookYield:
     // We rely on the may_reenter effects to add the appropriate local asets.
     return may_load_store_kill(
-      AHeapAny | AActRec {inst.src(0)}, AHeapAny, AMIStateAny);
+      AHeapAny | AActRec {inst.src(0)}, APropAny, AMIStateAny);
 
   /*
    * If we're returning from a function, it's ReturnEffects.  The RetCtrl
@@ -624,7 +624,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyRetCoerce:
   case VerifyRetFail:
   case VerifyRetFailHard:
-    return may_load_store(AHeapAny, AHeapAny);
+    return may_load_store(AHeapAny, APropAny);
 
   case ContEnter:
     {
@@ -726,7 +726,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       auto const foldable = callee->isFoldable() ? AEmpty : ARdsAny;
       return GeneralEffects {
         read | AHeapAny | foldable | AVMRegAny | AVMRegState,
-        AHeapAny | foldable | AVMRegAny,
+        APropAny | foldable | AVMRegAny,
         AEmpty,
         stack_below(extra->spOffset) | AMIStateAny,
         inout,
@@ -750,14 +750,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }();
     return may_load_store_move(
       frame | AActRec { fp },
-      AHeapAny,
+      AEmpty,
       frame
     );
   }
 
   // AGWH construction updates the AsyncGenerator object.
   case CreateAGWH:
-    return may_load_store(AHeapAny | AActRec { inst.src(0) }, AHeapAny);
+    return may_load_store(AHeapAny | AActRec { inst.src(0) }, APropAny);
 
   case CreateCCWH:
     {
@@ -768,7 +768,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
           AliasIdSet::IdRange{ extra->first, extra->first + extra->count }
         }
       };
-      return may_load_store(frame, AHeapAny);
+      return may_load_store(frame, APropAny);
     }
 
   case CountWHNotDone:
@@ -785,7 +785,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   // This re-enters to call extension-defined instance constructors.
   case ConstructInstance:
-    return may_load_store(AHeapAny, AHeapAny);
+    return may_load_store(AHeapAny, APropAny);
 
   // Closures don't ever throw or reenter on construction
   case ConstructClosure:
@@ -815,15 +815,25 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureLoad { AElemAny };
 
   case IterInitArr:
+  case IterNextArr: {
+    auto const fp = inst.src(1);
+    auto const iters =
+      AliasClass { aiter_all(fp, inst.extra<IterData>()->args.iterId) };
+    return may_load_store_kill(
+      iters | AElemAny,
+      iters,
+      AMIStateAny
+    );
+  }
+
   case IterInitObj:
-  case IterNextArr:
   case IterNextObj: {
     auto const fp = inst.src(1);
     auto const iters =
       AliasClass { aiter_all(fp, inst.extra<IterData>()->args.iterId) };
     return may_load_store_kill(
       iters | AHeapAny,
-      iters | AHeapAny,
+      iters | APropAny,
       AMIStateAny
     );
   }
@@ -897,10 +907,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureStore { pointee(inst.src(0)), inst.src(1), inst.src(0) };
 
   case LdClsInitElem:
-    return PureLoad { AHeapAny };
+    return PureLoad { APropAny };
 
   case StClsInitElem:
-    return PureStore { AHeapAny };
+    return PureStore { APropAny };
 
   case LdPairElem:
     return PureLoad { AHeapAny };
@@ -954,13 +964,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InitProps:
     return may_load_store(
       AHeapAny,
-      AHeapAny | ARds { inst.extra<InitProps>()->cls->propHandle() }
+      APropAny | ARds { inst.extra<InitProps>()->cls->propHandle() }
     );
 
   case InitSProps:
     return may_load_store(
       AHeapAny,
-      AHeapAny | ARds { inst.extra<InitSProps>()->cls->sPropInitHandle() }
+      APropAny | ARds { inst.extra<InitSProps>()->cls->sPropInitHandle() }
     );
 
   case LdARFunc:
@@ -1257,12 +1267,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     if (inst.src(0)->type() <= TKeyset && inst.src(1)->type() <= TKeyset) {
       return may_load_store(AElemAny, AEmpty);
     } else {
-      return may_load_store(AHeapAny, AHeapAny);
+      return may_load_store(AHeapAny, APropAny);
     }
   }
 
   case AKExistsObj:
-    return may_load_store(AHeapAny, AHeapAny);
+    return may_load_store(AHeapAny, APropAny);
 
   //////////////////////////////////////////////////////////////////////
   // Member instructions
@@ -1336,7 +1346,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AHeapAny, AEmpty /* Note */);
 
   case DeserializeLazyProp:
-    return may_load_store(AHeapAny, AHeapAny);
+    return may_load_store(AHeapAny, APropAny);
 
   case LdInitPropAddr:
     return may_load_store(
@@ -1442,7 +1452,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       extra->offset,
       extra->offset + static_cast<int32_t>(extra->size)
     );
-    return may_load_store(AliasClass(stack_in)|AHeapAny, AHeapAny);
+    return may_load_store(AliasClass(stack_in)|AHeapAny, APropAny);
   }
 
   case DefFP:
@@ -1852,7 +1862,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AHeapAny, AHeapAny);
 
   case GetMemoKey:
-    return may_load_store(AHeapAny, AHeapAny);
+    return may_load_store(AHeapAny, APropAny);
 
   case GetMemoKeyScalar:
     return IrrelevantEffects{};
@@ -1875,13 +1885,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case StaticAnalysisError:
     if (Cfg::Eval::CrashOnStaticAnalysisError) return IrrelevantEffects{};
-    return may_load_store(AHeapAny, AHeapAny);
+    return may_load_store(AHeapAny, APropAny);
 
   case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload
   case LdClsPropAddrOrRaise:  // raises errors, and 86{s,p}init
     return may_load_store(
       AHeapAny,
-      AHeapAny | all_pointees(inst) | AMIStateROProp
+      APropAny | all_pointees(inst) | AMIStateROProp
     );
   case Clone:
   case ThrowArrayIndexException:
@@ -1976,7 +1986,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowMustBeValueTypeException:
   case ArrayUnmarkLegacyShallow:
   case ArrayUnmarkLegacyRecursive:
-  case SetOpTV:
   case OutlineSetOp:
   case ThrowAsTypeStructException:
   case ThrowAsTypeStructError:
@@ -1984,6 +1993,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case PropTypeValid: // Can raise and autoload
   case HandleRequestSurprise:
   case BespokeEscalateToVanilla:
+    return may_load_store(AHeapAny, APropAny);
+
+  case SetOpTV:
+    // This can write anywhere, although used only to write properties.
+    // FIXME: replace with OutlineSetOp.
     return may_load_store(AHeapAny, AHeapAny);
 
   case BespokeSetPos:
@@ -2004,7 +2018,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   // debug_backtrace() traverses stack and WaitHandles on the heap.
   case DebugBacktrace:
-    return may_load_store(AHeapAny|ALocalAny, AHeapAny);
+    return may_load_store(AHeapAny|ALocalAny, APropAny);
 
   // This instruction doesn't touch memory we track, except that it may
   // re-enter to construct php Exception objects.  During this re-entry anything
@@ -2075,7 +2089,7 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, const MemEffects& me) {
         // Any instruction that can raise an error can run a user error handler
         // and have arbitrary effects on the heap.
         always_assert(AHeapAny <= x.loads);
-        always_assert(AHeapAny <= x.stores);
+        always_assert(APropAny <= x.stores);
         /*
          * They also ought to kill /something/ on the stack, because of
          * possible re-entry.  It's not incorrect to leave things out of the
@@ -2292,7 +2306,7 @@ AliasClass pointee(const Type& type) {
   if (type.maybe(TMemToProp))    ret = ret | APropAny;
   if (type.maybe(TMemToElem))    ret = ret | AElemAny;
   if (type.maybe(TMemToMISTemp)) ret = ret | AMIStateTempBase;
-  if (type.maybe(TMemToClsInit)) ret = ret | AHeapAny;
+  if (type.maybe(TMemToClsInit)) ret = ret | APropAny;
   if (type.maybe(TMemToSProp))   ret = ret | ARdsAny;
   if (type.maybe(TMemToGbl))     ret = ret | AOther | ARdsAny;
   if (type.maybe(TMemToOther))   ret = ret | AOther | ARdsAny;

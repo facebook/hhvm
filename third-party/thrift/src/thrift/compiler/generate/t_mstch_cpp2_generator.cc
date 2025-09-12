@@ -132,7 +132,7 @@ std::vector<t_annotation> get_fatal_annotations(
     if (is_annotation_blacklisted_in_fatal(iter.first)) {
       continue;
     }
-    fatal_annotations.push_back({iter.first, iter.second});
+    fatal_annotations.emplace_back(iter.first, iter.second);
   }
 
   return fatal_annotations;
@@ -750,7 +750,7 @@ class cpp_mstch_program : public mstch_program {
   mstch::node to_fatal_string_array(const std::vector<std::string>&& vec) {
     mstch::array a;
     for (size_t i = 0; i < vec.size(); i++) {
-      a.push_back(mstch::map{
+      a.emplace_back(mstch::map{
           {"fatal_string:name", vec.at(i)},
           {"last?", i == vec.size() - 1},
       });
@@ -767,7 +767,7 @@ class cpp_mstch_program : public mstch_program {
       std::vector<std::string> extra_includes;
       boost::split(extra_includes, it->second, [](char c) { return c == ':'; });
       for (auto& include : extra_includes) {
-        includes.push_back(mstch::map{{"cpp_include", std::move(include)}});
+        includes.emplace_back(mstch::map{{"cpp_include", std::move(include)}});
       }
     }
     return includes;
@@ -795,7 +795,7 @@ class cpp_mstch_program : public mstch_program {
   mstch::node thrift_includes() {
     mstch::array a;
     for (const auto* program : program_->get_includes_for_codegen()) {
-      a.push_back(make_mstch_program_cached(program, context_));
+      a.emplace_back(make_mstch_program_cached(program, context_));
     }
     return a;
   }
@@ -853,7 +853,7 @@ class cpp_mstch_program : public mstch_program {
         fmt::format("{}()", schematizer::name_schema(sm_, *program_))};
     initializers.reserve(includes.size() + 1);
     for (const auto& [_, include] : includes) {
-      initializers.push_back(include);
+      initializers.emplace_back(include);
     }
     return initializers;
   }
@@ -869,7 +869,7 @@ class cpp_mstch_program : public mstch_program {
     mstch::array a;
     for (const auto& pair : program_->namespaces()) {
       if (!pair.second.empty()) {
-        a.push_back(mstch::map{
+        a.emplace_back(mstch::map{
             {"language:safe_name", get_fatal_string_short_id(pair.first)},
             {"language:safe_namespace",
              get_fatal_namespace_name_short_id(pair.first, pair.second)},
@@ -951,7 +951,7 @@ class cpp_mstch_program : public mstch_program {
 
     mstch::array a;
     for (const auto& name : unique_names) {
-      a.push_back(mstch::map{
+      a.emplace_back(mstch::map{
           {"identifier:name", name.first},
           {"identifier:fatal_string", render_fatal_string(name.second)},
       });
@@ -974,7 +974,7 @@ class cpp_mstch_program : public mstch_program {
     }
     mstch::array a;
     for (const auto& f : ordered_fields) {
-      a.push_back(*f);
+      a.emplace_back(*f);
     }
     return a;
   }
@@ -1150,7 +1150,7 @@ class cpp_mstch_service : public mstch_service {
     mstch::array a;
     for (const auto* program :
          service_->program()->get_includes_for_codegen()) {
-      a.push_back(make_mstch_program_cached(program, context_));
+      a.emplace_back(make_mstch_program_cached(program, context_));
     }
     return a;
   }
@@ -1613,7 +1613,7 @@ class cpp_mstch_struct : public mstch_struct {
     mstch::array fields;
     for (auto i : cpp2::get_mixins_and_members(*struct_)) {
       const auto suffix = "_ref";
-      fields.push_back(mstch::map{
+      fields.emplace_back(mstch::map{
           {"mixin:name", i.mixin->name()},
           {"mixin:field_name", i.member->name()},
           {"mixin:accessor", i.member->name() + suffix}});
@@ -2860,7 +2860,7 @@ void t_mstch_cpp2_generator::generate_out_of_line_services(
   mstch::array mstch_services;
   mstch_services.reserve(services.size());
   for (const t_service* service : services) {
-    mstch_services.push_back(
+    mstch_services.emplace_back(
         make_mstch_service_cached(get_program(), service, mstch_context_));
   }
   mstch::map context{
@@ -2878,7 +2878,7 @@ void t_mstch_cpp2_generator::generate_inline_services(
   mstch::array mstch_services;
   mstch_services.reserve(services.size());
   for (const t_service* service : services) {
-    mstch_services.push_back(
+    mstch_services.emplace_back(
         make_mstch_service_cached(get_program(), service, mstch_context_));
   }
   auto any_service_has_any_function = [&](auto&& predicate) -> bool {
@@ -2938,7 +2938,7 @@ mstch::array t_mstch_cpp2_generator::cpp_includes(const t_program* program) {
         include = fmt::format("\"{}\"", include);
       }
       cpp_include.emplace("cpp_include", std::move(include));
-      a.push_back(std::move(cpp_include));
+      a.emplace_back(std::move(cpp_include));
     }
   }
   return a;

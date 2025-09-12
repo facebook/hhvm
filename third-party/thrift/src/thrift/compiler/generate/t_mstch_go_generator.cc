@@ -147,7 +147,7 @@ class mstch_go_program : public mstch_program {
   mstch::node thrift_imports() {
     mstch::array a;
     for (const auto* program : program_->get_includes_for_codegen()) {
-      a.push_back(make_mstch_program_cached(program, context_));
+      a.emplace_back(make_mstch_program_cached(program, context_));
     }
     return a;
   }

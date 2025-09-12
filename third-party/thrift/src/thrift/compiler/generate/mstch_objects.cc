@@ -240,7 +240,7 @@ mstch::node mstch_const_value::const_struct() {
   }
 
   for (size_t i = 0, size = constants.size(); i < size; ++i) {
-    a.push_back(context_.const_factory->make_mstch_object(
+    a.emplace_back(context_.const_factory->make_mstch_object(
         constants[i],
         context_,
         mstch_element_position(i, size),
@@ -422,7 +422,7 @@ mstch::node mstch_program::constants() {
   mstch::array a;
   const auto& container = program_->consts();
   for (size_t i = 0, size = container.size(); i < size; ++i) {
-    a.push_back(context_.const_factory->make_mstch_object(
+    a.emplace_back(context_.const_factory->make_mstch_object(
         container[i],
         context_,
         mstch_element_position(i, size),

@@ -116,7 +116,7 @@ class json_experimental_program : public mstch_program {
     mstch::array includes;
     auto last = program_->includes().size();
     for (auto program : program_->get_included_programs()) {
-      includes.push_back(mstch::map{
+      includes.emplace_back(mstch::map{
           {"name", program->name()},
           {"path", program->include_prefix() + program->name() + ".thrift"},
           {"last?", (--last) == 0}});
@@ -128,7 +128,7 @@ class json_experimental_program : public mstch_program {
     mstch::array result;
     auto last = program_->namespaces().size();
     for (auto it : program_->namespaces()) {
-      result.push_back(mstch::map{
+      result.emplace_back(mstch::map{
           {"key", it.first}, {"value", it.second}, {"last?", (--last) == 0}});
     }
     return result;
@@ -142,22 +142,22 @@ class json_experimental_program : public mstch_program {
       auto domain_prefix = std::vector<std::string>();
       domain_prefix.insert(
           domain_prefix.end(), domain.begin(), std::prev(domain.end()));
-      result.push_back(mstch::map{
+      result.emplace_back(mstch::map{
           {"key", std::string("domain_prefix")},
           {"value", fmt::format("{}", fmt::join(domain_prefix, "."))},
           {"last?", false}});
-      result.push_back(mstch::map{
+      result.emplace_back(mstch::map{
           {"key", std::string("domain_suffix")},
           {"value", package.domain()[domain.size() - 1]},
           {"last?", false}});
     }
     if (!package.path().empty()) {
-      result.push_back(mstch::map{
+      result.emplace_back(mstch::map{
           {"key", std::string("path")},
           {"value", fmt::format("{}", fmt::join(package.path(), "/"))},
           {"last?", false}});
     }
-    result.push_back(mstch::map{
+    result.emplace_back(mstch::map{
         {"key", std::string("filename")},
         {"value", program_->name()},
         {"last?", true}});

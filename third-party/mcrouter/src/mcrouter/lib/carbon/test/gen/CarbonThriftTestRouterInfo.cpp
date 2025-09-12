@@ -165,8 +165,6 @@ extern template class ExtraRouteHandleProviderIf<carbon::test::CarbonThriftTestR
 namespace carbon {
 namespace test {
 
-constexpr const char* CarbonThriftTestRouterInfo::name;
-
 /* static */ CarbonThriftTestRouterInfo::RouteHandleFactoryMap
 CarbonThriftTestRouterInfo::buildRouteMap() {
   RouteHandleFactoryMap map{

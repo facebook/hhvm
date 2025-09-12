@@ -165,8 +165,6 @@ extern template class ExtraRouteHandleProviderIf<facebook::memcache::MemcacheRou
 namespace facebook {
 namespace memcache {
 
-constexpr const char* MemcacheRouterInfo::name;
-
 /* static */ MemcacheRouterInfo::RouteHandleFactoryMap
 MemcacheRouterInfo::buildRouteMap() {
   RouteHandleFactoryMap map{

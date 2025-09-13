@@ -59,6 +59,7 @@ use instruction_sequence::InstrSeq;
 use instruction_sequence::instr;
 use itertools::Itertools;
 use lazy_static::lazy_static;
+use naming_special_names_rust::classes;
 use naming_special_names_rust::collections;
 use naming_special_names_rust::emitter_special_functions;
 use naming_special_names_rust::fb;
@@ -2991,10 +2992,62 @@ fn emit_special_function<'a, 'd>(
                     ),
                 ));
             }
-            Ok(Some(InstrSeq::gather(vec![
-                emit_reified_arg(e, env, pos, false, targs[0].hint())?.0,
-                instr::class_get_ts(),
-            ])))
+            let hint = targs[0].hint();
+            match hint.1.as_ref() {
+                aast_defs::Hint_::Haccess(
+                    aast_defs::Hint(_, box aast_defs::Hint_::Happly(ast_defs::Id(_, id), hs2)),
+                    hs,
+                ) if hs.len() == 1
+                    && hs2.is_empty()
+                    && (string_utils::strip_hh_ns(id) == typehints::THIS
+                        || string_utils::strip_hh_ns(id) == classes::SELF) =>
+                {
+                    let mut prev_cls = Some(if string_utils::strip_hh_ns(id) == typehints::THIS {
+                        instr::late_bound_cls()
+                    } else {
+                        instr::self_cls()
+                    });
+                    if hs.is_empty() {
+                        return Ok(prev_cls);
+                    }
+
+                    let fq_id = hhbc::FunctionName::intern("HH\\type_structure_class");
+                    let inner = scope::with_unnamed_local(e, |_, tmp| {
+                        let mut ins = vec![];
+                        for h in hs {
+                            let fcall_args = FCallArgs::new(
+                                FCallArgsFlags::default(),
+                                1,
+                                2,
+                                vec![],
+                                vec![],
+                                None,
+                                None,
+                            );
+
+                            let (before, base) = if let Some(base) = prev_cls.take() {
+                                (instr::empty(), base)
+                            } else {
+                                (instr::pop_l(tmp), instr::push_l(tmp))
+                            };
+                            ins.push(InstrSeq::gather(vec![
+                                before,
+                                instr::null_uninit(),
+                                instr::null_uninit(),
+                                base,
+                                instr::string(&h.1),
+                                instr::f_call_func_d(fcall_args, fq_id),
+                            ]));
+                        }
+                        Ok((instr::empty(), InstrSeq::gather(ins), instr::empty()))
+                    })?;
+                    Ok(Some(inner))
+                }
+                _ => Ok(Some(InstrSeq::gather(vec![
+                    emit_reified_arg(e, env, pos, false, hint)?.0,
+                    instr::class_get_ts(),
+                ]))),
+            }
         }
         _ => Ok(
             match (args, istype_op(lower_fq_name), is_isexp_op(lower_fq_name)) {

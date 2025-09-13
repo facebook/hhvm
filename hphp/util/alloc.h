@@ -276,109 +276,6 @@ void* mallocx_on_node(size_t size, int node, size_t align);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// Helpers (malloc, free, sized_free) to allocate/deallocate on a specific arena
-// given flags. When not using event hooks, fallback version is used. `fallback`
-// can be empty, in which case generic malloc/free will be used when not using
-// extent hooks. These functions will crash with 0-sized alloc/deallocs.
-#if USE_JEMALLOC
-#define DEF_ALLOC_FUNCS(prefix, flag, fallback)                 \
-  inline void* prefix##_malloc(size_t size) {                   \
-    assert(size != 0);                                          \
-    return mallocx(size, flag);                                 \
-  }                                                             \
-  inline void prefix##_free(void* ptr) {                        \
-    assert(ptr != nullptr);                                     \
-    return dallocx(ptr, flag);                                  \
-  }                                                             \
-  inline void* prefix##_realloc(void* ptr, size_t size) {       \
-    assert(size != 0);                                          \
-    return rallocx(ptr, size, flag);                            \
-  }                                                             \
-  inline void prefix##_sized_free(void* ptr, size_t size) {     \
-    assert(ptr != nullptr);                                     \
-    assert(sallocx(ptr, flag) == nallocx(size, flag));          \
-    return sdallocx(ptr, size, flag);                           \
-  }
-#else
-#define DEF_ALLOC_FUNCS(prefix, flag, fallback)                 \
-  inline void* prefix##_malloc(size_t size) {                   \
-    return fallback##malloc(size);                              \
-  }                                                             \
-  inline void prefix##_free(void* ptr) {                        \
-    return fallback##free(ptr);                                 \
-  }                                                             \
-  inline void* prefix##_realloc(void* ptr, size_t size) {       \
-    assert(size != 0);                                          \
-    return fallback##realloc(ptr, size);                        \
-  }                                                             \
-  inline void prefix##_sized_free(void* ptr, size_t size) {     \
-    return fallback##free(ptr);                                 \
-  }
-#endif
-
-#define HIGH_ARENA_FLAGS (high_arena_flags | MALLOCX_TCACHE(high_arena_tcache))
-
-DEF_ALLOC_FUNCS(vm, HIGH_ARENA_FLAGS, )
-DEF_ALLOC_FUNCS(vm_cold, high_cold_arena_flags, )
-
-// Allocations that are guaranteed to live below kUncountedMaxAddr when
-// USE_JEMALLOC. This provides a new way to check for countedness
-// for arrays and strings.
-DEF_ALLOC_FUNCS(uncounted, HIGH_ARENA_FLAGS, )
-
-// Allocations for the APC but do not necessarily live below kUncountedMaxAddr,
-// e.g., APCObject, or the hash table. Currently they live below
-// kUncountedMaxAddr anyway, but this may change later.
-DEF_ALLOC_FUNCS(apc, HIGH_ARENA_FLAGS, )
-
-// Thread-local allocations that are not accessed outside the thread.
-DEF_ALLOC_FUNCS(local, local_arena_flags, )
-
-// Low arena is always present when jemalloc is used, even when arena hooks are
-// not used.
-inline void* low_malloc(size_t size) {
-#ifndef USE_JEMALLOC
-  return malloc(size);
-#else
-  assert(size);
-  return mallocx(size, low_arena_flags);
-#endif
-}
-
-inline void low_free(void* ptr) {
-#ifndef USE_JEMALLOC
-  free(ptr);
-#else
-  assert(ptr);
-  dallocx(ptr, low_arena_flags);
-#endif
-}
-
-inline void* low_realloc(void* ptr, size_t size) {
-#ifndef USE_JEMALLOC
-  return realloc(ptr, size);
-#else
-  assert(ptr);
-  return rallocx(ptr, size, low_arena_flags);
-#endif
-}
-
-inline void low_sized_free(void* ptr, size_t size) {
-#ifndef USE_JEMALLOC
-  free(ptr);
-#else
-  assert(ptr);
-  sdallocx(ptr, size, low_arena_flags);
-#endif
-}
-
-// lower arena and mid arena alias low arena when extent hooks are not
-// used.
-DEF_ALLOC_FUNCS(lower, lower_arena_flags, low_)
-DEF_ALLOC_FUNCS(small, small_arena_flags, low_)
-
-#undef DEF_ALLOC_FUNCS
-
 // General purpose adaptor that wraps allocation and sized deallocation function
 // into an allocator that works with STL-stype containers.
 template <void* (*AF)(size_t), void (*DF)(void*, size_t), typename T>
@@ -421,20 +318,78 @@ struct WrapAllocator {
   }
 };
 
-template<typename T> using LowAllocator =
-  WrapAllocator<low_malloc, low_sized_free, T>;
-template<typename T> using LowerAllocator =
-  WrapAllocator<lower_malloc, lower_sized_free, T>;
-template<typename T> using SmallAllocator =
-  WrapAllocator<small_malloc, small_sized_free, T>;
-template<typename T> using VMAllocator =
-  WrapAllocator<vm_malloc, vm_sized_free, T>;
-template<typename T> using VMColdAllocator =
-  WrapAllocator<vm_cold_malloc, vm_cold_sized_free, T>;
-template<typename T> using APCAllocator =
-  WrapAllocator<apc_malloc, apc_sized_free, T>;
-template<typename T> using LocalAllocator =
-  WrapAllocator<local_malloc, local_sized_free, T>;
+///////////////////////////////////////////////////////////////////////////////
+
+// Helpers (malloc, free, sized_free) to allocate/deallocate on a specific arena
+// given flags. When not using jemalloc generic malloc/free will be used.
+#if USE_JEMALLOC
+#define DEF_ALLOC_FUNCS(prefix, flag, upper_prefix)             \
+  inline void* prefix##_malloc(size_t size) {                   \
+    assert(size != 0);                                          \
+    return mallocx(size, flag);                                 \
+  }                                                             \
+  inline void prefix##_free(void* ptr) {                        \
+    assert(ptr != nullptr);                                     \
+    return dallocx(ptr, flag);                                  \
+  }                                                             \
+  inline void* prefix##_realloc(void* ptr, size_t size) {       \
+    assert(size != 0);                                          \
+    return rallocx(ptr, size, flag);                            \
+  }                                                             \
+  inline void prefix##_sized_free(void* ptr, size_t size) {     \
+    assert(ptr != nullptr);                                     \
+    assert(sallocx(ptr, flag) == nallocx(size, flag));          \
+    return sdallocx(ptr, size, flag);                           \
+  }                                                             \
+                                                                \
+  template<typename T> using upper_prefix##Allocator =          \
+    WrapAllocator<prefix##_malloc, prefix##_sized_free, T>;
+#else
+#define DEF_ALLOC_FUNCS(prefix, flag, upper_prefix)             \
+  inline void* prefix##_malloc(size_t size) {                   \
+    assert(size != 0);                                          \
+    return malloc(size);                                        \
+  }                                                             \
+  inline void prefix##_free(void* ptr) {                        \
+    assert(ptr != nullptr);                                     \
+    return free(ptr);                                           \
+  }                                                             \
+  inline void* prefix##_realloc(void* ptr, size_t size) {       \
+    assert(size != 0);                                          \
+    return realloc(ptr, size);                                  \
+  }                                                             \
+  inline void prefix##_sized_free(void* ptr, size_t size) {     \
+    assert(ptr != nullptr);                                     \
+    return free(ptr);                                           \
+  }                                                             \
+                                                                \
+  template<typename T> using upper_prefix##Allocator =          \
+    WrapAllocator<prefix##_malloc, prefix##_sized_free, T>;
+#endif
+
+#define HIGH_ARENA_FLAGS (high_arena_flags | MALLOCX_TCACHE(high_arena_tcache))
+
+DEF_ALLOC_FUNCS(vm, HIGH_ARENA_FLAGS, VM)
+DEF_ALLOC_FUNCS(vm_cold, high_cold_arena_flags, VMCold)
+
+// Allocations that are guaranteed to live below kUncountedMaxAddr when
+// USE_JEMALLOC. This provides a new way to check for countedness
+// for arrays and strings.
+DEF_ALLOC_FUNCS(uncounted, HIGH_ARENA_FLAGS, Uncounted)
+
+// Allocations for the APC but do not necessarily live below kUncountedMaxAddr,
+// e.g., APCObject, or the hash table. Currently they live below
+// kUncountedMaxAddr anyway, but this may change later.
+DEF_ALLOC_FUNCS(apc, HIGH_ARENA_FLAGS, APC)
+
+// Thread-local allocations that are not accessed outside the thread.
+DEF_ALLOC_FUNCS(local, local_arena_flags, Local)
+
+DEF_ALLOC_FUNCS(low, low_arena_flags, Low)
+DEF_ALLOC_FUNCS(lower, lower_arena_flags, Lower)
+DEF_ALLOC_FUNCS(small, small_arena_flags, Small)
+
+#undef DEF_ALLOC_FUNCS
 
 using SwappableReadonlyArena = ReadOnlyArena<VMColdAllocator<char>, false, 8>;
 void setup_swappable_readonly_arena(uint32_t chunk_size);

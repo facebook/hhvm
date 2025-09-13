@@ -106,7 +106,6 @@ THRIFT_FLAG_DEFINE_bool(server_fizz_enable_aegis, false);
 THRIFT_FLAG_DEFINE_bool(server_fizz_prefer_psk_ke, false);
 THRIFT_FLAG_DEFINE_bool(server_fizz_enable_receiving_dc, false);
 THRIFT_FLAG_DEFINE_bool(server_fizz_enable_presenting_dc, false);
-THRIFT_FLAG_DEFINE_bool(enable_rotation_for_in_memory_ticket_seeds, false);
 THRIFT_FLAG_DEFINE_bool(
     init_decorated_processor_factory_only_resource_pools_checks, false);
 THRIFT_FLAG_DEFINE_bool(default_sync_max_requests_to_concurrency_limit, false);
@@ -2057,9 +2056,6 @@ EffectiveTicketSeedStrategy ThriftServer::getEffectiveTicketSeedStrategy()
   });
   if (readFromFile) {
     return EffectiveTicketSeedStrategy::FILE;
-  }
-  if (!THRIFT_FLAG(enable_rotation_for_in_memory_ticket_seeds)) {
-    return EffectiveTicketSeedStrategy::IN_MEMORY;
   }
   return EffectiveTicketSeedStrategy::IN_MEMORY_WITH_ROTATION;
 }

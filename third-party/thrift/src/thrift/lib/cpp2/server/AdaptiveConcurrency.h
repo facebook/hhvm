@@ -136,7 +136,7 @@ class AdaptiveConcurrencyController {
   void nextRttRecalcStart(Clock::time_point);
 
   void recalculate();
-  const Config& config() const { return **config_; }
+  folly::observer::Snapshot<Config> config() const { return *config_; }
   bool inSamplingPeriod(std::chrono::steady_clock::time_point) const;
 
   constexpr static size_t nSamples = 200;

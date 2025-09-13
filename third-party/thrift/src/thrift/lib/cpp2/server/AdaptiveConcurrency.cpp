@@ -53,9 +53,9 @@ AdaptiveConcurrencyController::AdaptiveConcurrencyController(
     : config_(std::move(oConfig)),
       maxRequestsLimit_(std::move(maxRequestsLimit)),
       thriftServerConfig_(thriftServerConfig),
-      minRtt_(config().minTargetRtt),
-      concurrencyLimit_(config().minConcurrency) {
-  rttRecalcStart_ = config().isEnabled() ? Clock::now() : kZero;
+      minRtt_(config()->minTargetRtt),
+      concurrencyLimit_(config()->minConcurrency) {
+  rttRecalcStart_ = config()->isEnabled() ? Clock::now() : kZero;
 
   originalMaxRequestsLimit_ = **maxRequestsLimit_;
   if (originalMaxRequestsLimit_ <= 0 || originalMaxRequestsLimit_ > 1000) {
@@ -105,13 +105,14 @@ void AdaptiveConcurrencyController::requestStarted(Clock::time_point started) {
   // once across threads.
   rttRecalc = rttRecalcStart_.exchange(kZero);
   if (rttRecalc != kZero) {
+    auto conf = config();
     // This ensures that a sampling period is not already in progress.
     DCHECK(samplingPeriodStart_.load() == kZero);
-    DCHECK(config().isEnabled());
+    DCHECK(conf->isEnabled());
 
     // tell the server to start enforcing min concurrency
-    maxRequests_.store(config().minConcurrency);
-    maxRequestsOb_.setValue(config().minConcurrency);
+    maxRequests_.store(conf->minConcurrency);
+    maxRequestsOb_.setValue(conf->minConcurrency);
 
     // reset targetRtt to 0 to indicate that we are computing targetRtt
     targetRtt_.store({});
@@ -120,9 +121,9 @@ void AdaptiveConcurrencyController::requestStarted(Clock::time_point started) {
     // requests collected here will be used to compute the target RTT.
     samplingPeriodStart_.store(Clock::now());
 
-    if (config().targetRttFixed.count() == 0) {
+    if (conf->targetRttFixed.count() == 0) {
       // and schedule next rtt recalc, with jitter
-      auto dur = jitter(config().recalcInterval, config().recalcPeriodJitter);
+      auto dur = jitter(conf->recalcInterval, conf->recalcPeriodJitter);
       nextRttRecalcStart_.store(Clock::now() + dur);
     }
   }
@@ -161,8 +162,9 @@ void AdaptiveConcurrencyController::requestFinished(
 
     auto now = Clock::now();
     auto nextRttRecalc = nextRttRecalcStart_.load();
+    auto conf = config();
     if (nextRttRecalc != kZero &&
-        now + config().samplingInterval > nextRttRecalc) {
+        now + conf->samplingInterval > nextRttRecalc) {
       // start recalibration for requests that will start running in 500ms
       // in other words: if rtt recalculation will start before sampling
       // interval ends, do not start sampling process
@@ -170,7 +172,7 @@ void AdaptiveConcurrencyController::requestFinished(
     } else {
       // schedule next sampling period. we don't need to collect samples all the
       // time.
-      samplingPeriodStart_.store(now + config().samplingInterval);
+      samplingPeriodStart_.store(now + conf->samplingInterval);
     }
     latencySamplesIdx_.store(0);
     latencySamplesCnt_.store(0);
@@ -178,12 +180,12 @@ void AdaptiveConcurrencyController::requestFinished(
 }
 
 void AdaptiveConcurrencyController::recalculate() {
-  const auto& cfg = config();
+  auto cfg = config();
   // Enforce that the targetRttPercentile is strictly < 1.0 and > 0.0
   // All other values 0.0 < x < 1.0 are viable.
   auto targetPct = std::min(
       std::nextafter(1.0, 0.0),
-      std::max(std::nextafter(0.0, 1.0), cfg.targetRttPercentile));
+      std::max(std::nextafter(0.0, 1.0), cfg->targetRttPercentile));
 
   auto sampleCount = latencySamplesCnt_.load(std::memory_order_relaxed);
   auto pct =
@@ -192,16 +194,16 @@ void AdaptiveConcurrencyController::recalculate() {
       latencySamples_.begin(), pct, latencySamples_.begin() + sampleCount);
   Duration pctRtt{*pct}; // get the value pointed by pct
   sampledRtt_.store(pctRtt); // for monitoring
-  minRtt_.store(Clock::duration{cfg.minTargetRtt});
+  minRtt_.store(Clock::duration{cfg->minTargetRtt});
   if (targetRtt_.load() == Duration{}) {
-    if (cfg.targetRttFixed == std::chrono::milliseconds{}) {
+    if (cfg->targetRttFixed == std::chrono::milliseconds{}) {
       // If a min target RTT latency is specified then ensure that the
       // computed target is not below that minimum threshold.
       targetRtt_.store(std::max(
-          std::chrono::round<Clock::duration>(cfg.minTargetRtt),
-          std::chrono::round<Clock::duration>(pctRtt * cfg.targetRttFactor)));
+          std::chrono::round<Clock::duration>(cfg->minTargetRtt),
+          std::chrono::round<Clock::duration>(pctRtt * cfg->targetRttFactor)));
     } else {
-      targetRtt_.store(Clock::duration{cfg.targetRttFixed});
+      targetRtt_.store(Clock::duration{cfg->targetRttFixed});
     }
     // reset concurrency limit to what it was before we started rtt calibration
     maxRequests_.store(concurrencyLimit_);
@@ -224,7 +226,7 @@ void AdaptiveConcurrencyController::recalculate() {
     size_t upperConcurrencyLimit =
         std::min(originalMaxRequestsLimit_, newLimit);
 
-    concurrencyLimit_ = std::max(cfg.minConcurrency, upperConcurrencyLimit);
+    concurrencyLimit_ = std::max(cfg->minConcurrency, upperConcurrencyLimit);
 
     maxRequests_.store(concurrencyLimit_);
     maxRequestsOb_.setValue(concurrencyLimit_);
@@ -268,7 +270,7 @@ std::chrono::microseconds AdaptiveConcurrencyController::minTargetRtt() const {
 }
 
 size_t AdaptiveConcurrencyController::getMinConcurrency() const {
-  return config().minConcurrency;
+  return config()->minConcurrency;
 }
 
 size_t AdaptiveConcurrencyController::getConcurrency() const {

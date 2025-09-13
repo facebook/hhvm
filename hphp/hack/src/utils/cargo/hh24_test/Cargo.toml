@@ -17,7 +17,7 @@ hh24_types = { version = "0.0.0", path = "../../hh24_types" }
 names = { version = "0.0.0", path = "../../../naming/names_rust" }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
 relative_path = { version = "0.0.0", path = "../../rust/relative_path" }
-tempfile = "3.15"
+tempfile = "3.22"
 
 [dev-dependencies]
 maplit = "1.0"

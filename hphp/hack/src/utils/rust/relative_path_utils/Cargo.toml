@@ -15,4 +15,4 @@ anyhow = "1.0.98"
 relative_path = { version = "0.0.0", path = "../relative_path" }
 
 [dev-dependencies]
-tempfile = "3.15"
+tempfile = "3.22"

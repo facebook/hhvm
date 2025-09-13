@@ -14,4 +14,4 @@ path = "../../file_provider.rs"
 anyhow = "1.0.98"
 bstr = { version = "1.10.0", features = ["serde", "std", "unicode"] }
 pos = { version = "0.0.0", path = "../../../pos/cargo/pos" }
-tempfile = "3.15"
+tempfile = "3.22"

@@ -78,6 +78,10 @@ class IncrementalResolver : public SchemaBackedResolver {
   const DefinitionNode* definitionOf(
       const type::DefinitionKey& key) const override;
   std::vector<folly::not_null<const ProgramNode*>> programs() const override;
+  std::optional<folly::F14FastSet<type_system::Uri>> getKnownUris()
+      const override {
+    return std::nullopt;
+  }
 
  private:
   const DefinitionNode& getDefinitionNode(

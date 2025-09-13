@@ -377,8 +377,7 @@ class TypeSystem {
    * must fail.
    *
    * If the set of URIs is not finitely enumerable, then this function should
-   * return an empty optional. Note that such TypeSystem implementations are not
-   * serializable.
+   * return an empty optional.
    */
   virtual std::optional<folly::F14FastSet<Uri>> getKnownUris() const = 0;
 

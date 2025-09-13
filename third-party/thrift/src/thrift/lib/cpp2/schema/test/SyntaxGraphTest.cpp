@@ -811,6 +811,7 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
   ASSERT_EQ(def->asStruct().uri(), uri);
 
   auto& typeSystem = syntaxGraph.asTypeSystem();
+  EXPECT_EQ(typeSystem.getKnownUris()->size(), 6);
 
   const type_system::StructNode& structNode =
       typeSystem.getUserDefinedTypeOrThrow(uri).asStruct();

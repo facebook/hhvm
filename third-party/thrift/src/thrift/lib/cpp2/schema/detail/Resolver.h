@@ -20,6 +20,7 @@
 
 #include <folly/memory/not_null.h>
 #include <thrift/lib/cpp2/schema/SchemaV1.h>
+#include <thrift/lib/thrift/gen-cpp2/type_id_types.h>
 
 #ifdef THRIFT_SCHEMA_AVAILABLE
 
@@ -57,6 +58,14 @@ class Resolver {
    * List of all unique .thrift files that are accessible in the schema.
    */
   virtual std::vector<folly::not_null<const ProgramNode*>> programs() const = 0;
+
+  /**
+   * Generates a set of all user-defined type URIs currently known to the
+   * fully resolved resolver. For non-fully resolved resolver, it returns an
+   * empty optional since the set of URIs is not enumerable,
+   */
+  virtual std::optional<folly::F14FastSet<type_system::Uri>> getKnownUris()
+      const = 0;
 };
 
 } // namespace detail

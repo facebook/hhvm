@@ -177,9 +177,8 @@ class SchemaRegistry : public type_system::SourceIndexedTypeSystem {
   }
   std::optional<folly::F14FastSet<type_system::Uri>> getKnownUris()
       const override {
-    // The SchemaRegistry should not be serialized. So we pessimitically return
-    // an empty optional even though we can enumerate all URIs for files with
-    // the `any` cpp2 compiler option enabled.
+    // We pessimitically return an empty optional even though we can enumerate
+    // all URIs for files with the `any` cpp2 compiler option enabled.
     return std::nullopt;
   }
   std::optional<type_system::DefinitionRef>

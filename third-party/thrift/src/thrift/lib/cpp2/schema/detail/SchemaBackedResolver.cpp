@@ -221,6 +221,7 @@ class SchemaIndex {
   }
 
   Resolver& resolver_;
+  bool fromFullyResolvedResolver_ = false;
 
  public:
   const ProgramNode& programOf(const type::ProgramId&) const;
@@ -229,6 +230,7 @@ class SchemaIndex {
   const DefinitionNode* definitionForUri(std::string_view uri) const;
   const DefinitionNode* definitionForSourceIdentifier(
       type_system::SourceIdentifierView sourceIdentifier) const;
+  std::optional<folly::F14FastSet<type_system::Uri>> getKnownUris() const;
   ProgramNode::IncludesList programs() const;
 
   void updateIndices(const type::Schema& schema, bool resolve = false) {
@@ -250,6 +252,7 @@ class SchemaIndex {
             fmt::format("Definition {} cannot be resolved.", keyRef.get()));
       }
     }
+    fromFullyResolvedResolver_ = true;
   }
 };
 
@@ -272,6 +275,10 @@ class FullyResolvedSchemaRefBackedResolver : public SchemaBackedResolver {
   }
   ProgramNode::IncludesList programs() const override {
     return index_->programs();
+  }
+  std::optional<folly::F14FastSet<type_system::Uri>> getKnownUris()
+      const override {
+    return index_->getKnownUris();
   }
 
  private:
@@ -297,6 +304,10 @@ class FullyResolvedSchemaBackedResolver : public SchemaBackedResolver {
   }
   ProgramNode::IncludesList programs() const override {
     return index_->programs();
+  }
+  std::optional<folly::F14FastSet<type_system::Uri>> getKnownUris()
+      const override {
+    return index_->getKnownUris();
   }
 
  private:
@@ -481,6 +492,19 @@ ProgramNode::IncludesList SchemaIndex::programs() const {
     programs.emplace_back(&program);
   }
   return programs;
+}
+
+std::optional<folly::F14FastSet<type_system::Uri>> SchemaIndex::getKnownUris()
+    const {
+  if (fromFullyResolvedResolver_) {
+    folly::F14FastSet<type_system::Uri> ret;
+    ret.reserve(definitionKeysByUri_.size());
+    for (const auto& [uri, _] : definitionKeysByUri_) {
+      ret.insert(uri);
+    }
+    return std::move(ret);
+  }
+  return std::nullopt;
 }
 
 void SchemaIndex::updateProgramsById(

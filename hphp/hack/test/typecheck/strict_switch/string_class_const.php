@@ -1,13 +1,13 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('strict_switch')>>
+// <<file: __EnableUnstableFeatures('strict_switch')>>
 class C {
   const string X = "X";
 }
 
 // class consts are not string literals but should be bucketed in the same way
-<<__StrictSwitch>>
-function string_class_const(string $x) : void {
+// <<__StrictSwitch>>
+function string_class_const(string $x): void {
   switch ($x) {
     case C::X:
       return;
@@ -26,7 +26,7 @@ enum F: string as string {
   B = "B";
 }
 
-<<__StrictSwitch>>
+// <<__StrictSwitch>>
 function redundant_class_const(string $x): void {
   switch ($x) {
     case E::A:
@@ -40,7 +40,7 @@ function redundant_class_const(string $x): void {
   }
 }
 
-<<__StrictSwitch>>
+// <<__StrictSwitch>>
 function multiple_class_const(string $x): void {
   switch ($x) {
     // We don't store enum values in the typed AST and so cannot see that
@@ -64,8 +64,7 @@ enum G: string {
   A = "A";
 }
 
-
-<<__StrictSwitch>>
+// <<__StrictSwitch>>
 function not_transparent_class_const(string $x): void {
   switch ($x) {
     case G::A:

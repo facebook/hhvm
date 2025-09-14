@@ -1,2 +1,1 @@
-ERROR: File "attrib_no_enable.php", line 3, characters 1-18:
-Cannot use unstable feature: `strict_switch` (Parsing[1002])
+No errors

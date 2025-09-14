@@ -1,13 +1,13 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('strict_switch')>>
+// <<file: __EnableUnstableFeatures('strict_switch')>>
 
 class A {
-    <<__StrictSwitch>>
-    private function mixed(mixed $x): void {
-        switch($x) {
-            default:
-                break;
-        }
+  // <<__StrictSwitch>>
+  private function mixed(mixed $x): void {
+    switch ($x) {
+      default:
+        break;
     }
+  }
 }

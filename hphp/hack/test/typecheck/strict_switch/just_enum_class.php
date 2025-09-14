@@ -1,13 +1,13 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('union_intersection_type_hints', 'strict_switch')>>
+<<file: __EnableUnstableFeatures('union_intersection_type_hints')>>
 
-enum IntEnumAB:int {
+enum IntEnumAB: int {
   A = 1;
   B = 2;
 }
 
-enum IntEnumCD:int {
+enum IntEnumCD: int {
   C = 1;
   D = 2;
 }
@@ -55,7 +55,9 @@ function enum_class_memberof_arraykey_subtype(string $x): void {
 }
 
 <<__StrictSwitch>>
-function enum_class_memberof_wrong(\HH\MemberOf<MixedEnumClass, string> $x): void {
+function enum_class_memberof_wrong(
+  \HH\MemberOf<MixedEnumClass, string> $x,
+): void {
   switch ($x) {
     case MixedEnumClass::LabelInt:
       return;
@@ -63,7 +65,9 @@ function enum_class_memberof_wrong(\HH\MemberOf<MixedEnumClass, string> $x): voi
 }
 
 <<__StrictSwitch>>
-function enum_class_memberof_two_int(\HH\MemberOf<MixedEnumClass, int> $x): void {
+function enum_class_memberof_two_int(
+  \HH\MemberOf<MixedEnumClass, int> $x,
+): void {
   switch ($x) {
     case MixedEnumClass::LabelInt:
       return;
@@ -73,7 +77,12 @@ function enum_class_memberof_two_int(\HH\MemberOf<MixedEnumClass, int> $x): void
 }
 
 <<__StrictSwitch>>
-function enum_class_union_memberof((\HH\MemberOf<MixedEnumClass, IntEnumAB> | \HH\MemberOf<MixedEnumClass, IntEnumCD>) $x): void {
+function enum_class_union_memberof(
+  (
+    \HH\MemberOf<MixedEnumClass, IntEnumAB> |
+    \HH\MemberOf<MixedEnumClass, IntEnumCD>
+  ) $x,
+): void {
   switch ($x) {
     case MixedEnumClass::LabelA:
       return;
@@ -85,7 +94,9 @@ enum class ExtendedEnumClass: mixed extends MixedEnumClass {
 }
 
 <<__StrictSwitch>>
-function extended_enum_class_memberof(\HH\MemberOf<ExtendedEnumClass, string> $x): void {
+function extended_enum_class_memberof(
+  \HH\MemberOf<ExtendedEnumClass, string> $x,
+): void {
   switch ($x) {
     case ExtendedEnumClass::LabelString1:
       return;

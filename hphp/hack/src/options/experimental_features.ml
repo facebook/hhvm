@@ -103,7 +103,6 @@ let feature_name_map =
       ("typed_local_variables", TypedLocalVariables);
       ("pipe_await", PipeAwait);
       ("match_statements", MatchStatements);
-      ("strict_switch", StrictSwitch);
       ("class_type", ClassType);
       ("function_references", FunctionReferences);
       ("function_type_optional_params", FunctionTypeOptionalParams);

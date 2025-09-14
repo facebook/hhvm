@@ -1,16 +1,16 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('union_intersection_type_hints', 'strict_switch')>>
+<<file: __EnableUnstableFeatures('union_intersection_type_hints')>>
 
-enum IntEnumGAsInt:int as int {
+enum IntEnumGAsInt: int as int {
   G = 7;
 }
 
-enum StringEnumHAsString:string as string {
+enum StringEnumHAsString: string as string {
   H = "H";
 }
 
-<<__StrictSwitch>>
+// <<__StrictSwitch>>
 function union_transparent_enum_int((int | IntEnumGAsInt) $x): void {
   switch ($x) {
     case 8:
@@ -20,8 +20,10 @@ function union_transparent_enum_int((int | IntEnumGAsInt) $x): void {
   }
 }
 
-<<__StrictSwitch>>
-function union_transparent_enum_string((string | StringEnumHAsString) $x): void {
+// <<__StrictSwitch>>
+function union_transparent_enum_string(
+  (string | StringEnumHAsString) $x,
+): void {
   switch ($x) {
     case "bar":
       return;

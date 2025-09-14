@@ -1,7 +1,7 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('strict_switch')>>
-<<__StrictSwitch>>
+// <<file: __EnableUnstableFeatures('strict_switch')>>
+// <<__StrictSwitch>>
 function just_nullable_int_literal_default(?int $x): void {
   switch ($x) {
     case null:
@@ -9,21 +9,21 @@ function just_nullable_int_literal_default(?int $x): void {
     case 42:
       return;
     default:
-        return;
+      return;
   }
 }
 
-<<__StrictSwitch>>
+// <<__StrictSwitch>>
 function just_nullable_int_default(?int $x): void {
   switch ($x) {
     case null:
       return;
     default:
-        return;
+      return;
   }
 }
 
-<<__StrictSwitch>>
+// <<__StrictSwitch>>
 function nullable_int_not_null(?int $x): void {
   if ($x is null) {
     return;
@@ -37,7 +37,7 @@ function nullable_int_not_null(?int $x): void {
   }
 }
 
-<<__StrictSwitch>>
+// <<__StrictSwitch>>
 function nullable_int_not_int(?int $x): void {
   if ($x is int) {
     return;

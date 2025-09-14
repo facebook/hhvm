@@ -1,13 +1,13 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('union_intersection_type_hints', 'strict_switch')>>
+<<file: __EnableUnstableFeatures('union_intersection_type_hints')>>
 
-enum IntEnumAB:int {
+enum IntEnumAB: int {
   A = 1;
   B = 2;
 }
 
-enum IntEnumCD:int {
+enum IntEnumCD: int {
   C = 1;
   D = 2;
 }

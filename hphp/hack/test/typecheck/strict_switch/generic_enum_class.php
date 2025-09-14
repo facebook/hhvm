@@ -1,6 +1,6 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('union_intersection_type_hints', 'strict_switch')>>
+<<file: __EnableUnstableFeatures('union_intersection_type_hints')>>
 
 interface Intf {}
 
@@ -25,18 +25,22 @@ enum class DerivedEnumClass: Intf {
   IntClass LabelIntClass = new IntClass(0);
 }
 
-<<__StrictSwitch>>
-function generic_enum_switch<T>(\HH\MemberOf<DerivedEnumClass, GenericClass<T>> $x): void {
+// <<__StrictSwitch>>
+function generic_enum_switch<T>(
+  \HH\MemberOf<DerivedEnumClass, GenericClass<T>> $x,
+): void {
   switch ($x) {
     case DerivedEnumClass::GenInt:
     case DerivedEnumClass::DerGenInt2:
     case DerivedEnumClass::GenString:
-        return;
+      return;
   }
 }
 
-<<__StrictSwitch>>
-function instantiated_enum_switch(\HH\MemberOf<DerivedEnumClass, GenericClass<int>> $x): void {
+// <<__StrictSwitch>>
+function instantiated_enum_switch(
+  \HH\MemberOf<DerivedEnumClass, GenericClass<int>> $x,
+): void {
   switch ($x) {
     case DerivedEnumClass::GenInt:
     case DerivedEnumClass::DerGenInt2:

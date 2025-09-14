@@ -326,8 +326,6 @@ pub mod user_attributes {
 
     pub const MODULE_LEVEL_TRAIT: &str = "__ModuleLevelTrait";
 
-    pub const STRICT_SWITCH: &str = "__StrictSwitch";
-
     pub const PACKAGE_OVERRIDE: &str = "__PackageOverride";
 
     pub const REQUIRE_PACKAGE: &str = "__RequirePackage";

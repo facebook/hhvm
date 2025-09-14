@@ -248,8 +248,6 @@ type t = {
   hack_warnings: int none_or_all_except;  (** turn on hack warnings *)
   warnings_default_all: bool;
   warnings_in_sandcastle: bool;
-  tco_strict_switch: bool;
-      (** Enable strict case checking in switch statements *)
   tco_allowed_files_for_ignore_readonly: string list;
   tco_package_exclude_patterns: string list;
       (** Patterns for files excluded from the package boundary check. *)
@@ -398,7 +396,6 @@ val set :
   ?hack_warnings:int none_or_all_except ->
   ?warnings_default_all:bool ->
   ?warnings_in_sandcastle:bool ->
-  ?tco_strict_switch:bool ->
   ?tco_allowed_files_for_ignore_readonly:string list ->
   ?tco_package_exclude_patterns:string list ->
   ?tco_package_allow_typedef_violations:bool ->

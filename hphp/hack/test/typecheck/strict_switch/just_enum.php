@@ -1,13 +1,13 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('strict_switch')>>
+// <<file: __EnableUnstableFeatures('strict_switch')>>
 
-enum IntEnumAB:int {
+enum IntEnumAB: int {
   A = 1;
   B = 2;
 }
 
-<<__StrictSwitch>>
+// <<__StrictSwitch>>
 function just_enum(IntEnumAB $x): void {
   switch ($x) {
     case IntEnumAB::A:
@@ -17,7 +17,7 @@ function just_enum(IntEnumAB $x): void {
   }
 }
 
-<<__StrictSwitch>>
+// <<__StrictSwitch>>
 function redundant_default(IntEnumAB $x): void {
   switch ($x) {
     case IntEnumAB::A:
@@ -29,7 +29,7 @@ function redundant_default(IntEnumAB $x): void {
   }
 }
 
-<<__StrictSwitch>>
+// <<__StrictSwitch>>
 function redundant_label(IntEnumAB $x): void {
   switch ($x) {
     case IntEnumAB::A:
@@ -41,7 +41,7 @@ function redundant_label(IntEnumAB $x): void {
   }
 }
 
-<<__StrictSwitch>>
+// <<__StrictSwitch>>
 function opaque(int $x): void {
   switch ($x) {
     case IntEnumAB::A:

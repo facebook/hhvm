@@ -1,7 +1,7 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('strict_switch')>>
-<<__StrictSwitch>>
+// <<file: __EnableUnstableFeatures('strict_switch')>>
+// <<__StrictSwitch>>
 function just_int(int $x): void {
   switch ($x) {
     case 0:
@@ -11,7 +11,7 @@ function just_int(int $x): void {
   }
 }
 
-<<__StrictSwitch>>
+// <<__StrictSwitch>>
 function non_literal(int $x): void {
   $y = 0;
 
@@ -23,7 +23,7 @@ function non_literal(int $x): void {
   }
 }
 
-<<__StrictSwitch>>
+// <<__StrictSwitch>>
 function missing_default(int $x): void {
   switch ($x) {
     case 0:
@@ -31,7 +31,7 @@ function missing_default(int $x): void {
   }
 }
 
-<<__StrictSwitch>>
+// <<__StrictSwitch>>
 function redundant_literal(int $x): void {
   switch ($x) {
     case 0:

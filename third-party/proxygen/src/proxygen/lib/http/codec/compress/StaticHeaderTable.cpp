@@ -108,7 +108,7 @@ StaticHeaderTable::StaticHeaderTable(const char* entries[][2], int size)
   list<HPACKHeader> hlist;
   uint32_t byteCount = 0;
   for (int i = 0; i < size; ++i) {
-    hlist.push_back(HPACKHeader(entries[i][0], entries[i][1]));
+    hlist.emplace_back(entries[i][0], entries[i][1]);
     byteCount += hlist.back().bytes();
   }
   // initialize with a capacity that will exactly fit the static headers

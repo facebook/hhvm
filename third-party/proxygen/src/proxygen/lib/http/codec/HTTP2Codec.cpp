@@ -1660,7 +1660,7 @@ size_t HTTP2Codec::generateSettings(folly::IOBufQueue& writeBuf) {
         continue;
     }
 
-    settings.push_back(SettingPair(setting.id, setting.value));
+    settings.emplace_back(setting.id, setting.value);
   }
   VLOG(4) << getTransportDirectionString(getTransportDirection())
           << " generating " << (unsigned)settings.size() << " settings";

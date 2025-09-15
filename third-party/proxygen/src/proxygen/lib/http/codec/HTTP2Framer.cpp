@@ -420,7 +420,7 @@ ErrorCode parseSettings(Cursor& cursor,
   for (auto length = header.length; length > 0; length -= 6) {
     uint16_t id = cursor.readBE<uint16_t>();
     uint32_t val = cursor.readBE<uint32_t>();
-    settings.push_back(std::make_pair(SettingsId(id), val));
+    settings.emplace_back(SettingsId(id), val);
   }
   return ErrorCode::NO_ERROR;
 }

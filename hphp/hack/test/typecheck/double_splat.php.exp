@@ -1,0 +1,14 @@
+ERROR: File "double_splat.php", line 12, characters 11-11:
+An expression is expected here. (Parsing[1002])
+ERROR: File "double_splat.php", line 12, characters 8-10:
+Unbound name: `...` (a global constant) (Naming[2049])
+ERROR: File "double_splat.php", line 13, characters 9-11:
+Unbound name: `...` (a global constant) (Naming[2049])
+ERROR: File "double_splat.php", line 14, characters 9-11:
+Unbound name: `...` (a global constant) (Naming[2049])
+ERROR: File "double_splat.php", line 12, characters 8-10:
+Unbound global constant (Typing) (Typing[4106])
+ERROR: File "double_splat.php", line 13, characters 9-11:
+Unbound global constant (Typing) (Typing[4106])
+ERROR: File "double_splat.php", line 14, characters 9-11:
+Unbound global constant (Typing) (Typing[4106])

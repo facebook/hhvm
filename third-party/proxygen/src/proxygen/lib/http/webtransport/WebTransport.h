@@ -113,7 +113,7 @@ class WebTransport {
         StreamReadHandle*, uint64_t streamId, folly::Try<StreamData>)>;
     void awaitNextRead(
         folly::Executor* exec,
-        const ReadStreamDataFn& readCb,
+        ReadStreamDataFn readCb,
         folly::Optional<std::chrono::milliseconds> timeout = folly::none);
 
     // Notify the peer to stop sending data.  The StreamReadHandle is invalid

@@ -8,6 +8,16 @@
 
 #include "proxygen/lib/http/webtransport/WebTransport.h"
 
+namespace {
+
+// read handle is invalid after reading a terminal ev (exc or eom)
+using StreamData = proxygen::WebTransport::StreamData;
+bool isTerminalEv(const folly::Try<StreamData>& ev) {
+  return ev.hasException() || ev->fin;
+}
+
+} // namespace
+
 namespace proxygen {
 
 WebTransport::Exception::Exception(uint32_t inError)
@@ -35,18 +45,18 @@ WebTransport::toApplicationErrorCode(uint64_t h) {
 
 void WebTransport::StreamReadHandle::awaitNextRead(
     folly::Executor* exec,
-    const ReadStreamDataFn& readCb,
+    ReadStreamDataFn readCb,
     folly::Optional<std::chrono::milliseconds> timeout) {
   auto id = getID();
   auto fut = readStreamData();
   if (timeout) {
     fut = std::move(fut).within(*timeout);
   }
-  std::move(fut).via(exec).thenTry([this, id, readCb](auto streamData) {
-    readCb((streamData.hasException() || streamData->fin) ? nullptr : this,
-           id,
-           std::move(streamData));
-  });
+  std::move(fut).via(exec).thenTry(
+      [this, id, cb = std::move(readCb)](auto streamData) {
+        auto* handle = isTerminalEv(streamData) ? nullptr : this;
+        cb(handle, id, std::move(streamData));
+      });
 }
 
 } // namespace proxygen

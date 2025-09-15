@@ -75,8 +75,8 @@ class WebTransport {
 
   // The result of a read() operation
   struct StreamData {
-    std::unique_ptr<folly::IOBuf> data;
-    bool fin;
+    std::unique_ptr<folly::IOBuf> data{nullptr};
+    bool fin{false};
   };
 
   // Base class for StreamReadHandle / StreamWriteHandle
@@ -202,8 +202,8 @@ class WebTransport {
 
   // Handle for bidirectional streams
   struct BidiStreamHandle {
-    StreamReadHandle* readHandle;
-    StreamWriteHandle* writeHandle;
+    StreamReadHandle* readHandle{nullptr};
+    StreamWriteHandle* writeHandle{nullptr};
   };
 
   // Create a new unidirectional stream

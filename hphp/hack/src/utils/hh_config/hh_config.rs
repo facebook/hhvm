@@ -85,7 +85,7 @@ impl HhConfig {
     fn get_package_info(root: impl AsRef<Path>, hhconfig: &ConfigFile) -> PackageInfo {
         let package_config_pathbuf =
             Self::get_repo_packages_config_path(hhconfig, PACKAGE_FILE_PATH_RELATIVE_TO_ROOT);
-        PackageInfo::from_text_strict(
+        PackageInfo::from_text_non_strict(
             root.as_ref()
                 .join(package_config_pathbuf)
                 .to_str()

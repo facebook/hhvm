@@ -262,29 +262,11 @@ final class ThriftContextPropState {
     $ods->bumpKey('contextprop.fb_vc.'.$src);
 
     if ($vc is FBFreeBasicServicesViewerContext) {
-      if (
-        IsItFaster::shouldExperiment(
-          'remove_backdoors',
-          OncallShortName\qf_capacity_eng,
-        )
-      ) {
-        FBLogger('viewer_context_module.fbs', 'get_user_id_hack')->debug(
-          '%s called on %s, replacing with zero',
-          __FUNCTION__,
-          nameof FBFreeBasicServicesViewerContext,
-        );
-      } else {
-        call_defaults_from_zoned_shallow(
-          ()[defaults] ==> {
-            FBLogger('viewer_context_module.fbs', 'get_user_id_hack')->debug(
-              '%s called on %s, replacing with zero',
-              __FUNCTION__,
-              nameof FBFreeBasicServicesViewerContext,
-            );
-          },
-          'temporary debug logging with no user data to remove this hack',
-        );
-      }
+      FBLogger('viewer_context_module.fbs', 'get_user_id_hack')->debug(
+        '%s called on %s, replacing with zero',
+        __FUNCTION__,
+        nameof FBFreeBasicServicesViewerContext,
+      );
       $user_id = ZERO_FBID;
     } else {
       $user_id = $vc->getUserID();

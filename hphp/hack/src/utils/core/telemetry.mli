@@ -78,6 +78,11 @@ val object_opt : key:string -> value:t option -> t -> t
 
 val duration : ?key:string -> start_time:float -> ?end_time:float -> t -> t
 
+(* Similarly to [duration], will add the duration between [start_time] and
+   [end_time] as [key]. However, if there are any pre-existing int values for
+   [key], will remove them and add their sum to the newly added duration. *)
+val add_duration : ?key:string -> start_time:float -> ?end_time:float -> t -> t
+
 (** [with_duration ~description telemetry f] runs [f] and adds
   in [telemetry] the duration [f] took in milliseconds
   at key "[description]_duration_ms" *)

@@ -180,23 +180,23 @@ let query_notifier
   let telemetry =
     Telemetry.create () |> Telemetry.duration ~key:"start" ~start_time
   in
-  let (env, (raw_updates, clock)) =
+  let (env, (raw_updates, clock, telemetry)) =
     match query_kind with
     | `Sync ->
       ( env,
         begin
           try
-            let (changes, clock) =
-              ServerNotifier.get_changes_sync genv.notifier
+            let (changes, clock, telemetry) =
+              ServerNotifier.get_changes_sync genv.notifier telemetry
             in
-            (ServerNotifier.SyncChanges changes, clock)
+            (ServerNotifier.SyncChanges changes, clock, telemetry)
           with
-          | Watchman.Timeout -> (ServerNotifier.Unavailable, None)
+          | Watchman.Timeout -> (ServerNotifier.Unavailable, None, telemetry)
         end )
     | `Async ->
       ( { env with last_notifier_check_time = start_time },
-        ServerNotifier.get_changes_async genv.notifier )
-    | `Skip -> (env, (ServerNotifier.AsyncChanges SSet.empty, None))
+        ServerNotifier.get_changes_async genv.notifier telemetry )
+    | `Skip -> (env, (ServerNotifier.AsyncChanges SSet.empty, None, telemetry))
   in
   let telemetry = Telemetry.duration telemetry ~key:"notified" ~start_time in
   let unpack_updates = function
@@ -223,19 +223,30 @@ let query_notifier
        empty raw_updates set from ServerNotifier.get_changes_async. *)
     genv.local_config.edenfs_file_watcher.enabled
   in
-  let rec pump_async_updates acc acc_clock =
+  let rec pump_async_updates acc acc_clock iteration telemetry =
     match ServerNotifier.maybe_changes_available genv.notifier with
     | Some true ->
-      let (changes, clock) = ServerNotifier.get_changes_async genv.notifier in
+      let (changes, clock, telemetry) =
+        ServerNotifier.get_changes_async genv.notifier telemetry
+      in
       let (_, raw_updates) = unpack_updates changes in
       if stop_pumping_on_empty_updates && SSet.is_empty raw_updates then
-        (acc, clock)
+        (acc, clock, iteration + 1, telemetry)
       else
-        pump_async_updates (SSet.union acc raw_updates) clock
-    | _ -> (acc, acc_clock)
+        pump_async_updates
+          (SSet.union acc raw_updates)
+          clock
+          (iteration + 1)
+          telemetry
+    | _ -> (acc, acc_clock, iteration, telemetry)
   in
-  let (raw_updates, clock) = pump_async_updates raw_updates clock in
+  let (raw_updates, clock, pump_iterations, telemetry) =
+    pump_async_updates raw_updates clock 0 telemetry
+  in
   let telemetry = Telemetry.duration telemetry ~key:"pumped" ~start_time in
+  let telemetry =
+    Telemetry.int_ telemetry ~key:"pump_iterations" ~value:pump_iterations
+  in
   Program.exit_if_critical_update genv ~raw_updates;
   let updates =
     FindUtils.post_file_watcher_filter_from_fully_qualified_raw_updates

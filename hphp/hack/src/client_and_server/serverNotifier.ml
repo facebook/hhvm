@@ -401,11 +401,12 @@ let process_watchman_state_changes ~sync instance_ref root local_config : unit =
   in
   List.iter changes ~f:process_changes
 
-let get_changes_sync (t : t) : SSet.t * clock option =
-  let (changes, new_clock) =
+let get_changes_sync (t : t) telemetry : SSet.t * clock option * Telemetry.t =
+  let (changes, new_clock, telemetry) =
     match t with
-    | IndexOnly _ -> (SSet.empty, None)
-    | MockChanges { get_changes_sync; _ } -> (get_changes_sync (), None)
+    | IndexOnly _ -> (SSet.empty, None, telemetry)
+    | MockChanges { get_changes_sync; _ } ->
+      (get_changes_sync (), None, telemetry)
     | Dfind { dfind; _ } ->
       let set =
         try
@@ -417,8 +418,9 @@ let get_changes_sync (t : t) : SSet.t * clock option =
         with
         | _ -> Exit.exit Exit_status.Dfind_died
       in
-      (set, None)
+      (set, None, telemetry)
     | Watchman { local_config; watchman; root; _ } ->
+      let start_time = Unix.gettimeofday () in
       let (watchman', changes) =
         Watchman.get_changes_synchronously
           ~timeout:
@@ -426,13 +428,16 @@ let get_changes_sync (t : t) : SSet.t * clock option =
               .ServerLocalConfig.Watchman.synchronous_timeout
           !watchman
       in
+      let telemetry =
+        Telemetry.add_duration ~key:"sync_watcher" ~start_time telemetry
+      in
       watchman := watchman';
       let changes =
         List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
             SSet.union acc (convert_watchman_changes ~root ~local_config c))
       in
       let clock = Watchman.get_clock !watchman in
-      (changes, Some (ServerNotifierTypes.Watchman clock))
+      (changes, Some (ServerNotifierTypes.Watchman clock), telemetry)
     | EdenfsFileWatcher
         { instance; root; local_config; tmp_watchman_instance; last_clock; _ }
       ->
@@ -456,19 +461,23 @@ let get_changes_sync (t : t) : SSet.t * clock option =
            query_notifier to check if there are actual changes, which might take us here.
            Without this delay, this will cause us to clog the CPU. *)
         Unix.sleepf 0.25;
-        (SSet.empty, Some (ServerNotifierTypes.Eden !last_clock))
+        (SSet.empty, Some (ServerNotifierTypes.Eden !last_clock), telemetry)
       ) else
+        let start_time = Unix.gettimeofday () in
         (* Note that this will handle all errors by raising Exit_status *)
         let (changes, new_clock) =
           handle_edenfs_watcher_result
             (Edenfs_watcher.get_changes_sync instance)
+        in
+        let telemetry =
+          Telemetry.add_duration ~key:"sync_watcher" ~start_time telemetry
         in
         last_clock := new_clock;
         let changes_set =
           List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
               SSet.union acc (convert_edenfs_watcher_changes local_config c))
         in
-        (changes_set, Some (ServerNotifierTypes.Eden new_clock))
+        (changes_set, Some (ServerNotifierTypes.Eden new_clock), telemetry)
   in
 
   if
@@ -487,18 +496,23 @@ let get_changes_sync (t : t) : SSet.t * clock option =
           file)
       changes
   end;
-  (changes, new_clock)
+  (changes, new_clock, telemetry)
 
-let get_changes_async (t : t) : changes * clock option =
-  let (changes, new_clock) =
+let get_changes_async (t : t) telemetry : changes * clock option * Telemetry.t =
+  let (changes, new_clock, telemetry) =
     match t with
-    | IndexOnly _ -> (SyncChanges SSet.empty, None)
-    | MockChanges { get_changes_async; _ } -> (get_changes_async (), None)
+    | IndexOnly _ -> (SyncChanges SSet.empty, None, telemetry)
+    | MockChanges { get_changes_async; _ } ->
+      (get_changes_async (), None, telemetry)
     | Dfind _ ->
-      let (changes, _) = get_changes_sync t in
-      (SyncChanges changes, None)
+      let (changes, _, telemetry) = get_changes_sync t telemetry in
+      (SyncChanges changes, None, telemetry)
     | Watchman { watchman; root; local_config; _ } ->
+      let start_time = Unix.gettimeofday () in
       let (watchman', changes) = Watchman.get_changes !watchman in
+      let telemetry =
+        Telemetry.add_duration ~key:"async_watcher" ~start_time telemetry
+      in
       watchman := watchman';
       let changes =
         match changes with
@@ -514,7 +528,7 @@ let get_changes_async (t : t) : changes * clock option =
       in
       let clock = Watchman.get_clock !watchman in
 
-      (changes, Some (ServerNotifierTypes.Watchman clock))
+      (changes, Some (ServerNotifierTypes.Watchman clock), telemetry)
     | EdenfsFileWatcher
         { instance; tmp_watchman_instance; root; local_config; last_clock; _ }
       ->
@@ -533,19 +547,23 @@ let get_changes_async (t : t) : changes * clock option =
            query_notifier to check if there are actual changes, which might take us here.
            Without this delay, this will cause us to clog the CPU. *)
         Unix.sleepf 0.25;
-        (AsyncChanges SSet.empty, Some (Eden !last_clock))
+        (AsyncChanges SSet.empty, Some (Eden !last_clock), telemetry)
       ) else
+        let start_time = Unix.gettimeofday () in
         (* Note that this will handle all errors by raising Exit_status *)
         let (changes, new_clock) =
           handle_edenfs_watcher_result
             (Edenfs_watcher.get_changes_async instance)
+        in
+        let telemetry =
+          Telemetry.add_duration ~key:"async_watcher" ~start_time telemetry
         in
         last_clock := new_clock;
         let changes_set =
           List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
               SSet.union acc (convert_edenfs_watcher_changes local_config c))
         in
-        (AsyncChanges changes_set, Some (Eden new_clock))
+        (AsyncChanges changes_set, Some (Eden new_clock), telemetry)
   in
 
   if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then begin
@@ -570,7 +588,7 @@ let get_changes_async (t : t) : changes * clock option =
         change_set
     end
   end;
-  (changes, new_clock)
+  (changes, new_clock, telemetry)
 
 let notification_fd (t : t) : Caml_unix.file_descr option =
   match t with

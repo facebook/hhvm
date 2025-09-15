@@ -817,7 +817,10 @@ let get_updates_exn ~(genv : ServerEnv.genv) ~(root : Path.t) :
   let start_t = Unix.gettimeofday () in
   Hh_logger.log "Getting files changed while parsing...";
   ServerNotifier.wait_until_ready genv.notifier;
-  let (changes, clock) = ServerNotifier.get_changes_async genv.notifier in
+  let telemetry = Telemetry.create () in
+  let (changes, clock, _telemetry) =
+    ServerNotifier.get_changes_async genv.notifier telemetry
+  in
   let files_changed_while_parsing =
     match changes with
     | ServerNotifier.Unavailable -> Relative_path.Set.empty

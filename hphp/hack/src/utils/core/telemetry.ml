@@ -138,6 +138,32 @@ let duration
   let ms = int_of_float (1000.0 *. seconds) in
   (key, Hh_json.int_ ms) :: telemetry
 
+let add_duration
+    ?(key : string = "duration")
+    ~(start_time : float)
+    ?(end_time : float option)
+    (telemetry : t) : t =
+  let end_time = Option.value end_time ~default:(Unix.gettimeofday ()) in
+  let seconds = end_time -. start_time in
+  let new_duration_ms = int_of_float (1000.0 *. seconds) in
+
+  let (previous_duration_ms, filtered_telemetry) =
+    List.fold_right
+      telemetry
+      ~init:(0, [])
+      ~f:(fun ((cur_key, cur_value) as cur_entry) (acc_duration, acc_telemtry)
+         ->
+        match cur_value with
+        | Hh_json.JSON_Number cur_value when String.equal cur_key key ->
+          (match Int.of_string_opt cur_value with
+          | Some cur_value -> (cur_value + acc_duration, acc_telemtry)
+          | None -> (acc_duration, cur_entry :: acc_telemtry))
+        | _ -> (acc_duration, cur_entry :: acc_telemtry))
+  in
+  let overall_duration_ms = new_duration_ms + previous_duration_ms in
+
+  (key, Hh_json.int_ overall_duration_ms) :: filtered_telemetry
+
 let with_duration ~(description : string) (telemetry : t) (f : unit -> 'a) :
     'a * t =
   let start_time = Unix.gettimeofday () in

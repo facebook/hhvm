@@ -39,12 +39,12 @@ val wait_until_ready : t -> unit
 
 (** This might return AsyncChanges the ones that we happen to have received by now,
 or SyncChanges, depending on the underlying notifier's state *)
-val get_changes_async : t -> changes * clock option
+val get_changes_async : t -> Telemetry.t -> changes * clock option * Telemetry.t
 
 (** Returns all changes up to the point this was invoked, represented as a set
 of changed files. This will raise an exception if the file watching service
 is unavailable *)
-val get_changes_sync : t -> SSet.t * clock option
+val get_changes_sync : t -> Telemetry.t -> SSet.t * clock option * Telemetry.t
 
 (** If supported by the backend, returns a file descriptor that can be used to
     be notified about file system changes. The FD being read-ready is a

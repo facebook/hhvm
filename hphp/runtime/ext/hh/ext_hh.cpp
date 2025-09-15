@@ -1539,8 +1539,7 @@ const StaticString
   s_include_paths("include_paths"),
   s_soft_includes("soft_includes"),
   s_packages("packages"),
-  s_soft_packages("soft_packages"),
-  s_domains("domains");
+  s_soft_packages("soft_packages");
 } // namespace
 
 Array HHVM_FUNCTION(get_all_packages) {

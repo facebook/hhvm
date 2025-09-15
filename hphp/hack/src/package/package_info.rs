@@ -163,14 +163,6 @@ mod test {
         let my_prod = &info.deployments().unwrap()["my-prod"];
         assert_eq!(my_prod.packages.as_ref().unwrap()[0].get_ref(), "foo");
         assert_eq!(my_prod.packages.as_ref().unwrap()[1].get_ref(), "bar");
-        assert_eq!(
-            my_prod.domains.as_ref().unwrap()[0].get_ref(),
-            r"www\.my-prod\.com"
-        );
-        assert_eq!(
-            my_prod.domains.as_ref().unwrap()[1].get_ref(),
-            r".*\.website\.com$"
-        );
     }
 
     #[test]

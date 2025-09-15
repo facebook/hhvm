@@ -362,7 +362,7 @@ function get_all_packages(
  */
 <<__Native>>
 function get_all_deployments(
-): dict<string, shape('packages' => vec<string>, 'domains' => vec<string>)>;
+): dict<string, shape('packages' => vec<string>)>;
 
 /*
  * Returns whether a package named $name exist in the current deployment.

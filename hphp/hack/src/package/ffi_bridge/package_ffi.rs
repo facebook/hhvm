@@ -33,7 +33,6 @@ mod ffi {
     struct Deployment {
         packages: Vec<String>,
         soft_packages: Vec<String>,
-        domains: Vec<String>,
     }
     extern "Rust" {
         pub fn package_info(packages_toml: &CxxString) -> PackageInfo;
@@ -73,7 +72,6 @@ pub fn package_info(packages_toml: &CxxString) -> ffi::PackageInfo {
                             let deployment_ffi = ffi::Deployment {
                                 packages: convert(deployment.packages.as_ref()),
                                 soft_packages: convert(deployment.soft_packages.as_ref()),
-                                domains: convert(deployment.domains.as_ref()),
                             };
                             ffi::DeploymentMapEntry {
                                 name: name.get_ref().into(),

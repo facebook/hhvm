@@ -10,11 +10,11 @@ open Hh_prelude
 type errors = (Pos.t * string * (Pos.t * string) list) list
 
 external extract_packages_from_text_strict :
-  string -> string -> (Package.t list, errors) result
+  string -> (Package.t list, errors) result
   = "extract_packages_from_text_strict_ffi"
 
 external extract_packages_from_text_non_strict :
-  string -> string -> (Package.t list, errors) result
+  string -> (Package.t list, errors) result
   = "extract_packages_from_text_non_strict_ffi"
 
 let repo_config_path =
@@ -30,8 +30,7 @@ let parse (strict : bool) (path : string) =
     else
       extract_packages_from_text_non_strict
   in
-  let contents = Sys_utils.cat path in
-  match extract_packages_from_text path contents with
+  match extract_packages_from_text path with
   | Error [] -> failwith "Bad package specifiction"
   | Error errors ->
     let strings =

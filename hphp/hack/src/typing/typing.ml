@@ -3723,7 +3723,7 @@ end = struct
             local_obj_ty
         in
         Option.iter ty_err_opt2 ~f:(Typing_error_utils.add_typing_error ~env);
-        let (_, env, fty) = TUtils.strip_supportdyn env fty in
+        let (supportdyn, env, fty) = TUtils.strip_supportdyn env fty in
         let (env, fty) = Env.expand_type env fty in
         (match deref fty with
         | (reason, Tfun ftype) ->
@@ -3768,7 +3768,7 @@ end = struct
           in
           let ty =
             Typing_dynamic.maybe_wrap_with_supportdyn
-              ~should_wrap:true
+              ~should_wrap:supportdyn
               reason
               caller
           in

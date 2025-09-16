@@ -2012,7 +2012,17 @@ void DebuggerClient::processTakeCode() {
       // strip the trailing ;
       m_line = m_line.substr(0, m_line.size() - 1);
     }
-    m_code = std::string("<?hh $_=(") + m_line.substr(1) + "); ";
+    std::string pattern = R"((=\s*\$([a-zA-Z_\d]+)\s*=))";
+    std::string match;
+
+    if (RE2::PartialMatch(m_line, pattern, &match)) {
+      m_code = std::string("<?hh ") + m_line.substr(1) + ";";
+      std::string variable = match.substr(1, match.size() - 2).c_str();
+      processEval();
+      m_code = std::string("<?hh $_=") + variable + ";";
+    } else {
+      m_code = std::string("<?hh $_=(") + m_line.substr(1) + "); ";
+    }
     if (processEval()) CmdVariable::PrintVariable(*this, s_UNDERSCORE);
     return;
   } else if (first != '<' && m_line != "k" && m_line != "K") {

@@ -85,7 +85,7 @@ class MinimalConnectionStats : public ConnectionStats {
   std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> egressBodyBytes_;
   std::optional<StatsWrapper::TLTimeseriesMinuteAndAllTime> ingressBodyBytes_;
   std::optional<StatsWrapper::TLTimeseriesMinute> upstreamLoadShed_;
-  std::optional<StatsWrapper::TLHistogram> totalDuration_;
+  std::optional<BaseStats::LazyQuantileStatWrapper> totalDuration_;
 
   std::optional<StatsWrapper::TLCounter> currConns_;
   std::optional<StatsWrapper::TLTimeseries> newConns_;

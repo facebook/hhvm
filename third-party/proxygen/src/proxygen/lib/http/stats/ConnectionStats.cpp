@@ -29,13 +29,8 @@ MinimalConnectionStats::MinimalConnectionStats(const std::string& prefix,
     ingressBodyBytes_.emplace(prefix + "_ingress_body_bytes", SUM, RATE);
 
     totalDuration_.emplace(prefix + "_conn_duration",
-                           100,
-                           0,
-                           5000,
-                           facebook::fb303::AVG,
-                           50,
-                           95,
-                           99);
+                           facebook::fb303::ExportTypeConsts::kAvg,
+                           facebook::fb303::QuantileConsts::kP50_P95_P99);
     currConns_.emplace(prefix + "_conn");
     newConns_.emplace(prefix + "_new_conn", SUM);
     currTcpConns_.emplace(prefix + "_tcp_conn");
@@ -71,7 +66,7 @@ void MinimalConnectionStats::recordResponse(
 }
 
 void MinimalConnectionStats::recordDuration(size_t duration) {
-  BaseStats::addToOptionalStat(totalDuration_, duration);
+  BaseStats::addValueToOptionalStat(totalDuration_, duration);
 }
 
 void MinimalConnectionStats::addEgressBytes(size_t bytes) {

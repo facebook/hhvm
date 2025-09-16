@@ -47,7 +47,7 @@ int run_codemod(
 
   // Parse the Thrift file.
   auto source_mgr = source_manager();
-  auto diags = make_diagnostics_printer(source_mgr);
+  diagnostics_engine diags = options.make_diagnostics_engine(source_mgr);
   auto program_bundle =
       parse_ast(source_mgr, diags, *filename, parsing_params, &sema_params);
   if (!program_bundle) {

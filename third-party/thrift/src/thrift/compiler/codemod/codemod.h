@@ -19,6 +19,7 @@
 #include <functional>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
+#include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/source_location.h>
 
 namespace apache::thrift::compiler {
@@ -30,6 +31,14 @@ struct codemod_parsing_options {
   // and this option changes it.
   bool skip_lowering_cpp_type_annotations = true;
   bool skip_lowering_annotations = true;
+
+  /**
+   * Override the default diagnostics handling behavior.
+   * By default, all error level diagnostics are printed to stderr, and lower
+   * level diagnostics are ignored.
+   */
+  std::function<diagnostics_engine(source_manager&)> make_diagnostics_engine =
+      make_diagnostics_printer;
 };
 
 // Parses a Thrift file specified in the command-line arguments and runs

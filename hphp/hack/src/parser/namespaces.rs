@@ -58,37 +58,6 @@ impl NamespaceEnv for namespace_env::Env {
     }
 }
 
-impl NamespaceEnv for oxidized_by_ref::namespace_env::Env<'_> {
-    fn disable_xhp_element_mangling(&self) -> bool {
-        self.disable_xhp_element_mangling
-    }
-    fn is_codegen(&self) -> bool {
-        matches!(self.mode, oxidized_by_ref::namespace_env::Mode::ForCodegen)
-    }
-    fn name(&self) -> Option<&str> {
-        self.name
-    }
-    fn get_imported_name(
-        &self,
-        kind: ElaborateKind,
-        prefix: &str,
-        has_bslash: bool,
-    ) -> Option<&str> {
-        let uses = {
-            if has_bslash {
-                self.ns_uses
-            } else {
-                match kind {
-                    ElaborateKind::Class => self.class_uses,
-                    ElaborateKind::Fun => self.fun_uses,
-                    ElaborateKind::Const => self.const_uses,
-                }
-            }
-        };
-        uses.get(&prefix).copied()
-    }
-}
-
 #[derive(Clone, Debug, Copy, Eq, PartialEq)]
 pub enum ElaborateKind {
     Fun,
@@ -223,27 +192,6 @@ pub fn elaborate_id(nsenv: &namespace_env::Env, kind: ElaborateKind, id: &mut Id
     if let Some(s) = elaborate_raw_id(nsenv, kind, &id.1, false) {
         id.1 = s;
     }
-}
-
-pub fn elaborate_raw_id_in<'a>(
-    arena: &'a bumpalo::Bump,
-    nsenv: &oxidized_by_ref::namespace_env::Env<'a>,
-    kind: ElaborateKind,
-    id: &'a str,
-    elaborate_xhp_namespaces_for_facts: bool,
-) -> &'a str {
-    match elaborate_raw_id(nsenv, kind, id, elaborate_xhp_namespaces_for_facts) {
-        Some(s) => arena.alloc_str(&s),
-        None => id,
-    }
-}
-
-pub fn elaborate_into_current_ns_in<'a>(
-    arena: &'a bumpalo::Bump,
-    nsenv: &oxidized_by_ref::namespace_env::Env<'a>,
-    id: &str,
-) -> &'a str {
-    arena.alloc_str(&elaborate_into_current_ns(nsenv, id))
 }
 
 /// First pass of flattening namespaces, run super early in the pipeline, right

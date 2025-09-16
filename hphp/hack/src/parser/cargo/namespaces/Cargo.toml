@@ -11,8 +11,6 @@ license = "MIT"
 path = "../../namespaces.rs"
 
 [dependencies]
-bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 core_utils_rust = { version = "0.0.0", path = "../../../utils/core" }
 naming_special_names_rust = { version = "0.0.0", path = "../../../naming" }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
-oxidized_by_ref = { version = "0.0.0", path = "../../../oxidized_by_ref" }

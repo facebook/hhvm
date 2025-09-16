@@ -1,2 +1,2 @@
 WARN: File "like_type_refinement_dynamic_inside_v_outside.php", line 7, characters 7-41:
-This `is` check is always `false`. The expression on the left has type `null` which shares no values with `KeyedTraversable<nothing, nothing>`. (Warn[12010])
+This `is` check is always `false`. The expression on the left has type `null` which shares no values with `KeyedTraversable<Tk#1, Tv#1>`. (Warn[12010])

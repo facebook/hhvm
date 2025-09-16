@@ -1,7 +1,7 @@
 WARN: File "module_hint.php--here.php", line 12, characters 5-11:
-This `is` check is always `true`. The expression on the left has type `(G<T#1> & D & (D, int))` which is a subtype of `D`. (Warn[12009])
+This `is` check is always `true`. The expression on the left has type `(D & (D, int) & G<T#1>)` which is a subtype of `D`. (Warn[12009])
 WARN: File "module_hint.php--here.php", line 14, characters 5-17:
-This `is` check is always `true`. The expression on the left has type `(G<T#1> & D & (D, int))` which is a subtype of `(D, int)`. (Warn[12009])
+This `is` check is always `true`. The expression on the left has type `(D & (D, int) & G<T#1>)` which is a subtype of `(D, int)`. (Warn[12009])
 WARN: File "module_hint.php--here.php", line 15, characters 5-11:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `(G<T#1> & D & (D, int))` which shares no values with `E`. (Warn[12012])
 ERROR: File "module_hint.php--here.php", line 9, characters 11-11:

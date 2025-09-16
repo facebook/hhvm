@@ -3,10 +3,10 @@ File "anyarray.php", line 68, characters 5-15:
 File "anyarray.php", line 77, characters 5-15:
   nothing
 WARN: File "anyarray.php", line 70, characters 14-29:
-This `is` check is always `false`. The expression on the left has type `not AnyArray` which shares no values with `dict<nothing, nothing>`. (Warn[12010])
+This `is` check is always `false`. The expression on the left has type `not AnyArray` which shares no values with `dict<Tk#1, Tv#1>`. (Warn[12010])
 WARN: File "anyarray.php", line 72, characters 14-25:
-This `is` check is always `false`. The expression on the left has type `not AnyArray` which shares no values with `vec<nothing>`. (Warn[12010])
+This `is` check is always `false`. The expression on the left has type `not AnyArray` which shares no values with `vec<T#1>`. (Warn[12010])
 WARN: File "anyarray.php", line 74, characters 14-28:
-This `is` check is always `false`. The expression on the left has type `not AnyArray` which shares no values with `keyset<nothing>`. (Warn[12010])
+This `is` check is always `false`. The expression on the left has type `not AnyArray` which shares no values with `keyset<T#1>`. (Warn[12010])
 WARN: File "anyarray.php", line 76, characters 14-33:
-This `is` check is always `false`. The expression on the left has type `not AnyArray` which shares no values with `AnyArray<nothing, nothing>`. (Warn[12010])
+This `is` check is always `false`. The expression on the left has type `not AnyArray` which shares no values with `AnyArray<Tk#1, Tv#1>`. (Warn[12010])

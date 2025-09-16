@@ -1,9 +1,9 @@
 WARN: File "is_as_shallow_checks.php", line 9, characters 3-21:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Erased<nothing>`. (Warn[12012])
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Erased<T#1>`. (Warn[12012])
 WARN: File "is_as_shallow_checks.php", line 10, characters 3-23:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Erased<int>`. (Warn[12012])
 WARN: File "is_as_shallow_checks.php", line 14, characters 3-22:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Reified<nothing>`. (Warn[12012])
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Reified<T#1>`. (Warn[12012])
 WARN: File "is_as_shallow_checks.php", line 15, characters 3-24:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Reified<int>`. (Warn[12012])
 WARN: File "is_as_shallow_checks.php", line 16, characters 3-33:
@@ -11,15 +11,15 @@ This `as` assertion will always fail and lead to an exception at runtime. The ex
 WARN: File "is_as_shallow_checks.php", line 17, characters 3-50:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Reified<Reified<Reified<Erased<int>>>>`. (Warn[12012])
 WARN: File "is_as_shallow_checks.php", line 21, characters 3-22:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Both<nothing, nothing>`. (Warn[12012])
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Both<Ta#1, Tb#1>`. (Warn[12012])
 WARN: File "is_as_shallow_checks.php", line 22, characters 3-24:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Both<nothing, int>`. (Warn[12012])
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Both<Ta#1, int>`. (Warn[12012])
 WARN: File "is_as_shallow_checks.php", line 23, characters 3-24:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Both<int, nothing>`. (Warn[12012])
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Both<int, Tb#1>`. (Warn[12012])
 WARN: File "is_as_shallow_checks.php", line 24, characters 3-33:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Both<nothing, Reified<int>>`. (Warn[12012])
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Both<Ta#1, Reified<int>>`. (Warn[12012])
 WARN: File "is_as_shallow_checks.php", line 25, characters 3-32:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Both<nothing, Erased<int>>`. (Warn[12012])
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Both<Ta#1, Erased<int>>`. (Warn[12012])
 ERROR: File "is_as_shallow_checks.php", line 10, characters 13-23:
 Invalid `as` expression hint (Typing[4195])
   File "is_as_shallow_checks.php", line 10, characters 13-23:

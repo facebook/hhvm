@@ -1,2 +1,2 @@
 WARN: File "dict_is_constmap.php", line 7, characters 7-30:
-This `is` check is always `false`. The expression on the left has type `dict<int, dict<int, int>>` which shares no values with `ConstMap<nothing, nothing>`. (Warn[12010])
+This `is` check is always `false`. The expression on the left has type `dict<int, dict<int, int>>` which shares no values with `ConstMap<Tk#1, Tv#1>`. (Warn[12010])

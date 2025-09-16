@@ -1,2 +1,2 @@
 WARN: File "inter_array_ops.php", line 6, characters 13-24:
-This `is` check is always `false`. The expression on the left has type `null` which shares no values with `vec<nothing>`. (Warn[12010])
+This `is` check is always `false`. The expression on the left has type `null` which shares no values with `vec<T#1>`. (Warn[12010])

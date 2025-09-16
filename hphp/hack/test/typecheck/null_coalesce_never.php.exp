@@ -1,0 +1,4 @@
+WARN: File "null_coalesce_never.php", line 6, characters 3-30:
+This null coalesce will always evaluate to its left-hand side. (Warn[12023])
+  File "null_coalesce_never.php", line 3, characters 23-30:
+  The expression on the left has type `vec<int>` which can never be `null`.

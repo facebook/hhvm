@@ -893,6 +893,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if let ::std::option::Option::Some(r) = <go__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
+                }
             },
             1 => {
 
@@ -904,6 +908,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <go__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<go__types::Tag>() {

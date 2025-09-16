@@ -100,6 +100,10 @@ class Name implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
           shape(
           )
         ),
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
       ],

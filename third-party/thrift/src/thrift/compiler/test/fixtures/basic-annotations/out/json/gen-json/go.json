@@ -15,7 +15,8 @@
         "scope.Field" : {  },
         "scope.Function" : {  },
         "scope.FunctionParameter" : {  },
-        "scope.Typedef" : {  }
+        "scope.Typedef" : {  },
+        "scope.Structured" : {  }
       },
       "fields" : {
         "name" : {
@@ -24,11 +25,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 36,
+              "line" : 37,
               "column" : 3
             },
             "end" : {
-              "line" : 36,
+              "line" : 37,
               "column" : 18
             }
           }
@@ -40,13 +41,13 @@
           "column" : 1
         },
         "end" : {
-          "line" : 37,
+          "line" : 38,
           "column" : 2
         }
       }
     },
     "Tag" : {
-      "lineno" : 40,
+      "lineno" : 41,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -60,11 +61,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 43,
+              "line" : 44,
               "column" : 3
             },
             "end" : {
-              "line" : 43,
+              "line" : 44,
               "column" : 17
             }
           }
@@ -72,17 +73,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 40,
+          "line" : 41,
           "column" : 1
         },
         "end" : {
-          "line" : 44,
+          "line" : 45,
           "column" : 2
         }
       }
     },
     "MinimizePadding" : {
-      "lineno" : 74,
+      "lineno" : 75,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -93,17 +94,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 74,
+          "line" : 75,
           "column" : 1
         },
         "end" : {
-          "line" : 75,
+          "line" : 76,
           "column" : 26
         }
       }
     },
     "UseReflectCodec" : {
-      "lineno" : 87,
+      "lineno" : 88,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -114,11 +115,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 87,
+          "line" : 88,
           "column" : 1
         },
         "end" : {
-          "line" : 88,
+          "line" : 89,
           "column" : 26
         }
       }

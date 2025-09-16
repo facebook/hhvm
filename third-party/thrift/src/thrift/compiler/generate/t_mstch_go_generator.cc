@@ -533,6 +533,10 @@ class mstch_go_struct : public mstch_struct {
       // Unexported/lowercase
       return go::munge_ident(name, false);
     } else {
+      auto name_override = go::get_go_name_annotation(struct_);
+      if (name_override != nullptr) {
+        return *name_override;
+      }
       // Exported/uppercase
       return go::munge_ident(name, true);
     }

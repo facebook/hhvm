@@ -32,6 +32,7 @@ namespace py thrift.annotation.go
 @scope.Function
 @scope.FunctionParameter
 @scope.Typedef
+@scope.Structured
 struct Name {
   1: string name;
 }

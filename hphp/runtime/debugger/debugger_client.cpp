@@ -646,6 +646,12 @@ bool DebuggerClient::connectRemote(const std::string &host, int port) {
   if (tryConnect(host, port, false)) {
     return true;
   }
+
+  info("Retrying connection to %s:%d. If the webserver has just been restarted, the connection may not succeed until the webserver is ready...", host.c_str(), port);
+  if (tryConnect(host, port, false)) {
+    return true;
+  }
+
   error("Unable to connect to %s:%d.", host.c_str(), port);
   return false;
 }

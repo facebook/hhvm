@@ -473,11 +473,6 @@ fn is_variadic_expression(node: S<'_>) -> bool {
         || test_decorated_expression_child(node, is_variadic_expression)
 }
 
-fn is_double_variadic(node: S<'_>) -> bool {
-    is_decorated_expression(node, |x| x.is_ellipsis())
-        && test_decorated_expression_child(node, is_variadic_expression)
-}
-
 fn is_variadic_parameter_declaration(node: S<'_>) -> bool {
     match &node.children {
         ParameterDeclaration(x) => x.ellipsis.is_ellipsis(),
@@ -2289,15 +2284,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         });
     }
 
-    fn decoration_errors(&mut self, node: S<'a>) {
-        self.produce_error(
-            |_, x| is_double_variadic(x),
-            node,
-            || errors::double_variadic,
-            node,
-        );
-    }
-
     fn named_argument_errors(&mut self, node: S<'a>) {
         if !FeatureName::NamedParametersUse.can_use(
             &self.env.parser_options,
@@ -2416,7 +2402,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     param_errors(self, &x.parameters)
                 }
             }
-            DecoratedExpression(_) => self.decoration_errors(node),
             _ => {}
         }
     }

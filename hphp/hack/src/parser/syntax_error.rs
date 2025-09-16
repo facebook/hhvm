@@ -776,7 +776,6 @@ pub const using_st_function_scoped_top_level: Error = Cow::Borrowed(concat!(
     "Using statement in function scoped form may only be used at the top ",
     "level of a function or a method",
 ));
-pub const double_variadic: Error = Cow::Borrowed("Parameter redundantly marked as variadic `...`.");
 pub fn conflicting_trait_require_clauses(name: &str) -> Error {
     Cow::Owned(format!("Conflicting requirements for `{}`", name))
 }

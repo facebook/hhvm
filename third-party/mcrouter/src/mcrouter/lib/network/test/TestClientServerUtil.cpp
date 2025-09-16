@@ -357,9 +357,9 @@ void TestClient::sendGet(
         if (req.key_ref()->fullKey() == "empty") {
           checkLogic(value.empty(), "Expected empty value, got {}", value);
         } else if (req.key_ref()->fullKey().startsWith("value_size:")) {
-          auto key = req.key_ref()->fullKey();
-          key.removePrefix("value_size:");
-          size_t valSize = folly::to<size_t>(key);
+          auto sizeKey = req.key_ref()->fullKey();
+          sizeKey.removePrefix("value_size:");
+          size_t valSize = folly::to<size_t>(sizeKey);
           checkLogic(
               value.size() == valSize,
               "Expected value of size {}, got {}",

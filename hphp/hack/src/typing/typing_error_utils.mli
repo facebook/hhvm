@@ -7,12 +7,6 @@
  *)
 val add_typing_error : Typing_error.t -> env:Typing_env_types.env -> unit
 
-val apply_callback_to_errors :
-  Errors.t ->
-  Typing_error.Reasons_callback.t ->
-  env:Typing_env_types.env ->
-  unit
-
 val ambiguous_inheritance :
   Pos_or_decl.t ->
   string ->

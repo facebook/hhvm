@@ -7034,22 +7034,6 @@ let add_typing_error err ~env =
        ~env
        ~current_span:(Errors.get_current_span ())
 
-(* Until we return a list of errors from typing, we have to apply
-   'client errors' to a callback for using in subtyping *)
-let apply_callback_to_errors errors on_error ~env =
-  let on_error User_error.{ code; reasons; explanation; _ } =
-    let code = Option.value_exn (Error_code.of_enum code) in
-    Eval_result.iter ~f:Errors.add_error
-    @@ Eval_result.suppress_intersection ~is_suppressed
-    @@ Eval_reasons_callback.apply
-         Eval_secondary.
-           { code; reasons = lazy reasons; explanation = lazy explanation }
-         on_error
-         ~env
-         ~current_span:(Errors.get_current_span ())
-  in
-  Errors.iter errors ~f:on_error
-
 let apply_error_from_reasons_callback eval_snd err ~env =
   Eval_result.iter ~f:Errors.add_error
   @@ Eval_result.suppress_intersection ~is_suppressed

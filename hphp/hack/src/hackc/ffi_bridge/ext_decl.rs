@@ -30,30 +30,8 @@ use oxidized::typing_defs_core::Ty;
 use oxidized::typing_defs_core::Ty_;
 use oxidized::typing_defs_core::UserAttribute;
 use oxidized::typing_defs_core::UserAttributeParam;
-use oxidized_by_ref::ast_defs::Id as IdObr;
-use oxidized_by_ref::direct_decl_parser::ParsedFile as ParsedFileObr;
 use oxidized_by_ref::file_info::Mode;
-use oxidized_by_ref::shallow_decl_defs::AbstractTypeconst as AbstractTypeconstObr;
 use oxidized_by_ref::shallow_decl_defs::ClassConstKind;
-use oxidized_by_ref::shallow_decl_defs::ConcreteTypeconst as ConcreteTypeconstObr;
-use oxidized_by_ref::shallow_decl_defs::DeclConstraintRequirement as DeclConstraintRequirementObr;
-use oxidized_by_ref::shallow_decl_defs::ShallowClass as ShallowClassObr;
-use oxidized_by_ref::shallow_decl_defs::ShallowClassConst as ShallowClassConstObr;
-use oxidized_by_ref::shallow_decl_defs::ShallowMethod as ShallowMethodObr;
-use oxidized_by_ref::shallow_decl_defs::ShallowProp as ShallowPropObr;
-use oxidized_by_ref::shallow_decl_defs::ShallowTypeconst as ShallowTypeconstObr;
-use oxidized_by_ref::shallow_decl_defs::Typeconst as TypeconstObr;
-use oxidized_by_ref::typing_defs::TypedefTypeAssignment as TypedefTypeAssignmentObr;
-use oxidized_by_ref::typing_defs_core::FunParams as FunParamsObr;
-use oxidized_by_ref::typing_defs_core::ShapeType as ShapeTypeObr;
-use oxidized_by_ref::typing_defs_core::Tparam as TparamObr;
-use oxidized_by_ref::typing_defs_core::TshapeFieldName as TshapeFieldNameObr;
-use oxidized_by_ref::typing_defs_core::TupleType as TupleTypeObr;
-use oxidized_by_ref::typing_defs_core::Ty as TyObr;
-use oxidized_by_ref::typing_defs_core::Ty_ as Ty_Obr;
-use oxidized_by_ref::typing_defs_core::UserAttribute as UserAttributeObr;
-use oxidized_by_ref::typing_defs_core::UserAttributeParam as UserAttributeParamObr;
-use oxidized_by_ref::typing_reason;
 use ty::reason::BReason;
 
 use crate::ffi::ExtDeclAttribute;
@@ -78,8 +56,6 @@ use crate::ffi::ExtDeclTypeStructureSubType;
 #[derive(Debug)]
 pub enum ParsedFileHolder {
     O(ParsedFile),
-    #[allow(dead_code)]
-    Obr(ParsedFileObr<'static>, bumpalo::Bump),
 }
 
 fn find_class<'a>(parsed_file: &'a ParsedFile, symbol: &str) -> Option<&'a ShallowClass> {
@@ -96,27 +72,9 @@ fn find_class<'a>(parsed_file: &'a ParsedFile, symbol: &str) -> Option<&'a Shall
         .map(|(_, shallow_class)| shallow_class)
 }
 
-fn find_class_obr<'a>(
-    parsed_file: &ParsedFileObr<'a>,
-    symbol: &str,
-) -> Option<&'a ShallowClassObr<'a>> {
-    let input_symbol_formatted = symbol.starts_with('\\');
-    parsed_file
-        .decls
-        .classes()
-        .find(|&(mut sym, _)| {
-            if !input_symbol_formatted {
-                sym = &sym[1..];
-            }
-            sym == symbol
-        })
-        .map(|(_, shallow_class)| shallow_class)
-}
-
 pub fn get_file_attributes(parsed_file: &ParsedFileHolder, name: &str) -> Vec<ExtDeclAttribute> {
     match parsed_file {
         ParsedFileHolder::O(file) => get_attributes(&file.file_attributes, name),
-        ParsedFileHolder::Obr(file, _) => get_attributes_obr(file.file_attributes, name),
     }
 }
 
@@ -130,16 +88,6 @@ pub fn get_file_consts(parsed_file: &ParsedFileHolder, name: &str) -> Vec<ExtDec
                 name: fmt_type(cname),
                 type_: extract_type_name(&decl.type_),
                 value: str_or_empty(decl.value.as_deref()),
-            })
-            .collect(),
-        ParsedFileHolder::Obr(file, _) => file
-            .decls
-            .consts()
-            .filter(|(cname, _)| name.is_empty() || name == strip_global_ns(cname))
-            .map(|(cname, decl)| ExtDeclFileConst {
-                name: fmt_type(cname),
-                type_: extract_type_name_obr(decl.type_),
-                value: str_or_empty(decl.value),
             })
             .collect(),
     }
@@ -163,36 +111,12 @@ pub fn get_file_funcs(parsed_file: &ParsedFileHolder, name: &str) -> Vec<ExtDecl
                 signature: get_signature(&decl.type_.1),
             })
             .collect(),
-        ParsedFileHolder::Obr(file, _) => file
-            .decls
-            .funs()
-            .filter(|(cname, _)| name.is_empty() || name == strip_global_ns(cname))
-            .map(|(cname, decl)| ExtDeclFileFunc {
-                name: fmt_type(cname),
-                type_: extract_type_name_obr(decl.type_),
-                module: id_or_empty_obr(decl.module),
-                internal: decl.internal,
-                support_dynamic_type: decl.support_dynamic_type,
-                php_std_lib: decl.php_std_lib,
-                no_auto_dynamic: decl.no_auto_dynamic,
-                no_auto_likes: decl.no_auto_likes,
-                signature: get_signature_obr(decl.type_.1),
-            })
-            .collect(),
     }
 }
 
 pub fn get_file_modules(parsed_file: &ParsedFileHolder, name: &str) -> Vec<ExtDeclModule> {
     match parsed_file {
         ParsedFileHolder::O(file) => file
-            .decls
-            .modules()
-            .filter(|(cname, _)| name.is_empty() || cname == &name)
-            .map(|(cname, _)| ExtDeclModule {
-                name: fmt_type(cname),
-            })
-            .collect(),
-        ParsedFileHolder::Obr(file, _) => file
             .decls
             .modules()
             .filter(|(cname, _)| name.is_empty() || cname == &name)
@@ -207,13 +131,6 @@ pub fn get_file_module_membership(parsed_file: &ParsedFileHolder) -> String {
     match parsed_file {
         ParsedFileHolder::O(file) => {
             if let Some(module_membership) = &file.module_membership {
-                module_membership.to_string()
-            } else {
-                "".to_string()
-            }
-        }
-        ParsedFileHolder::Obr(file, _) => {
-            if let Some(module_membership) = file.module_membership {
                 module_membership.to_string()
             } else {
                 "".to_string()
@@ -266,48 +183,6 @@ pub fn get_file_typedefs(parsed_file: &ParsedFileHolder, name: &str) -> Vec<ExtD
                 }
             })
             .collect(),
-        ParsedFileHolder::Obr(file, _) => file
-            .decls
-            .typedefs()
-            .filter(|(cname, _)| name.is_empty() || name == strip_global_ns(cname))
-            .map(|(cname, decl)| {
-                let (visibility, type_) = match decl.type_assignment {
-                    TypedefTypeAssignmentObr::SimpleTypeDef((vis, hint)) => {
-                        (enum_typedef_visibility(vis), extract_type_name_obr(hint))
-                    }
-                    TypedefTypeAssignmentObr::CaseType((variant, variants)) => {
-                        let mut hints;
-                        let ty_ = if variants.is_empty() {
-                            variant.0.1
-                        } else {
-                            hints = variants.iter().map(|v| v.0).collect::<Vec<_>>();
-                            hints.insert(0, variant.0);
-                            Ty_Obr::Tunion(&hints)
-                        };
-                        (
-                            String::from("case_type"),
-                            extract_type_name_obr(&TyObr(
-                                &typing_reason::Reason::NoReason, // the position is ignored when printing the type
-                                ty_,
-                            )),
-                        )
-                    }
-                };
-                ExtDeclTypeDef {
-                    name: fmt_type(cname),
-                    module: id_or_empty_obr(decl.module),
-                    visibility,
-                    tparams: get_typed_params_obr(decl.tparams),
-                    as_constraint: extract_type_name_opt_obr(decl.as_constraint),
-                    super_constraint: extract_type_name_opt_obr(decl.super_constraint),
-                    type_,
-                    is_ctx: decl.is_ctx,
-                    attributes: get_attributes_obr(decl.attributes, ""),
-                    internal: decl.internal,
-                    docs_url: str_or_empty(decl.docs_url),
-                }
-            })
-            .collect(),
     }
 }
 
@@ -330,36 +205,12 @@ pub fn get_type_structure(parsed_file: &ParsedFileHolder, name: &str) -> Vec<Ext
                 }
             })
             .collect(),
-        ParsedFileHolder::Obr(file, _) => file
-            .decls
-            .typedefs()
-            .filter(|(cname, _)| name.is_empty() || name == strip_global_ns(cname))
-            .map(|(_cname, decl)| match decl.type_assignment {
-                TypedefTypeAssignmentObr::SimpleTypeDef((_vis, hint)) => {
-                    build_type_structure_obr(hint)
-                }
-                TypedefTypeAssignmentObr::CaseType((variant, variants)) => {
-                    let mut hints = variants.iter().map(|v| v.0).collect::<Vec<_>>();
-                    hints.insert(0, variant.0);
-                    build_type_structure_obr(&TyObr(
-                        // the reason is not included in the type structure
-                        &typing_reason::Reason::NoReason,
-                        Ty_Obr::Tunion(&hints),
-                    ))
-                }
-            })
-            .collect(),
     }
 }
 
 pub fn get_file(parsed_file: &ParsedFileHolder) -> ExtDeclFile {
     let (disable_xhp_element_mangling, has_first_pass_parse_errors, mode) = match parsed_file {
         ParsedFileHolder::O(file) => (
-            file.disable_xhp_element_mangling,
-            file.has_first_pass_parse_errors,
-            file.mode,
-        ),
-        ParsedFileHolder::Obr(file, _) => (
             file.disable_xhp_element_mangling,
             file.has_first_pass_parse_errors,
             file.mode,
@@ -409,13 +260,6 @@ pub fn get_class_methods(
                 None => Vec::new(),
             }
         }
-        ParsedFileHolder::Obr(file, _) => {
-            let class_opt = find_class_obr(file, kls);
-            match class_opt {
-                Some(cls) => get_methods_obr(cls.methods, name),
-                None => Vec::new(),
-            }
-        }
     }
 }
 
@@ -429,13 +273,6 @@ pub fn get_class_smethods(
             let class_opt = find_class(file, kls);
             match class_opt {
                 Some(cls) => get_methods(&cls.static_methods, name),
-                None => Vec::new(),
-            }
-        }
-        ParsedFileHolder::Obr(file, _) => {
-            let class_opt = find_class_obr(file, kls);
-            match class_opt {
-                Some(cls) => get_methods_obr(cls.static_methods, name),
                 None => Vec::new(),
             }
         }
@@ -455,13 +292,6 @@ pub fn get_class_consts(
                 None => Vec::new(),
             }
         }
-        ParsedFileHolder::Obr(file, _) => {
-            let class_opt = find_class_obr(file, kls);
-            match class_opt {
-                Some(cls) => get_consts_obr(cls.consts, name),
-                None => Vec::new(),
-            }
-        }
     }
 }
 
@@ -478,13 +308,6 @@ pub fn get_class_typeconsts(
                 None => Vec::new(),
             }
         }
-        ParsedFileHolder::Obr(file, _) => {
-            let class_opt = find_class_obr(file, kls);
-            match class_opt {
-                Some(cls) => get_typeconsts_obr(cls.typeconsts, name),
-                None => Vec::new(),
-            }
-        }
     }
 }
 
@@ -497,13 +320,6 @@ pub fn get_class_props(parsed_file: &ParsedFileHolder, kls: &str, name: &str) ->
                 None => Vec::new(),
             }
         }
-        ParsedFileHolder::Obr(file, _) => {
-            let class_opt = find_class_obr(file, kls);
-            match class_opt {
-                Some(cls) => get_props_obr(cls.props, name),
-                None => Vec::new(),
-            }
-        }
     }
 }
 
@@ -513,13 +329,6 @@ pub fn get_class_sprops(parsed_file: &ParsedFileHolder, kls: &str, name: &str) -
             let class_opt = find_class(file, kls);
             match class_opt {
                 Some(cls) => get_props(&cls.sprops, name),
-                None => Vec::new(),
-            }
-        }
-        ParsedFileHolder::Obr(file, _) => {
-            let class_opt = find_class_obr(file, kls);
-            match class_opt {
-                Some(cls) => get_props_obr(cls.sprops, name),
                 None => Vec::new(),
             }
         }
@@ -539,26 +348,15 @@ pub fn get_class_attributes(
                 None => Vec::new(),
             }
         }
-        ParsedFileHolder::Obr(file, _) => {
-            let class_opt = find_class_obr(file, kls);
-            match class_opt {
-                Some(cls) => get_attributes_obr(cls.user_attributes, name),
-                None => Vec::new(),
-            }
-        }
     }
 }
+
 pub fn get_classes(parsed_file: &ParsedFileHolder) -> Vec<ExtDeclClass> {
     match parsed_file {
         ParsedFileHolder::O(file) => file
             .decls
             .classes()
             .map(|(_kls, decl)| get_class_impl(decl))
-            .collect(),
-        ParsedFileHolder::Obr(file, _) => file
-            .decls
-            .classes()
-            .map(|(_kls, decl)| get_class_impl_obr(decl))
             .collect(),
     }
 }
@@ -568,10 +366,6 @@ pub fn get_class(parsed_file: &ParsedFileHolder, name: &str) -> Option<ExtDeclCl
         ParsedFileHolder::O(file) => {
             let class_opt = find_class(file, name);
             Some(get_class_impl(class_opt?))
-        }
-        ParsedFileHolder::Obr(file, _) => {
-            let class_opt = find_class_obr(file, name);
-            Some(get_class_impl_obr(class_opt?))
         }
     }
 }
@@ -768,54 +562,6 @@ fn get_class_impl(class: &ShallowClass) -> ExtDeclClass {
     }
 }
 
-fn get_class_impl_obr(class: &ShallowClassObr<'_>) -> ExtDeclClass {
-    ExtDeclClass {
-        kind: enum_class_kind(class.kind), // ClassishKind (cls, iface, trait, enum)
-        name: fmt_type(class.name.1),
-
-        // Optional strings
-        module: id_or_empty_obr(class.module),
-        docs_url: str_or_empty(class.docs_url),
-        enum_type: get_enum_type_obr(class.enum_type),
-
-        // Flags
-        final_: class.final_,
-        abstract_: class.abstract_,
-        is_xhp: class.is_xhp,
-        internal: class.internal,
-        has_xhp_keyword: class.has_xhp_keyword,
-        xhp_marked_empty: class.xhp_marked_empty,
-        support_dynamic_type: class.support_dynamic_type,
-        is_strict: class.mode == oxidized_by_ref::file_info::Mode::Mstrict,
-
-        // Special Params
-        tparams: get_typed_params_obr(class.tparams),
-
-        // Implementation
-        extends: extract_type_name_vec_obr(class.extends),
-        uses: extract_type_name_vec_obr(class.uses),
-        implements: extract_type_name_vec_obr(class.implements),
-        require_extends: extract_type_name_vec_obr(class.req_extends),
-        require_implements: extract_type_name_vec_obr(class.req_implements),
-        require_class: extract_type_name_cr_vec_obr(class.req_constraints),
-        xhp_attr_uses: extract_type_name_vec_obr(class.xhp_attr_uses),
-
-        // Nested Types
-        user_attributes: get_attributes_obr(class.user_attributes, ""),
-        methods: get_methods_obr(class.methods, ""),
-        static_methods: get_methods_obr(class.static_methods, ""),
-        constructor: get_method_opt_obr(class.constructor),
-        consts: get_consts_obr(class.consts, ""),
-        typeconsts: get_typeconsts_obr(class.typeconsts, ""),
-        props: get_props_obr(class.props, ""),
-        sprops: get_props_obr(class.sprops, ""),
-        /*
-            Not supported yet
-            pub xhp_enum_values: s_map::SMap<'a, &'a [ast_defs::XhpEnumValue<'a>]>,
-        */
-    }
-}
-
 fn get_method_params(params: &FunParams) -> Vec<ExtDeclMethodParam> {
     params
         .iter()
@@ -828,22 +574,6 @@ fn get_method_params(params: &FunParams) -> Vec<ExtDeclMethodParam> {
             is_optional: p.flags.is_optional(),
             is_readonly: p.flags.is_readonly(),
             def_value: str_or_empty(p.def_value.as_deref()),
-        })
-        .collect()
-}
-
-fn get_method_params_obr(params: &FunParamsObr<'_>) -> Vec<ExtDeclMethodParam> {
-    params
-        .iter()
-        .map(|p| ExtDeclMethodParam {
-            name: str_or_empty(p.name),
-            type_: extract_type_name_obr(p.type_),
-            accept_disposable: p.flags.accepts_disposable(),
-            is_inout: p.flags.is_inout(),
-            has_default: p.def_value.is_some(),
-            is_optional: p.flags.is_optional(),
-            is_readonly: p.flags.is_readonly(),
-            def_value: str_or_empty(p.def_value),
         })
         .collect()
 }
@@ -869,38 +599,10 @@ fn get_props(props: &[ShallowProp], name: &str) -> Vec<ExtDeclProp> {
         })
         .collect()
 }
-fn get_props_obr(props: &[&ShallowPropObr<'_>], name: &str) -> Vec<ExtDeclProp> {
-    props
-        .iter()
-        .filter(|prop| name.is_empty() || prop.name.1 == name)
-        .map(|prop| ExtDeclProp {
-            name: prop.name.1.to_string(),
-            visibility: enum_visibility(&prop.visibility),
-            type_: extract_type_name_obr(prop.type_),
-            is_abstract: prop.flags.is_abstract(),
-            is_const: prop.flags.is_const(),
-            is_lateinit: prop.flags.is_lateinit(),
-            is_readonly: prop.flags.is_readonly(),
-            needs_init: prop.flags.needs_init(),
-            is_php_std_lib: prop.flags.is_php_std_lib(),
-            is_lsb: prop.flags.is_lsb(),
-            is_safe_global_variable: prop.flags.is_safe_global_variable(),
-            no_auto_likes: prop.flags.no_auto_likes(),
-            // prop.xhp_attr - not supported yet
-        })
-        .collect()
-}
 
 fn get_method_opt(method: Option<&ShallowMethod>) -> Vec<ExtDeclMethod> {
     match method {
         Some(method) => vec![get_method(method)],
-        None => vec![],
-    }
-}
-
-fn get_method_opt_obr(method: Option<&ShallowMethodObr<'_>>) -> Vec<ExtDeclMethod> {
-    match method {
-        Some(method) => vec![get_method_obr(method)],
         None => vec![],
     }
 }
@@ -921,35 +623,11 @@ fn get_method(meth: &ShallowMethod) -> ExtDeclMethod {
     }
 }
 
-fn get_method_obr(meth: &ShallowMethodObr<'_>) -> ExtDeclMethod {
-    ExtDeclMethod {
-        name: fmt_type(meth.name.1),
-        type_: extract_type_name_obr(meth.type_),
-        visibility: enum_visibility(&meth.visibility),
-        attributes: get_attributes_obr(meth.attributes, ""),
-        signature: get_signature_obr(meth.type_.1),
-        is_abstract: meth.flags.is_abstract(),
-        is_final: meth.flags.is_final(),
-        is_dynamicallycallable: meth.flags.is_dynamicallycallable(),
-        is_override: meth.flags.is_override(),
-        is_php_std_lib: meth.flags.is_php_std_lib(),
-        supports_dynamic_type: meth.flags.supports_dynamic_type(),
-    }
-}
-
 fn get_methods(methods: &[ShallowMethod], name: &str) -> Vec<ExtDeclMethod> {
     methods
         .iter()
         .filter(|meth| name.is_empty() || meth.name.1 == name)
         .map(get_method)
-        .collect()
-}
-
-fn get_methods_obr(methods: &[&ShallowMethodObr<'_>], name: &str) -> Vec<ExtDeclMethod> {
-    methods
-        .iter()
-        .filter(|meth| name.is_empty() || meth.name.1 == name)
-        .map(|meth| get_method_obr(meth))
         .collect()
 }
 
@@ -979,35 +657,6 @@ fn get_typeconsts(typeconsts: &[ShallowTypeconst], name: &str) -> Vec<ExtDeclCla
         .collect()
 }
 
-fn get_typeconsts_obr(
-    typeconsts: &[&ShallowTypeconstObr<'_>],
-    name: &str,
-) -> Vec<ExtDeclClassTypeConst> {
-    typeconsts
-        .iter()
-        .filter(|tc| name.is_empty() || tc.name.1 == name)
-        .map(|tc| {
-            let kind = match &tc.kind {
-                TypeconstObr::TCAbstract(AbstractTypeconstObr { default, .. }) => match default {
-                    None => String::new(),
-                    Some(d) => extract_type_name_obr(d),
-                },
-                TypeconstObr::TCConcrete(ConcreteTypeconstObr { tc_type, .. }) => {
-                    extract_type_name_obr(tc_type)
-                }
-            };
-
-            ExtDeclClassTypeConst {
-                name: fmt_type(tc.name.1),
-                is_ctx: tc.is_ctx,
-                enforceable: tc.enforceable.1,
-                reifiable: tc.reifiable.is_some(),
-                kind,
-            }
-        })
-        .collect()
-}
-
 fn get_consts(consts: &[ShallowClassConst], name: &str) -> Vec<ExtDeclClassConst> {
     consts
         .iter()
@@ -1017,19 +666,6 @@ fn get_consts(consts: &[ShallowClassConst], name: &str) -> Vec<ExtDeclClassConst
             type_: extract_type_name(&c.type_),
             is_abstract: c.abstract_ != ClassConstKind::CCConcrete,
             value: str_or_empty(c.value.as_deref()),
-        })
-        .collect()
-}
-
-fn get_consts_obr(consts: &[&ShallowClassConstObr<'_>], name: &str) -> Vec<ExtDeclClassConst> {
-    consts
-        .iter()
-        .filter(|c| name.is_empty() || c.name.1 == name)
-        .map(|c| ExtDeclClassConst {
-            name: fmt_type(c.name.1),
-            type_: extract_type_name_obr(c.type_),
-            is_abstract: c.abstract_ != ClassConstKind::CCConcrete,
-            value: str_or_empty(c.value),
         })
         .collect()
 }
@@ -1047,36 +683,12 @@ fn get_enum_type(
     }
 }
 
-fn get_enum_type_obr(
-    enum_type: Option<&oxidized_by_ref::shallow_decl_defs::EnumType<'_>>,
-) -> Vec<ExtDeclEnumType> {
-    match enum_type {
-        Some(en) => vec![ExtDeclEnumType {
-            base: extract_type_name_obr(en.base),
-            constraint: extract_type_name_opt_obr(en.constraint),
-            includes: extract_type_name_vec_obr(en.includes),
-        }],
-        None => vec![],
-    }
-}
-
 fn get_where_contraints(
     arr: &[oxidized::shallow_decl_defs::WhereConstraint],
 ) -> Vec<ExtDeclTypeConstraint> {
     arr.iter()
         .map(|w| ExtDeclTypeConstraint {
             type_: extract_type_name(&w.0),
-            kind: enum_constraint_kind(w.1),
-        })
-        .collect()
-}
-
-fn get_where_contraints_obr(
-    arr: &[&oxidized_by_ref::shallow_decl_defs::WhereConstraint<'_>],
-) -> Vec<ExtDeclTypeConstraint> {
-    arr.iter()
-        .map(|w| ExtDeclTypeConstraint {
-            type_: extract_type_name_obr(w.0),
             kind: enum_constraint_kind(w.1),
         })
         .collect()
@@ -1095,23 +707,6 @@ fn get_typed_params(arr: &[Tparam]) -> Vec<ExtDeclTparam> {
                 .collect(),
             reified: enum_reify_kind(t.reified),
             user_attributes: get_attributes(&t.user_attributes, ""),
-        })
-        .collect()
-}
-
-fn get_typed_params_obr(arr: &[&TparamObr<'_>]) -> Vec<ExtDeclTparam> {
-    arr.iter()
-        .map(|t| ExtDeclTparam {
-            variance: enum_variance(t.variance),
-            name: fmt_type(t.name.1),
-            constraints: (t.constraints.iter())
-                .map(|c| ExtDeclTypeConstraint {
-                    kind: enum_constraint_kind(c.0),
-                    type_: extract_type_name_obr(c.1),
-                })
-                .collect(),
-            reified: enum_reify_kind(t.reified),
-            user_attributes: get_attributes_obr(t.user_attributes, ""),
         })
         .collect()
 }
@@ -1136,30 +731,6 @@ fn get_attributes(arr: &[UserAttribute], name: &str) -> Vec<ExtDeclAttribute> {
                 })
                 .collect(),
             raw_val: str_or_empty(t.raw_val.as_deref()),
-        })
-        .collect()
-}
-
-fn get_attributes_obr(arr: &[&UserAttributeObr<'_>], name: &str) -> Vec<ExtDeclAttribute> {
-    let input_symbol_formatted = name.starts_with('\\');
-
-    arr.iter()
-        .filter(|t| {
-            name.is_empty()
-                || t.name.1 == name
-                || (!input_symbol_formatted && &t.name.1[1..] == name)
-        })
-        .map(|t| ExtDeclAttribute {
-            name: fmt_type(t.name.1),
-            args: (t.params.iter())
-                .map(|arg| match arg {
-                    UserAttributeParamObr::Classname(cn) => fmt_type(cn),
-                    UserAttributeParamObr::String(s) => s.to_string(),
-                    UserAttributeParamObr::Int(i) => i.to_string(),
-                    _ => String::from("__ext_decl_unknown"),
-                })
-                .collect(),
-            raw_val: str_or_empty(t.raw_val),
         })
         .collect()
 }
@@ -1196,51 +767,11 @@ fn get_signature(ty: &Ty_) -> Vec<ExtDeclSignature> {
     }
 }
 
-fn get_signature_obr(ty: Ty_Obr<'_>) -> Vec<ExtDeclSignature> {
-    match ty {
-        oxidized_by_ref::typing_defs::Ty_::Tfun(ft) => {
-            let implicit_params = match ft.implicit_params.capability {
-                oxidized_by_ref::typing_defs_core::Capability::CapDefaults(_) => String::new(),
-                oxidized_by_ref::typing_defs_core::Capability::CapTy(x) => extract_type_name_obr(x),
-            };
-
-            vec![ExtDeclSignature {
-                tparams: get_typed_params_obr(ft.tparams),
-                where_constraints: get_where_contraints_obr(ft.where_constraints),
-                return_type: extract_type_name_obr(ft.ret),
-                params: get_method_params_obr(ft.params),
-                implicit_params,
-                require_package: str_or_empty(ft.require_package),
-                return_disposable: ft.flags.return_disposable(),
-                is_coroutine: ft.flags.is_coroutine(),
-                is_async: ft.flags.is_async(),
-                is_generator: ft.flags.is_generator(),
-                instantiated_targs: ft.flags.instantiated_targs(),
-                is_function_pointer: ft.flags.is_function_pointer(),
-                returns_readonly: ft.flags.returns_readonly(),
-                readonly_this: ft.flags.readonly_this(),
-                support_dynamic_type: ft.flags.support_dynamic_type(),
-                is_memoized: ft.flags.is_memoized(),
-                variadic: ft.flags.variadic(),
-            }]
-        }
-        _ => Vec::new(),
-    }
-}
-
 fn build_unnamed_type_structure_subtype(ty: &Ty) -> ExtDeclTypeStructureSubType {
     ExtDeclTypeStructureSubType {
         name: String::new(),
         optional: false,
         type_: build_type_structure(ty),
-    }
-}
-
-fn build_unnamed_type_structure_subtype_obr(ty: &&TyObr<'_>) -> ExtDeclTypeStructureSubType {
-    ExtDeclTypeStructureSubType {
-        name: String::new(),
-        optional: false,
-        type_: build_type_structure_obr(ty),
     }
 }
 
@@ -1379,158 +910,11 @@ fn build_type_structure(outer_ty: &Ty) -> ExtDeclTypeStructure {
     }
 }
 
-fn build_type_structure_obr(outer_ty: &TyObr<'_>) -> ExtDeclTypeStructure {
-    match outer_ty.1 {
-        Ty_Obr::Taccess(_)
-        | Ty_Obr::Tthis
-        | Ty_Obr::Tany(_)
-        | Ty_Obr::Tclass(_)
-        | Ty_Obr::Tdynamic
-        | Ty_Obr::Tgeneric(_)
-        | Ty_Obr::Tmixed
-        | Ty_Obr::Twildcard
-        | Ty_Obr::Tnonnull
-        | Ty_Obr::Tprim(_) => ExtDeclTypeStructure {
-            type_: extract_type_name_obr(outer_ty),
-            kind: String::from("primitive"),
-            nullable: false,
-            subtypes: vec![],
-        },
-        Ty_Obr::Tfun(_fun_type) => ExtDeclTypeStructure {
-            type_: extract_type_name_obr(outer_ty),
-            kind: String::from("function"),
-            nullable: false,
-            subtypes: vec![],
-        },
-
-        // Pseudo Recursive
-        Ty_Obr::Toption(ty) => {
-            let mut inner = build_type_structure_obr(ty);
-            inner.nullable = true;
-            inner
-        }
-
-        Ty_Obr::Tapply(&(_id, targs)) => ExtDeclTypeStructure {
-            type_: extract_type_name_obr(outer_ty),
-            kind: String::from("apply"),
-            nullable: false,
-            subtypes: targs
-                .iter()
-                .map(build_unnamed_type_structure_subtype_obr)
-                .collect(),
-        },
-        Ty_Obr::Tlike(ty) => ExtDeclTypeStructure {
-            type_: extract_type_name_obr(outer_ty),
-            kind: String::from("like"),
-            nullable: false,
-            subtypes: vec![build_unnamed_type_structure_subtype_obr(&ty)],
-        },
-        Ty_Obr::Tshape(&ShapeTypeObr {
-            origin: _,
-            unknown_value: _kind,
-            fields,
-        }) => {
-            let shape_fields = fields
-                .iter()
-                .map(
-                    |(shape_field, shape_field_type)| ExtDeclTypeStructureSubType {
-                        name: match shape_field.0 {
-                            TshapeFieldNameObr::TSFregexGroup(field_name) => {
-                                field_name.1.to_string()
-                            }
-                            TshapeFieldNameObr::TSFlitStr(field_name) => field_name.1.to_string(),
-                            TshapeFieldNameObr::TSFclassConst((
-                                (_pos, classish_name),
-                                field_name,
-                            )) => {
-                                let cname = fmt_type(classish_name);
-                                format!("{}::{}", cname, field_name.1)
-                            }
-                        },
-                        type_: build_type_structure_obr(shape_field_type.ty),
-                        optional: shape_field_type.optional,
-                    },
-                )
-                .collect();
-
-            ExtDeclTypeStructure {
-                type_: extract_type_name_obr(outer_ty),
-                kind: String::from("shape"),
-                nullable: false,
-                subtypes: shape_fields,
-            }
-        }
-        Ty_Obr::TvecOrDict(&(tk, tv)) => ExtDeclTypeStructure {
-            type_: extract_type_name_obr(outer_ty),
-            kind: String::from("refinement"),
-            nullable: false,
-            subtypes: vec![
-                ExtDeclTypeStructureSubType {
-                    name: String::from("keys"),
-                    optional: false,
-                    type_: build_type_structure_obr(tk),
-                },
-                ExtDeclTypeStructureSubType {
-                    name: String::from("values"),
-                    optional: false,
-                    type_: build_type_structure_obr(tv),
-                },
-            ],
-        },
-        Ty_Obr::Ttuple(&TupleTypeObr { required, extra: _ }) => ExtDeclTypeStructure {
-            type_: extract_type_name_obr(outer_ty),
-            kind: String::from("tuple"),
-            nullable: false,
-            subtypes: required
-                .iter()
-                .map(build_unnamed_type_structure_subtype_obr)
-                .collect(),
-        },
-        Ty_Obr::Tintersection(tys) => ExtDeclTypeStructure {
-            type_: extract_type_name_obr(outer_ty),
-            kind: String::from("intersection"),
-            nullable: false,
-            subtypes: tys
-                .iter()
-                .map(build_unnamed_type_structure_subtype_obr)
-                .collect(),
-        },
-        Ty_Obr::Tunion(tys) => ExtDeclTypeStructure {
-            type_: extract_type_name_obr(outer_ty),
-            kind: String::from("union"),
-            nullable: false,
-            subtypes: tys
-                .iter()
-                .map(build_unnamed_type_structure_subtype_obr)
-                .collect(),
-        },
-        Ty_Obr::Trefinement(&(root_ty, _class_ref)) => ExtDeclTypeStructure {
-            type_: extract_type_name_obr(outer_ty),
-            kind: String::from("refinement"),
-            nullable: false,
-            subtypes: vec![build_unnamed_type_structure_subtype_obr(&root_ty)],
-        },
-        _ => ExtDeclTypeStructure {
-            type_: extract_type_name_obr(outer_ty),
-            kind: String::from("other"),
-            nullable: false,
-            subtypes: vec![],
-        },
-    }
-}
-
 // ========== Types ==========
 
 fn extract_type_name_opt(t: Option<&Ty>) -> String {
     match t {
         Some(ty) => extract_type_name(ty),
-        None => String::new(),
-    }
-}
-
-fn extract_type_name_opt_obr(t: Option<&TyObr<'_>>) -> String {
-    match t {
-        Some(ty) => extract_type_name_obr(ty),
         None => String::new(),
     }
 }
@@ -1541,18 +925,8 @@ fn extract_type_name(t: &Ty) -> String {
     converted_ty.to_string()
 }
 
-fn extract_type_name_obr(t: &TyObr<'_>) -> String {
-    #[allow(suspicious_double_ref_op)]
-    let converted_ty: ty::decl::Ty<BReason> = (&t).clone().into();
-    converted_ty.to_string()
-}
-
 fn extract_type_name_vec(arr: &[Ty]) -> Vec<String> {
     arr.iter().map(extract_type_name).collect()
-}
-
-fn extract_type_name_vec_obr(arr: &[&TyObr<'_>]) -> Vec<String> {
-    arr.iter().map(|t| extract_type_name_obr(t)).collect()
 }
 
 fn extract_type_name_cr_vec(arr: &[DeclConstraintRequirement]) -> Vec<String> {
@@ -1560,15 +934,6 @@ fn extract_type_name_cr_vec(arr: &[DeclConstraintRequirement]) -> Vec<String> {
         .filter_map(|cr| match cr {
             DeclConstraintRequirement::DCREqual(t) => Some(extract_type_name(t)),
             DeclConstraintRequirement::DCRSubtype(_) => None,
-        })
-        .collect()
-}
-
-fn extract_type_name_cr_vec_obr(arr: &[DeclConstraintRequirementObr<'_>]) -> Vec<String> {
-    arr.iter()
-        .filter_map(|cr| match cr {
-            DeclConstraintRequirementObr::DCREqual(t) => Some(extract_type_name_obr(t)),
-            DeclConstraintRequirementObr::DCRSubtype(_) => None,
         })
         .collect()
 }
@@ -1588,10 +953,6 @@ fn fmt_type(original_name: &str) -> String {
 // ========== Simple ==========
 
 fn id_or_empty(x: Option<&Id>) -> String {
-    str_or_empty(x.map(|y| y.name()))
-}
-
-fn id_or_empty_obr(x: Option<IdObr<'_>>) -> String {
     str_or_empty(x.map(|y| y.name()))
 }
 

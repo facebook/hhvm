@@ -10,7 +10,6 @@
 type direct_decl_mode =
   | Normal
   | Cached
-  | Zoncolan
 
 val go :
   Provider_context.t ->

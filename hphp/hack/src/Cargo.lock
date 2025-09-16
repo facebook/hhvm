@@ -872,7 +872,6 @@ name = "compiler_ffi"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "arena_deserializer",
  "bincode 1.3.3",
  "bumpalo",
  "compile",
@@ -1230,7 +1229,6 @@ version = "0.0.0"
 dependencies = [
  "arena_deserializer",
  "bincode 1.3.3",
- "bumpalo",
  "direct_decl_parser",
  "hash",
  "oxidized",
@@ -1403,12 +1401,9 @@ dependencies = [
 name = "direct_decl_parser"
 version = "0.0.0"
 dependencies = [
- "bumpalo",
  "direct_decl_smart_constructors",
- "direct_decl_smart_constructors_obr",
  "mode_parser",
  "oxidized",
- "oxidized_by_ref",
  "parser",
  "parser_core_types",
  "relative_path",
@@ -1429,25 +1424,6 @@ dependencies = [
  "oxidized",
  "parser_core_types",
  "relative_path",
- "smart_constructors",
-]
-
-[[package]]
-name = "direct_decl_smart_constructors_obr"
-version = "0.0.0"
-dependencies = [
- "arena_collections",
- "bstr",
- "bumpalo",
- "escaper",
- "flatten_smart_constructors",
- "hash",
- "hh_autoimport_rust",
- "namespaces_rust",
- "naming_special_names_rust",
- "oxidized",
- "oxidized_by_ref",
- "parser_core_types",
  "smart_constructors",
 ]
 
@@ -1800,7 +1776,6 @@ dependencies = [
  "hhbc_string_utils",
  "naming_special_names_rust",
  "oxidized",
- "oxidized_by_ref",
  "serde",
  "serde_json",
 ]
@@ -4446,7 +4421,6 @@ dependencies = [
 name = "rust_decl_ffi"
 version = "0.0.0"
 dependencies = [
- "bumpalo",
  "crossbeam",
  "direct_decl_parser",
  "hh_hash",
@@ -4455,7 +4429,6 @@ dependencies = [
  "ocamlrep_custom",
  "ocamlrep_ocamlpool",
  "oxidized",
- "oxidized_by_ref",
  "rayon",
  "relative_path",
 ]

@@ -136,11 +136,6 @@ impl<'a> ExternalDeclProvider<'a> {
                 let holder = unsafe { ptr.as_ref() }.unwrap();
                 match &holder.parsed_file {
                     ParsedFileHolder::O(file) => find(&file.decls),
-                    ParsedFileHolder::Obr(_file, _) => {
-                        panic!(
-                            "Attempt to use ExternalDeclProvider with Oxidized-by-ref decl parser"
-                        )
-                    }
                 }
             }
             ExternalDeclProviderResult::RustVec(p) => {

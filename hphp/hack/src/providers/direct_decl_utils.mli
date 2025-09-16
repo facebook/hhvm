@@ -12,12 +12,6 @@ type parsed_file_with_hashes = Direct_decl_parser.parsed_file_with_hashes = {
   pfh_decls: (string * Shallow_decl_defs.decl * Int64.t * string option) list;
 }
 
-(** Fork of [direct_decl_parse_and_cache] using legacy oxidized-by-ref decls *)
-val direct_decl_parse_zoncolan :
-  Provider_context.t ->
-  Relative_path.t ->
-  Direct_decl_parser.parsed_file_with_hashes option
-
 (** NOTE: this produces decls in reverse lexical order *)
 val direct_decl_parse_and_cache :
   Provider_context.t ->

@@ -1,22 +1,4 @@
 (rule
- (alias sound_dynamic_typing_decl_obr)
- (deps
-  %{exe:../../../src/hh_single_decl.exe}
-  %{project_root}/hack/test/verify.py
-  %{project_root}/hack/test/review.sh
-  (glob_files %{project_root}/hack/test/sound_dynamic/decl/HH_FLAGS)
-  (glob_files %{project_root}/hack/test/sound_dynamic/decl/*.php)
-  (glob_files %{project_root}/hack/test/sound_dynamic/typing/*.exp))
- (action
-  (run
-   %{project_root}/hack/test/verify.py
-   %{project_root}/hack/test/sound_dynamic/decl
-   --program
-   %{exe:../../../src/hh_single_decl.exe}
-   --flags
-   --decl-parse-obr)))
-
-(rule
  (alias sound_dynamic_typing_decl_typing)
  (deps
   %{exe:../../../src/hh_single_type_check.exe}
@@ -44,5 +26,4 @@
 (alias
  (name runtest)
  (deps
-  (alias sound_dynamic_typing_decl_obr)
   (alias sound_dynamic_typing_decl_typing)))

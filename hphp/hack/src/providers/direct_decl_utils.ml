@@ -231,24 +231,4 @@ let direct_decl_parse_and_cache ctx file =
     | None -> ());
     result
 
-let direct_decl_parse_zoncolan ctx file =
-  Counters.count Counters.Category.Direct_decl_parse @@ fun () ->
-  match get_file_contents ~ignore_file_content_caches:false ctx file with
-  | None -> None
-  | Some contents ->
-    let popt = Provider_context.get_popt ctx in
-    let opts = DeclParserOptions.from_parser_options popt in
-    let deregister_php_stdlib_if_hhi =
-      popt.ParserOptions.deregister_php_stdlib
-    in
-    let parsed_file =
-      Direct_decl_parser.parse_and_hash_decls_obr
-        opts
-        deregister_php_stdlib_if_hhi
-        file
-        contents
-    in
-    cache_decls ctx file parsed_file.pfh_decls;
-    Some parsed_file
-
 let decls_to_fileinfo = Direct_decl_parser.decls_to_fileinfo

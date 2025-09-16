@@ -2629,7 +2629,6 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
         let mut tparams = tparams;
         let mut where_constraints = where_constraints;
 
-        // The divergence here from the lowerer comes from using oxidized_by_ref instead of oxidized
         let mut ty_by_param: BTreeMap<String, (Ty, Pos)> = params
             .iter()
             .filter_map(|param| {

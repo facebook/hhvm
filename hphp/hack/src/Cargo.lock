@@ -3626,31 +3626,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "oxidized_by_ref"
-version = "0.0.0"
-dependencies = [
- "arena_collections",
- "arena_deserializer",
- "arena_trait",
- "bitflags 2.9.0",
- "bstr",
- "bumpalo",
- "eq_modulo_pos",
- "hh24_types",
- "hh_hash",
- "no_pos_hash",
- "ocamlrep",
- "ocamlrep_caml_builtins",
- "oxidized",
- "pretty_assertions",
- "rc_pos",
- "relative_path",
- "rust_to_ocaml_attr",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "package"
 version = "0.0.0"
 dependencies = [

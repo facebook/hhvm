@@ -48,7 +48,6 @@ members = [
     "ocamlrep_marshal/cargo/ocamlrep_marshal_ffi_bindings",
     "options",
     "oxidized",
-    "oxidized_by_ref",
     "package/cargo",
     "package/ffi_bridge",
     "package/ocaml_ffi/cargo",

@@ -354,6 +354,8 @@ impl HhConfig {
                 "constraint_array_index_assign",
                 default.tco_constraint_array_index_assign,
             )?,
+            tco_constraint_method_call: hhconfig
+                .get_bool_or("constraint_method_call", default.tco_constraint_method_call)?,
             code_agnostic_fixme: hhconfig
                 .get_bool_or("code_agnostic_fixme", default.code_agnostic_fixme)?,
             allowed_fixme_codes_strict: hhconfig.get_int_set_or(

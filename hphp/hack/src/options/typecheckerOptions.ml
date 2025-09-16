@@ -96,6 +96,8 @@ let constraint_array_index t = t.GlobalOptions.tco_constraint_array_index
 let constraint_array_index_assign t =
   t.GlobalOptions.tco_constraint_array_index_assign
 
+let constraint_method_call t = t.GlobalOptions.tco_constraint_method_call
+
 let log_levels t = t.GlobalOptions.log_levels
 
 let remote_old_decls_no_limit t = t.GlobalOptions.tco_remote_old_decls_no_limit

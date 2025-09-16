@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4450438682619d5690baa9bafd2158fd>>
+// @generated SignedSource<<09d7a09f844f0189eb598083b89bbc6e>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -196,6 +196,8 @@ pub struct GlobalOptions {
     pub tco_constraint_array_index: bool,
     /// Flag to enable the constraint solver to infer that a type can be indexed then assigned
     pub tco_constraint_array_index_assign: bool,
+    /// Flag to enable the constraint solver to infer that a type supports method calls
+    pub tco_constraint_method_call: bool,
     /// HH_FIXME should silence *any* error, not just the one specified by code
     pub code_agnostic_fixme: bool,
     /// Error codes for which we allow HH_FIXMEs in strict mode

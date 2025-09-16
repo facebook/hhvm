@@ -384,6 +384,7 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?tco_constraint_array_index:(bool_opt "constraint_array_index" config)
     ?tco_constraint_array_index_assign:
       (bool_opt "constraint_array_index_assign" config)
+    ?tco_constraint_method_call:(bool_opt "constraint_method_call" config)
     ?code_agnostic_fixme:(bool_opt "code_agnostic_fixme" config)
     ?allowed_fixme_codes_strict:
       (prepare_iset config "allowed_fixme_codes_strict")

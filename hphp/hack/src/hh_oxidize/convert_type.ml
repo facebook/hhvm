@@ -49,97 +49,44 @@ let add_indirection_between () =
     ("patt_locl_ty", "ShapeField", "PattLoclTy");
     ("patt_typing_error", "PattTypingError", "Secondary");
     ("typing_defs_core", "TypePredicate", "TypePredicate_");
+    ("typing_defs_core", "Ty", "Ty_");
   ]
-  @
-  match Configuration.mode () with
-  | Configuration.ByBox -> [("typing_defs_core", "Ty", "Ty_")]
-  | Configuration.ByRef ->
-    [
-      ("aast", "Expr_", "Expr");
-      ("aast", "Expr_", "Afield");
-      ("aast", "Expr_", "AssertExpr");
-      ("typing_defs_core", "Ty_", "Ty");
-    ]
 
 let equal_s3 = [%derive.eq: string * string * string]
 
 let should_add_indirection ~seen_indirection (ty : Rust_type.t) =
-  match Configuration.mode () with
-  | Configuration.ByRef ->
-    if not (is_copy ty) then
-      true
-    else if seen_indirection then
-      false
-    else if String.equal (self ()) (type_name_and_params ty |> fst) then
-      true
-    else
-      let (ty, _) = type_name_and_params ty in
-      List.mem
-        (add_indirection_between ())
-        (curr_module_name (), self (), ty)
-        ~equal:equal_s3
-  | Configuration.ByBox ->
-    let (ty, _) = type_name_and_params ty in
-    (not seen_indirection)
-    && (String.equal (self ()) ty
-       || List.mem
-            (add_indirection_between ())
-            (curr_module_name (), self (), ty)
-            ~equal:equal_s3)
+  let (ty, _) = type_name_and_params ty in
+  (not seen_indirection)
+  && (String.equal (self ()) ty
+     || List.mem
+          (add_indirection_between ())
+          (curr_module_name (), self (), ty)
+          ~equal:equal_s3)
 
 let add_rcoc_between = [("file_info", "Pos", "relative_path::RelativePath")]
 
 let should_add_rcoc ty =
-  match Configuration.mode () with
-  | Configuration.ByRef -> false
-  | Configuration.ByBox ->
-    List.mem add_rcoc_between (curr_module_name (), self (), ty) ~equal:equal_s3
+  List.mem add_rcoc_between (curr_module_name (), self (), ty) ~equal:equal_s3
 
 (* These types inherently add an indirection, so we don't need to box instances
    of recursion in their type arguments. *)
 let indirection_types = SSet.of_list ["Vec"]
 
-(* When oxidizing by-reference, do not add a lifetime parameter to these builtins. *)
-let owned_builtins =
-  SSet.of_list
-    (["Option"; "std::cell::RefCell"; "std::cell::Cell"; "Int64"] @ primitives)
-
-let is_owned_builtin = SSet.mem owned_builtins
-
 let rec core_type ?(seen_indirection = false) ~safe_ints (ct : core_type) :
     Rust_type.t =
-  let (is_by_box, is_by_ref) =
-    match Configuration.mode () with
-    | Configuration.ByBox -> (true, false)
-    | Configuration.ByRef -> (false, true)
-  in
   match ct.ptyp_desc with
-  | Ptyp_var "ty" when is_by_ref ->
-    rust_ref (lifetime "a") (rust_type "Ty" [lifetime "a"] [])
   | Ptyp_var name -> convert_type_name name |> rust_type_var
   | Ptyp_alias (_, { txt = name; _ }) ->
     rust_type (convert_type_name name) [] []
   | Ptyp_tuple tys -> tuple ~safe_ints tys
   | Ptyp_arrow _ -> raise (Skip_type_decl "it contains an arrow type")
-  | Ptyp_constr ({ txt = Lident "list"; _ }, [arg]) when is_by_ref ->
-    let arg = core_type ~seen_indirection:true ~safe_ints arg in
-    rust_ref (lifetime "a") (rust_type "[]" [] [arg])
-  | Ptyp_constr ({ txt = Lident "string"; _ }, []) when is_by_ref ->
-    rust_ref (lifetime "a") (rust_simple_type "str")
-  | Ptyp_constr ({ txt = Lident "byte_string"; _ }, []) when is_by_box ->
+  | Ptyp_constr ({ txt = Lident "byte_string"; _ }, []) ->
     rust_type "bstr::BString" [] []
-  | Ptyp_constr ({ txt = Lident "t_byte_string"; _ }, []) when is_by_box ->
+  | Ptyp_constr ({ txt = Lident "t_byte_string"; _ }, []) ->
     rust_type "bstr::BString" [] []
-  | Ptyp_constr ({ txt = Lident "byte_string"; _ }, []) when is_by_ref ->
-    rust_ref (lifetime "a") (rust_simple_type "bstr::BStr")
-  | Ptyp_constr ({ txt = Lident "t_byte_string"; _ }, []) when is_by_ref ->
-    rust_ref (lifetime "a") (rust_simple_type "bstr::BStr")
   | Ptyp_constr ({ txt = Ldot (Lident "Path", "t"); _ }, []) ->
     (* Path.t *)
-    if is_by_ref then
-      rust_ref (lifetime "a") (rust_simple_type "std::path::Path")
-    else
-      rust_simple_type "std::path::PathBuf"
+    rust_simple_type "std::path::PathBuf"
   | Ptyp_constr ({ txt = Ldot (Lident "Hash", "hash_value"); _ }, []) ->
     (* Hash.hash_value *)
     rust_type "isize" [] []
@@ -160,11 +107,7 @@ let rec core_type ?(seen_indirection = false) ~safe_ints (ct : core_type) :
       | Lident "bool" -> "bool"
       | Lident "float" -> "f64"
       | Lident "list" -> "Vec"
-      | Lident "ref" -> begin
-        match Configuration.mode () with
-        | Configuration.ByRef -> "std::cell::Cell"
-        | Configuration.ByBox -> "std::cell::RefCell"
-      end
+      | Lident "ref" -> "std::cell::RefCell"
       | Ldot (Lident "Int64", "t") ->
         Output.add_extern_use "ocamlrep_caml_builtins::Int64";
         "Int64"
@@ -191,34 +134,14 @@ let rec core_type ?(seen_indirection = false) ~safe_ints (ct : core_type) :
       | _ when String.equal id "FunType" -> []
       | _ -> args
     in
-    let add_lifetime =
-      is_by_ref
-      && Option.is_none extern_type
-      && (not (is_owned_builtin id))
-      && not (Configuration.owned_type id)
-    in
-    let lifetime =
-      if add_lifetime then
-        [lifetime "a"]
-      else
-        []
-    in
+    let lifetime = [] in
     let args = List.map args ~f:(core_type ~seen_indirection ~safe_ints) in
 
     if should_add_rcoc id then
       rust_type "std::sync::Arc" [] [rust_type id lifetime args]
     (* Direct or indirect recursion *)
     else if should_add_indirection ~seen_indirection (rust_type id [] args) then
-      match Configuration.mode () with
-      | Configuration.ByRef ->
-        if String.equal id "Option" then
-          rust_type
-            "Option"
-            []
-            [rust_ref (Rust_type.lifetime "a") (List.hd_exn args)]
-        else
-          rust_ref (Rust_type.lifetime "a") (rust_type id lifetime args)
-      | Configuration.ByBox -> rust_type "Box" [] [rust_type id [] args]
+      rust_type "Box" [] [rust_type id [] args]
     else
       rust_type id lifetime args
   | Ptyp_any -> raise (Skip_type_decl "cannot convert type Ptyp_any")

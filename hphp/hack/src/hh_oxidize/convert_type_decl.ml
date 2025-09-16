@@ -17,11 +17,6 @@ open State
 open Convert_longident
 open Rust_type
 
-let is_by_ref () =
-  match Configuration.mode () with
-  | Configuration.ByRef -> true
-  | Configuration.ByBox -> false
-
 let stringify_attribute { attr_name; attr_payload; _ } =
   match (attr_name, attr_payload) with
   | ({ txt = "ocaml.doc" | "value"; _ }, _) -> None
@@ -53,7 +48,7 @@ let add_default_attr_if_ocaml_yojson_drop_if attributes acc_attr_list =
 
 let add_deserialize_with_arena tys acc_attr_list =
   let contains_ref = List.exists ~f:Rust_type.contains_ref tys in
-  if contains_ref || (is_by_ref () && List.exists ~f:Rust_type.is_var tys) then
+  if contains_ref then
     (* deserialize a type contains any Cell causes a compilation error, see T90211775 *)
     let contains_cell =
       List.exists
@@ -88,32 +83,26 @@ let rust_de_field_attr (tys : Rust_type.t list) (attributes : attributes) :
   else
     sprintf "#[serde(%s)]" @@ String.concat ~sep:", " serde_attr_list
 
-let default_implements () =
-  match Configuration.mode () with
-  | Configuration.ByRef -> [(Some "arena_trait", "TrivialDrop")]
-  | Configuration.ByBox -> []
+let default_implements () = []
 
 let implements_traits _name = default_implements ()
 
 let default_derives () =
-  (match Configuration.mode () with
-  | Configuration.ByBox ->
-    [(Some "ocamlrep", "FromOcamlRep"); (Some "serde", "Deserialize")]
-  | Configuration.ByRef -> [(Some "ocamlrep", "FromOcamlRepIn")])
-  @ [
-      (None, "Clone");
-      (None, "Debug");
-      (None, "Eq");
-      (None, "Hash");
-      (None, "Ord");
-      (None, "PartialEq");
-      (None, "PartialOrd");
-      (Some "no_pos_hash", "NoPosHash");
-      (Some "eq_modulo_pos", "EqModuloPos");
-      (Some "ocamlrep", "ToOcamlRep");
-      (Some "serde", "Serialize");
-      (Some "serde", "Deserialize");
-    ]
+  [
+    (Some "ocamlrep", "FromOcamlRep");
+    (None, "Clone");
+    (None, "Debug");
+    (None, "Eq");
+    (None, "Hash");
+    (None, "Ord");
+    (None, "PartialEq");
+    (None, "PartialOrd");
+    (Some "no_pos_hash", "NoPosHash");
+    (Some "eq_modulo_pos", "EqModuloPos");
+    (Some "ocamlrep", "ToOcamlRep");
+    (Some "serde", "Serialize");
+    (Some "serde", "Deserialize");
+  ]
 
 let derive_copy ty = Convert_type.is_copy (Rust_type.rust_simple_type ty)
 
@@ -130,8 +119,6 @@ let derive_default (ty : label) =
     ]
     ty
     ~equal:String.equal
-
-let is_by_box () = not (is_by_ref ())
 
 let additional_derives ty : (string option * string) list =
   let result = [] in
@@ -166,7 +153,6 @@ module DeriveSkipLists : sig
   val skip_derive : ty:string -> trait:string -> bool
 end = struct
   let skip_list_for_ty ty =
-    let is_by_ref = is_by_ref () in
     match ty with
     (* A custom implementation of Ord for Error_ matches the sorting behavior of
        errors in OCaml. *)
@@ -185,13 +171,8 @@ end = struct
     | "tast::SavedEnv" -> ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
     | "tast::ByNames" -> ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
     | "ast_defs::Id" -> ["Debug"]
-    | "errors::Errors" when is_by_ref -> ["Debug"]
-    | "typing_reason::T_" when is_by_ref -> ["Debug"]
     | "typing_defs_core::Ty" -> ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
     | "typing_defs_core::Ty_" -> ["Debug"]
-    | "typing_defs_core::ConstraintType" when is_by_ref ->
-      ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
-    | "typing_defs_core::TshapeFieldName" when is_by_ref -> ["Debug"]
     | "file_info::Change" -> ["EqModuloPos"]
     | _ -> []
 
@@ -268,41 +249,22 @@ let derived_traits ty =
   |> List.append (additional_derives ty)
 
 let denylisted_types () =
-  (match Configuration.mode () with
-  | Configuration.ByRef ->
-    [
-      ("typing_defs_core", "CanIndex");
-      ("typing_defs_core", "CanIndexAssign");
-      ("typing_defs_core", "CanTraverse");
-      ("typing_defs_core", "ConstraintType_");
-      ("typing_defs_core", "ConstraintType");
-      ("typing_defs_core", "Destructure");
-      ("typing_defs_core", "DestructureKind");
-      ("typing_defs_core", "HasMember");
-      ("typing_defs_core", "HasTypeMember");
-      ("typing_defs_core", "InternalType");
-      ("typing_reason", "Stats");
-      ("typing_reason", "PathElem");
-      ("typing_reason", "Path");
-      ("nast", "Defs");
-    ]
-  | Configuration.ByBox -> [])
-  @ [
-      ("aast_defs", "ByteString");
-      ("errors", "FinalizedError");
-      ("errors", "Marker");
-      ("errors", "MarkedMessage");
-      ("errors", "PositionGroup");
-      ("file_info", "Saved");
-      ("typing_defs", "ExpandEnv");
-      ("typing_defs", "PhaseTy");
-      ("typing_defs", "WildcardAction");
-      ("typing_reason", "DeclPhase");
-      ("typing_reason", "LoclPhase");
-      ("typing_reason", "Stats");
-      ("typing_reason", "PathElem");
-      ("typing_reason", "Path");
-    ]
+  [
+    ("aast_defs", "ByteString");
+    ("errors", "FinalizedError");
+    ("errors", "Marker");
+    ("errors", "MarkedMessage");
+    ("errors", "PositionGroup");
+    ("file_info", "Saved");
+    ("typing_defs", "ExpandEnv");
+    ("typing_defs", "PhaseTy");
+    ("typing_defs", "WildcardAction");
+    ("typing_reason", "DeclPhase");
+    ("typing_reason", "LoclPhase");
+    ("typing_reason", "Stats");
+    ("typing_reason", "PathElem");
+    ("typing_reason", "Path");
+  ]
 
 (* HACK: ignore anything beginning with the "decl" or "locl" prefix, since the
    oxidized version of Ty does not have a phase. *)
@@ -346,15 +308,12 @@ A list of (<module>, <ty1>) where ty1 is enum and all non-empty variant fields s
 be wrapped by Box to keep ty1 size down.
 *)
 let box_variant () =
-  (match Configuration.mode () with
-  | Configuration.ByRef -> [("typing_defs_core", "Ty_")]
-  | Configuration.ByBox -> [])
-  @ [
-      ("aast_defs", "Expr_");
-      ("aast_defs", "Stmt_");
-      ("aast_defs", "Def");
-      ("aast_defs", "Pattern");
-    ]
+  [
+    ("aast_defs", "Expr_");
+    ("aast_defs", "Stmt_");
+    ("aast_defs", "Def");
+    ("aast_defs", "Pattern");
+  ]
 
 let equal_s2 = [%derive.eq: string * string]
 
@@ -368,7 +327,6 @@ let should_box_variant ty =
    should be two words or less (the size of a slice). *)
 let unbox_field ty =
   let open String in
-  let is_copy = Convert_type.is_copy ty in
   let ty = Rust_type.rust_type_to_string ty in
   ty = "String"
   || ty = "bstr::BString"
@@ -378,26 +336,11 @@ let unbox_field ty =
   || is_prefix ty ~prefix:"Option<&'a "
   || is_prefix ty ~prefix:"std::cell::Cell<&'a "
   || is_prefix ty ~prefix:"std::cell::RefCell<&'a "
-  ||
-  match Configuration.mode () with
-  | Configuration.ByRef ->
-    ty = "tany_sentinel::TanySentinel"
-    || ty = "ident::Ident"
-    || ty = "ConditionTypeName<'a>"
-    || ty = "ConstraintType<'a>"
-    || (is_prefix ty ~prefix:"Option<" && is_copy)
-    || (is_prefix ty ~prefix:"std::cell::Cell<" && is_copy)
-    || (is_prefix ty ~prefix:"std::cell::RefCell<" && is_copy)
-    || Convert_type.is_primitive ty
-  | Configuration.ByBox -> false
 
 let add_rcoc = [("aast_defs", "Nsenv"); ("aast", "Nsenv")]
 
 let should_add_rcoc ty =
-  match Configuration.mode () with
-  | Configuration.ByRef -> false
-  | Configuration.ByBox ->
-    List.mem add_rcoc (curr_module_name (), ty) ~equal:equal_s2
+  List.mem add_rcoc (curr_module_name (), ty) ~equal:equal_s2
 
 let denylisted ty_name =
   let ty = (curr_module_name (), ty_name) in
@@ -572,17 +515,9 @@ let ocaml_attr attrs =
 
 let type_param (ct, _) = Convert_type.core_type ct
 
-let type_params ~safe_ints name params =
+let type_params ~safe_ints _name params =
   let params = List.map ~f:(type_param ~safe_ints) params in
-  let lifetime =
-    match Configuration.mode () with
-    | Configuration.ByRef ->
-      if Configuration.owned_type name then
-        []
-      else
-        [Rust_type.lifetime "a"]
-    | Configuration.ByBox -> []
-  in
+  let lifetime = [] in
   (lifetime, params)
 
 let record_label_declaration
@@ -658,18 +593,10 @@ let declare_constructor_arguments ?(box_fields = false) ~safe_ints types :
         if unbox_field ty then
           ty
         else
-          match Configuration.mode () with
-          | Configuration.ByRef -> rust_ref (lifetime "a") ty
-          | Configuration.ByBox -> rust_type "Box" [] [ty]
+          rust_type "Box" [] [ty]
       in
       [ty]
-    | _ ->
-      (match Configuration.mode () with
-      | Configuration.ByRef ->
-        let tys = Convert_type.tuple ~seen_indirection:true ~safe_ints types in
-        [rust_ref (lifetime "a") tys]
-      | Configuration.ByBox ->
-        [rust_type "Box" [] [Convert_type.tuple ~safe_ints types]])
+    | _ -> [rust_type "Box" [] [Convert_type.tuple ~safe_ints types]]
 
 let variant_constructor_value cd =
   (* If we see the [@value 42] attribute, assume it's for ppx_deriving enum,
@@ -867,7 +794,7 @@ let type_declaration ~mutual_rec ~safe_ints ~original_type_name name td =
     doc ^ derive_attr ^ serde_attr ^ attr ^ additional_attrs ^ repr ^ "\npub"
   in
   let deserialize_in_arena_macro ~force_derive_copy =
-    if is_by_ref () || force_derive_copy || String.equal name "EmitId" then
+    if force_derive_copy || String.equal name "EmitId" then
       let lts = List.map lifetime ~f:(fun _ -> Rust_type.lifetime "arena") in
       sprintf
         "arena_deserializer::impl_deserialize_in_arena!(%s%s);\n"
@@ -1029,18 +956,8 @@ let type_declaration ~mutual_rec ~safe_ints ~original_type_name name td =
       else
         lifetime
     in
-    let force_derive_copy =
-      if is_by_ref () then
-        true
-      else
-        all_nullary
-    in
-    let box_fields =
-      if is_by_ref () then
-        true
-      else
-        should_box_variant name
-    in
+    let force_derive_copy = all_nullary in
+    let box_fields = should_box_variant name in
     let num_variants = List.length ctors in
     let enum_kind =
       if not all_nullary then

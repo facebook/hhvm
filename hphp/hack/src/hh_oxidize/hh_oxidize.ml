@@ -174,8 +174,6 @@ let parse_extern_types_file filename =
                   name);
            map)
 
-let parse_owned_types_file filename = SSet.of_list (parse_types_file filename)
-
 let parse_copy_types_file filename = SSet.of_list (parse_types_file filename)
 
 let parse_safe_ints_file filename = SSet.of_list (parse_types_file filename)
@@ -205,9 +203,7 @@ let parse_args () =
   let regen_command = ref None in
   let rustfmt_path = ref None in
   let files = ref [] in
-  let mode = ref Configuration.ByBox in
   let extern_types_file = ref None in
-  let owned_types_file = ref None in
   let copy_types_file = ref None in
   let safe_ints_types_file = ref None in
   let options =
@@ -221,17 +217,10 @@ let parse_args () =
       ( "--rustfmt-path",
         Arg.String (fun s -> rustfmt_path := Some s),
         " Path to rustfmt binary used to format output" );
-      ( "--by-ref",
-        Arg.Unit (fun () -> mode := Configuration.ByRef),
-        " Use references instead of Box, slices instead of Vec and String" );
       ( "--extern-types-file",
         Arg.String (fun s -> extern_types_file := Some s),
         " Use the types listed in this file rather than assuming all types"
         ^ " are defined within the set of files being oxidized" );
-      ( "--owned-types-file",
-        Arg.String (fun s -> owned_types_file := Some s),
-        " Do not add a lifetime parameter to the types listend in this file"
-        ^ " (when --by-ref is enabled)" );
       ( "--copy-types-file",
         Arg.String (fun s -> copy_types_file := Some s),
         " Do not use references for the types listed in this file"
@@ -248,11 +237,6 @@ let parse_args () =
     | None -> Configuration.(default.extern_types)
     | Some filename -> parse_extern_types_file filename
   in
-  let owned_types =
-    match !owned_types_file with
-    | None -> Configuration.(default.owned_types)
-    | Some filename -> parse_owned_types_file filename
-  in
   let copy_types = Option.map !copy_types_file ~f:parse_copy_types_file in
   let safe_ints_types =
     Option.value_map
@@ -260,14 +244,7 @@ let parse_args () =
       ~f:parse_safe_ints_file
       ~default:SSet.empty
   in
-  Configuration.set
-    {
-      Configuration.mode = !mode;
-      extern_types;
-      owned_types;
-      copy_types;
-      safe_ints_types;
-    };
+  Configuration.set { extern_types; copy_types; safe_ints_types };
   let rustfmt_path = Option.value !rustfmt_path ~default:"rustfmt" in
   let regen_command = !regen_command in
   match !files with

@@ -150,6 +150,7 @@ constexpr char CLASSNAME_TO_CLASS_NOEXIST_EXCEPTION[] =
   "Failed to load class from %s %s for classname_to_class.";
 constexpr char REFLECTION_MISS_CONSTANTS_FROM_INCLUDED_ENUMS[] =
   "ReflectionClass::getConstants() misses constants from the enums/enum classes included by %s";
+constexpr char NON_ASYNC_OVERRIDES_ASYNC[] = "Cannot override async method %s with non-async method in class %s";
 
 } // namespace Strings
 } // namespace HPHP

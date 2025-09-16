@@ -2189,6 +2189,14 @@ void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
     }
   }
 
+  if (parentMethod->isAsync() && !method->isAsync()) {
+    raise_notice(
+      Strings::NON_ASYNC_OVERRIDES_ASYNC,
+      parentMethod->fullName()->data(),
+      m_preClass->name()->data()
+    );
+  }
+
   if ((method->attrs() & AttrAbstract) &&
       !(parentMethod->attrs() & AttrAbstract) &&
       !method->isFromTrait()) {

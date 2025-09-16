@@ -2284,6 +2284,11 @@ std::string serializeSBProfData(const std::string& root,
     ProfDataSerializer ser{profFileName, ProfDataSerializer::FileMode::Create};
 
     write_raw(ser, kMagic);
+
+    // Prod jumpstart profile writes extra data after the header. Sandbox profiles
+    // don't, but still need to write a placeholder offset to avoid being overwritten.
+    write_raw(ser, off_t(0));
+
     // TODO: repo-schema
     auto const sbProfData = getSBSerProfDataCopy();
     // TODO: do not serialize unit paths for preloading here --
@@ -2526,6 +2531,11 @@ std::string deserializeSBProfData(const std::string& root,
       if (read_raw<decltype(kMagic)>(des) != kMagic) {
         throw std::runtime_error("Not a profile-data dump");
       }
+
+      // read extra data offset. See above comment in serializeSBProfData, but for
+      // SB profiles, we can ignore this value for now.
+      auto const _ = read_raw<off_t>(des);
+
       // TODO: repo-schema
       read_units_preload(des, root);
       auto& sbProfData = getSBDeserProfData();

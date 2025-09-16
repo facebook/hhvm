@@ -8,11 +8,11 @@
 open Hh_prelude
 
 (* NB: Must keep in sync with Rust type
-   oxidized_by_ref::direct_decl_parser::Decls *)
+   oxidized::direct_decl_parser::Decls *)
 type decls = (string * Shallow_decl_defs.decl) list [@@deriving show]
 
 (* NB: Must keep in sync with Rust type
-   oxidized_by_ref::direct_decl_parser::ParsedFile *)
+   oxidized::direct_decl_parser::ParsedFile *)
 type parsed_file = {
   pf_mode: FileInfo.mode option;
   pf_file_attributes: Typing_defs.user_attribute list;

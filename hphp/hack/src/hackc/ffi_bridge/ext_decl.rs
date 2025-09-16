@@ -11,7 +11,9 @@ use hhbc_string_utils::strip_global_ns;
 use hhbc_string_utils::strip_hh_ns;
 use oxidized::ast_defs::Id;
 use oxidized::direct_decl_parser::ParsedFile;
+use oxidized::file_info::Mode;
 use oxidized::shallow_decl_defs::AbstractTypeconst;
+use oxidized::shallow_decl_defs::ClassConstKind;
 use oxidized::shallow_decl_defs::ConcreteTypeconst;
 use oxidized::shallow_decl_defs::DeclConstraintRequirement;
 use oxidized::shallow_decl_defs::ShallowClass;
@@ -30,8 +32,6 @@ use oxidized::typing_defs_core::Ty;
 use oxidized::typing_defs_core::Ty_;
 use oxidized::typing_defs_core::UserAttribute;
 use oxidized::typing_defs_core::UserAttributeParam;
-use oxidized_by_ref::file_info::Mode;
-use oxidized_by_ref::shallow_decl_defs::ClassConstKind;
 use ty::reason::BReason;
 
 use crate::ffi::ExtDeclAttribute;
@@ -890,8 +890,8 @@ fn str_or_empty(x: Option<&str>) -> String {
 }
 
 // ========== ENUMS ==========
-fn enum_class_kind(x: oxidized_by_ref::ast_defs::ClassishKind) -> String {
-    use oxidized_by_ref::ast_defs::ClassishKind;
+fn enum_class_kind(x: oxidized::ast_defs::ClassishKind) -> String {
+    use oxidized::ast_defs::ClassishKind;
     match x {
         ClassishKind::Cclass(_) => String::from("class"),
         ClassishKind::Cinterface => String::from("interface"),
@@ -928,8 +928,8 @@ fn enum_constraint_kind(x: oxidized::ast_defs::ConstraintKind) -> String {
     }
 }
 
-fn enum_visibility(x: &oxidized_by_ref::ast_defs::Visibility) -> String {
-    use oxidized_by_ref::ast_defs::Visibility;
+fn enum_visibility(x: &oxidized::ast_defs::Visibility) -> String {
+    use oxidized::ast_defs::Visibility;
     match x {
         Visibility::Private => String::from("private"),
         Visibility::Public => String::from("public"),
@@ -939,8 +939,8 @@ fn enum_visibility(x: &oxidized_by_ref::ast_defs::Visibility) -> String {
     }
 }
 
-fn enum_typedef_visibility(x: &oxidized_by_ref::ast_defs::TypedefVisibility) -> String {
-    use oxidized_by_ref::ast_defs::TypedefVisibility;
+fn enum_typedef_visibility(x: &oxidized::ast_defs::TypedefVisibility) -> String {
+    use oxidized::ast_defs::TypedefVisibility;
     match x {
         TypedefVisibility::Transparent => String::from("transparent"),
         TypedefVisibility::Opaque => String::from("opaque"),

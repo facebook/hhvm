@@ -888,7 +888,6 @@ dependencies = [
  "libc",
  "options",
  "oxidized",
- "oxidized_by_ref",
  "parser_core_types",
  "relative_path",
  "serde",

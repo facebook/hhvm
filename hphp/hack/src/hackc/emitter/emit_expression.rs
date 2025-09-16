@@ -4707,7 +4707,7 @@ fn emit_class_const<'a, 'd>(
         }
         _ => {
             let load_const = if string_utils::is_class(&id.1) {
-                instr::lazy_class_from_class()
+                instr::empty()
             } else {
                 let const_id = hhbc::ConstName::from_ast_name(&id.1);
                 instr::cls_cns(const_id)

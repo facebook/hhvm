@@ -1,0 +1,2 @@
+WARN: File "impossible_nullable_as.bad.php", line 4, characters 3-18:
+This `as` assertion will always fail and lead to a `null` value. The expression on the left has type `null` which shares no values with `nonnull`. (Warn[12012])

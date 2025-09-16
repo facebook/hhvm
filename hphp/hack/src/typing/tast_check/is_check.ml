@@ -154,7 +154,7 @@ let handler ~as_lint =
             {
               expr = (lhs_ty, lhs_pos, lhs_expr);
               hint;
-              is_nullable = false;
+              is_nullable;
               enforce_deep = _;
             } ) ->
         let (env, hint_ty) = Env.localize_hint_for_refinement env hint in
@@ -174,7 +174,7 @@ let handler ~as_lint =
                     original_pos = p;
                     replacement_pos = lhs_pos;
                   }))
-          ~never:(is_as_warning ~as_lint As_always_fails)
+          ~never:(is_as_warning ~as_lint (As_always_fails { is_nullable }))
       | ( _,
           p,
           Binop

@@ -1,3 +1,5 @@
+WARN: File "as_expression_mutable_prim_nullable.php", line 5, characters 12-27:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Warn[12011])
 ERROR: File "as_expression_mutable_prim_nullable.php", line 5, characters 12-27:
 Invalid return type (Typing[4110])
   File "as_expression_mutable_prim_nullable.php", line 4, characters 38-40:

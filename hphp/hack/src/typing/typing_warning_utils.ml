@@ -79,7 +79,7 @@ module Is_as_always = struct
     | Typing_warning.Is_as_always.Is_is_always_true -> Codes.IsIsAlwaysTrue
     | Typing_warning.Is_as_always.Is_is_always_false -> Codes.IsIsAlwaysFalse
     | Typing_warning.Is_as_always.As_always_succeeds _ -> Codes.AsAlwaysSucceeds
-    | Typing_warning.Is_as_always.As_always_fails -> Codes.AsAlwaysFails
+    | Typing_warning.Is_as_always.As_always_fails _ -> Codes.AsAlwaysFails
 
   let codes =
     [
@@ -92,16 +92,26 @@ module Is_as_always = struct
   let lint_severity _ = Lints_core.Lint_warning
 
   let claim { Typing_warning.Is_as_always.kind; lhs_ty; rhs_ty } =
-    Printf.sprintf
-      (match kind with
-      | Typing_warning.Is_as_always.Is_is_always_true ->
+    (match kind with
+    | Typing_warning.Is_as_always.Is_is_always_true ->
+      Printf.sprintf
         "This `is` check is always `true`. The expression on the left has type %s which is a subtype of %s."
-      | Typing_warning.Is_as_always.Is_is_always_false ->
+    | Typing_warning.Is_as_always.Is_is_always_false ->
+      Printf.sprintf
         "This `is` check is always `false`. The expression on the left has type %s which shares no values with %s."
-      | Typing_warning.Is_as_always.As_always_succeeds _ ->
+    | Typing_warning.Is_as_always.As_always_succeeds _ ->
+      Printf.sprintf
         "This `as` assertion will always succeed and hence is redundant. The expression on the left has a type %s which is a subtype of %s."
-      | Typing_warning.Is_as_always.As_always_fails ->
-        "This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type %s which shares no values with %s.")
+    | Typing_warning.Is_as_always.As_always_fails { is_nullable } ->
+      let consequence =
+        if is_nullable then
+          "a `null` value"
+        else
+          "an exception at runtime"
+      in
+      Printf.sprintf
+        "This `as` assertion will always fail and lead to %s. The expression on the left has type %s which shares no values with %s."
+        consequence)
       (Markdown_lite.md_codify lhs_ty)
       (Markdown_lite.md_codify rhs_ty)
 
@@ -113,13 +123,13 @@ module Is_as_always = struct
       Lints_codes.Codes.is_always_true
     | Is_is_always_false -> Lints_codes.Codes.is_always_false
     | As_always_succeeds _ -> Lints_codes.Codes.as_always_succeeds
-    | As_always_fails -> Lints_codes.Codes.as_always_fails
+    | As_always_fails _ -> Lints_codes.Codes.as_always_fails
 
   let lint_quickfix { Typing_warning.Is_as_always.kind; _ } =
     match kind with
     | Typing_warning.Is_as_always.Is_is_always_true
     | Is_is_always_false
-    | As_always_fails ->
+    | As_always_fails _ ->
       None
     | As_always_succeeds quickfix -> Some quickfix
 

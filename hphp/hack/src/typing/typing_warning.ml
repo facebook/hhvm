@@ -21,7 +21,7 @@ module Is_as_always = struct
     | Is_is_always_true
     | Is_is_always_false
     | As_always_succeeds of quickfix
-    | As_always_fails
+    | As_always_fails of { is_nullable: bool }
 
   type t = {
     kind: kind;

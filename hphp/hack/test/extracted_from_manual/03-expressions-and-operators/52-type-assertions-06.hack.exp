@@ -1,0 +1,4 @@
+WARN: File "52-type-assertions-06.hack", line 4, characters 3-11:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Warn[12011])
+WARN: File "52-type-assertions-06.hack", line 5, characters 3-15:
+This `as` assertion will always fail and lead to a `null` value. The expression on the left has type `string` which shares no values with `int`. (Warn[12012])

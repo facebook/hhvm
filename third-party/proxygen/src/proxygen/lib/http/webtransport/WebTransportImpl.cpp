@@ -197,7 +197,6 @@ void WebTransportImpl::onWebTransportStopSending(HTTPCodec::StreamID id,
 
 void WebTransportImpl::StreamWriteHandle::onStopSending(uint32_t errorCode) {
   // The caller already decodes errorCode, if necessary
-  auto token = cancellationSource_.getToken();
   if (writePromise_) {
     writePromise_->setException(WebTransport::Exception(errorCode));
     writePromise_.reset();
@@ -205,7 +204,7 @@ void WebTransportImpl::StreamWriteHandle::onStopSending(uint32_t errorCode) {
     stopSendingErrorCode_ = errorCode;
   }
 
-  cancellationSource_.requestCancellation();
+  cs_.requestCancellation();
 }
 
 void WebTransportImpl::StreamWriteHandle::onStreamWriteReady(
@@ -330,7 +329,7 @@ void WebTransportImpl::StreamReadHandle::readError(
 
 void WebTransportImpl::StreamReadHandle::deliverReadError(
     const folly::exception_wrapper& ex) {
-  cancellationSource_.requestCancellation();
+  cs_.requestCancellation();
   if (readPromise_) {
     readPromise_->setException(ex);
     readPromise_.reset();

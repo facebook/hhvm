@@ -199,19 +199,11 @@ class WebTransportImpl : public WebTransport {
       , public quic::StreamWriteCallback {
    public:
     StreamWriteHandle(WebTransportImpl& tp, HTTPCodec::StreamID id)
-        : impl_(tp), id_(id) {
+        : WebTransport::StreamWriteHandle(id), impl_(tp) {
     }
 
     ~StreamWriteHandle() override {
-      cancellationSource_.requestCancellation();
-    }
-
-    folly::CancellationToken getCancelToken() override {
-      return cancellationSource_.getToken();
-    }
-
-    uint64_t getID() override {
-      return id_;
+      cs_.requestCancellation();
     }
 
     folly::Expected<FCState, WebTransport::ErrorCode> writeStreamData(
@@ -241,9 +233,7 @@ class WebTransportImpl : public WebTransport {
     void onStreamWriteReady(quic::StreamId id, uint64_t) noexcept override;
 
     WebTransportImpl& impl_;
-    HTTPCodec::StreamID id_;
     folly::Optional<folly::Promise<uint64_t>> writePromise_;
-    folly::CancellationSource cancellationSource_;
   };
 
   class StreamReadHandle
@@ -251,18 +241,10 @@ class WebTransportImpl : public WebTransport {
       , public quic::StreamReadCallback {
    public:
     StreamReadHandle(WebTransportImpl& impl, HTTPCodec::StreamID id)
-        : impl_(impl), id_(id) {
+        : WebTransport::StreamReadHandle(id), impl_(impl) {
     }
 
     ~StreamReadHandle() override = default;
-
-    uint64_t getID() override {
-      return id_;
-    }
-
-    folly::CancellationToken getCancelToken() override {
-      return cancellationSource_.getToken();
-    }
 
     folly::SemiFuture<WebTransport::StreamData> readStreamData() override;
 
@@ -283,12 +265,10 @@ class WebTransportImpl : public WebTransport {
 
    private:
     WebTransportImpl& impl_;
-    HTTPCodec::StreamID id_;
     folly::Optional<folly::Promise<WebTransport::StreamData>> readPromise_;
     folly::IOBufQueue buf_{folly::IOBufQueue::cacheChainLength()};
     bool eof_{false};
     folly::Optional<folly::exception_wrapper> error_;
-    folly::CancellationSource cancellationSource_;
   };
 
  private:

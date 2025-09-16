@@ -84,7 +84,9 @@ class WebTransport {
    public:
     virtual ~StreamHandleBase() = default;
 
-    virtual uint64_t getID() = 0;
+    uint64_t getID() const {
+      return id_;
+    }
 
     // The caller may register a CancellationCallback on this token to be
     // notified of asynchronous cancellation of the stream by the peer.
@@ -92,12 +94,22 @@ class WebTransport {
     // For StreamWriteHandle in particular, the handle is still valid in a
     // CancellationCallback, but not after that.  If the app doesn't terminate
     // the stream from the callback, the stream will be reset automatically.
-    virtual folly::CancellationToken getCancelToken() = 0;
+    folly::CancellationToken getCancelToken() const {
+      return cs_.getToken();
+    }
+
+   protected:
+    StreamHandleBase(uint64_t id) : id_(id) {
+    }
+
+    const uint64_t id_;
+    folly::CancellationSource cs_;
   };
 
   // Handle for read streams
   class StreamReadHandle : public StreamHandleBase {
    public:
+    using StreamHandleBase::StreamHandleBase;
     ~StreamReadHandle() override = default;
 
     // Wait for data to be delivered on the stream.  If the stream is reset by
@@ -161,6 +173,7 @@ class WebTransport {
   // Handle for write streams
   class StreamWriteHandle : public StreamHandleBase {
    public:
+    using StreamHandleBase::StreamHandleBase;
     ~StreamWriteHandle() override = default;
 
     // Write the data and optional fin to the stream.

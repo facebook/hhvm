@@ -23,19 +23,20 @@ class FakeStreamHandle
     : public WebTransport::StreamReadHandle
     , public WebTransport::StreamWriteHandle {
  public:
-  explicit FakeStreamHandle(uint64_t inId) : id(inId) {
+  explicit FakeStreamHandle(uint64_t inId)
+      : WebTransport::StreamReadHandle(inId),
+        WebTransport::StreamWriteHandle(inId) {
   }
 
   ~FakeStreamHandle() {
-    cs_.requestCancellation();
+    WebTransport::StreamReadHandle::cs_.requestCancellation();
+    WebTransport::StreamWriteHandle::cs_.requestCancellation();
   }
 
-  uint64_t getID() override {
-    return id;
+  uint64_t getID() const {
+    return WebTransport::StreamReadHandle::getID();
   }
-  folly::CancellationToken getCancelToken() override {
-    return cs_.getToken();
-  }
+
   folly::Optional<uint32_t> getWriteErr() {
     return writeErr_;
   }
@@ -60,6 +61,9 @@ class FakeStreamHandle
     if (!stopSendingErrorCode_) {
       stopSendingErrorCode_ = code;
       cs_.requestCancellation();
+    }
+    if (!writeErr_) {
+      writeErr_.emplace(code);
     }
     return folly::unit;
   }
@@ -142,9 +146,9 @@ class FakeStreamHandle
     }
     if (promise_) {
       promise_->setException(WebTransport::Exception(err));
-    } else {
-      writeErr_ = err;
+      promise_.reset();
     }
+    writeErr_ = err;
     return folly::unit;
   }
   GenericApiRet setPriority(uint8_t urgency,

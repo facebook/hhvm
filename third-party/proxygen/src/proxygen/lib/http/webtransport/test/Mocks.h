@@ -17,26 +17,21 @@ using GenericApiRet = folly::Expected<folly::Unit, WebTransport::ErrorCode>;
 
 class MockStreamReadHandle : public WebTransport::StreamReadHandle {
  public:
-  explicit MockStreamReadHandle(uint64_t inId) : id(inId) {
-    ON_CALL(*this, getID()).WillByDefault(testing::Return(id));
+  explicit MockStreamReadHandle(uint64_t inId)
+      : WebTransport::StreamReadHandle(inId) {
   }
 
-  MOCK_METHOD(uint64_t, getID, ());
-  MOCK_METHOD(folly::CancellationToken, getCancelToken, ());
   using ReadStreamDataRet = folly::SemiFuture<WebTransport::StreamData>;
   MOCK_METHOD(ReadStreamDataRet, readStreamData, ());
   MOCK_METHOD(GenericApiRet, stopSending, (uint32_t));
-  uint64_t id{0};
 };
 
 class MockStreamWriteHandle : public WebTransport::StreamWriteHandle {
  public:
-  explicit MockStreamWriteHandle(uint64_t inId) : id(inId) {
-    ON_CALL(*this, getID()).WillByDefault(testing::Return(id));
+  explicit MockStreamWriteHandle(uint64_t inId)
+      : WebTransport::StreamWriteHandle(inId) {
   }
 
-  MOCK_METHOD(uint64_t, getID, ());
-  MOCK_METHOD(folly::CancellationToken, getCancelToken, ());
   using WriteStreamDataRet =
       folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>;
   MOCK_METHOD(WriteStreamDataRet,
@@ -51,7 +46,6 @@ class MockStreamWriteHandle : public WebTransport::StreamWriteHandle {
 
   MOCK_METHOD(GenericApiRet, resetStream, (uint32_t));
   MOCK_METHOD(GenericApiRet, setPriority, (uint8_t, uint32_t, bool));
-  uint64_t id{0};
 };
 
 class MockWebTransport : public WebTransport {

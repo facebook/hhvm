@@ -54,7 +54,6 @@ impl Pos {
         file: None,
         span: PosSpanTiny::make_dummy(),
     });
-
     pub fn is_none(&self) -> bool {
         match self {
             Pos(PosImpl::Tiny { file, span }) => span.is_dummy() && file.is_none(),

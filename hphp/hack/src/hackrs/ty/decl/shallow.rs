@@ -132,7 +132,7 @@ pub struct ShallowMethod<R: Reason> {
     // note(sf, 2022-01-27):
     //   - c.f.
     //     - `Shallow_decl_defs.shallow_method`
-    //     - `oxidized_by_ref::shallow_decl_defs::ShallowMethod<'_>`
+    //     - `oxidized::shallow_decl_defs::ShallowMethod`
     pub name: Positioned<MethodName, R::Pos>,
     pub ty: Ty<R>,
     pub visibility: Visibility,
@@ -151,7 +151,7 @@ pub struct ShallowClass<R: Reason> {
     // note(sf, 2022-01-27):
     //  - c.f.
     //    - `Shallow_decl_defs.shallow_class`
-    //    - `oxidized_by_ref::shallow_decl_defs::ShallowClass<'_>`
+    //    - `oxidized::shallow_decl_defs::ShallowClass`
     pub mode: oxidized::file_info::Mode,
     pub is_final: bool,
     pub is_abstract: bool,

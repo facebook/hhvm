@@ -14,10 +14,9 @@ use crate::reason::Reason;
 impl<P: pos::Pos> ToOcamlRep for Enforceable<P> {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         let mut block = alloc.block_with_size(2);
-        let pos = self.as_ref().map_or_else(
-            || alloc.add(oxidized_by_ref::pos::Pos::none()),
-            |p| alloc.add(p),
-        );
+        let pos = self
+            .as_ref()
+            .map_or_else(|| alloc.add(&oxidized::pos::Pos::NONE), |p| alloc.add(p));
         alloc.set_field(&mut block, 0, pos);
         alloc.set_field(&mut block, 1, alloc.add_copy(self.is_some()));
         block.build()

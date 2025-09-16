@@ -294,7 +294,7 @@ impl ToOxidized for NReason {
 
 impl ToOcamlRep for NReason {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
-        oxidized_by_ref::typing_reason::Reason::NoReason.to_ocamlrep(alloc)
+        oxidized::typing_reason::Reason::NoReason.to_ocamlrep(alloc)
     }
 }
 

@@ -35,9 +35,7 @@ impl Context {
     /// if the types are declared in different modules).
     ///
     /// `extern_files` is used to provide the definitions of types which are
-    /// declared in `extern_files` and re-exported in `files` (e.g., when using
-    /// `oxidized_by_ref` for `files`, use `oxidized` for `extern_files`, since
-    /// `oxidized_by_ref` re-exports types defined in `oxidized`).
+    /// declared in `extern_files` and re-exported in `files`.
     pub fn with_extern_files(
         files: &[(&Path, Vec<syn::Item>)],
         extern_files: &[(&Path, Vec<syn::Item>)],
@@ -65,8 +63,7 @@ impl Context {
             );
         }
         // The "extern" files provide the definitions of types which were
-        // imported from the oxidized crate to the oxidized_by_ref crate via
-        // an extern_types.txt file.
+        // imported via an extern_types.txt file.
         for (filename, items) in extern_files {
             eprintln!("Processing extern file {:?}", filename);
             for item in items.iter() {

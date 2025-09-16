@@ -433,7 +433,7 @@ impl ToOxidized for NPos {
 
 impl ToOcamlRep for NPos {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
-        oxidized_by_ref::pos::Pos::none().to_ocamlrep(alloc)
+        oxidized::pos::Pos::NONE.to_ocamlrep(alloc)
     }
 }
 

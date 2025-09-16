@@ -99,9 +99,9 @@ TEST(HashTest, HashType) {
   std::unordered_set<std::size_t> s;
   auto check_and_add = [&s](auto tag, const auto& v) {
     using Tag = decltype(tag);
-    EXPECT_EQ(s.contains(hash<Tag>(v)), 0);
+    EXPECT_FALSE(s.contains(hash<Tag>(v)));
     s.insert(hash<Tag>(v));
-    EXPECT_EQ(s.contains(hash<Tag>(v)), 1);
+    EXPECT_TRUE(s.contains(hash<Tag>(v)));
   };
 
   for (auto i = 0; i < 10; i++) {

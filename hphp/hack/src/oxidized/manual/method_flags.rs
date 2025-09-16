@@ -42,7 +42,10 @@ impl MethodFlags {
     pub fn supports_dynamic_type(&self) -> bool {
         self.contains(Self::SUPPORT_DYNAMIC_TYPE)
     }
-    pub fn needs_concrete(&self) -> bool {
+    pub fn is_no_auto_likes(&self) -> bool {
+        self.contains(Self::NO_AUTO_LIKES)
+    }
+    pub fn is_needs_concrete(&self) -> bool {
         self.contains(Self::NEEDS_CONCRETE)
     }
 }

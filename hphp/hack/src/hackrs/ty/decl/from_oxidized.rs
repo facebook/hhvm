@@ -407,7 +407,7 @@ impl<R: Reason> From<o::shallow_decl_defs::ShallowMethod> for shallow::ShallowMe
             visibility: sm.visibility,
             deprecated: sm.deprecated.map(Into::into),
             attributes: slice(sm.attributes),
-            flags: oxidized_by_ref::method_flags::MethodFlags::from_bits_truncate(sm.flags.bits()),
+            flags: oxidized::method_flags::MethodFlags::from_bits_truncate(sm.flags.bits()),
             sort_text: sm.sort_text,
         }
     }
@@ -420,7 +420,7 @@ impl<R: Reason> From<o::shallow_decl_defs::ShallowProp> for shallow::ShallowProp
             xhp_attr: sp.xhp_attr,
             ty: sp.type_.into(),
             visibility: sp.visibility,
-            flags: oxidized_by_ref::prop_flags::PropFlags::from_bits_truncate(sp.flags.bits()),
+            flags: oxidized::prop_flags::PropFlags::from_bits_truncate(sp.flags.bits()),
         }
     }
 }

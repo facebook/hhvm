@@ -56,29 +56,26 @@ final class ThriftContextPropStateTest extends WWWTest {
   public function testUserIdsNullable(): void {
     $tcps = ThriftContextPropState::get();
 
-    // 0 is different from null
-    $tcps->setUserIds(ContextProp\UserIds::withDefaultValues());
-    expect($tcps->getUserIds())->toNotBeNull();
-    expect($tcps->getUserIds()?->fb_user_id)->toBeNull();
-    expect($tcps->getUserIds()?->ig_user_id)->toBeNull();
-
     // override existing value
-    $tcps->setUserIds(new ContextProp\UserIds(1, 2));
+    ThriftContextPropState::updateFBUserId(1, "test");
+    ThriftContextPropState::updateIGUserId(2, "test");
     expect($tcps->getUserIds()?->fb_user_id)->toEqual(1);
     expect($tcps->getUserIds()?->ig_user_id)->toEqual(2);
 
     // back to null
-    $tcps->setUserIds(null);
-    expect($tcps->getUserIds())->toBeNull();
+    ThriftContextPropState::updateFBUserId(null, "test");
+    ThriftContextPropState::updateIGUserId(null, "test");
+    expect($tcps->getUserIds()?->fb_user_id)->toBeNull();
+    expect($tcps->getUserIds()?->ig_user_id)->toBeNull();
 
     // set FB Id only
-    $tcps->setFBUserId(3);
+    ThriftContextPropState::updateFBUserId(3, "test");
     expect($tcps->getUserIds()?->fb_user_id)->toEqual(3);
     expect($tcps->getFBUserId())->toEqual(3);
     expect($tcps->getUserIds()?->ig_user_id)->toBeNull();
 
     // set IG Id only
-    $tcps->setIGUserId(4);
+    ThriftContextPropState::updateIGUserId(4, "test");
     expect($tcps->getUserIds()?->fb_user_id)->toEqual(3);
     expect($tcps->getUserIds()?->ig_user_id)->toEqual(4);
     expect($tcps->getIGUserId())->toEqual(4);
@@ -278,13 +275,12 @@ final class ThriftContextPropStateTest extends WWWTest {
     $e = Base64::encode($s);
 
     ThriftContextPropState::initFromString($e);
-    // expect these to be no-op if TFM already has user ids
     ThriftContextPropState::updateUserIdFromVC($fb_vc, "test");
     ThriftContextPropState::updateUserIdFromVC($ig_vc, "test");
 
     $tcps = ThriftContextPropState::get();
-    expect($tcps->getUserIds()?->fb_user_id)->toEqual(123);
-    expect($tcps->getUserIds()?->ig_user_id)->toEqual(456);
+    expect($tcps->getUserIds()?->fb_user_id)->toEqual(1);
+    expect($tcps->getUserIds()?->ig_user_id)->toEqual(2);
   }
 
   public async function testUpdatedWithExplicitFBUserId(
@@ -327,11 +323,10 @@ final class ThriftContextPropStateTest extends WWWTest {
     $e = Base64::encode($s);
 
     ThriftContextPropState::initFromString($e);
-    // expect these to be no-op if TFM already has user ids
     ThriftContextPropState::updateFBUserId(456, "test");
 
     $tcps = ThriftContextPropState::get();
-    expect($tcps->getUserIds()?->fb_user_id)->toEqual(123);
+    expect($tcps->getUserIds()?->fb_user_id)->toEqual(456);
   }
 
   public async function testUpdatedWithExplicitIGUserId(
@@ -376,7 +371,7 @@ final class ThriftContextPropStateTest extends WWWTest {
     ThriftContextPropState::updateIGUserId(456, "test");
 
     $tcps = ThriftContextPropState::get();
-    expect($tcps->getUserIds()?->ig_user_id)->toEqual(123);
+    expect($tcps->getUserIds()?->ig_user_id)->toEqual(456);
   }
 
   public function testGen()[defaults]: void {

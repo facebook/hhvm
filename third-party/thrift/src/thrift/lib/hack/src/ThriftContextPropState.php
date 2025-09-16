@@ -22,6 +22,11 @@
 //  www/flib/thrift/core/protocol/__tests__/TCompactProtocolTest.php
 //  www/flib/batch_queue/queue/impl/__tests__/ScribeBatchQueueTest.php
 
+enum UserIdCategory: int {
+  FB = 0;
+  IG = 1;
+}
+
 final class ThriftContextPropState {
   private static ?ThriftContextPropState $instance = null;
   private ThriftFrameworkMetadata $storage;
@@ -161,14 +166,6 @@ final class ThriftContextPropState {
 
   // update FB user id from explicit value
   public static function updateFBUserId(?int $fb_user_id, string $src): bool {
-    // don't overwrite if TCPS already has a valid fb user id
-    $tcps_fb_user_id = self::get()->getFBUserId();
-    $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
-
-    if (self::coerceId($tcps_fb_user_id) is nonnull) {
-      $ods->bumpKey('contextprop.fb_user_id_exists.'.$src);
-      return false;
-    }
     if (
       !JustKnobs::eval(
         'meta_cp/www:enable_user_id_ctx_prop',
@@ -178,18 +175,24 @@ final class ThriftContextPropState {
     ) {
       return false;
     }
+    $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
+    $ods->bumpKey('contextprop.update_fb_user_id.'.$src);
+    $fb_user_id = self::coerceId($fb_user_id, UserIdCategory::FB);
+    $tcps_fb_user_id =
+      self::coerceId(self::get()->getFBUserId(), UserIdCategory::FB);
 
-    $fb_user_id = self::coerceId($fb_user_id);
-
-    if ($fb_user_id is nonnull) {
-      $fb_user_id = UserIdValidation::validateFBUserId($fb_user_id);
-      self::get()->setFBUserId($fb_user_id);
-      $ods->bumpKey('contextprop.set_fb_user_id.'.$src);
-      return true;
+    if ($fb_user_id == $tcps_fb_user_id) {
+      $ods->bumpKey('contextprop.same_fb_user_id.'.$src);
+      return false;
     }
 
-    $ods->bumpKey('contextprop.missing_fb_user_id.'.$src);
-    return false;
+    if ($tcps_fb_user_id is nonnull) {
+      $ods->bumpKey('contextprop.fb_user_id_override.'.$src);
+    }
+
+    self::get()->setFBUserId($fb_user_id);
+    $ods->bumpKey('contextprop.fb_user_id_set.'.$src);
+    return true;
   }
 
   // update user id from ViewerContext
@@ -200,39 +203,15 @@ final class ThriftContextPropState {
     if ($vc is null) {
       return;
     }
-    // allow upsamping/downsampling per source
-    if (
-      !JustKnobs::eval(
-        'meta_cp/www:enable_user_id_ctx_prop',
-        /*hashval=*/null,
-        /*switchval=*/$src,
-      )
-    ) {
-      return;
-    }
 
-    $updated_TCPS = false;
     if ($vc is IFBViewerContext) {
-      $updated_TCPS = self::updateFBUserIdFromVC($vc, $src);
+      self::updateFBUserIdFromVC($vc, $src);
     } else if ($vc is IIGViewerContext) {
-      $updated_TCPS = self::updateIGUserIdFromVC($vc, $src);
-    }
-
-    if ($updated_TCPS) {
-      $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
-      $ods->bumpKey('contextprop.user_id_set.'.$src);
+      self::updateIGUserIdFromVC($vc, $src);
     }
   }
 
   public static function updateIGUserId(?int $ig_user_id, string $src): bool {
-    // don't overwrite if TCPS already has a valid ig user id
-    $tcps_ig_user_id = self::get()->getIGUserId();
-    $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
-
-    if (self::coerceId($tcps_ig_user_id) is nonnull) {
-      $ods->bumpKey('contextprop.ig_user_id_exists.'.$src);
-      return false;
-    }
     if (
       !JustKnobs::eval(
         'meta_cp/www:enable_user_id_ctx_prop',
@@ -242,25 +221,30 @@ final class ThriftContextPropState {
     ) {
       return false;
     }
-    $ig_user_id = self::coerceId($ig_user_id);
+    $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
+    $ods->bumpKey('contextprop.update_ig_user_id.'.$src);
+    $ig_user_id = self::coerceId($ig_user_id, UserIdCategory::IG);
+    $tcps_ig_user_id =
+      self::coerceId(self::get()->getIGUserId(), UserIdCategory::IG);
 
-    if ($ig_user_id is nonnull) {
-      self::get()->setIGUserId($ig_user_id);
-      $ods->bumpKey('contextprop.set_ig_user_id.'.$src);
-      return true;
+    if ($ig_user_id == $tcps_ig_user_id) {
+      $ods->bumpKey('contextprop.same_ig_user_id.'.$src);
+      return false;
     }
 
-    $ods->bumpKey('contextprop.missing_ig_user_id.'.$src);
-    return false;
+    if ($tcps_ig_user_id is nonnull) {
+      $ods->bumpKey('contextprop.ig_user_id_override.'.$src);
+    }
+
+    self::get()->setIGUserId($ig_user_id);
+    $ods->bumpKey('contextprop.ig_user_id_set.'.$src);
+    return true;
   }
 
   private static function updateFBUserIdFromVC(
     IFBViewerContext $vc,
     string $src,
   ): bool {
-    $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
-    $ods->bumpKey('contextprop.fb_vc.'.$src);
-
     if ($vc is FBFreeBasicServicesViewerContext) {
       FBLogger('viewer_context_module.fbs', 'get_user_id_hack')->debug(
         '%s called on %s, replacing with zero',
@@ -271,28 +255,33 @@ final class ThriftContextPropState {
     } else {
       $user_id = $vc->getUserID();
     }
-    $fb_user_id = self::coerceId($user_id);
-    return self::updateFBUserId($fb_user_id, $src);
+    return self::updateFBUserId($user_id, $src);
   }
 
   private static function updateIGUserIdFromVC(
     IIGViewerContext $vc,
     string $src,
   ): bool {
-    $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
-    $ods->bumpKey('contextprop.ig_vc.'.$src);
-
-    $ig_user_id = self::coerceId($vc->getViewerID());
-    return self::updateIGUserId($ig_user_id, $src);
+    return self::updateIGUserId($vc->getViewerID(), $src);
   }
 
-  // returns id if it is valid (non-null, positive)
-  private static function coerceId(?int $id): ?int {
-    if ($id is null) {
+  // returns id if it is valid (non-null, positive), and should match the type
+  private static function coerceId(
+    ?int $user_id,
+    UserIdCategory $user_id_category,
+  ): ?int {
+    if ($user_id is null || $user_id <= 0) {
       return null;
     }
-    if ($id > 0) {
-      return $id;
+
+    switch ($user_id_category) {
+      case UserIdCategory::FB:
+        if (fbid_in_uid_range($user_id)) {
+          return $user_id;
+        }
+        break;
+      case UserIdCategory::IG:
+        return $user_id;
     }
     return null;
   }
@@ -459,7 +448,7 @@ final class ThriftContextPropState {
   }
 
   // user id setters
-  public function setUserIds(
+  private function setUserIds(
     ?ContextProp\UserIds $user_ids,
   )[write_props]: void {
     $this->storage->baggage =
@@ -470,7 +459,7 @@ final class ThriftContextPropState {
     $this->dirty();
   }
 
-  public function setFBUserId(int $fb_user_id): void {
+  private function setFBUserId(?int $fb_user_id): void {
     $this->storage->baggage =
       $this->storage->baggage ?? ContextProp\Baggage::withDefaultValues();
     $baggage = $this->storage->baggage as nonnull;
@@ -483,7 +472,7 @@ final class ThriftContextPropState {
     $this->dirty();
   }
 
-  public function setIGUserId(int $ig_user_id): void {
+  private function setIGUserId(?int $ig_user_id): void {
     $this->storage->baggage =
       $this->storage->baggage ?? ContextProp\Baggage::withDefaultValues();
     $baggage = $this->storage->baggage as nonnull;

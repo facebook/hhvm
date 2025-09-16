@@ -12,7 +12,6 @@ mod printer;
 pub mod shallow;
 pub mod subst;
 mod to_oxidized;
-mod to_oxidized_by_ref;
 pub mod ty;
 
 pub use folded::ClassConst;

@@ -20,7 +20,6 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::ToOxidized;
-use crate::ToOxidizedByRef;
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
@@ -84,15 +83,6 @@ impl EqModuloPos for Symbol {
         self == rhs
     }
 }
-
-impl<'a> ToOxidizedByRef<'a> for Symbol {
-    type Output = &'a str;
-
-    fn to_oxidized_by_ref(&self, _arena: &'a bumpalo::Bump) -> &'a str {
-        self.as_str()
-    }
-}
-
 impl ToOxidized for Symbol {
     type Output = String;
 
@@ -213,14 +203,6 @@ impl EqModuloPos for Bytes {
     }
 }
 
-impl<'a> ToOxidizedByRef<'a> for Bytes {
-    type Output = &'a [u8];
-
-    fn to_oxidized_by_ref(&self, _arena: &'a bumpalo::Bump) -> &'a [u8] {
-        self.0.as_bytes()
-    }
-}
-
 impl ToOxidized for Bytes {
     type Output = bstr::BString;
 
@@ -309,14 +291,6 @@ macro_rules! common_impls {
         impl<T: IntoUtf8Bytes> From<T> for $name {
             fn from(s: T) -> Self {
                 Self::new(s)
-            }
-        }
-
-        impl<'a> ToOxidizedByRef<'a> for $name {
-            type Output = &'a str;
-
-            fn to_oxidized_by_ref(&self, _arena: &'a bumpalo::Bump) -> &'a str {
-                self.as_str()
             }
         }
 

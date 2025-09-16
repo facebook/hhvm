@@ -21,7 +21,6 @@ use pos::NPos;
 use pos::Pos;
 use pos::Symbol;
 use pos::ToOxidized;
-use pos::ToOxidizedByRef;
 use pos::TypeName;
 use serde::Deserialize;
 use serde::Serialize;
@@ -46,7 +45,6 @@ pub trait Reason:
     + DeserializeOwned
     + for<'a> From<oxidized::typing_reason::T_>
     + for<'a> From<oxidized_by_ref::typing_reason::T_<'a>>
-    + for<'a> ToOxidizedByRef<'a, Output = oxidized_by_ref::typing_reason::T_<'a>>
     + ToOxidized<Output = oxidized::typing_reason::T_>
     + ToOcamlRep
     + FromOcamlRep
@@ -209,22 +207,6 @@ impl<'a> From<oxidized_by_ref::typing_reason::ExprDepTypeReason<'a>> for ExprDep
     }
 }
 
-impl<'a> ToOxidizedByRef<'a> for ExprDepTypeReason {
-    type Output = oxidized_by_ref::typing_reason::ExprDepTypeReason<'a>;
-
-    fn to_oxidized_by_ref(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        use oxidized_by_ref::typing_reason::ExprDepTypeReason as Obr;
-        match self {
-            ExprDepTypeReason::ERexpr(i) => Obr::ERexpr(*i),
-            ExprDepTypeReason::ERstatic => Obr::ERstatic,
-            ExprDepTypeReason::ERclass(s) => Obr::ERclass(s.to_oxidized_by_ref(arena)),
-            ExprDepTypeReason::ERparent(s) => Obr::ERparent(s.to_oxidized_by_ref(arena)),
-            ExprDepTypeReason::ERself(s) => Obr::ERself(s.to_oxidized_by_ref(arena)),
-            ExprDepTypeReason::ERpu(s) => Obr::ERpu(s.to_oxidized_by_ref(arena)),
-        }
-    }
-}
-
 #[derive(Debug, Clone, PartialEq, Eq, EqModuloPos, Hash, Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]
 pub enum WitnessDecl<P> {
@@ -307,14 +289,6 @@ impl<'a> From<oxidized_by_ref::typing_reason::Reason<'a>> for BReason {
     }
 }
 
-impl<'a> ToOxidizedByRef<'a> for BReason {
-    type Output = oxidized_by_ref::typing_reason::Reason<'a>;
-    // Unused
-    fn to_oxidized_by_ref(&self, _arena: &'a bumpalo::Bump) -> Self::Output {
-        oxidized_by_ref::typing_reason::Reason::NoReason
-    }
-}
-
 impl ToOxidized for BReason {
     type Output = oxidized::typing_reason::Reason;
     // Unused
@@ -381,14 +355,6 @@ impl From<oxidized::typing_reason::T_> for NReason {
 impl<'a> From<oxidized_by_ref::typing_reason::T_<'a>> for NReason {
     fn from(reason: oxidized_by_ref::typing_reason::T_<'a>) -> Self {
         Self::from_oxidized_by_ref(reason)
-    }
-}
-
-impl<'a> ToOxidizedByRef<'a> for NReason {
-    type Output = oxidized_by_ref::typing_reason::Reason<'a>;
-
-    fn to_oxidized_by_ref(&self, _arena: &'a bumpalo::Bump) -> Self::Output {
-        oxidized_by_ref::typing_reason::Reason::NoReason
     }
 }
 

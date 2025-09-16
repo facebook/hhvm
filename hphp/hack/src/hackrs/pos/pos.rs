@@ -20,11 +20,9 @@ use serde::de::DeserializeOwned;
 mod relative_path;
 mod symbol;
 mod to_oxidized;
-mod to_oxidized_by_ref;
 pub use oxidized::file_pos_large::FilePosLarge;
 pub use symbol::*;
 pub use to_oxidized::ToOxidized;
-pub use to_oxidized_by_ref::ToOxidizedByRef;
 
 pub use crate::relative_path::*;
 
@@ -38,7 +36,6 @@ pub trait Pos:
     + for<'a> From<oxidized::pos::Pos>
     + for<'a> From<&'a oxidized::pos::Pos>
     + for<'a> From<&'a oxidized_by_ref::pos::Pos<'a>>
-    + for<'a> ToOxidizedByRef<'a, Output = &'a oxidized_by_ref::pos::Pos<'a>>
     + for<'a> ToOxidized<Output = oxidized::pos::Pos>
     + ToOcamlRep
     + FromOcamlRep
@@ -270,35 +267,6 @@ impl<'a> From<&'a oxidized_by_ref::pos::Pos<'a>> for BPos {
     }
 }
 
-impl<'a> ToOxidizedByRef<'a> for BPos {
-    type Output = &'a oxidized_by_ref::pos::Pos<'a>;
-
-    fn to_oxidized_by_ref(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        let file = self.file().to_oxidized_by_ref(arena);
-        arena.alloc(match &self.0 {
-            PosImpl::Small { span, .. } => {
-                let (start, end) = **span;
-                oxidized_by_ref::pos::Pos::from_raw_span(
-                    arena,
-                    file,
-                    PosSpanRaw {
-                        start: start.into(),
-                        end: end.into(),
-                    },
-                )
-            }
-            PosImpl::Large { span, .. } => {
-                let (start, end) = **span;
-                oxidized_by_ref::pos::Pos::from_raw_span(arena, file, PosSpanRaw { start, end })
-            }
-            PosImpl::Tiny { span, .. } => {
-                let span = span.to_raw_span();
-                oxidized_by_ref::pos::Pos::from_raw_span(arena, file, span)
-            }
-        })
-    }
-}
-
 impl ToOxidized for BPos {
     type Output = oxidized::pos::Pos;
 
@@ -468,14 +436,6 @@ impl<'a> From<&'a oxidized_by_ref::pos::Pos<'a>> for NPos {
     }
 }
 
-impl<'a> ToOxidizedByRef<'a> for NPos {
-    type Output = &'a oxidized_by_ref::pos::Pos<'a>;
-
-    fn to_oxidized_by_ref(&self, _arena: &'a bumpalo::Bump) -> Self::Output {
-        oxidized_by_ref::pos::Pos::none()
-    }
-}
-
 impl ToOxidized for NPos {
     type Output = oxidized::pos::Pos;
 
@@ -574,19 +534,6 @@ impl<'a, S: From<&'a str>, P: Pos> From<oxidized_by_ref::typing_defs::PosId<'a>>
     fn from(pos_id: oxidized_by_ref::typing_defs::PosId<'a>) -> Self {
         let (pos, id) = pos_id;
         Self::new(Pos::from_decl(pos), S::from(id))
-    }
-}
-
-impl<'a, S: ToOxidizedByRef<'a, Output = &'a str>, P: Pos> ToOxidizedByRef<'a>
-    for Positioned<S, P>
-{
-    type Output = oxidized_by_ref::typing_reason::PosId<'a>;
-
-    fn to_oxidized_by_ref(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        (
-            self.pos.to_oxidized_by_ref(arena),
-            self.id.to_oxidized_by_ref(arena),
-        )
     }
 }
 

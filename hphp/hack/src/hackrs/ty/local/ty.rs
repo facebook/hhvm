@@ -13,7 +13,6 @@ use oxidized::ast_defs::Variance;
 use oxidized::typing_defs_flags::FunTypeFlags;
 use pos::Positioned;
 use pos::Symbol;
-use pos::ToOxidizedByRef;
 use pos::TypeName;
 
 use crate::decl::UserAttribute;
@@ -404,128 +403,6 @@ impl<R: Reason> FunType<R> {
         } else {
             (&self.params, None)
         }
-    }
-}
-
-impl<'a> ToOxidizedByRef<'a> for Exact {
-    type Output = oxidized_by_ref::typing_defs::Exact<'a>;
-
-    fn to_oxidized_by_ref(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        use oxidized_by_ref::typing_defs::Exact as E;
-        match &self {
-            Exact::Exact => E::Exact,
-            Exact::Nonexact => {
-                let r = oxidized_by_ref::decl_defs::ClassRefinement {
-                    cr_consts: arena_collections::map::Map::empty(),
-                };
-                E::Nonexact(&*arena.alloc(r))
-            }
-        }
-    }
-}
-
-#[allow(clippy::todo)]
-impl<'a, R: Reason> ToOxidizedByRef<'a> for Ty<R> {
-    type Output = oxidized_by_ref::typing_defs::Ty<'a>;
-
-    fn to_oxidized_by_ref(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        use oxidized_by_ref::typing_defs::Ty_ as OTy_;
-        let r = arena.alloc(self.reason().to_oxidized_by_ref(arena));
-        let ty = match &**self.node() {
-            Ty_::Tvar(tv) => OTy_::Tvar((*tv).into()),
-            Ty_::Tprim(x) => OTy_::Tprim(arena.alloc(*x)),
-            Ty_::Toption(_) => todo!(),
-            Ty_::Tunion(tys) => {
-                OTy_::Tunion(&*arena.alloc_slice_fill_iter(tys.iter().map(|_ty| todo!())))
-            }
-            Ty_::Tintersection(_) => todo!(),
-            Ty_::Tfun(ft) => OTy_::Tfun(&*arena.alloc(ft.to_oxidized_by_ref(arena))),
-            Ty_::Tany => todo!(),
-            Ty_::Tnonnull => todo!(),
-            Ty_::Tgeneric(x) => OTy_::Tgeneric(&*arena.alloc_str(x.as_str())),
-            Ty_::Tclass(pos_id, exact, tys) => OTy_::Tclass(
-                &*arena.alloc((
-                    pos_id.to_oxidized_by_ref(arena),
-                    exact.to_oxidized_by_ref(arena),
-                    &*arena.alloc_slice_fill_iter(
-                        tys.iter()
-                            .map(|ty| &*arena.alloc(ty.to_oxidized_by_ref(arena))),
-                    ),
-                )),
-            ),
-        };
-        oxidized_by_ref::typing_defs::Ty(r, ty)
-    }
-}
-
-impl<'a, R: Reason> ToOxidizedByRef<'a> for FunType<R> {
-    type Output = oxidized_by_ref::typing_defs::FunType<'a>;
-
-    fn to_oxidized_by_ref(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        use oxidized_by_ref::typing_defs::FunType as OFunType;
-        let FunType {
-            tparams,
-            params,
-            ret,
-            flags,
-        } = self;
-        OFunType {
-            tparams: tparams.to_oxidized_by_ref(arena),
-            where_constraints: &[],
-            params: &*arena.alloc_slice_fill_iter(
-                params
-                    .iter()
-                    .map(|p| &*arena.alloc(p.to_oxidized_by_ref(arena))),
-            ),
-            implicit_params: &*arena.alloc(oxidized_by_ref::typing_defs_core::FunImplicitParams {
-                capability: oxidized_by_ref::typing_defs_core::Capability::CapDefaults(
-                    oxidized_by_ref::pos::Pos::none(),
-                ),
-            }),
-            ret: &*arena.alloc(ret.to_oxidized_by_ref(arena)),
-            flags: flags.clone(),
-            require_package: None,
-            instantiated: true,
-        }
-    }
-}
-
-impl<'a, R: Reason> ToOxidizedByRef<'a> for FunParam<R> {
-    type Output = oxidized_by_ref::typing_defs::FunParam<'a>;
-
-    fn to_oxidized_by_ref(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        use oxidized_by_ref::typing_defs::FunParam as OFunParam;
-        OFunParam {
-            pos: self.pos.to_oxidized_by_ref(arena),
-            name: self.name.map(|n| n.to_oxidized_by_ref(arena)),
-            type_: &*arena.alloc(self.ty.to_oxidized_by_ref(arena)),
-            flags: oxidized::typing_defs_flags::FunParamFlags::from_bits_truncate(0),
-            def_value: self.def_value.as_deref().to_oxidized_by_ref(arena),
-        }
-    }
-}
-
-impl<'a, R: Reason> ToOxidizedByRef<'a> for Tparam<R> {
-    type Output = &'a oxidized_by_ref::typing_defs::Tparam<'a>;
-
-    fn to_oxidized_by_ref(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        use oxidized_by_ref::typing_defs::Tparam as OTparam;
-        let Tparam {
-            variance,
-            name,
-            constraints,
-            reified,
-            user_attributes,
-        } = self;
-        assert!(constraints.is_empty(), "TODO");
-        let tp = OTparam {
-            variance: variance.clone(),
-            name: name.to_oxidized_by_ref(arena),
-            constraints: &[],
-            reified: reified.clone(),
-            user_attributes: user_attributes.to_oxidized_by_ref(arena),
-        };
-        arena.alloc(tp)
     }
 }
 

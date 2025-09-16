@@ -3861,7 +3861,6 @@ dependencies = [
  "bumpalo",
  "eq_modulo_pos",
  "hh24_types",
- "im",
  "indexmap 2.10.0",
  "intern",
  "ocamlrep",
@@ -5542,8 +5541,6 @@ dependencies = [
 name = "ty"
 version = "0.0.0"
 dependencies = [
- "arena_collections",
- "bumpalo",
  "eq_modulo_pos",
  "hash",
  "hcons",

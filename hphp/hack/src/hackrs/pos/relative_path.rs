@@ -17,7 +17,6 @@ pub use relative_path::RelativePathCtx;
 
 use crate::Bytes;
 use crate::ToOxidized;
-use crate::ToOxidizedByRef;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -96,17 +95,6 @@ impl RelativePath {
 }
 
 impl arena_trait::TrivialDrop for RelativePath {}
-
-impl<'a> ToOxidizedByRef<'a> for RelativePath {
-    type Output = &'a oxidized_by_ref::relative_path::RelativePath<'a>;
-
-    fn to_oxidized_by_ref(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        arena.alloc(oxidized_by_ref::relative_path::RelativePath::new(
-            self.prefix,
-            Path::new(OsStr::from_bytes(self.suffix.as_bytes())),
-        ))
-    }
-}
 
 impl ToOxidized for RelativePath {
     type Output = relative_path::RelativePath;

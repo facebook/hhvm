@@ -24,12 +24,14 @@ TEST(McDistributionUtilsTest, distributeSetTest) {
   folly::F14FastMap<std::string, std::string> resultKvPairs;
 
   facebook::memcache::mcrouter::AxonProxyWriteFn writeProxyFn =
-      [&](auto bucketId, auto&& kvPairs, bool isSecureWrites) {
-        resultBucketId = bucketId;
-        resultKvPairs = kvPairs;
-        secureWrites = isSecureWrites;
-        return true;
-      };
+      [&](auto bucketId,
+          auto&& kvPairs,
+          bool isSecureWrites) -> folly::exception_wrapper {
+    resultBucketId = bucketId;
+    resultKvPairs = kvPairs;
+    secureWrites = isSecureWrites;
+    return folly::exception_wrapper();
+  };
 
   auto axonCtx = mcrouter::AxonContext{
       .fallbackAsynclog = false,
@@ -44,7 +46,7 @@ TEST(McDistributionUtilsTest, distributeSetTest) {
   req.value_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "value");
   auto result = distributeWriteRequest(
       req, axonCtxPtr, bucketId, targetRegion, sourceRegion, message);
-  EXPECT_TRUE(result);
+  EXPECT_FALSE(result.has_exception_ptr());
   EXPECT_FALSE(secureWrites);
   EXPECT_EQ(resultBucketId, bucketId);
   EXPECT_EQ(resultKvPairs.size(), 8);
@@ -92,12 +94,14 @@ TEST(McDistributionUtilsTest, distributeSetWithSecurityTest) {
   folly::F14FastMap<std::string, std::string> resultKvPairs;
 
   facebook::memcache::mcrouter::AxonProxyWriteFn writeProxyFn =
-      [&](auto bucketId, auto&& kvPairs, bool isSecureWrites) {
-        resultBucketId = bucketId;
-        resultKvPairs = kvPairs;
-        secureWrites = isSecureWrites;
-        return true;
-      };
+      [&](auto bucketId,
+          auto&& kvPairs,
+          bool isSecureWrites) -> folly::exception_wrapper {
+    resultBucketId = bucketId;
+    resultKvPairs = kvPairs;
+    secureWrites = isSecureWrites;
+    return folly::exception_wrapper();
+  };
 
   auto axonCtx = mcrouter::AxonContext{
       .fallbackAsynclog = false,
@@ -118,7 +122,7 @@ TEST(McDistributionUtilsTest, distributeSetWithSecurityTest) {
       sourceRegion,
       message,
       /*secureWrites=*/true);
-  EXPECT_TRUE(result);
+  EXPECT_FALSE(result.has_exception_ptr());
   EXPECT_TRUE(secureWrites);
   EXPECT_EQ(resultBucketId, bucketId);
   EXPECT_EQ(resultKvPairs.size(), 8);
@@ -165,11 +169,11 @@ TEST(McDistributionUtilsTest, distributeDeleteDirectedTest) {
   folly::F14FastMap<std::string, std::string> resultKvPairs;
 
   facebook::memcache::mcrouter::AxonProxyWriteFn writeProxyFn =
-      [&](auto bucketId, auto&& kvPairs, bool) {
-        resultBucketId = bucketId;
-        resultKvPairs = kvPairs;
-        return true;
-      };
+      [&](auto bucketId, auto&& kvPairs, bool) -> folly::exception_wrapper {
+    resultBucketId = bucketId;
+    resultKvPairs = kvPairs;
+    return folly::exception_wrapper();
+  };
 
   auto axonCtx = mcrouter::AxonContext{
       .fallbackAsynclog = false,
@@ -189,7 +193,7 @@ TEST(McDistributionUtilsTest, distributeDeleteDirectedTest) {
       targetRegion,
       sourceRegion,
       message);
-  EXPECT_TRUE(result);
+  EXPECT_FALSE(result.has_exception_ptr());
   EXPECT_EQ(resultBucketId, bucketId);
   EXPECT_EQ(resultKvPairs.size(), 8);
 
@@ -238,11 +242,11 @@ TEST(McDistributionUtilsTest, distributeDeleteBroadcastTest) {
   folly::F14FastMap<std::string, std::string> resultKvPairs;
 
   facebook::memcache::mcrouter::AxonProxyWriteFn writeProxyFn =
-      [&](auto bucketId, auto&& kvPairs, bool) {
-        resultBucketId = bucketId;
-        resultKvPairs = kvPairs;
-        return true;
-      };
+      [&](auto bucketId, auto&& kvPairs, bool) -> folly::exception_wrapper {
+    resultBucketId = bucketId;
+    resultKvPairs = kvPairs;
+    return folly::exception_wrapper();
+  };
 
   auto axonCtx = mcrouter::AxonContext{
       .fallbackAsynclog = false,
@@ -262,7 +266,7 @@ TEST(McDistributionUtilsTest, distributeDeleteBroadcastTest) {
       targetRegion,
       sourceRegion,
       message);
-  EXPECT_TRUE(result);
+  EXPECT_FALSE(result.has_exception_ptr());
   EXPECT_EQ(resultBucketId, bucketId);
   EXPECT_EQ(resultKvPairs.size(), 8);
 
@@ -310,11 +314,11 @@ TEST(McDistributionUtilsTest, spoolDeleteTest) {
   folly::F14FastMap<std::string, std::string> resultKvPairs;
 
   facebook::memcache::mcrouter::AxonProxyWriteFn writeProxyFn =
-      [&](auto bucketId, auto&& kvPairs, bool) {
-        resultBucketId = bucketId;
-        resultKvPairs = kvPairs;
-        return true;
-      };
+      [&](auto bucketId, auto&& kvPairs, bool) -> folly::exception_wrapper {
+    resultBucketId = bucketId;
+    resultKvPairs = kvPairs;
+    return folly::exception_wrapper();
+  };
 
   auto axonCtx = mcrouter::AxonContext{
       .fallbackAsynclog = false,
@@ -334,7 +338,7 @@ TEST(McDistributionUtilsTest, spoolDeleteTest) {
       targetRegion,
       sourceRegion,
       message);
-  EXPECT_TRUE(result);
+  EXPECT_FALSE(result.has_exception_ptr());
   EXPECT_EQ(resultBucketId, bucketId);
   EXPECT_EQ(resultKvPairs.size(), 8);
 

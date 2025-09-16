@@ -57,8 +57,9 @@ memcache::McDeleteRequest addDeleteRequestSource(
  * @param sourceRegion Source (client) region of the distribution
  * @param message Optional message to pass down with the record
  * @param secureWrites enable client identity check for writes
+ * @return exception thrown in case of failure
  */
-FOLLY_NOINLINE bool distributeWriteRequest(
+FOLLY_NOINLINE folly::exception_wrapper distributeWriteRequest(
     const memcache::McSetRequest& req,
     const std::shared_ptr<AxonContext>& axonCtx,
     uint64_t bucketId,
@@ -83,8 +84,9 @@ FOLLY_NOINLINE bool distributeWriteRequest(
  * @param targetRegion Target region for the distribution
  * @param sourceRegion Source (client) region of the distribution
  * @param message Optional message to pass down with the record
+ * @return exception thrown in case of failure
  */
-FOLLY_NOINLINE bool distributeDeleteRequest(
+FOLLY_NOINLINE folly::exception_wrapper distributeDeleteRequest(
     const memcache::McDeleteRequest& req,
     const std::shared_ptr<AxonContext>& axonCtx,
     uint64_t bucketId,

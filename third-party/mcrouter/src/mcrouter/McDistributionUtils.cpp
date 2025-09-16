@@ -22,7 +22,7 @@ memcache::McDeleteRequest addDeleteRequestSource(
   return ret;
 }
 
-FOLLY_NOINLINE bool distributeWriteRequest(
+FOLLY_NOINLINE folly::exception_wrapper distributeWriteRequest(
     const memcache::McSetRequest& req,
     const std::shared_ptr<AxonContext>& axonCtx,
     uint64_t bucketId,
@@ -60,7 +60,7 @@ FOLLY_NOINLINE bool distributeWriteRequest(
   return axonCtx->writeProxyFn(bucketId, std::move(kvPairs), secureWrites);
 }
 
-FOLLY_NOINLINE bool distributeDeleteRequest(
+FOLLY_NOINLINE folly::exception_wrapper distributeDeleteRequest(
     const memcache::McDeleteRequest& req,
     const std::shared_ptr<AxonContext>& axonCtx,
     uint64_t bucketId,
@@ -71,7 +71,8 @@ FOLLY_NOINLINE bool distributeDeleteRequest(
   std::optional<std::string> region;
   if (targetRegion.empty()) {
     // targetRegion must be set
-    return false;
+    return folly::make_exception_wrapper<std::runtime_error>(
+        "targetRegion must be set");
   }
   region = targetRegion;
   std::optional<std::string> pool;

@@ -57,8 +57,10 @@ class RequestClass {
 
 using ExtraDataMap = folly::F14FastMap<std::string, std::string>;
 using ExtraDataCallbackT = std::function<ExtraDataMap()>;
-using AxonProxyWriteFn = std::function<
-    bool(uint64_t, folly::F14FastMap<std::string, std::string>&&, bool)>;
+using AxonProxyWriteFn = std::function<folly::exception_wrapper(
+    uint64_t,
+    folly::F14FastMap<std::string, std::string>&&,
+    bool)>;
 
 struct AxonContext {
   bool fallbackAsynclog{false};

@@ -340,18 +340,21 @@ class DistributionRoute {
     DestinationRequestCtx dctx(nowUs());
     onBeforeDistribution(req, ctx, *req.bucketId_ref(), dctx);
 
-    auto axonLogRes = distributionFn(req, std::forward<Args>(args)...);
-    auto reply = axonLogRes ? createReply(DefaultReply, req)
-                            : ReplyT<Request>(carbon::Result::LOCAL_ERROR);
+    auto exWrapper = distributionFn(req, std::forward<Args>(args)...);
+    auto success = !exWrapper;
+    auto reply = success
+        ? createReply(DefaultReply, req)
+        : createReply<Request>(
+              ErrorReply, folly::exceptionStr(exWrapper).toStdString());
     dctx.endTime = nowUs();
     onAfterDistribution(req, reply, ctx, *req.bucketId_ref(), dctx);
 
-    if (axonLogRes) {
+    if (success) {
       ctx.proxy().stats().increment(distribution_axon_write_success_stat);
     } else {
       ctx.proxy().stats().increment(distribution_axon_write_failed_stat);
     }
-    return {reply, axonLogRes};
+    return {reply, success};
   }
 };
 

@@ -1061,21 +1061,6 @@ void in(ISS& env, const bc::ClassName& op) {
   push(env, TSStr);
 }
 
-void in(ISS& env, const bc::LazyClassFromClass&) {
-  auto const ty = topC(env);
-  if (ty.subtypeOf(BCls) && is_specialized_cls(ty)) {
-    auto const& dcls = dcls_of(ty);
-    if (dcls.isExact()) {
-      return reduce(env,
-                    bc::PopC {},
-                    bc::LazyClass { dcls.cls().name() });
-    }
-    effect_free(env);
-  }
-  popC(env);
-  push(env, TLazyCls);
-}
-
 void in(ISS& env, const bc::EnumClassLabelName& op) {
   auto const ty = topC(env);
   if (ty.subtypeOf(BEnumClassLabel) && is_specialized_ecl(ty)) {

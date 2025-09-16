@@ -599,12 +599,6 @@ SSATmp* simplifyLdCls(State& env, const IRInstruction* inst) {
   if (str->inst()->is(LdClsName)) {
     return str->inst()->src(0);
   }
-  if (str->inst()->is(LdLazyClsName)) {
-    auto const lcls = str->inst()->src(0);
-    if (lcls->inst()->is(LdLazyCls)) {
-      return lcls->inst()->src(0);
-    }
-  }
   if (str->hasConstVal() && (cls->hasConstVal(TCls) || cls->isA(TNullptr))) {
     auto const sval = str->strVal();
     auto const cval = cls->hasConstVal(TCls) ? cls->clsVal() : nullptr;
@@ -3720,12 +3714,6 @@ SSATmp* simplifyLdClsName(State& env, const IRInstruction* inst) {
   return src->hasConstVal(TCls) ? cns(env, src->clsVal()->name()) : nullptr;
 }
 
-SSATmp* simplifyLdLazyCls(State& env, const IRInstruction* inst) {
-  auto const src = inst->src(0);
-  return src->hasConstVal(TCls) ?
-    cns(env, LazyClassData::create(src->clsVal()->name())) : nullptr;
-}
-
 SSATmp* simplifyLdLazyClsName(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   return src->hasConstVal(TLazyCls) ?
@@ -3739,7 +3727,7 @@ SSATmp* simplifyLdEnumClassLabelName(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyLookupCls(State& env, const IRInstruction* inst) {
   auto const str = inst->src(0);
-  if (str->inst()->is(LdClsName, LdLazyCls)) {
+  if (str->inst()->is(LdClsName)) {
     return str->inst()->src(0);
   }
   if (str->hasConstVal()) {
@@ -4301,7 +4289,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(HasReifiedParent)
       X(LdCls)
       X(LdClsName)
-      X(LdLazyCls)
       X(LdLazyClsName)
       X(LdEnumClassLabelName)
       X(LdWHResult)

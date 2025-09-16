@@ -109,7 +109,6 @@ static const struct {
   { OpDir,         {None,             Stack1,       OutString       }},
   { OpMethod,      {None,             Stack1,       OutString       }},
   { OpClassName,   {Stack1,           Stack1,       OutString       }},
-  { OpLazyClassFromClass, {Stack1,    Stack1,       OutLazyClass    }},
   { OpEnumClassLabelName, {Stack1,    Stack1,       OutString       }},
   { OpFuncCred,    {None,             Stack1,       OutObject       }},
 

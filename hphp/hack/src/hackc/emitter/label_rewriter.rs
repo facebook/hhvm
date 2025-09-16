@@ -290,7 +290,6 @@ where
             | Opcode::Keyset(..)
             | Opcode::LateBoundCls
             | Opcode::LazyClass(..)
-            | Opcode::LazyClassFromClass
             | Opcode::LockObj
             | Opcode::Lte
             | Opcode::Lt

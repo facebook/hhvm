@@ -138,7 +138,6 @@ impl<'a> PushCount<'a> for instr::Hhbc {
             | Hhbc::IterGetKey(..)
             | Hhbc::IterGetValue(..)
             | Hhbc::LateBoundCls(_)
-            | Hhbc::LazyClassFromClass(..)
             | Hhbc::LockObj { .. }
             | Hhbc::MemoSet(..)
             | Hhbc::MemoSetEager(..)

@@ -815,7 +815,6 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
         | (Hhbc::IssetS(_, _), _)
         | (Hhbc::IterBase(_, _), _)
         | (Hhbc::LateBoundCls(_), _)
-        | (Hhbc::LazyClassFromClass(_, _), _)
         | (Hhbc::LockObj(_, _), _)
         | (Hhbc::MemoSet(_, _, _), _)
         | (Hhbc::MemoSetEager(_, _, _), _)

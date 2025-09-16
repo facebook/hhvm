@@ -526,7 +526,6 @@ impl<'b> InstrEmitter<'b> {
                 Opcode::IterSetValue(iter_args, local)
             }
             Hhbc::LateBoundCls(_) => Opcode::LateBoundCls,
-            Hhbc::LazyClassFromClass(_, _) => Opcode::LazyClassFromClass,
             Hhbc::LockObj(..) => Opcode::LockObj,
             Hhbc::MemoSet(_, ref locals, _) => {
                 let locals = self.convert_local_range(locals);

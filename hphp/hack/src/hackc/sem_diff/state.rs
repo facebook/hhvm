@@ -1239,7 +1239,6 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::Keyset(..)
             | Opcode::LateBoundCls
             | Opcode::LazyClass(..)
-            | Opcode::LazyClassFromClass
             | Opcode::Method
             | Opcode::NewCol(..)
             | Opcode::NewDictArray(_)
@@ -1574,7 +1573,6 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::IssetS
         | Opcode::IterBase
         | Opcode::LateBoundCls
-        | Opcode::LazyClassFromClass
         | Opcode::LockObj
         | Opcode::Lt
         | Opcode::Lte

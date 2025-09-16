@@ -212,7 +212,6 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::Int(..)
             | Opcode::Keyset(..)
             | Opcode::LazyClass(..)
-            | Opcode::LazyClassFromClass
             | Opcode::NewCol(..)
             | Opcode::Null
             | Opcode::NullUninit

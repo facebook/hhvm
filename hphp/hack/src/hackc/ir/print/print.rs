@@ -1005,9 +1005,6 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) ->
         Hhbc::LateBoundCls(_) => {
             write!(w, "late_bound_cls")?;
         }
-        Hhbc::LazyClassFromClass(vid, _) => {
-            write!(w, "lazy_class_from_class {}", FmtVid(func, vid, verbose))?;
-        }
         Hhbc::LockObj(vid, _) => {
             write!(w, "lock_obj {}", FmtVid(func, vid, verbose))?;
         }

@@ -177,7 +177,6 @@ bool canDCE(const IRInstruction& inst) {
   case LdObjInvoke:
   case LdClsName:
   case LdLazyClsName:
-  case LdLazyCls:
   case LdEnumClassLabelName:
   case LdFuncCls:
   case LdFuncInOutBits:

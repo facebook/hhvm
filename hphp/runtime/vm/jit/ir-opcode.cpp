@@ -806,7 +806,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdInitRDSAddr:
   case LdIterEnd:
   case LdIterPos:
-  case LdLazyCls:
   case LdLazyClsName:
   case LdLoc:
   case LdLocAddr:

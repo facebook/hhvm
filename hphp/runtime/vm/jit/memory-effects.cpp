@@ -1780,7 +1780,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdUnwinderValue:
   case StUnwinderExn:
   case LdClsName:
-  case LdLazyCls:
   case LdAFWHActRec:
   case LdContActRec:
   case LdContArKey:

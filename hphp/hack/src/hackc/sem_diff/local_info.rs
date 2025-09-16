@@ -171,7 +171,6 @@ impl LocalInfo {
             | Opcode::Keyset(..)
             | Opcode::LateBoundCls
             | Opcode::LazyClass(..)
-            | Opcode::LazyClassFromClass
             | Opcode::LockObj
             | Opcode::Lt
             | Opcode::Lte

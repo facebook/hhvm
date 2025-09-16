@@ -201,8 +201,6 @@ pub(crate) enum Hhbc {
     IterInit,
     #[decl(fn hhbc_iter_next(it: *Iterator, key: **HackMixed, var: **HackMixed) -> *HackBool)]
     IterNext,
-    #[decl(fn hhbc_lazy_class_from_class(*HackMixed) -> *HackString)]
-    LazyClassFromClass,
     #[decl(fn hhbc_lock_obj(*HackMixed) -> void)]
     LockObj,
     #[decl(fn hhbc_memo_set(...) -> *HackMixed)]

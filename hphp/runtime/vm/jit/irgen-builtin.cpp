@@ -719,8 +719,7 @@ SSATmp* impl_opt_type_structure(IRGS& env, const ParamPrep& params,
   auto const clsTmp = [&] () -> SSATmp* {
     if (clsNameTmp->isA(TCls)) return clsNameTmp;
     if (clsNameTmp->isA(TObj)) return gen(env, LdObjClass, clsNameTmp);
-    if (clsNameTmp->inst()->is(LdClsName) ||
-        clsNameTmp->inst()->is(LdLazyCls)) {
+    if (clsNameTmp->inst()->is(LdClsName)) {
       return clsNameTmp->inst()->src(0);
     }
     if (clsNameTmp->type().subtypeOfAny(TStr, TLazyCls)) {

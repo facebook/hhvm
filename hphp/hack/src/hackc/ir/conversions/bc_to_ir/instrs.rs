@@ -1003,7 +1003,6 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::IterSetValue => simple!(Hhbc::IterSetValue),
         Opcode::LateBoundCls => simple!(Hhbc::LateBoundCls),
         Opcode::LazyClass => simple!(Immediate::LazyClass),
-        Opcode::LazyClassFromClass => simple!(Hhbc::LazyClassFromClass),
         Opcode::LockObj => simple!(Hhbc::LockObj),
         Opcode::Lt => simple!(Hhbc::CmpOp, CmpOp::Lt),
         Opcode::Lte => simple!(Hhbc::CmpOp, CmpOp::Lte),

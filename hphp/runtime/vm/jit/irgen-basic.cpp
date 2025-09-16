@@ -341,12 +341,6 @@ void emitClassName(IRGS& env) {
   push(env, gen(env, LdClsName, cls));
 }
 
-void emitLazyClassFromClass(IRGS& env) {
-  auto const cls = popC(env);
-  if (!cls->isA(TCls)) PUNT(LazyClassFromClass-NotClass);
-  push(env, gen(env, LdLazyCls, cls));
-}
-
 const StaticString
   s_name_of_not_enum_class_label("Attempting to get name of non enum class label");
 

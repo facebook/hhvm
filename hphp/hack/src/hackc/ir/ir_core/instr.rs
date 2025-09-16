@@ -508,7 +508,6 @@ pub enum Hhbc {
     IterGetValue(IterArgs, LocalId, LocId),
     IterSetValue(ValueId, IterArgs, LocalId, LocId),
     LateBoundCls(LocId),
-    LazyClassFromClass(ValueId, LocId),
     LockObj(ValueId, LocId),
     MemoSet(ValueId, Box<[LocalId]>, LocId),
     MemoSetEager(ValueId, Box<[LocalId]>, LocId),

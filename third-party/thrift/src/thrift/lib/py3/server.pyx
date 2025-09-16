@@ -295,6 +295,9 @@ cdef class ThriftServer:
             unique_ptr[[cServerModule]](module._cpp_module.release())
         )
 
+    def set_stream_expire_time(self, seconds):
+        self.server.get().setStreamExpireTime(milliseconds(<int64_t>(seconds * 1000)))
+
     @property
     def handler(self):
         if self.handler is not None:

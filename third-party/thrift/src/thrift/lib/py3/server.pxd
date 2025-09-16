@@ -96,6 +96,7 @@ cdef extern from "thrift/lib/cpp2/server/ThriftServer.h" \
         void setTaskExpireTime(milliseconds timeout)
         void setUseClientTimeout(cbool useClientTimeout)
         void addModule(unique_ptr[cServerModule] module)
+        void setStreamExpireTime(milliseconds timeout)
 
 cdef extern from "folly/ssl/OpenSSLCertUtils.h" \
         namespace "folly::ssl":

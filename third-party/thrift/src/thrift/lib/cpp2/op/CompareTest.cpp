@@ -282,11 +282,11 @@ TEST(CompareTest, UnorderedFields) {
   EXPECT_TRUE(equalTo(lhs, rhs));
   EXPECT_FALSE(lessThan(lhs, rhs));
 
-  lhs.f1()->push_front("0");
+  lhs.f1()->emplace_front("0");
   EXPECT_FALSE(equalTo(lhs, rhs));
   EXPECT_TRUE(lessThan(lhs, rhs));
 
-  rhs.f1()->push_front("0");
+  rhs.f1()->emplace_front("0");
   EXPECT_TRUE(equalTo(lhs, rhs));
   EXPECT_FALSE(lessThan(lhs, rhs));
 

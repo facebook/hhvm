@@ -386,19 +386,19 @@ TEST_F(RocketClientChannelTest, BatchedWriteFastFirstResponseFiberSync) {
           .delayed(std::chrono::seconds(2))
           .via(&evb)
           .thenValue([&](auto&&) { slowWritingSocket->flushBufferedWrites(); });
-  futures.push_back(std::move(sf));
+  futures.emplace_back(std::move(sf));
 
   for (size_t i = 0; i < 5; ++i) {
     sf = echoSync(client, 25).via(&evb).thenTry([](auto&& response) {
       EXPECT_TRUE(response.hasValue());
       EXPECT_EQ(25, response.value()->computeChainDataLength());
     });
-    futures.push_back(std::move(sf));
+    futures.emplace_back(std::move(sf));
 
     sf = noResponseIOBufSync(client, 25).via(&evb).thenTry([](auto&& response) {
       EXPECT_TRUE(response.hasValue());
     });
-    futures.push_back(std::move(sf));
+    futures.emplace_back(std::move(sf));
 
     sf = echoIOBufAsByteStreamSync(client, 25)
              .via(&evb)
@@ -413,14 +413,14 @@ TEST_F(RocketClientChannelTest, BatchedWriteFastFirstResponseFiberSync) {
                        })
                    .futureJoin();
              });
-    futures.push_back(std::move(sf));
+    futures.emplace_back(std::move(sf));
   }
 
   sf = echoSync(client, 2000).via(&evb).thenTry([](auto&& response) {
     EXPECT_TRUE(response.hasValue());
     EXPECT_EQ(2000, response.value()->computeChainDataLength());
   });
-  futures.push_back(std::move(sf));
+  futures.emplace_back(std::move(sf));
 
   folly::collectAllUnsafe(std::move(futures)).getVia(&evb);
 }
@@ -441,20 +441,20 @@ TEST_F(RocketClientChannelTest, BatchedWriteFastFirstResponseSemiFuture) {
           .delayed(std::chrono::seconds(2))
           .via(&evb)
           .thenValue([&](auto&&) { slowWritingSocket->flushBufferedWrites(); });
-  futures.push_back(std::move(sf));
+  futures.emplace_back(std::move(sf));
 
   for (size_t i = 0; i < 5; ++i) {
     sf = echoSemiFuture(client, 25).via(&evb).thenTry([&](auto&& response) {
       EXPECT_TRUE(response.hasValue());
       EXPECT_EQ(25, response.value()->computeChainDataLength());
     });
-    futures.push_back(std::move(sf));
+    futures.emplace_back(std::move(sf));
 
     sf = noResponseIOBufSemiFuture(client, 25)
              .via(&evb)
              .thenTry(
                  [&](auto&& response) { EXPECT_TRUE(response.hasValue()); });
-    futures.push_back(std::move(sf));
+    futures.emplace_back(std::move(sf));
 
     sf = echoIOBufAsByteStreamSemiFuture(client, 25)
              .via(&evb)
@@ -469,14 +469,14 @@ TEST_F(RocketClientChannelTest, BatchedWriteFastFirstResponseSemiFuture) {
                        })
                    .futureJoin();
              });
-    futures.push_back(std::move(sf));
+    futures.emplace_back(std::move(sf));
   }
 
   sf = echoSemiFuture(client, 2000).via(&evb).thenTry([&](auto&& response) {
     EXPECT_TRUE(response.hasValue());
     EXPECT_EQ(2000, response.value()->computeChainDataLength());
   });
-  futures.push_back(std::move(sf));
+  futures.emplace_back(std::move(sf));
 
   folly::collectAllUnsafe(std::move(futures)).getVia(&evb);
 }
@@ -502,19 +502,19 @@ void doFailLastRequestsInBatchFiber(
                   slowWritingSocket->errorOutBufferedWrites(
                       failLastRequestWithNBytesWritten);
                 });
-  futures.push_back(std::move(sf));
+  futures.emplace_back(std::move(sf));
 
   for (size_t i = 0; i < 5; ++i) {
     sf = echoSync(client, 25).via(&evb).thenTry([](auto&& response) {
       EXPECT_TRUE(response.hasValue());
       EXPECT_EQ(25, response.value()->computeChainDataLength());
     });
-    futures.push_back(std::move(sf));
+    futures.emplace_back(std::move(sf));
 
     sf = noResponseIOBufSync(client, 25).via(&evb).thenTry([](auto&& response) {
       EXPECT_FALSE(response.hasValue());
     });
-    futures.push_back(std::move(sf));
+    futures.emplace_back(std::move(sf));
 
     sf = echoIOBufAsByteStreamSync(client, 25)
              .via(&evb)
@@ -529,7 +529,7 @@ void doFailLastRequestsInBatchFiber(
                        })
                    .futureJoin();
              });
-    futures.push_back(std::move(sf));
+    futures.emplace_back(std::move(sf));
   }
 
   for (size_t i = 0; i < 5; ++i) {
@@ -539,13 +539,13 @@ void doFailLastRequestsInBatchFiber(
           response.exception()
               .template is_compatible_with<transport::TTransportException>());
     });
-    futures.push_back(std::move(sf));
+    futures.emplace_back(std::move(sf));
 
     sf = echoIOBufAsByteStreamSync(client, 2000)
              .via(&evb)
              .thenTry(
                  [&](auto&& stream) { EXPECT_TRUE(stream.hasException()); });
-    futures.push_back(std::move(sf));
+    futures.emplace_back(std::move(sf));
   }
 
   folly::collectAllUnsafe(std::move(futures)).getVia(&evb);
@@ -571,20 +571,20 @@ void doFailLastRequestsInBatchSemiFuture(
                   slowWritingSocket->errorOutBufferedWrites(
                       failLastRequestWithNBytesWritten);
                 });
-  futures.push_back(std::move(sf));
+  futures.emplace_back(std::move(sf));
 
   for (size_t i = 0; i < 5; ++i) {
     sf = echoSemiFuture(client, 25).via(&evb).thenTry([&](auto&& response) {
       EXPECT_TRUE(response.hasValue());
       EXPECT_EQ(25, response.value()->computeChainDataLength());
     });
-    futures.push_back(std::move(sf));
+    futures.emplace_back(std::move(sf));
 
     sf = noResponseIOBufSemiFuture(client, 25)
              .via(&evb)
              .thenTry(
                  [&](auto&& response) { EXPECT_TRUE(response.hasValue()); });
-    futures.push_back(std::move(sf));
+    futures.emplace_back(std::move(sf));
 
     sf = echoIOBufAsByteStreamSemiFuture(client, 25)
              .via(&evb)
@@ -599,7 +599,7 @@ void doFailLastRequestsInBatchSemiFuture(
                        })
                    .futureJoin();
              });
-    futures.push_back(std::move(sf));
+    futures.emplace_back(std::move(sf));
   }
 
   for (size_t i = 0; i < 5; ++i) {
@@ -609,13 +609,13 @@ void doFailLastRequestsInBatchSemiFuture(
           response.exception()
               .template is_compatible_with<transport::TTransportException>());
     });
-    futures.push_back(std::move(sf));
+    futures.emplace_back(std::move(sf));
 
     sf = echoIOBufAsByteStreamSemiFuture(client, 2000)
              .via(&evb)
              .thenTry(
                  [&](auto&& stream) { EXPECT_TRUE(stream.hasException()); });
-    futures.push_back(std::move(sf));
+    futures.emplace_back(std::move(sf));
   }
 
   folly::collectAllUnsafe(std::move(futures)).getVia(&evb);
@@ -659,7 +659,7 @@ TEST_F(
           .delayed(flushDelay)
           .via(&evb)
           .thenValue([&](auto&&) { slowWritingSocket->flushBufferedWrites(); });
-  futures.push_back(std::move(sf));
+  futures.emplace_back(std::move(sf));
 
   auto checkResponse = [](const auto& response, size_t expectedResponseSize) {
     if (expectedResponseSize == 0) {
@@ -696,7 +696,7 @@ TEST_F(
                             auto&& response) {
                  checkResponse(response, responseSize);
                });
-      futures.push_back(std::move(sf));
+      futures.emplace_back(std::move(sf));
 
       sf = echoSemiFuture(client, requestSize, timeout)
                .via(&evb)
@@ -705,7 +705,7 @@ TEST_F(
                             auto&& response) {
                  checkResponse(response, responseSize);
                });
-      futures.push_back(std::move(sf));
+      futures.emplace_back(std::move(sf));
 
       ++requestSize;
     }
@@ -739,7 +739,7 @@ TEST_F(RocketClientChannelTest, StreamInitialResponseBeforeBatchedWriteFails) {
                   slowWritingSocket->errorOutBufferedWrites(
                       folly::Optional<size_t>(0));
                 });
-  futures.push_back(std::move(sf));
+  futures.emplace_back(std::move(sf));
 
   // Keep the stream alive on both client and server until the end of the test
   std::optional<ClientBufferedStream<signed char>::Subscription> subscription;
@@ -754,7 +754,7 @@ TEST_F(RocketClientChannelTest, StreamInitialResponseBeforeBatchedWriteFails) {
              subscription.emplace(
                  std::move(*stream).subscribeExTry(&evb, [](auto&&) {}));
            });
-  futures.push_back(std::move(sf));
+  futures.emplace_back(std::move(sf));
 
   // Include more requests in the write batch
   for (size_t i = 0; i < 10; ++i) {
@@ -764,7 +764,7 @@ TEST_F(RocketClientChannelTest, StreamInitialResponseBeforeBatchedWriteFails) {
           response.exception()
               .template is_compatible_with<transport::TTransportException>());
     });
-    futures.push_back(std::move(sf));
+    futures.emplace_back(std::move(sf));
   }
 
   folly::collectAllUnsafe(std::move(futures)).getVia(&evb);

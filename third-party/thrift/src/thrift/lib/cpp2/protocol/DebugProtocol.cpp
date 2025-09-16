@@ -94,7 +94,7 @@ void DebugProtocolWriter::indentDown() {
 
 void DebugProtocolWriter::pushState(ItemType t) {
   indentUp();
-  writeState_.push_back(t);
+  writeState_.emplace_back(t);
 }
 
 void DebugProtocolWriter::popState() {

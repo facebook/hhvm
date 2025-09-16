@@ -73,7 +73,7 @@ void TProcessorBase::addProcessorEventHandler_deprecated(
   assert(
       find(getHandlers().begin(), getHandlers().end(), handler) ==
       getHandlers().end());
-  getHandlers().push_back(std::move(handler));
+  getHandlers().emplace_back(std::move(handler));
 }
 
 void TProcessorBase::removeProcessorEventHandler(
@@ -147,7 +147,7 @@ void TClientBase::addClientEventHandler(
   assert(
       find(getHandlers().begin(), getHandlers().end(), handler) ==
       getHandlers().end());
-  getHandlers().push_back(std::move(handler));
+  getHandlers().emplace_back(std::move(handler));
 }
 
 void TClientBase::removeClientEventHandler(

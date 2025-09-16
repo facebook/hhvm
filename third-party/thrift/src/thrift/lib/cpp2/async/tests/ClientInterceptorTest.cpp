@@ -645,16 +645,16 @@ class TracingClientInterceptor : public NamedClientInterceptor<folly::Unit> {
   const std::vector<Trace>& responses() const { return responses_; }
 
   std::optional<folly::Unit> onRequest(RequestInfo requestInfo) override {
-    requests_.push_back(
-        {std::string(requestInfo.serviceName),
-         std::string(requestInfo.methodName)});
+    requests_.emplace_back(
+        std::string(requestInfo.serviceName),
+        std::string(requestInfo.methodName));
     return folly::unit;
   }
 
   void onResponse(folly::Unit*, ResponseInfo responseInfo) override {
-    responses_.push_back(
-        {std::string(responseInfo.serviceName),
-         std::string(responseInfo.methodName)});
+    responses_.emplace_back(
+        std::string(responseInfo.serviceName),
+        std::string(responseInfo.methodName));
   }
 
  private:

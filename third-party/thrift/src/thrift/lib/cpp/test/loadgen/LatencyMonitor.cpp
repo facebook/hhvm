@@ -442,19 +442,19 @@ void LatencyMonitor::setDefaultOpFields() {
 
   if (numEnabledOps == 1) {
     // If there is just 1 operation, print all statistics for it
-    defaultFields.push_back(FieldInfo(FIELD_QPS));
-    defaultFields.push_back(FieldInfo(FIELD_LATENCY));
-    defaultFields.push_back(FieldInfo(FIELD_PCT_LATENCY));
-    defaultFields.push_back(FieldInfo(FIELD_ALL_TIME_QPS));
-    defaultFields.push_back(FieldInfo(FIELD_ALL_TIME_LATENCY));
-    defaultFields.push_back(FieldInfo(FIELD_ALL_TIME_PCT_LATENCY));
+    defaultFields.emplace_back(FIELD_QPS);
+    defaultFields.emplace_back(FIELD_LATENCY);
+    defaultFields.emplace_back(FIELD_PCT_LATENCY);
+    defaultFields.emplace_back(FIELD_ALL_TIME_QPS);
+    defaultFields.emplace_back(FIELD_ALL_TIME_LATENCY);
+    defaultFields.emplace_back(FIELD_ALL_TIME_PCT_LATENCY);
   } else {
     // Otherwise, print the QPS and latency for each operation
-    defaultFields.push_back(FieldInfo(FIELD_QPS));
-    defaultFields.push_back(FieldInfo(FIELD_LATENCY));
-    defaultFields.push_back(FieldInfo(FIELD_PCT_LATENCY));
+    defaultFields.emplace_back(FIELD_QPS);
+    defaultFields.emplace_back(FIELD_LATENCY);
+    defaultFields.emplace_back(FIELD_PCT_LATENCY);
     // And the print the all-time QPS summed across all operations
-    totalFields_.push_back(FieldInfo(FIELD_ALL_TIME_QPS));
+    totalFields_.emplace_back(FIELD_ALL_TIME_QPS);
   }
 
   for (uint32_t op = 0; op < numOpTypes_; ++op) {

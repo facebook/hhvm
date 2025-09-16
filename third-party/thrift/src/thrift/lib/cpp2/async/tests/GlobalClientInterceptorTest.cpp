@@ -46,9 +46,9 @@ class GlobalTracingClientInterceptor
   const std::vector<Trace>& requests() const { return requests_; }
 
   std::optional<folly::Unit> onRequest(RequestInfo requestInfo) override {
-    requests_.push_back(
-        {std::string(requestInfo.serviceName),
-         std::string(requestInfo.methodName)});
+    requests_.emplace_back(
+        std::string(requestInfo.serviceName),
+        std::string(requestInfo.methodName));
     return folly::unit;
   }
 

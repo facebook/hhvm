@@ -51,9 +51,7 @@ GaussianMixtureModel::GaussianMixtureModel(const folly::dynamic& cfgDict) {
         for (uint32_t idx = 0; idx < this->nComponents; ++idx) {
           boost::normal_distribution<double> dist(
               this->mus[idx], this->sigmas[idx]);
-          ggP.push_back(
-              boost::variate_generator<RNG, boost::normal_distribution<double>>(
-                  RNG::getRNG(), dist));
+          ggP.emplace_back(RNG::getRNG(), dist);
         }
         return ggP;
       });

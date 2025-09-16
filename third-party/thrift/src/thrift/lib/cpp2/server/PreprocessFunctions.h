@@ -40,7 +40,7 @@ class PreprocessFunctionSet {
           name));
     }
 
-    functions_.push_back(std::make_pair(name, std::move(function)));
+    functions_.emplace_back(name, std::move(function));
   }
 
   void deprecatedSet(Func&& function) {

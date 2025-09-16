@@ -62,7 +62,7 @@ class RequestDebugLog : public folly::RequestData {
     if (!truncated_ &&
         entries_.size() >= FLAGS_thrift_server_request_debug_log_entries_max) {
       truncated_ = true;
-      entries_.push_back("THE REST OF LOG WILL BE TRUNCATED.");
+      entries_.emplace_back("THE REST OF LOG WILL BE TRUNCATED.");
     }
     return entries_;
   }

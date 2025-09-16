@@ -309,12 +309,12 @@ TEST_F(SinkServiceTest, SinkEarlyFinalResponseWithLongWait) {
 TEST_F(SinkServiceTest, DISABLED_SinkEarlyClose) {
   std::vector<std::thread> ths;
   for (int i = 0; i < 100; i++) {
-    ths.push_back(std::thread([this]() {
+    ths.emplace_back([this]() {
       connectToServer(
           [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
             auto sink = co_await client.co_range(0, 100);
           });
-    }));
+    });
   }
   for (auto& th : ths) {
     th.join();

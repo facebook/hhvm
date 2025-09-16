@@ -103,33 +103,33 @@ class TransportUpgradeTest : public TestSetup {
           EXPECT_TRUE(response.hasValue());
           EXPECT_EQ(3, response.value());
         });
-    futures.push_back(std::move(f1));
+    futures.emplace_back(std::move(f1));
     auto f2 = client->semifuture_add(1).via(&evb).thenTry([&](auto&& response) {
       EXPECT_TRUE(response.hasValue());
       EXPECT_LE(1, response.value());
       EXPECT_GE(8, response.value());
     });
-    futures.push_back(std::move(f2));
+    futures.emplace_back(std::move(f2));
     auto f3 = client->semifuture_add(2).via(&evb).thenTry([&](auto&& response) {
       EXPECT_TRUE(response.hasValue());
       EXPECT_LE(2, response.value());
       EXPECT_GE(8, response.value());
     });
-    futures.push_back(std::move(f3));
+    futures.emplace_back(std::move(f3));
     auto f4 = client->semifuture_addTwoNumbers(42, 15).via(&evb).thenTry(
         [&](auto&& response) {
           EXPECT_TRUE(response.hasValue());
           EXPECT_EQ(57, response.value());
         });
-    futures.push_back(std::move(f4));
+    futures.emplace_back(std::move(f4));
     auto f5 = client->semifuture_add(5).via(&evb).thenTry([&](auto&& response) {
       EXPECT_TRUE(response.hasValue());
       EXPECT_LE(5, response.value());
       EXPECT_GE(8, response.value());
     });
-    futures.push_back(std::move(f5));
+    futures.emplace_back(std::move(f5));
     auto f6 = client->semifuture_noResponse("test").via(&evb);
-    futures.push_back(std::move(f6));
+    futures.emplace_back(std::move(f6));
 
     folly::collectAllUnsafe(std::move(futures)).getVia(&evb);
 
@@ -219,7 +219,7 @@ TEST_F(TransportUpgradeTest, RawClientRocketUpgradeTimeout) {
           .delayed(std::chrono::milliseconds(150))
           .via(&evb)
           .thenValue([&](auto&&) { slowWritingSocket->flushBufferedWrites(); });
-  futures.push_back(std::move(sf));
+  futures.emplace_back(std::move(sf));
 
   THRIFT_FLAG_SET_MOCK(raw_client_rocket_upgrade_timeout_ms, 100);
 
@@ -245,7 +245,7 @@ TEST_F(TransportUpgradeTest, RawClientRocketUpgradeTimeout) {
         ASSERT_NE(nullptr, upgradeChannel);
         ASSERT_EQ(nullptr, upgradeChannel->rocketChannel_);
       });
-  futures.push_back(std::move(sf));
+  futures.emplace_back(std::move(sf));
 
   folly::collectAllUnsafe(std::move(futures)).getVia(&evb);
 }

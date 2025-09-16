@@ -373,7 +373,7 @@ FOLLY_NODISCARD std::optional<ResponseRpcError> processFirstResponse(
     if (size) {
       keys.reserve(size);
       for (auto& [k, v] : *metadata.otherMetadata()) {
-        keys.push_back(k);
+        keys.emplace_back(k);
       }
     }
     return folly::dynamic::object("size", size) //

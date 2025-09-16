@@ -43,7 +43,7 @@ TEST(FrozenUtil, FreezeAndMap) {
 
   auto thawed = mapped.thaw();
   EXPECT_EQ(original, thawed);
-  original.push_back("different");
+  original.emplace_back("different");
   EXPECT_NE(original, thawed);
 }
 

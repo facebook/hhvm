@@ -143,7 +143,7 @@ void ReconnectingRequestChannel::sendRequestResponse(
         cob.release()->onResponseError(pendingRequestOverflowError());
         return;
       }
-      requestQueue_.push_back(
+      requestQueue_.emplace_back(
           [this,
            options = options,
            methodMetadata = std::move(methodMetadata),
@@ -198,7 +198,7 @@ void ReconnectingRequestChannel::sendRequestNoResponse(
         cob.release()->onResponseError(pendingRequestOverflowError());
         return;
       }
-      requestQueue_.push_back(
+      requestQueue_.emplace_back(
           [this,
            options = options,
            methodMetadata = std::move(methodMetadata),
@@ -252,15 +252,15 @@ void ReconnectingRequestChannel::sendRequestStream(
         cob->onFirstResponseError(pendingRequestOverflowError());
         return;
       }
-      requestQueue_.push_back([this,
-                               options = options,
-                               methodMetadata = std::move(methodMetadata),
-                               request = std::move(request),
-                               header = std::move(header),
-                               cob = std::move(cob),
-                               frameworkMetadata =
-                                   std::move(frameworkMetadata)](
-                                  bool failRequest) mutable {
+      requestQueue_.emplace_back([this,
+                                  options = options,
+                                  methodMetadata = std::move(methodMetadata),
+                                  request = std::move(request),
+                                  header = std::move(header),
+                                  cob = std::move(cob),
+                                  frameworkMetadata =
+                                      std::move(frameworkMetadata)](
+                                     bool failRequest) mutable {
         if (failRequest) {
           cob->onFirstResponseError(requestQueueNonEmptyAtDestructionError());
           return;
@@ -304,15 +304,15 @@ void ReconnectingRequestChannel::sendRequestSink(
         cob->onFirstResponseError(pendingRequestOverflowError());
         return;
       }
-      requestQueue_.push_back([this,
-                               options = options,
-                               methodMetadata = std::move(methodMetadata),
-                               request = std::move(request),
-                               header = std::move(header),
-                               cob = std::move(cob),
-                               frameworkMetadata =
-                                   std::move(frameworkMetadata)](
-                                  bool failRequest) mutable {
+      requestQueue_.emplace_back([this,
+                                  options = options,
+                                  methodMetadata = std::move(methodMetadata),
+                                  request = std::move(request),
+                                  header = std::move(header),
+                                  cob = std::move(cob),
+                                  frameworkMetadata =
+                                      std::move(frameworkMetadata)](
+                                     bool failRequest) mutable {
         if (failRequest) {
           cob->onFirstResponseError(requestQueueNonEmptyAtDestructionError());
           return;

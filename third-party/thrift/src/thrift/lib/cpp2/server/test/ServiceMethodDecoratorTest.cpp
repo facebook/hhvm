@@ -364,7 +364,7 @@ CO_TEST_P(ServiceMethodDecoratorTestP, DecoratorDataPassed) {
         assets = *extractedAssets;
       }
       assets.push_back(*response.text());
-      assets.push_back("after_echo");
+      assets.emplace_back("after_echo");
       afterParams.decoratorData.put(assetDataOnResponse_, std::move(assets));
     }
 

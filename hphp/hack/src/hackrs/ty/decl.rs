@@ -6,7 +6,6 @@
 mod debug;
 pub mod folded;
 mod from_oxidized;
-mod from_oxidized_by_ref;
 mod ocamlrep;
 mod printer;
 pub mod shallow;

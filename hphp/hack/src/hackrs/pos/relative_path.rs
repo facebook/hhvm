@@ -138,12 +138,6 @@ impl From<&relative_path::RelativePath> for RelativePath {
     }
 }
 
-impl From<&oxidized_by_ref::relative_path::RelativePath<'_>> for RelativePath {
-    fn from(path: &oxidized_by_ref::relative_path::RelativePath<'_>) -> Self {
-        Self::new(path.prefix(), path.path())
-    }
-}
-
 impl fmt::Debug for RelativePath {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}|{}", self.prefix, self.path().display())

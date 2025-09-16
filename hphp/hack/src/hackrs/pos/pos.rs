@@ -35,7 +35,6 @@ pub trait Pos:
     + DeserializeOwned
     + for<'a> From<oxidized::pos::Pos>
     + for<'a> From<&'a oxidized::pos::Pos>
-    + for<'a> From<&'a oxidized_by_ref::pos::Pos<'a>>
     + for<'a> ToOxidized<Output = oxidized::pos::Pos>
     + ToOcamlRep
     + FromOcamlRep
@@ -55,7 +54,7 @@ pub trait Pos:
         })
     }
 
-    fn from_decl(pos: &oxidized_by_ref::pos::Pos<'_>) -> Self {
+    fn from_decl(pos: oxidized::pos::Pos) -> Self {
         Self::mk(|| {
             let PosSpanRaw { start, end } = pos.to_raw_span();
             (pos.filename().into(), start, end)
@@ -261,12 +260,6 @@ impl<'a> From<&'a oxidized::pos::Pos> for BPos {
     }
 }
 
-impl<'a> From<&'a oxidized_by_ref::pos::Pos<'a>> for BPos {
-    fn from(pos: &'a oxidized_by_ref::pos::Pos<'a>) -> Self {
-        Self::from_decl(pos)
-    }
-}
-
 impl ToOxidized for BPos {
     type Output = oxidized::pos::Pos;
 
@@ -430,12 +423,6 @@ impl<'a> From<&'a oxidized::pos::Pos> for NPos {
     }
 }
 
-impl<'a> From<&'a oxidized_by_ref::pos::Pos<'a>> for NPos {
-    fn from(pos: &'a oxidized_by_ref::pos::Pos<'a>) -> Self {
-        Self::from_decl(pos)
-    }
-}
-
 impl ToOxidized for NPos {
     type Output = oxidized::pos::Pos;
 
@@ -514,26 +501,10 @@ impl<'a, S: From<&'a str>, P: Pos> From<&'a oxidized::ast_defs::Id> for Position
     }
 }
 
-impl<'a, S: From<&'a str>, P: Pos> From<oxidized_by_ref::ast_defs::Id<'a>> for Positioned<S, P> {
-    fn from(pos_id: oxidized_by_ref::ast_defs::Id<'a>) -> Self {
-        let oxidized_by_ref::ast_defs::Id(pos, id) = pos_id;
-        Self::new(Pos::from_decl(pos), S::from(id))
-    }
-}
-
 impl<S: From<String>, P: Pos> From<oxidized::typing_defs::PosId> for Positioned<S, P> {
     fn from(pos_id: oxidized::typing_defs::PosId) -> Self {
         let (pos, id) = pos_id;
         Self::new(Pos::from_ast(&pos), S::from(id))
-    }
-}
-
-impl<'a, S: From<&'a str>, P: Pos> From<oxidized_by_ref::typing_defs::PosId<'a>>
-    for Positioned<S, P>
-{
-    fn from(pos_id: oxidized_by_ref::typing_defs::PosId<'a>) -> Self {
-        let (pos, id) = pos_id;
-        Self::new(Pos::from_decl(pos), S::from(id))
     }
 }
 

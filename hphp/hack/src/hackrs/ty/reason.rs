@@ -44,7 +44,6 @@ pub trait Reason:
     + Serialize
     + DeserializeOwned
     + for<'a> From<oxidized::typing_reason::T_>
-    + for<'a> From<oxidized_by_ref::typing_reason::T_<'a>>
     + ToOxidized<Output = oxidized::typing_reason::T_>
     + ToOcamlRep
     + FromOcamlRep
@@ -128,54 +127,6 @@ pub trait Reason:
             }
         })
     }
-
-    fn from_oxidized_by_ref(reason: oxidized_by_ref::typing_reason::T_<'_>) -> Self {
-        Self::mk(|| {
-            use ReasonImpl as RI;
-            use oxidized_by_ref::typing_reason::T_ as OR;
-            use oxidized_by_ref::typing_reason::WitnessDecl as WD;
-
-            match reason {
-                OR::NoReason => RI::NoReason,
-                OR::FromWitnessDecl(&WD::WitnessFromDecl(pos)) => {
-                    RI::FromWitnessDecl(WitnessDecl::WitnessFromDecl(pos.into()))
-                }
-
-                OR::FromWitnessDecl(&WD::Hint(pos)) => {
-                    RI::FromWitnessDecl(WitnessDecl::Hint(pos.into()))
-                }
-
-                OR::FromWitnessDecl(&WD::ClassClass(&(pos, s))) => RI::FromWitnessDecl(
-                    WitnessDecl::ClassClass(pos.into(), TypeName(Symbol::new(s))),
-                ),
-
-                OR::FromWitnessDecl(&WD::VarParamFromDecl(pos)) => {
-                    RI::FromWitnessDecl(WitnessDecl::VarParamFromDecl(pos.into()))
-                }
-
-                OR::FromWitnessDecl(&WD::TupleFromSplat(pos)) => {
-                    RI::FromWitnessDecl(WitnessDecl::TupleFromSplat(pos.into()))
-                }
-
-                OR::FromWitnessDecl(&WD::VecOrDictKey(pos)) => {
-                    RI::FromWitnessDecl(WitnessDecl::VecOrDictKey(pos.into()))
-                }
-
-                OR::FromWitnessDecl(&WD::RetFunKindFromDecl(&(pos, fun_kind))) => {
-                    RI::FromWitnessDecl(WitnessDecl::RetFunKindFromDecl(pos.into(), fun_kind))
-                }
-
-                OR::Instantiate {
-                    type__: r1,
-                    var_name: sym,
-                    var: r2,
-                } => RI::Instantiate((*r1).into(), TypeName(Symbol::new(sym)), (*r2).into()),
-                _ => {
-                    panic!("Error occurred: {:#?}", reason)
-                }
-            }
-        })
-    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, EqModuloPos, Hash, Serialize, Deserialize)]
@@ -191,20 +142,6 @@ pub enum ExprDepTypeReason {
     ERparent(Symbol),
     ERself(Symbol),
     ERpu(Symbol),
-}
-
-impl<'a> From<oxidized_by_ref::typing_reason::ExprDepTypeReason<'a>> for ExprDepTypeReason {
-    fn from(edtr: oxidized_by_ref::typing_reason::ExprDepTypeReason<'a>) -> Self {
-        use oxidized_by_ref::typing_reason::ExprDepTypeReason as Obr;
-        match edtr {
-            Obr::ERexpr(i) => ExprDepTypeReason::ERexpr(i),
-            Obr::ERstatic => ExprDepTypeReason::ERstatic,
-            Obr::ERclass(s) => ExprDepTypeReason::ERclass(Symbol::new(s)),
-            Obr::ERparent(s) => ExprDepTypeReason::ERparent(Symbol::new(s)),
-            Obr::ERself(s) => ExprDepTypeReason::ERself(Symbol::new(s)),
-            Obr::ERpu(s) => ExprDepTypeReason::ERpu(Symbol::new(s)),
-        }
-    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, EqModuloPos, Hash, Serialize, Deserialize)]
@@ -283,12 +220,6 @@ impl From<oxidized::typing_reason::T_> for BReason {
     }
 }
 
-impl<'a> From<oxidized_by_ref::typing_reason::Reason<'a>> for BReason {
-    fn from(reason: oxidized_by_ref::typing_reason::Reason<'a>) -> Self {
-        Self::from_oxidized_by_ref(reason)
-    }
-}
-
 impl ToOxidized for BReason {
     type Output = oxidized::typing_reason::Reason;
     // Unused
@@ -350,11 +281,6 @@ impl Walkable<NReason> for NReason {}
 impl From<oxidized::typing_reason::T_> for NReason {
     fn from(reason: oxidized::typing_reason::T_) -> Self {
         Self::from_oxidized(reason)
-    }
-}
-impl<'a> From<oxidized_by_ref::typing_reason::T_<'a>> for NReason {
-    fn from(reason: oxidized_by_ref::typing_reason::T_<'a>) -> Self {
-        Self::from_oxidized_by_ref(reason)
     }
 }
 

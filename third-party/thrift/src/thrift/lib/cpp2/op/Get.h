@@ -470,18 +470,24 @@ namespace detail {
 
 template <size_t... I, typename F>
 constexpr void for_each_ordinal_impl(F&& f, std::index_sequence<I...>) {
-  // This doesn't use a fold expression because it hits clang expression nesting
-  // limits for large structs.
+  // This doesn't use fold expression (from C++17) as this file is used in
+  // C++14 environment as well.
   int unused[] = {0, (f(type::detail::pos_to_ordinal<I>{}), 0)...};
   static_cast<void>(unused);
 }
 
 template <size_t... I, typename F>
 ord_result_t<F> find_by_ordinal_impl(F&& f, std::index_sequence<I...>) {
-  ord_result_t<F> result{};
-  (void)((result = f(type::detail::pos_to_ordinal<I>{}),
-          static_cast<bool>(result)) ||
-         ...);
+  auto result = ord_result_t<F>();
+  // TODO(afuller): Use a short circuting c++17 folding expression.
+  for_each_ordinal_impl(
+      [&](auto id) {
+        auto found = f(id);
+        if (static_cast<bool>(found)) {
+          result = std::move(found);
+        }
+      },
+      std::index_sequence<I...>{});
   return result;
 }
 

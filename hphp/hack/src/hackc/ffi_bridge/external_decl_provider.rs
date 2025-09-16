@@ -19,7 +19,6 @@ use libc::c_char;
 
 use crate::DeclProvider;
 use crate::DeclsHolder;
-use crate::ParsedFileHolder;
 
 /// Keep this in sync with struct ExternalDeclProviderResult in decl_provider.h
 #[repr(C)]
@@ -134,9 +133,7 @@ impl<'a> ExternalDeclProvider<'a> {
             ExternalDeclProviderResult::Missing => Err(Error::NotFound),
             ExternalDeclProviderResult::Decls(ptr) => {
                 let holder = unsafe { ptr.as_ref() }.unwrap();
-                match &holder.parsed_file {
-                    ParsedFileHolder::O(file) => find(&file.decls),
-                }
+                find(&holder.parsed_file.decls)
             }
             ExternalDeclProviderResult::RustVec(p) => {
                 // turn raw pointer back into &Vec<u8>

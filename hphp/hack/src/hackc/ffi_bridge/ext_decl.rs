@@ -53,11 +53,6 @@ use crate::ffi::ExtDeclTypeDef;
 use crate::ffi::ExtDeclTypeStructure;
 use crate::ffi::ExtDeclTypeStructureSubType;
 
-#[derive(Debug)]
-pub enum ParsedFileHolder {
-    O(ParsedFile),
-}
-
 fn find_class<'a>(parsed_file: &'a ParsedFile, symbol: &str) -> Option<&'a ShallowClass> {
     let input_symbol_formatted = symbol.starts_with('\\');
     parsed_file
@@ -72,150 +67,130 @@ fn find_class<'a>(parsed_file: &'a ParsedFile, symbol: &str) -> Option<&'a Shall
         .map(|(_, shallow_class)| shallow_class)
 }
 
-pub fn get_file_attributes(parsed_file: &ParsedFileHolder, name: &str) -> Vec<ExtDeclAttribute> {
-    match parsed_file {
-        ParsedFileHolder::O(file) => get_attributes(&file.file_attributes, name),
+pub fn get_file_attributes(parsed_file: &ParsedFile, name: &str) -> Vec<ExtDeclAttribute> {
+    get_attributes(&parsed_file.file_attributes, name)
+}
+
+pub fn get_file_consts(parsed_file: &ParsedFile, name: &str) -> Vec<ExtDeclFileConst> {
+    parsed_file
+        .decls
+        .consts()
+        .filter(|(cname, _)| name.is_empty() || name == strip_global_ns(cname))
+        .map(|(cname, decl)| ExtDeclFileConst {
+            name: fmt_type(cname),
+            type_: extract_type_name(&decl.type_),
+            value: str_or_empty(decl.value.as_deref()),
+        })
+        .collect()
+}
+
+pub fn get_file_funcs(parsed_file: &ParsedFile, name: &str) -> Vec<ExtDeclFileFunc> {
+    parsed_file
+        .decls
+        .funs()
+        .filter(|(cname, _)| name.is_empty() || name == strip_global_ns(cname))
+        .map(|(cname, decl)| ExtDeclFileFunc {
+            name: fmt_type(cname),
+            type_: extract_type_name(&decl.type_),
+            module: id_or_empty(decl.module.as_ref()),
+            internal: decl.internal,
+            support_dynamic_type: decl.support_dynamic_type,
+            php_std_lib: decl.php_std_lib,
+            no_auto_dynamic: decl.no_auto_dynamic,
+            no_auto_likes: decl.no_auto_likes,
+            signature: get_signature(&decl.type_.1),
+        })
+        .collect()
+}
+
+pub fn get_file_modules(parsed_file: &ParsedFile, name: &str) -> Vec<ExtDeclModule> {
+    parsed_file
+        .decls
+        .modules()
+        .filter(|(cname, _)| name.is_empty() || cname == &name)
+        .map(|(cname, _)| ExtDeclModule {
+            name: fmt_type(cname),
+        })
+        .collect()
+}
+
+pub fn get_file_module_membership(parsed_file: &ParsedFile) -> String {
+    if let Some(module_membership) = &parsed_file.module_membership {
+        module_membership.to_string()
+    } else {
+        "".to_string()
     }
 }
 
-pub fn get_file_consts(parsed_file: &ParsedFileHolder, name: &str) -> Vec<ExtDeclFileConst> {
-    match parsed_file {
-        ParsedFileHolder::O(file) => file
-            .decls
-            .consts()
-            .filter(|(cname, _)| name.is_empty() || name == strip_global_ns(cname))
-            .map(|(cname, decl)| ExtDeclFileConst {
-                name: fmt_type(cname),
-                type_: extract_type_name(&decl.type_),
-                value: str_or_empty(decl.value.as_deref()),
-            })
-            .collect(),
-    }
-}
-
-pub fn get_file_funcs(parsed_file: &ParsedFileHolder, name: &str) -> Vec<ExtDeclFileFunc> {
-    match parsed_file {
-        ParsedFileHolder::O(file) => file
-            .decls
-            .funs()
-            .filter(|(cname, _)| name.is_empty() || name == strip_global_ns(cname))
-            .map(|(cname, decl)| ExtDeclFileFunc {
-                name: fmt_type(cname),
-                type_: extract_type_name(&decl.type_),
-                module: id_or_empty(decl.module.as_ref()),
-                internal: decl.internal,
-                support_dynamic_type: decl.support_dynamic_type,
-                php_std_lib: decl.php_std_lib,
-                no_auto_dynamic: decl.no_auto_dynamic,
-                no_auto_likes: decl.no_auto_likes,
-                signature: get_signature(&decl.type_.1),
-            })
-            .collect(),
-    }
-}
-
-pub fn get_file_modules(parsed_file: &ParsedFileHolder, name: &str) -> Vec<ExtDeclModule> {
-    match parsed_file {
-        ParsedFileHolder::O(file) => file
-            .decls
-            .modules()
-            .filter(|(cname, _)| name.is_empty() || cname == &name)
-            .map(|(cname, _)| ExtDeclModule {
-                name: fmt_type(cname),
-            })
-            .collect(),
-    }
-}
-
-pub fn get_file_module_membership(parsed_file: &ParsedFileHolder) -> String {
-    match parsed_file {
-        ParsedFileHolder::O(file) => {
-            if let Some(module_membership) = &file.module_membership {
-                module_membership.to_string()
-            } else {
-                "".to_string()
-            }
-        }
-    }
-}
-
-pub fn get_file_typedefs(parsed_file: &ParsedFileHolder, name: &str) -> Vec<ExtDeclTypeDef> {
-    match parsed_file {
-        ParsedFileHolder::O(file) => file
-            .decls
-            .typedefs()
-            .filter(|(cname, _)| name.is_empty() || name == strip_global_ns(cname))
-            .map(|(cname, decl)| {
-                let (visibility, type_) = match &decl.type_assignment {
-                    TypedefTypeAssignment::SimpleTypeDef(vis, hint) => {
-                        (enum_typedef_visibility(vis), extract_type_name(hint))
-                    }
-                    TypedefTypeAssignment::CaseType(variant, variants) => {
-                        let mut hints;
-                        let ty_ = if variants.is_empty() {
-                            variant.0.1.clone()
-                        } else {
-                            hints = variants.iter().map(|v| v.0.clone()).collect::<Vec<_>>();
-                            hints.insert(0, variant.0.clone());
-                            Box::new(Ty_::Tunion(hints))
-                        };
-                        (
-                            String::from("case_type"),
-                            extract_type_name(&Ty(
-                                oxidized::typing_reason::Reason::NoReason, // the position is ignored when printing the type
-                                ty_,
-                            )),
-                        )
-                    }
-                };
-                ExtDeclTypeDef {
-                    name: fmt_type(cname),
-                    module: id_or_empty(decl.module.as_ref()),
-                    visibility,
-                    tparams: get_typed_params(&decl.tparams),
-                    as_constraint: extract_type_name_opt(decl.as_constraint.as_ref()),
-                    super_constraint: extract_type_name_opt(decl.super_constraint.as_ref()),
-                    type_,
-                    is_ctx: decl.is_ctx,
-                    attributes: get_attributes(&decl.attributes, ""),
-                    internal: decl.internal,
-                    docs_url: str_or_empty(decl.docs_url.as_deref()),
+pub fn get_file_typedefs(parsed_file: &ParsedFile, name: &str) -> Vec<ExtDeclTypeDef> {
+    parsed_file
+        .decls
+        .typedefs()
+        .filter(|(cname, _)| name.is_empty() || name == strip_global_ns(cname))
+        .map(|(cname, decl)| {
+            let (visibility, type_) = match &decl.type_assignment {
+                TypedefTypeAssignment::SimpleTypeDef(vis, hint) => {
+                    (enum_typedef_visibility(vis), extract_type_name(hint))
                 }
-            })
-            .collect(),
-    }
-}
-
-pub fn get_type_structure(parsed_file: &ParsedFileHolder, name: &str) -> Vec<ExtDeclTypeStructure> {
-    match parsed_file {
-        ParsedFileHolder::O(file) => file
-            .decls
-            .typedefs()
-            .filter(|(cname, _)| name.is_empty() || name == strip_global_ns(cname))
-            .map(|(_cname, decl)| match &decl.type_assignment {
-                TypedefTypeAssignment::SimpleTypeDef(_vis, hint) => build_type_structure(hint),
                 TypedefTypeAssignment::CaseType(variant, variants) => {
-                    let mut hints = variants.iter().map(|v| v.0.clone()).collect::<Vec<_>>();
-                    hints.insert(0, variant.0.clone());
-                    build_type_structure(&Ty(
-                        // the reason is not included in the type structure
-                        oxidized::typing_reason::Reason::NoReason,
-                        Box::new(Ty_::Tunion(hints)),
-                    ))
+                    let mut hints;
+                    let ty_ = if variants.is_empty() {
+                        variant.0.1.clone()
+                    } else {
+                        hints = variants.iter().map(|v| v.0.clone()).collect::<Vec<_>>();
+                        hints.insert(0, variant.0.clone());
+                        Box::new(Ty_::Tunion(hints))
+                    };
+                    (
+                        String::from("case_type"),
+                        extract_type_name(&Ty(
+                            oxidized::typing_reason::Reason::NoReason, // the position is ignored when printing the type
+                            ty_,
+                        )),
+                    )
                 }
-            })
-            .collect(),
-    }
+            };
+            ExtDeclTypeDef {
+                name: fmt_type(cname),
+                module: id_or_empty(decl.module.as_ref()),
+                visibility,
+                tparams: get_typed_params(&decl.tparams),
+                as_constraint: extract_type_name_opt(decl.as_constraint.as_ref()),
+                super_constraint: extract_type_name_opt(decl.super_constraint.as_ref()),
+                type_,
+                is_ctx: decl.is_ctx,
+                attributes: get_attributes(&decl.attributes, ""),
+                internal: decl.internal,
+                docs_url: str_or_empty(decl.docs_url.as_deref()),
+            }
+        })
+        .collect()
 }
 
-pub fn get_file(parsed_file: &ParsedFileHolder) -> ExtDeclFile {
-    let (disable_xhp_element_mangling, has_first_pass_parse_errors, mode) = match parsed_file {
-        ParsedFileHolder::O(file) => (
-            file.disable_xhp_element_mangling,
-            file.has_first_pass_parse_errors,
-            file.mode,
-        ),
-    };
+pub fn get_type_structure(parsed_file: &ParsedFile, name: &str) -> Vec<ExtDeclTypeStructure> {
+    parsed_file
+        .decls
+        .typedefs()
+        .filter(|(cname, _)| name.is_empty() || name == strip_global_ns(cname))
+        .map(|(_cname, decl)| match &decl.type_assignment {
+            TypedefTypeAssignment::SimpleTypeDef(_vis, hint) => build_type_structure(hint),
+            TypedefTypeAssignment::CaseType(variant, variants) => {
+                let mut hints = variants.iter().map(|v| v.0.clone()).collect::<Vec<_>>();
+                hints.insert(0, variant.0.clone());
+                build_type_structure(&Ty(
+                    // the reason is not included in the type structure
+                    oxidized::typing_reason::Reason::NoReason,
+                    Box::new(Ty_::Tunion(hints)),
+                ))
+            }
+        })
+        .collect()
+}
+
+pub fn get_file(parsed_file: &ParsedFile) -> ExtDeclFile {
+    let disable_xhp_element_mangling = parsed_file.disable_xhp_element_mangling;
+    let has_first_pass_parse_errors = parsed_file.has_first_pass_parse_errors;
+    let mode = parsed_file.mode;
     ExtDeclFile {
         disable_xhp_element_mangling,
         has_first_pass_parse_errors,
@@ -229,7 +204,7 @@ pub fn get_file(parsed_file: &ParsedFileHolder) -> ExtDeclFile {
     }
 }
 
-pub fn get_shape_keys(parsed_file: &ParsedFileHolder, name: &str) -> Vec<String> {
+pub fn get_shape_keys(parsed_file: &ParsedFile, name: &str) -> Vec<String> {
     // don't let empty strings pass in, else we fetch all type structures
     if name.is_empty() {
         return vec![];
@@ -247,131 +222,85 @@ pub fn get_shape_keys(parsed_file: &ParsedFileHolder, name: &str) -> Vec<String>
 }
 
 //pub fn get_method(parsed_file: &ParsedFile<'_>, name: &str) -> Option<ExtDeclClass>
-pub fn get_class_methods(
-    parsed_file: &ParsedFileHolder,
-    kls: &str,
-    name: &str,
-) -> Vec<ExtDeclMethod> {
-    match parsed_file {
-        ParsedFileHolder::O(file) => {
-            let class_opt = find_class(file, kls);
-            match class_opt {
-                Some(cls) => get_methods(&cls.methods, name),
-                None => Vec::new(),
-            }
-        }
+pub fn get_class_methods(parsed_file: &ParsedFile, kls: &str, name: &str) -> Vec<ExtDeclMethod> {
+    let class_opt = find_class(parsed_file, kls);
+    match class_opt {
+        Some(cls) => get_methods(&cls.methods, name),
+        None => Vec::new(),
     }
 }
 
-pub fn get_class_smethods(
-    parsed_file: &ParsedFileHolder,
-    kls: &str,
-    name: &str,
-) -> Vec<ExtDeclMethod> {
-    match parsed_file {
-        ParsedFileHolder::O(file) => {
-            let class_opt = find_class(file, kls);
-            match class_opt {
-                Some(cls) => get_methods(&cls.static_methods, name),
-                None => Vec::new(),
-            }
-        }
+pub fn get_class_smethods(parsed_file: &ParsedFile, kls: &str, name: &str) -> Vec<ExtDeclMethod> {
+    let class_opt = find_class(parsed_file, kls);
+    match class_opt {
+        Some(cls) => get_methods(&cls.static_methods, name),
+        None => Vec::new(),
     }
 }
 
-pub fn get_class_consts(
-    parsed_file: &ParsedFileHolder,
-    kls: &str,
-    name: &str,
-) -> Vec<ExtDeclClassConst> {
-    match parsed_file {
-        ParsedFileHolder::O(file) => {
-            let class_opt = find_class(file, kls);
-            match class_opt {
-                Some(cls) => get_consts(&cls.consts, name),
-                None => Vec::new(),
-            }
-        }
+pub fn get_class_consts(parsed_file: &ParsedFile, kls: &str, name: &str) -> Vec<ExtDeclClassConst> {
+    let class_opt = find_class(parsed_file, kls);
+    match class_opt {
+        Some(cls) => get_consts(&cls.consts, name),
+        None => Vec::new(),
     }
 }
 
 pub fn get_class_typeconsts(
-    parsed_file: &ParsedFileHolder,
+    parsed_file: &ParsedFile,
     kls: &str,
     name: &str,
 ) -> Vec<ExtDeclClassTypeConst> {
-    match parsed_file {
-        ParsedFileHolder::O(file) => {
-            let class_opt = find_class(file, kls);
-            match class_opt {
-                Some(cls) => get_typeconsts(&cls.typeconsts, name),
-                None => Vec::new(),
-            }
-        }
+    let class_opt = find_class(parsed_file, kls);
+    match class_opt {
+        Some(cls) => get_typeconsts(&cls.typeconsts, name),
+        None => Vec::new(),
     }
 }
 
-pub fn get_class_props(parsed_file: &ParsedFileHolder, kls: &str, name: &str) -> Vec<ExtDeclProp> {
-    match parsed_file {
-        ParsedFileHolder::O(file) => {
-            let class_opt = find_class(file, kls);
-            match class_opt {
-                Some(cls) => get_props(&cls.props, name),
-                None => Vec::new(),
-            }
-        }
+pub fn get_class_props(parsed_file: &ParsedFile, kls: &str, name: &str) -> Vec<ExtDeclProp> {
+    let class_opt = find_class(parsed_file, kls);
+    match class_opt {
+        Some(cls) => get_props(&cls.props, name),
+        None => Vec::new(),
     }
 }
 
-pub fn get_class_sprops(parsed_file: &ParsedFileHolder, kls: &str, name: &str) -> Vec<ExtDeclProp> {
-    match parsed_file {
-        ParsedFileHolder::O(file) => {
-            let class_opt = find_class(file, kls);
-            match class_opt {
-                Some(cls) => get_props(&cls.sprops, name),
-                None => Vec::new(),
-            }
-        }
+pub fn get_class_sprops(parsed_file: &ParsedFile, kls: &str, name: &str) -> Vec<ExtDeclProp> {
+    let class_opt = find_class(parsed_file, kls);
+    match class_opt {
+        Some(cls) => get_props(&cls.sprops, name),
+        None => Vec::new(),
     }
 }
 
 pub fn get_class_attributes(
-    parsed_file: &ParsedFileHolder,
+    parsed_file: &ParsedFile,
     kls: &str,
     name: &str,
 ) -> Vec<ExtDeclAttribute> {
-    match parsed_file {
-        ParsedFileHolder::O(file) => {
-            let class_opt = find_class(file, kls);
-            match class_opt {
-                Some(cls) => get_attributes(&cls.user_attributes, name),
-                None => Vec::new(),
-            }
-        }
+    let class_opt = find_class(parsed_file, kls);
+    match class_opt {
+        Some(cls) => get_attributes(&cls.user_attributes, name),
+        None => Vec::new(),
     }
 }
 
-pub fn get_classes(parsed_file: &ParsedFileHolder) -> Vec<ExtDeclClass> {
-    match parsed_file {
-        ParsedFileHolder::O(file) => file
-            .decls
-            .classes()
-            .map(|(_kls, decl)| get_class_impl(decl))
-            .collect(),
-    }
+pub fn get_classes(parsed_file: &ParsedFile) -> Vec<ExtDeclClass> {
+    parsed_file
+        .decls
+        .classes()
+        .map(|(_kls, decl)| get_class_impl(decl))
+        .collect()
 }
 
-pub fn get_class(parsed_file: &ParsedFileHolder, name: &str) -> Option<ExtDeclClass> {
-    match parsed_file {
-        ParsedFileHolder::O(file) => {
-            let class_opt = find_class(file, name);
-            Some(get_class_impl(class_opt?))
-        }
-    }
+pub fn get_class(parsed_file: &ParsedFile, name: &str) -> Option<ExtDeclClass> {
+    let class_opt = find_class(parsed_file, name);
+    Some(get_class_impl(class_opt?))
 }
 
 pub fn get_public_api_for_class(
-    parsed_file: &ParsedFileHolder,
+    parsed_file: &ParsedFile,
     name: &str,
 ) -> Result<String, std::fmt::Error> {
     let mut buffer = String::with_capacity(100); // TODO, use filesize as hint

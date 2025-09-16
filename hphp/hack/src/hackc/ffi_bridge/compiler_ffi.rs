@@ -21,7 +21,6 @@ use decl_provider::DeclProvider;
 use decl_provider::SelfProvider;
 use direct_decl_parser::DeclParserOptions;
 use direct_decl_parser::ParsedFile;
-use ext_decl::ParsedFileHolder;
 use external_decl_provider::ExternalDeclProvider;
 use hhbc::Unit;
 use options::Hhvm;
@@ -523,7 +522,7 @@ mod ffi {
 // Opaque to C++, so we don't need repr(C).
 #[derive(Debug)]
 pub struct DeclsHolder {
-    parsed_file: ParsedFileHolder,
+    parsed_file: ParsedFile,
 }
 
 // This is accessed in test_ffi.cpp; hence repr(C)
@@ -611,15 +610,13 @@ fn compile_from_text(env: &ffi::NativeEnv, source_text: &[u8]) -> Result<Vec<u8>
 fn type_exists(holder: &DeclsHolder, symbol: &str) -> bool {
     let input_symbol_formatted = symbol.starts_with('\\');
     // TODO T123158488: fix case insensitive lookups
-    match &holder.parsed_file {
-        ParsedFileHolder::O(file) => file.decls.types().any(|(sym, _)| {
-            if !input_symbol_formatted {
-                &sym[1..] == symbol
-            } else {
-                sym == symbol
-            }
-        }),
-    }
+    holder.parsed_file.decls.types().any(|(sym, _)| {
+        if !input_symbol_formatted {
+            &sym[1..] == symbol
+        } else {
+            sym == symbol
+        }
+    })
 }
 
 pub fn direct_decl_parse_and_serialize(
@@ -629,12 +626,8 @@ pub fn direct_decl_parse_and_serialize(
 ) -> ffi::DeclsAndBlob {
     match parse_decls(config, filename, text) {
         Ok(decls) | Err(DeclsError(decls, _)) => {
-            let (serialized, has_errors) = match decls.parsed_file {
-                ParsedFileHolder::O(ref file) => (
-                    decl_provider::serialize_decls(&file.decls).unwrap(),
-                    file.has_first_pass_parse_errors,
-                ),
-            };
+            let serialized = decl_provider::serialize_decls(&decls.parsed_file.decls).unwrap();
+            let has_errors = decls.parsed_file.has_first_pass_parse_errors;
             ffi::DeclsAndBlob {
                 serialized,
                 decls,
@@ -670,9 +663,7 @@ pub fn parse_decls(
     let parsed_file: ParsedFile =
         direct_decl_parser::parse_decls_for_bytecode(&decl_opts, relpath, text);
     let has_errors = parsed_file.has_first_pass_parse_errors;
-    let holder = Box::new(DeclsHolder {
-        parsed_file: ParsedFileHolder::O(parsed_file),
-    });
+    let holder = Box::new(DeclsHolder { parsed_file });
     match has_errors {
         false => Ok(holder),
         true => Err(DeclsError(
@@ -687,12 +678,8 @@ pub fn parse_decls(
 pub struct DeclsError(Box<DeclsHolder>, PathBuf);
 
 fn verify_deserialization(result: &ffi::DeclsAndBlob) -> bool {
-    match &result.decls.parsed_file {
-        ParsedFileHolder::O(file) => {
-            let decls = decl_provider::deserialize_decls(&result.serialized).unwrap();
-            decls == file.decls
-        }
-    }
+    let decls = decl_provider::deserialize_decls(&result.serialized).unwrap();
+    decls == result.decls.parsed_file.decls
 }
 
 fn compile_unit_from_text(
@@ -728,16 +715,12 @@ fn compile_unit_from_text(
 }
 
 fn decls_to_symbols(holder: &DeclsHolder) -> ffi::FileSymbols {
-    match &holder.parsed_file {
-        ParsedFileHolder::O(file) => facts::Facts::from_decls(file).into(),
-    }
+    facts::Facts::from_decls(&holder.parsed_file).into()
 }
 
 fn decls_to_facts_binary(decls: &DeclsHolder, sha1sum: &CxxString) -> Result<Vec<u8>> {
     use bincode::Options;
-    let facts = match &decls.parsed_file {
-        ParsedFileHolder::O(file) => facts::Facts::from_decls(file),
-    };
+    let facts = facts::Facts::from_decls(&decls.parsed_file);
     let file_facts = ffi::FileFacts::from_facts(facts, sha1sum.to_string_lossy().into_owned());
     let mut buf = Vec::new();
     bincode::options().serialize_into(&mut buf, &file_facts)?;
@@ -752,11 +735,7 @@ fn binary_to_facts(blob: &CxxString) -> bincode::Result<ffi::FileFacts> {
 fn decls_holder_to_binary(decls: &DeclsHolder) -> bincode::Result<Vec<u8>> {
     use bincode::Options;
     let mut buf = Vec::new();
-    match &decls.parsed_file {
-        ParsedFileHolder::O(file) => {
-            bincode::options().serialize_into(&mut buf, file)?;
-        }
-    }
+    bincode::options().serialize_into(&mut buf, &decls.parsed_file)?;
     Ok(buf)
 }
 
@@ -766,19 +745,13 @@ fn binary_to_decls_holder(blob: &CxxString) -> bincode::Result<Box<DeclsHolder>>
     let op = bincode::options().with_native_endian();
     let mut de = bincode::de::Deserializer::from_slice(data, op);
     let parsed_file = ParsedFile::deserialize(&mut de)?;
-    Ok(Box::new(DeclsHolder {
-        parsed_file: ParsedFileHolder::O(parsed_file),
-    }))
+    Ok(Box::new(DeclsHolder { parsed_file }))
 }
 
 fn binary_to_decls_and_blob(blob: &CxxString) -> bincode::Result<ffi::DeclsAndBlob> {
     let decls = binary_to_decls_holder(blob)?;
-    let (serialized, has_errors) = match &decls.parsed_file {
-        ParsedFileHolder::O(file) => (
-            decl_provider::serialize_decls(&file.decls).unwrap(),
-            file.has_first_pass_parse_errors,
-        ),
-    };
+    let serialized = decl_provider::serialize_decls(&decls.parsed_file.decls).unwrap();
+    let has_errors = decls.parsed_file.has_first_pass_parse_errors;
     Ok(ffi::DeclsAndBlob {
         serialized,
         has_errors,

@@ -27,3 +27,11 @@ proxygen_add_test(TARGET ResourceStatsTest
     proxygen
     testmain
 )
+
+proxygen_add_test(TARGET BaseStatsTest
+  SOURCES
+    BaseStatsTest.cpp
+  DEPENDS
+    proxygen
+    testmain
+)

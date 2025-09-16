@@ -9,6 +9,7 @@
 #pragma once
 
 #include <fb303/ThreadCachedServiceData.h>
+#include <fb303/detail/QuantileStatWrappers.h>
 
 DECLARE_bool(basestats_all_time_timeseries);
 
@@ -71,6 +72,69 @@ class BaseStats {
 
    private:
     std::unique_ptr<facebook::fb303::TimeseriesWrapperBase> impl_;
+  };
+
+  class LazyQuantileStatWrapper {
+   public:
+    explicit LazyQuantileStatWrapper(
+        folly::StringPiece name,
+        folly::Range<const facebook::fb303::ExportType*> stats =
+            facebook::fb303::ExportTypeConsts::kCountAvg,
+        folly::Range<const double*> quantiles =
+            facebook::fb303::QuantileConsts::kP95_P99_P999,
+        folly::Range<const size_t*> slidingWindowPeriods =
+            facebook::fb303::SlidingWindowPeriodConsts::kOneMin) {
+      // We convert these to owned datastructures
+      std::vector<facebook::fb303::ExportType> statsVec;
+      statsVec.reserve(stats.size());
+      std::vector<double> quantilesVec;
+      quantilesVec.reserve(quantiles.size());
+      std::vector<size_t> slidingWindowPeriodsVec;
+      slidingWindowPeriodsVec.reserve(slidingWindowPeriods.size());
+
+      for (auto stat : stats) {
+        statsVec.push_back(stat);
+      }
+      for (auto quantile : quantiles) {
+        quantilesVec.push_back(quantile);
+      }
+      for (auto slidingWindowPeriod : slidingWindowPeriods) {
+        slidingWindowPeriodsVec.push_back(slidingWindowPeriod);
+      }
+      statWrapperInfo_ =
+          std::make_unique<QuantileStatWrapperInfo>(QuantileStatWrapperInfo{
+              .name = name.toString(),
+              .stats = std::move(statsVec),
+              .quantiles = std::move(quantilesVec),
+              .slidingWindowPeriods = std::move(slidingWindowPeriodsVec)});
+    }
+
+    void addValue(double value) {
+      folly::call_once(initQuantileStatFlag, [&]() {
+        statWrapper_ =
+            std::make_unique<facebook::fb303::detail::QuantileStatWrapper>(
+                statWrapperInfo_->name,
+                statWrapperInfo_->stats,
+                statWrapperInfo_->quantiles,
+                statWrapperInfo_->slidingWindowPeriods);
+        statWrapperInfo_.reset();
+      });
+      statWrapper_->addValue(value);
+    }
+
+   protected:
+    // A class to store objects needed to create a QuantileStatWrapper object
+    // for lazy construction
+    struct QuantileStatWrapperInfo {
+      std::string name;
+      std::vector<facebook::fb303::ExportType> stats;
+      std::vector<double> quantiles;
+      std::vector<size_t> slidingWindowPeriods;
+    };
+
+    folly::once_flag initQuantileStatFlag;
+    std::unique_ptr<QuantileStatWrapperInfo> statWrapperInfo_;
+    std::unique_ptr<facebook::fb303::detail::QuantileStatWrapper> statWrapper_;
   };
 
   using TLHistogram = facebook::fb303::MinuteOnlyHistogram;

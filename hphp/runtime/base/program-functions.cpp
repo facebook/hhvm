@@ -2609,7 +2609,7 @@ void init_current_pthread_stack_limits() {
   }
 }
 
-void hphp_process_init(bool skipExtensions) {
+void hphp_process_init(bool initForWorkerProcess /* = false */) {
   init_current_pthread_stack_limits();
   BootStats::mark("pthread_init");
 
@@ -2624,7 +2624,7 @@ void hphp_process_init(bool skipExtensions) {
 
   rds::processInit();
 
-  hphp_thread_init(skipExtensions);
+  hphp_thread_init(/* skipExtensions= */ initForWorkerProcess);
 
   struct sigaction action = {};
   action.sa_sigaction = on_timeout;
@@ -2676,10 +2676,12 @@ void hphp_process_init(bool skipExtensions) {
       .bind(rds::Mode::Normal, rds::LinkID{"ExceptionBreakpointIntr"});
   }
 
-  jit::mcgen::processInit();
-  jit::processInitProfData();
+  if (!initForWorkerProcess) {
+    jit::mcgen::processInit();
+    jit::processInitProfData();
+  }
   if (Cfg::Eval::EnableDecl) {
-    if (!skipExtensions) {
+    if (!initForWorkerProcess) {
       ExtensionRegistry::moduleDeclInit();
     }
     BootStats::mark("s_builtin_symbols_populated");
@@ -2693,7 +2695,7 @@ void hphp_process_init(bool skipExtensions) {
   BootStats::mark("XboxServer::Restart");
   Stream::RegisterCoreWrappers();
   BootStats::mark("Stream::RegisterCoreWrappers");
-  if (!skipExtensions) {
+  if (!initForWorkerProcess) {
     ExtensionRegistry::moduleInit();
     BootStats::mark("ExtensionRegistry::moduleInit");
   }
@@ -2703,7 +2705,7 @@ void hphp_process_init(bool skipExtensions) {
       "DeploymentId", RuntimeOption::DeploymentId);
   }
 
-  if (!skipExtensions) {
+  if (!initForWorkerProcess) {
     // Now that constants have been bound we can update options using constants
     // in ini files (e.g., E_ALL) and sync some other options
     update_constants_and_options();

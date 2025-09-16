@@ -306,8 +306,8 @@ using UniquePtrRefVec = std::vector<UniquePtrRef<T>>;
 //////////////////////////////////////////////////////////////////////
 
 // Set up the process state (either for the main process or for
-// extern-worker Jobs). If "full" is true, systemlib will be parsed
-// and initialized.
+// extern-worker Jobs). If "full" is true, systemlib and JIT data
+// structures will be parsed and initialized.
 void process_init(const Options&, const RepoGlobalData&, bool full);
 // Undo process_init().
 void process_exit();

@@ -324,8 +324,8 @@ void Package::parseInit(const Config& config, FileMetaVec meta) {
   config.apply();
   Logger::LogLevel = Logger::LogError;
 
-  // Inhibit extensions and systemlib from being initialized. It
-  // takes a while and we don't need it.
+  // Inhibit systemlib, extensions and JIT data structures from being
+  // initialized. It takes a while and we don't need it.
   register_process_init();
   hphp_process_init(true);
 

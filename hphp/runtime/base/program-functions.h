@@ -83,7 +83,11 @@ time_t start_time();
 
 struct ExecutionContext;
 
-void hphp_process_init(bool skipExtensions = false);
+/*
+ * If `initAsWorker` is set, JIT data structure and extensions will not be
+ * initialized as they're expensive to set up and unused by workers.
+ */
+void hphp_process_init(bool initForWorkerProcess = false);
 void cli_client_init();
 void cli_client_thread_init();
 void cli_client_thread_exit();

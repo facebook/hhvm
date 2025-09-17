@@ -70,3 +70,8 @@ var loadSheddingError = NewApplicationException(
 	LOADSHEDDING,
 	"load shedding due to max request limit",
 )
+
+var taskExpiredError = NewApplicationException(
+	UNKNOWN_APPLICATION_EXCEPTION,
+	"Task Expired",
+)

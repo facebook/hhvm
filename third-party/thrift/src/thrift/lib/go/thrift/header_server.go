@@ -42,8 +42,6 @@ const (
 	ClientID = "client_id"
 )
 
-var taskExpiredException = NewApplicationException(UNKNOWN_APPLICATION_EXCEPTION, "Task Expired")
-
 type server struct {
 	processor   Processor
 	listener    net.Listener
@@ -460,7 +458,7 @@ func (s *server) scheduleResponse(ctx, rctx context.Context, prot headerProtocol
 				// send back a response that we couldn't even start the request in in time needed
 				// if this happens, the server is very likely overloaded
 				s.stats.QueueingTimeout.RecordEvent()
-				scheduleWrite(taskExpiredException)
+				scheduleWrite(taskExpiredError)
 				return
 			}
 			// connection must be closed, nothing to do.

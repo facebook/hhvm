@@ -348,6 +348,20 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
         ^ "; valid kinds are Method, Property, Class_const, Typeconst, Function, Class, ExplicitClass, and GConst"
         ^ "; use ExplicitClass instead of Class to exclude references via self/static/parent"
       );
+      ( "--find-my-tests",
+        Arg.Rest
+          begin
+            fun symbol ->
+              set_mode
+                ~validate:false
+                (match !mode with
+                | None -> MODE_FIND_MY_TESTS [symbol]
+                | Some (MODE_FIND_MY_TESTS symbols) ->
+                  MODE_FIND_MY_TESTS (symbol :: symbols)
+                | _ -> raise (Arg.Bad "only a single mode should be specified"))
+          end,
+        " (mode) return test files that reference the given methods [C::m list]"
+      );
       Common_argspecs.force_dormant_start force_dormant_start;
       Common_argspecs.from from;
       ( "--from-arc-diff",

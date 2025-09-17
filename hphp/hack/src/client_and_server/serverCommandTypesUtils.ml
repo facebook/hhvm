@@ -42,6 +42,7 @@ let debug_describe_t : type a. a t -> string = function
   | VERBOSE _ -> "VERBOSE"
   | DEPS_OUT_BATCH _ -> "DEPS_OUT_BATCH"
   | DEPS_IN_BATCH _ -> "DEPS_IN_BATCH"
+  | FIND_MY_TESTS _ -> "FIND_MY_TESTS"
 
 let debug_describe_cmd (type a) (command : a command) : string =
   let ({ ServerCommandTypes.from; _ }, rpc) = command in

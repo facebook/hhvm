@@ -61,6 +61,7 @@
  (modules
   fullFidelityParseService
   serverCheckUtils
+  serverFindMyTests
   serverIdle
   serverTastHolesBatch
   serverInvalidateUnits

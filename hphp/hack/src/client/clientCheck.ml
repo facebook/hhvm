@@ -51,6 +51,18 @@ let print_refs (results : (string * Pos.absolute) list) ~(json : bool) : unit =
   else
     FindRefsWireFormat.CliHumanReadable.print_results results
 
+let print_find_my_tests_result (result : string list) ~(json : bool) : unit =
+  if json then
+    let result_obj =
+      Hh_json.(
+        JSON_Array
+          (List.map result ~f:(fun file ->
+               JSON_Object [("file_path", JSON_String file)])))
+    in
+    print_endline (Hh_json.json_to_multiline result_obj)
+  else
+    List.iter result ~f:(fun file -> print_endline file)
+
 let parse_name_or_member_id ~name_only_action ~name_and_member_action name =
   let pieces = Str.split (Str.regexp "::") name in
   let default_namespace str =
@@ -989,6 +1001,17 @@ let main_internal
     in
     List.iter results ~f:(fun s -> print_refs s ~json:true);
     Lwt.return (Exit_status.No_error, Telemetry.create ())
+  | ClientEnv.MODE_FIND_MY_TESTS symbols ->
+    let%lwt (result, telemtry) =
+      rpc args @@ ServerCommandTypes.FIND_MY_TESTS symbols
+    in
+    (match result with
+    | Ok fmt_result ->
+      print_find_my_tests_result fmt_result ~json:args.output_json;
+      Lwt.return (Exit_status.No_error, telemtry)
+    | Error error ->
+      Printf.eprintf "%s\n" error;
+      Lwt.return (Exit_status.Input_error, telemtry))
 
 let rec flush_event_logger () : unit Lwt.t =
   let%lwt () = Lwt_unix.sleep 1.0 in

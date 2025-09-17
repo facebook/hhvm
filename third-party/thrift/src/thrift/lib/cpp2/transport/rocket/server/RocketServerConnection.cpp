@@ -848,6 +848,7 @@ void RocketServerConnection::handleBiDiFrame(
   auto handlePayloadFrame = [&](PayloadFrame&& payloadFrame) {
     const bool next = payloadFrame.hasNext();
     const bool complete = payloadFrame.hasComplete();
+    bool alive = true;
 
     if (auto fullPayload = bufferOrGetFullPayload(std::move(payloadFrame))) {
       if (next) {
@@ -858,17 +859,17 @@ void RocketServerConnection::handleBiDiFrame(
 
         if (auto error = getErrorFromPayload(streamPayload)) {
           if (clientCallback.isSinkOpen()) {
-            std::ignore = clientCallback.onSinkError(std::move(*error));
+            alive = clientCallback.onSinkError(std::move(*error));
           }
         } else {
           if (clientCallback.isSinkOpen()) {
-            std::ignore = clientCallback.onSinkNext(std::move(*streamPayload));
+            alive = clientCallback.onSinkNext(std::move(*streamPayload));
           }
         }
       }
 
       if (complete) {
-        if (clientCallback.isSinkOpen()) {
+        if (alive && clientCallback.isSinkOpen()) {
           std::ignore = clientCallback.onSinkComplete();
         }
       }

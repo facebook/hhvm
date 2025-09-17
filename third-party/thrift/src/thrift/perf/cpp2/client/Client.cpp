@@ -61,7 +61,7 @@ DEFINE_uint32(batch_size, 16, "Flow control batch size");
  * outgoing and incoming connections.
  */
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
   if (FLAGS_num_clients == 0) {
     int32_t numCores = sysconf(_SC_NPROCESSORS_ONLN);
     FLAGS_num_clients = numCores;

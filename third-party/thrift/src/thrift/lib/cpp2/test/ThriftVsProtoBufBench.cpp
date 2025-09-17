@@ -340,7 +340,7 @@ BENCHMARK_MEM(read, ComplexStruct, 1)
 BENCHMARK_MEM(write, ComplexStruct, 1)
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
   if (FLAGS_memory_request) {
     if (folly::kIsSanitize) {
       LOG(ERROR) << "cannot use jemalloc with sanitizer, abort!";

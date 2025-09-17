@@ -51,7 +51,7 @@ void print_variant_info(T const& object) {
 }
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
 
   simple_variant value;
   print_variant_info(value);

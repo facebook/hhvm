@@ -887,6 +887,3 @@ apache::thrift::ServiceRequestInfoMap NestedContainersServiceInfoHolder::staticR
   return requestInfoMap;
 }
 } // namespace cpp2
-
-namespace apache::thrift::detail {
-}

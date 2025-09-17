@@ -64,6 +64,3 @@ apache::thrift::ServiceRequestInfoMap EmptyServiceServiceInfoHolder::staticReque
   return requestInfoMap;
 }
 } // namespace some::valid::ns
-
-namespace apache::thrift::detail {
-}

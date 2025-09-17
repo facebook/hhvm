@@ -402,6 +402,3 @@ std::unique_ptr<apache::thrift::Tile> GoodServiceAsyncProcessor::createInteracti
   auto fn = getInteractionConstructorMap().at(name);
   return (this->*fn)();
 }} // namespace cpp2
-
-namespace apache::thrift::detail {
-}

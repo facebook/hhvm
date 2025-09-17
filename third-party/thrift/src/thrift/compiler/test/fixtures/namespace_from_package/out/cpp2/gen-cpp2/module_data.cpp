@@ -10,6 +10,9 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+namespace test::namespace_from_package::module {
+class TestService;
+} // namespace test::namespace_from_package::module
 namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::namespace_from_package::module::Foo>::name = "Foo";
@@ -29,5 +32,10 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::namespace
 namespace detail {
 
 
+template <> struct TSchemaAssociation<::test::namespace_from_package::module::TestService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -329397207201317601;
+  static constexpr ::std::string_view definitionKey = {"\xfd\xc7\xa9\x30\xb3\x49\xfe\xdd\xf3\x02\xd6\x87\x71\x2a\x3c\x60", 16};
+};
 } // namespace detail
 } // namespace apache::thrift

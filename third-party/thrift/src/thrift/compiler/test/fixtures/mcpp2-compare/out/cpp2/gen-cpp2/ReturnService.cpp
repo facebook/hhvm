@@ -2668,6 +2668,3 @@ apache::thrift::ServiceRequestInfoMap ReturnServiceServiceInfoHolder::staticRequ
   return requestInfoMap;
 }
 } // namespace some::valid::ns
-
-namespace apache::thrift::detail {
-}

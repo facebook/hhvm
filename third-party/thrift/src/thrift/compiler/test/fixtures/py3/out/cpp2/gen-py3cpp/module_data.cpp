@@ -10,6 +10,15 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+namespace py3::simple {
+class SimpleService;
+} // namespace py3::simple
+namespace py3::simple {
+class DerivedService;
+} // namespace py3::simple
+namespace py3::simple {
+class RederivedService;
+} // namespace py3::simple
 namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::py3::simple::SimpleException>::name = "SimpleException";
@@ -377,5 +386,20 @@ namespace detail {
 
 
 
+template <> struct TSchemaAssociation<::py3::simple::SimpleService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -8607107063930754448;
+  static constexpr ::std::string_view definitionKey = {"\xdf\xb1\xae\x13\x68\x8d\x49\x6b\x34\x02\x72\x3d\xba\xb1\x90\xf6", 16};
+};
+template <> struct TSchemaAssociation<::py3::simple::DerivedService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -8607107063930754448;
+  static constexpr ::std::string_view definitionKey = {"\xb6\xfb\x1c\x3a\xe8\x84\xfa\xaa\x15\xd1\xba\xd9\x15\x60\x63\x2f", 16};
+};
+template <> struct TSchemaAssociation<::py3::simple::RederivedService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -8607107063930754448;
+  static constexpr ::std::string_view definitionKey = {"\x0e\x71\x8a\x50\x92\x6e\xa8\xf0\xca\x6b\x29\x99\x82\x5b\xd2\x1d", 16};
+};
 } // namespace detail
 } // namespace apache::thrift

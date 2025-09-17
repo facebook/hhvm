@@ -1705,9 +1705,6 @@ std::unique_ptr<apache::thrift::Tile> DecoratedServiceAsyncProcessor::createInte
   return (this->*fn)();
 }} // namespace cpp2
 
-namespace apache::thrift::detail {
-}
-
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::cpp2::UndecoratedService>::getProcessor() {
   return std::make_unique<::cpp2::UndecoratedServiceAsyncProcessor>(this);
 }
@@ -2914,9 +2911,6 @@ apache::thrift::ServiceRequestInfoMap UndecoratedServiceServiceInfoHolder::stati
 }
 } // namespace cpp2
 
-namespace apache::thrift::detail {
-}
-
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>::getProcessor() {
   return std::make_unique<::cpp2::DecoratedService_ExtendsUndecoratedServiceAsyncProcessor>(this);
 }
@@ -3288,9 +3282,6 @@ apache::thrift::ServiceRequestInfoMap DecoratedService_ExtendsUndecoratedService
   return requestInfoMap;
 }
 } // namespace cpp2
-
-namespace apache::thrift::detail {
-}
 
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>::getProcessor() {
   return std::make_unique<::cpp2::DecoratedService_ExtendsDecoratedServiceAsyncProcessor>(this);
@@ -3712,9 +3703,6 @@ apache::thrift::ServiceRequestInfoMap DecoratedService_ExtendsDecoratedServiceSe
 }
 } // namespace cpp2
 
-namespace apache::thrift::detail {
-}
-
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::cpp2::UndecoratedService_ExtendsDecoratedService>::getProcessor() {
   return std::make_unique<::cpp2::UndecoratedService_ExtendsDecoratedServiceAsyncProcessor>(this);
 }
@@ -3942,9 +3930,6 @@ apache::thrift::ServiceRequestInfoMap UndecoratedService_ExtendsDecoratedService
   return requestInfoMap;
 }
 } // namespace cpp2
-
-namespace apache::thrift::detail {
-}
 
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>::getProcessor() {
   return std::make_unique<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceAsyncProcessor>(this);
@@ -4383,7 +4368,4 @@ apache::thrift::ServiceRequestInfoMap DecoratedService_ExtendsUndecoratedService
   return requestInfoMap;
 }
 } // namespace cpp2
-
-namespace apache::thrift::detail {
-}
 

@@ -23,6 +23,11 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+{{#program:services}}
+namespace {{service:qualified_namespace}} {
+class {{service:cpp_name}};
+} // namespace {{service:qualified_namespace}}
+{{/program:services}}
 namespace apache::thrift {
 {{#program:structs}}
 
@@ -59,5 +64,9 @@ namespace detail {
 {{#partial schema_association.definition node=enum:self}}
 {{/program:enums}}
 
+{{#program:services}}
+{{#partial schema_association.declaration node=service:self}}
+{{#partial schema_association.definition node=service:self}}
+{{/program:services}}
 } // namespace detail
 } // namespace apache::thrift

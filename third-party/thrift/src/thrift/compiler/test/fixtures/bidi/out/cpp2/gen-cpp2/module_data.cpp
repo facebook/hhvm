@@ -10,9 +10,17 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+namespace cpp2 {
+class BiDiService;
+} // namespace cpp2
 namespace apache::thrift {
 
 namespace detail {
 
+template <> struct TSchemaAssociation<::cpp2::BiDiService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 469164823722770924;
+  static constexpr ::std::string_view definitionKey = {"\xc0\x56\x46\x64\xbe\xe2\xa6\xd1\x27\xc6\x36\x25\xc4\x5a\xed\x87", 16};
+};
 } // namespace detail
 } // namespace apache::thrift

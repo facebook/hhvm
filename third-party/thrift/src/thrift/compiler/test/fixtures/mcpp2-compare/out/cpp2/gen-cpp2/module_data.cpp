@@ -10,6 +10,15 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+namespace some::valid::ns {
+class EmptyService;
+} // namespace some::valid::ns
+namespace some::valid::ns {
+class ReturnService;
+} // namespace some::valid::ns
+namespace some::valid::ns {
+class ParamService;
+} // namespace some::valid::ns
 namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::some::valid::ns::Empty>::name = "Empty";
@@ -803,5 +812,20 @@ namespace detail {
 
 
 
+template <> struct TSchemaAssociation<::some::valid::ns::EmptyService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -7170422325064689213;
+  static constexpr ::std::string_view definitionKey = {"\x72\x51\x9c\xc5\x56\xbd\xf7\x53\x2c\x78\xa8\x0f\x39\x47\x4c\x04", 16};
+};
+template <> struct TSchemaAssociation<::some::valid::ns::ReturnService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -7170422325064689213;
+  static constexpr ::std::string_view definitionKey = {"\x79\x81\x11\xe1\x30\x19\xda\xb0\xae\x08\xb8\xf7\xb0\x34\xf9\x18", 16};
+};
+template <> struct TSchemaAssociation<::some::valid::ns::ParamService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -7170422325064689213;
+  static constexpr ::std::string_view definitionKey = {"\xd1\x28\x4c\xbd\xd9\x54\xd3\xae\x81\x28\x15\x82\x25\xec\xe5\xde", 16};
+};
 } // namespace detail
 } // namespace apache::thrift

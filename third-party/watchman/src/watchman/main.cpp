@@ -405,7 +405,7 @@ static SpawnResult spawn_site_specific(
     const char* spawner) {
   std::vector<std::string_view> args;
   args.reserve(1 + daemon_argv.size());
-  args.push_back(spawner);
+  args.emplace_back(spawner);
   for (auto& arg : daemon_argv) {
     args.push_back(arg);
   }

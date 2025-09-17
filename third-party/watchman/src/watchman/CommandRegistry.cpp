@@ -104,7 +104,7 @@ std::vector<const CommandDefinition*> CommandDefinition::getAll() {
 BaseResponse::BaseResponse() : version{PACKAGE_VERSION, W_STRING_UNICODE} {}
 
 void capability_register(std::string_view name) {
-  CommandRegistry::get().capabilities.emplace(std::string{name});
+  CommandRegistry::get().capabilities.emplace(name);
 }
 
 bool capability_supported(std::string_view name) {

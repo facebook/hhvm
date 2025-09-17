@@ -73,10 +73,6 @@ from thrift.python.streaming.sink cimport (
     cSinkConsumer,
     makeIOBufSinkConsumer,
 )
-from cpython.contextvars cimport PyContextVar_Set, PyContextVar_Reset
-from folly.request_context import _RequestContext as _FOLLY_REQUEST_CONTEXT
-from folly.request_context cimport create as folly_request_context_create
-
 
 
 ctypedef unique_ptr[cIOBuf] UniqueIOBuf
@@ -292,9 +288,7 @@ cdef int combinedHandler(
     RpcKind kind,
 ) except -1:
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = PyContextVar_Set(THRIFT_REQUEST_CONTEXT, __context)
-
-    __folly_context_token = PyContextVar_Set(_FOLLY_REQUEST_CONTEXT, folly_request_context_create())
+    __context_token = THRIFT_REQUEST_CONTEXT.set(__context)
 
     asyncio.get_event_loop().create_task(
         serverCallback_coro(
@@ -307,8 +301,7 @@ cdef int combinedHandler(
         )
     )
 
-    PyContextVar_Reset(_FOLLY_REQUEST_CONTEXT, __folly_context_token)
-    PyContextVar_Reset(THRIFT_REQUEST_CONTEXT, __context_token)
+    THRIFT_REQUEST_CONTEXT.reset(__context_token)
     return 0
 
 cdef api void handleLifecycleCallback(object func, string funcName, cFollyPromise[cFollyUnit] cPromise):

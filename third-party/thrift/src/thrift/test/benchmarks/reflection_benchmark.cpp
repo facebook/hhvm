@@ -122,7 +122,7 @@ void addReflectionBenchmarks() {
 } // namespace apache::thrift::test
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
   apache::thrift::test::addReflectionBenchmarks();
   folly::runBenchmarks();
   return 0;

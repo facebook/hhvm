@@ -18,13 +18,16 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"net"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift"
 	"thrift/lib/go/thrift/e2e/service"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -79,4 +82,44 @@ func runHeaderTest(t *testing.T, serverTransport thrift.TransportID) {
 	require.NoError(t, err)
 	require.Equal(t, echoedHeaders[persistentHeaderKey], persistentHeaderValue)
 	require.Equal(t, echoedHeaders[rpcHeaderKey], rpcHeaderValue)
+}
+
+func TestHeadersUnderConcurrency(t *testing.T) {
+	// Ensures that headers are not mixed up under concurrency/load.
+	const (
+		persistentHeaderKey   = "persistentHeader"
+		persistentHeaderValue = "persistentHeaderValue"
+		rpcHeaderKey          = "rpcHeader"
+	)
+
+	addr, stopServer := startE2EServer(t, thrift.TransportIDRocket, thrift.WithNumWorkers(10))
+	defer stopServer()
+
+	channel, err := thrift.NewClient(
+		thrift.WithRocket(),
+		thrift.WithDialer(func() (net.Conn, error) {
+			return net.DialTimeout("unix", addr.String(), 5*time.Second)
+		}),
+		thrift.WithIoTimeout(5*time.Second),
+		thrift.WithPersistentHeader(persistentHeaderKey, persistentHeaderValue),
+	)
+	require.NoError(t, err)
+
+	client := service.NewE2EChannelClient(channel)
+	defer client.Close()
+
+	var clientsWG sync.WaitGroup
+	for i := range 1000 {
+		clientsWG.Go(
+			func() {
+				rpcHeaderValue := fmt.Sprintf("rpcHeaderValue-%d", i)
+				ctx := thrift.WithHeaders(context.Background(), map[string]string{rpcHeaderKey: rpcHeaderValue})
+				echoedHeaders, err := client.EchoHeaders(ctx)
+				assert.NoError(t, err)
+				assert.Equal(t, echoedHeaders[persistentHeaderKey], persistentHeaderValue)
+				assert.Equal(t, echoedHeaders[rpcHeaderKey], rpcHeaderValue)
+			},
+		)
+	}
+	clientsWG.Wait()
 }

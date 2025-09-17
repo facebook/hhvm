@@ -24,10 +24,13 @@
 #include <fmt/core.h>
 #include <fmt/format.h>
 #include <re2/re2.h>
+#include <thrift/compiler/ast/t_program.h>
 
 namespace apache::thrift::compiler::codemod {
 
 inline constexpr auto kDefaultDomain = "meta.com";
+inline constexpr auto kBackwardsCompatibleNamespaceComment =
+    "// Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility";
 
 class package_name_generator {
  public:
@@ -453,42 +456,52 @@ inline std::string get_package(
   return gen.get_longest_package();
 }
 
+/**
+ * Returns the Thrift IDL content to add a package declaration with the given
+ * name to `program`.
+ *
+ * Adding a package to a file without namespaces breaks the existing references
+ * to generated code.
+ *
+ * For certain languages, in absence of namespace a default one is used.
+ * Override the namespace from package by adding default namespaces.
+ * This ensures that the existing references don't break.
+ */
 inline std::string get_replacement_content(
-    bool program_has_definitions,
-    const std::map<std::string, std::string>& namespaces,
-    const std::string& pkg) {
-  auto content = fmt::format("package \"{}\"\n\n", pkg);
+    const t_program& program, const std::string& pkg) {
+  std::string content = fmt::format("package \"{}\"\n\n", pkg);
 
-  /*
-   * Adding a package to a file without namespaces
-   * breaks the existing references to generated code.
-   *
-   * For certain languages, in absence of namespace a default one is used.
-   * Override the namespace from package by adding default namespaces.
-   * This ensures that the existing references don't break.
-   *
-   * This is only needed if there are some definitions in the thrift file.
-   * If there are no definitions, then this can be skipped.
-   */
-  if (program_has_definitions) {
-    if (!namespaces.contains("cpp2")) {
-      if (!namespaces.contains("cpp")) {
-        content += "namespace cpp2 \"cpp2\"\n";
-      } else {
-        content +=
-            fmt::format("namespace cpp2 \"{}.cpp2\"\n", namespaces.at("cpp"));
-      }
-    }
-    if (!namespaces.contains("hack") && !namespaces.contains("php")) {
-      content += "namespace hack \"\"\n";
-    }
-    if (!namespaces.contains("py3")) {
-      content += "namespace py3 \"\"\n";
-    }
+  // If there are no definitions in the thrift file, then namespace changes
+  // cannot possibly break existing references. We can simply set the package
+  // name without any namespace.
+  if (program.definitions().empty()) {
+    return content;
+  }
 
-    if (namespaces.empty()) {
-      content += "\n";
+  const std::map<std::string, std::string>& namespaces = program.namespaces();
+  if (!namespaces.contains("cpp2")) {
+    if (!namespaces.contains("cpp")) {
+      content += fmt::format(
+          "namespace cpp2 \"cpp2\" {}\n", kBackwardsCompatibleNamespaceComment);
+    } else {
+      content +=
+          fmt::format("namespace cpp2 \"{}.cpp2\"\n", namespaces.at("cpp"));
     }
+  }
+
+  if (!namespaces.contains("hack") && !namespaces.contains("php")) {
+    content += fmt::format(
+        "namespace hack \"\" {}\n", kBackwardsCompatibleNamespaceComment);
+    ;
+  }
+
+  if (!namespaces.contains("py3")) {
+    content += fmt::format(
+        "namespace py3 \"\" {}\n", kBackwardsCompatibleNamespaceComment);
+  }
+
+  if (namespaces.empty()) {
+    content += "\n";
   }
   return content;
 }

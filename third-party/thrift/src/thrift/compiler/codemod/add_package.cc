@@ -44,11 +44,7 @@ class add_package {
       return;
     }
     auto offset = fm_.get_namespace_offset();
-    fm_.add(
-        {offset,
-         offset,
-         get_replacement_content(
-             !prog_.definitions().empty(), prog_.namespaces(), pkg)});
+    fm_.add({offset, offset, get_replacement_content(prog_, pkg)});
 
     if (!prog_.namespaces().contains("cpp2") &&
         prog_.namespaces().contains("cpp")) {

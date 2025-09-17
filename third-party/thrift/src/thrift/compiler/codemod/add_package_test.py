@@ -83,9 +83,9 @@ class ThriftPackage(unittest.TestCase):
 
                 package "meta.com/thrift/test/foo"
 
-                namespace cpp2 "cpp2"
-                namespace hack ""
-                namespace py3 ""
+                namespace cpp2 "cpp2" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
+                namespace hack "" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
+                namespace py3 "" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
 
                 struct S {
                 }
@@ -106,8 +106,8 @@ class ThriftPackage(unittest.TestCase):
             """\
                 package "meta.com/thrift/annotation"
 
-                namespace hack ""
-                namespace py3 ""
+                namespace hack "" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
+                namespace py3 "" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
                 namespace cpp2 "thrift.annotation"
 
                 include "bar.thrift"
@@ -243,7 +243,7 @@ class ThriftPackage(unittest.TestCase):
                 package "meta.com/thrift/annotation"
 
                 namespace cpp2 "thrift.annotation.cpp2"
-                namespace hack ""
+                namespace hack "" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
                 namespace py3  "thrift.annotation"
 
                 struct foo {}
@@ -284,7 +284,7 @@ class ThriftPackage(unittest.TestCase):
             """\
                 package "meta.com/foo"
 
-                namespace cpp2 "cpp2"
+                namespace cpp2 "cpp2" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
                 namespace hack ""
                 namespace py3  ""
 

@@ -27,7 +27,7 @@ using example::chatroom::ChatRoomServiceAsyncClient;
 
 int main(int argc, char* argv[]) {
   FLAGS_logtostderr = true;
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
 
   // Create an EventBase.
   folly::EventBase eventBase;

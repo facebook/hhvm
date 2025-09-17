@@ -76,7 +76,7 @@ void printStructuredAnnotationData() {
 } // namespace apache::thrift::metadata
 
 int main(int argc, char* argv[]) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
   apache::thrift::metadata::printServiceMethodName();
   apache::thrift::metadata::printStructFieldName();
   apache::thrift::metadata::printStructuredAnnotationData();

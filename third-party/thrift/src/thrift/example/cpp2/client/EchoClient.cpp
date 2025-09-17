@@ -32,7 +32,7 @@ using example::chatroom::EchoAsyncClient;
 
 int main(int argc, char* argv[]) {
   FLAGS_logtostderr = true;
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
 
   // create eventbase first so no dangling stack refs on 'client' dealloc
   folly::EventBase evb;

@@ -60,7 +60,7 @@ void walk(watchman::AbsolutePath path, size_t threadCountHint) {
 }
 
 int main(int argc, char* argv[]) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
 
   if (argc == 1) {
     std::cerr << "Provide at least a root path to walk" << std::endl;

@@ -25,7 +25,7 @@ using namespace watchman;
 using namespace std::chrono;
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
 
   system("rm -f hit");
 

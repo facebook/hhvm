@@ -274,7 +274,7 @@ int main(int argc, char* argv[]) {
   };
   setrlimit(RLIMIT_MEMLOCK, &rlim); // best effort
 
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
 
   LOG(INFO) << "Running on port " << FLAGS_port;
 

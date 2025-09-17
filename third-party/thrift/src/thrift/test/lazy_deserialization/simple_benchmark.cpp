@@ -95,6 +95,6 @@ BENCHMARK_RELATIVE(list_i32_without_index_lazy_then_access_field) {
 } // namespace apache::thrift::test
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
   folly::runBenchmarks();
 }

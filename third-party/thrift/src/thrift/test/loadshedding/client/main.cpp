@@ -32,7 +32,7 @@ DEFINE_uint32(
     "Number of microseconds a server will spend per request [default: 100ms]");
 
 int main(int argc, char* argv[]) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
 
   Client client("::1", FLAGS_port);
 

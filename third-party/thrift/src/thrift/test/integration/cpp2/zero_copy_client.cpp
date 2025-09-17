@@ -176,7 +176,7 @@ int main(int argc, char* argv[]) {
   };
   setrlimit(RLIMIT_MEMLOCK, &rlim); // best effort
 
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
   Client client(FLAGS_server, FLAGS_port);
   client.run(FLAGS_num);
 

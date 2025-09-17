@@ -44,6 +44,6 @@ BENCHMARK_RELATIVE(reserialize_without_undeserialized_field) {
 } // namespace apache::thrift::test
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
   folly::runBenchmarks();
 }

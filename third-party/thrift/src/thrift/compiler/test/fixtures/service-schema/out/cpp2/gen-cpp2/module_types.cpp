@@ -27,6 +27,10 @@ bool TEnumTraits<::facebook::thrift::test::Result>::findValue(std::string_view n
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::Result>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 

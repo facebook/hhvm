@@ -69,6 +69,8 @@ template <> struct TEnumTraits<::a::different::ns::AnEnum> {
   }
   static constexpr type min() { return type::FIELDA; }
   static constexpr type max() { return type::FIELDB; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 } // namespace apache::thrift

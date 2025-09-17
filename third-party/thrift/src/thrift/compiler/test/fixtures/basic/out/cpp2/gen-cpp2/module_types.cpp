@@ -27,6 +27,10 @@ bool TEnumTraits<::test::fixtures::basic::MyEnum>::findValue(std::string_view na
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::test::fixtures::basic::MyEnum>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -42,6 +46,10 @@ bool TEnumTraits<::test::fixtures::basic::HackEnum>::findName(type value, std::s
 
 bool TEnumTraits<::test::fixtures::basic::HackEnum>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+const std::vector<std::any>& TEnumTraits<::test::fixtures::basic::HackEnum>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
 }} // apache::thrift

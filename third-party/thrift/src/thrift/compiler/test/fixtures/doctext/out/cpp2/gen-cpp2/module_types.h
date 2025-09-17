@@ -77,6 +77,8 @@ template <> struct TEnumTraits<::cpp2::B> {
   }
   static constexpr type min() { return type::HELLO; }
   static constexpr type max() { return type::HELLO; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 } // namespace apache::thrift

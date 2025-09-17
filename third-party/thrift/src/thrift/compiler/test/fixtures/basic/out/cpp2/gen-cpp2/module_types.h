@@ -200,6 +200,8 @@ template <> struct TEnumTraits<::test::fixtures::basic::MyEnum> {
   }
   static constexpr type min() { return type::MyValue1; }
   static constexpr type max() { return type::MyValue2; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::test::fixtures::basic::HackEnum> {
@@ -232,6 +234,8 @@ template <> struct TEnumTraits<::test::fixtures::basic::HackEnum> {
   }
   static constexpr type min() { return type::Value1; }
   static constexpr type max() { return type::Value2; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 } // namespace apache::thrift

@@ -227,6 +227,8 @@ template <> struct TEnumTraits<::test::fixtures::enums::Metasyntactic> {
   }
   static constexpr type min() { return type::FOO; }
   static constexpr type max() { return type::BAX; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::test::fixtures::enums::MyEnum1> {
@@ -259,6 +261,8 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum1> {
   }
   static constexpr type min() { return type::ME1_0; }
   static constexpr type max() { return type::ME1_6; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::test::fixtures::enums::MyEnum2> {
@@ -291,6 +295,8 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum2> {
   }
   static constexpr type min() { return type::ME2_0; }
   static constexpr type max() { return type::ME2_2; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::test::fixtures::enums::MyEnum3> {
@@ -323,6 +329,8 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum3> {
   }
   static constexpr type min() { return type::ME3_N2; }
   static constexpr type max() { return type::ME3_10; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::test::fixtures::enums::MyEnum4> {
@@ -355,6 +363,8 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum4> {
   }
   static constexpr type min() { return type::ME4_D; }
   static constexpr type max() { return type::ME4_C; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1> {
@@ -387,6 +397,8 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1> {
   }
   static constexpr type min() { return type::ONE; }
   static constexpr type max() { return type::FOUR; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2> {
@@ -419,6 +431,8 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2> {
   }
   static constexpr type min() { return type::ONE; }
   static constexpr type max() { return type::FOUR; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 } // namespace apache::thrift

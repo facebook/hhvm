@@ -142,6 +142,8 @@ template <> struct TEnumTraits<::facebook::thrift::test::Enum> {
   }
   static constexpr type min() { return type::first; }
   static constexpr type max() { return type::second; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 } // namespace apache::thrift

@@ -158,6 +158,25 @@ TEST(AnnotationTest, GetExceptionFieldAnnotationValue) {
   EXPECT_FALSE(
       (get_field_annotation<Sensitive, MyException, ident::message>()));
 }
+
+TEST(AnnotationTest, GetEnumAnnotationValue) {
+  Doc expected;
+  expected.text() = "I am an enum";
+
+  // Checking whether a enum has a given annotation. If so, use it.
+  if (auto* doc = get_enum_annotation<Doc, MyEnum>()) {
+    EXPECT_EQ(*doc, expected);
+  } else {
+    ADD_FAILURE();
+  }
+
+  // `Doc` annotation exists on MyEnum
+  EXPECT_TRUE((get_enum_annotation<Doc, MyEnum>()));
+
+  // `Oncall` annotation does not exist on MyEnum
+  EXPECT_FALSE((get_enum_annotation<Oncall, MyEnum>()));
+}
+
 TEST(AnnotationTest, HasStructAnnotation) {
   // Test MyStruct annotations - should have both Doc and ExtraAnnotation
   EXPECT_TRUE((has_struct_annotation<Doc, MyStruct>()));

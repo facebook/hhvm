@@ -31,12 +31,14 @@ struct Oncall {
 @scope.Union
 @scope.Exception
 @scope.Field
+@scope.Enum
 struct Doc {
   1: string text;
 }
 
 @thrift.RuntimeAnnotation
 @scope.Struct
+@scope.Enum
 struct ExtraAnnotation {}
 
 @thrift.RuntimeAnnotation
@@ -75,6 +77,10 @@ exception MyException {
   @Oncall{name = "exception_field"}
   @Doc{text = "Error message"}
   1: string message;
+}
+
+@Doc{text = "I am an enum"}
+enum MyEnum {
 }
 
 struct NoAnnotationsStruct {

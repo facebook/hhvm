@@ -27,6 +27,10 @@ bool TEnumTraits<::test::fixtures::enums::Metasyntactic>::findValue(std::string_
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::Metasyntactic>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -42,6 +46,10 @@ bool TEnumTraits<::test::fixtures::enums::MyEnum1>::findName(type value, std::st
 
 bool TEnumTraits<::test::fixtures::enums::MyEnum1>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::MyEnum1>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
 }} // apache::thrift
@@ -61,6 +69,10 @@ bool TEnumTraits<::test::fixtures::enums::MyEnum2>::findValue(std::string_view n
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::MyEnum2>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -76,6 +88,10 @@ bool TEnumTraits<::test::fixtures::enums::MyEnum3>::findName(type value, std::st
 
 bool TEnumTraits<::test::fixtures::enums::MyEnum3>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::MyEnum3>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
 }} // apache::thrift
@@ -95,6 +111,10 @@ bool TEnumTraits<::test::fixtures::enums::MyEnum4>::findValue(std::string_view n
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::MyEnum4>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -112,6 +132,10 @@ bool TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1>::findValue(std::string
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -127,6 +151,10 @@ bool TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2>::findName(type value, 
 
 bool TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
 }} // apache::thrift

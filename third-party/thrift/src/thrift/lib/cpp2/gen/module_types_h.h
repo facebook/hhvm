@@ -371,7 +371,59 @@ const Annotation* get_struct_annotation() {
   return ret;
 }
 
-/// Check if a struct has a specific annotation at compile time, for example:
+/// Get the enum annotation. If Enum doesn't have the corresponding Annotation,
+/// returns nullptr.
+///
+/// For example, for the following thrift file
+///
+///     @thrift.RuntimeAnnotation
+///     @scope.Enum
+///     struct Doc {
+///       1: string text;
+///     }
+///
+///     @scope.Enum
+///     struct Other {}
+///
+///     @Doc{text="I am an enum"}
+///     enum MyEnum {
+///       VALUE = 1,
+///     }
+///
+/// We can write the following code.
+///
+///     // `Doc` annotation exists on MyEnum
+///     assert(get_enum_annotation<Doc, MyEnum>());
+///
+///     // Check the value of `Doc` annotation on MyEnum
+///     assert(*get_enum_annotation<Doc, MyEnum>() ==
+///            Doc{"I am an enum"});
+///
+///     // Build failure since `Other` is not marked with
+///     @thrift.RuntimeAnnotation.
+///     get_enum_annotation<Other, MyEnum>;
+///
+template <class Annotation, class Enum>
+const Annotation* get_enum_annotation() {
+  using detail::annotation::is_runtime_annotation;
+  static_assert(
+      is_runtime_annotation<Annotation>,
+      "Annotation is not annotated with @thrift.RuntimeAnnotation.");
+
+  static const Annotation* ret = []() -> const Annotation* {
+    for (const std::any& v : TEnumTraits<Enum>::annotations()) {
+      if (auto* p = std::any_cast<Annotation>(&v)) {
+        return p;
+      }
+    }
+    return nullptr;
+  }();
+
+  return ret;
+}
+
+/// Check if a struct/union/exception has a specific annotation at compile time,
+/// for example:
 ///
 /// * has_struct_annotation<EventDef, MyStruct>() == true
 ///   // Returns true if MyStruct has an EventDef annotation

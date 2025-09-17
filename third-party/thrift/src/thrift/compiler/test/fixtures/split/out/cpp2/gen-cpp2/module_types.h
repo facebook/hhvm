@@ -108,6 +108,8 @@ template <> struct TEnumTraits<::cpp2::MyEnum> {
   }
   static constexpr type min() { return type::MyValue1; }
   static constexpr type max() { return type::MyValue2; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 } // namespace apache::thrift

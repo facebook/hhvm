@@ -27,6 +27,10 @@ bool TEnumTraits<::cpp2::EmptyEnum>::findValue(std::string_view name, type* out)
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::cpp2::EmptyEnum>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -44,6 +48,10 @@ bool TEnumTraits<::cpp2::City>::findValue(std::string_view name, type* out) noex
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::cpp2::City>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -59,6 +67,10 @@ bool TEnumTraits<::cpp2::Company>::findName(type value, std::string_view* out) n
 
 bool TEnumTraits<::cpp2::Company>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+const std::vector<std::any>& TEnumTraits<::cpp2::Company>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
 }} // apache::thrift

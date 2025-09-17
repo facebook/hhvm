@@ -154,6 +154,8 @@ template <> struct TEnumTraits<::cpp2::Animal> {
   }
   static constexpr type min() { return type::DOG; }
   static constexpr type max() { return type::TARANTULA; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 } // namespace apache::thrift

@@ -428,6 +428,8 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_op
   }
   static constexpr type min() { return type::none; }
   static constexpr type max() { return type::three; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::apache::thrift::fixtures::types::is_unscoped> {
@@ -460,6 +462,8 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::is_unscoped> {
   }
   static constexpr type min() { return type::hello; }
   static constexpr type max() { return type::world; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum> {
@@ -492,6 +496,8 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEn
   }
   static constexpr type min() { return type::ZERO; }
   static constexpr type max() { return type::NONZERO; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 } // namespace apache::thrift

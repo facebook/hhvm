@@ -27,6 +27,10 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::enum1>::findValue(std::string_view
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::test_cpp2::cpp_reflection::enum1>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -42,6 +46,10 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::enum2>::findName(type value, std::
 
 bool TEnumTraits<::test_cpp2::cpp_reflection::enum2>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+const std::vector<std::any>& TEnumTraits<::test_cpp2::cpp_reflection::enum2>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
 }} // apache::thrift
@@ -61,6 +69,10 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::enum3>::findValue(std::string_view
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::test_cpp2::cpp_reflection::enum3>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -76,6 +88,10 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::findName
 
 bool TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+const std::vector<std::any>& TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
 }} // apache::thrift

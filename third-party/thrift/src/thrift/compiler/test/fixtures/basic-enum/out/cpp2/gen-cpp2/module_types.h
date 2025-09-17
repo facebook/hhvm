@@ -107,6 +107,8 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::EmptyEnum> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::test::fixtures::enumstrict::MyEnum> {
@@ -135,6 +137,8 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyEnum> {
   }
   static constexpr type min() { return type::ONE; }
   static constexpr type max() { return type::TWO; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum> {
@@ -163,6 +167,8 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyUseIntrinsicDefau
   }
   static constexpr type min() { return type::ZERO; }
   static constexpr type max() { return type::TWO; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::test::fixtures::enumstrict::MyBigEnum> {
@@ -191,6 +197,8 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyBigEnum> {
   }
   static constexpr type min() { return type::UNKNOWN; }
   static constexpr type max() { return type::NINETEEN; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 } // namespace apache::thrift

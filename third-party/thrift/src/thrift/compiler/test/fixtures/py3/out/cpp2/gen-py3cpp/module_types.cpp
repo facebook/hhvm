@@ -27,6 +27,10 @@ bool TEnumTraits<::py3::simple::AnEnum>::findValue(std::string_view name, type* 
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::py3::simple::AnEnum>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -44,6 +48,10 @@ bool TEnumTraits<::py3::simple::AnEnumRenamed>::findValue(std::string_view name,
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::py3::simple::AnEnumRenamed>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -59,6 +67,10 @@ bool TEnumTraits<::py3::simple::Flags>::findName(type value, std::string_view* o
 
 bool TEnumTraits<::py3::simple::Flags>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+const std::vector<std::any>& TEnumTraits<::py3::simple::Flags>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
 }} // apache::thrift

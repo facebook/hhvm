@@ -200,6 +200,8 @@ template <> struct TEnumTraits<::cpp2::EmptyEnum> {
     (void)findName(value, &ret);
     return ret.data();
   }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::cpp2::City> {
@@ -228,6 +230,8 @@ template <> struct TEnumTraits<::cpp2::City> {
   }
   static constexpr type min() { return type::NYC; }
   static constexpr type max() { return type::LON; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::cpp2::Company> {
@@ -256,6 +260,8 @@ template <> struct TEnumTraits<::cpp2::Company> {
   }
   static constexpr type min() { return type::FACEBOOK; }
   static constexpr type max() { return type::__FRIEND__FEED; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 } // namespace apache::thrift

@@ -365,6 +365,8 @@ template <> struct TEnumTraits<::py3::simple::AnEnum> {
   }
   static constexpr type min() { return type::None; }
   static constexpr type max() { return type::FOUR; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::py3::simple::AnEnumRenamed> {
@@ -393,6 +395,8 @@ template <> struct TEnumTraits<::py3::simple::AnEnumRenamed> {
   }
   static constexpr type min() { return type::name; }
   static constexpr type max() { return type::normal; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::py3::simple::Flags> {
@@ -421,6 +425,8 @@ template <> struct TEnumTraits<::py3::simple::Flags> {
   }
   static constexpr type min() { return type::flag_A; }
   static constexpr type max() { return type::flag_D; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 } // namespace apache::thrift

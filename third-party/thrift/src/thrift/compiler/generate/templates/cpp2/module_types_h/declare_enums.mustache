@@ -74,6 +74,8 @@ template <> struct TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_nam
   static constexpr type min() { return type::{{enum:cpp_min}}; }
   static constexpr type max() { return type::{{enum:cpp_max}}; }
   {{/if (not (array.empty? enum:values))}}
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 {{/program:enums}}
 

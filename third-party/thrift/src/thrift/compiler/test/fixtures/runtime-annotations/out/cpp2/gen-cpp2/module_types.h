@@ -76,6 +76,8 @@ template <> struct TEnumTraits<::facebook::thrift::test::MyEnum> {
   }
   static constexpr type min() { return type::VALUE; }
   static constexpr type max() { return type::VALUE; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 } // namespace apache::thrift

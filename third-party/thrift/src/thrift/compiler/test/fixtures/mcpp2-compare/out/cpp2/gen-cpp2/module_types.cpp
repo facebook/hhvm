@@ -27,6 +27,10 @@ bool TEnumTraits<::some::valid::ns::MyEnumA>::findValue(std::string_view name, t
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::some::valid::ns::MyEnumA>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -42,6 +46,10 @@ bool TEnumTraits<::some::valid::ns::AnnotatedEnum>::findName(type value, std::st
 
 bool TEnumTraits<::some::valid::ns::AnnotatedEnum>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+const std::vector<std::any>& TEnumTraits<::some::valid::ns::AnnotatedEnum>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
 }} // apache::thrift
@@ -61,6 +69,10 @@ bool TEnumTraits<::some::valid::ns::AnnotatedEnum2>::findValue(std::string_view 
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::some::valid::ns::AnnotatedEnum2>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -76,6 +88,10 @@ bool TEnumTraits<::some::valid::ns::MyEnumB>::findName(type value, std::string_v
 
 bool TEnumTraits<::some::valid::ns::MyEnumB>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+const std::vector<std::any>& TEnumTraits<::some::valid::ns::MyEnumB>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
 }} // apache::thrift

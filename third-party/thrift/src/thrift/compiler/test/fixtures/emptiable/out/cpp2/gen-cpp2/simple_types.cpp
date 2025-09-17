@@ -27,6 +27,10 @@ bool TEnumTraits<::apache::thrift::test::MyEnum>::findValue(std::string_view nam
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::apache::thrift::test::MyEnum>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 

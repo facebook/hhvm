@@ -27,6 +27,10 @@ bool TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>::findVa
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 

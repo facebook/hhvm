@@ -27,6 +27,10 @@ bool TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::findValue(
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -44,6 +48,10 @@ bool TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::findValue(std:
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -59,6 +67,10 @@ bool TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum>::findName(
 
 bool TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+const std::vector<std::any>& TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
 }} // apache::thrift

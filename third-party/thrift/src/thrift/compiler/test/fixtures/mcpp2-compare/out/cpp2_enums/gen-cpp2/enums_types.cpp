@@ -27,6 +27,10 @@ bool TEnumTraits<::facebook::ns::qwerty::AnEnumA>::findValue(std::string_view na
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::facebook::ns::qwerty::AnEnumA>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -42,6 +46,10 @@ bool TEnumTraits<::facebook::ns::qwerty::AnEnumB>::findName(type value, std::str
 
 bool TEnumTraits<::facebook::ns::qwerty::AnEnumB>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+const std::vector<std::any>& TEnumTraits<::facebook::ns::qwerty::AnEnumB>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
 }} // apache::thrift
@@ -61,6 +69,10 @@ bool TEnumTraits<::facebook::ns::qwerty::AnEnumC>::findValue(std::string_view na
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::facebook::ns::qwerty::AnEnumC>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -78,6 +90,10 @@ bool TEnumTraits<::facebook::ns::qwerty::AnEnumD>::findValue(std::string_view na
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::facebook::ns::qwerty::AnEnumD>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -93,6 +109,10 @@ bool TEnumTraits<::facebook::ns::qwerty::AnEnumE>::findName(type value, std::str
 
 bool TEnumTraits<::facebook::ns::qwerty::AnEnumE>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+const std::vector<std::any>& TEnumTraits<::facebook::ns::qwerty::AnEnumE>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
 }} // apache::thrift

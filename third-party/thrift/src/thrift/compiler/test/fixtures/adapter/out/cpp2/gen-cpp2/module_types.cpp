@@ -27,6 +27,10 @@ bool TEnumTraits<::facebook::thrift::test::Color>::findValue(std::string_view na
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::Color>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -42,6 +46,10 @@ bool TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::findName(type val
 
 bool TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
 }} // apache::thrift

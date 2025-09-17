@@ -27,6 +27,10 @@ bool TEnumTraits<::test::fixtures::python_capi::MyEnum>::findValue(std::string_v
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::test::fixtures::python_capi::MyEnum>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -42,6 +46,10 @@ bool TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>::findName(type
 
 bool TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+const std::vector<std::any>& TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
 }} // apache::thrift

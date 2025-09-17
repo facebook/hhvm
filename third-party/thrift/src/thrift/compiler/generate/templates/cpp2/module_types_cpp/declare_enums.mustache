@@ -41,6 +41,25 @@ bool TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::findValu
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::annotations() noexcept {
+  {{#if enum:has_runtime_annotation?}}
+  static const folly::Indestructible<std::vector<std::any>> ret = [] {
+      std::vector<std::any> values;
+  {{#enum:structured_annotations}}
+  {{#constant:is_runtime_annotation?}}
+  {{#constant:type}}{{#constant:value}}{{#constant:field}}
+      values.emplace_back({{> common/iterate_const_values}});
+  {{/constant:field}}{{/constant:value}}{{/constant:type}}
+  {{/constant:is_runtime_annotation?}}
+  {{/enum:structured_annotations}}
+      return values;
+    }();
+  return *ret;
+  {{#else}}
+  return ::apache::thrift::detail::annotation::empty_annotations();
+  {{/if enum:has_runtime_annotation?}}
+}
+
 }} // apache::thrift
 
 {{/program:split_enums}}

@@ -133,6 +133,8 @@ template <> struct TEnumTraits<::test::fixtures::tablebased::ExampleEnum> {
   }
   static constexpr type min() { return type::ZERO; }
   static constexpr type max() { return type::NONZERO; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 } // namespace apache::thrift

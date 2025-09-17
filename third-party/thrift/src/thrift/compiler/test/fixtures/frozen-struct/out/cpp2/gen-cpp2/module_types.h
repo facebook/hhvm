@@ -129,6 +129,8 @@ template <> struct TEnumTraits<::some::ns::EnumB> {
   }
   static constexpr type min() { return type::EMPTY; }
   static constexpr type max() { return type::EMPTY; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 } // namespace apache::thrift

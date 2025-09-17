@@ -923,6 +923,8 @@ template <> struct TEnumTraits<::some::valid::ns::MyEnumA> {
   }
   static constexpr type min() { return type::fieldA; }
   static constexpr type max() { return type::fieldC; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::some::valid::ns::AnnotatedEnum> {
@@ -951,6 +953,8 @@ template <> struct TEnumTraits<::some::valid::ns::AnnotatedEnum> {
   }
   static constexpr type min() { return type::FIELDA; }
   static constexpr type max() { return type::FIELDC; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::some::valid::ns::AnnotatedEnum2> {
@@ -979,6 +983,8 @@ template <> struct TEnumTraits<::some::valid::ns::AnnotatedEnum2> {
   }
   static constexpr type min() { return type::FIELDA; }
   static constexpr type max() { return type::FIELDC; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::some::valid::ns::MyEnumB> {
@@ -1007,6 +1013,8 @@ template <> struct TEnumTraits<::some::valid::ns::MyEnumB> {
   }
   static constexpr type min() { return type::AField; }
   static constexpr type max() { return type::AField; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 } // namespace apache::thrift

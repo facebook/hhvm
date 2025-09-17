@@ -478,6 +478,8 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::MyEnum> {
   }
   static constexpr type min() { return type::MyValue1; }
   static constexpr type max() { return type::MyValue2; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 template <> struct TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum> {
@@ -510,6 +512,8 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum> 
   }
   static constexpr type min() { return type::l0O1; }
   static constexpr type max() { return type::FuBaR; }
+
+  static const std::vector<std::any>& annotations() noexcept;
 };
 
 } // namespace apache::thrift

@@ -27,6 +27,10 @@ bool TEnumTraits<::test::fixtures::enumstrict::EmptyEnum>::findValue(std::string
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enumstrict::EmptyEnum>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -42,6 +46,10 @@ bool TEnumTraits<::test::fixtures::enumstrict::MyEnum>::findName(type value, std
 
 bool TEnumTraits<::test::fixtures::enumstrict::MyEnum>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enumstrict::MyEnum>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
 }} // apache::thrift
@@ -61,6 +69,10 @@ bool TEnumTraits<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>::findV
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
+}
+
 }} // apache::thrift
 
 
@@ -76,6 +88,10 @@ bool TEnumTraits<::test::fixtures::enumstrict::MyBigEnum>::findName(type value, 
 
 bool TEnumTraits<::test::fixtures::enumstrict::MyBigEnum>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enumstrict::MyBigEnum>::annotations() noexcept {
+  return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
 }} // apache::thrift

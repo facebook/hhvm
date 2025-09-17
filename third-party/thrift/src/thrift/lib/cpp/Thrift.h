@@ -87,6 +87,8 @@ struct TEnumTraits {
   //
   //      static char const* findName(type value) noexcept;
   //
+  //      static const std::vector<std::any>& annotations() noexcept;
+  //
   //  When instantiated with an enum type T which is not empty, includes:
   //
   //      static constexpr type min() { /*...*/ }

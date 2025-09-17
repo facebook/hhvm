@@ -400,3 +400,6 @@ apache::thrift::ServiceRequestInfoMap HeaderClientMethodsAnnotationOnFunctionSer
   return requestInfoMap;
 }
 } // namespace cpp2
+
+namespace apache::thrift::detail {
+}

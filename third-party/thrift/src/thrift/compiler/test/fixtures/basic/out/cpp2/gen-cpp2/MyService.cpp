@@ -1703,3 +1703,6 @@ apache::thrift::ServiceRequestInfoMap MyServiceServiceInfoHolder::staticRequestI
   return requestInfoMap;
 }
 } // namespace test::fixtures::basic
+
+namespace apache::thrift::detail {
+}

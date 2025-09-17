@@ -2334,3 +2334,6 @@ std::unique_ptr<apache::thrift::Tile> FootprintTestServiceAsyncProcessor::create
   auto fn = getInteractionConstructorMap().at(name);
   return (this->*fn)();
 }} // namespace cpp2_struct_footprint
+
+namespace apache::thrift::detail {
+}

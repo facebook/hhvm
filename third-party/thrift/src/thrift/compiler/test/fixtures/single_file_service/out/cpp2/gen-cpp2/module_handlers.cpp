@@ -406,6 +406,9 @@ std::unique_ptr<apache::thrift::Tile> AAsyncProcessor::createInteractionImpl(con
   return (this->*fn)();
 }} // namespace cpp2
 
+namespace apache::thrift::detail {
+}
+
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::cpp2::B>::getProcessor() {
   return std::make_unique<::cpp2::BAsyncProcessor>(this);
 }
@@ -954,6 +957,9 @@ apache::thrift::ServiceRequestInfoMap BServiceInfoHolder::staticRequestInfoMap()
 }
 } // namespace cpp2
 
+namespace apache::thrift::detail {
+}
+
 std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::cpp2::C>::getProcessor() {
   return std::make_unique<::cpp2::CAsyncProcessor>(this);
 }
@@ -1184,4 +1190,7 @@ std::unique_ptr<apache::thrift::Tile> CAsyncProcessor::createInteractionImpl(con
   auto fn = getInteractionConstructorMap().at(name);
   return (this->*fn)();
 }} // namespace cpp2
+
+namespace apache::thrift::detail {
+}
 

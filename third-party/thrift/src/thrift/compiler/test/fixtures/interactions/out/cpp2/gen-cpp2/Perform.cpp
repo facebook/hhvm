@@ -1095,3 +1095,6 @@ std::unique_ptr<apache::thrift::Tile> PerformAsyncProcessor::createInteractionIm
   auto fn = getInteractionConstructorMap().at(name);
   return (this->*fn)();
 }} // namespace cpp2
+
+namespace apache::thrift::detail {
+}

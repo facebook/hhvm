@@ -400,3 +400,6 @@ apache::thrift::ServiceRequestInfoMap SomeServiceServiceInfoHolder::staticReques
   return requestInfoMap;
 }
 } // namespace apache::thrift::fixtures::types
+
+namespace apache::thrift::detail {
+}

@@ -171,3 +171,6 @@ apache::thrift::ServiceRequestInfoMap MyServiceFastServiceInfoHolder::staticRequ
   return requestInfoMap;
 }
 } // namespace cpp2
+
+namespace apache::thrift::detail {
+}

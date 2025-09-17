@@ -10,15 +10,6 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
-namespace cpp2 {
-class MyService;
-} // namespace cpp2
-namespace cpp2 {
-class MyServiceFast;
-} // namespace cpp2
-namespace cpp2 {
-class DbMixedStackArguments;
-} // namespace cpp2
 namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::MyStruct>::name = "MyStruct";
@@ -43,20 +34,5 @@ namespace detail {
 
 
 
-template <> struct TSchemaAssociation<::cpp2::MyService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -3445220662518901917;
-  static constexpr ::std::string_view definitionKey = {"\x6e\x3d\x96\x08\x1f\x60\x22\x43\x45\x9f\x3f\x67\x37\x48\xb9\x89", 16};
-};
-template <> struct TSchemaAssociation<::cpp2::MyServiceFast, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -3445220662518901917;
-  static constexpr ::std::string_view definitionKey = {"\x51\xd4\xc1\x3f\x66\xd3\xfc\xc5\x40\xd9\x05\x1e\x39\xe0\x79\x37", 16};
-};
-template <> struct TSchemaAssociation<::cpp2::DbMixedStackArguments, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -3445220662518901917;
-  static constexpr ::std::string_view definitionKey = {"\x41\x18\x36\x1c\x2b\x79\xf0\x05\x71\xd4\x8f\x3f\xd5\x56\x62\xa1", 16};
-};
 } // namespace detail
 } // namespace apache::thrift

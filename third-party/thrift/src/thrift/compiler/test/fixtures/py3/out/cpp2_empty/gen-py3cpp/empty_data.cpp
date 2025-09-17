@@ -10,17 +10,9 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
-namespace cpp2 {
-class NullService;
-} // namespace cpp2
 namespace apache::thrift {
 
 namespace detail {
 
-template <> struct TSchemaAssociation<::cpp2::NullService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 1205150269192565637;
-  static constexpr ::std::string_view definitionKey = {"\x8c\xed\x4e\x40\x8d\x25\xb0\xaf\x62\xfc\xe5\x34\x19\x22\x66\x6c", 16};
-};
 } // namespace detail
 } // namespace apache::thrift

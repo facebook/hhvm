@@ -524,3 +524,6 @@ std::unique_ptr<apache::thrift::Tile> InteractLocallyAsyncProcessor::createInter
   auto fn = getInteractionConstructorMap().at(name);
   return (this->*fn)();
 }} // namespace thrift::shared_interactions
+
+namespace apache::thrift::detail {
+}

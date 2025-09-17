@@ -10,12 +10,6 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
-namespace cpp2_struct_footprint {
-class FootprintTestService;
-} // namespace cpp2_struct_footprint
-namespace cpp2_struct_footprint {
-class ExtendedFootprintService;
-} // namespace cpp2_struct_footprint
 namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2_struct_footprint::SimpleStruct>::name = "SimpleStruct";
@@ -139,15 +133,5 @@ namespace detail {
 
 
 
-template <> struct TSchemaAssociation<::cpp2_struct_footprint::FootprintTestService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -2016535262471784061;
-  static constexpr ::std::string_view definitionKey = {"\xc5\x02\x98\x08\x5e\x2a\xc5\x07\xd6\x51\xe6\xd7\x0b\x48\x29\x80", 16};
-};
-template <> struct TSchemaAssociation<::cpp2_struct_footprint::ExtendedFootprintService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -2016535262471784061;
-  static constexpr ::std::string_view definitionKey = {"\x87\x7f\xce\xad\xc6\x08\x35\xe8\xc9\x7d\xe6\x96\xad\x65\xa6\xf4", 16};
-};
 } // namespace detail
 } // namespace apache::thrift

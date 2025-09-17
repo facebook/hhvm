@@ -4410,3 +4410,6 @@ apache::thrift::ServiceRequestInfoMap ParamServiceServiceInfoHolder::staticReque
   return requestInfoMap;
 }
 } // namespace some::valid::ns
+
+namespace apache::thrift::detail {
+}

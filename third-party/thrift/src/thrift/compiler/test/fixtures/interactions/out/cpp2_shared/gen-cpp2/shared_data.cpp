@@ -10,9 +10,6 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
-namespace thrift::shared_interactions {
-class InteractLocally;
-} // namespace thrift::shared_interactions
 namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::thrift::shared_interactions::DoSomethingResult>::name = "DoSomethingResult";
@@ -36,10 +33,5 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::thrift::shared_
 namespace detail {
 
 
-template <> struct TSchemaAssociation<::thrift::shared_interactions::InteractLocally, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -4220872492017656570;
-  static constexpr ::std::string_view definitionKey = {"\x56\xd1\x04\xc3\x6f\x07\x7b\x82\x7b\x8a\x05\x38\xf1\xf1\x9b\xc8", 16};
-};
 } // namespace detail
 } // namespace apache::thrift

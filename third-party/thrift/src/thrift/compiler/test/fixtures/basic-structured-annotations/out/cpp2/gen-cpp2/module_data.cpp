@@ -10,9 +10,6 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
-namespace test::fixtures::basic-structured-annotations {
-class MyService;
-} // namespace test::fixtures::basic-structured-annotations
 namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::basic-structured-annotations::runtime_annotation>::name = "runtime_annotation";
@@ -181,10 +178,5 @@ namespace detail {
 
 
 
-template <> struct TSchemaAssociation<::test::fixtures::basic-structured-annotations::MyService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 2611009038593588256;
-  static constexpr ::std::string_view definitionKey = {"\xc8\x2a\xeb\x8a\x75\x70\x9a\xe9\x31\x21\x27\x31\x60\xce\xcf\x00", 16};
-};
 } // namespace detail
 } // namespace apache::thrift

@@ -10,12 +10,6 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
-namespace cpp2 {
-class HeaderClientMethodsAnnotationOnService;
-} // namespace cpp2
-namespace cpp2 {
-class HeaderClientMethodsAnnotationOnFunction;
-} // namespace cpp2
 namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::EchoRequest>::name = "EchoRequest";
@@ -50,15 +44,5 @@ namespace detail {
 
 
 
-template <> struct TSchemaAssociation<::cpp2::HeaderClientMethodsAnnotationOnService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 8289997534464861998;
-  static constexpr ::std::string_view definitionKey = {"\xd3\x04\x79\x51\xe1\x0e\xe4\x64\x58\xde\xf0\x95\x04\x48\xb9\xb4", 16};
-};
-template <> struct TSchemaAssociation<::cpp2::HeaderClientMethodsAnnotationOnFunction, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 8289997534464861998;
-  static constexpr ::std::string_view definitionKey = {"\x9c\xdd\xc7\xa5\x1c\x0f\xae\x50\xa3\x27\xa7\xe4\xe1\x56\xea\x62", 16};
-};
 } // namespace detail
 } // namespace apache::thrift

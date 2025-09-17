@@ -400,3 +400,6 @@ apache::thrift::ServiceRequestInfoMap DbMixedStackArgumentsServiceInfoHolder::st
   return requestInfoMap;
 }
 } // namespace test::fixtures::basic
+
+namespace apache::thrift::detail {
+}

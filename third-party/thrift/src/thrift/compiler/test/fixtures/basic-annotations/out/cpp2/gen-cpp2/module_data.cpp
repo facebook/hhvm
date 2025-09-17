@@ -10,21 +10,6 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
-namespace cpp2 {
-class MyService;
-} // namespace cpp2
-namespace cpp2 {
-class MyServicePrioParent;
-} // namespace cpp2
-namespace cpp2 {
-class MyServicePrioChild;
-} // namespace cpp2
-namespace cpp2 {
-class GoodService;
-} // namespace cpp2
-namespace cpp2 {
-class FooBarBazService;
-} // namespace cpp2
 namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::MyStructNestedAnnotation>::name = "MyStructNestedAnnotation";
@@ -133,30 +118,5 @@ namespace detail {
 
 
 
-template <> struct TSchemaAssociation<::cpp2::MyService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -2278009136013983862;
-  static constexpr ::std::string_view definitionKey = {"\x92\x4d\x53\x72\x3a\x75\xd5\x0a\xa0\x29\x39\x96\x73\x1b\x00\xbd", 16};
-};
-template <> struct TSchemaAssociation<::cpp2::MyServicePrioParent, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -2278009136013983862;
-  static constexpr ::std::string_view definitionKey = {"\xb4\x40\xdb\x33\x94\x2e\xad\x60\x21\x66\x8e\xcc\x05\xad\xb3\x2c", 16};
-};
-template <> struct TSchemaAssociation<::cpp2::MyServicePrioChild, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -2278009136013983862;
-  static constexpr ::std::string_view definitionKey = {"\xd1\x42\x45\x21\x83\xa1\xb3\x07\x12\xba\xf6\x0c\xe0\x07\xc8\x7f", 16};
-};
-template <> struct TSchemaAssociation<::cpp2::GoodService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -2278009136013983862;
-  static constexpr ::std::string_view definitionKey = {"\xd2\xf8\x8b\xfd\xb2\xc2\xc1\x88\x0a\x84\x16\x31\x81\xe6\xf1\xc7", 16};
-};
-template <> struct TSchemaAssociation<::cpp2::FooBarBazService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -2278009136013983862;
-  static constexpr ::std::string_view definitionKey = {"\x52\x5b\x9b\xd0\x41\xeb\x66\x8b\x08\x61\x4e\x33\x84\x52\xef\x91", 16};
-};
 } // namespace detail
 } // namespace apache::thrift

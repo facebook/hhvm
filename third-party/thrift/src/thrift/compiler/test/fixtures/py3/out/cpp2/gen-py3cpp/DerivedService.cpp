@@ -236,3 +236,6 @@ apache::thrift::ServiceRequestInfoMap DerivedServiceServiceInfoHolder::staticReq
   return requestInfoMap;
 }
 } // namespace py3::simple
+
+namespace apache::thrift::detail {
+}

@@ -10,12 +10,6 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
-namespace facebook::thrift::test {
-class Service;
-} // namespace facebook::thrift::test
-namespace facebook::thrift::test {
-class AdapterService;
-} // namespace facebook::thrift::test
 namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::MyAnnotation>::name = "MyAnnotation";
@@ -780,15 +774,5 @@ namespace detail {
 
 
 
-template <> struct TSchemaAssociation<::facebook::thrift::test::Service, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8555449446587739158;
-  static constexpr ::std::string_view definitionKey = {"\xac\x91\xa8\xcd\x36\xfc\x98\x4a\xcb\x2e\x9a\x2a\x05\x9e\x4e\x19", 16};
-};
-template <> struct TSchemaAssociation<::facebook::thrift::test::AdapterService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8555449446587739158;
-  static constexpr ::std::string_view definitionKey = {"\x3c\xe4\xa8\x33\x33\x98\x74\x23\x8f\xc5\xd3\xde\xc9\x3c\xe5\x44", 16};
-};
 } // namespace detail
 } // namespace apache::thrift

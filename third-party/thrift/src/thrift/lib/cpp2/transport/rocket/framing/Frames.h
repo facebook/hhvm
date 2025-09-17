@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <limits>
 #include <memory>
 #include <stdexcept>
 #include <utility>
@@ -462,7 +461,10 @@ class KeepAliveFrame {
   void serialize(Serializer& writer) &&;
   std::unique_ptr<folly::IOBuf> serialize() &&;
 
+  StreamId streamId() const noexcept { return streamId_; }
+
  private:
+  StreamId streamId_{0};
   Flags flags_;
   std::unique_ptr<folly::IOBuf> data_;
 };

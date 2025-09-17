@@ -25,6 +25,7 @@ size_t Serializer::writePayload(Payload&& p) {
   if (p.hasNonemptyMetadata()) {
     nwritten += writeFrameOrMetadataSize(p.metadataSize());
   }
+  FOLLY_SAFE_DCHECK(p.buffer() != nullptr, "buffer is null");
   if (!p.buffer()->empty()) {
     nwritten += write(std::move(p).buffer());
   }

@@ -921,6 +921,7 @@ KeepAliveFrame::KeepAliveFrame(std::unique_ptr<folly::IOBuf> frame) {
   folly::io::Cursor cursor(frame.get());
   const StreamId zero(readStreamId(cursor));
   DCHECK_EQ(StreamId{0}, zero);
+  streamId_ = zero;
 
   FrameType type;
   std::tie(type, flags_) = readFrameTypeAndFlags(cursor);

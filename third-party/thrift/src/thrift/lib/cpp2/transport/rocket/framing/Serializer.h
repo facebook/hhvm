@@ -87,6 +87,12 @@ class Serializer {
 
   std::unique_ptr<folly::IOBuf> move() && { return queue_.move(); }
 
+  std::unique_ptr<folly::IOBuf> moveAndReset() {
+    auto&& buf = queue_.move();
+    queue_.clearAndTryReuseLargestBuffer();
+    return buf;
+  }
+
  private:
   static constexpr size_t kQueueAppenderChunkSize = 512;
 

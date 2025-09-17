@@ -26,7 +26,7 @@ folly::coro::Task<void> fetchUrl(folly::EventBase* evb, std::string url) {
 } // namespace
 
 int main(int argc, char* argv[]) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
   ::gflags::ParseCommandLineFlags(&argc, &argv, false);
 
   folly::EventBase evb;

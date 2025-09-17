@@ -121,12 +121,12 @@ func (h *Handler) ThrowError(ctx context.Context, code int32) (err error) {
 
 // ThrowUnexpected - throws a ApplicationException
 func (h *Handler) ThrowUnexpected(ctx context.Context, code int32) (err error) {
-	return thrift.NewApplicationException(thrift.UNKNOWN_APPLICATION_EXCEPTION, "Unknown Exception")
+	return errors.New("Unknown Exception")
 }
 
 // OnewayThrow - throws a ApplicationException
 func (h *Handler) OnewayThrow(ctx context.Context, code int32) (err error) {
-	return thrift.NewApplicationException(thrift.UNKNOWN_APPLICATION_EXCEPTION, "Unknown Exception")
+	return errors.New("Unknown Exception")
 }
 
 // Send - does nothing

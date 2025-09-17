@@ -56,7 +56,7 @@ std::unique_ptr<HTTP2RoutingHandler> createHTTP2RoutingHandler(
 }
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
 
   int32_t numCores = sysconf(_SC_NPROCESSORS_ONLN);
   if (FLAGS_io_threads == 0) {

@@ -221,7 +221,7 @@ BENCHMARK(JsonDeserialization, iters) {
 }
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
   folly::runBenchmarks();
   return 0;
 }

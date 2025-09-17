@@ -72,7 +72,7 @@ BENCHMARK_RELATIVE(unsafe, n) {
 }
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
   runBenchmarks();
   return 0;
 }

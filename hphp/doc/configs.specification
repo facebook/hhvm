@@ -1876,6 +1876,23 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   When refining a type and selecting between two possible RATArray
   specializaitons, always select the version from the refinement.
 
+- bool Jit.CollectTranslationStats = false, sinancepel
+
+  If true, the JIT will emit counters for each prologue and func entry
+  to keep counters even after profiing, and log these call stats via
+  StructuredLog during process shutdown.
+
+- uint32_t Jit.ReportTranslationStatsMinCallCount = 5000, sinancepel
+
+  The minimum call count for the JIT to report call stats. Has no effect
+  unless Jit.CollectTranslationStats is true; computes call counts during
+  HHVM shutdown.
+
+- uint32_t Jit.TranslationStatsSampleRate = 1, sinancepel
+
+  On average, log every 1 / Jit.TranslationStatsSampleRate counters. Has
+  no effect unless Jit.CollectTranslationStats is set.
+
 # Mail
 
 - std::string Mail.SendmailPath = "/usr/lib/sendmail -t -i", UNKNOWN

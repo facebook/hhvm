@@ -590,6 +590,7 @@ bool canDCE(const IRInstruction& inst) {
   case IncStat:
   case IncProfCounter:
   case IncCallCounter:
+  case IncStatCounter:
   case DbgAssertRefCount:
   case DbgAssertFunc:
   case DbgCheckLocalsDecRefd:

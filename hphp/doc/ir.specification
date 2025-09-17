@@ -2722,6 +2722,11 @@ ReqBindJmp and CallFuncEntry.
   the function containing the previous translation in the call stack into the
   current function given by `callee'.
 
+| IncStatCounter<TransID>, ND, NA, NF
+
+  Increment the TransStats counter associated with translation TransID. Only
+  valid for FuncEntry and Prologue SrcKey's.
+
 | DbgAssertRefCount<AssertReason>, ND, S(Cell), NF
 
   Assert that S0 has a valid refcount. If S0 has a reference counted type and

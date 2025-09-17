@@ -74,6 +74,7 @@
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/translation-stats.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -2679,6 +2680,7 @@ void hphp_process_init(bool initForWorkerProcess /* = false */) {
   if (!initForWorkerProcess) {
     jit::mcgen::processInit();
     jit::processInitProfData();
+    jit::processInitTransStats();
   }
   if (Cfg::Eval::EnableDecl) {
     if (!initForWorkerProcess) {
@@ -3181,6 +3183,7 @@ void hphp_process_exit() noexcept {
   // an earlier step fails, and don't propagate exceptions ouf of this function
 #define LOG_AND_IGNORE(voidexpr) try { voidexpr; } catch (...) { \
     Logger::Error("got exception in cleanup step: " #voidexpr); }
+  LOG_AND_IGNORE(jit::logGlobalTransStats())
   LOG_AND_IGNORE(teardown_cli_server())
   LOG_AND_IGNORE(Xenon::getInstance().stop())
   LOG_AND_IGNORE(jit::mcgen::joinWorkerThreads())

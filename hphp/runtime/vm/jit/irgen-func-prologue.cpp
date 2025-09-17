@@ -36,6 +36,7 @@
 #include "hphp/runtime/vm/jit/irgen-types.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/runtime/vm/jit/translation-stats.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/type.h"
 
@@ -383,6 +384,15 @@ void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t argc,
   if (isProfiling(env.context.kind)) {
     gen(env, IncProfCounter, TransIDData{transID});
     profData()->setProfiling(callee);
+  }
+
+  if (Cfg::Jit::CollectTranslationStats) {
+    auto transStats = globalTransStats();
+    assertx(transStats != nullptr);
+    auto sk = SrcKey{callee, argc, SrcKey::PrologueTag {}};
+    TransID transStatsID = transStats->initTransStats(env.context.kind, sk);
+    assertx(transStatsID != kInvalidTransID);
+    gen(env, IncStatCounter, TransIDData{transStatsID});
   }
 }
 

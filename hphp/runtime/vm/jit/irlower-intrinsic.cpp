@@ -39,6 +39,7 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/translation-stats.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
@@ -1001,6 +1002,13 @@ void cgIncProfCounter(IRLS& env, const IRInstruction* inst) {
   } else {
     v << decqmlock{v.cns(counterAddr)[0], v.makeReg()};
   }
+}
+
+void cgIncStatCounter(IRLS& env, const IRInstruction* inst) {
+  auto const transID = inst->extra<TransIDData>()->transId;
+  auto const counterAddr = globalTransStats()->transStatsCounterAddr(transID);
+  auto& v = vmain(env);
+  v << decqmlock{v.cns(counterAddr)[0], v.makeReg()};
 }
 
 void cgCheckCold(IRLS& env, const IRInstruction* inst) {

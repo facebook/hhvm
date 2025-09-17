@@ -708,6 +708,7 @@ bool opcodeMayRaise(Opcode opc) {
   case HasToString:
   case IncCallCounter:
   case IncProfCounter:
+  case IncStatCounter:
   case IncRef:
   case IncStat:
   case InitDictElem:

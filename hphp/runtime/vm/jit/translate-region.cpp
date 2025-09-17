@@ -40,6 +40,7 @@
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/translation-stats.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/timer.h"
@@ -225,6 +226,13 @@ void emitGuards(irgen::IRGS& irgs,
 
   if (sk.nonTrivialFuncEntry()) {
     emitEntryAssertions(irgs, block.func(), sk);
+  }
+  if (Cfg::Jit::CollectTranslationStats) {
+    auto transStats = globalTransStats();
+    assertx(transStats != nullptr);
+    TransID transStatsID = transStats->initTransStats(irgs.context.kind, sk);
+    assertx(transStatsID != kInvalidTransID);
+    gen(irgs, IncStatCounter, TransIDData{transStatsID});
   }
 
   // Emit type guards/preconditions.
@@ -909,9 +917,9 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
 
   if (Cfg::HHIR::EnableInliningPass) {
     auto stitchContext = irgen::InlineStitchingContext {
-      irgs.unit, *calleeRegionAndUnit.unit(), irgs.irb.get(), psk.srcKey, entry, 
+      irgs.unit, *calleeRegionAndUnit.unit(), irgs.irb.get(), psk.srcKey, entry,
       fp(irgs), sp(irgs), ctx, irgs,
-    };    
+    };
     irgen::stitchCalleeUnit(stitchContext);
     return true;
   }

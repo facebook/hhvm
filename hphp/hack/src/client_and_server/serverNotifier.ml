@@ -123,6 +123,7 @@ let init
         (in_fd, log_fd, log_fd)
         (GlobalConfig.scuba_table_name, [root])
     in
+    HackEventLogger.set_file_watcher_dfind ();
     Dfind { root; ready = ref false; dfind }
   in
 
@@ -153,7 +154,7 @@ let init
         ()
     in
     Option.map wenv ~f:(fun wenv ->
-        HackEventLogger.set_use_watchman ();
+        HackEventLogger.set_file_watcher_watchman ();
         Watchman
           {
             wenv;
@@ -210,9 +211,6 @@ let init
       HackEventLogger.edenfs_watcher_fallback ~msg;
       None
     | Result.Ok (instance, initial_clock) ->
-      (* TODO(frankemrich): Add use_edenfs_file_watcher to hh_server_events
-         table and HackEventLogger *)
-      (* HackEventLogger.set_use_edenfs_file_watcher (); *)
       let last_clock = ref initial_clock in
 
       (* This is just temporary:
@@ -246,6 +244,7 @@ let init
         let tmp_watchman_instance =
           ref (Watchman.Watchman_alive watchman_env)
         in
+        HackEventLogger.set_file_watcher_edenfs ();
         Some
           (EdenfsFileWatcher
              {

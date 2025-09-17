@@ -17,7 +17,11 @@ let flush () = ()
 
 let deserialize_globals _ = ()
 
-let set_use_watchman _ = ()
+let set_file_watcher_watchman () = ()
+
+let set_file_watcher_dfind () = ()
+
+let set_file_watcher_edenfs () = ()
 
 let set_use_full_fidelity_parser _ = ()
 

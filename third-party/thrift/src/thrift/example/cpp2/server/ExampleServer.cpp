@@ -55,7 +55,7 @@ std::shared_ptr<ThriftServer> newServer(int32_t port) {
 
 int main(int argc, char** argv) {
   FLAGS_logtostderr = 1;
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
 
   auto chatroom_server = newServer<ChatRoomServiceHandler>(FLAGS_chatroom_port);
   std::thread t([&] {

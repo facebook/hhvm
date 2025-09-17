@@ -27,7 +27,7 @@ using namespace std::chrono;
 DEFINE_int32(port, 7777, "Port for the thrift server");
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
 
   auto handler = std::make_shared<BackendServiceHandler>();
   auto server = std::make_shared<ThriftServer>();

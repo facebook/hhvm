@@ -31,7 +31,7 @@ using apache::thrift::util::ScopedServerThread;
 DEFINE_uint32(rps, 100, "Request per second [default: 100]");
 
 int main(int argc, char* argv[]) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
 
   auto handler = std::make_shared<BackendServiceHandler>();
   auto server = std::make_shared<ThriftServer>();

@@ -227,6 +227,82 @@ bool generate_reduced_client(const t_interface& i) {
   return i.is_interaction();
 }
 
+// Compute the set of types that appear anywhere in the service
+// definition as input or output types. This presents maps, lists etc as seen
+// in declarations, but unpacks the payloads of sinks and streams.
+whisker::array::ptr build_user_type_footprint(
+    const t_service& service,
+    const whisker::prototype_database& prototype_database) {
+  std::vector<const t_type*> types;
+  std::unordered_set<const t_type*> seen;
+
+  // Helper to extract the necesary types from a single type identified in
+  // some component of a method declaration.  Deals with maps, lists, streams
+  // that surround actual types.
+  auto extract_type = [&](const t_type* type) -> void {
+    // Maintain insertion order for stable output.
+    // Insert into types in order of detection (parsing), use "seen"
+    // to avoid duplicates.
+    if (seen.count(type) == 0) {
+      types.emplace_back(type);
+      seen.insert(type);
+    }
+  };
+
+  // Go through each method declaration and identfiy the places that could
+  // contain user defined types.
+  std::deque<const t_function*> pending;
+  for (const auto& function : service.functions()) {
+    pending.emplace_back(&function);
+  }
+  while (!pending.empty()) {
+    const auto& function = *pending.front();
+    pending.erase(pending.begin());
+    for (const auto& param : function.params().fields()) {
+      extract_type(param.get_type());
+    }
+    if (const auto& excs = function.exceptions();
+        !t_throws::is_null_or_empty(excs)) {
+      for (auto& ex : excs->fields()) {
+        extract_type(ex.get_type());
+      }
+    }
+
+    extract_type(&function.return_type().deref());
+    if (auto& type = function.interaction()) {
+      if (auto* srv_type =
+              dynamic_cast<const t_service*>(type->get_true_type())) {
+        for (const auto& intfunc : srv_type->functions()) {
+          pending.emplace_back(&intfunc);
+        }
+        continue;
+      }
+    }
+    if (function.sink()) {
+      extract_type(&function.sink()->elem_type().deref());
+      if (!function.sink()->final_response_type().empty()) {
+        extract_type(&function.sink()->final_response_type().deref());
+      }
+    }
+    if (function.stream()) {
+      extract_type(&function.stream()->elem_type().deref());
+    }
+  }
+  whisker::array::raw ret;
+  for (const t_type* typeptr : types) {
+    // This line below should be this:
+    // auto obj = resolve_derived_t_type(prototype_database, *typeptr);
+    //
+    // resolve_derived_t_type() does not produce the correct result for
+    // right now - the right result being a match of the type names
+    // used in service stub definitions, due to problems with inconsistent
+    // behavior of the cpp_type property across different implementations/types.
+    auto obj = prototype_database.create<t_type>(*typeptr);
+    ret.emplace_back(std::move(obj));
+  }
+  return whisker::array::of(std::move(ret));
+}
+
 struct cpp2_field_generator_context {
   const t_field* serialization_prev = nullptr;
   const t_field* serialization_next = nullptr;
@@ -585,6 +661,9 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
         });
 
     def.property("qualified_name", &cpp2::get_service_qualified_name);
+    def.property("user_type_footprint", [&](const t_service& service) {
+      return build_user_type_footprint(service, proto);
+    });
 
     return std::move(def).make();
   }

@@ -24,7 +24,7 @@
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
   auto server = std::make_shared<apache::thrift::ThriftServer>();
   auto handler =
       std::make_shared<apache::thrift::conformance::ConformanceHandler>();

@@ -47,6 +47,13 @@ class SchemaBackedResolver : public Resolver {
   virtual const DefinitionNode* getDefinitionNodeBySourceIdentifier(
       type_system::SourceIdentifierView sourceIdentifier) const;
 
+  /**
+   * Gets source identifier for given definition, or returns nullopt if not
+   * found.
+   */
+  virtual std::optional<type_system::SourceIdentifierView>
+  getSourceIdentifierByDefinitionRef(type_system::DefinitionRef ref) const;
+
  protected:
   folly::not_null_unique_ptr<SchemaIndex> index_;
 };
@@ -72,6 +79,10 @@ class IncrementalResolver : public SchemaBackedResolver {
 
   const DefinitionNode* getDefinitionNodeBySourceIdentifier(
       type_system::SourceIdentifierView sourceIdentifier) const override;
+
+  std::optional<type_system::SourceIdentifierView>
+  getSourceIdentifierByDefinitionRef(
+      type_system::DefinitionRef ref) const override;
 
   const ProgramNode& programOf(const type::ProgramId& id) const override;
   const protocol::Value& valueOf(const type::ValueId& id) const override;

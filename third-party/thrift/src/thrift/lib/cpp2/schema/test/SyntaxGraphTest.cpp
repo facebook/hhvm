@@ -781,13 +781,6 @@ TEST(SyntaxGraphTest, getTypeSystemDefinitionRefBySourceIdentifier) {
   auto& registry = SchemaRegistry::get();
 
   EXPECT_EQ(
-      &registry.getTypeSystemDefinitionRef<test::TestStruct>().asStruct(),
-      &registry
-           .getTypeSystemDefinitionRefBySourceIdentifier(
-               {"file://thrift/lib/cpp2/schema/test/syntax_graph.thrift",
-                "TestStruct"})
-           ->asStruct());
-  EXPECT_EQ(
       &registry.getTypeSystemDefinitionRef<test::TestUnion>().asUnion(),
       &registry
            .getTypeSystemDefinitionRefBySourceIdentifier(
@@ -803,6 +796,23 @@ TEST(SyntaxGraphTest, getTypeSystemDefinitionRefBySourceIdentifier) {
            ->asEnum());
 }
 
+TEST(SyntaxGraphTest, getSourceIdentiferForUserDefinedType) {
+  auto& registry = SchemaRegistry::get();
+
+  EXPECT_EQ(
+      *registry.getSourceIdentifierByTypeSystemDefinitionRef(
+          registry.getTypeSystemDefinitionRef<test::TestUnion>()),
+      (type_system::SourceIdentifier{
+          "file://thrift/lib/cpp2/schema/test/syntax_graph.thrift",
+          "TestUnion"}));
+  EXPECT_EQ(
+      *registry.getSourceIdentifierByTypeSystemDefinitionRef(
+          registry.getTypeSystemDefinitionRef<test::TestEnum>()),
+      (type_system::SourceIdentifier{
+          "file://thrift/lib/cpp2/schema/test/syntax_graph.thrift",
+          "TestEnum"}));
+}
+
 TEST_F(ServiceSchemaTest, asTypeSystem) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
   auto& mainProgram = syntaxGraph.findProgramByName("syntax_graph");
@@ -813,8 +823,8 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
   auto& typeSystem = syntaxGraph.asTypeSystem();
   EXPECT_EQ(typeSystem.getKnownUris()->size(), 6);
 
-  const type_system::StructNode& structNode =
-      typeSystem.getUserDefinedTypeOrThrow(uri).asStruct();
+  const auto& ref = typeSystem.getUserDefinedTypeOrThrow(uri);
+  const type_system::StructNode& structNode = ref.asStruct();
   EXPECT_EQ(structNode.uri(), uri);
   EXPECT_EQ(structNode.fields().size(), 1);
   EXPECT_EQ(structNode.fields()[0].identity().name(), "myself");
@@ -824,13 +834,13 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
       type_system::PresenceQualifier::OPTIONAL_);
   EXPECT_EQ(structNode.fields()[0].type().asStruct().uri(), uri);
   EXPECT_EQ(&structNode.fields()[0].type().asStruct(), &structNode);
+  type_system::SourceIdentifierView ident = {
+      "file://thrift/lib/cpp2/schema/test/syntax_graph.thrift",
+      "TestRecursiveStruct"};
   EXPECT_EQ(
       &structNode,
-      &typeSystem
-           .getUserDefinedTypeBySourceIdentifier(
-               {"file://thrift/lib/cpp2/schema/test/syntax_graph.thrift",
-                "TestRecursiveStruct"})
-           ->asStruct());
+      &typeSystem.getUserDefinedTypeBySourceIdentifier(ident)->asStruct());
+  EXPECT_EQ(ident, typeSystem.getSourceIdentiferForUserDefinedType(ref));
 
   EXPECT_EQ(&syntaxGraph.asTypeSystemStructNode(def->asStruct()), &structNode);
   const auto& sgStructNode = syntaxGraph.asSyntaxGraphStructNode(structNode);

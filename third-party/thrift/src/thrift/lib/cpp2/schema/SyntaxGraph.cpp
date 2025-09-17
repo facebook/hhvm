@@ -929,8 +929,8 @@ class TypeSystemFacade final : public type_system::SourceIndexedTypeSystem {
 
   std::optional<type_system::SourceIdentifierView>
   getSourceIdentiferForUserDefinedType(
-      type_system::DefinitionRef) const override {
-    throw std::runtime_error("not implemented");
+      type_system::DefinitionRef ref) const override {
+    return resolver_.getSourceIdentifierByDefinitionRef(ref);
   }
 
   type_system::SourceIndexedTypeSystem::NameToDefinitionsMap

@@ -130,6 +130,10 @@ class SchemaIndex {
       type_system::SourceIdentifierHash,
       std::equal_to<>>;
   DefinitionKeysBySourceIdentifier definitionKeysBySourceIdentifier_;
+  // An index of URI to source identifier.
+  using SourceIdentifiersByUri =
+      folly::F14FastMap<std::string_view, type_system::SourceIdentifier>;
+  SourceIdentifiersByUri sourceIdentifiersByUri_;
 
   // A set of unresolved definition keys collected while updating indexes.
   // This can be used to detect missing definitions in selective resolver.
@@ -146,8 +150,10 @@ class SchemaIndex {
       DefinitionsByKey&, const type::Schema&, const ProgramIdsByDefinitionKey&);
 
   void updateDefinitionKeysByUri(DefinitionKeysByUri&, const DefinitionsByKey&);
-  void updateDefinitionKeysBySourceIdentifier(
-      DefinitionKeysBySourceIdentifier&, const DefinitionsByKey&);
+  void updateSourceIdentifiers(
+      DefinitionKeysBySourceIdentifier&,
+      SourceIdentifiersByUri&,
+      const DefinitionsByKey&);
 
   DefinitionNode createDefinition(
       const ProgramIdsByDefinitionKey&,
@@ -230,6 +236,8 @@ class SchemaIndex {
   const DefinitionNode* definitionForUri(std::string_view uri) const;
   const DefinitionNode* definitionForSourceIdentifier(
       type_system::SourceIdentifierView sourceIdentifier) const;
+  std::optional<type_system::SourceIdentifierView> sourceIdentifierForUri(
+      std::string_view uri) const;
   std::optional<folly::F14FastSet<type_system::Uri>> getKnownUris() const;
   ProgramNode::IncludesList programs() const;
 
@@ -239,8 +247,10 @@ class SchemaIndex {
     updateProgramsById(programsById_, schema, definitionsByKey_);
     updateValuesById(valuesById_, schema);
     updateDefinitionKeysByUri(definitionKeysByUri_, definitionsByKey_);
-    updateDefinitionKeysBySourceIdentifier(
-        definitionKeysBySourceIdentifier_, definitionsByKey_);
+    updateSourceIdentifiers(
+        definitionKeysBySourceIdentifier_,
+        sourceIdentifiersByUri_,
+        definitionsByKey_);
 
     auto unresolved = std::move(unresolvedDefinitionRefs_);
     if (!resolve) {
@@ -486,6 +496,15 @@ const DefinitionNode* SchemaIndex::definitionForSourceIdentifier(
   return definitionOf(*definitionKey);
 }
 
+std::optional<type_system::SourceIdentifierView>
+SchemaIndex::sourceIdentifierForUri(std::string_view uri) const {
+  auto sourceIdentifier = folly::get_ptr(sourceIdentifiersByUri_, uri);
+  if (!sourceIdentifier) {
+    return std::nullopt;
+  }
+  return *sourceIdentifier;
+}
+
 ProgramNode::IncludesList SchemaIndex::programs() const {
   ProgramNode::IncludesList programs;
   for (const auto& [_, program] : programsById_) {
@@ -625,17 +644,35 @@ void SchemaIndex::updateDefinitionKeysByUri(
   }
 }
 
-void SchemaIndex::updateDefinitionKeysBySourceIdentifier(
-    SchemaIndex::DefinitionKeysBySourceIdentifier& result,
+void SchemaIndex::updateSourceIdentifiers(
+    SchemaIndex::DefinitionKeysBySourceIdentifier&
+        definitionKeysBySourceIdentifier,
+    SchemaIndex::SourceIdentifiersByUri& sourceIdentifiersByDefinitionKey,
     const SchemaIndex::DefinitionsByKey& definitionsByKey) {
   for (const auto& [definitionKey, definition] : definitionsByKey) {
-    const auto& program = definition.program();
-    std::string uri = "file://";
-    uri += program.path();
-    type_system::SourceIdentifier sourceIdentifier{
-        std::move(uri), std::string{definition.name()}};
+    // We only care about definitions that have a uri.
+    auto uri = definition.visit([](const auto& def) {
+      if constexpr (std::is_base_of_v<
+                        detail::WithUri,
+                        std::decay_t<decltype(def)>>) {
+        return def.uri();
+      } else {
+        return std::string_view{};
+      }
+    });
 
-    result.emplace(sourceIdentifier, definitionKey);
+    if (uri.empty() || sourceIdentifiersByDefinitionKey.contains(uri)) {
+      continue;
+    }
+
+    const auto& program = definition.program();
+    std::string sourceIdentifierUri = "file://";
+    sourceIdentifierUri += program.path();
+    type_system::SourceIdentifier sourceIdentifier{
+        std::move(sourceIdentifierUri), std::string{definition.name()}};
+
+    definitionKeysBySourceIdentifier.emplace(sourceIdentifier, definitionKey);
+    sourceIdentifiersByDefinitionKey.emplace(uri, sourceIdentifier);
   }
 }
 
@@ -1027,6 +1064,12 @@ const DefinitionNode* SchemaBackedResolver::getDefinitionNodeBySourceIdentifier(
   return index_->definitionForSourceIdentifier(sourceIdentifier);
 }
 
+std::optional<type_system::SourceIdentifierView>
+SchemaBackedResolver::getSourceIdentifierByDefinitionRef(
+    type_system::DefinitionRef ref) const {
+  return index_->sourceIdentifierForUri(ref.uri());
+}
+
 const DefinitionNode* IncrementalResolver::getDefinitionNodeByUri(
     std::string_view uri) const {
   auto schemaReadGuard = schema_.rlock();
@@ -1037,6 +1080,13 @@ const DefinitionNode* IncrementalResolver::getDefinitionNodeBySourceIdentifier(
     type_system::SourceIdentifierView sourceIdentifier) const {
   auto schemaReadGuard = schema_.rlock();
   return index_->definitionForSourceIdentifier(sourceIdentifier);
+}
+
+std::optional<type_system::SourceIdentifierView>
+IncrementalResolver::getSourceIdentifierByDefinitionRef(
+    type_system::DefinitionRef ref) const {
+  auto schemaReadGuard = schema_.rlock();
+  return index_->sourceIdentifierForUri(ref.uri());
 }
 
 const DefinitionNode* IncrementalResolver::getDefinitionNodeByUri(

@@ -165,6 +165,15 @@ class SchemaRegistry : public type_system::SourceIndexedTypeSystem {
     return getUserDefinedTypeBySourceIdentifier(sourceIdentifier);
   }
 
+  /**
+   * Gets source identifier for given TypeSystem node, or nullopt if not found.
+   */
+  std::optional<type_system::SourceIdentifierView>
+  getSourceIdentifierByTypeSystemDefinitionRef(
+      type_system::DefinitionRef ref) const {
+    return getSourceIdentiferForUserDefinedType(ref);
+  }
+
   explicit SchemaRegistry(BaseSchemaRegistry& base);
   ~SchemaRegistry() override;
 
@@ -192,8 +201,8 @@ class SchemaRegistry : public type_system::SourceIndexedTypeSystem {
   }
   std::optional<type_system::SourceIdentifierView>
   getSourceIdentiferForUserDefinedType(
-      type_system::DefinitionRef) const override {
-    throw std::runtime_error("not implemented");
+      type_system::DefinitionRef ref) const override {
+    return resolver_->getSourceIdentifierByDefinitionRef(ref);
   }
   type_system::SourceIndexedTypeSystem::NameToDefinitionsMap
   getUserDefinedTypesAtLocation(std::string_view) const override {

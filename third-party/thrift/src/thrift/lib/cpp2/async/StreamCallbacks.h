@@ -32,82 +32,10 @@
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
+#include <thrift/lib/cpp2/async/StreamPayload.h>
+
 namespace apache::thrift {
 class ContextStack;
-
-struct FirstResponsePayload {
-  FirstResponsePayload(
-      std::unique_ptr<folly::IOBuf> p, ResponseRpcMetadata&& md)
-      : payload(std::move(p)), metadata(std::move(md)) {}
-
-  std::unique_ptr<folly::IOBuf> payload;
-  ResponseRpcMetadata metadata;
-  folly::SocketFds fds;
-};
-
-struct StreamPayload {
-  StreamPayload(
-      std::unique_ptr<folly::IOBuf> p,
-      StreamPayloadMetadata&& md,
-      bool isOrderedHdr = false)
-      : payload(std::move(p)),
-        metadata(std::move(md)),
-        isOrderedHeader(isOrderedHdr) {}
-
-  // IMPORTANT: The copy constructor / copy assignment are only intended for
-  // `StreamPayload`s that are intended to be sent.  Never copy received
-  // payloads.
-
-  StreamPayload(const StreamPayload& oth)
-      : metadata(oth.metadata), isOrderedHeader(oth.isOrderedHeader) {
-    if (oth.payload) {
-      payload = oth.payload->clone();
-    }
-    fds.cloneToSendFromOrDfatal(oth.fds);
-  }
-
-  StreamPayload(StreamPayload&&) = default;
-
-  StreamPayload& operator=(const StreamPayload& oth) {
-    if (oth.payload) {
-      payload = oth.payload->clone();
-    }
-    metadata = oth.metadata;
-    isOrderedHeader = oth.isOrderedHeader;
-    fds.cloneToSendFromOrDfatal(oth.fds);
-    return *this;
-  }
-
-  StreamPayload& operator=(StreamPayload&& oth) = default;
-
-  std::unique_ptr<folly::IOBuf> payload;
-  StreamPayloadMetadata metadata;
-  // OrderedHeader is sent as a PAYLOAD frame with an empty payload
-  bool isOrderedHeader;
-  folly::SocketFds fds; // Sent only via `RichPayloadToSend`
-};
-
-struct HeadersPayload {
-  HeadersPayload(HeadersPayloadContent&& p, HeadersPayloadMetadata&& md)
-      : payload(std::move(p)), metadata(std::move(md)) {}
-
-  explicit HeadersPayload(HeadersPayloadContent&& p) : payload(std::move(p)) {}
-
-  explicit HeadersPayload(StreamPayloadMetadata&& sp) {
-    payload.otherMetadata().copy_from(sp.otherMetadata());
-    metadata.compression().copy_from(sp.compression());
-  }
-
-  HeadersPayloadContent payload;
-  HeadersPayloadMetadata metadata;
-
-  explicit operator StreamPayload() && {
-    StreamPayloadMetadata md;
-    md.otherMetadata().copy_from(payload.otherMetadata());
-    md.compression().copy_from(metadata.compression());
-    return StreamPayload(nullptr, std::move(md));
-  }
-};
 
 template <typename ClientBridgePtr>
 class FirstResponseClientCallback {

@@ -250,6 +250,7 @@ add_library(
   async/ServerGeneratorStreamBridge.cpp
   async/ServerRequestData.cpp
   async/ServerSinkBridge.cpp
+  async/StreamPayload.cpp
   async/processor/AsyncProcessor.cpp
   async/processor/AsyncProcessorFunc.cpp
   async/processor/EventTask.cpp

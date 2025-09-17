@@ -278,6 +278,9 @@ const Annotation* get_field_annotation() {
   static_assert(
       op::get_ordinal<Struct, Id>::value != static_cast<FieldOrdinal>(0),
       "Id not found in Struct.");
+  static_assert(
+      is_thrift_class_v<Struct>,
+      "Struct is not a Thrift struct, union, or exception.");
 
   static const Annotation* ret = []() -> const Annotation* {
     for (const std::any& v :
@@ -358,6 +361,9 @@ const Annotation* get_struct_annotation() {
   static_assert(
       is_runtime_annotation<Annotation>,
       "Annotation is not annotated with @thrift.RuntimeAnnotation.");
+  static_assert(
+      is_thrift_class_v<Struct>,
+      "Struct is not a Thrift struct, union, or exception.");
 
   static const Annotation* ret = []() -> const Annotation* {
     for (const std::any& v : struct_annotation_values<Struct>()) {
@@ -409,6 +415,7 @@ const Annotation* get_enum_annotation() {
   static_assert(
       is_runtime_annotation<Annotation>,
       "Annotation is not annotated with @thrift.RuntimeAnnotation.");
+  static_assert(util::is_thrift_enum_v<Enum>, "Enum is not a Thrift enum.");
 
   static const Annotation* ret = []() -> const Annotation* {
     for (const std::any& v : TEnumTraits<Enum>::annotations()) {

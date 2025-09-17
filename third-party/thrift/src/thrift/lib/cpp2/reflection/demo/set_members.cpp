@@ -57,7 +57,7 @@ struct member_setter {
 };
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
 
   using type = simple_struct;
   using setter = member_setter<type>;

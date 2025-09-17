@@ -302,7 +302,7 @@ BENCHMARK(all_map_elems_with_patch_after_partial_deser) {
 } // namespace apache::thrift::protocol
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
   apache::thrift::protocol::init(10000);
   runBenchmarks();
   return 0;

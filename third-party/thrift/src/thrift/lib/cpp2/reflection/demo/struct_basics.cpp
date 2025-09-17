@@ -49,7 +49,7 @@ void print_struct_info(T const& object) {
 }
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
 
   simple_struct value;
   *value.i32_data() = 12345678;

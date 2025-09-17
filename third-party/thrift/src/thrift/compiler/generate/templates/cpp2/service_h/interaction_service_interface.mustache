@@ -17,7 +17,7 @@
 }}{{> service_h/service_info_holder}}
 
 
-class {{service:cpp_name}}If : public apache::thrift::{{#if interaction:serial?}}SerialInteraction{{/if}}{{#if interaction:event_base?}}EventBase{{/if}}Tile, public apache::thrift::ServerInterface {
+class {{interaction:name}}If : public apache::thrift::{{#if interaction:serial?}}SerialInteraction{{/if}}{{#if interaction:event_base?}}EventBase{{/if}}Tile, public apache::thrift::ServerInterface {
  public:
   std::string_view getGeneratedName() const override { return "{{service:name}}"; }
 

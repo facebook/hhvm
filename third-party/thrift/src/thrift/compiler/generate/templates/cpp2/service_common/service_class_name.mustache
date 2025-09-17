@@ -14,9 +14,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{^service:interaction?}}{{!
-}}apache::thrift::ServiceHandler<{{service:qualified_name}}>{{!
-}}{{/service:interaction?}}{{!
-}}{{#service:interaction?}}{{!
-}}apache::thrift::ServiceHandler<{{service:parent_service_qualified_name}}>::{{service:cpp_name}}If{{!
-}}{{/service:interaction?}}
+}}{{#pragma ignore-newlines}}
+{{#if service:interaction?}}
+apache::thrift::ServiceHandler<{{service:parent_service_qualified_name}}>::{{interaction:name}}If
+{{#else}}
+apache::thrift::ServiceHandler<{{service:qualified_name}}>
+{{/if service:interaction?}}

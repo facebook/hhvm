@@ -650,8 +650,15 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     auto def = whisker::dsl::prototype_builder<h_service>::extends(base);
 
     def.property("cpp_name", [](const t_service& service) {
-      return service.is_interaction() ? service.name()
-                                      : cpp2::get_name(&service);
+      if (service.is_interaction()) {
+        // DO_BEFORE(hchok, 20250930) - once we're confident all usages on
+        // interaction are switched to interaction:name, this override can be
+        // removed so the property resolved to t_named prototype's cpp_name
+        throw whisker::eval_error(
+            "service:cpp_name used on an interaction node - "
+            "the corresponding interpolation should be replaced with interaction:name");
+      }
+      return cpp2::get_name(&service);
     });
 
     def.property(

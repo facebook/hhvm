@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}class {{service:cpp_name}}ServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
+}}class {{#if service:interaction?}}{{interaction:name}}{{#else}}{{service:cpp_name}}{{/if}}ServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
   public:
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();

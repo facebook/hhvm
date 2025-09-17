@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}class {{service:cpp_name}} final : public apache::thrift::InteractionHandle {
+}}class {{interaction:name}} final : public apache::thrift::InteractionHandle {
   using apache::thrift::InteractionHandle::InteractionHandle;
   friend class ::apache::thrift::Client<{{service:parent_service_qualified_name}}>;
  public:

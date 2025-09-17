@@ -96,7 +96,7 @@ func (s *rocketServer) ServeContext(ctx context.Context) error {
 		return newRocketServerTransport(s.listener, s.connContext, s.proc, s.transportID, s.log, s.stats, s.pstats, s.observer), nil
 	}
 	r := rsocket.Receive().
-		Scheduler(s.requestScheduler(), s.responeScheduler()).
+		Scheduler(s.requestScheduler(), s.responseScheduler()).
 		Acceptor(s.acceptor).
 		Transport(transporter)
 	return r.Serve(ctx)
@@ -109,7 +109,7 @@ func (s *rocketServer) requestScheduler() scheduler.Scheduler {
 	return scheduler.NewElastic(s.numWorkers)
 }
 
-func (s *rocketServer) responeScheduler() scheduler.Scheduler {
+func (s *rocketServer) responseScheduler() scheduler.Scheduler {
 	return scheduler.Elastic()
 }
 

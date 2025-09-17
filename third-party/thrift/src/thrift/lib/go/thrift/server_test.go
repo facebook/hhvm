@@ -531,7 +531,7 @@ func TestGoroutinePerRequest(t *testing.T) {
 	})
 }
 
-func TestLeadHeader(t *testing.T) {
+func TestLoadHeader(t *testing.T) {
 	listener, err := net.Listen("tcp", "[::]:0")
 	require.NoError(t, err)
 	addr := listener.Addr()

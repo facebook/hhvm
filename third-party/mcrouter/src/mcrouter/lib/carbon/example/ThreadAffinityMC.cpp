@@ -102,7 +102,7 @@ DEFINE_validator(num_clients, &ValidateNumClients);
 DEFINE_validator(num_req_per_client, &ValidateNumRequestsPerClient);
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
 
   // Create CarbonRouterInstance
   XLOG(INFO, "Creating CarbonRouterInstance");

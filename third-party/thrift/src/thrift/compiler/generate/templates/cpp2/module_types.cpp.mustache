@@ -266,9 +266,9 @@ template<> const std::vector<std::any>& field_annotation_values<{{struct:cpp_ful
       std::vector<std::any> values;
 {{#field:structured_annotations}}
 {{#constant:is_runtime_annotation?}}
-{{#constant:type}}{{#constant:value}}{{#constant:field}}
+{{#constant:type}}{{#constant:value}}
       values.emplace_back({{> common/iterate_const_values}});
-{{/constant:field}}{{/constant:value}}{{/constant:type}}
+{{/constant:value}}{{/constant:type}}
 {{/constant:is_runtime_annotation?}}
 {{/field:structured_annotations}}
       return values;
@@ -287,9 +287,9 @@ template<> const std::vector<std::any>& struct_annotation_values<{{struct:cpp_fu
     std::vector<std::any> values;
 {{#struct:structured_annotations}}
 {{#constant:is_runtime_annotation?}}
-{{#constant:type}}{{#constant:value}}{{#constant:field}}
+{{#constant:type}}{{#constant:value}}
     values.emplace_back({{> common/iterate_const_values}});
-{{/constant:field}}{{/constant:value}}{{/constant:type}}
+{{/constant:value}}{{/constant:type}}
 {{/constant:is_runtime_annotation?}}
 {{/struct:structured_annotations}}
     return values;

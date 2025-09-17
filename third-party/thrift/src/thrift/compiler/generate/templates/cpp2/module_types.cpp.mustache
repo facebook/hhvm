@@ -265,11 +265,11 @@ template<> const std::vector<std::any>& field_annotation_values<{{struct:cpp_ful
     static const folly::Indestructible<std::vector<std::any>> ret = [] {
       std::vector<std::any> values;
 {{#field:structured_annotations}}
-{{#constant:cpp_runtime_annotation?}}
+{{#constant:is_runtime_annotation?}}
 {{#constant:type}}{{#constant:value}}{{#constant:field}}
       values.emplace_back({{> common/iterate_const_values}});
 {{/constant:field}}{{/constant:value}}{{/constant:type}}
-{{/constant:cpp_runtime_annotation?}}
+{{/constant:is_runtime_annotation?}}
 {{/field:structured_annotations}}
       return values;
     }();
@@ -281,21 +281,21 @@ template<> const std::vector<std::any>& field_annotation_values<{{struct:cpp_ful
   folly::assume_unreachable();
 }
 {{/struct:fields_with_runtime_annotation?}}
-{{#struct:has_struct_runtime_annotation?}}
+{{#struct:has_runtime_annotation?}}
 template<> const std::vector<std::any>& struct_annotation_values<{{struct:cpp_fullname}}>() {
   static const folly::Indestructible<std::vector<std::any>> ret = [] {
     std::vector<std::any> values;
 {{#struct:structured_annotations}}
-{{#constant:cpp_runtime_annotation?}}
+{{#constant:is_runtime_annotation?}}
 {{#constant:type}}{{#constant:value}}{{#constant:field}}
     values.emplace_back({{> common/iterate_const_values}});
 {{/constant:field}}{{/constant:value}}{{/constant:type}}
-{{/constant:cpp_runtime_annotation?}}
+{{/constant:is_runtime_annotation?}}
 {{/struct:structured_annotations}}
     return values;
   }();
   return *ret;
 }
-{{/struct:has_struct_runtime_annotation?}}
+{{/struct:has_runtime_annotation?}}
 {{/program:split_structs}}
 }

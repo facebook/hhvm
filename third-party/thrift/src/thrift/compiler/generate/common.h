@@ -93,4 +93,20 @@ inline std::string get_escaped_string(std::string_view str) {
 // Generates a unique cache id for a given program and namespace.
 std::string program_cache_id(const t_program* prog, std::string ns);
 
+// Checks if the given named entity is directly annotated with
+// @thrift.RuntimeAnnotation, indicating it should be available at runtime.
+inline bool is_runtime_annotation(const t_named& named) {
+  return named.has_structured_annotation(kRuntimeAnnotationUri);
+}
+
+// Checks if the given named entity has any structured annotations that are
+// marked as runtime annotations. Returns true if any of the entity's
+// annotations have been marked with @thrift.RuntimeAnnotation.
+inline bool has_runtime_annotation(const t_named& named) {
+  return std::any_of(
+      named.structured_annotations().begin(),
+      named.structured_annotations().end(),
+      [](const t_const& cnst) { return is_runtime_annotation(*cnst.type()); });
+}
+
 } // namespace apache::thrift::compiler

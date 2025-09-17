@@ -85,6 +85,12 @@ prototype<t_named>::ptr t_whisker_generator::make_prototype_for_named(
     }
     return w::array(std::move(result));
   });
+  def.property("is_runtime_annotation?", [](const t_named& self) {
+    return is_runtime_annotation(self);
+  });
+  def.property("has_runtime_annotation?", [](const t_named& self) {
+    return has_runtime_annotation(self);
+  });
   def.property("uri", mem_fn(&t_named::uri));
 
   def.property("definition_key", [this](const t_named& named) {
@@ -358,6 +364,9 @@ prototype<t_const>::ptr t_whisker_generator::make_prototype_for_const(
   });
   def.property("value", [&](const t_const& self) {
     return proto.create<t_const_value>(*self.value());
+  });
+  def.property("is_runtime_annotation?", [](const t_const& self) {
+    return is_runtime_annotation(*self.type());
   });
   return std::move(def).make();
 }

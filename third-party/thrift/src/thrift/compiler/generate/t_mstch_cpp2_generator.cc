@@ -208,17 +208,6 @@ bool resolves_to_container_or_struct(const t_type* type) {
   return type->is<t_container>() || type->is<t_structured>();
 }
 
-bool is_runtime_annotation(const t_named& named) {
-  return named.has_structured_annotation(kRuntimeAnnotationUri);
-}
-
-bool has_runtime_annotation(const t_named& named) {
-  return std::any_of(
-      named.structured_annotations().begin(),
-      named.structured_annotations().end(),
-      [](const t_const& cnst) { return is_runtime_annotation(*cnst.type()); });
-}
-
 bool has_schema(source_manager& sm, const t_program& program) {
   return program.find({schematizer::name_schema(sm, program), source_range{}});
 }
@@ -1608,8 +1597,6 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::cpp_declare_equal_to},
             {"struct:cpp_noncopyable", &cpp_mstch_struct::cpp_noncopyable},
             {"struct:cpp_noncomparable", &cpp_mstch_struct::cpp_noncomparable},
-            {"struct:cpp_runtime_annotation?",
-             &cpp_mstch_struct::cpp_runtime_annotation},
             {"struct:is_eligible_for_constexpr?",
              &cpp_mstch_struct::is_eligible_for_constexpr},
             {"struct:virtual", &cpp_mstch_struct::cpp_virtual},
@@ -1647,8 +1634,6 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::has_fields_with_runtime_annotation},
             {"struct:fields_with_runtime_annotation",
              &cpp_mstch_struct::fields_with_runtime_annotation},
-            {"struct:has_struct_runtime_annotation?",
-             &cpp_mstch_struct::has_struct_runtime_annotation},
             {"struct:structured_runtime_annotations",
              &cpp_mstch_struct::structured_runtime_annotations},
             {"struct:any?", &cpp_mstch_struct::any},
@@ -1788,9 +1773,6 @@ class cpp_mstch_struct : public mstch_struct {
   mstch::node cpp_noncomparable() {
     return struct_->has_unstructured_annotation(
         {"cpp.noncomparable", "cpp2.noncomparable"});
-  }
-  mstch::node cpp_runtime_annotation() {
-    return is_runtime_annotation(*struct_);
   }
   mstch::node is_eligible_for_constexpr() {
     return is_eligible_for_constexpr_(struct_) ||
@@ -2001,10 +1983,6 @@ class cpp_mstch_struct : public mstch_struct {
     }
 
     return cache.emplace(struct_, std::move(result)).first->second;
-  }
-
-  mstch::node has_struct_runtime_annotation() {
-    return has_runtime_annotation(*struct_);
   }
 
   mstch::node structured_runtime_annotations() {
@@ -2275,8 +2253,6 @@ class cpp_mstch_field : public mstch_field {
             {"field:raw_binary?", &cpp_mstch_field::raw_binary},
             {"field:raw_string_or_binary?",
              &cpp_mstch_field::raw_string_or_binary},
-            {"field:cpp_has_runtime_annotation?",
-             &cpp_mstch_field::cpp_has_runtime_annotation},
             {"field:use_op_encode?", &cpp_mstch_field::use_op_encode},
             {"field:fill?", &cpp_mstch_field::fill},
             {"field:structured_runtime_annotations",
@@ -2534,10 +2510,6 @@ class cpp_mstch_field : public mstch_field {
         !cpp_name_resolver::find_first_adapter(*field_);
   }
 
-  mstch::node cpp_has_runtime_annotation() {
-    return has_runtime_annotation(*field_);
-  }
-
   mstch::node use_op_encode() {
     const t_structured* parent = whisker_context().get_field_parent(field_);
     assert(parent != nullptr);
@@ -2628,8 +2600,6 @@ class cpp_mstch_const : public mstch_const {
             {"constant:enum_value", &cpp_mstch_const::enum_value},
             {"constant:cpp_adapter", &cpp_mstch_const::cpp_adapter},
             {"constant:cpp_type", &cpp_mstch_const::cpp_type},
-            {"constant:cpp_runtime_annotation?",
-             &cpp_mstch_const::cpp_runtime_annotation},
             {"constant:has_extra_arg?", &cpp_mstch_const::has_extra_arg},
             {"constant:extra_arg", &cpp_mstch_const::extra_arg},
             {"constant:extra_arg_type", &cpp_mstch_const::extra_arg_type},
@@ -2647,9 +2617,6 @@ class cpp_mstch_const : public mstch_const {
       }
     }
     return mstch::node();
-  }
-  mstch::node cpp_runtime_annotation() {
-    return is_runtime_annotation(*const_->type());
   }
   mstch::node cpp_adapter() {
     if (const std::string* adapter =

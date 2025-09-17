@@ -71,10 +71,10 @@ namespace apache::thrift::detail::annotation {
 template<>
 const std::vector<std::any>& field_annotation_values<{{struct:cpp_fullname}}>(FieldId);
 {{/struct:fields_with_runtime_annotation?}}
-{{#struct:has_struct_runtime_annotation?}}
+{{#struct:has_runtime_annotation?}}
 template<>
 const std::vector<std::any>& struct_annotation_values<{{struct:cpp_fullname}}>();
-{{/struct:has_struct_runtime_annotation?}}
+{{/struct:has_runtime_annotation?}}
 {{/program:structs}}
 } // namespace apache::thrift::detail::annotation
 
@@ -131,7 +131,7 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
 
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = {{(has_compiler_option? "json")}};
-  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = {{struct:cpp_runtime_annotation?}};
+  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = {{struct:is_runtime_annotation?}};
   {{#struct:uri}}
   static std::string_view __fbthrift_thrift_uri();
   {{/struct:uri}}
@@ -141,7 +141,7 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "{{program:name}}";
   }
-{{#struct:has_struct_runtime_annotation?}}
+{{#struct:has_runtime_annotation?}}
   using __fbthrift_struct_annotations = folly::tag_t<
 {{#struct:structured_runtime_annotations}}
 {{#constant:type.self.structured?}}
@@ -151,7 +151,7 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
 {{/constant:type.self.structured?}}
 {{/struct:structured_runtime_annotations}}
   >;
-{{/struct:has_struct_runtime_annotation?}}
+{{/struct:has_runtime_annotation?}}
 {{#struct:fields_with_runtime_annotation?}}
   using __fbthrift_list_of_field_with_annotation = folly::tag_t<
 {{#struct:fields_with_runtime_annotation}}

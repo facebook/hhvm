@@ -16,8 +16,6 @@
 
 // WARNING: This code is highly experimental.
 // DO NOT USE for any production code.
-package "facebook.com/thrift/type_system"
-
 include "thrift/annotation/cpp.thrift"
 include "thrift/lib/thrift/id.thrift"
 include "thrift/lib/thrift/type_id.thrift"
@@ -26,6 +24,9 @@ include "thrift/annotation/thrift.thrift"
 
 cpp_include "thrift/lib/thrift/detail/TypeSystemAdapter.h"
 cpp_include "folly/container/F14Map.h"
+
+@thrift.TerseWrite
+package "facebook.com/thrift/type_system"
 
 namespace cpp2 apache.thrift.type_system
 namespace py3 apache.thrift.type_system

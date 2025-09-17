@@ -187,7 +187,7 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
       /* .definingServiceName =*/ "{{service:parent_service_name}}",
       /* .methodName =*/ "{{> common/function_name}}",
       /* .qualifiedMethodName =*/ "{{#if service:interaction?}}{{service:parent_service_name}}{{#else}}{{service:name}}{{/if service:interaction?}}.{{> common/function_name}}"};
-{{#if service:self.interaction?}}{{! TODO(ezou) deal with this case properly}}
+{{#if service:self.interaction?}}
   apache::thrift::HandlerCallbackOneWay::DecoratorAfterCallback decoratorCallback{
     // apache::thrift::detail::TileInternalAPI(iface).getDecoratorIface(),
     static_cast<void*>(iface_),

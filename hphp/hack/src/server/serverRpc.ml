@@ -404,7 +404,7 @@ let handle :
   | ServerCommandTypes.DEPS_IN_BATCH positions ->
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, ServerDepsInBatch.go ~ctx ~genv ~env positions)
-  | ServerCommandTypes.FIND_MY_TESTS symbols ->
+  | ServerCommandTypes.FIND_MY_TESTS (max_distance, symbols) ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    let result = ServerFindMyTests.go ~ctx ~genv ~env symbols in
+    let result = ServerFindMyTests.go ~ctx ~genv ~env ~max_distance symbols in
     (env, result)

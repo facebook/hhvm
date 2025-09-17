@@ -570,6 +570,7 @@ let env =
       is_interactive = false;
       warning_switches = [];
       dump_config = false;
+      find_my_tests_max_distance = 1;
     }
 
 let make_error_filter env =

@@ -51,17 +51,22 @@ let print_refs (results : (string * Pos.absolute) list) ~(json : bool) : unit =
   else
     FindRefsWireFormat.CliHumanReadable.print_results results
 
-let print_find_my_tests_result (result : string list) ~(json : bool) : unit =
+let print_find_my_tests_result result ~(json : bool) : unit =
+  let module FMT = ServerCommandTypes.Find_my_tests in
   if json then
     let result_obj =
       Hh_json.(
         JSON_Array
-          (List.map result ~f:(fun file ->
-               JSON_Object [("file_path", JSON_String file)])))
+          (List.map result ~f:(fun (entry : FMT.result_entry) ->
+               JSON_Object
+                 [
+                   ("file_path", JSON_String entry.FMT.file_path);
+                   ("distance", JSON_Number (Int.to_string entry.FMT.distance));
+                 ])))
     in
     print_endline (Hh_json.json_to_multiline result_obj)
   else
-    List.iter result ~f:(fun file -> print_endline file)
+    List.iter result ~f:(fun file -> print_endline file.FMT.file_path)
 
 let parse_name_or_member_id ~name_only_action ~name_and_member_action name =
   let pieces = Str.split (Str.regexp "::") name in
@@ -141,6 +146,7 @@ let connect
     is_interactive = _;
     warning_switches = _;
     dump_config = _;
+    find_my_tests_max_distance = _;
   } =
     args
   in
@@ -1003,7 +1009,9 @@ let main_internal
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | ClientEnv.MODE_FIND_MY_TESTS symbols ->
     let%lwt (result, telemtry) =
-      rpc args @@ ServerCommandTypes.FIND_MY_TESTS symbols
+      rpc args
+      @@ ServerCommandTypes.FIND_MY_TESTS
+           (args.find_my_tests_max_distance, symbols)
     in
     (match result with
     | Ok fmt_result ->

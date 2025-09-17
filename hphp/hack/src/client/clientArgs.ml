@@ -213,6 +213,7 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
           (MODE_STATUS_SINGLE
              { filenames = single_files; show_tast; preexisting_warnings }))
   in
+  let find_my_tests_max_distance = ref 1 in
   (* parse args *)
   let usage =
     match cmd with
@@ -361,6 +362,10 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
                 | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) return test files that reference the given methods [C::m list]"
+      );
+      ( "--find-my-tests-max-distance",
+        Arg.Int (fun max_distance -> find_my_tests_max_distance := max_distance),
+        "maximum distance between given symbol(s) and any test that --find-my-tests will return (default: 1)"
       );
       Common_argspecs.force_dormant_start force_dormant_start;
       Common_argspecs.from from;
@@ -895,6 +900,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     is_interactive;
     warning_switches = List.rev !warning_switches;
     dump_config = !dump_config;
+    find_my_tests_max_distance = !find_my_tests_max_distance;
   }
 
 let parse_start_env command ~from_default =

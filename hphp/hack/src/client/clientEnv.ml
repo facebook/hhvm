@@ -112,6 +112,7 @@ type client_check_env = {
       number of places, e.g., error formatting and spinners. *)
   warning_switches: Filter_errors.switch list;
   dump_config: bool;
+  find_my_tests_max_distance: int;
 }
 
 let string_to_rename_mode = function

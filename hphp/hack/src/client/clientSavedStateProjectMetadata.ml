@@ -52,6 +52,7 @@ let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
     is_interactive = _;
     warning_switches = _;
     dump_config = _;
+    find_my_tests_max_distance = _;
   } =
     env
   in

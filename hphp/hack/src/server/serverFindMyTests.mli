@@ -10,5 +10,6 @@ val go :
   ctx:Provider_context.t ->
   genv:ServerEnv.genv ->
   env:ServerEnv.env ->
+  max_distance:int ->
   string list ->
   ServerCommandTypes.Find_my_tests.result

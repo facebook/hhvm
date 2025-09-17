@@ -143,7 +143,12 @@ module Find_refs = struct
 end
 
 module Find_my_tests = struct
-  type result = (string list, string) Result.t
+  type result_entry = {
+    file_path: string;
+    distance: int;
+  }
+
+  type result = (result_entry list, string) Result.t
 end
 
 module Rename = struct
@@ -409,7 +414,7 @@ type _ t =
   | DEPS_IN_BATCH :
       (string * int * int) list
       -> Find_refs.result_or_retry list t
-  | FIND_MY_TESTS : string list -> Find_my_tests.result t
+  | FIND_MY_TESTS : (int * string list) -> Find_my_tests.result t
 
 type cmd_metadata = {
   from: string;

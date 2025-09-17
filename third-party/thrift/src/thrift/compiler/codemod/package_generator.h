@@ -69,6 +69,10 @@ class package_name_generator {
   }
 
   static std::string from_file_path(const std::string& path) {
+    if (path.empty()) {
+      return "";
+    }
+
     auto dot = path.find_last_of('.');
     auto slash = path.find_first_of('/');
     if (slash == std::string::npos) {

@@ -117,7 +117,7 @@ class EchoHandler
 } // namespace
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
   ::gflags::ParseCommandLineFlags(&argc, &argv, false);
 
   HTTPServer::Config httpServerConfig;

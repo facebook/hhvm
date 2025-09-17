@@ -7,7 +7,6 @@
 
 use hack_macros::hack_expr;
 use hack_macros::hack_stmt;
-use naming_special_names_rust::pseudo_functions;
 use naming_special_names_rust::special_idents;
 use nast::Afield;
 use nast::Block;
@@ -563,29 +562,12 @@ impl LiftAwait {
                 args,
                 unpacked_arg,
             }) => {
-                // Do not lift await out of UNSAFE_CAST<t1,t2>(await e) because
-                // this will affect the bytecode that is generated.
-                if !args.is_empty()
-                    && {
-                        if let Expr_::Id(ref id) = func.2 {
-                            id.1 == pseudo_functions::UNSAFE_CAST
-                                || id.1 == pseudo_functions::UNSAFE_NONNULL_CAST
-                        } else {
-                            false
-                        }
-                    }
-                    && is_await(args[0].to_expr_ref())
-                {
-                    let Expr((), pos, e) = args[0].to_expr_mut();
-                    self.do_await(leave_await, pos, e, con, seq, tmps)
-                } else {
-                    self.extract_await(func, con, seq, tmps);
-                    for arg in args {
-                        self.extract_await(arg.to_expr_mut(), con, seq, tmps)
-                    }
-                    if let Some(unpack) = unpacked_arg {
-                        self.extract_await(unpack, con, seq, tmps)
-                    }
+                self.extract_await(func, con, seq, tmps);
+                for arg in args {
+                    self.extract_await(arg.to_expr_mut(), con, seq, tmps)
+                }
+                if let Some(unpack) = unpacked_arg {
+                    self.extract_await(unpack, con, seq, tmps)
                 }
             }
             Expr_::New(box (nast::ClassId(_, _, cid), _, args, unpacked_arg, _)) => {

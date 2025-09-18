@@ -126,13 +126,13 @@ class FizzUtil {
       const std::vector<std::string>& newSecrets) {
     std::vector<folly::ByteRange> ticketSecrets;
     if (!currentSecret.empty()) {
-      ticketSecrets.push_back(folly::StringPiece(currentSecret));
+      ticketSecrets.emplace_back(folly::StringPiece(currentSecret));
     }
     for (const auto& secret : oldSecrets) {
-      ticketSecrets.push_back(folly::StringPiece(secret));
+      ticketSecrets.emplace_back(folly::StringPiece(secret));
     }
     for (const auto& secret : newSecrets) {
-      ticketSecrets.push_back(folly::StringPiece(secret));
+      ticketSecrets.emplace_back(folly::StringPiece(secret));
     }
     return ticketSecrets;
   }

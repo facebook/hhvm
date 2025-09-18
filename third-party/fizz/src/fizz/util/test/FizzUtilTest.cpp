@@ -24,14 +24,14 @@ TEST(UtilTest, GetAlpnFromNpn) {
   std::list<std::string> protocolList1{"test", "test2"};
   std::list<std::string> protocolList2{"test3", "test4"};
 
-  npList.push_back(folly::SSLContext::NextProtocolsItem(1, protocolList1));
+  npList.emplace_back(1, protocolList1);
   {
     std::vector<std::string> expectedList{
         std::begin(protocolList1), std::end(protocolList1)};
     EXPECT_EQ(FizzUtil::getAlpnsFromNpnList(npList), expectedList);
   }
 
-  npList.push_back(folly::SSLContext::NextProtocolsItem(2, protocolList2));
+  npList.emplace_back(2, protocolList2);
   {
     std::vector<std::string> expectedList{
         std::begin(protocolList2), std::end(protocolList2)};

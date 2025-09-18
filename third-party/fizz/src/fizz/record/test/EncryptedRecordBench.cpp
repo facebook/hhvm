@@ -348,7 +348,7 @@ BENCHMARK_NAMED_PARAM(
     IOBufAllocation::ForceShared);
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
   CryptoUtils::init();
   folly::runBenchmarks();
   return 0;

@@ -498,11 +498,8 @@ const DefinitionNode* SchemaIndex::definitionForSourceIdentifier(
 
 std::optional<type_system::SourceIdentifierView>
 SchemaIndex::sourceIdentifierForUri(std::string_view uri) const {
-  auto sourceIdentifier = folly::get_ptr(sourceIdentifiersByUri_, uri);
-  if (!sourceIdentifier) {
-    return std::nullopt;
-  }
-  return *sourceIdentifier;
+  return folly::get_optional<std::optional<type_system::SourceIdentifierView>>(
+      sourceIdentifiersByUri_, uri);
 }
 
 ProgramNode::IncludesList SchemaIndex::programs() const {

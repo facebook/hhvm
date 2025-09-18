@@ -72,6 +72,7 @@ class RpcOptions {
     NONE = 0,
     CRC32 = 1,
     XXH3_64 = 2,
+    SERVER_ONLY_CRC32 = 3,
   };
 
   using PRIORITY = apache::thrift::concurrency::PRIORITY;
@@ -90,6 +91,7 @@ class RpcOptions {
   RpcOptions& setClientOnlyTimeouts(bool val);
   bool getClientOnlyTimeouts() const;
 
+  [[deprecated("Use setChecksum instead")]]
   RpcOptions& setEnableChecksum(bool val);
   bool getEnableChecksum() const;
 

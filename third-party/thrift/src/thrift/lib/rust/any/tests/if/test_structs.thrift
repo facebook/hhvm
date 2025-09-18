@@ -46,6 +46,4 @@ struct BasicType {
   1: i64 x;
 }
 
-@thrift.AllowLegacyTypedefUri
-@thrift.Uri{value = "facebook.com/icsp/new_any/SimpleTypeDef"}
 typedef BasicType SimpleTypeDef

@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
   for (int i = 0; i < FLAGS_num_clients; ++i) {
     auto evb = std::make_shared<folly::EventBase>();
     evbs.push_back(evb);
-    threads.push_back(std::thread([&, evb = std::move(evb)]() {
+    threads.emplace_back([&, evb = std::move(evb)]() {
       // Create Thrift Async Client
       folly::SocketAddress addr;
       if (!FLAGS_unix_socket_path.empty()) {
@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
       if (!FLAGS_sync) {
         evb->loopForever();
       }
-    }));
+    });
   }
 
   // Closing connections

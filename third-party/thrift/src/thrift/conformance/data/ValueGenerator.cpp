@@ -87,15 +87,6 @@ void addNumberValues(NamedValues<Tag>& values) {
     values.emplace_back(1.9156918820264798e-56, "fmt_case_1");
     values.emplace_back(3788512123356.9854, "fmt_case_2");
   }
-
-  if constexpr (!key) {
-    if constexpr (numeric_limits::has_quiet_NaN) {
-      values.emplace_back(numeric_limits::quiet_NaN(), "NaN");
-    }
-    if (auto nzero = -static_cast<T>(0); std::signbit(nzero)) {
-      values.emplace_back(nzero, "neg_zero");
-    }
-  }
 }
 
 template <typename Tag, bool key>

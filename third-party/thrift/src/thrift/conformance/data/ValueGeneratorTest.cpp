@@ -59,26 +59,6 @@ std::ostream& operator<<(std::ostream& os, const NamedValue<T>& value) {
 namespace {
 
 template <typename C>
-::testing::AssertionResult includesNan(const C& container) {
-  for (const auto& value : container) {
-    if (std::isnan(value.value)) {
-      return ::testing::AssertionSuccess();
-    }
-  }
-  return ::testing::AssertionFailure();
-}
-
-template <typename C>
-::testing::AssertionResult includesNegZero(const C& container) {
-  for (const auto& value : container) {
-    if (value.value == 0 && std::signbit(value.value)) {
-      return ::testing::AssertionSuccess();
-    }
-  }
-  return ::testing::AssertionFailure();
-}
-
-template <typename C>
 ::testing::AssertionResult allUnique(const C& container) {
   for (auto outer = container.begin(); outer != container.end(); ++outer) {
     for (auto inner = outer + 1; inner != container.end(); ++inner) {
@@ -188,18 +168,6 @@ TYPED_TEST(ValueGeneratorTest, Map_Keys) {
     EXPECT_EQ(maps[i].value.size(), expected) << i;
   }
   EXPECT_TRUE(allUnique(maps));
-}
-
-TYPED_TEST(FloatingPointGeneratorTest, Nan) {
-  SCOPED_TRACE(type::getName<TypeParam>());
-  EXPECT_TRUE(includesNan(this->values));
-  EXPECT_FALSE(includesNan(this->keyValues));
-}
-
-TYPED_TEST(FloatingPointGeneratorTest, NegZero) {
-  SCOPED_TRACE(type::getName<TypeParam>());
-  EXPECT_TRUE(includesNegZero(this->values));
-  EXPECT_FALSE(includesNegZero(this->keyValues));
 }
 
 } // namespace

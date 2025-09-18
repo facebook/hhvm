@@ -108,11 +108,11 @@ void BiDiServiceAsyncProcessor::executeRequest_simple(
       /* .definingServiceName =*/ "BiDiService",
       /* .methodName =*/ "simple",
       /* .qualifiedMethodName =*/ "BiDiService.simple"};
-  apache::thrift::HandlerCallback</* TODO (@sazonovk) */>::DecoratorAfterCallback decoratorCallback{
+  apache::thrift::HandlerCallback<::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>>::DecoratorAfterCallback decoratorCallback{
     static_cast<void*>(iface_),
     apache::thrift::ServiceHandler<::cpp2::BiDiService>::fbthrift_invoke_decorator_after_simple};
  auto callback =
-      apache::thrift::HandlerCallbackPtr</* TODO (@sazonovk) */>::make(
+      apache::thrift::HandlerCallbackPtr<::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
           std::move(ctxStack),
@@ -165,13 +165,13 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::ResponseAndServerStreamFactory BiDiServiceAsyncProcessor::return_simple(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
-    /* TODO (@sazonovk) */&& _return) {
+    ::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>&& _return) {
 std::pair<
     apache::thrift::SerializedResponse,
     apache::thrift::detail::SinkConsumerImpl>
 BiDiServiceAsyncProcessor::return_simple(
     apache::thrift::ContextStack* ctx,
-    /* TODO (@sazonovk) */&& _return,
+    ::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>&& _return,
     folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
   BiDiService_simple_presult::InitialResponsePResultType result;
@@ -295,11 +295,11 @@ void BiDiServiceAsyncProcessor::executeRequest_response(
       /* .definingServiceName =*/ "BiDiService",
       /* .methodName =*/ "response",
       /* .qualifiedMethodName =*/ "BiDiService.response"};
-  apache::thrift::HandlerCallback</* TODO (@sazonovk) */>::DecoratorAfterCallback decoratorCallback{
+  apache::thrift::HandlerCallback<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>>::DecoratorAfterCallback decoratorCallback{
     static_cast<void*>(iface_),
     apache::thrift::ServiceHandler<::cpp2::BiDiService>::fbthrift_invoke_decorator_after_response};
  auto callback =
-      apache::thrift::HandlerCallbackPtr</* TODO (@sazonovk) */>::make(
+      apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
           std::move(ctxStack),
@@ -352,18 +352,18 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::ResponseAndServerStreamFactory BiDiServiceAsyncProcessor::return_response(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
-    /* TODO (@sazonovk) */&& _return) {
+    ::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>&& _return) {
 std::pair<
     apache::thrift::SerializedResponse,
     apache::thrift::detail::SinkConsumerImpl>
 BiDiServiceAsyncProcessor::return_response(
     apache::thrift::ContextStack* ctx,
-    /* TODO (@sazonovk) */&& _return,
+    ::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>&& _return,
     folly::Executor::KeepAlive<> executor) {
   ProtocolOut_ prot;
   BiDiService_response_presult::InitialResponsePResultType result;
   using StreamPResultType = BiDiService_response_presult::StreamPResultType;
-  result.get<0>().value = const_cast</* TODO (@sazonovk) */::ResponseType*>(&_return.response);
+  result.get<0>().value = const_cast<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>::ResponseType*>(&_return.response);
   result.setIsSet(0, true);
   auto& returnStream = _return.stream;
   auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));

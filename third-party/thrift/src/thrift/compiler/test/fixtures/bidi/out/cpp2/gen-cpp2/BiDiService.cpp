@@ -33,15 +33,15 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 // Method 'simple'
 //
 
-/* TODO (@sazonovk) */ apache::thrift::ServiceHandler<::cpp2::BiDiService>::simple() {
+::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t> apache::thrift::ServiceHandler<::cpp2::BiDiService>::simple() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("simple");
 }
 
-/* TODO (@sazonovk) */ apache::thrift::ServiceHandler<::cpp2::BiDiService>::sync_simple() {
+::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t> apache::thrift::ServiceHandler<::cpp2::BiDiService>::sync_simple() {
   return simple();
 }
 
-folly::SemiFuture</* TODO (@sazonovk) */>
+folly::SemiFuture<::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>>
 apache::thrift::ServiceHandler<::cpp2::BiDiService>::semifuture_simple() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_simple.compare_exchange_strong(
@@ -51,7 +51,7 @@ apache::thrift::ServiceHandler<::cpp2::BiDiService>::semifuture_simple() {
   return sync_simple();
 }
 
-folly::Future</* TODO (@sazonovk) */>
+folly::Future<::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>>
 apache::thrift::ServiceHandler<::cpp2::BiDiService>::future_simple() {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
   __fbthrift_invocation_simple.compare_exchange_strong(
@@ -64,7 +64,7 @@ apache::thrift::ServiceHandler<::cpp2::BiDiService>::future_simple() {
 }
 
 #if FOLLY_HAS_COROUTINES
-folly::coro::Task</* TODO (@sazonovk) */>
+folly::coro::Task<::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>>
 apache::thrift::ServiceHandler<::cpp2::BiDiService>::co_simple() {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
   __fbthrift_invocation_simple.compare_exchange_strong(
@@ -75,7 +75,7 @@ apache::thrift::ServiceHandler<::cpp2::BiDiService>::co_simple() {
                              withCapturedArgs<>());
 }
 
-folly::coro::Task</* TODO (@sazonovk) */> apache::thrift::ServiceHandler<::cpp2::BiDiService>::co_simple(
+folly::coro::Task<::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>> apache::thrift::ServiceHandler<::cpp2::BiDiService>::co_simple(
     apache::thrift::RequestParams /* params */) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
   __fbthrift_invocation_simple.compare_exchange_strong(
@@ -87,7 +87,7 @@ folly::coro::Task</* TODO (@sazonovk) */> apache::thrift::ServiceHandler<::cpp2:
 #endif // FOLLY_HAS_COROUTINES
 
 void apache::thrift::ServiceHandler<::cpp2::BiDiService>::async_tm_simple(
-    apache::thrift::HandlerCallbackPtr</* TODO (@sazonovk) */> callback) {
+    apache::thrift::HandlerCallbackPtr<::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -179,15 +179,15 @@ determineInvocationType:
 // Method 'response'
 //
 
-/* TODO (@sazonovk) */ apache::thrift::ServiceHandler<::cpp2::BiDiService>::response() {
+::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t> apache::thrift::ServiceHandler<::cpp2::BiDiService>::response() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("response");
 }
 
-/* TODO (@sazonovk) */ apache::thrift::ServiceHandler<::cpp2::BiDiService>::sync_response() {
+::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t> apache::thrift::ServiceHandler<::cpp2::BiDiService>::sync_response() {
   return response();
 }
 
-folly::SemiFuture</* TODO (@sazonovk) */>
+folly::SemiFuture<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>>
 apache::thrift::ServiceHandler<::cpp2::BiDiService>::semifuture_response() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_response.compare_exchange_strong(
@@ -197,7 +197,7 @@ apache::thrift::ServiceHandler<::cpp2::BiDiService>::semifuture_response() {
   return sync_response();
 }
 
-folly::Future</* TODO (@sazonovk) */>
+folly::Future<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>>
 apache::thrift::ServiceHandler<::cpp2::BiDiService>::future_response() {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
   __fbthrift_invocation_response.compare_exchange_strong(
@@ -210,7 +210,7 @@ apache::thrift::ServiceHandler<::cpp2::BiDiService>::future_response() {
 }
 
 #if FOLLY_HAS_COROUTINES
-folly::coro::Task</* TODO (@sazonovk) */>
+folly::coro::Task<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>>
 apache::thrift::ServiceHandler<::cpp2::BiDiService>::co_response() {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
   __fbthrift_invocation_response.compare_exchange_strong(
@@ -221,7 +221,7 @@ apache::thrift::ServiceHandler<::cpp2::BiDiService>::co_response() {
                              withCapturedArgs<>());
 }
 
-folly::coro::Task</* TODO (@sazonovk) */> apache::thrift::ServiceHandler<::cpp2::BiDiService>::co_response(
+folly::coro::Task<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>> apache::thrift::ServiceHandler<::cpp2::BiDiService>::co_response(
     apache::thrift::RequestParams /* params */) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
   __fbthrift_invocation_response.compare_exchange_strong(
@@ -233,7 +233,7 @@ folly::coro::Task</* TODO (@sazonovk) */> apache::thrift::ServiceHandler<::cpp2:
 #endif // FOLLY_HAS_COROUTINES
 
 void apache::thrift::ServiceHandler<::cpp2::BiDiService>::async_tm_response(
-    apache::thrift::HandlerCallbackPtr</* TODO (@sazonovk) */> callback) {
+    apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create

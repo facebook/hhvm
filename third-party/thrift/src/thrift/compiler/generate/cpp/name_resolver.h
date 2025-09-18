@@ -205,6 +205,8 @@ class cpp_name_resolver {
   std::unordered_map<const t_type*, std::string> type_tag_cache_;
   std::unordered_map<const t_field*, std::string> field_type_tag_cache_;
   std::unordered_map<const t_field*, std::string> field_reference_type_cache_;
+  // Sinks are not reused, so are sufficient for use as keys
+  std::unordered_map<const t_sink*, std::string> bidi_cache_;
 
   std::string gen_namespaced_name(
       const t_program& program, const t_named& node) {

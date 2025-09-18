@@ -133,11 +133,26 @@ const std::string& cpp_name_resolver::get_return_type(const t_function& fun) {
   }
 
   type_resolve_fn resolve_fn = &cpp_name_resolver::get_native_type;
-  if (const t_sink* sink = fun.sink()) {
-    return detail::get_or_gen(sink_cache_, sink, [&]() {
-      if (!sink->get_final_response_type()) {
-        return std::string("/* TODO (@sazonovk) */");
+  const t_sink* sink = fun.sink();
+  const t_stream* stream = fun.stream();
+  if (sink != nullptr && stream != nullptr) {
+    return detail::get_or_gen(bidi_cache_, sink, [&]() {
+      if (!fun.has_void_initial_response()) {
+        return detail::gen_template_type(
+            "::apache::thrift::ResponseAndStreamTransformation",
+            {resolve(resolve_fn, *fun.return_type().get_type()),
+             resolve(resolve_fn, *sink->get_elem_type()),
+             resolve(resolve_fn, *stream->elem_type().get_type())});
       }
+      return detail::gen_template_type(
+          "::apache::thrift::StreamTransformation",
+          {resolve(resolve_fn, *sink->get_elem_type()),
+           resolve(resolve_fn, *stream->elem_type().get_type())});
+    });
+  }
+
+  if (sink != nullptr) {
+    return detail::get_or_gen(sink_cache_, sink, [&]() {
       if (!fun.has_void_initial_response()) {
         return detail::gen_template_type(
             "::apache::thrift::ResponseAndSinkConsumer",
@@ -152,7 +167,7 @@ const std::string& cpp_name_resolver::get_return_type(const t_function& fun) {
     });
   }
 
-  const t_stream* stream = fun.stream();
+  assert(stream != nullptr);
   return detail::get_or_gen(stream_cache_, stream, [&]() {
     if (!fun.has_void_initial_response()) {
       return detail::gen_template_type(

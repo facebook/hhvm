@@ -51,24 +51,24 @@ class ServiceHandler<::cpp2::BiDiService> : public apache::thrift::ServerInterfa
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:
 
-  virtual /* TODO (@sazonovk) */ sync_simple();
-  [[deprecated("Use sync_simple instead")]] virtual /* TODO (@sazonovk) */ simple();
-  virtual folly::Future</* TODO (@sazonovk) */> future_simple();
-  virtual folly::SemiFuture</* TODO (@sazonovk) */> semifuture_simple();
+  virtual ::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t> sync_simple();
+  [[deprecated("Use sync_simple instead")]] virtual ::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t> simple();
+  virtual folly::Future<::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>> future_simple();
+  virtual folly::SemiFuture<::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>> semifuture_simple();
 #if FOLLY_HAS_COROUTINES
-  virtual folly::coro::Task</* TODO (@sazonovk) */> co_simple();
-  virtual folly::coro::Task</* TODO (@sazonovk) */> co_simple(apache::thrift::RequestParams params);
+  virtual folly::coro::Task<::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>> co_simple();
+  virtual folly::coro::Task<::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>> co_simple(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_simple(apache::thrift::HandlerCallbackPtr</* TODO (@sazonovk) */> callback);
-  virtual /* TODO (@sazonovk) */ sync_response();
-  [[deprecated("Use sync_response instead")]] virtual /* TODO (@sazonovk) */ response();
-  virtual folly::Future</* TODO (@sazonovk) */> future_response();
-  virtual folly::SemiFuture</* TODO (@sazonovk) */> semifuture_response();
+  virtual void async_tm_simple(apache::thrift::HandlerCallbackPtr<::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>> callback);
+  virtual ::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t> sync_response();
+  [[deprecated("Use sync_response instead")]] virtual ::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t> response();
+  virtual folly::Future<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>> future_response();
+  virtual folly::SemiFuture<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>> semifuture_response();
 #if FOLLY_HAS_COROUTINES
-  virtual folly::coro::Task</* TODO (@sazonovk) */> co_response();
-  virtual folly::coro::Task</* TODO (@sazonovk) */> co_response(apache::thrift::RequestParams params);
+  virtual folly::coro::Task<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>> co_response();
+  virtual folly::coro::Task<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>> co_response(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_response(apache::thrift::HandlerCallbackPtr</* TODO (@sazonovk) */> callback);
+  virtual void async_tm_response(apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>> callback);
  private:
   static ::cpp2::BiDiServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_simple{apache::thrift::detail::si::InvocationType::AsyncTm};
@@ -81,8 +81,8 @@ class ServiceHandler<::cpp2::BiDiService> : public apache::thrift::ServerInterfa
     static_cast<ServiceHandler<::cpp2::BiDiService>*>(iface)->fbthrift_execute_decorators_after_simple(*ctx);
   }
   virtual void fbthrift_execute_decorators_before_response(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_response(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType</* TODO (@sazonovk) */>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_response(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType</* TODO (@sazonovk) */>::type result) {
+  virtual void fbthrift_execute_decorators_after_response(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_response(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>>::type result) {
     static_cast<ServiceHandler<::cpp2::BiDiService>*>(iface)->fbthrift_execute_decorators_after_response(*ctx, result);
   }
 };
@@ -144,14 +144,14 @@ class BiDiServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   static apache::thrift::ResponseAndServerStreamFactory return_simple(
       apache::thrift::ContextStack* ctx,
       folly::Executor::KeepAlive<> executor,
-      /* TODO (@sazonovk) */&& _return);
+      ::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>&& _return);
 
   static std::pair<
       apache::thrift::SerializedResponse,
       apache::thrift::detail::SinkConsumerImpl>
   return_simple(
       apache::thrift::ContextStack* ctx,
-      /* TODO (@sazonovk) */&& _return,
+      ::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>&& _return,
       folly::Executor::KeepAlive<> executor);
 
   template <class ProtocolIn_, class ProtocolOut_>
@@ -190,14 +190,14 @@ class BiDiServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   static apache::thrift::ResponseAndServerStreamFactory return_response(
       apache::thrift::ContextStack* ctx,
       folly::Executor::KeepAlive<> executor,
-      /* TODO (@sazonovk) */&& _return);
+      ::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>&& _return);
 
   static std::pair<
       apache::thrift::SerializedResponse,
       apache::thrift::detail::SinkConsumerImpl>
   return_response(
       apache::thrift::ContextStack* ctx,
-      /* TODO (@sazonovk) */&& _return,
+      ::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>&& _return,
       folly::Executor::KeepAlive<> executor);
 
   template <class ProtocolIn_, class ProtocolOut_>

@@ -16,8 +16,6 @@
 
 #include <thrift/lib/cpp2/transport/rocket/server/RocketBiDiClientCallback.h>
 
-#include <thrift/lib/cpp/transport/TTransportException.h>
-
 namespace apache::thrift::rocket {
 
 //

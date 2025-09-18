@@ -101,10 +101,9 @@ struct ChannelRequestCallbackFactory {
   uint32_t initialRequestN_;
 };
 
-class RocketServerConnection final
-    : public ManagedConnectionIf,
-      private folly::AsyncTransport::WriteCallback,
-      private folly::AsyncTransport::BufferCallback {
+class RocketServerConnection final : public ManagedConnectionIf,
+                                     folly::AsyncTransport::WriteCallback,
+                                     folly::AsyncTransport::BufferCallback {
  public:
   using UniquePtr = std::
       unique_ptr<RocketServerConnection, folly::DelayedDestruction::Destructor>;

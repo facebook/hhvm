@@ -1,1 +1,1 @@
-Fatal error: Access level to B::$foo must be protected internal (as in class A) or weaker in %s on line 10
+Fatal error: Access level to B::$foo must be protected internal (as in class A) or weaker in %s on line 9

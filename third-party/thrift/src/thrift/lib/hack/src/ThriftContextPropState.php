@@ -166,21 +166,16 @@ final class ThriftContextPropState {
 
   // update FB user id from explicit value
   public static function updateFBUserId(?int $fb_user_id, string $src): bool {
-    if (
-      !JustKnobs::eval(
-        'meta_cp/www:enable_user_id_ctx_prop',
-        /*hashval=*/null,
-        /*switchval=*/$src,
-      )
-    ) {
-      return false;
-    }
     $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
     $ods->bumpKey('contextprop.update_fb_user_id.'.$src);
+    // Make sure the id is valid (non-null, positive) and matches the type
+    // However we still allow invalid user id to be set in some cases
     $fb_user_id = self::coerceId($fb_user_id, UserIdCategory::FB);
-    $tcps_fb_user_id =
-      self::coerceId(self::get()->getFBUserId(), UserIdCategory::FB);
+    if ($fb_user_id is nonnull) {
+      $ods->bumpKey('contextprop.update_with_valid_fb_user_id'.$src);
+    }
 
+    $tcps_fb_user_id = self::get()->getFBUserId();
     if ($fb_user_id == $tcps_fb_user_id) {
       $ods->bumpKey('contextprop.same_fb_user_id.'.$src);
       return false;
@@ -212,21 +207,15 @@ final class ThriftContextPropState {
   }
 
   public static function updateIGUserId(?int $ig_user_id, string $src): bool {
-    if (
-      !JustKnobs::eval(
-        'meta_cp/www:enable_user_id_ctx_prop',
-        /*hashval=*/null,
-        /*switchval=*/$src,
-      )
-    ) {
-      return false;
-    }
     $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
     $ods->bumpKey('contextprop.update_ig_user_id.'.$src);
+    // Make sure the id is valid (non-null, positive) and matches the type
+    // However we still allow invalid user id to be set in some cases
     $ig_user_id = self::coerceId($ig_user_id, UserIdCategory::IG);
-    $tcps_ig_user_id =
-      self::coerceId(self::get()->getIGUserId(), UserIdCategory::IG);
-
+    if ($ig_user_id is nonnull) {
+      $ods->bumpKey('contextprop.update_with_valid_ig_user_id'.$src);
+    }
+    $tcps_ig_user_id = self::get()->getIGUserId();
     if ($ig_user_id == $tcps_ig_user_id) {
       $ods->bumpKey('contextprop.same_ig_user_id.'.$src);
       return false;

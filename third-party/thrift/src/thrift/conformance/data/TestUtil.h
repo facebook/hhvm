@@ -55,16 +55,6 @@ struct GetTestTypeName<type::map<KeyTag, ValueTag>> {
   }
 };
 
-// Note just annotating all adapters like this, if any specific adapters need
-// different names, create a more specialized template
-template <typename Adapter, typename Tag>
-struct GetTestTypeName<type::adapted<Adapter, Tag>> {
-  const std::string& operator()() const {
-    FOLLY_EXPORT static const auto* kName =
-        new std::string(fmt::format("adapted<{}>", GetTestTypeName<Tag>()()));
-    return *kName;
-  }
-};
 } // namespace detail
 
 // When called, returns a std::string representing the given

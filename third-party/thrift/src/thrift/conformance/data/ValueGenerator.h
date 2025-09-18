@@ -104,30 +104,6 @@ struct ValueGenerator<type::list<VTag>> : BaseValueGenerator<type::list<VTag>> {
   static Values getValues(const typename ValueGenerator<VTag>::Values& values);
 };
 
-// The generator for a service of values.
-template <typename Adapter, typename VTag>
-struct ValueGenerator<type::adapted<Adapter, VTag>>
-    : BaseValueGenerator<type::adapted<Adapter, VTag>> {
-  using Base = BaseValueGenerator<type::adapted<Adapter, VTag>>;
-  using Values = typename Base::Values;
-  using native_type = typename Base::native_type;
-
-  FOLLY_EXPORT static const Values& getKeyValues() {
-    static auto* kValues =
-        new Values(getValues(ValueGenerator<VTag>::getKeyValues()));
-    return *kValues;
-  }
-
-  FOLLY_EXPORT static const Values& getInterestingValues() {
-    static auto* iValues =
-        new Values(getValues(ValueGenerator<VTag>::getInterestingValues()));
-    return *iValues;
-  }
-
- private:
-  static Values getValues(const typename ValueGenerator<VTag>::Values& values);
-};
-
 // The generator for a set of values.
 template <typename VTag>
 struct ValueGenerator<type::set<VTag>> : BaseValueGenerator<type::set<VTag>> {
@@ -213,16 +189,6 @@ auto ValueGenerator<type::list<VTag>>::getValues(
     addValues(values, std::back_inserter(frontSwap));
     std::swap(frontSwap[0], frontSwap[2]);
     result.emplace_back(std::move(frontSwap), "frontSwap");
-  }
-  return result;
-}
-
-template <typename Adapter, typename VTag>
-auto ValueGenerator<type::adapted<Adapter, VTag>>::getValues(
-    const typename ValueGenerator<VTag>::Values& values) -> Values {
-  Values result;
-  for (const auto& value : values) {
-    result.emplace_back(Adapter::fromThrift(value.value), value.name);
   }
   return result;
 }

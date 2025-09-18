@@ -124,7 +124,7 @@ class UtilsGivenFrameTestCase(base.TestHHVMBinary):
         self.assertEqual(utils.template_type(smart_ptr.type), "std::unique_ptr")
         raw_ptr = utils.rawptr(smart_ptr)
         self.assertIsNotNone(raw_ptr)
-        self.assertEqual(utils.template_type(raw_ptr.type), "HPHP::detail::LowPtrImpl")
+        self.assertEqual(utils.template_type(raw_ptr.type), "HPHP::ptrimpl::PtrImpl")
 
     def test_arch_regs(self) -> None:
         # Make sure we're consistent with what LLDB is telling us are FP, PC, SP,

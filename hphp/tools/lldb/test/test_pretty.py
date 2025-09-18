@@ -54,7 +54,7 @@ class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
             "Resource": r"\(HPHP::TypedValue\) tv = \{ Resource, \(hdr = 0x.*, data = 0x.*\) *\}",
             "RFunc": r'\(HPHP::TypedValue\) tv = \{ RFunc, \(HPHP::RFuncData \*\) prfunc = 0x.* \("Exception::__construct"\) \}',
             "RClsMeth": r'\(HPHP::TypedValue\) tv = \{ RClsMeth, \(HPHP::RClsMethData \*\) prclsmeth = 0x.* \("InvalidArgumentException::Exception::__construct"\) \}',
-            "ClsMeth": r'\(HPHP::TypedValue\) tv = \{ ClsMeth, \(HPHP::ClsMethData(::cls_meth_t)?\) \*?m_data = \(m_cls = \d+, m_func = \d+\) \("InvalidArgumentException::Exception::__construct"\) \}',
+            "ClsMeth": r'\(HPHP::TypedValue\) tv = \{ ClsMeth, \(HPHP::ClsMethData\) \*m_data = \(m_cls = "InvalidArgumentException", m_func = "Exception::__construct"\) \("InvalidArgumentException::Exception::__construct"\) }',
             "Boolean": r"\(HPHP::TypedValue\) tv = \{ Boolean, True \}",
             "Int64": r"\(HPHP::TypedValue\) tv = \{ Int64, 42 \}",
             "Double": r"\(HPHP::TypedValue\) tv = \{ Double, 3.1415 \}",
@@ -238,27 +238,25 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
             expected_output = "(HPHP::Optional<HPHP::String>) v = None"
             self.assertEqual(output.strip(), expected_output)
 
-        with self.subTest("HPHP::LowPtr"):
-            self.run_until_breakpoint("takeLowPtr")
+        with self.subTest("HPHP::PackedPtr"):
+            self.run_until_breakpoint("takePackedPtr")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = (
-                '(HPHP::LowPtr<HPHP::Class>) v = "InvalidArgumentException"'
-            )
+            expected_output = '(HPHP::PackedPtr<Class>) v = "InvalidArgumentException"'
             self.assertEqual(output.strip(), expected_output)
 
-        with self.subTest("HPHP::LowPtr &"):
-            self.run_until_breakpoint("takeLowPtrRef")
+        with self.subTest("HPHP::PackedPtr &"):
+            self.run_until_breakpoint("takePackedPtrRef")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = r'\(const HPHP::LowPtr<HPHP::Class> &\) v = 0x.* "InvalidArgumentException"'
+            expected_output = r'\(const HPHP::PackedPtr<Class> &\) v = 0x.* "InvalidArgumentException"'
             # LLDB always prints the raw contents of references, so just check the first line
             self.assertRegex(output.split("\n")[0].strip(), expected_output)
 
-        with self.subTest("HPHP::LowStrPtr"):
+        with self.subTest("HPHP::PackedStringPtr"):
             # This is used e.g. as an alias in types.h, so let's make sure
             # we can handle aliases too.
-            self.run_until_breakpoint("takeLowStrPtr")
+            self.run_until_breakpoint("takePackedStringPtr")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = '(HPHP::LowStrPtr) v = "hello"'
+            expected_output = '(HPHP::PackedStringPtr) v = "hello"'
             self.assertEqual(output.strip(), expected_output)
 
         with self.subTest("HPHP::Extension"):

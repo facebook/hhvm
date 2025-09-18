@@ -170,9 +170,9 @@ void takePtrToResource(OptResource* UNUSED v) { return; }
 void takeObject(Object UNUSED v) { return; }
 void takeReqPtr(req::ptr<ObjectData> UNUSED v) { return; }
 void takeOptional(Optional<String> UNUSED v) { return; }
-void takeLowPtr(PackedPtr<Class> UNUSED v) { return; }
-void takeLowPtrRef(const PackedPtr<Class> UNUSED &v) { return; }
-void takeLowStrPtr(PackedStringPtr UNUSED v) { return; }
+void takePackedPtr(PackedPtr<Class> UNUSED v) { return; }
+void takePackedPtrRef(const PackedPtr<Class> UNUSED &v) { return; }
+void takePackedStringPtr(PackedStringPtr UNUSED v) { return; }
 void takeExtension(Extension UNUSED v) { return; }
 void takeArrayData(ArrayData UNUSED *v) { return; }
 void takeArrayVec(Array UNUSED v) { return; }
@@ -212,9 +212,9 @@ void buildOtherValues() {
   takeReqPtr(*reinterpret_cast<req::ptr<ObjectData> *>(&TestObject)); // Want to get its sole private member m_obj
   takeOptional(Optional<String>("hello"));
   takeOptional(Optional<String>());
-  takeLowPtr(lp);
-  takeLowPtrRef(lp);
-  takeLowStrPtr(PackedStringPtr(StringData::MakeStatic("hello")));
+  takePackedPtr(lp);
+  takePackedPtrRef(lp);
+  takePackedStringPtr(PackedStringPtr(StringData::MakeStatic("hello")));
   takeExtension(Extension("test-extension", "0.5", "test-oncall"));
   takeArrayData(vec.get());
   takeArrayVec(vec);

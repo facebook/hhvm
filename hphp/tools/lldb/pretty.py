@@ -161,8 +161,8 @@ def pp_ReqPtr(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
     return pretty_ptr(val_obj)
 
 
-@format("^HPHP::(LowPtr<.*>|detail::LowPtrImpl<.*>)$", regex=True)
-def pp_LowPtr(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
+@format("^HPHP::(PackedPtr<.*>|ptrimpl::PtrImpl<.*>)$", regex=True)
+def pp_PackedPtr(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
     return pretty_ptr(val_obj)
 
 

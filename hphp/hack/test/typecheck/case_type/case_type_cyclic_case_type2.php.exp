@@ -1,5 +1,5 @@
 ERROR: File "case_type_cyclic_case_type2.php", line 4, characters 11-19:
-Cyclic type definition (Typing[4014])
+Cyclic type definition (Typing[4498])
   File "case_type_cyclic_case_type2.php", line 4, characters 23-31:
   Cyclic use is here
 ERROR: File "case_type_cyclic_case_type2.php", line 4, characters 11-19:

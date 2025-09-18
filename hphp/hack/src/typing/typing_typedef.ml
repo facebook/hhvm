@@ -207,7 +207,7 @@ let casetype_def env typedef =
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err2;
     env
 
-let check_cycles env (t_pos, t_name) hints =
+let check_cycles env (t_pos, t_name) t_assignment hints =
   let (env, cycles) =
     List.fold_left hints ~init:(env, []) ~f:(fun (env, cycles) hint ->
         let ((env, _ty_err_opt, new_cycles), _ty) =
@@ -220,7 +220,14 @@ let check_cycles env (t_pos, t_name) hints =
         (env, new_cycles @ cycles))
   in
   Type_expansions.report cycles
-  |> Option.iter ~f:(Typing_error_utils.add_typing_error ~env);
+  |> Option.iter ~f:(fun e ->
+         let e =
+           match t_assignment with
+           | SimpleTypeDef _ -> e
+           | CaseType _ ->
+             Typing_error.with_code ~code:Error_codes.Typing.RecursiveCaseType e
+         in
+         Typing_error_utils.add_typing_error ~env e);
   env
 
 let check_where_clauses_with_recursive_mentions env t_name where_constraints =
@@ -301,7 +308,11 @@ let typedef_def ctx typedef =
 
   let env =
     if do_report_cycles env then
-      check_cycles env t_name (List.map ~f:fst hint_constraints_pairs)
+      check_cycles
+        env
+        t_name
+        t_assignment
+        (List.map ~f:fst hint_constraints_pairs)
     else
       env
   in

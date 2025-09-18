@@ -95,6 +95,6 @@ Invalid constraint on `newtype` (Typing[4332])
   File "case_type_wellformed.php", line 14, characters 83-86:
   But got `bool`
 ERROR: File "case_type_wellformed.php", line 16, characters 11-19:
-Cyclic type definition (Typing[4014])
+Cyclic type definition (Typing[4498])
   File "case_type_wellformed.php", line 16, characters 28-36:
   Cyclic use is here

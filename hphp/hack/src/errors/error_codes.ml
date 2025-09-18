@@ -784,6 +784,7 @@ module Typing = struct
     | SimpliHackEvalError [@value 4495]
     | ProtectedInternalMethCaller [@value 4496]
     | StaticPropOnTrait [@value 4497]
+    | RecursiveCaseType [@value 4498]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

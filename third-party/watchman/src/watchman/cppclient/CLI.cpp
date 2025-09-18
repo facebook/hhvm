@@ -31,7 +31,7 @@ using namespace folly;
 using namespace watchman;
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
 
   folly::ScopedEventBaseThread sebt;
   auto eb = sebt.getEventBase();

@@ -17,6 +17,6 @@ FOLLY_INIT_LOGGING_CONFIG(".=WARNING,folly=INFO; default:async=true");
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
   return RUN_ALL_TESTS();
 }

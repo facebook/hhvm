@@ -1845,4 +1845,8 @@ let extract_static_method fun_ty ~class_name ~folded_class ~env =
     | _ :: ft_params -> ft_params
     | _ -> failwith "Expected at least one parameter"
   in
-  (env, Typing_defs_core.{ fun_ty with ft_params })
+  let fun_ty = Typing_defs_core.{ fun_ty with ft_params } in
+  (* In generic methods we don't need to retain unused class-level generics even
+     if they are marked [reify] *)
+  let fun_ty = drop_unused_generics fun_ty ~names:SSet.empty in
+  (env, fun_ty)

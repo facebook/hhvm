@@ -168,6 +168,7 @@ class Protocol {
 
   static void checkDuplicateExtensions(const std::vector<Extension>& exts) {
     std::vector<ExtensionType> extensionList;
+    extensionList.reserve(exts.size());
     for (const auto& extension : exts) {
       extensionList.push_back(extension.extension_type);
     }

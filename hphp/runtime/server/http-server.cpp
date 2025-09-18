@@ -312,7 +312,7 @@ void HttpServer::onServerShutdown() {
 
 void HttpServer::serverStopped(HPHP::Server* server) {
   Logger::Info("Page server stopped");
-  assertx(server == m_pageServer.get());
+  assertx(server == m_pageServer.get() || (m_secondaryPageServer && server == m_secondaryPageServer.get()));
   removePid();
 
   auto sockFile = Cfg::Server::FileSocket;

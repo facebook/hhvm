@@ -14,22 +14,16 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{^function:oneway?}}{{!
-  }}{{^function:stream?}}{{!
-    }}{{^function:sink?}}{{!
-      }}apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE{{!
-    }}{{/function:sink?}}{{!
-
-    }}{{#function:sink?}}{{!
-      }}apache::thrift::RpcKind::SINK{{!
-    }}{{/function:sink?}}{{!
-  }}{{/function:stream?}}{{!
-
-  }}{{#function:stream?}}{{!
-    }}apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE{{!
-  }}{{/function:stream?}}{{!
-}}{{/function:oneway?}}{{!
-
-}}{{#function:oneway?}}{{!
-  }}apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE{{!
-}}{{/function:oneway?}}
+}}
+{{#pragma ignore-newlines}}
+{{#if function:self.oneway?}}
+apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE
+{{#else if function:self.bidirectional_stream?}}
+apache::thrift::RpcKind::BIDIRECTIONAL_STREAM
+{{#else if function:self.stream?}}
+apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE
+{{#else if function:self.sink?}}
+apache::thrift::RpcKind::SINK
+{{#else}}
+apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE
+{{/if function:self.oneway?}}

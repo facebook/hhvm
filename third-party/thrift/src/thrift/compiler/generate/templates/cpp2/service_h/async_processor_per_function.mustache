@@ -43,20 +43,19 @@
 
 {{/function:cpp_recv_arg?}}
 {{#function:cpp_recv_arg?}}
- {{^function:stream?}}{{^function:sink?}}
-  static apache::thrift::SerializedResponse return_{{function:prefixed_name}}(
-      apache::thrift::ContextStack* ctx,
-      {{function:cpp_return_type}} const& _return);
+ {{#if function:self.bidirectional_stream?}}
+  static /* TODO(ezou) needs to be something else */ void  return_{{function:prefixed_name}}(
+    apache::thrift::ContextStack* ctx,
+    folly::Executor::KeepAlive<> executor,
+    {{function:cpp_return_type}}&& _return);
 
- {{/function:sink?}}{{/function:stream?}}
- {{#function:stream?}}
+ {{#else if function:self.stream?}}
   static apache::thrift::ResponseAndServerStreamFactory return_{{function:prefixed_name}}(
       apache::thrift::ContextStack* ctx,
       folly::Executor::KeepAlive<> executor,
       {{function:cpp_return_type}}&& _return);
 
- {{/function:stream?}}
- {{#function:sink?}}
+{{#else if function:self.sink?}}
   static std::pair<
       apache::thrift::SerializedResponse,
       apache::thrift::detail::SinkConsumerImpl>
@@ -65,7 +64,12 @@
       {{function:cpp_return_type}}&& _return,
       folly::Executor::KeepAlive<> executor);
 
- {{/function:sink?}}
+{{#else}}
+  static apache::thrift::SerializedResponse return_{{function:prefixed_name}}(
+      apache::thrift::ContextStack* ctx,
+      {{function:cpp_return_type}} const& _return);
+
+{{/if function:self.bidirectional_stream?}}
 {{/function:cpp_recv_arg?}}
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_{{function:prefixed_name}}(

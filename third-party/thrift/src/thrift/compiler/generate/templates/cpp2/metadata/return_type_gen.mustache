@@ -14,8 +14,12 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{^function:sink_or_stream?}}{{> metadata/type_gen }}{{/function:sink_or_stream?}}{{!
-}}{{#function:sink?}}std::make_unique<Sink>({{#function:sink_elem_type}}{{> metadata/type_gen}}{{/function:sink_elem_type}}, {{#function:sink_final_response_type}}{{> metadata/type_gen}}{{/function:sink_final_response_type}}{{#function:sink_has_first_response?}}, {{#function:sink_first_response_type}}{{> metadata/type_gen}}{{/function:sink_first_response_type}}{{/function:sink_has_first_response?}}){{/function:sink?}}{{!
-}}{{#function:stream?}}{{!
-}}std::make_unique<Stream>({{#function:stream_elem_type}}{{> metadata/type_gen}}{{/function:stream_elem_type}}{{#function:stream_has_first_response?}}, {{#function:stream_first_response_type}}{{> metadata/type_gen}}{{/function:stream_first_response_type}}{{/function:stream_has_first_response?}}){{!
-}}{{/function:stream?}}
+}}
+{{#pragma ignore-newlines}}
+{{#if function:stream?}}
+std::make_unique<Stream>({{#function:stream_elem_type}}{{> metadata/type_gen}}{{/function:stream_elem_type}}{{#function:stream_has_first_response?}}, {{#function:stream_first_response_type}}{{> metadata/type_gen}}{{/function:stream_first_response_type}}{{/function:stream_has_first_response?}})
+{{#else if function:sink?}}
+std::make_unique<Sink>({{#function:sink_elem_type}}{{> metadata/type_gen}}{{/function:sink_elem_type}}, {{#function:sink_final_response_type}}{{> metadata/type_gen}}{{/function:sink_final_response_type}}{{#function:sink_has_first_response?}}, {{#function:sink_first_response_type}}{{> metadata/type_gen}}{{/function:sink_first_response_type}}{{/function:sink_has_first_response?}})
+{{#else}}
+{{> metadata/type_gen }}
+{{/if function:stream?}}

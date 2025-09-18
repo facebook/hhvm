@@ -84,6 +84,10 @@ class t_function final : public t_named {
   const t_sink* sink() const { return sink_.get(); }
   const t_stream* stream() const { return stream_.get(); }
 
+  bool is_bidirectional_stream() const {
+    return sink() != nullptr && stream() != nullptr;
+  }
+
   t_paramlist& params() { return *params_; }
   const t_paramlist& params() const { return *params_; }
 

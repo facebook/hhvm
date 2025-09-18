@@ -30,7 +30,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_simple([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "simple";
-  auto func_ret_type = std::make_unique<Sink>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), )std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE));
+  auto func_ret_type = std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));
@@ -38,7 +38,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_response([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "response";
-  auto func_ret_type = std::make_unique<Sink>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), , std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE))std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
+  auto func_ret_type = std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));

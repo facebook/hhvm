@@ -17,7 +17,7 @@
 }}{{!
 }}{{#let function_comma = (if function:params.fields? ", " null)}}
 #if FOLLY_HAS_COROUTINES
-{{#function:sink?}}
+{{#if (and function:sink? (not function:bidirectional_stream?))}}
 folly::coro::Task<{{> types/return_type_client}}> {{> service_common/client_class_name}}::co_{{function:cpp_name}}({{> service_common/function_param_list_client}}) {
   ::apache::thrift::RpcOptions rpcOptions;
   co_return co_await co_{{function:cpp_name}}(rpcOptions{{function_comma}}{{> service_common/param_list}});
@@ -70,7 +70,7 @@ folly::coro::Task<{{> types/return_type_client}}> {{> service_common/client_clas
   );
 {{/function:creates_interaction?}}
 }
-{{/function:sink?}}{{!
+{{/if (and function:sink? (not function:bidirectional_stream?))}}{{!
 Other coroutine functions are inline templates to prevent binary size regression
 }}
 #endif // FOLLY_HAS_COROUTINES

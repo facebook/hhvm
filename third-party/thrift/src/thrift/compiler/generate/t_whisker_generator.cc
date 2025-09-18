@@ -702,9 +702,8 @@ prototype<t_function>::ptr t_whisker_generator::make_prototype_for_function(
   def.property("stream?", [](const t_function& self) {
     return self.stream() != nullptr;
   });
-  def.property("bidirectional_stream?", [](const t_function& self) {
-    return self.sink() && self.stream();
-  });
+  def.property(
+      "bidirectional_stream?", mem_fn(&t_function::is_bidirectional_stream));
   def.property("stream_has_first_response?", [](const t_function& self) {
     return !self.has_void_initial_response() && self.stream() != nullptr;
   });
@@ -744,6 +743,15 @@ prototype<t_service>::ptr t_whisker_generator::make_prototype_for_service(
       }
     }
     return to_array(interactions, proto.of<t_interaction>());
+  });
+
+  def.property("has_bidirectional_streams?", [](const t_service& self) {
+    return std::any_of(
+        self.functions().begin(),
+        self.functions().end(),
+        [](const t_function& function) {
+          return function.is_bidirectional_stream();
+        });
   });
 
   return std::move(def).make();

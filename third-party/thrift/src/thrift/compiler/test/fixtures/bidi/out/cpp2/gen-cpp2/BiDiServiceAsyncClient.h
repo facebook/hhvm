@@ -51,7 +51,7 @@ class Client<::cpp2::BiDiService> : public apache::thrift::GeneratedAsyncClient 
 
 
  protected:
-  void fbthrift_serialize_and_send_simple(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback*apache::thrift::StreamClientCallback* callback, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_simple(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::BiDiClientCallback* callback, bool stealRpcOptions = false);
  public:
 #if FOLLY_HAS_COROUTINES
   /** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "service": "BiDiService", "function": "simple"} */
@@ -72,11 +72,11 @@ class Client<::cpp2::BiDiService> : public apache::thrift::GeneratedAsyncClient 
  private:
   apache::thrift::SerializedRequest fbthrift_serialize_simple(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename RpcOptions>
-  void fbthrift_send_simple(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::SinkClientCallback*apache::thrift::StreamClientCallback* callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata);
+  void fbthrift_send_simple(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::BiDiClientCallback* callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> simpleCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
  protected:
-  void fbthrift_serialize_and_send_response(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback*apache::thrift::StreamClientCallback* callback, bool stealRpcOptions = false);
+  void fbthrift_serialize_and_send_response(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::BiDiClientCallback* callback, bool stealRpcOptions = false);
  public:
 #if FOLLY_HAS_COROUTINES
   /** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "service": "BiDiService", "function": "response"} */
@@ -97,7 +97,7 @@ class Client<::cpp2::BiDiService> : public apache::thrift::GeneratedAsyncClient 
  private:
   apache::thrift::SerializedRequest fbthrift_serialize_response(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename RpcOptions>
-  void fbthrift_send_response(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::SinkClientCallback*apache::thrift::StreamClientCallback* callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata);
+  void fbthrift_send_response(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::BiDiClientCallback* callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> responseCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };

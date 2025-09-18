@@ -27,6 +27,7 @@
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/async/tests/util/TestSinkService.h>
 #include <thrift/lib/cpp2/async/tests/util/TestStreamService.h>
+#include <thrift/lib/cpp2/async/tests/util/gen-cpp2/TestBiDiService.h>
 #include <thrift/lib/cpp2/async/tests/util/gen-cpp2/TestSinkServiceAsyncClient.h>
 #include <thrift/lib/cpp2/async/tests/util/gen-cpp2/TestStreamServiceAsyncClient.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>

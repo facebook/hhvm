@@ -92,6 +92,10 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::setUpAndProcess_{{functi
 template <typename ProtocolIn_, typename ProtocolOut_>
 void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}(
     apache::thrift::ServerRequest&& serverRequest) {
+{{#if function:self.bidirectional_stream?}}
+  std::ignore = serverRequest;
+  apache::thrift::detail::si::throw_app_exn_unimplemented("Not Implemented Yet");
+{{#else}}
 {{#if in_or_creates_interaction?}}
   auto tile = serverRequest.requestContext()->releaseTile();
 {{/if in_or_creates_interaction?}}
@@ -296,6 +300,7 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
 #else
   makeExecuteHandler()(std::move(callback), std::move(args));
 #endif // FOLLY_HAS_COROUTINES
+{{/if function:self.bidirectional_stream?}}
 }
 
 {{^function:oneway?}}
@@ -310,13 +315,17 @@ apache::thrift::SerializedResponse {{service:parent_service_cpp_name}}AsyncProce
     apache::thrift::ContextStack* ctx,
     {{function:cpp_return_type}} const& _return) {
 {{/function:sink?}}{{/function:stream?}}
-{{#function:stream?}}
+{{#if function:self.bidirectional_stream?}}
+/* TODO(ezou) needs to be something else */ void {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(
+    apache::thrift::ContextStack* ctx,
+    folly::Executor::KeepAlive<> executor,
+    {{function:cpp_return_type}}&& _return) {
+{{#else if function:self.stream?}}
 apache::thrift::ResponseAndServerStreamFactory {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     {{function:cpp_return_type}}&& _return) {
-{{/function:stream?}}
-{{#function:sink?}}
+{{#else if function:self.sink?}}
 std::pair<
     apache::thrift::SerializedResponse,
     apache::thrift::detail::SinkConsumerImpl>
@@ -324,8 +333,14 @@ std::pair<
     apache::thrift::ContextStack* ctx,
     {{function:cpp_return_type}}&& _return,
     folly::Executor::KeepAlive<> executor) {
-{{/function:sink?}}
+{{/if function:self.bidirectional_stream?}}
 {{/function:cpp_recv_arg?}}
+{{#if function:self.bidirectional_stream?}}
+  std::ignore = ctx;
+  std::ignore = _return;
+  std::ignore = executor;
+  apache::thrift::detail::si::throw_app_exn_unimplemented("Not Implemented Yet");
+{{#else}}
   ProtocolOut_ prot;
 {{#function:stream?}}
   {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::InitialResponsePResultType result;
@@ -366,6 +381,7 @@ std::pair<
 {{/type:void?}}
   return serializeResponse("{{> common/function_name}}", &prot, ctx, result);
 {{/function:sink?}}{{/function:stream?}}
+{{/if function:self.bidirectional_stream?}}
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

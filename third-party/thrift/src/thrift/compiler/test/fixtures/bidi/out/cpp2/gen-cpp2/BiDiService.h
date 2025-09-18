@@ -12,6 +12,7 @@
 #include "thrift/compiler/test/fixtures/bidi/gen-cpp2/module_types.h"
 #include <thrift/lib/cpp2/async/ServerStream.h>
 #include <thrift/lib/cpp2/async/Sink.h>
+#include <thrift/lib/cpp2/async/BidirectionalStream.h>
 
 namespace folly {
   class IOBuf;
@@ -141,18 +142,10 @@ class BiDiServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   void executeRequest_simple(apache::thrift::ServerRequest&& serverRequest);
 
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::ResponseAndServerStreamFactory return_simple(
-      apache::thrift::ContextStack* ctx,
-      folly::Executor::KeepAlive<> executor,
-      ::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>&& _return);
-
-  static std::pair<
-      apache::thrift::SerializedResponse,
-      apache::thrift::detail::SinkConsumerImpl>
-  return_simple(
-      apache::thrift::ContextStack* ctx,
-      ::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>&& _return,
-      folly::Executor::KeepAlive<> executor);
+  static /* TODO(ezou) needs to be something else */ void  return_simple(
+    apache::thrift::ContextStack* ctx,
+    folly::Executor::KeepAlive<> executor,
+    ::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>&& _return);
 
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_simple(
@@ -187,18 +180,10 @@ class BiDiServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   void executeRequest_response(apache::thrift::ServerRequest&& serverRequest);
 
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::ResponseAndServerStreamFactory return_response(
-      apache::thrift::ContextStack* ctx,
-      folly::Executor::KeepAlive<> executor,
-      ::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>&& _return);
-
-  static std::pair<
-      apache::thrift::SerializedResponse,
-      apache::thrift::detail::SinkConsumerImpl>
-  return_response(
-      apache::thrift::ContextStack* ctx,
-      ::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>&& _return,
-      folly::Executor::KeepAlive<> executor);
+  static /* TODO(ezou) needs to be something else */ void  return_response(
+    apache::thrift::ContextStack* ctx,
+    folly::Executor::KeepAlive<> executor,
+    ::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>&& _return);
 
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_response(

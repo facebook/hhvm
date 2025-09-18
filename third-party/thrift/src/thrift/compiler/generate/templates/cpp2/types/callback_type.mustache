@@ -14,14 +14,14 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#function:return_type}}{{#function:sink?}}{{!
-}}apache::thrift::SinkClientCallback*{{!
-}}{{/function:sink?}}{{!
-
-}}{{#function:stream?}}{{!
-}}apache::thrift::StreamClientCallback*{{!
-}}{{/function:stream?}}{{!
-
-}}{{^function:sink_or_stream?}}{{!
-}}apache::thrift::RequestClientCallback::Ptr{{!
-}}{{/function:sink_or_stream?}}{{/function:return_type}}
+}}
+{{#pragma ignore-newlines}}
+{{#if (and function:self.sink? function:self.stream?)}}
+apache::thrift::BiDiClientCallback*
+{{#else if function:self.sink?}}
+apache::thrift::SinkClientCallback*
+{{#else if function:self.stream?}}{{! Stream case}}
+apache::thrift::StreamClientCallback*
+{{#else}}
+apache::thrift::RequestClientCallback::Ptr
+{{/if (and function:self.sink? function:self.stream?)}}

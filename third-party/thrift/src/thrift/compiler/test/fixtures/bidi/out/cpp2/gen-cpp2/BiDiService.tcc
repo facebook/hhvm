@@ -36,7 +36,7 @@ void BiDiServiceAsyncProcessor::setUpAndProcess_simple(
     folly::EventBase* eb,
     [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
   if (!setUpRequestProcessing(
-          req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE, iface_)) {
+          req, ctx, eb, tm, apache::thrift::RpcKind::BIDIRECTIONAL_STREAM, iface_)) {
     return;
   }
   auto scope = iface_->getRequestExecutionScope(
@@ -48,7 +48,7 @@ void BiDiServiceAsyncProcessor::setUpAndProcess_simple(
       ctx,
       eb,
       tm,
-      apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
+      apache::thrift::RpcKind::BIDIRECTIONAL_STREAM,
       &BiDiServiceAsyncProcessor::
           executeRequest_simple<ProtocolIn_, ProtocolOut_>,
       this);
@@ -57,139 +57,19 @@ void BiDiServiceAsyncProcessor::setUpAndProcess_simple(
 template <typename ProtocolIn_, typename ProtocolOut_>
 void BiDiServiceAsyncProcessor::executeRequest_simple(
     apache::thrift::ServerRequest&& serverRequest) {
-  // make sure getRequestContext is null
-  // so async calls don't accidentally use it
-  iface_->setRequestContext(nullptr);
-  struct ArgsState {
-    BiDiService_simple_pargs pargs() {
-      BiDiService_simple_pargs args;
-      return args;
-    }
-
-    auto asTupleOfRefs() & {
-      return std::tie(
-      );
-    }
-  } args;
-
-  auto ctxStack = apache::thrift::ContextStack::create(
-      this->getEventHandlersSharedPtr(),
-      this->getServiceName(),
-      "BiDiService.simple",
-      serverRequest.requestContext());
-  try {
-    auto pargs = args.pargs();
-    deserializeRequest<ProtocolIn_>(
-        pargs,
-        "simple",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
-        ctxStack.get());
-  } catch (...) {
-    folly::exception_wrapper ew(std::current_exception());
-    apache::thrift::detail::ap::process_handle_exn_deserialization<
-        ProtocolOut_>(
-        ew,
-        apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
-            serverRequest.requestContext(),
-        apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
-        "simple");
-    return;
-  }
-  auto requestPileNotification =
-      apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(
-          serverRequest);
-  auto concurrencyControllerNotification =
-      apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(
-          serverRequest);
-  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
-      /* .serviceName =*/ this->getServiceName(),
-      /* .definingServiceName =*/ "BiDiService",
-      /* .methodName =*/ "simple",
-      /* .qualifiedMethodName =*/ "BiDiService.simple"};
-  apache::thrift::HandlerCallback<::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::cpp2::BiDiService>::fbthrift_invoke_decorator_after_simple};
- auto callback =
-      apache::thrift::HandlerCallbackPtr<::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>>::make(
-          apache::thrift::detail::ServerRequestHelper::request(
-              std::move(serverRequest)),
-          std::move(ctxStack),
-          std::move(methodNameInfo),
-          return_simple<ProtocolIn_, ProtocolOut_>,
-          throw_wrapped_simple<ProtocolIn_, ProtocolOut_>,
-          serverRequest.requestContext()->getProtoSeqId(),
-          apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
-          apache::thrift::detail::ServerRequestHelper::executor(serverRequest),
-          serverRequest.requestContext(),
-          requestPileNotification,
-          concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
-  // Execute method decorator before_simple.
-  iface_->fbthrift_execute_decorators_before_simple(*serverRequest.requestContext());
-
-  const auto makeExecuteHandler = [&] {
-    return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
-      (void)args;
-      ifacePtr->async_tm_simple(std::move(cb));
-    };
-  };
-#if FOLLY_HAS_COROUTINES
-  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
-          *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
-      auto argRefs = args.asTupleOfRefs();
-      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
-          *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
-      executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
-  } else {
-    makeExecuteHandler()(std::move(callback), std::move(args));
-  }
-#else
-  makeExecuteHandler()(std::move(callback), std::move(args));
-#endif // FOLLY_HAS_COROUTINES
+  std::ignore = serverRequest;
+  apache::thrift::detail::si::throw_app_exn_unimplemented("Not Implemented Yet");
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory BiDiServiceAsyncProcessor::return_simple(
+/* TODO(ezou) needs to be something else */ void BiDiServiceAsyncProcessor::return_simple(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>&& _return) {
-std::pair<
-    apache::thrift::SerializedResponse,
-    apache::thrift::detail::SinkConsumerImpl>
-BiDiServiceAsyncProcessor::return_simple(
-    apache::thrift::ContextStack* ctx,
-    ::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>&& _return,
-    folly::Executor::KeepAlive<> executor) {
-  ProtocolOut_ prot;
-  BiDiService_simple_presult::InitialResponsePResultType result;
-  using StreamPResultType = BiDiService_simple_presult::StreamPResultType;
-  auto& returnStream = _return;
-  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
-  return {serializeResponse("simple", &prot, ctx, result), std::move(encodedStream)};
-  BiDiService_simple_presult::InitialResponsePResultType result;
-  using SinkPResultType = BiDiService_simple_presult::SinkPResultType;
-  using FinalResponsePResultType =
-      BiDiService_simple_presult::FinalResponsePResultType;
-  auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
-      ProtocolIn_,
-      ProtocolOut_,
-      SinkPResultType,
-      FinalResponsePResultType>(std::move(_return), std::move(executor));
-
-  return {serializeResponse("simple", &prot, ctx, result), std::move(sinkConsumerImpl)};
+  std::ignore = ctx;
+  std::ignore = _return;
+  std::ignore = executor;
+  apache::thrift::detail::si::throw_app_exn_unimplemented("Not Implemented Yet");
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -223,7 +103,7 @@ void BiDiServiceAsyncProcessor::setUpAndProcess_response(
     folly::EventBase* eb,
     [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
   if (!setUpRequestProcessing(
-          req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE, iface_)) {
+          req, ctx, eb, tm, apache::thrift::RpcKind::BIDIRECTIONAL_STREAM, iface_)) {
     return;
   }
   auto scope = iface_->getRequestExecutionScope(
@@ -235,7 +115,7 @@ void BiDiServiceAsyncProcessor::setUpAndProcess_response(
       ctx,
       eb,
       tm,
-      apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
+      apache::thrift::RpcKind::BIDIRECTIONAL_STREAM,
       &BiDiServiceAsyncProcessor::
           executeRequest_response<ProtocolIn_, ProtocolOut_>,
       this);
@@ -244,143 +124,19 @@ void BiDiServiceAsyncProcessor::setUpAndProcess_response(
 template <typename ProtocolIn_, typename ProtocolOut_>
 void BiDiServiceAsyncProcessor::executeRequest_response(
     apache::thrift::ServerRequest&& serverRequest) {
-  // make sure getRequestContext is null
-  // so async calls don't accidentally use it
-  iface_->setRequestContext(nullptr);
-  struct ArgsState {
-    BiDiService_response_pargs pargs() {
-      BiDiService_response_pargs args;
-      return args;
-    }
-
-    auto asTupleOfRefs() & {
-      return std::tie(
-      );
-    }
-  } args;
-
-  auto ctxStack = apache::thrift::ContextStack::create(
-      this->getEventHandlersSharedPtr(),
-      this->getServiceName(),
-      "BiDiService.response",
-      serverRequest.requestContext());
-  try {
-    auto pargs = args.pargs();
-    deserializeRequest<ProtocolIn_>(
-        pargs,
-        "response",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
-        ctxStack.get());
-  } catch (...) {
-    folly::exception_wrapper ew(std::current_exception());
-    apache::thrift::detail::ap::process_handle_exn_deserialization<
-        ProtocolOut_>(
-        ew,
-        apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
-            serverRequest.requestContext(),
-        apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
-        "response");
-    return;
-  }
-  auto requestPileNotification =
-      apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(
-          serverRequest);
-  auto concurrencyControllerNotification =
-      apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(
-          serverRequest);
-  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
-      /* .serviceName =*/ this->getServiceName(),
-      /* .definingServiceName =*/ "BiDiService",
-      /* .methodName =*/ "response",
-      /* .qualifiedMethodName =*/ "BiDiService.response"};
-  apache::thrift::HandlerCallback<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>>::DecoratorAfterCallback decoratorCallback{
-    static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::cpp2::BiDiService>::fbthrift_invoke_decorator_after_response};
- auto callback =
-      apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>>::make(
-          apache::thrift::detail::ServerRequestHelper::request(
-              std::move(serverRequest)),
-          std::move(ctxStack),
-          std::move(methodNameInfo),
-          return_response<ProtocolIn_, ProtocolOut_>,
-          throw_wrapped_response<ProtocolIn_, ProtocolOut_>,
-          serverRequest.requestContext()->getProtoSeqId(),
-          apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
-          apache::thrift::detail::ServerRequestHelper::executor(serverRequest),
-          serverRequest.requestContext(),
-          requestPileNotification,
-          concurrencyControllerNotification,
-          std::move(serverRequest.requestData()),
-          apache::thrift::TilePtr(),
-          std::move(decoratorCallback));
-  // Execute method decorator before_response.
-  iface_->fbthrift_execute_decorators_before_response(*serverRequest.requestContext());
-
-  const auto makeExecuteHandler = [&] {
-    return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
-      (void)args;
-      ifacePtr->async_tm_response(std::move(cb));
-    };
-  };
-#if FOLLY_HAS_COROUTINES
-  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
-          *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
-      auto argRefs = args.asTupleOfRefs();
-      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
-          *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
-      executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
-  } else {
-    makeExecuteHandler()(std::move(callback), std::move(args));
-  }
-#else
-  makeExecuteHandler()(std::move(callback), std::move(args));
-#endif // FOLLY_HAS_COROUTINES
+  std::ignore = serverRequest;
+  apache::thrift::detail::si::throw_app_exn_unimplemented("Not Implemented Yet");
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory BiDiServiceAsyncProcessor::return_response(
+/* TODO(ezou) needs to be something else */ void BiDiServiceAsyncProcessor::return_response(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>&& _return) {
-std::pair<
-    apache::thrift::SerializedResponse,
-    apache::thrift::detail::SinkConsumerImpl>
-BiDiServiceAsyncProcessor::return_response(
-    apache::thrift::ContextStack* ctx,
-    ::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>&& _return,
-    folly::Executor::KeepAlive<> executor) {
-  ProtocolOut_ prot;
-  BiDiService_response_presult::InitialResponsePResultType result;
-  using StreamPResultType = BiDiService_response_presult::StreamPResultType;
-  result.get<0>().value = const_cast<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>::ResponseType*>(&_return.response);
-  result.setIsSet(0, true);
-  auto& returnStream = _return.stream;
-  auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
-  return {serializeResponse("response", &prot, ctx, result), std::move(encodedStream)};
-  BiDiService_response_presult::InitialResponsePResultType result;
-  using SinkPResultType = BiDiService_response_presult::SinkPResultType;
-  using FinalResponsePResultType =
-      BiDiService_response_presult::FinalResponsePResultType;
-  result.get<0>().value = &_return.response;
-  result.setIsSet(0, true);
-  auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
-      ProtocolIn_,
-      ProtocolOut_,
-      SinkPResultType,
-      FinalResponsePResultType>(std::move(_return.sinkConsumer),std::move(executor));
-
-  return {serializeResponse("response", &prot, ctx, result), std::move(sinkConsumerImpl)};
+  std::ignore = ctx;
+  std::ignore = _return;
+  std::ignore = executor;
+  apache::thrift::detail::si::throw_app_exn_unimplemented("Not Implemented Yet");
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

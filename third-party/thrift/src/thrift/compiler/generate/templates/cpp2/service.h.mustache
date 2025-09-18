@@ -42,6 +42,9 @@
 {{#service:sinks?}}
 #include <thrift/lib/cpp2/async/Sink.h>
 {{/service:sinks?}}
+{{#if service:self.has_bidirectional_streams?}}
+#include <thrift/lib/cpp2/async/BidirectionalStream.h>
+{{/if service:self.has_bidirectional_streams?}}
 {{/service:interactions?}}
 {{#service:interactions?}}
 #include <thrift/lib/cpp2/async/ServerStream.h>

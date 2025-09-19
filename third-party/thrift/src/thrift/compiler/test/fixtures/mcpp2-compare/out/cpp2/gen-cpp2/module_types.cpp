@@ -31,6 +31,14 @@ const std::vector<std::any>& TEnumTraits<::some::valid::ns::MyEnumA>::annotation
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::some::valid::ns::MyEnumA>::enumValueAnnotations(::some::valid::ns::MyEnumA value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -51,6 +59,14 @@ bool TEnumTraits<::some::valid::ns::AnnotatedEnum>::findValue(std::string_view n
 const std::vector<std::any>& TEnumTraits<::some::valid::ns::AnnotatedEnum>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
+
+const std::vector<std::any>& TEnumTraits<::some::valid::ns::AnnotatedEnum>::enumValueAnnotations(::some::valid::ns::AnnotatedEnum value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
 
 }} // apache::thrift
 
@@ -73,6 +89,14 @@ const std::vector<std::any>& TEnumTraits<::some::valid::ns::AnnotatedEnum2>::ann
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::some::valid::ns::AnnotatedEnum2>::enumValueAnnotations(::some::valid::ns::AnnotatedEnum2 value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -93,6 +117,14 @@ bool TEnumTraits<::some::valid::ns::MyEnumB>::findValue(std::string_view name, t
 const std::vector<std::any>& TEnumTraits<::some::valid::ns::MyEnumB>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
+
+const std::vector<std::any>& TEnumTraits<::some::valid::ns::MyEnumB>::enumValueAnnotations(::some::valid::ns::MyEnumB value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
 
 }} // apache::thrift
 

@@ -31,6 +31,14 @@ const std::vector<std::any>& TEnumTraits<::test::fixtures::tablebased::ExampleEn
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::test::fixtures::tablebased::ExampleEnum>::enumValueAnnotations(::test::fixtures::tablebased::ExampleEnum value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 namespace apache {

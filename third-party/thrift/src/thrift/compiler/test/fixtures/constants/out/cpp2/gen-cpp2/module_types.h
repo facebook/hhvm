@@ -202,6 +202,7 @@ template <> struct TEnumTraits<::cpp2::EmptyEnum> {
   }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::cpp2::EmptyEnum) noexcept;
 };
 
 template <> struct TEnumTraits<::cpp2::City> {
@@ -232,6 +233,7 @@ template <> struct TEnumTraits<::cpp2::City> {
   static constexpr type max() { return type::LON; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::cpp2::City) noexcept;
 };
 
 template <> struct TEnumTraits<::cpp2::Company> {
@@ -262,6 +264,7 @@ template <> struct TEnumTraits<::cpp2::Company> {
   static constexpr type max() { return type::__FRIEND__FEED; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::cpp2::Company) noexcept;
 };
 
 } // namespace apache::thrift

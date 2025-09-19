@@ -77,6 +77,7 @@ template <> struct TEnumTraits<::facebook::thrift::test::Result> {
   static constexpr type max() { return type::GOOD; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::facebook::thrift::test::Result) noexcept;
 };
 
 } // namespace apache::thrift

@@ -146,6 +146,7 @@ template <> struct TEnumTraits<::test::fixtures::basic-structured-annotations::M
   static constexpr type max() { return type::ONE; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::test::fixtures::basic-structured-annotations::MyEnum) noexcept;
 };
 
 } // namespace apache::thrift

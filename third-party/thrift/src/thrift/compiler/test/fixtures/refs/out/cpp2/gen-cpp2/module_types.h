@@ -353,6 +353,7 @@ template <> struct TEnumTraits<::cpp2::MyEnum> {
   static constexpr type max() { return type::One; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::cpp2::MyEnum) noexcept;
 };
 
 template <> struct TEnumTraits<::cpp2::TypedEnum> {
@@ -383,6 +384,7 @@ template <> struct TEnumTraits<::cpp2::TypedEnum> {
   static constexpr type max() { return type::VAL2; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::cpp2::TypedEnum) noexcept;
 };
 
 } // namespace apache::thrift

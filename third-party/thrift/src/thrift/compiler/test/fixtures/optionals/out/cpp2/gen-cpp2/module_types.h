@@ -156,6 +156,7 @@ template <> struct TEnumTraits<::cpp2::Animal> {
   static constexpr type max() { return type::TARANTULA; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::cpp2::Animal) noexcept;
 };
 
 } // namespace apache::thrift

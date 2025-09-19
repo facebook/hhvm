@@ -31,6 +31,14 @@ const std::vector<std::any>& TEnumTraits<::test_cpp2::cpp_reflection::enum1>::an
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::test_cpp2::cpp_reflection::enum1>::enumValueAnnotations(::test_cpp2::cpp_reflection::enum1 value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -51,6 +59,14 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::enum2>::findValue(std::string_view
 const std::vector<std::any>& TEnumTraits<::test_cpp2::cpp_reflection::enum2>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
+
+const std::vector<std::any>& TEnumTraits<::test_cpp2::cpp_reflection::enum2>::enumValueAnnotations(::test_cpp2::cpp_reflection::enum2 value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
 
 }} // apache::thrift
 
@@ -73,6 +89,14 @@ const std::vector<std::any>& TEnumTraits<::test_cpp2::cpp_reflection::enum3>::an
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::test_cpp2::cpp_reflection::enum3>::enumValueAnnotations(::test_cpp2::cpp_reflection::enum3 value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -93,6 +117,14 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::findValu
 const std::vector<std::any>& TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
+
+const std::vector<std::any>& TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::enumValueAnnotations(::test_cpp2::cpp_reflection::enum_with_special_names value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
 
 }} // apache::thrift
 

@@ -177,6 +177,30 @@ TEST(AnnotationTest, GetEnumAnnotationValue) {
   EXPECT_FALSE((get_enum_annotation<Oncall, MyEnum>()));
 }
 
+TEST(AnnotationTest, GetEnumValueAnnotationValue) {
+  Doc expected;
+  expected.text() = "I am an enum value";
+
+  // Checking whether an enum value has a given annotation. If so, use it.
+  if (auto* doc = get_enum_value_annotation<Doc>(MyEnum::VALUE)) {
+    EXPECT_EQ(*doc, expected);
+  } else {
+    ADD_FAILURE();
+  }
+
+  // `Doc` annotation exists on MyEnum::VALUE
+  EXPECT_TRUE((get_enum_value_annotation<Doc>(MyEnum::VALUE)));
+
+  // `Doc` annotation does not exist on MyEnum::NONE
+  EXPECT_FALSE((get_enum_value_annotation<Doc>(MyEnum::NONE)));
+
+  // `Doc` annotation does not exist on MyEnum::VALUE2
+  EXPECT_FALSE((get_enum_value_annotation<Doc>(MyEnum::VALUE2)));
+
+  // `Oncall` annotation does not exist on MyEnum::VALUE
+  EXPECT_FALSE((get_enum_value_annotation<Oncall>(MyEnum::VALUE)));
+}
+
 TEST(AnnotationTest, HasStructAnnotation) {
   // Test MyStruct annotations - should have both Doc and ExtraAnnotation
   EXPECT_TRUE((has_struct_annotation<Doc, MyStruct>()));

@@ -60,6 +60,32 @@ const std::vector<std::any>& TEnumTraits<::{{program:qualified_namespace}}::{{en
   {{/if enum:has_runtime_annotation?}}
 }
 
+const std::vector<std::any>& TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::enumValueAnnotations(::{{program:qualified_namespace}}::{{enum:cpp_name}} value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    {{#enum:values}}
+    {{#if enum_value:has_runtime_annotation?}}
+    case {{enum_value:value}}: {
+      static const folly::Indestructible<std::vector<std::any>> ret = [] {
+          std::vector<std::any> values;
+      {{#enum_value:structured_annotations}}
+      {{#constant:is_runtime_annotation?}}
+      {{#constant:type}}{{#constant:value}}
+          values.emplace_back({{> common/iterate_const_values}});
+      {{/constant:value}}{{/constant:type}}
+      {{/constant:is_runtime_annotation?}}
+      {{/enum_value:structured_annotations}}
+          return values;
+        }();
+      return *ret;
+    }
+    {{/if enum_value:has_runtime_annotation?}}
+    {{/enum:values}}
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 {{/program:split_enums}}

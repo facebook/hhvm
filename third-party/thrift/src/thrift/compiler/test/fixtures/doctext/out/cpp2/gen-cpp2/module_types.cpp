@@ -31,6 +31,14 @@ const std::vector<std::any>& TEnumTraits<::cpp2::B>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::cpp2::B>::enumValueAnnotations(::cpp2::B value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 

@@ -429,6 +429,55 @@ const Annotation* get_enum_annotation() {
   return ret;
 }
 
+/// Get the enum value annotation. If Enum value doesn't have the corresponding
+/// Annotation, returns nullptr.
+///
+/// For example, for the following thrift file
+///
+///     @thrift.RuntimeAnnotation
+///     @scope.EnumValue
+///     struct Doc {
+///       1: string text;
+///     }
+///
+///     @scope.EnumValue
+///     struct Other {}
+///
+///     enum MyEnum {
+///       @Doc{text="I am an enum value"}
+///       VALUE = 1,
+///     }
+///
+/// We can write the following code.
+///
+///     // `Doc` annotation exists on MyEnum::VALUE
+///     assert(get_enum_value_annotation<Doc, MyEnum>(MyEnum::VALUE));
+///
+///     // Check the value of `Doc` annotation on MyEnum::VALUE
+///     assert(*get_enum_value_annotation<Doc, MyEnum>(MyEnum::VALUE) ==
+///            Doc{"I am an enum"});
+///
+///     // Build failure since `Other` is not marked with
+///     @thrift.RuntimeAnnotation.
+///     get_enum_value_annotation<Other, MyEnum>;
+///
+template <class Annotation, class Enum>
+const Annotation* get_enum_value_annotation(Enum value) {
+  using detail::annotation::is_runtime_annotation;
+  static_assert(
+      is_runtime_annotation<Annotation>,
+      "Annotation is not annotated with @thrift.RuntimeAnnotation.");
+  static_assert(util::is_thrift_enum_v<Enum>, "Enum is not a Thrift enum.");
+
+  // TODO(dokwon): Consider creating static local variable to cache lookup.
+  for (const std::any& v : TEnumTraits<Enum>::enumValueAnnotations(value)) {
+    if (auto* p = std::any_cast<Annotation>(&v)) {
+      return p;
+    }
+  }
+  return nullptr;
+}
+
 /// Check if a struct/union/exception has a specific annotation at compile time,
 /// for example:
 ///

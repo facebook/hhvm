@@ -31,6 +31,14 @@ const std::vector<std::any>& TEnumTraits<::cpp2::EmptyEnum>::annotations() noexc
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::cpp2::EmptyEnum>::enumValueAnnotations(::cpp2::EmptyEnum value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -52,6 +60,14 @@ const std::vector<std::any>& TEnumTraits<::cpp2::City>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::cpp2::City>::enumValueAnnotations(::cpp2::City value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -72,6 +88,14 @@ bool TEnumTraits<::cpp2::Company>::findValue(std::string_view name, type* out) n
 const std::vector<std::any>& TEnumTraits<::cpp2::Company>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
+
+const std::vector<std::any>& TEnumTraits<::cpp2::Company>::enumValueAnnotations(::cpp2::Company value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
 
 }} // apache::thrift
 

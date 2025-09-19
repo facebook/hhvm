@@ -93,6 +93,7 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumA> {
   static constexpr type max() { return type::FIELDA; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::facebook::ns::qwerty::AnEnumA) noexcept;
 };
 
 template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumB> {
@@ -123,6 +124,7 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumB> {
   static constexpr type max() { return type::FIELDB; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::facebook::ns::qwerty::AnEnumB) noexcept;
 };
 
 template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumC> {
@@ -153,6 +155,7 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumC> {
   static constexpr type max() { return type::FIELDC; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::facebook::ns::qwerty::AnEnumC) noexcept;
 };
 
 template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumD> {
@@ -183,6 +186,7 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumD> {
   static constexpr type max() { return type::FIELDD; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::facebook::ns::qwerty::AnEnumD) noexcept;
 };
 
 template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumE> {
@@ -213,6 +217,7 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumE> {
   static constexpr type max() { return type::FIELDA; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::facebook::ns::qwerty::AnEnumE) noexcept;
 };
 
 } // namespace apache::thrift

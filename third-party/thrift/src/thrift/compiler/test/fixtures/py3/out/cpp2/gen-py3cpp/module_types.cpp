@@ -31,6 +31,14 @@ const std::vector<std::any>& TEnumTraits<::py3::simple::AnEnum>::annotations() n
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::py3::simple::AnEnum>::enumValueAnnotations(::py3::simple::AnEnum value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -52,6 +60,14 @@ const std::vector<std::any>& TEnumTraits<::py3::simple::AnEnumRenamed>::annotati
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::py3::simple::AnEnumRenamed>::enumValueAnnotations(::py3::simple::AnEnumRenamed value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -72,6 +88,14 @@ bool TEnumTraits<::py3::simple::Flags>::findValue(std::string_view name, type* o
 const std::vector<std::any>& TEnumTraits<::py3::simple::Flags>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
+
+const std::vector<std::any>& TEnumTraits<::py3::simple::Flags>::enumValueAnnotations(::py3::simple::Flags value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
 
 }} // apache::thrift
 

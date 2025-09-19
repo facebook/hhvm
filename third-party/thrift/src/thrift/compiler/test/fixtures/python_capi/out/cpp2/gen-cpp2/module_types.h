@@ -480,6 +480,7 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::MyEnum> {
   static constexpr type max() { return type::MyValue2; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::test::fixtures::python_capi::MyEnum) noexcept;
 };
 
 template <> struct TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum> {
@@ -514,6 +515,7 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum> 
   static constexpr type max() { return type::FuBaR; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::test::fixtures::python_capi::NormalDecentEnum) noexcept;
 };
 
 } // namespace apache::thrift

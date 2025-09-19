@@ -31,6 +31,14 @@ const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::Enum>::annota
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::Enum>::enumValueAnnotations(::facebook::thrift::test::Enum value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 

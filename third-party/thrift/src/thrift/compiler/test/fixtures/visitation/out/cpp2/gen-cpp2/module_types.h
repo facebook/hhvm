@@ -890,6 +890,7 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum1> {
   static constexpr type max() { return type::field2; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::test_cpp2::cpp_reflection::enum1) noexcept;
 };
 
 template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum2> {
@@ -920,6 +921,7 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum2> {
   static constexpr type max() { return type::field2_2; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::test_cpp2::cpp_reflection::enum2) noexcept;
 };
 
 template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum3> {
@@ -950,6 +952,7 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum3> {
   static constexpr type max() { return type::field1_3; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::test_cpp2::cpp_reflection::enum3) noexcept;
 };
 
 template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names> {
@@ -980,6 +983,7 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_na
   static constexpr type max() { return type::fields; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::test_cpp2::cpp_reflection::enum_with_special_names) noexcept;
 };
 
 } // namespace apache::thrift

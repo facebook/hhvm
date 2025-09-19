@@ -36,6 +36,22 @@ const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::MyEnum>::anno
   return *ret;
 }
 
+const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::MyEnum>::enumValueAnnotations(::facebook::thrift::test::MyEnum value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    case 1: {
+      static const folly::Indestructible<std::vector<std::any>> ret = [] {
+          std::vector<std::any> values;
+          values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MyAnnotation>());
+          return values;
+        }();
+      return *ret;
+    }
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 

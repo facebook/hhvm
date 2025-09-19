@@ -31,6 +31,14 @@ const std::vector<std::any>& TEnumTraits<::test::fixtures::python_capi::MyEnum>:
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::test::fixtures::python_capi::MyEnum>::enumValueAnnotations(::test::fixtures::python_capi::MyEnum value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -51,6 +59,14 @@ bool TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>::findValue(std
 const std::vector<std::any>& TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
+
+const std::vector<std::any>& TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>::enumValueAnnotations(::test::fixtures::python_capi::NormalDecentEnum value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
 
 }} // apache::thrift
 

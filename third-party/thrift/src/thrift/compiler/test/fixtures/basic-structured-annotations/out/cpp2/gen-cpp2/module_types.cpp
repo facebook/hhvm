@@ -31,6 +31,14 @@ const std::vector<std::any>& TEnumTraits<::test::fixtures::basic-structured-anno
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>::enumValueAnnotations(::test::fixtures::basic-structured-annotations::MyEnum value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 

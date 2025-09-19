@@ -31,6 +31,14 @@ const std::vector<std::any>& TEnumTraits<::facebook::ns::qwerty::AnEnumA>::annot
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::facebook::ns::qwerty::AnEnumA>::enumValueAnnotations(::facebook::ns::qwerty::AnEnumA value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -51,6 +59,14 @@ bool TEnumTraits<::facebook::ns::qwerty::AnEnumB>::findValue(std::string_view na
 const std::vector<std::any>& TEnumTraits<::facebook::ns::qwerty::AnEnumB>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
+
+const std::vector<std::any>& TEnumTraits<::facebook::ns::qwerty::AnEnumB>::enumValueAnnotations(::facebook::ns::qwerty::AnEnumB value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
 
 }} // apache::thrift
 
@@ -73,6 +89,14 @@ const std::vector<std::any>& TEnumTraits<::facebook::ns::qwerty::AnEnumC>::annot
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::facebook::ns::qwerty::AnEnumC>::enumValueAnnotations(::facebook::ns::qwerty::AnEnumC value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -94,6 +118,14 @@ const std::vector<std::any>& TEnumTraits<::facebook::ns::qwerty::AnEnumD>::annot
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::facebook::ns::qwerty::AnEnumD>::enumValueAnnotations(::facebook::ns::qwerty::AnEnumD value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -114,6 +146,14 @@ bool TEnumTraits<::facebook::ns::qwerty::AnEnumE>::findValue(std::string_view na
 const std::vector<std::any>& TEnumTraits<::facebook::ns::qwerty::AnEnumE>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
+
+const std::vector<std::any>& TEnumTraits<::facebook::ns::qwerty::AnEnumE>::enumValueAnnotations(::facebook::ns::qwerty::AnEnumE value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
 
 }} // apache::thrift
 

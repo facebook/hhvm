@@ -31,6 +31,14 @@ const std::vector<std::any>& TEnumTraits<::test::fixtures::enumstrict::EmptyEnum
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enumstrict::EmptyEnum>::enumValueAnnotations(::test::fixtures::enumstrict::EmptyEnum value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -51,6 +59,14 @@ bool TEnumTraits<::test::fixtures::enumstrict::MyEnum>::findValue(std::string_vi
 const std::vector<std::any>& TEnumTraits<::test::fixtures::enumstrict::MyEnum>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
+
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enumstrict::MyEnum>::enumValueAnnotations(::test::fixtures::enumstrict::MyEnum value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
 
 }} // apache::thrift
 
@@ -73,6 +89,14 @@ const std::vector<std::any>& TEnumTraits<::test::fixtures::enumstrict::MyUseIntr
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>::enumValueAnnotations(::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -93,6 +117,14 @@ bool TEnumTraits<::test::fixtures::enumstrict::MyBigEnum>::findValue(std::string
 const std::vector<std::any>& TEnumTraits<::test::fixtures::enumstrict::MyBigEnum>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
+
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enumstrict::MyBigEnum>::enumValueAnnotations(::test::fixtures::enumstrict::MyBigEnum value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
 
 }} // apache::thrift
 

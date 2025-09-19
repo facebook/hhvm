@@ -430,6 +430,7 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_op
   static constexpr type max() { return type::three; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::apache::thrift::fixtures::types::has_bitwise_ops) noexcept;
 };
 
 template <> struct TEnumTraits<::apache::thrift::fixtures::types::is_unscoped> {
@@ -464,6 +465,7 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::is_unscoped> {
   static constexpr type max() { return type::world; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::apache::thrift::fixtures::types::is_unscoped) noexcept;
 };
 
 template <> struct TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum> {
@@ -498,6 +500,7 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEn
   static constexpr type max() { return type::NONZERO; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::apache::thrift::fixtures::types::MyForwardRefEnum) noexcept;
 };
 
 } // namespace apache::thrift

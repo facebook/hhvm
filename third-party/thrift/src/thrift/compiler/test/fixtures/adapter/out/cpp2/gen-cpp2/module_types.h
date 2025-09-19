@@ -555,6 +555,7 @@ template <> struct TEnumTraits<::facebook::thrift::test::Color> {
   static constexpr type max() { return type::BLUE; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::facebook::thrift::test::Color) noexcept;
 };
 
 template <> struct TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum> {
@@ -589,6 +590,7 @@ template <> struct TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum> {
   static constexpr type max() { return type::One; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::facebook::thrift::test::ThriftAdaptedEnum) noexcept;
 };
 
 } // namespace apache::thrift

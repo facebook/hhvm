@@ -793,6 +793,7 @@ template <> struct TEnumTraits<::cpp2::MyEnum> {
   static constexpr type max() { return type::MyValue5; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::cpp2::MyEnum) noexcept;
 };
 
 } // namespace apache::thrift

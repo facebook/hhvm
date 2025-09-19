@@ -135,6 +135,7 @@ template <> struct TEnumTraits<::test::fixtures::tablebased::ExampleEnum> {
   static constexpr type max() { return type::NONZERO; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::test::fixtures::tablebased::ExampleEnum) noexcept;
 };
 
 } // namespace apache::thrift

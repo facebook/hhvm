@@ -31,6 +31,14 @@ const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::Color>::annot
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::Color>::enumValueAnnotations(::facebook::thrift::test::Color value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -51,6 +59,14 @@ bool TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::findValue(std::st
 const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
+
+const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::enumValueAnnotations(::facebook::thrift::test::ThriftAdaptedEnum value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
 
 }} // apache::thrift
 

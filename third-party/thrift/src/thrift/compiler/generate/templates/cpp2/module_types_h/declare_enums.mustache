@@ -76,6 +76,7 @@ template <> struct TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_nam
   {{/if (not (array.empty? enum:values))}}
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::{{program:qualified_namespace}}::{{enum:cpp_name}}) noexcept;
 };
 {{/program:enums}}
 

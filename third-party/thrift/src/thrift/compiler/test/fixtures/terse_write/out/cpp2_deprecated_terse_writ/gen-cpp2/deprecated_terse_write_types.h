@@ -429,6 +429,7 @@ template <> struct TEnumTraits<::facebook::thrift::test::terse_write::deprecated
   static constexpr type max() { return type::ME1; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::facebook::thrift::test::terse_write::deprecated::MyEnum) noexcept;
 };
 
 } // namespace apache::thrift

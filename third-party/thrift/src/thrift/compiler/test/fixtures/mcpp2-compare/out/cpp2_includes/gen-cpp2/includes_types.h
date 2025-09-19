@@ -71,6 +71,7 @@ template <> struct TEnumTraits<::a::different::ns::AnEnum> {
   static constexpr type max() { return type::FIELDB; }
 
   static const std::vector<std::any>& annotations() noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::a::different::ns::AnEnum) noexcept;
 };
 
 } // namespace apache::thrift

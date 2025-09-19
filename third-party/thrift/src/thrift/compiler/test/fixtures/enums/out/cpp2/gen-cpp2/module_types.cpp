@@ -31,6 +31,14 @@ const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::Metasyntactic>
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::Metasyntactic>::enumValueAnnotations(::test::fixtures::enums::Metasyntactic value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -51,6 +59,14 @@ bool TEnumTraits<::test::fixtures::enums::MyEnum1>::findValue(std::string_view n
 const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::MyEnum1>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
+
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::MyEnum1>::enumValueAnnotations(::test::fixtures::enums::MyEnum1 value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
 
 }} // apache::thrift
 
@@ -73,6 +89,14 @@ const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::MyEnum2>::anno
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::MyEnum2>::enumValueAnnotations(::test::fixtures::enums::MyEnum2 value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -93,6 +117,14 @@ bool TEnumTraits<::test::fixtures::enums::MyEnum3>::findValue(std::string_view n
 const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::MyEnum3>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
+
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::MyEnum3>::enumValueAnnotations(::test::fixtures::enums::MyEnum3 value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
 
 }} // apache::thrift
 
@@ -115,6 +147,14 @@ const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::MyEnum4>::anno
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::MyEnum4>::enumValueAnnotations(::test::fixtures::enums::MyEnum4 value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -136,6 +176,14 @@ const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1>::enumValueAnnotations(::test::fixtures::enums::MyBitmaskEnum1 value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -156,6 +204,14 @@ bool TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2>::findValue(std::string
 const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
+
+const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2>::enumValueAnnotations(::test::fixtures::enums::MyBitmaskEnum2 value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
 
 }} // apache::thrift
 

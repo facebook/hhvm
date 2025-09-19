@@ -827,9 +827,14 @@ class mstch_enum_value : public mstch_base {
         {
             {"self", &mstch_enum_value::self},
             {"enum_value:self", &mstch_enum_value::self},
+            {"enum_value:structured_annotations",
+             &mstch_enum_value::structured_annotations},
         });
   }
   whisker::object self() { return make_self(*enum_value_); }
+  mstch::node structured_annotations() {
+    return mstch_base::structured_annotations(enum_value_);
+  }
 
  protected:
   const t_enum_value* enum_value_;

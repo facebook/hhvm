@@ -31,6 +31,14 @@ const std::vector<std::any>& TEnumTraits<::test::fixtures::basic::MyEnum>::annot
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
+const std::vector<std::any>& TEnumTraits<::test::fixtures::basic::MyEnum>::enumValueAnnotations(::test::fixtures::basic::MyEnum value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
+
 }} // apache::thrift
 
 
@@ -51,6 +59,14 @@ bool TEnumTraits<::test::fixtures::basic::HackEnum>::findValue(std::string_view 
 const std::vector<std::any>& TEnumTraits<::test::fixtures::basic::HackEnum>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
+
+const std::vector<std::any>& TEnumTraits<::test::fixtures::basic::HackEnum>::enumValueAnnotations(::test::fixtures::basic::HackEnum value) noexcept {
+  switch (static_cast<std::int32_t>(value)) {
+    default:
+      return ::apache::thrift::detail::annotation::empty_annotations();
+  }
+}
+
 
 }} // apache::thrift
 

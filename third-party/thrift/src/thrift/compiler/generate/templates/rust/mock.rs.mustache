@@ -426,7 +426,11 @@ pub mod __dependencies {
     {{#program:direct_dependencies}}
     #[doc(hidden)]
     #[deprecated{{#dependency:label}} = "Please use `{{.}}-mocks` directly"{{/dependency:label}}]
-    pub extern crate {{dependency:name_unmangled}}_mocks;
+    pub mod {{dependency:name_unmangled}}_mocks {
+        #[doc(hidden)]
+        #[deprecated]
+        pub use ::{{dependency:name_unmangled}}_mocks::*;
+    }
     {{/program:direct_dependencies}}
 }
 {{/program:direct_dependencies?}}

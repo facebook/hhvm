@@ -45,7 +45,7 @@ FOLLY_ATTR_WEAK int customStressTestMain(int argc, char* argv[])
 using namespace apache::thrift::stress;
 
 int main(int argc, char* argv[]) {
-  folly::init(&argc, &argv);
+  const folly::Init init(&argc, &argv);
 
   if (&customStressTestMain) {
     return customStressTestMain(argc, argv);

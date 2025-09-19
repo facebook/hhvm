@@ -104,7 +104,7 @@ class QueueTest : public testing::Test {
                  HTTPCodec::StreamID id,
                  HTTPTransaction*,
                  double r) {
-    nodes_.push_back(std::make_pair(id, r * 100));
+    nodes_.emplace_back(id, r * 100);
     return false;
   }
 
@@ -127,7 +127,7 @@ class QueueTest : public testing::Test {
     q_.nextEgress(nextEgressResults);
     nodes_.clear();
     for (auto p : nextEgressResults) {
-      nodes_.push_back(std::make_pair(getTxnID(p.first), p.second * 100));
+      nodes_.emplace_back(getTxnID(p.first), p.second * 100);
     }
   }
 

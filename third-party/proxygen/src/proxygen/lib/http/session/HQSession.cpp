@@ -332,7 +332,7 @@ bool HQSession::onTransportReadyCommon() noexcept {
   if (datagramEnabled_) {
     // If local supports Datagram, assume the peer does too, until receiving
     // peer settings
-    defaultSettings.push_back({SettingsId::_HQ_DATAGRAM, 1});
+    defaultSettings.emplace_back(SettingsId::_HQ_DATAGRAM, 1);
     sock_->setDatagramCallback(this);
   }
   sock_->setPingCallback(this);

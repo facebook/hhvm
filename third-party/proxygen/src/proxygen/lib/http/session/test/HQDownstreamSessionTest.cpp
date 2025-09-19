@@ -3381,7 +3381,7 @@ TEST_P(HQDownstreamSessionTestDeliveryAck,
             }
             CHECK_NE(it->second.writeState,
                      MockQuicSocketDriver::StateEnum::CLOSED);
-            it->second.deliveryCallbacks.push_back({offset, cb});
+            it->second.deliveryCallbacks.emplace_back(offset, cb);
             return {};
           }));
 
@@ -3542,7 +3542,7 @@ TEST_P(HQDownstreamSessionTestDeliveryAck, TestBodyDeliveryErr) {
             }
             CHECK_NE(it->second.writeState,
                      MockQuicSocketDriver::StateEnum::CLOSED);
-            it->second.deliveryCallbacks.push_back({offset, cb});
+            it->second.deliveryCallbacks.emplace_back(offset, cb);
             return {};
           }));
 

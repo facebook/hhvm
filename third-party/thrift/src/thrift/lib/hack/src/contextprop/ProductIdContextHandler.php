@@ -32,7 +32,7 @@ final class ProductIdContextHandler implements IContextHandler {
   ): void {
     // override product ID if necessary
     $product_id = TagManager::getLatestOriginID();
-    if ($product_id !== null && $product_id !== $mutable_tfm->origin_id) {
+    if ($product_id !== $mutable_tfm->origin_id) {
       $mutable_tfm->origin_id = $product_id;
     }
   }

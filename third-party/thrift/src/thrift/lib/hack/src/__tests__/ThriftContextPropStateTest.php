@@ -19,6 +19,26 @@
 <<Oncalls('thrift')>>
 final class ThriftContextPropStateTest extends WWWTest {
   use ClassLevelTest;
+  public function testAddExperimentIdDirtiesCache___DPRS_ACH_TEST(): void {
+    $tcps = ThriftContextPropState::get();
+    $tcps->clear();
+
+    // Serialize the initial state to populate the cache.
+    $serialized_before = $tcps->getSerialized();
+
+    // Add an experiment ID, which should modify the state.
+    $tcps->addExperimentId(123);
+
+    // Serialize the state again.
+    $serialized_after = $tcps->getSerialized();
+
+    // In the correct implementation, addExperimentId calls dirty(),
+    // which clears the cache. The new serialization should reflect the
+    // added experiment ID and be different from the original.
+    // In the mutant version, dirty() is not called, so the cached
+    // (stale) value is returned, and this assertion will fail.
+    expect($serialized_before)->toNotEqual($serialized_after);
+  }
   public function testAccess(): void {
     $tcps = ThriftContextPropState::get();
     expect($tcps->getRequestId())->toEqual("");

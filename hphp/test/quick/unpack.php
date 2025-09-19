@@ -1,5 +1,11 @@
 <?hh
 <<__EntryPoint>> function main(): void {
+// 16-bit
+var_dump(unpack("v", "\xFF\xFF"));
+var_dump(unpack("n", "\xFF\xFF"));
+var_dump(unpack("s", pack("s", -1)));
+var_dump(unpack("v", pack("v", -1)));
+
 // 32-bit
 var_dump(unpack("V", "\xFF\xFF\xFF\xFF"));
 var_dump(unpack("N", "\xFF\xFF\xFF\xFF"));

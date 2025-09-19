@@ -857,8 +857,10 @@ void TransportCompatibilityTest::TestRequestResponse_Checksumming() {
         setCompression(compression);
 
         server_->observer_->taskKilled_ = 0;
-        auto future =
-            client->future_echo(RpcOptions().setEnableChecksum(true), *payload);
+        auto future = client->future_echo(
+            RpcOptions().setChecksum(
+                apache::thrift::RpcOptions::Checksum::SERVER_ONLY_CRC32),
+            *payload);
 
         if (testType == CorruptionType::NONE) {
           EXPECT_EQ(asString, std::move(future).get());
@@ -998,42 +1000,46 @@ void TransportCompatibilityTest::TestOneway_Checksumming(bool usingSampling) {
   if (usingSampling) {
     THRIFT_FLAG_SET_MOCK(thrift_client_checksum_sampling_rate, 1);
   }
-  connectToServer(
-      [this, usingSampling](std::unique_ptr<TestServiceAsyncClient> client) {
-        EXPECT_CALL(*handler_.get(), onewayLogBlob_(_));
+  connectToServer([this, usingSampling](
+                      std::unique_ptr<TestServiceAsyncClient> client) {
+    EXPECT_CALL(*handler_.get(), onewayLogBlob_(_));
 
-        auto setCorruption = [&](bool val) {
-          auto channel = static_cast<ClientChannel*>(client->getChannel());
-          channel->getEventBase()->runInEventBaseThreadAndWait([&]() {
-            auto p = std::make_shared<TAsyncSocketIntercepted::Params>();
-            p->corruptLastWriteByte_ = val;
-            dynamic_cast<TAsyncSocketIntercepted*>(channel->getTransport())
-                ->setParams(p);
-          });
-        };
-
-        for (bool shouldCorrupt : {false, true}) {
-          static const int kSize = 32 << 10; // > IOBuf buf sharing thresh
-          std::string asString(kSize, 'a');
-
-          setCorruption(shouldCorrupt);
-
-          auto payload = folly::IOBuf::copyBuffer(asString);
-          client
-              ->future_onewayLogBlob(
-                  RpcOptions().setEnableChecksum(!usingSampling), *payload)
-              .get();
-          // Unlike request/response case, no exception is thrown here for
-          // a one-way RPC.
-          /* sleep override */
-          std::this_thread::sleep_for(std::chrono::milliseconds(200));
-
-          if (shouldCorrupt) {
-            EXPECT_EQ(1, server_->observer_->taskKilled_);
-          }
-        }
-        setCorruption(false);
+    auto setCorruption = [&](bool val) {
+      auto channel = static_cast<ClientChannel*>(client->getChannel());
+      channel->getEventBase()->runInEventBaseThreadAndWait([&]() {
+        auto p = std::make_shared<TAsyncSocketIntercepted::Params>();
+        p->corruptLastWriteByte_ = val;
+        dynamic_cast<TAsyncSocketIntercepted*>(channel->getTransport())
+            ->setParams(p);
       });
+    };
+
+    for (bool shouldCorrupt : {false, true}) {
+      static const int kSize = 32 << 10; // > IOBuf buf sharing thresh
+      std::string asString(kSize, 'a');
+
+      setCorruption(shouldCorrupt);
+
+      auto payload = folly::IOBuf::copyBuffer(asString);
+      client
+          ->future_onewayLogBlob(
+              RpcOptions().setChecksum(
+                  !usingSampling
+                      ? apache::thrift::RpcOptions::Checksum::SERVER_ONLY_CRC32
+                      : apache::thrift::RpcOptions::Checksum::NONE),
+              *payload)
+          .get();
+      // Unlike request/response case, no exception is thrown here for
+      // a one-way RPC.
+      /* sleep override */
+      std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+      if (shouldCorrupt) {
+        EXPECT_EQ(1, server_->observer_->taskKilled_);
+      }
+    }
+    setCorruption(false);
+  });
 }
 
 void TransportCompatibilityTest::TestRequestContextIsPreserved() {

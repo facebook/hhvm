@@ -347,7 +347,8 @@ SerializedRequest preprocessSendT(
       throw;
     }
 
-    if (rpcOptions.getEnableChecksum() ||
+    if (rpcOptions.getChecksum() ==
+            apache::thrift::RpcOptions::Checksum::SERVER_ONLY_CRC32 ||
         (checksumSamplingRate &&
          folly::Random::rand64(checksumSamplingRate) == 0)) {
       header.setCrc32c(apache::thrift::checksum::crc32c(*queue.front()));

@@ -182,8 +182,10 @@ TEST_F(RocketCompatibilityTest, RequestResponse_NoCompression) {
     static const int kSize = 32 << 10;
     std::string asString(kSize, 'a');
     std::unique_ptr<folly::IOBuf> payload = folly::IOBuf::copyBuffer(asString);
-    auto result =
-        client->future_echo(RpcOptions().setEnableChecksum(true), *payload);
+    auto result = client->future_echo(
+        RpcOptions().setChecksum(
+            apache::thrift::RpcOptions::Checksum::SERVER_ONLY_CRC32),
+        *payload);
     EXPECT_EQ(std::move(result).get(), asString);
 
     auto* channel = dynamic_cast<RocketClientChannel*>(client->getChannel());

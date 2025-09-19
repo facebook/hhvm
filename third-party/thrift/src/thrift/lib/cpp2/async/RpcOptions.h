@@ -91,8 +91,7 @@ class RpcOptions {
   RpcOptions& setClientOnlyTimeouts(bool val);
   bool getClientOnlyTimeouts() const;
 
-  [[deprecated("Use setChecksum instead")]]
-  RpcOptions& setEnableChecksum(bool val);
+  [[deprecated("Use getChecksum instead")]]
   bool getEnableChecksum() const;
 
   RpcOptions& setChunkTimeout(std::chrono::milliseconds chunkTimeout);
@@ -196,7 +195,6 @@ class RpcOptions {
   timeout_ms_t processingTimeout_{0};
   uint8_t priority_{apache::thrift::concurrency::N_PRIORITIES};
   bool clientOnlyTimeouts_{false};
-  bool enableChecksum_{false};
   BufferOptions bufferOptions_;
   int64_t interactionId_{0};
   int32_t operationMask_{0};

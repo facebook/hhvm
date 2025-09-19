@@ -517,7 +517,9 @@ TEST_F(StreamingTest, ChecksummingRequest) {
           bool didThrow = false;
           try {
             auto futureRet = client->semifuture_requestWithBlob(
-                RpcOptions().setEnableChecksum(true), *payload);
+                RpcOptions().setChecksum(
+                    apache::thrift::RpcOptions::Checksum::SERVER_ONLY_CRC32),
+                *payload);
             auto stream = std::move(futureRet).get();
             auto result = std::move(stream);
             auto subscription = std::move(result).subscribeExTry(

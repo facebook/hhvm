@@ -64,13 +64,8 @@ bool RpcOptions::getClientOnlyTimeouts() const {
   return clientOnlyTimeouts_;
 }
 
-RpcOptions& RpcOptions::setEnableChecksum(bool val) {
-  enableChecksum_ = val;
-  return *this;
-}
-
 bool RpcOptions::getEnableChecksum() const {
-  return enableChecksum_;
+  return checksum_ == Checksum::SERVER_ONLY_CRC32;
 }
 
 RpcOptions& RpcOptions::setChunkTimeout(

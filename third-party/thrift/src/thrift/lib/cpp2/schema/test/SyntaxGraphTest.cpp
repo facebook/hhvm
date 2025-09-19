@@ -875,6 +875,13 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
     EXPECT_EQ(
         annot.asFieldSet().at(FieldId{2}).asFieldSet().at(FieldId{1}).asInt64(),
         4);
+    auto s = type_system::embed<type::struct_t<test::TestStructuredAnnotation>>(
+        annot);
+    EXPECT_EQ(s.field1(), 3);
+    EXPECT_EQ(s.field2()->field1(), 4);
+    EXPECT_THROW(
+        type_system::embed<type::struct_t<test::ComplexAnnotation>>(annot),
+        std::runtime_error);
   }
   {
     const auto& annot = *unionNode.getAnnotationOrNull(
@@ -900,6 +907,14 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
             .at(FieldId{1})
             .asInt64(),
         2);
+    auto s = type_system::embed<type::struct_t<test::ComplexAnnotation>>(annot);
+    EXPECT_EQ(s.l()[0].field1(), 1);
+    EXPECT_TRUE(s.s()->contains("foo"));
+    EXPECT_EQ(s.m()->at("bar").field1(), 2);
+    EXPECT_THROW(
+        type_system::embed<type::struct_t<test::TestStructuredAnnotation>>(
+            annot),
+        std::runtime_error);
   }
 
   uri = "meta.com/thrift_test/TestEnum";

@@ -25,6 +25,7 @@
 #include <folly/Utility.h>
 #include <folly/container/F14Map.h>
 #include <folly/container/F14Set.h>
+#include <folly/container/Reserve.h>
 #include <folly/lang/Assume.h>
 #include <folly/lang/Exception.h>
 
@@ -591,6 +592,186 @@ class SerializableRecord final {
  */
 std::string toDebugString(const SerializableRecord&);
 std::ostream& operator<<(std::ostream&, const SerializableRecord&);
+
+namespace detail {
+template <typename Tag>
+struct EmbedInplace;
+
+template <>
+struct EmbedInplace<type::bool_t> {
+  void operator()(
+      type::native_type<type::bool_t>& value,
+      const SerializableRecord& record) const {
+    value = record.asBool();
+  }
+};
+
+template <typename Tag>
+  requires type::is_a_v<Tag, type::number_c>
+struct EmbedInplace<Tag> {
+  void operator()(
+      type::native_type<Tag>& value, const SerializableRecord& record) const {
+    if constexpr (type::is_a_v<Tag, type::byte_t>) {
+      value = record.asInt8();
+    } else if constexpr (type::is_a_v<Tag, type::i16_t>) {
+      value = record.asInt16();
+    } else if constexpr (type::is_a_v<Tag, type::i32_t>) {
+      value = record.asInt32();
+    } else if constexpr (type::is_a_v<Tag, type::i64_t>) {
+      value = record.asInt64();
+    } else if constexpr (type::is_a_v<Tag, type::float_t>) {
+      value = record.asFloat32();
+    } else if constexpr (type::is_a_v<Tag, type::double_t>) {
+      value = record.asFloat64();
+    }
+  }
+};
+
+template <>
+struct EmbedInplace<type::string_t> {
+  void operator()(std::string& value, const SerializableRecord& record) const {
+    value = record.asText();
+  }
+};
+
+template <>
+struct EmbedInplace<type::binary_t> {
+  void operator()(std::string& value, const SerializableRecord& record) const {
+    value = record.asByteArray()->toString();
+  }
+
+  void operator()(folly::IOBuf& value, const SerializableRecord& record) const {
+    value = record.asByteArray()->cloneAsValue();
+  }
+
+  void operator()(
+      std::unique_ptr<folly::IOBuf>& value,
+      const SerializableRecord& record) const {
+    value = record.asByteArray()->clone();
+  }
+};
+
+template <typename T>
+struct EmbedInplace<type::enum_t<T>> {
+  void operator()(T& value, const SerializableRecord& record) const {
+    value = static_cast<T>(record.asInt32().datum);
+  }
+};
+
+template <typename Tag>
+struct EmbedInplace<type::list<Tag>> {
+  template <typename ListType>
+  void operator()(ListType& value, const SerializableRecord& record) const {
+    const auto& list = record.asList();
+    value.clear();
+    folly::reserve_if_available(value, list.size());
+    for (const auto& element : list) {
+      auto& datum = value.emplace_back();
+      EmbedInplace<Tag>{}(datum, element);
+    }
+  }
+};
+
+template <typename Tag>
+struct EmbedInplace<type::set<Tag>> {
+  template <typename SetType>
+  void operator()(SetType& value, const SerializableRecord& record) const {
+    const auto& set = record.asSet();
+    value.clear();
+    folly::reserve_if_available(value, set.size());
+    for (const auto& element : set) {
+      type::native_type<Tag> datum;
+      EmbedInplace<Tag>{}(datum, element);
+      value.insert(std::move(datum));
+    }
+  }
+};
+
+template <typename KeyTag, typename ValueTag>
+struct EmbedInplace<type::map<KeyTag, ValueTag>> {
+  template <typename MapType>
+  void operator()(MapType& value, const SerializableRecord& record) const {
+    const auto& map = record.asMap();
+    value.clear();
+    folly::reserve_if_available(value, map.size());
+    for (const auto& [k, v] : map) {
+      type::native_type<KeyTag> keyDatum;
+      EmbedInplace<KeyTag>{}(keyDatum, k);
+      type::native_type<ValueTag> valueDatum;
+      EmbedInplace<ValueTag>{}(valueDatum, v);
+      value.emplace(std::move(keyDatum), std::move(valueDatum));
+    }
+  }
+};
+
+template <typename T, typename Tag>
+struct EmbedInplace<type::cpp_type<T, Tag>> : EmbedInplace<Tag> {};
+
+// TODO: Add Field adapter if needed.
+template <typename Adapter, typename Tag>
+struct EmbedInplace<type::adapted<Adapter, Tag>> {
+  template <typename U>
+  void operator()(U& m, const SerializableRecord& record) const {
+    // TODO: Optimize in-place adapter
+    type::native_type<Tag> orig;
+    EmbedInplace<Tag>{}(orig, record);
+    m = Adapter::fromThrift(std::move(orig));
+  }
+};
+
+template <class T>
+struct EmbedInplaceStructure {
+  void operator()(T& s, const SerializableRecord& record) const {
+    for (const auto& [id, value] : record.asFieldSet()) {
+      op::invoke_by_field_id<T>(
+          static_cast<FieldId>(id),
+          [&, v = value]<typename Id>(Id) {
+            using FieldTag = op::get_type_tag<T, Id>;
+            using FieldType = op::get_native_type<T, Id>;
+            FieldType t;
+            EmbedInplace<FieldTag>{}(t, v);
+
+            using Ref = op::get_field_ref<T, Id>;
+            if constexpr (apache::thrift::detail::is_shared_or_unique_ptr_v<
+                              Ref>) {
+              op::get<Id>(s) =
+                  std::make_unique<op::get_native_type<T, Id>>(std::move(t));
+            } else {
+              op::get<Id>(s) = std::move(t);
+            }
+          },
+          [&] {
+            // Missing field in T.
+          });
+    }
+  }
+};
+
+template <typename T>
+struct EmbedInplace<type::struct_t<T>> : EmbedInplaceStructure<T> {};
+template <typename T>
+struct EmbedInplace<type::union_t<T>> : EmbedInplaceStructure<T> {};
+template <typename T>
+struct EmbedInplace<type::exception_t<T>> : EmbedInplaceStructure<T> {};
+
+} // namespace detail
+
+/**
+ * Embed SerializableRecord to a corresponding Thrift type provided by Tag. If
+ * SerializableRecord is partial, then the missing fields will be filled with
+ * default. If the record contains unknown fields, it drops the data. This can
+ * happen if the record is produced from different schema version.
+ *
+ * Pre-conditions:
+ *   - Provided record is compatible with a corresponding Thrift type provided
+ *     by Tag, else throws `std::runtime_error`
+ */
+template <typename Tag>
+auto embed(const SerializableRecord& record) {
+  type::native_type<Tag> value;
+  detail::EmbedInplace<Tag>{}(value, record);
+  return value;
+}
 
 } // namespace apache::thrift::type_system
 

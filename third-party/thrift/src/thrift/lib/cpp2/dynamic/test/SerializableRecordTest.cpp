@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 
 #include <thrift/lib/cpp2/dynamic/SerializableRecord.h>
+#include <thrift/lib/cpp2/schema/test/gen-cpp2/syntax_graph_types.h>
 
 #include <limits>
 #include <type_traits>
@@ -470,6 +471,103 @@ TEST(SerializableRecordTest, InvalidDatumSerde) {
         decode(std::move(raw));
       },
       std::invalid_argument);
+}
+
+TEST(SerializableRecordTest, embedPrimitive) {
+  EXPECT_EQ(embed<type::bool_t>(SerializableRecord::Bool(true)), true);
+  EXPECT_EQ(embed<type::byte_t>(SerializableRecord::Int8(42)), 42);
+  EXPECT_EQ(embed<type::i16_t>(SerializableRecord::Int16(43)), 43);
+  EXPECT_EQ(embed<type::i32_t>(SerializableRecord::Int32(44)), 44);
+  EXPECT_EQ(embed<type::i64_t>(SerializableRecord::Int64(45)), 45);
+  EXPECT_EQ(embed<type::float_t>(SerializableRecord::Float32(46.0)), 46.0);
+  EXPECT_EQ(embed<type::double_t>(SerializableRecord::Float64(47.0)), 47.0);
+  EXPECT_EQ(embed<type::string_t>(SerializableRecord::Text("hello")), "hello");
+  EXPECT_EQ(embed<type::binary_t>(makeByteArray("world")), "world");
+  EXPECT_EQ(
+      (embed<type::cpp_type<folly::IOBuf, type::binary_t>>(
+           makeByteArray("world")))
+          .toString(),
+      "world");
+}
+
+TEST(SerializableRecordTest, embedContainer) {
+  auto l = embed<type::list<type::i32_t>>(SerializableRecord::List(
+      {SerializableRecord::Int32(1), SerializableRecord::Int32(2)}));
+  EXPECT_EQ(l.size(), 2);
+  EXPECT_EQ(l[0], 1);
+  EXPECT_EQ(l[1], 2);
+
+  auto s = embed<type::set<type::i32_t>>(SerializableRecord::Set(
+      {SerializableRecord::Int32(1), SerializableRecord::Int32(1)}));
+  EXPECT_EQ(s.size(), 1);
+  EXPECT_TRUE(s.contains(1));
+
+  auto m = embed<type::map<type::i32_t, type::i32_t>>(SerializableRecord::Map({
+      {SerializableRecord::Int32(1), SerializableRecord::Int32(2)},
+      {SerializableRecord::Int32(3), SerializableRecord::Int32(4)},
+  }));
+  EXPECT_EQ(m.size(), 2);
+  EXPECT_EQ(m.at(1), 2);
+  EXPECT_EQ(m.at(3), 4);
+}
+
+TEST(SerializableRecordTest, embedEnum) {
+  using syntax_graph::test::TestEnum;
+  EXPECT_EQ(
+      embed<type::enum_t<TestEnum>>(SerializableRecord::Int32(0)),
+      TestEnum::UNSET);
+  EXPECT_EQ(
+      embed<type::enum_t<TestEnum>>(SerializableRecord::Int32(1)),
+      TestEnum::VALUE_1);
+  EXPECT_EQ(
+      embed<type::enum_t<TestEnum>>(SerializableRecord::Int32(2)),
+      TestEnum::VALUE_2);
+  // Test open enum
+  EXPECT_EQ(
+      embed<type::enum_t<TestEnum>>(SerializableRecord::Int32(3)), TestEnum(3));
+}
+
+TEST(SerializableRecordTest, embedStruct) {
+  using syntax_graph::test::TestEnum;
+  using syntax_graph::test::TestStruct;
+  {
+    // all fields present
+    SerializableRecord r = SerializableRecord::FieldSet({
+        {FieldId(1), SerializableRecord::Int32(42)},
+        {FieldId(2), SerializableRecord::Int32(1)},
+    });
+    auto s = embed<type::struct_t<TestStruct>>(r);
+    EXPECT_EQ(s.field1(), 42);
+    EXPECT_EQ(s.field2(), TestEnum::VALUE_1);
+  }
+  {
+    // missing fields
+    SerializableRecord r = SerializableRecord::FieldSet({});
+    auto s = embed<type::struct_t<TestStruct>>(r);
+    EXPECT_EQ(s.field1(), 10);
+    EXPECT_FALSE(s.field2().has_value());
+  }
+  {
+    // unknown field
+    SerializableRecord r = SerializableRecord::FieldSet({
+        {FieldId(3), SerializableRecord::Int32(42)},
+    });
+    auto s = embed<type::struct_t<TestStruct>>(r);
+    EXPECT_EQ(s.field1(), 10);
+    EXPECT_FALSE(s.field2().has_value());
+  }
+  {
+    // type mismatch
+    SerializableRecord r = SerializableRecord::FieldSet({
+        {FieldId(1), SerializableRecord::Int64(42)},
+    });
+    EXPECT_THROW(embed<type::struct_t<TestStruct>>(r), std::runtime_error);
+  }
+}
+
+TEST(SerializableRecordTest, embedInvalid) {
+  EXPECT_THROW(
+      embed<type::i32_t>(SerializableRecord::Bool(true)), std::runtime_error);
 }
 
 } // namespace apache::thrift::type_system

@@ -16,7 +16,18 @@
 
 }}
 {{#pragma ignore-newlines}}
-{{#if function:stream?}}
+{{#if function:bidirectional_stream?}}
+  {{#if function:sink_has_first_response?}}
+apache::thrift::ResponseAndBidirectionalStream<
+{{#function:sink_first_response_type}}{{type:cpp_type}}{{/function:sink_first_response_type}}, {{!}}
+{{#function:sink_elem_type}}{{type:cpp_type}}{{/function:sink_elem_type}}, {{!}}
+{{#function:stream_elem_type}}{{type:cpp_type}}{{/function:stream_elem_type}}>
+  {{#else}}
+apache::thrift::BidirectionalStream<
+{{#function:sink_elem_type}}{{type:cpp_type}}{{/function:sink_elem_type}}, {{!}}
+{{#function:stream_elem_type}}{{type:cpp_type}}{{/function:stream_elem_type}}>
+  {{/if function:sink_has_first_response?}}
+{{#else if function:stream?}}
   {{#if function:stream_has_first_response?}}
 apache::thrift::ResponseAndClientBufferedStream<
 {{#function:stream_first_response_type}}{{type:cpp_type}}{{/function:stream_first_response_type}},
@@ -38,4 +49,4 @@ apache::thrift::ClientSink<
   {{/if function:sink_has_first_response?}}
 {{#else}}
 {{function:cpp_return_type}}
-{{/if function:stream?}}
+{{/if function:bidirectional_stream?}}

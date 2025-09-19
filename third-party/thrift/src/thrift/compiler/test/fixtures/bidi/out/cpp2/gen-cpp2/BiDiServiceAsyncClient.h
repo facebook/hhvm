@@ -55,20 +55,15 @@ class Client<::cpp2::BiDiService> : public apache::thrift::GeneratedAsyncClient 
  public:
 #if FOLLY_HAS_COROUTINES
   /** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "service": "BiDiService", "function": "simple"} */
-  folly::coro::Task<apache::thrift::ClientBufferedStream<::std::int16_t>> co_simple();
+  folly::coro::Task<apache::thrift::BidirectionalStream<::std::int32_t, ::std::int16_t>> co_simple();
   /** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "service": "BiDiService", "function": "simple"} */
-  folly::coro::Task<apache::thrift::ClientBufferedStream<::std::int16_t>> co_simple(apache::thrift::RpcOptions& rpcOptions);
+  folly::coro::Task<apache::thrift::BidirectionalStream<::std::int32_t, ::std::int16_t>> co_simple(apache::thrift::RpcOptions& rpcOptions);
 #endif // FOLLY_HAS_COROUTINES
 
   /** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "service": "BiDiService", "function": "simple"} */
-  static folly::exception_wrapper recv_wrapped_simple(apache::thrift::ClientBufferedStream<::std::int16_t>& _return, ::apache::thrift::ClientReceiveState& state);
+  static folly::exception_wrapper recv_wrapped_simple(apache::thrift::BidirectionalStream<::std::int32_t, ::std::int16_t>& _return, ::apache::thrift::ClientReceiveState& state);
   /** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "service": "BiDiService", "function": "simple"} */
-  static apache::thrift::ClientBufferedStream<::std::int16_t> recv_simple(::apache::thrift::ClientReceiveState& state);
-  // Mock friendly virtual instance method
-  /** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "service": "BiDiService", "function": "simple"} */
-  virtual apache::thrift::ClientBufferedStream<::std::int16_t> recv_instance_simple(::apache::thrift::ClientReceiveState& state);
-  /** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "service": "BiDiService", "function": "simple"} */
-  virtual folly::exception_wrapper recv_instance_wrapped_simple(apache::thrift::ClientBufferedStream<::std::int16_t>& _return, ::apache::thrift::ClientReceiveState& state);
+  static apache::thrift::BidirectionalStream<::std::int32_t, ::std::int16_t> recv_simple(::apache::thrift::ClientReceiveState& state);
  private:
   apache::thrift::SerializedRequest fbthrift_serialize_simple(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename RpcOptions>
@@ -80,20 +75,15 @@ class Client<::cpp2::BiDiService> : public apache::thrift::GeneratedAsyncClient 
  public:
 #if FOLLY_HAS_COROUTINES
   /** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "service": "BiDiService", "function": "response"} */
-  folly::coro::Task<apache::thrift::ResponseAndClientBufferedStream<::std::string,::std::int16_t>> co_response();
+  folly::coro::Task<apache::thrift::ResponseAndBidirectionalStream<::std::string, ::std::int32_t, ::std::int16_t>> co_response();
   /** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "service": "BiDiService", "function": "response"} */
-  folly::coro::Task<apache::thrift::ResponseAndClientBufferedStream<::std::string,::std::int16_t>> co_response(apache::thrift::RpcOptions& rpcOptions);
+  folly::coro::Task<apache::thrift::ResponseAndBidirectionalStream<::std::string, ::std::int32_t, ::std::int16_t>> co_response(apache::thrift::RpcOptions& rpcOptions);
 #endif // FOLLY_HAS_COROUTINES
 
   /** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "service": "BiDiService", "function": "response"} */
-  static folly::exception_wrapper recv_wrapped_response(apache::thrift::ResponseAndClientBufferedStream<::std::string,::std::int16_t>& _return, ::apache::thrift::ClientReceiveState& state);
+  static folly::exception_wrapper recv_wrapped_response(apache::thrift::ResponseAndBidirectionalStream<::std::string, ::std::int32_t, ::std::int16_t>& _return, ::apache::thrift::ClientReceiveState& state);
   /** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "service": "BiDiService", "function": "response"} */
-  static apache::thrift::ResponseAndClientBufferedStream<::std::string,::std::int16_t> recv_response(::apache::thrift::ClientReceiveState& state);
-  // Mock friendly virtual instance method
-  /** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "service": "BiDiService", "function": "response"} */
-  virtual apache::thrift::ResponseAndClientBufferedStream<::std::string,::std::int16_t> recv_instance_response(::apache::thrift::ClientReceiveState& state);
-  /** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "service": "BiDiService", "function": "response"} */
-  virtual folly::exception_wrapper recv_instance_wrapped_response(apache::thrift::ResponseAndClientBufferedStream<::std::string,::std::int16_t>& _return, ::apache::thrift::ClientReceiveState& state);
+  static apache::thrift::ResponseAndBidirectionalStream<::std::string, ::std::int32_t, ::std::int16_t> recv_response(::apache::thrift::ClientReceiveState& state);
  private:
   apache::thrift::SerializedRequest fbthrift_serialize_response(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename RpcOptions>

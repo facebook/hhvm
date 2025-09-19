@@ -327,6 +327,21 @@ struct ThriftPResultSink {
   FinalResponsePresult finalResponse;
 };
 
+template <
+    typename InitialResponsePresult,
+    typename SinkPresult,
+    typename StreamPresult>
+struct ThriftPResultBiDi {
+  using InitialResponsePResultType = InitialResponsePresult;
+  using SinkPResultType = SinkPresult;
+  using StreamPResultType = StreamPresult;
+  using FinalResponsePResultType = void;
+
+  InitialResponsePresult initialResponse;
+  SinkPresult sink;
+  StreamPresult stream;
+};
+
 template <bool hasIsSet, class... Args>
 class Cpp2Ops<ThriftPresult<hasIsSet, Args...>> {
  public:
@@ -469,6 +484,7 @@ folly::exception_wrapper recv_wrapped_helper(
     return folly::exception_wrapper(folly::current_exception());
   }
 }
+
 template <
     typename ProtocolReader,
     typename ProtocolWriter,
@@ -484,13 +500,18 @@ ClientSink<SinkType, FinalResponseType> createSink(ClientReceiveState& state) {
       SinkPResult,
       SinkType>
       encode;
-  return ClientSink<SinkType, FinalResponseType>(
-      state.extractSink(),
-      &encode,
-      apache::thrift::detail::ap::decode_stream_element<
+  auto decode = [] {
+    if constexpr (std::is_void_v<FinalResponseType>) {
+      return nullptr;
+    } else {
+      return &apache::thrift::detail::ap::decode_stream_element<
           ProtocolReader,
           FinalResponsePResult,
-          FinalResponseType>);
+          FinalResponseType>;
+    }
+  }();
+  return ClientSink<SinkType, FinalResponseType>(
+      state.extractSink(), &encode, decode);
 #else
   (void)state;
   std::terminate();
@@ -608,6 +629,35 @@ folly::exception_wrapper recv_wrapped(
     ClientReceiveState& state,
     apache::thrift::ClientSink<Item, FinalResponse>& _return) {
   return recv_wrapped_impl<PResult>(prot, state, (void*)nullptr, &_return);
+}
+
+template <
+    typename PResult,
+    typename ProtocolReader,
+    typename Response,
+    typename SinkElement,
+    typename StreamElement>
+folly::exception_wrapper recv_wrapped(
+    ProtocolReader* prot,
+    ClientReceiveState& state,
+    apache::thrift::
+        ResponseAndBidirectionalStream<Response, SinkElement, StreamElement>&
+            _return) {
+  return recv_wrapped_impl<PResult>(
+      prot, state, &_return.response, &_return.sink, &_return.stream);
+}
+
+template <
+    typename PResult,
+    typename ProtocolReader,
+    typename SinkElement,
+    typename StreamElement>
+folly::exception_wrapper recv_wrapped(
+    ProtocolReader* prot,
+    ClientReceiveState& state,
+    apache::thrift::BidirectionalStream<SinkElement, StreamElement>& _return) {
+  return recv_wrapped_impl<PResult>(
+      prot, state, (void*)nullptr, &_return.sink, &_return.stream);
 }
 
 [[noreturn]] void throw_app_exn(const char* msg);

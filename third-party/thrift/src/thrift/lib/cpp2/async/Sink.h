@@ -109,6 +109,9 @@ class ClientSink {
       }
     }
 
+    if constexpr (std::is_void_v<R>) {
+      co_return;
+    }
     co_return deserializer_(std::move(finalResponse)).value();
   }
 

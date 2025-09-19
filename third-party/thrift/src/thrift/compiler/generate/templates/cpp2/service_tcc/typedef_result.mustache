@@ -14,16 +14,18 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#function:return_type}}
-{{^function:oneway?}}
-{{^function:stream?}}
-{{^function:sink?}}
-typedef apache::thrift::ThriftPresult<true{{> service_tcc/field_data_return}}{{!
-    }}{{#function:exceptions}}{{> service_tcc/field_data_throws}}{{/function:exceptions}}>{{!
-    }} {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult;
-{{/function:sink?}}{{!
-
-}}{{#function:sink?}}
+}}
+{{#function:return_type}}
+{{#if function:bidirectional_stream?}}
+typedef apache::thrift::ThriftPResultBiDi<
+    apache::thrift::ThriftPresult<true{{#function:stream_first_response_type}}{{> service_tcc/field_data_return}}{{/function:stream_first_response_type}}{{!
+      }}{{#function:exceptions}}{{> service_tcc/field_data_throws}}{{/function:exceptions}}>,
+    apache::thrift::ThriftPresult<true{{#function:sink_elem_type}}{{> service_tcc/field_data_return}}{{/function:sink_elem_type}}{{!
+      }}{{#function:sink_exceptions}}{{> service_tcc/field_data_throws}}{{/function:sink_exceptions}}>,
+    apache::thrift::ThriftPresult<true{{#function:stream_elem_type}}{{> service_tcc/field_data_return}}{{/function:stream_elem_type}}{{!
+      }}{{#function:stream_exceptions}}{{> service_tcc/field_data_throws}}{{/function:stream_exceptions}}>
+    > {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult;
+{{#else if function:sink?}}
 typedef apache::thrift::ThriftPResultSink<
     apache::thrift::ThriftPresult<true{{#function:sink_first_response_type}}{{> service_tcc/field_data_return}}{{/function:sink_first_response_type}}{{!
       }}{{#function:exceptions}}{{> service_tcc/field_data_throws}}{{/function:exceptions}}>,
@@ -32,16 +34,16 @@ typedef apache::thrift::ThriftPResultSink<
     apache::thrift::ThriftPresult<true{{#function:sink_final_response_type}}{{> service_tcc/field_data_return}}{{/function:sink_final_response_type}}{{!
       }}{{#function:sink_final_response_exceptions}}{{> service_tcc/field_data_throws}}{{/function:sink_final_response_exceptions}}>
     > {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult;
-{{/function:sink?}}
-{{/function:stream?}}{{!
-
-}}{{#function:stream?}}
+{{#else if function:stream?}}
 typedef apache::thrift::ThriftPResultStream<
     apache::thrift::ThriftPresult<true{{#function:stream_first_response_type}}{{> service_tcc/field_data_return}}{{/function:stream_first_response_type}}{{!
       }}{{#function:exceptions}}{{> service_tcc/field_data_throws}}{{/function:exceptions}}>,
     apache::thrift::ThriftPresult<true{{#function:stream_elem_type}}{{> service_tcc/field_data_return}}{{/function:stream_elem_type}}{{!
       }}{{#function:stream_exceptions}}{{> service_tcc/field_data_throws}}{{/function:stream_exceptions}}>
     > {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult;
-{{/function:stream?}}
-{{/function:oneway?}}
+{{#else if (not function:oneway?)}}
+typedef apache::thrift::ThriftPresult<true{{> service_tcc/field_data_return}}{{!
+    }}{{#function:exceptions}}{{> service_tcc/field_data_throws}}{{/function:exceptions}}>{{!
+    }} {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult;
+{{/if function:bidirectional_stream?}}
 {{/function:return_type}}

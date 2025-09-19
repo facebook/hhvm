@@ -12,13 +12,15 @@
 
 namespace cpp2 {
 typedef apache::thrift::ThriftPresult<false> BiDiService_simple_pargs;
-typedef apache::thrift::ThriftPResultStream<
+typedef apache::thrift::ThriftPResultBiDi<
     apache::thrift::ThriftPresult<true>,
+    apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>>,
     apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int16_t*>>
     > BiDiService_simple_presult;
 typedef apache::thrift::ThriftPresult<false> BiDiService_response_pargs;
-typedef apache::thrift::ThriftPResultStream<
+typedef apache::thrift::ThriftPResultBiDi<
     apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::string, ::std::string*>>,
+    apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>>,
     apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int16_t*>>
     > BiDiService_response_presult;
 //

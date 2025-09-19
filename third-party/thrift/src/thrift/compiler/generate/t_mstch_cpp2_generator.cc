@@ -1351,11 +1351,13 @@ class cpp_mstch_function : public mstch_function {
   }
 
   mstch::node virtual_client_methods() {
-    return !generate_reduced_client(interface()) && !function_->interaction();
+    return !generate_reduced_client(interface()) && !function_->interaction() &&
+        !function_->is_bidirectional_stream();
   }
 
   mstch::node legacy_client_methods() {
-    return !generate_reduced_client(interface()) && !function_->interaction();
+    return !generate_reduced_client(interface()) && !function_->interaction() &&
+        !function_->is_bidirectional_stream();
   }
 
  private:

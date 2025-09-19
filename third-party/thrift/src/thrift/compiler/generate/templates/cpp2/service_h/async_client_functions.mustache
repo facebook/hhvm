@@ -22,7 +22,7 @@
 {{> common/fun_docblock}}
   {{type:name}} {{function:cpp_name}}();
 {{/function:starts_interaction?}}{{^function:starts_interaction?}}
-{{^function:sink?}}
+{{^function:sink?}}{{! includes bidi }}
 {{#function:legacy_client_methods?}}
 {{> common/fun_docblock}}
   virtual void {{function:cpp_name}}(std::unique_ptr<apache::thrift::RequestCallback> callback{{function_comma}}{{> service_common/function_param_list_client}});

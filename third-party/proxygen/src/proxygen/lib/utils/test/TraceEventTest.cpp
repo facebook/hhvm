@@ -101,9 +101,9 @@ TEST(TraceEventTest, VectorDataIntegralValue) {
   TraceEvent traceEvent((TraceEventType::TotalRequest));
 
   std::vector<std::string> data;
-  data.push_back("Abc");
-  data.push_back("Hij");
-  data.push_back("Xyz");
+  data.emplace_back("Abc");
+  data.emplace_back("Hij");
+  data.emplace_back("Xyz");
   traceEvent.addMeta(TraceFieldType::Protocol, data);
 
   ASSERT_THROW(
@@ -115,9 +115,9 @@ TEST(TraceEventTest, VectorDataStringValue) {
   TraceEvent traceEvent((TraceEventType::TotalRequest));
 
   std::vector<std::string> data;
-  data.push_back("A");
-  data.push_back("B");
-  data.push_back("C");
+  data.emplace_back("A");
+  data.emplace_back("B");
+  data.emplace_back("C");
   traceEvent.addMeta(TraceFieldType::Protocol, data);
 
   ASSERT_EQ(
@@ -129,9 +129,9 @@ TEST(TraceEventTest, VectorDataVectorValue) {
   TraceEvent traceEvent((TraceEventType::TotalRequest));
 
   std::vector<std::string> data;
-  data.push_back("A");
-  data.push_back("B");
-  data.push_back("C");
+  data.emplace_back("A");
+  data.emplace_back("B");
+  data.emplace_back("C");
   traceEvent.addMeta(TraceFieldType::Protocol, data);
 
   std::vector<std::string> extractedData(
@@ -172,9 +172,9 @@ TEST(TraceEventTest, IteratorValueTypeCheckString) {
 TEST(TraceEventTest, IteratorValueTypeCheckStringArray) {
   TraceEvent traceEvent((TraceEventType::TotalRequest));
   std::vector<std::string> arrData;
-  arrData.push_back("A");
-  arrData.push_back("B");
-  arrData.push_back("C");
+  arrData.emplace_back("A");
+  arrData.emplace_back("B");
+  arrData.emplace_back("C");
   traceEvent.addMeta(TraceFieldType::Protocol, arrData);
 
   auto itr = traceEvent.getMetaDataItr();
@@ -230,9 +230,9 @@ TEST(TraceEventTest, StringArrayValueToString) {
   traceEvent.start(TimePoint(std::chrono::milliseconds(100)));
   traceEvent.end(TimePoint(std::chrono::milliseconds(200)));
   std::vector<std::string> arrData;
-  arrData.push_back("A");
-  arrData.push_back("B");
-  arrData.push_back("C");
+  arrData.emplace_back("A");
+  arrData.emplace_back("B");
+  arrData.emplace_back("C");
   traceEvent.addMeta(TraceFieldType::Protocol, arrData);
 
   std::ostringstream out;

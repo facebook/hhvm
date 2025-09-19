@@ -53,7 +53,7 @@ void FileServerListGenerator::FileGenerator::run(milliseconds /*timeout*/) {
     while (std::getline(sstream, line)) {
       SocketAddress address;
       address.setFromHostPort(line);
-      servers.push_back(ServerConfig(address.getAddressStr(), address));
+      servers.emplace_back(address.getAddressStr(), address);
     }
   } else if (params_->fileType == FileType::JSON) {
     try {

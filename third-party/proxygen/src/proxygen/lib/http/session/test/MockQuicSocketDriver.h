@@ -574,7 +574,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                         << " type=" << uint64_t(type);
                 cb->onByteEventRegistered(
                     {.id = id, .offset = finOffset, .type = type});
-                stream.deliveryCallbacks.push_back({finOffset, cb});
+                stream.deliveryCallbacks.emplace_back(finOffset, cb);
               }
               eventBase_->runInLoop([this, deleted = deleted_] {
                 if (!*deleted) {
@@ -659,7 +659,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                         << " type=" << uint64_t(type);
                 cb->onByteEventRegistered(
                     {.id = id, .offset = finOffset, .type = type});
-                stream.deliveryCallbacks.push_back({finOffset, cb});
+                stream.deliveryCallbacks.emplace_back(finOffset, cb);
               }
               eventBase_->runInLoop([this, deleted = deleted_] {
                 if (!*deleted) {

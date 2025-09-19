@@ -272,7 +272,7 @@ void TestAsyncTransport::writev(AsyncTransport::WriteCallback* callback,
 
   shared_ptr<WriteEvent> event = WriteEvent::newEvent(vec, count);
   if (writeState_ == kStatePaused || pendingWriteEvents_.size() > 0) {
-    pendingWriteEvents_.push_back(std::make_pair(event, callback));
+    pendingWriteEvents_.emplace_back(event, callback);
   } else {
     CHECK_EQ(writeState_, kStateOpen);
     writeEvents_.push_back(event);

@@ -9,6 +9,7 @@
 #include <eden/common/utils/StringConv.h>
 #include <fmt/core.h>
 #include <folly/String.h>
+#include <folly/portability/Unistd.h>
 #include "watchman/Logging.h"
 #include "watchman/Options.h"
 #include "watchman/fs/FileSystem.h"
@@ -17,6 +18,8 @@
 #ifdef _WIN32
 #include <Lmcons.h> // @manual
 #include <Shlobj.h> // @manual
+#else
+#include <pwd.h>
 #endif
 
 namespace watchman {
@@ -131,9 +134,62 @@ std::string computeUserName() {
   throw std::logic_error("unreachable");
 }
 
+std::string computeHomeDirectory() {
+#ifdef _WIN32
+  const char* home = getenv("USERPROFILE");
+  if (!home) {
+    const char* drive = getenv("HOMEDRIVE");
+    const char* path = getenv("HOMEPATH");
+    if (!drive && !path) {
+      log(FATAL,
+          "Failed to determine home directory based on USERPROFILE, HOMEDRIVE, and HOMEPATH\n");
+    }
+    return std::string(drive) + path;
+  }
+  return home;
+#else
+  uid_t uid = getuid();
+  struct passwd* pw = getpwuid(uid);
+
+  if (pw) {
+    return pw->pw_dir;
+  }
+
+  const char* home = getenv("HOME");
+  if (!home) {
+    log(FATAL,
+        "Failed to determine home directory based on getpwuid and HOME\n");
+  }
+  return home;
+#endif
+}
+
+const std::string& getHomeDirectory() {
+  static std::string homeDir = computeHomeDirectory();
+  return homeDir;
+}
+
 const std::string& getTemporaryDirectory() {
   static std::string tmpdir = computeTemporaryDirectory();
   return tmpdir;
+}
+
+std::string computeXDGStateHomeDirectory() {
+  char* xdgStateHome = getenv("XDG_STATE_HOME");
+
+  // https://specifications.freedesktop.org/basedir-spec/latest/#variables
+  // $XDG_STATE_HOME is either not set or empty, a default equal to
+  // $HOME/.local/state should be used.
+  if (!xdgStateHome || *xdgStateHome == 0) {
+    return fmt::format("{}/.local/state", getHomeDirectory());
+  }
+
+  return xdgStateHome;
+}
+
+const std::string& getXDGStateHomeDirectory() {
+  static std::string xdgStateHome = computeXDGStateHomeDirectory();
+  return xdgStateHome;
 }
 
 std::string computeWatchmanStateDirectory(const std::string& user) {
@@ -145,7 +201,9 @@ std::string computeWatchmanStateDirectory(const std::string& user) {
   return getCachedWatchmanAppDataPath();
 #else
   auto state_parent =
-#ifdef WATCHMAN_STATE_DIR
+#if defined(WATCHMAN_USE_XDG_STATE_HOME)
+      fmt::format("{}/watchman", getXDGStateHomeDirectory())
+#elif defined(WATCHMAN_STATE_DIR)
       WATCHMAN_STATE_DIR
 #else
       getTemporaryDirectory().c_str()

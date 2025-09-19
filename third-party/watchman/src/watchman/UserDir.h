@@ -22,8 +22,12 @@ std::string computeUserName();
 const std::string& getTemporaryDirectory();
 
 /**
+ * Returns a cached reference to the current user's home directory.
+ */
+const std::string& getHomeDirectory();
+
+/**
  * Computes the Watchman state directory corresponding to the given user name.
  */
 std::string computeWatchmanStateDirectory(const std::string& user);
-
 } // namespace watchman

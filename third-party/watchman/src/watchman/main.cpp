@@ -485,8 +485,6 @@ static SpawnResult spawn_via_launchd() {
   uint32_t size = sizeof(watchman_path);
   char plist_path[WATCHMAN_NAME_MAX];
   FILE* fp;
-  struct passwd* pw;
-  uid_t uid;
 
   close_random_fds();
 
@@ -494,19 +492,11 @@ static SpawnResult spawn_via_launchd() {
     log(FATAL, "_NSGetExecutablePath: path too long; size ", size, "\n");
   }
 
-  uid = getuid();
-  pw = getpwuid(uid);
-  if (!pw) {
-    log(FATAL,
-        "getpwuid(",
-        uid,
-        ") failed: ",
-        folly::errnoStr(errno),
-        ".  I don't know who you are\n");
-  }
-
   snprintf(
-      plist_path, sizeof(plist_path), "%s/Library/LaunchAgents", pw->pw_dir);
+      plist_path,
+      sizeof(plist_path),
+      "%s/Library/LaunchAgents",
+      getHomeDirectory().c_str());
   // Best effort attempt to ensure that the agents dir exists.  We'll detect
   // and report the failure in the fopen call below.
   mkdir(plist_path, 0755);
@@ -514,7 +504,7 @@ static SpawnResult spawn_via_launchd() {
       plist_path,
       sizeof(plist_path),
       "%s/Library/LaunchAgents/com.github.facebook.watchman.plist",
-      pw->pw_dir);
+      getHomeDirectory().c_str());
 
   if (access(plist_path, R_OK) == 0) {
     // Unload any that may already exist, as it is likely wrong

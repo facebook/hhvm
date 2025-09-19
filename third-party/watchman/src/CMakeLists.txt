@@ -170,6 +170,11 @@ if(NOT WIN32)
     target.  Disabling this is useful in the case where the CMAKE_INSTALL_PREFIX
     is owned by a non-privileged user but where the WATCHMAN_STATE_DIR requires
     administrative rights to create and set its permissions.")
+  option(WATCHMAN_USE_XDG_STATE_HOME
+    "If enabled, use $XDG_STATE_HOME/watchman as the Watchman state directory. \
+    XDG_STATE_HOME defaults to $HOME/.local/state."
+    OFF
+  )
 else()
   set(WATCHMAN_STATE_DIR)
   set(INSTALL_WATCHMAN_STATE_DIR)
@@ -199,6 +204,9 @@ if(BUILD_INFO)
   config_h("#define WATCHMAN_BUILD_INFO \"${BUILD_INFO}\"")
 endif ()
 
+if(WATCHMAN_USE_XDG_STATE_HOME)
+  config_h("#define WATCHMAN_USE_XDG_STATE_HOME 1")
+endif()
 
 # While most of these tests are not strictly needed on windows, it is vital
 # that we probe for and find strtoll in order for the jansson build to use

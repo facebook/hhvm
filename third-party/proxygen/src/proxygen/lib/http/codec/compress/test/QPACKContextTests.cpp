@@ -1004,7 +1004,7 @@ TEST(QPACKContextTests, DecodeErrors) {
 
   VLOG(10) << "Insert too large";
   vector<HPACKHeader> req;
-  req.emplace_back(HPACKHeader("X-Header-Too-Big", "aaaaaaaaaaaaaaaaa"));
+  req.emplace_back("X-Header-Too-Big", "aaaaaaaaaaaaaaaaa");
   auto result = encoder.encode(req, 10, 1);
   EXPECT_EQ(decoder2.decodeEncoderStream(std::move(result.control)),
             HPACK::DecodeError::INSERT_TOO_LARGE);

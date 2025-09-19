@@ -30,8 +30,8 @@ TEST_F(LoggingTests, Refset) {
 
 TEST_F(LoggingTests, DumpHeaderVector) {
   vector<HPACKHeader> headers;
-  headers.push_back(HPACKHeader(":path", "index.html"));
-  headers.push_back(HPACKHeader("content-type", "gzip"));
+  headers.emplace_back(":path", "index.html");
+  headers.emplace_back("content-type", "gzip");
   stringstream out;
   out << headers;
   EXPECT_EQ(out.str(), ":path: index.html\ncontent-type: gzip\n\n");
@@ -39,8 +39,8 @@ TEST_F(LoggingTests, DumpHeaderVector) {
 
 TEST_F(LoggingTests, PrintDelta) {
   vector<HPACKHeader> v1;
-  v1.push_back(HPACKHeader(":path", "/"));
-  v1.push_back(HPACKHeader(":host", "www.facebook.com"));
+  v1.emplace_back(":path", "/");
+  v1.emplace_back(":host", "www.facebook.com");
   vector<HPACKHeader> v2;
 
   // empty v1 or v2
@@ -48,18 +48,18 @@ TEST_F(LoggingTests, PrintDelta) {
   EXPECT_EQ(printDelta(v2, v1), "\n - :path: /\n - :host: www.facebook.com\n");
 
   // skip first header from v1
-  v2.push_back(HPACKHeader(":path", "/"));
+  v2.emplace_back(":path", "/");
   EXPECT_EQ(printDelta(v1, v2), "\n + :host: www.facebook.com\n");
 
-  v2.push_back(HPACKHeader(":path", "/"));
+  v2.emplace_back(":path", "/");
   EXPECT_EQ(printDelta(v2, v1),
             "\n - :host: www.facebook.com\n + :path: / (duplicate)\n");
 
   v2.pop_back();
   v1.clear();
-  v1.push_back(HPACKHeader(":a", "b"));
-  v1.push_back(HPACKHeader(":a", "b"));
-  v1.push_back(HPACKHeader(":path", "/"));
+  v1.emplace_back(":a", "b");
+  v1.emplace_back(":a", "b");
+  v1.emplace_back(":path", "/");
   EXPECT_EQ(printDelta(v1, v2), "\n + :a: b\n duplicate :a: b\n");
 }
 

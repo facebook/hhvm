@@ -25,6 +25,8 @@
 
 namespace HPHP {
 
+static_assert(sizeof(int32_t) == 4, "int32_t is not 4 bytes");
+
 #define INC_OUTPUTPOS(a,b)                                              \
   if ((a) < 0 || ((INT_MAX - outputpos)/((int)b)) < (a)) {              \
     raise_invalid_argument_warning                                      \
@@ -35,84 +37,24 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static folly::Singleton<ZendPack> zend_pack;
-ZendPack* ZendPack::getInstance() {
-  // ZendPack caches maps based on endianness
-  // so only needs to be instantiated once
-  return zend_pack.get();
+template <typename T>
+void packInt(const Variant& val, std::endian endian, char *output) {
+  auto i = val.toInt64();
+  if (endian != std::endian::native) {
+    T* n = (T*)(&i);
+    *n = folly::Endian::swap(*n);
+  }
+  memcpy(output, &i, sizeof(T));
 }
 
-ZendPack::ZendPack() {
-  int machine_endian_check = 1;
-  int64_t i;
-
-  int64_t n = 2;
-  for (i = 0; i < n; i++) {
-    big_endian_2byte_map[i] = n - 1 - i;
-    little_endian_2byte_map[i] = i;
-  }
-
-  n = 4;
-  for (i = 0; i < n; i++) {
-    big_endian_4byte_map[i] = n - 1 - i;
-    little_endian_4byte_map[i] = i;
-  }
-
-  n = 8;
-  for (i = 0; i < n; i++) {
-    big_endian_8byte_map[i] = n - 1 - i;
-    little_endian_8byte_map[i] = i;
-  }
-
-  machine_little_endian = ((char *)&machine_endian_check)[0];
-
-  if (machine_little_endian) {
-    /* Where to get lo to hi bytes from */
-    byte_map[0] = 0;
-
-    for (i = 0; i < (int)sizeof(int); i++) {
-      int_map[i] = i;
-    }
-
-    std::copy(little_endian_2byte_map, little_endian_2byte_map + 2, machine_endian_2byte_map);
-    std::copy(little_endian_4byte_map, little_endian_4byte_map + 4, machine_endian_4byte_map);
-    std::copy(little_endian_8byte_map, little_endian_8byte_map + 8, machine_endian_8byte_map);
-  } else {
-    int64_t size = sizeof(int64_t);
-
-    /* Where to get hi to lo bytes from */
-    byte_map[0] = size - 1;
-
-    for (i = 0; i < (int)sizeof(int); i++) {
-      int_map[i] = size - (sizeof(int64_t) - i);
-    }
-
-    std::copy(big_endian_2byte_map, big_endian_2byte_map + 2, machine_endian_2byte_map);
-    std::copy(big_endian_4byte_map, big_endian_4byte_map + 4, machine_endian_4byte_map);
-    std::copy(big_endian_8byte_map, big_endian_8byte_map + 8, machine_endian_8byte_map);
-  }
-}
-
-void packInt(const Variant& val, int64_t size, int64_t *map,
-                    char *output) {
-  int64_t n = val.toInt64();
-  char *v = (char*)&n;
-  for (int64_t i = 0; i < size; i++) {
-    *output++ = v[map[i]];
-  }
-}
-
-template <typename T, std::size_t N>
-void packFloat(
-    const Variant& val,
-    int64_t (&map)[N],
-    char *output) requires (N == sizeof(T)) {
-  int64_t size = sizeof(T);
+template <typename T>
+void packFloat(const Variant& val, std::endian endian, char *output) {
   T f = (T)val.toDouble();
-  char *v = (char*)&f;
-  for (int64_t i = 0; i < size; i++) {
-    *output++ = v[map[i]];
+  if (endian != std::endian::native) {
+    f = folly::Endian::swap(f);
   }
+
+  memcpy(output, &f, sizeof(T));
 }
 
 Variant ZendPack::pack(const String& fmt, const Array& argv) {
@@ -378,7 +320,7 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     case 'c':
     case 'C':
       while (arg-- > 0) {
-        packInt(argv[currentarg++], 1, byte_map, &output[outputpos]);
+        packInt<uint8_t>(argv[currentarg++], std::endian::native, &output[outputpos]);
         outputpos++;
       }
       break;
@@ -387,16 +329,15 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     case 'S':
     case 'n':
     case 'v': {
-      int64_t *map = machine_endian_2byte_map;
-
+      auto endian = std::endian::native;
       if (code == 'n') {
-        map = big_endian_2byte_map;
+        endian = std::endian::big;
       } else if (code == 'v') {
-        map = little_endian_2byte_map;
+        endian = std::endian::little;
       }
 
       while (arg-- > 0) {
-        packInt(argv[currentarg++], 2, map, &output[outputpos]);
+        packInt<uint16_t>(argv[currentarg++], endian, &output[outputpos]);
         outputpos += 2;
       }
       break;
@@ -405,7 +346,7 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     case 'i':
     case 'I':
       while (arg-- > 0) {
-        packInt(argv[currentarg++], sizeof(int), int_map, &output[outputpos]);
+        packInt<int>(argv[currentarg++], std::endian::native, &output[outputpos]);
         outputpos += sizeof(int);
       }
       break;
@@ -414,16 +355,15 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     case 'L':
     case 'N':
     case 'V': {
-      int64_t *map = machine_endian_4byte_map;
-
+      auto endian = std::endian::native;
       if (code == 'N') {
-        map = big_endian_4byte_map;
+        endian = std::endian::big;
       } else if (code == 'V') {
-        map = little_endian_4byte_map;
+        endian = std::endian::little;
       }
 
       while (arg-- > 0) {
-        packInt(argv[currentarg++], 4, map, &output[outputpos]);
+        packInt<uint32_t>(argv[currentarg++], endian, &output[outputpos]);
         outputpos += 4;
       }
       break;
@@ -433,15 +373,15 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     case 'Q':
     case 'J':
     case 'P': {
-      int64_t *map = machine_endian_8byte_map;
+      auto endian = std::endian::native;
       if (code == 'J') {
-        map = big_endian_8byte_map;
+        endian = std::endian::big;
       } else if (code == 'P') {
-        map = little_endian_8byte_map;
+        endian = std::endian::little;
       }
 
       while (arg-- > 0) {
-        packInt(argv[currentarg++], 8, map, &output[outputpos]);
+        packInt<uint64_t>(argv[currentarg++], endian, &output[outputpos]);
         outputpos += 8;
       }
       break;
@@ -450,14 +390,14 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     case 'f':
     case 'g':
     case 'G': {
-      auto map = &machine_endian_4byte_map;
-      if (code == 'g') {
-        map = &little_endian_4byte_map;
-      } else if (code == 'G') {
-        map = &big_endian_4byte_map;
+      auto endian = std::endian::native;
+      if (code == 'G') {
+        endian = std::endian::big;
+      } else if (code == 'g') {
+        endian = std::endian::little;
       }
       while (arg-- > 0) {
-        packFloat<float>(argv[currentarg++], *map, &output[outputpos]);
+        packFloat<float>(argv[currentarg++], endian, &output[outputpos]);
         outputpos += 4;
       }
       break;
@@ -466,14 +406,14 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     case 'd':
     case 'e':
     case 'E': {
-      auto map = &machine_endian_8byte_map;
-      if (code == 'e') {
-        map = &little_endian_8byte_map;
-      } else if (code == 'E') {
-        map = &big_endian_8byte_map;
+      auto endian = std::endian::native;
+      if (code == 'E') {
+        endian = std::endian::big;
+      } else if (code == 'e') {
+        endian = std::endian::little;
       }
       while (arg-- > 0) {
-        packFloat<double>(argv[currentarg++], *map, &output[outputpos]);
+        packFloat<double>(argv[currentarg++], endian, &output[outputpos]);
         outputpos += 8;
       }
       break;
@@ -505,35 +445,27 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
   return str;
 }
 
-int64_t unpackInt(const char *data, int64_t size, int issigned,
-                         int64_t *map) {
-  int64_t result;
-  char *cresult = (char *) &result;
-  int i;
+template <typename T>
+int64_t unpackInt(const char *data, std::endian endian, bool checkSignedBit) {
+  int64_t result = checkSignedBit && (data[endian == std::endian::little ? sizeof(T) - 1 : 0] & 0x80) != 0 ? -1 : 0;
+  memcpy(&result, data, sizeof(T));
 
-  result = issigned ? -1 : 0;
-
-  for (i = 0; i < size; i++) {
-    cresult[map[i]] = *data++;
+  if (endian != std::endian::native) {
+    T* n = (T*)(&result);
+    *n = folly::Endian::swap(*n);
   }
 
   return result;
 }
 
 
-template <typename T, std::size_t N>
-double unpackFloat(
-    const char *data,
-    int64_t (&map)[N]) requires (N == sizeof(T)) {
-  int64_t size = sizeof(T);
+template <typename T>
+double unpackFloat(const char *data, std::endian endian) {
   T result;
-  char *cresult = (char *) &result;
-  int i;
-
-  for (i = 0; i < size; i++) {
-    cresult[map[i]] = *data++;
+  memcpy(&result, data, sizeof(T));
+  if (endian != std::endian::native) {
+    result = folly::Endian::swap(result);
   }
-
   return (double)result;
 }
 
@@ -782,146 +714,101 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
           break;
         }
 
-        case 'c':
-        case 'C': {
-          int issigned = (type == 'c') ? (input[inputpos] & 0x80) : 0;
-          ret.set(n_key, unpackInt(&input[inputpos], 1, issigned, byte_map));
+        case 'c': { /* int8 */
+          ret.set(n_key, unpackInt<uint8_t>(&input[inputpos], std::endian::native, true));
           break;
         }
 
-        case 's':
-        case 'S':
-        case 'n':
-        case 'v': {
-          int issigned = 0;
-          int64_t *map = machine_endian_2byte_map;
-
-          if (type == 's') {
-            issigned = input[inputpos + (machine_little_endian ? 1 : 0)] &
-              0x80;
-          } else if (type == 'n') {
-            map = big_endian_2byte_map;
-          } else if (type == 'v') {
-            map = little_endian_2byte_map;
-          }
-
-          ret.set(n_key, unpackInt(&input[inputpos], 2, issigned, map));
+        case 'C': { /* uint8 */
+          ret.set(n_key, unpackInt<uint8_t>(&input[inputpos], std::endian::native, false));
           break;
         }
 
-        case 'i':
-        case 'I': {
-          int32_t v = 0;
-          int issigned = 0;
-
-          if (type == 'i') {
-            issigned = input[inputpos + (machine_little_endian ?
-                                         (sizeof(int) - 1) : 0)] & 0x80;
-          } else if (sizeof(int32_t) > 4 &&
-                     (input[inputpos + machine_endian_4byte_map[3]]
-                      & 0x80) == 0x80) {
-            v = ~INT_MAX;
-          }
-
-          v |= unpackInt(&input[inputpos], sizeof(int), issigned, int_map);
-          if (type == 'i') {
-            ret.set(n_key, v);
-          } else {
-            uint64_t u64 = uint32_t(v);
-            ret.set(n_key, u64);
-          }
+        case 's': { /* int16 */
+          ret.set(n_key, unpackInt<uint16_t>(&input[inputpos], std::endian::native, true));
           break;
         }
 
-        case 'l':
-        case 'L':
-        case 'N':
-        case 'V': {
-          int issigned = 0;
-          int64_t *map = machine_endian_4byte_map;
-          int64_t v = 0;
-
-          if (type == 'l' || type == 'L') {
-            issigned = input[inputpos + (machine_little_endian ? 3 : 0)]
-              & 0x80;
-          } else if (type == 'N') {
-            issigned = input[inputpos] & 0x80;
-            map = big_endian_4byte_map;
-          } else if (type == 'V') {
-            issigned = input[inputpos + 3] & 0x80;
-            map = little_endian_4byte_map;
-          }
-
-          if (sizeof(int32_t) > 4 && issigned) {
-            v = ~INT_MAX;
-          }
-
-          v |= unpackInt(&input[inputpos], 4, issigned, map);
-          if (type == 'l') {
-            ret.set(n_key, v);
-          } else {
-            uint64_t u64 = uint32_t(v);
-            ret.set(n_key, u64);
-          }
+        case 'S': { /* uint16 */
+          ret.set(n_key, unpackInt<uint16_t>(&input[inputpos], std::endian::native, false));
           break;
         }
 
-        case 'q':
-        case 'Q':
-        case 'J':
-        case 'P': {
-          int issigned = 0;
-          int64_t *map = machine_endian_8byte_map;
-          int64_t v = 0;
-          if (type == 'q' || type == 'Q') {
-            issigned = input[inputpos + (machine_little_endian ? 7 : 0)] & 0x80;
-          } else if (type == 'J') {
-            issigned = input[inputpos] & 0x80;
-            map = big_endian_8byte_map;
-          } else if (type == 'P') {
-            issigned = input[inputpos + 7] & 0x80;
-            map = little_endian_8byte_map;
-          }
+        case 'n': { /* big endian uint16 */
+          ret.set(n_key, unpackInt<uint16_t>(&input[inputpos], std::endian::big, false));
+          break;
+        }
 
-          v = unpackInt(&input[inputpos], 8, issigned, map);
+        case 'v': { /* little endian uint16 */
+          ret.set(n_key, unpackInt<uint16_t>(&input[inputpos], std::endian::little, false));
+          break;
+        }
 
-          if (type == 'q') {
-            ret.set(n_key, v);
-          } else {
-            uint64_t u64 = uint64_t(v);
-            ret.set(n_key, u64);
-          }
+        case 'i':   /* int */
+        case 'l': { /* int32 */
+          ret.set(n_key, unpackInt<uint32_t>(&input[inputpos], std::endian::native, true));
+          break;
+        }
 
+        case 'I':   /* uint */
+        case 'L': { /* uint32 */
+          ret.set(n_key, unpackInt<uint32_t>(&input[inputpos], std::endian::native, false));
+          break;
+        }
+
+        case 'N': { /* big endian uint32 */
+          ret.set(n_key, unpackInt<uint32_t>(&input[inputpos], std::endian::big, false));
+          break;
+        }
+
+        case 'V': { /* little endian uint32 */
+          ret.set(n_key, unpackInt<uint32_t>(&input[inputpos], std::endian::little, false));
+          break;
+        }
+
+        case 'q':   /* int64 */
+        case 'Q': { /* uint64 */
+          ret.set(n_key, unpackInt<uint64_t>(&input[inputpos], std::endian::native, false));
+          break;
+        }
+
+        case 'J': { /* big endian uint64 */
+          ret.set(n_key, unpackInt<uint64_t>(&input[inputpos], std::endian::big, false));
+          break;
+        }
+
+        case 'P': { /* little endian uint64 */
+          ret.set(n_key, unpackInt<uint64_t>(&input[inputpos], std::endian::little, false));
           break;
         }
 
         case 'f': {/* float */
-          ret.set(n_key, unpackFloat<float>(&input[inputpos], machine_endian_4byte_map));
+          ret.set(n_key, unpackFloat<float>(&input[inputpos], std::endian::native));
           break;
         }
 
         case 'g': {/* little endian float */
-          ret.set(n_key, unpackFloat<float>(&input[inputpos], little_endian_4byte_map));
+          ret.set(n_key, unpackFloat<float>(&input[inputpos], std::endian::little));
           break;
         }
 
         case 'G': { /* big endian float */
-          ret.set(n_key, unpackFloat<float>(&input[inputpos], big_endian_4byte_map));
+          ret.set(n_key, unpackFloat<float>(&input[inputpos], std::endian::big));
           break;
         }
 
         case 'd': { /* double */
-          ret.set(n_key, unpackFloat<double>(&input[inputpos], machine_endian_8byte_map));
+          ret.set(n_key, unpackFloat<double>(&input[inputpos], std::endian::native));
           break;
         }
 
         case 'e': {/* little endian double */
-          ret.set(n_key, unpackFloat<double>(&input[inputpos], little_endian_8byte_map));
+          ret.set(n_key, unpackFloat<double>(&input[inputpos], std::endian::little));
           break;
         }
 
         case 'E': {/* big endian double */ 
-          ret.set(n_key, unpackFloat<double>(&input[inputpos], big_endian_8byte_map));
+          ret.set(n_key, unpackFloat<double>(&input[inputpos], std::endian::big));
           break;
         }
 

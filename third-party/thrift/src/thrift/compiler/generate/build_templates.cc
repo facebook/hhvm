@@ -122,6 +122,7 @@ int main(int argc, char** argv) {
   std::cout << "char const* const templates_content_datas[] = {" << endl;
   for (const auto& kvp : templates) {
     std::cout << "//  " << kvp.first << endl;
+    std::cout << "(" << std::endl;
     const auto max_size = string_literal_max_size;
     const auto num_pieces = (kvp.second.size() + max_size - 1u) / max_size;
     for (std::size_t i = 0; i < num_pieces; ++i) {
@@ -131,7 +132,7 @@ int main(int argc, char** argv) {
       const auto piece = kvp.second.substr(i * max_size, max_size);
       std::cout << "R\"" << tag << "(" << piece << ")" << tag << "\"";
     }
-    std::cout << "," << endl;
+    std::cout << ")," << endl;
   }
   std::cout << "};" << endl;
 

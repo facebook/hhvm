@@ -59,7 +59,7 @@ class TestMcrouterBasic(TestMcrouterBasicBase):
 
         invalid_key = "/blah/bloh/key"
         self.assertFalse(mcr.set(invalid_key, "value"))
-        self.assertEqual(mcr.get(invalid_key), "SERVER_ERROR local error")
+        self.assertEqual(mcr.get(invalid_key), "SERVER_ERROR RootRoute: No rh found")
 
     def test_stats(self):
         mcr = self.get_mcrouter(["--proxy-threads=8"])

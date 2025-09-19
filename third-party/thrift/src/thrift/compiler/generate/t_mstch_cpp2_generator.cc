@@ -2224,7 +2224,6 @@ class cpp_mstch_field : public mstch_field {
              &cpp_mstch_field::cpp_accessor_attribute},
             {"field:zero_copy_arg", &cpp_mstch_field::zero_copy_arg},
             {"field:cpp_noncopyable?", &cpp_mstch_field::cpp_noncopyable},
-            {"field:enum_has_value", &cpp_mstch_field::enum_has_value},
             {"field:deprecated_terse_writes?",
              &cpp_mstch_field::deprecated_terse_writes},
             {"field:deprecated_terse_writes_with_non_redundant_custom_default?",
@@ -2416,18 +2415,6 @@ class cpp_mstch_field : public mstch_field {
   mstch::node cpp_noncopyable() {
     return field_->get_type()->has_unstructured_annotation(
         {"cpp.noncopyable", "cpp2.noncopyable"});
-  }
-  whisker::object enum_has_value() {
-    if (auto enm = field_->get_type()->try_as<t_enum>()) {
-      const auto* const_value = field_->get_value();
-      using cv = t_const_value::t_const_value_kind;
-      if (const_value->kind() == cv::CV_INTEGER) {
-        if (auto* enum_value = enm->find_value(const_value->get_integer())) {
-          return make_self<t_enum_value>(*enum_value);
-        }
-      }
-    }
-    return whisker::make::null;
   }
   mstch::node serialization_prev_field_key() {
     const cpp2_field_generator_context* field_context =

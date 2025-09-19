@@ -10,9 +10,33 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+namespace cpp2 {
+class MyRoot;
+} // namespace cpp2
+namespace cpp2 {
+class MyNode;
+} // namespace cpp2
+namespace cpp2 {
+class MyLeaf;
+} // namespace cpp2
 namespace apache::thrift {
 
 namespace detail {
 
+template <> struct TSchemaAssociation<::cpp2::MyRoot, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 8628767142313694045;
+  static constexpr ::std::string_view definitionKey = {"\x40\x89\x75\x2b\x34\x35\x6a\x48\x96\x74\x26\x0d\x6b\xa5\x11\x33", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::MyNode, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 8628767142313694045;
+  static constexpr ::std::string_view definitionKey = {"\x3c\x44\xbd\xeb\x29\x4d\x61\xa3\xe4\xa3\x85\xc2\x8e\x5b\xd1\xe6", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::MyLeaf, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 8628767142313694045;
+  static constexpr ::std::string_view definitionKey = {"\x6a\x3a\x26\x43\xc2\xc8\xa5\xac\x79\xbe\xad\x50\x92\x69\x2b\x76", 16};
+};
 } // namespace detail
 } // namespace apache::thrift

@@ -10,6 +10,18 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+namespace test_cpp2::cpp_reflection {
+class service1;
+} // namespace test_cpp2::cpp_reflection
+namespace test_cpp2::cpp_reflection {
+class service2;
+} // namespace test_cpp2::cpp_reflection
+namespace test_cpp2::cpp_reflection {
+class service3;
+} // namespace test_cpp2::cpp_reflection
+namespace test_cpp2::cpp_reflection {
+class service_with_special_names;
+} // namespace test_cpp2::cpp_reflection
 namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test_cpp2::cpp_reflection::union1>::name = "union1";
@@ -836,5 +848,25 @@ namespace detail {
 
 
 
+template <> struct TSchemaAssociation<::test_cpp2::cpp_reflection::service1, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -5817357428381503798;
+  static constexpr ::std::string_view definitionKey = {"\xd8\xa8\xfa\x9a\xed\x63\xe0\x12\x25\x47\xee\x16\x5f\x9f\xcd\x8f", 16};
+};
+template <> struct TSchemaAssociation<::test_cpp2::cpp_reflection::service2, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -5817357428381503798;
+  static constexpr ::std::string_view definitionKey = {"\x65\x4f\xcc\x39\xe2\x5e\xac\x05\x30\x0c\x79\x14\xcc\x0c\x2d\x75", 16};
+};
+template <> struct TSchemaAssociation<::test_cpp2::cpp_reflection::service3, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -5817357428381503798;
+  static constexpr ::std::string_view definitionKey = {"\x39\xf9\x6d\x2b\x44\xd7\x88\x83\x1f\xe6\x33\x5e\x56\xcb\x71\x30", 16};
+};
+template <> struct TSchemaAssociation<::test_cpp2::cpp_reflection::service_with_special_names, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -5817357428381503798;
+  static constexpr ::std::string_view definitionKey = {"\xda\xb0\x97\xda\x9e\x15\x21\x4d\x51\x5d\x8f\x3a\x53\x97\xf7\x83", 16};
+};
 } // namespace detail
 } // namespace apache::thrift

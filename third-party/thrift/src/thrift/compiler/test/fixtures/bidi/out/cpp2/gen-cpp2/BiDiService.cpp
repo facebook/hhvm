@@ -388,6 +388,3 @@ apache::thrift::ServiceRequestInfoMap BiDiServiceServiceInfoHolder::staticReques
   return requestInfoMap;
 }
 } // namespace cpp2
-
-namespace apache::thrift::detail {
-}

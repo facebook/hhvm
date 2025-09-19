@@ -15,7 +15,6 @@
   limitations under the License.
 
 }}
-{{#import "types/schema_association" as schema_association}}
 {{#import "method_decorators/decorator_cpp" as decorator_cpp}}
 std::unique_ptr<apache::thrift::AsyncProcessor> {{> service_common/service_class_name}}::getProcessor() {
   return std::make_unique<{{service:qualified_name}}AsyncProcessor>(this);
@@ -88,7 +87,3 @@ void {{service:cpp_name}}AsyncProcessor::executeRequest(apache::thrift::ServerRe
 {{> service_cpp/interaction_constructor_map}}
 {{/service:interactions?}}
 } // namespace {{service:qualified_namespace}}
-
-namespace apache::thrift::detail {
-{{#partial schema_association.definition node=service:self}}
-}

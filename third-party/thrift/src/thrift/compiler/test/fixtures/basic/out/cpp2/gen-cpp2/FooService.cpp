@@ -235,6 +235,3 @@ apache::thrift::ServiceRequestInfoMap FooServiceServiceInfoHolder::staticRequest
   return requestInfoMap;
 }
 } // namespace test::fixtures::basic
-
-namespace apache::thrift::detail {
-}

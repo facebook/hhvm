@@ -400,6 +400,3 @@ apache::thrift::ServiceRequestInfoMap AdapterServiceServiceInfoHolder::staticReq
   return requestInfoMap;
 }
 } // namespace facebook::thrift::test
-
-namespace apache::thrift::detail {
-}

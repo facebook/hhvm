@@ -238,6 +238,3 @@ apache::thrift::ServiceRequestInfoMap ExtendedFootprintServiceServiceInfoHolder:
   return requestInfoMap;
 }
 } // namespace cpp2_struct_footprint
-
-namespace apache::thrift::detail {
-}

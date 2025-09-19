@@ -10,6 +10,15 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+namespace cpp2 {
+class A;
+} // namespace cpp2
+namespace cpp2 {
+class B;
+} // namespace cpp2
+namespace cpp2 {
+class C;
+} // namespace cpp2
 namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::Foo>::name = "Foo";
@@ -29,5 +38,20 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::Foo>::iss
 namespace detail {
 
 
+template <> struct TSchemaAssociation<::cpp2::A, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -7283581240934668548;
+  static constexpr ::std::string_view definitionKey = {"\x17\xa8\x53\xd5\x98\xc7\x14\x67\xf7\x7b\x70\xbf\xfd\x06\xcf\xce", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::B, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -7283581240934668548;
+  static constexpr ::std::string_view definitionKey = {"\x46\x40\x1e\x86\xac\xfc\xa8\x93\xd7\xb5\xb9\xbe\x1e\x1b\x5d\x4d", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::C, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -7283581240934668548;
+  static constexpr ::std::string_view definitionKey = {"\x33\xd4\xc1\x6b\x55\x68\xb4\x68\x3d\x36\x71\xe1\x99\x01\xf4\x09", 16};
+};
 } // namespace detail
 } // namespace apache::thrift

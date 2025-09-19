@@ -10,6 +10,9 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+namespace cpp2 {
+class Raiser;
+} // namespace cpp2
 namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::Fiery>::name = "Fiery";
@@ -131,5 +134,10 @@ namespace detail {
 
 
 
+template <> struct TSchemaAssociation<::cpp2::Raiser, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -4294775116102366513;
+  static constexpr ::std::string_view definitionKey = {"\x75\x1a\x2c\xda\xc4\xdb\xff\x78\x5d\xcd\xcc\x07\x4e\x97\x5c\x23", 16};
+};
 } // namespace detail
 } // namespace apache::thrift

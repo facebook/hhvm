@@ -236,6 +236,3 @@ apache::thrift::ServiceRequestInfoMap FB303ServiceServiceInfoHolder::staticReque
   return requestInfoMap;
 }
 } // namespace test::fixtures::basic
-
-namespace apache::thrift::detail {
-}

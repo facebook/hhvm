@@ -64,6 +64,3 @@ apache::thrift::ServiceRequestInfoMap NullServiceServiceInfoHolder::staticReques
   return requestInfoMap;
 }
 } // namespace cpp2
-
-namespace apache::thrift::detail {
-}

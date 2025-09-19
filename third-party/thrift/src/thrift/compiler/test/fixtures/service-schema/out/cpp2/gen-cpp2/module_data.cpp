@@ -10,6 +10,12 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+namespace facebook::thrift::test {
+class PrimitivesService;
+} // namespace facebook::thrift::test
+namespace facebook::thrift::test {
+class ExtendedService;
+} // namespace facebook::thrift::test
 namespace apache::thrift {
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::CustomException>::name = "CustomException";
@@ -40,5 +46,21 @@ namespace detail {
     return ::facebook::thrift::test::module_constants::_fbthrift_schema_bc0984a218954d47_includes();
 }
 
+template <> struct TSchemaAssociation<::facebook::thrift::test::PrimitivesService, false> {
+  static ::folly::Range<const ::std::string_view*> bundle();
+  static constexpr int64_t programId = -4897237288056697529;
+  static constexpr ::std::string_view definitionKey = {"\x8a\x6f\xcf\x1a\xc4\x7f\xef\xe9\xfc\xd0\xb5\xce\x3b\x5e\x14\xb4", 16};
+};
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::PrimitivesService, false>::bundle() {
+    return ::facebook::thrift::test::module_constants::_fbthrift_schema_bc0984a218954d47_includes();
+}
+template <> struct TSchemaAssociation<::facebook::thrift::test::ExtendedService, false> {
+  static ::folly::Range<const ::std::string_view*> bundle();
+  static constexpr int64_t programId = -4897237288056697529;
+  static constexpr ::std::string_view definitionKey = {"\x2f\x39\x63\x5e\x7a\x62\x4d\xa7\x6e\x69\x78\xae\x7e\x49\xe3\x79", 16};
+};
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::ExtendedService, false>::bundle() {
+    return ::facebook::thrift::test::module_constants::_fbthrift_schema_bc0984a218954d47_includes();
+}
 } // namespace detail
 } // namespace apache::thrift

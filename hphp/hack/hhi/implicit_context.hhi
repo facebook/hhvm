@@ -48,7 +48,8 @@ namespace HH {
     )[this::CRun, ctx $f]: Tout;
   }
 
-  <<__Sealed(FBMemoSensitiveImplicitContext::class)>>
+  // Avoid referencing an internal class in OSS.
+  <<__Sealed(FBMemoAgnosticImplicitContext::class)>> // @oss-disable
   abstract class MemoSensitiveImplicitContext extends ImplicitContextBase {
     abstract const type TData as IPureMemoizeParam;
 

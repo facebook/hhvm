@@ -77,25 +77,25 @@ final class ThriftContextPropStateTest extends WWWTest {
     $tcps = ThriftContextPropState::get();
 
     // override existing value
-    ThriftContextPropState::updateFBUserId(1, "test");
-    ThriftContextPropState::updateIGUserId(2, "test");
+    expect(ThriftContextPropState::updateFBUserId(1, "test"))->toBeTrue();
+    expect(ThriftContextPropState::updateIGUserId(2, "test"))->toBeTrue();
     expect($tcps->getUserIds()?->fb_user_id)->toEqual(1);
     expect($tcps->getUserIds()?->ig_user_id)->toEqual(2);
 
-    // back to null
-    ThriftContextPropState::updateFBUserId(null, "test");
-    ThriftContextPropState::updateIGUserId(null, "test");
-    expect($tcps->getUserIds()?->fb_user_id)->toBeNull();
-    expect($tcps->getUserIds()?->ig_user_id)->toBeNull();
+    // do not allow null to override existing value
+    expect(ThriftContextPropState::updateFBUserId(null, "test"))->toBeFalse();
+    expect(ThriftContextPropState::updateIGUserId(null, "test"))->toBeFalse();
+    expect($tcps->getUserIds()?->fb_user_id)->toEqual(1);
+    expect($tcps->getUserIds()?->ig_user_id)->toEqual(2);
 
     // set FB Id only
-    ThriftContextPropState::updateFBUserId(3, "test");
+    expect(ThriftContextPropState::updateFBUserId(3, "test"))->toBeTrue();
     expect($tcps->getUserIds()?->fb_user_id)->toEqual(3);
     expect($tcps->getFBUserId())->toEqual(3);
-    expect($tcps->getUserIds()?->ig_user_id)->toBeNull();
+    expect($tcps->getUserIds()?->ig_user_id)->toEqual(2);
 
     // set IG Id only
-    ThriftContextPropState::updateIGUserId(4, "test");
+    expect(ThriftContextPropState::updateIGUserId(4, "test"))->toBeTrue();
     expect($tcps->getUserIds()?->fb_user_id)->toEqual(3);
     expect($tcps->getUserIds()?->ig_user_id)->toEqual(4);
     expect($tcps->getIGUserId())->toEqual(4);

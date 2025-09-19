@@ -169,16 +169,17 @@ final class ThriftContextPropState {
     $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
     $ods->bumpKey('contextprop.update_fb_user_id.'.$src);
     // Make sure the id is valid (non-null, positive) and matches the type
-    // However we still allow invalid user id to be set in some cases
     $fb_user_id = self::coerceId($fb_user_id, UserIdCategory::FB);
-    if ($fb_user_id is nonnull) {
-      $ods->bumpKey('contextprop.update_with_valid_fb_user_id'.$src);
+    if ($fb_user_id is null) {
+      return false;
     }
+
+    $ods->bumpKey('contextprop.update_with_valid_fb_user_id'.$src);
 
     $tcps_fb_user_id = self::get()->getFBUserId();
     if ($fb_user_id == $tcps_fb_user_id) {
       $ods->bumpKey('contextprop.same_fb_user_id.'.$src);
-      return false;
+      return true;
     }
 
     if ($tcps_fb_user_id is nonnull) {
@@ -210,15 +211,17 @@ final class ThriftContextPropState {
     $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
     $ods->bumpKey('contextprop.update_ig_user_id.'.$src);
     // Make sure the id is valid (non-null, positive) and matches the type
-    // However we still allow invalid user id to be set in some cases
     $ig_user_id = self::coerceId($ig_user_id, UserIdCategory::IG);
-    if ($ig_user_id is nonnull) {
-      $ods->bumpKey('contextprop.update_with_valid_ig_user_id'.$src);
+    if ($ig_user_id is null) {
+      return false;
     }
+
+    $ods->bumpKey('contextprop.update_with_valid_ig_user_id'.$src);
+
     $tcps_ig_user_id = self::get()->getIGUserId();
     if ($ig_user_id == $tcps_ig_user_id) {
       $ods->bumpKey('contextprop.same_ig_user_id.'.$src);
-      return false;
+      return true;
     }
 
     if ($tcps_ig_user_id is nonnull) {
@@ -244,6 +247,12 @@ final class ThriftContextPropState {
     } else {
       $user_id = $vc->getUserID();
     }
+
+    if ($user_id !== ZERO_FBID && self::updateFBUserId($user_id, $src)) {
+      return true;
+    }
+
+    $user_id = LoginState::getInstance()->getLoggedInAccount();
     return self::updateFBUserId($user_id, $src);
   }
 

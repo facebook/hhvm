@@ -638,24 +638,11 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_service(proto);
     auto def = whisker::dsl::prototype_builder<h_service>::extends(base);
 
-    def.property("cpp_name", [](const t_service& service) {
-      if (service.is_interaction()) {
-        // DO_BEFORE(hchok, 20250930) - once we're confident all usages on
-        // interaction are switched to interaction:name, this override can be
-        // removed so the property resolved to t_named prototype's cpp_name
-        throw whisker::eval_error(
-            "service:cpp_name used on an interaction node - "
-            "the corresponding interpolation should be replaced with interaction:name");
-      }
-      return cpp2::get_name(&service);
-    });
-
     def.property(
         "cpp_requires_method_decorator?", [](const t_service& service) {
           return service.has_structured_annotation(
               apache::thrift::compiler::kCppGenerateServiceMethodDecorator);
         });
-
     def.property("qualified_name", &cpp2::get_service_qualified_name);
     def.property("user_type_footprint", [&](const t_service& service) {
       return build_user_type_footprint(service, proto);

@@ -376,7 +376,7 @@ void Config::Bind(T& loc, const IniSetting::Map& ini, const Hdf& config, \
                    IniName(name, prepend_hhvm), &loc); \
 }
 
-CONTAINER_CONFIG_BODY(std::vector<uint32_t>, UInt32Vector)
+CONTAINER_CONFIG_BODY(std::vector<int32_t>, Int32Vector)
 CONTAINER_CONFIG_BODY(std::vector<std::string>, StrVector)
 namespace { using simap = std::unordered_map<std::string, int>; }
 CONTAINER_CONFIG_BODY(simap, IntMap)

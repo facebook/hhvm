@@ -344,10 +344,10 @@ double Hdf::configGetDouble(double defValue /* = 0 */) const {
   return n;
 }
 
-void Hdf::configGet(std::vector<uint32_t> &values) const {
+void Hdf::configGet(std::vector<int32_t> &values) const {
   values.clear();
   for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
-    values.push_back(hdf.configGetUInt32(0));
+    values.push_back(hdf.configGetInt32(0));
   }
 }
 

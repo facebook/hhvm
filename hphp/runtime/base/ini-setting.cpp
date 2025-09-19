@@ -377,15 +377,15 @@ static folly::dynamic ini_dyn(Array& t) {
   return folly::dynamic::array();
 }
 
-Variant ini_get(std::vector<uint32_t>& p) { return ini_get_vec(p); }
-bool ini_on_update(const Variant& value, std::vector<uint32_t>& p) {
+Variant ini_get(std::vector<int32_t>& p) { return ini_get_vec(p); }
+bool ini_on_update(const Variant& value, std::vector<int32_t>& p) {
   INI_ASSERT_ARR_INNER(value, Integer);
   for (ArrayIter iter(value.toArray()); iter; ++iter) {
     p.push_back(iter.second().toInt64());
   }
   return true;
 }
-static void ini_log(std::vector<uint32_t>& t, const char* name,
+static void ini_log(std::vector<int32_t>& t, const char* name,
                     StructuredLogEntry& ent) {
   std::vector<std::string> strs;
   std::vector<folly::StringPiece> v;
@@ -395,12 +395,12 @@ static void ini_log(std::vector<uint32_t>& t, const char* name,
   }
   ent.setVec(name, v);
 }
-static folly::dynamic ini_dyn(std::vector<uint32_t>& t) {
+static folly::dynamic ini_dyn(std::vector<int32_t>& t) {
   auto arr = folly::dynamic::array();
   for (auto i : t) arr.push_back(i);
   return arr;
 }
-static size_t ini_hash(std::vector<uint32_t>& t) {
+static size_t ini_hash(std::vector<int32_t>& t) {
   return folly::hash::hash_range(t.begin(), t.end());
 }
 

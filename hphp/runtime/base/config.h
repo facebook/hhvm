@@ -124,9 +124,9 @@ struct Config {
                    const double defValue = 0,
                    const bool prepend_hhvm = true);
   static void
-  Bind(std::vector<uint32_t>& loc, const IniSettingMap& ini,
+  Bind(std::vector<int32_t>& loc, const IniSettingMap& ini,
        const Hdf& config, const std::string& name = "",
-       const std::vector<uint32_t>& defValue = std::vector<uint32_t>(),
+       const std::vector<int32_t>& defValue = std::vector<int32_t>(),
        const bool prepend_hhvm = true);
   static void
   Bind(std::vector<std::string>& loc, const IniSettingMap& ini,
@@ -229,11 +229,11 @@ struct Config {
                           const std::string& name = "",
                           const double defValue = 0,
                           const bool prepend_hhvm = true);
-  static std::vector<uint32_t>
-  GetUInt32Vector(const IniSettingMap& ini, const Hdf& config,
-                  const std::string& name = "",
-                  const std::vector<uint32_t>& def = std::vector<uint32_t>{},
-                  const bool prepend_hhvm = true);
+  static std::vector<int32_t>
+  GetInt32Vector(const IniSettingMap& ini, const Hdf& config,
+                 const std::string& name = "",
+                 const std::vector<int32_t>& def = std::vector<int32_t>{},
+                 const bool prepend_hhvm = true);
   static std::vector<std::string>
   GetStrVector(const IniSettingMap& ini, const Hdf& config,
                const std::string& name = "",

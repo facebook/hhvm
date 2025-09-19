@@ -241,7 +241,7 @@ public:
   X(double) \
   INI_TYPES4(X, X, X, X) \
   X(std::string) \
-  X(std::vector<uint32_t>) \
+  X(std::vector<int32_t>) \
   X(std::vector<std::string>) \
   X(std::unordered_map<std::string INI_COMMA int>) \
   X(Array)

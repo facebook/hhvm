@@ -70,9 +70,14 @@ mstch_factories::mstch_factories() {
   add<mstch_struct>();
   add<mstch_field>();
   add<mstch_enum>();
+  add<mstch_enum_value>();
   add<mstch_const>();
   add<mstch_const_value>();
   add<mstch_const_map_element>();
+}
+
+mstch::node mstch_enum::values() {
+  return make_mstch_enum_values(enum_->get_enum_values());
 }
 
 mstch::node mstch_type::get_structured() {

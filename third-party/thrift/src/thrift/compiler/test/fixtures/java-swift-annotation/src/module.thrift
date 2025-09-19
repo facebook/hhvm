@@ -16,6 +16,7 @@
 
 namespace java.swift test.fixtures.annotation
 
+include "thrift/annotation/compat.thrift"
 include "thrift/annotation/java.thrift"
 
 typedef map<i32, i64> (java.swift.type = "com.foo.FastIntLongMap") FMap
@@ -95,3 +96,17 @@ const MyStruct MY_CONSTANT = {
   "detailField": "the devil",
   "detailMap": {},
 };
+
+@compat.Enums{type = compat.EnumType.Legacy}
+enum TestEnumLegacy {
+  ONE = 1,
+  TWO = 2,
+  THREE = 3,
+}
+
+@compat.Enums{type = compat.EnumType.Open}
+enum TestEnumOpen {
+  ZERO = 0,
+  ONE = 1,
+  TWO = 2,
+}

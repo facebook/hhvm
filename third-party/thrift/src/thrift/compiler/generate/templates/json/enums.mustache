@@ -23,13 +23,13 @@
     {{! Before the first entry, open the object}}
     "constants" : {
     {{/if first?}}
-      "{{enum_value.name}}" : {
-        "name" : "{{enum_value.name}}",
-        {{#enum_value.docs?}}
-        "docstring" : {{enum_value.docstring}},
-        {{/enum_value.docs?}}
-        "lineno" : {{enum_value.lineno}},
-        "value" : {{enum_value.value}}
+      "{{enum_value.self.name}}" : {
+        "name" : "{{enum_value.self.name}}",
+        {{#enum_value.self.docs?}}
+        "docstring" : {{enum_value.self.docstring}},
+        {{/enum_value.self.docs?}}
+        "lineno" : {{enum_value.self.lineno}},
+        "value" : {{enum_value.self.value}}
       }{{#if (not last?)}},{{#else}}
     {{! After the last entry, close the object on a new line}}
     },{{/if (not last?)}}

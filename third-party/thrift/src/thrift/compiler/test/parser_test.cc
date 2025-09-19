@@ -97,7 +97,7 @@ TEST(ParserTest, include_paths) {
       diagnostics_engine(source_mgr, [&diag](diagnostic d) { diag = d; });
 
   parsing_params params;
-  params.incl_searchpath.push_back("some/path/");
+  params.incl_searchpath.emplace_back("some/path/");
 
   // Types must be resolved in parse_ast.
   auto programs = parse_ast(source_mgr, diags, "rootFile.thrift", params);
@@ -184,7 +184,7 @@ TEST(ParserTest, struct_annotation) {
 
   parsing_params params;
   if (auto* includes = std::getenv("IMPLICIT_INCLUDES")) {
-    params.incl_searchpath.push_back(includes);
+    params.incl_searchpath.emplace_back(includes);
   }
   auto programs = parse_ast(source_mgr, diags, "test.thrift", params);
   EXPECT_FALSE(diags.has_errors());

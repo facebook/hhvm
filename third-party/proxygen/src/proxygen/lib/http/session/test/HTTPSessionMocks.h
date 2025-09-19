@@ -8,6 +8,9 @@
 
 #pragma once
 
+#include <array>
+#include <vector>
+
 #include <folly/portability/GMock.h>
 #include <proxygen/lib/http/HTTPMessage.h>
 #include <proxygen/lib/http/codec/test/TestUtils.h>
@@ -79,11 +82,12 @@ class HTTPHandlerBase {
   }
 
   void sendBody(uint32_t content_length) {
+    constexpr uint32_t kMaxChunkSize = 4'096;
+    std::array<char, kMaxChunkSize> buf;
+    buf.fill('a');
     while (content_length > 0) {
-      uint32_t toSend = std::min(content_length, uint32_t(4096));
-      char buf[toSend];
-      memset(buf, 'a', toSend);
-      txn_->sendBody(folly::IOBuf::copyBuffer(buf, toSend));
+      const uint32_t toSend = std::min(kMaxChunkSize, content_length);
+      txn_->sendBody(folly::IOBuf::copyBuffer(buf.data(), toSend));
       content_length -= toSend;
     }
   }
@@ -128,12 +132,11 @@ class HTTPHandlerBase {
     reply.setHTTPVersion(1, 1);
     reply.setIsChunked(true);
     txn_->sendHeaders(reply);
+    const std::vector<char> buf(chunkSize, 'a');
     while (content_length > 0) {
-      uint32_t toSend = std::min(content_length, chunkSize);
-      char buf[toSend];
-      memset(buf, 'a', toSend);
+      const uint32_t toSend = std::min(content_length, chunkSize);
       txn_->sendChunkHeader(toSend);
-      txn_->sendBody(folly::IOBuf::copyBuffer(buf, toSend));
+      txn_->sendBody(folly::IOBuf::copyBuffer(buf.data(), toSend));
       txn_->sendChunkTerminator();
       content_length -= toSend;
     }

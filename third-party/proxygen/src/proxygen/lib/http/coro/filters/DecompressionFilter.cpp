@@ -22,9 +22,9 @@ struct SupportedCompression {
 
 // sorted in descending order of preference
 constexpr std::array kSupportedCompressionTypes = {
-    SupportedCompression{"gzip", CompressionType::GZIP},
-    SupportedCompression{"deflate", CompressionType::DEFLATE},
-    SupportedCompression{"zstd", CompressionType::ZSTD}};
+    SupportedCompression{.name = "gzip", .type = CompressionType::GZIP},
+    SupportedCompression{.name = "deflate", .type = CompressionType::DEFLATE},
+    SupportedCompression{.name = "zstd", .type = CompressionType::ZSTD}};
 
 using folly::coro::co_error;
 

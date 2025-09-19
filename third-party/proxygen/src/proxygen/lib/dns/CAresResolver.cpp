@@ -368,7 +368,7 @@ void CAresResolver::Query::queryCallback(
 
       if (status == ARES_SUCCESS) {
         for (char** aliasp = host->h_aliases; *aliasp != nullptr; aliasp++) {
-          answers.push_back(Answer(std::chrono::seconds(60), *aliasp));
+          answers.emplace_back(std::chrono::seconds(60), *aliasp);
         }
       } else {
         self->fail(

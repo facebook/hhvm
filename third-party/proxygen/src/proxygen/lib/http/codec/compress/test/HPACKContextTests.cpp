@@ -117,8 +117,8 @@ TEST_F(HPACKContextTests, StaticIndex) {
 TEST_F(HPACKContextTests, EncoderMultipleValues) {
   HPACKEncoder encoder(true);
   vector<HPACKHeader> req;
-  req.push_back(HPACKHeader("accept-encoding", "gzip"));
-  req.push_back(HPACKHeader("accept-encoding", "sdch,gzip"));
+  req.emplace_back("accept-encoding", "gzip");
+  req.emplace_back("accept-encoding", "sdch,gzip");
   unique_ptr<IOBuf> encoded = encoder.encode(req);
   EXPECT_TRUE(encoded->length() > 0);
   EXPECT_EQ(encoder.getTable().size(), 2);
@@ -137,9 +137,9 @@ TEST_F(HPACKContextTests, DecoderLargeHeader) {
   HPACKEncoder encoder(true, size);
   HPACKDecoder decoder(size);
   vector<HPACKHeader> headers;
-  headers.push_back(HPACKHeader(":path", "verylargeheader"));
+  headers.emplace_back(":path", "verylargeheader");
   // add a static entry
-  headers.push_back(HPACKHeader(":method", "GET"));
+  headers.emplace_back(":method", "GET");
   auto buf = encoder.encode(headers);
   auto decoded = proxygen::hpack::decode(decoder, buf.get());
   EXPECT_EQ(encoder.getTable().size(), 0);
@@ -152,13 +152,13 @@ TEST_F(HPACKContextTests, DecoderLargeHeaderClear) {
   HPACKEncoder encoder(true, 4096);
   HPACKDecoder decoder(40);
   vector<HPACKHeader> headers;
-  headers.push_back(HPACKHeader("foo", "bar"));
+  headers.emplace_back("foo", "bar");
   auto buf = encoder.encode(headers);
   auto decoded = proxygen::hpack::decode(decoder, buf.get());
   EXPECT_EQ(encoder.getTable().size(), 1);
   EXPECT_EQ(decoder.getTable().size(), 1);
   headers.clear();
-  headers.push_back(HPACKHeader("bar", "verylargeheader"));
+  headers.emplace_back("bar", "verylargeheader");
   buf = encoder.encode(headers);
   decoded = proxygen::hpack::decode(decoder, buf.get());
   EXPECT_EQ(encoder.getTable().size(), 2);
@@ -172,7 +172,7 @@ TEST_F(HPACKContextTests, DecoderInvalidPeek) {
   HPACKEncoder encoder(true);
   HPACKDecoder decoder;
   vector<HPACKHeader> headers;
-  headers.push_back(HPACKHeader("x-fb-debug", "test"));
+  headers.emplace_back("x-fb-debug", "test");
 
   unique_ptr<IOBuf> encoded = encoder.encode(headers);
   unique_ptr<IOBuf> first = IOBuf::create(128);
@@ -193,7 +193,7 @@ TEST_F(HPACKContextTests, DecoderInvalidLiteralPeek) {
   HPACKEncoder encoder(true);
   HPACKDecoder decoder;
   vector<HPACKHeader> headers;
-  headers.push_back(HPACKHeader("x-fb-random", "bla"));
+  headers.emplace_back("x-fb-random", "bla");
   unique_ptr<IOBuf> encoded = encoder.encode(headers);
 
   unique_ptr<IOBuf> first = IOBuf::create(128);
@@ -300,7 +300,7 @@ TEST_F(HPACKContextTests, EncodeToWriteBuf) {
   HPACKEncoder encoder(true);
   folly::IOBufQueue writeBuf{folly::IOBufQueue::cacheChainLength()};
   vector<HPACKHeader> headers;
-  headers.push_back(HPACKHeader("x-fb-debug", "test"));
+  headers.emplace_back("x-fb-debug", "test");
 
   encoder.encode(headers, writeBuf);
   EXPECT_GT(writeBuf.chainLength(), 0);
@@ -315,7 +315,7 @@ TEST_P(HPACKContextTests, ContextUpdate) {
   if (setDecoderSize) {
     decoder.setHeaderTableMaxSize(8192);
   }
-  headers.push_back(HPACKHeader("x-fb-random", "bla"));
+  headers.emplace_back("x-fb-random", "bla");
   unique_ptr<IOBuf> encoded = encoder.encode(headers);
 
   unique_ptr<IOBuf> first = IOBuf::create(128);

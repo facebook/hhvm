@@ -171,7 +171,7 @@ void CachingDNSResolver::searchCache(std::string name,
 void CachingDNSResolver::dumpDNSCache(
     std::vector<std::pair<std::string, CacheEntry>>& results, DNSCache& cache) {
   for (const auto& e : cache) {
-    results.push_back(e); // copy
+    results.emplace_back(e); // copy
   }
 }
 

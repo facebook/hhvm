@@ -288,12 +288,86 @@
       },
       "Attributes" : {
         "name" : "Attributes",
+        "structured_annotations": {
+          "scope.Struct" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Struct",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
+          "scope.Union" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Union",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
+          "scope.Enum" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Enum",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
+          "scope.Exception" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Exception",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
+          "scope.Service" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Service",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
+          "scope.Field" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Field",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
+          "scope.Typedef" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Typedef",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
+          "scope.FunctionParameter" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "FunctionParameter",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
+          "scope.Const" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Const",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
+        },
         "docstring" : "This annotation is for adding Hack attributes.\n* Where to use: field or struct type\n* Value: add attributes like `JSEnum` to structs or fields\n* Example:\n\n```\n// In thrift\nenum MyEnum {\n  ALLOWED = 1,\n  THIS_IS_ALLOWED  =  2,\n  THIS_IS_ALLOWED_2 = 3,\n}(\n  hack.attributes=\n    \"\\JSEnum(shape('name' => 'MyEnum')),\n    \\GraphQLEnum('MyEnum', 'Description for my enum',)\"\n)\nstruct MyThriftStruct {\n  1: string foo (hack.attributes = \"FieldAttribute\");\n  2: string bar;\n  3: string baz;\n} (hack.attributes = \"ClassAttribute\")\n```\n```\n//thrift compiler will generate this for you\n<<\\JSEnum(shape('name' => 'MyEnum')),\n\\GraphQLEnum('MyEnum', 'Description for my enum',)>>\nenum MyEnum: int {\n ALLOWED = 1;\n THIS_IS_ALLOWED = 2;\n THIS_IS_ALLOWED_2 = 3;\n}\n<<ClassAttribute>>\nclass MyThriftStruct implements \\IThriftStruct {\n ....\n <<FieldAttribute>>\n public string $foo;\n ....\n}\n```\n",
         "fields" : {
           "attributes" : {
             "name" : "attributes",
             "key" : 1,
-            "lineno" : 176,
+            "lineno" : 185,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "list",
@@ -335,7 +409,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 179
+        "lineno" : 188
       },
       "ModuleInternal" : {
         "name" : "ModuleInternal",
@@ -400,7 +474,7 @@
         "docstring" : "This annotation is to generate an entity as internal\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 185
+        "lineno" : 194
       },
       "GenerateClientMethodsWithHeaders" : {
         "name" : "GenerateClientMethodsWithHeaders",
@@ -425,7 +499,7 @@
         "docstring" : "Given either of the following Thrift service definitions:\n\n    @hack.GenerateClientMethodsWithHeaders\n    service Foo {\n      FooResponse bar();\n    }\n\n    service Foo {\n      @hack.GenerateClientMethodsWithHeaders\n      FooResponse bar();\n    }\n\nThis annotation instructs the compiler to generate the following client method that returns both the response and headers in addition to the bar() method:\n  - (FooResponse, ?dict<string, string>) header_bar()\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 210
+        "lineno" : 219
       },
       "MigrationBlockingAllowInheritance" : {
         "name" : "MigrationBlockingAllowInheritance",
@@ -442,7 +516,7 @@
         "docstring" : "Generated Hack types are being changed to `final` by default.\n\nFor existing thrift types that are inherited from and cannot be easily migrated,\nuse this annotation to make the generated class non-final.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 220
+        "lineno" : 229
       },
       "MigrationBlockingLegacyJSONSerialization" : {
         "name" : "MigrationBlockingLegacyJSONSerialization",
@@ -459,7 +533,7 @@
         "docstring" : "Hack Unions without the `protected` compiler option may rely on `fb_json_serialize` for JSON serialization.\nAdding this annotation will implement the JSONSerializable Hack interface allowing `fb_json_serialize` to continue being used.\n\nNote: This should only be used for migration purposes. Use `JSONThriftSerializer` instead.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 229
+        "lineno" : 238
       }
   },
   "source_path" : "thrift/annotation/hack",

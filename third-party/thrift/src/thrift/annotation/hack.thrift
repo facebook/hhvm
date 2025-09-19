@@ -172,6 +172,15 @@ struct StructTrait {
 ///  ....
 /// }
 /// ```
+@scope.Struct
+@scope.Union
+@scope.Enum
+@scope.Exception
+@scope.Service
+@scope.Field
+@scope.Typedef
+@scope.FunctionParameter
+@scope.Const
 struct Attributes {
   1: list<string> attributes;
 }

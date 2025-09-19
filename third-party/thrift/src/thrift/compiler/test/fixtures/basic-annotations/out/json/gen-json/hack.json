@@ -309,6 +309,17 @@
       "lineno" : 175,
       "is_exception" : false,
       "is_union" : false,
+      "structured_annotations" : {
+        "scope.Struct" : {  },
+        "scope.Union" : {  },
+        "scope.Enum" : {  },
+        "scope.Exception" : {  },
+        "scope.Service" : {  },
+        "scope.Field" : {  },
+        "scope.Typedef" : {  },
+        "scope.FunctionParameter" : {  },
+        "scope.Const" : {  }
+      },
       "fields" : {
         "attributes" : {
           "type_enum" : "LIST",
@@ -316,11 +327,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 176,
+              "line" : 185,
               "column" : 3
             },
             "end" : {
-              "line" : 176,
+              "line" : 185,
               "column" : 30
             }
           }
@@ -332,13 +343,13 @@
           "column" : 1
         },
         "end" : {
-          "line" : 177,
+          "line" : 186,
           "column" : 2
         }
       }
     },
     "StructAsTrait" : {
-      "lineno" : 179,
+      "lineno" : 188,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -351,17 +362,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 179,
+          "line" : 188,
           "column" : 1
         },
         "end" : {
-          "line" : 182,
+          "line" : 191,
           "column" : 24
         }
       }
     },
     "ModuleInternal" : {
-      "lineno" : 185,
+      "lineno" : 194,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -378,17 +389,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 185,
+          "line" : 194,
           "column" : 1
         },
         "end" : {
-          "line" : 192,
+          "line" : 201,
           "column" : 25
         }
       }
     },
     "GenerateClientMethodsWithHeaders" : {
-      "lineno" : 210,
+      "lineno" : 219,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -400,42 +411,21 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 210,
+          "line" : 219,
           "column" : 1
         },
         "end" : {
-          "line" : 212,
+          "line" : 221,
           "column" : 43
         }
       }
     },
     "MigrationBlockingAllowInheritance" : {
-      "lineno" : 220,
-      "is_exception" : false,
-      "is_union" : false,
-      "structured_annotations" : {
-        "scope.Structured" : {  }
-      },
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 220,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 221,
-          "column" : 44
-        }
-      }
-    },
-    "MigrationBlockingLegacyJSONSerialization" : {
       "lineno" : 229,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
-        "scope.Union" : {  }
+        "scope.Structured" : {  }
       },
       "fields" : {
 
@@ -447,6 +437,27 @@
         },
         "end" : {
           "line" : 230,
+          "column" : 44
+        }
+      }
+    },
+    "MigrationBlockingLegacyJSONSerialization" : {
+      "lineno" : 238,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Union" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 238,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 239,
           "column" : 51
         }
       }

@@ -71,7 +71,7 @@ BENCHMARK_NAMED_PARAM(weightedCh3Bench, size_10000_short_05, 10000, 0.5, 12)
 BENCHMARK_DRAW_LINE();
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv, true);
+  const folly::Init init(&argc, &argv, true);
 
   folly::runBenchmarks();
   return 0;

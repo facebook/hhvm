@@ -100,7 +100,7 @@ BENCHMARK_RELATIVE(Vector_100, n) {
 }
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv, true /* removeFlags */);
+  const folly::Init init(&argc, &argv, true /* removeFlags */);
   folly::runBenchmarks();
   return 0;
 }

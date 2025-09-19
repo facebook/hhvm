@@ -36,13 +36,9 @@ struct ServerLoadInfo {
 // In-code definition of WWWThriftServerInfo
 // Only store relevant fields
 struct ThriftWWWCustomHealthCheckerFields {
-  int64_t jitMaturity{0};
   int64_t jitWeightFactor{0};
   int64_t loadHint{0};
-  int64_t semrBucket{-1};
-  int64_t jumpstartBucket{-1};
   int64_t serverUpTime{0};
-  bool prepareToStop{false};
 };
 
 enum ServerDownInfo {

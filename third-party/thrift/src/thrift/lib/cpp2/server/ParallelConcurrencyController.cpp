@@ -145,7 +145,7 @@ void ParallelConcurrencyController::scheduleOnExecutor() {
           executor_, [this]() { executeRequest(pile_.dequeue()); });
     }
     case RequestExecutionMode::Serial: {
-      auto keepAlive = folly::SmallSerialExecutor::create(
+      auto keepAlive = folly::SerialExecutor::create(
           folly::Executor::getKeepAliveToken(executor_));
       auto& executor = *keepAlive.get();
       return scheduleOnExecutorInner(

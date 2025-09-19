@@ -2061,7 +2061,6 @@ EffectiveTicketSeedStrategy ThriftServer::getEffectiveTicketSeedStrategy()
 }
 
 void ThriftServer::scheduleInMemoryTicketSeeds() {
-  LOG(INFO) << "Using randomly generated TLS ticket keys.";
   wangle::TLSTicketKeySeeds seeds;
   tlsCredWatcher_.withWLock([this, &seeds](auto& credWatcher) {
     if (!credWatcher) {

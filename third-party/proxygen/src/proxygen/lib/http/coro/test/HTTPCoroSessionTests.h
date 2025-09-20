@@ -347,6 +347,7 @@ class HTTPCoroSessionTest : public testing::TestWithParam<TestParams> {
   HTTPCoroSession *session_{nullptr};
   testing::NiceMock<MockLifecycleObserver> lifecycleObs_;
   std::unique_ptr<HTTPCodec> peerCodec_;
+  HTTPCodec *codec_{nullptr}; // self codec
   hq::HQMultiCodec *multiCodec_{nullptr};
   testing::NiceMock<MockHTTPCodecCallback> callbacks_;
   folly::IOBufQueue writeBuf_{folly::IOBufQueue::cacheChainLength()};

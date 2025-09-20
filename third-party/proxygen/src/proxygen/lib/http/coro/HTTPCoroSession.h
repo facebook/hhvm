@@ -338,9 +338,7 @@ class HTTPCoroSession
     std::shared_ptr<WebTransport> wt;
   };
   virtual folly::coro::Task<WtReqResult> sendWtReq(
-      RequestReservation, const HTTPMessage&) noexcept {
-    return folly::coro::makeTask<WtReqResult>({});
-  }
+      RequestReservation reservation, const HTTPMessage& msg) noexcept;
 
   void describe(std::ostream& os) const override;
 

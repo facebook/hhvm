@@ -81,6 +81,7 @@ void HTTPCoroSessionTest::setUp(std::shared_ptr<HTTPHandler> handler) {
         codec->getEgressSettings()
             ->getSetting(SettingsId::_HQ_QPACK_BLOCKED_STREAMS)
             ->value);
+    codec_ = codec.get();
     if (handler) {
       session_ =
           HTTPCoroSession::makeDownstreamCoroSession(muxTransport_->getSocket(),
@@ -95,17 +96,15 @@ void HTTPCoroSessionTest::setUp(std::shared_ptr<HTTPHandler> handler) {
     auto transport =
         std::make_unique<TestUniplexTransport>(&evb_, &transportState_);
     transport_ = transport.get();
+    auto codec =
+        HTTPCodecFactory::getCodec(GetParam().codecProtocol, direction_);
+    codec_ = codec.get();
     if (handler) {
       session_ = HTTPCoroSession::makeDownstreamCoroSession(
-          std::move(transport),
-          handler,
-          HTTPCodecFactory::getCodec(GetParam().codecProtocol, direction_),
-          std::move(tinfo));
+          std::move(transport), handler, std::move(codec), std::move(tinfo));
     } else {
       session_ = HTTPCoroSession::makeUpstreamCoroSession(
-          std::move(transport),
-          HTTPCodecFactory::getCodec(GetParam().codecProtocol, direction_),
-          std::move(tinfo));
+          std::move(transport), std::move(codec), std::move(tinfo));
     }
   }
   peerCodec_->generateConnectionPreface(writeBuf_);

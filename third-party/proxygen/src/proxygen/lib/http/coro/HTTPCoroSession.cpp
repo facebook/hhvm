@@ -8,12 +8,14 @@
 
 #include "proxygen/lib/http/coro/HTTPCoroSession.h"
 #include "proxygen/lib/http/coro/HTTPFixedSource.h"
-#include <folly/logging/xlog.h>
 #include <proxygen/lib/http/HTTPPriorityFunctions.h>
 #include <proxygen/lib/http/codec/HQUtils.h>
 #include <proxygen/lib/http/codec/HTTPChecks.h>
 #include <proxygen/lib/http/codec/HTTPParallelCodec.h>
 #include <proxygen/lib/http/session/HTTPSessionStats.h>
+#include <proxygen/lib/http/webtransport/HTTPWebTransport.h>
+
+#include <folly/logging/xlog.h>
 #include <quic/priority/HTTPPriorityQueue.h>
 #include <quic/state/QuicStreamUtilities.h>
 #include <wangle/acceptor/ConnectionManager.h>
@@ -3711,4 +3713,62 @@ std::ostream& operator<<(std::ostream& os, const HTTPCoroSession& session) {
   session.describe(os);
   return os;
 }
+
+// WebTransport related functions below
+namespace {
+
+constexpr std::string_view kWtNotSupported = "WebTransport not supported";
+constexpr std::string_view kInvalidWtReq = "Invalid WebTransport request";
+
+using WtReqResult = HTTPCoroSession::WtReqResult;
+
+/**
+ * http/2 wt draft:
+ * > In order to indicate support for WebTransport, both the client and the
+ * > server MUST send a SETTINGS_WEBTRANSPORT_MAX_SESSIONS value greater than
+ * > "0" in their SETTINGS frame
+ *
+ * > An endpoint needs to send both SETTINGS_ENABLE_CONNECT_PROTOCOL and
+ * > SETTINGS_WEBTRANSPORT_MAX_SESSIONS for WebTransport to be enabled.
+ */
+bool supportsWt(std::initializer_list<const HTTPSettings*> settings) {
+  constexpr auto kEnableConnectProto = SettingsId::ENABLE_CONNECT_PROTOCOL;
+  constexpr auto kEnableWtMaxSess = SettingsId::WEBTRANSPORT_MAX_SESSIONS;
+  return std::all_of(settings.begin(), settings.end(), [](auto* settings) {
+    return settings &&
+           settings->getSetting(kEnableConnectProto, /*defaultVal=*/0) &&
+           settings->getSetting(kEnableWtMaxSess, /*defaultVal=*/0);
+  });
+}
+
+folly::coro::Task<WtReqResult> makeInternalEx(std::string_view err) {
+  return folly::coro::makeErrorTask<WtReqResult>(
+      HTTPError{HTTPErrorCode::INTERNAL_ERROR, std::string(err)});
+}
+
+}; // namespace
+
+/**
+ * Common logic that can be used by derived classes to validate both that
+ * WebTransport is supported and request is valid. Although this function is a
+ * Task (for derived classes to override as those will have asynchrony), it is
+ * sychronously resolved and should only be checked for errors via co_awaitTry()
+ */
+folly::coro::Task<WtReqResult> HTTPCoroSession::sendWtReq(
+    RequestReservation reservation, const HTTPMessage& msg) noexcept {
+  if (!reservation.fromSession(this)) {
+    return makeInternalEx("Invalid reservation");
+  }
+
+  const bool wtEnabled =
+      supportsWt({codec_->getIngressSettings(), codec_->getEgressSettings()});
+  const bool validWtReq = HTTPWebTransport::isConnectMessage(msg);
+  if (!(wtEnabled && validWtReq)) {
+    return makeInternalEx(!validWtReq ? kInvalidWtReq : kWtNotSupported);
+  }
+
+  // valid wt req
+  return folly::coro::makeTask<WtReqResult>({});
+}
+
 } // namespace proxygen::coro

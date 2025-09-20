@@ -40,8 +40,23 @@ class HTTPStreamSourceHolder
      * different consumer and producer threads; setting sourceComplete_ flag and
      * destructing source_ are not atomic operations.
      */
+    egressFc_.post(); // unblock fc waiters
     source_.reset();
     libRef_.reset();
+  }
+
+  void windowOpen(HTTPCodec::StreamID) override {
+    egressFc_.post();
+    egressFc_.reset();
+  }
+
+  folly::coro::Task<void> awaitEgressBuffer() {
+    auto* source = get();
+    bool blocked = source && source->bodyBytesBuffered() >= egressBufferSize_;
+    if (blocked) {
+      co_await egressFc_;
+    }
+    co_return;
   }
 
   HTTPStreamSource* get() {
@@ -52,10 +67,13 @@ class HTTPStreamSourceHolder
   HTTPStreamSourceHolder(folly::EventBase* evb,
                          folly::Optional<HTTPCodec::StreamID> id,
                          uint32_t egressBufferSize)
-      : source_(std::in_place, evb, id, this, egressBufferSize) {
+      : source_(std::in_place, evb, id, this, egressBufferSize),
+        egressBufferSize_(egressBufferSize) {
   }
   std::optional<HTTPStreamSource> source_;
   std::shared_ptr<HTTPStreamSourceHolder> libRef_;
+  folly::coro::Baton egressFc_;
+  uint32_t egressBufferSize_;
 };
 
 } // namespace proxygen::coro

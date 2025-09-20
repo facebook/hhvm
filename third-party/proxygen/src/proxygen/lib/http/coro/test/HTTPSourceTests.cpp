@@ -1670,6 +1670,46 @@ TEST(HTTPStreamSourceHolder, DestructorTest) {
   source->get()->headers(makePostRequest(1'000));
 }
 
+TEST(HTTPStreamSourceHolder, EgressBackpressure) {
+  using folly::coro::blockingWait;
+  using FlowControlState = HTTPStreamSource::FlowControlState;
+
+  folly::EventBase evb;
+  auto source = HTTPStreamSourceHolder::make(
+      &evb, /*id=*/folly::none, /*egressBufferSize=*/2);
+  auto* pSource = source->get();
+  pSource->headers(makePostRequest(4));
+
+  // enqueue one byte => fc available => ::awaitEgressBuffer should not suspend
+  auto fc = pSource->body(makeBuf(1), /*padding=*/0, /*eom=*/false);
+  auto fut =
+      co_withExecutor(&evb, source->awaitEgressBuffer()).startInlineUnsafe();
+  EXPECT_EQ(fc, FlowControlState::OPEN);
+  EXPECT_TRUE(fut.isReady() && fut.hasValue());
+
+  // enqueue second byte => not enough fc credit => ::awaitEgressBuffer should
+  // suspend
+  fc = pSource->body(makeBuf(1), /*padding=*/0, /*eom=*/false);
+  fut = co_withExecutor(&evb, source->awaitEgressBuffer()).startInlineUnsafe();
+  EXPECT_EQ(fc, FlowControlState::CLOSED);
+  EXPECT_TRUE(!fut.isReady());
+
+  // consume body => unblocks fc
+  blockingWait(pSource->readHeaderEvent(), &evb);
+  blockingWait(pSource->readBodyEvent(), &evb);
+
+  // fut should now be available
+  EXPECT_TRUE(fut.isReady() && fut.hasValue());
+
+  // enqueuing another two bytes => fc blocked again
+  fc = pSource->body(makeBuf(2), /*padding=*/0, /*eom=*/false);
+  fut = co_withExecutor(&evb, source->awaitEgressBuffer()).startInlineUnsafe();
+  EXPECT_EQ(fc, FlowControlState::CLOSED);
+  EXPECT_TRUE(!fut.isReady());
+
+  blockingWait(pSource->readBodyEvent(), &evb);
+}
+
 } // namespace proxygen::coro::test
 // Test cases to write:
 //

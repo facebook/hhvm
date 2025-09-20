@@ -26,15 +26,27 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::facebook::thrift::test::Color>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::thrift::test::Color>(metadata);
-  if (res.preExists) {
+  auto res = metadata.enums()->emplace("module.Color", ::apache::thrift::metadata::ThriftEnum{});
+  if (!res.second) {
     return;
+  }
+  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
+  enum_metadata.name() = "module.Color";
+  using EnumTraits = TEnumTraits<::facebook::thrift::test::Color>;
+  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 void EnumMetadata<::facebook::thrift::test::ThriftAdaptedEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::thrift::test::ThriftAdaptedEnum>(metadata);
-  if (res.preExists) {
+  auto res = metadata.enums()->emplace("module.ThriftAdaptedEnum", ::apache::thrift::metadata::ThriftEnum{});
+  if (!res.second) {
     return;
+  }
+  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
+  enum_metadata.name() = "module.ThriftAdaptedEnum";
+  using EnumTraits = TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>;
+  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 

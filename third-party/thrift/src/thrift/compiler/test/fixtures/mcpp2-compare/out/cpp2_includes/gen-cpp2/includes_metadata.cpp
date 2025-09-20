@@ -26,9 +26,15 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::a::different::ns::AnEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::a::different::ns::AnEnum>(metadata);
-  if (res.preExists) {
+  auto res = metadata.enums()->emplace("includes.AnEnum", ::apache::thrift::metadata::ThriftEnum{});
+  if (!res.second) {
     return;
+  }
+  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
+  enum_metadata.name() = "includes.AnEnum";
+  using EnumTraits = TEnumTraits<::a::different::ns::AnEnum>;
+  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 

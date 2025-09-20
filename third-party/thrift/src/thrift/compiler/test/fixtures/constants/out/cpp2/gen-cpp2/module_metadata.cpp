@@ -26,21 +26,39 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::cpp2::EmptyEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::cpp2::EmptyEnum>(metadata);
-  if (res.preExists) {
+  auto res = metadata.enums()->emplace("module.EmptyEnum", ::apache::thrift::metadata::ThriftEnum{});
+  if (!res.second) {
     return;
+  }
+  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
+  enum_metadata.name() = "module.EmptyEnum";
+  using EnumTraits = TEnumTraits<::cpp2::EmptyEnum>;
+  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 void EnumMetadata<::cpp2::City>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::cpp2::City>(metadata);
-  if (res.preExists) {
+  auto res = metadata.enums()->emplace("module.City", ::apache::thrift::metadata::ThriftEnum{});
+  if (!res.second) {
     return;
+  }
+  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
+  enum_metadata.name() = "module.City";
+  using EnumTraits = TEnumTraits<::cpp2::City>;
+  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 void EnumMetadata<::cpp2::Company>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::cpp2::Company>(metadata);
-  if (res.preExists) {
+  auto res = metadata.enums()->emplace("module.Company", ::apache::thrift::metadata::ThriftEnum{});
+  if (!res.second) {
     return;
+  }
+  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
+  enum_metadata.name() = "module.Company";
+  using EnumTraits = TEnumTraits<::cpp2::Company>;
+  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 

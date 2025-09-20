@@ -26,29 +26,53 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::some::valid::ns::MyEnumA>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::some::valid::ns::MyEnumA>(metadata);
-  if (res.preExists) {
+  auto res = metadata.enums()->emplace("module.MyEnumA", ::apache::thrift::metadata::ThriftEnum{});
+  if (!res.second) {
     return;
+  }
+  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
+  enum_metadata.name() = "module.MyEnumA";
+  using EnumTraits = TEnumTraits<::some::valid::ns::MyEnumA>;
+  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 void EnumMetadata<::some::valid::ns::AnnotatedEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::some::valid::ns::AnnotatedEnum>(metadata);
-  if (res.preExists) {
+  auto res = metadata.enums()->emplace("module.AnnotatedEnum", ::apache::thrift::metadata::ThriftEnum{});
+  if (!res.second) {
     return;
   }
-  res.metadata.structured_annotations()->push_back(*cvStruct("cpp.EnumType", { {"type", cvInteger(4) } }).cv_struct());
+  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
+  enum_metadata.name() = "module.AnnotatedEnum";
+  using EnumTraits = TEnumTraits<::some::valid::ns::AnnotatedEnum>;
+  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
+  }
+  enum_metadata.structured_annotations()->push_back(*cvStruct("cpp.EnumType", { {"type", cvInteger(4) } }).cv_struct());
 }
 void EnumMetadata<::some::valid::ns::AnnotatedEnum2>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::some::valid::ns::AnnotatedEnum2>(metadata);
-  if (res.preExists) {
+  auto res = metadata.enums()->emplace("module.AnnotatedEnum2", ::apache::thrift::metadata::ThriftEnum{});
+  if (!res.second) {
     return;
   }
-  res.metadata.structured_annotations()->push_back(*cvStruct("cpp.EnumType", { {"type", cvInteger(2) } }).cv_struct());
+  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
+  enum_metadata.name() = "module.AnnotatedEnum2";
+  using EnumTraits = TEnumTraits<::some::valid::ns::AnnotatedEnum2>;
+  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
+  }
+  enum_metadata.structured_annotations()->push_back(*cvStruct("cpp.EnumType", { {"type", cvInteger(2) } }).cv_struct());
 }
 void EnumMetadata<::some::valid::ns::MyEnumB>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::some::valid::ns::MyEnumB>(metadata);
-  if (res.preExists) {
+  auto res = metadata.enums()->emplace("module.MyEnumB", ::apache::thrift::metadata::ThriftEnum{});
+  if (!res.second) {
     return;
+  }
+  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
+  enum_metadata.name() = "module.MyEnumB";
+  using EnumTraits = TEnumTraits<::some::valid::ns::MyEnumB>;
+  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 

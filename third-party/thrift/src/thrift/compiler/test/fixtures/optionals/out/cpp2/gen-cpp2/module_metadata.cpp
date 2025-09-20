@@ -26,9 +26,15 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::cpp2::Animal>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::cpp2::Animal>(metadata);
-  if (res.preExists) {
+  auto res = metadata.enums()->emplace("module.Animal", ::apache::thrift::metadata::ThriftEnum{});
+  if (!res.second) {
     return;
+  }
+  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
+  enum_metadata.name() = "module.Animal";
+  using EnumTraits = TEnumTraits<::cpp2::Animal>;
+  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 

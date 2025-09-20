@@ -192,37 +192,68 @@ std::atomic<TraceTask*> s_traceTask{nullptr}; // Task up for grabs.
 __thread TraceTask* tl_traceTask{nullptr};
 
 InitFiniNode s_traceRequestStart([]() {
-  if (!tl_traceTask && !s_traceTask.load(std::memory_order_acquire)) return;
-  if (!tl_traceTask) {
-    // Try grab the task.
-    tl_traceTask = s_traceTask.exchange(nullptr, std::memory_order_acq_rel);
-  }
-  if (!tl_traceTask) return; // We lost the race; nothing to do.
-  if (tl_traceTask->count == 0) {
-    // Task already complete.
-    Trace::trace("Trace complete at %d\n", (int)time(nullptr));
-    Trace::setTraceThread("");
-    delete tl_traceTask;
-    tl_traceTask = nullptr;
-    return;
-  }
-  const string url = g_context->getRequestUrl();
-  if (url.find(tl_traceTask->url) == string::npos) {
-    // URL mismatch; hand task back (and discard any unlikely colliding task).
-    delete s_traceTask.exchange(tl_traceTask, std::memory_order_acq_rel);
-    tl_traceTask = nullptr;
-    Trace::setTraceThread("");
-  } else {
-    // Work on task.
-    --tl_traceTask->count;
-    const auto spec = tl_traceTask->spec;
-    Trace::setTraceThread(spec);
-    Trace::trace("Trace for %s at %d using spec %s\n",
-                 url.c_str(), (int)time(nullptr), spec.c_str());
-  }
-}, InitFiniNode::When::RequestStart, "trace");
+    // A quick, lock-free check to see if there's any work to do.
+    if (!s_traceTask.load(std::memory_order_acquire)) {
+        return;
+    }
 
-} // namespace
+    // Try to grab the task using a CAS loop. This ensures we only
+    // grab the task if it hasn't been taken by another thread.
+    TraceTask* task = nullptr;
+    do {
+        task = s_traceTask.load(std::memory_order_relaxed);
+        if (!task) {
+            // Another thread already took the task. We're done.
+            return;
+        }
+    } while (!s_traceTask.compare_exchange_weak(
+        task,
+        nullptr,
+        std::memory_order_acq_rel,
+        std::memory_order_relaxed
+    ));
+
+    // Now 'task' holds the pointer to the TraceTask.
+    // This thread now owns the task exclusively.
+    
+    // Perform URL check and update state.
+    const string url = g_context->getRequestUrl();
+    if (url.find(task->url) == string::npos) {
+        // URL mismatch; clean up and return.
+        delete task;
+        Trace::setTraceThread("");
+    } else {
+        // Work on task.
+        task->count--;
+        Trace::setTraceThread(task->spec);
+        Trace::trace("Trace for %s at %d using spec %s\n",
+                     url.c_str(), (int)time(nullptr), task->spec.c_str());
+        
+        // Handle the case where the task is complete.
+        if (task->count == 0) {
+            Trace::trace("Trace complete at %d\n", (int)time(nullptr));
+            delete task;
+        } else {
+            // If not complete, put the task back into the shared atomic variable
+            // for another thread to grab later.
+            TraceTask* expected = nullptr;
+            TraceTask* desired = task;
+            while (!s_traceTask.compare_exchange_weak(
+                expected,
+                desired,
+                std::memory_order_acq_rel,
+                std::memory_order_relaxed
+            )) {
+                // Another thread snuck in and put a task here.
+                // We're in a bad state, so we must clean up and return.
+                // This scenario is unlikely but possible with a race.
+                // Log an error or handle it as appropriate.
+                delete expected;
+                break;
+            }
+        }
+    }
+}, InitFiniNode::When::RequestStart, "trace");
 #endif // HPHP_TRACE
 
 void AdminRequestHandler::logToAccessLog(Transport* transport) {

@@ -613,8 +613,8 @@ void ThriftServer::setup() {
   switch (getEffectiveTicketSeedStrategy()) {
     case EffectiveTicketSeedStrategy::IN_MEMORY_WITH_ROTATION:
       fizzConfig_.supportedPskModes = {
-          fizz::PskKeyExchangeMode::psk_dhe_ke,
-          fizz::PskKeyExchangeMode::psk_ke};
+          fizz::PskKeyExchangeMode::psk_ke,
+          fizz::PskKeyExchangeMode::psk_dhe_ke};
       scheduleInMemoryTicketSeeds();
       break;
     case EffectiveTicketSeedStrategy::IN_MEMORY:

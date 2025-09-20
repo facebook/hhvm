@@ -42,7 +42,8 @@
 
 namespace proxygen {
 class HTTPSessionStats;
-}
+class WebTransport;
+} // namespace proxygen
 
 namespace proxygen::coro {
 
@@ -324,6 +325,22 @@ class HTTPCoroSession
       RequestReservation reservation,
       const HTTPMessage& headers,
       HTTPSourceHolder bodySource) noexcept;
+
+  /**
+   * verifies a WebTransport request is valid; yields an
+   * HTTPError(INTERNAL_ERROR) if invalid
+   *
+   * returns an asynchronous result containing the server's response and a
+   * WebTransport handle
+   */
+  struct WtReqResult {
+    std::unique_ptr<HTTPMessage> resp;
+    std::shared_ptr<WebTransport> wt;
+  };
+  virtual folly::coro::Task<WtReqResult> sendWtReq(
+      RequestReservation, const HTTPMessage&) noexcept {
+    return folly::coro::makeTask<WtReqResult>({});
+  }
 
   void describe(std::ostream& os) const override;
 

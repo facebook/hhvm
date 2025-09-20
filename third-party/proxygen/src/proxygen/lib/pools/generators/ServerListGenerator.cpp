@@ -16,14 +16,14 @@ using std::chrono::milliseconds;
 
 namespace proxygen {
 
-void ServerListGenerator::attachEventBase(EventBase* base) {
+void ServerListGeneratorIf::attachEventBase(EventBase* eventBase) {
   CHECK(!eventBase_);
-  CHECK(base->isInEventBaseThread());
+  CHECK(eventBase->isInEventBaseThread());
 
-  eventBase_ = base;
+  eventBase_ = eventBase;
 }
 
-void ServerListGenerator::detachEventBase() {
+void ServerListGeneratorIf::detachEventBase() {
   CHECK(!eventBase_ || eventBase_->isInEventBaseThread());
 
   eventBase_ = nullptr;

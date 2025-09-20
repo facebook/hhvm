@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
   gflags::SetCommandLineOptionWithMode(
       "logtostderr", "1", gflags::SET_FLAGS_DEFAULT);
 #endif
-  folly::init(&argc, &argv, false);
+  const folly::Init init(&argc, &argv, false);
   int err = 0;
 
   auto expectedParams = initializeParamsFromCmdline();

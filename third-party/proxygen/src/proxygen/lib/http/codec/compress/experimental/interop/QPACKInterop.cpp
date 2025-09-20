@@ -403,7 +403,7 @@ int interopQIF(QPACKCodec& decoder) {
 } // namespace
 
 int main(int argc, char** argv) {
-  folly::init(&argc, &argv, true);
+  const folly::Init init(&argc, &argv, true);
   QPACKCodec decoder;
   decoder.setEncoderHeaderTableSize(FLAGS_table_size);
   std::vector<compress::Header> empty;

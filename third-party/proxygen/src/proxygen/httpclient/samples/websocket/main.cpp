@@ -26,7 +26,7 @@ DEFINE_string(url,
               "URL to perform the HTTP method against");
 
 int main(int argc, char* argv[]) {
-  folly::init(&argc, &argv, false);
+  const folly::Init init(&argc, &argv, false);
 
   EventBase evb;
   URL url(FLAGS_url);

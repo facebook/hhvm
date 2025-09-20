@@ -47,7 +47,7 @@ class WebSocketHandlerFactory : public RequestHandlerFactory {
 } // namespace
 
 int main(int argc, char* argv[]) {
-  folly::init(&argc, &argv, true);
+  const folly::Init init(&argc, &argv, true);
 
   std::vector<HTTPServer::IPConfig> IPs = {
       {SocketAddress(FLAGS_ip, FLAGS_http_port, true), Protocol::HTTP},

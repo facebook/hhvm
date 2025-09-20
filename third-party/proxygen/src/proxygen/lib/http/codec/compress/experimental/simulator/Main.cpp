@@ -34,7 +34,7 @@ DEFINE_bool(same_packet_compression,
 using namespace proxygen::compress;
 
 int main(int argc, char* argv[]) {
-  folly::init(&argc, &argv, true);
+  const folly::Init init(&argc, &argv, true);
   if (FLAGS_same_packet_compression) {
     LOG(WARNING) << "Same packet compression no longer supported";
   }

@@ -33,7 +33,7 @@ using namespace apache::thrift;
 using namespace apache::thrift::test;
 
 int main(int argc, char* argv[]) {
-  folly::init(&argc, &argv, true);
+  const folly::Init init(&argc, &argv, true);
 
   signal(SIGINT, exit);
 

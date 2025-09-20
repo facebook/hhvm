@@ -1023,10 +1023,6 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_function(proto);
     auto def = whisker::dsl::prototype_builder<h_function>::extends(base);
 
-    def.property("created_interaction", [](const t_function& self) {
-      const t_type_ref& interaction = self.interaction();
-      return interaction ? interaction->name() : "";
-    });
     def.property("returns_tuple?", [](const t_function& self) {
       return !self.has_void_initial_response() &&
           (self.sink_or_stream() || self.interaction());

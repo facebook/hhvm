@@ -38,7 +38,7 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::setUpAndProcess_{{functi
     folly::EventBase* eb,
     [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
   if (!setUpRequestProcessing(
-          req, ctx, eb, {{^function:eb}}tm{{/function:eb}}{{#function:eb}}nullptr{{/function:eb}}, {{> types/function_kind}}, iface_{{#service:interaction?}}, "{{service:name}}"{{/service:interaction?}}{{#function:creates_interaction?}}, "{{function:created_interaction}}", true{{/function:creates_interaction?}})) {
+          req, ctx, eb, {{#if function:eb}}nullptr{{#else}}tm{{/if}}, {{> types/function_kind}}, iface_{{#if service:interaction?}}, "{{interaction:name}}"{{/if}}{{#if function:creates_interaction?}}, "{{function:created_interaction.cpp_name}}", true{{/if}})) {
     return;
   }
 {{^function:eb}}

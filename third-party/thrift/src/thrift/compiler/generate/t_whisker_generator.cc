@@ -687,6 +687,12 @@ prototype<t_function>::ptr t_whisker_generator::make_prototype_for_function(
   def.property("creates_interaction?", [](const t_function& self) {
     return !self.interaction().empty();
   });
+  def.property("created_interaction", [&proto](const t_function& self) {
+    return self.interaction().empty()
+        ? w::null
+        : w::native_handle(proto.create<t_interaction>(
+              self.interaction()->as<t_interaction>()));
+  });
 
   // Sink methods
   def.property("sink_or_stream?", [](const t_function& self) {
@@ -760,7 +766,7 @@ prototype<t_service>::ptr t_whisker_generator::make_prototype_for_service(
 prototype<t_interaction>::ptr
 t_whisker_generator::make_prototype_for_interaction(
     const prototype_database& proto) const {
-  auto def = prototype_builder<h_interaction>::extends(proto.of<t_service>());
+  auto def = prototype_builder<h_interaction>::extends(proto.of<t_interface>());
   return std::move(def).make();
 }
 

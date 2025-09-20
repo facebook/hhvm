@@ -63,7 +63,7 @@
 {{#function:creates_interaction?}}
 {{> common/fun_docblock}}
   std::pair<
-    apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction}},
+    apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction.cpp_name}},
     folly::SemiFuture<{{> types/return_type_client_no_handle_lift_unit}}>
   > eager_semifuture_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function_comma}}{{> service_common/function_param_list_client}});
 {{/function:creates_interaction?}}
@@ -122,7 +122,7 @@
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
   {{/function:stream?}}
   {{#function:creates_interaction?}}
-    {{function:created_interaction}} interactionHandle(channel_, "{{function:created_interaction}}", ctx ? ctx->getClientInterceptors() : nullptr);
+    {{function:created_interaction.cpp_name}} interactionHandle(channel_, "{{function:created_interaction.cpp_name}}", ctx ? ctx->getClientInterceptors() : nullptr);
   {{/function:creates_interaction?}}
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie({{> service_common/param_list}});

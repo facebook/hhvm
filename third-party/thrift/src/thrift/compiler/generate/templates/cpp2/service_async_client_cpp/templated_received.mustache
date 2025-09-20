@@ -32,9 +32,9 @@ void {{> service_common/client_class_name}}::fbthrift_send_{{function:cpp_name}}
                 ::apache::thrift::FunctionQualifier::{{function:qualifier}},
                 "{{service:thrift_uri_or_service_name}}"{{#function:creates_interaction?}},
                 ::apache::thrift::InteractionMethodPosition::Factory,
-                "{{function:created_interaction}}"{{/function:creates_interaction?}}{{#service:interaction?}},
+                "{{function:created_interaction.cpp_name}}"{{/function:creates_interaction?}}{{#service:interaction?}},
                 ::apache::thrift::InteractionMethodPosition::Member,
-                "{{service:name}}"{{/service:interaction?}});
+                "{{interaction:name}}"{{/service:interaction?}});
   apache::thrift::clientSendT<{{> types/function_kind}}>(std::move(request), {{!
     }}{{#if in_or_creates_interaction?}}std::move(rpcOpts){{#else}}std::forward<RpcOptions>(rpcOptions){{/if}}{{!
     }}, std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), std::move(interceptorFrameworkMetadata));

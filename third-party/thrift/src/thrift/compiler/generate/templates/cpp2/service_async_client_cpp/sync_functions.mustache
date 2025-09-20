@@ -52,7 +52,7 @@ void {{> service_common/client_class_name}}::sync_{{function:cpp_name}}(apache::
     rpcOptions.getBufferOptions());
 {{/if (not function:stream?)}}
 {{#if function:creates_interaction?}}
-  {{function:created_interaction}} interactionHandle(channel_, "{{function:created_interaction}}", interceptors_);
+  {{function:created_interaction.cpp_name}} interactionHandle(channel_, "{{function:created_interaction.cpp_name}}", interceptors_);
 {{/if function:creates_interaction?}}
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {

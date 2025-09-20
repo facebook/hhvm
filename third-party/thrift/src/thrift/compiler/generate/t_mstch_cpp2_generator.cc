@@ -622,10 +622,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
       return !f.return_type()->is_void() || f.sink_or_stream();
     });
 
-    def.property("created_interaction", [](const t_function& f) {
-      return cpp2::get_name(f.interaction().get_type());
-    });
-
     def.property("stack_arguments?", [this](const t_function& function) {
       return cpp2::is_stack_arguments(compiler_options(), function);
     });
@@ -1289,8 +1285,6 @@ class cpp_mstch_function : public mstch_function {
         {
             {"function:eb", &cpp_mstch_function::event_based},
             {"function:stack_arguments?", &cpp_mstch_function::stack_arguments},
-            {"function:created_interaction",
-             &cpp_mstch_function::created_interaction},
             {"function:sync_returns_by_outparam?",
              &cpp_mstch_function::sync_returns_by_outparam},
             {"function:prefixed_name", &cpp_mstch_function::prefixed_name},
@@ -1310,9 +1304,6 @@ class cpp_mstch_function : public mstch_function {
   }
   mstch::node stack_arguments() {
     return cpp2::is_stack_arguments(context_.options, *function_);
-  }
-  mstch::node created_interaction() {
-    return cpp2::get_name(function_->interaction().get_type());
   }
   mstch::node sync_returns_by_outparam() {
     return is_complex_return(function_->return_type()->get_true_type()) &&

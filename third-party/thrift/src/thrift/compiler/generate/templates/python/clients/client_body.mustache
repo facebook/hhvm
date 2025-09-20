@@ -79,14 +79,14 @@ class Async({{#service:extends}}{{!
         rpc_options: _typing.Optional[RpcOptions] = None,
     ) -> {{#function:return_type}}{{!
         }}{{#function:returns_tuple?}}_typing.Tuple[{{/function:returns_tuple?}}{{!
-        }}{{#function:creates_interaction?}}{{service:name}}_{{function:created_interaction}}.Async{{!
+        }}{{#function:creates_interaction?}}{{service:name}}_{{function:created_interaction.name}}.Async{{!
             }}{{#function:sink_or_stream?}}, {{> types/pep484_return_type}}{{/function:sink_or_stream?}}{{!
             }}{{^type:void?}}, {{> types/pep484_return_type}}{{/type:void?}}{{/function:creates_interaction?}}{{!
         }}{{^function:creates_interaction?}}{{> types/pep484_return_type}}{{/function:creates_interaction?}}{{!
         }}{{#function:returns_tuple?}}]{{/function:returns_tuple?}}{{!
     }}{{/function:return_type}}:
         {{#function:creates_interaction?}}
-        _fbthrift_interaction = self.create{{function:created_interaction}}()
+        _fbthrift_interaction = self.create{{function:created_interaction.name}}()
         {{/function:creates_interaction?}}
         _fbthrift_resp = await self._send_request(
             {{^service:interaction?}}"{{service:name}}"{{/service:interaction?}}{{#service:interaction?}}"{{service:parent_service_name}}"{{/service:interaction?}},
@@ -97,7 +97,7 @@ class Async({{#service:extends}}{{!
             qualifier = _fbthrift_FunctionQualifier.{{function:qualifier}},
             {{#function:creates_interaction?}}
             interaction_position=_fbthrift_InteractionMethodPosition.Factory,
-            interaction_name="{{function:created_interaction}}",
+            interaction_name="{{function:created_interaction.name}}",
             created_interaction = _fbthrift_interaction,
             {{/function:creates_interaction?}}
             {{#service:interaction?}}

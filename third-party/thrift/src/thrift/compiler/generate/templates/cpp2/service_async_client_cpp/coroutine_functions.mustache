@@ -35,7 +35,7 @@ folly::coro::Task<{{> types/return_type_client}}> {{> service_common/client_clas
   auto wrappedCallback = {{#if function:stream?}}apache::thrift::createBiDiClientCallback{{#else}}apache::thrift::createSinkClientCallback{{/if}}(
     apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback)));
 {{#function:creates_interaction?}}
-  {{function:created_interaction}} interactionHandle(channel_, "{{function:created_interaction}}", interceptors_);
+  {{function:created_interaction.cpp_name}} interactionHandle(channel_, "{{function:created_interaction.cpp_name}}", interceptors_);
 {{/function:creates_interaction?}}
 
   if (ctx != nullptr) {

@@ -40,7 +40,7 @@ folly::SemiFuture<{{> types/return_type_client_lift_unit}}> {{> service_common/c
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
 {{/function:stream?}}
 {{#function:creates_interaction?}}
-  {{function:created_interaction}} interactionHandle(channel_, "{{function:created_interaction}}", interceptors_);
+  {{function:created_interaction.cpp_name}} interactionHandle(channel_, "{{function:created_interaction.cpp_name}}", interceptors_);
 {{/function:creates_interaction?}}
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
@@ -114,11 +114,11 @@ folly::SemiFuture<{{> types/return_type_client_lift_unit}}> {{> service_common/c
 
 {{#function:creates_interaction?}}
 std::pair<
-  apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction}},
+  apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction.cpp_name}},
   folly::SemiFuture<{{> types/return_type_client_no_handle_lift_unit}}>
 > {{> service_common/client_class_name}}::eager_semifuture_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function_comma}}{{> service_common/function_param_list_client}}) {
   auto callbackAndFuture = makeSemiFutureCallback(recv_wrapped_{{function:cpp_name}}, channel_);
-  {{function:created_interaction}} interactionHandle(channel_, "{{function:created_interaction}}", interceptors_);
+  {{function:created_interaction.cpp_name}} interactionHandle(channel_, "{{function:created_interaction.cpp_name}}", interceptors_);
   auto callback = std::move(callbackAndFuture.first);
   {{function:cpp_name}}(rpcOptions, std::move(callback){{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function_comma}}{{> service_common/param_list}});
   return std::make_pair(std::move(interactionHandle), std::move(callbackAndFuture.second));

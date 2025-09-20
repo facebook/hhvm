@@ -81,6 +81,13 @@ int main(int argc, char** argv) {
 
   std::cout << endl;
 
+  std::cout << "#if defined(__clang__)" << endl;
+  std::cout << R"(#pragma clang diagnostic ignored "-Wstring-concatenation")"
+            << endl;
+  std::cout << "#endif" << endl;
+
+  std::cout << endl;
+
   std::cout << "namespace apache {" << endl;
   std::cout << "namespace thrift {" << endl;
   std::cout << "namespace compiler {" << endl;

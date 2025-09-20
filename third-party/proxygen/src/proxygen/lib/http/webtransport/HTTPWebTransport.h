@@ -8,19 +8,13 @@
 
 #pragma once
 
-#include <proxygen/lib/http/HTTPMessage.h>
-
 namespace proxygen {
+
+class HTTPMessage;
 
 class HTTPWebTransport {
  public:
-  static bool isConnectMessage(const proxygen::HTTPMessage& msg) {
-    constexpr std::string_view kWebTransport{"webtransport"};
-    return msg.isRequest() &&
-           msg.getMethod() == proxygen::HTTPMethod::CONNECT &&
-           msg.getUpgradeProtocol() &&
-           *msg.getUpgradeProtocol() == kWebTransport;
-  }
+  static bool isConnectMessage(const proxygen::HTTPMessage& msg);
 };
 
 } // namespace proxygen

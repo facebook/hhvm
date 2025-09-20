@@ -16,6 +16,8 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 
+#include <fmt/format.h>
+
 namespace apache::thrift::detail::md {
 
 ThriftConstValue cvBool(bool value) {
@@ -69,6 +71,27 @@ ThriftConstValuePair cvPair(ThriftConstValue&& key, ThriftConstValue&& value) {
   pair.key() = std::move(key);
   pair.value() = std::move(value);
   return pair;
+}
+
+template <class Node>
+static std::string getName(const Node& node) {
+  const auto& def = node.definition();
+  return fmt::format("{}.{}", def.program().name(), def.name());
+}
+
+GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
+    metadata::ThriftMetadata& md, const syntax_graph::EnumNode& node) {
+  auto name = getName(node);
+  auto res = md.enums()->emplace(name, metadata::ThriftEnum{});
+  GenMetadataResult<metadata::ThriftEnum> ret{!res.second, res.first->second};
+  if (ret.preExists) {
+    return ret;
+  }
+  ret.metadata.name() = std::move(name);
+  for (const auto& value : node.values()) {
+    ret.metadata.elements()[value.i32()] = value.name();
+  }
+  return ret;
 }
 
 } // namespace apache::thrift::detail::md

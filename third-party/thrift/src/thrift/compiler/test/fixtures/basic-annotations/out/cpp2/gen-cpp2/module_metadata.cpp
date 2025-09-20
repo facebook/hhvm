@@ -26,17 +26,11 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::cpp2::YourEnum>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.enums()->emplace("module.MyEnum", ::apache::thrift::metadata::ThriftEnum{});
-  if (!res.second) {
+  auto res = genEnumMetadata<::cpp2::YourEnum>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
-  enum_metadata.name() = "module.MyEnum";
-  using EnumTraits = TEnumTraits<::cpp2::YourEnum>;
-  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
-  }
-  enum_metadata.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourEnum") } }).cv_struct());
+  res.metadata.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourEnum") } }).cv_struct());
 }
 
 const ::apache::thrift::metadata::ThriftStruct&

@@ -150,7 +150,7 @@ int main(int argc, char* argv[]) {
   folly::gflags::SetCommandLineOptionWithMode(
       "logtostderr", "1", folly::gflags::SET_FLAGS_DEFAULT);
 #endif
-  folly::init(&argc, &argv, false);
+  const folly::Init init(&argc, &argv, false);
 
   EventBase evb;
 

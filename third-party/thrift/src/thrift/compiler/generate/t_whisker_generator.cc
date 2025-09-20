@@ -112,17 +112,25 @@ prototype<t_named>::ptr t_whisker_generator::make_prototype_for_named(
 }
 
 namespace {
+// mem_fn wrapper checking whether a collection is non-empty
+template <typename Self>
+auto is_non_empty_collection(auto (Self::*function)() const) {
+  return [function](const Self& self) -> whisker::object {
+    return whisker::object(!(self.*function)().empty());
+  };
+}
 
-// When a t_type is bound to a native_handle for use within Whisker templates,
-// we want to make sure that we attach the prototype of the most-derived t_type
-// subclass. This allows the following usage pattern:
-//
-//   {{#if type.struct?}}
-//     {{type.fields}}
-//     ...
-//
-// The object `type.fields` is accessible after the check for `type.struct?`
-// because this function will attach the prototype of t_struct.
+// mem_fn over a t_type, but after resolving any typedefs first
+template <typename R>
+static auto true_type_mem_fn(R (t_type::*function)() const) {
+  return [function](const t_type& self) -> whisker::object {
+    return whisker::object(
+        std::decay_t<R>((self.get_true_type()->*function)()));
+  };
+}
+
+} // namespace
+
 object resolve_derived_t_type(
     const prototype_database& proto, const t_type& self) {
   return self.visit(
@@ -155,32 +163,13 @@ object resolve_derived_t_type(
         // to Whisker to avoid additional tech debt.
         return object(proto.create<t_struct>(struct_));
       },
-      [&](const t_service&) -> object {
+      [](const t_service&) -> object {
         // This is tech debt from a time before t_interaction was moved out of
         // t_type (for return types). This case should no longer happen in
         // practice.
-        throw std::logic_error("t_type -> t_service is not supported");
+        throw whisker::eval_error("t_type -> t_service is not supported");
       });
 }
-
-// mem_fn wrapper checking whether a collection is non-empty
-template <typename Self>
-auto is_non_empty_collection(auto (Self::*function)() const) {
-  return [function](const Self& self) -> whisker::object {
-    return whisker::object(!(self.*function)().empty());
-  };
-}
-
-// mem_fn over a t_type, but after resolving any typedefs first
-template <typename R>
-static auto true_type_mem_fn(R (t_type::*function)() const) {
-  return [function](const t_type& self) -> whisker::object {
-    return whisker::object(
-        std::decay_t<R>((self.get_true_type()->*function)()));
-  };
-}
-
-} // namespace
 
 prototype<t_type>::ptr t_whisker_generator::make_prototype_for_type(
     const prototype_database& proto) const {

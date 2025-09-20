@@ -587,4 +587,19 @@ class t_whisker_generator : public t_generator {
   void initialize_context();
 };
 
+/**
+ * When a t_type is bound to a native_handle for use within Whisker templates,
+ * we want to make sure that we attach the prototype of the most-derived
+ * t_type subclass. This allows the following usage pattern:
+ *
+ *   {{#if type.struct?}}
+ *     {{type.fields}}
+ *     ...
+ *
+ * The object `type.fields` is accessible after the check for `type.struct?`
+ * because this function will attach the prototype of t_struct.
+ */
+whisker::object resolve_derived_t_type(
+    const whisker::prototype_database& proto, const t_type& self);
+
 } // namespace apache::thrift::compiler

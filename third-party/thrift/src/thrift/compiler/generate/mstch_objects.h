@@ -470,8 +470,8 @@ class mstch_service : public mstch_base {
     register_methods(
         this,
         {
-            {"self", &mstch_service::self},
-            {"service:self", &mstch_service::self},
+            {"self", &mstch_service::self_unqualified},
+            {"service:self", &mstch_service::self_service},
             // In mstch, interactions are bound as "service:*" and
             // "service:self" defaults to the t_service prototype. This provides
             // a way to access the interaction Whisker prototype from mstch
@@ -506,12 +506,23 @@ class mstch_service : public mstch_base {
 
   virtual std::string get_service_namespace(const t_program*) { return {}; }
 
-  whisker::object self() { return make_self(*service_); }
-  whisker::object self_interaction() {
-    if (const t_interaction* ex = service_->try_as<t_interaction>()) {
-      return make_self<t_interaction>(*ex);
+  /** Un-qualified self - return most derived prototype */
+  whisker::object self_unqualified() {
+    if (const t_interaction* interaction = service_->try_as<t_interaction>()) {
+      return make_self<t_interaction>(*interaction);
     }
-
+    return make_self<t_service>(*service_);
+  }
+  /**
+   * service:self - returns service prototype, but accepts interactions for
+   * backwards compatibility
+   */
+  whisker::object self_service() { return make_self<t_service>(*service_); }
+  /** interaction:self - must be an interaction */
+  whisker::object self_interaction() {
+    if (const t_interaction* interaction = service_->try_as<t_interaction>()) {
+      return make_self<t_interaction>(*interaction);
+    }
     throw whisker::eval_error("interaction:self used on non-interaction node");
   }
   mstch::node has_functions() { return !get_functions().empty(); }
@@ -657,7 +668,9 @@ class mstch_type : public mstch_base {
         });
   }
 
-  whisker::object self() { return make_self(*type_); }
+  whisker::object self() {
+    return resolve_derived_t_type(*context_.prototypes, *type_);
+  }
 
   virtual std::string get_type_namespace(const t_program*) { return ""; }
   mstch::node get_structured();
@@ -727,7 +740,9 @@ class mstch_struct : public mstch_base {
         });
   }
 
-  whisker::object self() { return make_self(*struct_); }
+  whisker::object self() {
+    return resolve_derived_t_type(*context_.prototypes, *struct_);
+  }
   mstch::node has_fields() { return struct_->has_fields(); }
   whisker::object self_exception() {
     if (const t_exception* ex = struct_->try_as<t_exception>()) {

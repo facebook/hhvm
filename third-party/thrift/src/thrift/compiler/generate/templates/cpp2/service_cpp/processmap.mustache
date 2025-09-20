@@ -23,20 +23,20 @@ const {{service:cpp_name}}AsyncProcessor::ProcessMap {{service:cpp_name}}AsyncPr
 {{/service:functions?}}
 {{#service:functions?}}
 const {{service:cpp_name}}AsyncProcessor::ProcessMap {{service:cpp_name}}AsyncProcessor::kOwnProcessMap_ {
-{{#service:functions}}{{#function:return_type}}{{^function:starts_interaction?}}
+{{#service:functions}}{{^function:starts_interaction?}}{{#function:return_type}}
   {"{{function:name}}",
     {&{{service:cpp_name}}AsyncProcessor::setUpAndProcess_{{function:cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
      &{{service:cpp_name}}AsyncProcessor::setUpAndProcess_{{function:cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
      &{{service:cpp_name}}AsyncProcessor::executeRequest_{{function:cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
      &{{service:cpp_name}}AsyncProcessor::executeRequest_{{function:cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
-{{/function:starts_interaction?}}{{/function:return_type}}{{/service:functions}}
-{{#service:interactions}}{{#service:functions}}{{#function:return_type}}
+{{/function:return_type}}{{/function:starts_interaction?}}{{/service:functions}}
+{{#service:interactions}}{{#service:functions}}
   {"{{service:name}}.{{function:name}}",
     {&{{service:parent_service_cpp_name}}AsyncProcessor::setUpAndProcess_{{interaction:name}}_{{function:cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
      &{{service:parent_service_cpp_name}}AsyncProcessor::setUpAndProcess_{{interaction:name}}_{{function:cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
      &{{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{interaction:name}}_{{function:cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
      &{{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{interaction:name}}_{{function:cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
-{{/function:return_type}}{{/service:functions}}{{/service:interactions}}
+{{/service:functions}}{{/service:interactions}}
 };
 {{/service:functions?}}
 

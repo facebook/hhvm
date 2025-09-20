@@ -21,9 +21,9 @@
 
 {{/service:functions?}}
 {{#service:functions}}{{!
-}}{{#let function_comma = (if function:params.fields? ", " null)}}{{!
-}}{{#function:return_type}}
-{{^function:starts_interaction?}}
+}}{{#let function_comma = (if function:params.fields? ", " null)}}
+{{#if (not function:starts_interaction?)}}
+{{#function:return_type}}
 //
 // Method '{{function:name}}'
 //
@@ -251,18 +251,18 @@ void {{> service_common/service_class_name}}::async_eb_{{function:cpp_name}}(
 // End of Method '{{function:name}}'
 //
 
-{{/function:starts_interaction?}}
-{{#function:starts_interaction?}}
+{{/function:return_type}}
+{{#else}}
 
-std::unique_ptr<{{> service_common/service_class_name}}::{{type:name}}If> {{> service_common/service_class_name}}::{{function:cpp_name}}() {
+std::unique_ptr<{{> service_common/service_class_name}}::{{function:created_interaction.name}}If> {{> service_common/service_class_name}}::{{function:cpp_name}}() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("{{function:name}}");
 }
 //
 // End of Method '{{function:name}}'
 //
 
-{{/function:starts_interaction?}}
-{{/function:return_type}}{{/service:functions}}{{#service:functions?}}
+{{/if (not function:starts_interaction?)}}
+{{/service:functions}}{{#service:functions?}}
 //
 // End of Service Methods
 //

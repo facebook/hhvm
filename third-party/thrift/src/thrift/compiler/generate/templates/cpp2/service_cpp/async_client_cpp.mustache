@@ -21,7 +21,9 @@ namespace {{service:qualified_namespace}} {
 {{> service_async_client_cpp/templated_received}}
 
 
-{{#service:functions}}{{#function:return_type}}{{^function:starts_interaction?}}
+{{#service:functions}}
+{{#if (not function:starts_interaction?)}}
+{{#function:return_type}}
 {{> service_async_client_cpp/function_implementation}}
 
 
@@ -52,12 +54,13 @@ void apache::thrift::Client<{{service:qualified_name}}>::{{function:cpp_name}}(f
 {{/function:virtual_client_methods?}}
 
 {{/function:oneway?}}
-{{/function:starts_interaction?}}{{#function:starts_interaction?}}
-apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{type:name}} apache::thrift::Client<{{service:qualified_name}}>::{{function:cpp_name}}() {
-  return {{type:name}}(channel_, "{{type:name}}", interceptors_);
+{{/function:return_type}}
+{{#else}}
+apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction.name}} apache::thrift::Client<{{service:qualified_name}}>::{{function:cpp_name}}() {
+  return {{function:created_interaction.name}}(channel_, "{{function:created_interaction.name}}", interceptors_);
 }
-{{/function:starts_interaction?}}
-{{/function:return_type}}{{/service:functions}}
+{{/if (not function:starts_interaction?)}}
+{{/service:functions}}
 
 {{#service:interactions}}
 

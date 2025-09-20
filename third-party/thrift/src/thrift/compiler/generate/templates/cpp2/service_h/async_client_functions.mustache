@@ -16,12 +16,12 @@
 
 }}
 {{#service:functions}}{{!
-}}{{#let function_comma = (if function:params.fields? ", " null)}}{{!
-}}{{#function:return_type}}
-{{#function:starts_interaction?}}
+}}{{#let function_comma = (if function:params.fields? ", " null)}}
+{{#if function:starts_interaction?}}
 {{> common/fun_docblock}}
-  {{type:name}} {{function:cpp_name}}();
-{{/function:starts_interaction?}}{{^function:starts_interaction?}}
+  {{function:created_interaction.name}} {{function:cpp_name}}();
+{{#else}}
+{{#function:return_type}}
 {{^function:sink?}}{{! includes bidi }}
 {{#function:legacy_client_methods?}}
 {{> common/fun_docblock}}
@@ -267,4 +267,5 @@
   folly::SemiFuture<{{> types/return_type_client_lift_unit}}> fbthrift_semifuture_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function_comma}}{{> service_common/function_param_list_client}});
 {{/function:sink?}}
  public:
-{{/function:starts_interaction?}}{{/function:return_type}}{{/service:functions}}
+{{/function:return_type}}
+{{/if function:starts_interaction?}}{{/service:functions}}

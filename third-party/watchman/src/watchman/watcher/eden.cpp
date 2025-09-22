@@ -1330,11 +1330,12 @@ class EdenView final : public QueryableView {
     std::move(stream).subscribeInline(
         [&](folly::Try<ChangedFileResult>&& changeTry) mutable {
           if (changeTry.hasException()) {
-            log(ERR,
-                "Error: ",
-                folly::exceptionStr(changeTry.exception()),
-                "\n");
+            std::string logMessage = fmt::format(
+                "Error: {}",
+                folly::exceptionStr(changeTry.exception()).toStdString());
             freshInstance = true;
+            log(ERR, logMessage, "\n");
+            ctx->freshInstanceCause = std::move(logMessage);
             return false;
           }
 
@@ -1385,6 +1386,12 @@ class EdenView final : public QueryableView {
               byFile.size() > thresholdForFreshInstance_ &&
               ctx->query->empty_on_fresh_instance) {
             freshInstance = true;
+            std::string logMessage = fmt::format(
+                "Change amount {} exceeded threshold {}",
+                byFile.size(),
+                thresholdForFreshInstance_);
+            log(ERR, logMessage, "\n");
+            ctx->freshInstanceCause = std::move(logMessage);
             return false;
           }
 
@@ -1392,6 +1399,7 @@ class EdenView final : public QueryableView {
         });
 
     if (freshInstance) {
+      // ctx logging done when setting freshInstance to true
       result = makeFreshInstance(ctx);
     } else {
       for (auto& [name, count] : byFile) {
@@ -1418,6 +1426,11 @@ class EdenView final : public QueryableView {
       // didn't match the current root which means that eden was restarted.
       // We need to translate this to a fresh instance result set and
       // return a list of all possible matching files.
+
+      // Append here since sometimes the since.is_fresh_instance also sets a ctx
+      // msg
+      ctx->freshInstanceCause += ", Since fresh instance in getAllChangesSince";
+      log(ERR, ctx->freshInstanceCause, "\n");
       return makeFreshInstance(ctx);
     }
     folly::stop_watch<std::chrono::microseconds> timer;
@@ -1438,16 +1451,21 @@ class EdenView final : public QueryableView {
       }
       // mountGeneration differs, or journal was truncated,
       // so treat this as equivalent to a fresh instance result
+      std::string logMessage = fmt::format(
+          "EdenFS journal truncated or mount generation changed: {}",
+          err.what());
+      log(ERR, logMessage, "\n");
+      ctx->freshInstanceCause = std::move(logMessage);
       return makeFreshInstance(ctx);
     } catch (const SCMError& err) {
       // Most likely this means a checkout occurred but we encountered
       // an error trying to get the list of files changed between the two
       // commits.  Generate a fresh instance result since we were unable
       // to compute the list of files changed.
-      log(ERR,
-          "SCM error while processing EdenFS journal update: ",
-          err.what(),
-          "\n");
+      std::string logMessage = fmt::format(
+          "SCM error while processing EdenFS journal update: {}", err.what());
+      log(ERR, logMessage, "\n");
+      ctx->freshInstanceCause = std::move(logMessage);
       return makeFreshInstance(ctx);
     }
   }

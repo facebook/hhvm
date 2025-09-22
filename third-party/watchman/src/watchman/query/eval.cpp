@@ -257,7 +257,9 @@ static void execute_common(
     // or if the query used the changes_since_mergebase_with generator
     if (sample->will_log || eventCount == samplingRate ||
         (!ctx->generatorType.empty() &&
-         ctx->generatorType == "scm_files_changed_since_mergebase_with")) {
+         ctx->generatorType == "scm_files_changed_since_mergebase_with") ||
+        (!ctx->freshInstanceCause.empty() &&
+         ctx->freshInstanceCause != "New instance")) {
       addRootMetadataToEvent(root_metadata, *queryExecute);
       queryExecute->event_count = eventCount != samplingRate ? 0 : eventCount;
       queryExecute->fresh_instance = res->isFreshInstance;
@@ -287,6 +289,10 @@ static void execute_common(
           ? facebook::eden::ProcessInfoCache::cleanProcessCommandline(
                 std::move(clientInfo.clientInfo.value().get().name))
           : "";
+
+      if (!ctx->freshInstanceCause.empty()) {
+        queryExecute->fresh_instance_cause = ctx->freshInstanceCause;
+      }
 
       getLogger()->logEvent(*queryExecute);
     }
@@ -503,6 +509,17 @@ QueryResult w_query_execute(
                                       ctx.lastAgeOutTickValueAtStartOfQuery,
                                       &root->inner.cursors)
                                 : QuerySince{};
+
+  // If there is a since spec, check if it is fresh instance
+  // By default new instances are fresh instance
+  if (ctx.since.is_fresh_instance()) {
+    if (query->since_spec) {
+      ctx.freshInstanceCause = "Since spec eval resulted in fresh instance";
+      log(DBG, "Since spec eval resulted in fresh instance\n");
+    } else {
+      ctx.freshInstanceCause = "New instance";
+    }
+  }
 
   if (query->bench_iterations > 0) {
     for (uint32_t i = 0; i < query->bench_iterations; ++i) {

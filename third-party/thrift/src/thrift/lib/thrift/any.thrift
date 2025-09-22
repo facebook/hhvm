@@ -36,7 +36,6 @@ namespace py thrift.lib.thrift.any
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {"thrift.patch.uri": "facebook.com/thrift/op/AnyPatch"},
 }
-@thrift.Uri{value = ""}
 typedef any_rep.AnyStruct Any
 
 /** A type that can hold any subset of 'any' value.
@@ -44,7 +43,6 @@ typedef any_rep.AnyStruct Any
  * Unlike `Any`, `SemiAny` may not hold enough information to deserialized the
  * stored value.
  */
-@thrift.Uri{value = ""}
 typedef any_rep.SemiAnyStruct SemiAny
 
 /** A list of SemiAny values, accessible by ValueId. */

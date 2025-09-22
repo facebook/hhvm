@@ -83,13 +83,11 @@ enum BaseTypeEnum {
   Map = 16,
 }
 
-@thrift.Uri{value = ""}
 @cpp.Adapter{
   name = "::apache::thrift::InlineAdapter<::apache::thrift::type::Protocol>",
 }
 typedef type_rep.ProtocolUnion Protocol
 
-@thrift.Uri{value = ""}
 @cpp.Adapter{
   name = "::apache::thrift::InlineAdapter<::apache::thrift::type::Type>",
 }

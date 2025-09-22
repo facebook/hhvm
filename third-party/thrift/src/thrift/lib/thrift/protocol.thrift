@@ -36,9 +36,7 @@ namespace py.asyncio apache_thrift_asyncio.protocol
 namespace go thrift.lib.thrift.protocol
 namespace py thrift.lib.thrift.protocol
 
-@thrift.Uri{value = ""}
 typedef protocol_detail.Object Object
-@thrift.Uri{value = ""}
 typedef protocol_detail.Value Value
 
 // Represents serialized data of unmasked fields.

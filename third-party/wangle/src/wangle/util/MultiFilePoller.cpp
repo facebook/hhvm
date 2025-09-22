@@ -63,7 +63,7 @@ MultiFilePoller::CallbackId MultiFilePoller::registerFiles(
       pathsToCallbackIds_[path].push_back(cbId);
       // Use reference to key of pathsToCallbackIds_ map to avoid duplicates.
       const auto& key = pathsToCallbackIds_.find(path)->first;
-      cbPaths.push_back(key);
+      cbPaths.emplace_back(key);
     }
     idsToCallbacks_.emplace(cbId, CallbackDetail(cbPaths, std::move(cb)));
   }

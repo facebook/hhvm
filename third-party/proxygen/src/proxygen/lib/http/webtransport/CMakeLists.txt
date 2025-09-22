@@ -17,8 +17,6 @@ target_include_directories(
     $<BUILD_INTERFACE:${PROXYGEN_FBCODE_ROOT}>
     $<BUILD_INTERFACE:${PROXYGEN_GENERATED_ROOT}>
     $<INSTALL_INTERFACE:include/>
-    ${LIBGMOCK_INCLUDE_DIR}
-    ${LIBGTEST_INCLUDE_DIR}
 )
 target_compile_options(
     quicwebtransport PRIVATE

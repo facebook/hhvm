@@ -288,7 +288,6 @@ target_include_directories(
     $<BUILD_INTERFACE:${PROXYGEN_FBCODE_ROOT}>
     $<BUILD_INTERFACE:${PROXYGEN_GENERATED_ROOT}>
     $<INSTALL_INTERFACE:include/>
-    ${c-ares_INCLUDE_DIR}
 )
 target_compile_options(
     proxygen PRIVATE

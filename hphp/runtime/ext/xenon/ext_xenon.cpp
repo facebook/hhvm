@@ -19,6 +19,8 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/implicit-context.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/server/http-server.h"
@@ -79,6 +81,7 @@ const StaticString
   s_function("function"),
   s_file("file"),
   s_interpreter("Interpreter"),
+  s_implicit_context("implicitContext"),
   s_isWait("ioWaitSample"),
   s_tid("tid"),
   s_jit("Jit"),
@@ -229,7 +232,8 @@ Array XenonRequestLocalData::createResponse() {
       s_xbox_workers, frame[s_xbox_workers],
       s_pagelets_workers, frame[s_pagelets_workers],
       s_http_workers, frame[s_http_workers],
-      s_cli_workers, frame[s_cli_workers]
+      s_cli_workers, frame[s_cli_workers],
+      s_implicit_context, frame[s_implicit_context]
     ));
   }
   return stacks.toArray();
@@ -261,6 +265,15 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
                              .fromWaitHandle(wh)
                              .withMetadata()
                              .ignoreArgs());
+  
+  auto const obj = *ImplicitContext::activeCtx;
+  auto const context = Native::data<ImplicitContext>(obj);
+  auto& existing_m_map = context->m_map;
+  DictInit ic_state(existing_m_map.size());
+  for (auto const& p : existing_m_map) {
+    ic_state.set(String(p.first->nameStr()), p.second.first);
+  }
+
   Array dict = make_dict_array(
     s_time_ns, now_ns,
     s_lastTriggerTime, triggerTime,
@@ -275,7 +288,9 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
     Cfg::Xenon::TrackActiveWorkers ?
     (HttpServer::Server ? HttpServer::Server->getPageServer()->getActiveWorker() : 0) : -1,
     s_cli_workers,
-    Cfg::Xenon::TrackActiveWorkers ? cli_server_active_workers() : -1
+    Cfg::Xenon::TrackActiveWorkers ? cli_server_active_workers() : -1,
+    s_implicit_context,
+    ic_state.toArray()
   );
   m_stackSnapshots.append(dict);
 

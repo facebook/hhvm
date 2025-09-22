@@ -83,5 +83,6 @@ function entrypoint_xenon_init(): void {
   VS($stacks[0]['sourceType'] != null, true);
   VS($stacks[0]['timeNano'] != null, true);
   VS($stacks[0]['CliWorkers'] != null, true);
+  VS($stacks[0]['implicitContext'] != null, true);
   verifyTestRun($stacks, $required_functions, $optional_functions);
 }

@@ -26,11 +26,32 @@ cpp_include "mcrouter/lib/carbon/test/gen/BMessages.h"
 namespace cpp2 carbon.test.A.thrift
 namespace py3 carbon.test.A.thrift
 
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+",
+"cpp.virtual": "1"
+
+  },
+}
 struct TestARequest {
   1: carbon.IOBufKey key
   2: bool dummy2
   3: optional ticket_rep_TicketRep ticket
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -42,25 +63,14 @@ struct TestARequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct TestAReply {
   1: carbon_result.Result result
   2: i32 valInt32
-}(cpp.methods = "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-cpp.virtual
-)
+}
 
 @cpp.Type{name = "carbon::util::ThriftWrapperStruct<graphene::ticket::cpp2::TicketRep>"}
 typedef ticket_rep.TicketRep ticket_rep_TicketRep

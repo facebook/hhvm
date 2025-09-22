@@ -41,11 +41,9 @@ enum MyEnum {
   C = 2
 }
 
-union TestUnionThrift {
-  1: carbon.ui64 a
-  2: carbon.ui32 b
-  3: carbon.ui16 c
-}(cpp.methods = "
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
  public:
   template <class V>
   void visitFields(V&& v);
@@ -62,10 +60,36 @@ union TestUnionThrift {
 
   template <class V>
   void foreachMember(V&& v) const;
-")
+"
+  },
+}
+union TestUnionThrift {
+  1: carbon.ui64 a
+  2: carbon.ui32 b
+  3: carbon.ui16 c
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+"
+  },
+}
 struct TinyStruct {
   1: i64 foo
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -76,10 +100,15 @@ struct TinyStruct {
 
   void deserialize(carbon::CarbonProtocolReader& reader);
 
-")
+"
+  },
+}
 struct MyBaseStruct {
   1: i64 baseInt64Member
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -90,7 +119,9 @@ struct MyBaseStruct {
 
   void deserialize(carbon::CarbonProtocolReader& reader);
 
-")
+"
+  },
+}
 struct MySimpleStruct {
   @thrift.Mixin
   -1: MyBaseStruct myBaseStruct
@@ -98,7 +129,10 @@ struct MySimpleStruct {
   2: string stringMember
   3: MyEnum enumMember
   4: list<string> vectorMember
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -109,7 +143,11 @@ struct MySimpleStruct {
 
   void deserialize(carbon::CarbonProtocolReader& reader);
 
-")
+",
+"cpp.virtual": "1"
+
+  },
+}
 struct ThriftTestRequest {
   @thrift.Mixin
   -2: TinyStruct tinyStruct
@@ -118,7 +156,10 @@ struct ThriftTestRequest {
   1: carbon.IOBufKey key
   2: bool testBool
   3: byte testInt8
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -130,12 +171,17 @@ struct ThriftTestRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct ThriftTestReply {
   1: carbon_result.Result result
   2: string message
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -147,8 +193,10 @@ struct ThriftTestReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct DummyThriftRequest {
   1: carbon.IOBufKey key
   2: bool testBool
@@ -169,7 +217,10 @@ struct DummyThriftRequest {
   17: optional bool testOptionalKeywordBool
   18: optional string testOptionalKeywordString
   19: optional carbon.IOBuf testOptionalKeywordIobuf
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -181,12 +232,17 @@ struct DummyThriftRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct DummyThriftReply {
   1: carbon_result.Result result
   2: string message
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -198,15 +254,20 @@ struct DummyThriftReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct CustomRequest {
   1: carbon.IOBufKey key
   2: byte testInt8
   3: Timestamp_i64 timestamp
   4: optional CustomAdapterTypeI64 customAdapterTypeI64
   5: CustomAdapterTypeBinary customAdapterTypeBinary
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -218,25 +279,14 @@ struct CustomRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct CustomReply {
   1: carbon_result.Result result
   2: i32 valInt32
-}(cpp.methods = "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-cpp.virtual
-)
+}
 
 @cpp.Adapter{name = "::apache::thrift::IndirectionAdapter<Timestamp>"}
 typedef i64 Timestamp_i64

@@ -53,9 +53,9 @@ exception CarbonResultInvalidRequest {
   1: string message
 }
 
-struct McVersionRequest {
-  1: carbon.IOBufKey key
-}(cpp.methods = "
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -67,14 +67,40 @@ struct McVersionRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
+struct McVersionRequest {
+  1: carbon.IOBufKey key
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+",
+"cpp.virtual": "1"
+
+  },
+}
 struct McVersionReply {
   1: carbon_result.Result result
   2: carbon.IOBuf value
   3: string message
   4: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -86,11 +112,16 @@ struct McVersionReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McStatsRequest {
   1: carbon.IOBufKey key
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -102,14 +133,19 @@ struct McStatsRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McStatsReply {
   1: carbon_result.Result result
   2: string message
   3: list<string> stats
   4: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -121,11 +157,16 @@ struct McStatsReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McShutdownRequest {
   1: carbon.IOBufKey key
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -137,13 +178,18 @@ struct McShutdownRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McShutdownReply {
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -155,11 +201,16 @@ struct McShutdownReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McQuitRequest {
   1: carbon.IOBufKey key
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -171,13 +222,18 @@ struct McQuitRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McQuitReply {
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -189,11 +245,16 @@ struct McQuitReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McExecRequest {
   1: carbon.IOBufKey key
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -205,14 +266,19 @@ struct McExecRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McExecReply {
   1: carbon_result.Result result
   2: string response
   3: string message
   4: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -224,11 +290,16 @@ struct McExecReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct GoAwayAcknowledgement {
 
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -240,23 +311,12 @@ struct GoAwayAcknowledgement {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct GoAwayRequest {
   1: carbon_result.Result result
   2: string reason
-}(cpp.methods = "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-cpp.virtual
-)
+}
 

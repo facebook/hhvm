@@ -30,6 +30,24 @@ enum EnumUInt32 {
   YESTERDAY = 2
 }
 
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+",
+"cpp.virtual": "1"
+
+  },
+}
 struct HelloRequest {
   1: carbon.IOBufKey key
   2: carbon.ui64 shardId
@@ -39,7 +57,10 @@ struct HelloRequest {
   6: carbon.ui64 beforeLatencyUs
   7: carbon.ui64 afterLatencyUs
   8: carbon.ui32 clientVersion
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -51,12 +72,17 @@ struct HelloRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct HelloReply {
   1: carbon_result.Result result
   2: string message
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -68,12 +94,17 @@ struct HelloReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct GoodbyeRequest {
   1: carbon.IOBufKey key
   2: carbon.ui64 shardId
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -85,23 +116,12 @@ struct GoodbyeRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct GoodbyeReply {
   1: carbon_result.Result result
   2: string message
-}(cpp.methods = "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-cpp.virtual
-)
+}
 

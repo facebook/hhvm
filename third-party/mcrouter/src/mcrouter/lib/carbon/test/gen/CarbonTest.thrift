@@ -23,6 +23,26 @@ cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
 namespace cpp2 carbon.test.thrift
 namespace py3 carbon.test.thrift
 
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+",
+"cpp.virtual": "1"
+,
+"cpp.noncomparable": "1"
+
+  },
+}
 struct TestRequest {
   1: carbon.IOBufKey key
   2: bool dummy2
@@ -66,7 +86,10 @@ struct TestRequest {
   41: optional string testOptionalKeywordString
   42: optional carbon.IOBuf testOptionalKeywordIobuf
   43: optional bool testOptionalKeywordBool
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -78,15 +101,18 @@ struct TestRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-,
-cpp.noncomparable
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct TestReply {
   1: carbon_result.Result result
   2: i32 valInt32
   3: i64 valInt64
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -98,11 +124,16 @@ struct TestReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct TestRequestStringKey {
   1: carbon.StringKey key
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -114,11 +145,16 @@ struct TestRequestStringKey {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct TestReplyStringKey {
   1: carbon_result.Result result
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -129,28 +165,15 @@ struct TestReplyStringKey {
 
   void deserialize(carbon::CarbonProtocolReader& reader);
 
-",
-cpp.virtual
-)
+"
+  },
+}
 struct TestOptionalBool {
   1: optional bool optionalBool
-}(cpp.methods = "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-")
-union TestUnion {
-  1: carbon.ui64 a
-  2: carbon.ui32 b
-  3: carbon.ui16 c
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
  public:
   template <class V>
   void visitFields(V&& v);
@@ -167,7 +190,30 @@ union TestUnion {
 
   template <class V>
   void foreachMember(V&& v) const;
-")
+"
+  },
+}
+union TestUnion {
+  1: carbon.ui64 a
+  2: carbon.ui32 b
+  3: carbon.ui16 c
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+"
+  },
+}
 struct TestF14Containers {
   1: string_to_i64_folly_F14FastMap fastMap
   2: string_to_i64_folly_F14NodeMap nodeMap
@@ -177,7 +223,10 @@ struct TestF14Containers {
   6: i64_folly_F14FastSet nodeSet
   7: i64_folly_F14FastSet valueSet
   8: i64_folly_F14FastSet vectorSet
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -188,7 +237,9 @@ struct TestF14Containers {
 
   void deserialize(carbon::CarbonProtocolReader& reader);
 
-")
+"
+  },
+}
 struct TestStdContainers {
   1: string_to_i64_std_unordered_map fastMap
   2: string_to_i64_std_unordered_map nodeMap
@@ -198,18 +249,7 @@ struct TestStdContainers {
   6: i64_std_unordered_set nodeSet
   7: i64_std_unordered_set valueSet
   8: i64_std_unordered_set vectorSet
-}(cpp.methods = "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-")
+}
 @cpp.EnumType{type = cpp.EnumUnderlyingType.U32}
 enum EnumUInt32 {
   AAA = 0,
@@ -252,9 +292,28 @@ enum EnumInt8 {
   CCC = 2
 }
 
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+"
+  },
+}
 struct StructWithEnumUInt32 {
   1: EnumUInt32 testEnum
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -265,10 +324,15 @@ struct StructWithEnumUInt32 {
 
   void deserialize(carbon::CarbonProtocolReader& reader);
 
-")
+"
+  },
+}
 struct StructWithEnumUInt16 {
   1: EnumUInt16 testEnum
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -279,10 +343,15 @@ struct StructWithEnumUInt16 {
 
   void deserialize(carbon::CarbonProtocolReader& reader);
 
-")
+"
+  },
+}
 struct StructWithEnumUInt8 {
   1: EnumUInt8 testEnum
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -293,10 +362,15 @@ struct StructWithEnumUInt8 {
 
   void deserialize(carbon::CarbonProtocolReader& reader);
 
-")
+"
+  },
+}
 struct StructWithEnumInt32 {
   1: EnumInt32 testEnum
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -307,10 +381,15 @@ struct StructWithEnumInt32 {
 
   void deserialize(carbon::CarbonProtocolReader& reader);
 
-")
+"
+  },
+}
 struct StructWithEnumInt16 {
   1: EnumInt16 testEnum
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -321,10 +400,15 @@ struct StructWithEnumInt16 {
 
   void deserialize(carbon::CarbonProtocolReader& reader);
 
-")
+"
+  },
+}
 struct StructWithEnumInt8 {
   1: EnumInt8 testEnum
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -335,11 +419,16 @@ struct StructWithEnumInt8 {
 
   void deserialize(carbon::CarbonProtocolReader& reader);
 
-")
+"
+  },
+}
 struct StructWithOptionalEnumUInt32 {
   1: optional EnumUInt32 testEnum
   2: optional EnumUInt32 testEmptyEnum
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -350,11 +439,16 @@ struct StructWithOptionalEnumUInt32 {
 
   void deserialize(carbon::CarbonProtocolReader& reader);
 
-")
+"
+  },
+}
 struct StructWithOptionalEnumUInt16 {
   1: optional EnumUInt16 testEnum
   2: optional EnumUInt16 testEmptyEnum
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -365,11 +459,16 @@ struct StructWithOptionalEnumUInt16 {
 
   void deserialize(carbon::CarbonProtocolReader& reader);
 
-")
+"
+  },
+}
 struct StructWithOptionalEnumUInt8 {
   1: optional EnumUInt8 testEnum
   2: optional EnumUInt8 testEmptyEnum
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -380,11 +479,16 @@ struct StructWithOptionalEnumUInt8 {
 
   void deserialize(carbon::CarbonProtocolReader& reader);
 
-")
+"
+  },
+}
 struct StructWithOptionalEnumInt32 {
   1: optional EnumInt32 testEnum
   2: optional EnumInt32 testEmptyEnum
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -395,11 +499,16 @@ struct StructWithOptionalEnumInt32 {
 
   void deserialize(carbon::CarbonProtocolReader& reader);
 
-")
+"
+  },
+}
 struct StructWithOptionalEnumInt16 {
   1: optional EnumInt16 testEnum
   2: optional EnumInt16 testEmptyEnum
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -410,22 +519,13 @@ struct StructWithOptionalEnumInt16 {
 
   void deserialize(carbon::CarbonProtocolReader& reader);
 
-")
+"
+  },
+}
 struct StructWithOptionalEnumInt8 {
   1: optional EnumInt8 testEnum
   2: optional EnumInt8 testEmptyEnum
-}(cpp.methods = "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-")
+}
 
 @cpp.Type{name = "std::unordered_map<std::string, std::string>"}
 typedef map<string, string> string_to_string_std_unordered_map

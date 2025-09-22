@@ -24,6 +24,22 @@ namespace cpp2 facebook.memcache.thrift
 namespace py3 facebook.memcache.thrift
 namespace hack memcache
 
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+"
+  },
+}
 struct MemcacheRequestCommon {
   1: optional carbon.ui64 beforeLatencyUs
   2: optional carbon.ui64 afterLatencyUs
@@ -31,7 +47,10 @@ struct MemcacheRequestCommon {
   4: optional i64 productId
   5: optional i32 regionalizationEntity
   6: optional carbon.ui32 mcTenantId
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -42,27 +61,15 @@ struct MemcacheRequestCommon {
 
   void deserialize(carbon::CarbonProtocolReader& reader);
 
-")
+"
+  },
+}
 struct MemcacheReplyCommon {
   1: carbon.ui32 replySourceBitMask
-}(cpp.methods = "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-")
-struct McGetRequest {
-  @thrift.Mixin
-  -1: MemcacheRequestCommon memcacheRequestCommon
-  1: carbon.IOBufKey key
-  2: carbon.ui64 flags
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -74,8 +81,34 @@ struct McGetRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
+struct McGetRequest {
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
+  1: carbon.IOBufKey key
+  2: carbon.ui64 flags
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+",
+"cpp.virtual": "1"
+
+  },
+}
 struct McGetReply {
   @thrift.Mixin
   -1: MemcacheReplyCommon memcacheReplyCommon
@@ -85,7 +118,10 @@ struct McGetReply {
   4: string message
   5: i16 appSpecificErrorCode
   6: optional i32 exptime
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -97,8 +133,10 @@ struct McGetReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McSetRequest {
   @thrift.Mixin
   -1: MemcacheRequestCommon memcacheRequestCommon
@@ -106,7 +144,10 @@ struct McSetRequest {
   2: i32 exptime
   3: carbon.ui64 flags
   4: carbon.IOBuf value
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -118,8 +159,10 @@ struct McSetRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McSetReply {
   @thrift.Mixin
   -1: MemcacheReplyCommon memcacheReplyCommon
@@ -128,7 +171,10 @@ struct McSetReply {
   3: carbon.IOBuf value
   4: string message
   5: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -140,8 +186,10 @@ struct McSetReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McDeleteRequest {
   @thrift.Mixin
   -1: MemcacheRequestCommon memcacheRequestCommon
@@ -150,7 +198,10 @@ struct McDeleteRequest {
   3: i32 exptime
   4: carbon.IOBuf value
   5: string_to_carbon_ui64_std_unordered_map attributes
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -162,8 +213,10 @@ struct McDeleteRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McDeleteReply {
   @thrift.Mixin
   -1: MemcacheReplyCommon memcacheReplyCommon
@@ -172,7 +225,10 @@ struct McDeleteReply {
   3: carbon.IOBuf value
   4: string message
   5: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -184,14 +240,19 @@ struct McDeleteReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McLeaseGetRequest {
   @thrift.Mixin
   -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
   2: carbon.ui64 flags
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -203,8 +264,10 @@ struct McLeaseGetRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McLeaseGetReply {
   @thrift.Mixin
   -1: MemcacheReplyCommon memcacheReplyCommon
@@ -215,7 +278,10 @@ struct McLeaseGetReply {
   5: string message
   6: i16 appSpecificErrorCode
   7: optional i32 exptime
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -227,8 +293,10 @@ struct McLeaseGetReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McLeaseSetRequest {
   @thrift.Mixin
   -1: MemcacheRequestCommon memcacheRequestCommon
@@ -237,7 +305,10 @@ struct McLeaseSetRequest {
   3: carbon.ui64 flags
   4: carbon.IOBuf value
   5: i64 leaseToken
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -249,15 +320,20 @@ struct McLeaseSetRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McLeaseSetReply {
   @thrift.Mixin
   -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -269,8 +345,10 @@ struct McLeaseSetReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McAddRequest {
   @thrift.Mixin
   -1: MemcacheRequestCommon memcacheRequestCommon
@@ -278,7 +356,10 @@ struct McAddRequest {
   2: i32 exptime
   3: carbon.ui64 flags
   4: carbon.IOBuf value
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -290,15 +371,20 @@ struct McAddRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McAddReply {
   @thrift.Mixin
   -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -310,8 +396,10 @@ struct McAddReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McReplaceRequest {
   @thrift.Mixin
   -1: MemcacheRequestCommon memcacheRequestCommon
@@ -319,7 +407,10 @@ struct McReplaceRequest {
   2: i32 exptime
   3: carbon.ui64 flags
   4: carbon.IOBuf value
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -331,15 +422,20 @@ struct McReplaceRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McReplaceReply {
   @thrift.Mixin
   -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -351,14 +447,19 @@ struct McReplaceReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McGetsRequest {
   @thrift.Mixin
   -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
   2: carbon.ui64 flags
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -370,8 +471,10 @@ struct McGetsRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McGetsReply {
   @thrift.Mixin
   -1: MemcacheReplyCommon memcacheReplyCommon
@@ -381,7 +484,10 @@ struct McGetsReply {
   4: carbon.ui64 flags
   5: string message
   6: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -393,8 +499,10 @@ struct McGetsReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McCasRequest {
   @thrift.Mixin
   -1: MemcacheRequestCommon memcacheRequestCommon
@@ -403,7 +511,10 @@ struct McCasRequest {
   3: carbon.ui64 flags
   4: carbon.IOBuf value
   5: carbon.ui64 casToken
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -415,15 +526,20 @@ struct McCasRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McCasReply {
   @thrift.Mixin
   -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -435,15 +551,20 @@ struct McCasReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McIncrRequest {
   @thrift.Mixin
   -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
   2: i64 delta
   3: carbon.ui64 flags
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -455,8 +576,10 @@ struct McIncrRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McIncrReply {
   @thrift.Mixin
   -1: MemcacheReplyCommon memcacheReplyCommon
@@ -464,7 +587,10 @@ struct McIncrReply {
   2: i64 delta
   3: string message
   4: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -476,15 +602,20 @@ struct McIncrReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McDecrRequest {
   @thrift.Mixin
   -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
   2: i64 delta
   3: carbon.ui64 flags
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -496,8 +627,10 @@ struct McDecrRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McDecrReply {
   @thrift.Mixin
   -1: MemcacheReplyCommon memcacheReplyCommon
@@ -505,7 +638,10 @@ struct McDecrReply {
   2: i64 delta
   3: string message
   4: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -517,14 +653,19 @@ struct McDecrReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McMetagetRequest {
   @thrift.Mixin
   -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
   2: carbon.ui64 flags
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -536,8 +677,10 @@ struct McMetagetRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McMetagetReply {
   @thrift.Mixin
   -1: MemcacheReplyCommon memcacheReplyCommon
@@ -548,7 +691,10 @@ struct McMetagetReply {
   5: string ipAddress
   6: string message
   7: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -560,8 +706,10 @@ struct McMetagetReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McAppendRequest {
   @thrift.Mixin
   -1: MemcacheRequestCommon memcacheRequestCommon
@@ -569,7 +717,10 @@ struct McAppendRequest {
   2: i32 exptime
   3: carbon.ui64 flags
   4: carbon.IOBuf value
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -581,15 +732,20 @@ struct McAppendRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McAppendReply {
   @thrift.Mixin
   -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -601,8 +757,10 @@ struct McAppendReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McPrependRequest {
   @thrift.Mixin
   -1: MemcacheRequestCommon memcacheRequestCommon
@@ -610,7 +768,10 @@ struct McPrependRequest {
   2: i32 exptime
   3: carbon.ui64 flags
   4: carbon.IOBuf value
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -622,15 +783,20 @@ struct McPrependRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McPrependReply {
   @thrift.Mixin
   -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -642,14 +808,19 @@ struct McPrependReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McTouchRequest {
   @thrift.Mixin
   -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
   2: i32 exptime
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -661,15 +832,20 @@ struct McTouchRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McTouchReply {
   @thrift.Mixin
   -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -681,13 +857,18 @@ struct McTouchReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McFlushReRequest {
   @thrift.Mixin
   -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -699,15 +880,20 @@ struct McFlushReRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McFlushReReply {
   @thrift.Mixin
   -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -719,14 +905,19 @@ struct McFlushReReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McFlushAllRequest {
   @thrift.Mixin
   -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
   2: i32 delay
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -738,15 +929,20 @@ struct McFlushAllRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McFlushAllReply {
   @thrift.Mixin
   -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -758,14 +954,19 @@ struct McFlushAllReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McGatRequest {
   @thrift.Mixin
   -1: MemcacheRequestCommon memcacheRequestCommon
   1: i32 exptime
   2: carbon.IOBufKey key
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -777,8 +978,10 @@ struct McGatRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McGatReply {
   @thrift.Mixin
   -1: MemcacheReplyCommon memcacheReplyCommon
@@ -787,7 +990,10 @@ struct McGatReply {
   3: carbon.ui64 flags
   4: string message
   5: i16 appSpecificErrorCode
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -799,14 +1005,19 @@ struct McGatReply {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McGatsRequest {
   @thrift.Mixin
   -1: MemcacheRequestCommon memcacheRequestCommon
   1: i32 exptime
   2: carbon.IOBufKey key
-}(cpp.methods = "
+}
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "
   template <class V>
   void visitFields(V&& v);
   template <class V>
@@ -818,8 +1029,10 @@ struct McGatsRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ",
-cpp.virtual
-)
+"cpp.virtual": "1"
+
+  },
+}
 struct McGatsReply {
   @thrift.Mixin
   -1: MemcacheReplyCommon memcacheReplyCommon
@@ -829,20 +1042,7 @@ struct McGatsReply {
   4: carbon.ui64 flags
   5: string message
   6: i16 appSpecificErrorCode
-}(cpp.methods = "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-cpp.virtual
-)
+}
 
 @cpp.Type{name = "std::unordered_map<std::string, uint64_t>"}
 typedef map<string, carbon.ui64> string_to_carbon_ui64_std_unordered_map

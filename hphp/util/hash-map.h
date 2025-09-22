@@ -69,18 +69,18 @@ using hphp_const_char_map = hphp_hash_map<const char*, T, cstr_hash, eqstr>;
 
 // folly::ConcurrentHashMapSIMD is only defined on some platforms, so
 // fallback to ConcurrentHashMap if not available.
-#if FOLLY_SSE_PREREQ(4, 2) && !FOLLY_MOBILE
+#if (FOLLY_SSE_PREREQ(4, 2) || (FOLLY_AARCH64 && FOLLY_F14_CRC_INTRINSIC_AVAILABLE)) && !FOLLY_MOBILE
 template <typename K, typename V,
           typename H = std::hash<K>,
-          typename C = std::equal_to<K>, 
-          typename A = std::allocator<uint8_t>, 
+          typename C = std::equal_to<K>,
+          typename A = std::allocator<uint8_t>,
           uint8_t S = 8>
 using folly_concurrent_hash_map_simd = folly::ConcurrentHashMapSIMD<K, V, H, C, A, S>;
 #else
 template <typename K, typename V,
           typename H = std::hash<K>,
           typename C = std::equal_to<K>,
-          typename A = std::allocator<uint8_t>, 
+          typename A = std::allocator<uint8_t>,
           uint8_t S = 8>
 using folly_concurrent_hash_map_simd = folly::ConcurrentHashMap<K, V, H, C, A, S>;
 #endif

@@ -229,4 +229,12 @@ final class ThriftPolicyZoneModuleContext
   public function getSmcServiceName()[]: string {
     return $this->smcServiceName;
   }
+
+  public function getServiceName()[]: string {
+    return $this->xid->getServiceName();
+  }
+
+  public function getMethodName()[]: string {
+    return $this->xid->getMethodName();
+  }
 }

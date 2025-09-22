@@ -259,7 +259,7 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 			return nil, err
 		}
 
-		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats)))
+		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats, s.totalActiveRequestCount)))
 
 		payload, err := rocket.EncodeResponsePayload(
 			protocol.name,

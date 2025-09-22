@@ -221,7 +221,7 @@ func (s *server) writeMessage(
 		prot.setRequestHeader(k, v)
 	}
 	// *always* write our load header
-	prot.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats)))
+	prot.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats, nil)))
 
 	messageType := REPLY
 	if _, isExc := response.(ApplicationExceptionIf); isExc {
@@ -302,7 +302,9 @@ func (s *server) reader(ctx context.Context, socket net.Conn, writeCh chan func(
 		msg.headerSeqID = prot.GetSeqID()
 		if remainingMsStr, ok := msg.headers[ClientTimeoutKey]; ok {
 			if remainingMs, err := strconv.Atoi(remainingMsStr); err == nil && remainingMs > 0 {
-				requestCtx, _ = context.WithTimeout(ctx, time.Duration(1.1*float32(remainingMs))*time.Millisecond) // see links for the 1.1 magic number
+				var timeoutCancel context.CancelFunc
+				requestCtx, timeoutCancel = context.WithTimeout(ctx, time.Duration(1.1*float32(remainingMs))*time.Millisecond) // see links for the 1.1 magic number
+				defer timeoutCancel()
 			}
 		}
 		requestNum++

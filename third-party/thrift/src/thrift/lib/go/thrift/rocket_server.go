@@ -92,6 +92,8 @@ func newUpgradeToRocketServer(proc Processor, listener net.Listener, opts *serve
 }
 
 func (s *rocketServer) ServeContext(ctx context.Context) error {
+	// TODO: support graceful shutdown and track with thrift.task_killed
+
 	transporter := func(context.Context) (transport.ServerTransport, error) {
 		return newRocketServerTransport(s.listener, s.connContext, s.proc, s.transportID, s.log, s.stats, s.pstats, s.observer), nil
 	}
@@ -216,14 +218,16 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 
 	request, err := rocket.DecodeRequestPayload(msg)
 	if err != nil {
-		// Notify observer that connection was dropped due to malformed rocket payload
+		// Notify observer that connection was dropped and task killed due to malformed rocket payload
 		s.observer.ConnDropped()
+		s.observer.TaskKilled()
 		return mono.Error(err)
 	}
 	protocol, err := newProtocolBufferFromRequest(request)
 	if err != nil {
-		// Notify observer that connection was dropped due to protocol buffer creation error
+		// Notify observer that connection was dropped and task killed due to protocol buffer creation error
 		s.observer.ConnDropped()
+		s.observer.TaskKilled()
 		return mono.Error(err)
 	}
 
@@ -295,15 +299,17 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 
 	request, err := rocket.DecodeRequestPayload(msg)
 	if err != nil {
-		// Notify observer that connection was dropped due to malformed rocket payload
+		// Notify observer that connection was dropped and task killed due to malformed rocket payload
 		s.observer.ConnDropped()
+		s.observer.TaskKilled()
 		s.log("rocketServer fireAndForget decode request payload error: %v", err)
 		return
 	}
 	protocol, err := newProtocolBufferFromRequest(request)
 	if err != nil {
-		// Notify observer that connection was dropped due to protocol buffer creation error
+		// Notify observer that connection was dropped and task killed due to protocol buffer creation error
 		s.observer.ConnDropped()
+		s.observer.TaskKilled()
 		s.log("rocketServer fireAndForget error creating protocol: %v", err)
 		return
 	}

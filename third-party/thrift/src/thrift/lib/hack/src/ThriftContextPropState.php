@@ -174,7 +174,7 @@ final class ThriftContextPropState {
       return false;
     }
 
-    $ods->bumpKey('contextprop.update_with_valid_fb_user_id'.$src);
+    $ods->bumpKey('contextprop.update_with_valid_fb_user_id.'.$src);
 
     $tcps_fb_user_id = self::get()->getFBUserId();
     if ($fb_user_id == $tcps_fb_user_id) {
@@ -182,7 +182,7 @@ final class ThriftContextPropState {
       return true;
     }
 
-    if ($tcps_fb_user_id is nonnull) {
+    if (self::coerceId($tcps_fb_user_id, UserIdCategory::FB) is nonnull) {
       $ods->bumpKey('contextprop.fb_user_id_override.'.$src);
     }
 
@@ -224,7 +224,7 @@ final class ThriftContextPropState {
       return true;
     }
 
-    if ($tcps_ig_user_id is nonnull) {
+    if (self::coerceId($tcps_ig_user_id, UserIdCategory::IG) is nonnull) {
       $ods->bumpKey('contextprop.ig_user_id_override.'.$src);
     }
 

@@ -29,7 +29,7 @@ struct foo {
 } (
   python.type = "DenseFoo",
   java.final = "",
-  cpp2.methods = "public: void manuallyDefinedDummyMethod() {}",
+  cpp.methods = "public: void manuallyDefinedDummyMethod() {}",
 )
 
 typedef string (unicode.encoding = "UTF-16") non_latin_string

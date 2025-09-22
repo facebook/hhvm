@@ -1567,9 +1567,9 @@ def get_reflection__AnnotatedStruct() -> __StructSpec:
         annotations={
             """cpp.declare_equal_to""": """1""",
             """cpp.declare_hash""": """1""",
+            """cpp.methods""": """void foo(const std::string& bar) {}""",
             """cpp.noncopyable""": """1""",
             """cpp.virtual""": """1""",
-            """cpp2.methods""": """void foo(const std::string& bar) {}""",
         },
     )
     defaults = _module_types.AnnotatedStruct()

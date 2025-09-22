@@ -348,7 +348,7 @@ struct AnnotatedStruct {
   cpp.noncopyable,
   cpp.declare_hash,
   cpp.declare_equal_to = 1,
-  cpp2.methods = "void foo(const std::string& bar) {}",
+  cpp.methods = "void foo(const std::string& bar) {}",
 )
 
 struct ComplexContainerStruct {

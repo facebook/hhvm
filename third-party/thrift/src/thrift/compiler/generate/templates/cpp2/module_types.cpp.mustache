@@ -260,25 +260,27 @@ namespace apache::thrift::detail::annotation {
 {{#struct:fields_with_runtime_annotation?}}
 template<> const std::vector<std::any>& field_annotation_values<{{struct:cpp_fullname}}>(FieldId id) {
   switch (static_cast<int16_t>(id)) {
-{{#struct:fields}}
-  case {{field:id}}: {
-    static const folly::Indestructible<std::vector<std::any>> ret = [] {
-      std::vector<std::any> values;
-{{#field:structured_annotations}}
-{{#constant:is_runtime_annotation?}}
-{{#constant:type}}{{#constant:value}}
-      values.emplace_back({{> common/iterate_const_values}});
-{{/constant:value}}{{/constant:type}}
-{{/constant:is_runtime_annotation?}}
-{{/field:structured_annotations}}
-      return values;
-    }();
-    return *ret;
-  }
-{{/struct:fields}}
+  {{#struct:fields}}
+  {{#if field:has_runtime_annotation?}}
+    case {{field:id}}: {
+      static const folly::Indestructible<std::vector<std::any>> ret = [] {
+        std::vector<std::any> values;
+  {{#field:structured_annotations}}
+  {{#constant:is_runtime_annotation?}}
+  {{#constant:type}}{{#constant:value}}
+        values.emplace_back({{> common/iterate_const_values}});
+  {{/constant:value}}{{/constant:type}}
+  {{/constant:is_runtime_annotation?}}
+  {{/field:structured_annotations}}
+        return values;
+      }();
+      return *ret;
+    }
+  {{/if field:has_runtime_annotation?}}
+  {{/struct:fields}}
+    default:
+        return ::apache::thrift::detail::annotation::empty_annotations();
   };
-
-  folly::assume_unreachable();
 }
 {{/struct:fields_with_runtime_annotation?}}
 {{#struct:has_runtime_annotation?}}

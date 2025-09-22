@@ -810,38 +810,17 @@ namespace test::fixtures::basic-structured-annotations { namespace {
 namespace apache::thrift::detail::annotation {
 template<> const std::vector<std::any>& field_annotation_values<::test::fixtures::basic-structured-annotations::MyStruct>(FieldId id) {
   switch (static_cast<int16_t>(id)) {
-  case 1: {
-    static const folly::Indestructible<std::vector<std::any>> ret = [] {
-      std::vector<std::any> values;
-      values.emplace_back(::apache::thrift::detail::make_structured_constant<::test::fixtures::basic-structured-annotations::runtime_annotation>());
-      return values;
-    }();
-    return *ret;
-  }
-  case 2: {
-    static const folly::Indestructible<std::vector<std::any>> ret = [] {
-      std::vector<std::any> values;
-      return values;
-    }();
-    return *ret;
-  }
-  case 3: {
-    static const folly::Indestructible<std::vector<std::any>> ret = [] {
-      std::vector<std::any> values;
-      return values;
-    }();
-    return *ret;
-  }
-  case 4: {
-    static const folly::Indestructible<std::vector<std::any>> ret = [] {
-      std::vector<std::any> values;
-      return values;
-    }();
-    return *ret;
-  }
+    case 1: {
+      static const folly::Indestructible<std::vector<std::any>> ret = [] {
+        std::vector<std::any> values;
+        values.emplace_back(::apache::thrift::detail::make_structured_constant<::test::fixtures::basic-structured-annotations::runtime_annotation>());
+        return values;
+      }();
+      return *ret;
+    }
+    default:
+        return ::apache::thrift::detail::annotation::empty_annotations();
   };
-
-  folly::assume_unreachable();
 }
 template<> const std::vector<std::any>& struct_annotation_values<::test::fixtures::basic-structured-annotations::MyStruct>() {
   static const folly::Indestructible<std::vector<std::any>> ret = [] {

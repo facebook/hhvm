@@ -310,17 +310,17 @@ namespace facebook::thrift::test { namespace {
 namespace apache::thrift::detail::annotation {
 template<> const std::vector<std::any>& field_annotation_values<::facebook::thrift::test::MyStruct>(FieldId id) {
   switch (static_cast<int16_t>(id)) {
-  case 1: {
-    static const folly::Indestructible<std::vector<std::any>> ret = [] {
-      std::vector<std::any> values;
-      values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MyAnnotation>());
-      return values;
-    }();
-    return *ret;
-  }
+    case 1: {
+      static const folly::Indestructible<std::vector<std::any>> ret = [] {
+        std::vector<std::any> values;
+        values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MyAnnotation>());
+        return values;
+      }();
+      return *ret;
+    }
+    default:
+        return ::apache::thrift::detail::annotation::empty_annotations();
   };
-
-  folly::assume_unreachable();
 }
 template<> const std::vector<std::any>& struct_annotation_values<::facebook::thrift::test::MyStruct>() {
   static const folly::Indestructible<std::vector<std::any>> ret = [] {
@@ -332,17 +332,17 @@ template<> const std::vector<std::any>& struct_annotation_values<::facebook::thr
 }
 template<> const std::vector<std::any>& field_annotation_values<::facebook::thrift::test::MyUnion>(FieldId id) {
   switch (static_cast<int16_t>(id)) {
-  case 1: {
-    static const folly::Indestructible<std::vector<std::any>> ret = [] {
-      std::vector<std::any> values;
-      values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MyAnnotation>());
-      return values;
-    }();
-    return *ret;
-  }
+    case 1: {
+      static const folly::Indestructible<std::vector<std::any>> ret = [] {
+        std::vector<std::any> values;
+        values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MyAnnotation>());
+        return values;
+      }();
+      return *ret;
+    }
+    default:
+        return ::apache::thrift::detail::annotation::empty_annotations();
   };
-
-  folly::assume_unreachable();
 }
 template<> const std::vector<std::any>& struct_annotation_values<::facebook::thrift::test::MyUnion>() {
   static const folly::Indestructible<std::vector<std::any>> ret = [] {
@@ -354,17 +354,17 @@ template<> const std::vector<std::any>& struct_annotation_values<::facebook::thr
 }
 template<> const std::vector<std::any>& field_annotation_values<::facebook::thrift::test::MyException>(FieldId id) {
   switch (static_cast<int16_t>(id)) {
-  case 1: {
-    static const folly::Indestructible<std::vector<std::any>> ret = [] {
-      std::vector<std::any> values;
-      values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MyAnnotation>());
-      return values;
-    }();
-    return *ret;
-  }
+    case 1: {
+      static const folly::Indestructible<std::vector<std::any>> ret = [] {
+        std::vector<std::any> values;
+        values.emplace_back(::apache::thrift::detail::make_structured_constant<::facebook::thrift::test::MyAnnotation>());
+        return values;
+      }();
+      return *ret;
+    }
+    default:
+        return ::apache::thrift::detail::annotation::empty_annotations();
   };
-
-  folly::assume_unreachable();
 }
 template<> const std::vector<std::any>& struct_annotation_values<::facebook::thrift::test::MyException>() {
   static const folly::Indestructible<std::vector<std::any>> ret = [] {

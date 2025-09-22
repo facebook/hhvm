@@ -142,15 +142,18 @@ VnFqMCnjdeFhc/LA6rx3ALn2jfDj9jQR0QGRouFA7NbYZFx7Uj3HOw0/
 } // namespace
 
 namespace quic::samples {
-FizzServerContextPtr createFizzServerContext(const HQServerParams& params) {
+FizzServerContextPtr createFizzServerContextInsecure(
+    const HQServerParams& params,
+    const std::string& certificateFilePath,
+    const std::string& keyFilePath) {
 
   std::string certData = kDefaultCertData;
-  if (!params.certificateFilePath.empty()) {
-    folly::readFile(params.certificateFilePath.c_str(), certData);
+  if (!certificateFilePath.empty()) {
+    folly::readFile(certificateFilePath.c_str(), certData);
   }
   std::string keyData = kDefaultKeyData;
-  if (!params.keyFilePath.empty()) {
-    folly::readFile(params.keyFilePath.c_str(), keyData);
+  if (!keyFilePath.empty()) {
+    folly::readFile(keyFilePath.c_str(), keyData);
   }
   auto cert = fizz::openssl::CertUtils::makeSelfCert(certData, keyData);
   auto certManager = std::make_shared<fizz::server::CertManager>();
@@ -188,17 +191,20 @@ FizzServerContextPtr createFizzServerContext(const HQServerParams& params) {
   return serverCtx;
 }
 
-FizzClientContextPtr createFizzClientContext(const HQBaseParams& params,
-                                             bool earlyData) {
+FizzClientContextPtr createFizzClientContext(
+    const HQBaseParams& params,
+    bool earlyData,
+    const std::string& certificateFilePath,
+    const std::string& keyFilePath) {
   auto ctx = std::make_shared<fizz::client::FizzClientContext>();
 
   std::string certData = kDefaultCertData;
-  if (!params.certificateFilePath.empty()) {
-    folly::readFile(params.certificateFilePath.c_str(), certData);
+  if (!certificateFilePath.empty()) {
+    folly::readFile(certificateFilePath.c_str(), certData);
   }
   std::string keyData = kDefaultKeyData;
-  if (!params.keyFilePath.empty()) {
-    folly::readFile(params.keyFilePath.c_str(), keyData);
+  if (!keyFilePath.empty()) {
+    folly::readFile(keyFilePath.c_str(), keyData);
   }
   auto cert = fizz::openssl::CertUtils::makeSelfCert(certData, keyData);
   auto certMgr = std::make_shared<fizz::client::CertManager>();
@@ -216,13 +222,16 @@ FizzClientContextPtr createFizzClientContext(const HQBaseParams& params,
   return ctx;
 }
 
-wangle::SSLContextConfig createSSLContext(const HQBaseParams& params) {
+wangle::SSLContextConfig createSSLContext(
+    const HQBaseParams& params,
+    const std::string& certificateFilePath,
+    const std::string& keyFilePath) {
   wangle::SSLContextConfig sslCfg;
   sslCfg.isDefault = true;
   sslCfg.clientVerification =
       folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
-  if (!params.certificateFilePath.empty() && !params.keyFilePath.empty()) {
-    sslCfg.setCertificate(params.certificateFilePath, params.keyFilePath, "");
+  if (!certificateFilePath.empty() && !keyFilePath.empty()) {
+    sslCfg.setCertificate(certificateFilePath, keyFilePath, "");
   } else {
     sslCfg.setCertificateBuf(kDefaultCertData, kDefaultKeyData);
   }

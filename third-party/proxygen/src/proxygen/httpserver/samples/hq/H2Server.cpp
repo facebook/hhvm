@@ -7,6 +7,7 @@
  */
 
 #include <proxygen/httpserver/HTTPTransactionHandlerAdaptor.h>
+
 #include <proxygen/httpserver/samples/hq/FizzContext.h>
 #include <proxygen/httpserver/samples/hq/H2Server.h>
 
@@ -64,7 +65,8 @@ std::unique_ptr<H2Server::AcceptorConfig> H2Server::createServerAcceptorConfig(
   auto acceptorConfig = std::make_unique<AcceptorConfig>();
   proxygen::HTTPServer::IPConfig ipConfig(
       params.localH2Address.value(), proxygen::HTTPServer::Protocol::HTTP2);
-  ipConfig.sslConfigs.emplace_back(createSSLContext(params));
+  ipConfig.sslConfigs.emplace_back(
+      createSSLContext(params, params.certificateFilePath, params.keyFilePath));
   acceptorConfig->push_back(ipConfig);
   return acceptorConfig;
 }

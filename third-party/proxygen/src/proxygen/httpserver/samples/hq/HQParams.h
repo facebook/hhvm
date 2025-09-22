@@ -74,8 +74,6 @@ struct HQBaseParams {
   bool prettyJson{false};
 
   // Fizz options
-  std::string certificateFilePath;
-  std::string keyFilePath;
   std::string pskFilePath;
   std::shared_ptr<quic::QuicPskCache> pskCache;
   fizz::server::ClientAuthMode clientAuth{fizz::server::ClientAuthMode::None};

@@ -397,8 +397,6 @@ void initializeQLogSettings(HQBaseParams& hqParams) {
 } // initializeQLogSettings
 
 void initializeFizzSettings(HQBaseParams& hqParams) {
-  hqParams.certificateFilePath = FLAGS_cert;
-  hqParams.keyFilePath = FLAGS_key;
   hqParams.pskFilePath = FLAGS_psk_file;
   if (!FLAGS_psk_file.empty()) {
     hqParams.pskCache = std::make_shared<proxygen::PersistentQuicPskCache>(
@@ -496,9 +494,17 @@ HQToolParamsBuilderFromCmdline::HQToolParamsBuilderFromCmdline(
   if (hqParams_.mode == HQMode::CLIENT) {
     initializeHttpClientSettings(
         boost::get<HQToolClientParams>(hqParams_.params));
+    // Populate client TLS file paths from flags
+    auto& clientParams = boost::get<HQToolClientParams>(hqParams_.params);
+    clientParams.certificateFilePath = FLAGS_cert;
+    clientParams.keyFilePath = FLAGS_key;
   } else {
     initializeHttpServerSettings(
         boost::get<HQToolServerParams>(hqParams_.params));
+    // Populate server TLS file paths from flags
+    auto& serverParams = boost::get<HQToolServerParams>(hqParams_.params);
+    serverParams.certificateFilePath = FLAGS_cert;
+    serverParams.keyFilePath = FLAGS_key;
   }
 
   initializeQLogSettings(hqParams_.baseParams());

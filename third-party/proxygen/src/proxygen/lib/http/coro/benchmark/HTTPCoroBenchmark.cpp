@@ -274,8 +274,6 @@ class BenchmarkFixture {
     if (transportType_ == TransportType::QUIC) {
       HQServerParams params;
       params.serverThreads = 1;
-      params.certificateFilePath = getServerCertPath();
-      params.keyFilePath = getServerKeyPath();
       params.transportSettings.maxNumPTOs = 1000;
       params.transportSettings.maxCwndInMss = quic::kLargeMaxCwndInMss;
       params.transportSettings.batchingMode =
@@ -285,10 +283,13 @@ class BenchmarkFixture {
       params.transportSettings.maxBatchSize = 48;
       params.transportSettings.writeConnectionDataPacketsLimit = 48;
       resp_ = makeBuf(respSize_);
-      legacyQuicServer_ =
-          ScopedHQServer::start(params, [this](HTTPMessage* msg) {
+      legacyQuicServer_ = ScopedHQServer::start(
+          params,
+          [this](HTTPMessage* msg) {
             return SizeHandler::makeHandler(msg, resp_->clone());
-          });
+          },
+          getServerCertPath(),
+          getServerKeyPath());
       serverAddress_ = legacyQuicServer_->getAddress();
     } else {
       std::unique_ptr<wangle::SSLContextConfig> sslCfg;

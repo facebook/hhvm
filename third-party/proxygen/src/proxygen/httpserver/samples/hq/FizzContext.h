@@ -20,10 +20,19 @@ using FizzServerContextPtr =
 
 using FizzClientContextPtr = std::shared_ptr<fizz::client::FizzClientContext>;
 
-FizzServerContextPtr createFizzServerContext(const HQServerParams& params);
+FizzServerContextPtr createFizzServerContextInsecure(
+    const HQServerParams& params,
+    const std::string& certificateFilePath,
+    const std::string& keyFilePath);
 
-FizzClientContextPtr createFizzClientContext(const HQBaseParams& params,
-                                             bool earlyData);
+FizzClientContextPtr createFizzClientContext(
+    const HQBaseParams& params,
+    bool earlyData,
+    const std::string& certificateFilePath,
+    const std::string& keyFilePath);
 
-wangle::SSLContextConfig createSSLContext(const HQBaseParams& params);
+wangle::SSLContextConfig createSSLContext(
+    const HQBaseParams& params,
+    const std::string& certificateFilePath,
+    const std::string& keyFilePath);
 } // namespace quic::samples

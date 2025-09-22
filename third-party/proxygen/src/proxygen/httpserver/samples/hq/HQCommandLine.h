@@ -34,6 +34,8 @@ struct HQToolClientParams : public HQClientParams {
   bool migrateClient{false};
   bool sendRequestsSequentially;
   std::vector<std::string> requestGaps;
+  std::string certificateFilePath;
+  std::string keyFilePath;
 };
 
 struct HQToolServerParams : public HQServerParams {
@@ -43,6 +45,8 @@ struct HQToolServerParams : public HQServerParams {
   std::chrono::milliseconds httpServerIdleTimeout;
   std::vector<int> httpServerShutdownOn;
   bool httpServerEnableContentCompression;
+  std::string certificateFilePath;
+  std::string keyFilePath;
 };
 
 struct HQToolParams {

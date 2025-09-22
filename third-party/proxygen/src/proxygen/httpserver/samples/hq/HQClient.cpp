@@ -279,7 +279,10 @@ void HQClient::initializeQuicClient() {
   auto handshakeContextBuilder =
       quic::FizzClientQuicHandshakeContext::Builder()
           .setFizzClientContext(
-              createFizzClientContext(params_, params_.earlyData))
+              createFizzClientContext(params_,
+                                      params_.earlyData,
+                                      params_.certificateFilePath,
+                                      params_.keyFilePath))
           .setPskCache(params_.pskCache);
 
   if (!params_.verifyServerCert) {

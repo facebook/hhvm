@@ -9,6 +9,7 @@
 #include <proxygen/httpserver/samples/hq/HQServer.h>
 
 #include <ostream>
+
 #include <quic/common/udpsocket/FollyQuicAsyncUDPSocket.h>
 #include <string>
 
@@ -234,16 +235,22 @@ void HQServerTransportFactory::handleHQAlpn(
 HQServer::HQServer(
     HQServerParams params,
     HTTPTransactionHandlerProvider httpTransactionHandlerProvider,
-    std::function<void(proxygen::HQSession*)> onTransportReadyFn)
+    std::function<void(proxygen::HQSession*)> onTransportReadyFn,
+    const std::string& certificateFilePath,
+    const std::string& keyFilePath)
     : HQServer(std::move(params),
                std::make_unique<HQServerTransportFactory>(
                    params_,
                    std::move(httpTransactionHandlerProvider),
-                   std::move(onTransportReadyFn))) {
+                   std::move(onTransportReadyFn)),
+               certificateFilePath,
+               keyFilePath) {
 }
 
 HQServer::HQServer(HQServerParams params,
-                   std::unique_ptr<quic::QuicServerTransportFactory> factory)
+                   std::unique_ptr<quic::QuicServerTransportFactory> factory,
+                   const std::string& certificateFilePath,
+                   const std::string& keyFilePath)
     : params_(std::move(params)) {
   params_.transportSettings.datagramConfig.enabled = true;
   params_.transportSettings.advertisedKnobFrameSupport = true;
@@ -258,7 +265,8 @@ HQServer::HQServer(HQServerParams params,
       std::make_unique<QuicSharedUDPSocketFactory>());
   server_->setHealthCheckToken("health");
   server_->setSupportedVersion(params_.quicVersions);
-  server_->setFizzContext(createFizzServerContext(params_));
+  server_->setFizzContext(createFizzServerContextInsecure(
+      params_, certificateFilePath, keyFilePath));
   if (params_.rateLimitPerThread) {
     server_->setRateLimit(
         [rateLimitPerThread = params_.rateLimitPerThread.value()]() {

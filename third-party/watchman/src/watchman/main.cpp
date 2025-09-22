@@ -17,6 +17,7 @@
 #include <folly/system/Shell.h>
 
 #include <stdio.h>
+#include <optional>
 
 #include "watchman/ChildProcess.h"
 #include "watchman/Client.h"
@@ -1039,8 +1040,9 @@ static int inner_main(int argc, char** argv) {
   // TODO: We used to avoid folly::init so it didn't interfere with our own
   // signal handling. We want to swap to folly signal handling, so we'll do a
   // full init on Linux to test it. We should remove this if in the future.
+  std::optional<folly::Init> folly_init;
   if (kUseFollySignalHandler) {
-    const folly::Init init(&argc, &argv, folly::InitOptions().useGFlags(false));
+    folly_init.emplace(&argc, &argv, folly::InitOptions().useGFlags(false));
   } else {
     folly::SingletonVault::singleton()->registrationComplete();
   }

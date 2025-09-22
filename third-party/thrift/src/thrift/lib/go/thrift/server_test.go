@@ -614,9 +614,3 @@ func TestLoadHeader(t *testing.T) {
 	err = serverEG.Wait()
 	require.ErrorIs(t, err, context.Canceled)
 }
-
-func TestServerObserverDefaultNotNil(t *testing.T) {
-	serverOptions := newServerOptions()
-	assert.NotNil(t, serverOptions.serverObserver)
-	assert.IsType(t, &noopServerObserver{}, serverOptions.serverObserver)
-}

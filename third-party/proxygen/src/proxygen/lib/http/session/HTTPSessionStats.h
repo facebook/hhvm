@@ -17,6 +17,11 @@ namespace proxygen {
 // This may be retired with a byte events refactor
 class HTTPSessionStats : public TTLBAStats {
  public:
+  HTTPSessionStats() = default;
+  HTTPSessionStats(const HTTPSessionStats&) = delete;
+  HTTPSessionStats& operator=(const HTTPSessionStats&) = delete;
+  HTTPSessionStats(HTTPSessionStats&&) = delete;
+  HTTPSessionStats& operator=(HTTPSessionStats&&) = delete;
   ~HTTPSessionStats() noexcept override {
   }
 

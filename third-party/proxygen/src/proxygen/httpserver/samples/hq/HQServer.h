@@ -32,12 +32,14 @@ class HQServer {
            HTTPTransactionHandlerProvider httpTransactionHandlerProvider,
            std::function<void(proxygen::HQSession*)> onTransportReadyFn,
            const std::string& certificateFilePath,
-           const std::string& keyFilePath);
+           const std::string& keyFilePath,
+           fizz::server::ClientAuthMode clientAuth);
 
   HQServer(HQServerParams params,
            std::unique_ptr<quic::QuicServerTransportFactory> factory,
            const std::string& certificateFilePath,
-           const std::string& keyFilePath);
+           const std::string& keyFilePath,
+           fizz::server::ClientAuthMode clientAuth);
 
   // Starts the QUIC transport in background thread
   void start(std::vector<folly::EventBase*> evbs = {});
@@ -73,20 +75,26 @@ class ScopedHQServer {
       const HQServerParams& params,
       HTTPTransactionHandlerProvider handlerProvider,
       const std::string& certificateFilePath,
-      const std::string& keyFilePath) {
-    return std::make_unique<ScopedHQServer>(
-        params, std::move(handlerProvider), certificateFilePath, keyFilePath);
+      const std::string& keyFilePath,
+      fizz::server::ClientAuthMode clientAuth) {
+    return std::make_unique<ScopedHQServer>(params,
+                                            std::move(handlerProvider),
+                                            certificateFilePath,
+                                            keyFilePath,
+                                            clientAuth);
   }
 
   ScopedHQServer(HQServerParams params,
                  HTTPTransactionHandlerProvider handlerProvider,
                  const std::string& certificateFilePath,
-                 const std::string& keyFilePath)
+                 const std::string& keyFilePath,
+                 fizz::server::ClientAuthMode clientAuth)
       : server_(std::move(params),
                 std::move(handlerProvider),
                 nullptr,
                 certificateFilePath,
-                keyFilePath) {
+                keyFilePath,
+                clientAuth) {
     server_.start();
   }
 

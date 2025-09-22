@@ -47,6 +47,7 @@ struct HQToolServerParams : public HQServerParams {
   bool httpServerEnableContentCompression;
   std::string certificateFilePath;
   std::string keyFilePath;
+  fizz::server::ClientAuthMode clientAuth{fizz::server::ClientAuthMode::None};
 };
 
 struct HQToolParams {

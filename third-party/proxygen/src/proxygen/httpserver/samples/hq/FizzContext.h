@@ -22,6 +22,7 @@ using FizzClientContextPtr = std::shared_ptr<fizz::client::FizzClientContext>;
 
 FizzServerContextPtr createFizzServerContextInsecure(
     const HQServerParams& params,
+    fizz::server::ClientAuthMode clientAuth,
     const std::string& certificateFilePath,
     const std::string& keyFilePath);
 

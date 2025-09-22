@@ -52,11 +52,13 @@ void startServer(
       sendKnobFrame(session, ("Hello, World from Server!"));
     };
   }
+
   HQServer server(params,
                   dispatchFn,
                   std::move(onTransportReadyFn),
                   params.certificateFilePath,
-                  params.keyFilePath);
+                  params.keyFilePath,
+                  params.clientAuth);
   if (statsFactory) {
     server.setStatsFactory(std::move(statsFactory));
   }

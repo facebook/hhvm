@@ -76,7 +76,6 @@ struct HQBaseParams {
   // Fizz options
   std::string pskFilePath;
   std::shared_ptr<quic::QuicPskCache> pskCache;
-  fizz::server::ClientAuthMode clientAuth{fizz::server::ClientAuthMode::None};
 
   // Transport knobs
   std::string transportKnobs;

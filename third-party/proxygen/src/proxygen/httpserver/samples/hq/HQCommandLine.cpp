@@ -396,7 +396,9 @@ void initializeQLogSettings(HQBaseParams& hqParams) {
   hqParams.prettyJson = FLAGS_pretty_json;
 } // initializeQLogSettings
 
-void initializeFizzSettings(HQBaseParams& hqParams) {
+void initializeFizzSettings(HQToolParams& toolParams) {
+  // Derive HQBaseParams from tool params
+  auto& hqParams = toolParams.baseParams();
   hqParams.pskFilePath = FLAGS_psk_file;
   if (!FLAGS_psk_file.empty()) {
     hqParams.pskCache = std::make_shared<proxygen::PersistentQuicPskCache>(
@@ -410,13 +412,7 @@ void initializeFizzSettings(HQBaseParams& hqParams) {
         std::make_shared<proxygen::SynchronizedLruQuicPskCache>(1000);
   }
 
-  if (FLAGS_client_auth_mode == "none") {
-    hqParams.clientAuth = fizz::server::ClientAuthMode::None;
-  } else if (FLAGS_client_auth_mode == "optional") {
-    hqParams.clientAuth = fizz::server::ClientAuthMode::Optional;
-  } else if (FLAGS_client_auth_mode == "required") {
-    hqParams.clientAuth = fizz::server::ClientAuthMode::Required;
-  }
+  // No longer set client auth on params; handled during server startup.
 
 } // initializeFizzSettings
 
@@ -505,11 +501,19 @@ HQToolParamsBuilderFromCmdline::HQToolParamsBuilderFromCmdline(
     auto& serverParams = boost::get<HQToolServerParams>(hqParams_.params);
     serverParams.certificateFilePath = FLAGS_cert;
     serverParams.keyFilePath = FLAGS_key;
+    // Set client auth mode on server params for tooling visibility
+    if (FLAGS_client_auth_mode == std::string("optional")) {
+      serverParams.clientAuth = fizz::server::ClientAuthMode::Optional;
+    } else if (FLAGS_client_auth_mode == std::string("required")) {
+      serverParams.clientAuth = fizz::server::ClientAuthMode::Required;
+    } else {
+      serverParams.clientAuth = fizz::server::ClientAuthMode::None;
+    }
   }
 
   initializeQLogSettings(hqParams_.baseParams());
 
-  initializeFizzSettings(hqParams_.baseParams());
+  initializeFizzSettings(hqParams_);
 
   for (auto& err : validate(hqParams_)) {
     invalidParams_.push_back(err);

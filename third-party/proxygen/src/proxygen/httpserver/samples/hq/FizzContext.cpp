@@ -144,6 +144,7 @@ VnFqMCnjdeFhc/LA6rx3ALn2jfDj9jQR0QGRouFA7NbYZFx7Uj3HOw0/
 namespace quic::samples {
 FizzServerContextPtr createFizzServerContextInsecure(
     const HQServerParams& params,
+    fizz::server::ClientAuthMode clientAuth,
     const std::string& certificateFilePath,
     const std::string& keyFilePath) {
 
@@ -172,7 +173,7 @@ FizzServerContextPtr createFizzServerContextInsecure(
   folly::Random::secureRandom(ticketSeed.data(), ticketSeed.size());
   ticketCipher->setTicketSecrets({{folly::range(ticketSeed)}});
   serverCtx->setTicketCipher(ticketCipher);
-  serverCtx->setClientAuthMode(params.clientAuth);
+  serverCtx->setClientAuthMode(clientAuth);
   serverCtx->setSupportedAlpns(params.supportedAlpns);
   serverCtx->setAlpnMode(fizz::server::AlpnMode::Required);
   serverCtx->setSendNewSessionTicket(false);

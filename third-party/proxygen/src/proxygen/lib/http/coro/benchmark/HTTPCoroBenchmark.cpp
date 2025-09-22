@@ -289,7 +289,8 @@ class BenchmarkFixture {
             return SizeHandler::makeHandler(msg, resp_->clone());
           },
           getServerCertPath(),
-          getServerKeyPath());
+          getServerKeyPath(),
+          fizz::server::ClientAuthMode::None);
       serverAddress_ = legacyQuicServer_->getAddress();
     } else {
       std::unique_ptr<wangle::SSLContextConfig> sslCfg;

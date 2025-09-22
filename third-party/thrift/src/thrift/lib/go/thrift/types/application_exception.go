@@ -16,6 +16,8 @@
 
 package types
 
+// Source of truth:
+// https://github.com/facebook/fbthrift/blob/ab59cb324a53259c0f6836f9f2be4f9e605f9ecf/thrift/lib/cpp/TApplicationException.h#L41
 const (
 	UNKNOWN_APPLICATION_EXCEPTION  = 0
 	UNKNOWN_METHOD                 = 1
@@ -25,7 +27,15 @@ const (
 	MISSING_RESULT                 = 5
 	INTERNAL_ERROR                 = 6
 	PROTOCOL_ERROR                 = 7
-	LOADSHEDDING                   = 8
+	INVALID_TRANSFORM              = 8
+	INVALID_PROTOCOL               = 9
+	UNSUPPORTED_CLIENT_TYPE        = 10
+	LOADSHEDDING                   = 11
+	TIMEOUT                        = 12
+	INJECTED_FAILURE               = 13
+	CHECKSUM_MISMATCH              = 14
+	INTERRUPTION                   = 15
+	TENANT_QUOTA_EXCEEDED          = 16
 )
 
 // ApplicationExceptionIf is an application level Thrift exception

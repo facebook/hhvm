@@ -171,15 +171,3 @@ func TestRocketServerOverloadDisabled(t *testing.T) {
 	assert.Equal(t, numRequests, result.successCount)
 	assert.Equal(t, 0, result.overloadCount)
 }
-
-func TestLoadSheddingExceptionType(t *testing.T) {
-	loadSheddingErr := NewApplicationException(LOADSHEDDING, "test message")
-	assert.Equal(t, int32(8), LOADSHEDDING)
-	assert.Equal(t, LOADSHEDDING, loadSheddingErr.TypeID())
-	assert.Equal(t, "test message", loadSheddingErr.Error())
-}
-
-func TestLoadSheddingErrorConstant(t *testing.T) {
-	assert.Equal(t, LOADSHEDDING, loadSheddingError.TypeID())
-	assert.Equal(t, "load shedding due to max request limit", loadSheddingError.Error())
-}

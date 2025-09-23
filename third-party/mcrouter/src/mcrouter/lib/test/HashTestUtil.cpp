@@ -20,7 +20,7 @@ genEndpoints(int n) {
     raw.push_back(endpoint);
   }
   for (const auto& e : raw) {
-    ref.push_back(e);
+    ref.emplace_back(e);
   }
   return std::make_pair(std::move(raw), std::move(ref));
 }

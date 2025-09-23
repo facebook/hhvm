@@ -125,13 +125,13 @@ std::shared_ptr<fizz::server::FizzServerContext> createFizzServerContext(
   if (ticketKeySeeds) {
     std::vector<folly::ByteRange> ticketSecrets;
     for (const auto& secret : ticketKeySeeds->currentSeeds) {
-      ticketSecrets.push_back(folly::StringPiece(secret));
+      ticketSecrets.emplace_back(folly::StringPiece(secret));
     }
     for (const auto& secret : ticketKeySeeds->oldSeeds) {
-      ticketSecrets.push_back(folly::StringPiece(secret));
+      ticketSecrets.emplace_back(folly::StringPiece(secret));
     }
     for (const auto& secret : ticketKeySeeds->newSeeds) {
-      ticketSecrets.push_back(folly::StringPiece(secret));
+      ticketSecrets.emplace_back(folly::StringPiece(secret));
     }
     auto cipher = std::make_shared<fizz::server::AES128TicketCipher>(
         ctx->getFactoryPtr(), std::move(certMgr));

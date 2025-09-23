@@ -108,7 +108,7 @@ void TestServerOnRequest::onRequest(
     foundReply.value_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, value);
 
     if (req.key_ref()->fullKey() == "hold") {
-      waitingReplies_.push_back(
+      waitingReplies_.emplace_back(
           [ctx = std::move(ctx), reply = std::move(foundReply)]() mutable {
             McServerRequestContext::reply(std::move(ctx), std::move(reply));
           });

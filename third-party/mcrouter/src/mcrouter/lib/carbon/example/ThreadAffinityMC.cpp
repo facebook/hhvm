@@ -154,7 +154,7 @@ int main(int argc, char** argv) {
   XLOGF(INFO, "Creating {} CarbonRouterClient", FLAGS_num_clients);
   std::vector<std::thread> threads;
   for (int t = 0; t < FLAGS_num_client_threads; ++t) {
-    threads.push_back(std::thread([&]() {
+    threads.emplace_back([&]() {
       std::vector<Pointer> clients;
       for (int i = 0; i < FLAGS_num_clients; ++i) {
         clients.push_back(
@@ -170,7 +170,7 @@ int main(int argc, char** argv) {
           sendGetRequest(clients[i].get(), fmt::format("key:{}{}", i, j));
         }
       }
-    }));
+    });
   }
 
   for (auto& thread : threads) {

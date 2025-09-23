@@ -10,7 +10,7 @@
 
 namespace {
 constexpr uint64_t kMaxWTIngressBuf = 65535;
-}
+} // namespace
 
 namespace proxygen {
 
@@ -336,6 +336,9 @@ WebTransportImpl::StreamReadHandle::readStreamData() {
     VLOG(4) << __func__ << " returning data len=" << buf_.chainLength();
     auto bufLen = buf_.chainLength();
     WebTransport::StreamData streamData({.data = buf_.move(), .fin = eof_});
+    impl_.bytesRead_ += bufLen;
+    impl_.maybeGrantFlowControl();
+
     if (eof_) {
       // unregister the read callback, but don't send STOP_SENDING
       impl_.stopReadingWebTransportIngress(id_, folly::none);
@@ -363,6 +366,10 @@ void WebTransportImpl::StreamReadHandle::readAvailable(
   bool eof = readRes.value().second;
   // deliver data, eof
   auto state = dataAvailable(std::move(data), eof);
+  if (state == WebTransport::FCState::SESSION_CLOSED) {
+    impl_.terminateSession(WebTransport::kInternalError);
+    return;
+  }
   if (state == WebTransport::FCState::BLOCKED && !eof) {
     VLOG(4) << __func__ << " pausing reads";
     impl_.tp_.pauseWebTransportIngress(id);
@@ -374,7 +381,20 @@ WebTransport::FCState WebTransportImpl::StreamReadHandle::dataAvailable(
   VLOG(4)
       << "dataAvailable buflen=" << (data ? data->computeChainDataLength() : 0)
       << " eof=" << uint64_t(eof);
+
+  if (data) {
+    auto dataLen = data->computeChainDataLength();
+    if (!impl_.recvFlowController_.reserve(dataLen)) {
+      return WebTransport::FCState::SESSION_CLOSED;
+    }
+  }
+
   if (readPromise_) {
+    if (data) {
+      auto dataLen = data->computeChainDataLength();
+      impl_.bytesRead_ += dataLen;
+      impl_.maybeGrantFlowControl();
+    }
     readPromise_->setValue(
         WebTransport::StreamData({.data = std::move(data), .fin = eof}));
     readPromise_.reset();
@@ -431,6 +451,19 @@ void WebTransportImpl::StreamReadHandle::deliverReadError(
   } else {
     error_ = ex;
   }
+}
+
+void WebTransportImpl::maybeGrantFlowControl() {
+  if (shouldGrantFlowControl()) {
+    auto newMaxData = bytesRead_ + kDefaultWTReceiveWindow;
+    recvFlowController_.grant(newMaxData);
+    tp_.sendWTMaxData(newMaxData);
+  }
+}
+
+bool WebTransportImpl::shouldGrantFlowControl() const {
+  auto bufferedBytes = recvFlowController_.getCurrentOffset() - bytesRead_;
+  return bufferedBytes < kDefaultWTReceiveWindow / 2;
 }
 
 } // namespace proxygen

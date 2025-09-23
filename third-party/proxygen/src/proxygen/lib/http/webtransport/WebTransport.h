@@ -169,7 +169,7 @@ class WebTransport {
     uint32_t writePrefaceSize_{0};
   };
 
-  enum class FCState { BLOCKED, UNBLOCKED };
+  enum class FCState { BLOCKED, UNBLOCKED, SESSION_CLOSED };
   // Handle for write streams
   class StreamWriteHandle : public StreamHandleBase {
    public:

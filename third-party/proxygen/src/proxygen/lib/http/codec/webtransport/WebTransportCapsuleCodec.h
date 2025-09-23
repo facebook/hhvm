@@ -43,6 +43,8 @@ class WebTransportCapsuleCodec : public CapsuleCodec {
       : CapsuleCodec(callback), callback_(callback), version_(version) {
   }
 
+  ~WebTransportCapsuleCodec() override = default;
+
   void setCallback(Callback* callback) {
     CapsuleCodec::setCallback(callback);
     callback_ = callback;

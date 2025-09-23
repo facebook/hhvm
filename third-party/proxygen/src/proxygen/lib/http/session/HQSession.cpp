@@ -16,6 +16,7 @@
 #include <proxygen/lib/http/codec/HTTPCodecFilter.h>
 #include <proxygen/lib/http/codec/QPACKDecoderCodec.h>
 #include <proxygen/lib/http/codec/QPACKEncoderCodec.h>
+#include <proxygen/lib/http/codec/webtransport/WebTransportFramer.h>
 #include <proxygen/lib/http/session/HTTPSession.h>
 #include <proxygen/lib/http/session/HTTPSessionStats.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
@@ -3941,6 +3942,20 @@ HQSession::HQStreamTransport::sendWebTransportStreamData(
   } else {
     return WebTransport::FCState::UNBLOCKED;
   }
+}
+
+folly::Expected<folly::Unit, WebTransport::ErrorCode>
+HQSession::HQStreamTransport::sendWTMaxData(uint64_t maxData) {
+  WTMaxDataCapsule capsule{maxData};
+  folly::IOBufQueue buf{folly::IOBufQueue::cacheChainLength()};
+
+  auto writeRes = writeWTMaxData(buf, capsule);
+  if (writeRes.hasError()) {
+    return folly::makeUnexpected(WebTransport::ErrorCode::SEND_ERROR);
+  }
+
+  txn_.sendBody(buf.move());
+  return folly::unit;
 }
 
 folly::Expected<folly::Unit, WebTransport::ErrorCode>

@@ -12,6 +12,11 @@
 #include <proxygen/lib/http/webtransport/FlowController.h>
 #include <proxygen/lib/http/webtransport/WebTransport.h>
 
+namespace {
+constexpr uint64_t kDefaultWTReceiveWindow = 1'048'576;
+constexpr double kFlowControlThreshold = 0.5;
+} // namespace
+
 namespace proxygen {
 
 class WebTransportImpl : public WebTransport {
@@ -35,6 +40,9 @@ class WebTransportImpl : public WebTransport {
                                std::unique_ptr<folly::IOBuf> /*data*/,
                                bool /*eof*/,
                                ByteEventCallback* /* byteEventCallback */) = 0;
+
+    virtual folly::Expected<folly::Unit, WebTransport::ErrorCode> sendWTMaxData(
+        uint64_t maxData) = 0;
 
     virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
     notifyPendingWriteOnStream(HTTPCodec::StreamID,
@@ -324,8 +332,12 @@ class WebTransportImpl : public WebTransport {
   using WTIngressStreamMap = std::map<HTTPCodec::StreamID, StreamReadHandle>;
   WTEgressStreamMap wtEgressStreams_;
   WTIngressStreamMap wtIngressStreams_;
-  FlowController sendFlowController_{};
+  // Initialize flow controllers with max value for backward compatibility and
+  // to ensure no functional change yet.
+  FlowController sendFlowController_{std::numeric_limits<size_t>::max()};
+  FlowController recvFlowController_{std::numeric_limits<size_t>::max()};
   folly::Optional<uint32_t> sessionCloseError_;
+  uint64_t bytesRead_{0};
 
  public:
   [[nodiscard]] bool isSessionTerminated() const {
@@ -357,6 +369,16 @@ class WebTransportImpl : public WebTransport {
       HTTPCodec::StreamID id);
 
   void onWebTransportStopSending(HTTPCodec::StreamID id, uint32_t errorCode);
+
+  void maybeGrantFlowControl();
+  [[nodiscard]] bool shouldGrantFlowControl() const;
+
+  void setFlowControlLimits(
+      size_t sendWindow = std::numeric_limits<size_t>::max(),
+      size_t recvWindow = std::numeric_limits<size_t>::max()) {
+    sendFlowController_ = FlowController(sendWindow);
+    recvFlowController_ = FlowController(recvWindow);
+  }
 };
 
 } // namespace proxygen

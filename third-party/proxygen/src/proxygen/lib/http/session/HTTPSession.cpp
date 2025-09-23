@@ -2030,6 +2030,15 @@ size_t HTTPSession::sendWindowUpdate(HTTPTransaction* txn,
   return sent;
 }
 
+folly::Expected<folly::Unit, WebTransport::ErrorCode>
+HTTPSession::sendWTMaxData(uint64_t /*maxData*/) {
+  return folly::unit;
+}
+
+bool HTTPSession::usesEncodedApplicationErrorCodes() {
+  return true;
+}
+
 void HTTPSession::notifyIngressBodyProcessed(uint32_t bytes) noexcept {
   if (HTTPSessionBase::notifyBodyProcessed(bytes)) {
     resumeReads();

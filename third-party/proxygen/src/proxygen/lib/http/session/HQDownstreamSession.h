@@ -161,6 +161,11 @@ class HQDownstreamSession : public HQSession {
               << " Ingress function called on egress-only stream, ignoring";
     }
 
+    folly::Expected<folly::Unit, WebTransport::ErrorCode> sendWTMaxData(
+        uint64_t /* maxData */) override {
+      return folly::unit;
+    }
+
    private:
     hq::PushId pushId_; // The push id in context of which this stream is sent
   }; // HQEgressPushStream

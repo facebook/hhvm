@@ -266,6 +266,12 @@ class MockHTTPTransactionTransport : public HTTPTransaction::Transport {
               stopReadingWebTransportIngress,
               (HTTPCodec::StreamID, folly::Optional<uint32_t>));
 
+  MOCK_METHOD((folly::Expected<folly::Unit, WebTransport::ErrorCode>),
+              sendWTMaxData,
+              (uint64_t));
+
+  MOCK_METHOD(bool, usesEncodedApplicationErrorCodes, ());
+
   MOCK_METHOD(void, trackEgressBodyOffset, (uint64_t, ByteEvent::EventFlags));
 
   MockHTTPCodec mockCodec_;

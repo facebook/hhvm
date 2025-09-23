@@ -33,6 +33,8 @@ class HTTPTransactionWebTransportTest : public testing::Test {
     EXPECT_CALL(transport_, describe(_)).WillRepeatedly(Return());
     EXPECT_CALL(transport_, supportsWebTransport())
         .WillRepeatedly(Return(true));
+    EXPECT_CALL(transport_, usesEncodedApplicationErrorCodes())
+        .WillRepeatedly(Return(true));
     if (withHandler) {
       handler_.expectTransaction();
       txn_->setHandler(&handler_);
@@ -60,6 +62,9 @@ class HTTPTransactionWebTransportTest : public testing::Test {
 
     wt_ = txn_->getWebTransport();
     EXPECT_NE(wt_, nullptr);
+    auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+    ASSERT_NE(wtImpl, nullptr);
+    wtImpl->setFlowControlLimits(0, kDefaultWTReceiveWindow);
   }
 
   void TearDown() override {
@@ -186,6 +191,8 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStream) {
                  });
   EXPECT_FALSE(fut.isReady());
 
+  EXPECT_CALL(transport_, sendWTMaxData(kDefaultWTReceiveWindow + 10))
+      .WillOnce(Return(folly::unit));
   implHandle->dataAvailable(makeBuf(10), false);
   EXPECT_FALSE(fut.isReady());
   eventBase_.loopOnce();
@@ -199,6 +206,8 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStream) {
   EXPECT_CALL(transport_, readWebTransportData(_, _)).WillOnce(Invoke([] {
     return std::make_pair(makeBuf(32768), false);
   }));
+  EXPECT_CALL(transport_, sendWTMaxData(kDefaultWTReceiveWindow + 10 + 65536))
+      .WillOnce(Return(folly::unit));
   implHandle->readAvailable(0);
   EXPECT_CALL(transport_, resumeWebTransportIngress(0));
   fut = readHandle->readStreamData()
@@ -436,6 +445,8 @@ TEST_F(HTTPTransactionWebTransportTest, BidiStreamEdgeCases) {
   EXPECT_CALL(transport_,
               stopReadingWebTransportIngress(0, folly::Optional<uint32_t>()));
 
+  EXPECT_CALL(transport_, sendWTMaxData(kDefaultWTReceiveWindow))
+      .WillOnce(Return(folly::unit));
   auto fut = streamHandle.readHandle->readStreamData()
                  .via(&eventBase_)
                  .thenTry([](auto streamData) {
@@ -537,6 +548,8 @@ TEST_F(HTTPTransactionWebTransportTest, StreamIDAPIs) {
   EXPECT_CALL(transport_, readWebTransportData(_, _)).WillOnce(Invoke([] {
     return std::make_pair(makeBuf(10), false);
   }));
+  EXPECT_CALL(transport_, sendWTMaxData(kDefaultWTReceiveWindow + 10))
+      .WillOnce(Return(folly::unit));
   quicReadCallback->readAvailable(id);
   eventBase_.loopOnce();
   EXPECT_TRUE(fut.isReady());
@@ -860,6 +873,46 @@ TEST_F(HTTPTransactionWebTransportTest, CoalescedWritesPartialFlowControl) {
   wtImpl->onMaxData(450);
 
   EXPECT_CALL(transport_, resetWebTransportEgress(_, _));
+}
+
+TEST_F(HTTPTransactionWebTransportTest, RecvFlowControlCloseSession) {
+  WebTransport::StreamReadHandle* readHandle{nullptr};
+  EXPECT_CALL(handler_, onWebTransportUniStream(_, _))
+      .WillOnce(SaveArg<1>(&readHandle));
+
+  auto implHandle = txn_->onWebTransportUniStream(0);
+  EXPECT_NE(readHandle, nullptr);
+
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+
+  EXPECT_FALSE(wtImpl->isSessionTerminated());
+  EXPECT_FALSE(wtImpl->getSessionCloseError().has_value());
+
+  EXPECT_CALL(transport_, readWebTransportData(0, 65535))
+      .WillOnce(Invoke([](auto, auto) {
+        return std::make_pair(makeBuf(2 * kDefaultWTReceiveWindow), false);
+      }));
+  EXPECT_CALL(
+      transport_,
+      stopReadingWebTransportIngress(0, makeOpt(WebTransport::kSessionGone)))
+      .WillOnce(Return(folly::unit));
+
+  // This tests both paths:
+  // 1. dataAvailable returns SESSION_CLOSED when flow control is exceeded
+  // 2. readAvailable calls terminateSession when dataAvailable returns
+  // SESSION_CLOSED
+  implHandle->readAvailable(0);
+
+  EXPECT_TRUE(wtImpl->isSessionTerminated());
+  EXPECT_TRUE(wtImpl->getSessionCloseError().has_value());
+  EXPECT_EQ(wtImpl->getSessionCloseError().value(),
+            WebTransport::kInternalError);
+
+  EXPECT_EQ(wt_->createUniStream().error(),
+            WebTransport::ErrorCode::SESSION_TERMINATED);
+  EXPECT_EQ(wt_->createBidiStream().error(),
+            WebTransport::ErrorCode::SESSION_TERMINATED);
 }
 
 } // namespace proxygen::test

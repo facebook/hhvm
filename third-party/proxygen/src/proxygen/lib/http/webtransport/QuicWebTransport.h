@@ -133,6 +133,9 @@ class QuicWebTransport
     return quicSocket_->getTransportInfo();
   }
 
+  folly::Expected<folly::Unit, WebTransport::ErrorCode> sendWTMaxData(
+      uint64_t maxData) override;
+
   bool usesEncodedApplicationErrorCodes() override {
     return false;
   }

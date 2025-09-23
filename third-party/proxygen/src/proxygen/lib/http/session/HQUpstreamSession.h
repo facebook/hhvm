@@ -189,6 +189,12 @@ class HQUpstreamSession : public HQSession {
       return pushId_;
     }
 
+    folly::Expected<folly::Unit, WebTransport::ErrorCode> sendWTMaxData(
+        uint64_t /* maxData */) override {
+      // Push streams are ingress-only, so sendMaxData is not applicable
+      return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
+    }
+
    private:
     hq::PushId pushId_; // The push id in context of which this stream is
                         // received

@@ -1847,6 +1847,9 @@ class HQSession
         bool /*eof*/,
         WebTransport::ByteEventCallback* /* deliveryCallback */) override;
 
+    folly::Expected<folly::Unit, WebTransport::ErrorCode> sendWTMaxData(
+        uint64_t maxData) override;
+
     folly::Expected<folly::Unit, WebTransport::ErrorCode>
     notifyPendingWriteOnStream(HTTPCodec::StreamID,
                                quic::StreamWriteCallback* wcb) override;

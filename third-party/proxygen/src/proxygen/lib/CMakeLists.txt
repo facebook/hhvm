@@ -198,6 +198,7 @@ add_library(
     http/codec/TransportDirection.cpp
     http/codec/RateLimitFilter.cpp
     http/codec/webtransport/WebTransportFramer.cpp
+    http/codec/webtransport/WebTransportCapsuleCodec.cpp
     http/connpool/ServerIdleSessionController.cpp
     http/connpool/SessionHolder.cpp
     http/connpool/SessionPool.cpp

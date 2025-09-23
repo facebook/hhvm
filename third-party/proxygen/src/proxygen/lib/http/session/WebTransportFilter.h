@@ -73,6 +73,10 @@ class WebTransportFilter
 
   void onEOM() noexcept override {
     codec_->onIngress(nullptr, true);
+
+    if (nextTransactionHandler_) {
+      nextTransactionHandler_->onEOM();
+    }
   }
 
   std::unique_ptr<HTTPMessageFilter> clone() noexcept override {
@@ -132,6 +136,20 @@ class WebTransportFilter
     return WebTransport::FCState::UNBLOCKED;
   }
 
+  folly::Expected<folly::Unit, WebTransport::ErrorCode> sendWTMaxData(
+      uint64_t maxData) override {
+    WTMaxDataCapsule capsule{maxData};
+    folly::IOBufQueue buf{folly::IOBufQueue::cacheChainLength()};
+    auto writeRes = writeWTMaxData(buf, capsule);
+    if (writeRes.hasError()) {
+      return folly::makeUnexpected(WebTransport::ErrorCode::SEND_ERROR);
+    }
+    if (txn_) {
+      txn_->sendBody(buf.move());
+    }
+    return folly::unit;
+  }
+
   folly::Expected<folly::Unit, WebTransport::ErrorCode> resetWebTransportEgress(
       HTTPCodec::StreamID /*id*/, uint32_t /*errorCode*/) override {
     return folly::unit;
@@ -189,6 +207,14 @@ class WebTransportFilter
 
   bool usesEncodedApplicationErrorCodes() override {
     return false;
+  }
+
+  const folly::SocketAddress& getLocalAddress() const override {
+    return txn_->getLocalAddress();
+  }
+
+  const folly::SocketAddress& getPeerAddress() const override {
+    return txn_->getPeerAddress();
   }
 
   void onConnectionError(CapsuleCodec::ErrorCode error) override {

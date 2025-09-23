@@ -200,6 +200,11 @@ QuicWebTransport::sendDatagram(std::unique_ptr<folly::IOBuf> datagram) {
 }
 
 folly::Expected<folly::Unit, WebTransport::ErrorCode>
+QuicWebTransport::sendWTMaxData(uint64_t /*maxData*/) {
+  return folly::unit;
+}
+
+folly::Expected<folly::Unit, WebTransport::ErrorCode>
 QuicWebTransport::closeSession(folly::Optional<uint32_t> error) {
   if (quicSocket_) {
     if (error) {

@@ -170,14 +170,18 @@ struct Allocator {
 
   template <class U>
   struct rebind {
-    using other = Allocator<
-      U,
-      typename action_helper<
-        typename std::remove_const<
-          typename std::remove_pointer<U>::type
-        >::type, Action
-      >::type
-    >;
+    using other = std::conditional_t<
+        std::is_same<U, T>::value,
+        Allocator<T, Action>,
+        Allocator<
+          U,
+          typename action_helper<
+            typename std::remove_const<
+              typename std::remove_pointer<U>::type
+            >::type, Action
+          >::type
+        >
+      >;
   };
 
   pointer address(reference value) {
@@ -275,4 +279,3 @@ template<class T> T* calloc_raw_array(size_t count) {
 ////////////////////////////////////////////////////////////////////////////////
 
 }
-

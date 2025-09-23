@@ -21,6 +21,7 @@ import (
 	"io"
 	"testing"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -125,8 +126,8 @@ func transportHTTPClientTest(t *testing.T, writer WriteFlusher, reader io.Reader
 func TestIsEOF(t *testing.T) {
 	require.True(t, isEOF(io.EOF))
 	require.True(t, isEOF(fmt.Errorf("wrapped error: %w", io.EOF)))
-	require.True(t, isEOF(NewTransportException(END_OF_FILE, "dummy")))
-	require.True(t, isEOF(fmt.Errorf("wrapped trasport error: %w", NewTransportException(END_OF_FILE, "dummy"))))
+	require.True(t, isEOF(types.NewTransportException(END_OF_FILE, "dummy")))
+	require.True(t, isEOF(fmt.Errorf("wrapped trasport error: %w", types.NewTransportException(END_OF_FILE, "dummy"))))
 	require.False(t, isEOF(io.ErrNoProgress))
 }
 

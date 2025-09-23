@@ -145,7 +145,7 @@ func newOptions(opts ...ClientOption) *clientOptions {
 	}
 
 	if res.transport == TransportIDUnknown {
-		panic(NewTransportException(types.NOT_SUPPORTED, "no transport specified! Please use thrift.WithHeader() or thrift.WithUpgradeToRocket() in the thrift.NewClient call"))
+		panic(types.NewTransportException(types.NOT_SUPPORTED, "no transport specified! Please use thrift.WithHeader() or thrift.WithUpgradeToRocket() in the thrift.NewClient call"))
 	}
 	return res
 }

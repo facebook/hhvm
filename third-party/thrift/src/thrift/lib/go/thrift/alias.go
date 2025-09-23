@@ -115,18 +115,6 @@ func Pointerize[T types.ThriftPointerizable](v T) *T {
 	return types.Pointerize(v)
 }
 
-func PrependError(prepend string, err error) error {
-	return types.PrependError(prepend, err)
-}
-
-func NewTransportException(t int, msg string) types.TransportException {
-	return types.NewTransportException(t, msg)
-}
-
-func NewFormatException(err error) FormatException {
-	return types.NewProtocolException(err)
-}
-
 func NewTransportExceptionFromError(err error) types.TransportException {
 	return types.NewTransportExceptionFromError(err)
 }

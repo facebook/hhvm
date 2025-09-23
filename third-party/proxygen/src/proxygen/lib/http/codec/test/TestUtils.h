@@ -236,6 +236,8 @@ class FakeHTTPCodecCallback : public HTTPCodec::Callback {
         maxStreams = setting.value;
       } else if (setting.id == SettingsId::_HQ_DATAGRAM) {
         datagramEnabled = setting.value;
+      } else if (setting.id == SettingsId::WT_INITIAL_MAX_DATA) {
+        wtInitialMaxData = setting.value;
       }
     }
   }
@@ -349,6 +351,7 @@ class FakeHTTPCodecCallback : public HTTPCodec::Callback {
     lastCertId = 0;
     windowSize = 0;
     maxStreams = 0;
+    wtInitialMaxData = 0;
     datagramEnabled = 0;
     headerFrames = 0;
     unknownFrames = 0;
@@ -428,6 +431,7 @@ class FakeHTTPCodecCallback : public HTTPCodec::Callback {
   uint16_t lastCertId{0};
   uint64_t windowSize{0};
   uint64_t maxStreams{0};
+  uint64_t wtInitialMaxData{0};
   uint64_t datagramEnabled{0};
   uint32_t headerFrames{0};
   uint32_t greaseFrames{0};

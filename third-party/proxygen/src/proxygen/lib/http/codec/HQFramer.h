@@ -103,6 +103,7 @@ enum class SettingId : uint64_t {
   H3_DATAGRAM_RFC = 0x33,
   ENABLE_WEBTRANSPORT = 0x2b603742,
   WEBTRANSPORT_MAX_SESSIONS = 0x2b603743,
+  WT_INITIAL_MAX_DATA = 0x2b61,
 };
 
 using SettingValue = uint64_t;

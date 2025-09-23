@@ -1832,6 +1832,10 @@ class HQSession
     folly::Expected<folly::Unit, WebTransport::ErrorCode> sendDatagram(
         std::unique_ptr<folly::IOBuf> datagram) override;
 
+    size_t getWTInitialSendWindow() const override {
+      return session_.wtInitialSendWindow_;
+    }
+
     [[nodiscard]] bool supportsWebTransport() const override {
       return session_.supportsWebTransport();
     }
@@ -1985,8 +1989,10 @@ class HQSession
       {SettingsId::MAX_HEADER_LIST_SIZE, hq::kDefaultEgressMaxHeaderListSize},
       {SettingsId::_HQ_QPACK_BLOCKED_STREAMS,
        hq::kDefaultEgressQpackBlockedStream},
+      {SettingsId::WT_INITIAL_MAX_DATA, std::numeric_limits<size_t>::max()},
   };
   HTTPSettings ingressSettings_;
+  size_t wtInitialSendWindow_;
   // Maximum Stream/Push ID that we are allowed to open, from GOAWAY
   quic::StreamId peerMinUnseenId_{hq::kMaxClientBidiStreamId};
   uint64_t minUnseenIncomingPushId_{0};

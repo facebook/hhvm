@@ -796,6 +796,7 @@ size_t HQSession::sendSettings() {
         case hq::SettingId::H3_DATAGRAM_DRAFT_8:
         case hq::SettingId::H3_DATAGRAM_RFC:
         case hq::SettingId::WEBTRANSPORT_MAX_SESSIONS:
+        case hq::SettingId::WT_INITIAL_MAX_DATA:
           break;
         case hq::SettingId::ENABLE_WEBTRANSPORT:
           if (setting.value) {
@@ -1577,6 +1578,10 @@ void HQSession::applySettings(const SettingsList& settings) {
           hasWT = setting.value > 0;
           VLOG(3) << "Peer sent WEBTRANSPORT_MAX_SESSIONS: " << uint32_t(hasWT);
           supportsWebTransport_.set(folly::to_underlying(SettingEnabled::PEER));
+          break;
+        case hq::SettingId::WT_INITIAL_MAX_DATA:
+          VLOG(3) << "Peer sent WT_INITIAL_MAX_DATA: " << setting.value;
+          wtInitialSendWindow_ = setting.value;
           break;
       }
     }

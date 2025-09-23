@@ -2432,6 +2432,15 @@ TEST_P(HQUpstreamSessionTestWebTransport, Datagrams) {
   closeWTSession();
 }
 
+TEST_P(HQUpstreamSessionTestWebTransport, ReceiveWTInitialMaxData) {
+  // Verify that the WT_INITIAL_MAX_DATA setting was received in the initial
+  // settings.
+  EXPECT_EQ(httpCallbacks_.wtInitialMaxData, 65536);
+  EXPECT_EQ(httpCallbacks_.settings, 1);
+  EXPECT_EQ(handler_->txn_->getTransport().getWTInitialSendWindow(), 65536);
+  closeWTSession();
+}
+
 /**
  * Instantiate the Parametrized test cases
  */

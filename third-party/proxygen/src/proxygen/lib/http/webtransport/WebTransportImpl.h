@@ -85,6 +85,10 @@ class WebTransportImpl : public WebTransport {
     }
 
     virtual bool usesEncodedApplicationErrorCodes() = 0;
+
+    virtual size_t getWTInitialSendWindow() const {
+      return std::numeric_limits<size_t>::max();
+    }
   };
 
   class SessionProvider {
@@ -99,7 +103,7 @@ class WebTransportImpl : public WebTransport {
   };
 
   WebTransportImpl(TransportProvider& tp, SessionProvider& sp)
-      : tp_(tp), sp_(sp) {
+      : tp_(tp), sp_(sp), sendFlowController_(tp_.getWTInitialSendWindow()) {
   }
 
   ~WebTransportImpl() override = default;

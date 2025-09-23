@@ -99,6 +99,8 @@ folly::Optional<hq::SettingId> httpToHqSettingsId(proxygen::SettingsId id) {
       return hq::SettingId::ENABLE_WEBTRANSPORT;
     case proxygen::SettingsId::WEBTRANSPORT_MAX_SESSIONS:
       return hq::SettingId::WEBTRANSPORT_MAX_SESSIONS;
+    case proxygen::SettingsId::WT_INITIAL_MAX_DATA:
+      return hq::SettingId::WT_INITIAL_MAX_DATA;
     default:
       return folly::none; // this setting has no meaning in HQ
   }
@@ -124,6 +126,8 @@ folly::Optional<proxygen::SettingsId> hqToHttpSettingsId(hq::SettingId id) {
       return proxygen::SettingsId::ENABLE_WEBTRANSPORT;
     case hq::SettingId::WEBTRANSPORT_MAX_SESSIONS:
       return proxygen::SettingsId::WEBTRANSPORT_MAX_SESSIONS;
+    case hq::SettingId::WT_INITIAL_MAX_DATA:
+      return proxygen::SettingsId::WT_INITIAL_MAX_DATA;
   }
   return folly::none;
 }

@@ -229,7 +229,7 @@ bool process(CompilerOptions &po) {
 
   for (auto extension : ExtensionRegistry::getExtensions()) {
     for (auto file : extension->hackFiles()) {
-      if (!files.contains(file)) {
+      if (!files.contains("ext_" + file)) {
         Logger::Error(
           "Error while compiling stdlib: %s not found in input files - did you add an extension without any hack files? If so, override hackFiles to return an empty vector.", file.c_str());
       }

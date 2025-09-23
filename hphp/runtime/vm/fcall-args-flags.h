@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace HPHP {
 
 enum FCallArgsFlags : uint16_t {

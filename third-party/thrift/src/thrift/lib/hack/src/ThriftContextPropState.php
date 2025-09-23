@@ -279,7 +279,11 @@ final class ThriftContextPropState {
         }
         break;
       case UserIdCategory::IG:
-        return $user_id;
+        if (
+          IgidUtils::isUserFbid($user_id) || IgidUtils::isUserIgid($user_id)
+        ) {
+          return $user_id;
+        }
     }
     return null;
   }

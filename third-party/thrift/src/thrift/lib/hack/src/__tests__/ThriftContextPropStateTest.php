@@ -74,6 +74,7 @@ final class ThriftContextPropStateTest extends WWWTest {
   }
 
   public function testUserIdsNullable(): void {
+    self::mockFunction(IgidUtils::isUserFbid<>)->mockReturn(true);
     $tcps = ThriftContextPropState::get();
 
     // override existing value
@@ -222,6 +223,7 @@ final class ThriftContextPropStateTest extends WWWTest {
 
   public async function testInitializationWithVC()[defaults]: Awaitable<void> {
     MockJustKnobs::setBool('meta_cp/www:enable_user_id_ctx_prop', true);
+    self::mockFunction(IgidUtils::isUserFbid<>)->mockReturn(true);
     $tfm = ThriftFrameworkMetadata::withDefaultValues();
     $tfm->baggage = ContextProp\Baggage::withDefaultValues();
     $tfm->baggage->user_ids = ContextProp\UserIds::fromShape(
@@ -278,6 +280,7 @@ final class ThriftContextPropStateTest extends WWWTest {
   public async function testInitializationUserIdsNotOverwritten(
   )[defaults]: Awaitable<void> {
     MockJustKnobs::setBool('meta_cp/www:enable_user_id_ctx_prop', true);
+    self::mockFunction(IgidUtils::isUserFbid<>)->mockReturn(true);
     $tfm = ThriftFrameworkMetadata::withDefaultValues();
     $tfm->baggage = ContextProp\Baggage::withDefaultValues();
     $tfm->baggage->user_ids = ContextProp\UserIds::fromShape(
@@ -352,6 +355,7 @@ final class ThriftContextPropStateTest extends WWWTest {
   public async function testUpdatedWithExplicitIGUserId(
   )[defaults]: Awaitable<void> {
     MockJustKnobs::setBool('meta_cp/www:enable_user_id_ctx_prop', true);
+    self::mockFunction(IgidUtils::isUserFbid<>)->mockReturn(true);
     $tfm = ThriftFrameworkMetadata::withDefaultValues();
     $tfm->baggage = ContextProp\Baggage::withDefaultValues();
     $tfm->baggage->user_ids = ContextProp\UserIds::fromShape(
@@ -375,6 +379,7 @@ final class ThriftContextPropStateTest extends WWWTest {
   public async function testUpdatedWithExplicitIGUserIdNoOverwrite(
   )[defaults]: Awaitable<void> {
     MockJustKnobs::setBool('meta_cp/www:enable_user_id_ctx_prop', true);
+    self::mockFunction(IgidUtils::isUserFbid<>)->mockReturn(true);
     $tfm = ThriftFrameworkMetadata::withDefaultValues();
     $tfm->baggage = ContextProp\Baggage::withDefaultValues();
     $tfm->baggage->user_ids = ContextProp\UserIds::fromShape(

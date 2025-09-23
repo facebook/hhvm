@@ -150,11 +150,10 @@ func newOptions(opts ...ClientOption) *clientOptions {
 	return res
 }
 
-// DeprecatedNewClient will return a connected thrift protocol object.
+// NewClient will return a connected thrift RequestChannel object.
 // Effectively, this is an open thrift connection to a server.
 // A thrift client can use this connection to communicate with a server.
-// Deprecated: use NewClient instead.
-func DeprecatedNewClient(opts ...ClientOption) (Protocol, error) {
+func NewClient(opts ...ClientOption) (RequestChannel, error) {
 	options := newOptions(opts...)
 
 	// Important: TLS config must be modified *before* the dialerFn below is called.
@@ -198,22 +197,10 @@ func DeprecatedNewClient(opts ...ClientOption) (Protocol, error) {
 		return nil, protocolErr
 	}
 
-	return protocol, nil
-}
-
-// NewClient will return a connected thrift RequestChannel object.
-// Effectively, this is an open thrift connection to a server.
-// A thrift client can use this connection to communicate with a server.
-func NewClient(opts ...ClientOption) (RequestChannel, error) {
-	proto, err := DeprecatedNewClient(opts...)
-	if err != nil {
-		return nil, err
-	}
-
 	// RocketClient (protocol) implements RequestChannel.
 	// It doesn't need to be wrapped in a SerialChannel.
-	if channel, ok := proto.(RequestChannel); ok {
+	if channel, ok := protocol.(RequestChannel); ok {
 		return channel, nil
 	}
-	return NewSerialChannel(proto), nil
+	return NewSerialChannel(protocol), nil
 }

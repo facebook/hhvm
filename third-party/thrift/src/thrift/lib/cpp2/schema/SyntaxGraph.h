@@ -1741,6 +1741,9 @@ class SyntaxGraph final : public detail::WithDebugPrinting<SyntaxGraph> {
   const type_system::UnionNode& asTypeSystemUnionNode(
       const UnionNode& node) const;
   const type_system::EnumNode& asTypeSystemEnumNode(const EnumNode& node) const;
+  // TypedefNodes will be recursively resolved to target type as TypeSystem
+  // doesn't support Typedef.
+  type_system::TypeRef asTypeSystemTypeRef(const TypeRef& ref) const;
 
   /**
    * Allows converting a TypeSystem node into its corresponding SyntaxGraph. A

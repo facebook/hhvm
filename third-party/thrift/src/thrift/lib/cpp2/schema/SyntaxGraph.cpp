@@ -1229,6 +1229,62 @@ const type_system::EnumNode& SyntaxGraph::asTypeSystemEnumNode(
     const EnumNode& node) const {
   return asTypeSystemDefinitionRef(node.definition()).asEnum();
 }
+type_system::TypeRef SyntaxGraph::asTypeSystemTypeRef(
+    const TypeRef& node) const {
+  auto& facade = static_cast<const TypeSystemFacade&>(asTypeSystem());
+  return node.visit(
+      [&](Primitive p) {
+        switch (p) {
+          case Primitive::BOOL:
+            return type_system::TypeSystem::Bool();
+          case Primitive::BYTE:
+            return type_system::TypeSystem::Byte();
+          case Primitive::I16:
+            return type_system::TypeSystem::I16();
+          case Primitive::I32:
+            return type_system::TypeSystem::I32();
+          case Primitive::I64:
+            return type_system::TypeSystem::I64();
+          case Primitive::FLOAT:
+            return type_system::TypeSystem::Float();
+          case Primitive::DOUBLE:
+            return type_system::TypeSystem::Double();
+          case Primitive::STRING:
+            return type_system::TypeSystem::String();
+          case Primitive::BINARY:
+            return type_system::TypeSystem::Binary();
+        }
+        folly::assume_unreachable();
+      },
+      [&](const List& l) {
+        return facade.ListOf(asTypeSystemTypeRef(l.elementType()));
+      },
+      [&](const Set& s) {
+        return facade.SetOf(asTypeSystemTypeRef(s.elementType()));
+      },
+      [&](const Map& m) {
+        return facade.MapOf(
+            asTypeSystemTypeRef(m.keyType()),
+            asTypeSystemTypeRef(m.valueType()));
+      },
+      [&](const StructNode& s) {
+        return type_system::TypeRef(asTypeSystemStructNode(s));
+      },
+      [&](const UnionNode& u) {
+        return type_system::TypeRef(asTypeSystemUnionNode(u));
+      },
+      [&](const EnumNode& e) {
+        return type_system::TypeRef(asTypeSystemEnumNode(e));
+      },
+      [&](const TypedefNode& t) -> type_system::TypeRef {
+        // Typedefs doesn't exist in TypeSystem and they are simply an alias.
+        return asTypeSystemTypeRef(t.targetType().trueType());
+      },
+      [&](const ExceptionNode&) -> type_system::TypeRef {
+        folly::throw_exception<std::runtime_error>(
+            "Exceptions aren't supported by TypeSystem");
+      });
+}
 
 const DefinitionNode& SyntaxGraph::asSyntaxGraphDefinition(
     const type_system::DefinitionNode& node) const {

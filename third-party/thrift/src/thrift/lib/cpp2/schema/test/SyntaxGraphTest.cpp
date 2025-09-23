@@ -954,6 +954,32 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
       &mainProgram.definitionsByName().at("TestEnum")->asEnum(), &sgEnumNode);
 }
 
+TEST_F(ServiceSchemaTest, asTypeSystemTypeRef) {
+  auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
+  auto& mainProgram = syntaxGraph.findProgramByName("syntax_graph");
+  {
+    auto def = mainProgram.definitionsByName().at("TestRecursiveStruct");
+    auto ref = TypeRef::of(def->asStruct());
+    auto tsRef = syntaxGraph.asTypeSystemTypeRef(ref);
+    EXPECT_EQ(
+        tsRef.asStruct().uri(), "meta.com/thrift_test/TestRecursiveStruct");
+  }
+  {
+    auto def =
+        mainProgram.definitionsByName().at("TypedefToTestStructuredAnnotation");
+    auto ref = TypeRef::of(def->asTypedef());
+    auto tsRef = syntaxGraph.asTypeSystemTypeRef(ref);
+    EXPECT_EQ(
+        tsRef.asStruct().uri(),
+        "meta.com/thrift_test/TestStructuredAnnotation");
+  }
+  {
+    auto def = mainProgram.definitionsByName().at("TestException");
+    auto ref = TypeRef::of(def->asException());
+    EXPECT_THROW(syntaxGraph.asTypeSystemTypeRef(ref), std::runtime_error);
+  }
+}
+
 TEST(SyntaxGraphTest, getSchemaMerge) {
   auto& registry = SchemaRegistry::get();
 

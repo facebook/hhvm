@@ -42,7 +42,9 @@ func NewServer(processor Processor, listener net.Listener, transportType Transpo
 	serverOptions := newServerOptions(options...)
 	switch transportType {
 	case TransportIDHeader:
-		return newHeaderServer(processor, listener, serverOptions)
+		// NOTE: temporary workaround while Header support is being removed.
+		// This code is never hit actually.
+		return newUpgradeToRocketServer(processor, listener, serverOptions)
 	case TransportIDRocket:
 		return newRocketServer(processor, listener, serverOptions)
 	case TransportIDUpgradeToRocket:

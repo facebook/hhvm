@@ -440,9 +440,6 @@ func TestPanics(t *testing.T) {
 		require.ErrorIs(t, err, context.Canceled)
 	}
 
-	t.Run("NewServer/Header", func(t *testing.T) {
-		runPanicTestFunc(t, TransportIDHeader)
-	})
 	t.Run("NewServer/UpgradeToRocket", func(t *testing.T) {
 		runPanicTestFunc(t, TransportIDUpgradeToRocket)
 	})

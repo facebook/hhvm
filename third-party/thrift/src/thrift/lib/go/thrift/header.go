@@ -106,13 +106,6 @@ func (c ClientType) String() string {
 	}
 }
 
-type HeaderFlags uint16
-
-const (
-	HeaderFlagSupportOutOfOrder HeaderFlags = 0x01
-	HeaderFlagDuplexReverse     HeaderFlags = 0x08
-)
-
 type InfoIDType uint32
 
 const (

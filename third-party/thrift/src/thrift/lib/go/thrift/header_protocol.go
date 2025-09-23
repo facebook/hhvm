@@ -120,16 +120,6 @@ func (p *headerProtocol) Close() error {
 	return p.trans.Close()
 }
 
-// Deprecated: SetSeqID() is a deprecated method.
-func (p *headerProtocol) SetSeqID(seq uint32) {
-	p.trans.SetSeqID(seq)
-}
-
-// Deprecated: GetSeqID() is a deprecated method.
-func (p *headerProtocol) GetSeqID() uint32 {
-	return p.trans.SeqID()
-}
-
 // Control underlying header transport
 
 // Deprecated: setRequestHeader is deprecated and will eventually be private.
@@ -145,34 +135,6 @@ func (p *headerProtocol) ProtocolID() types.ProtocolID {
 	return p.protoID
 }
 
-// Deprecated: GetFlags() is a deprecated method.
-func (t *headerProtocol) GetFlags() HeaderFlags {
-	return t.trans.GetFlags()
-}
-
-// Deprecated: SetFlags() is a deprecated method.
-func (p *headerProtocol) SetFlags(flags HeaderFlags) {
-	p.trans.SetFlags(flags)
-}
-
 func (p *headerProtocol) AddTransform(trans TransformID) error {
 	return p.trans.AddTransform(trans)
 }
-
-// Deprecated: HeaderProtocolSeqID is a deprecated type, temporarily introduced to ease transition to new API.
-type HeaderProtocolSeqID interface {
-	GetSeqID() uint32
-	SetSeqID(uint32)
-}
-
-// Compile time interface enforcer
-var _ HeaderProtocolSeqID = (*headerProtocol)(nil)
-
-// Deprecated: HeaderProtocolFlags is a deprecated type, temporarily introduced to ease transition to new API.
-type HeaderProtocolFlags interface {
-	GetFlags() HeaderFlags
-	SetFlags(flags HeaderFlags)
-}
-
-// Compile time interface enforcer
-var _ HeaderProtocolFlags = (*headerProtocol)(nil)

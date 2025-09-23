@@ -153,16 +153,6 @@ func (t *headerTransport) applyUntransform() error {
 	return nil
 }
 
-// GetFlags returns the header flags.
-func (t *headerTransport) GetFlags() HeaderFlags {
-	return HeaderFlags(t.flags)
-}
-
-// SetFlags sets the header flags.
-func (t *headerTransport) SetFlags(flags HeaderFlags) {
-	t.flags = uint16(flags)
-}
-
 // ResetProtocol needs to be called between every frame receive (BeginMessageRead)
 // We do this to read out the header for each frame. This contains the length of the
 // frame and protocol / metadata info.

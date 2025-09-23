@@ -17,7 +17,6 @@
 package gotest
 
 import (
-	"bytes"
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift"
@@ -26,9 +25,9 @@ import (
 )
 
 // Run this benchmark:
-// buck2 run thrift/test/go/:gobench -- -test.bench=. -test.benchtime=100000x
+// buck2 run @mode/opt thrift/test/go/:gobench -- -test.bench=. -test.benchtime=100000x
 
-func BenchmarkStructRead(b *testing.B) {
+func BenchmarkStructDecode(b *testing.B) {
 	// TODO: field51 and field53 result in non-buildable code.
 	// Use manual workaround below for now.
 	// ....
@@ -44,24 +43,17 @@ func BenchmarkStructRead(b *testing.B) {
 		{"hello1", "hello2", "hello3"}: "value1",
 	}
 
-	buffer := bytes.NewBuffer(make([]byte, 0, 10*1024*1024))
-	proto := thrift.NewBinaryFormat(buffer)
-	err := originalStruct.Write(proto)
+	dataBytes, err := thrift.EncodeBinary(originalStruct)
 	require.NoError(b, err)
 
-	dataBytes := buffer.Bytes()
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		buffer.Reset()
-		buffer.Write(dataBytes)
+	for b.Loop() {
 		readTargetStruct := thrifttest.NewVariousFieldsStruct()
-		err = readTargetStruct.Read(proto)
+		err = thrift.DecodeBinary(dataBytes, readTargetStruct)
 		require.NoError(b, err)
 	}
 }
 
-func BenchmarkStructWrite(b *testing.B) {
+func BenchmarkStructEncode(b *testing.B) {
 	// TODO: field51 and field53 result in non-buildable code.
 	// Use manual workaround below for now.
 	// ....
@@ -77,13 +69,8 @@ func BenchmarkStructWrite(b *testing.B) {
 		{"hello1", "hello2", "hello3"}: "value1",
 	}
 
-	buffer := bytes.NewBuffer(make([]byte, 0, 10*1024*1024))
-	proto := thrift.NewBinaryFormat(buffer)
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		buffer.Reset()
-		err := originalStruct.Write(proto)
+	for b.Loop() {
+		_, err := thrift.EncodeBinary(originalStruct)
 		require.NoError(b, err)
 	}
 }
@@ -104,8 +91,7 @@ func BenchmarkStructToString(b *testing.B) {
 		{"hello1", "hello2", "hello3"}: "value1",
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_ = originalStruct.String()
 	}
 }

@@ -52,6 +52,20 @@ void WebTransportImpl::terminateSessionStreams(uint32_t errorCode,
   wtEgressStreams_.clear();
 }
 
+void WebTransportImpl::onMaxData(uint64_t maxData) noexcept {
+  if (sendFlowController_.grant(maxData) &&
+      sendFlowController_.getAvailable() > 0) {
+    auto it = wtEgressStreams_.begin();
+    while (it != wtEgressStreams_.end() &&
+           sendFlowController_.getAvailable() > 0) {
+      auto currentIt = it++;
+      currentIt->second.flushBufferedWrites();
+    }
+  } else {
+    VLOG(4) << __func__ << " failed to grant maxData=" << maxData;
+  }
+}
+
 folly::Expected<WebTransport::StreamWriteHandle*, WebTransport::ErrorCode>
 WebTransportImpl::newWebTransportUniStream() {
   if (sessionCloseError_.has_value()) {
@@ -123,8 +137,18 @@ WebTransportImpl::sendWebTransportStreamData(
     std::unique_ptr<folly::IOBuf> data,
     bool eof,
     ByteEventCallback* deliveryCallback) {
+  bool blocked = false;
+  if (data) {
+    auto dataLen = data->computeChainDataLength();
+    // sendWebTransportStreamData will only be called when
+    // dataLen <= available window
+    blocked = !sendFlowController_.reserve(dataLen);
+  }
   auto res = tp_.sendWebTransportStreamData(
       id, std::move(data), eof, deliveryCallback);
+  if (blocked) {
+    res = WebTransport::FCState::BLOCKED;
+  }
   if (eof || res.hasError()) {
     wtEgressStreams_.erase(id);
   }
@@ -158,13 +182,27 @@ WebTransportImpl::StreamWriteHandle::writeStreamData(
   if (stopSendingErrorCode_) {
     return folly::makeUnexpected(WebTransport::ErrorCode::STOP_SENDING);
   }
-  impl_.sp_.refreshTimeout();
-  auto fcState = impl_.sendWebTransportStreamData(
-      id_, std::move(data), fin, deliveryCallback);
-  if (fcState.hasError()) {
-    return folly::makeUnexpected(fcState.error());
+  if (!data && !fin) {
+    return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
   }
-  return *fcState;
+
+  impl_.sp_.refreshTimeout();
+
+  if (!bufferedWrites_.empty() && bufferedWrites_.back().fin) {
+    return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
+  }
+  if (!bufferedWrites_.empty() &&
+      bufferedWrites_.back().deliveryCallback == nullptr) {
+    if (data) {
+      bufferedWrites_.back().buf.append(std::move(data));
+    }
+    bufferedWrites_.back().deliveryCallback = deliveryCallback;
+    bufferedWrites_.back().fin = fin;
+  } else {
+    bufferedWrites_.emplace_back(std::move(data), deliveryCallback, fin);
+  }
+
+  return flushBufferedWrites();
 }
 
 folly::Expected<folly::SemiFuture<uint64_t>, WebTransport::ErrorCode>
@@ -209,9 +247,65 @@ void WebTransportImpl::StreamWriteHandle::onStopSending(uint32_t errorCode) {
 
 void WebTransportImpl::StreamWriteHandle::onStreamWriteReady(
     quic::StreamId, uint64_t maxToSend) noexcept {
-  if (writePromise_) {
+  streamWriteReady_ = true;
+  flushBufferedWrites();
+  maybeResolveWritePromise(maxToSend);
+}
+
+folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
+WebTransportImpl::StreamWriteHandle::flushBufferedWrites() {
+  auto availableSpace = impl_.sendFlowController_.getAvailable();
+
+  while (availableSpace > 0 && !bufferedWrites_.empty()) {
+    auto& frontEntry = bufferedWrites_.front();
+    auto bufToSend = frontEntry.buf.splitAtMost(availableSpace);
+
+    availableSpace -= bufToSend->computeChainDataLength();
+    ByteEventCallback* sendDeliveryCallback = nullptr;
+    bool sendFin = false;
+
+    if (frontEntry.buf.empty()) {
+      sendDeliveryCallback = frontEntry.deliveryCallback;
+      sendFin = frontEntry.fin;
+      bufferedWrites_.pop_front();
+    }
+
+    auto res = impl_.sendWebTransportStreamData(
+        id_, std::move(bufToSend), sendFin, sendDeliveryCallback);
+
+    if (res.hasError()) {
+      return folly::makeUnexpected(res.error());
+    }
+
+    if (sendFin || *res == WebTransport::FCState::BLOCKED) {
+      return *res;
+    }
+  }
+
+  return bufferedWrites_.empty() ? WebTransport::FCState::UNBLOCKED
+                                 : WebTransport::FCState::BLOCKED;
+}
+
+/**
+ * A write can be blocked for two separate reasons:
+ * 1. The QUIC transport has no room
+ * 2. There's no room as per the WT_MAX_DATA sent to us by the peer
+ *
+ * This sets writePromise_ only if there's room in the QUIC transport
+ * and there's room as per the WT_MAX_DATA sent to us by the peer, as well as no
+ * pending writes.
+ */
+void WebTransportImpl::StreamWriteHandle::maybeResolveWritePromise(
+    uint64_t maxToSend) {
+  if (!writePromise_) {
+    return;
+  }
+
+  if (impl_.sendFlowController_.getAvailable() > 0 && streamWriteReady_ &&
+      bufferedWrites_.empty()) {
     writePromise_->setValue(maxToSend);
     writePromise_.reset();
+    streamWriteReady_ = false;
   }
 }
 

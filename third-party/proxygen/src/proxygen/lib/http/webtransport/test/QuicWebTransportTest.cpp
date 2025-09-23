@@ -81,6 +81,9 @@ TEST_F(QuicWebTransportTest, PeerUniStream) {
 TEST_F(QuicWebTransportTest, PeerBidiStream) {
   EXPECT_CALL(*handler_, onNewBidiStream(_))
       .WillOnce([this](WebTransport::BidiStreamHandle bidiHandle) {
+        auto wtImpl = dynamic_cast<WebTransportImpl*>(transport_.get());
+        ASSERT_NE(wtImpl, nullptr);
+        wtImpl->onMaxData(1000);
         bidiHandle.writeHandle->writeStreamData(
             folly::IOBuf::copyBuffer("hello"), true, nullptr);
         bidiHandle.readHandle->awaitNextRead(
@@ -172,6 +175,10 @@ TEST_F(QuicWebTransportTest, WriteWithDeliveryCallback) {
   uint32_t expectedOffset = data.size();
   EXPECT_CALL(*mockCallback, onByteEvent(expectedStreamId, expectedOffset))
       .Times(1);
+
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(transport_.get());
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->onMaxData(1000);
 
   handle.value()->writeStreamData(
       folly::IOBuf::copyBuffer(data), true, mockCallback.get());

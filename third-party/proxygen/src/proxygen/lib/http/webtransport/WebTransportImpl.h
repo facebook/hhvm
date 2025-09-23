@@ -9,6 +9,7 @@
 #pragma once
 
 #include <proxygen/lib/http/codec/HTTPCodec.h>
+#include <proxygen/lib/http/webtransport/FlowController.h>
 #include <proxygen/lib/http/webtransport/WebTransport.h>
 
 namespace proxygen {
@@ -96,6 +97,7 @@ class WebTransportImpl : public WebTransport {
   ~WebTransportImpl() override = default;
 
   void destroy();
+  void onMaxData(uint64_t maxData) noexcept;
 
   // WT API
   folly::Expected<WebTransport::StreamWriteHandle*, WebTransport::ErrorCode>
@@ -225,15 +227,40 @@ class WebTransportImpl : public WebTransport {
         override;
 
     void onStopSending(uint32_t errorCode);
+    folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
+    flushBufferedWrites();
+    void maybeResolveWritePromise(uint64_t maxToSend);
 
     // TODO: what happens to promise_ if this stream is reset or the
     // conn closes
 
    private:
+    /*
+     * Used to store buffered writes when we have insufficient flow control.
+     */
+    struct BufferedWrite {
+      folly::IOBufQueue buf;
+      ByteEventCallback* deliveryCallback;
+      bool fin;
+
+      BufferedWrite(std::unique_ptr<folly::IOBuf> data,
+                    ByteEventCallback* callback,
+                    bool fin)
+          : buf(folly::IOBufQueue::cacheChainLength()),
+            deliveryCallback(callback),
+            fin(fin) {
+        if (data) {
+          buf.append(std::move(data));
+        }
+      }
+    };
+
     void onStreamWriteReady(quic::StreamId id, uint64_t) noexcept override;
 
     WebTransportImpl& impl_;
     folly::Optional<folly::Promise<uint64_t>> writePromise_;
+    std::list<BufferedWrite> bufferedWrites_;
+    bool streamWriteReady_{false};
   };
 
   class StreamReadHandle
@@ -297,6 +324,7 @@ class WebTransportImpl : public WebTransport {
   using WTIngressStreamMap = std::map<HTTPCodec::StreamID, StreamReadHandle>;
   WTEgressStreamMap wtEgressStreams_;
   WTIngressStreamMap wtIngressStreams_;
+  FlowController sendFlowController_{};
   folly::Optional<uint32_t> sessionCloseError_;
 
  public:

@@ -2259,6 +2259,9 @@ TEST_P(HQUpstreamSessionTestWebTransport, BidirectionalStream) {
   // small write
   auto mockCallback1 = std::make_unique<StrictMock<MockDeliveryCallback>>();
   EXPECT_CALL(*mockCallback1, onByteEvent(id, 10)).Times(1);
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->onMaxData(1000);
   stream.writeHandle->writeStreamData(makeBuf(10), false, mockCallback1.get());
   eventBase_.loopOnce();
 
@@ -2269,12 +2272,21 @@ TEST_P(HQUpstreamSessionTestWebTransport, BidirectionalStream) {
   EXPECT_CALL(*mockCallback2, onByteEvent(id, 65536 + 10)).Times(1);
   stream.writeHandle->writeStreamData(
       makeBuf(65536), false, mockCallback2.get());
-  stream.writeHandle->awaitWritable().value().via(&eventBase_).then([&](auto) {
-    VLOG(4) << "big write complete";
-    // after it completes, write FIN
-    stream.writeHandle->writeStreamData(nullptr, true, nullptr);
+
+  // capture the write handle and cancellation token to avoid UAF
+  auto writeHandle = stream.writeHandle;
+  auto cancelToken = writeHandle->getCancelToken();
+
+  stream.writeHandle->awaitWritable()
+      .value()
+      .via(&eventBase_)
+      .then([&, writeHandle, cancelToken](const auto&) {
+        VLOG(4) << "big write complete";
+        if (!cancelToken.isCancellationRequested()) {
+          // after it completes, write FIN
+          writeHandle->writeStreamData(nullptr, true, nullptr);
 #if 0
-        stream.writeHandle
+        writeHandle
             .value()
             .via(&eventBase_)
             .then([&](auto) {
@@ -2283,12 +2295,17 @@ TEST_P(HQUpstreamSessionTestWebTransport, BidirectionalStream) {
             });
         // ug, can't determine fin write complete;
 #endif
-    writeComplete = true;
-  });
+          writeComplete = true;
+        } else {
+          VLOG(4) << "Stream was cancelled, skipping FIN write";
+          writeComplete = true;
+        }
+      });
   eventBase_.loopOnce();
   // grow the fcw which will complete the big write
   socketDriver_->setStreamFlowControlWindow(id, 100000);
   socketDriver_->setConnectionFlowControlWindow(100000);
+  wtImpl->onMaxData(100000);
   eventBase_.loopOnce();
   eventBase_.loopOnce();
   eventBase_.loopOnce();

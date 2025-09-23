@@ -117,6 +117,16 @@ class HTTPTransactionWebTransportTest : public testing::Test {
   folly::EventBase evb_;
 };
 
+class MockDeliveryCallback : public WebTransport::ByteEventCallback {
+ public:
+  MOCK_METHOD(void, onByteEvent, (quic::StreamId, uint64_t), (noexcept));
+
+  MOCK_METHOD(void,
+              onByteEventCanceled,
+              (quic::StreamId, uint64_t),
+              (noexcept));
+};
+
 TEST_F(HTTPTransactionWebTransportTest, CreateStreams) {
   EXPECT_CALL(transport_, newWebTransportBidiStream()).WillOnce(Return(0));
   EXPECT_CALL(transport_, initiateReadOnBidiStream(_, _))
@@ -138,7 +148,12 @@ TEST_F(HTTPTransactionWebTransportTest, CreateStreams) {
   EXPECT_CALL(transport_,
               sendWebTransportStreamData(1, testing::_, true, nullptr))
       .WillOnce(Return(WTFCState::UNBLOCKED));
+
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->onMaxData(1000);
   res2.value()->writeStreamData(nullptr, true, nullptr);
+
   // Try creating streams but fail at transport
   EXPECT_CALL(transport_, newWebTransportBidiStream())
       .WillOnce(Return(folly::makeUnexpected(
@@ -287,6 +302,11 @@ TEST_F(HTTPTransactionWebTransportTest, WriteFails) {
   EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
   auto res = wt_->createUniStream();
   EXPECT_TRUE(res.hasValue());
+
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->onMaxData(1000);
+
   EXPECT_CALL(transport_,
               sendWebTransportStreamData(1, testing::_, false, nullptr))
       .WillOnce(
@@ -299,6 +319,11 @@ TEST_F(HTTPTransactionWebTransportTest, WriteStreamPauseStopSending) {
   EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
   auto writeHandle = wt_->createUniStream();
   EXPECT_FALSE(writeHandle.hasError());
+
+  // Grant flow control space before any writes
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->onMaxData(1000);
 
   // Block write, then resume
   bool ready = false;
@@ -387,13 +412,16 @@ TEST_F(HTTPTransactionWebTransportTest, AwaitWritableCancel) {
   EXPECT_FALSE(ready);
 
   // Resume - only happens once because the reset, maybe?
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->onMaxData(1000);
   wcb->onStreamWriteReady(0, 65536);
   eventBase_.loopOnce();
   EXPECT_TRUE(ready);
 }
 
 TEST_F(HTTPTransactionWebTransportTest, BidiStreamEdgeCases) {
-  WebTransport::BidiStreamHandle streamHandle;
+  WebTransport::BidiStreamHandle streamHandle{};
   EXPECT_CALL(handler_, onWebTransportBidiStream(_, _))
       .WillOnce(SaveArg<1>(&streamHandle));
 
@@ -520,6 +548,9 @@ TEST_F(HTTPTransactionWebTransportTest, StreamIDAPIs) {
   wt_->stopSending(id, WT_APP_ERROR_1);
 
   // write by ID
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->onMaxData(1000);
   EXPECT_CALL(transport_,
               sendWebTransportStreamData(id, testing::_, false, nullptr))
       .WillOnce(Return(WTFCState::UNBLOCKED));
@@ -594,6 +625,241 @@ TEST_F(HTTPTransactionWebTransportTest, StopSendingThenAbort) {
   // 1. Should you be able to resetStream() while write is outstanding? (yes)
   // 2. Should you be able to stopSending() when read is outstanding?
   eventBase_.loopOnce();
+}
+
+TEST_F(HTTPTransactionWebTransportTest, WriteBufferingBasic) {
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
+  auto writeHandle = wt_->createUniStream();
+  EXPECT_FALSE(writeHandle.hasError());
+
+  // no flow control space initially, writes should be buffered
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  auto res = writeHandle.value()->writeStreamData(makeBuf(100), false, nullptr);
+  EXPECT_TRUE(res.hasValue());
+  EXPECT_EQ(*res, WTFCState::BLOCKED);
+
+  // grant flow control and verify buffered data is flushed
+  EXPECT_CALL(transport_,
+              sendWebTransportStreamData(1, testing::_, false, nullptr))
+      .WillOnce(Return(WTFCState::UNBLOCKED));
+  wtImpl->onMaxData(1000);
+
+  // write more data with available flow control, should send immediately
+  EXPECT_CALL(transport_,
+              sendWebTransportStreamData(1, testing::_, false, nullptr))
+      .WillOnce(Return(WTFCState::UNBLOCKED));
+  res = writeHandle.value()->writeStreamData(makeBuf(50), false, nullptr);
+  EXPECT_TRUE(res.hasValue());
+  EXPECT_EQ(*res, WTFCState::UNBLOCKED);
+  EXPECT_CALL(transport_, resetWebTransportEgress(_, _));
+}
+
+TEST_F(HTTPTransactionWebTransportTest, WriteBufferingEOF) {
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
+  auto writeHandle = wt_->createUniStream();
+  EXPECT_FALSE(writeHandle.hasError());
+
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+
+  // write data with EOF but no flow control, should buffer
+  auto res = writeHandle.value()->writeStreamData(makeBuf(100), true, nullptr);
+  EXPECT_TRUE(res.hasValue());
+  EXPECT_EQ(*res, WTFCState::BLOCKED);
+
+  // grant flow control, should flush buffered data with EOF
+  EXPECT_CALL(transport_,
+              sendWebTransportStreamData(1, testing::_, true, nullptr))
+      .WillOnce(Return(WTFCState::UNBLOCKED));
+  wtImpl->onMaxData(1000);
+}
+
+TEST_F(HTTPTransactionWebTransportTest, WriteBufferingPartialSend) {
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
+  auto writeHandle = wt_->createUniStream();
+  EXPECT_FALSE(writeHandle.hasError());
+
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+
+  // write large data without flow control, should buffer
+  auto res =
+      writeHandle.value()->writeStreamData(makeBuf(1000), false, nullptr);
+  EXPECT_TRUE(res.hasValue());
+  EXPECT_EQ(*res, WTFCState::BLOCKED);
+
+  // grant partial flow control, should flush partial data
+  EXPECT_CALL(transport_,
+              sendWebTransportStreamData(1, testing::_, false, nullptr))
+      .WillOnce(Return(WTFCState::UNBLOCKED));
+  wtImpl->onMaxData(500);
+
+  // grant more flow control, should flush remaining buffered data
+  EXPECT_CALL(transport_,
+              sendWebTransportStreamData(1, testing::_, false, nullptr))
+      .WillOnce(Return(WTFCState::UNBLOCKED));
+  wtImpl->onMaxData(1000);
+  EXPECT_CALL(transport_, resetWebTransportEgress(_, _));
+}
+
+TEST_F(HTTPTransactionWebTransportTest, StreamWriteReadyCallback) {
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
+  auto writeHandle = wt_->createUniStream();
+  EXPECT_FALSE(writeHandle.hasError());
+
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+
+  // write data without flow control, should buffer
+  auto res = writeHandle.value()->writeStreamData(makeBuf(100), false, nullptr);
+  EXPECT_TRUE(res.hasValue());
+  EXPECT_EQ(*res, WTFCState::BLOCKED);
+
+  bool writeReady = false;
+  quic::StreamWriteCallback* wcb{nullptr};
+  EXPECT_CALL(transport_, notifyPendingWriteOnStream(1, testing::_))
+      .WillOnce(DoAll(SaveArg<1>(&wcb), Return(folly::unit)));
+  writeHandle.value()
+      ->awaitWritable()
+      .value()
+      .via(&eventBase_)
+      .thenTry([&writeReady](const auto& result) {
+        EXPECT_FALSE(result.hasException());
+        writeReady = true;
+      });
+  EXPECT_FALSE(writeReady);
+
+  // trigger onStreamWriteReady, should flush buffered writes and resolve
+  // promise
+  EXPECT_CALL(transport_,
+              sendWebTransportStreamData(1, testing::_, false, nullptr))
+      .WillOnce(Return(WTFCState::UNBLOCKED));
+  wtImpl->onMaxData(1000);
+  wcb->onStreamWriteReady(1, 65536);
+  eventBase_.loopOnce();
+  EXPECT_TRUE(writeReady);
+  EXPECT_CALL(transport_, resetWebTransportEgress(_, _));
+}
+
+TEST_F(HTTPTransactionWebTransportTest, FlushBufferedWritesMultiple) {
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
+  auto writeHandle = wt_->createUniStream();
+  EXPECT_FALSE(writeHandle.hasError());
+
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+
+  auto dcb1 = std::make_unique<StrictMock<MockDeliveryCallback>>();
+  auto dcb2 = std::make_unique<StrictMock<MockDeliveryCallback>>();
+  auto dcb3 = std::make_unique<StrictMock<MockDeliveryCallback>>();
+
+  // write multiple chunks without flow control, should buffer into three
+  // entries
+  auto res1 =
+      writeHandle.value()->writeStreamData(makeBuf(100), false, dcb1.get());
+  EXPECT_TRUE(res1.hasValue());
+  EXPECT_EQ(*res1, WTFCState::BLOCKED);
+
+  auto res2 =
+      writeHandle.value()->writeStreamData(makeBuf(200), false, dcb2.get());
+  EXPECT_TRUE(res2.hasValue());
+  EXPECT_EQ(*res2, WTFCState::BLOCKED);
+
+  auto res3 =
+      writeHandle.value()->writeStreamData(makeBuf(150), false, dcb3.get());
+  EXPECT_TRUE(res3.hasValue());
+  EXPECT_EQ(*res3, WTFCState::BLOCKED);
+
+  // grant flow control, should flush first buffered entry
+  EXPECT_CALL(transport_,
+              sendWebTransportStreamData(1, testing::_, false, dcb1.get()))
+      .WillOnce(Return(WTFCState::UNBLOCKED));
+  wtImpl->onMaxData(100);
+
+  // grant more flow control, should flush second buffered entry
+  EXPECT_CALL(transport_,
+              sendWebTransportStreamData(1, testing::_, false, dcb2.get()))
+      .WillOnce(Return(WTFCState::UNBLOCKED));
+  wtImpl->onMaxData(300);
+
+  // grant more flow control, should flush third buffered entry
+  EXPECT_CALL(transport_,
+              sendWebTransportStreamData(1, testing::_, false, dcb3.get()))
+      .WillOnce(Return(WTFCState::UNBLOCKED));
+  wtImpl->onMaxData(500);
+  EXPECT_CALL(transport_, resetWebTransportEgress(_, _));
+}
+
+TEST_F(HTTPTransactionWebTransportTest, CoalescedWrites) {
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
+  auto writeHandle = wt_->createUniStream();
+  EXPECT_FALSE(writeHandle.hasError());
+
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+
+  // write multiple chunks without flow control, should buffer all into one
+  // coalesced entry because of no delivery callbacks
+  auto res1 =
+      writeHandle.value()->writeStreamData(makeBuf(100), false, nullptr);
+  EXPECT_TRUE(res1.hasValue());
+  EXPECT_EQ(*res1, WTFCState::BLOCKED);
+
+  auto res2 =
+      writeHandle.value()->writeStreamData(makeBuf(200), false, nullptr);
+  EXPECT_TRUE(res2.hasValue());
+  EXPECT_EQ(*res2, WTFCState::BLOCKED);
+
+  auto res3 =
+      writeHandle.value()->writeStreamData(makeBuf(150), false, nullptr);
+  EXPECT_TRUE(res3.hasValue());
+  EXPECT_EQ(*res3, WTFCState::BLOCKED);
+
+  // grant flow control, should flush the entire buffered entry
+  EXPECT_CALL(transport_,
+              sendWebTransportStreamData(1, testing::_, false, nullptr))
+      .WillOnce(Return(WTFCState::UNBLOCKED));
+  wtImpl->onMaxData(1000);
+  EXPECT_CALL(transport_, resetWebTransportEgress(_, _));
+}
+
+TEST_F(HTTPTransactionWebTransportTest, CoalescedWritesPartialFlowControl) {
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
+  auto writeHandle = wt_->createUniStream();
+  EXPECT_FALSE(writeHandle.hasError());
+
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+
+  auto res1 =
+      writeHandle.value()->writeStreamData(makeBuf(100), false, nullptr);
+  EXPECT_TRUE(res1.hasValue());
+  EXPECT_EQ(*res1, WTFCState::BLOCKED);
+
+  auto res2 =
+      writeHandle.value()->writeStreamData(makeBuf(200), false, nullptr);
+  EXPECT_TRUE(res2.hasValue());
+  EXPECT_EQ(*res2, WTFCState::BLOCKED);
+
+  auto res3 =
+      writeHandle.value()->writeStreamData(makeBuf(150), false, nullptr);
+  EXPECT_TRUE(res3.hasValue());
+  EXPECT_EQ(*res3, WTFCState::BLOCKED);
+
+  // due to coalescing with nullptr callbacks, we expect only 2 transport calls
+  // (not 3) when flow control is granted in non-aligned chunks
+  EXPECT_CALL(transport_,
+              sendWebTransportStreamData(1, testing::_, false, nullptr))
+      .WillOnce(Return(WTFCState::UNBLOCKED));
+  wtImpl->onMaxData(250);
+
+  EXPECT_CALL(transport_,
+              sendWebTransportStreamData(1, testing::_, false, nullptr))
+      .WillOnce(Return(WTFCState::UNBLOCKED));
+  wtImpl->onMaxData(450);
+
+  EXPECT_CALL(transport_, resetWebTransportEgress(_, _));
 }
 
 } // namespace proxygen::test

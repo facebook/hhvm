@@ -53,6 +53,10 @@ class WebTransportFilter
     handler_ = handler;
   }
 
+  void setWebTransportImpl(WebTransportImpl* wtImpl) {
+    wtImpl_ = wtImpl;
+  }
+
   void onBody(std::unique_ptr<folly::IOBuf> chain) noexcept override {
     if (sessionClosed_) {
       XLOG(ERR) << "Received additional data after WT_CLOSE_SESSION capsule, "
@@ -201,6 +205,9 @@ class WebTransportFilter
   }
   void onWTMaxDataCapsule(WTMaxDataCapsule capsule) override {
     XLOG(DBG1) << __func__;
+    if (wtImpl_) {
+      wtImpl_->onMaxData(capsule.maximumData);
+    }
   }
   void onWTMaxStreamDataCapsule(WTMaxStreamDataCapsule capsule) override {
     XLOG(DBG1) << __func__;
@@ -261,6 +268,7 @@ class WebTransportFilter
   };
   std::list<WriteCallback> writeCallbacks_;
   WebTransportHandler* handler_{nullptr};
+  WebTransportImpl* wtImpl_{nullptr};
 
   bool sessionClosed_{false};
   uint32_t closeErrorCode_{0};

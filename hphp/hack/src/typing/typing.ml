@@ -10040,6 +10040,7 @@ end = struct
              *   because we know that enforcement will ensure this.
              * If t is not enforced, then the parameter is assumed to have type u|t when checking the body,
              * as though the default expression had been assigned conditionally to the parameter.
+             * If t is type dynamic, leave it alone.
              *)
             let support_dynamic = Env.get_support_dynamic_type env in
             let like_ty1 =
@@ -10063,7 +10064,11 @@ end = struct
             if support_dynamic then
               match enforced with
               | Enforced -> (env, ty1)
-              | _ -> Union.union env ty1 ty2
+              | _ ->
+                if Typing_utils.is_dynamic env ty1 then
+                  (env, ty1)
+                else
+                  Union.union env ty1 ty2
             else
               (env, ty1)
         in

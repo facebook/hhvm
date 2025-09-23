@@ -1467,7 +1467,8 @@ end = struct
               env |> simplify_pushed_like ||| dyn_finish ty
         in
         simplify
-          ~subtype_env
+          ~subtype_env:
+            { subtype_env with Subtype_env.ignore_likes = delay_push }
           ~this_ty
           ~lhs:{ sub_supportdyn; ty_sub = lty_sub }
           ~rhs:

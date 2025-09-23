@@ -41,8 +41,7 @@ type rocketServer struct {
 	log           func(format string, args ...any)
 	connContext   ConnContextFunc
 
-	pipeliningEnabled bool
-	numWorkers        int
+	numWorkers int
 
 	stats                   *stats.ServerStats
 	pstats                  map[string]*stats.TimingSeries
@@ -61,8 +60,7 @@ func newRocketServer(proc Processor, listener net.Listener, opts *serverOptions)
 		log:           opts.log,
 		connContext:   opts.connContext,
 
-		pipeliningEnabled: opts.pipeliningEnabled,
-		numWorkers:        opts.numWorkers,
+		numWorkers: opts.numWorkers,
 
 		pstats:      opts.processorStats,
 		stats:       opts.serverStats,
@@ -81,8 +79,7 @@ func newUpgradeToRocketServer(proc Processor, listener net.Listener, opts *serve
 		log:           opts.log,
 		connContext:   opts.connContext,
 
-		pipeliningEnabled: opts.pipeliningEnabled,
-		numWorkers:        opts.numWorkers,
+		numWorkers: opts.numWorkers,
 
 		pstats:      opts.processorStats,
 		stats:       opts.serverStats,
@@ -131,7 +128,6 @@ func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload,
 	socket := newRocketServerSocket(
 		ctx,
 		s.proc,
-		s.pipeliningEnabled,
 		s.log,
 		s.stats,
 		s.pstats,
@@ -149,7 +145,6 @@ func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload,
 type rocketServerSocket struct {
 	ctx                     context.Context
 	proc                    Processor
-	pipeliningEnabled       bool
 	log                     func(format string, args ...any)
 	stats                   *stats.ServerStats
 	pstats                  map[string]*stats.TimingSeries
@@ -161,7 +156,6 @@ type rocketServerSocket struct {
 func newRocketServerSocket(
 	ctx context.Context,
 	proc Processor,
-	pipeliningEnabled bool,
 	log func(format string, args ...any),
 	stats *stats.ServerStats,
 	pstats map[string]*stats.TimingSeries,
@@ -172,7 +166,6 @@ func newRocketServerSocket(
 	return &rocketServerSocket{
 		ctx:                     ctx,
 		proc:                    proc,
-		pipeliningEnabled:       pipeliningEnabled,
 		log:                     log,
 		stats:                   stats,
 		pstats:                  pstats,
@@ -288,14 +281,7 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 
 		return payload, err
 	}
-	if s.pipeliningEnabled {
-		return mono.FromFunc(workItem)
-	}
-	response, err := workItem(s.ctx)
-	if err != nil {
-		return mono.Error(err)
-	}
-	return mono.Just(response)
+	return mono.FromFunc(workItem)
 }
 
 func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {

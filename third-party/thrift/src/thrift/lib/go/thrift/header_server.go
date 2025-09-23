@@ -30,18 +30,6 @@ import (
 	thriftstats "github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
 )
 
-const (
-	// LoadHeaderKey is the header key for thrift headers where ServiceRouter
-	// expects load to be reported for cached load.  You must configure this
-	// in your SMC tier under the "load_counter" key.
-	LoadHeaderKey = "load"
-
-	// ClientTimeoutKey is the header key for thrift headers with ServiceRouter
-	ClientTimeoutKey = "client_timeout"
-	// ClientID is the header key for thrift headers with ServiceRouter
-	ClientID = "client_id"
-)
-
 type server struct {
 	processor   Processor
 	listener    net.Listener

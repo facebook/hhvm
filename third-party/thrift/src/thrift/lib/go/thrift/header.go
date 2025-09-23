@@ -42,6 +42,14 @@ const (
 	QueueTimeoutHeader   string = "queue_timeout"
 	ClientMetadataHeader string = "client_metadata"
 	ClientMetadata       string = "{\"agent\":\"headertransport.go\"}"
+	// LoadHeaderKey is the header key for thrift headers where ServiceRouter
+	// expects load to be reported for cached load.  You must configure this
+	// in your SMC tier under the "load_counter" key.
+	LoadHeaderKey = "load"
+	// ClientTimeoutKey is the header key for thrift headers with ServiceRouter
+	ClientTimeoutKey = "client_timeout"
+	// ClientID is the header key for thrift headers with ServiceRouter
+	ClientID = "client_id"
 	// Header Magicks
 	// 0 and 16th bits must be 0 to differentiate from framed & unframed
 	HeaderMagic      uint32 = 0x0FFF0000

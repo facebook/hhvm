@@ -50,7 +50,7 @@ class CapsuleCodec {
   }
 
   virtual folly::Expected<folly::Unit, ErrorCode> parseCapsule(
-      folly::io::Cursor& cursor) {
+      folly::io::Cursor& /*cursor*/) {
     // Override for capsule specific parsing functions
     // Return folly::none if parsing is successful, or an error code if it fails
     return folly::makeUnexpected(ErrorCode::PARSE_ERROR);

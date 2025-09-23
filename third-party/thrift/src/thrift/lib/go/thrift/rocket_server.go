@@ -347,26 +347,29 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	s.observer.ProcessTime(processTime)
 }
 
-// processWithExceptionTracking wraps the process function to track exceptions
+// processWithExceptionTracking wraps the process function to track declared and undeclared exceptions
 // Declared exceptions are structured exceptions defined in Thrift IDL files that are
 // explicitly declared in service method signatures (e.g., "throws (1: MyException ex)")
+// Undeclared exceptions are ApplicationException instances for processing errors, unknown methods, etc.
 func (s *rocketServerSocket) processWithExceptionTracking(ctx context.Context, protocol *protocolBuffer) error {
 	err := process(ctx, s.proc, protocol, s.pstats)
 	if err != nil {
 		return err
 	}
-	// Detect declared exceptions by checking protocol headers set by setRequestHeadersForResult()
-	// in processor.go when WritableResult.Exception() returns a structured exception:
-	// - "uex" header contains the exception type name (e.g., "MyException")
-	// - "uexw" header contains the exception message text
-	// Both headers being present confirms this is a declared (structured) exception,
-	// not an application exception or undeclared error
+	// Check for exceptions by examining protocol headers set during processing:
+	// Both declared and undeclared exceptions set "uex" (exception type) and "uexw" (exception message) headers
 	headers := protocol.getRequestHeaders()
 	exceptionType := headers["uex"]
 	exceptionMessage := headers["uexw"]
 	if exceptionType != "" && exceptionMessage != "" {
-		// TODO: track undeclared exceptions
-		s.observer.DeclaredException()
+		// Determine if this is a declared or undeclared exception by checking the exception type
+		// ApplicationException indicates an undeclared exception (processing errors, unknown methods, etc.)
+		// All other exception types are considered declared exceptions from the service IDL
+		if exceptionType == "ApplicationException" {
+			s.observer.UndeclaredException()
+		} else {
+			s.observer.DeclaredException()
+		}
 	}
 	return nil
 }

@@ -195,9 +195,10 @@ func DeprecatedNewClient(opts ...ClientOption) (Protocol, error) {
 	if protocolErr != nil {
 		// Protocol creation failed, close the connection (IMPORTANT!).
 		conn.Close()
+		return nil, protocolErr
 	}
 
-	return protocol, protocolErr
+	return protocol, nil
 }
 
 // NewClient will return a connected thrift RequestChannel object.

@@ -15,6 +15,12 @@ class TTLBAStats {
   virtual ~TTLBAStats() noexcept {
   }
 
+  TTLBAStats() = default;
+  TTLBAStats(const TTLBAStats&) = delete;
+  TTLBAStats& operator=(const TTLBAStats&) = delete;
+  TTLBAStats(TTLBAStats&&) = delete;
+  TTLBAStats& operator=(TTLBAStats&&) = delete;
+
   virtual void recordPresendIOSplit() noexcept = 0;
   virtual void recordPresendExceedLimit() noexcept = 0;
   virtual void recordTTLBAExceedLimit() noexcept = 0;

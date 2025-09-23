@@ -137,7 +137,7 @@ func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload,
 	)
 	return rsocket.NewAbstractSocket(
 		rsocket.MetadataPush(socket.metadataPush),
-		rsocket.RequestResponse(socket.requestResonse),
+		rsocket.RequestResponse(socket.requestResponse),
 		rsocket.FireAndForget(socket.fireAndForget),
 	), nil
 }
@@ -210,7 +210,7 @@ func (s *rocketServerSocket) metadataPush(msg payload.Payload) {
 	// This is usually something like transportMetadata = map[deciding_accessors:IP=...], but we do not handle it.
 }
 
-func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
+func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 	requestReceivedTime := time.Now()
 
 	request, err := rocket.DecodeRequestPayload(msg)

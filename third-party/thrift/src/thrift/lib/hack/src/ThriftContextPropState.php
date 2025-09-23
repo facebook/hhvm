@@ -216,7 +216,7 @@ final class ThriftContextPropState {
       return false;
     }
 
-    $ods->bumpKey('contextprop.update_with_valid_ig_user_id'.$src);
+    $ods->bumpKey('contextprop.update_with_valid_ig_user_id.'.$src);
 
     $tcps_ig_user_id = self::get()->getIGUserId();
     if ($ig_user_id == $tcps_ig_user_id) {

@@ -257,7 +257,7 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 		s.observer.ProcessDelay(processDelay)
 
 		// Track actual handler execution time
-		if err := process(ctx, s.proc, protocol, s.pstats); err != nil {
+		if err := s.processWithExceptionTracking(ctx, protocol); err != nil {
 			// Notify observer that connection was dropped due to unparseable message begin
 			s.observer.ConnDropped()
 			return nil, err
@@ -335,7 +335,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	s.observer.ProcessDelay(processDelay)
 
 	// TODO: support pipelining
-	if err := process(s.ctx, s.proc, protocol, s.pstats); err != nil {
+	if err := s.processWithExceptionTracking(s.ctx, protocol); err != nil {
 		// Notify observer that connection was dropped due to unparseable message begin
 		s.observer.ConnDropped()
 		s.log("rocketServer fireAndForget process error: %v", err)
@@ -345,6 +345,30 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	// Track actual handler execution time
 	processTime := time.Since(processStartTime)
 	s.observer.ProcessTime(processTime)
+}
+
+// processWithExceptionTracking wraps the process function to track exceptions
+// Declared exceptions are structured exceptions defined in Thrift IDL files that are
+// explicitly declared in service method signatures (e.g., "throws (1: MyException ex)")
+func (s *rocketServerSocket) processWithExceptionTracking(ctx context.Context, protocol *protocolBuffer) error {
+	err := process(ctx, s.proc, protocol, s.pstats)
+	if err != nil {
+		return err
+	}
+	// Detect declared exceptions by checking protocol headers set by setRequestHeadersForResult()
+	// in processor.go when WritableResult.Exception() returns a structured exception:
+	// - "uex" header contains the exception type name (e.g., "MyException")
+	// - "uexw" header contains the exception message text
+	// Both headers being present confirms this is a declared (structured) exception,
+	// not an application exception or undeclared error
+	headers := protocol.getRequestHeaders()
+	exceptionType := headers["uex"]
+	exceptionMessage := headers["uexw"]
+	if exceptionType != "" && exceptionMessage != "" {
+		// TODO: track undeclared exceptions
+		s.observer.DeclaredException()
+	}
+	return nil
 }
 
 func newProtocolBufferFromRequest(request *rocket.RequestPayload) (*protocolBuffer, error) {

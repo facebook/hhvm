@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+namespace py3 thrift.test
 namespace cpp other_cpp1
 namespace cpp2 other_cpp2
 

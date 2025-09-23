@@ -1,0 +1,22 @@
+(3,22)-(3,30) A type specifier is expected here.
+(3,31)-(3,34) Encountered unexpected token `int`.
+(4,32)-(4,32) A right parenthesis `)` is expected here.
+(4,32)-(4,40) A type specifier is expected here.
+(4,41)-(4,41) A right parenthesis `)` is expected here.
+(4,41)-(4,44) Encountered unexpected token `int`.
+(4,54)-(4,54) A left brace `{` is expected here.
+(4,56)-(4,56) An expression is expected here.
+(4,58)-(4,58) A semicolon `;` is expected here.
+(4,59)-(4,59) An expression is expected here.
+(4,61)-(4,61) An expression is expected here.
+(4,61)-(4,68) Cannot use collection initialization for non-collection class.
+(4,68)-(5,1) A semicolon `;` is expected here.
+(5,1)-(5,38) Declarations are not supported outside global scope
+(5,13)-(5,31) Cannot use unstable feature: `named_parameters`
+(5,19)-(5,24) A type specifier is expected here.
+(5,25)-(5,28) Encountered unexpected token `int`.
+(5,41)-(6,1) Inline function definitions are not supported in Hack
+(6,1)-(6,44) Declarations are not supported outside global scope
+(6,22)-(6,30) A type specifier is expected here.
+(6,31)-(6,34) Encountered unexpected token `int`.
+(6,47)-(7,1) Inline function definitions are not supported in Hack

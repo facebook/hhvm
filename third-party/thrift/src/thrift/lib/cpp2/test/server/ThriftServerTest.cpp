@@ -1047,11 +1047,6 @@ class OverloadTest
     return errorType == ErrorType::Client || errorType == ErrorType::Server;
   }
 
-  bool useQueueConcurrency() {
-    return useResourcePoolsFlagsSet() &&
-        THRIFT_FLAG(enforce_queue_concurrency_resource_pools);
-  }
-
   TApplicationException::TApplicationExceptionType getShedError() {
     if (isCustomError()) {
       return TApplicationException::UNKNOWN;
@@ -1060,8 +1055,6 @@ class OverloadTest
         errorType == ErrorType::AppOverload ||
         errorType == ErrorType::MethodOverload) {
       return TApplicationException::LOADSHEDDING;
-    } else if (useQueueConcurrency()) {
-      return TApplicationException::TIMEOUT;
     } else {
       return TApplicationException::LOADSHEDDING;
     }
@@ -1076,8 +1069,6 @@ class OverloadTest
       return "load shedding due to custom isOverloaded() callback";
     } else if (errorType == ErrorType::MethodOverload) {
       return "method loadshedding request";
-    } else if (useQueueConcurrency()) {
-      return "Queue Timeout";
     } else {
       return "load shedding due to max request limit";
     }
@@ -1102,12 +1093,8 @@ class OverloadTest
       EXPECT_EQ(*folly::get_ptr(headers, "ex"), kAppOverloadedErrorCode);
       EXPECT_EQ(folly::get_ptr(headers, "uex"), nullptr);
       EXPECT_EQ(folly::get_ptr(headers, "uexw"), nullptr);
-    } else if (errorType == ErrorType::Overload && !useQueueConcurrency()) {
+    } else if (errorType == ErrorType::Overload) {
       EXPECT_EQ(*folly::get_ptr(headers, "ex"), kOverloadedErrorCode);
-      EXPECT_EQ(folly::get_ptr(headers, "uex"), nullptr);
-      EXPECT_EQ(folly::get_ptr(headers, "uexw"), nullptr);
-    } else if (errorType == ErrorType::Overload && useQueueConcurrency()) {
-      EXPECT_EQ(*folly::get_ptr(headers, "ex"), kServerQueueTimeoutErrorCode);
       EXPECT_EQ(folly::get_ptr(headers, "uex"), nullptr);
       EXPECT_EQ(folly::get_ptr(headers, "uexw"), nullptr);
     } else {
@@ -1118,12 +1105,6 @@ class OverloadTest
   void SetUp() override {
     bool concurrencyFlag;
     std::tie(transport, compression, errorType, concurrencyFlag) = GetParam();
-
-    if (concurrencyFlag) {
-      THRIFT_FLAG_SET_MOCK(enforce_queue_concurrency_resource_pools, true);
-    } else {
-      THRIFT_FLAG_SET_MOCK(enforce_queue_concurrency_resource_pools, false);
-    }
   }
 };
 

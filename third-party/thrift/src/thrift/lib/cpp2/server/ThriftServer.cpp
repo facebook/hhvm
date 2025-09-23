@@ -98,8 +98,6 @@ THRIFT_FLAG_DEFINE_bool(enable_on_stop_serving, true);
 
 THRIFT_FLAG_DEFINE_bool(enable_io_queue_lag_detection, true);
 
-THRIFT_FLAG_DEFINE_bool(enforce_queue_concurrency_resource_pools, false);
-
 THRIFT_FLAG_DEFINE_bool(fizz_server_enable_hybrid_kex, false);
 
 THRIFT_FLAG_DEFINE_bool(server_fizz_enable_aegis, false);
@@ -2095,12 +2093,8 @@ folly::Optional<OverloadResult> ThriftServer::checkOverload(
         LoadShedder::CUSTOM};
   }
 
-  // If active request tracking is disabled or we are using resource pools,
-  // skip max requests enforcement here. Resource pools has its own separate
-  // concurrency limiting mechanism.
-  bool useQueueConcurrency = !resourcePoolSet().empty() &&
-      THRIFT_FLAG(enforce_queue_concurrency_resource_pools);
-  if (!isActiveRequestsTrackingDisabled() && !useQueueConcurrency) {
+  // If active request tracking is disabled, skip max requests enforcement here.
+  if (!isActiveRequestsTrackingDisabled()) {
     if (auto maxRequests = getMaxRequests(); maxRequests > 0 &&
         !getMethodsBypassMaxRequestsLimit().contains(method) &&
         static_cast<uint32_t>(getActiveRequests()) >= maxRequests) {

@@ -218,4 +218,11 @@ folly::coro::Task<double> StressTestHandler::co_calculateSquares(
   co_return co_await fanOut();
 }
 
+void StressTestHandler::async_eb_aligned(
+    HandlerCallbackPtr<std::unique_ptr<AlignedResponse>> callback,
+    std::unique_ptr<AlignedRequest> /*request*/) {
+  AlignedResponse resp;
+  callback->result(resp);
+}
+
 } // namespace apache::thrift::stress

@@ -67,6 +67,15 @@ struct StreamRequest {
   3: binary payload;
 }
 
+struct AlignedRequest {
+  1: optional binary resv;
+  2: IOBufPtr data_aligned;
+}
+
+struct AlignedResponse {
+  1: bool aligned;
+}
+
 service StressTest {
   @cpp.ProcessInEbThreadUnsafe
   void ping();
@@ -84,4 +93,7 @@ service StressTest {
   );
 
   double calculateSquares(1: i32 count);
+
+  @cpp.ProcessInEbThreadUnsafe
+  AlignedResponse aligned(1: AlignedRequest req);
 }

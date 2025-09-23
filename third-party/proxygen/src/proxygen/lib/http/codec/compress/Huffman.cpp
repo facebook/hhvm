@@ -8,6 +8,7 @@
 
 #include <proxygen/lib/http/codec/compress/Huffman.h>
 
+#include <array>
 #include <folly/Indestructible.h>
 #include <folly/container/Reserve.h>
 #include <folly/portability/Sockets.h>
@@ -206,7 +207,7 @@ pair<uint32_t, uint8_t> HuffTree::getCode(uint8_t ch) const {
 }
 
 // http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-09#appendix-C
-const uint32_t s_codesTable[kTableSize] = {
+constexpr std::array<uint32_t, kTableSize> s_codesTable = {
     0x1ff8,    0x7fffd8,   0xfffffe2, 0xfffffe3, 0xfffffe4,  0xfffffe5,
     0xfffffe6, 0xfffffe7,  0xfffffe8, 0xffffea,  0x3ffffffc, 0xfffffe9,
     0xfffffea, 0x3ffffffd, 0xfffffeb, 0xfffffec, 0xfffffed,  0xfffffee,
@@ -251,7 +252,7 @@ const uint32_t s_codesTable[kTableSize] = {
     0x7ffffe9, 0x7ffffea,  0x7ffffeb, 0xffffffe, 0x7ffffec,  0x7ffffed,
     0x7ffffee, 0x7ffffef,  0x7fffff0, 0x3ffffee};
 
-const uint8_t s_bitsTable[kTableSize] = {
+constexpr std::array<uint8_t, kTableSize> s_bitsTable = {
     13, 23, 28, 28, 28, 28, 28, 28, 28, 24, 30, 28, 28, 30, 28, 28, 28, 28, 28,
     28, 28, 28, 30, 28, 28, 28, 28, 28, 28, 28, 28, 28, 6,  10, 10, 12, 13, 6,
     8,  11, 10, 10, 8,  11, 8,  6,  6,  6,  5,  5,  5,  6,  6,  6,  6,  6,  6,
@@ -269,7 +270,7 @@ const uint8_t s_bitsTable[kTableSize] = {
 
 const HuffTree& huffTree() {
   static const folly::Indestructible<HuffTree> huffTree{
-      HuffTree{s_codesTable, s_bitsTable}};
+      HuffTree{s_codesTable.data(), s_bitsTable.data()}};
   return *huffTree;
 }
 

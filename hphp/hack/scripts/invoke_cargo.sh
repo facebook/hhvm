@@ -40,7 +40,7 @@ if [ -z "${HACK_NO_CARGO_VENDOR}" ]; then
 fi
 
 if [ -z "${TARGET_DIR}" ]; then
-  TARGET_DIR="${HACK_BUILD_ROOT}/target"
+  TARGET_DIR="${HACK_BUILD_ROOT}/target/$pkg"
 fi
 
 if [ -z ${HACKDEBUG+1} ]; then

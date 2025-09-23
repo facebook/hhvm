@@ -282,9 +282,10 @@ void SampleServer<Service>::connectToServer(
             sslSocket->sslConn(nullptr);
             socket = std::move(sslSocket);
           }
-          auto channel = HTTPClientChannel::newHTTP2Channel(std::move(socket));
-          channel->setProtocolId(protocol::T_COMPACT_PROTOCOL);
-          return channel;
+          auto httpChannel =
+              HTTPClientChannel::newHTTP2Channel(std::move(socket));
+          httpChannel->setProtocolId(protocol::T_COMPACT_PROTOCOL);
+          return httpChannel;
         });
     callMe(std::move(channel), nullptr);
   } else if (transport == "http2") {

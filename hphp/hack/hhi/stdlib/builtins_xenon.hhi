@@ -20,7 +20,7 @@ namespace HH {
     ?'XboxWorkers' => int,
     ?'HttpWorkers' => int,
     ?'CliWorkers' => int,
-    ?'ImplicitContext' => dict<classname<ImplicitContextBase>, mixed>,
+    ?'implicitContext' => dict<classname<ImplicitContextBase>, mixed>,
   );
 
   /**

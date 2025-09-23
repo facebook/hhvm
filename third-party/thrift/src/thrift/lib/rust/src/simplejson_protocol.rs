@@ -1178,6 +1178,32 @@ where
     buf.finish()
 }
 
+/// Serialize a Thrift value using the simple JSON protocol from a reference.
+/// This avoids taking ownership of the value being serialized.
+#[inline]
+pub fn serialize_ref<T>(v: &T) -> Bytes
+where
+    T: SerializeRef,
+{
+    let mut sizer = SimpleJsonProtocolSerializer {
+        buffer: SizeCounter::new().writer(),
+        state: vec![SerializationState::NotInContainer],
+    };
+    v.rs_thrift_write(&mut sizer);
+
+    let sz = sizer.finish();
+
+    // Now that we have the size, allocate an output buffer and serialize into it
+    let mut buf = SimpleJsonProtocolSerializer {
+        buffer: BytesMut::with_capacity(sz).writer(),
+        state: vec![SerializationState::NotInContainer],
+    };
+    v.rs_thrift_write(&mut buf);
+
+    // Done
+    buf.finish()
+}
+
 pub trait DeserializeSlice:
     for<'a> Deserialize<SimpleJsonProtocolDeserializer<Cursor<&'a [u8]>>>
 {

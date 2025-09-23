@@ -714,6 +714,31 @@ where
     buf.finish()
 }
 
+/// Serialize a Thrift value using the binary protocol from a reference.
+/// This avoids taking ownership of the value being serialized.
+#[inline]
+pub fn serialize_ref<T>(v: &T) -> Bytes
+where
+    T: SerializeRef,
+{
+    let sz = serialize_size(v);
+    let buf = serialize_to_buffer_ref(v, BytesMut::with_capacity(sz));
+    buf.finish()
+}
+
+/// Serialize a Thrift value using the binary protocol to a pre-allocated buffer from a reference.
+/// This will panic if the buffer is not large enough. A buffer at least as
+/// large as the return value of `serialize_size` will not panic.
+#[inline]
+pub fn serialize_to_buffer_ref<T>(v: &T, buffer: BytesMut) -> BinaryProtocolSerializer<BytesMut>
+where
+    T: SerializeRef,
+{
+    let mut buf = BinaryProtocolSerializer::with_buffer(buffer);
+    v.rs_thrift_write(&mut buf);
+    buf
+}
+
 pub trait DeserializeSlice:
     for<'a> Deserialize<BinaryProtocolDeserializer<Cursor<&'a [u8]>>>
 {

@@ -129,7 +129,7 @@ func SetRequestHeaders(ctx context.Context, protocol Protocol) error {
 	}
 	headersMap, ok := headers.(map[string]string)
 	if !ok {
-		return NewTransportException(INVALID_HEADERS_TYPE, "Headers key in context value is not map[string]string")
+		return NewTransportException(types.INVALID_HEADERS_TYPE, "Headers key in context value is not map[string]string")
 	}
 	for k, v := range headersMap {
 		protocol.setRequestHeader(k, v)

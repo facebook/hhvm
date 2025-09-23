@@ -20,6 +20,8 @@ import (
 	"context"
 	"fmt"
 	"sync"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // serialChannel is a simple threadsafe channel which allows for a single
@@ -73,7 +75,7 @@ func (c *serialChannel) recvMsg(ctx context.Context, method string, seqID int32,
 	}
 
 	if msgSeqID != seqID {
-		return NewApplicationException(BAD_SEQUENCE_ID, fmt.Sprintf("%s failed: out of sequence response", method))
+		return NewApplicationException(types.BAD_SEQUENCE_ID, fmt.Sprintf("%s failed: out of sequence response", method))
 	}
 
 	switch mTypeID {

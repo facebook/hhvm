@@ -58,6 +58,38 @@ THRIFT_FLAG_DEFINE_bool(thrift_enable_stream_counters, true);
 
 namespace apache::thrift::rocket {
 
+ChannelRequestCallbackFactory::ChannelRequestCallbackFactory(
+    ClientCallbackUniquePtr& callback,
+    StreamId streamId,
+    IRocketServerConnection& connection,
+    uint32_t initialRequestN)
+    : callback_(&callback),
+      streamId_(streamId),
+      connection_(&connection),
+      initialRequestN_(initialRequestN) {}
+
+template <>
+RocketBiDiClientCallback*
+ChannelRequestCallbackFactory::create<RocketBiDiClientCallback>() {
+  auto ret = std::make_unique<RocketBiDiClientCallback>(
+      streamId_,
+      static_cast<RocketServerConnection&>(*connection_),
+      initialRequestN_);
+  auto ptr = ret.get();
+  *callback_ = std::move(ret);
+  return ptr;
+}
+
+template <>
+RocketSinkClientCallback*
+ChannelRequestCallbackFactory::create<RocketSinkClientCallback>() {
+  auto ret = std::make_unique<RocketSinkClientCallback>(
+      streamId_, static_cast<RocketServerConnection&>(*connection_));
+  auto ptr = ret.get();
+  *callback_ = std::move(ret);
+  return ptr;
+}
+
 RocketServerConnection::RocketServerConnection(
     folly::AsyncTransport::UniquePtr socket,
     std::unique_ptr<RocketServerHandler> frameHandler,
@@ -127,7 +159,7 @@ StreamMetricCallback& getNoopStreamMetricCallback() {
 RocketStreamClientCallback* FOLLY_NULLABLE
 RocketServerConnection::createStreamClientCallback(
     StreamId streamId,
-    RocketServerConnection& connection,
+    IRocketServerConnection& connection,
     uint32_t initialRequestN) {
   auto [it, inserted] = streams_.try_emplace(streamId);
   if (!inserted) {
@@ -135,7 +167,7 @@ RocketServerConnection::createStreamClientCallback(
   }
   auto cb = std::make_unique<RocketStreamClientCallback>(
       streamId,
-      connection,
+      static_cast<RocketServerConnection&>(connection),
       initialRequestN,
       THRIFT_FLAG(thrift_enable_stream_counters)
           ? streamMetricCallback_
@@ -145,10 +177,24 @@ RocketServerConnection::createStreamClientCallback(
   return cbPtr;
 }
 
+RocketSinkClientCallback* FOLLY_NULLABLE
+RocketServerConnection::createSinkClientCallback(
+    StreamId streamId, IRocketServerConnection& connection) {
+  auto [it, inserted] = streams_.try_emplace(streamId);
+  if (!inserted) {
+    return nullptr;
+  }
+  auto cb = std::make_unique<RocketSinkClientCallback>(
+      streamId, static_cast<RocketServerConnection&>(connection));
+  auto cbPtr = cb.get();
+  it->second = std::move(cb);
+  return cbPtr;
+}
+
 std::optional<ChannelRequestCallbackFactory>
 RocketServerConnection::createChannelClientCallback(
     StreamId streamId,
-    RocketServerConnection& connection,
+    IRocketServerConnection& connection,
     uint32_t initialRequestN) {
   auto [it, inserted] = streams_.try_emplace(streamId);
   if (!inserted) {
@@ -381,6 +427,24 @@ void RocketServerConnection::closeIfNeeded() {
   writeBatcher_.drain();
 
   destroy();
+}
+
+void RocketServerConnection::incrementActivePauseHandlers() {
+  ++activePausedHandlers_;
+}
+
+void RocketServerConnection::decrementActivePauseHandlers() {
+  --activePausedHandlers_;
+}
+
+void RocketServerConnection::tryResumeSocketReading() {
+  if (state_ == ConnectionState::ALIVE || state_ == ConnectionState::DRAINING) {
+    socket_->setReadCB(&parser_);
+  }
+}
+
+void RocketServerConnection::pauseSocketReading() {
+  socket_->setReadCB(nullptr);
 }
 
 void RocketServerConnection::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
@@ -1303,55 +1367,6 @@ void RocketServerConnection::applyQosMarking(
         << "Failed to apply DSCP to socket: "
         << folly::exceptionStr(folly::current_exception());
   }
-}
-
-RocketServerConnection::ReadResumableHandle::ReadResumableHandle(
-    RocketServerConnection* connection)
-    : connection_(connection) {}
-
-RocketServerConnection::ReadResumableHandle::~ReadResumableHandle() {
-  if (connection_ != nullptr) {
-    std::move(*this).resume();
-  }
-}
-
-RocketServerConnection::ReadResumableHandle::ReadResumableHandle(
-    ReadResumableHandle&& handle) noexcept
-    : connection_(std::exchange(handle.connection_, nullptr)) {}
-
-RocketServerConnection::ReadPausableHandle::ReadPausableHandle(
-    RocketServerConnection* connection)
-    : connection_(connection) {
-  ++connection_->activePausedHandlers_;
-}
-
-void RocketServerConnection::ReadResumableHandle::resume() && {
-  DCHECK(connection_ != nullptr) << "resume() has been called on this handle";
-  --connection_->activePausedHandlers_;
-  if (connection_->state_ == ConnectionState::ALIVE ||
-      connection_->state_ == ConnectionState::DRAINING) {
-    connection_->socket_->setReadCB(&connection_->parser_);
-  }
-  connection_->closeIfNeeded();
-  connection_ = nullptr;
-}
-
-RocketServerConnection::ReadPausableHandle::~ReadPausableHandle() {
-  if (connection_ != nullptr) {
-    --connection_->activePausedHandlers_;
-    connection_->closeIfNeeded();
-  }
-}
-
-RocketServerConnection::ReadPausableHandle::ReadPausableHandle(
-    ReadPausableHandle&& handle) noexcept
-    : connection_(std::exchange(handle.connection_, nullptr)) {}
-
-RocketServerConnection::ReadResumableHandle
-RocketServerConnection::ReadPausableHandle::pause() && {
-  DCHECK(connection_ != nullptr) << "pause() has been called on this handle";
-  connection_->socket_->setReadCB(nullptr);
-  return ReadResumableHandle(std::exchange(connection_, nullptr));
 }
 
 void RocketServerConnection::pauseStreams() {

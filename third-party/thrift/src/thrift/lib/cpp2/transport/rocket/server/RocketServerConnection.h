@@ -49,61 +49,19 @@
 #include <thrift/lib/cpp2/transport/rocket/compression/CustomCompressor.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Parser.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
+#include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnectionObserver.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerFrameContext.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerHandler.h>
+#include <thrift/lib/cpp2/transport/rocket/server/RocketSinkClientCallback.h>
+#include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-THRIFT_FLAG_DECLARE_bool(enable_rocket_connection_observers);
+namespace apache::thrift::rocket {
 
-namespace apache::thrift {
+class RocketBiDiClientCallback;
 
-class Cpp2ConnContext;
-class RocketSinkClientCallback;
-class RocketStreamClientCallback;
-
-namespace rocket {
-
-using ClientCallbackUniquePtr = std::variant<
-    std::unique_ptr<RocketStreamClientCallback>,
-    std::unique_ptr<RocketSinkClientCallback>,
-    std::unique_ptr<RocketBiDiClientCallback>>;
-using ClientCallbackPtr = std::variant<
-    RocketStreamClientCallback*,
-    RocketSinkClientCallback*,
-    RocketBiDiClientCallback*>;
-
-// We don't know if a channel request will be a sink or bidi stream until
-// later, so return a factory object instead.
-struct ChannelRequestCallbackFactory {
-  ChannelRequestCallbackFactory(
-      ClientCallbackUniquePtr& callback,
-      StreamId streamId,
-      RocketServerConnection& connection,
-      uint32_t initialRequestN)
-      : callback_(&callback),
-        streamId_(streamId),
-        connection_(&connection),
-        initialRequestN_(initialRequestN) {}
-
-  template <typename T>
-  T* create() {
-    auto ret = std::make_unique<T>(streamId_, *connection_, initialRequestN_);
-    auto ptr = ret.get();
-    *callback_ = std::move(ret);
-    return ptr;
-  }
-
- private:
-  ClientCallbackUniquePtr* callback_;
-  StreamId streamId_;
-  RocketServerConnection* connection_;
-  uint32_t initialRequestN_;
-};
-
-class RocketServerConnection final : public ManagedConnectionIf,
-                                     folly::AsyncTransport::WriteCallback,
-                                     folly::AsyncTransport::BufferCallback {
+class RocketServerConnection final : public IRocketServerConnection {
  public:
   using UniquePtr = std::
       unique_ptr<RocketServerConnection, folly::DelayedDestruction::Destructor>;
@@ -133,140 +91,112 @@ class RocketServerConnection final : public ManagedConnectionIf,
       StreamMetricCallback& streamMetricCallback,
       const Config& cfg = {});
 
+  RocketServerConnection(RocketServerConnection&&) = delete;
+  RocketServerConnection& operator=(RocketServerConnection&&) = delete;
+  RocketServerConnection(const RocketServerConnection&) = delete;
+  RocketServerConnection& operator=(const RocketServerConnection&) = delete;
+
   void send(
       std::unique_ptr<folly::IOBuf> data,
       MessageChannel::SendCallbackPtr cb = nullptr,
       StreamId streamId = StreamId(),
-      folly::SocketFds fds = folly::SocketFds{});
+      folly::SocketFds fds = folly::SocketFds{}) override;
 
-  void sendErrorAfterDrain(StreamId streamId, RocketException&& rex);
+  void sendErrorAfterDrain(StreamId streamId, RocketException&& rex) override;
 
   // does not create callback and returns nullptr if streamId is already in use
   RocketStreamClientCallback* FOLLY_NULLABLE createStreamClientCallback(
       StreamId streamId,
-      RocketServerConnection& connection,
-      uint32_t initialRequestN);
+      IRocketServerConnection& connection,
+      uint32_t initialRequestN) override;
+
+  // does not create callback and returns nullptr if streamId is already in use
+  RocketSinkClientCallback* FOLLY_NULLABLE createSinkClientCallback(
+      StreamId streamId, IRocketServerConnection& connection) override;
 
   // does not create callback and returns nullptr if streamId is already in use
   std::optional<ChannelRequestCallbackFactory> createChannelClientCallback(
       StreamId streamId,
-      RocketServerConnection& connection,
-      uint32_t initialRequestN);
+      IRocketServerConnection& connection,
+      uint32_t initialRequestN) override;
 
   // Parser callbacks
-  void handleFrame(std::unique_ptr<folly::IOBuf> frame);
-  void close(folly::exception_wrapper ew);
+  void handleFrame(std::unique_ptr<folly::IOBuf> frame) override;
+  void close(folly::exception_wrapper ew) override;
 
   // AsyncTransport::WriteCallback implementation
-  void writeStarting() noexcept final;
-  void writeSuccess() noexcept final;
+  void writeStarting() noexcept override;
+  void writeSuccess() noexcept override;
   void writeErr(
       size_t bytesWritten,
-      const folly::AsyncSocketException& ex) noexcept final;
+      const folly::AsyncSocketException& ex) noexcept override;
 
   // AsyncTransport::BufferCallback implementation
-  void onEgressBuffered() final;
-  void onEgressBufferCleared() final;
+  void onEgressBuffered() override;
+  void onEgressBufferCleared() override;
 
-  folly::EventBase& getEventBase() const { return evb_; }
+  folly::EventBase& getEventBase() const override { return evb_; }
 
-  size_t getNumStreams() const { return streams_.size(); }
+  size_t getNumStreams() const override { return streams_.size(); }
 
   void sendPayload(
       StreamId streamId,
       Payload&& payload,
       Flags flags,
-      apache::thrift::MessageChannel::SendCallbackPtr cb = nullptr);
+      apache::thrift::MessageChannel::SendCallbackPtr cb = nullptr) override;
   void sendError(
       StreamId streamId,
       RocketException&& rex,
-      apache::thrift::MessageChannel::SendCallbackPtr cb = nullptr);
-  void sendRequestN(StreamId streamId, int32_t n);
-  void sendCancel(StreamId streamId);
-  void sendMetadataPush(std::unique_ptr<folly::IOBuf> metadata);
+      apache::thrift::MessageChannel::SendCallbackPtr cb = nullptr) override;
+  void sendRequestN(StreamId streamId, int32_t n) override;
+  void sendCancel(StreamId streamId) override;
+  void sendMetadataPush(std::unique_ptr<folly::IOBuf> metadata) override;
 
-  void freeStream(StreamId streamId, bool markRequestComplete);
+  void freeStream(StreamId streamId, bool markRequestComplete) override;
 
-  void scheduleStreamTimeout(folly::HHWheelTimer::Callback*);
+  void scheduleStreamTimeout(folly::HHWheelTimer::Callback*) override;
   void scheduleSinkTimeout(
-      folly::HHWheelTimer::Callback*, std::chrono::milliseconds timeout);
+      folly::HHWheelTimer::Callback*,
+      std::chrono::milliseconds timeout) override;
 
-  void incInflightFinalResponse() { inflightSinkFinalResponses_++; }
-  void decInflightFinalResponse() {
+  void incInflightFinalResponse() override { inflightSinkFinalResponses_++; }
+  void decInflightFinalResponse() override {
     DCHECK(inflightSinkFinalResponses_ != 0);
     inflightSinkFinalResponses_--;
     closeIfNeeded();
   }
 
-  void applyQosMarking(const RequestSetupMetadata& setupMetadata);
+  void applyQosMarking(const RequestSetupMetadata& setupMetadata) override;
 
-  class ReadResumableHandle {
-   public:
-    explicit ReadResumableHandle(RocketServerConnection* connection);
-    ~ReadResumableHandle();
-
-    ReadResumableHandle(ReadResumableHandle&&) noexcept;
-    ReadResumableHandle(const ReadResumableHandle&) = delete;
-    ReadResumableHandle& operator=(const ReadResumableHandle&) = delete;
-    ReadResumableHandle& operator=(ReadResumableHandle&&) = delete;
-
-    void resume() &&;
-    folly::EventBase& getEventBase() { return connection_->evb_; }
-
-    Cpp2ConnContext* getCpp2ConnContext() {
-      return connection_->frameHandler_->getCpp2ConnContext();
-    }
-
-   private:
-    RocketServerConnection* connection_;
-  };
-
-  class ReadPausableHandle {
-   public:
-    explicit ReadPausableHandle(RocketServerConnection* connection);
-    ~ReadPausableHandle();
-
-    ReadPausableHandle(ReadPausableHandle&&) noexcept;
-    ReadPausableHandle(const ReadPausableHandle&) = delete;
-    ReadPausableHandle& operator=(const ReadPausableHandle&) = delete;
-    ReadPausableHandle& operator=(ReadPausableHandle&&) = delete;
-
-    ReadResumableHandle pause() &&;
-    folly::EventBase& getEventBase() { return connection_->evb_; }
-
-    Cpp2ConnContext* getCpp2ConnContext() {
-      return connection_->frameHandler_->getCpp2ConnContext();
-    }
-
-   private:
-    RocketServerConnection* connection_;
-  };
+  Cpp2ConnContext* getCpp2ConnContext() override {
+    return frameHandler_->getCpp2ConnContext();
+  }
 
   void setOnWriteQuiescenceCallback(
-      folly::Function<void(ReadPausableHandle)> cb) {
+      folly::Function<void(ReadPausableHandle)> cb) override {
     onWriteQuiescence_ = std::move(cb);
   }
 
-  bool isDecodingMetadataUsingBinaryProtocol() {
+  bool isDecodingMetadataUsingBinaryProtocol() override {
     // NOTE: state check in RocketServerConnection::handleFrame should
     // guarantee decodeMetadataUsingBinary_ has value when this method is
     // invoked.
     return decodeMetadataUsingBinary_.value();
   }
 
-  bool incMemoryUsage(uint32_t memSize);
+  bool incMemoryUsage(uint32_t memSize) override;
 
-  void decMemoryUsage(uint32_t memSize) {
+  void decMemoryUsage(uint32_t memSize) override {
     ingressMemoryTracker_.decrement(memSize);
   }
 
-  int32_t getVersion() const { return frameHandler_->getVersion(); }
+  int32_t getVersion() const override { return frameHandler_->getVersion(); }
 
-  bool areStreamsPaused() const noexcept { return streamsPaused_; }
+  bool areStreamsPaused() const noexcept override { return streamsPaused_; }
 
-  size_t getNumActiveRequests() const final { return inflightRequests_; }
+  size_t getNumActiveRequests() const override { return inflightRequests_; }
 
-  size_t getNumPendingWrites() const final {
+  size_t getNumPendingWrites() const override {
     size_t result = 0;
     for (const WriteBatchContext& batch : inflightWritesQueue_) {
       result += batch.requestCompleteCount;
@@ -278,7 +208,7 @@ class RocketServerConnection final : public ManagedConnectionIf,
     return peerAddress_;
   }
 
-  folly::AsyncSocket* getRawSocket() const { return rawSocket_; }
+  folly::AsyncSocket* getRawSocket() const override { return rawSocket_; }
 
   using RocketServerConnectionObserverContainer = folly::ObserverContainer<
       RocketServerConnectionObserver,
@@ -600,7 +530,11 @@ class RocketServerConnection final : public ManagedConnectionIf,
 
   ~RocketServerConnection() override;
 
-  void closeIfNeeded();
+  void closeIfNeeded() override;
+  void incrementActivePauseHandlers() override;
+  void decrementActivePauseHandlers() override;
+  void tryResumeSocketReading() override;
+  void pauseSocketReading() override;
   void flushWrites(
       std::unique_ptr<folly::IOBuf> writes, WriteBatchContext&& context);
   void flushWritesWithFds(
@@ -690,7 +624,7 @@ class RocketServerConnection final : public ManagedConnectionIf,
   RocketServerConnectionObserverContainer observerContainer_;
 
  public:
-  PayloadSerializer::Ptr getPayloadSerializer() {
+  PayloadSerializer::Ptr getPayloadSerializer() override {
     if (payloadSerializerHolder_) {
       return payloadSerializerHolder_->get();
     }
@@ -698,7 +632,8 @@ class RocketServerConnection final : public ManagedConnectionIf,
     return PayloadSerializer::getInstance();
   }
 
-  void applyCustomCompression(std::shared_ptr<CustomCompressor> compressor) {
+  void applyCustomCompression(
+      std::shared_ptr<CustomCompressor> compressor) override {
     CustomCompressionPayloadSerializerStrategyOptions options;
     options.compressor = compressor;
 
@@ -718,5 +653,4 @@ class RocketServerConnection final : public ManagedConnectionIf,
   std::shared_ptr<CustomCompressor> customCompressor_;
 };
 
-} // namespace rocket
-} // namespace apache::thrift
+} // namespace apache::thrift::rocket

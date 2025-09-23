@@ -174,14 +174,15 @@ class IRocketServerConnection : public ManagedConnectionIf,
   virtual void close(folly::exception_wrapper ew) = 0;
 
   // AsyncTransport::WriteCallback implementation
-  virtual void writeStarting() noexcept = 0;
-  virtual void writeSuccess() noexcept = 0;
+  void writeStarting() noexcept override = 0;
+  void writeSuccess() noexcept override = 0;
   virtual void writeErr(
-      size_t bytesWritten, const folly::AsyncSocketException& ex) noexcept = 0;
+      size_t bytesWritten,
+      const folly::AsyncSocketException& ex) noexcept override = 0;
 
   // AsyncTransport::BufferCallback implementation
-  virtual void onEgressBuffered() = 0;
-  virtual void onEgressBufferCleared() = 0;
+  void onEgressBuffered() override = 0;
+  void onEgressBufferCleared() override = 0;
 
   virtual folly::EventBase& getEventBase() const = 0;
   virtual size_t getNumStreams() const = 0;

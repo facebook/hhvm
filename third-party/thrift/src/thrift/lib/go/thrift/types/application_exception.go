@@ -44,6 +44,10 @@ type ApplicationExceptionIf interface {
 	error
 	Struct
 	TypeID() int32
+	// The state of interface assertions on ApplicationException type is extremely brittle.
+	// The following super-unique method ensures that only ApplicationException type can be
+	// asserted to ApplicationExceptionIf.
+	DoNotUseButEnsureInterfaceMatch()
 }
 
 // ApplicationException is an application level Thrift exception
@@ -75,6 +79,11 @@ func (e *ApplicationException) Error() string {
 // TypeID returns the exception type
 func (e *ApplicationException) TypeID() int32 {
 	return e.exceptionType
+}
+
+// DoNotUseButEnsureInterfaceMatch - do not call this method ever.
+func (e *ApplicationException) DoNotUseButEnsureInterfaceMatch() {
+	panic("do not call this method")
 }
 
 // Unwrap returns the original error that cause the application error. Returns nil if there was no wrapped error.

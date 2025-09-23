@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(squangle CXX C)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -23,4 +23,3 @@ target_link_libraries(squangle Folly::folly)
 
 install(TARGETS squangle LIBRARY ARCHIVE DESTINATION lib)
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/" DESTINATION include FILES_MATCHING PATTERN "*.h")
-

@@ -6590,14 +6590,10 @@ std::string t_hack_generator::typedef_to_typehint(
     typehint = *adapter + "::THackType";
   } else {
     typehint = type_to_typehint(ttypedef->get_type(), variations);
-
-    if ((ttypedef->get_true_type()->is<t_struct>() ||
-         ttypedef->get_true_type()->is<t_union>()) &&
-        variations[TypeToTypehintVariations::IS_SHAPE]) {
+    if (!wrapper && variations[TypeToTypehintVariations::IS_SHAPE]) {
       return typehint;
     }
   }
-
   bool typedef_option =
       !variations[TypeToTypehintVariations::IGNORE_TYPEDEF_OPTION] && typedef_;
   if (wrapper) {

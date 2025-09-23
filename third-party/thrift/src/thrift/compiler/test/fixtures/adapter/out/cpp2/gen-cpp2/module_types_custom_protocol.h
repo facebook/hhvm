@@ -1427,6 +1427,22 @@ _readField_adaptedStructField:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           7,
+          8,
+          apache::thrift::protocol::T_LIST))) {
+    goto _advance_failure;
+  }
+_readField_structListFieldWithTypedef:
+  {
+    _readState.beforeSubobject(iprot);
+    this->__fbthrift_field_structListFieldWithTypedef = ::facebook::thrift::test::ListOfFooTypedef();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::facebook::thrift::test::ListOfFooTypedef>::readWithContext(*iprot, this->__fbthrift_field_structListFieldWithTypedef, _readState);
+    _readState.afterSubobject(iprot);
+  }
+ this->__isset.set(7, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          8,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _advance_failure;
@@ -1505,6 +1521,14 @@ _loop:
         goto _skip;
       }
     }
+    case 8:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_LIST))) {
+        goto _readField_structListFieldWithTypedef;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -1548,6 +1572,10 @@ uint32_t Bar::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("adaptedStructField", apache::thrift::protocol::T_STRUCT, 7);
     xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<::my::Adapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::detail::DirectlyAdapted>>>(*prot_, this->__fbthrift_field_adaptedStructField);
   }
+  {
+    xfer += prot_->serializedFieldSize("structListFieldWithTypedef", apache::thrift::protocol::T_LIST, 8);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::facebook::thrift::test::ListOfFooTypedef>::serializedSize<false>(*prot_, this->__fbthrift_field_structListFieldWithTypedef);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -1583,6 +1611,10 @@ uint32_t Bar::serializedSizeZC(Protocol_ const* prot_) const {
   {
     xfer += prot_->serializedFieldSize("adaptedStructField", apache::thrift::protocol::T_STRUCT, 7);
     xfer += ::apache::thrift::op::serialized_size<true, ::apache::thrift::type::adapted<::my::Adapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::detail::DirectlyAdapted>>>(*prot_, this->__fbthrift_field_adaptedStructField);
+  }
+  {
+    xfer += prot_->serializedFieldSize("structListFieldWithTypedef", apache::thrift::protocol::T_LIST, 8);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::facebook::thrift::test::ListOfFooTypedef>::serializedSize<true>(*prot_, this->__fbthrift_field_structListFieldWithTypedef);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1646,6 +1678,13 @@ uint32_t Bar::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 7, kPrevFieldId>(*prot_, "adaptedStructField", previousFieldHasValue);
     previousFieldHasValue = true;
     xfer += ::apache::thrift::op::encode<::apache::thrift::type::adapted<::my::Adapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::detail::DirectlyAdapted>>>(*prot_, this->__fbthrift_field_adaptedStructField);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 7;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 8, kPrevFieldId>(*prot_, "structListFieldWithTypedef", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::facebook::thrift::test::ListOfFooTypedef>::write(*prot_, this->__fbthrift_field_structListFieldWithTypedef);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

@@ -109,6 +109,8 @@ struct VisitByFieldId<::facebook::thrift::test::Bar> {
       return f(5, static_cast<T&&>(t).optionalUnionField_ref());
     case 7:
       return f(6, static_cast<T&&>(t).adaptedStructField_ref());
+    case 8:
+      return f(7, static_cast<T&&>(t).structListFieldWithTypedef_ref());
     default:
       throwInvalidThriftId(fieldId, "::facebook::thrift::test::Bar");
     }

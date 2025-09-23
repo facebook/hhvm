@@ -247,7 +247,8 @@ class Bar:
         optionalStructListField: __T.Optional[__T.List[my.Adapter1.Type]] = ...,
         unionField: __T.Optional[my.Adapter1.Type] = ...,
         optionalUnionField: __T.Optional[my.Adapter1.Type] = ...,
-        adaptedStructField: __T.Optional[DirectlyAdapted] = ...
+        adaptedStructField: __T.Optional[DirectlyAdapted] = ...,
+        structListFieldWithTypedef: __T.Optional[__T.List[Foo]] = ...
     ) -> None:
         ...
 
@@ -279,6 +280,10 @@ class Bar:
     def adaptedStructField(self) -> DirectlyAdapted: ...
     @adaptedStructField.setter
     def adaptedStructField(self, value: __T.Optional[DirectlyAdapted]) -> None: ...
+    @__property__
+    def structListFieldWithTypedef(self) -> __T.List[Foo]: ...
+    @structListFieldWithTypedef.setter
+    def structListFieldWithTypedef(self, value: __T.Optional[__T.List[Foo]]) -> None: ...
 
 
     def isUnion(self) -> bool: ...
@@ -1513,6 +1518,7 @@ MyI64 = int
 DoubleTypedefI64 = int
 MyI32 = int
 FooWithAdapter = Foo
+ListOfFooTypedef = __T.List[Foo]
 StructWithAdapter = my.Adapter2.Type
 UnionWithAdapter = my.Adapter2.Type
 AdaptedA = A

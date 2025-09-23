@@ -137,7 +137,7 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::facebook::thrif
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::Bar>::name = "Bar";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::facebook::thrift::test::Bar>::fields_names = { {
+THRIFT_DATA_MEMBER const std::array<std::string_view, 8> TStructDataStorage<::facebook::thrift::test::Bar>::fields_names = { {
   "structField"sv,
   "optionalStructField"sv,
   "structListField"sv,
@@ -145,8 +145,9 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::fa
   "unionField"sv,
   "optionalUnionField"sv,
   "adaptedStructField"sv,
+  "structListFieldWithTypedef"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::facebook::thrift::test::Bar>::fields_ids = { {
+THRIFT_DATA_MEMBER const std::array<int16_t, 8> TStructDataStorage<::facebook::thrift::test::Bar>::fields_ids = { {
   1,
   2,
   3,
@@ -154,8 +155,9 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::facebook::t
   5,
   6,
   7,
+  8,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::facebook::thrift::test::Bar>::fields_types = { {
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 8> TStructDataStorage<::facebook::thrift::test::Bar>::fields_types = { {
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_LIST,
@@ -163,8 +165,9 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::fac
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
+  TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::facebook::thrift::test::Bar>::isset_indexes = { {
+THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::facebook::thrift::test::Bar>::isset_indexes = { {
   0,
   1,
   2,
@@ -172,6 +175,7 @@ THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::facebook::thrif
   4,
   5,
   6,
+  7,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdapted>::name = "DirectlyAdapted";
@@ -782,13 +786,13 @@ namespace detail {
 
 template <> struct TSchemaAssociation<::facebook::thrift::test::Service, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8555449446587739158;
-  static constexpr ::std::string_view definitionKey = {"\xac\x91\xa8\xcd\x36\xfc\x98\x4a\xcb\x2e\x9a\x2a\x05\x9e\x4e\x19", 16};
+  static constexpr int64_t programId = -3402983759148418281;
+  static constexpr ::std::string_view definitionKey = {"\xf6\xc8\x7b\x66\x77\x63\x8d\xe1\xb9\x5f\xf2\x05\x85\xed\xc6\xf4", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::AdapterService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8555449446587739158;
-  static constexpr ::std::string_view definitionKey = {"\x3c\xe4\xa8\x33\x33\x98\x74\x23\x8f\xc5\xd3\xde\xc9\x3c\xe5\x44", 16};
+  static constexpr int64_t programId = -3402983759148418281;
+  static constexpr ::std::string_view definitionKey = {"\x79\xbe\xa6\x4f\x3a\x0d\xbe\x6c\x5d\xbe\xf1\xff\x5c\xf3\x9f\x6f", 16};
 };
 } // namespace detail
 } // namespace apache::thrift

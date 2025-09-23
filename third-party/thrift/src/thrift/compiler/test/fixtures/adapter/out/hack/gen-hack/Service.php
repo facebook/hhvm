@@ -125,7 +125,7 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
 
   const type TShape = shape(
     'arg1' => \facebook\thrift\test\StringWithAdapter_7208,
-    'arg2' => \facebook\thrift\test\StringWithCppAdapter,
+    'arg2' => string,
     ?'arg3' => ?\facebook\thrift\test\Foo::TShape,
   );
   const int STRUCTURAL_ID = 2523845110818656514;

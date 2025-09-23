@@ -298,6 +298,22 @@ var (
                 NewFunc:    func() thrift.Struct { return NewDirectlyAdapted() },
             },
     }
+    premadeCodecTypeSpec_list_module_Foo = &thrift.TypeSpec{
+        FullName: "list<module.Foo>",
+        CodecListSpec:
+            &thrift.CodecListSpec{
+                ElementWireType: thrift.STRUCT,
+                ElementTypeSpec: premadeCodecTypeSpec_module_Foo,
+            },
+    }
+    premadeCodecTypeSpec_module_ListOfFooTypedef = &thrift.TypeSpec{
+        FullName: "module.ListOfFooTypedef",
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "module.ListOfFooTypedef",
+                UnderlyingTypeSpec: premadeCodecTypeSpec_list_module_Foo,
+            },
+    }
     premadeCodecTypeSpec_module_Bar = &thrift.TypeSpec{
         FullName: "module.Bar",
         CodecStructSpec:
@@ -1169,6 +1185,15 @@ var (
                     ValueTypeSpec:        premadeCodecTypeSpec_module_DirectlyAdapted,
                     MustBeSetToSerialize: true,
                 },
+                {
+                    ID:                   8,
+                    WireType:             thrift.LIST,
+                    Name:                 "structListFieldWithTypedef",
+                    ReflectIndex:         7,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_ListOfFooTypedef,
+                    MustBeSetToSerialize: false,
+                },
             },
             FieldSpecIDToIndex:   map[int16]int{
                 1: 0,
@@ -1178,6 +1203,7 @@ var (
                 5: 4,
                 6: 5,
                 7: 6,
+                8: 7,
             },
             FieldSpecNameToIndex: map[string]int{
                 "structField": 0,
@@ -1187,6 +1213,7 @@ var (
                 "unionField": 4,
                 "optionalUnionField": 5,
                 "adaptedStructField": 6,
+                "structListFieldWithTypedef": 7,
             },
         }
     premadeStructSpec_DirectlyAdapted =
@@ -2500,6 +2527,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_FooWithAdapter_9317.FullName] = premadeCodecTypeSpec_module_FooWithAdapter_9317
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Baz_7352.FullName] = premadeCodecTypeSpec_module_Baz_7352
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DirectlyAdapted.FullName] = premadeCodecTypeSpec_module_DirectlyAdapted
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ListOfFooTypedef.FullName] = premadeCodecTypeSpec_module_ListOfFooTypedef
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Bar.FullName] = premadeCodecTypeSpec_module_Bar
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IndependentDirectlyAdapted.FullName] = premadeCodecTypeSpec_module_IndependentDirectlyAdapted
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructWithFieldAdapter.FullName] = premadeCodecTypeSpec_module_StructWithFieldAdapter

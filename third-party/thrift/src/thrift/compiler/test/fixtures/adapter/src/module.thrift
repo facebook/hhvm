@@ -216,6 +216,8 @@ union Baz {
 }
 typedef Foo FooWithAdapter
 
+typedef list<Foo> ListOfFooTypedef
+
 struct Bar {
   @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1', adaptedType = '::my::Cpp::Type1'}
@@ -232,6 +234,7 @@ struct Bar {
   @cpp.Adapter{name = '::my::Adapter1'}
   6: optional Baz_7352 optionalUnionField;
   7: DirectlyAdapted adaptedStructField;
+  8: ListOfFooTypedef structListFieldWithTypedef;
 }
 
 @cpp.Adapter{name = "::my::Adapter"}

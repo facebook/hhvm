@@ -179,16 +179,16 @@ public class AdapterService {
       super(protocolFactory, clientManager, transport);
     }
 
-    public void count(AsyncMethodCallback resultHandler121) throws TException {
+    public void count(AsyncMethodCallback resultHandler125) throws TException {
       checkReady();
-      count_call method_call = new count_call(resultHandler121, this, ___protocolFactory, ___transport);
+      count_call method_call = new count_call(resultHandler125, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class count_call extends TAsyncMethodCall {
-      public count_call(AsyncMethodCallback resultHandler122, TAsyncClient client118, TProtocolFactory protocolFactory119, TNonblockingTransport transport120) throws TException {
-        super(client118, protocolFactory119, transport120, resultHandler122, false);
+      public count_call(AsyncMethodCallback resultHandler126, TAsyncClient client122, TProtocolFactory protocolFactory123, TNonblockingTransport transport124) throws TException {
+        super(client122, protocolFactory123, transport124, resultHandler126, false);
       }
 
       public void write_args(TProtocol prot) throws TException {
@@ -208,17 +208,17 @@ public class AdapterService {
       }
     }
 
-    public void adaptedTypes(HeapAllocated arg, AsyncMethodCallback resultHandler126) throws TException {
+    public void adaptedTypes(HeapAllocated arg, AsyncMethodCallback resultHandler130) throws TException {
       checkReady();
-      adaptedTypes_call method_call = new adaptedTypes_call(arg, resultHandler126, this, ___protocolFactory, ___transport);
+      adaptedTypes_call method_call = new adaptedTypes_call(arg, resultHandler130, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class adaptedTypes_call extends TAsyncMethodCall {
       private HeapAllocated arg;
-      public adaptedTypes_call(HeapAllocated arg, AsyncMethodCallback resultHandler127, TAsyncClient client123, TProtocolFactory protocolFactory124, TNonblockingTransport transport125) throws TException {
-        super(client123, protocolFactory124, transport125, resultHandler127, false);
+      public adaptedTypes_call(HeapAllocated arg, AsyncMethodCallback resultHandler131, TAsyncClient client127, TProtocolFactory protocolFactory128, TNonblockingTransport transport129) throws TException {
+        super(client127, protocolFactory128, transport129, resultHandler131, false);
         this.arg = arg;
       }
 

@@ -67,6 +67,7 @@ struct ForEachField<::facebook::thrift::test::Bar> {
     f(4, static_cast<T&&>(t).unionField_ref()...);
     f(5, static_cast<T&&>(t).optionalUnionField_ref()...);
     f(6, static_cast<T&&>(t).adaptedStructField_ref()...);
+    f(7, static_cast<T&&>(t).structListFieldWithTypedef_ref()...);
   }
 };
 

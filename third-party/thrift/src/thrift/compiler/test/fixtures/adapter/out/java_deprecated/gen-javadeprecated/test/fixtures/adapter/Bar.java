@@ -33,6 +33,7 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
   private static final TField UNION_FIELD_FIELD_DESC = new TField("unionField", TType.STRUCT, (short)5);
   private static final TField OPTIONAL_UNION_FIELD_FIELD_DESC = new TField("optionalUnionField", TType.STRUCT, (short)6);
   private static final TField ADAPTED_STRUCT_FIELD_FIELD_DESC = new TField("adaptedStructField", TType.STRUCT, (short)7);
+  private static final TField STRUCT_LIST_FIELD_WITH_TYPEDEF_FIELD_DESC = new TField("structListFieldWithTypedef", TType.LIST, (short)8);
 
   public Foo structField;
   public Foo optionalStructField;
@@ -41,6 +42,7 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
   public Baz unionField;
   public Baz optionalUnionField;
   public DirectlyAdapted adaptedStructField;
+  public List<Foo> structListFieldWithTypedef;
   public static final int STRUCTFIELD = 1;
   public static final int OPTIONALSTRUCTFIELD = 2;
   public static final int STRUCTLISTFIELD = 3;
@@ -48,6 +50,7 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
   public static final int UNIONFIELD = 5;
   public static final int OPTIONALUNIONFIELD = 6;
   public static final int ADAPTEDSTRUCTFIELD = 7;
+  public static final int STRUCTLISTFIELDWITHTYPEDEF = 8;
 
   // isset id assignments
 
@@ -71,6 +74,9 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
         new StructMetaData(TType.STRUCT, Baz.class)));
     tmpMetaDataMap.put(ADAPTEDSTRUCTFIELD, new FieldMetaData("adaptedStructField", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, DirectlyAdapted.class)));
+    tmpMetaDataMap.put(STRUCTLISTFIELDWITHTYPEDEF, new FieldMetaData("structListFieldWithTypedef", TFieldRequirementType.DEFAULT, 
+        new ListMetaData(TType.LIST, 
+            new StructMetaData(TType.STRUCT, Foo.class))));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
 
@@ -85,12 +91,14 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
       Foo structField,
       List<Foo> structListField,
       Baz unionField,
-      DirectlyAdapted adaptedStructField) {
+      DirectlyAdapted adaptedStructField,
+      List<Foo> structListFieldWithTypedef) {
     this();
     this.structField = structField;
     this.structListField = structListField;
     this.unionField = unionField;
     this.adaptedStructField = adaptedStructField;
+    this.structListFieldWithTypedef = structListFieldWithTypedef;
   }
 
   public Bar(
@@ -100,7 +108,8 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
       List<Foo> optionalStructListField,
       Baz unionField,
       Baz optionalUnionField,
-      DirectlyAdapted adaptedStructField) {
+      DirectlyAdapted adaptedStructField,
+      List<Foo> structListFieldWithTypedef) {
     this();
     this.structField = structField;
     this.optionalStructField = optionalStructField;
@@ -109,6 +118,7 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
     this.unionField = unionField;
     this.optionalUnionField = optionalUnionField;
     this.adaptedStructField = adaptedStructField;
+    this.structListFieldWithTypedef = structListFieldWithTypedef;
   }
 
   public static class Builder {
@@ -119,6 +129,7 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
     private Baz unionField;
     private Baz optionalUnionField;
     private DirectlyAdapted adaptedStructField;
+    private List<Foo> structListFieldWithTypedef;
 
     public Builder() {
     }
@@ -158,6 +169,11 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
       return this;
     }
 
+    public Builder setStructListFieldWithTypedef(final List<Foo> structListFieldWithTypedef) {
+      this.structListFieldWithTypedef = structListFieldWithTypedef;
+      return this;
+    }
+
     public Bar build() {
       Bar result = new Bar();
       result.setStructField(this.structField);
@@ -167,6 +183,7 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
       result.setUnionField(this.unionField);
       result.setOptionalUnionField(this.optionalUnionField);
       result.setAdaptedStructField(this.adaptedStructField);
+      result.setStructListFieldWithTypedef(this.structListFieldWithTypedef);
       return result;
     }
   }
@@ -199,6 +216,9 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
     }
     if (other.isSetAdaptedStructField()) {
       this.adaptedStructField = TBaseHelper.deepCopy(other.adaptedStructField);
+    }
+    if (other.isSetStructListFieldWithTypedef()) {
+      this.structListFieldWithTypedef = TBaseHelper.deepCopy(other.structListFieldWithTypedef);
     }
   }
 
@@ -374,6 +394,30 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
     }
   }
 
+  public List<Foo> getStructListFieldWithTypedef() {
+    return this.structListFieldWithTypedef;
+  }
+
+  public Bar setStructListFieldWithTypedef(List<Foo> structListFieldWithTypedef) {
+    this.structListFieldWithTypedef = structListFieldWithTypedef;
+    return this;
+  }
+
+  public void unsetStructListFieldWithTypedef() {
+    this.structListFieldWithTypedef = null;
+  }
+
+  // Returns true if field structListFieldWithTypedef is set (has been assigned a value) and false otherwise
+  public boolean isSetStructListFieldWithTypedef() {
+    return this.structListFieldWithTypedef != null;
+  }
+
+  public void setStructListFieldWithTypedefIsSet(boolean __value) {
+    if (!__value) {
+      this.structListFieldWithTypedef = null;
+    }
+  }
+
   @SuppressWarnings("unchecked")
   public void setFieldValue(int fieldID, Object __value) {
     switch (fieldID) {
@@ -433,6 +477,14 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
       }
       break;
 
+    case STRUCTLISTFIELDWITHTYPEDEF:
+      if (__value == null) {
+        unsetStructListFieldWithTypedef();
+      } else {
+        setStructListFieldWithTypedef((List<Foo>)__value);
+      }
+      break;
+
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
     }
@@ -460,6 +512,9 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
 
     case ADAPTEDSTRUCTFIELD:
       return getAdaptedStructField();
+
+    case STRUCTLISTFIELDWITHTYPEDEF:
+      return getStructListFieldWithTypedef();
 
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
@@ -490,12 +545,14 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
 
     if (!TBaseHelper.equalsNobinary(this.isSetAdaptedStructField(), that.isSetAdaptedStructField(), this.adaptedStructField, that.adaptedStructField)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.isSetStructListFieldWithTypedef(), that.isSetStructListFieldWithTypedef(), this.structListFieldWithTypedef, that.structListFieldWithTypedef)) { return false; }
+
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {structField, optionalStructField, structListField, optionalStructListField, unionField, optionalUnionField, adaptedStructField});
+    return Arrays.deepHashCode(new Object[] {structField, optionalStructField, structListField, optionalStructListField, unionField, optionalUnionField, adaptedStructField, structListFieldWithTypedef});
   }
 
   @Override
@@ -563,6 +620,14 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
       return lastComparison;
     }
     lastComparison = TBaseHelper.compareTo(adaptedStructField, other.adaptedStructField);
+    if (lastComparison != 0) { 
+      return lastComparison;
+    }
+    lastComparison = Boolean.valueOf(isSetStructListFieldWithTypedef()).compareTo(other.isSetStructListFieldWithTypedef());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    lastComparison = TBaseHelper.compareTo(structListFieldWithTypedef, other.structListFieldWithTypedef);
     if (lastComparison != 0) { 
       return lastComparison;
     }
@@ -660,6 +725,26 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
+        case STRUCTLISTFIELDWITHTYPEDEF:
+          if (__field.type == TType.LIST) {
+            {
+              TList _list74 = iprot.readListBegin();
+              this.structListFieldWithTypedef = new ArrayList<Foo>(Math.max(0, _list74.size));
+              for (int _i75 = 0; 
+                   (_list74.size < 0) ? iprot.peekList() : (_i75 < _list74.size); 
+                   ++_i75)
+              {
+                Foo _elem76;
+                _elem76 = new Foo();
+                _elem76.read(iprot);
+                this.structListFieldWithTypedef.add(_elem76);
+              }
+              iprot.readListEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -693,8 +778,8 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
       oprot.writeFieldBegin(STRUCT_LIST_FIELD_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.STRUCT, this.structListField.size()));
-        for (Foo _iter74 : this.structListField)        {
-          _iter74.write(oprot);
+        for (Foo _iter77 : this.structListField)        {
+          _iter77.write(oprot);
         }
         oprot.writeListEnd();
       }
@@ -705,8 +790,8 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
         oprot.writeFieldBegin(OPTIONAL_STRUCT_LIST_FIELD_FIELD_DESC);
         {
           oprot.writeListBegin(new TList(TType.STRUCT, this.optionalStructListField.size()));
-          for (Foo _iter75 : this.optionalStructListField)          {
-            _iter75.write(oprot);
+          for (Foo _iter78 : this.optionalStructListField)          {
+            _iter78.write(oprot);
           }
           oprot.writeListEnd();
         }
@@ -728,6 +813,17 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
     if (this.adaptedStructField != null) {
       oprot.writeFieldBegin(ADAPTED_STRUCT_FIELD_FIELD_DESC);
       this.adaptedStructField.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.structListFieldWithTypedef != null) {
+      oprot.writeFieldBegin(STRUCT_LIST_FIELD_WITH_TYPEDEF_FIELD_DESC);
+      {
+        oprot.writeListBegin(new TList(TType.STRUCT, this.structListFieldWithTypedef.size()));
+        for (Foo _iter79 : this.structListFieldWithTypedef)        {
+          _iter79.write(oprot);
+        }
+        oprot.writeListEnd();
+      }
       oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();
@@ -833,6 +929,17 @@ public class Bar implements TBase, java.io.Serializable, Cloneable, Comparable<B
       sb.append("null");
     } else {
       sb.append(TBaseHelper.toString(this.getAdaptedStructField(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("structListFieldWithTypedef");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getStructListFieldWithTypedef() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getStructListFieldWithTypedef(), indent + 1, prettyPrint));
     }
     first = false;
     sb.append(newLine + TBaseHelper.reduceIndent(indentStr));

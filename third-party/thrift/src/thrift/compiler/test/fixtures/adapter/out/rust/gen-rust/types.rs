@@ -29,6 +29,8 @@ pub type MyI32 = <::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::Adapted
 
 pub type FooWithAdapter = <::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::AdaptedType;
 
+pub type ListOfFooTypedef = ::std::vec::Vec<crate::types::Foo>;
+
 pub type StructWithAdapter = crate::types::Bar;
 
 pub type UnionWithAdapter = crate::types::Baz;
@@ -149,6 +151,7 @@ pub struct Bar {
     pub unionField: crate::types::Baz_7352,
     pub optionalUnionField: ::std::option::Option<crate::types::Baz_7352>,
     pub adaptedStructField: crate::types::DirectlyAdapted,
+    pub structListFieldWithTypedef: crate::types::ListOfFooTypedef,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -2098,6 +2101,7 @@ impl ::std::default::Default for self::Bar {
             unionField: ::std::default::Default::default(),
             optionalUnionField: ::std::option::Option::None,
             adaptedStructField: ::std::default::Default::default(),
+            structListFieldWithTypedef: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -2114,6 +2118,7 @@ impl ::std::fmt::Debug for self::Bar {
             .field("unionField", &self.unionField)
             .field("optionalUnionField", &self.optionalUnionField)
             .field("adaptedStructField", &self.adaptedStructField)
+            .field("structListFieldWithTypedef", &self.structListFieldWithTypedef)
             .finish()
     }
 }
@@ -2174,6 +2179,9 @@ where
         p.write_field_begin("adaptedStructField", ::fbthrift::TType::Struct, 7);
         ::fbthrift::Serialize::rs_thrift_write(&self.adaptedStructField, p);
         p.write_field_end();
+        p.write_field_begin("structListFieldWithTypedef", ::fbthrift::TType::List, 8);
+        ::fbthrift::Serialize::rs_thrift_write(&self.structListFieldWithTypedef, p);
+        p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -2192,6 +2200,7 @@ where
             ::fbthrift::Field::new("optionalUnionField", ::fbthrift::TType::Struct, 6),
             ::fbthrift::Field::new("structField", ::fbthrift::TType::Struct, 1),
             ::fbthrift::Field::new("structListField", ::fbthrift::TType::List, 3),
+            ::fbthrift::Field::new("structListFieldWithTypedef", ::fbthrift::TType::List, 8),
             ::fbthrift::Field::new("unionField", ::fbthrift::TType::Struct, 5),
         ];
 
@@ -2250,6 +2259,13 @@ where
                 break 'fastpath true;
             }
             (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::List, 8) {
+                output.structListFieldWithTypedef = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "structListFieldWithTypedef", strct: "Bar"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
 
             fty != ::fbthrift::TType::Stop
         };
@@ -2265,6 +2281,7 @@ where
                     (::fbthrift::TType::Struct, 5) => output.unionField = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "unionField", strct: "Bar"})?,
                     (::fbthrift::TType::Struct, 6) => output.optionalUnionField = ::std::option::Option::Some(::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "optionalUnionField", strct: "Bar"})?),
                     (::fbthrift::TType::Struct, 7) => output.adaptedStructField = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "adaptedStructField", strct: "Bar"})?,
+                    (::fbthrift::TType::List, 8) => output.structListFieldWithTypedef = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "structListFieldWithTypedef", strct: "Bar"})?,
                     (fty, _) => p.skip(fty)?,
                 }
                 p.read_field_end()?;
@@ -2417,6 +2434,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
                 }
             },
             7 => {
+            },
+            8 => {
             },
             _ => {}
         }

@@ -578,6 +578,7 @@ Bar::Bar(const Bar& srcObj) :
     __fbthrift_field_unionField(srcObj.__fbthrift_field_unionField),
     __fbthrift_field_optionalUnionField(srcObj.__fbthrift_field_optionalUnionField),
     __fbthrift_field_adaptedStructField(srcObj.__fbthrift_field_adaptedStructField),
+    __fbthrift_field_structListFieldWithTypedef(srcObj.__fbthrift_field_structListFieldWithTypedef),
     __isset(srcObj.__isset) {
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_structField, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_optionalStructField, *this);
@@ -612,6 +613,7 @@ Bar::Bar([[maybe_unused]] Bar&& other) noexcept :
     __fbthrift_field_unionField(std::move(other.__fbthrift_field_unionField)),
     __fbthrift_field_optionalUnionField(std::move(other.__fbthrift_field_optionalUnionField)),
     __fbthrift_field_adaptedStructField(std::move(other.__fbthrift_field_adaptedStructField)),
+    __fbthrift_field_structListFieldWithTypedef(std::move(other.__fbthrift_field_structListFieldWithTypedef)),
     __isset(other.__isset) {
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_structField, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_optionalStructField, *this);
@@ -628,19 +630,21 @@ Bar& Bar::operator=([[maybe_unused]] Bar&& other) noexcept {
     this->__fbthrift_field_unionField = std::move(other.__fbthrift_field_unionField);
     this->__fbthrift_field_optionalUnionField = std::move(other.__fbthrift_field_optionalUnionField);
     this->__fbthrift_field_adaptedStructField = std::move(other.__fbthrift_field_adaptedStructField);
+    this->__fbthrift_field_structListFieldWithTypedef = std::move(other.__fbthrift_field_structListFieldWithTypedef);
     __isset = other.__isset;
     return *this;
 }
 
 
-Bar::Bar(apache::thrift::FragileConstructor, ::my::Cpp::Type1 structField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::Foo_3943, Bar> optionalStructField__arg, ::std::vector<::facebook::thrift::test::FooWithAdapter_9317> structListField__arg, ::std::vector<::facebook::thrift::test::FooWithAdapter_9317> optionalStructListField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::facebook::thrift::test::Baz_7352, Bar> unionField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 6, ::facebook::thrift::test::Baz_7352, Bar> optionalUnionField__arg, ::facebook::thrift::test::DirectlyAdapted adaptedStructField__arg) :
+Bar::Bar(apache::thrift::FragileConstructor, ::my::Cpp::Type1 structField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::Foo_3943, Bar> optionalStructField__arg, ::std::vector<::facebook::thrift::test::FooWithAdapter_9317> structListField__arg, ::std::vector<::facebook::thrift::test::FooWithAdapter_9317> optionalStructListField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::facebook::thrift::test::Baz_7352, Bar> unionField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 6, ::facebook::thrift::test::Baz_7352, Bar> optionalUnionField__arg, ::facebook::thrift::test::DirectlyAdapted adaptedStructField__arg, ::facebook::thrift::test::ListOfFooTypedef structListFieldWithTypedef__arg) :
     __fbthrift_field_structField(std::move(structField__arg)),
     __fbthrift_field_optionalStructField(std::move(optionalStructField__arg)),
     __fbthrift_field_structListField(std::move(structListField__arg)),
     __fbthrift_field_optionalStructListField(std::move(optionalStructListField__arg)),
     __fbthrift_field_unionField(std::move(unionField__arg)),
     __fbthrift_field_optionalUnionField(std::move(optionalUnionField__arg)),
-    __fbthrift_field_adaptedStructField(std::move(adaptedStructField__arg)) { 
+    __fbthrift_field_adaptedStructField(std::move(adaptedStructField__arg)),
+    __fbthrift_field_structListFieldWithTypedef(std::move(structListFieldWithTypedef__arg)) { 
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_structField, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_optionalStructField, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 5>(__fbthrift_field_unionField, *this);
@@ -653,6 +657,7 @@ Bar::Bar(apache::thrift::FragileConstructor, ::my::Cpp::Type1 structField__arg, 
   __isset.set(folly::index_constant<4>(), true);
   __isset.set(folly::index_constant<5>(), true);
   __isset.set(folly::index_constant<6>(), true);
+  __isset.set(folly::index_constant<7>(), true);
 }
 
 void Bar::__fbthrift_clear() {
@@ -664,6 +669,7 @@ void Bar::__fbthrift_clear() {
   ::apache::thrift::adapt_detail::clear<::my::Adapter1, 5>(__fbthrift_field_unionField, *this);
   ::apache::thrift::adapt_detail::clear<::my::Adapter1, 6>(__fbthrift_field_optionalUnionField, *this);
   ::apache::thrift::adapt_detail::clear<::my::Adapter, 7>(__fbthrift_field_adaptedStructField, *this);
+  this->__fbthrift_field_structListFieldWithTypedef.clear();
   __isset = {};
 }
 
@@ -699,6 +705,14 @@ const ::std::vector<::facebook::thrift::test::FooWithAdapter_9317>* Bar::get_opt
   return optionalStructListField_ref().has_value() ? std::addressof(__fbthrift_field_optionalStructListField) : nullptr;
 }
 
+const ::facebook::thrift::test::ListOfFooTypedef& Bar::get_structListFieldWithTypedef() const& {
+  return __fbthrift_field_structListFieldWithTypedef;
+}
+
+::facebook::thrift::test::ListOfFooTypedef Bar::get_structListFieldWithTypedef() && {
+  return static_cast<::facebook::thrift::test::ListOfFooTypedef&&>(__fbthrift_field_structListFieldWithTypedef);
+}
+
 void swap([[maybe_unused]] Bar& a, [[maybe_unused]] Bar& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_structField, b.__fbthrift_field_structField);
@@ -708,6 +722,7 @@ void swap([[maybe_unused]] Bar& a, [[maybe_unused]] Bar& b) {
   swap(a.__fbthrift_field_unionField, b.__fbthrift_field_unionField);
   swap(a.__fbthrift_field_optionalUnionField, b.__fbthrift_field_optionalUnionField);
   swap(a.__fbthrift_field_adaptedStructField, b.__fbthrift_field_adaptedStructField);
+  swap(a.__fbthrift_field_structListFieldWithTypedef, b.__fbthrift_field_structListFieldWithTypedef);
   swap(a.__isset, b.__isset);
 }
 
@@ -740,6 +755,12 @@ static_assert(
         Bar,
         ::apache::thrift::type_class::structure,
         ::facebook::thrift::test::detail::DirectlyAdapted>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Bar,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::facebook::thrift::test::ListOfFooTypedef>,
     "inconsistent use of json option");
 
 } // namespace facebook::thrift::test

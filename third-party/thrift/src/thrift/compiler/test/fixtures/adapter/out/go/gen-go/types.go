@@ -289,6 +289,62 @@ func ReadFooWithAdapter(p thrift.Decoder) (*FooWithAdapter, error) {
     return decodeResult, decodeErr
 }
 
+type ListOfFooTypedef = []*Foo
+
+func NewListOfFooTypedef() ListOfFooTypedef {
+    return make([]*Foo, 0)
+}
+
+func WriteListOfFooTypedef(item ListOfFooTypedef, p thrift.Encoder) error {
+    if err := p.WriteListBegin(thrift.STRUCT, len(item)); err != nil {
+        return thrift.PrependError("error writing list begin: ", err)
+    }
+    for _, v := range item {
+        {
+            item := v
+            if err := item.Write(p); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
+    return nil
+}
+
+func ReadListOfFooTypedef(p thrift.Decoder) (ListOfFooTypedef, error) {
+    var decodeResult ListOfFooTypedef
+    decodeErr := func() error {
+        _ /* elemType */, size, err := p.ReadListBegin()
+        if err != nil {
+            return thrift.PrependError("error reading list begin: ", err)
+        }
+        
+        listResult := make([]*Foo, 0, size)
+        for i := 0; i < size; i++ {
+            var elem *Foo
+            {
+                result := NewFoo()
+                err := result.Read(p)
+                if err != nil {
+                    return err
+                }
+                elem = result
+            }
+            listResult = append(listResult, elem)
+        }
+        
+        if err := p.ReadListEnd(); err != nil {
+            return thrift.PrependError("error reading list end: ", err)
+        }
+        result := listResult
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
 type StructWithAdapter = Bar
 
 func NewStructWithAdapter() *StructWithAdapter {
@@ -2907,6 +2963,7 @@ type Bar struct {
     UnionField *Baz_7352 `thrift:"unionField,5" json:"unionField" db:"unionField"`
     OptionalUnionField *Baz_7352 `thrift:"optionalUnionField,6,optional" json:"optionalUnionField,omitempty" db:"optionalUnionField"`
     AdaptedStructField *DirectlyAdapted `thrift:"adaptedStructField,7" json:"adaptedStructField" db:"adaptedStructField"`
+    StructListFieldWithTypedef ListOfFooTypedef `thrift:"structListFieldWithTypedef,8" json:"structListFieldWithTypedef" db:"structListFieldWithTypedef"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*Bar)(nil)
@@ -2962,6 +3019,13 @@ func (x *Bar) GetAdaptedStructField() *DirectlyAdapted {
         return nil
     }
     return x.AdaptedStructField
+}
+
+func (x *Bar) GetStructListFieldWithTypedef() ListOfFooTypedef {
+    if !x.IsSetStructListFieldWithTypedef() {
+        return NewListOfFooTypedef()
+    }
+    return x.StructListFieldWithTypedef
 }
 
 func (x *Bar) SetStructFieldNonCompat(value *Foo_6868) *Bar {
@@ -3034,6 +3098,16 @@ func (x *Bar) SetAdaptedStructField(value *DirectlyAdapted) *Bar {
     return x
 }
 
+func (x *Bar) SetStructListFieldWithTypedefNonCompat(value ListOfFooTypedef) *Bar {
+    x.StructListFieldWithTypedef = value
+    return x
+}
+
+func (x *Bar) SetStructListFieldWithTypedef(value ListOfFooTypedef) *Bar {
+    x.StructListFieldWithTypedef = value
+    return x
+}
+
 func (x *Bar) IsSetStructField() bool {
     return x != nil && x.StructField != nil
 }
@@ -3060,6 +3134,10 @@ func (x *Bar) IsSetOptionalUnionField() bool {
 
 func (x *Bar) IsSetAdaptedStructField() bool {
     return x != nil && x.AdaptedStructField != nil
+}
+
+func (x *Bar) IsSetStructListFieldWithTypedef() bool {
+    return x != nil && x.StructListFieldWithTypedef != nil
 }
 
 func (x *Bar) writeField1(p thrift.Encoder) error {  // StructField
@@ -3226,6 +3304,23 @@ func (x *Bar) writeField7(p thrift.Encoder) error {  // AdaptedStructField
     return nil
 }
 
+func (x *Bar) writeField8(p thrift.Encoder) error {  // StructListFieldWithTypedef
+    if err := p.WriteFieldBegin("structListFieldWithTypedef", thrift.LIST, 8); err != nil {
+        return thrift.PrependError("Bar write field begin error: ", err)
+    }
+
+    item := x.StructListFieldWithTypedef
+    err := WriteListOfFooTypedef(item, p)
+    if err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("Bar write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *Bar) readField1(p thrift.Decoder) error {  // StructField
     result, err := ReadFoo_6868(p)
     if err != nil {
@@ -3333,6 +3428,16 @@ func (x *Bar) readField7(p thrift.Decoder) error {  // AdaptedStructField
     return nil
 }
 
+func (x *Bar) readField8(p thrift.Decoder) error {  // StructListFieldWithTypedef
+    result, err := ReadListOfFooTypedef(p)
+    if err != nil {
+        return err
+    }
+
+    x.StructListFieldWithTypedef = result
+    return nil
+}
+
 
 
 
@@ -3364,6 +3469,9 @@ func (x *Bar) Write(p thrift.Encoder) error {
         return err
     }
     if err := x.writeField7(p); err != nil {
+        return err
+    }
+    if err := x.writeField8(p); err != nil {
         return err
     }
 
@@ -3408,6 +3516,8 @@ func (x *Bar) Read(p thrift.Decoder) error {
             fieldReadErr = x.readField6(p)
         case ((id == 7 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "adaptedStructField")):  // adaptedStructField
             fieldReadErr = x.readField7(p)
+        case ((id == 8 && wireType == thrift.LIST) || (id == thrift.NO_FIELD_ID && fieldName == "structListFieldWithTypedef")):  // structListFieldWithTypedef
+            fieldReadErr = x.readField8(p)
         default:
             fieldReadErr = p.Skip(wireType)
         }
@@ -3437,7 +3547,8 @@ func (x *Bar) setDefaults() *Bar {
         SetStructFieldNonCompat(NewFoo_6868()).
         SetStructListFieldNonCompat(make([]*FooWithAdapter_9317, 0)).
         SetUnionFieldNonCompat(NewBaz_7352()).
-        SetAdaptedStructFieldNonCompat(NewDirectlyAdapted())
+        SetAdaptedStructFieldNonCompat(NewDirectlyAdapted()).
+        SetStructListFieldWithTypedefNonCompat(NewListOfFooTypedef())
 }
 
 func (x *Bar) GetThriftStructMetadata() *metadata.ThriftStruct {

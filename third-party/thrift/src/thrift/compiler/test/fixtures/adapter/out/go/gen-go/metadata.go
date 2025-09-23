@@ -652,6 +652,21 @@ var (
                     Name: "module.DirectlyAdapted",
                 },
         }
+    premadeThriftType_list_module_Foo =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_module_Foo,
+                },
+        }
+    premadeThriftType_module_ListOfFooTypedef =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.ListOfFooTypedef",
+                    UnderlyingType: premadeThriftType_list_module_Foo,
+                },
+        }
     premadeThriftType_module_Bar =
         &metadata.ThriftType{
             TStruct:
@@ -1841,6 +1856,12 @@ var (
                     IsOptional: false,
                     Type:       premadeThriftType_module_DirectlyAdapted,
                 },
+                &metadata.ThriftField{
+                    Id:         8,
+                    Name:       "structListFieldWithTypedef",
+                    IsOptional: false,
+                    Type:       premadeThriftType_module_ListOfFooTypedef,
+                },
             },
         }
     premadeStructMetadata_DirectlyAdapted =
@@ -2753,6 +2774,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["module.FooWithAdapter_9317"] = premadeThriftType_module_FooWithAdapter_9317
     fbthriftThriftTypesMap["module.Baz_7352"] = premadeThriftType_module_Baz_7352
     fbthriftThriftTypesMap["module.DirectlyAdapted"] = premadeThriftType_module_DirectlyAdapted
+    fbthriftThriftTypesMap["module.ListOfFooTypedef"] = premadeThriftType_module_ListOfFooTypedef
     fbthriftThriftTypesMap["module.Bar"] = premadeThriftType_module_Bar
     fbthriftThriftTypesMap["module.IndependentDirectlyAdapted"] = premadeThriftType_module_IndependentDirectlyAdapted
     fbthriftThriftTypesMap["module.StructWithFieldAdapter"] = premadeThriftType_module_StructWithFieldAdapter

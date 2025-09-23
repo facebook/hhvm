@@ -84,6 +84,7 @@ type MyI64 = int;
 type DoubleTypedefI64 = \facebook\thrift\test\MyI64;
 type MyI32 = \Adapter1::THackType;
 type FooWithAdapter = \Adapter1::THackType;
+type ListOfFooTypedef = Vector<\facebook\thrift\test\Foo>;
 type StructWithAdapter = \Adapter2::THackType;
 type UnionWithAdapter = \Adapter2::THackType;
 type AdaptedA = \facebook\thrift\test\A;
@@ -474,9 +475,9 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     'mapField' => \Adapter3::THackType,
     ?'optionalMapField' => ?\Adapter3::THackType,
     'binaryField' => \Adapter1::THackType,
-    'longField' => \facebook\thrift\test\MyI64,
-    'adaptedLongField' => \facebook\thrift\test\MyI64,
-    'doubleAdaptedField' => \facebook\thrift\test\DoubleTypedefI64,
+    'longField' => int,
+    'adaptedLongField' => int,
+    'doubleAdaptedField' => int,
     'adapted_list' => vec<int>,
     'adapted_set' => dict<int, bool>,
     'adapted_map' => dict<string, int>,
@@ -1827,7 +1828,7 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
     ?'setField' => ?\facebook\thrift\test\SetWithAdapter,
     ?'mapField' => ?\Adapter3::THackType,
     ?'binaryField' => ?\Adapter1::THackType,
-    ?'longField' => ?\facebook\thrift\test\MyI64,
+    ?'longField' => ?int,
   );
   const int STRUCTURAL_ID = 1906005273047242984;
   /**
@@ -2548,6 +2549,16 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       'type' => \TType::STRUCT,
       'class' => \facebook\thrift\test\DirectlyAdapted::class,
     ),
+    8 => shape(
+      'var' => 'structListFieldWithTypedef',
+      'type' => \TType::LST,
+      'etype' => \TType::STRUCT,
+      'elem' => shape(
+        'type' => \TType::STRUCT,
+        'class' => \facebook\thrift\test\Foo::class,
+      ),
+      'format' => 'collection',
+    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'structField' => 1,
@@ -2557,6 +2568,7 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     'unionField' => 5,
     'optionalUnionField' => 6,
     'adaptedStructField' => 7,
+    'structListFieldWithTypedef' => 8,
   ];
 
   const type TConstructorShape = shape(
@@ -2567,6 +2579,7 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     ?'unionField' => ?\Adapter1::THackType,
     ?'optionalUnionField' => ?\Adapter1::THackType,
     ?'adaptedStructField' => ?\facebook\thrift\test\DirectlyAdapted,
+    ?'structListFieldWithTypedef' => ?\facebook\thrift\test\ListOfFooTypedef,
   );
 
   const type TShape = shape(
@@ -2577,8 +2590,9 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     ?'unionField' => ?\Adapter1::THackType,
     ?'optionalUnionField' => ?\Adapter1::THackType,
     ?'adaptedStructField' => ?\facebook\thrift\test\DirectlyAdapted::TShape,
+    'structListFieldWithTypedef' => vec<\facebook\thrift\test\Foo::TShape>,
   );
-  const int STRUCTURAL_ID = 8821530390027423431;
+  const int STRUCTURAL_ID = 3169215708272312197;
   /**
    * Original thrift field:-
    * 1: module.Foo_6868 structField
@@ -2614,8 +2628,13 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
    * 7: module.DirectlyAdapted adaptedStructField
    */
   public ?\facebook\thrift\test\DirectlyAdapted $adaptedStructField;
+  /**
+   * Original thrift field:-
+   * 8: module.ListOfFooTypedef structListFieldWithTypedef
+   */
+  public \facebook\thrift\test\ListOfFooTypedef $structListFieldWithTypedef;
 
-  public function __construct(?\Adapter1::THackType $structField = null, ?\Adapter1::THackType $optionalStructField = null, ?Vector<\facebook\thrift\test\FooWithAdapter_9317> $structListField = null, ?Vector<\facebook\thrift\test\FooWithAdapter_9317> $optionalStructListField = null, ?\Adapter1::THackType $unionField = null, ?\Adapter1::THackType $optionalUnionField = null, ?\facebook\thrift\test\DirectlyAdapted $adaptedStructField = null)[] {
+  public function __construct(?\Adapter1::THackType $structField = null, ?\Adapter1::THackType $optionalStructField = null, ?Vector<\facebook\thrift\test\FooWithAdapter_9317> $structListField = null, ?Vector<\facebook\thrift\test\FooWithAdapter_9317> $optionalStructListField = null, ?\Adapter1::THackType $unionField = null, ?\Adapter1::THackType $optionalUnionField = null, ?\facebook\thrift\test\DirectlyAdapted $adaptedStructField = null, ?\facebook\thrift\test\ListOfFooTypedef $structListFieldWithTypedef = null)[] {
     $this->structField = $structField;
     $this->optionalStructField = $optionalStructField;
     $this->structListField = $structListField ?? Vector {};
@@ -2623,6 +2642,7 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     $this->unionField = $unionField;
     $this->optionalUnionField = $optionalUnionField;
     $this->adaptedStructField = $adaptedStructField;
+    $this->structListFieldWithTypedef = $structListFieldWithTypedef ?? Vector {};
   }
 
   public static function withDefaultValues()[]: this {
@@ -2638,6 +2658,7 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       Shapes::idx($shape, 'unionField'),
       Shapes::idx($shape, 'optionalUnionField'),
       Shapes::idx($shape, 'adaptedStructField'),
+      Shapes::idx($shape, 'structListFieldWithTypedef'),
     );
   }
 
@@ -2900,6 +2921,38 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
               "name" => "adaptedStructField",
             )
           ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 8,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.ListOfFooTypedef",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_list" => \tmeta_ThriftListType::fromShape(
+                            shape(
+                              "valueType" => \tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                                    shape(
+                                      "name" => "module.Foo",
+                                    )
+                                  ),
+                                )
+                              ),
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "structListFieldWithTypedef",
+            )
+          ),
         ],
         "is_union" => false,
       )
@@ -3030,6 +3083,12 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       Shapes::idx($shape, 'unionField'),
       Shapes::idx($shape, 'optionalUnionField'),
       Shapes::idx($shape, 'adaptedStructField') |> $$ === null ? null : (\facebook\thrift\test\DirectlyAdapted::__fromShape($$)),
+      $shape['structListFieldWithTypedef']
+        |> Vec\map(
+          $$,
+          $_val2 ==> $_val2
+            |> \facebook\thrift\test\Foo::__fromShape($$),
+        ) |> new Vector($$),
     );
   }
 
@@ -3048,6 +3107,10 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       'unionField' => $this->unionField,
       'optionalUnionField' => $this->optionalUnionField,
       'adaptedStructField' => $this->adaptedStructField?->__toShape(),
+      'structListFieldWithTypedef' => $this->structListFieldWithTypedef->map(
+        ($_val0) ==> $_val0->__toShape(),
+      )
+        |> vec($$),
     );
   }
   public function getInstanceKey()[write_props]: string {
@@ -3116,6 +3179,19 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       $_tmp25 = \facebook\thrift\test\DirectlyAdapted::withDefaultValues();
       $_tmp25->readFromJson($_tmp24);
       $this->adaptedStructField = $_tmp25;
+    }
+    if (idx($parsed, 'structListFieldWithTypedef') !== null) {
+      $_json29 = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\ListOfFooTypedef>($parsed['structListFieldWithTypedef']);
+      $_container30 = Vector {};
+      foreach($_json29 as $_key27 => $_value28) {
+        $_elem31 = \facebook\thrift\test\Foo::withDefaultValues();
+        $_tmp32 = \json_encode($_value28);
+        $_tmp33 = \facebook\thrift\test\Foo::withDefaultValues();
+        $_tmp33->readFromJson($_tmp32);
+        $_elem31 = $_tmp33;
+        $_container30 []= $_elem31;
+      }
+      $this->structListFieldWithTypedef = $_container30;
     }
   }
 
@@ -4570,15 +4646,15 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   );
 
   const type TShape = shape(
-    'delay' => \facebook\thrift\test\DurationMs,
-    'custom' => \facebook\thrift\test\CustomProtocolType,
+    'delay' => int,
+    'custom' => string,
     'timeout' => int,
     'data' => int,
     'meta' => string,
-    'indirectionString' => \facebook\thrift\test\IndirectionString,
+    'indirectionString' => string,
     'string_data' => string,
-    'double_wrapped_bool' => \facebook\thrift\test\AdaptedBool,
-    'double_wrapped_integer' => \facebook\thrift\test\AdaptedInteger,
+    'double_wrapped_bool' => bool,
+    'double_wrapped_integer' => int,
     'binary_data' => string,
   );
   const int STRUCTURAL_ID = 1886811565365098978;
@@ -5241,28 +5317,28 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
   );
 
   const type TShape = shape(
-    'adaptedBool' => \facebook\thrift\test\AdaptedBool,
-    'adaptedByte' => \facebook\thrift\test\AdaptedByte,
-    'adaptedShort' => \facebook\thrift\test\AdaptedShort,
-    'adaptedInteger' => \facebook\thrift\test\AdaptedInteger,
-    'adaptedLong' => \facebook\thrift\test\AdaptedLong,
-    'adaptedDouble' => \facebook\thrift\test\AdaptedDouble,
-    'adaptedString' => \facebook\thrift\test\AdaptedString,
+    'adaptedBool' => bool,
+    'adaptedByte' => int,
+    'adaptedShort' => int,
+    'adaptedInteger' => int,
+    'adaptedLong' => int,
+    'adaptedDouble' => float,
+    'adaptedString' => string,
     'adaptedList' => vec<int>,
     'adaptedSet' => dict<int, bool>,
     'adaptedMap' => dict<int, int>,
-    'adaptedBoolDefault' => \facebook\thrift\test\AdaptedBool,
-    'adaptedByteDefault' => \facebook\thrift\test\AdaptedByte,
-    'adaptedShortDefault' => \facebook\thrift\test\AdaptedShort,
-    'adaptedIntegerDefault' => \facebook\thrift\test\AdaptedInteger,
-    'adaptedLongDefault' => \facebook\thrift\test\AdaptedLong,
-    'adaptedDoubleDefault' => \facebook\thrift\test\AdaptedDouble,
-    'adaptedStringDefault' => \facebook\thrift\test\AdaptedString,
-    ?'adaptedEnum' => ?\facebook\thrift\test\AdaptedEnum,
+    'adaptedBoolDefault' => bool,
+    'adaptedByteDefault' => int,
+    'adaptedShortDefault' => int,
+    'adaptedIntegerDefault' => int,
+    'adaptedLongDefault' => int,
+    'adaptedDoubleDefault' => float,
+    'adaptedStringDefault' => string,
+    ?'adaptedEnum' => ?\facebook\thrift\test\ThriftAdaptedEnum,
     'adaptedListDefault' => vec<int>,
     'adaptedSetDefault' => dict<int, bool>,
     'adaptedMapDefault' => dict<int, int>,
-    'doubleTypedefBool' => \facebook\thrift\test\DoubleTypedefBool,
+    'doubleTypedefBool' => bool,
   );
   const int STRUCTURAL_ID = 1552800196824590900;
   /**
@@ -6573,8 +6649,8 @@ class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   );
 
   const type TShape = shape(
-    ?'delay' => ?\facebook\thrift\test\DurationMs,
-    ?'custom' => ?\facebook\thrift\test\CustomProtocolType,
+    ?'delay' => ?int,
+    ?'custom' => ?string,
   );
   const int STRUCTURAL_ID = 7327808847999377042;
   /**
@@ -8604,7 +8680,7 @@ class CountingStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
 
   const type TShape = shape(
     ?'regularInt' => ?int,
-    ?'countingInt' => ?\facebook\thrift\test\CountingInt,
+    ?'countingInt' => ?int,
     ?'regularString' => ?string,
   );
   const int STRUCTURAL_ID = 1297891124769241261;

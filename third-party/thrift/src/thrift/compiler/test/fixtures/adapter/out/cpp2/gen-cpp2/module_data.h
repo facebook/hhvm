@@ -120,7 +120,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::Baz> {
 };
 
 template <> struct TStructDataStorage<::facebook::thrift::test::Bar> {
-  static constexpr const std::size_t fields_size = 7;
+  static constexpr const std::size_t fields_size = 8;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;

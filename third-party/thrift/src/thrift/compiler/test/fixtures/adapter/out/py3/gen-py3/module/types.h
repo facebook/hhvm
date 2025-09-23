@@ -108,6 +108,9 @@ inline void reset_field<::facebook::thrift::test::Bar>(
     case 6:
       obj.adaptedStructField_ref().copy_from(default_inst<::facebook::thrift::test::Bar>().adaptedStructField_ref());
       return;
+    case 7:
+      obj.structListFieldWithTypedef_ref().copy_from(default_inst<::facebook::thrift::test::Bar>().structListFieldWithTypedef_ref());
+      return;
   }
 }
 

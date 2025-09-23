@@ -20,6 +20,7 @@
  * Seriously, this is the documentation for this whole program.
  */
 
+namespace py3 thrift.test
 namespace java thrift.test
 namespace cpp thrift.test
 namespace json thrift.test.doc

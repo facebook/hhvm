@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/thrift.thrift"
+namespace py3 thrift.test
 
 struct DefaultValues {
   1: i32 def_reg;

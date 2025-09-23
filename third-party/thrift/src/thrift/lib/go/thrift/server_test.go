@@ -614,3 +614,55 @@ func TestLoadHeader(t *testing.T) {
 	err = serverEG.Wait()
 	require.ErrorIs(t, err, context.Canceled)
 }
+
+func TestNumWorkersOption(t *testing.T) {
+	listener, err := net.Listen("tcp", "[::]:0")
+	require.NoError(t, err)
+	addr := listener.Addr()
+	t.Logf("Server listening on %v", addr)
+
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+	server := NewServer(processor, listener, TransportIDRocket, WithNumWorkers(1))
+
+	serverCtx, serverCancel := context.WithCancel(context.Background())
+	var serverEG errgroup.Group
+	serverEG.Go(func() error {
+		return server.ServeContext(serverCtx)
+	})
+
+	channel, err := NewClient(
+		WithRocket(),
+		WithIoTimeout(5*time.Second),
+		WithDialer(func() (net.Conn, error) {
+			return net.DialTimeout(addr.Network(), addr.String(), 5*time.Second)
+		}),
+	)
+	require.NoError(t, err)
+	client := dummyif.NewDummyChannelClient(channel)
+
+	var clientsWG sync.WaitGroup
+	startTime := time.Now()
+	for range 2 {
+		clientsWG.Go(
+			func() {
+				err := client.Sleep(context.Background(), 10 /* ms */)
+				assert.NoError(t, err)
+			},
+		)
+	}
+	clientsWG.Wait()
+	timeElapsed := time.Since(startTime)
+
+	err = client.Close()
+	require.NoError(t, err)
+
+	// The core assertion of this test!!!
+	// We just did two 10ms sleeps. With a single worker - WithNumWorkers(1),
+	// the requests should have gotten handled in series, taking at least 20ms.
+	require.Greater(t, timeElapsed, 20*time.Millisecond)
+
+	// Shut down server.
+	serverCancel()
+	err = serverEG.Wait()
+	require.ErrorIs(t, err, context.Canceled)
+}

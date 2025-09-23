@@ -105,14 +105,18 @@ func (s *rocketServer) ServeContext(ctx context.Context) error {
 }
 
 func (s *rocketServer) requestScheduler() scheduler.Scheduler {
+	// Request scheduler must be elastic to ensure that we can quickly peek at
+	// the request metadata and set the necessary timeouts (e.g. queue timeout).
+	// The actual heavy lifting (e.g. request processing, handling, response
+	// serializaton) will be done by the response scheduler.
+	return scheduler.Elastic()
+}
+
+func (s *rocketServer) responseScheduler() scheduler.Scheduler {
 	if s.numWorkers == GoroutinePerRequest {
 		return scheduler.Elastic()
 	}
 	return scheduler.NewElastic(s.numWorkers)
-}
-
-func (s *rocketServer) responseScheduler() scheduler.Scheduler {
-	return scheduler.Elastic()
 }
 
 func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload, sendingSocket rsocket.CloseableRSocket) (rsocket.RSocket, error) {

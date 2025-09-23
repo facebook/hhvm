@@ -60,6 +60,16 @@ class StreamElementEncoder {
 };
 
 template <typename T>
+class SinkElementDecoder {
+ public:
+  virtual folly::Try<T> operator()(
+      folly::Try<apache::thrift::StreamPayload>&&) = 0;
+
+ protected:
+  ~SinkElementDecoder() = default;
+};
+
+template <typename T>
 struct RichPayloadToSend { // received as `RichPayloadReceived`
   T payload;
   transport::THeader::StringToStringMap metadata;

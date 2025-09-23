@@ -33,8 +33,8 @@ type httpProtocol struct {
 
 var _ Protocol = (*httpProtocol)(nil)
 
-// NewHTTPProtocol creates a Protocol from a format that serializes directly to an HTTPClient.
-func NewHTTPProtocol(url string) (Protocol, error) {
+// NewHTTPRequestChannel creates a Protocol from a format that serializes directly to an HTTPClient.
+func NewHTTPRequestChannel(url string) (RequestChannel, error) {
 	httpClient, err := newHTTPPostClient(url)
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func NewHTTPProtocol(url string) (Protocol, error) {
 	if err := p.resetProtocol(); err != nil {
 		return nil, err
 	}
-	return p, nil
+	return NewSerialChannel(p), nil
 }
 
 func (p *httpProtocol) SetTimeout(timeout time.Duration) {

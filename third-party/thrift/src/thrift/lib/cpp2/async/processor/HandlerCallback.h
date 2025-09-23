@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <thrift/lib/cpp2/async/BidirectionalStream.h>
+#include <thrift/lib/cpp2/async/BiDiStream.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/async/processor/HandlerCallbackBase.h>
 

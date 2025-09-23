@@ -91,9 +91,6 @@ class RpcOptions {
   RpcOptions& setClientOnlyTimeouts(bool val);
   bool getClientOnlyTimeouts() const;
 
-  [[deprecated("Use getChecksum instead")]]
-  bool getEnableChecksum() const;
-
   RpcOptions& setChunkTimeout(std::chrono::milliseconds chunkTimeout);
   std::chrono::milliseconds getChunkTimeout() const;
 

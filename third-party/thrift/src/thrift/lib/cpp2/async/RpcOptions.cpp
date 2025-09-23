@@ -64,10 +64,6 @@ bool RpcOptions::getClientOnlyTimeouts() const {
   return clientOnlyTimeouts_;
 }
 
-bool RpcOptions::getEnableChecksum() const {
-  return checksum_ == Checksum::SERVER_ONLY_CRC32;
-}
-
 RpcOptions& RpcOptions::setChunkTimeout(
     std::chrono::milliseconds chunkTimeout) {
   chunkTimeout_ = validateTimeout(chunkTimeout);

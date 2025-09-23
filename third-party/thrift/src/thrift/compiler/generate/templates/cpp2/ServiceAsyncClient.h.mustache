@@ -45,7 +45,9 @@
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
 #include <thrift/lib/cpp2/async/Sink.h>
-{{/service:interactions?}}
+{{/service:interactions?}}{{#if service:self.has_bidirectional_streams?}}
+#include <thrift/lib/cpp2/async/BiDiStream.h>
+{{/if service:self.has_bidirectional_streams?}}
 
 namespace apache { namespace thrift {
   class Cpp2RequestContext;

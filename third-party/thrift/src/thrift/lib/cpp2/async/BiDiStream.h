@@ -19,8 +19,41 @@
 #include <folly/Function.h>
 #include <folly/coro/AsyncGenerator.h>
 #include <folly/coro/Task.h>
+#include <thrift/lib/cpp2/async/ClientBufferedStream.h>
+#include <thrift/lib/cpp2/async/Sink.h>
 
 namespace apache::thrift {
+
+/**
+ * BidirectionalStream is the Client return type for a BiDi method that does not
+ * have an initial response, e.g `sink<T>, stream<U> bidiNoInitialResponse()`
+ */
+template <typename SinkElement, typename StreamElement>
+class BidirectionalStream {
+ public:
+  using SinkElementType = SinkElement;
+  using StreamElementType = StreamElement;
+
+  ClientSink<SinkElement, void> sink;
+  ClientBufferedStream<StreamElement> stream;
+};
+
+/**
+ * ResponseAndBidirectionalStream is the Client return type for a BiDi method
+ * that has an initial response, e.g
+ * `R, sink<T>, stream<U> bidiWithInitialResponse()`
+ */
+template <typename Response, typename SinkElement, typename StreamElement>
+class ResponseAndBidirectionalStream {
+ public:
+  using ResponseType = Response;
+  using SinkElementType = SinkElement;
+  using StreamElementType = StreamElement;
+
+  Response response;
+  ClientSink<SinkElement, void> sink;
+  ClientBufferedStream<StreamElement> stream;
+};
 
 template <typename InputElement, typename OutputElement>
 struct StreamTransformation {

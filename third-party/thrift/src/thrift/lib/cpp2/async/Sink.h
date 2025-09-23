@@ -167,29 +167,4 @@ class ResponseAndSinkConsumer {
   SinkConsumer<SinkElement, FinalResponse> sinkConsumer;
 };
 
-template <typename T>
-class ClientBufferedStream;
-
-template <typename Response, typename SinkElement, typename StreamElement>
-class ResponseAndBidirectionalStream {
- public:
-  using ResponseType = Response;
-  using SinkElementType = SinkElement;
-  using StreamElementType = StreamElement;
-
-  Response response;
-  ClientSink<SinkElement> sink;
-  ClientBufferedStream<StreamElement> stream;
-};
-
-template <typename SinkElement, typename StreamElement>
-class BidirectionalStream {
- public:
-  using SinkElementType = SinkElement;
-  using StreamElementType = StreamElement;
-
-  ClientSink<SinkElement> sink;
-  ClientBufferedStream<StreamElement> stream;
-};
-
 } // namespace apache::thrift

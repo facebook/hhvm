@@ -152,15 +152,17 @@ cdef api void call_cy_TestService_init(
     cdef Promise_cint64_t __promise = Promise_cint64_t._fbthrift_create(cmove(cPromise))
     arg_int1 = int1
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        TestService_init_coro(
-            self,
-            __promise,
-            arg_int1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          TestService_init_coro(
+              self,
+              __promise,
+              arg_int1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_TestService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise

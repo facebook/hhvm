@@ -666,16 +666,18 @@ cdef api void call_cy_PubSubStreamingService_returnstream(
     arg_i32_from = i32_from
     arg_i32_to = i32_to
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        PubSubStreamingService_returnstream_coro(
-            self,
-            __promise,
-            arg_i32_from,
-            arg_i32_to
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          PubSubStreamingService_returnstream_coro(
+              self,
+              __promise,
+              arg_i32_from,
+              arg_i32_to
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_PubSubStreamingService_streamthrows(
     object self,
     Cpp2RequestContext* ctx,
@@ -685,15 +687,17 @@ cdef api void call_cy_PubSubStreamingService_streamthrows(
     cdef Promise_cServerStream__cint32_t __promise = Promise_cServerStream__cint32_t._fbthrift_create(cmove(cPromise))
     arg_foo = foo
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        PubSubStreamingService_streamthrows_coro(
-            self,
-            __promise,
-            arg_foo
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          PubSubStreamingService_streamthrows_coro(
+              self,
+              __promise,
+              arg_foo
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_PubSubStreamingService_servicethrows(
     object self,
     Cpp2RequestContext* ctx,
@@ -703,15 +707,17 @@ cdef api void call_cy_PubSubStreamingService_servicethrows(
     cdef Promise_cServerStream__cint32_t __promise = Promise_cServerStream__cint32_t._fbthrift_create(cmove(cPromise))
     arg_foo = foo
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        PubSubStreamingService_servicethrows_coro(
-            self,
-            __promise,
-            arg_foo
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          PubSubStreamingService_servicethrows_coro(
+              self,
+              __promise,
+              arg_foo
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_PubSubStreamingService_servicethrows2(
     object self,
     Cpp2RequestContext* ctx,
@@ -721,15 +727,17 @@ cdef api void call_cy_PubSubStreamingService_servicethrows2(
     cdef Promise_cServerStream__cint32_t __promise = Promise_cServerStream__cint32_t._fbthrift_create(cmove(cPromise))
     arg_foo = foo
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        PubSubStreamingService_servicethrows2_coro(
-            self,
-            __promise,
-            arg_foo
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          PubSubStreamingService_servicethrows2_coro(
+              self,
+              __promise,
+              arg_foo
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_PubSubStreamingService_boththrows(
     object self,
     Cpp2RequestContext* ctx,
@@ -739,15 +747,17 @@ cdef api void call_cy_PubSubStreamingService_boththrows(
     cdef Promise_cServerStream__cint32_t __promise = Promise_cServerStream__cint32_t._fbthrift_create(cmove(cPromise))
     arg_foo = foo
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        PubSubStreamingService_boththrows_coro(
-            self,
-            __promise,
-            arg_foo
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          PubSubStreamingService_boththrows_coro(
+              self,
+              __promise,
+              arg_foo
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_PubSubStreamingService_responseandstreamstreamthrows(
     object self,
     Cpp2RequestContext* ctx,
@@ -757,15 +767,17 @@ cdef api void call_cy_PubSubStreamingService_responseandstreamstreamthrows(
     cdef Promise_cResponseAndServerStream__cint32_t_cint32_t __promise = Promise_cResponseAndServerStream__cint32_t_cint32_t._fbthrift_create(cmove(cPromise))
     arg_foo = foo
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        PubSubStreamingService_responseandstreamstreamthrows_coro(
-            self,
-            __promise,
-            arg_foo
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          PubSubStreamingService_responseandstreamstreamthrows_coro(
+              self,
+              __promise,
+              arg_foo
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_PubSubStreamingService_responseandstreamservicethrows(
     object self,
     Cpp2RequestContext* ctx,
@@ -775,15 +787,17 @@ cdef api void call_cy_PubSubStreamingService_responseandstreamservicethrows(
     cdef Promise_cResponseAndServerStream__cint32_t_cint32_t __promise = Promise_cResponseAndServerStream__cint32_t_cint32_t._fbthrift_create(cmove(cPromise))
     arg_foo = foo
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        PubSubStreamingService_responseandstreamservicethrows_coro(
-            self,
-            __promise,
-            arg_foo
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          PubSubStreamingService_responseandstreamservicethrows_coro(
+              self,
+              __promise,
+              arg_foo
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_PubSubStreamingService_responseandstreamboththrows(
     object self,
     Cpp2RequestContext* ctx,
@@ -793,15 +807,17 @@ cdef api void call_cy_PubSubStreamingService_responseandstreamboththrows(
     cdef Promise_cResponseAndServerStream__cint32_t_cint32_t __promise = Promise_cResponseAndServerStream__cint32_t_cint32_t._fbthrift_create(cmove(cPromise))
     arg_foo = foo
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        PubSubStreamingService_responseandstreamboththrows_coro(
-            self,
-            __promise,
-            arg_foo
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          PubSubStreamingService_responseandstreamboththrows_coro(
+              self,
+              __promise,
+              arg_foo
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_PubSubStreamingService_returnstreamFast(
     object self,
     Cpp2RequestContext* ctx,
@@ -813,16 +829,18 @@ cdef api void call_cy_PubSubStreamingService_returnstreamFast(
     arg_i32_from = i32_from
     arg_i32_to = i32_to
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        PubSubStreamingService_returnstreamFast_coro(
-            self,
-            __promise,
-            arg_i32_from,
-            arg_i32_to
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          PubSubStreamingService_returnstreamFast_coro(
+              self,
+              __promise,
+              arg_i32_from,
+              arg_i32_to
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_PubSubStreamingService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise

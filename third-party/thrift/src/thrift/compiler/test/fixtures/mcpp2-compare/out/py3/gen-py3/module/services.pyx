@@ -1133,14 +1133,16 @@ cdef api void call_cy_ReturnService_noReturn(
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_noReturn_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_noReturn_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_boolReturn(
     object self,
     Cpp2RequestContext* ctx,
@@ -1148,14 +1150,16 @@ cdef api void call_cy_ReturnService_boolReturn(
 ) noexcept:
     cdef Promise_cbool __promise = Promise_cbool._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_boolReturn_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_boolReturn_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_i16Return(
     object self,
     Cpp2RequestContext* ctx,
@@ -1163,14 +1167,16 @@ cdef api void call_cy_ReturnService_i16Return(
 ) noexcept:
     cdef Promise_cint16_t __promise = Promise_cint16_t._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_i16Return_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_i16Return_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_i32Return(
     object self,
     Cpp2RequestContext* ctx,
@@ -1178,14 +1184,16 @@ cdef api void call_cy_ReturnService_i32Return(
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_i32Return_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_i32Return_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_i64Return(
     object self,
     Cpp2RequestContext* ctx,
@@ -1193,14 +1201,16 @@ cdef api void call_cy_ReturnService_i64Return(
 ) noexcept:
     cdef Promise_cint64_t __promise = Promise_cint64_t._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_i64Return_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_i64Return_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_floatReturn(
     object self,
     Cpp2RequestContext* ctx,
@@ -1208,14 +1218,16 @@ cdef api void call_cy_ReturnService_floatReturn(
 ) noexcept:
     cdef Promise_float __promise = Promise_float._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_floatReturn_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_floatReturn_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_doubleReturn(
     object self,
     Cpp2RequestContext* ctx,
@@ -1223,14 +1235,16 @@ cdef api void call_cy_ReturnService_doubleReturn(
 ) noexcept:
     cdef Promise_double __promise = Promise_double._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_doubleReturn_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_doubleReturn_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_stringReturn(
     object self,
     Cpp2RequestContext* ctx,
@@ -1238,14 +1252,16 @@ cdef api void call_cy_ReturnService_stringReturn(
 ) noexcept:
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_stringReturn_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_stringReturn_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_binaryReturn(
     object self,
     Cpp2RequestContext* ctx,
@@ -1253,14 +1269,16 @@ cdef api void call_cy_ReturnService_binaryReturn(
 ) noexcept:
     cdef Promise_binary __promise = Promise_binary._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_binaryReturn_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_binaryReturn_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_mapReturn(
     object self,
     Cpp2RequestContext* ctx,
@@ -1268,14 +1286,16 @@ cdef api void call_cy_ReturnService_mapReturn(
 ) noexcept:
     cdef Promise_cmap__string_cint64_t __promise = Promise_cmap__string_cint64_t._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_mapReturn_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_mapReturn_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_simpleTypedefReturn(
     object self,
     Cpp2RequestContext* ctx,
@@ -1283,14 +1303,16 @@ cdef api void call_cy_ReturnService_simpleTypedefReturn(
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_simpleTypedefReturn_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_simpleTypedefReturn_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_complexTypedefReturn(
     object self,
     Cpp2RequestContext* ctx,
@@ -1298,14 +1320,16 @@ cdef api void call_cy_ReturnService_complexTypedefReturn(
 ) noexcept:
     cdef Promise_vector__cmap___module_cbindings_cEmpty__module_cbindings_cMyStruct __promise = Promise_vector__cmap___module_cbindings_cEmpty__module_cbindings_cMyStruct._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_complexTypedefReturn_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_complexTypedefReturn_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_list_mostComplexTypedefReturn(
     object self,
     Cpp2RequestContext* ctx,
@@ -1313,14 +1337,16 @@ cdef api void call_cy_ReturnService_list_mostComplexTypedefReturn(
 ) noexcept:
     cdef Promise_vector__vector__vector__cmap___module_cbindings_cEmpty__module_cbindings_cMyStruct __promise = Promise_vector__vector__vector__cmap___module_cbindings_cEmpty__module_cbindings_cMyStruct._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_list_mostComplexTypedefReturn_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_list_mostComplexTypedefReturn_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_enumReturn(
     object self,
     Cpp2RequestContext* ctx,
@@ -1328,14 +1354,16 @@ cdef api void call_cy_ReturnService_enumReturn(
 ) noexcept:
     cdef Promise__module_cbindings_cMyEnumA __promise = Promise__module_cbindings_cMyEnumA._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_enumReturn_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_enumReturn_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_list_EnumReturn(
     object self,
     Cpp2RequestContext* ctx,
@@ -1343,14 +1371,16 @@ cdef api void call_cy_ReturnService_list_EnumReturn(
 ) noexcept:
     cdef Promise_vector___module_cbindings_cMyEnumA __promise = Promise_vector___module_cbindings_cMyEnumA._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_list_EnumReturn_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_list_EnumReturn_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_structReturn(
     object self,
     Cpp2RequestContext* ctx,
@@ -1358,14 +1388,16 @@ cdef api void call_cy_ReturnService_structReturn(
 ) noexcept:
     cdef Promise__module_cbindings_cMyStruct __promise = Promise__module_cbindings_cMyStruct._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_structReturn_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_structReturn_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_set_StructReturn(
     object self,
     Cpp2RequestContext* ctx,
@@ -1373,14 +1405,16 @@ cdef api void call_cy_ReturnService_set_StructReturn(
 ) noexcept:
     cdef Promise_cset___module_cbindings_cMyStruct __promise = Promise_cset___module_cbindings_cMyStruct._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_set_StructReturn_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_set_StructReturn_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_unionReturn(
     object self,
     Cpp2RequestContext* ctx,
@@ -1388,14 +1422,16 @@ cdef api void call_cy_ReturnService_unionReturn(
 ) noexcept:
     cdef Promise__module_cbindings_cComplexUnion __promise = Promise__module_cbindings_cComplexUnion._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_unionReturn_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_unionReturn_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_list_UnionReturn(
     object self,
     Cpp2RequestContext* ctx,
@@ -1403,14 +1439,16 @@ cdef api void call_cy_ReturnService_list_UnionReturn(
 ) noexcept:
     cdef Promise_vector___module_cbindings_cComplexUnion __promise = Promise_vector___module_cbindings_cComplexUnion._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_list_UnionReturn_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_list_UnionReturn_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_readDataEb(
     object self,
     Cpp2RequestContext* ctx,
@@ -1420,15 +1458,17 @@ cdef api void call_cy_ReturnService_readDataEb(
     cdef Promise___iobuf_cIOBuf __promise = Promise___iobuf_cIOBuf._fbthrift_create(cmove(cPromise))
     arg_size = size
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_readDataEb_coro(
-            self,
-            __promise,
-            arg_size
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_readDataEb_coro(
+              self,
+              __promise,
+              arg_size
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_readData(
     object self,
     Cpp2RequestContext* ctx,
@@ -1438,15 +1478,17 @@ cdef api void call_cy_ReturnService_readData(
     cdef Promise_unique_ptr__iobuf_cIOBuf __promise = Promise_unique_ptr__iobuf_cIOBuf._fbthrift_create(cmove(cPromise))
     arg_size = size
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ReturnService_readData_coro(
-            self,
-            __promise,
-            arg_size
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ReturnService_readData_coro(
+              self,
+              __promise,
+              arg_size
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ReturnService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
@@ -2132,15 +2174,17 @@ cdef api void call_cy_ParamService_void_ret_i16_param(
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_void_ret_i16_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_void_ret_i16_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_void_ret_byte_i16_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2152,16 +2196,18 @@ cdef api void call_cy_ParamService_void_ret_byte_i16_param(
     arg_param1 = param1
     arg_param2 = param2
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_void_ret_byte_i16_param_coro(
-            self,
-            __promise,
-            arg_param1,
-            arg_param2
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_void_ret_byte_i16_param_coro(
+              self,
+              __promise,
+              arg_param1,
+              arg_param2
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_void_ret_map_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2171,15 +2217,17 @@ cdef api void call_cy_ParamService_void_ret_map_param(
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.Map__string_i64__from_cpp(deref(param1))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_void_ret_map_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_void_ret_map_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_void_ret_map_setlist_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2191,16 +2239,18 @@ cdef api void call_cy_ParamService_void_ret_map_setlist_param(
     arg_param1 = _module_types.Map__string_i64__from_cpp(deref(param1))
     arg_param2 = _module_types.Set__List__string__from_cpp(deref(param2))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_void_ret_map_setlist_param_coro(
-            self,
-            __promise,
-            arg_param1,
-            arg_param2
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_void_ret_map_setlist_param_coro(
+              self,
+              __promise,
+              arg_param1,
+              arg_param2
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_void_ret_map_typedef_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2210,15 +2260,17 @@ cdef api void call_cy_ParamService_void_ret_map_typedef_param(
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_void_ret_map_typedef_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_void_ret_map_typedef_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_void_ret_enum_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2228,15 +2280,17 @@ cdef api void call_cy_ParamService_void_ret_enum_param(
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.MyEnumA(<int> param1)
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_void_ret_enum_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_void_ret_enum_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_void_ret_struct_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2246,15 +2300,17 @@ cdef api void call_cy_ParamService_void_ret_struct_param(
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMyStruct](param1.release()))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_void_ret_struct_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_void_ret_struct_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_void_ret_listunion_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2264,15 +2320,17 @@ cdef api void call_cy_ParamService_void_ret_listunion_param(
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.List__ComplexUnion__from_cpp(deref(param1))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_void_ret_listunion_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_void_ret_listunion_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_bool_ret_i32_i64_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2284,16 +2342,18 @@ cdef api void call_cy_ParamService_bool_ret_i32_i64_param(
     arg_param1 = param1
     arg_param2 = param2
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_bool_ret_i32_i64_param_coro(
-            self,
-            __promise,
-            arg_param1,
-            arg_param2
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_bool_ret_i32_i64_param_coro(
+              self,
+              __promise,
+              arg_param1,
+              arg_param2
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_bool_ret_map_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2303,15 +2363,17 @@ cdef api void call_cy_ParamService_bool_ret_map_param(
     cdef Promise_cbool __promise = Promise_cbool._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.Map__string_i64__from_cpp(deref(param1))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_bool_ret_map_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_bool_ret_map_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_bool_ret_union_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2321,15 +2383,17 @@ cdef api void call_cy_ParamService_bool_ret_union_param(
     cdef Promise_cbool __promise = Promise_cbool._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.ComplexUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cComplexUnion](param1.release()))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_bool_ret_union_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_bool_ret_union_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_i64_ret_float_double_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2341,16 +2405,18 @@ cdef api void call_cy_ParamService_i64_ret_float_double_param(
     arg_param1 = param1
     arg_param2 = param2
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_i64_ret_float_double_param_coro(
-            self,
-            __promise,
-            arg_param1,
-            arg_param2
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_i64_ret_float_double_param_coro(
+              self,
+              __promise,
+              arg_param1,
+              arg_param2
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_i64_ret_string_typedef_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2362,16 +2428,18 @@ cdef api void call_cy_ParamService_i64_ret_string_typedef_param(
     arg_param1 = (deref(param1)).data().decode('UTF-8')
     arg_param2 = _module_types.Set__List__List__Map__Empty_MyStruct__from_cpp(deref(param2))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_i64_ret_string_typedef_param_coro(
-            self,
-            __promise,
-            arg_param1,
-            arg_param2
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_i64_ret_string_typedef_param_coro(
+              self,
+              __promise,
+              arg_param1,
+              arg_param2
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_i64_ret_i32_i32_i32_i32_i32_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2389,19 +2457,21 @@ cdef api void call_cy_ParamService_i64_ret_i32_i32_i32_i32_i32_param(
     arg_param4 = param4
     arg_param5 = param5
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_i64_ret_i32_i32_i32_i32_i32_param_coro(
-            self,
-            __promise,
-            arg_param1,
-            arg_param2,
-            arg_param3,
-            arg_param4,
-            arg_param5
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_i64_ret_i32_i32_i32_i32_i32_param_coro(
+              self,
+              __promise,
+              arg_param1,
+              arg_param2,
+              arg_param3,
+              arg_param4,
+              arg_param5
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_double_ret_setstruct_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2411,15 +2481,17 @@ cdef api void call_cy_ParamService_double_ret_setstruct_param(
     cdef Promise_double __promise = Promise_double._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.Set__MyStruct__from_cpp(deref(param1))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_double_ret_setstruct_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_double_ret_setstruct_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_string_ret_string_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2429,15 +2501,17 @@ cdef api void call_cy_ParamService_string_ret_string_param(
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
     arg_param1 = (deref(param1)).data().decode('UTF-8')
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_string_ret_string_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_string_ret_string_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_binary_ret_binary_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2447,15 +2521,17 @@ cdef api void call_cy_ParamService_binary_ret_binary_param(
     cdef Promise_binary __promise = Promise_binary._fbthrift_create(cmove(cPromise))
     arg_param1 = (deref(param1))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_binary_ret_binary_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_binary_ret_binary_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_map_ret_bool_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2465,15 +2541,17 @@ cdef api void call_cy_ParamService_map_ret_bool_param(
     cdef Promise_cmap__string_cint64_t __promise = Promise_cmap__string_cint64_t._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_map_ret_bool_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_map_ret_bool_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_list_ret_map_setlist_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2485,16 +2563,18 @@ cdef api void call_cy_ParamService_list_ret_map_setlist_param(
     arg_param1 = _module_types.Map__i32_List__string__from_cpp(deref(param1))
     arg_param2 = _module_types.List__string__from_cpp(deref(param2))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_list_ret_map_setlist_param_coro(
-            self,
-            __promise,
-            arg_param1,
-            arg_param2
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_list_ret_map_setlist_param_coro(
+              self,
+              __promise,
+              arg_param1,
+              arg_param2
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_mapsetlistmapliststring_ret_listlistlist_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2504,15 +2584,17 @@ cdef api void call_cy_ParamService_mapsetlistmapliststring_ret_listlistlist_para
     cdef Promise_cmap__cset__vector__cint32_t_cmap__vector__cset__string_string __promise = Promise_cmap__cset__vector__cint32_t_cmap__vector__cset__string_string._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.List__List__List__List__i32__from_cpp(deref(param1))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_mapsetlistmapliststring_ret_listlistlist_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_mapsetlistmapliststring_ret_listlistlist_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_typedef_ret_i32_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2522,15 +2604,17 @@ cdef api void call_cy_ParamService_typedef_ret_i32_param(
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_typedef_ret_i32_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_typedef_ret_i32_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_listtypedef_ret_typedef_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2540,15 +2624,17 @@ cdef api void call_cy_ParamService_listtypedef_ret_typedef_param(
     cdef Promise_vector__cint32_t __promise = Promise_vector__cint32_t._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.List__Map__Empty_MyStruct__from_cpp(deref(param1))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_listtypedef_ret_typedef_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_listtypedef_ret_typedef_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_enum_ret_double_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2558,15 +2644,17 @@ cdef api void call_cy_ParamService_enum_ret_double_param(
     cdef Promise__module_cbindings_cMyEnumA __promise = Promise__module_cbindings_cMyEnumA._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_enum_ret_double_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_enum_ret_double_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_enum_ret_double_enum_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2578,16 +2666,18 @@ cdef api void call_cy_ParamService_enum_ret_double_enum_param(
     arg_param1 = param1
     arg_param2 = _module_types.MyEnumA(<int> param2)
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_enum_ret_double_enum_param_coro(
-            self,
-            __promise,
-            arg_param1,
-            arg_param2
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_enum_ret_double_enum_param_coro(
+              self,
+              __promise,
+              arg_param1,
+              arg_param2
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_listenum_ret_map_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2597,15 +2687,17 @@ cdef api void call_cy_ParamService_listenum_ret_map_param(
     cdef Promise_vector___module_cbindings_cMyEnumA __promise = Promise_vector___module_cbindings_cMyEnumA._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.Map__string_i64__from_cpp(deref(param1))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_listenum_ret_map_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_listenum_ret_map_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_struct_ret_i16_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2615,15 +2707,17 @@ cdef api void call_cy_ParamService_struct_ret_i16_param(
     cdef Promise__module_cbindings_cMyStruct __promise = Promise__module_cbindings_cMyStruct._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_struct_ret_i16_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_struct_ret_i16_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_setstruct_ret_set_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2633,15 +2727,17 @@ cdef api void call_cy_ParamService_setstruct_ret_set_param(
     cdef Promise_cset___module_cbindings_cMyStruct __promise = Promise_cset___module_cbindings_cMyStruct._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.Set__string__from_cpp(deref(param1))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_setstruct_ret_set_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_setstruct_ret_set_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_union_ret_i32_i32_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2653,16 +2749,18 @@ cdef api void call_cy_ParamService_union_ret_i32_i32_param(
     arg_param1 = param1
     arg_param2 = param2
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_union_ret_i32_i32_param_coro(
-            self,
-            __promise,
-            arg_param1,
-            arg_param2
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_union_ret_i32_i32_param_coro(
+              self,
+              __promise,
+              arg_param1,
+              arg_param2
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_listunion_string_param(
     object self,
     Cpp2RequestContext* ctx,
@@ -2672,15 +2770,17 @@ cdef api void call_cy_ParamService_listunion_string_param(
     cdef Promise_vector___module_cbindings_cComplexUnion __promise = Promise_vector___module_cbindings_cComplexUnion._fbthrift_create(cmove(cPromise))
     arg_param1 = (deref(param1)).data().decode('UTF-8')
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_listunion_string_param_coro(
-            self,
-            __promise,
-            arg_param1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_listunion_string_param_coro(
+              self,
+              __promise,
+              arg_param1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_annotatedParams(
     object self,
     Cpp2RequestContext* ctx,
@@ -2728,34 +2828,36 @@ cdef api void call_cy_ParamService_annotatedParams(
     arg_iobuf_ptr_val = _fbthrift_iobuf.from_unique_ptr(move_iobuf(deref(iobuf_ptr_val)))
     arg_struct_struct = _module_types.containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.ccontainerStruct](struct_struct.release()))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ParamService_annotatedParams_coro(
-            self,
-            __promise,
-            arg_no_annotation,
-            arg_opt_ref_type_shared,
-            arg_base_type,
-            arg_list_type,
-            arg_set_type,
-            arg_map_type,
-            arg_map_struct_type,
-            arg_iobuf_type,
-            arg_iobuf_ptr,
-            arg_list_i32_template,
-            arg_list_string_template,
-            arg_set_template,
-            arg_map_template,
-            arg_typedef_list_template,
-            arg_typedef_deque_template,
-            arg_typedef_set_template,
-            arg_typedef_map_template,
-            arg_iobuf_type_val,
-            arg_iobuf_ptr_val,
-            arg_struct_struct
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ParamService_annotatedParams_coro(
+              self,
+              __promise,
+              arg_no_annotation,
+              arg_opt_ref_type_shared,
+              arg_base_type,
+              arg_list_type,
+              arg_set_type,
+              arg_map_type,
+              arg_map_struct_type,
+              arg_iobuf_type,
+              arg_iobuf_ptr,
+              arg_list_i32_template,
+              arg_list_string_template,
+              arg_set_template,
+              arg_map_template,
+              arg_typedef_list_template,
+              arg_typedef_deque_template,
+              arg_typedef_set_template,
+              arg_typedef_map_template,
+              arg_iobuf_type_val,
+              arg_iobuf_ptr_val,
+              arg_struct_struct
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ParamService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise

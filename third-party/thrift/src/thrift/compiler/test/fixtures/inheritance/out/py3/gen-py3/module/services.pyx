@@ -205,14 +205,16 @@ cdef api void call_cy_MyRoot_do_root(
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        MyRoot_do_root_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          MyRoot_do_root_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_MyRoot_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
@@ -326,14 +328,16 @@ cdef api void call_cy_MyNode_do_mid(
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        MyNode_do_mid_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          MyNode_do_mid_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_MyNode_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
@@ -447,14 +451,16 @@ cdef api void call_cy_MyLeaf_do_leaf(
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        MyLeaf_do_leaf_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          MyLeaf_do_leaf_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_MyLeaf_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise

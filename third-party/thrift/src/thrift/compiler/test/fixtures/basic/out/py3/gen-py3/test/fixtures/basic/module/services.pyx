@@ -422,14 +422,16 @@ cdef api void call_cy_FooService_simple_rpc(
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        FooService_simple_rpc_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          FooService_simple_rpc_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_FooService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
@@ -545,15 +547,17 @@ cdef api void call_cy_FB303Service_simple_rpc(
     cdef Promise__test_fixtures_basic_module_cbindings_cReservedKeyword __promise = Promise__test_fixtures_basic_module_cbindings_cReservedKeyword._fbthrift_create(cmove(cPromise))
     arg_int_parameter = int_parameter
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        FB303Service_simple_rpc_coro(
-            self,
-            __promise,
-            arg_int_parameter
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          FB303Service_simple_rpc_coro(
+              self,
+              __promise,
+              arg_int_parameter
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_FB303Service_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
@@ -669,14 +673,16 @@ cdef api void call_cy_MyService_ping(
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        MyService_ping_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          MyService_ping_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_MyService_getRandomData(
     object self,
     Cpp2RequestContext* ctx,
@@ -684,14 +690,16 @@ cdef api void call_cy_MyService_getRandomData(
 ) noexcept:
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        MyService_getRandomData_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          MyService_getRandomData_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_MyService_sink(
     object self,
     Cpp2RequestContext* ctx,
@@ -701,15 +709,17 @@ cdef api void call_cy_MyService_sink(
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_sink = sink
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        MyService_sink_coro(
-            self,
-            __promise,
-            arg_sink
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          MyService_sink_coro(
+              self,
+              __promise,
+              arg_sink
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_MyService_putDataById(
     object self,
     Cpp2RequestContext* ctx,
@@ -721,16 +731,18 @@ cdef api void call_cy_MyService_putDataById(
     arg_id = id
     arg_data = (deref(data)).data().decode('UTF-8')
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        MyService_putDataById_coro(
-            self,
-            __promise,
-            arg_id,
-            arg_data
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          MyService_putDataById_coro(
+              self,
+              __promise,
+              arg_id,
+              arg_data
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_MyService_hasDataById(
     object self,
     Cpp2RequestContext* ctx,
@@ -740,15 +752,17 @@ cdef api void call_cy_MyService_hasDataById(
     cdef Promise_cbool __promise = Promise_cbool._fbthrift_create(cmove(cPromise))
     arg_id = id
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        MyService_hasDataById_coro(
-            self,
-            __promise,
-            arg_id
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          MyService_hasDataById_coro(
+              self,
+              __promise,
+              arg_id
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_MyService_getDataById(
     object self,
     Cpp2RequestContext* ctx,
@@ -758,15 +772,17 @@ cdef api void call_cy_MyService_getDataById(
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
     arg_id = id
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        MyService_getDataById_coro(
-            self,
-            __promise,
-            arg_id
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          MyService_getDataById_coro(
+              self,
+              __promise,
+              arg_id
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_MyService_deleteDataById(
     object self,
     Cpp2RequestContext* ctx,
@@ -776,15 +792,17 @@ cdef api void call_cy_MyService_deleteDataById(
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_id = id
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        MyService_deleteDataById_coro(
-            self,
-            __promise,
-            arg_id
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          MyService_deleteDataById_coro(
+              self,
+              __promise,
+              arg_id
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_MyService_lobDataById(
     object self,
     Cpp2RequestContext* ctx,
@@ -796,16 +814,18 @@ cdef api void call_cy_MyService_lobDataById(
     arg_id = id
     arg_data = (deref(data)).data().decode('UTF-8')
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        MyService_lobDataById_coro(
-            self,
-            __promise,
-            arg_id,
-            arg_data
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          MyService_lobDataById_coro(
+              self,
+              __promise,
+              arg_id,
+              arg_data
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_MyService_invalid_return_for_hack(
     object self,
     Cpp2RequestContext* ctx,
@@ -813,14 +833,16 @@ cdef api void call_cy_MyService_invalid_return_for_hack(
 ) noexcept:
     cdef Promise_cset__float __promise = Promise_cset__float._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        MyService_invalid_return_for_hack_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          MyService_invalid_return_for_hack_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_MyService_rpc_skipped_codegen(
     object self,
     Cpp2RequestContext* ctx,
@@ -828,14 +850,16 @@ cdef api void call_cy_MyService_rpc_skipped_codegen(
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        MyService_rpc_skipped_codegen_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          MyService_rpc_skipped_codegen_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_MyService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
@@ -1220,15 +1244,17 @@ cdef api void call_cy_DbMixedStackArguments_getDataByKey0(
     cdef Promise_binary __promise = Promise_binary._fbthrift_create(cmove(cPromise))
     arg_key = (deref(key)).data().decode('UTF-8')
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        DbMixedStackArguments_getDataByKey0_coro(
-            self,
-            __promise,
-            arg_key
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          DbMixedStackArguments_getDataByKey0_coro(
+              self,
+              __promise,
+              arg_key
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_DbMixedStackArguments_getDataByKey1(
     object self,
     Cpp2RequestContext* ctx,
@@ -1238,15 +1264,17 @@ cdef api void call_cy_DbMixedStackArguments_getDataByKey1(
     cdef Promise_binary __promise = Promise_binary._fbthrift_create(cmove(cPromise))
     arg_key = (deref(key)).data().decode('UTF-8')
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        DbMixedStackArguments_getDataByKey1_coro(
-            self,
-            __promise,
-            arg_key
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          DbMixedStackArguments_getDataByKey1_coro(
+              self,
+              __promise,
+              arg_key
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_DbMixedStackArguments_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise

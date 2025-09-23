@@ -157,15 +157,17 @@ cdef api void call_cy_ExtendTestService_check(
     cdef Promise_cbool __promise = Promise_cbool._fbthrift_create(cmove(cPromise))
     arg_struct1 = _my_namespacing_test_hsmodule_types.HsFoo._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_my_namespacing_test_hsmodule_cbindings.cHsFoo](struct1.release()))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        ExtendTestService_check_coro(
-            self,
-            __promise,
-            arg_struct1
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          ExtendTestService_check_coro(
+              self,
+              __promise,
+              arg_struct1
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_ExtendTestService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise

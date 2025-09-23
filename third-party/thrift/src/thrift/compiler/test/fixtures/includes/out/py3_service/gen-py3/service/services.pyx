@@ -159,16 +159,18 @@ cdef api void call_cy_MyService_query(
     arg_s = _module_types.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMyStruct](s.release()))
     arg_i = _includes_types.Included._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_includes_cbindings.cIncluded](i.release()))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        MyService_query_coro(
-            self,
-            __promise,
-            arg_s,
-            arg_i
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          MyService_query_coro(
+              self,
+              __promise,
+              arg_s,
+              arg_i
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_MyService_has_arg_docs(
     object self,
     Cpp2RequestContext* ctx,
@@ -180,16 +182,18 @@ cdef api void call_cy_MyService_has_arg_docs(
     arg_s = _module_types.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMyStruct](s.release()))
     arg_i = _includes_types.Included._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_includes_cbindings.cIncluded](i.release()))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        MyService_has_arg_docs_coro(
-            self,
-            __promise,
-            arg_s,
-            arg_i
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          MyService_has_arg_docs_coro(
+              self,
+              __promise,
+              arg_s,
+              arg_i
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_MyService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise

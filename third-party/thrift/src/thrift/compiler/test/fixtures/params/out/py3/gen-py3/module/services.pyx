@@ -176,15 +176,17 @@ cdef api void call_cy_NestedContainers_mapList(
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_foo = _module_types.Map__i32_List__i32__from_cpp(deref(foo))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        NestedContainers_mapList_coro(
-            self,
-            __promise,
-            arg_foo
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          NestedContainers_mapList_coro(
+              self,
+              __promise,
+              arg_foo
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_NestedContainers_mapSet(
     object self,
     Cpp2RequestContext* ctx,
@@ -194,15 +196,17 @@ cdef api void call_cy_NestedContainers_mapSet(
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_foo = _module_types.Map__i32_Set__i32__from_cpp(deref(foo))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        NestedContainers_mapSet_coro(
-            self,
-            __promise,
-            arg_foo
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          NestedContainers_mapSet_coro(
+              self,
+              __promise,
+              arg_foo
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_NestedContainers_listMap(
     object self,
     Cpp2RequestContext* ctx,
@@ -212,15 +216,17 @@ cdef api void call_cy_NestedContainers_listMap(
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_foo = _module_types.List__Map__i32_i32__from_cpp(deref(foo))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        NestedContainers_listMap_coro(
-            self,
-            __promise,
-            arg_foo
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          NestedContainers_listMap_coro(
+              self,
+              __promise,
+              arg_foo
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_NestedContainers_listSet(
     object self,
     Cpp2RequestContext* ctx,
@@ -230,15 +236,17 @@ cdef api void call_cy_NestedContainers_listSet(
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_foo = _module_types.List__Set__i32__from_cpp(deref(foo))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        NestedContainers_listSet_coro(
-            self,
-            __promise,
-            arg_foo
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          NestedContainers_listSet_coro(
+              self,
+              __promise,
+              arg_foo
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_NestedContainers_turtles(
     object self,
     Cpp2RequestContext* ctx,
@@ -248,15 +256,17 @@ cdef api void call_cy_NestedContainers_turtles(
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_foo = _module_types.List__List__Map__i32_Map__i32_Set__i32__from_cpp(deref(foo))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        NestedContainers_turtles_coro(
-            self,
-            __promise,
-            arg_foo
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          NestedContainers_turtles_coro(
+              self,
+              __promise,
+              arg_foo
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_NestedContainers_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise

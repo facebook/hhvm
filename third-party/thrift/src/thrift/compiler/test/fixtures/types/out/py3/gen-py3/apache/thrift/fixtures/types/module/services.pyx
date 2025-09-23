@@ -181,15 +181,17 @@ cdef api void call_cy_SomeService_bounce_map(
     cdef Promise__apache_thrift_fixtures_types_module_cbindings_std_unordered_map__cint32_t_string __promise = Promise__apache_thrift_fixtures_types_module_cbindings_std_unordered_map__cint32_t_string._fbthrift_create(cmove(cPromise))
     arg_m = _apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_string__from_cpp(deref(m))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        SomeService_bounce_map_coro(
-            self,
-            __promise,
-            arg_m
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          SomeService_bounce_map_coro(
+              self,
+              __promise,
+              arg_m
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_SomeService_binary_keyed_map(
     object self,
     Cpp2RequestContext* ctx,
@@ -199,15 +201,17 @@ cdef api void call_cy_SomeService_binary_keyed_map(
     cdef Promise_cmap__binary_cint64_t __promise = Promise_cmap__binary_cint64_t._fbthrift_create(cmove(cPromise))
     arg_r = _apache_thrift_fixtures_types_module_types.List__i64__from_cpp(deref(r))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        SomeService_binary_keyed_map_coro(
-            self,
-            __promise,
-            arg_r
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          SomeService_binary_keyed_map_coro(
+              self,
+              __promise,
+              arg_r
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_SomeService_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise

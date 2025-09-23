@@ -54,15 +54,17 @@ cdef api void call_cy_{{service:name}}_{{function:name}}(
         }}{{/field:type}}
     {{/function:args}}
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        {{service:name}}_{{function:name}}_coro(
-            self,
-            __promise{{#function:args}},
-            arg_{{field:py_name}}{{/function:args}}
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          {{service:name}}_{{function:name}}_coro(
+              self,
+              __promise{{#function:args}},
+              arg_{{field:py_name}}{{/function:args}}
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 {{/service:supportedFunctions}}
 {{#service:lifecycleFunctions}}
 cdef api void call_cy_{{service:name}}_{{function:name}}(

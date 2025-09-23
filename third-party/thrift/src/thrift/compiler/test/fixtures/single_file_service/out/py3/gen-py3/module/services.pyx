@@ -316,14 +316,16 @@ cdef api void call_cy_A_foo(
 ) noexcept:
     cdef Promise__module_cbindings_cFoo __promise = Promise__module_cbindings_cFoo._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        A_foo_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          A_foo_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_A_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise
@@ -439,15 +441,17 @@ cdef api void call_cy_B_bar(
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_foo = _module_types.Foo._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFoo](foo.release()))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        B_bar_coro(
-            self,
-            __promise,
-            arg_foo
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          B_bar_coro(
+              self,
+              __promise,
+              arg_foo
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_B_stream_stuff(
     object self,
     Cpp2RequestContext* ctx,
@@ -455,14 +459,16 @@ cdef api void call_cy_B_stream_stuff(
 ) noexcept:
     cdef Promise_cServerStream__cint32_t __promise = Promise_cServerStream__cint32_t._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
-    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    asyncio.get_event_loop().create_task(
-        B_stream_stuff_coro(
-            self,
-            __promise
-        )
-    )
-    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          B_stream_stuff_coro(
+              self,
+              __promise
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
 cdef api void call_cy_B_onStartServing(
     object self,
     cFollyPromise[cFollyUnit] cPromise

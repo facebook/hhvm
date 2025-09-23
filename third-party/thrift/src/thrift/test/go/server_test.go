@@ -33,8 +33,8 @@ import (
 const localConnTimeout = time.Second * 1
 const testCallString = "this is a fairly lengthy test string \\ that ' has \x20 some 东西奇怪的"
 
-// createTestHeaderServer Create and bind a test server to localhost
-func createTestHeaderServer(handler thrifttest.ThriftTest) (context.CancelFunc, net.Addr, error) {
+// createTestServer Create and bind a test server to localhost
+func createTestServer(handler thrifttest.ThriftTest) (context.CancelFunc, net.Addr, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	processor := thrifttest.NewThriftTestProcessor(handler)
 
@@ -44,7 +44,7 @@ func createTestHeaderServer(handler thrifttest.ThriftTest) (context.CancelFunc, 
 	}
 	taddr := listener.Addr()
 
-	server := thrift.NewServer(processor, listener, thrift.TransportIDHeader)
+	server := thrift.NewServer(processor, listener, thrift.TransportIDUpgradeToRocket)
 	go func(server thrift.Server) {
 		err = server.ServeContext(ctx)
 		if err != nil && !errors.Is(err, context.Canceled) {
@@ -63,8 +63,8 @@ func createTestHeaderServer(handler thrifttest.ThriftTest) (context.CancelFunc, 
 	return cancel, taddr, nil
 }
 
-// connectTestHeaderServer Create a client and connect to a test server
-func connectTestHeaderServer(
+// connectTestServer Create a client and connect to a test server
+func connectTestServer(
 	addr net.Addr,
 ) (thrifttest.ThriftTestClient, error) {
 	channel, err := thrift.NewClient(
@@ -82,11 +82,11 @@ func connectTestHeaderServer(
 
 func doClientTest(ctx context.Context, t *testing.T) {
 	handler := &testHandler{}
-	cancel, addr, err := createTestHeaderServer(handler)
+	cancel, addr, err := createTestServer(handler)
 	require.NoError(t, err)
 	defer cancel()
 
-	client, err := connectTestHeaderServer(addr)
+	client, err := connectTestServer(addr)
 	require.NoError(t, err)
 	defer client.Close()
 

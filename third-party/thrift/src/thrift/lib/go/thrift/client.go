@@ -198,7 +198,7 @@ func NewClient(opts ...ClientOption) (RequestChannel, error) {
 	}
 
 	// RocketClient (protocol) implements RequestChannel.
-	// It doesn't need to be wrapped in a SerialChannel.
+	// It doesn't need to be wrapped in a serialChannel.
 	if channel, ok := protocol.(RequestChannel); ok {
 		return channel, nil
 	}

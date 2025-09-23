@@ -20,7 +20,7 @@ package thrift
 type Protocol interface {
 	Format
 
-	// used by SerialChannel and generated thrift Clients
+	// used by serialChannel and generated thrift Clients
 	Close() error
 
 	// Deprecated

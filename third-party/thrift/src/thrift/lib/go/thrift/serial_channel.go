@@ -22,9 +22,9 @@ import (
 	"sync"
 )
 
-// SerialChannel is a simple threadsafe channel which allows for a single
+// serialChannel is a simple threadsafe channel which allows for a single
 // request-response to occur at once. Head of line blocking can occur with this channel.
-type SerialChannel struct {
+type serialChannel struct {
 	protocol Protocol
 	seqID    int32
 	lock     sync.Mutex
@@ -32,13 +32,13 @@ type SerialChannel struct {
 
 // NewSerialChannel creates a new serial channel.
 // The protocol should already be open.
-func NewSerialChannel(protocol Protocol) *SerialChannel {
-	return &SerialChannel{
+func NewSerialChannel(protocol Protocol) RequestChannel {
+	return &serialChannel{
 		protocol: protocol,
 	}
 }
 
-func (c *SerialChannel) sendMsg(ctx context.Context, method string, request WritableStruct, msgType MessageType) (int32, error) {
+func (c *serialChannel) sendMsg(ctx context.Context, method string, request WritableStruct, msgType MessageType) (int32, error) {
 	c.seqID++
 	seqID := c.seqID
 
@@ -61,8 +61,8 @@ func (c *SerialChannel) sendMsg(ctx context.Context, method string, request Writ
 	return seqID, c.protocol.Flush()
 }
 
-func (c *SerialChannel) recvMsg(ctx context.Context, method string, seqID int32, response ReadableStruct) error {
-	// TODO: Implement per-call cancellation for a SerialChannel
+func (c *serialChannel) recvMsg(ctx context.Context, method string, seqID int32, response ReadableStruct) error {
+	// TODO: Implement per-call cancellation for a serialChannel
 	recvMethod, mTypeID, msgSeqID, err := c.protocol.ReadMessageBegin()
 	if err != nil {
 		return err
@@ -104,7 +104,7 @@ func (c *SerialChannel) recvMsg(ctx context.Context, method string, seqID int32,
 }
 
 // Close closes the client connection
-func (c *SerialChannel) Close() error {
+func (c *serialChannel) Close() error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	return c.protocol.Close()
@@ -112,7 +112,7 @@ func (c *SerialChannel) Close() error {
 
 // SendRequestResponse will call the given method with the given thrift struct, and read the response
 // into the given response struct. It only allows one outstanding request at once, but is thread-safe.
-func (c *SerialChannel) SendRequestResponse(ctx context.Context, method string, request WritableStruct, response ReadableStruct) error {
+func (c *serialChannel) SendRequestResponse(ctx context.Context, method string, request WritableStruct, response ReadableStruct) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -131,7 +131,7 @@ func (c *SerialChannel) SendRequestResponse(ctx context.Context, method string, 
 
 // SendRequestNoResponse will call the given method with the given thrift struct. It returns immediately when the request is sent.
 // It only allows one outstanding request at once, but is thread-safe.
-func (c *SerialChannel) SendRequestNoResponse(ctx context.Context, method string, request WritableStruct) error {
+func (c *serialChannel) SendRequestNoResponse(ctx context.Context, method string, request WritableStruct) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -144,7 +144,7 @@ func (c *SerialChannel) SendRequestNoResponse(ctx context.Context, method string
 }
 
 // SendRequestStream performs a request-stream call.
-func (c *SerialChannel) SendRequestStream(
+func (c *serialChannel) SendRequestStream(
 	ctx context.Context,
 	method string,
 	request WritableStruct,

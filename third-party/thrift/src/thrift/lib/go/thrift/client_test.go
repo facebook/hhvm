@@ -142,7 +142,7 @@ func TestNewClientCreation(t *testing.T) {
 			}),
 		)
 		require.NoError(t, err)
-		require.IsType(t, &SerialChannel{}, channel)
+		require.IsType(t, &serialChannel{}, channel)
 		err = channel.Close()
 		require.NoError(t, err)
 	})
@@ -155,7 +155,7 @@ func TestNewClientCreation(t *testing.T) {
 			}),
 		)
 		require.NoError(t, err)
-		require.IsType(t, &SerialChannel{}, channel)
+		require.IsType(t, &serialChannel{}, channel)
 		err = channel.Close()
 		require.NoError(t, err)
 	})

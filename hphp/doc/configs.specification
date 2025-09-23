@@ -1821,8 +1821,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - uint32_t Jit.PGORelaxPercent = 100, UNKNOWN
 - uint32_t Jit.PGOCalledFuncCheckNumSpeculations = 6, UNKNOWN
-- double Jit.PGOCalledFuncCheckThreshold = 10, UNKNOWN
-- double Jit.PGOCalledFuncExitThreshold = 0.1, UNKNOWN
+- double Jit.PGOCalledFuncCheckThreshold = 0.1, UNKNOWN
+- double Jit.PGOCalledFuncExitThreshold = 0.001, UNKNOWN
 - bool Jit.PGODumpCallGraph = false, UNKNOWN
 - bool Jit.PGOOptCodeCallGraph = true, UNKNOWN
 - bool Jit.PGOHFSortPlus = false, UNKNOWN

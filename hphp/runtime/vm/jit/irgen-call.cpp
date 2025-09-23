@@ -409,7 +409,7 @@ void speculateTargetFunction(IRGS& env, SSATmp* callee,
   double probability = choices[attempts].probability / remainingProb;
   // Don't emit the check if the probability of it succeeding is below the
   // threshold.
-  if (probability * 100 < Cfg::Jit::PGOCalledFuncCheckThreshold) {
+  if (probability < Cfg::Jit::PGOCalledFuncCheckThreshold) {
     return indirectCall();
   }
 

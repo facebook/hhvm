@@ -72,7 +72,7 @@ func skipMessage(protocol Protocol) error {
 	return protocol.ReadMessageEnd()
 }
 
-func setRequestHeadersForError(protocol Protocol, err types.ApplicationExceptionIf) {
+func setRequestHeadersForError(protocol Protocol, err error) {
 	protocol.setRequestHeader("uex", errorType(err))
 	protocol.setRequestHeader("uexw", err.Error())
 }

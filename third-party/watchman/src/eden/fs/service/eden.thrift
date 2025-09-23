@@ -1654,12 +1654,15 @@ struct GetScmStatusResult {
  * only be extended with optional fields.
  */
 struct RootIdOptions {
+  // TODO(T238835643): finish filterId field deprecation
+  // DEPRECATED: Use fid instead, as it allows passing non-utf8 identifiers
+  1: optional string filterId;
   /**
    * The ID of the filter that should be applied to the supplied RootId. The
    * filter determines which entries in the repository should be hidden from
    * the working copy.
    */
-  1: optional string filterId;
+  2: optional binary fid;
 }
 
 struct GetScmStatusParams {
@@ -1774,7 +1777,10 @@ struct GetCurrentSnapshotInfoRequest {
 }
 
 struct GetCurrentSnapshotInfoResponse {
+  // TODO(T238835643): finish filterId field deprecation
+  // DEPRECATED: Use fid instead, as it allows passing non-utf8 identifiers
   1: optional string filterId;
+  2: optional binary fid;
 }
 
 struct RemoveRecursivelyParams {

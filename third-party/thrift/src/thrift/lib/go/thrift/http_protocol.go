@@ -48,7 +48,7 @@ func NewHTTPRequestChannel(url string) (RequestChannel, error) {
 	if err := p.resetProtocol(); err != nil {
 		return nil, err
 	}
-	return NewSerialChannel(p), nil
+	return newSerialChannel(p), nil
 }
 
 func (p *httpProtocol) SetTimeout(timeout time.Duration) {

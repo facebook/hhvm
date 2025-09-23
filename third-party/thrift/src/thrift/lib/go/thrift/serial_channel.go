@@ -30,9 +30,9 @@ type serialChannel struct {
 	lock     sync.Mutex
 }
 
-// NewSerialChannel creates a new serial channel.
+// newSerialChannel creates a new serial channel.
 // The protocol should already be open.
-func NewSerialChannel(protocol Protocol) RequestChannel {
+func newSerialChannel(protocol Protocol) RequestChannel {
 	return &serialChannel{
 		protocol: protocol,
 	}

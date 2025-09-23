@@ -202,5 +202,5 @@ func NewClient(opts ...ClientOption) (RequestChannel, error) {
 	if channel, ok := protocol.(RequestChannel); ok {
 		return channel, nil
 	}
-	return NewSerialChannel(protocol), nil
+	return newSerialChannel(protocol), nil
 }

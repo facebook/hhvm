@@ -64,7 +64,7 @@ func TestRocketClientClose(t *testing.T) {
 	proto, err := newRocketClient(cconn, types.ProtocolIDCompact, 0, nil)
 	require.NoError(t, err)
 
-	client := dummyif.NewDummyChannelClient(NewSerialChannel(proto))
+	client := dummyif.NewDummyChannelClient(newSerialChannel(proto))
 	result, err := client.Echo(context.TODO(), "hello")
 	require.NoError(t, err)
 	require.Equal(t, "hello", result)
@@ -99,7 +99,7 @@ func TestRocketClientUnix(t *testing.T) {
 	proto, err := newRocketClient(conn, types.ProtocolIDCompact, 0, nil)
 	require.NoError(t, err)
 
-	client := dummyif.NewDummyChannelClient(NewSerialChannel(proto))
+	client := dummyif.NewDummyChannelClient(newSerialChannel(proto))
 	defer client.Close()
 	result, err := client.Echo(context.TODO(), "hello")
 	require.NoError(t, err)

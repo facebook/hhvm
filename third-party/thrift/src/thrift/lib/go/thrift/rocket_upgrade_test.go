@@ -48,7 +48,7 @@ func TestUpgradeToRocketFallbackAgainstHeaderServer(t *testing.T) {
 	proto, err := newUpgradeToRocketClient(conn, types.ProtocolIDCompact, 0, nil)
 	require.NoError(t, err)
 
-	client := dummyif.NewDummyChannelClient(NewSerialChannel(proto))
+	client := dummyif.NewDummyChannelClient(newSerialChannel(proto))
 	defer client.Close()
 	result, err := client.Echo(context.TODO(), "hello")
 	require.NoError(t, err)
@@ -79,7 +79,7 @@ func TestUpgradeToRocketServerAgainstHeaderClient(t *testing.T) {
 	proto, err := newHeaderProtocol(conn, types.ProtocolIDCompact, 0, nil)
 	require.NoError(t, err)
 
-	client := dummyif.NewDummyChannelClient(NewSerialChannel(proto))
+	client := dummyif.NewDummyChannelClient(newSerialChannel(proto))
 	defer client.Close()
 	result, err := client.Echo(context.TODO(), "hello")
 	require.NoError(t, err)
@@ -110,7 +110,7 @@ func TestUpgradeToRocketAgainstUpgradeToRocketServer(t *testing.T) {
 	proto, err := newUpgradeToRocketClient(conn, types.ProtocolIDCompact, 0, nil)
 	require.NoError(t, err)
 
-	client := dummyif.NewDummyChannelClient(NewSerialChannel(proto))
+	client := dummyif.NewDummyChannelClient(newSerialChannel(proto))
 	defer client.Close()
 	result, err := client.Echo(context.TODO(), "hello")
 	require.NoError(t, err)

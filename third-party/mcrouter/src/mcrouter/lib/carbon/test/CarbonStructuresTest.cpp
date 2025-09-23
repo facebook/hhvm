@@ -343,7 +343,7 @@ TEST(CarbonBasic, setAndGet) {
   req.testOptionalBool_ref() = false;
   EXPECT_EQ(false, *req.testOptionalBool_ref());
   std::vector<folly::Optional<std::string>> ovec;
-  ovec.emplace_back(folly::Optional<std::string>("hello"));
+  ovec.emplace_back("hello");
 
   // optional fields
   const auto lstring = longString();
@@ -442,7 +442,7 @@ TEST(CarbonTest, serializeDeserialize) {
   outRequest.testF14ValueSet_ref()->insert("hello F14ValueSet");
   outRequest.testF14VectorSet_ref()->insert("hello F14VectorSet");
   outRequest.testOptionalBool_ref() = false;
-  outRequest.testIOBufList_ref()->emplace_back(folly::IOBuf());
+  outRequest.testIOBufList_ref()->emplace_back();
   const auto inRequest = serializeAndDeserialize(outRequest);
   expectEqTestRequest(outRequest, inRequest);
 }

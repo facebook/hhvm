@@ -274,8 +274,12 @@ class TileStreamGuard {
 
   bool hasTile() const { return (bool)tile_; }
 
-  std::chrono::steady_clock::time_point getInteractionCreationTime() const {
-    return tile_->getInteractionCreationTime();
+  std::optional<std::chrono::steady_clock::time_point>
+  getInteractionCreationTime() const {
+    if (hasTile()) {
+      return tile_->getInteractionCreationTime();
+    }
+    return std::nullopt;
   }
 
  private:

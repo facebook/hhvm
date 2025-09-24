@@ -94,14 +94,15 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
           callback->setContextStack(contextStack);
         }
 
-        auto stream = new ServerGeneratorStreamBridge(
-            callback, clientEb, std::move(contextStack));
+        auto stream =
+            new ServerGeneratorStreamBridge(callback, clientEb, contextStack);
         auto streamPtr = stream->copy();
         fromAsyncGeneratorImpl<WithHeader>(
             std::move(streamPtr),
             encode,
             std::move(gen),
-            TileStreamGuard::transferFrom(std::move(interaction)))
+            TileStreamGuard::transferFrom(std::move(interaction)),
+            contextStack)
             .scheduleOn(std::move(serverExecutor))
             .start([sp = stream->copy()](folly::Try<folly::Unit> t) {
               if (t.hasException()) {
@@ -146,7 +147,8 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
       StreamElementEncoder<T>* encode,
       folly::coro::AsyncGenerator<
           std::conditional_t<WithHeader, MessageVariant<T>, T>&&> gen,
-      TileStreamGuard interaction) {
+      TileStreamGuard interaction,
+      std::shared_ptr<ContextStack> contextStack) {
     class ReadyCallback final : public QueueConsumer {
      public:
       void consume() override { baton.post(); }
@@ -163,7 +165,7 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
       stream->serverClose();
     };
 
-    stream->notifyStreamSubscribe(interaction);
+    notifyStreamSubscribe(contextStack.get(), interaction);
 
     // ensure the generator is destroyed before the interaction TimeStreamGuard
     auto gen_ = std::move(gen);
@@ -183,19 +185,20 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
           queue.pop();
           switch (next) {
             case detail::StreamControl::CANCEL:
-              stream->notifyStreamFinally(stream->cancelSource_);
+              notifyStreamCancel(contextStack.get());
               co_return;
             case detail::StreamControl::PAUSE:
-              stream->notifyStreamPause(
+              notifyStreamPause(
+                  contextStack.get(),
                   details::STREAM_PAUSE_REASON::EXPLICIT_PAUSE);
               pauseStream = true;
               break;
             case detail::StreamControl::RESUME:
-              stream->notifyStreamResumeReceive();
+              notifyStreamResumeReceive(contextStack.get());
               pauseStream = false;
               break;
             default:
-              stream->notifyStreamCredit(next);
+              notifyStreamCredit(contextStack.get(), next);
               credits += next;
               break;
           }
@@ -210,13 +213,13 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
           co_await folly::coro::co_awaitTry(folly::coro::co_withCancellation(
               stream->cancelSource_.getToken(), gen_.next()));
       if (next.hasException()) {
-        stream->notifyStreamFinally(stream->cancelSource_, next.exception());
+        notifyStreamError(contextStack.get(), next.exception());
         stream->publish((*encode)(std::move(next.exception())));
         co_return;
       }
       if (!next->has_value()) {
         stream->publish({});
-        stream->notifyStreamFinally(stream->cancelSource_);
+        notifyStreamCompletion(contextStack.get());
         co_return;
       }
 
@@ -234,9 +237,10 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
         --credits;
       }
 
-      stream->notifyStreamNext();
+      notifyStreamNext(contextStack.get());
       if (credits == 0) {
-        stream->notifyStreamPause(details::STREAM_PAUSE_REASON::NO_CREDITS);
+        notifyStreamPause(
+            contextStack.get(), details::STREAM_PAUSE_REASON::NO_CREDITS);
       }
     }
   }
@@ -265,17 +269,6 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
 
   void processClientMessages();
 
-  // Helper methods to encapsulate ContextStack usage
-  void notifyStreamSubscribe(const TileStreamGuard& interaction);
-  void notifyStreamFinally(
-      folly::CancellationSource& cancelSource,
-      const folly::exception_wrapper& exception = {});
-  void notifyStreamPause(details::STREAM_PAUSE_REASON reason);
-  void notifyStreamResumeReceive();
-  void notifyStreamCredit(int64_t credits);
-  void notifyStreamNext();
-  void notifyStreamError(const folly::exception_wrapper& exception);
-
   StreamClientCallback* clientCallback_;
   folly::EventBase* evb_;
   std::shared_ptr<ContextStack> contextStack_;
@@ -283,6 +276,24 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
 #if FOLLY_HAS_COROUTINES
   folly::CancellationSource cancelSource_;
 #endif
+
+  //
+  // Helper methods to encapsulate ContextStack usage
+  //
+  static void notifyStreamSubscribe(
+      ContextStack* contextStack, const TileStreamGuard& interaction);
+  static void notifyStreamCancel(ContextStack* contextStack);
+  static void notifyStreamError(
+      ContextStack* contextStack, const folly::exception_wrapper& exception);
+  static void notifyStreamCompletion(ContextStack* contextStack);
+  static void notifyStreamPause(
+      ContextStack* contextStack, details::STREAM_PAUSE_REASON reason);
+  static void notifyStreamResumeReceive(ContextStack* contextStack);
+  static void notifyStreamCredit(ContextStack* contextStack, int64_t credits);
+  static void notifyStreamNext(ContextStack* contextStack);
+  //
+  // end of Helper methods to encapsulate ContextStack usage
+  //
 
   friend class test::TestProducerCallback;
 };

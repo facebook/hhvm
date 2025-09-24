@@ -132,64 +132,68 @@ void ServerGeneratorStreamBridge::close() {
   serverClose();
 }
 
+//
 // Helper methods to encapsulate ContextStack usage
-void ServerGeneratorStreamBridge::notifyStreamSubscribe(
-    const TileStreamGuard& interaction) {
-  if (contextStack_) {
-    StreamEventHandler::StreamContext streamCtx;
-    if (interaction.hasTile()) {
-      streamCtx.interactionCreationTime =
-          interaction.getInteractionCreationTime();
-    }
-    contextStack_->onStreamSubscribe(std::move(streamCtx));
+//
+/*static*/ void ServerGeneratorStreamBridge::notifyStreamSubscribe(
+    ContextStack* contextStack, const TileStreamGuard& interaction) {
+  if (contextStack) {
+    contextStack->onStreamSubscribe(
+        {.interactionCreationTime = interaction.getInteractionCreationTime()});
   }
 }
 
-void ServerGeneratorStreamBridge::notifyStreamFinally(
-    folly::CancellationSource& cancelSource,
-    const folly::exception_wrapper& exception) {
-  if (contextStack_) {
-    if (cancelSource.isCancellationRequested()) {
-      contextStack_->onStreamFinally(details::STREAM_ENDING_TYPES::CANCEL);
-    } else if (exception) {
-      contextStack_->handleStreamErrorWrapped(exception);
-      contextStack_->onStreamFinally(details::STREAM_ENDING_TYPES::ERROR);
-    } else {
-      contextStack_->onStreamFinally(details::STREAM_ENDING_TYPES::COMPLETE);
-    }
+/*static*/ void ServerGeneratorStreamBridge::notifyStreamCancel(
+    ContextStack* contextStack) {
+  if (contextStack) {
+    contextStack->onStreamFinally(details::STREAM_ENDING_TYPES::CANCEL);
   }
 }
 
-void ServerGeneratorStreamBridge::notifyStreamPause(
-    details::STREAM_PAUSE_REASON reason) {
-  if (contextStack_) {
-    contextStack_->onStreamPause(reason);
+/*static*/ void ServerGeneratorStreamBridge::notifyStreamError(
+    ContextStack* contextStack, const folly::exception_wrapper& exception) {
+  if (contextStack) {
+    contextStack->handleStreamErrorWrapped(exception);
+    contextStack->onStreamFinally(details::STREAM_ENDING_TYPES::ERROR);
   }
 }
 
-void ServerGeneratorStreamBridge::notifyStreamResumeReceive() {
-  if (contextStack_) {
-    contextStack_->onStreamResumeReceive();
+/*static*/ void ServerGeneratorStreamBridge::notifyStreamCompletion(
+    ContextStack* contextStack) {
+  if (contextStack) {
+    contextStack->onStreamFinally(details::STREAM_ENDING_TYPES::COMPLETE);
   }
 }
 
-void ServerGeneratorStreamBridge::notifyStreamCredit(int64_t credits) {
-  if (contextStack_) {
-    contextStack_->onStreamCredit(credits);
+/*static*/ void ServerGeneratorStreamBridge::notifyStreamPause(
+    ContextStack* contextStack, details::STREAM_PAUSE_REASON reason) {
+  if (contextStack) {
+    contextStack->onStreamPause(reason);
   }
 }
 
-void ServerGeneratorStreamBridge::notifyStreamNext() {
-  if (contextStack_) {
-    contextStack_->onStreamNext();
+/*static*/ void ServerGeneratorStreamBridge::notifyStreamResumeReceive(
+    ContextStack* contextStack) {
+  if (contextStack) {
+    contextStack->onStreamResumeReceive();
   }
 }
 
-void ServerGeneratorStreamBridge::notifyStreamError(
-    const folly::exception_wrapper& exception) {
-  if (contextStack_) {
-    contextStack_->handleStreamErrorWrapped(exception);
+/*static*/ void ServerGeneratorStreamBridge::notifyStreamCredit(
+    ContextStack* contextStack, int64_t credits) {
+  if (contextStack) {
+    contextStack->onStreamCredit(credits);
   }
 }
 
+/*static*/ void ServerGeneratorStreamBridge::notifyStreamNext(
+    ContextStack* contextStack) {
+  if (contextStack) {
+    contextStack->onStreamNext();
+  }
+}
+
+//
+// end of Helper methods to encapsulate ContextStack usage
+//
 } // namespace apache::thrift::detail

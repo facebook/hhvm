@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"context"
+	"math"
 	"net"
 	"time"
 
@@ -26,6 +27,7 @@ import (
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/rocket"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
+	"github.com/jjeffcaii/reactor-go/scheduler"
 	rsocket "github.com/rsocket/rsocket-go"
 	"github.com/rsocket/rsocket-go/core/transport"
 	"github.com/rsocket/rsocket-go/payload"
@@ -64,13 +66,18 @@ type rsocketClient struct {
 	client rsocket.Client
 	conn   net.Conn
 
+	clientScheduler scheduler.Scheduler
+
 	initGroup singleflight.Group
 
 	useZstd bool
 }
 
 func newRSocketClient(conn net.Conn) RSocketClient {
-	return &rsocketClient{conn: conn}
+	return &rsocketClient{
+		conn:            conn,
+		clientScheduler: scheduler.NewElastic(math.MaxInt32),
+	}
 }
 
 func (r *rsocketClient) SendSetup(_ context.Context) error {
@@ -98,6 +105,7 @@ func (r *rsocketClient) SendSetup(_ context.Context) error {
 		clientBuilder := rsocket.Connect().
 			KeepAlive(time.Millisecond*30000, time.Millisecond*3600000, 1).
 			MetadataMimeType(rocket.RocketMetadataCompactMimeType).
+			Scheduler(r.clientScheduler, r.clientScheduler).
 			SetupPayload(setupPayload).
 			OnClose(func(error) {})
 
@@ -256,6 +264,7 @@ func (r *rsocketClient) RequestStream(
 }
 
 func (r *rsocketClient) Close() error {
+	defer r.clientScheduler.Close()
 	if r.client != nil {
 		return r.client.Close()
 	}

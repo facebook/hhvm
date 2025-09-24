@@ -113,69 +113,76 @@ let where_constraint env (ty1, ck, ty2) =
 (* Functions building the types for the parameters of a function *)
 (* It's not completely trivial because of optional arguments  *)
 
-let check_params ~from_abstract_method env paraml =
-  (* We wish to give an error on the first non-default parameter
-     after a default parameter. That is:
-     function foo(int $x, ?int $y = null, int $z)
-     is an error on $z. *)
-  (* TODO: This check doesn't need to be done at type checking time; it is
-     entirely syntactic. When we switch over to the FFP, remove this code. *)
-  let rec loop seen_default (acc : Typing_error.t list) paraml =
-    match paraml with
-    | [] -> acc
-    | param :: rl ->
+(** Check for `optional` keyword where it isn't allowed. Example: `function foo(optional int $x): void {}` (should be a default arg instead) *)
+let check_params_for_bad_optional_keyword ~from_abstract_method env paraml :
+    Typing_error.t list =
+  List.filter_map paraml ~f:(fun param ->
       let is_optional_not_default =
         Aast_utils.is_param_optional param
         && Option.is_none (Aast_utils.get_param_default param)
       in
-      let acc =
-        if is_optional_not_default then
-          if
-            not
-              (TypecheckerOptions.enable_abstract_method_optional_parameters
-                 (Decl_env.tcopt env))
-          then
+      if is_optional_not_default then
+        if
+          not
+            (TypecheckerOptions.enable_abstract_method_optional_parameters
+               (Decl_env.tcopt env))
+        then
+          Some
             Typing_error.(
               primary
               @@ Primary.Optional_parameter_not_supported param.param_pos)
-            :: acc
-          else if not from_abstract_method then
+        else if not from_abstract_method then
+          Some
             Typing_error.(
               primary @@ Primary.Optional_parameter_not_abstract param.param_pos)
-            :: acc
-          else
-            acc
         else
-          acc
-      in
-      (* Assume that a variadic parameter is the last one we need
-            to check. We've already given a parse error if the variadic
-            parameter is not last. *)
-      if Aast_utils.is_param_variadic param then
-        acc
+          None
       else
+        None)
+
+(** Required parameters must not come before optional parameters.
+    For example: function foo(int $x, ?int $y = null, int $z)
+    produces an error for parameter $z *)
+let check_params_for_required_after_optional ~from_abstract_method paraml :
+    Typing_error.t option =
+  let open struct
+    type ('a, 'b) t =
+      | Init
+      | Seen_optional_or_default
+      | Found_required_after_optional_or_default of ('a, 'b) Aast_defs.fun_param
+  end in
+  let res =
+    List.fold paraml ~init:Init ~f:(fun state param : _ t ->
         let is_optional_or_default =
           Option.is_some (Aast_utils.get_param_default param)
-          || is_optional_not_default
+          || Aast_utils.is_param_optional param
         in
-        let acc =
-          if seen_default && not is_optional_or_default then
-            Typing_error.(
-              primary
-              @@
-              if from_abstract_method then
-                Primary.Previous_default_or_optional param.param_pos
-              else
-                Primary.Previous_default param.param_pos)
-            :: acc
-          else
-            acc
-        in
-        (* We've seen at least one required parameter, and there's an
-            optional parameter after it.  Given an error, and then stop looking
-            for more errors in this parameter list. *)
-        loop is_optional_or_default acc rl
+        match state with
+        | Init when is_optional_or_default -> Seen_optional_or_default
+        | Init -> Init
+        | Seen_optional_or_default
+          when is_optional_or_default || Aast_utils.is_param_variadic param ->
+          Seen_optional_or_default
+        | Seen_optional_or_default ->
+          Found_required_after_optional_or_default param
+        | Found_required_after_optional_or_default _ -> state)
   in
-  loop false [] paraml
+  match res with
+  | Init
+  | Seen_optional_or_default ->
+    None
+  | Found_required_after_optional_or_default param when from_abstract_method ->
+    Some
+      Typing_error.(
+        primary @@ Primary.Previous_default_or_optional param.param_pos)
+  | Found_required_after_optional_or_default param ->
+    Some Typing_error.(primary @@ Primary.Previous_default param.param_pos)
+
+let check_params ~from_abstract_method env paraml : Typing_error.t list =
+  let err =
+    check_params_for_required_after_optional ~from_abstract_method paraml
+  in
+  Option.to_list err
+  @ check_params_for_bad_optional_keyword ~from_abstract_method env paraml
 
 let make_params env paraml = List.map paraml ~f:(make_param_ty env)

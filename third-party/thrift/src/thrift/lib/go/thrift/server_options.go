@@ -42,27 +42,25 @@ type ConnContextFunc func(context.Context, net.Conn) context.Context
 
 // serverOptions is options needed to run a thrift server
 type serverOptions struct {
-	pipeliningEnabled bool
-	numWorkers        int
-	log               func(format string, args ...any)
-	connContext       ConnContextFunc
-	serverStats       *stats.ServerStats
-	processorStats    map[string]*stats.TimingSeries
-	serverObserver    ServerObserver
-	maxRequests       int64
+	numWorkers     int
+	log            func(format string, args ...any)
+	connContext    ConnContextFunc
+	serverStats    *stats.ServerStats
+	processorStats map[string]*stats.TimingSeries
+	serverObserver ServerObserver
+	maxRequests    int64
 }
 
 func defaultServerOptions() *serverOptions {
 	logger := log.New(os.Stderr, "", log.LstdFlags)
 	return &serverOptions{
-		pipeliningEnabled: true,
-		numWorkers:        GoroutinePerRequest,
-		log:               logger.Printf,
-		connContext:       WithConnInfo,
-		processorStats:    make(map[string]*stats.TimingSeries),
-		serverStats:       stats.NewServerStats(stats.NewTimingConfig(defaultStatsPeriod), defaultStatsPeriod),
-		serverObserver:    newNoopServerObserver(),
-		maxRequests:       0, // disable
+		numWorkers:     GoroutinePerRequest,
+		log:            logger.Printf,
+		connContext:    WithConnInfo,
+		processorStats: make(map[string]*stats.TimingSeries),
+		serverStats:    stats.NewServerStats(stats.NewTimingConfig(defaultStatsPeriod), defaultStatsPeriod),
+		serverObserver: newNoopServerObserver(),
+		maxRequests:    0, // disable
 	}
 }
 
@@ -72,13 +70,6 @@ func newServerOptions(options ...ServerOption) *serverOptions {
 		option(opts)
 	}
 	return opts
-}
-
-// WithoutPipelining disables pipelining for the thrift server.
-func WithoutPipelining() ServerOption {
-	return func(server *serverOptions) {
-		server.pipeliningEnabled = false
-	}
 }
 
 // WithNumWorkers sets the number of concurrent workers for the thrift server.

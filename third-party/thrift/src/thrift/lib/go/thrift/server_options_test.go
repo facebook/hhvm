@@ -46,14 +46,6 @@ func TestListenerALPNOptions(t *testing.T) {
 	}
 }
 
-func TestWithoutPipelining(t *testing.T) {
-	defaultOptions := newServerOptions()
-	require.True(t, defaultOptions.pipeliningEnabled)
-
-	customOptions := newServerOptions(WithoutPipelining())
-	require.False(t, customOptions.pipeliningEnabled)
-}
-
 func TestWithNumWorkers(t *testing.T) {
 	defaultOptions := newServerOptions()
 	require.Equal(t, GoroutinePerRequest, defaultOptions.numWorkers)

@@ -13,7 +13,6 @@
 #include <ostream>
 #include <proxygen/lib/http/structuredheaders/StructuredHeadersConstants.h>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 namespace proxygen {

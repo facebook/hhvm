@@ -1205,18 +1205,24 @@ Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
   return ret;
 }
 
-Array HHVM_FUNCTION(openssl_csr_get_dns_names, const Variant& csr) {
-  auto pcsr = CSRequest::Get(csr);
-  if (!pcsr) throw_openssl_exception("Could not parse CSR");
-  auto ret = Array::CreateVec();
-  STACK_OF(X509_EXTENSION) *csr_exts = X509_REQ_get_extensions(pcsr->csr());
-  if (!csr_exts) return ret;
-  STACK_OF(GENERAL_NAME) *subject_alt_names = (STACK_OF(GENERAL_NAME) *)X509V3_get_d2i(
+STACK_OF(GENERAL_NAME) *openssl_csr_get_subject_alt_names(X509_REQ *csr) {
+  if (!csr) return nullptr;
+  STACK_OF(X509_EXTENSION) *csr_exts = X509_REQ_get_extensions(csr);
+  if (!csr_exts) return nullptr;
+  return (STACK_OF(GENERAL_NAME) *)X509V3_get_d2i(
     csr_exts,
     NID_subject_alt_name,
     NULL,
     NULL // at least once
   );
+}
+
+
+Array HHVM_FUNCTION(openssl_csr_get_dns_names, const Variant& csr) {
+  auto pcsr = CSRequest::Get(csr);
+  if (!pcsr) throw_openssl_exception("Could not parse CSR");
+  auto ret = Array::CreateVec();
+  auto *subject_alt_names = openssl_csr_get_subject_alt_names(pcsr->csr());
   if (!subject_alt_names) return ret;
   // get DNS names from SANs
   for (int i = 0; i < sk_GENERAL_NAME_num(subject_alt_names); i++){
@@ -1229,6 +1235,31 @@ Array HHVM_FUNCTION(openssl_csr_get_dns_names, const Variant& csr) {
     }
   }
   return ret;
+}
+
+String HHVM_FUNCTION(openssl_csr_get_upn, const Variant& csr) {
+  auto pcsr = CSRequest::Get(csr);
+  if (!pcsr) throw_openssl_exception("Could not parse CSR");
+  auto *subject_alt_names = openssl_csr_get_subject_alt_names(pcsr->csr());
+  if (!subject_alt_names) throw_openssl_exception("CSR contains no SANs");
+  // loop through all the SANs
+  for (int i = 0; i < sk_GENERAL_NAME_num(subject_alt_names); i++){
+    const GENERAL_NAME *general_name = sk_GENERAL_NAME_value(subject_alt_names, i);
+    if (!general_name) continue;
+    ASN1_OBJECT *oid = NULL;
+    ASN1_TYPE *value = NULL;
+    // seek an otherName
+    if(!GENERAL_NAME_get0_otherName(general_name, &oid, &value)) continue;
+    // compare its OID to MS UPN
+    if (OBJ_obj2nid(oid) != NID_ms_upn) continue;
+    // get the utf8string from the UPN
+    if(ASN1_TYPE_get(value) == V_ASN1_UTF8STRING) {
+      ASN1_UTF8STRING *upn = value->value.utf8string;
+      if (!upn || !upn->data) continue;
+      return String((char *)upn->data, upn->length, CopyString);
+    }  
+  }
+  throw_openssl_exception("No valid UPNs in CSR");
 }
 
 Variant HHVM_FUNCTION(openssl_error_string) {
@@ -3452,6 +3483,7 @@ struct opensslExtension final : Extension {
     HHVM_FE(openssl_csr_get_public_key);
     HHVM_FE(openssl_csr_get_subject);
     HHVM_FE(openssl_csr_get_dns_names);
+    HHVM_FE(openssl_csr_get_upn);
     HHVM_FE(openssl_csr_new);
     HHVM_FE(openssl_csr_sign);
     HHVM_FE(openssl_error_string);

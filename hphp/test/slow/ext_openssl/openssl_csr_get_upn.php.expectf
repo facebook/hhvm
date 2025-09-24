@@ -1,0 +1,6 @@
+string(16) "mslavin@meta.com"
+string(16) "mslavin@meta.com"
+No valid UPNs in CSR
+
+Warning: cannot get CSR in %s/test/slow/ext_openssl/openssl_csr_get_upn.php on line %d
+Could not parse CSR

@@ -332,6 +332,21 @@ struct ComplexStruct {
   67: NestedMap var12;
 }
 
+union ComplexUnion {
+  1: Empty var1;
+  2: SmallInt var2;
+  4: BigInt var3;
+  7: SmallString var4;
+  11: BigString var5;
+  16: Mixed var6;
+  22: SmallListInt var7;
+  29: BigListInt var8;
+  37: LargeListMixed var9;
+  46: LargeMapInt var10;
+  56: LargeMixed var11;
+  67: NestedMap var12;
+}
+
 @cpp.UseOpEncode
 struct OpEmpty {}
 
@@ -356,6 +371,16 @@ struct OpBigString {
 }
 
 @cpp.UseOpEncode
+struct OpBigBinary {
+  1: IOBuf bin;
+}
+
+@cpp.UseOpEncode
+struct OpLargeBinary {
+  1: IOBuf bin;
+}
+
+@cpp.UseOpEncode
 struct OpMixed {
   1: i32 int32;
   2: i64 int64;
@@ -369,8 +394,33 @@ struct OpSmallListInt {
 }
 
 @cpp.UseOpEncode
+struct OpBigListByte {
+  1: list<byte> lst;
+}
+
+@cpp.UseOpEncode
+struct OpBigListShort {
+  1: list<i16> lst;
+}
+
+@cpp.UseOpEncode
 struct OpBigListInt {
   1: list<i32> lst;
+}
+
+@cpp.UseOpEncode
+struct OpBigListBigInt {
+  1: list<i64> lst;
+}
+
+@cpp.UseOpEncode
+struct OpBigListFloat {
+  1: list<float> lst;
+}
+
+@cpp.UseOpEncode
+struct OpBigListDouble {
+  1: list<double> lst;
 }
 
 @cpp.UseOpEncode
@@ -420,6 +470,11 @@ struct OpLargeUnorderedMapMixed {
 struct OpLargeSortedVecMapMixed {
   @cpp.Type{template = "folly::sorted_vector_map"}
   1: map<i32, OpMixed> m;
+}
+
+@cpp.UseOpEncode
+struct OpNestedMapRaw {
+  1: map<i32, map<i32, map<i32, map<i32, map<i32, i32>>>>> m;
 }
 
 @cpp.UseOpEncode
@@ -615,6 +670,22 @@ struct OpBigListMixedInt {
 
 @cpp.UseOpEncode
 struct OpComplexStruct {
+  1: OpEmpty var1;
+  2: OpSmallInt var2;
+  4: OpBigInt var3;
+  7: OpSmallString var4;
+  11: OpBigString var5;
+  16: OpMixed var6;
+  22: OpSmallListInt var7;
+  29: OpBigListInt var8;
+  37: OpLargeListMixed var9;
+  46: OpLargeMapInt var10;
+  56: OpLargeMixed var11;
+  67: OpNestedMap var12;
+}
+
+@cpp.UseOpEncode
+union OpComplexUnion {
   1: OpEmpty var1;
   2: OpSmallInt var2;
   4: OpBigInt var3;

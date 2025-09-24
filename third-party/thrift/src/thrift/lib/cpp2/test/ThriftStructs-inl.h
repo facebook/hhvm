@@ -102,10 +102,29 @@ inline thrift::benchmark::BigBinary create<thrift::benchmark::BigBinary>() {
 }
 
 template <>
+inline thrift::benchmark::OpBigBinary create<thrift::benchmark::OpBigBinary>() {
+  auto buf = folly::IOBuf::create(10'000);
+  buf->append(10'000);
+  thrift::benchmark::OpBigBinary d;
+  d.bin() = std::move(buf);
+  return d;
+}
+
+template <>
 inline thrift::benchmark::LargeBinary create<thrift::benchmark::LargeBinary>() {
   auto buf = folly::IOBuf::create(10'000'000);
   buf->append(10'000'000);
   thrift::benchmark::LargeBinary d;
+  d.bin() = std::move(buf);
+  return d;
+}
+
+template <>
+inline thrift::benchmark::OpLargeBinary
+create<thrift::benchmark::OpLargeBinary>() {
+  auto buf = folly::IOBuf::create(10'000'000);
+  buf->append(10'000'000);
+  thrift::benchmark::OpLargeBinary d;
   d.bin() = std::move(buf);
   return d;
 }
@@ -159,9 +178,21 @@ inline thrift::benchmark::BigListByte create<thrift::benchmark::BigListByte>() {
 }
 
 template <>
+inline thrift::benchmark::OpBigListByte
+create<thrift::benchmark::OpBigListByte>() {
+  return createList<thrift::benchmark::OpBigListByte>(10000);
+}
+
+template <>
 inline thrift::benchmark::BigListShort
 create<thrift::benchmark::BigListShort>() {
   return createList<thrift::benchmark::BigListShort>(10000);
+}
+
+template <>
+inline thrift::benchmark::OpBigListShort
+create<thrift::benchmark::OpBigListShort>() {
+  return createList<thrift::benchmark::OpBigListShort>(10000);
 }
 
 template <>
@@ -180,15 +211,35 @@ inline thrift::benchmark::BigListBigInt
 create<thrift::benchmark::BigListBigInt>() {
   return createList<thrift::benchmark::BigListBigInt>(10000);
 }
+
+template <>
+inline thrift::benchmark::OpBigListBigInt
+create<thrift::benchmark::OpBigListBigInt>() {
+  return createList<thrift::benchmark::OpBigListBigInt>(10000);
+}
+
 template <>
 inline thrift::benchmark::BigListFloat
 create<thrift::benchmark::BigListFloat>() {
   return createList<thrift::benchmark::BigListFloat>(10000);
 }
+
+template <>
+inline thrift::benchmark::OpBigListFloat
+create<thrift::benchmark::OpBigListFloat>() {
+  return createList<thrift::benchmark::OpBigListFloat>(10000);
+}
+
 template <>
 inline thrift::benchmark::BigListDouble
 create<thrift::benchmark::BigListDouble>() {
   return createList<thrift::benchmark::BigListDouble>(10000);
+}
+
+template <>
+inline thrift::benchmark::OpBigListDouble
+create<thrift::benchmark::OpBigListDouble>() {
+  return createList<thrift::benchmark::OpBigListDouble>(10000);
 }
 
 template <>
@@ -365,9 +416,29 @@ create<thrift::benchmark::NestedMapRaw>() {
 }
 
 template <>
+inline thrift::benchmark::OpNestedMapRaw
+create<thrift::benchmark::OpNestedMapRaw>() {
+  thrift::benchmark::OpNestedMapRaw map;
+  populateMap([&](int i, int j, int k, int l, int m, int v) {
+    map.m()[i][j][k][l][m] = v;
+  });
+  return map;
+}
+
+template <>
 inline thrift::benchmark::SortedVecNestedMapRaw
 create<thrift::benchmark::SortedVecNestedMapRaw>() {
   thrift::benchmark::SortedVecNestedMapRaw map;
+  populateMap([&](int i, int j, int k, int l, int m, int v) {
+    map.m()[i][j][k][l][m] = v;
+  });
+  return map;
+}
+
+template <>
+inline thrift::benchmark::OpSortedVecNestedMapRaw
+create<thrift::benchmark::OpSortedVecNestedMapRaw>() {
+  thrift::benchmark::OpSortedVecNestedMapRaw map;
   populateMap([&](int i, int j, int k, int l, int m, int v) {
     map.m()[i][j][k][l][m] = v;
   });
@@ -607,5 +678,21 @@ create<thrift::benchmark::OpComplexStruct>() {
   d.var10() = create<thrift::benchmark::OpLargeMapInt>();
   d.var11() = create<thrift::benchmark::OpLargeMixed>();
   d.var12() = create<thrift::benchmark::OpNestedMap>();
+  return d;
+}
+
+template <>
+inline thrift::benchmark::ComplexUnion
+create<thrift::benchmark::ComplexUnion>() {
+  thrift::benchmark::ComplexUnion d;
+  d.var6_ref() = create<thrift::benchmark::Mixed>();
+  return d;
+}
+
+template <>
+inline thrift::benchmark::OpComplexUnion
+create<thrift::benchmark::OpComplexUnion>() {
+  thrift::benchmark::OpComplexUnion d;
+  d.var6_ref() = create<thrift::benchmark::OpMixed>();
   return d;
 }

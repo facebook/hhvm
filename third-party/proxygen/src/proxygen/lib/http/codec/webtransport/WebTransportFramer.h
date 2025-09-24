@@ -28,7 +28,8 @@ enum class CapsuleType : uint32_t {
   WT_MAX_STREAMS_UNI = 0x190B4D40,
   WT_DATA_BLOCKED = 0x190B4D41,
   WT_STREAM_DATA_BLOCKED = 0x190B4D42,
-  WT_STREAMS_BLOCKED = 0x190B4D43,
+  WT_STREAMS_BLOCKED_BIDI = 0x190B4D43,
+  WT_STREAMS_BLOCKED_UNI = 0x190B4D44,
   DATAGRAM = 0x00,
   CLOSE_WEBTRANSPORT_SESSION = 0x190B4D45,
   DRAIN_WEBTRANSPORT_SESSION = 0x190B4D46
@@ -157,7 +158,8 @@ WriteResult writeWTDataBlocked(folly::IOBufQueue& queue,
 WriteResult writeWTStreamDataBlocked(folly::IOBufQueue& queue,
                                      const WTStreamDataBlockedCapsule& capsule);
 WriteResult writeWTStreamsBlocked(folly::IOBufQueue& queue,
-                                  const WTStreamsBlockedCapsule& capsule);
+                                  const WTStreamsBlockedCapsule& capsule,
+                                  bool isBidi);
 WriteResult writeDatagram(folly::IOBufQueue& queue,
                           const DatagramCapsule& capsule);
 WriteResult writeCloseWebTransportSession(

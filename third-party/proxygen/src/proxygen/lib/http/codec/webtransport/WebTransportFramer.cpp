@@ -456,15 +456,17 @@ WriteResult writeWTStreamDataBlocked(
 }
 
 WriteResult writeWTStreamsBlocked(folly::IOBufQueue& queue,
-                                  const WTStreamsBlockedCapsule& capsule) {
+                                  const WTStreamsBlockedCapsule& capsule,
+                                  bool isBidi) {
   size_t size = 0;
   bool error = false;
   auto capsuleLen = getCapsuleSize<1, 0>({capsule.maximumStreams}, {});
   if (capsuleLen.hasError()) {
     return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
   }
-  writeCapsuleHeader(
-      queue, CapsuleType::WT_STREAMS_BLOCKED, size, error, capsuleLen.value());
+  auto type = isBidi ? CapsuleType::WT_STREAMS_BLOCKED_BIDI
+                     : CapsuleType::WT_STREAMS_BLOCKED_UNI;
+  writeCapsuleHeader(queue, type, size, error, capsuleLen.value());
   writeVarint(queue, capsule.maximumStreams, size, error);
   if (error) {
     return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);

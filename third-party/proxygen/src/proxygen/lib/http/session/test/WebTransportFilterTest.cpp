@@ -51,7 +51,11 @@ class MockWebTransportFilter : public WebTransportFilter {
               (WTStreamDataBlockedCapsule),
               (override));
   MOCK_METHOD(void,
-              onWTStreamsBlockedCapsule,
+              onWTStreamsBlockedBidiCapsule,
+              (WTStreamsBlockedCapsule),
+              (override));
+  MOCK_METHOD(void,
+              onWTStreamsBlockedUniCapsule,
               (WTStreamsBlockedCapsule),
               (override));
   MOCK_METHOD(void, onDatagramCapsule, (DatagramCapsule), (override));

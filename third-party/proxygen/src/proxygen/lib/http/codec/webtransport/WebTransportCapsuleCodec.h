@@ -32,7 +32,10 @@ class WebTransportCapsuleCodec : public CapsuleCodec {
     virtual void onWTDataBlockedCapsule(WTDataBlockedCapsule capsule) = 0;
     virtual void onWTStreamDataBlockedCapsule(
         WTStreamDataBlockedCapsule capsule) = 0;
-    virtual void onWTStreamsBlockedCapsule(WTStreamsBlockedCapsule capsule) = 0;
+    virtual void onWTStreamsBlockedBidiCapsule(
+        WTStreamsBlockedCapsule capsule) = 0;
+    virtual void onWTStreamsBlockedUniCapsule(
+        WTStreamsBlockedCapsule capsule) = 0;
     virtual void onDatagramCapsule(DatagramCapsule capsule) = 0;
     virtual void onCloseWebTransportSessionCapsule(
         CloseWebTransportSessionCapsule capsule) = 0;
@@ -59,7 +62,8 @@ class WebTransportCapsuleCodec : public CapsuleCodec {
       case folly::to_underlying(CapsuleType::WT_MAX_STREAMS_BIDI):
       case folly::to_underlying(CapsuleType::WT_MAX_STREAMS_UNI):
       case folly::to_underlying(CapsuleType::WT_DATA_BLOCKED):
-      case folly::to_underlying(CapsuleType::WT_STREAMS_BLOCKED):
+      case folly::to_underlying(CapsuleType::WT_STREAMS_BLOCKED_BIDI):
+      case folly::to_underlying(CapsuleType::WT_STREAMS_BLOCKED_UNI):
       case folly::to_underlying(CapsuleType::CLOSE_WEBTRANSPORT_SESSION):
       case folly::to_underlying(CapsuleType::DRAIN_WEBTRANSPORT_SESSION):
         return true;

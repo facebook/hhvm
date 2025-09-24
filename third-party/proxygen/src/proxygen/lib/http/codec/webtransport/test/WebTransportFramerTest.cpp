@@ -555,12 +555,12 @@ TEST(WebTransportFramerTest, WTStreamDataBlockedCapsuleSizeError) {
 TEST(WebTransportFramerTest, WTStreamsBlocked) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTStreamsBlockedCapsule capsule{100};
-  auto writeRes = writeWTStreamsBlocked(queue, capsule);
+  auto writeRes = writeWTStreamsBlocked(queue, capsule, true);
   ASSERT_TRUE(writeRes.hasValue());
   auto buf = queue.move();
   auto cursor = folly::io::Cursor(buf.get());
   auto payloadLen = parseCapsuleHeader(
-      cursor, static_cast<uint64_t>(CapsuleType::WT_STREAMS_BLOCKED));
+      cursor, static_cast<uint64_t>(CapsuleType::WT_STREAMS_BLOCKED_BIDI));
 
   auto parsedCapsule = parseWTStreamsBlocked(cursor, payloadLen);
   ASSERT_TRUE(parsedCapsule.hasValue());
@@ -570,14 +570,14 @@ TEST(WebTransportFramerTest, WTStreamsBlocked) {
 TEST(WebTransportFramerTest, WTStreamsBlockedError) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTStreamsBlockedCapsule capsule{100};
-  auto writeRes = writeWTStreamsBlocked(queue, capsule);
+  auto writeRes = writeWTStreamsBlocked(queue, capsule, true);
   ASSERT_TRUE(writeRes.hasValue());
   auto buf = queue.move();
   // hack buf so that maximumStreams (2 bytes) is empty
   buf->trimEnd(2);
   auto cursor = folly::io::Cursor(buf.get());
   auto payloadLen = parseCapsuleHeader(
-      cursor, static_cast<uint64_t>(CapsuleType::WT_STREAMS_BLOCKED));
+      cursor, static_cast<uint64_t>(CapsuleType::WT_STREAMS_BLOCKED_BIDI));
 
   auto parsedCapsule = parseWTStreamsBlocked(cursor, payloadLen);
   ASSERT_TRUE(parsedCapsule.hasError());
@@ -587,7 +587,47 @@ TEST(WebTransportFramerTest, WTStreamsBlockedError) {
 TEST(WebTransportFramerTest, WTStreamsBlockedCapsuleSizeError) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTStreamsBlockedCapsule capsule{std::numeric_limits<uint64_t>::max()};
-  auto writeRes = writeWTStreamsBlocked(queue, capsule);
+  auto writeRes = writeWTStreamsBlocked(queue, capsule, true);
+  ASSERT_FALSE(writeRes.hasValue());
+  EXPECT_EQ(writeRes.error(), quic::TransportErrorCode::INTERNAL_ERROR);
+}
+
+TEST(WebTransportFramerTest, WTStreamsBlockedUni) {
+  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+  WTStreamsBlockedCapsule capsule{100};
+  auto writeRes = writeWTStreamsBlocked(queue, capsule, false);
+  ASSERT_TRUE(writeRes.hasValue());
+  auto buf = queue.move();
+  auto cursor = folly::io::Cursor(buf.get());
+  auto payloadLen = parseCapsuleHeader(
+      cursor, static_cast<uint64_t>(CapsuleType::WT_STREAMS_BLOCKED_UNI));
+
+  auto parsedCapsule = parseWTStreamsBlocked(cursor, payloadLen);
+  ASSERT_TRUE(parsedCapsule.hasValue());
+  ASSERT_EQ(parsedCapsule->maximumStreams, capsule.maximumStreams);
+}
+
+TEST(WebTransportFramerTest, WTStreamsBlockedUniError) {
+  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+  WTStreamsBlockedCapsule capsule{100};
+  auto writeRes = writeWTStreamsBlocked(queue, capsule, false);
+  ASSERT_TRUE(writeRes.hasValue());
+  auto buf = queue.move();
+  // hack buf so that maximumStreams (2 bytes) is empty
+  buf->trimEnd(2);
+  auto cursor = folly::io::Cursor(buf.get());
+  auto payloadLen = parseCapsuleHeader(
+      cursor, static_cast<uint64_t>(CapsuleType::WT_STREAMS_BLOCKED_UNI));
+
+  auto parsedCapsule = parseWTStreamsBlocked(cursor, payloadLen);
+  ASSERT_TRUE(parsedCapsule.hasError());
+  EXPECT_EQ(parsedCapsule.error(), CapsuleCodec::ErrorCode::PARSE_UNDERFLOW);
+}
+
+TEST(WebTransportFramerTest, WTStreamsBlockedUniCapsuleSizeError) {
+  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+  WTStreamsBlockedCapsule capsule{std::numeric_limits<uint64_t>::max()};
+  auto writeRes = writeWTStreamsBlocked(queue, capsule, false);
   ASSERT_FALSE(writeRes.hasValue());
   EXPECT_EQ(writeRes.error(), quic::TransportErrorCode::INTERNAL_ERROR);
 }

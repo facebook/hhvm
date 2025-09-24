@@ -75,6 +75,12 @@ class BaseStats {
   };
 
   class LazyQuantileStatWrapper {
+   private:
+    inline size_t getNumCountersCreated() {
+      return statWrapperInfo_->quantiles.size() *
+             statWrapperInfo_->slidingWindowPeriods.size();
+    }
+
    public:
     explicit LazyQuantileStatWrapper(
         folly::StringPiece name,
@@ -107,6 +113,8 @@ class BaseStats {
               .stats = std::move(statsVec),
               .quantiles = std::move(quantilesVec),
               .slidingWindowPeriods = std::move(slidingWindowPeriodsVec)});
+
+      numCountersSaved_.incrementValue(getNumCountersCreated());
     }
 
     void addValue(double value) {
@@ -117,6 +125,8 @@ class BaseStats {
                 statWrapperInfo_->stats,
                 statWrapperInfo_->quantiles,
                 statWrapperInfo_->slidingWindowPeriods);
+        numCountersSaved_.incrementValue(static_cast<size_t>(-1) *
+                                         getNumCountersCreated());
         statWrapperInfo_.reset();
       });
       statWrapper_->addValue(value);
@@ -135,6 +145,10 @@ class BaseStats {
     folly::once_flag initQuantileStatFlag;
     std::unique_ptr<QuantileStatWrapperInfo> statWrapperInfo_;
     std::unique_ptr<facebook::fb303::detail::QuantileStatWrapper> statWrapper_;
+    // Keep track of the number of times we have saved a counter by using the
+    // lazy behavior
+    static inline TLCounter numCountersSaved_{
+        "num_counters_saved_with_lazy_quantile_stat"};
   };
 
   using TLHistogram = facebook::fb303::MinuteOnlyHistogram;

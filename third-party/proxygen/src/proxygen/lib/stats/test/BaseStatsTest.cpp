@@ -32,6 +32,10 @@ class TestLazyQuantileStatWrapper : public BaseStats::LazyQuantileStatWrapper {
   bool metadataExists() {
     return statWrapperInfo_.get() != nullptr;
   }
+
+  size_t getNumSavedCounters() {
+    return numCountersSaved_.getTcStatUnsafe()->value();
+  }
 };
 
 TEST(ProxyStatsWrapperTest, LazyQuantileStatWrapper) {
@@ -59,6 +63,20 @@ TEST(ProxyStatsWrapperTest, MultipleLazyQuantileStatWrapper) {
   EXPECT_FALSE(wrapper2.metadataExists());
   EXPECT_TRUE(wrapper1.quantileStatCreated());
   EXPECT_TRUE(wrapper2.quantileStatCreated());
+}
+
+TEST(ProxyStatsWrapperTest, TestSavingsCounter) {
+  TestLazyQuantileStatWrapper wrapper(
+      "test1",
+      facebook::fb303::ExportTypeConsts::kCountAvg,
+      facebook::fb303::QuantileConsts::kP95_P99_P999,
+      facebook::fb303::SlidingWindowPeriodConsts::kOneMinTenMin);
+  EXPECT_EQ(wrapper.getNumSavedCounters(), 6);
+  wrapper.addValue(10);
+  // Add a value a second time to make sure it's only decremented on the first
+  // counter bump
+  wrapper.addValue(10);
+  EXPECT_EQ(wrapper.getNumSavedCounters(), 0);
 }
 
 TEST(ProxyStatsWrapperTest, LazyQuantileStatWrapperConcurrency) {

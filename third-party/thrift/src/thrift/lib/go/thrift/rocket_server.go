@@ -366,9 +366,6 @@ func (s *rocketServerSocket) processWithExceptionTracking(ctx context.Context, p
 }
 
 func newProtocolBufferFromRequest(request *rocket.RequestPayload) (*protocolBuffer, error) {
-	if !request.HasMetadata() {
-		return nil, fmt.Errorf("expected metadata")
-	}
 	protocol, err := newProtocolBuffer(request.Headers(), request.ProtoID(), request.Data())
 	if err != nil {
 		return nil, err

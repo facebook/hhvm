@@ -111,10 +111,6 @@ func (r *RequestPayload) Data() []byte {
 	return r.data
 }
 
-func (r *RequestPayload) HasMetadata() bool {
-	return r.metadata != nil
-}
-
 func (r *RequestPayload) Name() string {
 	if r.metadata == nil {
 		return ""

@@ -134,6 +134,11 @@ class ScopedHTTPServer final {
     thread_.join();
   }
 
+  ScopedHTTPServer(const ScopedHTTPServer&) = delete;
+  ScopedHTTPServer& operator=(const ScopedHTTPServer&) = delete;
+  ScopedHTTPServer(ScopedHTTPServer&&) = delete;
+  ScopedHTTPServer& operator=(ScopedHTTPServer&&) = delete;
+
  private:
   ScopedHTTPServer(std::thread thread, std::unique_ptr<HTTPServer> server)
       : thread_(std::move(thread)), server_(std::move(server)) {

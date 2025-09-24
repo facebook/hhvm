@@ -55,14 +55,34 @@ class HQServer {
   // Stops both the QUIC transport AND the HTTP server handling loop
   void stop();
 
-  // Sets/unsets "reject connections" flag on the QUIC server
-  void rejectNewConnections(bool reject);
-
   void setStatsFactory(
       std::unique_ptr<quic::QuicTransportStatsCallbackFactory>&& statsFactory) {
     CHECK(server_);
     server_->setTransportStatsCallbackFactory(std::move(statsFactory));
   }
+
+  // Takeover runtime wrapper methods - forward to underlying QuicServer
+  // Takeover part 1: Methods called on the old instance.
+  void allowBeingTakenOver(const folly::SocketAddress& addr);
+  [[nodiscard]] int getTakeoverHandlerSocketFD() const;
+  [[nodiscard]] std::vector<int> getAllListeningSocketFDs() const;
+
+  // Takeover part 2: Methods called during the initialization of the new
+  // process.
+  void setListeningFDs(const std::vector<int>& fds);
+  void setProcessId(quic::ProcessId pid);
+  void setHostId(uint32_t hostId);
+  void setConnectionIdVersion(quic::ConnectionIdVersion version);
+  void waitUntilInitialized();
+
+  // Takeover part 3: Methods called during the packet forwarding setup.
+  [[nodiscard]] quic::ProcessId getProcessId() const;
+  [[nodiscard]] TakeoverProtocolVersion getTakeoverProtocolVersion() const;
+  void startPacketForwarding(const folly::SocketAddress& addr);
+
+  // Takeover part 4: Methods called on the old instance to wind down.
+  void rejectNewConnections(bool reject);
+  void pauseRead();
 
  private:
   HQServerParams params_;

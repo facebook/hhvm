@@ -312,4 +312,52 @@ void HQServer::rejectNewConnections(bool reject) {
   server_->rejectNewConnections([reject]() { return reject; });
 }
 
+void HQServer::setHostId(uint32_t hostId) {
+  server_->setHostId(hostId);
+}
+
+void HQServer::setProcessId(quic::ProcessId processId) {
+  server_->setProcessId(processId);
+}
+
+void HQServer::setConnectionIdVersion(quic::ConnectionIdVersion version) {
+  server_->setConnectionIdVersion(version);
+}
+
+void HQServer::waitUntilInitialized() {
+  server_->waitUntilInitialized();
+}
+
+void HQServer::allowBeingTakenOver(const folly::SocketAddress& addr) {
+  server_->allowBeingTakenOver(addr);
+}
+
+int HQServer::getTakeoverHandlerSocketFD() const {
+  return server_->getTakeoverHandlerSocketFD();
+}
+
+std::vector<int> HQServer::getAllListeningSocketFDs() const {
+  return server_->getAllListeningSocketFDs();
+}
+
+void HQServer::setListeningFDs(const std::vector<int>& fds) {
+  server_->setListeningFDs(fds);
+}
+
+quic::ProcessId HQServer::getProcessId() const {
+  return server_->getProcessId();
+}
+
+TakeoverProtocolVersion HQServer::getTakeoverProtocolVersion() const {
+  return server_->getTakeoverProtocolVersion();
+}
+
+void HQServer::startPacketForwarding(const folly::SocketAddress& addr) {
+  server_->startPacketForwarding(addr);
+}
+
+void HQServer::pauseRead() {
+  server_->pauseRead();
+}
+
 } // namespace quic::samples

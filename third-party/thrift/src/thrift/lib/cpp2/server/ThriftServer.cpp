@@ -534,7 +534,6 @@ class ThriftServer::ConnectionEventCallback
       const folly::NetworkSocket /* socket */,
       const folly::SocketAddress& clientAddr,
       const std::string& errorMsg) noexcept override {
-    FB_LOG_EVERY_MS(ERROR, 1000) << "Connection dropped, reason: " << errorMsg;
     THRIFT_CONNECTION_EVENT(server_socket_connection_dropped)
         .log(thriftServer_, clientAddr, [&] {
           folly::dynamic metadata = folly::dynamic::object;

@@ -79,21 +79,22 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
       return ServerStreamFactory([gen = std::move(gen),
                                   serverExecutor = std::move(serverExecutor),
                                   encode](
-                                     FirstResponsePayload&& payload,
-                                     StreamClientCallback* callback,
-                                     folly::EventBase* clientEb,
+                                     FirstResponsePayload&&
+                                         firstResponsePayload,
+                                     StreamClientCallback* clientCallback,
+                                     folly::EventBase* evb,
                                      TilePtr&& interaction,
                                      std::shared_ptr<ContextStack>
                                          contextStack) mutable {
-        DCHECK(clientEb->isInEventBaseThread());
+        DCHECK(evb->isInEventBaseThread());
 
         // For Stream, ContextStack is co-owned by Several Steam components
-        if (contextStack && callback) {
-          callback->setContextStack(contextStack);
+        if (contextStack && clientCallback) {
+          clientCallback->setContextStack(contextStack);
         }
 
         auto stream =
-            new ServerGeneratorStreamBridge(callback, clientEb, contextStack);
+            new ServerGeneratorStreamBridge(clientCallback, evb, contextStack);
         auto streamPtr = stream->copy();
         fromAsyncGeneratorImpl<WithHeader>(
             std::move(streamPtr),
@@ -111,8 +112,8 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
                 stream->serverClose();
               }
             });
-        std::ignore =
-            callback->onFirstResponse(std::move(payload), clientEb, stream);
+        std::ignore = clientCallback->onFirstResponse(
+            std::move(firstResponsePayload), evb, stream);
         stream->processClientMessages();
       });
     };
@@ -145,12 +146,12 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
       std::shared_ptr<ContextStack> contextStack) {
     class ReadyCallback final : public QueueConsumer {
      public:
-      void consume() override { baton.post(); }
+      void consume() override { baton_.post(); }
       void canceled() override { LOG(WARNING) << "Server stream is cancelled"; }
+      folly::coro::Task<void> wait() { co_await baton_; }
 
-      folly::coro::Task<void> wait() { co_await baton; }
-
-      folly::coro::Baton baton;
+     private:
+      folly::coro::Baton baton_;
     };
 
     bool pauseStream = false;
@@ -168,7 +169,7 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
       if (credits == 0 || pauseStream) {
         ReadyCallback ready;
         if (stream->serverWait(&ready)) {
-          co_await ready.baton;
+          co_await ready.wait();
         }
       }
 

@@ -32,7 +32,6 @@ class QueueConsumer {
 };
 
 #if FOLLY_HAS_COROUTINES
-
 class CoroConsumer final : public QueueConsumer {
  public:
   void consume() override { baton_.post(); }
@@ -45,5 +44,4 @@ class CoroConsumer final : public QueueConsumer {
   folly::coro::Baton baton_;
 };
 #endif
-
 } // namespace apache::thrift::detail

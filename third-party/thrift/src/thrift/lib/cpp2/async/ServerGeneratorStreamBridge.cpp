@@ -36,18 +36,19 @@ ServerGeneratorStreamBridge::ServerGeneratorStreamBridge(
       contextStack_(std::move(contextStack)) {}
 
 /* static */ ServerStreamFactory
-ServerGeneratorStreamBridge::fromProducerCallback(ProducerCallback* cb) {
-  return ServerStreamFactory([cb](
+ServerGeneratorStreamBridge::fromProducerCallback(
+    ProducerCallback* producerCallback) {
+  return ServerStreamFactory([producerCallback](
                                  FirstResponsePayload&& payload,
-                                 StreamClientCallback* callback,
+                                 StreamClientCallback* clientCallback,
                                  folly::EventBase* clientEb,
                                  TilePtr&&,
                                  std::shared_ptr<ContextStack>) mutable {
     DCHECK(clientEb->isInEventBaseThread());
-    auto stream = new ServerGeneratorStreamBridge(callback, clientEb);
+    auto stream = new ServerGeneratorStreamBridge(clientCallback, clientEb);
     std::ignore =
-        callback->onFirstResponse(std::move(payload), clientEb, stream);
-    cb->provideStream(stream->copy());
+        clientCallback->onFirstResponse(std::move(payload), clientEb, stream);
+    producerCallback->provideStream(stream->copy());
     stream->processClientMessages();
   });
 }
@@ -55,6 +56,7 @@ ServerGeneratorStreamBridge::fromProducerCallback(ProducerCallback* cb) {
 void ServerGeneratorStreamBridge::consume() {
   evb_->add([this]() { processClientMessages(); });
 }
+
 void ServerGeneratorStreamBridge::canceled() {
   Ptr(this);
 }

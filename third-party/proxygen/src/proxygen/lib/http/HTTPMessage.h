@@ -438,6 +438,10 @@ class HTTPMessage {
     return (getStatusCode() / 100) == 1;
   }
 
+  bool is2xxResponse() const {
+    return (getStatusCode() / 100) == 2;
+  }
+
   /**
    * Returns true if this is a 4xx response.
    */

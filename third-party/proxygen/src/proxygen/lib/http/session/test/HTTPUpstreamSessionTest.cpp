@@ -928,6 +928,7 @@ void HTTPUpstreamTest<CodecPair>::testBasicRequest() {
   handler->expectHeaders([&](std::shared_ptr<HTTPMessage> msg) {
     EXPECT_TRUE(msg->getIsChunked());
     EXPECT_FALSE(msg->getIsUpgraded());
+    EXPECT_TRUE(msg->is2xxResponse());
     EXPECT_EQ(200, msg->getStatusCode());
   });
   handler->expectEOM();
@@ -1340,6 +1341,7 @@ TEST_F(HTTPUpstreamSessionTest, 100ContinueKeepalive) {
   handler->expectHeaders([&](std::shared_ptr<HTTPMessage> msg) {
     EXPECT_FALSE(msg->getIsChunked());
     EXPECT_FALSE(msg->getIsUpgraded());
+    EXPECT_FALSE(msg->is2xxResponse());
     EXPECT_EQ(100, msg->getStatusCode());
   });
   handler->expectHeaders([&](std::shared_ptr<HTTPMessage> msg) {

@@ -3116,7 +3116,7 @@ TEST(CompilerTest, typedef_explicit_uri) {
 
     @thrift.AllowLegacyTypedefUri
     @thrift.Uri{value="facebook.com/thrift/MyExplicitUri"}
-    # expected-warning@-2: Typedef `MyInt5` has an explicit URI, which is not allowed
+    # expected-error@-2: Typedef `MyInt5` has an explicit URI, which is not allowed
     typedef i32 MyInt5;
   )",
       {"--extra-validation", "nonallowed_typedef_with_uri=none"});

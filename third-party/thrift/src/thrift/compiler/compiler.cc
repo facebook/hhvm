@@ -149,7 +149,7 @@ Options:
                 typedef_explicit_uri=none|warn|error
                   Action to take on typedef with a non-empty explicit URI
                   (specified using the @thrift.Uri annotation).
-                  Default: warn
+                  Default: error
 
                 struct_optional_field_custom_default=none|warn|error
                   Action to take on optional fields in structs (and exceptions)

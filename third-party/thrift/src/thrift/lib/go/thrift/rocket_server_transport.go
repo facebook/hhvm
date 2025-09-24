@@ -114,6 +114,7 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 			// Read/Write calls - so that we can access ALPN value and choose the transport.
 			tlsConn, isTLS := conn.(tlsConnectionStaterHandshaker)
 			if isTLS {
+				r.observer.ConnTLSAccepted()
 				r.stats.ConnsTLS.RecordEvent()
 
 				err = tlsConn.HandshakeContext(ctx)

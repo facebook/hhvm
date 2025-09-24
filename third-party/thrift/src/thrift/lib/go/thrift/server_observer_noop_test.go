@@ -31,6 +31,8 @@ func TestNoopServerObserver(t *testing.T) {
 
 	// Test that all methods can be called without panicking
 	observer.ConnDropped()
+	observer.ConnAccepted()
+	observer.ConnTLSAccepted()
 	observer.TaskKilled()
 	observer.TaskTimeout()
 	observer.DeclaredException()
@@ -39,6 +41,5 @@ func TestNoopServerObserver(t *testing.T) {
 	observer.ReceivedRequest()
 	observer.SentReply()
 	observer.ActiveRequests(10)
-	observer.ConnAccepted()
 	observer.ProcessTime(200 * time.Millisecond)
 }

@@ -34,8 +34,9 @@ func newNoopServerObserver() ServerObserver {
 // All methods are no-op implementations
 
 // Connection lifecycle events
-func (*noopServerObserver) ConnDropped()  {}
-func (*noopServerObserver) ConnAccepted() {}
+func (*noopServerObserver) ConnDropped()     {}
+func (*noopServerObserver) ConnAccepted()    {}
+func (*noopServerObserver) ConnTLSAccepted() {}
 
 // Request processing events
 func (*noopServerObserver) TaskKilled()          {}

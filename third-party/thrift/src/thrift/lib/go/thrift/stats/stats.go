@@ -28,7 +28,6 @@ type ServerStats struct {
 
 	// counters
 	ConnsEstablished        *TimingSeries // # of new connections
-	ConnsTLS                *TimingSeries // # of new TLS connections
 	ConnsClosed             *TimingSeries // # of server closed connections
 	ClientClosed            *TimingSeries // # of client closed connections
 	ConnectionPreemptedWork *TimingSeries // event where we didn't perform work due to connection being closed
@@ -113,7 +112,6 @@ func NewServerStats(cfg *TimingConfig, statsPeriod time.Duration) *ServerStats {
 
 		// events/duration stats
 		ConnsEstablished:        NewTimingSeries(cfg),
-		ConnsTLS:                NewTimingSeries(cfg),
 		ConnsClosed:             NewTimingSeries(cfg),
 		ClientClosed:            NewTimingSeries(cfg),
 		ConnectionPreemptedWork: NewTimingSeries(cfg),
@@ -159,8 +157,6 @@ func (stats *ServerStats) GetInts() map[string]int64 {
 
 	s := stats.ConnsEstablished.MustSummarize(stats.statsPeriod)
 	ints["connections.established."+periodStr] = int64(s.Count)
-	s = stats.ConnsTLS.MustSummarize(stats.statsPeriod)
-	ints["connections.tls."+periodStr] = int64(s.Count)
 	s = stats.ConnsClosed.MustSummarize(stats.statsPeriod)
 	ints["connections.closed."+periodStr] = int64(s.Count)
 	s = stats.ClientClosed.MustSummarize(stats.statsPeriod)

@@ -115,7 +115,6 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 			tlsConn, isTLS := conn.(tlsConnectionStaterHandshaker)
 			if isTLS {
 				r.observer.ConnTLSAccepted()
-				r.stats.ConnsTLS.RecordEvent()
 
 				err = tlsConn.HandshakeContext(ctx)
 				if err != nil {

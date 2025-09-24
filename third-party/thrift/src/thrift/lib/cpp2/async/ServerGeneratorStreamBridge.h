@@ -65,12 +65,81 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
     virtual void provideStream(Ptr stream) = 0;
     virtual ~ProducerCallback() = default;
   };
-  static ServerStreamFactory fromProducerCallback(ProducerCallback* cb);
 
   ~ServerGeneratorStreamBridge() override;
 
+  static ServerStreamFactory fromProducerCallback(ProducerCallback* cb);
+
 #if FOLLY_HAS_COROUTINES
+  template <bool WithHeader, typename T>
+  static ServerStreamFn<T> fromAsyncGenerator(
+      folly::coro::AsyncGenerator<
+          std::conditional_t<WithHeader, MessageVariant<T>, T>&&>&& gen) {
+    return [gen = std::move(gen)](
+               folly::Executor::KeepAlive<> serverExecutor,
+               StreamElementEncoder<T>* encode) mutable {
+      return ServerStreamFactory([gen = std::move(gen),
+                                  serverExecutor = std::move(serverExecutor),
+                                  encode](
+                                     FirstResponsePayload&& payload,
+                                     StreamClientCallback* callback,
+                                     folly::EventBase* clientEb,
+                                     TilePtr&& interaction,
+                                     std::shared_ptr<ContextStack>
+                                         contextStack) mutable {
+        DCHECK(clientEb->isInEventBaseThread());
+
+        // For Stream, ContextStack is co-owned by Several Steam components
+        if (contextStack && callback) {
+          callback->setContextStack(contextStack);
+        }
+
+        auto stream = new ServerGeneratorStreamBridge(
+            callback, clientEb, std::move(contextStack));
+        auto streamPtr = stream->copy();
+        fromAsyncGeneratorImpl<WithHeader>(
+            std::move(streamPtr),
+            encode,
+            std::move(gen),
+            TileStreamGuard::transferFrom(std::move(interaction)))
+            .scheduleOn(std::move(serverExecutor))
+            .start([sp = stream->copy()](folly::Try<folly::Unit> t) {
+              if (t.hasException()) {
+                LOG(ERROR)
+                    << "Closing Stream because it received an exception before it started: "
+                    << std::endl
+                    << t.exception();
+                sp->close();
+              }
+            });
+        std::ignore =
+            callback->onFirstResponse(std::move(payload), clientEb, stream);
+        stream->processClientMessages();
+      });
+    };
+  }
+#endif // FOLLY_HAS_COROUTINES
+
+  //
+  // TwoWayBridge methods
+  //
+  void consume();
+
+  void canceled();
+  //
+  // end of TwoWayBridge methods
+  //
+
+  void close();
+
+  ServerQueue getMessages();
+
+  bool wait(QueueConsumer* consumer);
+
+  void publish(folly::Try<StreamPayload>&& payload);
+
  private:
+#if FOLLY_HAS_COROUTINES
   template <bool WithHeader, typename T>
   static folly::coro::Task<> fromAsyncGeneratorImpl(
       std::unique_ptr<ServerGeneratorStreamBridge, Deleter> stream,
@@ -171,75 +240,16 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
       }
     }
   }
-
- public:
-  template <bool WithHeader, typename T>
-  static ServerStreamFn<T> fromAsyncGenerator(
-      folly::coro::AsyncGenerator<
-          std::conditional_t<WithHeader, MessageVariant<T>, T>&&>&& gen) {
-    return [gen = std::move(gen)](
-               folly::Executor::KeepAlive<> serverExecutor,
-               StreamElementEncoder<T>* encode) mutable {
-      return ServerStreamFactory([gen = std::move(gen),
-                                  serverExecutor = std::move(serverExecutor),
-                                  encode](
-                                     FirstResponsePayload&& payload,
-                                     StreamClientCallback* callback,
-                                     folly::EventBase* clientEb,
-                                     TilePtr&& interaction,
-                                     std::shared_ptr<ContextStack>
-                                         contextStack) mutable {
-        DCHECK(clientEb->isInEventBaseThread());
-
-        // For Stream, ContextStack is co-owned by Several Steam components
-        if (contextStack && callback) {
-          callback->setContextStack(contextStack);
-        }
-
-        auto stream = new ServerGeneratorStreamBridge(
-            callback, clientEb, std::move(contextStack));
-        auto streamPtr = stream->copy();
-        fromAsyncGeneratorImpl<WithHeader>(
-            std::move(streamPtr),
-            encode,
-            std::move(gen),
-            TileStreamGuard::transferFrom(std::move(interaction)))
-            .scheduleOn(std::move(serverExecutor))
-            .start([sp = stream->copy()](folly::Try<folly::Unit> t) {
-              if (t.hasException()) {
-                LOG(ERROR)
-                    << "Closing Stream because it received an exception before it started: "
-                    << std::endl
-                    << t.exception();
-                sp->close();
-              }
-            });
-        std::ignore =
-            callback->onFirstResponse(std::move(payload), clientEb, stream);
-        stream->processPayloads();
-      });
-    };
-  }
 #endif // FOLLY_HAS_COROUTINES
 
-  void consume();
-
-  void canceled();
-
-  void close();
-
-  ServerQueue getMessages();
-
-  bool wait(QueueConsumer* consumer);
-
-  void publish(folly::Try<StreamPayload>&& payload);
-
- private:
   ServerGeneratorStreamBridge(
       StreamClientCallback* clientCallback,
-      folly::EventBase* clientEb,
+      folly::EventBase* evb,
       std::shared_ptr<ContextStack> contextStack = nullptr);
 
+  //
+  // StreamServerCallback methods
+  //
   bool onStreamRequestN(uint64_t credits) override;
 
   void onStreamCancel() override;
@@ -249,8 +259,11 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
   void pauseStream() override;
 
   void resumeStream() override;
+  //
+  // end of StreamServerCallback methods
+  //
 
-  void processPayloads();
+  void processClientMessages();
 
   // Helper methods to encapsulate ContextStack usage
   void notifyStreamSubscribe(const TileStreamGuard& interaction);
@@ -263,9 +276,10 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
   void notifyStreamNext();
   void notifyStreamError(const folly::exception_wrapper& exception);
 
-  StreamClientCallback* streamClientCallback_;
-  folly::EventBase* clientEventBase_;
+  StreamClientCallback* clientCallback_;
+  folly::EventBase* evb_;
   std::shared_ptr<ContextStack> contextStack_;
+
 #if FOLLY_HAS_COROUTINES
   folly::CancellationSource cancelSource_;
 #endif

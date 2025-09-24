@@ -29,10 +29,10 @@ template class TwoWayBridge<
 
 ServerGeneratorStreamBridge::ServerGeneratorStreamBridge(
     StreamClientCallback* clientCallback,
-    folly::EventBase* clientEb,
+    folly::EventBase* evb,
     std::shared_ptr<ContextStack> contextStack)
-    : streamClientCallback_(clientCallback),
-      clientEventBase_(clientEb),
+    : clientCallback_(clientCallback),
+      evb_(evb),
       contextStack_(std::move(contextStack)) {}
 
 ServerGeneratorStreamBridge::~ServerGeneratorStreamBridge() {}
@@ -50,12 +50,12 @@ ServerGeneratorStreamBridge::fromProducerCallback(ProducerCallback* cb) {
     std::ignore =
         callback->onFirstResponse(std::move(payload), clientEb, stream);
     cb->provideStream(stream->copy());
-    stream->processPayloads();
+    stream->processClientMessages();
   });
 }
 
 void ServerGeneratorStreamBridge::consume() {
-  clientEventBase_->add([this]() { processPayloads(); });
+  evb_->add([this]() { processClientMessages(); });
 }
 void ServerGeneratorStreamBridge::canceled() {
   Ptr(this);
@@ -89,7 +89,7 @@ void ServerGeneratorStreamBridge::onStreamCancel() {
 
 void ServerGeneratorStreamBridge::resetClientCallback(
     StreamClientCallback& clientCallback) {
-  streamClientCallback_ = &clientCallback;
+  clientCallback_ = &clientCallback;
 }
 
 void ServerGeneratorStreamBridge::pauseStream() {
@@ -100,8 +100,8 @@ void ServerGeneratorStreamBridge::resumeStream() {
   clientPush(detail::StreamControl::RESUME);
 }
 
-void ServerGeneratorStreamBridge::processPayloads() {
-  clientEventBase_->dcheckIsInEventBaseThread();
+void ServerGeneratorStreamBridge::processClientMessages() {
+  evb_->dcheckIsInEventBaseThread();
   while (!clientWait(this)) {
     for (auto messages = clientGetMessages(); !messages.empty();
          messages.pop()) {
@@ -109,18 +109,18 @@ void ServerGeneratorStreamBridge::processPayloads() {
       auto& payload = messages.front();
       if (payload.hasValue()) {
         auto alive = payload->payload || payload->isOrderedHeader
-            ? streamClientCallback_->onStreamNext(std::move(payload.value()))
-            : streamClientCallback_->onStreamHeaders(
+            ? clientCallback_->onStreamNext(std::move(payload.value()))
+            : clientCallback_->onStreamHeaders(
                   HeadersPayload(std::move(payload->metadata)));
         if (!alive) {
           break;
         }
       } else if (payload.hasException()) {
-        streamClientCallback_->onStreamError(std::move(payload.exception()));
+        clientCallback_->onStreamError(std::move(payload.exception()));
         Ptr(this);
         return;
       } else {
-        streamClientCallback_->onStreamComplete();
+        clientCallback_->onStreamComplete();
         Ptr(this);
         return;
       }

@@ -74,7 +74,12 @@ class ServerSinkBridge : public TwoWayBridge<
       folly::EventBase& evb,
       SinkClientCallback* callback);
 
+  // start should be called on threadmanager's thread
+  folly::coro::Task<void> start();
+
+  //
   // SinkServerCallback method
+  //
   bool onSinkNext(StreamPayload&& payload) override;
 
   void onSinkError(folly::exception_wrapper ew) override;
@@ -82,13 +87,19 @@ class ServerSinkBridge : public TwoWayBridge<
   bool onSinkComplete() override;
 
   void resetClientCallback(SinkClientCallback& clientCallback) override;
+  //
+  // end of SinkServerCallback method
+  //
 
-  // start should be called on threadmanager's thread
-  folly::coro::Task<void> start();
-
+  //
+  // TwoWayBridge methods
+  //
   void consume();
 
   void canceled() {}
+  //
+  // end of TwoWayBridge methods
+  //
 
  private:
   ServerSinkBridge(
@@ -97,9 +108,7 @@ class ServerSinkBridge : public TwoWayBridge<
       SinkClientCallback* callback);
 
   folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&> makeGenerator();
-
   void processClientMessages();
-
   void close();
 
   // Helper methods to encapsulate ContextStack usage
@@ -123,6 +132,7 @@ class ServerSinkBridge : public TwoWayBridge<
 
   // only access in evb_ thread
   bool sinkComplete_{false};
+
   TileStreamGuard interaction_;
 };
 #endif

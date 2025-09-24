@@ -5954,8 +5954,7 @@ end = struct
         in
         let () =
           match result with
-          | (_, (ty, _, _), _)
-            when TUtils.is_tyvar_error env ty || is_dynamic ty ->
+          | (_, (ty, _, _), _) when TUtils.is_tyvar_error env ty ->
             Typing_error_utils.add_typing_error
               ~env
               Typing_error.(

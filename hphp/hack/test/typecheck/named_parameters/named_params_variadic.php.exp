@@ -1,0 +1,4 @@
+ERROR: File "named_params_variadic.php", line 16, characters 3-15:
+Missing required named argument: label (Typing[4499])
+  File "named_params_variadic.php", line 4, characters 10-13:
+  Definition is here

@@ -1,0 +1,12 @@
+ERROR: File "named_params_basic.php", line 12, characters 3-13:
+Missing required named argument: c (Typing[4499])
+  File "named_params_basic.php", line 4, characters 10-12:
+  Definition is here
+ERROR: File "named_params_basic.php", line 15, characters 3-13:
+Missing required named argument: b (Typing[4499])
+  File "named_params_basic.php", line 4, characters 10-12:
+  Definition is here
+ERROR: File "named_params_basic.php", line 18, characters 3-23:
+Unexpected named argument: d (Typing[4500])
+  File "named_params_basic.php", line 4, characters 10-12:
+  Definition is here

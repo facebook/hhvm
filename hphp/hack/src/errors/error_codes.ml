@@ -785,6 +785,9 @@ module Typing = struct
     | ProtectedInternalMethCaller [@value 4496]
     | StaticPropOnTrait [@value 4497]
     | RecursiveCaseType [@value 4498]
+    | MissingNamedArgs [@value 4499]
+    | UnexpectedNamedArgs [@value 4500]
+    | DuplicateNamedArgs [@value 4501]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

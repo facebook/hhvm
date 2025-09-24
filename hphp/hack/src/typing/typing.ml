@@ -1781,32 +1781,76 @@ let trait_most_concrete_parent trait env =
            end
          ~init:NotFound)
 
-let check_arity
-    ?(did_unpack = false) ~is_variadic_or_splat env pos pos_def ft (arity : int)
-    =
-  let exp_min = Typing_defs.arity_required ft in
-  if arity < exp_min then
-    Typing_error_utils.add_typing_error
-      ~env
-      Typing_error.(
-        primary
-        @@ Primary.Typing_too_few_args
-             { expected = exp_min; actual = arity; pos; decl_pos = pos_def });
-  if not is_variadic_or_splat then
-    let exp_max = List.length ft.ft_params in
-    let arity =
-      if did_unpack then
-        arity + 1
-      else
-        arity
-    in
-    if arity > exp_max then
+let check_arity_and_names
+    ?(did_unpack = false)
+    ~is_variadic_or_splat
+    env
+    pos
+    pos_def
+    ft
+    (arity : int)
+    ~(arg_names : SSet.t) =
+  let (exp_min, required_names) = Typing_defs.arity_and_names_required ft in
+  let positional_params =
+    List.filter ft.ft_params ~f:(fun fp ->
+        not (Typing_defs_core.get_fp_is_named fp))
+  in
+  let check_arity () : unit =
+    if arity < exp_min then
       Typing_error_utils.add_typing_error
         ~env
         Typing_error.(
           primary
-          @@ Primary.Typing_too_many_args
-               { expected = exp_max; actual = arity; pos; decl_pos = pos_def })
+          @@ Primary.Typing_too_few_args
+               { expected = exp_min; actual = arity; pos; decl_pos = pos_def });
+    if not is_variadic_or_splat then
+      let exp_max = List.length positional_params in
+      let arity =
+        if did_unpack then
+          arity + 1
+        else
+          arity
+      in
+      if arity > exp_max then
+        Typing_error_utils.add_typing_error
+          ~env
+          Typing_error.(
+            primary
+            @@ Primary.Typing_too_many_args
+                 { expected = exp_max; actual = arity; pos; decl_pos = pos_def })
+  in
+  let check_names () : unit =
+    let missing_names = SSet.diff required_names arg_names in
+    let extra_names =
+      let all_names =
+        ft.ft_params
+        |> List.filter_map ~f:Typing_defs.Named_params.name_of_named_param
+        |> SSet.of_list
+      in
+      SSet.diff arg_names all_names
+    in
+    let () =
+      if not (SSet.is_empty missing_names) then
+        let missing_names = SSet.elements missing_names in
+        Typing_error_utils.add_typing_error
+          ~env
+          Typing_error.(
+            primary
+            @@ Primary.Missing_named_args
+                 { missing_names; pos; decl_pos = pos_def })
+    in
+    if not (SSet.is_empty extra_names) then
+      let unexpected_names = SSet.elements extra_names in
+      Typing_error_utils.add_typing_error
+        ~env
+        Typing_error.(
+          primary
+          @@ Primary.Unexpected_named_args
+               { unexpected_names; pos; decl_pos = pos_def })
+  in
+
+  check_arity ();
+  check_names ()
 
 (* The last parameter of a function can be
  *    variadic (written t...), meaning any number of t's
@@ -1830,11 +1874,20 @@ let check_lambda_arity env lambda_pos def_pos lambda_ft expected_ft =
   with
   | ((_, None), (_, None)) ->
     (* what's the fewest arguments this type can take *)
-    let expected_min = Typing_defs.arity_required expected_ft in
-    let actual_min = Typing_defs.arity_required lambda_ft in
+    let (expected_min, _expected_required_named_params) =
+      Typing_defs.arity_and_names_required expected_ft
+    in
+    let (actual_min, _actual_required_named_params) =
+      Typing_defs.arity_and_names_required lambda_ft
+    in
+    (* TODO(named_params): use _expected_required_named_params and _actual_required_named_params *)
+    let positional_params_of ft =
+      List.filter ft.ft_params ~f:(fun fp ->
+          not (Typing_defs_core.get_fp_is_named fp))
+    in
     (* what's the most arguments this type can take (assuming no splat or variadics) *)
-    let expected_max = List.length expected_ft.ft_params in
-    let actual_max = List.length lambda_ft.ft_params in
+    let expected_max = List.length (positional_params_of expected_ft) in
+    let actual_max = List.length (positional_params_of lambda_ft) in
     (* actual must be able to take at least as many args as expected expects
      * and require no more than expected requires *)
     let too_few = actual_max < expected_max in
@@ -6948,6 +7001,24 @@ end = struct
           let (non_variadic_or_splat_params, variadic_or_splat_param) =
             get_variadic_or_splat_param ft
           in
+
+          let non_variadic_non_splat_indexed =
+            List.mapi non_variadic_or_splat_params ~f:Tuple2.create
+          in
+          (* "plain_params" are non-named, non-variadic, non-splat *)
+          let plain_params =
+            List.filter non_variadic_non_splat_indexed ~f:(fun (_, param) ->
+                not (Typing_defs_flags.FunParam.named param.fp_flags))
+          in
+          let named_params =
+            List.fold
+              non_variadic_non_splat_indexed
+              ~init:SMap.empty
+              ~f:(fun named_params (idx, fp) ->
+                match Typing_defs.Named_params.name_of_named_param fp with
+                | Some name -> SMap.add name (idx, fp) named_params
+                | None -> named_params)
+          in
           (* Force subtype with expected result *)
           let env = check_expected_ty "Call result" env ft.ft_ret expected in
           let env = Env.set_tyvar_variance env ft.ft_ret in
@@ -7010,17 +7081,41 @@ end = struct
             | _ -> (env, pass = 1)
           in
           let is_single_argument = List.length el = 1 in
-          let get_next_param_info paraml =
-            match paraml with
-            | (idx, param) :: paraml -> (idx, (false, Some param, paraml))
+          let get_next_positional_param_info
+              named_params_remaining plain_params_remaining =
+            match plain_params_remaining with
+            | (idx, param) :: plain_params_remaining -> begin
+              ( idx,
+                ( false,
+                  Some param,
+                  named_params_remaining,
+                  plain_params_remaining ) )
+            end
             | [] ->
               (match variadic_or_splat_param with
               | Some (`Variadic param) ->
                 ( List.length non_variadic_or_splat_params,
-                  (true, Some param, paraml) )
+                  ( true,
+                    Some param,
+                    named_params_remaining,
+                    plain_params_remaining ) )
               | Some (`Splat _)
               | None ->
-                (-1, (true, None, paraml)))
+                ( -1,
+                  (true, None, named_params_remaining, plain_params_remaining)
+                ))
+          in
+          let get_next_named_param_info
+              name named_params_remaining plain_params_remaining =
+            match SMap.find_opt name named_params_remaining with
+            | Some (idx, param) ->
+              ( idx,
+                ( false,
+                  Some param,
+                  SMap.remove name named_params_remaining,
+                  plain_params_remaining ) )
+            | None ->
+              (-1, (true, None, named_params_remaining, plain_params_remaining))
           in
           let check_arg env arg opt_param ~arg_idx ~param_idx ~is_variadic =
             let (arg_name, param_kind, e) =
@@ -7156,15 +7251,33 @@ end = struct
               pass
               env
               (args_with_result : arg_with_result list)
-              paraml
+              (named_params_remaining :
+                (int * Typing_defs.locl_ty Typing_defs.fun_param) SMap.t)
+              (plain_params_remaining :
+                (int * Typing_defs.locl_ty Typing_defs.fun_param) list)
+                (* plain params are non-named, non-variadic, non-splat *)
               used_dynamic_acc
               acc =
             match args_with_result with
             (* We've got an argument *)
             | (arg_idx, arg, opt_result) :: args_with_result ->
               (* Pick up next parameter type info *)
-              let (param_idx, (is_variadic, opt_param, paraml)) =
-                get_next_param_info paraml
+              let ( param_idx,
+                    ( is_variadic,
+                      opt_param,
+                      named_params_remaining,
+                      plain_params_remaining ) ) =
+                match arg with
+                | Ainout _
+                | Anormal _ ->
+                  get_next_positional_param_info
+                    named_params_remaining
+                    plain_params_remaining
+                | Anamed ((_, name), _) ->
+                  get_next_named_param_info
+                    name
+                    named_params_remaining
+                    plain_params_remaining
               in
               let (env, one_result, used_dynamic_info) =
                 (* If we're on the pass appropriate for this argument
@@ -7182,23 +7295,24 @@ end = struct
                 pass
                 env
                 args_with_result
-                paraml
+                named_params_remaining
+                plain_params_remaining
                 (combine_dynamic_info used_dynamic_acc used_dynamic_info)
                 ((arg_idx, arg, one_result) :: acc)
             | [] ->
               let rec collect_results
                   (reversed_res : arg_with_result list) tel argtys =
                 match reversed_res with
-                | [] -> (env, tel, argtys, used_dynamic_acc, paraml)
+                | [] ->
+                  (env, tel, argtys, used_dynamic_acc, plain_params_remaining)
                 (* We've still not finished, so bump pass and iterate *)
                 | (_, _, None) :: _ ->
                   check_args
                     (pass + 1)
                     env
                     (List.rev acc)
-                    (List.mapi
-                       ~f:(fun idx param -> (idx, param))
-                       non_variadic_or_splat_params)
+                    named_params
+                    plain_params
                     used_dynamic_acc
                     []
                 | (_, _, Some (te, ty)) :: reversed_res ->
@@ -7261,12 +7375,9 @@ end = struct
           let args_with_result =
             List.mapi el ~f:(fun idx e -> (idx, e, None))
           in
-          let (env, tel, argtys, used_dynamic_info1, remaining_params) =
-            let params =
-              List.mapi non_variadic_or_splat_params ~f:(fun idx param ->
-                  (idx, param))
-            in
-            check_args 0 env args_with_result params None []
+          (* plain_params_remainingl are unused non-named non-variadic non-optional parameters *)
+          let (env, tel, argtys, used_dynamic_info1, plain_params_remaining) =
+            check_args 0 env args_with_result named_params plain_params None []
           in
           let (env, ty_err_opt) = check_implicit_args env in
           Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
@@ -7288,8 +7399,7 @@ end = struct
                     (u1, ..., un) <: (t1, ..., tm, `...`t)
               *)
               let consumed =
-                List.length non_variadic_or_splat_params
-                - List.length remaining_params
+                List.length plain_params - List.length plain_params_remaining
               in
               let remaining_actual_tys =
                 List.drop (List.map argtys ~f:snd) consumed
@@ -7325,7 +7435,7 @@ end = struct
                     Ttuple
                       {
                         t_required =
-                          List.map remaining_params ~f:(fun (_, fp) ->
+                          List.map plain_params_remaining ~f:(fun (_, fp) ->
                               fp.fp_type);
                         t_extra = Tsplat splat_param.fp_type;
                       } )
@@ -7342,25 +7452,35 @@ end = struct
               in
               ( env,
                 opt_te,
-                List.length el + List.length remaining_params,
+                List.length
+                  (List.filter el ~f:(function
+                      | Aast_defs.Anamed _ -> false
+                      | _ -> true))
+                + List.length plain_params_remaining,
                 true,
                 used_dynamic_info )
             | None
             | Some (`Variadic _) ->
               (match unpacked_element with
-              | None -> (env, None, List.length el, false, None)
+              | None ->
+                let named_args =
+                  List.filter el ~f:(function
+                      | Aast_defs.Anamed _ -> false
+                      | _ -> true)
+                in
+                (env, None, List.length named_args, false, None)
               | Some e ->
                 let (consumed, required_params, optional_params) =
                   split_remaining_params_required_optional
                     non_variadic_or_splat_params
-                    remaining_params
+                    plain_params_remaining
                 in
                 let (env, te, unpacked_element_ty) =
                   expr ~expected:None ~ctxt:Context.default env e
                 in
                 (* Now that we're considering an splat (Some e) we need to construct a type that
-                 * represents the remainder of the function's parameters. `paraml` represents those
-                 * remaining parameters, and the variadic parameter is stored in `var_param`. For example, given
+                 * represents the remainder of the function's parameters. `plain_params_remaining` represents those
+                 * remaining positional parameters, and the variadic parameter is stored in `var_param`. For example, given
                  *
                  * function f(int $i, string $j, float $k = 3.14, mixed ...$m): void {}
                  * function g((string, float, bool) $t): void {
@@ -7502,9 +7622,18 @@ end = struct
                 Option.iter
                   ~f:(Typing_error_utils.add_typing_error ~env)
                   ty_err_opt;
+                let positional_arg_count =
+                  List.fold el ~init:0 ~f:(fun acc e ->
+                      let name = Typing_defs.Named_params.name_of_arg e in
+                      let is_named = Option.is_some name in
+                      if is_named then
+                        acc
+                      else
+                        acc + 1)
+                in
                 ( env,
                   Some te,
-                  List.length el + List.length d_required,
+                  positional_arg_count + List.length d_required,
                   Option.is_some d_variadic,
                   used_dynamic_info ))
           in
@@ -7536,12 +7665,41 @@ end = struct
             end else
               env
           in
+          let (arg_names, duplicate_arg_names) =
+            List.fold el ~init:(SSet.empty, []) ~f:(fun (acc, dupes) arg ->
+                match Typing_defs.Named_params.name_of_arg arg with
+                | Some name ->
+                  let old_acc = acc in
+                  let acc = SSet.add name acc in
+                  let dupes =
+                    if phys_equal old_acc acc then
+                      (* `SSet.add pre_existing_key` preserves physical equality
+                         * https://ocaml.org/manual/5.3/api/Set.S.html *)
+                      name :: dupes
+                    else
+                      dupes
+                  in
+                  (acc, dupes)
+                | None -> (acc, dupes))
+          in
+          let () =
+            if not (List.is_empty duplicate_arg_names) then
+              Typing_error_utils.add_typing_error
+                ~env
+                Typing_error.(
+                  primary
+                  @@ Primary.Duplicate_named_args
+                       {
+                         duplicate_names = duplicate_arg_names;
+                         pos = Pos.btw id_pos expr_pos;
+                       })
+          in
           (* If we unpacked an array, we don't check arity exactly. Since each
            * unpacked array consumes 1 or many parameters, it is nonsensical to say
            * that not enough args were passed in (so we don't do the min check).
            *)
           let () =
-            check_arity
+            check_arity_and_names
               ~did_unpack
               ~is_variadic_or_splat:(Option.is_some variadic_or_splat_param)
               env
@@ -7549,6 +7707,7 @@ end = struct
               pos_def
               ft
               arity
+              ~arg_names
           in
           (* Variadic params cannot be inout so we can stop early *)
           let env =

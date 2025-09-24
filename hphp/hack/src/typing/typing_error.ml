@@ -1365,6 +1365,20 @@ module Primary = struct
         actual: int;
         expected: int;
       }
+    | Missing_named_args of {
+        pos: Pos.t;
+        decl_pos: Pos_or_decl.t;
+        missing_names: string list;
+      }
+    | Unexpected_named_args of {
+        pos: Pos.t;
+        decl_pos: Pos_or_decl.t;
+        unexpected_names: string list;
+      }
+    | Duplicate_named_args of {
+        pos: Pos.t;
+        duplicate_names: string list;
+      }
     | Non_object_member of {
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;

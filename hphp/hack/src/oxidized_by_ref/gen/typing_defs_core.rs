@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0ae2e3b93050ba244e8118bd52d53a61>>
+// @generated SignedSource<<6ba603ac5647fd17952e7aa1049151d5>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -422,6 +422,9 @@ pub struct FunParam<'a> {
     #[rust_to_ocaml(attr = "hash.ignore")]
     #[rust_to_ocaml(attr = "equal fun _ _ -> true")]
     pub pos: &'a pos_or_decl::PosOrDecl<'a>,
+    /// used:
+    /// - for IDE features
+    /// - internally by `Typing_defs.Named_params.name_of_named_param`
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: Option<&'a str>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

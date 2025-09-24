@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b47f8b3d2fe0d574a850e1fc05428dfb>>
+// @generated SignedSource<<9721712fe870a552a4f8df4f704b24b9>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -462,6 +462,11 @@ pub struct FunParam {
     #[rust_to_ocaml(attr = "hash.ignore")]
     #[rust_to_ocaml(attr = "equal fun _ _ -> true")]
     pub pos: pos_or_decl::PosOrDecl,
+    /// Only type-relevant when
+    ///  `Option.is_some (Typing_defs.Named_params.name_of_named_param fp_name)`
+    /// used:
+    /// - for IDE features
+    /// - for named params (use accessor above)
     pub name: Option<String>,
     pub type_: Ty,
     pub flags: typing_defs_flags::fun_param::FunParam,

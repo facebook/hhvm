@@ -1,0 +1,8 @@
+ERROR: File "named_params_lambda.php", line 14, characters 3-12:
+Missing required named argument: opt (Typing[4499])
+  File "named_params_lambda.php", line 5, characters 13-112:
+  Definition is here
+ERROR: File "named_params_lambda.php", line 17, characters 3-49:
+Unexpected named argument: extra (Typing[4500])
+  File "named_params_lambda.php", line 5, characters 13-112:
+  Definition is here

@@ -52,6 +52,51 @@ module Common = struct
     and reasons = lazy [(decl_pos, "Definition is here")] in
     (Error_code.TypingTooFewArgs, claim, reasons)
 
+  let missing_named_args pos decl_pos missing_names =
+    let names_str = String.concat ~sep:", " missing_names in
+    let claim =
+      lazy
+        ( pos,
+          Printf.sprintf
+            "Missing required named argument%s: %s"
+            (if List.length missing_names > 1 then
+              "s"
+            else
+              "")
+            names_str )
+    and reasons = lazy [(decl_pos, "Definition is here")] in
+    (Error_code.MissingNamedArgs, claim, reasons)
+
+  let unexpected_named_args pos decl_pos unexpected_names =
+    let names_str = String.concat ~sep:", " unexpected_names in
+    let claim =
+      lazy
+        ( pos,
+          Printf.sprintf
+            "Unexpected named argument%s: %s"
+            (if List.length unexpected_names > 1 then
+              "s"
+            else
+              "")
+            names_str )
+    and reasons = lazy [(decl_pos, "Definition is here")] in
+    (Error_code.UnexpectedNamedArgs, claim, reasons)
+
+  let duplicate_named_args pos duplicate_names =
+    let names_str = String.concat ~sep:", " duplicate_names in
+    let claim =
+      lazy
+        ( pos,
+          Printf.sprintf
+            "Duplicate named argument%s: %s"
+            (if List.length duplicate_names > 1 then
+              "s"
+            else
+              "")
+            names_str )
+    and reasons = lazy [] in
+    (Error_code.DuplicateNamedArgs, claim, reasons)
+
   let snot_found_suggestion orig similar kind =
     match similar with
     | (`instance, pos, v) -> begin
@@ -2168,6 +2213,24 @@ end = struct
   let typing_too_few_args pos decl_pos actual expected =
     let (code, claim, reasons) =
       Common.typing_too_few_args pos decl_pos actual expected
+    in
+    create ~code ~claim ~reasons ()
+
+  let missing_named_args pos decl_pos missing_names =
+    let (code, claim, reasons) =
+      Common.missing_named_args pos decl_pos missing_names
+    in
+    create ~code ~claim ~reasons ()
+
+  let unexpected_named_args pos decl_pos unexpected_names =
+    let (code, claim, reasons) =
+      Common.unexpected_named_args pos decl_pos unexpected_names
+    in
+    create ~code ~claim ~reasons ()
+
+  let duplicate_named_args pos duplicate_names =
+    let (code, claim, reasons) =
+      Common.duplicate_named_args pos duplicate_names
     in
     create ~code ~claim ~reasons ()
 
@@ -4803,6 +4866,12 @@ end = struct
       typing_too_many_args pos decl_pos actual expected
     | Typing_too_few_args { pos; decl_pos; actual; expected } ->
       typing_too_few_args pos decl_pos actual expected
+    | Missing_named_args { pos; decl_pos; missing_names } ->
+      missing_named_args pos decl_pos missing_names
+    | Unexpected_named_args { pos; decl_pos; unexpected_names } ->
+      unexpected_named_args pos decl_pos unexpected_names
+    | Duplicate_named_args { pos; duplicate_names } ->
+      duplicate_named_args pos duplicate_names
     | Non_object_member { pos; ctxt; ty_name; member_name; kind; decl_pos } ->
       non_object_member pos ctxt ty_name member_name kind decl_pos
     | Static_instance_intersection

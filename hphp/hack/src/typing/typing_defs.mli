@@ -292,6 +292,14 @@ val is_constraint_type : internal_type -> bool
 (** Whether the given type is a union, intersection or option. *)
 val is_union_or_inter_type : locl_ty -> bool
 
+module Named_params : sig
+  (** (Some name) iff fp is a named parameter *)
+  val name_of_named_param : 'a fun_param -> string option
+
+  (** (Some name) iff arg is named *)
+  val name_of_arg : ('a, 'b) Aast_defs.argument -> string option
+end
+
 module InternalType : sig
   val get_var : internal_type -> Tvid.t option
 
@@ -307,7 +315,7 @@ val make_tany : unit -> 'a ty_
 (* Number of required parameters. Does not include optional, variadic, or
  * type-splat parameters
  *)
-val arity_required : 'a fun_type -> int
+val arity_and_names_required : 'a fun_type -> int * SSet.t
 
 val get_param_mode : Ast_defs.param_kind -> param_mode
 

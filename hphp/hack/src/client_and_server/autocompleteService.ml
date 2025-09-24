@@ -293,7 +293,11 @@ let insert_text_for_fun_call
            parameters.*)
         0
       else
-        arity_required ft
+        let (arity_count, _required_named_params) =
+          arity_and_names_required ft
+        in
+        (* TODO(named_params): use _required_named_params *)
+        arity_count
     in
     let fallback = Printf.sprintf "%s()" fun_name in
     if arity = 0 then
@@ -938,7 +942,12 @@ let autocomplete_hack_fake_arrow
            example, this is ", ${1:\$value})". *)
         let required_params =
           match Typing_defs.get_node fun_decl.fe_type with
-          | Tfun ft -> List.take ft.ft_params (arity_required ft)
+          | Tfun ft ->
+            let (arity_count, _required_named_params) =
+              arity_and_names_required ft
+            in
+            (* TODO(named_params): use _required_named_params *)
+            List.take ft.ft_params arity_count
           | _ -> []
         in
         let params = List.drop required_params 1 in

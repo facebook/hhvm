@@ -184,6 +184,13 @@ type 'ty fun_implicit_params = { capability: 'ty capability }
 type 'ty fun_param = {
   fp_pos: Pos_or_decl.t;
   fp_name: string option;
+      (**
+      * Only type-relevant when
+      *  `Option.is_some (Typing_defs.Named_params.name_of_named_param fp_name)`
+      * used:
+      * - for IDE features
+      * - for named params (use accessor above)
+      *)
   fp_type: 'ty;
   fp_flags: Typing_defs_flags.FunParam.t;
   fp_def_value: string option;
@@ -532,6 +539,8 @@ module Flags : sig
   val get_fp_accept_disposable : 'a fun_param -> bool
 
   val get_fp_is_optional : 'a fun_param -> bool
+
+  val get_fp_is_named : 'a fun_param -> bool
 
   val get_fp_ignore_readonly_error : 'a fun_param -> bool
 

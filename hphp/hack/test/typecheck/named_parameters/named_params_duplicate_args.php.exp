@@ -1,0 +1,6 @@
+ERROR: File "named_params_duplicate_args.php", line 12, characters 3-36:
+Duplicate named argument: b (Typing[4501])
+ERROR: File "named_params_duplicate_args.php", line 15, characters 3-44:
+Duplicate named argument: c (Typing[4501])
+ERROR: File "named_params_duplicate_args.php", line 18, characters 3-49:
+Duplicate named arguments: c, b (Typing[4501])

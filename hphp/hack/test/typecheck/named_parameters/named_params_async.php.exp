@@ -1,0 +1,8 @@
+ERROR: File "named_params_async.php", line 16, characters 20-39:
+Missing required named argument: message (Typing[4499])
+  File "named_params_async.php", line 4, characters 16-31:
+  Definition is here
+ERROR: File "named_params_async.php", line 19, characters 20-66:
+Unexpected named argument: extra (Typing[4500])
+  File "named_params_async.php", line 4, characters 16-31:
+  Definition is here

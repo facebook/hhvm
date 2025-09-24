@@ -438,6 +438,8 @@ module Flags = struct
 
   let get_fp_is_optional fp = FunParam.is_optional fp.fp_flags
 
+  let get_fp_is_named fp = FunParam.named fp.fp_flags
+
   let get_fp_ignore_readonly_error fp =
     FunParam.ignore_readonly_error fp.fp_flags
 

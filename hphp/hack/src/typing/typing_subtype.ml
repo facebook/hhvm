@@ -1893,9 +1893,13 @@ end = struct
       else
         Ok ()
     and arity_required_err =
-      if
-        (not splat_super)
-        && not (arity_required ft_sub <= arity_required ft_super)
+      let (arity_required_sub, _sub_required_named_params) =
+        arity_and_names_required ft_sub
+      in
+      let (arity_required_super, _super_required_named_params) =
+        arity_and_names_required ft_super
+      in
+      if (not splat_super) && not (arity_required_sub <= arity_required_super)
       then
         Error
           (Option.map
@@ -1906,8 +1910,8 @@ end = struct
                    apply_reasons ~on_error
                    @@ Secondary.Fun_too_many_args
                         {
-                          expected = arity_required ft_super;
-                          actual = arity_required ft_sub;
+                          expected = arity_required_super;
+                          actual = arity_required_sub;
                           pos = p_sub;
                           decl_pos = p_super;
                         }))
@@ -1984,6 +1988,7 @@ end = struct
           package_err;
           return_disposable_err;
           arity_required_err;
+          (* TODO(named_params): check named parameter names (not just arity of positional params) *)
           variadic_err;
         ]
     in

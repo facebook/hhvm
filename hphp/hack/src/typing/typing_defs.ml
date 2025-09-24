@@ -451,6 +451,34 @@ let is_union_or_inter_type (ty : locl_ty) =
   | Tclass_ptr _ ->
     false
 
+module Named_params = struct
+  let name_of_named_param (fp : _ fun_param) : string option =
+    if Typing_defs_core.get_fp_is_named fp then
+      match fp.fp_name with
+      | Some raw_name ->
+        let name = String.chop_prefix_if_exists ~prefix:"$" raw_name in
+        Some name
+      | None ->
+        let () =
+          (* TODO(named_params): remove runtime invariant checking,
+           * perhaps by changing fp.fp_name to `string` instead of `string option`
+           *)
+          HackEventLogger.invariant_violation_bug
+            ~path:(Pos_or_decl.filename fp.fp_pos)
+            "named param without name"
+        in
+        None
+    else
+      None
+
+  let name_of_arg (arg : _ Aast_defs.argument) : string option =
+    match arg with
+    | Ainout _
+    | Anormal _ ->
+      None
+    | Anamed ((_, name), _) -> Some name
+end
+
 module InternalType = struct
   let get_var t =
     match t with
@@ -472,19 +500,28 @@ let this = Local_id.make_scoped "$this"
  * codebase. *)
 let make_tany () = Tany TanySentinel.value
 
-(* Number of required parameters. Does not include optional, variadic, or
+(* Required parameters (number and names). Does not include optional, variadic, or
  * type-splat parameters
  *)
-let arity_required ft : int =
-  let a =
-    List.count
-      ~f:(fun fp -> (not (get_fp_is_optional fp)) && not (get_fp_splat fp))
-      ft.ft_params
+let arity_and_names_required ft : int * SSet.t =
+  let non_splat_non_optional =
+    List.filter ft.ft_params ~f:(fun fp ->
+        (not (get_fp_is_optional fp)) && not (get_fp_splat fp))
   in
-  if get_ft_variadic ft then
-    a - 1
-  else
-    a
+  let (names_required, positional_params) =
+    List.partition_map non_splat_non_optional ~f:(fun fp ->
+        match Named_params.name_of_named_param fp with
+        | Some name -> First name
+        | None -> Second fp)
+  in
+  let arity_raw = List.length positional_params in
+  let arity_required =
+    if get_ft_variadic ft then
+      arity_raw - 1
+    else
+      arity_raw
+  in
+  (arity_required, SSet.of_list names_required)
 
 let get_param_mode callconv =
   match callconv with

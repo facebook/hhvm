@@ -9,7 +9,15 @@
 #include <proxygen/lib/http/webtransport/WebTransportImpl.h>
 
 namespace {
+
 constexpr uint64_t kMaxWTIngressBuf = 65535;
+
+using StreamData = proxygen::WebTransport::StreamData;
+using ReadPromiseT = folly::Promise<StreamData>;
+ReadPromiseT emptyReadPromise() {
+  return ReadPromiseT::makeEmpty();
+}
+
 } // namespace
 
 namespace proxygen {
@@ -174,6 +182,8 @@ WebTransportImpl::stopReadingWebTransportIngress(
   return res;
 }
 
+// -- StreamWriteHandle & StreamReadHandle functions below --
+
 folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
 WebTransportImpl::StreamWriteHandle::writeStreamData(
     std::unique_ptr<folly::IOBuf> data,
@@ -309,19 +319,26 @@ void WebTransportImpl::StreamWriteHandle::maybeResolveWritePromise(
   }
 }
 
-folly::SemiFuture<WebTransport::StreamData>
+WebTransportImpl::StreamReadHandle::StreamReadHandle(WebTransportImpl& impl,
+                                                     HTTPCodec::StreamID id)
+    : WebTransport::StreamReadHandle(id),
+      impl_(impl),
+      readPromise_(emptyReadPromise()) {
+}
+
+folly::SemiFuture<StreamData>
 WebTransportImpl::StreamReadHandle::readStreamData() {
   VLOG(4) << __func__;
-  CHECK(!readPromise_) << "One read at a time";
+  CHECK(!readPromise_.valid()) << "One read at a time";
   if (error_) {
     auto ex = std::move(error_);
     impl_.wtIngressStreams_.erase(getID());
-    return folly::makeSemiFuture<WebTransport::StreamData>(std::move(ex));
+    return folly::makeSemiFuture<StreamData>(std::move(ex));
   } else if (buf_.empty() && !eof_) {
     VLOG(4) << __func__ << " waiting for data";
-    auto contract = folly::makePromiseContract<WebTransport::StreamData>();
-    readPromise_.emplace(std::move(contract.promise));
-    readPromise_->setInterruptHandler(
+    auto contract = folly::makePromiseContract<StreamData>();
+    readPromise_ = std::move(contract.promise);
+    readPromise_.setInterruptHandler(
         [this](const folly::exception_wrapper& ex) {
           VLOG(4) << "Exception from interrupt handler ex=" << ex.what();
           CHECK(ex.with_exception([this](const folly::FutureCancellation& ex) {
@@ -335,7 +352,7 @@ WebTransportImpl::StreamReadHandle::readStreamData() {
   } else {
     VLOG(4) << __func__ << " returning data len=" << buf_.chainLength();
     auto bufLen = buf_.chainLength();
-    WebTransport::StreamData streamData({.data = buf_.move(), .fin = eof_});
+    StreamData streamData({.data = buf_.move(), .fin = eof_});
     impl_.bytesRead_ += bufLen;
     impl_.maybeGrantFlowControl();
 
@@ -389,15 +406,14 @@ WebTransport::FCState WebTransportImpl::StreamReadHandle::dataAvailable(
     }
   }
 
-  if (readPromise_) {
+  if (readPromise_.valid()) {
     if (data) {
       auto dataLen = data->computeChainDataLength();
       impl_.bytesRead_ += dataLen;
       impl_.maybeGrantFlowControl();
     }
-    readPromise_->setValue(
-        WebTransport::StreamData({.data = std::move(data), .fin = eof}));
-    readPromise_.reset();
+    readPromise_.setValue(StreamData({.data = std::move(data), .fin = eof}));
+    readPromise_ = emptyReadPromise();
     if (eof) {
       // unregister the read callback, but don't send STOP_SENDING
       impl_.stopReadingWebTransportIngress(getID(), folly::none);
@@ -444,9 +460,9 @@ void WebTransportImpl::StreamReadHandle::readError(
 void WebTransportImpl::StreamReadHandle::deliverReadError(
     const folly::exception_wrapper& ex) {
   cs_.requestCancellation();
-  if (readPromise_) {
-    readPromise_->setException(ex);
-    readPromise_.reset();
+  if (readPromise_.valid()) {
+    readPromise_.setException(ex);
+    readPromise_ = emptyReadPromise();
     impl_.wtIngressStreams_.erase(getID());
   } else {
     error_ = ex;

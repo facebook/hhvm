@@ -279,9 +279,7 @@ class WebTransportImpl : public WebTransport {
       : public WebTransport::StreamReadHandle
       , public quic::StreamReadCallback {
    public:
-    StreamReadHandle(WebTransportImpl& impl, HTTPCodec::StreamID id)
-        : WebTransport::StreamReadHandle(id), impl_(impl) {
-    }
+    StreamReadHandle(WebTransportImpl& impl, HTTPCodec::StreamID id);
 
     ~StreamReadHandle() override = default;
 
@@ -304,7 +302,7 @@ class WebTransportImpl : public WebTransport {
 
    private:
     WebTransportImpl& impl_;
-    folly::Optional<folly::Promise<WebTransport::StreamData>> readPromise_;
+    folly::Promise<WebTransport::StreamData> readPromise_;
     folly::IOBufQueue buf_{folly::IOBufQueue::cacheChainLength()};
     bool eof_{false};
     folly::exception_wrapper error_;

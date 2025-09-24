@@ -95,26 +95,24 @@ func (s *rocketServer) ServeContext(ctx context.Context) error {
 	transporter := func(context.Context) (transport.ServerTransport, error) {
 		return newRocketServerTransport(s.listener, s.connContext, s.proc, s.transportID, s.log, s.stats, s.pstats, s.observer), nil
 	}
-	r := rsocket.Receive().
-		Scheduler(s.requestScheduler(), s.responseScheduler()).
-		Acceptor(s.acceptor).
-		Transport(transporter)
-	return r.Serve(ctx)
-}
 
-func (s *rocketServer) requestScheduler() scheduler.Scheduler {
 	// Request scheduler must be elastic to ensure that we can quickly peek at
 	// the request metadata and set the necessary timeouts (e.g. queue timeout).
 	// The actual heavy lifting (e.g. request processing, handling, response
 	// serializaton) will be done by the response scheduler.
-	return scheduler.NewElastic(math.MaxInt32)
-}
-
-func (s *rocketServer) responseScheduler() scheduler.Scheduler {
+	requestScheduler := scheduler.NewElastic(math.MaxInt32)
+	var responseScheduler scheduler.Scheduler
 	if s.numWorkers == GoroutinePerRequest {
-		return scheduler.NewElastic(math.MaxInt32)
+		responseScheduler = scheduler.NewElastic(math.MaxInt32)
+	} else {
+		responseScheduler = scheduler.NewElastic(s.numWorkers)
 	}
-	return scheduler.NewElastic(s.numWorkers)
+
+	r := rsocket.Receive().
+		Scheduler(requestScheduler, responseScheduler).
+		Acceptor(s.acceptor).
+		Transport(transporter)
+	return r.Serve(ctx)
 }
 
 func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload, sendingSocket rsocket.CloseableRSocket) (rsocket.RSocket, error) {

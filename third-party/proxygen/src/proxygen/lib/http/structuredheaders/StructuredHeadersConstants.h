@@ -9,7 +9,6 @@
 #pragma once
 
 #include <boost/variant.hpp>
-#include <map>
 #include <unordered_map>
 #include <vector>
 

@@ -19,6 +19,7 @@ package thrift
 import (
 	"context"
 	"fmt"
+	"math"
 	"net"
 	"sync/atomic"
 	"time"
@@ -106,12 +107,12 @@ func (s *rocketServer) requestScheduler() scheduler.Scheduler {
 	// the request metadata and set the necessary timeouts (e.g. queue timeout).
 	// The actual heavy lifting (e.g. request processing, handling, response
 	// serializaton) will be done by the response scheduler.
-	return scheduler.Elastic()
+	return scheduler.NewElastic(math.MaxInt32)
 }
 
 func (s *rocketServer) responseScheduler() scheduler.Scheduler {
 	if s.numWorkers == GoroutinePerRequest {
-		return scheduler.Elastic()
+		return scheduler.NewElastic(math.MaxInt32)
 	}
 	return scheduler.NewElastic(s.numWorkers)
 }

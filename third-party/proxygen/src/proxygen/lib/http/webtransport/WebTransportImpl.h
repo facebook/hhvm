@@ -212,9 +212,7 @@ class WebTransportImpl : public WebTransport {
       : public WebTransport::StreamWriteHandle
       , public quic::StreamWriteCallback {
    public:
-    StreamWriteHandle(WebTransportImpl& tp, HTTPCodec::StreamID id)
-        : WebTransport::StreamWriteHandle(id), impl_(tp) {
-    }
+    StreamWriteHandle(WebTransportImpl& tp, HTTPCodec::StreamID id);
 
     ~StreamWriteHandle() override {
       cs_.requestCancellation();
@@ -270,7 +268,7 @@ class WebTransportImpl : public WebTransport {
     void onStreamWriteReady(quic::StreamId id, uint64_t) noexcept override;
 
     WebTransportImpl& impl_;
-    folly::Optional<folly::Promise<uint64_t>> writePromise_;
+    folly::Promise<uint64_t> writePromise_;
     std::list<BufferedWrite> bufferedWrites_;
     bool streamWriteReady_{false};
   };

@@ -18,6 +18,11 @@ ReadPromiseT emptyReadPromise() {
   return ReadPromiseT::makeEmpty();
 }
 
+using WritePromiseT = folly::Promise<uint64_t>;
+WritePromiseT emptyWritePromise() {
+  return WritePromiseT::makeEmpty();
+}
+
 } // namespace
 
 namespace proxygen {
@@ -184,6 +189,13 @@ WebTransportImpl::stopReadingWebTransportIngress(
 
 // -- StreamWriteHandle & StreamReadHandle functions below --
 
+WebTransportImpl::StreamWriteHandle::StreamWriteHandle(WebTransportImpl& tp,
+                                                       HTTPCodec::StreamID id)
+    : WebTransport::StreamWriteHandle(id),
+      impl_(tp),
+      writePromise_(emptyWritePromise()) {
+}
+
 folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
 WebTransportImpl::StreamWriteHandle::writeStreamData(
     std::unique_ptr<folly::IOBuf> data,
@@ -217,19 +229,18 @@ WebTransportImpl::StreamWriteHandle::writeStreamData(
 
 folly::Expected<folly::SemiFuture<uint64_t>, WebTransport::ErrorCode>
 WebTransportImpl::StreamWriteHandle::awaitWritable() {
-  CHECK(!writePromise_) << "awaitWritable already called";
+  CHECK(!writePromise_.valid()) << "awaitWritable already called";
   auto contract = folly::makePromiseContract<uint64_t>();
-  writePromise_.emplace(std::move(contract.promise));
-  writePromise_->setInterruptHandler(
-      [this](const folly::exception_wrapper& ex) {
-        VLOG(4) << "Exception from interrupt handler ex=" << ex.what();
-        // if awaitWritable is cancelled, just reset it
-        CHECK(ex.with_exception([this](const folly::FutureCancellation& ex) {
-          VLOG(5) << "Setting exception ex=" << ex.what();
-          writePromise_->setException(ex);
-          writePromise_.reset();
-        })) << "Unexpected exception type";
-      });
+  writePromise_ = std::move(contract.promise);
+  writePromise_.setInterruptHandler([this](const folly::exception_wrapper& ex) {
+    VLOG(4) << "Exception from interrupt handler ex=" << ex.what();
+    // if awaitWritable is cancelled, just reset it
+    CHECK(ex.with_exception([this](const folly::FutureCancellation& ex) {
+      VLOG(5) << "Setting exception ex=" << ex.what();
+      writePromise_.setException(ex);
+      writePromise_ = emptyWritePromise();
+    })) << "Unexpected exception type";
+  });
   impl_.tp_.notifyPendingWriteOnStream(id_, this);
   return std::move(contract.future);
 }
@@ -245,9 +256,9 @@ void WebTransportImpl::onWebTransportStopSending(HTTPCodec::StreamID id,
 
 void WebTransportImpl::StreamWriteHandle::onStopSending(uint32_t errorCode) {
   // The caller already decodes errorCode, if necessary
-  if (writePromise_) {
-    writePromise_->setException(WebTransport::Exception(errorCode));
-    writePromise_.reset();
+  if (writePromise_.valid()) {
+    writePromise_.setException(WebTransport::Exception(errorCode));
+    writePromise_ = emptyWritePromise();
   } else if (!stopSendingErrorCode_) {
     stopSendingErrorCode_ = errorCode;
   }
@@ -307,14 +318,14 @@ WebTransportImpl::StreamWriteHandle::flushBufferedWrites() {
  */
 void WebTransportImpl::StreamWriteHandle::maybeResolveWritePromise(
     uint64_t maxToSend) {
-  if (!writePromise_) {
+  if (!writePromise_.valid()) {
     return;
   }
 
   if (impl_.sendFlowController_.getAvailable() > 0 && streamWriteReady_ &&
       bufferedWrites_.empty()) {
-    writePromise_->setValue(maxToSend);
-    writePromise_.reset();
+    writePromise_.setValue(maxToSend);
+    writePromise_ = emptyWritePromise();
     streamWriteReady_ = false;
   }
 }

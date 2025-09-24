@@ -238,13 +238,18 @@ let snippet_for_params (params : 'a Typing_defs.fun_param list) : string =
   let param_templates =
     List.mapi params ~f:(fun i param ->
         let prefix = param_snippet_prefix param.fp_type in
+        let named_arg_snippet =
+          match Typing_defs.Named_params.name_of_named_param param with
+          | Some name -> Printf.sprintf "%s=" name
+          | None -> ""
+        in
         let placeholder =
           match param.fp_name with
           | Some param_name ->
             String.substr_replace_first param_name ~pattern:"$" ~with_:prefix
           | None -> prefix ^ string_of_int (i + 1)
         in
-        Printf.sprintf "${%d:%s}" (i + 1) placeholder)
+        Printf.sprintf "${%d:%s%s}" (i + 1) named_arg_snippet placeholder)
   in
   String.concat ~sep:", " param_templates
 
@@ -273,6 +278,27 @@ let insert_text_for_xhp_req_attrs tag attrs has_children =
   else
     InsertLiterally content
 
+let required_params_of_fun_type (ft : _ fun_type) : _ Typing_defs.fun_param list
+    =
+  let (arity_count, required_named_params) = arity_and_names_required ft in
+  let (_, required_params_rev) =
+    List.fold
+      ft.ft_params
+      ~init:(0, [])
+      ~f:(fun (positional_param_count, required_params_rev) fp ->
+        match Typing_defs.Named_params.name_of_named_param fp with
+        | Some name when SSet.mem name required_named_params ->
+          (positional_param_count, fp :: required_params_rev)
+        | Some _ ->
+          (* optional named param *)
+          (positional_param_count, required_params_rev)
+        | None when positional_param_count >= arity_count ->
+          (* optional positional param *)
+          (positional_param_count + 1, required_params_rev)
+        | None -> (positional_param_count + 1, fp :: required_params_rev))
+  in
+  List.rev required_params_rev
+
 (* If we're autocompleting a call (function or method), insert a
    template for the arguments as well as function name. *)
 let insert_text_for_fun_call
@@ -286,24 +312,19 @@ let insert_text_for_fun_call
        end up with ->methName()(1, 2). *)
     InsertLiterally fun_name
   else
-    let arity =
+    let params =
       if Tast_env.is_in_expr_tree env then
         (* Helper functions in expression trees don't have relevant
            parameter names on their decl, so don't autofill
            parameters.*)
-        0
+        []
       else
-        let (arity_count, _required_named_params) =
-          arity_and_names_required ft
-        in
-        (* TODO(named_params): use _required_named_params *)
-        arity_count
+        required_params_of_fun_type ft
     in
     let fallback = Printf.sprintf "%s()" fun_name in
-    if arity = 0 then
+    if List.is_empty params then
       InsertLiterally fallback
     else
-      let params = List.take ft.ft_params arity in
       let snippet =
         Printf.sprintf "%s(%s)" fun_name (snippet_for_params params)
       in
@@ -916,7 +937,9 @@ let autocomplete_hack_fake_arrow
     let recv_start_pos = Pos.shrink_to_start recv_pos in
 
     let fake_arrow_funs =
-      filter_fake_arrow_namespaces (hhi_funs naming_table)
+      {|\HH\Lib\Str\example_for_testing_named_params_fake_arrow|}
+      (* safe to include the above because there will be no decl for it in prod *)
+      :: filter_fake_arrow_namespaces (hhi_funs naming_table)
     in
     let compatible_funs = compatible_fun_decls env recv_ty fake_arrow_funs in
 
@@ -940,17 +963,32 @@ let autocomplete_hack_fake_arrow
         (* Construct a snippet with placeholders for any additional
            required arguments for this function. For the C\contains()
            example, this is ", ${1:\$value})". *)
-        let required_params =
+        let params =
           match Typing_defs.get_node fun_decl.fe_type with
           | Tfun ft ->
-            let (arity_count, _required_named_params) =
-              arity_and_names_required ft
+            (* We drop the first positional parameter
+               * because the user has already written the receiver *)
+            let drop_first_positional_param params =
+              params
+              |> List.fold
+                   ~init:(false, [])
+                   ~f:(fun (has_dropped_first_positional_param, params_rev) fp
+                      ->
+                     let is_named =
+                       Option.is_some
+                         (Typing_defs.Named_params.name_of_named_param fp)
+                     in
+                     if has_dropped_first_positional_param || is_named then
+                       (has_dropped_first_positional_param, fp :: params_rev)
+                     else
+                       (true, params_rev))
+              |> snd
+              |> List.rev
             in
-            (* TODO(named_params): use _required_named_params *)
-            List.take ft.ft_params arity_count
+            let required_params = required_params_of_fun_type ft in
+            drop_first_positional_param required_params
           | _ -> []
         in
-        let params = List.drop required_params 1 in
         let res_insert_text =
           match params with
           | [] -> InsertLiterally ")"

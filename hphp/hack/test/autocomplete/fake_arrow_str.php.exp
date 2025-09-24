@@ -203,3 +203,8 @@ Str\uppercase
   INSERT )
   (function(string $string)[]: string)
 SORT TEXT: none
+Str\example_for_testing_named_params_fake_arrow
+  INSERT Str\example_for_testing_named_params_fake_arrow(
+  INSERT , ${1:length=\$length})
+  (function(string $_, named int $length): void)
+SORT TEXT: none

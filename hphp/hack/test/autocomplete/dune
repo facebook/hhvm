@@ -6,7 +6,8 @@
   %{project_root}/hack/test/review.sh
   (glob_files %{project_root}/hack/test/autocomplete/HH_FLAGS)
   (glob_files %{project_root}/hack/test/autocomplete/*.php)
-  (glob_files %{project_root}/hack/test/autocomplete/*.exp))
+  (glob_files %{project_root}/hack/test/autocomplete/*.exp)
+  (glob_files %{project_root}/hack/test/autocomplete/hhi/*.hhi))
  (action
   (run
    %{project_root}/hack/test/verify.py

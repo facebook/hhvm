@@ -107,6 +107,8 @@ func (s *rocketServer) ServeContext(ctx context.Context) error {
 	} else {
 		responseScheduler = scheduler.NewElastic(s.numWorkers)
 	}
+	defer requestScheduler.Close()
+	defer responseScheduler.Close()
 
 	r := rsocket.Receive().
 		Scheduler(requestScheduler, responseScheduler).

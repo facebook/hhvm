@@ -18,6 +18,7 @@
 
 #include <thrift/lib/cpp2/async/BiDiStream.h>
 #include <thrift/lib/cpp2/async/Interaction.h>
+#include <thrift/lib/cpp2/async/RpcTypes.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/async/StreamPayload.h>
 
@@ -74,5 +75,10 @@ class ServerBiDiStreamFactory {
 };
 
 } // namespace detail
+
+struct ResponseAndServerBiDiStreamFactory {
+  SerializedResponse response;
+  detail::ServerBiDiStreamFactory bidiStream;
+};
 
 } // namespace apache::thrift

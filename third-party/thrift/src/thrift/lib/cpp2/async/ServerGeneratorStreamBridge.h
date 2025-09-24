@@ -104,13 +104,13 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
             TileStreamGuard::transferFrom(std::move(interaction)),
             contextStack)
             .scheduleOn(std::move(serverExecutor))
-            .start([sp = stream->copy()](folly::Try<folly::Unit> t) {
+            .start([stream = stream->copy()](folly::Try<folly::Unit> t) {
               if (t.hasException()) {
                 LOG(ERROR)
                     << "Closing Stream because it received an exception before it started: "
                     << std::endl
                     << t.exception();
-                sp->close();
+                stream->serverClose();
               }
             });
         std::ignore =
@@ -125,19 +125,15 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
   // TwoWayBridge methods
   //
   void consume();
-
   void canceled();
   //
   // end of TwoWayBridge methods
   //
 
-  void close();
-
-  ServerQueue getMessages();
-
-  bool wait(QueueConsumer* consumer);
-
-  void publish(folly::Try<StreamPayload>&& payload);
+  using TwoWayBridge::serverClose;
+  using TwoWayBridge::serverGetMessages;
+  using TwoWayBridge::serverPush;
+  using TwoWayBridge::serverWait;
 
  private:
 #if FOLLY_HAS_COROUTINES
@@ -173,13 +169,13 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
     while (true) {
       if (credits == 0 || pauseStream) {
         ReadyCallback ready;
-        if (stream->wait(&ready)) {
+        if (stream->serverWait(&ready)) {
           co_await ready.baton;
         }
       }
 
       {
-        auto queue = stream->getMessages();
+        auto queue = stream->serverGetMessages();
         while (!queue.empty()) {
           auto next = queue.front();
           queue.pop();
@@ -214,11 +210,11 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
               stream->cancelSource_.getToken(), gen_.next()));
       if (next.hasException()) {
         notifyStreamError(contextStack.get(), next.exception());
-        stream->publish((*encode)(std::move(next.exception())));
+        stream->serverPush((*encode)(std::move(next.exception())));
         co_return;
       }
       if (!next->has_value()) {
-        stream->publish({});
+        stream->serverPush({});
         notifyStreamCompletion(contextStack.get());
         co_return;
       }
@@ -228,12 +224,12 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
         folly::Try<StreamPayload> sp =
             encodeMessageVariant(encode, std::move(item));
         bool hasPayload = sp->payload || sp->isOrderedHeader;
-        stream->publish(std::move(sp));
+        stream->serverPush(std::move(sp));
         if (hasPayload) {
           --credits;
         }
       } else {
-        stream->publish((*encode)(std::move(item)));
+        stream->serverPush((*encode)(std::move(item)));
         --credits;
       }
 

@@ -348,24 +348,24 @@ class TestProducerCallback
       if (credits_ == 0 && updateCreditsOrCancel()) {
         return;
       }
-      stream_->publish((*encoder_)(int(i)));
+      stream_->serverPush((*encoder_)(int(i)));
       --credits_;
     }
     if (ew_) {
-      stream_->publish((*encoder_)(std::move(ew_)));
+      stream_->serverPush((*encoder_)(std::move(ew_)));
     } else {
-      stream_->publish({});
+      stream_->serverPush({});
     }
   }
 
   // returns true iff stream was cancelled by client
   bool updateCreditsOrCancel() {
     ReadyCallback consumer;
-    if (stream_->wait(&consumer)) {
+    if (stream_->serverWait(&consumer)) {
       consumer.baton.wait();
     }
 
-    auto queue = stream_->getMessages();
+    auto queue = stream_->serverGetMessages();
     while (!queue.empty()) {
       auto next = queue.front();
       queue.pop();

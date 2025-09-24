@@ -61,19 +61,6 @@ void ServerGeneratorStreamBridge::canceled() {
   Ptr(this);
 }
 
-bool ServerGeneratorStreamBridge::wait(QueueConsumer* consumer) {
-  return serverWait(consumer);
-}
-
-void ServerGeneratorStreamBridge::publish(folly::Try<StreamPayload>&& payload) {
-  serverPush(std::move(payload));
-}
-
-ServerGeneratorStreamBridge::ServerQueue
-ServerGeneratorStreamBridge::getMessages() {
-  return serverGetMessages();
-}
-
 bool ServerGeneratorStreamBridge::onStreamRequestN(uint64_t credits) {
   clientPush(std::move(credits));
   return true;
@@ -126,10 +113,6 @@ void ServerGeneratorStreamBridge::processClientMessages() {
       }
     }
   }
-}
-
-void ServerGeneratorStreamBridge::close() {
-  serverClose();
 }
 
 //

@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -463,6 +464,10 @@ struct php_x509_request {
 
 ///////////////////////////////////////////////////////////////////////////////
 // utilities
+struct OpenSSLException : SystemLib::ClassLoader<"OpenSSLException"> {};
+[[noreturn]] void throw_openssl_exception(const std::string& msg){
+  throw_object(OpenSSLException::classof(), make_vec_array(msg));
+}
 
 static void add_assoc_name_entry(Array &ret, const char *key,
                                  X509_NAME *name, bool shortname) {
@@ -1197,6 +1202,32 @@ Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
 
  cleanup:
   php_openssl_dispose_config(&req);
+  return ret;
+}
+
+Array HHVM_FUNCTION(openssl_csr_get_dns_names, const Variant& csr) {
+  auto pcsr = CSRequest::Get(csr);
+  if (!pcsr) throw_openssl_exception("Could not parse CSR");
+  auto ret = Array::CreateVec();
+  STACK_OF(X509_EXTENSION) *csr_exts = X509_REQ_get_extensions(pcsr->csr());
+  if (!csr_exts) return ret;
+  STACK_OF(GENERAL_NAME) *subject_alt_names = (STACK_OF(GENERAL_NAME) *)X509V3_get_d2i(
+    csr_exts,
+    NID_subject_alt_name,
+    NULL,
+    NULL // at least once
+  );
+  if (!subject_alt_names) return ret;
+  // get DNS names from SANs
+  for (int i = 0; i < sk_GENERAL_NAME_num(subject_alt_names); i++){
+    const GENERAL_NAME *general_name = sk_GENERAL_NAME_value(subject_alt_names, i);
+    if (!general_name) continue;
+    if (general_name->type == GEN_DNS) {
+      const ASN1_IA5STRING *dns_name = general_name->d.dNSName;
+      if (!dns_name) continue;
+      ret.append(String((char *)dns_name->data,dns_name->length, CopyString));
+    }
+  }
   return ret;
 }
 
@@ -3420,6 +3451,7 @@ struct opensslExtension final : Extension {
     HHVM_FE(openssl_csr_export);
     HHVM_FE(openssl_csr_get_public_key);
     HHVM_FE(openssl_csr_get_subject);
+    HHVM_FE(openssl_csr_get_dns_names);
     HHVM_FE(openssl_csr_new);
     HHVM_FE(openssl_csr_sign);
     HHVM_FE(openssl_error_string);

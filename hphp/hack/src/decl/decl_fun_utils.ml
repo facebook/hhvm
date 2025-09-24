@@ -140,7 +140,7 @@ let check_params_for_bad_optional_keyword ~from_abstract_method env paraml :
       else
         None)
 
-(** Required parameters must not come before optional parameters.
+(** Required positional parameters must not come before optional positional parameters.
     For example: function foo(int $x, ?int $y = null, int $z)
     produces an error for parameter $z *)
 let check_params_for_required_after_optional ~from_abstract_method paraml :
@@ -151,8 +151,11 @@ let check_params_for_required_after_optional ~from_abstract_method paraml :
       | Seen_optional_or_default
       | Found_required_after_optional_or_default of ('a, 'b) Aast_defs.fun_param
   end in
+  let positional_params =
+    List.filter paraml ~f:(fun param -> Option.is_none param.param_named)
+  in
   let res =
-    List.fold paraml ~init:Init ~f:(fun state param : _ t ->
+    List.fold positional_params ~init:Init ~f:(fun state param : _ t ->
         let is_optional_or_default =
           Option.is_some (Aast_utils.get_param_default param)
           || Aast_utils.is_param_optional param

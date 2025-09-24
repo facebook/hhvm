@@ -66,8 +66,6 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
     virtual ~ProducerCallback() = default;
   };
 
-  ~ServerGeneratorStreamBridge() override;
-
   static ServerStreamFactory fromProducerCallback(ProducerCallback* cb);
 
 #if FOLLY_HAS_COROUTINES

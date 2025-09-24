@@ -35,8 +35,6 @@ ServerGeneratorStreamBridge::ServerGeneratorStreamBridge(
       evb_(evb),
       contextStack_(std::move(contextStack)) {}
 
-ServerGeneratorStreamBridge::~ServerGeneratorStreamBridge() {}
-
 /* static */ ServerStreamFactory
 ServerGeneratorStreamBridge::fromProducerCallback(ProducerCallback* cb) {
   return ServerStreamFactory([cb](

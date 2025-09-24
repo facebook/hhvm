@@ -166,6 +166,50 @@ thrift_generate(
   THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
 )
 
+thrift_generate(
+  "record" #file_name
+  "" #services
+  "cpp2" #language
+  "no_metadata" #options
+  "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
+  "${CMAKE_CURRENT_BINARY_DIR}" #output_path
+  "thrift/lib/thrift" #include_prefix
+  THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
+)
+
+thrift_generate(
+  "schema" #file_name
+  "" #services
+  "cpp2" #language
+  "no_metadata" #options
+  "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
+  "${CMAKE_CURRENT_BINARY_DIR}" #output_path
+  "thrift/lib/thrift" #include_prefix
+  THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
+)
+
+thrift_generate(
+  "type_id" #file_name
+  "" #services
+  "cpp2" #language
+  "no_metadata" #options
+  "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
+  "${CMAKE_CURRENT_BINARY_DIR}" #output_path
+  "thrift/lib/thrift" #include_prefix
+  THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
+)
+
+thrift_generate(
+  "type_system" #file_name
+  "" #services
+  "cpp2" #language
+  "no_metadata" #options
+  "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
+  "${CMAKE_CURRENT_BINARY_DIR}" #output_path
+  "thrift/lib/thrift" #include_prefix
+  THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
+)
+
 set_property(GLOBAL PROPERTY any_rep-cpp2-SOURCES ${any_rep-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY RpcMetadata-cpp2-SOURCES
   ${RpcMetadata-cpp2-SOURCES})
@@ -175,7 +219,13 @@ set_property(GLOBAL PROPERTY metadata-cpp2-SOURCES ${metadata-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY RocketUpgrade-cpp2-SOURCES
   ${RocketUpgrade-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY id-cpp2-SOURCES ${id-cpp2-SOURCES})
+set_property(GLOBAL PROPERTY record-cpp2-SOURCES ${record-cpp2-SOURCES})
+set_property(GLOBAL PROPERTY schema-cpp2-SOURCES ${schema-cpp2-SOURCES})
+set_property(GLOBAL PROPERTY type_id-cpp2-SOURCES ${type_id-cpp2-SOURCES})
+set_property(GLOBAL PROPERTY
+  type_system-cpp2-SOURCES ${type_system-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY standard-cpp2-SOURCES ${standard-cpp2-SOURCES})
+
 set_property(GLOBAL PROPERTY type_rep-cpp2-SOURCES ${type_rep-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY type-cpp2-SOURCES ${type-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY serverdbginfo-cpp2-SOURCES

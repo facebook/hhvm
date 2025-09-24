@@ -15,6 +15,10 @@
 # Set the cpp2 directory
 set(LIB_CPP2_HOME ${CMAKE_CURRENT_SOURCE_DIR})
 
+if (THRIFT_LIB_ONLY OR build_all)
+  add_subdirectory(schema)
+endif ()
+
 if (enable_tests)
   add_subdirectory(protocol/test)
   add_subdirectory(test)
@@ -41,7 +45,24 @@ get_property(type_rep-cpp2-SOURCES GLOBAL PROPERTY type_rep-cpp2-SOURCES)
 get_property(type-cpp2-SOURCES GLOBAL PROPERTY type-cpp2-SOURCES)
 get_property(serverdbginfo-cpp2-SOURCES GLOBAL PROPERTY
   serverdbginfo-cpp2-SOURCES)
+get_property(protocol-cpp2-SOURCES GLOBAL PROPERTY protocol-cpp2-SOURCES)
+get_property(protocol_detail-cpp2-SOURCES GLOBAL PROPERTY
+  protocol_detail-cpp2-SOURCES)
+get_property(record-cpp2-SOURCES GLOBAL PROPERTY record-cpp2-SOURCES)
 
+get_property(schema-cpp2-SOURCES GLOBAL PROPERTY schema-cpp2-SOURCES)
+get_property(type_id-cpp2-SOURCES GLOBAL PROPERTY type_id-cpp2-SOURCES)
+get_property(type_system-cpp2-SOURCES GLOBAL PROPERTY type_system-cpp2-SOURCES)
+get_property(syntax_graph-cpp2-SOURCES GLOBAL PROPERTY
+  syntax_graph-cpp2-SOURCES)
+
+bypass_source_check("${type_id-cpp2-SOURCES}")
+bypass_source_check("${protocol-cpp2-SOURCES}")
+bypass_source_check("${protocol_detail-cpp2-SOURCES}")
+bypass_source_check("${type_system-cpp2-SOURCES}")
+bypass_source_check("${schema-cpp2-SOURCES}")
+bypass_source_check("${record-cpp2-SOURCES}")
+bypass_source_check("${syntax_graph-cpp2-SOURCES}")
 bypass_source_check("${metadata-cpp2-SOURCES}")
 add_library(
   thriftmetadata
@@ -51,8 +72,38 @@ add_library(
   protocol/CompactProtocol.cpp # can't link against thriftprotocol, dep cycle
   ../cpp/protocol/TProtocolException.cpp
   ../cpp/util/VarintUtils.cpp
+
+  dynamic/SerializableRecord.cpp
+  dynamic/SerializableTypeSystemBuilder.cpp
+  dynamic/TypeId.cpp
+  dynamic/TypeSystem.cpp
+  dynamic/TypeSystemBuilder.cpp
+  runtime/BaseSchemaRegistry.cpp
+  runtime/Init.cpp
+  runtime/SchemaRegistry.cpp
+  schema/detail/Merge.cpp
+  schema/detail/SchemaBackedResolver.cpp
+  schema/SyntaxGraph.cpp
+  ../thrift/detail/protocol.cpp
+  ../thrift/detail/TypeIdAdapter.cpp
+  ../thrift/detail/TypeSystemAdapter.cpp
+
+  ${protocol-cpp2-SOURCES}
+  ${protocol_detail-cpp2-SOURCES}
+  ${type_id-cpp2-SOURCES}
+  ${type_system-cpp2-SOURCES}
+  ${schema-cpp2-SOURCES}
+  ${record-cpp2-SOURCES}
+  ${syntax_graph-cpp2-SOURCES}
 )
-add_dependencies(thriftmetadata metadata-cpp2-target)
+add_dependencies(thriftmetadata metadata-cpp2-target
+  protocol-cpp2-target
+  protocol_detail-cpp2-target
+  type_id-cpp2-target
+  type_system-cpp2-target
+  schema-cpp2-target
+  record-cpp2-target
+  syntax_graph-cpp2-target)
 target_link_libraries(
   thriftmetadata
   PUBLIC
@@ -268,7 +319,6 @@ add_library(
   gen/module_constants_cpp.cpp
   gen/module_metadata_cpp.cpp
   gen/module_types_cpp.cpp
-  runtime/BaseSchemaRegistry.cpp
   security/AsyncStopTLS.cpp
   security/FizzPeeker.cpp
   security/SSLUtil.cpp

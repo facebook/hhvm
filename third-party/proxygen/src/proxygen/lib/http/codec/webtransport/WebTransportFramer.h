@@ -24,7 +24,8 @@ enum class CapsuleType : uint32_t {
   WT_STREAM_WITH_FIN = 0x190B4D3C,
   WT_MAX_DATA = 0x190B4D3D,
   WT_MAX_STREAM_DATA = 0x190B4D3E,
-  WT_MAX_STREAMS = 0x190B4D3F,
+  WT_MAX_STREAMS_BIDI = 0x190B4D3F,
+  WT_MAX_STREAMS_UNI = 0x190B4D40,
   WT_DATA_BLOCKED = 0x190B4D41,
   WT_STREAM_DATA_BLOCKED = 0x190B4D42,
   WT_STREAMS_BLOCKED = 0x190B4D43,
@@ -149,7 +150,8 @@ WriteResult writeWTMaxData(folly::IOBufQueue& queue,
 WriteResult writeWTMaxStreamData(folly::IOBufQueue& queue,
                                  const WTMaxStreamDataCapsule& capsule);
 WriteResult writeWTMaxStreams(folly::IOBufQueue& queue,
-                              const WTMaxStreamsCapsule& capsule);
+                              const WTMaxStreamsCapsule& capsule,
+                              bool isBidi);
 WriteResult writeWTDataBlocked(folly::IOBufQueue& queue,
                                const WTDataBlockedCapsule& capsule);
 WriteResult writeWTStreamDataBlocked(folly::IOBufQueue& queue,

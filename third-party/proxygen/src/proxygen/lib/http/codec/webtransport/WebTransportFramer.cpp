@@ -398,15 +398,17 @@ WriteResult writeWTMaxStreamData(folly::IOBufQueue& queue,
 }
 
 WriteResult writeWTMaxStreams(folly::IOBufQueue& queue,
-                              const WTMaxStreamsCapsule& capsule) {
+                              const WTMaxStreamsCapsule& capsule,
+                              bool isBidi) {
   size_t size = 0;
   bool error = false;
   auto capsuleLen = getCapsuleSize<1, 0>({capsule.maximumStreams}, {});
   if (capsuleLen.hasError()) {
     return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
   }
-  writeCapsuleHeader(
-      queue, CapsuleType::WT_MAX_STREAMS, size, error, capsuleLen.value());
+  auto type = isBidi ? CapsuleType::WT_MAX_STREAMS_BIDI
+                     : CapsuleType::WT_MAX_STREAMS_UNI;
+  writeCapsuleHeader(queue, type, size, error, capsuleLen.value());
   writeVarint(queue, capsule.maximumStreams, size, error);
   if (error) {
     return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);

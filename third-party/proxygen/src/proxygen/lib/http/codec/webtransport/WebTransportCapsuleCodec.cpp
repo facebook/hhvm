@@ -84,11 +84,22 @@ WebTransportCapsuleCodec::parseCapsule(folly::io::Cursor& cursor) {
       }
       break;
     }
-    case folly::to_underlying(CapsuleType::WT_MAX_STREAMS): {
+    case folly::to_underlying(CapsuleType::WT_MAX_STREAMS_BIDI): {
       auto res = parseWTMaxStreams(cursor, curCapsuleLength_);
       if (res) {
         if (callback_) {
-          callback_->onWTMaxStreamsCapsule(std::move(res.value()));
+          callback_->onWTMaxStreamsBidiCapsule(std::move(res.value()));
+        }
+      } else {
+        return folly::makeUnexpected(res.error());
+      }
+      break;
+    }
+    case folly::to_underlying(CapsuleType::WT_MAX_STREAMS_UNI): {
+      auto res = parseWTMaxStreams(cursor, curCapsuleLength_);
+      if (res) {
+        if (callback_) {
+          callback_->onWTMaxStreamsUniCapsule(std::move(res.value()));
         }
       } else {
         return folly::makeUnexpected(res.error());

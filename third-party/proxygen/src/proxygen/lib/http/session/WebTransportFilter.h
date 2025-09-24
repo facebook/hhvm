@@ -241,7 +241,10 @@ class WebTransportFilter
   void onWTMaxStreamDataCapsule(WTMaxStreamDataCapsule /*capsule*/) override {
     XLOG(DBG1) << __func__;
   }
-  void onWTMaxStreamsCapsule(WTMaxStreamsCapsule /*capsule*/) override {
+  void onWTMaxStreamsBidiCapsule(WTMaxStreamsCapsule /*capsule*/) override {
+    XLOG(DBG1) << __func__;
+  }
+  void onWTMaxStreamsUniCapsule(WTMaxStreamsCapsule /*capsule*/) override {
     XLOG(DBG1) << __func__;
   }
   void onWTDataBlockedCapsule(WTDataBlockedCapsule /*capsule*/) override {

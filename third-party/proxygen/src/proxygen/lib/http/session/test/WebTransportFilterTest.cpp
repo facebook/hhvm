@@ -37,7 +37,14 @@ class MockWebTransportFilter : public WebTransportFilter {
               onWTMaxStreamDataCapsule,
               (WTMaxStreamDataCapsule),
               (override));
-  MOCK_METHOD(void, onWTMaxStreamsCapsule, (WTMaxStreamsCapsule), (override));
+  MOCK_METHOD(void,
+              onWTMaxStreamsBidiCapsule,
+              (WTMaxStreamsCapsule),
+              (override));
+  MOCK_METHOD(void,
+              onWTMaxStreamsUniCapsule,
+              (WTMaxStreamsCapsule),
+              (override));
   MOCK_METHOD(void, onWTDataBlockedCapsule, (WTDataBlockedCapsule), (override));
   MOCK_METHOD(void,
               onWTStreamDataBlockedCapsule,

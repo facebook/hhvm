@@ -1041,7 +1041,8 @@ static int inner_main(int argc, char** argv) {
   // signal handling. We want to swap to folly signal handling, so we'll do a
   // full init on Linux to test it. We should remove this if in the future.
   if (kUseFollySignalHandler) {
-    folly::init(&argc, &argv, folly::InitOptions().useGFlags(false));
+    folly::unsafe_unscoped_init(
+        &argc, &argv, folly::InitOptions().useGFlags(false));
   } else {
     folly::SingletonVault::singleton()->registrationComplete();
   }

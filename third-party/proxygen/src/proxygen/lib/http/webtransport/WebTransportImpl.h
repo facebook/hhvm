@@ -307,7 +307,7 @@ class WebTransportImpl : public WebTransport {
     folly::Optional<folly::Promise<WebTransport::StreamData>> readPromise_;
     folly::IOBufQueue buf_{folly::IOBufQueue::cacheChainLength()};
     bool eof_{false};
-    folly::Optional<folly::exception_wrapper> error_;
+    folly::exception_wrapper error_;
   };
 
  private:

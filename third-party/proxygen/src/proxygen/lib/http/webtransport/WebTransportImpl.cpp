@@ -314,7 +314,7 @@ WebTransportImpl::StreamReadHandle::readStreamData() {
   VLOG(4) << __func__;
   CHECK(!readPromise_) << "One read at a time";
   if (error_) {
-    auto ex = std::move(*error_);
+    auto ex = std::move(error_);
     impl_.wtIngressStreams_.erase(getID());
     return folly::makeSemiFuture<WebTransport::StreamData>(std::move(ex));
   } else if (buf_.empty() && !eof_) {

@@ -66,10 +66,11 @@ void printUsage(const char* option, const char* description) {
         current_group = opt.group;
         fprintf(stderr, "\n  %s\n", current_group.c_str());
       }
-      if (opt.short_option)
+      if (opt.short_option) {
         fprintf(stderr, "\t-%c,", opt.short_option);
-      else
+      } else {
         fprintf(stderr, "\t   ");
+      }
 
       fprintf(
           stderr,
@@ -78,8 +79,9 @@ void printUsage(const char* option, const char* description) {
           opt.long_option.c_str(),
           opt.docstring.c_str());
 
-      if (opt.type != McrouterOptionData::Type::toggle)
+      if (opt.type != McrouterOptionData::Type::toggle) {
         fprintf(stderr, " [default: %s]", opt.default_value.c_str());
+      }
 
       fprintf(stderr, "\n");
     }

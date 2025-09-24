@@ -311,7 +311,7 @@ void validateIdentitiesAreUnique(
     if (seenIds.contains(field.identity()->id())) {
       throw InvalidTypeError(fmt::format(
           "Duplicate field id '{}' in structured type '{}'",
-          field.identity()->id(),
+          folly::to_underlying(field.identity()->id()),
           uri));
     }
     seenIds.insert(field.identity()->id());

@@ -36,5 +36,8 @@ std::size_t std::hash<FieldIdentity>::operator()(
 fmt::format_context::iterator fmt::formatter<FieldIdentity>::format(
     const FieldIdentity& identity, fmt::format_context& ctx) const {
   return fmt::format_to(
-      ctx.out(), "({}, '{}')", identity.id(), identity.name());
+      ctx.out(),
+      "({}, '{}')",
+      folly::to_underlying(identity.id()),
+      identity.name());
 }

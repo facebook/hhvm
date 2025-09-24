@@ -168,7 +168,7 @@ std::string_view toString(Primitive p) {
       return "BINARY";
     default:
       folly::throw_exception<std::logic_error>(
-          fmt::format("Unknown Primitive value '{}'", p));
+          fmt::format("Unknown Primitive value '{}'", folly::to_underlying(p)));
   };
 }
 
@@ -421,7 +421,7 @@ void FieldNode::printTo(
     tree_printer::scope& scope, detail::VisitationTracker& visited) const {
   scope.print(
       "FieldNode (id={}, presence={}, name='{}')",
-      id(),
+      folly::to_underlying(id()),
       enumNameSafe(presence()),
       name());
   type().printTo(scope.make_child("type = "), visited);
@@ -595,13 +595,19 @@ void FunctionNode::Response::printTo(
 
 void FunctionNode::Param::printTo(
     tree_printer::scope& scope, detail::VisitationTracker& visited) const {
-  scope.print("FunctionNode::Param (id={}, name='{}')", id(), name());
+  scope.print(
+      "FunctionNode::Param (id={}, name='{}')",
+      folly::to_underlying(id()),
+      name());
   type().printTo(scope.make_child("type = "), visited);
 }
 
 void FunctionNode::Exception::printTo(
     tree_printer::scope& scope, detail::VisitationTracker& visited) const {
-  scope.print("FunctionNode::Exception (id={}, name='{}')", id(), name());
+  scope.print(
+      "FunctionNode::Exception (id={}, name='{}')",
+      folly::to_underlying(id()),
+      name());
   type().printTo(scope.make_child("type = "), visited);
 }
 

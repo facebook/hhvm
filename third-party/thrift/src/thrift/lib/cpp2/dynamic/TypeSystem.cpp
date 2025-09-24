@@ -43,7 +43,7 @@ StructuredNode::StructuredNode(
     if (!emplaced) {
       folly::throw_exception<InvalidTypeError>(fmt::format(
           "duplicate field id '{}' in struct '{}'",
-          field.identity().id(),
+          folly::to_underlying(field.identity().id()),
           uri_));
     }
     emplaced = fieldHandleByName_

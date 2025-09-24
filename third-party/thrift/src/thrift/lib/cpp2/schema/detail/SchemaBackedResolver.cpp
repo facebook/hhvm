@@ -378,8 +378,11 @@ decltype(auto) visitDefinition(
 }
 
 const ProgramNode& SchemaIndex::programOf(const type::ProgramId& id) const {
-  return folly::get_or_throw<InvalidSyntaxGraphError>(
-      programsById_, id, "Unknown ProgramId: ");
+  if (auto p = folly::get_ptr(programsById_, id)) {
+    return *p;
+  }
+  folly::throw_exception_fmt_format<InvalidSyntaxGraphError>(
+      "Unknown ProgramId: {}", folly::to_underlying(id));
 }
 
 const type::DefinitionKey& SchemaIndex::definitionKeyOf(
@@ -468,8 +471,11 @@ TypeRef SchemaIndex::typeOf(const type::TypeStruct& type) {
 }
 
 const protocol::Value& SchemaIndex::valueOf(const type::ValueId& id) const {
-  return folly::get_or_throw<InvalidSyntaxGraphError>(
-      valuesById_, id, "Unknown ValueId: ");
+  if (auto p = folly::get_ptr(valuesById_, id)) {
+    return *p;
+  }
+  folly::throw_exception_fmt_format<InvalidSyntaxGraphError>(
+      "Unknown ValueId: {}", folly::to_underlying(id));
 }
 
 const DefinitionNode* SchemaIndex::definitionOf(

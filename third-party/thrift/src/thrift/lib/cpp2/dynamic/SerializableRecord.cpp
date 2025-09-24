@@ -427,17 +427,25 @@ namespace {
 void printTo(tree_printer::scope& scope, const SerializableRecord& record) {
   record.visit(
       [&](SerializableRecord::Bool value) {
-        scope.print("Bool({})", value ? "true" : "false");
+        scope.print("Bool({})", value.datum ? "true" : "false");
       },
-      [&](SerializableRecord::Int8 value) { scope.print("Int8({})", value); },
-      [&](SerializableRecord::Int16 value) { scope.print("Int16({})", value); },
-      [&](SerializableRecord::Int32 value) { scope.print("Int32({})", value); },
-      [&](SerializableRecord::Int64 value) { scope.print("Int64({})", value); },
+      [&](SerializableRecord::Int8 value) {
+        scope.print("Int8({})", value.datum);
+      },
+      [&](SerializableRecord::Int16 value) {
+        scope.print("Int16({})", value.datum);
+      },
+      [&](SerializableRecord::Int32 value) {
+        scope.print("Int32({})", value.datum);
+      },
+      [&](SerializableRecord::Int64 value) {
+        scope.print("Int64({})", value.datum);
+      },
       [&](SerializableRecord::Float32 value) {
-        scope.print("Float32({})", value);
+        scope.print("Float32({})", value.datum);
       },
       [&](SerializableRecord::Float64 value) {
-        scope.print("Float64({})", value);
+        scope.print("Float64({})", value.datum);
       },
       [&](const SerializableRecord::Text& value) {
         scope.print("Text(\"{}\")", apache::thrift::detail::escape(value));
@@ -449,7 +457,8 @@ void printTo(tree_printer::scope& scope, const SerializableRecord& record) {
       [&](const SerializableRecord::FieldSet& value) {
         scope.print("FieldSet(size={})", value.size());
         for (const auto& [fieldId, field] : value) {
-          printTo(scope.make_child("{} → ", fieldId), field);
+          printTo(
+              scope.make_child("{} → ", folly::to_underlying(fieldId)), field);
         }
       },
       [&](const SerializableRecord::List& value) {

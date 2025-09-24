@@ -58,7 +58,7 @@ func DecodeResponsePayload(msg payload.Payload) (*responsePayload, error) {
 	if err := format.DecodeCompact(metadataBytes, res.metadata); err != nil {
 		return nil, err
 	}
-	res.data, err = maybeDecompress(res.data, res.metadata.GetCompression())
+	res.data, err = MaybeDecompress(res.data, res.metadata.GetCompression())
 	if err != nil {
 		return nil, fmt.Errorf("response payload decompression failed: %w", err)
 	}
@@ -96,7 +96,7 @@ func EncodeResponsePayload(
 		return payload.New(nil, metadataBytes), nil
 	}
 
-	dataBytes, err = maybeCompress(dataBytes, compression)
+	dataBytes, err = MaybeCompress(dataBytes, compression)
 	if err != nil {
 		return nil, err
 	}

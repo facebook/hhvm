@@ -19,10 +19,52 @@ package rocket
 import (
 	"bytes"
 	"compress/zlib"
+	"errors"
 	"io"
 
+	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	"github.com/klauspost/compress/zstd"
 )
+
+// MaybeCompress compresses data based on the given compression algorithm.
+func MaybeCompress(data []byte, compression rpcmetadata.CompressionAlgorithm) ([]byte, error) {
+	switch compression {
+	case rpcmetadata.CompressionAlgorithm_NONE:
+		return data, nil
+	case rpcmetadata.CompressionAlgorithm_ZSTD:
+		return compressZstd(data)
+	case rpcmetadata.CompressionAlgorithm_ZSTD_LESS:
+		return compressZstdLess(data)
+	case rpcmetadata.CompressionAlgorithm_ZSTD_MORE:
+		return compressZstdMore(data)
+	case rpcmetadata.CompressionAlgorithm_ZLIB:
+		return compressZlib(data)
+	case rpcmetadata.CompressionAlgorithm_ZLIB_LESS:
+		return compressZlibLess(data)
+	case rpcmetadata.CompressionAlgorithm_ZLIB_MORE:
+		return compressZlibMore(data)
+	default:
+		return nil, errors.New("unknown or unsupported compression algorithm")
+	}
+}
+
+// MaybeDecompress decompresses data based on the given compression algorithm.
+func MaybeDecompress(data []byte, compression rpcmetadata.CompressionAlgorithm) ([]byte, error) {
+	switch compression {
+	case rpcmetadata.CompressionAlgorithm_NONE:
+		return data, nil
+	case rpcmetadata.CompressionAlgorithm_ZSTD,
+		rpcmetadata.CompressionAlgorithm_ZSTD_LESS,
+		rpcmetadata.CompressionAlgorithm_ZSTD_MORE:
+		return decompressZstd(data)
+	case rpcmetadata.CompressionAlgorithm_ZLIB,
+		rpcmetadata.CompressionAlgorithm_ZLIB_LESS,
+		rpcmetadata.CompressionAlgorithm_ZLIB_MORE:
+		return decompressZlib(data)
+	default:
+		return nil, errors.New("unknown or unsupported compression algorithm")
+	}
+}
 
 // ## Request Compression
 // Requests may be compressed by the client after they have been serialized as described in #Request-serialization. If the request was compressed, the compression algorithm must be specified in the request metadata.

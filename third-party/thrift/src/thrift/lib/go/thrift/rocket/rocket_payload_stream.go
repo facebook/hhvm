@@ -55,7 +55,7 @@ func DecodeStreamPayload(msg payload.Payload) (*streamPayload, error) {
 	if err := format.DecodeCompact(metadataBytes, res.metadata); err != nil {
 		return nil, err
 	}
-	res.data, err = maybeDecompress(res.data, res.metadata.GetCompression())
+	res.data, err = MaybeDecompress(res.data, res.metadata.GetCompression())
 	if err != nil {
 		return nil, fmt.Errorf("stream payload decompression failed: %w", err)
 	}
@@ -93,7 +93,7 @@ func EncodeStreamPayload(
 		return payload.New(nil, metadataBytes), nil
 	}
 
-	dataBytes, err = maybeCompress(dataBytes, compression)
+	dataBytes, err = MaybeCompress(dataBytes, compression)
 	if err != nil {
 		return nil, err
 	}

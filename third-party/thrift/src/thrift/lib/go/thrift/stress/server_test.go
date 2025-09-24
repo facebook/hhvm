@@ -36,15 +36,12 @@ import (
 )
 
 func TestServerStress(t *testing.T) {
-	t.Run("Header", func(t *testing.T) {
-		runStressTest(t, thrift.TransportIDHeader)
+	t.Run("UpgradeToRocket", func(t *testing.T) {
+		runStressTest(t, thrift.TransportIDUpgradeToRocket)
 	})
-	// t.Run("UpgradeToRocket", func(t *testing.T) {
-	// 	runStressTest(t, thrift.TransportIDUpgradeToRocket)
-	// })
-	// t.Run("Rocket", func(t *testing.T) {
-	// 	runStressTest(t, thrift.TransportIDRocket)
-	// })
+	t.Run("Rocket", func(t *testing.T) {
+		runStressTest(t, thrift.TransportIDRocket)
+	})
 }
 
 func runStressTest(t *testing.T, serverTransport thrift.TransportID) {
@@ -158,6 +155,9 @@ func runStressTest(t *testing.T, serverTransport thrift.TransportID) {
 	serverCancel()
 	err = serverEG.Wait()
 	require.ErrorIs(t, err, context.Canceled)
+
+	// A tiny sleep to allow for some lingering goroutines to finish up.
+	time.Sleep(10 * time.Millisecond)
 
 	// Go routine check (after server shutdown)
 	// We shouldn't exceed 10 Go-routines, if we do - something didn't get cleaned up properly.

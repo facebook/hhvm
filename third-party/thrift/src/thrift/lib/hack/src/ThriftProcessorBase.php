@@ -24,6 +24,7 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
   abstract const string THRIFT_SVC_NAME;
   protected TProcessorEventHandler $eventHandler_;
   private bool $isSubRequest = false;
+  private vec<int> $flushTimes = vec[];
 
   public function __construct(protected this::TThriftIf $handler)[] {
     $this->eventHandler_ = new TProcessorEventHandler();
@@ -144,15 +145,35 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
     $transport->resetBuffer();
     $server_stream = await gen_start_thrift_stream($encoded_first_response);
 
-    $payload_encoder = ThriftStreamingSerializationHelpers::encodeStreamHelper(
-      $stream_response_type,
-      $output,
-    );
+    $payload_encoder =
+      $this->encodeStreamWithLatencyTracking($stream_response_type, $output);
     if ($server_stream === null) {
       // Stream was cancelled by the client.
       return;
     }
     await $server_stream->genStream<TStreamType>($stream, $payload_encoder);
+  }
+
+  final protected function encodeStreamWithLatencyTracking<
+    TStreamPayloadType as IResultThriftStruct with {
+      type TResult = TStreamType },
+    TStreamType,
+  >(
+    classname<TStreamPayloadType> $stream_response_type,
+    TProtocol $output,
+  ): (function(?TStreamType, ?Exception): (string, bool)) {
+    $payload_encoder = ThriftStreamingSerializationHelpers::encodeStreamHelper(
+      $stream_response_type,
+      $output,
+    );
+    return (?TStreamType $payload, ?\Exception $ex) ==> {
+      $this->flushTimes[] = request_stats_total_wall();
+      if (C\count($this->flushTimes) === 1) {
+        $flush0 = $this->flushTimes[0];
+        PerfMetadata::get()->setThriftFlush0Duration($flush0);
+      }
+      return $payload_encoder($payload, $ex);
+    };
   }
 
   final public function isSupportedMethod(string $fname_with_prefix)[]: bool {

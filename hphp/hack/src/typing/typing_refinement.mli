@@ -11,17 +11,7 @@
 type dnf_ty = Typing_defs.locl_ty list list
 
 module Uninstantiated_typing_logic : sig
-  type ty =
-    | Predicate of Typing_defs.type_predicate
-    | LoclTy of Typing_defs.locl_ty
-
-  type subtype_prop =
-    | Valid
-    | Invalid
-    | IsSubtype of ty * ty
-    | Conj of subtype_prop * subtype_prop
-    | Disj of subtype_prop * subtype_prop
-    | Instantiated of Typing_logic.subtype_prop
+  type subtype_prop
 
   val valid : subtype_prop
 

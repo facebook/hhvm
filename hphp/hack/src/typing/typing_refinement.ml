@@ -342,14 +342,32 @@ module TyPredicate = struct
 end
 
 module Uninstantiated_typing_logic = struct
-  type ty =
-    | Predicate of Typing_defs.type_predicate
-    | LoclTy of Typing_defs.locl_ty
+  type is_subtype_special_class = {
+    sub_reason: Reason.t;
+    sub_id: Ast_defs.id_;
+    sub_args: type_tag_generic list;
+    super_reason: Reason.t;
+    super_id: pos_id;
+    super_exact: exact;
+    super_args: locl_ty list;
+  }
 
   type subtype_prop =
     | Valid
     | Invalid
-    | IsSubtype of ty * ty
+    (* The only uninstantiated relation that we produce is for the GADT-style
+       inference when refining a value of one class type by a predicate of a
+       descendant class type. We represent this using the components of each
+       side to (a) represent this assumption and (b) because we need super_exact
+       when instantiating the proposition.
+       This prop is instantiated into a TL.IsSubtype of two class types but
+       where we copy the exact of the super type onto the sub type we get by
+       converting the predicate.
+       We do this because otherwise with-refinements on the super type might
+       cause the subtype relationship to not hold (and not produce any
+       refinements on generics).
+    *)
+    | IsSubtypeSpecialClass of is_subtype_special_class
     | Conj of subtype_prop * subtype_prop
     | Disj of subtype_prop * subtype_prop
     | Instantiated of Typing_logic.subtype_prop
@@ -362,20 +380,72 @@ module Uninstantiated_typing_logic = struct
 
   let disj a b = Disj (a, b)
 
-  let instantiate_ty map pos = function
-    | Predicate predicate -> TyPredicate.to_ty map pos predicate
-    | LoclTy ty -> ty
-
   module TL = Typing_logic
+
+  (* This converts any exact with-refinements (e.g. type T = int) into the
+     equivalent loose refinements (e.g. type T as int super int).
+     The reason for this is that an exact refinement will shadow any existing
+     information about the type constant on the class while loose refinements
+     are added on.
+     This is used when copying the with-refinements from the super type onto
+     the sub type for IsSubtypeSpecialClass.
+     It's relevant in the case that the super class has an exact refinement but
+     the sub class already has the type constant bounded or assigned.
+  *)
+  let replace_exact_with_loose = function
+    | Exact -> Exact
+    | Nonexact { cr_consts } ->
+      let cr_consts =
+        SMap.map
+          (fun { rc_bound; rc_is_ctx } ->
+            let rc_bound =
+              match rc_bound with
+              | TRloose bounds -> TRloose bounds
+              | TRexact ty -> TRloose { tr_lower = [ty]; tr_upper = [ty] }
+            in
+            { rc_bound; rc_is_ctx })
+          cr_consts
+      in
+      Nonexact { cr_consts }
 
   let rec instantiate_prop map pos = function
     | Valid -> TL.valid
     | Invalid -> TL.invalid ~fail:None
-    | IsSubtype (ty1, ty2) ->
-      let ty1 = instantiate_ty map pos ty1 in
-      let ty2 = instantiate_ty map pos ty2 in
+    | IsSubtypeSpecialClass
+        {
+          sub_reason;
+          sub_id;
+          sub_args;
+          super_reason;
+          super_id;
+          super_exact;
+          super_args;
+        } ->
+      let sub_ty =
+        TyPredicate.to_ty
+          map
+          pos
+          (sub_reason, IsTag (ClassTag (sub_id, sub_args)))
+      in
+      let sub_ty =
+        match deref sub_ty with
+        | (r, Tclass (sub_id, _, sub_args)) ->
+          mk (r, Tclass (sub_id, replace_exact_with_loose super_exact, sub_args))
+        | _ ->
+          Errors.invariant_violation
+            pos
+            (Telemetry.create ())
+            "Conversion of a class predicate did not produce a class type"
+            ~report_to_user:true;
+          sub_ty
+      in
+      let super_ty =
+        mk (super_reason, Tclass (super_id, super_exact, super_args))
+      in
       TL.IsSubtype
-        (false, Typing_defs_core.LoclType ty1, Typing_defs_core.LoclType ty2)
+        ( false,
+          Typing_defs_core.LoclType sub_ty,
+          Typing_defs_core.LoclType super_ty )
     | Conj (p1, p2) ->
       TL.conj (instantiate_prop map pos p1) (instantiate_prop map pos p2)
     | Disj (p1, p2) ->
@@ -385,17 +455,29 @@ module Uninstantiated_typing_logic = struct
         (instantiate_prop map pos p2)
     | Instantiated prop -> prop
 
-  let print_ty env = function
-    | Predicate (_r, predicate_) -> Typing_defs.show_type_predicate_ predicate_
-    | LoclTy ty -> Typing_print.debug env ty
-
   let print_prop env prop =
     let rec print_prop = function
       | Valid -> "TRUE"
       | Invalid -> "FALSE"
       | Conj (p1, p2) -> "(" ^ print_prop p1 ^ " && " ^ print_prop p2 ^ ")"
       | Disj (p1, p2) -> "(" ^ print_prop p1 ^ " || " ^ print_prop p2 ^ ")"
-      | IsSubtype (ty1, ty2) -> print_ty env ty1 ^ " <: " ^ print_ty env ty2
+      | IsSubtypeSpecialClass
+          {
+            sub_reason = _;
+            sub_id;
+            sub_args;
+            super_reason;
+            super_id;
+            super_exact;
+            super_args;
+          } ->
+        let sub_predicate_ = IsTag (ClassTag (sub_id, sub_args)) in
+        let super_ty =
+          mk (super_reason, Tclass (super_id, super_exact, super_args))
+        in
+        Typing_defs.show_type_predicate_ sub_predicate_
+        ^ " <S: "
+        ^ Typing_print.debug env super_ty
       | Instantiated prop -> Typing_print.subtype_prop env prop
     in
     print_prop prop
@@ -417,7 +499,7 @@ module TyPartition = struct
   type t = Partition.t * assumptions * assumptions
 
   type base_ty =
-    | ClassTy of pos_id * exact * locl_ty list
+    | ClassTy of Reason.t * pos_id * exact * locl_ty list
     | OtherTy
 
   let valid = UTL.valid
@@ -427,15 +509,14 @@ module TyPartition = struct
   (* Assuming a value `v` is a sub type of [base_ty] and satisifies [predicate], subtyping
      relations must hold *)
   let assume env base_ty predicate : assumptions =
-    let sub ty = UTL.IsSubtype (UTL.Predicate predicate, UTL.LoclTy ty) in
     Option.value ~default:valid
     @@
     match (base_ty, snd predicate) with
     (* Given a value `v` of type `C<T>` and a predicate `is D`, search for a class
        `K<TC>` and `K<TD>` respectively, it must hold that `K<TC> = K<TD>`
     *)
-    | (ClassTy (((_, name) as posid), exact, tyargs), IsTag (ClassTag (id, _)))
-      ->
+    | ( ClassTy (r, ((_, name) as posid), exact, tyargs),
+        IsTag (ClassTag (id, pred_args)) ) ->
       let open Option.Let_syntax in
       (* let* cls1 = Decl_entry.to_option (Env.get_class env id1) in *)
       let* class_info = Decl_entry.to_option (Env.get_class env id) in
@@ -444,14 +525,27 @@ module TyPartition = struct
         || Cls.has_ancestor class_info name
         || Cls.requires_ancestor class_info name
       then
-        return @@ sub (mk (Reason.none, Tclass (posid, exact, tyargs)))
+        let prop =
+          UTL.IsSubtypeSpecialClass
+            {
+              sub_reason = fst predicate;
+              sub_id = id;
+              sub_args = pred_args;
+              super_reason = r;
+              super_id = posid;
+              super_exact = exact;
+              super_args = tyargs;
+            }
+        in
+        return prop
       else
         None
     | ((ClassTy _ | OtherTy), _) -> None
 
   let assume env ty predicate =
     match get_node ty with
-    | Tclass (a, b, c) -> assume env (ClassTy (a, b, c)) predicate
+    | Tclass (a, b, c) ->
+      assume env (ClassTy (get_reason ty, a, b, c)) predicate
     | _ -> assume env OtherTy predicate
 
   let mk_left ~env ~predicate ty =

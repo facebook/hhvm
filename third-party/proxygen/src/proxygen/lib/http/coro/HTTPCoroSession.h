@@ -828,6 +828,9 @@ class HTTPUniplexTransportSession : public HTTPCoroSession {
 
   void setConnectionFlowControl(uint32_t connFlowControl) override;
 
+  folly::coro::Task<WtReqResult> sendWtReq(
+      RequestReservation reservation, const HTTPMessage& msg) noexcept final;
+
  private:
   folly::coro::Task<void> runImpl();
   void handleIngressLimitExceeded(HTTPCodec::StreamID streamID) override;

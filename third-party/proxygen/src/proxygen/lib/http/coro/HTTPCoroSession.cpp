@@ -3758,6 +3758,7 @@ folly::coro::Task<WtReqResult> makeInternalEx(std::string_view err) {
  */
 folly::coro::Task<WtReqResult> HTTPCoroSession::sendWtReq(
     RequestReservation reservation, const HTTPMessage& msg) noexcept {
+  XLOG_IF(FATAL, !folly::kIsDebug) << "wt wip"; // crash in non-debug modes
   if (!reservation.fromSession(this)) {
     return makeInternalEx("Invalid reservation");
   }
@@ -3766,11 +3767,36 @@ folly::coro::Task<WtReqResult> HTTPCoroSession::sendWtReq(
       supportsWt({codec_->getIngressSettings(), codec_->getEgressSettings()});
   const bool validWtReq = HTTPWebTransport::isConnectMessage(msg);
   if (!(wtEnabled && validWtReq)) {
-    return makeInternalEx(!validWtReq ? kInvalidWtReq : kWtNotSupported);
+    auto err = !validWtReq ? kInvalidWtReq : kWtNotSupported;
+    XLOG(DBG6) << __func__ << " err=" << err << "; sess=" << *this;
+    return makeInternalEx(err);
   }
 
   // valid wt req
   return folly::coro::makeTask<WtReqResult>({});
+}
+
+folly::coro::Task<WtReqResult> HTTPUniplexTransportSession::sendWtReq(
+    RequestReservation reservation, const HTTPMessage& msg) noexcept {
+  auto valid = co_await co_awaitTry(
+      HTTPCoroSession::sendWtReq(std::move(reservation), msg));
+  if (valid.hasException()) {
+    co_return valid;
+  }
+  // valid wt req
+  auto res = sendRequestImpl(/*headers=*/msg,
+                             /*egressHeadersFn=*/nullptr,
+                             /*byteEventRegistrations=*/{},
+                             /*bodySource=*/nullptr);
+
+  XCHECK(res.hasValue()); // http/2 should always succeed here
+  while (res->readable()) {
+    auto ev = co_await co_nothrow(res->readHeaderEvent());
+    if (ev.isFinal()) {
+      co_return {std::move(ev.headers), nullptr};
+    }
+  }
+  folly::assume_unreachable();
 }
 
 } // namespace proxygen::coro

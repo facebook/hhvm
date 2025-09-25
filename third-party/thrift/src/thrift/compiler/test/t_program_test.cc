@@ -69,7 +69,7 @@ TEST(TProgram, GetNamespace) {
   program.set_namespace("cpp", expect_2);
   program.set_namespace("py", expect_2);
 
-  const std::string expect_3 = "";
+  const std::string expect_3;
 
   EXPECT_EQ(expect_1, program.get_namespace("java"));
   EXPECT_EQ(expect_1, program.get_namespace("java.swift"));

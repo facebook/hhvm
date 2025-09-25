@@ -245,7 +245,7 @@ final class ThriftContextPropState {
       );
       $user_id = ZERO_FBID;
     } else {
-      $user_id = $vc->getUserID();
+      $user_id = $vc->getAccountID();
     }
 
     if ($user_id !== ZERO_FBID && self::updateFBUserId($user_id, $src)) {
@@ -261,6 +261,25 @@ final class ThriftContextPropState {
     string $src,
   ): bool {
     return self::updateIGUserId($vc->getViewerID(), $src);
+  }
+
+  private static function getIgUserId(int $ig_user_id): ?int {
+    if (IgidUtils::isUserFbid($ig_user_id)) {
+      return $ig_user_id;
+    }
+    try {
+      if (IgidUtils::isUserIgid($ig_user_id)) {
+        return IgidUtils::userIgidToFbid($ig_user_id);
+      }
+    } catch (\Exception $ex) {
+      ope(
+        $ex,
+        causes_the('No valid fbid for ig user id')->to(
+          'context proper user id',
+        ),
+      );
+    }
+    return null;
   }
 
   // returns id if it is valid (non-null, positive), and should match the type
@@ -279,11 +298,7 @@ final class ThriftContextPropState {
         }
         break;
       case UserIdCategory::IG:
-        if (
-          IgidUtils::isUserFbid($user_id) || IgidUtils::isUserIgid($user_id)
-        ) {
-          return $user_id;
-        }
+        return self::getIgUserId($user_id);
     }
     return null;
   }

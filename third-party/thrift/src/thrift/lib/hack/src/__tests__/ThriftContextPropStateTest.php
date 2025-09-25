@@ -231,7 +231,7 @@ final class ThriftContextPropStateTest extends WWWTest {
     );
 
     // set up mocks for VC
-    $fb_vc = mock(IFBViewerContext::class)->mockReturn('getUserID', fbid(1));
+    $fb_vc = mock(IFBViewerContext::class)->mockReturn('getAccountID', fbid(1));
     $ig_vc = mock(IIGViewerContext::class)->mockReturn('getViewerID', fbid(2));
 
     $buf = new TMemoryBuffer();
@@ -260,7 +260,8 @@ final class ThriftContextPropStateTest extends WWWTest {
     );
 
     // set up mocks for VC
-    $fb_vc = mock(IFBViewerContext::class)->mockReturn('getUserID', fbid(123));
+    $fb_vc =
+      mock(IFBViewerContext::class)->mockReturn('getAccountID', fbid(123));
 
     $buf = new TMemoryBuffer();
     $prot = new TCompactProtocolAccelerated($buf);
@@ -286,9 +287,8 @@ final class ThriftContextPropStateTest extends WWWTest {
     $tfm->baggage->user_ids = ContextProp\UserIds::fromShape(
       shape('fb_user_id' => 123, 'ig_user_id' => 456),
     );
-
     // set up mocks for VC
-    $fb_vc = mock(IFBViewerContext::class)->mockReturn('getUserID', fbid(1));
+    $fb_vc = mock(IFBViewerContext::class)->mockReturn('getAccountID', fbid(1));
     $ig_vc = mock(IIGViewerContext::class)->mockReturn('getViewerID', fbid(2));
 
     $buf = new TMemoryBuffer();

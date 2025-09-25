@@ -29,6 +29,7 @@
 #include "watchman/Logging.h"
 #include "watchman/Options.h"
 #include "watchman/PDU.h"
+#include "watchman/PathUtils.h"
 #include "watchman/PerfSample.h"
 #include "watchman/ProcessLock.h"
 #include "watchman/ProcessUtil.h"
@@ -64,19 +65,13 @@ PduFormat server_format{is_bser, 0};
 PduFormat output_format{is_json_pretty, 0};
 } // namespace
 
-static void compute_file_name(
-    std::string& str,
-    const std::string& user,
-    const char* suffix,
-    const char* what,
-    bool require_absolute = true);
-
 namespace {
 const std::string& get_pid_file() {
   // We defer computing this path until we're in the server context because
   // eager evaluation can trigger integration test failures unless all clients
   // are aware of both the pidfile and the sockpath being used in the tests.
-  compute_file_name(flags.pid_file, computeUserName(), "pid", "pidfile");
+  watchman::compute_file_name(
+      flags.pid_file, computeUserName(), "pid", "pidfile");
   return flags.pid_file;
 }
 } // namespace
@@ -531,7 +526,8 @@ static SpawnResult spawn_via_launchd() {
         "\n");
   }
 
-  compute_file_name(flags.pid_file, computeUserName(), "pid", "pidfile");
+  watchman::compute_file_name(
+      flags.pid_file, computeUserName(), "pid", "pidfile");
 
   const char* path_env =
       Configuration().getString("subprocess_path_env", getenv("PATH"));
@@ -637,168 +633,6 @@ static void parse_encoding(std::string_view enc, PduType* pdu) {
   exit(EX_USAGE);
 }
 
-static void verify_dir_ownership(const std::string& state_dir) {
-#ifndef _WIN32
-  // verify ownership
-  struct stat st;
-  int dir_fd;
-  int ret = 0;
-  uid_t euid = geteuid();
-  // TODO: also allow a gid to be specified here
-  const char* sock_group_name = cfg_get_string("sock_group", nullptr);
-  const char* secondary_sock_group =
-      cfg_get_string("secondary_sock_group", nullptr);
-  // S_ISGID is set so that files inside this directory inherit the group
-  // name
-  mode_t dir_perms =
-      cfg_get_perms(
-          "sock_access", false /* write bits */, true /* execute bits */) |
-      S_ISGID;
-
-  auto dirp =
-      openDir(state_dir.c_str(), false /* don't need strict symlink rules */);
-
-  dir_fd = dirp->getFd();
-  if (dir_fd == -1) {
-    log(ERR, "dirfd(", state_dir, "): ", folly::errnoStr(errno), "\n");
-    goto bail;
-  }
-
-  if (fstat(dir_fd, &st) != 0) {
-    log(ERR, "fstat(", state_dir, "): ", folly::errnoStr(errno), "\n");
-    ret = 1;
-    goto bail;
-  }
-  if (euid != st.st_uid) {
-    log(ERR,
-        "the owner of ",
-        state_dir,
-        " is uid ",
-        st.st_uid,
-        " and doesn't match your euid ",
-        euid,
-        "\n");
-    ret = 1;
-    goto bail;
-  }
-  if (st.st_mode & 0022) {
-    log(ERR,
-        "the permissions on ",
-        state_dir,
-        " allow others to write to it. "
-        "Verify that you own the contents and then fix its "
-        "permissions by running `chmod 0700 '",
-        state_dir,
-        "'`\n");
-    ret = 1;
-    goto bail;
-  }
-
-  if (sock_group_name) {
-    const struct group* sock_group = w_get_group(sock_group_name);
-    if (!sock_group) {
-      ret = 1;
-      goto bail;
-    }
-
-    if (fchown(dir_fd, -1, sock_group->gr_gid) == -1) {
-      log(ERR,
-          "setting up group '",
-          sock_group_name,
-          "' failed: ",
-          folly::errnoStr(errno),
-          "\n");
-      ret = 1;
-      goto bail;
-    }
-  }
-
-#ifdef __linux__
-  // Allow setting an ACL on the state_dir, this method does not require the
-  // owner to be a member of the target group.
-  if (secondary_sock_group) {
-    // TODO: pass mode_t dir_perms (from earlier in this function) to
-    // setSecondaryGroupACL instead of using three booleans
-    if (!watchman::setSecondaryGroupACL(
-            state_dir.c_str(),
-            secondary_sock_group,
-            true /* read bits */,
-            false /* write bits */,
-            true /* execute bits */)) {
-      ret = 1;
-      goto bail;
-    }
-  }
-#else
-  (void)secondary_sock_group;
-#endif
-
-  // Depending on group and world accessibility, change permissions on the
-  // directory. We can't leave the directory open and set permissions on the
-  // socket because not all POSIX systems respect permissions on UNIX domain
-  // sockets, but all POSIX systems respect permissions on the containing
-  // directory.
-  logf(DBG, "Setting permissions on state dir to {:o}\n", dir_perms);
-  if (fchmod(dir_fd, dir_perms) == -1) {
-    logf(
-        ERR,
-        "fchmod({}, {:o}): {}\n",
-        state_dir,
-        dir_perms,
-        folly::errnoStr(errno));
-    ret = 1;
-    goto bail;
-  }
-
-bail:
-  if (ret) {
-    exit(ret);
-  }
-#endif
-}
-
-static void compute_file_name(
-    std::string& str,
-    const std::string& user,
-    const char* suffix,
-    const char* what,
-    bool require_absolute) {
-  bool str_computed = false;
-  if (str.empty()) {
-    str_computed = true;
-    /* We'll put our various artifacts in a user specific dir
-     * within the state dir location */
-    auto state_dir = computeWatchmanStateDirectory(user);
-
-    if (mkdir(state_dir.c_str(), 0700) == 0 || errno == EEXIST) {
-      verify_dir_ownership(state_dir.c_str());
-    } else {
-      log(ERR,
-          "while computing ",
-          what,
-          ": failed to create ",
-          state_dir,
-          ": ",
-          folly::errnoStr(errno),
-          "\n");
-      exit(1);
-    }
-
-    str = fmt::format("{}/{}", state_dir, suffix);
-  }
-#ifndef _WIN32
-  if (require_absolute && !w_string_piece(str).pathIsAbsolute()) {
-    log(FATAL,
-        what,
-        " must be an absolute file path but ",
-        str,
-        " was",
-        str_computed ? " computed." : " provided.",
-        "\n");
-  }
-#endif
-}
-
 #ifdef _WIN32
 bool initialize_winsock() {
   WSADATA wsaData;
@@ -860,10 +694,11 @@ static void setup_sock_name() {
     flags.named_pipe_path = fmt::format("\\\\.\\pipe\\watchman-{}", user);
   }
 #endif
-  compute_file_name(flags.unix_sock_name, user, "sock", "sockname");
+  watchman::compute_file_name(flags.unix_sock_name, user, "sock", "sockname");
 
-  compute_file_name(flags.watchman_state_file, user, "state", "statefile");
-  compute_file_name(
+  watchman::compute_file_name(
+      flags.watchman_state_file, user, "state", "statefile");
+  watchman::compute_file_name(
       logging::log_name,
       user,
       "log",

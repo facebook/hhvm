@@ -197,6 +197,11 @@ std::string computeWatchmanStateDirectory(const std::string& user) {
     return fmt::format("{}/{}-state", flags.test_state_dir, user);
   }
 
+  char* testStateDir = getenv("WATCHMAN_TEST_STATE_DIR");
+  if (testStateDir) {
+    return testStateDir;
+  }
+
 #ifdef _WIN32
   return getCachedWatchmanAppDataPath();
 #else

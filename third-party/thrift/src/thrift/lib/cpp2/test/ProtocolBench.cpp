@@ -154,7 +154,7 @@ constexpr SerializerMethod getSerializerMethod(std::string_view prefix) {
   X1(Prefix, proto, write, bench, Op) \
   X1(Prefix, proto, read, bench, Op)
 
-#define APPLY(M, Prefix, proto)                \
+#define APPLY(M, Prefix, proto)        \
   M(Prefix, proto, Empty)              \
   M(Prefix, proto, SmallInt)           \
   M(Prefix, proto, BigInt)             \
@@ -165,6 +165,7 @@ constexpr SerializerMethod getSerializerMethod(std::string_view prefix) {
   M(Prefix, proto, Mixed)              \
   M(Prefix, proto, MixedInt)           \
   M(Prefix, proto, LargeMixed)         \
+  M(Prefix, proto, LargeMixedSparse)   \
   M(Prefix, proto, SmallListInt)       \
   M(Prefix, proto, BigListByte)        \
   M(Prefix, proto, BigListShort)       \
@@ -185,7 +186,7 @@ constexpr SerializerMethod getSerializerMethod(std::string_view prefix) {
   M(Prefix, proto, UnorderedMapInt)    \
   M(Prefix, proto, NestedMap)          \
   M(Prefix, proto, SortedVecNestedMap) \
-  M(Prefix, proto, ComplexStruct)\
+  M(Prefix, proto, ComplexStruct)      \
   M(Prefix, proto, ComplexUnion)
 
 #define X(Prefix, proto) APPLY(X2, Prefix, proto)              

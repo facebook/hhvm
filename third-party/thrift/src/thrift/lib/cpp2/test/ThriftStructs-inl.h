@@ -590,8 +590,38 @@ inline thrift::benchmark::LargeMixed create<thrift::benchmark::LargeMixed>() {
 template <>
 inline thrift::benchmark::OpLargeMixed
 create<thrift::benchmark::OpLargeMixed>() {
-  thrift::benchmark::OpLargeMixed d;
   return createLargeMixed<thrift::benchmark::OpLargeMixed>();
+}
+
+template <class T>
+inline T createLargeMixedSparse() {
+  T d;
+
+  // Set exactly 10% of the 100 fields (10 fields) with a good distribution
+  d.var3() = true;
+  d.var11() = "hello";
+  d.var23() = true;
+  d.var31() = true;
+  d.var42() = 12345;
+  d.var57() = 5;
+  d.var68() = "hello";
+  d.var74() = 12345;
+  d.var89() = 5;
+  d.var95() = true;
+
+  return d;
+}
+
+template <>
+inline thrift::benchmark::LargeMixedSparse
+create<thrift::benchmark::LargeMixedSparse>() {
+  return createLargeMixedSparse<thrift::benchmark::LargeMixedSparse>();
+}
+
+template <>
+inline thrift::benchmark::OpLargeMixedSparse
+create<thrift::benchmark::OpLargeMixedSparse>() {
+  return createLargeMixedSparse<thrift::benchmark::OpLargeMixedSparse>();
 }
 
 template <class T>

@@ -19,6 +19,8 @@
 // To access Cython C APIs, such as create_IOBuf(). See `types.pxd`.
 #include <thrift/lib/python/types_api.h> // @manual
 
+#include <cstddef>
+
 #include <folly/Indestructible.h>
 #include <folly/Range.h>
 #include <folly/container/F14Map.h>
@@ -29,7 +31,7 @@
 
 namespace apache::thrift::python {
 
-constexpr const size_t kHeadOffset = sizeof(PyVarObject);
+constexpr const size_t kHeadOffset = offsetof(PyTupleObject, ob_item);
 constexpr const size_t kFieldOffset = sizeof(PyObject*);
 
 /**
@@ -1789,6 +1791,8 @@ void DynamicStructInfo::addFieldInfo(
   // |  HEADER                           |
   // +-----------------------------------+
   // |  size (number of items)           |
+  // +-----------------------------------+
+  // |  ...                              |
   // +-----------------------------------+ -> kHeadOffset
   // |  item[0] (PyObject*)(isset flags) |
   // +-----------------------------------+
@@ -1798,6 +1802,9 @@ void DynamicStructInfo::addFieldInfo(
   // +-----------------------------------+
   // |  item[n-1] (PyObject*)            |
   // +-----------------------------------+
+  //
+  // CPython could add more fields before the "item" array; for example,
+  // CPython 3.14 added the 'ob_hash' field.
   //
   // When passing a PyTupleObject to TableBasedSerializer, fields are expected
   // to be identified by their offset from the start address of the struct.

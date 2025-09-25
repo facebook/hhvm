@@ -353,6 +353,9 @@ struct VariantControllerImpl {
     String ret = String(makeStaticString(str, len));
     return ret;
   }
+  static StringType createStaticStringSafe(const char* str, size_t len) {
+    return createStaticString(str, len);
+  }
   static StringType getStaticEmptyString() {
     return empty_string();
   }

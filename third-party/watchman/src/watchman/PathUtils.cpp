@@ -11,6 +11,7 @@
 #include <folly/Exception.h>
 #include <folly/String.h>
 #include <folly/portability/Fcntl.h>
+#include <folly/portability/Filesystem.h>
 #include <folly/portability/SysStat.h>
 
 #include "watchman/GroupLookup.h"
@@ -150,6 +151,27 @@ bail:
 #endif
 }
 
+void create_state_dir(const char* state_dir, std::error_code& ec) {
+  ec.clear();
+  auto created = folly::fs::create_directories(state_dir, ec);
+
+  // If create_directories() failed, it will set ec, so just return
+  // so the caller can handle the error.
+  if (ec) {
+    return;
+  }
+
+  if (created) {
+#ifndef _WIN32
+    // Ignore the result here as it doesn't matter, we will check the actual
+    // permissions in verify_dir_ownership
+    chmod(state_dir, 0700);
+#endif
+  }
+
+  verify_dir_ownership(state_dir);
+}
+
 void compute_file_name(
     std::string& str,
     const std::string& user,
@@ -163,16 +185,16 @@ void compute_file_name(
      * within the state dir location */
     auto state_dir = computeWatchmanStateDirectory(user);
 
-    if (mkdir(state_dir.c_str(), 0700) == 0 || errno == EEXIST) {
-      verify_dir_ownership(state_dir.c_str());
-    } else {
+    std::error_code ec;
+    create_state_dir(state_dir.c_str(), ec);
+    if (ec) {
       log(ERR,
           "while computing ",
           what,
           ": failed to create ",
           state_dir,
           ": ",
-          folly::errnoStr(errno),
+          ec.message(),
           "\n");
       exit(1);
     }

@@ -124,40 +124,39 @@ TEST_F(PathUtilsTest, computeFileNameWithExistingDirectory) {
 #endif
 }
 
-// TODO: uncomment this test after the issue is fixed
-// TEST_F(PathUtilsTest, computeFileNameWithNonExistingDirectory) {
-//   std::string result;
-//   std::string suffix = getRandomSuffix();
+TEST_F(PathUtilsTest, computeFileNameWithNonExistingDirectory) {
+  std::string result;
+  std::string suffix = getRandomSuffix();
 
-//   auto state_dir_parent = getTempPath() + "watchman_state/a/b";
+  auto state_dir_parent = getTempPath() + "watchman_state/a/b";
 
-//   // Verify that a parent directory doesn't exist
-//   EXPECT_FALSE(folly::fs::exists(state_dir_parent));
+  // Verify that a parent directory doesn't exist
+  EXPECT_FALSE(folly::fs::exists(state_dir_parent));
 
-//   auto state_dir = state_dir_parent + "/c/d";
-//   setWatchmanStateDir(state_dir);
+  auto state_dir = state_dir_parent + "/c/d";
+  setWatchmanStateDir(state_dir);
 
-//   auto expected = fmt::format("{}/{}", state_dir, suffix);
+  auto expected = fmt::format("{}/{}", state_dir, suffix);
 
-//   // This should compute a path and create directories as needed
-//   EXPECT_NO_THROW({
-//     compute_file_name(result, "testuser", suffix.c_str(), "testfile", true);
-//   });
+  // This should compute a path and create directories as needed
+  EXPECT_NO_THROW({
+    compute_file_name(result, "testuser", suffix.c_str(), "testfile", true);
+  });
 
-//   // The result should not be empty
-//   EXPECT_FALSE(result.empty());
-//   EXPECT_EQ(result, expected);
+  // The result should not be empty
+  EXPECT_FALSE(result.empty());
+  EXPECT_EQ(result, expected);
 
-//   // Verify the leaf directory was created
-//   EXPECT_TRUE(folly::fs::exists(state_dir));
+  // Verify the leaf directory was created
+  EXPECT_TRUE(folly::fs::exists(state_dir));
 
-//   // The result should be an absolute path (on Unix systems) and have correct
-//   // permissions
-// #ifndef _WIN32
-//   EXPECT_TRUE(result[0] == '/');
-//   checkDirectoryPermissions(state_dir);
-// #endif
-// }
+  // The result should be an absolute path (on Unix systems) and have correct
+  // permissions
+#ifndef _WIN32
+  EXPECT_TRUE(result[0] == '/');
+  checkDirectoryPermissions(state_dir);
+#endif
+}
 
 TEST_F(PathUtilsTest, computeFileNameRelativePathRequireAbsolute) {
   std::string result = "relative/path";

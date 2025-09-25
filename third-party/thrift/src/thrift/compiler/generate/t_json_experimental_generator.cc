@@ -57,6 +57,23 @@ class t_json_experimental_generator : public t_mstch_generator {
     return globals;
   }
 
+  prototype<t_const_value>::ptr make_prototype_for_const_value(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_const_value(proto);
+    auto def = whisker::dsl::prototype_builder<h_const_value>::extends(base);
+
+    def.property("bool_integer_value", [](const t_const_value& self) {
+      return self.kind() == t_const_value::CV_BOOL
+          ? whisker::make::i64(self.get_bool() ? 1 : 0)
+          : whisker::make::null;
+    });
+    def.property("string_value_any", [](const t_const_value& self) {
+      return to_json(&self);
+    });
+
+    return std::move(def).make();
+  }
+
   prototype<t_named>::ptr make_prototype_for_named(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_named(proto);
@@ -175,48 +192,6 @@ class json_experimental_program : public mstch_program {
   }
 };
 
-class json_experimental_const_value : public mstch_const_value {
- public:
-  json_experimental_const_value(
-      const t_const_value* cv,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const t_const* current_const,
-      const t_type* expected_type)
-      : mstch_const_value(cv, ctx, pos, current_const, expected_type) {
-    register_methods(
-        this,
-        {
-            {"value:integer_or_enum?",
-             &json_experimental_const_value::is_integer_or_enum},
-            {"value:bool_integer_value",
-             &json_experimental_const_value::get_bool_integer_value},
-            {"value:type_name", &json_experimental_const_value::get_type_name},
-            {"value:qualified_name",
-             &json_experimental_const_value::get_qualified_name},
-            {"value:string_value_any",
-             &json_experimental_const_value::string_value_any},
-        });
-  }
-  mstch::node is_integer_or_enum() {
-    // Enums are represented with CV_INTEGER with const_value_->is_enum().
-    return type_ == cv::CV_INTEGER;
-  }
-  mstch::node get_bool_integer_value() {
-    return type_ == cv::CV_BOOL ? (const_value_->get_bool() ? 1 : 0)
-                                : mstch::node();
-  }
-
-  mstch::node get_type_name() {
-    return current_const_->type()->get_true_type()->get_full_name();
-  }
-
-  mstch::node get_qualified_name() {
-    return current_const_->type()->get_true_type()->get_scoped_name();
-  }
-  mstch::node string_value_any() { return to_json(const_value_); }
-};
-
 void t_json_experimental_generator::generate_program() {
   out_dir_base_ = "gen-json_experimental";
   const auto* program = get_program();
@@ -228,7 +203,6 @@ void t_json_experimental_generator::generate_program() {
 
 void t_json_experimental_generator::set_mstch_factories() {
   mstch_context_.add<json_experimental_program>();
-  mstch_context_.add<json_experimental_const_value>();
 }
 
 THRIFT_REGISTER_GENERATOR(json_experimental, "JSON_EXPERIMENTAL", "");

@@ -55,7 +55,7 @@
       {{#constant:type}}{{#constant:value}}
       "{{constant:name}}": {
         "name": "{{constant:name}}",
-        "type": "{{value:type_name}}",
+        "type": "{{value:type.true_type.full_name}}",
         "value": {{value:string_value_any}},{{!
         }}{{#constant:docs?}}
         "docstring": {{constant:docstring}},{{/constant:docs?}}

@@ -174,6 +174,11 @@ object resolve_derived_t_type(
 prototype<t_type>::ptr t_whisker_generator::make_prototype_for_type(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_type>::extends(proto.of<t_named>());
+
+  def.property("true_type", [&](const t_type& self) {
+    return resolve_derived_t_type(proto, *self.get_true_type());
+  });
+
   // clang-format off
   def.property("typedef?",          mem_fn(&t_type::is<t_typedef>));
 

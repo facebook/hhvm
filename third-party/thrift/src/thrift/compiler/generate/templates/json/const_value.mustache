@@ -16,7 +16,7 @@
 
 }}
 {{#value:string?}}"{{value:string_value}}"{{/value:string?}}{{!
-}}{{#value:integer_or_enum?}}{{value:integer_value}}{{/value:integer_or_enum?}}{{!
+}}{{#if (or value:integer? value:enum?)}}{{value:integer_value}}{{/if}}{{!
 }}{{#value:double?}}{{value:double_value}}{{/value:double?}}{{!
 }}{{#value:bool?}}{{value:bool_integer_value}}{{/value:bool?}}{{!
 }}{{#value:list?}}{{!
@@ -31,7 +31,7 @@
   }}{{#value:map_elements}}{{!
     }}"{{#element:key}}{{! TODO(T20509094): support serialization of complex keys
       }}{{#value:string?}}\"{{value:string_value}}\"{{/value:string?}}{{!
-      }}{{#value:integer_or_enum?}}{{value:integer_value}}{{/value:integer_or_enum?}}{{!
+      }}{{#if (or value:integer? value:enum?)}}{{value:integer_value}}{{/if}}{{!
       }}{{#value:double?}}{{value:double_value}}{{/value:double?}}{{!
       }}{{#value:bool?}}{{value:bool_integer_value}}{{/value:bool?}}{{!
     }}{{/element:key}}" : {{!

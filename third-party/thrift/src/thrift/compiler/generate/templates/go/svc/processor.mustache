@@ -111,8 +111,7 @@ func (p *{{> svc/proc_func_name}}) Read(decoder thrift.Decoder) (thrift.Struct, 
     return args, nil
 }
 
-func (p *{{> svc/proc_func_name}}) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
-    var err2 error
+func (p *{{> svc/proc_func_name}}) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
     switch {{#function:exceptions?}}v := {{/function:exceptions?}}result.(type) {
     {{#function:exceptions}}
@@ -125,19 +124,16 @@ func (p *{{> svc/proc_func_name}}) Write(seqId int32, result thrift.WritableStru
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = encoder.WriteMessageBegin("{{function:name}}", messageType, seqId); err2 != nil {
-        err = err2
+    if err := encoder.WriteMessageBegin("{{function:name}}", messageType, seqId); err != nil {
+        return err
     }
-    if err2 = result.Write(encoder); err == nil && err2 != nil {
-        err = err2
+    if err := result.Write(encoder); err != nil {
+        return err
     }
-    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
-        err = err2
+    if err := encoder.WriteMessageEnd(); err != nil {
+        return err
     }
-    if err2 = encoder.Flush(); err == nil && err2 != nil {
-        err = err2
-    }
-    return err
+    return encoder.Flush()
 }
 
 func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {

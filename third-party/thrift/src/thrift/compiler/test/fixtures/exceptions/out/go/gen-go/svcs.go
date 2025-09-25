@@ -178,27 +178,23 @@ func (p *procFuncRaiserDoBland) Read(decoder thrift.Decoder) (thrift.Struct, err
     return args, nil
 }
 
-func (p *procFuncRaiserDoBland) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
-    var err2 error
+func (p *procFuncRaiserDoBland) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
     switch result.(type) {
     case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = encoder.WriteMessageBegin("doBland", messageType, seqId); err2 != nil {
-        err = err2
+    if err := encoder.WriteMessageBegin("doBland", messageType, seqId); err != nil {
+        return err
     }
-    if err2 = result.Write(encoder); err == nil && err2 != nil {
-        err = err2
+    if err := result.Write(encoder); err != nil {
+        return err
     }
-    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
-        err = err2
+    if err := encoder.WriteMessageEnd(); err != nil {
+        return err
     }
-    if err2 = encoder.Flush(); err == nil && err2 != nil {
-        err = err2
-    }
-    return err
+    return encoder.Flush()
 }
 
 func (p *procFuncRaiserDoBland) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
@@ -228,8 +224,7 @@ func (p *procFuncRaiserDoRaise) Read(decoder thrift.Decoder) (thrift.Struct, err
     return args, nil
 }
 
-func (p *procFuncRaiserDoRaise) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
-    var err2 error
+func (p *procFuncRaiserDoRaise) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
     switch v := result.(type) {
     case *Banal:
@@ -248,19 +243,16 @@ func (p *procFuncRaiserDoRaise) Write(seqId int32, result thrift.WritableStruct,
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = encoder.WriteMessageBegin("doRaise", messageType, seqId); err2 != nil {
-        err = err2
+    if err := encoder.WriteMessageBegin("doRaise", messageType, seqId); err != nil {
+        return err
     }
-    if err2 = result.Write(encoder); err == nil && err2 != nil {
-        err = err2
+    if err := result.Write(encoder); err != nil {
+        return err
     }
-    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
-        err = err2
+    if err := encoder.WriteMessageEnd(); err != nil {
+        return err
     }
-    if err2 = encoder.Flush(); err == nil && err2 != nil {
-        err = err2
-    }
-    return err
+    return encoder.Flush()
 }
 
 func (p *procFuncRaiserDoRaise) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
@@ -302,27 +294,23 @@ func (p *procFuncRaiserGet200) Read(decoder thrift.Decoder) (thrift.Struct, erro
     return args, nil
 }
 
-func (p *procFuncRaiserGet200) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
-    var err2 error
+func (p *procFuncRaiserGet200) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
     switch result.(type) {
     case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = encoder.WriteMessageBegin("get200", messageType, seqId); err2 != nil {
-        err = err2
+    if err := encoder.WriteMessageBegin("get200", messageType, seqId); err != nil {
+        return err
     }
-    if err2 = result.Write(encoder); err == nil && err2 != nil {
-        err = err2
+    if err := result.Write(encoder); err != nil {
+        return err
     }
-    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
-        err = err2
+    if err := encoder.WriteMessageEnd(); err != nil {
+        return err
     }
-    if err2 = encoder.Flush(); err == nil && err2 != nil {
-        err = err2
-    }
-    return err
+    return encoder.Flush()
 }
 
 func (p *procFuncRaiserGet200) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
@@ -353,8 +341,7 @@ func (p *procFuncRaiserGet500) Read(decoder thrift.Decoder) (thrift.Struct, erro
     return args, nil
 }
 
-func (p *procFuncRaiserGet500) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
-    var err2 error
+func (p *procFuncRaiserGet500) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
     switch v := result.(type) {
     case *Fiery:
@@ -373,19 +360,16 @@ func (p *procFuncRaiserGet500) Write(seqId int32, result thrift.WritableStruct, 
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = encoder.WriteMessageBegin("get500", messageType, seqId); err2 != nil {
-        err = err2
+    if err := encoder.WriteMessageBegin("get500", messageType, seqId); err != nil {
+        return err
     }
-    if err2 = result.Write(encoder); err == nil && err2 != nil {
-        err = err2
+    if err := result.Write(encoder); err != nil {
+        return err
     }
-    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
-        err = err2
+    if err := encoder.WriteMessageEnd(); err != nil {
+        return err
     }
-    if err2 = encoder.Flush(); err == nil && err2 != nil {
-        err = err2
-    }
-    return err
+    return encoder.Flush()
 }
 
 func (p *procFuncRaiserGet500) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {

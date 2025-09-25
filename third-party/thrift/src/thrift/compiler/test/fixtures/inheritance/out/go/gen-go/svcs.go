@@ -127,27 +127,23 @@ func (p *procFuncMyRootDoRoot) Read(decoder thrift.Decoder) (thrift.Struct, erro
     return args, nil
 }
 
-func (p *procFuncMyRootDoRoot) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
-    var err2 error
+func (p *procFuncMyRootDoRoot) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
     switch result.(type) {
     case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = encoder.WriteMessageBegin("do_root", messageType, seqId); err2 != nil {
-        err = err2
+    if err := encoder.WriteMessageBegin("do_root", messageType, seqId); err != nil {
+        return err
     }
-    if err2 = result.Write(encoder); err == nil && err2 != nil {
-        err = err2
+    if err := result.Write(encoder); err != nil {
+        return err
     }
-    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
-        err = err2
+    if err := encoder.WriteMessageEnd(); err != nil {
+        return err
     }
-    if err2 = encoder.Flush(); err == nil && err2 != nil {
-        err = err2
-    }
-    return err
+    return encoder.Flush()
 }
 
 func (p *procFuncMyRootDoRoot) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
@@ -245,27 +241,23 @@ func (p *procFuncMyNodeDoMid) Read(decoder thrift.Decoder) (thrift.Struct, error
     return args, nil
 }
 
-func (p *procFuncMyNodeDoMid) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
-    var err2 error
+func (p *procFuncMyNodeDoMid) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
     switch result.(type) {
     case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = encoder.WriteMessageBegin("do_mid", messageType, seqId); err2 != nil {
-        err = err2
+    if err := encoder.WriteMessageBegin("do_mid", messageType, seqId); err != nil {
+        return err
     }
-    if err2 = result.Write(encoder); err == nil && err2 != nil {
-        err = err2
+    if err := result.Write(encoder); err != nil {
+        return err
     }
-    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
-        err = err2
+    if err := encoder.WriteMessageEnd(); err != nil {
+        return err
     }
-    if err2 = encoder.Flush(); err == nil && err2 != nil {
-        err = err2
-    }
-    return err
+    return encoder.Flush()
 }
 
 func (p *procFuncMyNodeDoMid) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
@@ -363,27 +355,23 @@ func (p *procFuncMyLeafDoLeaf) Read(decoder thrift.Decoder) (thrift.Struct, erro
     return args, nil
 }
 
-func (p *procFuncMyLeafDoLeaf) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
-    var err2 error
+func (p *procFuncMyLeafDoLeaf) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
     switch result.(type) {
     case *thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = encoder.WriteMessageBegin("do_leaf", messageType, seqId); err2 != nil {
-        err = err2
+    if err := encoder.WriteMessageBegin("do_leaf", messageType, seqId); err != nil {
+        return err
     }
-    if err2 = result.Write(encoder); err == nil && err2 != nil {
-        err = err2
+    if err := result.Write(encoder); err != nil {
+        return err
     }
-    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
-        err = err2
+    if err := encoder.WriteMessageEnd(); err != nil {
+        return err
     }
-    if err2 = encoder.Flush(); err == nil && err2 != nil {
-        err = err2
-    }
-    return err
+    return encoder.Flush()
 }
 
 func (p *procFuncMyLeafDoLeaf) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {

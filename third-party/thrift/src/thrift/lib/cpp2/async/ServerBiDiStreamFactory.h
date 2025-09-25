@@ -24,17 +24,16 @@
 
 namespace apache::thrift {
 
-class BiDiServerCallback;
 class ContextStack;
 
 namespace detail {
 
 class ServerBiDiStreamFactory {
-  using TaskFactory = folly::Function<folly::coro::Task<void>(
+  using StartFunction = folly::Function<void(
       std::shared_ptr<ContextStack>,
       TilePtr&&,
       FirstResponsePayload&&,
-      BiDiServerCallback*,
+      BiDiClientCallback*,
       folly::EventBase*)>;
 
  public:
@@ -42,17 +41,18 @@ class ServerBiDiStreamFactory {
   explicit ServerBiDiStreamFactory(
       StreamTransformation<InputType, OutputType> streamTransformation,
       SinkElementDecoder<InputType>& decoder,
-      StreamElementEncoder<OutputType>& encoder) {
-    taskFactory_ = [transformFn = std::move(streamTransformation.func),
-                    decoder = decoder,
-                    encoder = encoder](
-                       std::shared_ptr<ContextStack>,
-                       TilePtr&&,
-                       FirstResponsePayload&&,
-                       BiDiServerCallback*,
-                       folly::EventBase*) mutable -> folly::coro::Task<void> {
+      StreamElementEncoder<OutputType>& encoder,
+      folly::Executor::KeepAlive<> serverExecutor) {
+    startFunction_ = [transformFn = std::move(streamTransformation.func),
+                      &decoder,
+                      &encoder,
+                      serverExecutor = std::move(serverExecutor)](
+                         std::shared_ptr<ContextStack>,
+                         TilePtr&&,
+                         FirstResponsePayload&&,
+                         BiDiClientCallback*,
+                         folly::EventBase*) mutable -> void {
       LOG(FATAL) << "Not implemented";
-      co_return;
     };
   }
 
@@ -60,16 +60,13 @@ class ServerBiDiStreamFactory {
 
   void setInteraction(TilePtr&& interaction);
 
-  folly::coro::Task<void> start(
-      FirstResponsePayload&& payload,
-      BiDiServerCallback* cb,
-      folly::EventBase* eb) &&;
+  void start(
+      FirstResponsePayload&& firstResponsePayload,
+      BiDiClientCallback* clientCallback,
+      folly::EventBase* eventBase) &&;
 
  private:
-  // taskFactory_ is analogous to ServerStreamFn, the difference here is simply
-  // where we define the function. For ServerStream, this is in
-  // ServerStreamBridge::fromAsyncGenerator
-  TaskFactory taskFactory_;
+  StartFunction startFunction_;
   std::shared_ptr<ContextStack> contextStack_{nullptr};
   TilePtr interaction_{};
 };

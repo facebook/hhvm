@@ -27,17 +27,16 @@ void ServerBiDiStreamFactory::setInteraction(TilePtr&& interaction) {
   interaction_ = std::move(interaction);
 }
 
-folly::coro::Task<void> ServerBiDiStreamFactory::start(
+void ServerBiDiStreamFactory::start(
     FirstResponsePayload&& payload,
-    BiDiServerCallback* cb,
-    folly::EventBase* eb) && {
-  co_await folly::coro::co_invoke(
-      std::move(taskFactory_),
+    BiDiClientCallback* clientCallback,
+    folly::EventBase* eventBase) && {
+  startFunction_(
       std::move(contextStack_),
       std::move(interaction_),
       std::move(payload),
-      cb,
-      eb);
+      clientCallback,
+      eventBase);
 }
 
 } // namespace apache::thrift::detail

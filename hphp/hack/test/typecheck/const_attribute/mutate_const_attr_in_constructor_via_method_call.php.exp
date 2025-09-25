@@ -1,0 +1,6 @@
+ERROR: File "mutate_const_attr_in_constructor_via_method_call.php", line 21, characters 12-12:
+Cannot mutate a `__Const` property (Typing[4196])
+ERROR: File "mutate_const_attr_in_constructor_via_method_call.php", line 36, characters 7-7:
+Cannot mutate a `__Const` property (Typing[4196])
+ERROR: File "mutate_const_attr_in_constructor_via_method_call.php", line 37, characters 7-7:
+Cannot mutate a `__Const` property (Typing[4196])

@@ -37,6 +37,18 @@ class QuicWebTransport
     handler_ = handler;
   }
 
+  [[nodiscard]] quic::TransportInfo getTransportInfo() const override {
+    XCHECK(quicSocket_);
+    return quicSocket_->getTransportInfo();
+  }
+
+  [[nodiscard]] quic::Expected<quic::QuicSocketLite::FlowControlState,
+                               quic::LocalErrorCode>
+  getConnectionFlowControl() const {
+    XCHECK(quicSocket_);
+    return quicSocket_->getConnectionFlowControl();
+  }
+
  private:
   void onFlowControlUpdate(quic::StreamId /*id*/) noexcept override;
 
@@ -126,11 +138,6 @@ class QuicWebTransport
 
   const folly::SocketAddress& getPeerAddress() const override {
     return quicSocket_->getPeerAddress();
-  }
-
-  [[nodiscard]] quic::TransportInfo getTransportInfo() const override {
-    XCHECK(quicSocket_);
-    return quicSocket_->getTransportInfo();
   }
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode> sendWTMaxData(

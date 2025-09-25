@@ -248,6 +248,7 @@ class MyUnion implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftUn
     $this->logIncorrectFieldAccessed(
       $this->_type,
       MyUnionEnum::union_annotated_field,
+      $this->union_annotated_field === null,
     );
     return $this->union_annotated_field;
   }
@@ -272,6 +273,7 @@ class MyUnion implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftUn
     $this->logIncorrectFieldAccessed(
       $this->_type,
       MyUnionEnum::union_adapted_type,
+      $this->union_adapted_type === null,
     );
     return $this->union_adapted_type;
   }

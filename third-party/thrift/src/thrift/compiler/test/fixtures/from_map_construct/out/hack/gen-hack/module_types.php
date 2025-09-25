@@ -431,6 +431,7 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     $this->logIncorrectFieldAccessed(
       $this->_type,
       TestUnionEnum::string_field,
+      $this->string_field === null,
     );
     return $this->string_field;
   }
@@ -455,6 +456,7 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     $this->logIncorrectFieldAccessed(
       $this->_type,
       TestUnionEnum::int_field,
+      $this->int_field === null,
     );
     return $this->int_field;
   }
@@ -479,6 +481,7 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     $this->logIncorrectFieldAccessed(
       $this->_type,
       TestUnionEnum::enum_field,
+      $this->enum_field === null,
     );
     return $this->enum_field;
   }
@@ -503,6 +506,7 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     $this->logIncorrectFieldAccessed(
       $this->_type,
       TestUnionEnum::foo_struct,
+      $this->foo_struct === null,
     );
     return $this->foo_struct;
   }

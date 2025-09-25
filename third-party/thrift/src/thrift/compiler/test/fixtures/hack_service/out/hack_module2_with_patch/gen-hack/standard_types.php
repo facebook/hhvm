@@ -248,6 +248,7 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeUriEnum::uri,
+      $this->uri === null,
     );
     return $this->uri;
   }
@@ -272,6 +273,7 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeUriEnum::typeHashPrefixSha2_256,
+      $this->typeHashPrefixSha2_256 === null,
     );
     return $this->typeHashPrefixSha2_256;
   }
@@ -296,6 +298,7 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeUriEnum::scopedName,
+      $this->scopedName === null,
     );
     return $this->scopedName;
   }
@@ -320,6 +323,7 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeUriEnum::definitionKey,
+      $this->definitionKey === null,
     );
     return $this->definitionKey;
   }
@@ -933,6 +937,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeNameEnum::boolType,
+      $this->boolType === null,
     );
     return $this->boolType;
   }
@@ -957,6 +962,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeNameEnum::byteType,
+      $this->byteType === null,
     );
     return $this->byteType;
   }
@@ -981,6 +987,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeNameEnum::i16Type,
+      $this->i16Type === null,
     );
     return $this->i16Type;
   }
@@ -1005,6 +1012,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeNameEnum::i32Type,
+      $this->i32Type === null,
     );
     return $this->i32Type;
   }
@@ -1029,6 +1037,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeNameEnum::i64Type,
+      $this->i64Type === null,
     );
     return $this->i64Type;
   }
@@ -1053,6 +1062,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeNameEnum::floatType,
+      $this->floatType === null,
     );
     return $this->floatType;
   }
@@ -1077,6 +1087,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeNameEnum::doubleType,
+      $this->doubleType === null,
     );
     return $this->doubleType;
   }
@@ -1101,6 +1112,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeNameEnum::stringType,
+      $this->stringType === null,
     );
     return $this->stringType;
   }
@@ -1125,6 +1137,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeNameEnum::binaryType,
+      $this->binaryType === null,
     );
     return $this->binaryType;
   }
@@ -1149,6 +1162,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeNameEnum::enumType,
+      $this->enumType === null,
     );
     return $this->enumType;
   }
@@ -1173,6 +1187,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeNameEnum::typedefType,
+      $this->typedefType === null,
     );
     return $this->typedefType;
   }
@@ -1197,6 +1212,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeNameEnum::structType,
+      $this->structType === null,
     );
     return $this->structType;
   }
@@ -1221,6 +1237,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeNameEnum::unionType,
+      $this->unionType === null,
     );
     return $this->unionType;
   }
@@ -1245,6 +1262,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeNameEnum::exceptionType,
+      $this->exceptionType === null,
     );
     return $this->exceptionType;
   }
@@ -1269,6 +1287,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeNameEnum::listType,
+      $this->listType === null,
     );
     return $this->listType;
   }
@@ -1293,6 +1312,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeNameEnum::setType,
+      $this->setType === null,
     );
     return $this->setType;
   }
@@ -1317,6 +1337,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       apache_thrift_type_standard_TypeNameEnum::mapType,
+      $this->mapType === null,
     );
     return $this->mapType;
   }

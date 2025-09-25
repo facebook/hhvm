@@ -176,6 +176,7 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     $this->logIncorrectFieldAccessed(
       $this->_type,
       PrimitiveEnum::i64_,
+      $this->i64_ === null,
     );
     return $this->i64_;
   }
@@ -200,6 +201,7 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     $this->logIncorrectFieldAccessed(
       $this->_type,
       PrimitiveEnum::string_,
+      $this->string_ === null,
     );
     return $this->string_;
   }
@@ -224,6 +226,7 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     $this->logIncorrectFieldAccessed(
       $this->_type,
       PrimitiveEnum::float5_,
+      $this->float5_ === null,
     );
     return $this->float5_;
   }
@@ -248,6 +251,7 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     $this->logIncorrectFieldAccessed(
       $this->_type,
       PrimitiveEnum::float4_,
+      $this->float4_ === null,
     );
     return $this->float4_;
   }
@@ -272,6 +276,7 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     $this->logIncorrectFieldAccessed(
       $this->_type,
       PrimitiveEnum::float3_,
+      $this->float3_ === null,
     );
     return $this->float3_;
   }
@@ -558,6 +563,7 @@ class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     $this->logIncorrectFieldAccessed(
       $this->_type,
       OtherPrimitiveEnum::i64_,
+      $this->i64_ === null,
     );
     return $this->i64_;
   }
@@ -582,6 +588,7 @@ class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     $this->logIncorrectFieldAccessed(
       $this->_type,
       OtherPrimitiveEnum::string_,
+      $this->string_ === null,
     );
     return $this->string_;
   }
@@ -606,6 +613,7 @@ class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     $this->logIncorrectFieldAccessed(
       $this->_type,
       OtherPrimitiveEnum::float5_,
+      $this->float5_ === null,
     );
     return $this->float5_;
   }
@@ -630,6 +638,7 @@ class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     $this->logIncorrectFieldAccessed(
       $this->_type,
       OtherPrimitiveEnum::float4_,
+      $this->float4_ === null,
     );
     return $this->float4_;
   }
@@ -654,6 +663,7 @@ class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     $this->logIncorrectFieldAccessed(
       $this->_type,
       OtherPrimitiveEnum::float3_,
+      $this->float3_ === null,
     );
     return $this->float3_;
   }

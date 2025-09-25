@@ -287,8 +287,9 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
   private function logIncorrectFieldAccessed(
     arraykey $expected_field,
     arraykey $actual_field,
+    bool $is_null = false,
   )[]: void {
-    if ($expected_field !== $actual_field) {
+    if ($expected_field !== $actual_field && !$is_null) {
       HH\Coeffects\fb\backdoor_from_pure__DO_NOT_USE(
         ()[defaults] ==> {
           if (JustKnobs::eval('thrift/hack:log_incorrect_union_field_access')) {

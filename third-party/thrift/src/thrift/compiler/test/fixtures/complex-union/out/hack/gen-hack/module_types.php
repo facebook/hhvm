@@ -213,6 +213,7 @@ class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       ComplexUnionEnum::intValue,
+      $this->intValue === null,
     );
     return $this->intValue;
   }
@@ -237,6 +238,7 @@ class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       ComplexUnionEnum::stringValue,
+      $this->stringValue === null,
     );
     return $this->stringValue;
   }
@@ -261,6 +263,7 @@ class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       ComplexUnionEnum::intListValue,
+      $this->intListValue === null,
     );
     return $this->intListValue;
   }
@@ -285,6 +288,7 @@ class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       ComplexUnionEnum::stringListValue,
+      $this->stringListValue === null,
     );
     return $this->stringListValue;
   }
@@ -309,6 +313,7 @@ class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       ComplexUnionEnum::typedefValue,
+      $this->typedefValue === null,
     );
     return $this->typedefValue;
   }
@@ -333,6 +338,7 @@ class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       ComplexUnionEnum::stringRef,
+      $this->stringRef === null,
     );
     return $this->stringRef;
   }
@@ -654,6 +660,7 @@ class ListUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftP
     $this->logIncorrectFieldAccessed(
       $this->_type,
       ListUnionEnum::intListValue,
+      $this->intListValue === null,
     );
     return $this->intListValue;
   }
@@ -678,6 +685,7 @@ class ListUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftP
     $this->logIncorrectFieldAccessed(
       $this->_type,
       ListUnionEnum::stringListValue,
+      $this->stringListValue === null,
     );
     return $this->stringListValue;
   }
@@ -891,6 +899,7 @@ class DataUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftP
     $this->logIncorrectFieldAccessed(
       $this->_type,
       DataUnionEnum::binaryData,
+      $this->binaryData === null,
     );
     return $this->binaryData;
   }
@@ -915,6 +924,7 @@ class DataUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftP
     $this->logIncorrectFieldAccessed(
       $this->_type,
       DataUnionEnum::stringData,
+      $this->stringData === null,
     );
     return $this->stringData;
   }
@@ -1290,6 +1300,7 @@ class ValUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftPr
     $this->logIncorrectFieldAccessed(
       $this->_type,
       ValUnionEnum::v1,
+      $this->v1 === null,
     );
     return $this->v1;
   }
@@ -1314,6 +1325,7 @@ class ValUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftPr
     $this->logIncorrectFieldAccessed(
       $this->_type,
       ValUnionEnum::v2,
+      $this->v2 === null,
     );
     return $this->v2;
   }
@@ -1510,6 +1522,7 @@ class VirtualComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata,
     $this->logIncorrectFieldAccessed(
       $this->_type,
       VirtualComplexUnionEnum::thingOne,
+      $this->thingOne === null,
     );
     return $this->thingOne;
   }
@@ -1534,6 +1547,7 @@ class VirtualComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata,
     $this->logIncorrectFieldAccessed(
       $this->_type,
       VirtualComplexUnionEnum::thingTwo,
+      $this->thingTwo === null,
     );
     return $this->thingTwo;
   }
@@ -1790,6 +1804,7 @@ class NonCopyableUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \I
     $this->logIncorrectFieldAccessed(
       $this->_type,
       NonCopyableUnionEnum::s,
+      $this->s === null,
     );
     return $this->s;
   }

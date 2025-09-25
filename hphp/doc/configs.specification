@@ -1462,6 +1462,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Attempt to get whether or not a function has been enqueued for async JIT before attempting to write
 
+- bool Eval.UseTopologicalMerge = true, paulbiss
+
+  Use a topological sort of dependencies when loading units
+
 # Hack.Lang
 
 - bool Hack.Lang.DisableLvalAsAnExpression = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)

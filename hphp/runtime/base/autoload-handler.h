@@ -36,6 +36,22 @@ struct RepoAutoloadMap;
 
 struct AutoloadHandler final : RequestEventHandler {
 
+  /*
+   * RAII helper to prevent autoloading within a particular scope.
+   */
+  struct Inhibit {
+    Inhibit() : prev(s_supressAutoloading ? *s_supressAutoloading : false) {
+      *s_supressAutoloading = true;
+    }
+    ~Inhibit() { *s_supressAutoloading = prev; }
+
+    Inhibit(Inhibit&&) = delete;
+    Inhibit& operator=(Inhibit&&) = delete;
+
+  private:
+    bool prev;
+  };
+
   AutoloadHandler() = default;
   AutoloadHandler(const AutoloadHandler&) = delete;
   AutoloadHandler(AutoloadHandler&&) = delete;
@@ -100,6 +116,10 @@ private:
   // queries (aka Facts) about the codebase.
   FactsStore* m_facts = nullptr;
   AutoloadMap* m_map = nullptr;
+
+  // When true disables the various autoload functions. The map itself remains
+  // accessible.
+  static RDS_LOCAL(bool, s_supressAutoloading);
 
   static std::unique_ptr<RepoAutoloadMap> s_repoAutoloadMap;
 };

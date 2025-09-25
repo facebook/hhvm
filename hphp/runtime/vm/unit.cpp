@@ -42,6 +42,7 @@
 #include "hphp/util/struct-log.h"
 
 #include "hphp/runtime/base/attr.h"
+#include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -386,9 +387,244 @@ void Unit::initialMerge() {
   m_mergeState.store(MergeState::InitialMerged, std::memory_order_release);
 }
 
+namespace {
+
+using PType = std::variant<PreClass*, PreTypeAlias*>;
+using SymCache = hphp_fast_map<
+  const StringData*,
+  PType,
+  string_data_hash,
+  string_data_tsame
+>;
+
+struct LoadContext {
+  SymCache syms;
+  bool isSystem{false};
+  AutoloadMap* am{nullptr};
+  std::vector<Unit*> unmerged;
+  hphp_fast_set<PType> loaded;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+Optional<PType> addUnit(LoadContext& ctx, Unit* d, const StringData* name) {
+  Optional<PType> ret;
+  for (auto& pcls : d->preclasses()) {
+    if (!PreClassEmitter::IsAnonymousClassName(pcls->name()->slice())) {
+      ctx.syms.emplace(pcls->name(), pcls.get());
+      if (name && pcls->name()->tsame(name)) ret = pcls.get();
+    }
+  }
+
+  for (auto& pty : d->typeAliases()) {
+    ctx.syms.emplace(pty.name, &pty);
+    if (name && pty.name->tsame(name)) ret = &pty;
+  }
+
+  // We will need to finish fulling loading this unit now that we're merging a
+  // symbol from it.
+  ctx.unmerged.emplace_back(d);
+  return ret;
+}
+
+Optional<PType> findPreType(LoadContext& ctx, const StringData* name) {
+  auto const symIt = ctx.syms.find(name);
+  if (symIt != ctx.syms.end()) return symIt->second;
+
+  // SystemLib should have no external dependencies so ignore AutoloadMap init.
+  // Initializing the autoload map before we the first unit in the repo can
+  // cause us to cache a null map for the duration of the request.
+  if (ctx.isSystem) return {};
+
+  // Lazily compute the autoload map- if all symbols are local then avoid a
+  // potentially expensive facts initialization.
+  if (!ctx.am) {
+    ctx.am = AutoloadHandler::s_instance->getAutoloadMap();
+    if (!ctx.am) return {};
+  }
+
+  auto const p = ctx.am->getTypeOrTypeAliasFile(StrNR{name});
+  if (!p) return {};
+
+  bool initial = true;
+  auto const d = lookupUnit(p->m_path.get(), g_context->getCwd().data(),
+                            &initial, nullptr, true, false, true);
+
+  // If the unit was already loaded the symbol should have been defined already,
+  // this implies we don't know where to find the symbol.
+  if (!d || !initial) return {};
+  return addUnit(ctx, d, name);
+}
+
+void loadTypeSafe(LoadContext& ctx, const StringData* name, PType initial) {
+  std::vector<PType> stack;
+  hphp_fast_set<PType> visited;
+
+  auto const exists = [&] (const StringData* p) {
+    if (p->isSymbol() && p->getCachedClass()) return true;
+    auto ne = NamedType::getNoCreate(p);
+    return ne && (ne->getCachedClass() || ne->getCachedTypeAlias());
+  };
+
+  auto const def = [&] (PType p) {
+    if (!ctx.loaded.emplace(p).second) return;
+    match<void>(
+      p,
+      [&] (PreClass* pc)      { return Class::def(pc, true); },
+      [&] (PreTypeAlias* pta) { return TypeAlias::def(pta, true); }
+    );
+  };
+
+  auto const load = [&] (const StringData* p) {
+    if (!p || p->empty() || exists(p)) return;
+
+    // If the symbol isn't available or a cycle is detected continue on and
+    // allow the error to be encountered later when def() is called with
+    // failIsFatal.
+    auto ty = findPreType(ctx, p);
+    if (ty && !visited.count(*ty)) stack.emplace_back(*ty);
+  };
+
+  // If the symbol already exists trigger an error unless we were the ones who
+  // loaded it.
+  if (exists(name)) def(initial);
+  stack.emplace_back(initial);
+
+  while (!stack.empty()) {
+    auto p = stack.back();
+    if (visited.emplace(p).second) {
+      match<void>(
+        p,
+        [&] (PreClass* pc) {
+          if (auto const parent = pc->parent())    load(parent);
+          for (auto const i : pc->interfaces())    load(i);
+          for (auto const e : pc->includedEnums()) load(e);
+          for (auto const t : pc->usedTraits())    load(t);
+          if (pc->enumBaseTy().isUnresolved()) {
+            load(pc->enumBaseTy().typeName());
+          }
+        },
+        [&] (PreTypeAlias* pta) {
+          if (pta->value.isUnresolved()) {
+            for (auto& tc : eachTypeConstraintInUnion(pta->value)) {
+              if (tc.isUnresolved()) load(tc.typeName());
+            }
+          }
+        }
+      );
+    } else {
+      stack.pop_back();
+      def(p);
+    }
+  }
+}
+
+void mergeUnitSafe(LoadContext& ctx, Unit* u) {
+  if (!u->preMerge()) return;
+
+  for (auto const& pc : u->preclasses()) {
+    if (!PreClassEmitter::IsAnonymousClassName(pc->name()->slice())) {
+      loadTypeSafe(ctx, pc->name(), pc.get());
+    }
+  }
+  for (auto& pta : u->typeAliases()) loadTypeSafe(ctx, pta.name, &pta);
+
+  u->finalMerge();
+}
+
+void mergeUnitSafe(Unit* u) {
+  LoadContext ctx;
+  addUnit(ctx, u, nullptr);
+  ctx.isSystem = u->isSystemLib();
+
+  // Disallow further autoloading while performing a safe merge. The merge
+  // algorithm is responsible for querying the autoload map for symbols while
+  // in this state. Calling into the autoloader could trigger reentry into the
+  // mergeUnitSafe() stack.
+  AutoloadHandler::Inhibit _;
+
+  for (size_t i = 0; i < ctx.unmerged.size(); ++i) {
+    mergeUnitSafe(ctx, ctx.unmerged[i]);
+  }
+}
+
+}
+
+bool Unit::preMerge() {
+  auto mergeState = m_mergeState.load(std::memory_order_acquire);
+  if (mergeState == MergeState::Merged) return false;
+
+  if (m_fatalInfo) {
+    raise_parse_error(filepath(),
+                      m_fatalInfo->m_fatalMsg.c_str(),
+                      m_fatalInfo->m_fatalLoc);
+  }
+
+  if (m_softDeployedRepoOnly) {
+    raise_warning("File %s is soft-deployed, but its unit was merged", filepath()->data());
+  }
+
+  if (mergeState == MergeState::Unmerged) {
+    SimpleLock lock(unitInitLock);
+    initialMerge();
+    mergeState = m_mergeState.load(std::memory_order_acquire);
+    assertx(mergeState >= MergeState::InitialMerged);
+  }
+
+  if (mergeState == MergeState::InitialMerged) {
+    mergeImpl<false, true>();
+  }
+
+  if (mergeState == MergeState::NeedsNonPersistentMerged) {
+    if (isSystemLib()) {
+      mergeImpl<true /* mergeOnlyNonPersistentFuncs */>();
+      assertx(!Cfg::Repo::Authoritative && Cfg::Jit::EnableRenameFunction);
+    } else {
+      mergeImpl<false, true>();
+      assertx(!Cfg::Repo::Authoritative);
+    }
+  }
+
+  return mergeState != MergeState::Merged;
+}
+
+void Unit::finalMerge() {
+  assertx(m_mergeState.load(std::memory_order_acquire) != MergeState::Unmerged);
+
+  if (Cfg::Eval::LogDeclDeps) {
+    logDeclInfo();
+
+    auto const thisPath = filepath();
+    auto const& options = RepoOptions::forFile(thisPath->data());
+    auto const dir = options.dir();
+    auto const relPath = std::filesystem::relative(
+      std::filesystem::path(thisPath->data()),
+      dir
+    );
+
+    for (auto& [path, sha] : m_deps) {
+      auto hash = SHA1{mangleUnitSha1(sha.toString(), path, options.flags())};
+      auto fpath = makeStaticString(dir / path);
+      g_context->m_loadedRdepMap[fpath].emplace_back(relPath, hash);
+    }
+  }
+
+  if (Cfg::Repo::Authoritative ||
+      (isSystemLib() && !Cfg::Jit::EnableRenameFunction)) {
+    m_mergeState.store(MergeState::Merged, std::memory_order_release);
+  } else {
+    m_mergeState.store(MergeState::NeedsNonPersistentMerged, std::memory_order_release);
+  }
+}
+
 void Unit::merge() {
   auto mergeState = m_mergeState.load(std::memory_order_acquire);
   if (mergeState == MergeState::Merged) return;
+
+  if (Cfg::Eval::UseTopologicalMerge &&
+      (!isSystemLib() || mergeState != MergeState::NeedsNonPersistentMerged)) {
+    return mergeUnitSafe(this);
+  }
 
   if (m_fatalInfo) {
     raise_parse_error(filepath(),
@@ -589,7 +825,7 @@ static bool defineSymbols(
   return madeProgress;
 }
 
-template<bool mergeOnlyNonPersistentFuncs>
+template<bool mergeOnlyNonPersistentFuncs, bool skipClassesAndAliases>
 void Unit::mergeImpl() {
   assertx(m_mergeState.load(std::memory_order_acquire) >=
           MergeState::InitialMerged);
@@ -624,6 +860,8 @@ void Unit::mergeImpl() {
     assertx(IMPLIES(Cfg::Repo::Authoritative, module.attrs & AttrPersistent));
     Module::def(&module);
   }
+
+  if (skipClassesAndAliases) return;
 
   boost::dynamic_bitset<> preClasses(m_preClasses.size());
   preClasses.set();

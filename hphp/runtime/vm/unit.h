@@ -455,6 +455,8 @@ public:
    * Merge the Unit if it is not already merged.
    */
   void merge();
+  bool preMerge();
+  void finalMerge();
 
   /*
    * Is this Unit empty---i.e., does it define nothing and have no
@@ -557,7 +559,8 @@ public:
 
 private:
   void initialMerge();
-  template<bool mergeOnlyNonPersistentFuncs> void mergeImpl();
+  template<bool mergeOnlyNonPersistentFuncs, bool skipClassesAndAliases = false>
+  void mergeImpl();
   UnitExtended* getExtended();
   const UnitExtended* getExtended() const;
 

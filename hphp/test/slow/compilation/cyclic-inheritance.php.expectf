@@ -1,1 +1,1 @@
-Fatal error: unknown class C in %s/cyclic-inheritance.php on line 3
+Fatal error: unknown class A in %s/cyclic-inheritance.php on line 4

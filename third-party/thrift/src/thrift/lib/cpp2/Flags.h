@@ -197,8 +197,8 @@ class FlagWrapper {
         flagWrapper(flagName, _default);                                       \
     return *flagWrapper;                                                       \
   }                                                                            \
-  /* This is here just to force a semicolon */                                 \
-  apache::thrift::detail::FlagWrapper<_type>& THRIFT_FLAG_WRAPPER__##_name()
+  /* Eagerly register the flag and force a trailing semicolon */               \
+  auto& THRIFT_FLAG_REGISTER__##_name = THRIFT_FLAG_WRAPPER__##_name()
 
 #define THRIFT_FLAG_DECLARE(_name, _type) \
   apache::thrift::detail::FlagWrapper<_type>& THRIFT_FLAG_WRAPPER__##_name()

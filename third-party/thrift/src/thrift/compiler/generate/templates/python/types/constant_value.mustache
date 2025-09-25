@@ -25,13 +25,11 @@ file.
   }}{{^value:nonzero?}}False{{/value:nonzero?}}{{!
 }}{{/value:bool?}}{{!
 }}{{#value:integer?}}{{!
-    }}{{#value:value_for_bool?}}{{!
-        }}{{#value:nonzero?}}True{{/value:nonzero?}}{{!
-        }}{{^value:nonzero?}}False{{/value:nonzero?}}{{!
-    }}{{/value:value_for_bool?}}{{!
-    }}{{^value:value_for_bool?}}{{!
-    }}{{value:integer_value}}{{#value:value_for_floating_point?}}.0{{/value:value_for_floating_point?}}{{!
-    }}{{/value:value_for_bool?}}{{!
+    }}{{#if value:type.bool?}}{{!
+        }}{{#if value:nonzero?}}True{{#else}}False{{/if}}{{!
+    }}{{#else}}{{!
+        }}{{value:integer_value}}{{#if value:type.floating_point?}}.0{{/if}}{{!
+    }}{{/if value:type.bool?}}{{!
 }}{{/value:integer?}}{{!
 }}{{#value:double?}}float({{value:double_value}}){{/value:double?}}{{!
 }}{{#value:const_struct?}}{{!
@@ -47,8 +45,7 @@ file.
 }}{{/value:const_struct?}}{{!
 }}{{^value:const_struct?}}{{!
 }}{{#value:string?}}{{!
-    }}{{#value:py3_binary?}}b"{{value:string_value}}"{{/value:py3_binary?}}{{!
-    }}{{^value:py3_binary?}}"{{value:unicode_value}}"{{/value:py3_binary?}}{{!
+    }}{{#if value:type.binary?}}b"{{value:string_value}}"{{#else}}"{{value:unicode_value}}"{{/if}}{{!
 }}{{/value:string?}}{{!
 }}{{#value:map?}}_fbthrift_python_types.Map({{!
     }}{{#value:map_key_type}}{{> types/typeinfo }}{{/value:map_key_type}}, {{!
@@ -59,8 +56,7 @@ file.
         }}{{/value:map_elements}}{{! purposeful close brace [next line]
 }}}){{/value:map?}}{{!
 }}{{#value:list?}}_fbthrift_python_types.{{!
-    }}{{#value:value_for_set?}}Set{{/value:value_for_set?}}{{!
-    }}{{^value:value_for_set?}}List{{/value:value_for_set?}}({{!
+    }}{{#if value:type.set?}}Set{{#else}}List{{/if}}({{!
         }}{{#value:list_elem_type}}{{> types/typeinfo }}{{/value:list_elem_type}}, {{!
         }}({{#value:list_elements}}{{> types/constant_value }}, {{/value:list_elements}}){{!
 }}){{/value:list?}}{{!

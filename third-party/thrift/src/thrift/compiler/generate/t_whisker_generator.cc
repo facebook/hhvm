@@ -365,6 +365,9 @@ t_whisker_generator::make_prototype_for_const_value(
     const prototype_database& proto) const {
   prototype_builder<h_const_value> def;
   using cv = t_const_value::t_const_value_kind;
+  def.property("type", [&proto](const t_const_value& self) {
+    return resolve_derived_t_type(proto, self.ttype().deref());
+  });
   def.property("bool?", [](const t_const_value& self) {
     return self.kind() == cv::CV_BOOL;
   });

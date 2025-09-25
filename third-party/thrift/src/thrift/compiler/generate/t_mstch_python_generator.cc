@@ -105,14 +105,6 @@ class python_generator_context {
   type_kind type_kind_;
 };
 
-bool is_const_value_primitive(
-    const t_const_value& self, t_primitive_type::type kind) {
-  const t_primitive_type* primitive = self.ttype().empty()
-      ? nullptr
-      : self.ttype()->get_true_type()->try_as<t_primitive_type>();
-  return primitive != nullptr && primitive->primitive_type() == kind;
-}
-
 const t_const* find_structured_adapter_annotation(
     const t_named& node, const char* uri = kPythonAdapterUri) {
   return node.find_structured_annotation_or_null(uri);
@@ -919,27 +911,12 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
                 *self.get_enum_value(), self.get_enum()->name()))
           : whisker::make::null;
     });
-    def.property("py3_binary?", [](const t_const_value& self) {
-      return self.kind() == t_const_value::CV_STRING &&
-          is_const_value_primitive(self, t_primitive_type::type::t_binary);
-    });
     def.property("unicode_value", [](const t_const_value& self) {
       return self.kind() == t_const_value::CV_STRING
           ? whisker::make::string(
                 get_escaped_string<nonascii_handling::no_escape>(
                     self.get_string()))
           : whisker::make::null;
-    });
-    def.property("value_for_bool?", [](const t_const_value& self) {
-      return is_const_value_primitive(self, t_primitive_type::type::t_bool);
-    });
-    def.property("value_for_floating_point?", [](const t_const_value& self) {
-      return is_const_value_primitive(self, t_primitive_type::type::t_float) ||
-          is_const_value_primitive(self, t_primitive_type::type::t_double);
-    });
-    def.property("value_for_set?", [](const t_const_value& self) {
-      return !self.ttype().empty() &&
-          self.ttype()->get_true_type()->is<t_set>();
     });
 
     return std::move(def).make();

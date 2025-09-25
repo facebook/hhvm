@@ -27,12 +27,13 @@ function main(): void {
   $c = new C(4);
   // Bug: not a type error, but we expect that value types
   // cannot be reassigned. HHVM enforces this at runtime.
+  // Function calls should typecheck accordingly
   $c->incrB();
   $c->incrA();
-  $c->b++;
-  $c->a++;
 
   // Correctly a type error
+  $c->b++;
+  $c->a++;
   $c->b = 5;
   $c->a = 10;
   $c->resetA();

@@ -6,26 +6,26 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <cstddef>
+#include <cstdint>
 #include <limits>
 
 // QUIC style flow controller using offsets
 
 class FlowController {
  public:
-  FlowController(size_t initialMax = 0) : maxOffset_(initialMax) {
+  FlowController(uint64_t initialMax = 0) : maxOffset_(initialMax) {
   }
 
-  bool reserve(size_t length) {
+  bool reserve(uint64_t length) {
     if (length == 0) {
       return true;
     }
 
-    if (currentOffset_ >= std::numeric_limits<size_t>::max() - length) {
+    if (currentOffset_ >= std::numeric_limits<uint64_t>::max() - length) {
       return false;
     }
 
-    size_t newOffset = currentOffset_ + length;
+    uint64_t newOffset = currentOffset_ + length;
     if (newOffset > maxOffset_) {
       return false;
     }
@@ -33,7 +33,7 @@ class FlowController {
     return true;
   }
 
-  bool grant(size_t offset) {
+  bool grant(uint64_t offset) {
     if (offset <= maxOffset_) {
       return false;
     }
@@ -45,18 +45,18 @@ class FlowController {
     return currentOffset_ >= maxOffset_;
   }
 
-  size_t getCurrentOffset() const {
+  uint64_t getCurrentOffset() const {
     return currentOffset_;
   }
-  size_t getMaxOffset() const {
+  uint64_t getMaxOffset() const {
     return maxOffset_;
   }
 
-  size_t getAvailable() const {
+  uint64_t getAvailable() const {
     return maxOffset_ - currentOffset_;
   }
 
  private:
-  size_t currentOffset_{0};
-  size_t maxOffset_;
+  uint64_t currentOffset_{0};
+  uint64_t maxOffset_;
 };

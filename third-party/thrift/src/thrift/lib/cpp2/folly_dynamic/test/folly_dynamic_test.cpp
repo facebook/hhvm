@@ -793,3 +793,12 @@ TEST(FromDynamic, struct_with_vector_bool) {
       v, dynamic_format::PORTABLE, format_adherence::LENIENT);
   EXPECT_EQ(res.values(), std::vector<bool>({true, false, true, false}));
 }
+
+TEST(FromDynamic, struct_with_list_field_with_default_values) {
+  folly::dynamic v = folly::dynamic::object();
+  v["list_field"] = folly::dynamic::array(4, 5, 6, 7);
+  auto res = from_dynamic<
+      test_cpp2::cpp_reflection::StructWithListFieldWithDefaultValues>(
+      v, dynamic_format::PORTABLE, format_adherence::STRICT);
+  EXPECT_EQ(res.list_field().value(), std::vector<int>({4, 5, 6, 7}));
+}

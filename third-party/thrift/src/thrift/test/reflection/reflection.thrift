@@ -675,3 +675,7 @@ struct StructWithAdaptedField {
 struct StructWithVectorBool {
   1: list<bool> values;
 }
+
+struct StructWithListFieldWithDefaultValues {
+  1: list<i32> list_field = [1, 2, 3];
+}

@@ -163,6 +163,7 @@ struct dynamic_converter_impl<apache::thrift::type::list<VTag>> {
     if (input.empty()) {
       return;
     }
+    out.clear();
     do_reserve(out, input.size());
     for (const auto& i : input) {
       out.emplace_back();

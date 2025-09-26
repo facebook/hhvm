@@ -39,4 +39,7 @@ type ServerObserver interface {
 	// Timing metrics
 	ProcessDelay(delay time.Duration)   // time from request received to handler start
 	ProcessTime(duration time.Duration) // time spent in handler execution
+
+	// Function-level metrics for tracking detailed request behavior
+	ReceivedRequestForFunction(function string) // request received for specific function
 }

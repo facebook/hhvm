@@ -42,4 +42,7 @@ func TestNoopServerObserver(t *testing.T) {
 	observer.SentReply()
 	observer.ActiveRequests(10)
 	observer.ProcessTime(200 * time.Millisecond)
+
+	// Test function-level metrics
+	observer.ReceivedRequestForFunction("testFunction")
 }

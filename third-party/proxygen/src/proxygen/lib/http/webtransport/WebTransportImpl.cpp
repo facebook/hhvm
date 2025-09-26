@@ -152,13 +152,10 @@ WebTransportImpl::sendWebTransportStreamData(
     std::unique_ptr<folly::IOBuf> data,
     bool eof,
     ByteEventCallback* deliveryCallback) {
-  bool blocked = false;
-  if (data) {
-    auto dataLen = data->computeChainDataLength();
-    // sendWebTransportStreamData will only be called when
-    // dataLen <= available window
-    blocked = !sendFlowController_.reserve(dataLen);
-  }
+  auto dataLen = data ? data->computeChainDataLength() : 0;
+  // WebTransportImpl::sendWebTransportStreamData will only be called when
+  // dataLen <= available window
+  bool blocked = !sendFlowController_.reserve(dataLen);
   auto res = tp_.sendWebTransportStreamData(
       id, std::move(data), eof, deliveryCallback);
   if (blocked) {

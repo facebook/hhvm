@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <array>
 #include <assert.h>
 #include <folly/Range.h>
 #include <folly/portability/Windows.h> // for windows compatibility: STRICT maybe defined by some win headers
@@ -38,7 +39,7 @@ class CodecUtil {
  public:
   // If these are needed elsewhere, we can move them to a more generic
   // namespace/class later
-  static const char http_tokens[256];
+  static const std::array<char, 256> http_tokens;
 
   static bool validateURL(folly::ByteRange url, URLValidateMode mode) {
     return proxygen::validateURL(url, mode);

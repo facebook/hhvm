@@ -23,7 +23,7 @@ namespace proxygen {
  * Earlier versions of this table allowed ' ', '"', '/' and '}'
  */
 // clang-format off
-const char CodecUtil::http_tokens[256] = {
+const std::array<char, 256> CodecUtil::http_tokens = {{
 /*   0 nul    1 soh    2 stx    3 etx    4 eot    5 enq    6 ack    7 bel  */
         0,       0,       0,       0,       0,       0,       0,       0,
 /*   8 bs     9 ht    10 nl    11 vt    12 np    13 cr    14 so    15 si   */
@@ -56,7 +56,7 @@ const char CodecUtil::http_tokens[256] = {
        'p',     'q',     'r',     's',     't',     'u',     'v',     'w',
 /* 120  x   121  y   122  z   123  {   124  |   125  }   126  ~   127 del */
        'x',     'y',     'z',      0,      '|',      1,     '~',       0
-};
+}};
 // clang-format on
 
 bool CodecUtil::hasGzipAndDeflate(const std::string& value,

@@ -178,6 +178,8 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 			// close connection on write failure
 			return writeErr
 		}
+		// Track undeclared exception only after successful write
+		observer.UndeclaredException()
 		return nil
 	}
 	if appException != nil {
@@ -186,10 +188,18 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 			// close connection on write failure
 			return writeErr
 		}
+		// Track undeclared exception only after successful write
+		observer.UndeclaredException()
 	} else {
 		if writeErr := pfunc.Write(seqID, result, prot); writeErr != nil {
 			// close connection on write failure
 			return writeErr
+		}
+		// For REPLY, check for declared exceptions via "uex" header for structured exceptions
+		if protocolBuffer, ok := prot.(*protocolBuffer); ok {
+			if uexHeader := protocolBuffer.getRequestHeaders()["uex"]; uexHeader != "" {
+				observer.DeclaredException()
+			}
 		}
 	}
 	// if we got here, we successfully processed the message

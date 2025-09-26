@@ -256,7 +256,7 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		s.observer.ProcessDelay(processDelay)
 
 		// Track actual handler execution time
-		if err := s.processWithExceptionTracking(ctx, protocol); err != nil {
+		if err := process(ctx, s.proc, protocol, s.pstats, s.observer); err != nil {
 			// Notify observer that connection was dropped due to unparseable message begin
 			s.observer.ConnDropped()
 			return nil, err
@@ -328,7 +328,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	s.observer.ProcessDelay(processDelay)
 
 	// TODO: support pipelining
-	if err := s.processWithExceptionTracking(s.ctx, protocol); err != nil {
+	if err := process(s.ctx, s.proc, protocol, s.pstats, s.observer); err != nil {
 		// Notify observer that connection was dropped due to unparseable message begin
 		s.observer.ConnDropped()
 		s.log("rocketServer fireAndForget process error: %v", err)
@@ -338,33 +338,6 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	// Track actual handler execution time
 	processTime := time.Since(processStartTime)
 	s.observer.ProcessTime(processTime)
-}
-
-// processWithExceptionTracking wraps the process function to track declared and undeclared exceptions
-// Declared exceptions are structured exceptions defined in Thrift IDL files that are
-// explicitly declared in service method signatures (e.g., "throws (1: MyException ex)")
-// Undeclared exceptions are ApplicationException instances for processing errors, unknown methods, etc.
-func (s *rocketServerSocket) processWithExceptionTracking(ctx context.Context, protocol *protocolBuffer) error {
-	err := process(ctx, s.proc, protocol, s.pstats, s.observer)
-	if err != nil {
-		return err
-	}
-	// Check for exceptions by examining protocol headers set during processing:
-	// Both declared and undeclared exceptions set "uex" (exception type) and "uexw" (exception message) headers
-	headers := protocol.getRequestHeaders()
-	exceptionType := headers["uex"]
-	exceptionMessage := headers["uexw"]
-	if exceptionType != "" && exceptionMessage != "" {
-		// Determine if this is a declared or undeclared exception by checking the exception type
-		// ApplicationException indicates an undeclared exception (processing errors, unknown methods, etc.)
-		// All other exception types are considered declared exceptions from the service IDL
-		if exceptionType == "ApplicationException" {
-			s.observer.UndeclaredException()
-		} else {
-			s.observer.DeclaredException()
-		}
-	}
-	return nil
 }
 
 func newProtocolBufferFromRequest(request *rocket.RequestPayload) (*protocolBuffer, error) {

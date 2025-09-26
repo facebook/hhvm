@@ -1,3 +1,4 @@
 hack: hack:hack_collections=1 src/module.thrift
 json: json:annotate src/module.thrift
 cpp2: mstch_cpp2 src/module.thrift
+python: mstch_python src/module.thrift

@@ -24,6 +24,11 @@ cv_integer={{value:integer_value}}
 cv_double={{value:double_value}}
   {{#else if value:string?}}
 cv_string="{{value:string_value}}"
+  {{#else if value:const_struct?}}
+    {{! Const struct is a map const value in IDL (where the keys are field names), but
+        with a const type that is a struct/union rather than map<k,v>. Therefore, we
+        need to test it before `value:map?`, because it is also a map. }}
+cv_struct={{> metadata/const_struct }}
   {{#else if value:map?}}
 cv_map=[
     {{#each value:map_elements as |map_elem|}}
@@ -35,7 +40,5 @@ value={{#map_elem.value}}{{> metadata/const_value }}{{/map_elem.value}}
 ]
   {{#else if value:list?}}
 cv_list=[{{#value:list_elements}}{{> metadata/const_value }}, {{/value:list_elements}}]
-  {{#else if value:const_struct?}}
-cv_struct={{> metadata/const_struct }}
   {{/if value:bool?}}
 )

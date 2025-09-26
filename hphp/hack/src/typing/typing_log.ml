@@ -611,7 +611,6 @@ let env_as_value env =
     in_lambda;
     in_expr_tree;
     in_macro_splice;
-    inside_constructor;
     checked;
     tpenv;
     log_levels = _;
@@ -625,6 +624,7 @@ let env_as_value env =
   } =
     env
   in
+  let inside_constructor = env.genv.fun_is_ctor in
   make_map
     [
       ("fresh_typarams", Set fresh_typarams);

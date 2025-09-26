@@ -51,7 +51,6 @@ type env = {
            contains nested expression trees with free variables. local_env contains
            the bindings for those free variables
       *)
-  inside_constructor: bool;
   checked: Tast.check_status;
       (** Set to true when checking if a <<__SoundDynamicallyCallable>> method body
           is well-typed under dyn..dyn->dyn assumptions, that is if it can be safely called

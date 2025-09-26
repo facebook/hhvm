@@ -38,7 +38,6 @@ type env = {
   in_lambda: bool;
   in_expr_tree: expr_tree_env option;
   in_macro_splice: Typing_local_types.t option;
-  inside_constructor: bool;
   checked: Tast.check_status;
   tracing_info: Decl_counters.tracing_info option;
   tpenv: Type_parameter_env.t;
@@ -93,7 +92,6 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
     in_lambda = false;
     in_expr_tree = None;
     in_macro_splice = None;
-    inside_constructor = false;
     checked = Tast.COnce;
     decl_env = { Decl_env.mode; droot; droot_member = None; ctx };
     tracing_info =

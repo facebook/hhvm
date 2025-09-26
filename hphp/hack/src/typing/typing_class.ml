@@ -1271,7 +1271,6 @@ let class_const_def ~in_enum_class c cls env cc =
       ty ) )
 
 let class_constr_def ~is_disposable env cls constructor =
-  let env = { env with inside_constructor = true } in
   Option.bind constructor ~f:(method_def ~is_disposable env cls)
 
 (** Type-check a property declaration, with optional initializer *)

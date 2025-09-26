@@ -118,9 +118,13 @@ let get_underlying_function_type env ty =
   opt_ft
 
 let set_inside_constructor env =
-  { env with Typing_env_types.inside_constructor = true }
+  {
+    env with
+    Typing_env_types.genv =
+      { env.Typing_env_types.genv with fun_is_ctor = true };
+  }
 
-let get_inside_constructor env = env.Typing_env_types.inside_constructor
+let get_inside_constructor env = env.Typing_env_types.genv.fun_is_ctor
 
 let fully_expand = Typing_expand.fully_expand
 

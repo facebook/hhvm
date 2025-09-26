@@ -68,11 +68,13 @@ void WebTransportImpl::terminateSessionStreams(uint32_t errorCode,
 void WebTransportImpl::onMaxData(uint64_t maxData) noexcept {
   if (sendFlowController_.grant(maxData) &&
       sendFlowController_.getAvailable() > 0) {
-    auto it = wtEgressStreams_.begin();
-    while (it != wtEgressStreams_.end() &&
-           sendFlowController_.getAvailable() > 0) {
-      auto currentIt = it++;
-      currentIt->second.flushBufferedWrites();
+    for (auto it = wtEgressStreams_.begin();
+         it != wtEgressStreams_.end() &&
+         sendFlowController_.getAvailable() > 0;) {
+      // Increment here in case we delete the stream in
+      // flushBufferedWrites -> sendWebTransportStreamData
+      auto currIt = it++;
+      currIt->second.flushBufferedWrites();
     }
   } else {
     VLOG(4) << __func__ << " failed to grant maxData=" << maxData;

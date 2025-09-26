@@ -452,6 +452,53 @@ t_whisker_generator::make_prototype_for_const_value(
         : w::null;
   });
 
+  // Returns an array of the elements in a structured const value.
+  // Each array element is a map containing a reference to the corresponding
+  // field ("field") and the const value being set ("value").
+  def.property("structured_elements", [&proto](const t_const_value& self) {
+    const t_structured* strct =
+        self.ttype()->get_true_type()->try_as<t_structured>();
+    if (strct == nullptr) {
+      return w::null;
+    }
+    whisker::array::raw result;
+    for (const auto& [key_const_val, val_const_val] : self.get_map()) {
+      const t_field* field =
+          strct->get_field_by_name(key_const_val->get_string());
+      assert(field != nullptr);
+      result.emplace_back(w::map({
+          {"field", w::native_handle(proto.create<t_field>(*field))},
+          {"value",
+           w::native_handle(proto.create<t_const_value>(*val_const_val))},
+      }));
+    }
+    return w::array(result);
+  });
+
+  def.property("list_elements", [&proto](const t_const_value& self) {
+    return self.kind() == cv::CV_LIST
+        ? to_array(self.get_list(), proto.of<t_const_value>())
+        : w::null;
+  });
+
+  def.property("map_elements", [&proto](const t_const_value& self) {
+    if (self.kind() != cv::CV_MAP) {
+      return w::null;
+    }
+    // Result must be a list, rather than Whisker map, because Whisker map only
+    // supports string keys, while our Thrift map key can be any const
+    whisker::array::raw result;
+    for (const auto& [key_const_val, val_const_val] : self.get_map()) {
+      result.emplace_back(w::map({
+          {"key",
+           w::native_handle(proto.create<t_const_value>(*key_const_val))},
+          {"value",
+           w::native_handle(proto.create<t_const_value>(*val_const_val))},
+      }));
+    }
+    return w::array(result);
+  });
+
   return std::move(def).make();
 }
 

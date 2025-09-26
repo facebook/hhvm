@@ -14,16 +14,10 @@
 
 # pyre-strict
 
-from typing import AsyncIterator, Generic, TypeVar
+from typing import AsyncIterator, TypeVar
 
 TChunk = TypeVar("TChunk")
 TFinalResponse = TypeVar("TFinalResponse")
-
-class ClientSink(Generic[TFinalResponse]):
-    def __init__(self) -> None: ...
-    async def sink(
-        self, iterator: AsyncIterator[TChunk]
-    ) -> Generic[TFinalResponse]: ...
 
 class ClientBufferedStream(AsyncIterator[TChunk]):
     def __aiter__(self) -> AsyncIterator[TChunk]: ...

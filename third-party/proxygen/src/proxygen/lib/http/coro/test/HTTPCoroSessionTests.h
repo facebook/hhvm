@@ -176,7 +176,7 @@ class MockLifecycleObserver : public LifecycleObserver {
   // MOCK_METHOD(void, onConnectionError, (const HTTPCoroSession&));
   // MOCK_METHOD(void, onFullHandshakeCompletion, (const HTTPCoroSession&));
   MOCK_METHOD(void, onIngressError, (const HTTPCoroSession &, ProxygenError));
-  MOCK_METHOD(void, onIngressEOF, ());
+  MOCK_METHOD(void, onIngressEOF, (const HTTPCoroSession &));
   MOCK_METHOD(void,
               onRead,
               (const HTTPCoroSession &,

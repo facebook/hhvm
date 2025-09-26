@@ -2508,7 +2508,7 @@ folly::coro::Task<void> HTTPUniplexTransportSession::readLoop() noexcept {
     }
     if (*rc == 0) { // peer closed the connection
       XLOG(DBG4) << "Read EOF sess=" << *this;
-      deliverLifecycleEvent(&LifecycleObserver::onIngressEOF);
+      deliverLifecycleEvent(&LifecycleObserver::onIngressEOF, *this);
       codec_->onIngressEOF();
       for (auto& [_, stream] : streams_) {
         stream->abortIngress(HTTPErrorCode::TRANSPORT_EOF);

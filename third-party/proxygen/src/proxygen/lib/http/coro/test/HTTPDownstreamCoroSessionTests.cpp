@@ -1550,7 +1550,7 @@ TEST_P(HTTPDownstreamSessionTest, LifecycleObserver) {
   EXPECT_CALL(lifecycleCb, onActivateConnection(_));
   EXPECT_CALL(lifecycleCb, onIngressMessage(_, _));
   if (IS_H1()) {
-    EXPECT_CALL(lifecycleCb, onIngressEOF());
+    EXPECT_CALL(lifecycleCb, onIngressEOF(_));
   }
   EXPECT_CALL(lifecycleCb, onWrite(_, _)).Times(AtLeast(1));
   EXPECT_CALL(lifecycleCb, onRequestEnd(_, _));
@@ -1627,8 +1627,8 @@ TEST_P(HTTPDownstreamSessionTest, LifecycleObserverRemoveCallback) {
   EXPECT_CALL(otherLifecycleCb, onIngressMessage(_, _)).Times(0);
 
   if (IS_H1()) {
-    EXPECT_CALL(lifecycleCb, onIngressEOF());
-    EXPECT_CALL(otherLifecycleCb, onIngressEOF()).Times(0);
+    EXPECT_CALL(lifecycleCb, onIngressEOF(_));
+    EXPECT_CALL(otherLifecycleCb, onIngressEOF(_)).Times(0);
   }
   EXPECT_CALL(lifecycleCb, onWrite(_, _)).Times(AtLeast(1));
   EXPECT_CALL(otherLifecycleCb, onWrite(_, _)).Times(AnyNumber());
@@ -1713,8 +1713,8 @@ TEST_P(HTTPDownstreamSessionTest, MultiLifecycleObserver) {
   EXPECT_CALL(lifecycleCb, onIngressMessage(_, _));
   EXPECT_CALL(otherLifecycleCb, onIngressMessage(_, _));
   if (IS_H1()) {
-    EXPECT_CALL(lifecycleCb, onIngressEOF());
-    EXPECT_CALL(otherLifecycleCb, onIngressEOF());
+    EXPECT_CALL(lifecycleCb, onIngressEOF(_));
+    EXPECT_CALL(otherLifecycleCb, onIngressEOF(_));
   }
   EXPECT_CALL(lifecycleCb, onWrite(_, _)).Times(AtLeast(1));
   EXPECT_CALL(otherLifecycleCb, onWrite(_, _)).Times(AtLeast(1));

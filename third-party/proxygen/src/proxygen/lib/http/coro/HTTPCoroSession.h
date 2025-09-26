@@ -127,7 +127,7 @@ class LifecycleObserver {
   }
   virtual void onIngressError(const HTTPCoroSession&, ProxygenError) {
   }
-  virtual void onIngressEOF() {
+  virtual void onIngressEOF(const HTTPCoroSession&) {
   }
   virtual void onRequestBegin(const HTTPCoroSession&) {
   }

@@ -26,41 +26,23 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::py3::simple::AnEnum>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.enums()->emplace("module.AnEnum", ::apache::thrift::metadata::ThriftEnum{});
-  if (!res.second) {
+  auto res = genEnumMetadata<::py3::simple::AnEnum>(metadata);
+  if (res.preExists) {
     return;
-  }
-  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
-  enum_metadata.name() = "module.AnEnum";
-  using EnumTraits = TEnumTraits<::py3::simple::AnEnum>;
-  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 void EnumMetadata<::py3::simple::AnEnumRenamed>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.enums()->emplace("module.AnEnumRenamed", ::apache::thrift::metadata::ThriftEnum{});
-  if (!res.second) {
+  auto res = genEnumMetadata<::py3::simple::AnEnumRenamed>(metadata);
+  if (res.preExists) {
     return;
-  }
-  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
-  enum_metadata.name() = "module.AnEnumRenamed";
-  using EnumTraits = TEnumTraits<::py3::simple::AnEnumRenamed>;
-  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 void EnumMetadata<::py3::simple::Flags>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.enums()->emplace("module.Flags", ::apache::thrift::metadata::ThriftEnum{});
-  if (!res.second) {
+  auto res = genEnumMetadata<::py3::simple::Flags>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
-  enum_metadata.name() = "module.Flags";
-  using EnumTraits = TEnumTraits<::py3::simple::Flags>;
-  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
-  }
-  enum_metadata.structured_annotations()->push_back(*cvStruct("python.Flags", {  }).cv_struct());
+  res.metadata.structured_annotations()->push_back(*cvStruct("python.Flags", {  }).cv_struct());
 }
 
 const ::apache::thrift::metadata::ThriftStruct&

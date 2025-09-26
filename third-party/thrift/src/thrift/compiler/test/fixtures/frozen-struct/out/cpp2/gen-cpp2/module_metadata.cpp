@@ -26,15 +26,9 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::some::ns::EnumB>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.enums()->emplace("module.EnumB", ::apache::thrift::metadata::ThriftEnum{});
-  if (!res.second) {
+  auto res = genEnumMetadata<::some::ns::EnumB>(metadata);
+  if (res.preExists) {
     return;
-  }
-  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
-  enum_metadata.name() = "module.EnumB";
-  using EnumTraits = TEnumTraits<::some::ns::EnumB>;
-  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 

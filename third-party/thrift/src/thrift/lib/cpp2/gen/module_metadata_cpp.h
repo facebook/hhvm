@@ -251,19 +251,4 @@ ThriftConstValue cvStruct(
 
 ThriftConstValuePair cvPair(ThriftConstValue&& key, ThriftConstValue&& value);
 
-template <class T>
-struct GenMetadataResult {
-  const bool preExists;
-  T& metadata;
-};
-
-// Generate metadata of `node` inside `md`, return the generated metadata.
-GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
-    metadata::ThriftMetadata& md, const syntax_graph::EnumNode& node);
-
-template <class E>
-auto genEnumMetadata(metadata::ThriftMetadata& md) {
-  return genEnumMetadata(md, SchemaRegistry::get().getNode<E>());
-}
-
 } // namespace apache::thrift::detail::md

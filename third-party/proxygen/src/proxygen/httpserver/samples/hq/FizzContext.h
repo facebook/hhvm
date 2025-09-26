@@ -11,6 +11,8 @@
 #include <fizz/client/FizzClientContext.h>
 #include <fizz/server/FizzServerContext.h>
 #include <proxygen/httpserver/samples/hq/HQParams.h>
+#include <vector>
+
 #include <wangle/ssl/SSLContextConfig.h>
 
 namespace quic::samples {
@@ -22,12 +24,14 @@ using FizzClientContextPtr = std::shared_ptr<fizz::client::FizzClientContext>;
 
 FizzServerContextPtr createFizzServerContextInsecure(
     const HQServerParams& params,
+    const std::vector<std::string>& supportedAlpns,
     fizz::server::ClientAuthMode clientAuth,
     const std::string& certificateFilePath,
     const std::string& keyFilePath);
 
 FizzClientContextPtr createFizzClientContext(
     const HQBaseParams& params,
+    const std::vector<std::string>& supportedAlpns,
     bool earlyData,
     const std::string& certificateFilePath,
     const std::string& keyFilePath);

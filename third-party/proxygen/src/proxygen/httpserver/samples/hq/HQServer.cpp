@@ -12,6 +12,7 @@
 
 #include <quic/common/udpsocket/FollyQuicAsyncUDPSocket.h>
 #include <string>
+#include <vector>
 
 #include <folly/io/async/EventBaseLocal.h>
 #include <proxygen/httpserver/samples/hq/FizzContext.h>
@@ -238,7 +239,8 @@ HQServer::HQServer(
     std::function<void(proxygen::HQSession*)> onTransportReadyFn,
     const std::string& certificateFilePath,
     const std::string& keyFilePath,
-    fizz::server::ClientAuthMode clientAuth)
+    fizz::server::ClientAuthMode clientAuth,
+    const std::vector<std::string>& supportedAlpns)
     : HQServer(std::move(params),
                std::make_unique<HQServerTransportFactory>(
                    params_,
@@ -246,14 +248,16 @@ HQServer::HQServer(
                    std::move(onTransportReadyFn)),
                certificateFilePath,
                keyFilePath,
-               clientAuth) {
+               clientAuth,
+               supportedAlpns) {
 }
 
 HQServer::HQServer(HQServerParams params,
                    std::unique_ptr<quic::QuicServerTransportFactory> factory,
                    const std::string& certificateFilePath,
                    const std::string& keyFilePath,
-                   fizz::server::ClientAuthMode clientAuth)
+                   fizz::server::ClientAuthMode clientAuth,
+                   const std::vector<std::string>& supportedAlpns)
     : params_(std::move(params)) {
   params_.transportSettings.datagramConfig.enabled = true;
   params_.transportSettings.advertisedKnobFrameSupport = true;
@@ -269,7 +273,7 @@ HQServer::HQServer(HQServerParams params,
   server_->setHealthCheckToken("health");
   server_->setSupportedVersion(params_.quicVersions);
   server_->setFizzContext(createFizzServerContextInsecure(
-      params_, clientAuth, certificateFilePath, keyFilePath));
+      params_, supportedAlpns, clientAuth, certificateFilePath, keyFilePath));
   if (params_.rateLimitPerThread) {
     server_->setRateLimit(
         [rateLimitPerThread = params_.rateLimitPerThread.value()]() {

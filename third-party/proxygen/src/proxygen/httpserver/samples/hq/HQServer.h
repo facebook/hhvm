@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <folly/io/async/EventBaseLocal.h>
 #include <proxygen/httpserver/samples/hq/HQParams.h>
@@ -33,13 +34,15 @@ class HQServer {
            std::function<void(proxygen::HQSession*)> onTransportReadyFn,
            const std::string& certificateFilePath,
            const std::string& keyFilePath,
-           fizz::server::ClientAuthMode clientAuth);
+           fizz::server::ClientAuthMode clientAuth,
+           const std::vector<std::string>& supportedAlpns);
 
   HQServer(HQServerParams params,
            std::unique_ptr<quic::QuicServerTransportFactory> factory,
            const std::string& certificateFilePath,
            const std::string& keyFilePath,
-           fizz::server::ClientAuthMode clientAuth);
+           fizz::server::ClientAuthMode clientAuth,
+           const std::vector<std::string>& supportedAlpns);
 
   // Starts the QUIC transport in background thread
   void start(std::vector<folly::EventBase*> evbs = {});
@@ -96,25 +99,29 @@ class ScopedHQServer {
       HTTPTransactionHandlerProvider handlerProvider,
       const std::string& certificateFilePath,
       const std::string& keyFilePath,
-      fizz::server::ClientAuthMode clientAuth) {
+      fizz::server::ClientAuthMode clientAuth,
+      const std::vector<std::string>& supportedAlpns) {
     return std::make_unique<ScopedHQServer>(params,
                                             std::move(handlerProvider),
                                             certificateFilePath,
                                             keyFilePath,
-                                            clientAuth);
+                                            clientAuth,
+                                            supportedAlpns);
   }
 
   ScopedHQServer(HQServerParams params,
                  HTTPTransactionHandlerProvider handlerProvider,
                  const std::string& certificateFilePath,
                  const std::string& keyFilePath,
-                 fizz::server::ClientAuthMode clientAuth)
+                 fizz::server::ClientAuthMode clientAuth,
+                 const std::vector<std::string>& supportedAlpns)
       : server_(std::move(params),
                 std::move(handlerProvider),
                 nullptr,
                 certificateFilePath,
                 keyFilePath,
-                clientAuth) {
+                clientAuth,
+                supportedAlpns) {
     server_.start();
   }
 

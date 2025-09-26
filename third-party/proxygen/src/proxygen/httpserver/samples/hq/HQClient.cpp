@@ -280,6 +280,7 @@ void HQClient::initializeQuicClient() {
       quic::FizzClientQuicHandshakeContext::Builder()
           .setFizzClientContext(
               createFizzClientContext(params_,
+                                      params_.supportedAlpns,
                                       params_.earlyData,
                                       params_.certificateFilePath,
                                       params_.keyFilePath))

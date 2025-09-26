@@ -19,6 +19,9 @@ enum class HQMode { INVALID, CLIENT, SERVER };
 std::ostream& operator<<(std::ostream& o, const HQMode& m);
 
 struct HQToolClientParams : public HQClientParams {
+  std::vector<std::string> supportedAlpns{
+      quic::samples::kDefaultSupportedAlpns};
+
   std::string outdir;
   bool logResponse;
   bool logResponseHeaders;
@@ -39,6 +42,9 @@ struct HQToolClientParams : public HQClientParams {
 };
 
 struct HQToolServerParams : public HQServerParams {
+  std::vector<std::string> supportedAlpns{
+      quic::samples::kDefaultSupportedAlpns};
+
   uint16_t h2port;
   folly::Optional<folly::SocketAddress> localH2Address;
   size_t httpServerThreads;

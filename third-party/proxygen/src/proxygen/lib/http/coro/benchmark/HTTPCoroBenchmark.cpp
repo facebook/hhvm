@@ -290,7 +290,8 @@ class BenchmarkFixture {
           },
           getServerCertPath(),
           getServerKeyPath(),
-          fizz::server::ClientAuthMode::None);
+          fizz::server::ClientAuthMode::None,
+          kDefaultSupportedAlpns);
       serverAddress_ = legacyQuicServer_->getAddress();
     } else {
       std::unique_ptr<wangle::SSLContextConfig> sslCfg;

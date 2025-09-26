@@ -233,7 +233,13 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
 
   if (!FLAGS_protocol.empty()) {
     hqParams.protocol = FLAGS_protocol;
-    hqParams.supportedAlpns = {hqParams.protocol};
+    if (hqUberParams.mode == HQMode::CLIENT) {
+      boost::get<HQToolClientParams>(hqUberParams.params).supportedAlpns = {
+          hqParams.protocol};
+    } else if (hqUberParams.mode == HQMode::SERVER) {
+      boost::get<HQToolServerParams>(hqUberParams.params).supportedAlpns = {
+          hqParams.protocol};
+    }
   }
 
   hqParams.transportSettings.advertisedInitialConnectionFlowControlWindow =

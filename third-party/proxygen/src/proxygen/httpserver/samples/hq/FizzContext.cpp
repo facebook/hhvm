@@ -144,6 +144,7 @@ VnFqMCnjdeFhc/LA6rx3ALn2jfDj9jQR0QGRouFA7NbYZFx7Uj3HOw0/
 namespace quic::samples {
 FizzServerContextPtr createFizzServerContextInsecure(
     const HQServerParams& params,
+    const std::vector<std::string>& supportedAlpns,
     fizz::server::ClientAuthMode clientAuth,
     const std::string& certificateFilePath,
     const std::string& keyFilePath) {
@@ -174,7 +175,7 @@ FizzServerContextPtr createFizzServerContextInsecure(
   ticketCipher->setTicketSecrets({{folly::range(ticketSeed)}});
   serverCtx->setTicketCipher(ticketCipher);
   serverCtx->setClientAuthMode(clientAuth);
-  serverCtx->setSupportedAlpns(params.supportedAlpns);
+  serverCtx->setSupportedAlpns(supportedAlpns);
   serverCtx->setAlpnMode(fizz::server::AlpnMode::Required);
   serverCtx->setSendNewSessionTicket(false);
   serverCtx->setEarlyDataFbOnly(false);
@@ -194,6 +195,7 @@ FizzServerContextPtr createFizzServerContextInsecure(
 
 FizzClientContextPtr createFizzClientContext(
     const HQBaseParams& params,
+    const std::vector<std::string>& supportedAlpns,
     bool earlyData,
     const std::string& certificateFilePath,
     const std::string& keyFilePath) {
@@ -211,7 +213,7 @@ FizzClientContextPtr createFizzClientContext(
   auto certMgr = std::make_shared<fizz::client::CertManager>();
   certMgr->addCert(std::move(cert));
   ctx->setClientCertManager(std::move(certMgr));
-  ctx->setSupportedAlpns(params.supportedAlpns);
+  ctx->setSupportedAlpns(supportedAlpns);
   ctx->setDefaultShares(
       {fizz::NamedGroup::x25519, fizz::NamedGroup::secp256r1});
   ctx->setSendEarlyData(earlyData);

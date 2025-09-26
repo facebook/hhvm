@@ -58,7 +58,8 @@ void startServer(
                   std::move(onTransportReadyFn),
                   params.certificateFilePath,
                   params.keyFilePath,
-                  params.clientAuth);
+                  params.clientAuth,
+                  params.supportedAlpns);
   if (statsFactory) {
     server.setStatsFactory(std::move(statsFactory));
   }

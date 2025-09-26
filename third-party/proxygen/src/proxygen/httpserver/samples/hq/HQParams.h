@@ -33,6 +33,14 @@ struct HTTPVersion {
   bool parse(const std::string&);
 };
 
+const std::vector<std::string> kDefaultSupportedAlpns = {"h3",
+                                                         "hq-interop",
+                                                         "h3-fb-05",
+                                                         "h3-alias-01",
+                                                         "h3-alias-02",
+                                                         "h3-29",
+                                                         "hq-29"};
+
 std::ostream& operator<<(std::ostream& o, const HTTPVersion& v);
 
 /**
@@ -51,13 +59,6 @@ struct HQBaseParams {
       quic::QuicVersion::QUIC_V1,
       quic::QuicVersion::QUIC_V1_ALIAS,
       quic::QuicVersion::QUIC_V1_ALIAS2};
-  std::vector<std::string> supportedAlpns{proxygen::kH3,
-                                          proxygen::kHQ,
-                                          proxygen::kH3FBCurrentDraft,
-                                          proxygen::kH3AliasV1,
-                                          proxygen::kH3AliasV2,
-                                          proxygen::kH3CurrentDraft,
-                                          proxygen::kHQCurrentDraft};
   quic::TransportSettings transportSettings;
   std::string congestionControlName;
   std::optional<quic::CongestionControlType> congestionControl;

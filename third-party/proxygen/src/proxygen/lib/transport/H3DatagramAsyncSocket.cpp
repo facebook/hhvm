@@ -10,6 +10,7 @@
 
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <folly/FileUtil.h>
+#include <proxygen/httpserver/samples/hq/HQParams.h>
 #include <quic/common/udpsocket/FollyQuicAsyncUDPSocket.h>
 #include <quic/fizz/client/handshake/FizzClientQuicHandshakeContext.h>
 #include <utility>
@@ -327,7 +328,8 @@ H3DatagramAsyncSocket::createFizzClientContext() {
     ctx->setClientCertManager(std::move(certMgr));
   }
 
-  std::vector<std::string> supportedAlpns = {proxygen::kH3FBCurrentDraft};
+  std::vector<std::string> supportedAlpns =
+      quic::samples::kDefaultSupportedAlpns;
   ctx->setSupportedAlpns(supportedAlpns);
   ctx->setRequireAlpn(true);
   ctx->setSendEarlyData(false);

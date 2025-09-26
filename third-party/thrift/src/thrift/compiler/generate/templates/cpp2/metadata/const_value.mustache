@@ -14,15 +14,15 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#value:const_struct?}}cvStruct({{!
+}}{{#value:structured?}}cvStruct({{!
 }}{{#value:const_struct_type}}{{#type:structured}}"{{type:program_name}}.{{struct:name}}"{{/type:structured}}{{/value:const_struct_type}}, {{!
 }}{ {{#value:const_struct}}{"{{constant:name}}", {{#constant:value}}{{> metadata/const_value}}{{/constant:value}} }{{^last?}}, {{/last?}}{{!
 }}{{/value:const_struct}} }{{!
-}}){{/value:const_struct?}}{{^value:const_struct?}}{{!
+}}){{/value:structured?}}{{!
 }}{{#value:bool?}}cvBool({{value:bool_value}}){{/value:bool?}}{{!
 }}{{#value:integer?}}cvInteger({{value:integer_value}}){{/value:integer?}}{{!
 }}{{#value:enum?}}cvInteger({{value:integer_value}}){{/value:enum?}}{{!
 }}{{#value:double?}}cvDouble({{value:double_value}}){{/value:double?}}{{!
 }}{{#value:string?}}cvString("{{value:string_value}}"){{/value:string?}}{{!
 }}{{#value:map?}}cvMap({ {{#value:map_elements}}cvPair({{#element:key}}{{> metadata/const_value}}{{/element:key}}, {{#element:value}}{{> metadata/const_value}}{{/element:value}}){{^last?}}, {{/last?}}{{/value:map_elements}} }){{/value:map?}}{{!
-}}{{#value:list?}}cvList({ {{#value:list_elements}}{{> metadata/const_value}}{{^last?}}, {{/last?}}{{/value:list_elements}} }){{/value:list?}}{{/value:const_struct?}}
+}}{{#value:list?}}cvList({ {{#value:list_elements}}{{> metadata/const_value}}{{^last?}}, {{/last?}}{{/value:list_elements}} }){{/value:list?}}

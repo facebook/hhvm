@@ -26,7 +26,7 @@
   }}{{/value:list_elements}}{{!
   }}]{{!
 }}{{/value:list?}}{{!
-}}{{#value:map?}}{{!
+}}{{#if (or value:map? value:structured?)}}{{!
   }}{{open_object}}{{!
   }}{{#value:map_elements}}{{!
     }}"{{#element:key}}{{! TODO(T20509094): support serialization of complex keys
@@ -38,4 +38,4 @@
     }}{{#element:value}}{{> const_value}}{{/element:value}}{{^last?}},{{/last?}}{{!
   }}{{/value:map_elements}}{{!
   }}{{close_object}}{{!
-}}{{/value:map?}}
+}}{{/if (or value:map? value:structured?)}}

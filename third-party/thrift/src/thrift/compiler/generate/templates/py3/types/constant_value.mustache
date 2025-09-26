@@ -34,13 +34,12 @@ file.
     }}{{/value:value_for_bool?}}{{!
 }}{{/value:integer?}}{{!
 }}{{#value:double?}}{{value:double_value}}{{/value:double?}}{{!
-}}{{#value:const_struct?}}{{!
+}}{{#value:structured?}}{{!
     }}{{#value:const_struct_type}}{{!
     }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr({{!
         }}{{> types/current_module_cbindings}}.{{> types/c_constant }}())){{!
     }}{{/value:const_struct_type}}{{!
-}}{{/value:const_struct?}}{{!
-}}{{^value:const_struct?}}{{!
+}}{{/value:structured?}}{{!
 }}{{#value:string?}}{{!
     }}{{#value:py3_binary?}}b"{{value:string_value}}"{{/value:py3_binary?}}{{!
     }}{{^value:py3_binary?}}"{{value:unicode_value}}"{{/value:py3_binary?}}{{!
@@ -55,7 +54,6 @@ file.
     }}{{> types/container_from_cpp }}({{> types/current_module_cbindings}}.{{> types/c_constant }}()){{!
     }}{{/value:const_container_type}}{{!
 }}{{/value:list?}}{{!
-}}{{/value:const_struct?}}{{!
 }}{{#value:enum?}}{{!
     }}{{^value:enum_value?}}__BadEnum({{/value:enum_value?}}{{!
     }}{{#value:const_enum_type}}{{#type:need_module_path?}}{{type:modulePath}}.{{!

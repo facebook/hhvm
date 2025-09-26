@@ -24,10 +24,7 @@ cv_integer={{value:integer_value}}
 cv_double={{value:double_value}}
   {{#else if value:string?}}
 cv_string="{{value:string_value}}"
-  {{#else if value:const_struct?}}
-    {{! Const struct is a map const value in IDL (where the keys are field names), but
-        with a const type that is a struct/union rather than map<k,v>. Therefore, we
-        need to test it before `value:map?`, because it is also a map. }}
+  {{#else if value:structured?}}
 cv_struct={{> metadata/const_struct }}
   {{#else if value:map?}}
 cv_map=[

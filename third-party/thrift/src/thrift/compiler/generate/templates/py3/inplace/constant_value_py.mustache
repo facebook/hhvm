@@ -34,7 +34,7 @@ file.
     }}{{/value:value_for_bool?}}{{!
 }}{{/value:integer?}}{{!
 }}{{#value:double?}}{{value:double_value}}{{/value:double?}}{{!
-}}{{#value:const_struct?}}{{!
+}}{{#value:structured?}}{{!
     }}{{#value:const_struct_type}}{{!
     }}{{#type:need_module_path?}}{{type:module_path_period_separated}}.{{/type:need_module_path?}}{{!
     }}{{#type:structured}}{{struct:name}}{{/type:structured}}{{!
@@ -44,8 +44,7 @@ file.
             }}{{> inplace/constant_value_py }}{{!
         }}{{/constant:value}}{{/constant:type}}{{^last?}}, {{/last?}}{{!
     }}{{/value:const_struct}}){{!
-}}{{/value:const_struct?}}{{!
-}}{{^value:const_struct?}}{{!
+}}{{/value:structured?}}{{!
 }}{{#value:string?}}{{!
     }}{{#value:py3_binary?}}b"{{value:string_value}}"{{/value:py3_binary?}}{{!
     }}{{^value:py3_binary?}}"{{value:unicode_value}}"{{/value:py3_binary?}}{{!
@@ -64,7 +63,6 @@ file.
         }}{{#value:list_elements}}{{> inplace/constant_value_py }}, {{!
     }}{{/value:list_elements}})){{/value:const_container_type}}{{!
 }}{{/value:list?}}{{!
-}}{{/value:const_struct?}}{{!
 }}{{#value:enum?}}{{!
     }}{{^value:enum_value?}}__BadEnum({{/value:enum_value?}}{{!
     }}{{#value:const_enum_type}}{{#type:need_module_path?}}{{type:module_path_period_separated}}.{{!

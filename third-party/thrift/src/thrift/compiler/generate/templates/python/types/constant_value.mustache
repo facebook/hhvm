@@ -32,7 +32,7 @@ file.
     }}{{/if value:type.bool?}}{{!
 }}{{/value:integer?}}{{!
 }}{{#value:double?}}float({{value:double_value}}){{/value:double?}}{{!
-}}{{#value:const_struct?}}{{!
+}}{{#value:structured?}}{{!
     }}{{#value:type.true_type}}{{!
     }}{{#type:need_module_path?}}{{type:module_name}}.{{/type:need_module_path?}}{{!
     }}{{> structs/unadapted_name}}{{!
@@ -42,8 +42,7 @@ file.
             }}{{> types/constant_value }}{{!
         }}{{/constant:value}}{{/constant:type}}{{^last?}}, {{/last?}}{{!
     }}{{/value:const_struct}}){{!
-}}{{/value:const_struct?}}{{!
-}}{{^value:const_struct?}}{{!
+}}{{/value:structured?}}{{!
 }}{{#value:string?}}{{!
     }}{{#if value:type.binary?}}b"{{value:string_value}}"{{#else}}"{{value:unicode_value}}"{{/if}}{{!
 }}{{/value:string?}}{{!
@@ -60,7 +59,6 @@ file.
         }}{{#value:list_elem_type}}{{> types/typeinfo }}{{/value:list_elem_type}}, {{!
         }}({{#value:list_elements}}{{> types/constant_value }}, {{/value:list_elements}}){{!
 }}){{/value:list?}}{{!
-}}{{/value:const_struct?}}{{!
 }}{{#value:enum?}}{{!
     }}{{^value:enum_value?}}_fbthrift_python_types.BadEnum({{/value:enum_value?}}{{!
     }}{{#value:type.true_type}}{{#type:need_module_path?}}{{type:module_name}}.{{!

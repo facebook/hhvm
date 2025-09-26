@@ -392,7 +392,8 @@ t_whisker_generator::make_prototype_for_const_value(
     return self.kind() == cv::CV_STRING;
   });
   def.property("map?", [](const t_const_value& self) {
-    return self.kind() == cv::CV_MAP;
+    return self.kind() == cv::CV_MAP && !self.ttype().empty() &&
+        self.ttype()->is<t_map>();
   });
   def.property("list?", [](const t_const_value& self) {
     return self.kind() == cv::CV_LIST;
@@ -405,10 +406,9 @@ t_whisker_generator::make_prototype_for_const_value(
     return (self.kind() == cv::CV_MAP && self.get_map().empty()) ||
         (self.kind() == cv::CV_LIST && self.get_list().empty());
   });
-  def.property("const_struct?", [](const t_const_value& self) {
-    return w::boolean(
-        !self.ttype().empty() &&
-        self.ttype()->get_true_type()->is<t_structured>());
+  def.property("structured?", [](const t_const_value& self) {
+    return self.kind() == cv::CV_MAP && !self.ttype().empty() &&
+        self.ttype()->get_true_type()->is<t_structured>();
   });
   def.property("nonzero?", [](const t_const_value& self) {
     switch (self.kind()) {

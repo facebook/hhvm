@@ -40,7 +40,7 @@
         {{> metadata/thrift_metadata_const_value}}
         {{/value:list_elements}}
     },
-    {{#else if value:const_struct?}}
+    {{#else if value:structured?}}
     CvStruct: {{> metadata/thrift_metadata_const_struct}}
     {{/if value:bool?}}
 },

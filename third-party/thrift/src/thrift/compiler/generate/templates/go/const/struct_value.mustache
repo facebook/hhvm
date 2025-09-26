@@ -16,7 +16,7 @@
 
 }}
 {{struct:go_qualified_new_func}}(){{!
-}}{{#value:const_struct?}}{{!
+}}{{#value:structured?}}{{!
 }}{{#value:const_struct}}.
     Set{{constant:go_name}}{{#program:compat_setters?}}NonCompat{{/program:compat_setters?}}({{!
     }}{{#constant:type}}{{!
@@ -30,4 +30,4 @@
     }}{{/constant:type}}{{!
     }}){{!
 }}{{/value:const_struct}}{{!
-}}{{/value:const_struct?}}
+}}{{/value:structured?}}

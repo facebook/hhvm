@@ -42,4 +42,5 @@ type ServerObserver interface {
 
 	// Function-level stats for tracking detailed request behavior
 	ReceivedRequestForFunction(function string) // request received for specific function
+	ReceivedReadForFunction(function string)    // request arguments read/deserialized for specific function
 }

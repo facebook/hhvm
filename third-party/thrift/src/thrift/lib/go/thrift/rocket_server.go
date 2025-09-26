@@ -345,7 +345,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 // explicitly declared in service method signatures (e.g., "throws (1: MyException ex)")
 // Undeclared exceptions are ApplicationException instances for processing errors, unknown methods, etc.
 func (s *rocketServerSocket) processWithExceptionTracking(ctx context.Context, protocol *protocolBuffer) error {
-	err := process(ctx, s.proc, protocol, s.pstats)
+	err := process(ctx, s.proc, protocol, s.pstats, s.observer)
 	if err != nil {
 		return err
 	}

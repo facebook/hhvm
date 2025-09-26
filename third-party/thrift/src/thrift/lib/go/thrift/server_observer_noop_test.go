@@ -45,4 +45,5 @@ func TestNoopServerObserver(t *testing.T) {
 
 	// Test function-level stats
 	observer.ReceivedRequestForFunction("testFunction")
+	observer.ReceivedReadForFunction("testFunction")
 }

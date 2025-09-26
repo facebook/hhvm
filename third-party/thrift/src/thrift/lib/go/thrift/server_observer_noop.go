@@ -54,3 +54,4 @@ func (*noopServerObserver) ProcessTime(_ time.Duration)  {}
 
 // Function-level stats (no-op implementations)
 func (*noopServerObserver) ReceivedRequestForFunction(_ string) {}
+func (*noopServerObserver) ReceivedReadForFunction(_ string)    {}

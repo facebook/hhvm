@@ -70,6 +70,8 @@ SrcDB g_srcDB;
 UniqueStubs g_ustubs;
 ServiceData::ExportedCounter* g_JitMaturityCounter{nullptr};
 int g_maxJitMaturity = 100; // may be reduced to 99 when workload changes
+folly::ConcurrentHashMap<FuncId, uint32_t> g_funcLiveTransBytes;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -214,6 +216,13 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind,
                       kind == TransKind::LivePrologue;
   auto const isProf = kind == TransKind::Profile ||
                       kind == TransKind::ProfPrologue;
+  
+  auto const hasLiveTransBytesLimit = Cfg::Jit::FuncLiveTranslationByteLimit != std::numeric_limits<uint32_t>::max();
+  if (isLive && hasLiveTransBytesLimit && 
+      g_funcLiveTransBytes[func->getFuncId()] > Cfg::Jit::FuncLiveTranslationByteLimit) {
+    return TranslationResult::Scope::Process;
+  }
+
   if (!noTheshold && (isLive || isProf)) {
     auto const funcThreshold = isLive ? Cfg::Jit::LiveThreshold
                                       : Cfg::Jit::ProfileThreshold;
@@ -815,6 +824,16 @@ void Translator::publishCodeInternal() {
   assertx(transMeta.has_value());
   this->publishCodeImpl();
   updateCodeSizeCounters();
+}
+
+void incrementLiveFuncTransBytes(FuncId funcId, uint32_t bytes) {
+  auto const hasLiveTransBytesLimit = Cfg::Jit::FuncLiveTranslationByteLimit != std::numeric_limits<uint32_t>::max();
+  if (!hasLiveTransBytesLimit) return;
+
+  auto prev = g_funcLiveTransBytes[funcId];
+  while (!g_funcLiveTransBytes.assign_if_equal(funcId, prev, prev + bytes)) {
+    prev = g_funcLiveTransBytes[funcId];
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

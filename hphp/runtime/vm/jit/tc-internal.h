@@ -261,4 +261,9 @@ void recycleInit();
  */
 void recycleStop();
 
+/**
+ * Increment the number of live translation bytes that have been JIT to the TC for
+ * the given function.
+ */
+void incrementLiveFuncTransBytes(FuncId funcId, uint32_t bytes);
 }

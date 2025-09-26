@@ -743,6 +743,11 @@ void RegionTranslator::publishMetaImpl() {
   recordTranslationSizes(tr);
 
   fixups.process(&tailBranches);
+
+  if (kind == TransKind::Live) {
+    incrementLiveFuncTransBytes(sk.func()->getFuncId(), 
+                                loc.mainSize() + loc.coldCodeSize() + loc.frozenCodeSize());
+  }
 }
 
 /*

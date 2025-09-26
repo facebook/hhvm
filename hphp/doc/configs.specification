@@ -1832,6 +1832,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool Jit.PGOHFSortPlus = false, UNKNOWN
 - uint8_t Jit.LiveThreshold, UNKNOWN
 - uint8_t Jit.ProfileThreshold, UNKNOWN
+- uint32_t Jit.FuncLiveTranslationByteLimit = -1, UNKNOWN
+
+  Max total number of live translation bytes to JIT into the TC for a function
+
 - uint32_t Jit.MaxLiveMainUsage = 96 * 1024 * 1024, UNKNOWN
 - uint32_t Jit.MaxLiveMainUsageLimit = 150994944, UNKNOWN
 - uint32_t Jit.SampleRate = 0, UNKNOWN

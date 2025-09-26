@@ -181,37 +181,6 @@
  (preprocess
   (pps ppx_deriving.std)))
 
-(library
- (name typing_common)
- (wrapped false)
- (modules
-  type_validator
-  typing_const_reifiable
-  typing_enforceable_hint
-  typing_reified_check
-  typing_tdef
-  typing_variance)
- (libraries
-  common
-  decl
-  decl_provider
-  hackfmt_doc
-  hackfmt_env
-  hackfmt
-  logging
-  naming_attributes
-  naming
-  symbol
-  typechecker_options
-  type_mapper_generic
-  typing_ast
-  typing_defs
-  typing_env
-  typing_algebra
-  folded_class
-  global_config)
- (preprocess
-  (pps ppx_deriving.std)))
 
 (library
  (name tast_type_collector)
@@ -263,7 +232,44 @@
   typing_sequencing
   typing_substring
   typing_try
-  typing_xhp)
+  typing_xhp
+  subtype_recursion_tracker
+  typing_algebra
+  typing_array_access_util
+  typing_case_types
+  typing_class_pointers
+  typing_coeffects
+  typing_coercion
+  typing_dynamic
+  typing_dynamic_utils
+  typing_enforceability
+  typing_enum
+  typing_intersection
+  typing_generic_constraint
+  typing_helpers
+  typing_type_integrity
+  typing_logic_helpers
+  typing_object_get
+  typing_ops
+  typing_partial_enforcement
+  typing_phase
+  typing_refinement
+  typing_return
+  typing_solver
+  typing_solver_utils
+  typing_shapes
+  typing_subtype
+  typing_subtype_tconst
+  typing_structure
+  typing_taccess
+  typing_type_member
+  typing_union
+  type_validator
+  typing_const_reifiable
+  typing_enforceable_hint
+  typing_reified_check
+  typing_tdef
+  typing_variance)
  (libraries
   decl_enum
   decl_init_check
@@ -274,11 +280,20 @@
   package_info
   pcre
   procs_procs
-  typing_common
   typing_error_utils
   type_mapper
   typing_json
-  typing_modules)
+  typing_modules
+  recursion_tracker
+  typing_dependent_type
+  typing_disposable
+  typing_env
+  typing_log
+  typing_utils
+  typing_visibility
+  lru
+  approx_set
+  partition)
  (preprocess
   (pps
    ppx_deriving.std)))
@@ -321,8 +336,6 @@
   typing_type_wellformedness)
  (libraries
   typing
-  typing_algebra
-  typing_common
   typing_modules
   typing_packages
   typing_skeleton)
@@ -354,55 +367,6 @@
  (preprocess
   (pps ppx_deriving.std)))
 
-(library
- (name typing_algebra)
- (wrapped false)
- (modules
-  subtype_recursion_tracker
-  typing_algebra
-  typing_array_access_util
-  typing_case_types
-  typing_class_pointers
-  typing_coeffects
-  typing_coercion
-  typing_dynamic
-  typing_dynamic_utils
-  typing_enforceability
-  typing_enum
-  typing_intersection
-  typing_generic_constraint
-  typing_helpers
-  typing_type_integrity
-  typing_logic_helpers
-  typing_object_get
-  typing_ops
-  typing_partial_enforcement
-  typing_phase
-  typing_refinement
-  typing_return
-  typing_solver
-  typing_solver_utils
-  typing_shapes
-  typing_subtype
-  typing_subtype_tconst
-  typing_structure
-  typing_taccess
-  typing_type_member
-  typing_union)
- (libraries
-  recursion_tracker
-  type_mapper
-  typing_dependent_type
-  typing_disposable
-  typing_env
-  typing_log
-  typing_utils
-  typing_visibility
-  lru
-  approx_set
-  partition)
- (preprocess
-  (pps ppx_deriving.std)))
 
 (library
  (name typing_visibility)

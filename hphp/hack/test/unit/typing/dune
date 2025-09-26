@@ -14,7 +14,7 @@
   pos
   relative_path
   typechecker_options
-  typing_algebra
+  typing
   typing_ast
   typing_defs
   utils_core))

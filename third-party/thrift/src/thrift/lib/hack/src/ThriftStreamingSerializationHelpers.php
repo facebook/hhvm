@@ -23,7 +23,7 @@ final abstract class ThriftStreamingSerializationHelpers {
       type TResult = TStreamType },
     TStreamType,
   >(
-    classname<TStreamPayloadType> $payload_classname,
+    class<TStreamPayloadType> $payload_classname,
     TProtocol $protocol,
   ): (function(?TStreamType, ?Exception): (string, bool)) {
     return (?TStreamType $payload, ?\Exception $ex) ==> {
@@ -103,7 +103,7 @@ final abstract class ThriftStreamingSerializationHelpers {
       type TResult = TStreamType },
     TStreamType,
   >(
-    classname<TStreamPayloadType> $payload_classname,
+    class<TStreamPayloadType> $payload_classname,
     string $name,
     TProtocol $protocol,
     shape(?'read_options' => int) $_options = shape(),

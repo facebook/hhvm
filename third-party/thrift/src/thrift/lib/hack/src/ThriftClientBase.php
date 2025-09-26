@@ -374,7 +374,7 @@ abstract class ThriftClientBase implements IThriftClient {
     TStreamType,
   >(
     classname<TFirstResponseType> $first_response_type,
-    classname<TStreamResponseType> $stream_response_type,
+    class<TStreamResponseType> $stream_response_type,
     string $name,
     bool $is_first_response_null,
     int $expectedsequenceid,
@@ -432,8 +432,8 @@ abstract class ThriftClientBase implements IThriftClient {
     TSinkFinalType,
   >(
     classname<TSinkFirstResponseType> $first_response_type,
-    classname<TSinkPayloadType> $sink_payload_type,
-    classname<TSinkFinalResponseType> $final_response_type,
+    class<TSinkPayloadType> $sink_payload_type,
+    class<TSinkFinalResponseType> $final_response_type,
     string $name,
     bool $is_first_response_null,
     int $expectedsequenceid,

@@ -133,7 +133,7 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
     TStreamType,
   >(
     HH\AsyncGenerator<null, TStreamType, void> $stream,
-    classname<TStreamResponseType> $stream_response_type,
+    class<TStreamResponseType> $stream_response_type,
     \TProtocol $output,
   ): Awaitable<void> {
     $transport = $output->getTransport();
@@ -159,7 +159,7 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
       type TResult = TStreamType },
     TStreamType,
   >(
-    classname<TStreamPayloadType> $stream_response_type,
+    class<TStreamPayloadType> $stream_response_type,
     TProtocol $output,
   ): (function(?TStreamType, ?Exception): (string, bool)) {
     $payload_encoder = ThriftStreamingSerializationHelpers::encodeStreamHelper(

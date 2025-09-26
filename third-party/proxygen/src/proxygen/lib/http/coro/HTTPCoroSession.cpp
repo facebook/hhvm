@@ -1439,6 +1439,7 @@ bool HTTPQuicCoroSession::getCurrentTransportInfoImpl(
     tinfo->totalBytes = int64_t(quicTransportInfo.bytesSent);
     updateQuicProtocolInfo(*currentQuicProtocolInfo_, *quicSocket_);
     tinfo->protocolInfo = currentQuicProtocolInfo_;
+    tinfo->validTcpinfo = true;
 
     if (connState) {
       tinfo->recvwnd = int64_t(connState->flowControlState.windowSize);

@@ -585,6 +585,64 @@ map::raw::value_type create_object_functions() {
         return !ctx.raw().positional_arguments()[0].is_null();
       });
 
+  /**
+   * Check if an object is of a certain type.
+   * Returns `true` if the object is of the type provided in the `type` named
+   * argument.
+   *
+   * Name: object.is?
+   *
+   * Arguments:
+   *   - [object] — the object to check.
+   *
+   * Named arguments:
+   *   - [type: string] — The type to check for. The value must be one of:
+   *     - "null"
+   *     - "i64"
+   *     - "f64"
+   *     - "string"
+   *     - "boolean"
+   *     - "array"
+   *     - "map"
+   *     - "native_function"
+   *     - "native_handle"
+   *
+   * Returns:
+   *   [boolean] whether the object is of the provided type.
+   */
+  object_functions["is?"] = dsl::make_function(
+      "object.is?", [](dsl::function::context ctx) -> boolean {
+        ctx.declare_named_arguments({"type"});
+        ctx.declare_arity(1);
+        const object& obj = ctx.raw().positional_arguments()[0];
+        const whisker::string& type =
+            ctx.named_argument<whisker::string>(
+                   "type", dsl::function::context::required)
+                .value_or("");
+
+        if (type == "null") {
+          return obj.is_null();
+        } else if (type == "i64") {
+          return obj.is_i64();
+        } else if (type == "f64") {
+          return obj.is_f64();
+        } else if (type == "string") {
+          return obj.is_string();
+        } else if (type == "boolean") {
+          return obj.is_boolean();
+        } else if (type == "array") {
+          return obj.is_array();
+        } else if (type == "map") {
+          return obj.is_map();
+        } else if (type == "native_function") {
+          return obj.is_native_function();
+        } else if (type == "native_handle") {
+          return obj.is_native_handle();
+        } else {
+          throw ctx.make_error("Unknown type '{}' for object.is?", type);
+        }
+      });
+
   return map::raw::value_type{"object", w::map(std::move(object_functions))};
 }
 

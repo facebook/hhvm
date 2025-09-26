@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 
 #include <thrift/compiler/whisker/diagnostic.h>
+#include <thrift/compiler/whisker/dsl.h>
 #include <thrift/compiler/whisker/object.h>
 #include <thrift/compiler/whisker/standard_library.h>
 #include <thrift/compiler/whisker/test/render_test_helpers.h>
@@ -629,6 +630,121 @@ TEST_F(StandardLibraryTest, object_eq) {
         "false\n"
         "false\n"
         "true\n");
+  }
+}
+
+TEST_F(StandardLibraryTest, object_is) {
+  strict_printable_types(diagnostic_level::info);
+
+  const whisker::object native_func = w::native_function(
+      whisker::dsl::make_function("dummy", [](dsl::function::context ctx) {
+        ctx.declare_arity(0);
+        ctx.declare_named_arguments({});
+        return w::null;
+      }));
+  const whisker::object native_obj =
+      w::native_handle(manage_owned<std::vector<int>>(), /*prototype=*/nullptr);
+
+  // Positive cases
+  {
+    auto result = render(
+        "{{ (object.is? null type=\"null\") }}\n"
+        "{{ (object.is? 42 type=\"i64\") }}\n"
+        "{{ (object.is? my_float type=\"f64\") }}\n"
+        "{{ (object.is? \"hello\" type=\"string\") }}\n"
+        "{{ (object.is? true type=\"boolean\") }}\n"
+        "{{ (object.is? false type=\"boolean\") }}\n"
+        "{{ (object.is? (array.of 1 2 3) type=\"array\") }}\n"
+        "{{ (object.is? this type=\"map\") }}\n"
+        "{{ (object.is? native_func type=\"native_function\") }}\n"
+        "{{ (object.is? native_obj type=\"native_handle\") }}\n",
+        w::map(
+            {{"my_float", w::f64(3.14)},
+             {"native_func", native_func},
+             {"native_obj", native_obj}}));
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "true\n"
+        "true\n"
+        "true\n"
+        "true\n"
+        "true\n"
+        "true\n"
+        "true\n"
+        "true\n"
+        "true\n"
+        "true\n");
+  }
+
+  // Negative cases
+  {
+    auto result = render(
+        "{{ (object.is? null type=\"i64\") }}\n"
+        "{{ (object.is? 42 type=\"null\") }}\n"
+        "{{ (object.is? 42 type=\"f64\") }}\n"
+        "{{ (object.is? 42 type=\"string\") }}\n"
+        "{{ (object.is? 42 type=\"boolean\") }}\n"
+        "{{ (object.is? 42 type=\"array\") }}\n"
+        "{{ (object.is? 42 type=\"map\") }}\n"
+        "{{ (object.is? 42 type=\"native_function\") }}\n"
+        "{{ (object.is? 42 type=\"native_handle\") }}\n",
+        w::null);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "false\n"
+        "false\n"
+        "false\n"
+        "false\n"
+        "false\n"
+        "false\n"
+        "false\n"
+        "false\n"
+        "false\n");
+  }
+
+  // Unknown type argument
+  {
+    auto result =
+        render("{{ (object.is? 42 type=\"unknown_type\") }}\n", w::null);
+    EXPECT_FALSE(result.has_value());
+    EXPECT_THAT(
+        diagnostics(),
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "Function 'object.is?' threw an error:\n"
+            "Unknown type 'unknown_type' for object.is?",
+            path_to_file,
+            1)));
+  }
+
+  // Missing type named argument (passed as positional)
+  {
+    auto result = render("{{ (object.is? 42 \"i64\") }}\n", w::null);
+    EXPECT_FALSE(result.has_value());
+    EXPECT_THAT(
+        diagnostics(),
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "Function 'object.is?' threw an error:\n"
+            "Expected 1 argument(s) but got 2",
+            path_to_file,
+            1)));
+  }
+
+  // Missing type named argument (not passed at all)
+  {
+    auto result = render("{{ (object.is? 42) }}\n", w::null);
+    EXPECT_FALSE(result.has_value());
+    EXPECT_THAT(
+        diagnostics(),
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "Function 'object.is?' threw an error:\n"
+            "Missing named argument 'type'.",
+            path_to_file,
+            1)));
   }
 }
 

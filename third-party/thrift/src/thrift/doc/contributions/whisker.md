@@ -2055,6 +2055,45 @@ true
 
 ---
 
+#### `object.is?`
+Check if an object is of a certain type. Returns `true` if the object is of the
+type provided in the `type` named argument.
+
+**Positional Arguments**:
+- `object` — the object to check
+
+**Named Arguments**:
+- `type` (string) — the type to check for. The value must be one of the following:
+  - `null`
+  - `i64`
+  - `f64`
+  - `string`
+  - `boolean`
+  - `array`
+  - `map`
+  - `native_function`
+  - `native_handle`
+
+<Example>
+
+```whisker title=example.whisker
+{{ (object.is? my_i64 type="string") }}
+{{ (object.is? my_i64 type="i64") }}
+```
+
+```json title=Context
+{ "my_i64": 3 }
+```
+
+```text title=Output
+false
+true
+```
+
+</Example>
+
+---
+
 #### `object.notnull?`
 Checks if an object is not null. Returns `true` if the object is not null, otherwise
 returns `false`.

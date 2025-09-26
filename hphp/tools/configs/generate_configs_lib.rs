@@ -1180,6 +1180,7 @@ pub fn generate_loader(sections: Vec<ConfigSection>, output_dir: PathBuf) {
         let h_content = format!(
             r#"#pragma once
 
+#include <cstdint>
 #include <string>
 
 namespace HPHP {{

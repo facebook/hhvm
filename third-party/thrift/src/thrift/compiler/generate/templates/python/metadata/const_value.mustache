@@ -14,13 +14,28 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}_fbthrift_metadata.ThriftConstValue({{!
-}}{{^value:const_struct?}}{{#value:bool?}}cv_bool={{#value:nonzero?}}True{{/value:nonzero?}}{{!
-  }}{{^value:nonzero?}}False{{/value:nonzero?}}{{/value:bool?}}{{!
-}}{{#value:integer?}}cv_integer={{value:integer_value}}{{/value:integer?}}{{!
-}}{{#value:enum?}}cv_integer={{value:integer_value}}{{/value:enum?}}{{!
-}}{{#value:double?}}cv_double={{value:double_value}}{{/value:double?}}{{!
-}}{{#value:string?}}cv_string="{{value:string_value}}"{{/value:string?}}{{!
-}}{{#value:map?}}cv_map=[{{#value:map_elements}}_fbthrift_metadata.ThriftConstValuePair(key={{#element:key}}{{> metadata/const_value }}{{/element:key}}, value={{#element:value}}{{> metadata/const_value }}{{/element:value}}), {{/value:map_elements}}]{{/value:map?}}{{!
-}}{{#value:list?}}cv_list=[{{#value:list_elements}}{{> metadata/const_value }}, {{/value:list_elements}}]{{/value:list?}}{{/value:const_struct?}}{{!
-}}{{#value:const_struct?}}cv_struct={{> metadata/const_struct }}{{/value:const_struct?}})
+}}{{#pragma ignore-newlines}}
+_fbthrift_metadata.ThriftConstValue(
+  {{#if value:bool?}}
+cv_bool={{#if value:nonzero?}}True{{#else}}False{{/if}}
+  {{#else if (or value:integer? value:enum?)}}
+cv_integer={{value:integer_value}}
+  {{#else if value:double?}}
+cv_double={{value:double_value}}
+  {{#else if value:string?}}
+cv_string="{{value:string_value}}"
+  {{#else if value:map?}}
+cv_map=[
+    {{#each value:map_elements as |map_elem|}}
+_fbthrift_metadata.ThriftConstValuePair(
+key={{#map_elem.key}}{{> metadata/const_value }}{{/map_elem.key}}, {{!}}
+value={{#map_elem.value}}{{> metadata/const_value }}{{/map_elem.value}}
+), {{!}}
+    {{/each}}
+]
+  {{#else if value:list?}}
+cv_list=[{{#value:list_elements}}{{> metadata/const_value }}, {{/value:list_elements}}]
+  {{#else if value:const_struct?}}
+cv_struct={{> metadata/const_struct }}
+  {{/if value:bool?}}
+)

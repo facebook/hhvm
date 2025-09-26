@@ -967,6 +967,10 @@ class mstch_const_map_element : public mstch_base {
         {
             {"element:key", &mstch_const_map_element::element_key},
             {"element:value", &mstch_const_map_element::element_value},
+            // Properties to enable Whisker migration, where map elements have
+            // 'key' and 'value' properties
+            {"key", &mstch_const_map_element::element_key},
+            {"value", &mstch_const_map_element::element_value},
         });
   }
   mstch::node element_key();

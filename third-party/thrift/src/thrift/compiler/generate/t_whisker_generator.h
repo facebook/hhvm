@@ -370,9 +370,9 @@ class t_whisker_generator : public t_generator {
 
   using h_program = make_handle<"program", t_program>;
 
-  using h_list = make_handle<"", t_list>;
-  using h_set = make_handle<"", t_set>;
-  using h_map = make_handle<"", t_map>;
+  using h_list = make_handle<"list", t_list>;
+  using h_set = make_handle<"set", t_set>;
+  using h_map = make_handle<"map", t_map>;
   using h_container = make_handle<"", t_container, h_set, h_list, h_map>;
 
   using h_const = make_handle<"constant", t_const>;

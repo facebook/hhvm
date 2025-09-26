@@ -176,7 +176,6 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     $this->logIncorrectFieldAccessed(
       $this->_type,
       PrimitiveEnum::i64_,
-      $this->i64_ === null,
     );
     return $this->i64_;
   }
@@ -201,7 +200,6 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     $this->logIncorrectFieldAccessed(
       $this->_type,
       PrimitiveEnum::string_,
-      $this->string_ === null,
     );
     return $this->string_;
   }
@@ -226,7 +224,6 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     $this->logIncorrectFieldAccessed(
       $this->_type,
       PrimitiveEnum::float5_,
-      $this->float5_ === null,
     );
     return $this->float5_;
   }
@@ -251,7 +248,6 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     $this->logIncorrectFieldAccessed(
       $this->_type,
       PrimitiveEnum::float4_,
-      $this->float4_ === null,
     );
     return $this->float4_;
   }
@@ -276,7 +272,6 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     $this->logIncorrectFieldAccessed(
       $this->_type,
       PrimitiveEnum::float3_,
-      $this->float3_ === null,
     );
     return $this->float3_;
   }
@@ -563,7 +558,6 @@ class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     $this->logIncorrectFieldAccessed(
       $this->_type,
       OtherPrimitiveEnum::i64_,
-      $this->i64_ === null,
     );
     return $this->i64_;
   }
@@ -588,7 +582,6 @@ class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     $this->logIncorrectFieldAccessed(
       $this->_type,
       OtherPrimitiveEnum::string_,
-      $this->string_ === null,
     );
     return $this->string_;
   }
@@ -613,7 +606,6 @@ class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     $this->logIncorrectFieldAccessed(
       $this->_type,
       OtherPrimitiveEnum::float5_,
-      $this->float5_ === null,
     );
     return $this->float5_;
   }
@@ -638,7 +630,6 @@ class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     $this->logIncorrectFieldAccessed(
       $this->_type,
       OtherPrimitiveEnum::float4_,
-      $this->float4_ === null,
     );
     return $this->float4_;
   }
@@ -663,7 +654,6 @@ class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     $this->logIncorrectFieldAccessed(
       $this->_type,
       OtherPrimitiveEnum::float3_,
-      $this->float3_ === null,
     );
     return $this->float3_;
   }
@@ -767,6 +757,542 @@ class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
 
   private static function __hackAdapterTypeChecks()[]: void {
     \ThriftUtil::requireSameType<\TimestampToTimeAdapter::TThriftType, int>();
+  }
+
+}
+
+enum Primitive1Enum: int {
+  _EMPTY_ = 0;
+  i64_ = 1;
+}
+
+/**
+ * Original thrift union:-
+ * Primitive1
+ */
+class Primitive1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<Primitive1Enum> {
+  use \ThriftUnionSerializationTrait;
+
+  use \ThriftLegacyJSONSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'i64_',
+      'union' => true,
+      'type' => \TType::I64,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'i64_' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'i64_' => ?int,
+  );
+
+  const int STRUCTURAL_ID = 8977798922771317429;
+  /**
+   * Original thrift field:-
+   * 1: i64 i64_
+   */
+  public ?int $i64_;
+  protected Primitive1Enum $_type = Primitive1Enum::_EMPTY_;
+
+  public function __construct(?int $i64_ = null)[] {
+    $this->_type = Primitive1Enum::_EMPTY_;
+    if ($i64_ !== null) {
+      $this->i64_ = $i64_;
+      $this->_type = Primitive1Enum::i64_;
+    }
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'i64_'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Primitive1';
+  }
+
+  public function getType()[]: Primitive1Enum {
+    return $this->_type;
+  }
+
+  public function reset()[write_props]: void {
+    switch ($this->_type) {
+      case Primitive1Enum::i64_:
+        $this->i64_ = null;
+        break;
+      case Primitive1Enum::_EMPTY_:
+        break;
+    }
+    $this->_type = Primitive1Enum::_EMPTY_;
+  }
+
+  public function set_i64_(int $i64_)[write_props]: this {
+    $this->reset();
+    $this->_type = Primitive1Enum::i64_;
+    $this->i64_ = $i64_;
+    return $this;
+  }
+
+  public function get_i64_()[]: ?int {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      Primitive1Enum::i64_,
+    );
+    return $this->i64_;
+  }
+
+  public function getx_i64_()[]: int {
+    invariant(
+      $this->_type === Primitive1Enum::i64_,
+      'get_i64_ called on an instance of Primitive1 whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->i64_ as nonnull;
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.Primitive1",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "i64_",
+            )
+          ),
+        ],
+        "is_union" => true,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+enum Primitive2Enum: int {
+  _EMPTY_ = 0;
+  i64_ = 1;
+}
+
+/**
+ * Original thrift union:-
+ * Primitive2
+ */
+class Primitive2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<Primitive2Enum> {
+  use \ThriftUnionSerializationTrait;
+
+  use \ThriftLegacyJSONSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'i64_',
+      'union' => true,
+      'type' => \TType::I64,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'i64_' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'i64_' => ?int,
+  );
+
+  const int STRUCTURAL_ID = 8977798922771317429;
+  /**
+   * Original thrift field:-
+   * 1: i64 i64_
+   */
+  public ?int $i64_;
+  protected Primitive2Enum $_type = Primitive2Enum::_EMPTY_;
+
+  public function __construct(?int $i64_ = null)[] {
+    $this->_type = Primitive2Enum::_EMPTY_;
+    if ($i64_ !== null) {
+      $this->i64_ = $i64_;
+      $this->_type = Primitive2Enum::i64_;
+    }
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'i64_'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Primitive2';
+  }
+
+  public function getType()[]: Primitive2Enum {
+    return $this->_type;
+  }
+
+  public function reset()[write_props]: void {
+    switch ($this->_type) {
+      case Primitive2Enum::i64_:
+        $this->i64_ = null;
+        break;
+      case Primitive2Enum::_EMPTY_:
+        break;
+    }
+    $this->_type = Primitive2Enum::_EMPTY_;
+  }
+
+  public function set_i64_(int $i64_)[write_props]: this {
+    $this->reset();
+    $this->_type = Primitive2Enum::i64_;
+    $this->i64_ = $i64_;
+    return $this;
+  }
+
+  public function get_i64_()[]: ?int {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      Primitive2Enum::i64_,
+    );
+    return $this->i64_;
+  }
+
+  public function getx_i64_()[]: int {
+    invariant(
+      $this->_type === Primitive2Enum::i64_,
+      'get_i64_ called on an instance of Primitive2 whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->i64_ as nonnull;
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.Primitive2",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "i64_",
+            )
+          ),
+        ],
+        "is_union" => true,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+enum Primitive3Enum: int {
+  _EMPTY_ = 0;
+  i64_ = 1;
+}
+
+/**
+ * Original thrift union:-
+ * Primitive3
+ */
+class Primitive3 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<Primitive3Enum> {
+  use \ThriftUnionSerializationTrait;
+
+  use \ThriftLegacyJSONSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'i64_',
+      'union' => true,
+      'type' => \TType::I64,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'i64_' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'i64_' => ?int,
+  );
+
+  const int STRUCTURAL_ID = 8977798922771317429;
+  /**
+   * Original thrift field:-
+   * 1: i64 i64_
+   */
+  public ?int $i64_;
+  protected Primitive3Enum $_type = Primitive3Enum::_EMPTY_;
+
+  public function __construct(?int $i64_ = null)[] {
+    $this->_type = Primitive3Enum::_EMPTY_;
+    if ($i64_ !== null) {
+      $this->i64_ = $i64_;
+      $this->_type = Primitive3Enum::i64_;
+    }
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'i64_'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Primitive3';
+  }
+
+  public function getType()[]: Primitive3Enum {
+    return $this->_type;
+  }
+
+  public function reset()[write_props]: void {
+    switch ($this->_type) {
+      case Primitive3Enum::i64_:
+        $this->i64_ = null;
+        break;
+      case Primitive3Enum::_EMPTY_:
+        break;
+    }
+    $this->_type = Primitive3Enum::_EMPTY_;
+  }
+
+  public function set_i64_(int $i64_)[write_props]: this {
+    $this->reset();
+    $this->_type = Primitive3Enum::i64_;
+    $this->i64_ = $i64_;
+    return $this;
+  }
+
+  public function get_i64_()[]: ?int {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      Primitive3Enum::i64_,
+    );
+    return $this->i64_;
+  }
+
+  public function getx_i64_()[]: int {
+    invariant(
+      $this->_type === Primitive3Enum::i64_,
+      'get_i64_ called on an instance of Primitive3 whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->i64_ as nonnull;
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.Primitive3",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "i64_",
+            )
+          ),
+        ],
+        "is_union" => true,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+enum Primitive4Enum: int {
+  _EMPTY_ = 0;
+  i64_ = 1;
+}
+
+/**
+ * Original thrift union:-
+ * Primitive4
+ */
+class Primitive4 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<Primitive4Enum> {
+  use \ThriftUnionSerializationTrait;
+
+  use \ThriftLegacyJSONSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'i64_',
+      'union' => true,
+      'type' => \TType::I64,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'i64_' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'i64_' => ?int,
+  );
+
+  const int STRUCTURAL_ID = 8977798922771317429;
+  /**
+   * Original thrift field:-
+   * 1: i64 i64_
+   */
+  public ?int $i64_;
+  protected Primitive4Enum $_type = Primitive4Enum::_EMPTY_;
+
+  public function __construct(?int $i64_ = null)[] {
+    $this->_type = Primitive4Enum::_EMPTY_;
+    if ($i64_ !== null) {
+      $this->i64_ = $i64_;
+      $this->_type = Primitive4Enum::i64_;
+    }
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'i64_'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Primitive4';
+  }
+
+  public function getType()[]: Primitive4Enum {
+    return $this->_type;
+  }
+
+  public function reset()[write_props]: void {
+    switch ($this->_type) {
+      case Primitive4Enum::i64_:
+        $this->i64_ = null;
+        break;
+      case Primitive4Enum::_EMPTY_:
+        break;
+    }
+    $this->_type = Primitive4Enum::_EMPTY_;
+  }
+
+  public function set_i64_(int $i64_)[write_props]: this {
+    $this->reset();
+    $this->_type = Primitive4Enum::i64_;
+    $this->i64_ = $i64_;
+    return $this;
+  }
+
+  public function get_i64_()[]: ?int {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      Primitive4Enum::i64_,
+    );
+    return $this->i64_;
+  }
+
+  public function getx_i64_()[]: int {
+    invariant(
+      $this->_type === Primitive4Enum::i64_,
+      'get_i64_ called on an instance of Primitive4 whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->i64_ as nonnull;
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.Primitive4",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "i64_",
+            )
+          ),
+        ],
+        "is_union" => true,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
   }
 
 }

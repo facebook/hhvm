@@ -19,7 +19,7 @@ enum PrimitiveEnum: int {
  * Original thrift union:-
  * Primitive
  */
-class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<PrimitiveEnum> {
+class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftProtectedUnion<PrimitiveEnum> {
   use \ThriftUnionSerializationTrait;
 
   use \ThriftLegacyJSONSerializationTrait;
@@ -73,27 +73,27 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
    * Original thrift field:-
    * 1: i64 i64_
    */
-  public ?\TimestampToTimeAdapter::THackType $i64_;
+  protected ?\TimestampToTimeAdapter::THackType $i64_;
   /**
    * Original thrift field:-
    * 2: string string_
    */
-  public ?string $string_;
+  protected ?string $string_;
   /**
    * Original thrift field:-
    * 5: float float5_
    */
-  public ?float $float5_;
+  protected ?float $float5_;
   /**
    * Original thrift field:-
    * 4: float float4_
    */
-  public ?float $float4_;
+  protected ?float $float4_;
   /**
    * Original thrift field:-
    * 3: float float3_
    */
-  public ?float $float3_;
+  protected ?float $float3_;
   protected PrimitiveEnum $_type = PrimitiveEnum::_EMPTY_;
 
   public function __construct(?\TimestampToTimeAdapter::THackType $i64_ = null, ?string $string_ = null, ?float $float5_ = null, ?float $float4_ = null, ?float $float3_ = null)[] {
@@ -176,6 +176,7 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     $this->logIncorrectFieldAccessed(
       $this->_type,
       PrimitiveEnum::i64_,
+      $this->i64_ === null,
     );
     return $this->i64_;
   }
@@ -200,6 +201,7 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     $this->logIncorrectFieldAccessed(
       $this->_type,
       PrimitiveEnum::string_,
+      $this->string_ === null,
     );
     return $this->string_;
   }
@@ -224,6 +226,7 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     $this->logIncorrectFieldAccessed(
       $this->_type,
       PrimitiveEnum::float5_,
+      $this->float5_ === null,
     );
     return $this->float5_;
   }
@@ -248,6 +251,7 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     $this->logIncorrectFieldAccessed(
       $this->_type,
       PrimitiveEnum::float4_,
+      $this->float4_ === null,
     );
     return $this->float4_;
   }
@@ -272,6 +276,7 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     $this->logIncorrectFieldAccessed(
       $this->_type,
       PrimitiveEnum::float3_,
+      $this->float3_ === null,
     );
     return $this->float3_;
   }
@@ -401,7 +406,7 @@ enum OtherPrimitiveEnum: int {
  * Original thrift union:-
  * OtherPrimitive
  */
-class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<OtherPrimitiveEnum> {
+class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftProtectedUnion<OtherPrimitiveEnum> {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -453,27 +458,27 @@ class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
    * Original thrift field:-
    * 1: i64 i64_
    */
-  public ?\TimestampToTimeAdapter::THackType $i64_;
+  protected ?\TimestampToTimeAdapter::THackType $i64_;
   /**
    * Original thrift field:-
    * 2: string string_
    */
-  public ?string $string_;
+  protected ?string $string_;
   /**
    * Original thrift field:-
    * 5: float float5_
    */
-  public ?float $float5_;
+  protected ?float $float5_;
   /**
    * Original thrift field:-
    * 4: float float4_
    */
-  public ?float $float4_;
+  protected ?float $float4_;
   /**
    * Original thrift field:-
    * 3: float float3_
    */
-  public ?float $float3_;
+  protected ?float $float3_;
   protected OtherPrimitiveEnum $_type = OtherPrimitiveEnum::_EMPTY_;
 
   public function __construct(?\TimestampToTimeAdapter::THackType $i64_ = null, ?string $string_ = null, ?float $float5_ = null, ?float $float4_ = null, ?float $float3_ = null)[] {
@@ -556,6 +561,7 @@ class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     $this->logIncorrectFieldAccessed(
       $this->_type,
       OtherPrimitiveEnum::i64_,
+      $this->i64_ === null,
     );
     return $this->i64_;
   }
@@ -580,6 +586,7 @@ class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     $this->logIncorrectFieldAccessed(
       $this->_type,
       OtherPrimitiveEnum::string_,
+      $this->string_ === null,
     );
     return $this->string_;
   }
@@ -604,6 +611,7 @@ class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     $this->logIncorrectFieldAccessed(
       $this->_type,
       OtherPrimitiveEnum::float5_,
+      $this->float5_ === null,
     );
     return $this->float5_;
   }
@@ -628,6 +636,7 @@ class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     $this->logIncorrectFieldAccessed(
       $this->_type,
       OtherPrimitiveEnum::float4_,
+      $this->float4_ === null,
     );
     return $this->float4_;
   }
@@ -652,6 +661,7 @@ class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     $this->logIncorrectFieldAccessed(
       $this->_type,
       OtherPrimitiveEnum::float3_,
+      $this->float3_ === null,
     );
     return $this->float3_;
   }
@@ -768,7 +778,7 @@ enum Primitive1Enum: int {
  * Original thrift union:-
  * Primitive1
  */
-class Primitive1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<Primitive1Enum> {
+class Primitive1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftProtectedUnion<Primitive1Enum> {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -791,7 +801,7 @@ class Primitive1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
    * Original thrift field:-
    * 1: i64 i64_
    */
-  public ?int $i64_;
+  protected ?int $i64_;
   protected Primitive1Enum $_type = Primitive1Enum::_EMPTY_;
 
   public function __construct(?int $i64_ = null)[] {
@@ -842,6 +852,7 @@ class Primitive1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     $this->logIncorrectFieldAccessed(
       $this->_type,
       Primitive1Enum::i64_,
+      $this->i64_ === null,
     );
     return $this->i64_;
   }
@@ -900,7 +911,7 @@ enum Primitive2Enum: int {
  * Original thrift union:-
  * Primitive2
  */
-class Primitive2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<Primitive2Enum> {
+class Primitive2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftProtectedUnion<Primitive2Enum> {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -923,7 +934,7 @@ class Primitive2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
    * Original thrift field:-
    * 1: i64 i64_
    */
-  public ?int $i64_;
+  protected ?int $i64_;
   protected Primitive2Enum $_type = Primitive2Enum::_EMPTY_;
 
   public function __construct(?int $i64_ = null)[] {
@@ -974,6 +985,7 @@ class Primitive2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     $this->logIncorrectFieldAccessed(
       $this->_type,
       Primitive2Enum::i64_,
+      $this->i64_ === null,
     );
     return $this->i64_;
   }
@@ -1032,7 +1044,7 @@ enum Primitive3Enum: int {
  * Original thrift union:-
  * Primitive3
  */
-class Primitive3 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<Primitive3Enum> {
+class Primitive3 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftProtectedUnion<Primitive3Enum> {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -1055,7 +1067,7 @@ class Primitive3 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
    * Original thrift field:-
    * 1: i64 i64_
    */
-  public ?int $i64_;
+  protected ?int $i64_;
   protected Primitive3Enum $_type = Primitive3Enum::_EMPTY_;
 
   public function __construct(?int $i64_ = null)[] {
@@ -1106,6 +1118,7 @@ class Primitive3 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     $this->logIncorrectFieldAccessed(
       $this->_type,
       Primitive3Enum::i64_,
+      $this->i64_ === null,
     );
     return $this->i64_;
   }
@@ -1164,7 +1177,7 @@ enum Primitive4Enum: int {
  * Original thrift union:-
  * Primitive4
  */
-class Primitive4 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<Primitive4Enum> {
+class Primitive4 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftProtectedUnion<Primitive4Enum> {
   use \ThriftUnionSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -1187,7 +1200,7 @@ class Primitive4 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
    * Original thrift field:-
    * 1: i64 i64_
    */
-  public ?int $i64_;
+  protected ?int $i64_;
   protected Primitive4Enum $_type = Primitive4Enum::_EMPTY_;
 
   public function __construct(?int $i64_ = null)[] {
@@ -1238,6 +1251,7 @@ class Primitive4 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     $this->logIncorrectFieldAccessed(
       $this->_type,
       Primitive4Enum::i64_,
+      $this->i64_ === null,
     );
     return $this->i64_;
   }

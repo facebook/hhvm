@@ -263,7 +263,6 @@ class FooUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUn
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \hack\fixtures\FooUnionEnum::int_field,
-      $this->int_field === null,
     );
     return $this->int_field;
   }
@@ -288,7 +287,6 @@ class FooUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUn
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \hack\fixtures\FooUnionEnum::str_field,
-      $this->str_field === null,
     );
     return $this->str_field;
   }

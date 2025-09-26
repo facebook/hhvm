@@ -514,7 +514,6 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\terse_write\MyUnionEnum::bool_field,
-      $this->bool_field === null,
     );
     return $this->bool_field;
   }
@@ -539,7 +538,6 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\terse_write\MyUnionEnum::byte_field,
-      $this->byte_field === null,
     );
     return $this->byte_field;
   }
@@ -564,7 +562,6 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\terse_write\MyUnionEnum::short_field,
-      $this->short_field === null,
     );
     return $this->short_field;
   }
@@ -589,7 +586,6 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\terse_write\MyUnionEnum::int_field,
-      $this->int_field === null,
     );
     return $this->int_field;
   }
@@ -614,7 +610,6 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\terse_write\MyUnionEnum::long_field,
-      $this->long_field === null,
     );
     return $this->long_field;
   }
@@ -639,7 +634,6 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\terse_write\MyUnionEnum::float_field,
-      $this->float_field === null,
     );
     return $this->float_field;
   }
@@ -664,7 +658,6 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\terse_write\MyUnionEnum::double_field,
-      $this->double_field === null,
     );
     return $this->double_field;
   }
@@ -689,7 +682,6 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\terse_write\MyUnionEnum::string_field,
-      $this->string_field === null,
     );
     return $this->string_field;
   }
@@ -714,7 +706,6 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\terse_write\MyUnionEnum::binary_field,
-      $this->binary_field === null,
     );
     return $this->binary_field;
   }
@@ -739,7 +730,6 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\terse_write\MyUnionEnum::enum_field,
-      $this->enum_field === null,
     );
     return $this->enum_field;
   }
@@ -764,7 +754,6 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\terse_write\MyUnionEnum::list_field,
-      $this->list_field === null,
     );
     return $this->list_field;
   }
@@ -789,7 +778,6 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\terse_write\MyUnionEnum::set_field,
-      $this->set_field === null,
     );
     return $this->set_field;
   }
@@ -814,7 +802,6 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\terse_write\MyUnionEnum::map_field,
-      $this->map_field === null,
     );
     return $this->map_field;
   }
@@ -839,7 +826,6 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\terse_write\MyUnionEnum::struct_field,
-      $this->struct_field === null,
     );
     return $this->struct_field;
   }

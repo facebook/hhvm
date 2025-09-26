@@ -137,6 +137,9 @@ class t_hack_generator : public t_concat_generator {
     typedef_ = option_is_specified(options, "typedef");
     server_stream_ = option_is_specified(options, "server_stream");
 
+    union_logger_rollout_ =
+        option_is_specified(options, "__union_logger_rollout");
+
     auto [_, ns_type_] = get_namespace(program_);
     has_hack_namespace = ns_type_ == HackThriftNamespaceType::HACK ||
         ns_type_ == HackThriftNamespaceType::PACKAGE;
@@ -1143,6 +1146,11 @@ class t_hack_generator : public t_concat_generator {
    * Setting this also implies protected_unions_
    */
   bool strict_unions_;
+
+  /**
+   * Control rollout of incorrect field access in union logging
+   */
+  bool union_logger_rollout_;
 
   /**
    * Preserve original union json serialization behavior with fb_json_encode
@@ -4193,7 +4201,11 @@ void t_hack_generator::generate_php_union_methods(
     indent_up();
     indent(out) << "$this->_type,\n";
     indent(out) << enumName << "::" << fieldName << ",\n";
-    indent(out) << "$this->" << fieldName << " === null,\n";
+
+    if (union_logger_rollout_) {
+      indent(out) << "$this->" << fieldName << " === null,\n";
+    }
+
     indent_down();
     indent(out) << ");\n";
     indent(out) << "return $this->" << fieldName << ";\n";

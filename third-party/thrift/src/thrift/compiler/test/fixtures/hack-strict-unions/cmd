@@ -1,3 +1,4 @@
 strict: hack:strict_unions=1 src/module.thrift
 non_protected: hack: src/module.thrift
 legacy_json_serialization: hack:legacy_union_json_serialization=1 src/module.thrift
+rollout: hack:protected_unions=1,__union_logger_rollout=1 src/module.thrift

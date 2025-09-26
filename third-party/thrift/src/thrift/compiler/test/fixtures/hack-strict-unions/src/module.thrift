@@ -35,3 +35,20 @@ union OtherPrimitive {
   4: float float4_ = 30;
   3: float float3_ = 50;
 }
+
+// for testing rollout mechanism
+union Primitive1 {
+  1: i64 i64_;
+}
+
+union Primitive2 {
+  1: i64 i64_;
+}
+
+union Primitive3 {
+  1: i64 i64_;
+}
+
+union Primitive4 {
+  1: i64 i64_;
+}

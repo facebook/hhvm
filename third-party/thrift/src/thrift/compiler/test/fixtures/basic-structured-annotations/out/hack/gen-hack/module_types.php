@@ -1124,7 +1124,6 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \test\fixtures\basic-structured-annotations\MyUnionEnum::first,
-      $this->first === null,
     );
     return $this->first;
   }
@@ -1149,7 +1148,6 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \test\fixtures\basic-structured-annotations\MyUnionEnum::second,
-      $this->second === null,
     );
     return $this->second;
   }

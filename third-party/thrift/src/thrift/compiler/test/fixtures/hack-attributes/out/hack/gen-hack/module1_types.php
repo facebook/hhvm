@@ -578,7 +578,6 @@ class UnionTesting implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \test\fixtures\jsenum\UnionTestingEnum::foo,
-      $this->foo === null,
     );
     return $this->foo;
   }
@@ -603,7 +602,6 @@ class UnionTesting implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \test\fixtures\jsenum\UnionTestingEnum::bar,
-      $this->bar === null,
     );
     return $this->bar;
   }
@@ -777,7 +775,6 @@ class UnionTestingStructured implements \IThriftSyncStruct, \IThriftStructMetada
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \test\fixtures\jsenum\UnionTestingStructuredEnum::foo,
-      $this->foo === null,
     );
     return $this->foo;
   }
@@ -802,7 +799,6 @@ class UnionTestingStructured implements \IThriftSyncStruct, \IThriftStructMetada
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \test\fixtures\jsenum\UnionTestingStructuredEnum::bar,
-      $this->bar === null,
     );
     return $this->bar;
   }

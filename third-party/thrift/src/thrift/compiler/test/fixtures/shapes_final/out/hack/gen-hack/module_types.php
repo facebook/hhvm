@@ -145,7 +145,6 @@ class Union implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \test\fixtures\UnionEnum::intValue,
-      $this->intValue === null,
     );
     return $this->intValue;
   }
@@ -170,7 +169,6 @@ class Union implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \test\fixtures\UnionEnum::stringValue,
-      $this->stringValue === null,
     );
     return $this->stringValue;
   }

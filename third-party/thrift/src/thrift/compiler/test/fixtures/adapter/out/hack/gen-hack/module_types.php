@@ -1938,7 +1938,6 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\BazEnum::intField,
-      $this->intField === null,
     );
     return $this->intField;
   }
@@ -1963,7 +1962,6 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\BazEnum::setField,
-      $this->setField === null,
     );
     return $this->setField;
   }
@@ -1988,7 +1986,6 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\BazEnum::mapField,
-      $this->mapField === null,
     );
     return $this->mapField;
   }
@@ -2013,7 +2010,6 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\BazEnum::binaryField,
-      $this->binaryField === null,
     );
     return $this->binaryField;
   }
@@ -2038,7 +2034,6 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\BazEnum::longField,
-      $this->longField === null,
     );
     return $this->longField;
   }
@@ -6726,7 +6721,6 @@ class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\AdaptTestUnionEnum::delay,
-      $this->delay === null,
     );
     return $this->delay;
   }
@@ -6751,7 +6745,6 @@ class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     $this->logIncorrectFieldAccessed(
       $this->_type,
       \facebook\thrift\test\AdaptTestUnionEnum::custom,
-      $this->custom === null,
     );
     return $this->custom;
   }

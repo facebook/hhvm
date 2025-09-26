@@ -1048,7 +1048,6 @@ class union1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnio
     $this->logIncorrectFieldAccessed(
       $this->_type,
       union1Enum::i,
-      $this->i === null,
     );
     return $this->i;
   }
@@ -1073,7 +1072,6 @@ class union1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnio
     $this->logIncorrectFieldAccessed(
       $this->_type,
       union1Enum::d,
-      $this->d === null,
     );
     return $this->d;
   }
@@ -1282,7 +1280,6 @@ class union2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnio
     $this->logIncorrectFieldAccessed(
       $this->_type,
       union2Enum::i,
-      $this->i === null,
     );
     return $this->i;
   }
@@ -1307,7 +1304,6 @@ class union2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnio
     $this->logIncorrectFieldAccessed(
       $this->_type,
       union2Enum::d,
-      $this->d === null,
     );
     return $this->d;
   }
@@ -1332,7 +1328,6 @@ class union2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnio
     $this->logIncorrectFieldAccessed(
       $this->_type,
       union2Enum::s,
-      $this->s === null,
     );
     return $this->s;
   }
@@ -1357,7 +1352,6 @@ class union2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnio
     $this->logIncorrectFieldAccessed(
       $this->_type,
       union2Enum::u,
-      $this->u === null,
     );
     return $this->u;
   }

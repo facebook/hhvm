@@ -101,7 +101,7 @@ struct TestHandler : public AsyncProcessorFactory {
   ServerCallbackFactory serverCallbackFactory_;
 };
 
-struct LowLevelBiDiServiceTest
+struct BiDiTransportTest
     : public AsyncTestSetup<TestHandler, Client<TestBiDiService>> {
   using ServerCallbackFactory = std::function<BiDiServerCallback*()>;
   using ClientCallbackFactory = std::function<BiDiClientCallback*(
@@ -148,7 +148,7 @@ struct LowLevelBiDiServiceTest
   }
 };
 
-TEST_F(LowLevelBiDiServiceTest, Basic) {
+TEST_F(BiDiTransportTest, Basic) {
   test(
       [](auto done) {
         auto client = new FiniteClient(5, 100, done);
@@ -161,7 +161,7 @@ TEST_F(LowLevelBiDiServiceTest, Basic) {
       });
 }
 
-TEST_F(LowLevelBiDiServiceTest, SinkCompletesButStreamContinues) {
+TEST_F(BiDiTransportTest, SinkCompletesButStreamContinues) {
   test(
       [](auto done) {
         auto client = new FiniteClient(3, 100, done);
@@ -175,7 +175,7 @@ TEST_F(LowLevelBiDiServiceTest, SinkCompletesButStreamContinues) {
       });
 }
 
-TEST_F(LowLevelBiDiServiceTest, StreamCompletesButSinkContinues) {
+TEST_F(BiDiTransportTest, StreamCompletesButSinkContinues) {
   test(
       [](auto done) {
         auto client = new FiniteClient(5, 100, done);
@@ -189,7 +189,7 @@ TEST_F(LowLevelBiDiServiceTest, StreamCompletesButSinkContinues) {
       });
 }
 
-TEST_F(LowLevelBiDiServiceTest, SinkErrorsButStreamCompletes) {
+TEST_F(BiDiTransportTest, SinkErrorsButStreamCompletes) {
   test(
       [](auto done) {
         auto client = new FiniteClient(3, 100, done);
@@ -204,7 +204,7 @@ TEST_F(LowLevelBiDiServiceTest, SinkErrorsButStreamCompletes) {
       });
 }
 
-TEST_F(LowLevelBiDiServiceTest, StreamErrorsButSinkCompletes) {
+TEST_F(BiDiTransportTest, StreamErrorsButSinkCompletes) {
   test(
       [](auto done) {
         auto client = new FiniteClient(5, 100, done);
@@ -218,7 +218,7 @@ TEST_F(LowLevelBiDiServiceTest, StreamErrorsButSinkCompletes) {
       });
 }
 
-TEST_F(LowLevelBiDiServiceTest, SinkGetsCancelledButStreamCompletes) {
+TEST_F(BiDiTransportTest, SinkGetsCancelledButStreamCompletes) {
   test(
       [](auto done) {
         auto client = new FiniteClient(5, 100, done);
@@ -233,7 +233,7 @@ TEST_F(LowLevelBiDiServiceTest, SinkGetsCancelledButStreamCompletes) {
       });
 }
 
-TEST_F(LowLevelBiDiServiceTest, StreamGetsCancelledButSinkCompletes) {
+TEST_F(BiDiTransportTest, StreamGetsCancelledButSinkCompletes) {
   test(
       [](auto done) {
         auto client = new FiniteClient(5, 3, done);
@@ -249,7 +249,7 @@ TEST_F(LowLevelBiDiServiceTest, StreamGetsCancelledButSinkCompletes) {
       });
 }
 
-TEST_F(LowLevelBiDiServiceTest, SinkErrorsThenStreamErrors) {
+TEST_F(BiDiTransportTest, SinkErrorsThenStreamErrors) {
   test(
       [](auto done) {
         auto client = new FiniteClient(3, 100, done);
@@ -264,7 +264,7 @@ TEST_F(LowLevelBiDiServiceTest, SinkErrorsThenStreamErrors) {
       });
 }
 
-TEST_F(LowLevelBiDiServiceTest, StreamGetsCancelledThenSinkGetsCancelled) {
+TEST_F(BiDiTransportTest, StreamGetsCancelledThenSinkGetsCancelled) {
   test(
       [](auto done) {
         auto client = new FiniteClient(3, 100, done);
@@ -281,7 +281,7 @@ TEST_F(LowLevelBiDiServiceTest, StreamGetsCancelledThenSinkGetsCancelled) {
       });
 }
 
-TEST_F(LowLevelBiDiServiceTest, BothSinkAndStreamGetCancelledOnRequestN) {
+TEST_F(BiDiTransportTest, BothSinkAndStreamGetCancelledOnRequestN) {
   class CustomClient : public BiDiSimplifiedEchoClient {
    public:
     explicit CustomClient(std::shared_ptr<CompletionSignal> done)
@@ -318,7 +318,7 @@ TEST_F(LowLevelBiDiServiceTest, BothSinkAndStreamGetCancelledOnRequestN) {
       [] { return new CustomServer(); });
 }
 
-TEST_F(LowLevelBiDiServiceTest, BothSinkAndStreamGetCancelledAfterOnePayload) {
+TEST_F(BiDiTransportTest, BothSinkAndStreamGetCancelledAfterOnePayload) {
   class CustomClient : public BiDiSimplifiedEchoClient {
    public:
     explicit CustomClient(std::shared_ptr<CompletionSignal> done)
@@ -360,7 +360,7 @@ TEST_F(LowLevelBiDiServiceTest, BothSinkAndStreamGetCancelledAfterOnePayload) {
       [] { return new CustomServer(); });
 }
 
-TEST_F(LowLevelBiDiServiceTest, BothSidesError) {
+TEST_F(BiDiTransportTest, BothSidesError) {
   class CustomClient : public BiDiSimplifiedEchoClient {
    public:
     explicit CustomClient(std::shared_ptr<CompletionSignal> done)
@@ -433,9 +433,9 @@ struct TestHandlerThatReturnsError : public AsyncProcessorFactory {
   }
 };
 
-struct FirstResponseErrorBiDiTest : public AsyncTestSetup<
-                                        TestHandlerThatReturnsError,
-                                        Client<TestBiDiService>> {
+struct FirstResponseErrorBiDiTransportTest : public AsyncTestSetup<
+                                                 TestHandlerThatReturnsError,
+                                                 Client<TestBiDiService>> {
   using ClientCallbackFactory = std::function<BiDiClientCallback*(
       std::shared_ptr<CompletionSignal> done)>;
 
@@ -468,155 +468,8 @@ struct FirstResponseErrorBiDiTest : public AsyncTestSetup<
   }
 };
 
-TEST_F(FirstResponseErrorBiDiTest, FirstResponseError) {
+TEST_F(FirstResponseErrorBiDiTransportTest, FirstResponseError) {
   test([](auto completion) { return new SimplifiedEchoClient(3, completion); });
-}
-
-//
-// Tests for the generated code
-//
-
-struct GeneratedCodeBiDiServiceTest : LowLevelBiDiServiceTest {};
-
-TEST_F(GeneratedCodeBiDiServiceTest, StreamCompletesThenSinkCompletes) {
-  handler_->useServerCallbackFactory([] {
-    auto server = new FiniteServer(1, 10);
-    server->setStreamLimitAction(FiniteServer::StreamLimitAction::COMPLETE);
-    return BiDiServerCallbackPtr(server);
-  });
-
-  connectToServer(
-      [](Client<TestBiDiService>& client) -> folly::coro::Task<void> {
-        auto [sink, stream] = co_await client.co_echo();
-        auto gen = std::move(stream).toAsyncGenerator();
-        EXPECT_EQ("stream-payload", *co_await gen.next());
-        EXPECT_FALSE(co_await gen.next());
-        co_await sink.sink([&]() -> folly::coro::AsyncGenerator<std::string&&> {
-          co_yield "sink-payload";
-        }());
-      });
-}
-
-TEST_F(GeneratedCodeBiDiServiceTest, SinkCompletesThenStreamCompletes) {
-  handler_->useServerCallbackFactory([] {
-    auto server = new FiniteServer(1, 10);
-    server->setStreamLimitAction(FiniteServer::StreamLimitAction::COMPLETE);
-    return BiDiServerCallbackPtr(server);
-  });
-
-  connectToServer(
-      [](Client<TestBiDiService>& client) -> folly::coro::Task<void> {
-        auto [sink, stream] = co_await client.co_echo();
-        co_await sink.sink([&]() -> folly::coro::AsyncGenerator<std::string&&> {
-          co_yield "sink-payload";
-        }());
-        auto gen = std::move(stream).toAsyncGenerator();
-        EXPECT_EQ("stream-payload", *co_await gen.next());
-        EXPECT_FALSE(co_await gen.next());
-      });
-}
-
-TEST_F(GeneratedCodeBiDiServiceTest, StreamErrorsButSinkCompletes) {
-  handler_->useServerCallbackFactory([] {
-    auto server = new FiniteServer(3, 100);
-    server->setStreamLimitAction(FiniteServer::StreamLimitAction::ERROR);
-    return BiDiServerCallbackPtr(server);
-  });
-
-  connectToServer(
-      [](Client<TestBiDiService>& client) -> folly::coro::Task<void> {
-        auto [sink, stream] = co_await client.co_echo();
-        auto gen = std::move(stream).toAsyncGenerator();
-
-        // Stream should error after limited messages
-        bool streamErrored = false;
-        try {
-          while (true) {
-            auto response = co_await gen.next();
-            if (!response.has_value()) {
-              break;
-            }
-          }
-        } catch (const std::exception&) {
-          streamErrored = true;
-        }
-        EXPECT_TRUE(streamErrored);
-
-        // Sink should still complete successfully
-        co_await sink.sink([&]() -> folly::coro::AsyncGenerator<std::string&&> {
-          for (int i = 0; i < 5; ++i) {
-            co_yield folly::to<std::string>("sink-", i);
-          }
-        }());
-      });
-}
-
-TEST_F(GeneratedCodeBiDiServiceTest, SinkErrorsButStreamCompletes) {
-  handler_->useServerCallbackFactory([] {
-    auto server = new ConfigurableServer();
-    server->setSinkErrorAction(
-        ConfigurableServer::SinkErrorAction::CONTINUE_STREAM);
-    return BiDiServerCallbackPtr(server);
-  });
-
-  connectToServer(
-      [](Client<TestBiDiService>& client) -> folly::coro::Task<void> {
-        auto [sink, stream] = co_await client.co_echo();
-        auto gen = std::move(stream).toAsyncGenerator();
-
-        // Start sink that will error after a few messages
-        try {
-          co_await sink.sink(
-              [&]() -> folly::coro::AsyncGenerator<std::string&&> {
-                for (int i = 0; i < 3; ++i) {
-                  co_yield folly::to<std::string>("sink-", i);
-                }
-                throw std::runtime_error("sink error");
-              }());
-        } catch (const std::exception&) {
-        }
-
-        // Stream echoes sink payloads then sends 2 more
-        for (int i = 0; i < 3; ++i) {
-          EXPECT_EQ(folly::to<std::string>("sink-", i), *co_await gen.next());
-        }
-        EXPECT_EQ("stream-payload", *co_await gen.next());
-        EXPECT_EQ("stream-payload", *co_await gen.next());
-        EXPECT_FALSE(co_await gen.next());
-      });
-}
-
-TEST_F(GeneratedCodeBiDiServiceTest, StreamErrorsAndSinkCompletes) {
-  handler_->useServerCallbackFactory([] {
-    auto server = new FiniteServer(2, 100);
-    server->setStreamLimitAction(FiniteServer::StreamLimitAction::ERROR);
-    return BiDiServerCallbackPtr(server);
-  });
-
-  connectToServer(
-      [](Client<TestBiDiService>& client) -> folly::coro::Task<void> {
-        auto [sink, stream] = co_await client.co_echo();
-        auto gen = std::move(stream).toAsyncGenerator();
-
-        // First drain the stream until it errors
-        bool streamErrored = false;
-        try {
-          while (true) {
-            EXPECT_TRUE(co_await gen.next());
-          }
-        } catch (const std::exception&) {
-          streamErrored = true;
-        }
-        EXPECT_TRUE(streamErrored);
-
-        // Now that the stream has errored, sink should still complete
-        // successfully
-        co_await sink.sink([&]() -> folly::coro::AsyncGenerator<std::string&&> {
-          for (int i = 0; i < 3; ++i) {
-            co_yield folly::to<std::string>("sink-", i);
-          }
-        }());
-      });
 }
 
 } // namespace apache::thrift

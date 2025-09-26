@@ -36,7 +36,8 @@ from thrift.python.mutable_serializer import (
     serialize_iobuf as serialize_iobuf_mutable,
     deserialize as deserialize_mutable,
 )
-from thrift.python.streaming.sink cimport ClientSink, BidirectionalStream
+from thrift.python.streaming.bidistream cimport BidirectionalStream
+from thrift.python.streaming.sink cimport ClientSink
 from thrift.python.streaming.stream cimport ClientBufferedStream
 from thrift.python.common cimport cRpcOptions, RpcOptions
 

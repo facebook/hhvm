@@ -37,17 +37,6 @@ cdef extern from "thrift/lib/cpp2/async/Sink.h" namespace "::apache::thrift":
 
     cdef cppclass cSinkConsumer "::apache::thrift::SinkConsumer"[TChunk, TFinalResponse]:
         pass
-
-    cdef cppclass cBidirectionalStream "::apache::thrift::BidirectionalStream"[TSinkElement, TStreamElement]:
-        cIOBufClientSink sink
-        # ClientBufferedStream will be imported from stream module
-
-    cdef cppclass cResponseAndBidirectionalStream "::apache::thrift::ResponseAndBidirectionalStream"[TResponse, TSinkElement, TStreamElement]:
-        TResponse response
-        cIOBufClientSink sink
-        # ClientBufferedStream will be imported from stream module
-
-
 cdef extern from "thrift/lib/python/streaming/Sink.h" namespace "::apache::thrift::python":
     cdef cppclass cIOBufClientSink "::apache::thrift::python::IOBufClientSink":
         cClientSink()
@@ -87,40 +76,6 @@ cdef class ClientSink:
         unique_ptr[cIOBufClientSink]&& client_sink,
         sink_cls,
         sink_final_resp_cls,
-        Protocol protocol,
-    )
-
-cdef class BidirectionalStream:
-    cdef ClientSink _sink
-    cdef ClientBufferedStream _stream
-    cdef _sink_elem_cls
-    cdef _stream_elem_cls
-
-    @staticmethod
-    cdef _fbthrift_create(
-        unique_ptr[cIOBufClientSink]&& client_sink,
-        unique_ptr[cIOBufClientBufferedStream] stream,
-        sink_elem_cls,
-        stream_elem_cls,
-        Protocol protocol,
-    )
-
-cdef class ResponseAndBidirectionalStream:
-    cdef object _response
-    cdef ClientSink _sink
-    cdef ClientBufferedStream _stream
-    cdef _response_cls
-    cdef _sink_elem_cls
-    cdef _stream_elem_cls
-
-    @staticmethod
-    cdef _fbthrift_create(
-        object response,
-        unique_ptr[cIOBufClientSink]&& client_sink,
-        unique_ptr[cIOBufClientBufferedStream] stream,
-        response_cls,
-        sink_elem_cls,
-        stream_elem_cls,
         Protocol protocol,
     )
 

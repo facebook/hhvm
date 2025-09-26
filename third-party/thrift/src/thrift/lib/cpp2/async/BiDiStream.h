@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/**
+ * This header defines user-facing types for BiDi (Bi-directional) methods.
+ * Client-side types are: BidirectionalStream, ResponseAndBidirectionalStream.
+ * Server-side types are: StreamTransformation, ResponseAndStreamTransformation.
+ */
+
 #pragma once
 
 #include <folly/Function.h>
@@ -55,6 +61,11 @@ class ResponseAndBidirectionalStream {
   ClientBufferedStream<StreamElement> stream;
 };
 
+/**
+ * StreamTransformation is the Server-side return type for a BiDi method that
+ * does not have an initial response:
+ * `sink<T>, stream<U> bidiNoInitialResponse()`
+ */
 template <typename InputElement, typename OutputElement>
 struct StreamTransformation {
   using InputType = folly::coro::AsyncGenerator<InputElement&&>;
@@ -64,6 +75,11 @@ struct StreamTransformation {
   Func func;
 };
 
+/**
+ * ResponseAndStreamTransformation is the Server-side return type for a BiDi
+ * method that has an initial response:
+ * `R, sink<T>, stream<U> bidiWithInitialResponse()`
+ */
 template <typename Response, typename InputElement, typename OutputElement>
 struct ResponseAndStreamTransformation {
   Response response;

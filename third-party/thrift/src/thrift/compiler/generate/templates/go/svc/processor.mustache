@@ -158,13 +158,11 @@ func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thr
             return result, nil
         {{/function:exceptions}}
         default:
-            x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing {{function:go_name}}: " + err.Error(), err)
-            return x, x
+            return nil, thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing {{function:go_name}}: " + err.Error(), err)
         }
         {{/function:exceptions?}}
         {{^function:exceptions?}}
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing {{function:go_name}}: " + err.Error(), err)
-        return x, x
+        return nil, thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing {{function:go_name}}: " + err.Error(), err)
         {{/function:exceptions?}}
     }
 

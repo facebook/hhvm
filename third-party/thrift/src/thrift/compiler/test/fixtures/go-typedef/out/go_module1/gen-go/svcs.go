@@ -192,8 +192,7 @@ func (p *procFuncFinderByPlate) RunContext(ctx context.Context, reqStruct thrift
     result := newRespFinderByPlate()
     retval, err := p.handler.ByPlate(ctx, args.Plate)
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing ByPlate: " + err.Error(), err)
-        return x, x
+        return nil, thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing ByPlate: " + err.Error(), err)
     }
 
     result.Success = retval
@@ -240,8 +239,7 @@ func (p *procFuncFinderAliasByPlate) RunContext(ctx context.Context, reqStruct t
     result := newRespFinderAliasByPlate()
     retval, err := p.handler.AliasByPlate(ctx, args.Plate)
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing AliasByPlate: " + err.Error(), err)
-        return x, x
+        return nil, thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing AliasByPlate: " + err.Error(), err)
     }
 
     result.Success = retval
@@ -288,8 +286,7 @@ func (p *procFuncFinderPreviousPlate) RunContext(ctx context.Context, reqStruct 
     result := newRespFinderPreviousPlate()
     retval, err := p.handler.PreviousPlate(ctx, args.Plate)
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing PreviousPlate: " + err.Error(), err)
-        return x, x
+        return nil, thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing PreviousPlate: " + err.Error(), err)
     }
 
     result.Success = &retval

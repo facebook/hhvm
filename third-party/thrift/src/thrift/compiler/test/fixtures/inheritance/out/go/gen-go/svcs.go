@@ -150,8 +150,7 @@ func (p *procFuncMyRootDoRoot) RunContext(ctx context.Context, reqStruct thrift.
     result := newRespMyRootDoRoot()
     err := p.handler.DoRoot(ctx)
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoRoot: " + err.Error(), err)
-        return x, x
+        return nil, thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoRoot: " + err.Error(), err)
     }
 
     return result, nil
@@ -264,8 +263,7 @@ func (p *procFuncMyNodeDoMid) RunContext(ctx context.Context, reqStruct thrift.R
     result := newRespMyNodeDoMid()
     err := p.handler.DoMid(ctx)
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoMid: " + err.Error(), err)
-        return x, x
+        return nil, thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoMid: " + err.Error(), err)
     }
 
     return result, nil
@@ -378,8 +376,7 @@ func (p *procFuncMyLeafDoLeaf) RunContext(ctx context.Context, reqStruct thrift.
     result := newRespMyLeafDoLeaf()
     err := p.handler.DoLeaf(ctx)
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoLeaf: " + err.Error(), err)
-        return x, x
+        return nil, thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoLeaf: " + err.Error(), err)
     }
 
     return result, nil

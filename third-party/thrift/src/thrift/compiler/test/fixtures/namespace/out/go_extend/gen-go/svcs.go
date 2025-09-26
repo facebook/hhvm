@@ -136,8 +136,7 @@ func (p *procFuncExtendTestServiceCheck) RunContext(ctx context.Context, reqStru
     result := newRespExtendTestServiceCheck()
     retval, err := p.handler.Check(ctx, args.Struct1)
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Check: " + err.Error(), err)
-        return x, x
+        return nil, thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Check: " + err.Error(), err)
     }
 
     result.Success = &retval

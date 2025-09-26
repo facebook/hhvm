@@ -115,6 +115,9 @@ class TransportErrorType(Enum):
     SSL_ERROR = cTTransportExceptionType__SSL_ERROR
     COULD_NOT_BIND = cTTransportExceptionType__COULD_NOT_BIND
     NETWORK_ERROR = cTTransportExceptionType__NETWORK_ERROR
+    EARLY_DATA_REJECTED = cTTransportExceptionType__EARLY_DATA_REJECTED
+    STREAMING_CONTRACT_VIOLATION = cTTransportExceptionType__STREAMING_CONTRACT_VIOLATION
+    INVALID_SETUP = cTTransportExceptionType__INVALID_SETUP
 
 
 class TransportOptions(Flag):

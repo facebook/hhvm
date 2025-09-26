@@ -76,6 +76,9 @@ cdef extern from "thrift/lib/cpp/transport/TTransportException.h" namespace "apa
         cTTransportExceptionType__SSL_ERROR "apache::thrift::transport::TTransportException::SSL_ERROR"
         cTTransportExceptionType__COULD_NOT_BIND "apache::thrift::transport::TTransportException::COULD_NOT_BIND"
         cTTransportExceptionType__NETWORK_ERROR "apache::thrift::transport::TTransportException::NETWORK_ERROR"
+        cTTransportExceptionType__EARLY_DATA_REJECTED "apache::thrift::transport::TTransportException::EARLY_DATA_REJECTED"
+        cTTransportExceptionType__STREAMING_CONTRACT_VIOLATION "apache::thrift::transport::TTransportException::STREAMING_CONTRACT_VIOLATION"
+        cTTransportExceptionType__INVALID_SETUP "apache::thrift::transport::TTransportException::INVALID_SETUP"
 
     enum cTTransportExceptionOptions "apache::thrift::transport::TTransportException::Options":
         cTTransportExceptionOptions__CHANNEL_IS_VALID "apache::thrift::transport::TTransportException::CHANNEL_IS_VALID"

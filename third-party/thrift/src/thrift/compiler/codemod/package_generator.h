@@ -71,11 +71,13 @@ class package_name_generator {
     return fmt::to_string(fmt::join(domain_.begin(), domain_.end(), "."));
   }
 
-  static std::string from_file_path(const std::string& path) {
+  static std::string from_file_path(std::string path) {
     if (path.empty()) {
       return "";
     }
 
+    // Replace any '-' with '_' - we disallow hypens in package names
+    std::replace(path.begin(), path.end(), '-', '_');
     auto dot = path.find_last_of('.');
     auto slash = path.find_first_of('/');
     if (slash == std::string::npos) {

@@ -65,31 +65,40 @@ class ThriftPackage(unittest.TestCase):
         )
 
     def test_package_from_file_path(self):
+        input_file = """\
+            /*
+             *  **License docblock**
+             */
+
+            struct S {
+            }
+
+            """
+        expected_output_file = """\
+            /*
+             *  **License docblock**
+             */
+
+            package "{package}"
+
+            namespace cpp2 "cpp2" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
+            namespace hack "" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
+            namespace py3 "" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
+
+            struct S {{
+            }}
+            """
+
         self.write_and_test(
             "fbcode/thrift/test/foo.thrift",
-            """\
-                /*
-                 *  **License docblock**
-                 */
+            input_file,
+            expected_output_file.format(package="meta.com/thrift/test/foo"),
+        )
 
-                struct S {
-                }
-
-                """,
-            """\
-                /*
-                 *  **License docblock**
-                 */
-
-                package "meta.com/thrift/test/foo"
-
-                namespace cpp2 "cpp2" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
-                namespace hack "" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
-                namespace py3 "" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
-
-                struct S {
-                }
-                """,
+        self.write_and_test(
+            "fbcode/thrift/test-hyphen/foo.thrift",
+            input_file,
+            expected_output_file.format(package="meta.com/thrift/test_hyphen/foo"),
         )
 
     def test_package_from_namespace(self):

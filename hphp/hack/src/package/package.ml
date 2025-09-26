@@ -31,6 +31,16 @@ type package_relationship =
   | Soft_includes
   | Equal
 
+let show_package p =
+  Printf.sprintf
+    "Package: %s\n  | includes: %s\n  | soft_includes: %s\n  | include_paths: %s\n"
+    (snd p.name)
+    (String.concat ~sep:", " (List.map ~f:snd p.includes))
+    (String.concat ~sep:", " (List.map ~f:snd p.soft_includes))
+    (String.concat
+       ~sep:", "
+       (List.map ~f:(fun (_, p) -> "//" ^ p) p.include_paths))
+
 let get_package_pos pkg = fst pkg.name
 
 let get_package_name pkg = snd pkg.name

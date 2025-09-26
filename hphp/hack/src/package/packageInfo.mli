@@ -9,6 +9,8 @@ type t [@@deriving show, eq]
 
 val empty : t
 
+val log_package_info : t -> unit
+
 val from_packages : Package.t list -> t
 
 val get_package : t -> string -> Package.t option

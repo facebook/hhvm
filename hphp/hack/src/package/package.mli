@@ -22,6 +22,8 @@ type package_relationship =
   | Soft_includes
   | Equal
 
+val show_package : t -> string
+
 val get_package_name : t -> string
 
 val get_package_pos : t -> Pos.t

@@ -584,6 +584,7 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
       ~strict:local_config.ServerLocalConfig.package_config_strict_validation
       ~pkgs_config_abs_path
   in
+  PackageInfo.log_package_info package_info;
   let global_opts =
     let tco_custom_error_config = CustomErrorConfig.load_and_parse () in
     let local_config_opts =

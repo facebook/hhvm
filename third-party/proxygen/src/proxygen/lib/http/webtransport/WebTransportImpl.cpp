@@ -410,19 +410,14 @@ WebTransport::FCState WebTransportImpl::StreamReadHandle::dataAvailable(
       << "dataAvailable buflen=" << (data ? data->computeChainDataLength() : 0)
       << " eof=" << uint64_t(eof);
 
-  if (data) {
-    auto dataLen = data->computeChainDataLength();
-    if (!impl_.recvFlowController_.reserve(dataLen)) {
-      return WebTransport::FCState::SESSION_CLOSED;
-    }
+  auto len = data ? data->computeChainDataLength() : 0;
+  if (!impl_.recvFlowController_.reserve(len)) {
+    return WebTransport::FCState::SESSION_CLOSED;
   }
 
   if (readPromise_.valid()) {
-    if (data) {
-      auto dataLen = data->computeChainDataLength();
-      impl_.bytesRead_ += dataLen;
-      impl_.maybeGrantFlowControl();
-    }
+    impl_.bytesRead_ += len;
+    impl_.maybeGrantFlowControl();
     readPromise_.setValue(StreamData({.data = std::move(data), .fin = eof}));
     readPromise_ = emptyReadPromise();
     if (eof) {
@@ -431,7 +426,7 @@ WebTransport::FCState WebTransportImpl::StreamReadHandle::dataAvailable(
       return WebTransport::FCState::UNBLOCKED;
     }
   } else {
-    buf_.append(std::move(data));
+    buf_.append(std::move(data)); // ok if nullptr
     eof_ = eof;
   }
   VLOG(4) << "dataAvailable buflen=" << buf_.chainLength();

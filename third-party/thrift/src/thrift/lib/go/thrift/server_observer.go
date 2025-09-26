@@ -36,10 +36,10 @@ type ServerObserver interface {
 	SentReply()                     // response successfully written to connection
 	ActiveRequests(numRequests int) // current count of processing requests
 
-	// Timing metrics
+	// Timing stats
 	ProcessDelay(delay time.Duration)   // time from request received to handler start
 	ProcessTime(duration time.Duration) // time spent in handler execution
 
-	// Function-level metrics for tracking detailed request behavior
+	// Function-level stats for tracking detailed request behavior
 	ReceivedRequestForFunction(function string) // request received for specific function
 }

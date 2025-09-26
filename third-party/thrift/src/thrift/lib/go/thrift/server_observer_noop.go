@@ -48,9 +48,9 @@ func (*noopServerObserver) ReceivedRequest()     {}
 func (*noopServerObserver) SentReply()           {}
 func (*noopServerObserver) ActiveRequests(_ int) {}
 
-// Timing metrics
+// Timing stats
 func (*noopServerObserver) ProcessDelay(_ time.Duration) {}
 func (*noopServerObserver) ProcessTime(_ time.Duration)  {}
 
-// Function-level metrics (no-op implementations)
+// Function-level stats (no-op implementations)
 func (*noopServerObserver) ReceivedRequestForFunction(_ string) {}

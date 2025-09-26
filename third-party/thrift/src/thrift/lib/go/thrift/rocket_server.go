@@ -231,6 +231,7 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 
 	// Notify observer that request was received
 	s.observer.ReceivedRequest()
+	s.observer.ReceivedRequestForFunction(protocol.name)
 
 	if s.isOverloaded() {
 		// Track connection drops and server overload events when rejecting requests
@@ -307,6 +308,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 
 	// Notify observer that request was received
 	s.observer.ReceivedRequest()
+	s.observer.ReceivedRequestForFunction(protocol.name)
 
 	if s.isOverloaded() {
 		// Track connection drops and server overload events when rejecting requests

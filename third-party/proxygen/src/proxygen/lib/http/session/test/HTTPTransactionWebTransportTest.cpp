@@ -206,12 +206,8 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStream) {
   EXPECT_CALL(transport_, readWebTransportData(_, _)).WillOnce(Invoke([] {
     return std::make_pair(makeBuf(32768), false);
   }));
-  // hmm, should WebTransportImpl ensure this isn't invoked if we've rx'd eof or
-  // is it the transport's responsiblity to not send WTMaxData capsule in this
-  // case – leaning towards the latter
   EXPECT_CALL(transport_, sendWTMaxData(kDefaultWTReceiveWindow + 10 + 65536))
-      .Times(2)
-      .WillRepeatedly(Return(folly::unit));
+      .WillOnce(Return(folly::unit));
   implHandle->readAvailable(0);
   EXPECT_CALL(transport_, resumeWebTransportIngress(0));
   fut = readHandle->readStreamData()
@@ -449,8 +445,7 @@ TEST_F(HTTPTransactionWebTransportTest, BidiStreamEdgeCases) {
   EXPECT_CALL(transport_,
               stopReadingWebTransportIngress(0, folly::Optional<uint32_t>()));
 
-  EXPECT_CALL(transport_, sendWTMaxData(kDefaultWTReceiveWindow))
-      .WillOnce(Return(folly::unit));
+  EXPECT_CALL(transport_, sendWTMaxData(kDefaultWTReceiveWindow)).Times(0);
   auto fut = streamHandle.readHandle->readStreamData()
                  .via(&eventBase_)
                  .thenTry([](auto streamData) {

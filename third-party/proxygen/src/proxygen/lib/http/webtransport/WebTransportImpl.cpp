@@ -363,8 +363,7 @@ WebTransportImpl::StreamReadHandle::readStreamData() {
     VLOG(4) << __func__ << " returning data len=" << buf_.chainLength();
     auto bufLen = buf_.chainLength();
     StreamData streamData({.data = buf_.move(), .fin = eof_});
-    impl_.bytesRead_ += bufLen;
-    impl_.maybeGrantFlowControl();
+    impl_.maybeGrantFlowControl(bufLen);
 
     if (eof_) {
       // unregister the read callback, but don't send STOP_SENDING
@@ -415,8 +414,7 @@ WebTransport::FCState WebTransportImpl::StreamReadHandle::dataAvailable(
   }
 
   if (readPromise_.valid()) {
-    impl_.bytesRead_ += len;
-    impl_.maybeGrantFlowControl();
+    impl_.maybeGrantFlowControl(len);
     readPromise_.setValue(StreamData({.data = std::move(data), .fin = eof}));
     readPromise_ = emptyReadPromise();
     if (eof) {
@@ -474,8 +472,9 @@ void WebTransportImpl::StreamReadHandle::deliverReadError(
   }
 }
 
-void WebTransportImpl::maybeGrantFlowControl() {
-  if (shouldGrantFlowControl()) {
+void WebTransportImpl::maybeGrantFlowControl(uint64_t bytesRead) {
+  bytesRead_ += bytesRead;
+  if (bytesRead && shouldGrantFlowControl()) {
     auto newMaxData = bytesRead_ + kDefaultWTReceiveWindow;
     recvFlowController_.grant(newMaxData);
     tp_.sendWTMaxData(newMaxData);

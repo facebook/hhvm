@@ -370,7 +370,7 @@ class WebTransportImpl : public WebTransport {
 
   void onWebTransportStopSending(HTTPCodec::StreamID id, uint32_t errorCode);
 
-  void maybeGrantFlowControl();
+  void maybeGrantFlowControl(uint64_t bytesRead);
   [[nodiscard]] bool shouldGrantFlowControl() const;
 
   void setFlowControlLimits(

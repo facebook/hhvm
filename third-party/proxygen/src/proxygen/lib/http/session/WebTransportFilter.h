@@ -306,6 +306,7 @@ class WebTransportFilter
   std::list<WriteCallback> writeCallbacks_;
   WebTransportHandler* handler_{nullptr};
   WebTransportImpl* wtImpl_{nullptr};
+  [[maybe_unused]] TransportProvider* h3Tp_{nullptr};
 
   bool sessionClosed_{false};
   uint32_t closeErrorCode_{0};

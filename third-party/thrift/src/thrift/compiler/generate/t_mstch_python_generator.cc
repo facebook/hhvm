@@ -1350,24 +1350,10 @@ class python_mstch_const_value : public mstch_const_value {
     register_methods(
         this,
         {
-            {"value:const_enum_type",
-             &python_mstch_const_value::const_enum_type},
             {"value:list_elem_type", &python_mstch_const_value::list_elem_type},
             {"value:map_key_type", &python_mstch_const_value::map_key_type},
             {"value:map_val_type", &python_mstch_const_value::map_val_type},
         });
-  }
-
-  mstch::node const_enum_type() {
-    if (!const_value_->ttype() || type_ != cv::CV_INTEGER ||
-        !const_value_->is_enum()) {
-      return {};
-    }
-    const auto* type = const_value_->ttype()->get_true_type();
-    if (type->is<t_enum>()) {
-      return context_.type_factory->make_mstch_object(type, context_);
-    }
-    return {};
   }
 
   mstch::node list_elem_type() {

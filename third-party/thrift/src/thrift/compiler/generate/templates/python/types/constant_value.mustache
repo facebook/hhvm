@@ -33,10 +33,10 @@ file.
 }}{{/value:integer?}}{{!
 }}{{#value:double?}}float({{value:double_value}}){{/value:double?}}{{!
 }}{{#value:const_struct?}}{{!
-    }}{{#value:const_struct_type}}{{!
+    }}{{#value:type.true_type}}{{!
     }}{{#type:need_module_path?}}{{type:module_name}}.{{/type:need_module_path?}}{{!
-    }}{{#type:structured}}{{> structs/unadapted_name}}{{/type:structured}}{{!
-    }}{{/value:const_struct_type}}{{!
+    }}{{> structs/unadapted_name}}{{!
+    }}{{/value:type.true_type}}{{!
     }}({{#value:const_struct}}{{!
         }}{{constant:name}}={{#constant:type}}{{#constant:value}}{{!
             }}{{> types/constant_value }}{{!
@@ -63,8 +63,8 @@ file.
 }}{{/value:const_struct?}}{{!
 }}{{#value:enum?}}{{!
     }}{{^value:enum_value?}}_fbthrift_python_types.BadEnum({{/value:enum_value?}}{{!
-    }}{{#value:const_enum_type}}{{#type:need_module_path?}}{{type:module_name}}.{{!
-    }}{{/type:need_module_path?}}{{/value:const_enum_type}}{{!
+    }}{{#value:type.true_type}}{{#type:need_module_path?}}{{type:module_name}}.{{!
+    }}{{/type:need_module_path?}}{{/value:type.true_type}}{{!
     }}{{value:enum_name}}{{#value:enum_value?}}.{{value:py3_enum_value_name}}{{/value:enum_value?}}{{!
     }}{{^value:enum_value?}}, {{value:integer_value}}){{/value:enum_value?}}{{!
 }}{{/value:enum?}}

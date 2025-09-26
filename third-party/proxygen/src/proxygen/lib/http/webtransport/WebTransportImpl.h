@@ -109,7 +109,6 @@ class WebTransportImpl : public WebTransport {
   ~WebTransportImpl() override = default;
 
   void destroy();
-  void onMaxData(uint64_t maxData) noexcept;
 
   // WT API
   folly::Expected<WebTransport::StreamWriteHandle*, WebTransport::ErrorCode>
@@ -379,6 +378,7 @@ class WebTransportImpl : public WebTransport {
     sendFlowController_ = FlowController(sendWindow);
     recvFlowController_ = FlowController(recvWindow);
   }
+  void onMaxData(uint64_t maxData) noexcept;
 };
 
 } // namespace proxygen

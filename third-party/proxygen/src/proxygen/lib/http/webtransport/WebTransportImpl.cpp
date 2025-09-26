@@ -33,36 +33,23 @@ void WebTransportImpl::destroy() {
 
 void WebTransportImpl::terminateSessionStreams(uint32_t errorCode,
                                                const std::string& reason) {
-  // These loops are dicey for possible erasure from callbacks
-  for (auto ingressStreamIt = wtIngressStreams_.begin();
-       ingressStreamIt != wtIngressStreams_.end();) {
-    auto id = ingressStreamIt->first;
-    auto& stream = ingressStreamIt->second;
-    ingressStreamIt++;
+  auto wtIngressStreams = std::move(wtIngressStreams_);
+  for (auto& [id, stream] : wtIngressStreams) {
     // Deliver an error to the application if needed
+    VLOG(4) << "aborting wt ingress id=" << id << " err=" << errorCode
+            << "; open=" << int(stream.open());
     if (stream.open()) {
-      VLOG(4) << "aborting WT ingress id=" << id << " with error=" << errorCode;
       stream.deliverReadError(WebTransport::Exception(errorCode, reason));
       stopReadingWebTransportIngress(id, errorCode);
-    } else {
-      VLOG(4) << "WT ingress already complete for id=" << id;
     }
   }
-  wtIngressStreams_.clear();
-  for (auto egressStreamIt = wtEgressStreams_.begin();
-       egressStreamIt != wtEgressStreams_.end();) {
-    auto id = egressStreamIt->first;
-    auto& stream = egressStreamIt->second;
-    egressStreamIt++;
+
+  auto wtEgressStreams = std::move(wtEgressStreams_);
+  for (auto& [id, stream] : wtEgressStreams) {
     // Deliver an error to the application
     stream.onStopSending(errorCode);
-    // The handler may have run and reset this stream, removing it from
-    // wtEgressStreams_, otherwise we have to reset it.
-    if (wtEgressStreams_.find(id) != wtEgressStreams_.end()) {
-      resetWebTransportEgress(id, errorCode);
-    }
+    resetWebTransportEgress(id, errorCode);
   }
-  wtEgressStreams_.clear();
 }
 
 void WebTransportImpl::onMaxData(uint64_t maxData) noexcept {

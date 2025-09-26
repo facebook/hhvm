@@ -495,15 +495,14 @@ TEST_F(HTTPTransactionWebTransportTest, StreamDetachWithOpenStreams) {
                        });
         readCancelled = true;
       });
-  folly::CancellationCallback writeCancel(
-      res->writeHandle->getCancelToken(), [&writeCancelled, &res, this] {
-        VLOG(4) << "writeCancelled";
-        EXPECT_CALL(transport_, resetWebTransportEgress(0, WT_APP_ERROR_2));
-        res->writeHandle->resetStream(WT_APP_ERROR_2);
-        writeCancelled = true;
-      });
+  folly::CancellationCallback writeCancel(res->writeHandle->getCancelToken(),
+                                          [&] {
+                                            VLOG(4) << "writeCancelled";
+                                            writeCancelled = true;
+                                          });
   HTTPException ex(HTTPException::Direction::INGRESS_AND_EGRESS, "aborted");
   handler_.expectError();
+  EXPECT_CALL(transport_, resetWebTransportEgress(0, _));
   EXPECT_CALL(
       transport_,
       stopReadingWebTransportIngress(0, makeOpt(WebTransport::kInternalError)));

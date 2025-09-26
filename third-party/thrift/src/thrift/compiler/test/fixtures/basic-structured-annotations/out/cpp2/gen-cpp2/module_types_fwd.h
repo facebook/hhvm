@@ -9,7 +9,7 @@
 #include <cstdint>
 
 // BEGIN forward_declare
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 class runtime_annotation;
 class structured_annotation_inline;
 class structured_annotation_with_default;
@@ -19,11 +19,11 @@ class structured_annotation_nested;
 class MyStruct;
 class MyException;
 class MyUnion;
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations
 // END forward_declare
 
 // BEGIN forward_declare_enums
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 enum class MyEnum;
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations
 // END forward_declare_enums

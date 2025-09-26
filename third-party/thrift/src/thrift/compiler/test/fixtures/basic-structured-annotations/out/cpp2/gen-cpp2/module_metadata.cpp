@@ -25,14 +25,14 @@ using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
-void EnumMetadata<::test::fixtures::basic-structured-annotations::MyEnum>::gen(ThriftMetadata& metadata) {
+void EnumMetadata<::test::fixtures::basic_structured_annotations::MyEnum>::gen(ThriftMetadata& metadata) {
   auto res = metadata.enums()->emplace("module.MyEnum", ::apache::thrift::metadata::ThriftEnum{});
   if (!res.second) {
     return;
   }
   ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
   enum_metadata.name() = "module.MyEnum";
-  using EnumTraits = TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>;
+  using EnumTraits = TEnumTraits<::test::fixtures::basic_structured_annotations::MyEnum>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
     enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
@@ -40,7 +40,7 @@ void EnumMetadata<::test::fixtures::basic-structured-annotations::MyEnum>::gen(T
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::basic-structured-annotations::runtime_annotation>::gen(ThriftMetadata& metadata) {
+StructMetadata<::test::fixtures::basic_structured_annotations::runtime_annotation>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.runtime_annotation", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
@@ -52,7 +52,7 @@ StructMetadata<::test::fixtures::basic-structured-annotations::runtime_annotatio
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::basic-structured-annotations::structured_annotation_inline>::gen(ThriftMetadata& metadata) {
+StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_inline>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.structured_annotation_inline", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
@@ -75,7 +75,7 @@ StructMetadata<::test::fixtures::basic-structured-annotations::structured_annota
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>::gen(ThriftMetadata& metadata) {
+StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.structured_annotation_with_default", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
@@ -98,7 +98,7 @@ StructMetadata<::test::fixtures::basic-structured-annotations::structured_annota
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::gen(ThriftMetadata& metadata) {
+StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.structured_annotation_recursive", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
@@ -108,7 +108,7 @@ StructMetadata<::test::fixtures::basic-structured-annotations::structured_annota
   module_structured_annotation_recursive.is_union() = false;
   static const auto* const
   module_structured_annotation_recursive_fields = new std::array<EncodedThriftField, 3>{ {
-    { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "recurse", true, std::make_unique<Struct<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>("module.structured_annotation_recursive"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), }},    { 3, "forward", false, std::make_unique<Struct<::test::fixtures::basic-structured-annotations::structured_annotation_forward>>("module.structured_annotation_forward"), std::vector<ThriftConstStruct>{ }},  }};
+    { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "recurse", true, std::make_unique<Struct<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>>("module.structured_annotation_recursive"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), }},    { 3, "forward", false, std::make_unique<Struct<::test::fixtures::basic_structured_annotations::structured_annotation_forward>>("module.structured_annotation_forward"), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_structured_annotation_recursive_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -121,7 +121,7 @@ StructMetadata<::test::fixtures::basic-structured-annotations::structured_annota
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::gen(ThriftMetadata& metadata) {
+StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_forward>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.structured_annotation_forward", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
@@ -144,7 +144,7 @@ StructMetadata<::test::fixtures::basic-structured-annotations::structured_annota
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::basic-structured-annotations::structured_annotation_nested>::gen(ThriftMetadata& metadata) {
+StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_nested>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.structured_annotation_nested", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
@@ -154,7 +154,7 @@ StructMetadata<::test::fixtures::basic-structured-annotations::structured_annota
   module_structured_annotation_nested.is_union() = false;
   static const auto* const
   module_structured_annotation_nested_fields = new std::array<EncodedThriftField, 2>{ {
-    { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "nest", false, std::make_unique<Struct<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>>("module.structured_annotation_with_default"), std::vector<ThriftConstStruct>{ }},  }};
+    { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "nest", false, std::make_unique<Struct<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>>("module.structured_annotation_with_default"), std::vector<ThriftConstStruct>{ }},  }};
   for (const auto& f : *module_structured_annotation_nested_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
@@ -167,7 +167,7 @@ StructMetadata<::test::fixtures::basic-structured-annotations::structured_annota
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::basic-structured-annotations::MyStruct>::gen(ThriftMetadata& metadata) {
+StructMetadata<::test::fixtures::basic_structured_annotations::MyStruct>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.MyStruct", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
@@ -196,7 +196,7 @@ StructMetadata<::test::fixtures::basic-structured-annotations::MyStruct>::gen(Th
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::basic-structured-annotations::MyException>::gen(ThriftMetadata& metadata) {
+StructMetadata<::test::fixtures::basic_structured_annotations::MyException>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.MyException", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
@@ -220,7 +220,7 @@ StructMetadata<::test::fixtures::basic-structured-annotations::MyException>::gen
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::basic-structured-annotations::MyUnion>::gen(ThriftMetadata& metadata) {
+StructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.MyUnion", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
@@ -244,7 +244,7 @@ StructMetadata<::test::fixtures::basic-structured-annotations::MyUnion>::gen(Thr
   return res.first->second;
 }
 
-void ExceptionMetadata<::test::fixtures::basic-structured-annotations::MyException>::gen(ThriftMetadata& metadata) {
+void ExceptionMetadata<::test::fixtures::basic_structured_annotations::MyException>::gen(ThriftMetadata& metadata) {
   auto res = metadata.exceptions()->emplace("module.MyException", ::apache::thrift::metadata::ThriftException{});
   if (!res.second) {
     return;
@@ -264,7 +264,7 @@ void ExceptionMetadata<::test::fixtures::basic-structured-annotations::MyExcepti
   }
   module_MyException.structured_annotations()->push_back(*cvStruct("module.structured_annotation_nested", { {"name", cvString("nesty") } }).cv_struct());
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>>::gen_first([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen_first([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "first";
   auto func_ret_type = std::make_unique<Typedef>("module.annotated_inline_string", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("module.structured_annotation_inline", { {"count", cvInteger(1) } }).cv_struct(), *cvStruct("module.structured_annotation_with_default", { {"name", cvString("abc") } }).cv_struct(),  });
@@ -273,7 +273,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic-st
   func.structured_annotations()->push_back(*cvStruct("module.structured_annotation_with_default", {  }).cv_struct());
   service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>>::gen_second([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen_second([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "second";
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE);
@@ -293,7 +293,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic-st
   service.functions()->push_back(std::move(func));
 }
 
-void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
   DCHECK(self != nullptr);
   // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
@@ -303,13 +303,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic-st
   response.context() = std::move(context);
 }
 
-const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_MyService;
   module_MyService.name() = "module.MyService";
-  module_MyService.uri() = "test.dev/fixtures/basic-structured-annotations/MyService";
+  module_MyService.uri() = "test.dev/fixtures/basic_structured_annotations/MyService";
   static const ThriftFunctionGenerator functions[] = {
-    ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>>::gen_first,
-    ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>>::gen_second,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen_first,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen_second,
   };
   for (auto& function_gen : functions) {
     function_gen(metadata, module_MyService);

@@ -12,7 +12,7 @@
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/included_constants.h"
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/namespaced_constants.h"
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 namespace module_constants {
 
 ::std::map<::std::string, ::std::string> const& MyConst() {
@@ -22,15 +22,15 @@ namespace module_constants {
 }
 
 
-::std::string_view _fbthrift_schema_243c2ae30ab47c20() {
+::std::string_view _fbthrift_schema_1eea918692ce0434() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_243c2ae30ab47c20_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_1eea918692ce0434_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_243c2ae30ab47c20_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_1eea918692ce0434_uris() {
   return {};
 }
 
 } // namespace module_constants
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations

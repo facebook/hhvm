@@ -10,16 +10,16 @@
 
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/module_types.h"
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift"} */
 namespace module_constants {
 
   /** Glean {"constant": "MyConst"} */
   ::std::map<::std::string, ::std::string> const& MyConst();
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_243c2ae30ab47c20();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_243c2ae30ab47c20_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_243c2ae30ab47c20_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_1eea918692ce0434();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_1eea918692ce0434_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_1eea918692ce0434_uris();
 
 } // namespace module_constants
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations

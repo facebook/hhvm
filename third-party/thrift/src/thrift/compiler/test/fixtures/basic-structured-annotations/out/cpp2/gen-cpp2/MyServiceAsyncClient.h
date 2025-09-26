@@ -18,28 +18,28 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 class MyService;
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations
 namespace apache::thrift {
 
 namespace detail {
 
 template<>
-struct ServiceMethodTypesFootprint<::test::fixtures::basic-structured-annotations::MyService> {
+struct ServiceMethodTypesFootprint<::test::fixtures::basic_structured_annotations::MyService> {
   // The types that appear in the definitions of service methods.
   // e.g. if it appears as a type of an input, output, exception sink or stream
   // parameter of a client stub, it appears here,
   using TypesInMethods = folly::tag_t<
-  ::test::fixtures::basic-structured-annotations::annotated_inline_string,
+  ::test::fixtures::basic_structured_annotations::annotated_inline_string,
   ::std::int64_t,
   bool>;
 };
 } // namespace detail
 
 template <>
-class Client<::test::fixtures::basic-structured-annotations::MyService> : public apache::thrift::GeneratedAsyncClient {
-  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::test::fixtures::basic-structured-annotations::MyService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
+class Client<::test::fixtures::basic_structured_annotations::MyService> : public apache::thrift::GeneratedAsyncClient {
+  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::test::fixtures::basic_structured_annotations::MyService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
  public:
   using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
@@ -48,7 +48,7 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
   }
 
   static std::string_view __fbthrift_thrift_uri() {
-    return "test.dev/fixtures/basic-structured-annotations/MyService";
+    return "test.dev/fixtures/basic_structured_annotations/MyService";
   }
 
 
@@ -61,33 +61,33 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
  public:
 
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
-  virtual void sync_first(::test::fixtures::basic-structured-annotations::annotated_inline_string& _return);
+  virtual void sync_first(::test::fixtures::basic_structured_annotations::annotated_inline_string& _return);
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
-  virtual void sync_first(apache::thrift::RpcOptions& rpcOptions, ::test::fixtures::basic-structured-annotations::annotated_inline_string& _return);
+  virtual void sync_first(apache::thrift::RpcOptions& rpcOptions, ::test::fixtures::basic_structured_annotations::annotated_inline_string& _return);
 
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
-  virtual folly::Future<::test::fixtures::basic-structured-annotations::annotated_inline_string> future_first();
+  virtual folly::Future<::test::fixtures::basic_structured_annotations::annotated_inline_string> future_first();
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
-  virtual folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inline_string> semifuture_first();
+  virtual folly::SemiFuture<::test::fixtures::basic_structured_annotations::annotated_inline_string> semifuture_first();
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
-  virtual folly::Future<::test::fixtures::basic-structured-annotations::annotated_inline_string> future_first(apache::thrift::RpcOptions& rpcOptions);
+  virtual folly::Future<::test::fixtures::basic_structured_annotations::annotated_inline_string> future_first(apache::thrift::RpcOptions& rpcOptions);
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
-  virtual folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inline_string> semifuture_first(apache::thrift::RpcOptions& rpcOptions);
+  virtual folly::SemiFuture<::test::fixtures::basic_structured_annotations::annotated_inline_string> semifuture_first(apache::thrift::RpcOptions& rpcOptions);
 
 #if FOLLY_HAS_COROUTINES
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   template <int = 0>
-  folly::coro::Task<::test::fixtures::basic-structured-annotations::annotated_inline_string> co_first() {
+  folly::coro::Task<::test::fixtures::basic_structured_annotations::annotated_inline_string> co_first() {
     return co_first<false>(nullptr);
   }
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
   template <int = 0>
-  folly::coro::Task<::test::fixtures::basic-structured-annotations::annotated_inline_string> co_first(apache::thrift::RpcOptions& rpcOptions) {
+  folly::coro::Task<::test::fixtures::basic_structured_annotations::annotated_inline_string> co_first(apache::thrift::RpcOptions& rpcOptions) {
     return co_first<true>(&rpcOptions);
   }
  private:
   template <bool hasRpcOptions>
-  folly::coro::Task<::test::fixtures::basic-structured-annotations::annotated_inline_string> co_first(apache::thrift::RpcOptions* rpcOptions) {
+  folly::coro::Task<::test::fixtures::basic_structured_annotations::annotated_inline_string> co_first(apache::thrift::RpcOptions* rpcOptions) {
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     const bool cancellable = cancelToken.canBeCancelled();
@@ -122,7 +122,7 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
     }
     returnState.resetProtocolId(protocolId);
     returnState.resetCtx(std::move(ctx));
-    ::test::fixtures::basic-structured-annotations::annotated_inline_string _return;
+    ::test::fixtures::basic_structured_annotations::annotated_inline_string _return;
     SCOPE_EXIT {
       if (hasRpcOptions && returnState.header()) {
         auto* rheader = returnState.header();
@@ -149,21 +149,21 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
 
 
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
-  static folly::exception_wrapper recv_wrapped_first(::test::fixtures::basic-structured-annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state);
+  static folly::exception_wrapper recv_wrapped_first(::test::fixtures::basic_structured_annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state);
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
-  static void recv_first(::test::fixtures::basic-structured-annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state);
+  static void recv_first(::test::fixtures::basic_structured_annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
-  virtual void recv_instance_first(::test::fixtures::basic-structured-annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state);
+  virtual void recv_instance_first(::test::fixtures::basic_structured_annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state);
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */
-  virtual folly::exception_wrapper recv_instance_wrapped_first(::test::fixtures::basic-structured-annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state);
+  virtual folly::exception_wrapper recv_instance_wrapped_first(::test::fixtures::basic_structured_annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state);
  private:
   apache::thrift::SerializedRequest fbthrift_serialize_first(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
   template <typename RpcOptions>
   void fbthrift_send_first(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> firstCtx(apache::thrift::RpcOptions* rpcOptions);
   template <typename CallbackType>
-  folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inline_string> fbthrift_semifuture_first(apache::thrift::RpcOptions& rpcOptions);
+  folly::SemiFuture<::test::fixtures::basic_structured_annotations::annotated_inline_string> fbthrift_semifuture_first(apache::thrift::RpcOptions& rpcOptions);
  public:
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "second"} */
   virtual void second(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_count);
@@ -282,6 +282,6 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
 
 } // namespace apache::thrift
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 using MyServiceAsyncClient [[deprecated("Use apache::thrift::Client<MyService> instead")]] = ::apache::thrift::Client<MyService>;
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations

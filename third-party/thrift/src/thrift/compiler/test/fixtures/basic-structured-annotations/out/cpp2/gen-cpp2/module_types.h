@@ -99,7 +99,7 @@ APACHE_THRIFT_DEFINE_ACCESSOR(second);
 } // namespace apache::thrift
 
 // BEGIN declare_enums
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 
 /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "name": "MyEnum", "kind": "enum" } */
 enum class MyEnum {
@@ -107,15 +107,15 @@ enum class MyEnum {
   ONE = 1,
 };
 
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations
 
-template<> struct std::hash<::test::fixtures::basic-structured-annotations::MyEnum> :
-  ::apache::thrift::detail::enum_hash<::test::fixtures::basic-structured-annotations::MyEnum> {};
+template<> struct std::hash<::test::fixtures::basic_structured_annotations::MyEnum> :
+  ::apache::thrift::detail::enum_hash<::test::fixtures::basic_structured_annotations::MyEnum> {};
 
 namespace apache::thrift {
 
-template <> struct TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum> {
-  using type = ::test::fixtures::basic-structured-annotations::MyEnum;
+template <> struct TEnumTraits<::test::fixtures::basic_structured_annotations::MyEnum> {
+  using type = ::test::fixtures::basic_structured_annotations::MyEnum;
 
   static constexpr std::size_t const size = 2;
   static folly::Range<type const*> const values;
@@ -134,7 +134,7 @@ template <> struct TEnumTraits<::test::fixtures::basic-structured-annotations::M
   }
 
   FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
-    return "test.dev/fixtures/basic-structured-annotations/MyEnum";
+    return "test.dev/fixtures/basic_structured_annotations/MyEnum";
   }
 
   static char const* findName(type value) noexcept {
@@ -146,13 +146,13 @@ template <> struct TEnumTraits<::test::fixtures::basic-structured-annotations::M
   static constexpr type max() { return type::ONE; }
 
   static const std::vector<std::any>& annotations() noexcept;
-  static const std::vector<std::any>& enumValueAnnotations(::test::fixtures::basic-structured-annotations::MyEnum) noexcept;
+  static const std::vector<std::any>& enumValueAnnotations(::test::fixtures::basic_structured_annotations::MyEnum) noexcept;
 };
 
 } // namespace apache::thrift
 // END declare_enums
 // BEGIN forward_declare
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 class runtime_annotation;
 class structured_annotation_inline;
 class structured_annotation_with_default;
@@ -162,23 +162,23 @@ class structured_annotation_nested;
 class MyStruct;
 class MyException;
 class MyUnion;
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 template<>
-const std::vector<std::any>& field_annotation_values<::test::fixtures::basic-structured-annotations::MyStruct>(FieldId);
+const std::vector<std::any>& field_annotation_values<::test::fixtures::basic_structured_annotations::MyStruct>(FieldId);
 template<>
-const std::vector<std::any>& struct_annotation_values<::test::fixtures::basic-structured-annotations::MyStruct>();
+const std::vector<std::any>& struct_annotation_values<::test::fixtures::basic_structured_annotations::MyStruct>();
 } // namespace apache::thrift::detail::annotation
 
 namespace apache::thrift::detail::qualifier {
 template<>
-struct is_cpp_ref_field_optional<::test::fixtures::basic-structured-annotations::structured_annotation_recursive,::apache::thrift::type::field_id<2>> : std::true_type{};
+struct is_cpp_ref_field_optional<::test::fixtures::basic_structured_annotations::structured_annotation_recursive,::apache::thrift::type::field_id<2>> : std::true_type{};
 } // namespace apache::thrift::detail::qualifier
 
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -782,8 +782,8 @@ class structured_annotation_recursive final  {
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::string_t,
-    ::apache::thrift::type::struct_t<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>,
-    ::apache::thrift::type::struct_t<::test::fixtures::basic-structured-annotations::structured_annotation_forward>
+    ::apache::thrift::type::struct_t<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>,
+    ::apache::thrift::type::struct_t<::test::fixtures::basic_structured_annotations::structured_annotation_forward>
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -803,7 +803,7 @@ class structured_annotation_recursive final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  structured_annotation_recursive(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> recurse__arg, ::test::fixtures::basic-structured-annotations::structured_annotation_forward forward__arg);
+  structured_annotation_recursive(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::unique_ptr<::test::fixtures::basic_structured_annotations::structured_annotation_recursive> recurse__arg, ::test::fixtures::basic_structured_annotations::structured_annotation_forward forward__arg);
 
   structured_annotation_recursive(structured_annotation_recursive&&) noexcept;
   structured_annotation_recursive(const structured_annotation_recursive& src);
@@ -817,9 +817,9 @@ class structured_annotation_recursive final  {
  private:
   ::std::string __fbthrift_field_name;
  private:
-  ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> __fbthrift_field_recurse;
+  ::std::unique_ptr<::test::fixtures::basic_structured_annotations::structured_annotation_recursive> __fbthrift_field_recurse;
  private:
-  ::test::fixtures::basic-structured-annotations::structured_annotation_forward __fbthrift_field_forward;
+  ::test::fixtures::basic_structured_annotations::structured_annotation_forward __fbthrift_field_forward;
  private:
   apache::thrift::detail::isset_bitset<2, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
@@ -864,77 +864,77 @@ class structured_annotation_recursive final  {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_name), __isset.at(0), __isset.bit(0)};
   }
   /** Glean { "field": "recurse" } */
-  FOLLY_ERASE ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>& recurse_ref() & {
+  FOLLY_ERASE ::std::unique_ptr<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>& recurse_ref() & {
     return __fbthrift_field_recurse;
   }
 
   /** Glean { "field": "recurse" } */
-  FOLLY_ERASE const ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>& recurse_ref() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>& recurse_ref() const& {
     return __fbthrift_field_recurse;
   }
 
   /** Glean { "field": "recurse" } */
-  FOLLY_ERASE ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>&& recurse_ref() && {
-    return static_cast<::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>&&>(__fbthrift_field_recurse);
+  FOLLY_ERASE ::std::unique_ptr<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>&& recurse_ref() && {
+    return static_cast<::std::unique_ptr<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>&&>(__fbthrift_field_recurse);
   }
 
   /** Glean { "field": "recurse" } */
-  FOLLY_ERASE const ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>&& recurse_ref() const&& {
-    return static_cast<const ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>&&>(__fbthrift_field_recurse);
+  FOLLY_ERASE const ::std::unique_ptr<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>&& recurse_ref() const&& {
+    return static_cast<const ::std::unique_ptr<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>&&>(__fbthrift_field_recurse);
   }
 
   /** Glean { "field": "recurse" } */
-  FOLLY_ERASE ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>& recurse() & {
+  FOLLY_ERASE ::std::unique_ptr<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>& recurse() & {
     return __fbthrift_field_recurse;
   }
 
   /** Glean { "field": "recurse" } */
-  FOLLY_ERASE const ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>& recurse() const& {
+  FOLLY_ERASE const ::std::unique_ptr<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>& recurse() const& {
     return __fbthrift_field_recurse;
   }
 
   /** Glean { "field": "recurse" } */
-  FOLLY_ERASE ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>&& recurse() && {
-    return static_cast<::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>&&>(__fbthrift_field_recurse);
+  FOLLY_ERASE ::std::unique_ptr<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>&& recurse() && {
+    return static_cast<::std::unique_ptr<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>&&>(__fbthrift_field_recurse);
   }
 
   /** Glean { "field": "recurse" } */
-  FOLLY_ERASE const ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>&& recurse() const&& {
-    return static_cast<const ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>&&>(__fbthrift_field_recurse);
+  FOLLY_ERASE const ::std::unique_ptr<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>&& recurse() const&& {
+    return static_cast<const ::std::unique_ptr<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>&&>(__fbthrift_field_recurse);
   }
 
   /** Glean { "field": "forward" } */
-  template <typename..., typename fbthrift_T = ::test::fixtures::basic-structured-annotations::structured_annotation_forward>
+  template <typename..., typename fbthrift_T = ::test::fixtures::basic_structured_annotations::structured_annotation_forward>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> forward_ref() const& {
     return {this->__fbthrift_field_forward, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "forward" } */
-  template <typename..., typename fbthrift_T = ::test::fixtures::basic-structured-annotations::structured_annotation_forward>
+  template <typename..., typename fbthrift_T = ::test::fixtures::basic_structured_annotations::structured_annotation_forward>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> forward_ref() & {
     return {this->__fbthrift_field_forward, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "forward" } */
-  template <typename..., typename fbthrift_T = ::test::fixtures::basic-structured-annotations::structured_annotation_forward>
+  template <typename..., typename fbthrift_T = ::test::fixtures::basic_structured_annotations::structured_annotation_forward>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> forward_ref() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_forward), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "forward" } */
-  template <typename..., typename fbthrift_T = ::test::fixtures::basic-structured-annotations::structured_annotation_forward>
+  template <typename..., typename fbthrift_T = ::test::fixtures::basic_structured_annotations::structured_annotation_forward>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> forward() const& {
     return {this->__fbthrift_field_forward, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "forward" } */
-  template <typename..., typename fbthrift_T = ::test::fixtures::basic-structured-annotations::structured_annotation_forward>
+  template <typename..., typename fbthrift_T = ::test::fixtures::basic_structured_annotations::structured_annotation_forward>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> forward() & {
     return {this->__fbthrift_field_forward, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "forward" } */
-  template <typename..., typename fbthrift_T = ::test::fixtures::basic-structured-annotations::structured_annotation_forward>
+  template <typename..., typename fbthrift_T = ::test::fixtures::basic_structured_annotations::structured_annotation_forward>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> forward() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_forward), __isset.at(1), __isset.bit(1)};
   }
@@ -961,16 +961,16 @@ class structured_annotation_recursive final  {
 
   /** Glean { "field": "forward" } */
   [[deprecated("Use `FOO.forward().value()` instead of `FOO.get_forward()`")]]
-  const ::test::fixtures::basic-structured-annotations::structured_annotation_forward& get_forward() const&;
+  const ::test::fixtures::basic_structured_annotations::structured_annotation_forward& get_forward() const&;
 
   /** Glean { "field": "forward" } */
   [[deprecated("Use `FOO.forward().value()` instead of `FOO.get_forward()`")]]
-  ::test::fixtures::basic-structured-annotations::structured_annotation_forward get_forward() &&;
+  ::test::fixtures::basic_structured_annotations::structured_annotation_forward get_forward() &&;
 
   /** Glean { "field": "forward" } */
-  template <typename T_structured_annotation_recursive_forward_struct_setter = ::test::fixtures::basic-structured-annotations::structured_annotation_forward>
+  template <typename T_structured_annotation_recursive_forward_struct_setter = ::test::fixtures::basic_structured_annotations::structured_annotation_forward>
   [[deprecated("Use `FOO.forward() = BAR` instead of `FOO.set_forward(BAR)`")]]
-  ::test::fixtures::basic-structured-annotations::structured_annotation_forward& set_forward(T_structured_annotation_recursive_forward_struct_setter&& forward_) {
+  ::test::fixtures::basic_structured_annotations::structured_annotation_forward& set_forward(T_structured_annotation_recursive_forward_struct_setter&& forward_) {
     forward_ref() = std::forward<T_structured_annotation_recursive_forward_struct_setter>(forward_);
     return __fbthrift_field_forward;
   }
@@ -1027,7 +1027,7 @@ class structured_annotation_nested final  {
 
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::string_t,
-    ::apache::thrift::type::struct_t<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>
+    ::apache::thrift::type::struct_t<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>
   >;
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1047,7 +1047,7 @@ class structured_annotation_nested final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  structured_annotation_nested(apache::thrift::FragileConstructor, ::std::string name__arg, ::test::fixtures::basic-structured-annotations::structured_annotation_with_default nest__arg);
+  structured_annotation_nested(apache::thrift::FragileConstructor, ::std::string name__arg, ::test::fixtures::basic_structured_annotations::structured_annotation_with_default nest__arg);
 
   structured_annotation_nested(structured_annotation_nested&&) noexcept;
 
@@ -1062,7 +1062,7 @@ class structured_annotation_nested final  {
  private:
   ::std::string __fbthrift_field_name;
  private:
-  ::test::fixtures::basic-structured-annotations::structured_annotation_with_default __fbthrift_field_nest;
+  ::test::fixtures::basic_structured_annotations::structured_annotation_with_default __fbthrift_field_nest;
  private:
   apache::thrift::detail::isset_bitset<2, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
@@ -1108,37 +1108,37 @@ class structured_annotation_nested final  {
   }
 
   /** Glean { "field": "nest" } */
-  template <typename..., typename fbthrift_T = ::test::fixtures::basic-structured-annotations::structured_annotation_with_default>
+  template <typename..., typename fbthrift_T = ::test::fixtures::basic_structured_annotations::structured_annotation_with_default>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> nest_ref() const& {
     return {this->__fbthrift_field_nest, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "nest" } */
-  template <typename..., typename fbthrift_T = ::test::fixtures::basic-structured-annotations::structured_annotation_with_default>
+  template <typename..., typename fbthrift_T = ::test::fixtures::basic_structured_annotations::structured_annotation_with_default>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> nest_ref() & {
     return {this->__fbthrift_field_nest, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "nest" } */
-  template <typename..., typename fbthrift_T = ::test::fixtures::basic-structured-annotations::structured_annotation_with_default>
+  template <typename..., typename fbthrift_T = ::test::fixtures::basic_structured_annotations::structured_annotation_with_default>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> nest_ref() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_nest), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "nest" } */
-  template <typename..., typename fbthrift_T = ::test::fixtures::basic-structured-annotations::structured_annotation_with_default>
+  template <typename..., typename fbthrift_T = ::test::fixtures::basic_structured_annotations::structured_annotation_with_default>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> nest() const& {
     return {this->__fbthrift_field_nest, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "nest" } */
-  template <typename..., typename fbthrift_T = ::test::fixtures::basic-structured-annotations::structured_annotation_with_default>
+  template <typename..., typename fbthrift_T = ::test::fixtures::basic_structured_annotations::structured_annotation_with_default>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> nest() & {
     return {this->__fbthrift_field_nest, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "nest" } */
-  template <typename..., typename fbthrift_T = ::test::fixtures::basic-structured-annotations::structured_annotation_with_default>
+  template <typename..., typename fbthrift_T = ::test::fixtures::basic_structured_annotations::structured_annotation_with_default>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> nest() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_nest), __isset.at(1), __isset.bit(1)};
   }
@@ -1165,16 +1165,16 @@ class structured_annotation_nested final  {
 
   /** Glean { "field": "nest" } */
   [[deprecated("Use `FOO.nest().value()` instead of `FOO.get_nest()`")]]
-  const ::test::fixtures::basic-structured-annotations::structured_annotation_with_default& get_nest() const&;
+  const ::test::fixtures::basic_structured_annotations::structured_annotation_with_default& get_nest() const&;
 
   /** Glean { "field": "nest" } */
   [[deprecated("Use `FOO.nest().value()` instead of `FOO.get_nest()`")]]
-  ::test::fixtures::basic-structured-annotations::structured_annotation_with_default get_nest() &&;
+  ::test::fixtures::basic_structured_annotations::structured_annotation_with_default get_nest() &&;
 
   /** Glean { "field": "nest" } */
-  template <typename T_structured_annotation_nested_nest_struct_setter = ::test::fixtures::basic-structured-annotations::structured_annotation_with_default>
+  template <typename T_structured_annotation_nested_nest_struct_setter = ::test::fixtures::basic_structured_annotations::structured_annotation_with_default>
   [[deprecated("Use `FOO.nest() = BAR` instead of `FOO.set_nest(BAR)`")]]
-  ::test::fixtures::basic-structured-annotations::structured_annotation_with_default& set_nest(T_structured_annotation_nested_nest_struct_setter&& nest_) {
+  ::test::fixtures::basic_structured_annotations::structured_annotation_with_default& set_nest(T_structured_annotation_nested_nest_struct_setter&& nest_) {
     nest_ref() = std::forward<T_structured_annotation_nested_nest_struct_setter>(nest_);
     return __fbthrift_field_nest;
   }
@@ -1221,14 +1221,14 @@ class MyStruct final  {
     return "module";
   }
   using __fbthrift_struct_annotations = folly::tag_t<
-    ::test::fixtures::basic-structured-annotations::runtime_annotation
+    ::test::fixtures::basic_structured_annotations::runtime_annotation
   >;
   using __fbthrift_list_of_field_with_annotation = folly::tag_t<
     ::apache::thrift::type::field_id<1>
   >;
   using __fbthrift_field_annotations = folly::tag_t<
     folly::tag_t<
-      ::test::fixtures::basic-structured-annotations::runtime_annotation
+      ::test::fixtures::basic_structured_annotations::runtime_annotation
     >
   >;
   static constexpr std::size_t __fbthrift_num_fields = 4;
@@ -1266,7 +1266,7 @@ class MyStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  MyStruct(apache::thrift::FragileConstructor, ::std::int64_t annotated_field__arg, ::test::fixtures::basic-structured-annotations::annotated_inline_string annotated_type__arg, ::std::string annotated_recursive__arg, ::std::int64_t annotated_nested__arg);
+  MyStruct(apache::thrift::FragileConstructor, ::std::int64_t annotated_field__arg, ::test::fixtures::basic_structured_annotations::annotated_inline_string annotated_type__arg, ::std::string annotated_recursive__arg, ::std::int64_t annotated_nested__arg);
 
   MyStruct(MyStruct&&) noexcept;
 
@@ -1281,7 +1281,7 @@ class MyStruct final  {
  private:
   ::std::int64_t __fbthrift_field_annotated_field;
  private:
-  ::test::fixtures::basic-structured-annotations::annotated_inline_string __fbthrift_field_annotated_type;
+  ::test::fixtures::basic_structured_annotations::annotated_inline_string __fbthrift_field_annotated_type;
  private:
   ::std::string __fbthrift_field_annotated_recursive;
  private:
@@ -1331,37 +1331,37 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "annotated_type" } */
-  template <typename..., typename fbthrift_T = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
+  template <typename..., typename fbthrift_T = ::test::fixtures::basic_structured_annotations::annotated_inline_string>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> annotated_type_ref() const& {
     return {this->__fbthrift_field_annotated_type, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "annotated_type" } */
-  template <typename..., typename fbthrift_T = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
+  template <typename..., typename fbthrift_T = ::test::fixtures::basic_structured_annotations::annotated_inline_string>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> annotated_type_ref() & {
     return {this->__fbthrift_field_annotated_type, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "annotated_type" } */
-  template <typename..., typename fbthrift_T = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
+  template <typename..., typename fbthrift_T = ::test::fixtures::basic_structured_annotations::annotated_inline_string>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> annotated_type_ref() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_annotated_type), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "annotated_type" } */
-  template <typename..., typename fbthrift_T = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
+  template <typename..., typename fbthrift_T = ::test::fixtures::basic_structured_annotations::annotated_inline_string>
   FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> annotated_type() const& {
     return {this->__fbthrift_field_annotated_type, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "annotated_type" } */
-  template <typename..., typename fbthrift_T = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
+  template <typename..., typename fbthrift_T = ::test::fixtures::basic_structured_annotations::annotated_inline_string>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> annotated_type() & {
     return {this->__fbthrift_field_annotated_type, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "annotated_type" } */
-  template <typename..., typename fbthrift_T = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
+  template <typename..., typename fbthrift_T = ::test::fixtures::basic_structured_annotations::annotated_inline_string>
   FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> annotated_type() && {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_annotated_type), __isset.at(1), __isset.bit(1)};
   }
@@ -1448,20 +1448,20 @@ class MyStruct final  {
 
   /** Glean { "field": "annotated_type" } */
   [[deprecated("Use `FOO.annotated_type().value()` instead of `FOO.get_annotated_type()`")]]
-  const ::test::fixtures::basic-structured-annotations::annotated_inline_string& get_annotated_type() const& {
+  const ::test::fixtures::basic_structured_annotations::annotated_inline_string& get_annotated_type() const& {
     return __fbthrift_field_annotated_type;
   }
 
   /** Glean { "field": "annotated_type" } */
   [[deprecated("Use `FOO.annotated_type().value()` instead of `FOO.get_annotated_type()`")]]
-  ::test::fixtures::basic-structured-annotations::annotated_inline_string get_annotated_type() && {
-    return static_cast<::test::fixtures::basic-structured-annotations::annotated_inline_string&&>(__fbthrift_field_annotated_type);
+  ::test::fixtures::basic_structured_annotations::annotated_inline_string get_annotated_type() && {
+    return static_cast<::test::fixtures::basic_structured_annotations::annotated_inline_string&&>(__fbthrift_field_annotated_type);
   }
 
   /** Glean { "field": "annotated_type" } */
-  template <typename T_MyStruct_annotated_type_struct_setter = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
+  template <typename T_MyStruct_annotated_type_struct_setter = ::test::fixtures::basic_structured_annotations::annotated_inline_string>
   [[deprecated("Use `FOO.annotated_type() = BAR` instead of `FOO.set_annotated_type(BAR)`")]]
-  ::test::fixtures::basic-structured-annotations::annotated_inline_string& set_annotated_type(T_MyStruct_annotated_type_struct_setter&& annotated_type_) {
+  ::test::fixtures::basic_structured_annotations::annotated_inline_string& set_annotated_type(T_MyStruct_annotated_type_struct_setter&& annotated_type_) {
     annotated_type_ref() = std::forward<T_MyStruct_annotated_type_struct_setter>(annotated_type_);
     return __fbthrift_field_annotated_type;
   }
@@ -1658,7 +1658,7 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
   uint32_t write(Protocol_* prot_) const;
 
   const char* what() const noexcept override {
-    return "::test::fixtures::basic-structured-annotations::MyException";
+    return "::test::fixtures::basic_structured_annotations::MyException";
   }
 
  private:
@@ -1790,8 +1790,8 @@ class MyUnion final  {
   ~MyUnion();
 
   union storage_type {
-    ::test::fixtures::basic-structured-annotations::annotated_inline_string first;
-    ::test::fixtures::basic-structured-annotations::annotated_inline_i64 second;
+    ::test::fixtures::basic_structured_annotations::annotated_inline_string first;
+    ::test::fixtures::basic_structured_annotations::annotated_inline_i64 second;
 
     storage_type() {}
     ~storage_type() {}
@@ -1802,8 +1802,8 @@ class MyUnion final  {
 
   /** Glean { "field": "first" } */
   template <typename... A> requires (sizeof...(A) == 0)
-  ::test::fixtures::basic-structured-annotations::annotated_inline_string& set_first(::test::fixtures::basic-structured-annotations::annotated_inline_string const &t) {
-    using T0 = ::test::fixtures::basic-structured-annotations::annotated_inline_string;
+  ::test::fixtures::basic_structured_annotations::annotated_inline_string& set_first(::test::fixtures::basic_structured_annotations::annotated_inline_string const &t) {
+    using T0 = ::test::fixtures::basic_structured_annotations::annotated_inline_string;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     fbthrift_type_ = folly::to_underlying(Type::first);
@@ -1813,8 +1813,8 @@ class MyUnion final  {
 
   /** Glean { "field": "first" } */
   template <typename... A> requires (sizeof...(A) == 0)
-  ::test::fixtures::basic-structured-annotations::annotated_inline_string& set_first(::test::fixtures::basic-structured-annotations::annotated_inline_string&& t) {
-    using T0 = ::test::fixtures::basic-structured-annotations::annotated_inline_string;
+  ::test::fixtures::basic_structured_annotations::annotated_inline_string& set_first(::test::fixtures::basic_structured_annotations::annotated_inline_string&& t) {
+    using T0 = ::test::fixtures::basic_structured_annotations::annotated_inline_string;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     fbthrift_type_ = folly::to_underlying(Type::first);
@@ -1823,18 +1823,18 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "first" } */
-  template<typename... T, typename = ::apache::thrift::safe_overload_t<::test::fixtures::basic-structured-annotations::annotated_inline_string, T...>> ::test::fixtures::basic-structured-annotations::annotated_inline_string& set_first(T&&... t) {
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<::test::fixtures::basic_structured_annotations::annotated_inline_string, T...>> ::test::fixtures::basic_structured_annotations::annotated_inline_string& set_first(T&&... t) {
     __fbthrift_clear();
     fbthrift_type_ = folly::to_underlying(Type::first);
-    ::new (std::addressof(value_.first)) ::test::fixtures::basic-structured-annotations::annotated_inline_string(std::forward<T>(t)...);
+    ::new (std::addressof(value_.first)) ::test::fixtures::basic_structured_annotations::annotated_inline_string(std::forward<T>(t)...);
     return value_.first;
   }
 
 
   /** Glean { "field": "second" } */
   template <typename... A> requires (sizeof...(A) == 0)
-  ::test::fixtures::basic-structured-annotations::annotated_inline_i64& set_second(::test::fixtures::basic-structured-annotations::annotated_inline_i64 t = ::test::fixtures::basic-structured-annotations::annotated_inline_i64()) {
-    using T0 = ::test::fixtures::basic-structured-annotations::annotated_inline_i64;
+  ::test::fixtures::basic_structured_annotations::annotated_inline_i64& set_second(::test::fixtures::basic_structured_annotations::annotated_inline_i64 t = ::test::fixtures::basic_structured_annotations::annotated_inline_i64()) {
+    using T0 = ::test::fixtures::basic_structured_annotations::annotated_inline_i64;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     fbthrift_type_ = folly::to_underlying(Type::second);
@@ -1844,7 +1844,7 @@ class MyUnion final  {
 
 
   /** Glean { "field": "first" } */
-  ::test::fixtures::basic-structured-annotations::annotated_inline_string const& get_first() const {
+  ::test::fixtures::basic_structured_annotations::annotated_inline_string const& get_first() const {
     if (getType() != Type::first) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
@@ -1852,97 +1852,97 @@ class MyUnion final  {
   }
 
   /** Glean { "field": "second" } */
-  ::test::fixtures::basic-structured-annotations::annotated_inline_i64 const& get_second() const {
+  ::test::fixtures::basic_structured_annotations::annotated_inline_i64 const& get_second() const {
     if (getType() != Type::second) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.second;
   }
 
-  ::test::fixtures::basic-structured-annotations::annotated_inline_string& mutable_first() {
+  ::test::fixtures::basic_structured_annotations::annotated_inline_string& mutable_first() {
     assert(getType() == Type::first);
     return value_.first;
   }
 
-  ::test::fixtures::basic-structured-annotations::annotated_inline_i64& mutable_second() {
+  ::test::fixtures::basic_structured_annotations::annotated_inline_i64& mutable_second() {
     assert(getType() == Type::second);
     return value_.second;
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
+  template <typename..., typename T = ::test::fixtures::basic_structured_annotations::annotated_inline_string>
   T move_first() {
     assert(getType() == Type::first);
     return std::move(value_.first);
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_i64>
+  template <typename..., typename T = ::test::fixtures::basic_structured_annotations::annotated_inline_i64>
   T move_second() {
     assert(getType() == Type::second);
     return std::move(value_.second);
   }
 
   /** Glean { "field": "first" } */
-  template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
+  template <typename..., typename T = ::test::fixtures::basic_structured_annotations::annotated_inline_string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> first_ref() const& {
     return {value_.first, fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "first" } */
-  template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
+  template <typename..., typename T = ::test::fixtures::basic_structured_annotations::annotated_inline_string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> first_ref() & {
     return {value_.first, fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "first" } */
-  template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
+  template <typename..., typename T = ::test::fixtures::basic_structured_annotations::annotated_inline_string>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> first_ref() && {
     return {std::move(value_.first), fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "first" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::test::fixtures::basic-structured-annotations::annotated_inline_string&> first() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::test::fixtures::basic_structured_annotations::annotated_inline_string&> first() const& {
     return {value_.first, fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "first" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic-structured-annotations::annotated_inline_string&> first() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic_structured_annotations::annotated_inline_string&> first() & {
     return {value_.first, fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "first" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic-structured-annotations::annotated_inline_string&&> first() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic_structured_annotations::annotated_inline_string&&> first() && {
     return {std::move(value_.first), fbthrift_type_, folly::to_underlying(Type::first), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   /** Glean { "field": "second" } */
-  template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_i64>
+  template <typename..., typename T = ::test::fixtures::basic_structured_annotations::annotated_inline_i64>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> second_ref() const& {
     return {value_.second, fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "second" } */
-  template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_i64>
+  template <typename..., typename T = ::test::fixtures::basic_structured_annotations::annotated_inline_i64>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> second_ref() & {
     return {value_.second, fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "second" } */
-  template <typename..., typename T = ::test::fixtures::basic-structured-annotations::annotated_inline_i64>
+  template <typename..., typename T = ::test::fixtures::basic_structured_annotations::annotated_inline_i64>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> second_ref() && {
     return {std::move(value_.second), fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "second" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::test::fixtures::basic-structured-annotations::annotated_inline_i64&> second() const& {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const ::test::fixtures::basic_structured_annotations::annotated_inline_i64&> second() const& {
     return {value_.second, fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "second" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic-structured-annotations::annotated_inline_i64&> second() & {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic_structured_annotations::annotated_inline_i64&> second() & {
     return {value_.second, fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
   /** Glean { "field": "second" } */
-  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic-structured-annotations::annotated_inline_i64&&> second() && {
+  FOLLY_ERASE ::apache::thrift::union_field_ref<::test::fixtures::basic_structured_annotations::annotated_inline_i64&&> second() && {
     return {std::move(value_.second), fbthrift_type_, folly::to_underlying(Type::second), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   Type getType() const { return static_cast<Type>(fbthrift_type_); }
@@ -1975,14 +1975,14 @@ unsigned long MyUnion::read(Protocol_* iprot) {
 }
 
 
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations
 
 namespace apache::thrift {
 
-template <> struct TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyUnion::Type>;
+template <> struct TEnumDataStorage<::test::fixtures::basic_structured_annotations::MyUnion::Type>;
 
-template <> struct TEnumTraits<::test::fixtures::basic-structured-annotations::MyUnion::Type> {
-  using type = ::test::fixtures::basic-structured-annotations::MyUnion::Type;
+template <> struct TEnumTraits<::test::fixtures::basic_structured_annotations::MyUnion::Type> {
+  using type = ::test::fixtures::basic_structured_annotations::MyUnion::Type;
 
   static constexpr std::size_t const size = 2;
   static folly::Range<type const*> const values;
@@ -2003,54 +2003,54 @@ template <> struct TEnumTraits<::test::fixtures::basic-structured-annotations::M
 } // namespace apache::thrift
 
 namespace apache::thrift::detail {
-template <> struct TSchemaAssociation<::test::fixtures::basic-structured-annotations::runtime_annotation, false> {
+template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::runtime_annotation, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 2611009038593588256;
-  static constexpr ::std::string_view definitionKey = {"\x04\x45\x1e\x96\x9b\xc4\x48\x28\x0f\x08\xa9\xea\x5e\x7e\x18\x64", 16};
+  static constexpr int64_t programId = 2227752972862751796;
+  static constexpr ::std::string_view definitionKey = {"\x80\xab\x88\x82\x9d\x87\xf2\x40\xa3\x2b\x52\x9a\xff\xdb\xf0\x0e", 16};
 };
-template <> struct TSchemaAssociation<::test::fixtures::basic-structured-annotations::structured_annotation_inline, false> {
+template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::structured_annotation_inline, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 2611009038593588256;
-  static constexpr ::std::string_view definitionKey = {"\x3d\x5c\x1b\x87\xdc\xb3\xb0\xf1\xd1\xce\x8b\x04\x63\x9f\x65\x1f", 16};
+  static constexpr int64_t programId = 2227752972862751796;
+  static constexpr ::std::string_view definitionKey = {"\x82\x6a\x3f\xc6\xe1\xcb\x16\xa9\xa8\x9a\x3c\xee\x46\x20\x99\x6e", 16};
 };
-template <> struct TSchemaAssociation<::test::fixtures::basic-structured-annotations::structured_annotation_with_default, false> {
+template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::structured_annotation_with_default, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 2611009038593588256;
-  static constexpr ::std::string_view definitionKey = {"\xfe\x85\x33\x0e\x4b\xb2\xed\x81\xcb\x69\xef\x52\x89\x56\x4d\x1c", 16};
+  static constexpr int64_t programId = 2227752972862751796;
+  static constexpr ::std::string_view definitionKey = {"\x00\x98\xf3\xcd\x98\x0d\x2f\x9a\x3a\xf9\xc5\x94\x09\x48\x31\x93", 16};
 };
-template <> struct TSchemaAssociation<::test::fixtures::basic-structured-annotations::structured_annotation_recursive, false> {
+template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::structured_annotation_recursive, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 2611009038593588256;
-  static constexpr ::std::string_view definitionKey = {"\x45\x2b\x1e\x0b\x3b\xc9\x26\xc5\x41\xd5\xf4\xad\xdf\xde\x83\xd9", 16};
+  static constexpr int64_t programId = 2227752972862751796;
+  static constexpr ::std::string_view definitionKey = {"\xbb\x08\xf6\xfd\x9a\x1f\xff\xcb\xe2\x79\x80\x45\xe9\xc2\x82\x5a", 16};
 };
-template <> struct TSchemaAssociation<::test::fixtures::basic-structured-annotations::structured_annotation_forward, false> {
+template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::structured_annotation_forward, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 2611009038593588256;
-  static constexpr ::std::string_view definitionKey = {"\x4b\x24\x64\x5b\x26\x92\x28\xe2\xa2\x44\x2d\x91\xa6\xf2\x8b\x8c", 16};
+  static constexpr int64_t programId = 2227752972862751796;
+  static constexpr ::std::string_view definitionKey = {"\xa3\x33\x70\xce\x1c\x10\x6f\xfb\x9b\xab\xbd\xcc\xaa\x7a\xe6\x04", 16};
 };
-template <> struct TSchemaAssociation<::test::fixtures::basic-structured-annotations::structured_annotation_nested, false> {
+template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::structured_annotation_nested, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 2611009038593588256;
-  static constexpr ::std::string_view definitionKey = {"\x7f\x81\xd4\x46\x4f\x9d\x6c\x67\xaf\xad\x4c\x55\x70\xa6\x4a\x00", 16};
+  static constexpr int64_t programId = 2227752972862751796;
+  static constexpr ::std::string_view definitionKey = {"\x79\x8d\xeb\x79\x05\xde\x02\x6e\xb2\xd0\x2c\x0e\x74\x9c\x70\x53", 16};
 };
-template <> struct TSchemaAssociation<::test::fixtures::basic-structured-annotations::MyStruct, false> {
+template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::MyStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 2611009038593588256;
-  static constexpr ::std::string_view definitionKey = {"\x89\x07\xff\x39\x35\xde\xec\x37\xf7\x56\x9d\x1d\x96\xa7\xf3\xc5", 16};
+  static constexpr int64_t programId = 2227752972862751796;
+  static constexpr ::std::string_view definitionKey = {"\xe2\xf8\x27\xa0\x91\x73\x03\xb5\x9a\xe9\x41\x39\xea\x24\x73\x3a", 16};
 };
-template <> struct TSchemaAssociation<::test::fixtures::basic-structured-annotations::MyException, false> {
+template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::MyException, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 2611009038593588256;
-  static constexpr ::std::string_view definitionKey = {"\xdc\xaa\x68\x0e\x01\x76\x12\x22\x5b\x37\xb0\x2e\x6c\x00\xda\x17", 16};
+  static constexpr int64_t programId = 2227752972862751796;
+  static constexpr ::std::string_view definitionKey = {"\xba\x1d\x7b\xf4\xf8\x39\xd5\xfe\x63\x4a\x8e\x3d\x56\x8d\x19\x56", 16};
 };
-template <> struct TSchemaAssociation<::test::fixtures::basic-structured-annotations::MyUnion, false> {
+template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::MyUnion, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 2611009038593588256;
-  static constexpr ::std::string_view definitionKey = {"\x4c\xd6\xf6\x8e\xe9\x82\xf5\xdf\x84\xd1\xa2\xc2\x70\x48\x0e\xda", 16};
+  static constexpr int64_t programId = 2227752972862751796;
+  static constexpr ::std::string_view definitionKey = {"\xe5\xd8\x24\xa7\xe0\xf0\x13\x59\x31\xa6\x58\xa1\x15\xec\xf5\xf3", 16};
 };
-template <> struct TSchemaAssociation<::test::fixtures::basic-structured-annotations::MyEnum, true> {
+template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::MyEnum, true> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 2611009038593588256;
-  static constexpr ::std::string_view definitionKey = {"\x8a\xa1\xc2\x80\xf8\xa4\xf9\xe1\x46\x54\x5d\x07\x5d\x0f\xb7\x31", 16};
+  static constexpr int64_t programId = 2227752972862751796;
+  static constexpr ::std::string_view definitionKey = {"\xd2\xce\x51\x73\x76\xc2\x92\xfd\xd7\x3c\x39\x24\xd6\xdf\x7f\x20", 16};
 };
 } // namespace apache::thrift::detail

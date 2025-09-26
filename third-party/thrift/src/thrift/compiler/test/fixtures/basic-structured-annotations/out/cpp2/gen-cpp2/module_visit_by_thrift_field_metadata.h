@@ -14,18 +14,18 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct VisitByFieldId<::test::fixtures::basic-structured-annotations::runtime_annotation> {
+struct VisitByFieldId<::test::fixtures::basic_structured_annotations::runtime_annotation> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     default:
-      throwInvalidThriftId(fieldId, "::test::fixtures::basic-structured-annotations::runtime_annotation");
+      throwInvalidThriftId(fieldId, "::test::fixtures::basic_structured_annotations::runtime_annotation");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured_annotation_inline> {
+struct VisitByFieldId<::test::fixtures::basic_structured_annotations::structured_annotation_inline> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -34,26 +34,26 @@ struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured
     case 2:
       return f(1, static_cast<T&&>(t).name_ref());
     default:
-      throwInvalidThriftId(fieldId, "::test::fixtures::basic-structured-annotations::structured_annotation_inline");
+      throwInvalidThriftId(fieldId, "::test::fixtures::basic_structured_annotations::structured_annotation_inline");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured_annotation_with_default> {
+struct VisitByFieldId<::test::fixtures::basic_structured_annotations::structured_annotation_with_default> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).name_ref());
     default:
-      throwInvalidThriftId(fieldId, "::test::fixtures::basic-structured-annotations::structured_annotation_with_default");
+      throwInvalidThriftId(fieldId, "::test::fixtures::basic_structured_annotations::structured_annotation_with_default");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> {
+struct VisitByFieldId<::test::fixtures::basic_structured_annotations::structured_annotation_recursive> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -64,26 +64,26 @@ struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured
     case 3:
       return f(2, static_cast<T&&>(t).forward_ref());
     default:
-      throwInvalidThriftId(fieldId, "::test::fixtures::basic-structured-annotations::structured_annotation_recursive");
+      throwInvalidThriftId(fieldId, "::test::fixtures::basic_structured_annotations::structured_annotation_recursive");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured_annotation_forward> {
+struct VisitByFieldId<::test::fixtures::basic_structured_annotations::structured_annotation_forward> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).count_ref());
     default:
-      throwInvalidThriftId(fieldId, "::test::fixtures::basic-structured-annotations::structured_annotation_forward");
+      throwInvalidThriftId(fieldId, "::test::fixtures::basic_structured_annotations::structured_annotation_forward");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured_annotation_nested> {
+struct VisitByFieldId<::test::fixtures::basic_structured_annotations::structured_annotation_nested> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -92,13 +92,13 @@ struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured
     case 2:
       return f(1, static_cast<T&&>(t).nest_ref());
     default:
-      throwInvalidThriftId(fieldId, "::test::fixtures::basic-structured-annotations::structured_annotation_nested");
+      throwInvalidThriftId(fieldId, "::test::fixtures::basic_structured_annotations::structured_annotation_nested");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::test::fixtures::basic-structured-annotations::MyStruct> {
+struct VisitByFieldId<::test::fixtures::basic_structured_annotations::MyStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -111,26 +111,26 @@ struct VisitByFieldId<::test::fixtures::basic-structured-annotations::MyStruct> 
     case 4:
       return f(3, static_cast<T&&>(t).annotated_nested_ref());
     default:
-      throwInvalidThriftId(fieldId, "::test::fixtures::basic-structured-annotations::MyStruct");
+      throwInvalidThriftId(fieldId, "::test::fixtures::basic_structured_annotations::MyStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::test::fixtures::basic-structured-annotations::MyException> {
+struct VisitByFieldId<::test::fixtures::basic_structured_annotations::MyException> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
     case 1:
       return f(0, static_cast<T&&>(t).context_ref());
     default:
-      throwInvalidThriftId(fieldId, "::test::fixtures::basic-structured-annotations::MyException");
+      throwInvalidThriftId(fieldId, "::test::fixtures::basic_structured_annotations::MyException");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::test::fixtures::basic-structured-annotations::MyUnion> {
+struct VisitByFieldId<::test::fixtures::basic_structured_annotations::MyUnion> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
@@ -139,7 +139,7 @@ struct VisitByFieldId<::test::fixtures::basic-structured-annotations::MyUnion> {
     case 2:
       return f(1, static_cast<T&&>(t).second_ref());
     default:
-      throwInvalidThriftId(fieldId, "::test::fixtures::basic-structured-annotations::MyUnion");
+      throwInvalidThriftId(fieldId, "::test::fixtures::basic_structured_annotations::MyUnion");
     }
   }
 };

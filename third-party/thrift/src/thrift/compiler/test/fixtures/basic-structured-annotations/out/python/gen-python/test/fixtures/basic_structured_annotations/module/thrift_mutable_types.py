@@ -10,24 +10,27 @@ from __future__ import annotations
 import folly.iobuf as _fbthrift_iobuf
 
 from abc import ABCMeta as _fbthrift_ABCMeta
-import test.fixtures.basic-structured-annotations.module.thrift_abstract_types as _fbthrift_abstract_types
+import test.fixtures.basic_structured_annotations.module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
-import thrift.python.exceptions as _fbthrift_python_exceptions
+import thrift.python.mutable_types as _fbthrift_python_mutable_types
+import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
+import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
+import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
-import included.thrift_types
-import included.thrift_types as _fbthrift__included__thrift_types
+import included.thrift_mutable_types
+import included.thrift_mutable_types as _fbthrift__included__thrift_mutable_types
 
-import namespaced.thrift_types
-import namespaced.thrift_types as _fbthrift__namespaced__thrift_types
+import namespaced.thrift_mutable_types
+import namespaced.thrift_mutable_types as _fbthrift__namespaced__thrift_mutable_types
 
-from test.fixtures.basic-structured-annotations.module.thrift_enums import (
+from test.fixtures.basic_structured_annotations.module.thrift_enums import (
     MyEnum,
     MyEnum as _fbthrift_MyEnum,
 )
 
 
-class runtime_annotation(metaclass=_fbthrift_python_types.StructMeta):
+class runtime_annotation(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
     )
 
@@ -37,28 +40,25 @@ class runtime_annotation(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_thrift_uri__():
-        return "test.dev/fixtures/basic-structured-annotations/runtime_annotation"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return "test.dev/fixtures/basic_structured_annotations/runtime_annotation"
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_runtime_annotation()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.thrift_types")
+        return converter.to_python_struct(immutable_types.runtime_annotation, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("test.fixtures.basic-structured-annotations.module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.runtime_annotation, self)
+        return self
 
     def _to_py3(self):
         import importlib
-        py3_types = importlib.import_module("test.fixtures.basic-structured-annotations.module.types")
+        py3_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.types")
         from thrift.py3 import converter
         return converter.to_py3_struct(py3_types.runtime_annotation, self)
 
@@ -75,7 +75,7 @@ class runtime_annotation(metaclass=_fbthrift_python_types.StructMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.runtime_annotation, runtime_annotation)
 _fbthrift_runtime_annotation = runtime_annotation
 
-class structured_annotation_inline(metaclass=_fbthrift_python_types.StructMeta):
+class structured_annotation_inline(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -107,28 +107,25 @@ class structured_annotation_inline(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_thrift_uri__():
-        return "test.dev/fixtures/basic-structured-annotations/structured_annotation_inline"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return "test.dev/fixtures/basic_structured_annotations/structured_annotation_inline"
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_structured_annotation_inline()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.thrift_types")
+        return converter.to_python_struct(immutable_types.structured_annotation_inline, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("test.fixtures.basic-structured-annotations.module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.structured_annotation_inline, self)
+        return self
 
     def _to_py3(self):
         import importlib
-        py3_types = importlib.import_module("test.fixtures.basic-structured-annotations.module.types")
+        py3_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.types")
         from thrift.py3 import converter
         return converter.to_py3_struct(py3_types.structured_annotation_inline, self)
 
@@ -145,7 +142,7 @@ class structured_annotation_inline(metaclass=_fbthrift_python_types.StructMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.structured_annotation_inline, structured_annotation_inline)
 _fbthrift_structured_annotation_inline = structured_annotation_inline
 
-class structured_annotation_with_default(metaclass=_fbthrift_python_types.StructMeta):
+class structured_annotation_with_default(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -166,28 +163,25 @@ class structured_annotation_with_default(metaclass=_fbthrift_python_types.Struct
 
     @staticmethod
     def __get_thrift_uri__():
-        return "test.dev/fixtures/basic-structured-annotations/structured_annotation_with_default"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return "test.dev/fixtures/basic_structured_annotations/structured_annotation_with_default"
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_structured_annotation_with_default()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.thrift_types")
+        return converter.to_python_struct(immutable_types.structured_annotation_with_default, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("test.fixtures.basic-structured-annotations.module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.structured_annotation_with_default, self)
+        return self
 
     def _to_py3(self):
         import importlib
-        py3_types = importlib.import_module("test.fixtures.basic-structured-annotations.module.types")
+        py3_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.types")
         from thrift.py3 import converter
         return converter.to_py3_struct(py3_types.structured_annotation_with_default, self)
 
@@ -204,7 +198,7 @@ class structured_annotation_with_default(metaclass=_fbthrift_python_types.Struct
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.structured_annotation_with_default, structured_annotation_with_default)
 _fbthrift_structured_annotation_with_default = structured_annotation_with_default
 
-class structured_annotation_recursive(metaclass=_fbthrift_python_types.StructMeta):
+class structured_annotation_recursive(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -222,7 +216,7 @@ class structured_annotation_recursive(metaclass=_fbthrift_python_types.StructMet
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "recurse",  # name
             "recurse",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(structured_annotation_recursive),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(structured_annotation_recursive),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -233,7 +227,7 @@ class structured_annotation_recursive(metaclass=_fbthrift_python_types.StructMet
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "forward",  # name
             "forward",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(structured_annotation_forward),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(structured_annotation_forward),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -247,28 +241,25 @@ class structured_annotation_recursive(metaclass=_fbthrift_python_types.StructMet
 
     @staticmethod
     def __get_thrift_uri__():
-        return "test.dev/fixtures/basic-structured-annotations/structured_annotation_recursive"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return "test.dev/fixtures/basic_structured_annotations/structured_annotation_recursive"
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_structured_annotation_recursive()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.thrift_types")
+        return converter.to_python_struct(immutable_types.structured_annotation_recursive, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("test.fixtures.basic-structured-annotations.module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.structured_annotation_recursive, self)
+        return self
 
     def _to_py3(self):
         import importlib
-        py3_types = importlib.import_module("test.fixtures.basic-structured-annotations.module.types")
+        py3_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.types")
         from thrift.py3 import converter
         return converter.to_py3_struct(py3_types.structured_annotation_recursive, self)
 
@@ -285,7 +276,7 @@ class structured_annotation_recursive(metaclass=_fbthrift_python_types.StructMet
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.structured_annotation_recursive, structured_annotation_recursive)
 _fbthrift_structured_annotation_recursive = structured_annotation_recursive
 
-class structured_annotation_forward(metaclass=_fbthrift_python_types.StructMeta):
+class structured_annotation_forward(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -306,28 +297,25 @@ class structured_annotation_forward(metaclass=_fbthrift_python_types.StructMeta)
 
     @staticmethod
     def __get_thrift_uri__():
-        return "test.dev/fixtures/basic-structured-annotations/structured_annotation_forward"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return "test.dev/fixtures/basic_structured_annotations/structured_annotation_forward"
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_structured_annotation_forward()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.thrift_types")
+        return converter.to_python_struct(immutable_types.structured_annotation_forward, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("test.fixtures.basic-structured-annotations.module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.structured_annotation_forward, self)
+        return self
 
     def _to_py3(self):
         import importlib
-        py3_types = importlib.import_module("test.fixtures.basic-structured-annotations.module.types")
+        py3_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.types")
         from thrift.py3 import converter
         return converter.to_py3_struct(py3_types.structured_annotation_forward, self)
 
@@ -344,7 +332,7 @@ class structured_annotation_forward(metaclass=_fbthrift_python_types.StructMeta)
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.structured_annotation_forward, structured_annotation_forward)
 _fbthrift_structured_annotation_forward = structured_annotation_forward
 
-class structured_annotation_nested(metaclass=_fbthrift_python_types.StructMeta):
+class structured_annotation_nested(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -362,7 +350,7 @@ class structured_annotation_nested(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "nest",  # name
             "nest",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(structured_annotation_with_default),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(structured_annotation_with_default),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -376,28 +364,25 @@ class structured_annotation_nested(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_thrift_uri__():
-        return "test.dev/fixtures/basic-structured-annotations/structured_annotation_nested"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return "test.dev/fixtures/basic_structured_annotations/structured_annotation_nested"
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_structured_annotation_nested()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.thrift_types")
+        return converter.to_python_struct(immutable_types.structured_annotation_nested, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("test.fixtures.basic-structured-annotations.module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.structured_annotation_nested, self)
+        return self
 
     def _to_py3(self):
         import importlib
-        py3_types = importlib.import_module("test.fixtures.basic-structured-annotations.module.types")
+        py3_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.types")
         from thrift.py3 import converter
         return converter.to_py3_struct(py3_types.structured_annotation_nested, self)
 
@@ -414,7 +399,7 @@ class structured_annotation_nested(metaclass=_fbthrift_python_types.StructMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.structured_annotation_nested, structured_annotation_nested)
 _fbthrift_structured_annotation_nested = structured_annotation_nested
 
-class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
+class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -468,28 +453,25 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
 
     @staticmethod
     def __get_thrift_uri__():
-        return "test.dev/fixtures/basic-structured-annotations/MyStruct"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return "test.dev/fixtures/basic_structured_annotations/MyStruct"
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_MyStruct()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.thrift_types")
+        return converter.to_python_struct(immutable_types.MyStruct, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("test.fixtures.basic-structured-annotations.module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.MyStruct, self)
+        return self
 
     def _to_py3(self):
         import importlib
-        py3_types = importlib.import_module("test.fixtures.basic-structured-annotations.module.types")
+        py3_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.types")
         from thrift.py3 import converter
         return converter.to_py3_struct(py3_types.MyStruct, self)
 
@@ -506,7 +488,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStruct, MyStruct)
 _fbthrift_MyStruct = MyStruct
 
-class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+class MyException(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -530,28 +512,25 @@ class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 
     @staticmethod
     def __get_thrift_uri__():
-        return "test.dev/fixtures/basic-structured-annotations/MyException"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return "test.dev/fixtures/basic_structured_annotations/MyException"
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__exception_MyException()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.thrift_types")
+        return converter.to_python_struct(immutable_types.MyException, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("test.fixtures.basic-structured-annotations.module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.MyException, self)
+        return self
 
     def _to_py3(self):
         import importlib
-        py3_types = importlib.import_module("test.fixtures.basic-structured-annotations.module.types")
+        py3_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.types")
         from thrift.py3 import converter
         return converter.to_py3_struct(py3_types.MyException, self)
 
@@ -566,7 +545,7 @@ class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             return converter.to_py_struct(py_asyncio_types.MyException, self)
 _fbthrift_MyException = MyException
 
-class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
+class MyUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -601,28 +580,25 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
 
     @staticmethod
     def __get_thrift_uri__():
-        return "test.dev/fixtures/basic-structured-annotations/MyUnion"
-
-    @classmethod
-    def _fbthrift_auto_migrate_enabled(cls):
-        return False
+        return "test.dev/fixtures/basic_structured_annotations/MyUnion"
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_MyUnion()
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+
 
     def _to_python(self):
-        return self
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.thrift_types")
+        return converter.to_python_struct(immutable_types.MyUnion, self)
 
     def _to_mutable_python(self):
-        from thrift.python import mutable_converter
-        import importlib
-        mutable_types = importlib.import_module("test.fixtures.basic-structured-annotations.module.thrift_mutable_types")
-        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.MyUnion, self)
+        return self
 
     def _to_py3(self):
         import importlib
-        py3_types = importlib.import_module("test.fixtures.basic-structured-annotations.module.types")
+        py3_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.types")
         from thrift.py3 import converter
         return converter.to_py3_struct(py3_types.MyUnion, self)
 
@@ -639,48 +615,10 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyUnion, MyUnion)
 _fbthrift_MyUnion = MyUnion
 
-# This unfortunately has to be down here to prevent circular imports
-import test.fixtures.basic-structured-annotations.module.thrift_metadata as _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_metadata
 
 _fbthrift_all_enums = [
     MyEnum,
 ]
-
-
-def _fbthrift_metadata__struct_runtime_annotation():
-    return _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_metadata.gen_metadata_struct_runtime_annotation()
-
-
-def _fbthrift_metadata__struct_structured_annotation_inline():
-    return _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_metadata.gen_metadata_struct_structured_annotation_inline()
-
-
-def _fbthrift_metadata__struct_structured_annotation_with_default():
-    return _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_metadata.gen_metadata_struct_structured_annotation_with_default()
-
-
-def _fbthrift_metadata__struct_structured_annotation_recursive():
-    return _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_metadata.gen_metadata_struct_structured_annotation_recursive()
-
-
-def _fbthrift_metadata__struct_structured_annotation_forward():
-    return _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_metadata.gen_metadata_struct_structured_annotation_forward()
-
-
-def _fbthrift_metadata__struct_structured_annotation_nested():
-    return _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_metadata.gen_metadata_struct_structured_annotation_nested()
-
-
-def _fbthrift_metadata__struct_MyStruct():
-    return _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_metadata.gen_metadata_struct_MyStruct()
-
-
-def _fbthrift_metadata__exception_MyException():
-    return _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_metadata.gen_metadata_exception_MyException()
-
-
-def _fbthrift_metadata__struct_MyUnion():
-    return _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_metadata.gen_metadata_struct_MyUnion()
 
 
 _fbthrift_all_structs = [
@@ -694,7 +632,7 @@ _fbthrift_all_structs = [
     MyException,
     MyUnion,
 ]
-_fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
+_fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
 
 
 MyConst = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string, { "ENUMERATOR": "enum", "CONST": "const"})
@@ -705,12 +643,12 @@ annotated_inline_i64 = int
 
 
 
-class _fbthrift_MyService_first_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_MyService_first_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
     )
 
 
-class _fbthrift_MyService_first_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_MyService_first_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -725,7 +663,7 @@ class _fbthrift_MyService_first_result(metaclass=_fbthrift_python_types.StructMe
     )
 
 
-class _fbthrift_MyService_second_args(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_MyService_second_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -741,7 +679,7 @@ class _fbthrift_MyService_second_args(metaclass=_fbthrift_python_types.StructMet
     )
 
 
-class _fbthrift_MyService_second_result(metaclass=_fbthrift_python_types.StructMeta):
+class _fbthrift_MyService_second_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -757,7 +695,7 @@ class _fbthrift_MyService_second_result(metaclass=_fbthrift_python_types.StructM
 
 
 
-_fbthrift_python_types.fill_specs(
+_fbthrift_python_mutable_types.fill_specs(
     _fbthrift_MyService_first_args,
     _fbthrift_MyService_first_result,
     _fbthrift_MyService_second_args,

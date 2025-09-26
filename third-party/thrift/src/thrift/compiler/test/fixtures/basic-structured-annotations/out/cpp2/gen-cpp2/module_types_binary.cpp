@@ -6,7 +6,7 @@
  */
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/module_types_custom_protocol.h"
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 
 template void runtime_annotation::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t runtime_annotation::write<>(apache::thrift::BinaryProtocolWriter*) const;
@@ -53,4 +53,4 @@ template uint32_t MyUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t MyUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations

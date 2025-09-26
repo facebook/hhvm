@@ -15,23 +15,23 @@
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
-folly::Range<::test::fixtures::basic-structured-annotations::MyEnum const*> const TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>::values = folly::range(TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyEnum>::values);
-folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyEnum>::names);
+const std::string_view TEnumTraits<::test::fixtures::basic_structured_annotations::MyEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
+folly::Range<::test::fixtures::basic_structured_annotations::MyEnum const*> const TEnumTraits<::test::fixtures::basic_structured_annotations::MyEnum>::values = folly::range(TEnumDataStorage<::test::fixtures::basic_structured_annotations::MyEnum>::values);
+folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::basic_structured_annotations::MyEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::basic_structured_annotations::MyEnum>::names);
 
-bool TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::test::fixtures::basic_structured_annotations::MyEnum>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::test::fixtures::basic_structured_annotations::MyEnum>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 
-const std::vector<std::any>& TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>::annotations() noexcept {
+const std::vector<std::any>& TEnumTraits<::test::fixtures::basic_structured_annotations::MyEnum>::annotations() noexcept {
   return ::apache::thrift::detail::annotation::empty_annotations();
 }
 
-const std::vector<std::any>& TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>::enumValueAnnotations(::test::fixtures::basic-structured-annotations::MyEnum value) noexcept {
+const std::vector<std::any>& TEnumTraits<::test::fixtures::basic_structured_annotations::MyEnum>::enumValueAnnotations(::test::fixtures::basic_structured_annotations::MyEnum value) noexcept {
   switch (static_cast<std::int32_t>(value)) {
     default:
       return ::apache::thrift::detail::annotation::empty_annotations();
@@ -43,10 +43,10 @@ const std::vector<std::any>& TEnumTraits<::test::fixtures::basic-structured-anno
 
 
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 
 std::string_view runtime_annotation::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic-structured-annotations/runtime_annotation";
+  return "test.dev/fixtures/basic_structured_annotations/runtime_annotation";
 }
 
 std::string_view runtime_annotation::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
@@ -85,13 +85,13 @@ void swap([[maybe_unused]] runtime_annotation& a, [[maybe_unused]] runtime_annot
 }
 
 
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations
 
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 
 std::string_view structured_annotation_inline::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic-structured-annotations/structured_annotation_inline";
+  return "test.dev/fixtures/basic_structured_annotations/structured_annotation_inline";
 }
 
 std::string_view structured_annotation_inline::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
@@ -173,13 +173,13 @@ void swap([[maybe_unused]] structured_annotation_inline& a, [[maybe_unused]] str
 }
 
 
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations
 
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 
 std::string_view structured_annotation_with_default::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic-structured-annotations/structured_annotation_with_default";
+  return "test.dev/fixtures/basic_structured_annotations/structured_annotation_with_default";
 }
 
 std::string_view structured_annotation_with_default::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
@@ -245,13 +245,13 @@ void swap([[maybe_unused]] structured_annotation_with_default& a, [[maybe_unused
 }
 
 
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations
 
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 
 std::string_view structured_annotation_recursive::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic-structured-annotations/structured_annotation_recursive";
+  return "test.dev/fixtures/basic_structured_annotations/structured_annotation_recursive";
 }
 
 std::string_view structured_annotation_recursive::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
@@ -299,7 +299,7 @@ structured_annotation_recursive& structured_annotation_recursive::operator=([[ma
 }
 
 
-structured_annotation_recursive::structured_annotation_recursive(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> recurse__arg, ::test::fixtures::basic-structured-annotations::structured_annotation_forward forward__arg) :
+structured_annotation_recursive::structured_annotation_recursive(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::unique_ptr<::test::fixtures::basic_structured_annotations::structured_annotation_recursive> recurse__arg, ::test::fixtures::basic_structured_annotations::structured_annotation_forward forward__arg) :
     __fbthrift_field_name(std::move(name__arg)),
     __fbthrift_field_recurse(std::move(recurse__arg)),
     __fbthrift_field_forward(std::move(forward__arg)) { 
@@ -331,12 +331,12 @@ bool structured_annotation_recursive::operator<([[maybe_unused]] const structure
 }
 
 
-const ::test::fixtures::basic-structured-annotations::structured_annotation_forward& structured_annotation_recursive::get_forward() const& {
+const ::test::fixtures::basic_structured_annotations::structured_annotation_forward& structured_annotation_recursive::get_forward() const& {
   return __fbthrift_field_forward;
 }
 
-::test::fixtures::basic-structured-annotations::structured_annotation_forward structured_annotation_recursive::get_forward() && {
-  return static_cast<::test::fixtures::basic-structured-annotations::structured_annotation_forward&&>(__fbthrift_field_forward);
+::test::fixtures::basic_structured_annotations::structured_annotation_forward structured_annotation_recursive::get_forward() && {
+  return static_cast<::test::fixtures::basic_structured_annotations::structured_annotation_forward&&>(__fbthrift_field_forward);
 }
 
 void swap([[maybe_unused]] structured_annotation_recursive& a, [[maybe_unused]] structured_annotation_recursive& b) {
@@ -351,22 +351,22 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         structured_annotation_recursive,
         ::apache::thrift::type_class::structure,
-        ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>,
+        ::test::fixtures::basic_structured_annotations::structured_annotation_recursive>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         structured_annotation_recursive,
         ::apache::thrift::type_class::structure,
-        ::test::fixtures::basic-structured-annotations::structured_annotation_forward>,
+        ::test::fixtures::basic_structured_annotations::structured_annotation_forward>,
     "inconsistent use of json option");
 
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations
 
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 
 std::string_view structured_annotation_forward::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic-structured-annotations/structured_annotation_forward";
+  return "test.dev/fixtures/basic_structured_annotations/structured_annotation_forward";
 }
 
 std::string_view structured_annotation_forward::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
@@ -421,13 +421,13 @@ void swap([[maybe_unused]] structured_annotation_forward& a, [[maybe_unused]] st
 }
 
 
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations
 
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 
 std::string_view structured_annotation_nested::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic-structured-annotations/structured_annotation_nested";
+  return "test.dev/fixtures/basic_structured_annotations/structured_annotation_nested";
 }
 
 std::string_view structured_annotation_nested::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
@@ -460,7 +460,7 @@ structured_annotation_nested& structured_annotation_nested::operator=([[maybe_un
 }
 
 
-structured_annotation_nested::structured_annotation_nested(apache::thrift::FragileConstructor, ::std::string name__arg, ::test::fixtures::basic-structured-annotations::structured_annotation_with_default nest__arg) :
+structured_annotation_nested::structured_annotation_nested(apache::thrift::FragileConstructor, ::std::string name__arg, ::test::fixtures::basic_structured_annotations::structured_annotation_with_default nest__arg) :
     __fbthrift_field_name(std::move(name__arg)),
     __fbthrift_field_nest(std::move(nest__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
@@ -490,12 +490,12 @@ bool structured_annotation_nested::operator<([[maybe_unused]] const structured_a
 }
 
 
-const ::test::fixtures::basic-structured-annotations::structured_annotation_with_default& structured_annotation_nested::get_nest() const& {
+const ::test::fixtures::basic_structured_annotations::structured_annotation_with_default& structured_annotation_nested::get_nest() const& {
   return __fbthrift_field_nest;
 }
 
-::test::fixtures::basic-structured-annotations::structured_annotation_with_default structured_annotation_nested::get_nest() && {
-  return static_cast<::test::fixtures::basic-structured-annotations::structured_annotation_with_default&&>(__fbthrift_field_nest);
+::test::fixtures::basic_structured_annotations::structured_annotation_with_default structured_annotation_nested::get_nest() && {
+  return static_cast<::test::fixtures::basic_structured_annotations::structured_annotation_with_default&&>(__fbthrift_field_nest);
 }
 
 void swap([[maybe_unused]] structured_annotation_nested& a, [[maybe_unused]] structured_annotation_nested& b) {
@@ -509,16 +509,16 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         structured_annotation_nested,
         ::apache::thrift::type_class::structure,
-        ::test::fixtures::basic-structured-annotations::structured_annotation_with_default>,
+        ::test::fixtures::basic_structured_annotations::structured_annotation_with_default>,
     "inconsistent use of json option");
 
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations
 
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 
 std::string_view MyStruct::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic-structured-annotations/MyStruct";
+  return "test.dev/fixtures/basic_structured_annotations/MyStruct";
 }
 
 std::string_view MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
@@ -557,7 +557,7 @@ MyStruct& MyStruct::operator=([[maybe_unused]] MyStruct&& other) noexcept {
 }
 
 
-MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int64_t annotated_field__arg, ::test::fixtures::basic-structured-annotations::annotated_inline_string annotated_type__arg, ::std::string annotated_recursive__arg, ::std::int64_t annotated_nested__arg) :
+MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int64_t annotated_field__arg, ::test::fixtures::basic_structured_annotations::annotated_inline_string annotated_type__arg, ::std::string annotated_recursive__arg, ::std::int64_t annotated_nested__arg) :
     __fbthrift_field_annotated_field(std::move(annotated_field__arg)),
     __fbthrift_field_annotated_type(std::move(annotated_type__arg)),
     __fbthrift_field_annotated_recursive(std::move(annotated_recursive__arg)),
@@ -571,7 +571,7 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int64_t annotated_
 void MyStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_annotated_field = ::std::int64_t();
-  this->__fbthrift_field_annotated_type = apache::thrift::StringTraits<::test::fixtures::basic-structured-annotations::annotated_inline_string>::fromStringLiteral("");
+  this->__fbthrift_field_annotated_type = apache::thrift::StringTraits<::test::fixtures::basic_structured_annotations::annotated_inline_string>::fromStringLiteral("");
   this->__fbthrift_field_annotated_recursive = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
   this->__fbthrift_field_annotated_nested = ::std::int64_t();
   __isset = {};
@@ -621,13 +621,13 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
 }
 
 
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations
 
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 
 std::string_view MyException::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic-structured-annotations/MyException";
+  return "test.dev/fixtures/basic_structured_annotations/MyException";
 }
 
 std::string_view MyException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
@@ -692,26 +692,26 @@ void swap([[maybe_unused]] MyException& a, [[maybe_unused]] MyException& b) {
 }
 
 
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations
 
 
 namespace apache { namespace thrift {
 
-folly::Range<::test::fixtures::basic-structured-annotations::MyUnion::Type const*> const TEnumTraits<::test::fixtures::basic-structured-annotations::MyUnion::Type>::values = folly::range(TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyUnion::Type>::values);
-folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::basic-structured-annotations::MyUnion::Type>::names = folly::range(TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyUnion::Type>::names);
+folly::Range<::test::fixtures::basic_structured_annotations::MyUnion::Type const*> const TEnumTraits<::test::fixtures::basic_structured_annotations::MyUnion::Type>::values = folly::range(TEnumDataStorage<::test::fixtures::basic_structured_annotations::MyUnion::Type>::values);
+folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::basic_structured_annotations::MyUnion::Type>::names = folly::range(TEnumDataStorage<::test::fixtures::basic_structured_annotations::MyUnion::Type>::names);
 
-bool TEnumTraits<::test::fixtures::basic-structured-annotations::MyUnion::Type>::findName(type value, std::string_view* out) noexcept {
+bool TEnumTraits<::test::fixtures::basic_structured_annotations::MyUnion::Type>::findName(type value, std::string_view* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::test::fixtures::basic-structured-annotations::MyUnion::Type>::findValue(std::string_view name, type* out) noexcept {
+bool TEnumTraits<::test::fixtures::basic_structured_annotations::MyUnion::Type>::findValue(std::string_view name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 
 std::string_view MyUnion::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic-structured-annotations/MyUnion";
+  return "test.dev/fixtures/basic_structured_annotations/MyUnion";
 }
 
 std::string_view MyUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
@@ -801,19 +801,19 @@ void swap(MyUnion& a, MyUnion& b) {
 }
 
 
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations
 
-namespace test::fixtures::basic-structured-annotations { namespace {
+namespace test::fixtures::basic_structured_annotations { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }
-}} // namespace test::fixtures::basic-structured-annotations
+}} // namespace test::fixtures::basic_structured_annotations
 namespace apache::thrift::detail::annotation {
-template<> const std::vector<std::any>& field_annotation_values<::test::fixtures::basic-structured-annotations::MyStruct>(FieldId id) {
+template<> const std::vector<std::any>& field_annotation_values<::test::fixtures::basic_structured_annotations::MyStruct>(FieldId id) {
   switch (static_cast<int16_t>(id)) {
     case 1: {
       static const folly::Indestructible<std::vector<std::any>> ret = [] {
         std::vector<std::any> values;
-        values.emplace_back(::apache::thrift::detail::make_structured_constant<::test::fixtures::basic-structured-annotations::runtime_annotation>());
+        values.emplace_back(::apache::thrift::detail::make_structured_constant<::test::fixtures::basic_structured_annotations::runtime_annotation>());
         return values;
       }();
       return *ret;
@@ -822,10 +822,10 @@ template<> const std::vector<std::any>& field_annotation_values<::test::fixtures
         return ::apache::thrift::detail::annotation::empty_annotations();
   };
 }
-template<> const std::vector<std::any>& struct_annotation_values<::test::fixtures::basic-structured-annotations::MyStruct>() {
+template<> const std::vector<std::any>& struct_annotation_values<::test::fixtures::basic_structured_annotations::MyStruct>() {
   static const folly::Indestructible<std::vector<std::any>> ret = [] {
     std::vector<std::any> values;
-    values.emplace_back(::apache::thrift::detail::make_structured_constant<::test::fixtures::basic-structured-annotations::runtime_annotation>());
+    values.emplace_back(::apache::thrift::detail::make_structured_constant<::test::fixtures::basic_structured_annotations::runtime_annotation>());
     return values;
   }();
   return *ret;

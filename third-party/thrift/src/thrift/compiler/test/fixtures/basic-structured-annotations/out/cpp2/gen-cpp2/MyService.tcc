@@ -10,9 +10,9 @@
 
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 typedef apache::thrift::ThriftPresult<false> MyService_first_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::string, ::test::fixtures::basic-structured-annotations::annotated_inline_string*>> MyService_first_presult;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::string, ::test::fixtures::basic_structured_annotations::annotated_inline_string*>> MyService_first_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>> MyService_second_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, bool*>> MyService_second_presult;
 //
@@ -102,11 +102,11 @@ void MyServiceAsyncProcessor::executeRequest_first(
       /* .definingServiceName =*/ "MyService",
       /* .methodName =*/ "first",
       /* .qualifiedMethodName =*/ "MyService.first"};
-  apache::thrift::HandlerCallback<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>>::DecoratorAfterCallback decoratorCallback{
+  apache::thrift::HandlerCallback<std::unique_ptr<::test::fixtures::basic_structured_annotations::annotated_inline_string>>::DecoratorAfterCallback decoratorCallback{
     static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::fbthrift_invoke_decorator_after_first};
+    apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::fbthrift_invoke_decorator_after_first};
  auto callback =
-      apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>>::make(
+      apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test::fixtures::basic_structured_annotations::annotated_inline_string>>::make(
           apache::thrift::detail::ServerRequestHelper::request(
               std::move(serverRequest)),
           std::move(ctxStack),
@@ -158,10 +158,10 @@ void MyServiceAsyncProcessor::executeRequest_first(
 template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_first(
     apache::thrift::ContextStack* ctx,
-    ::test::fixtures::basic-structured-annotations::annotated_inline_string const& _return) {
+    ::test::fixtures::basic_structured_annotations::annotated_inline_string const& _return) {
   ProtocolOut_ prot;
-  ::test::fixtures::basic-structured-annotations::MyService_first_presult result;
-  result.get<0>().value = const_cast<::test::fixtures::basic-structured-annotations::annotated_inline_string*>(&_return);
+  ::test::fixtures::basic_structured_annotations::MyService_first_presult result;
+  result.get<0>().value = const_cast<::test::fixtures::basic_structured_annotations::annotated_inline_string*>(&_return);
   result.setIsSet(0, true);
   return serializeResponse("first", &prot, ctx, result);
 }
@@ -274,7 +274,7 @@ void MyServiceAsyncProcessor::executeRequest_second(
       /* .qualifiedMethodName =*/ "MyService.second"};
   apache::thrift::HandlerCallback<bool>::DecoratorAfterCallback decoratorCallback{
     static_cast<void*>(iface_),
-    apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::fbthrift_invoke_decorator_after_second};
+    apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::fbthrift_invoke_decorator_after_second};
  auto callback =
       apache::thrift::HandlerCallbackPtr<bool>::make(
           apache::thrift::detail::ServerRequestHelper::request(
@@ -330,7 +330,7 @@ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_second(
     apache::thrift::ContextStack* ctx,
     bool const& _return) {
   ProtocolOut_ prot;
-  ::test::fixtures::basic-structured-annotations::MyService_second_presult result;
+  ::test::fixtures::basic_structured_annotations::MyService_second_presult result;
   result.get<0>().value = const_cast<bool*>(&_return);
   result.setIsSet(0, true);
   return serializeResponse("second", &prot, ctx, result);
@@ -360,4 +360,4 @@ void MyServiceAsyncProcessor::throw_wrapped_second(
 // End of Service Methods
 //
 
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations

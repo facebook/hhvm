@@ -20,7 +20,7 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
 @included.structured_annotation_included{name = 'aba'}
-package "test.dev/fixtures/basic-structured-annotations"
+package "test.dev/fixtures/basic_structured_annotations"
 
 @thrift.RuntimeAnnotation
 struct runtime_annotation {}

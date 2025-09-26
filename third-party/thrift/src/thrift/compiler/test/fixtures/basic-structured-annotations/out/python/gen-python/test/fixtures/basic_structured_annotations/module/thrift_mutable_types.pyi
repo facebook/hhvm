@@ -14,7 +14,7 @@ import builtins
 import enum
 
 import folly.iobuf as _fbthrift_iobuf
-import test.fixtures.basic-structured-annotations.module.thrift_abstract_types as _fbthrift_python_abstract_types
+import test.fixtures.basic_structured_annotations.module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
@@ -24,7 +24,7 @@ import included.thrift_mutable_types as _fbthrift__included__thrift_mutable_type
 
 import namespaced.thrift_mutable_types as _fbthrift__namespaced__thrift_mutable_types
 
-from test.fixtures.basic-structured-annotations.module.thrift_enums import (
+from test.fixtures.basic_structured_annotations.module.thrift_enums import (
     MyEnum as _fbthrift_MyEnum,
 )
 MyEnum = _fbthrift_MyEnum
@@ -40,9 +40,9 @@ class runtime_annotation(_fbthrift_python_mutable_types.MutableStruct, _fbthrift
         self,
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[None]]]: ...
-    def _to_python(self) -> "test.fixtures.basic-structured-annotations.module.thrift_types.runtime_annotation": ...  # type: ignore
+    def _to_python(self) -> "test.fixtures.basic_structured_annotations.module.thrift_types.runtime_annotation": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
-    def _to_py3(self) -> "test.fixtures.basic-structured-annotations.module.types.runtime_annotation": ...  # type: ignore
+    def _to_py3(self) -> "test.fixtures.basic_structured_annotations.module.types.runtime_annotation": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.runtime_annotation": ...  # type: ignore
 _fbthrift_runtime_annotation = runtime_annotation
 
@@ -70,9 +70,9 @@ class structured_annotation_inline(_fbthrift_python_mutable_types.MutableStruct,
         name: _typing.Optional[builtins.str]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.int, builtins.str]]]: ...
-    def _to_python(self) -> "test.fixtures.basic-structured-annotations.module.thrift_types.structured_annotation_inline": ...  # type: ignore
+    def _to_python(self) -> "test.fixtures.basic_structured_annotations.module.thrift_types.structured_annotation_inline": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
-    def _to_py3(self) -> "test.fixtures.basic-structured-annotations.module.types.structured_annotation_inline": ...  # type: ignore
+    def _to_py3(self) -> "test.fixtures.basic_structured_annotations.module.types.structured_annotation_inline": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.structured_annotation_inline": ...  # type: ignore
 _fbthrift_structured_annotation_inline = structured_annotation_inline
 
@@ -93,9 +93,9 @@ class structured_annotation_with_default(_fbthrift_python_mutable_types.MutableS
         name: _typing.Optional[builtins.str]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.str]]]: ...
-    def _to_python(self) -> "test.fixtures.basic-structured-annotations.module.thrift_types.structured_annotation_with_default": ...  # type: ignore
+    def _to_python(self) -> "test.fixtures.basic_structured_annotations.module.thrift_types.structured_annotation_with_default": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
-    def _to_py3(self) -> "test.fixtures.basic-structured-annotations.module.types.structured_annotation_with_default": ...  # type: ignore
+    def _to_py3(self) -> "test.fixtures.basic_structured_annotations.module.types.structured_annotation_with_default": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.structured_annotation_with_default": ...  # type: ignore
 _fbthrift_structured_annotation_with_default = structured_annotation_with_default
 
@@ -130,9 +130,9 @@ class structured_annotation_recursive(_fbthrift_python_mutable_types.MutableStru
         forward: _typing.Optional[_fbthrift_structured_annotation_forward]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.str, _fbthrift_structured_annotation_recursive, _fbthrift_structured_annotation_forward]]]: ...
-    def _to_python(self) -> "test.fixtures.basic-structured-annotations.module.thrift_types.structured_annotation_recursive": ...  # type: ignore
+    def _to_python(self) -> "test.fixtures.basic_structured_annotations.module.thrift_types.structured_annotation_recursive": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
-    def _to_py3(self) -> "test.fixtures.basic-structured-annotations.module.types.structured_annotation_recursive": ...  # type: ignore
+    def _to_py3(self) -> "test.fixtures.basic_structured_annotations.module.types.structured_annotation_recursive": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.structured_annotation_recursive": ...  # type: ignore
 _fbthrift_structured_annotation_recursive = structured_annotation_recursive
 
@@ -153,9 +153,9 @@ class structured_annotation_forward(_fbthrift_python_mutable_types.MutableStruct
         count: _typing.Optional[builtins.int]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.int]]]: ...
-    def _to_python(self) -> "test.fixtures.basic-structured-annotations.module.thrift_types.structured_annotation_forward": ...  # type: ignore
+    def _to_python(self) -> "test.fixtures.basic_structured_annotations.module.thrift_types.structured_annotation_forward": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
-    def _to_py3(self) -> "test.fixtures.basic-structured-annotations.module.types.structured_annotation_forward": ...  # type: ignore
+    def _to_py3(self) -> "test.fixtures.basic_structured_annotations.module.types.structured_annotation_forward": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.structured_annotation_forward": ...  # type: ignore
 _fbthrift_structured_annotation_forward = structured_annotation_forward
 
@@ -183,9 +183,9 @@ class structured_annotation_nested(_fbthrift_python_mutable_types.MutableStruct,
         nest: _typing.Optional[_fbthrift_structured_annotation_with_default]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.str, _fbthrift_structured_annotation_with_default]]]: ...
-    def _to_python(self) -> "test.fixtures.basic-structured-annotations.module.thrift_types.structured_annotation_nested": ...  # type: ignore
+    def _to_python(self) -> "test.fixtures.basic_structured_annotations.module.thrift_types.structured_annotation_nested": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
-    def _to_py3(self) -> "test.fixtures.basic-structured-annotations.module.types.structured_annotation_nested": ...  # type: ignore
+    def _to_py3(self) -> "test.fixtures.basic_structured_annotations.module.types.structured_annotation_nested": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.structured_annotation_nested": ...  # type: ignore
 _fbthrift_structured_annotation_nested = structured_annotation_nested
 
@@ -227,9 +227,9 @@ class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_ab
         annotated_nested: _typing.Optional[builtins.int]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.int, builtins.str, builtins.str, builtins.int]]]: ...
-    def _to_python(self) -> "test.fixtures.basic-structured-annotations.module.thrift_types.MyStruct": ...  # type: ignore
+    def _to_python(self) -> "test.fixtures.basic_structured_annotations.module.thrift_types.MyStruct": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
-    def _to_py3(self) -> "test.fixtures.basic-structured-annotations.module.types.MyStruct": ...  # type: ignore
+    def _to_py3(self) -> "test.fixtures.basic_structured_annotations.module.types.MyStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
 _fbthrift_MyStruct = MyStruct
 
@@ -246,9 +246,9 @@ class MyException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fb
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.str]]]: ...
-    def _to_python(self) -> "test.fixtures.basic-structured-annotations.module.thrift_types.MyException": ...  # type: ignore
+    def _to_python(self) -> "test.fixtures.basic_structured_annotations.module.thrift_types.MyException": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
-    def _to_py3(self) -> "test.fixtures.basic-structured-annotations.module.types.MyException": ...  # type: ignore
+    def _to_py3(self) -> "test.fixtures.basic_structured_annotations.module.types.MyException": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyException": ...  # type: ignore
 _fbthrift_MyException = MyException
 
@@ -281,9 +281,9 @@ class MyUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abst
     # pyre-ignore[15]: `fbthrift_current_field` overrides attribute defined in `_fbthrift_python_abstract_types.MyUnion` inconsistently. Type `MyUnion.FbThriftUnionFieldEnum` is not a subtype of the overridden attribute `_fbthrift_python_abstract_types.MyUnion.FbThriftUnionFieldEnum`
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
     def get_type(self) -> FbThriftUnionFieldEnum: ...
-    def _to_python(self) -> "test.fixtures.basic-structured-annotations.module.thrift_types.MyUnion": ...  # type: ignore
+    def _to_python(self) -> "test.fixtures.basic_structured_annotations.module.thrift_types.MyUnion": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
-    def _to_py3(self) -> "test.fixtures.basic-structured-annotations.module.types.MyUnion": ...  # type: ignore
+    def _to_py3(self) -> "test.fixtures.basic_structured_annotations.module.types.MyUnion": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyUnion": ...  # type: ignore
 _fbthrift_MyUnion = MyUnion
 

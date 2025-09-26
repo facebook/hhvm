@@ -9,42 +9,42 @@
 
 #include <thrift/lib/cpp2/gen/client_cpp.h>
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 typedef apache::thrift::ThriftPresult<false> MyService_first_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::string, ::test::fixtures::basic-structured-annotations::annotated_inline_string*>> MyService_first_presult;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::string, ::test::fixtures::basic_structured_annotations::annotated_inline_string*>> MyService_first_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>> MyService_second_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, bool*>> MyService_second_presult;
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations
 template <typename RpcOptions>
-void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::fbthrift_send_first(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata) {
+void apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::fbthrift_send_first(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata) {
 
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "first",
                 ::apache::thrift::FunctionQualifier::Unspecified,
-                "test.dev/fixtures/basic-structured-annotations/MyService");
+                "test.dev/fixtures/basic_structured_annotations/MyService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), std::move(interceptorFrameworkMetadata));
 }
 
 template <typename RpcOptions>
-void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::fbthrift_send_second(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata) {
+void apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::fbthrift_send_second(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata) {
 
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "second",
                 ::apache::thrift::FunctionQualifier::Unspecified,
-                "test.dev/fixtures/basic-structured-annotations/MyService");
+                "test.dev/fixtures/basic_structured_annotations/MyService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), std::move(interceptorFrameworkMetadata));
 }
 
 
 
-void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::first(std::unique_ptr<apache::thrift::RequestCallback> callback) {
+void apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::first(std::unique_ptr<apache::thrift::RequestCallback> callback) {
   ::apache::thrift::RpcOptions rpcOptions;
   first(rpcOptions, std::move(callback));
 }
 
-void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::first(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
+void apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::first(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto [ctx, header] = firstCtx(&rpcOptions);
   if (ctx != nullptr) {
     auto argsAsRefs = std::tie();
@@ -54,10 +54,10 @@ void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MySe
   fbthrift_serialize_and_send_first(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback));
 }
 
-apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::fbthrift_serialize_first(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
+apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::fbthrift_serialize_first(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
   return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
     using ProtocolWriter = std::decay_t<decltype(prot)>;
-    ::test::fixtures::basic-structured-annotations::MyService_first_pargs args;
+    ::test::fixtures::basic_structured_annotations::MyService_first_pargs args;
     const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
     const auto writer = [&](ProtocolWriter* p) { args.write(p); };
     return apache::thrift::preprocessSendT<ProtocolWriter>(
@@ -72,7 +72,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic
   });
 }
 
-void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::fbthrift_serialize_and_send_first(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
+void apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::fbthrift_serialize_and_send_first(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_first(rpcOptions, *header, contextStack);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
@@ -85,7 +85,7 @@ void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MySe
   }
 }
 
-std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::firstCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::firstCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -103,12 +103,12 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   return {std::move(ctx), std::move(header)};
 }
 
-void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::sync_first(::test::fixtures::basic-structured-annotations::annotated_inline_string& _return) {
+void apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::sync_first(::test::fixtures::basic_structured_annotations::annotated_inline_string& _return) {
   ::apache::thrift::RpcOptions rpcOptions;
   sync_first(rpcOptions, _return);
 }
 
-void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::sync_first(apache::thrift::RpcOptions& rpcOptions, ::test::fixtures::basic-structured-annotations::annotated_inline_string& _return) {
+void apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::sync_first(apache::thrift::RpcOptions& rpcOptions, ::test::fixtures::basic_structured_annotations::annotated_inline_string& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
   auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
@@ -145,8 +145,8 @@ void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MySe
 
 
 template <typename CallbackType>
-folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inline_string> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::fbthrift_semifuture_first(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::test::fixtures::basic-structured-annotations::annotated_inline_string>;
+folly::SemiFuture<::test::fixtures::basic_structured_annotations::annotated_inline_string> apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::fbthrift_semifuture_first(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::test::fixtures::basic_structured_annotations::annotated_inline_string>;
   folly::Promise<CallbackHelper::PromiseResult> promise;
   auto semifuture = promise.getSemiFuture();
   auto ctxAndHeader = firstCtx(&rpcOptions);
@@ -161,7 +161,7 @@ folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inli
     auto argsAsRefs = std::tie();
     if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions);
         exTry.hasException()) {
-      return folly::makeSemiFuture<::test::fixtures::basic-structured-annotations::annotated_inline_string>(std::move(exTry).exception());
+      return folly::makeSemiFuture<::test::fixtures::basic_structured_annotations::annotated_inline_string>(std::move(exTry).exception());
     }
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
   }
@@ -170,34 +170,34 @@ folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inli
   return std::move(semifuture).deferValue(CallbackHelper::processClientInterceptorsAndExtractResult);
 }
 
-folly::Future<::test::fixtures::basic-structured-annotations::annotated_inline_string> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::future_first() {
+folly::Future<::test::fixtures::basic_structured_annotations::annotated_inline_string> apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::future_first() {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_first(rpcOptions);
 }
 
-folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inline_string> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::semifuture_first() {
+folly::SemiFuture<::test::fixtures::basic_structured_annotations::annotated_inline_string> apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::semifuture_first() {
   ::apache::thrift::RpcOptions rpcOptions;
   return semifuture_first(rpcOptions);
 }
 
-folly::Future<::test::fixtures::basic-structured-annotations::annotated_inline_string> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::future_first(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackType = apache::thrift::FutureCallback<::test::fixtures::basic-structured-annotations::annotated_inline_string>;
+folly::Future<::test::fixtures::basic_structured_annotations::annotated_inline_string> apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::future_first(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackType = apache::thrift::FutureCallback<::test::fixtures::basic_structured_annotations::annotated_inline_string>;
   return fbthrift_semifuture_first<CallbackType>(rpcOptions).toUnsafeFuture();
 }
 
-folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inline_string> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::semifuture_first(apache::thrift::RpcOptions& rpcOptions) {
-  using CallbackType = apache::thrift::SemiFutureCallback<::test::fixtures::basic-structured-annotations::annotated_inline_string>;
+folly::SemiFuture<::test::fixtures::basic_structured_annotations::annotated_inline_string> apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::semifuture_first(apache::thrift::RpcOptions& rpcOptions) {
+  using CallbackType = apache::thrift::SemiFutureCallback<::test::fixtures::basic_structured_annotations::annotated_inline_string>;
   return fbthrift_semifuture_first<CallbackType>(rpcOptions);
 }
 
 
-void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::first(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback) {
+void apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::first(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback) {
   first(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)));
 }
 
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
-folly::exception_wrapper apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::recv_wrapped_first(::test::fixtures::basic-structured-annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state) {
+folly::exception_wrapper apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::recv_wrapped_first(::test::fixtures::basic_structured_annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
   }
@@ -205,7 +205,7 @@ folly::exception_wrapper apache::thrift::Client<::test::fixtures::basic-structur
     return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
   }
 
-  using result = ::test::fixtures::basic-structured-annotations::MyService_first_presult;
+  using result = ::test::fixtures::basic_structured_annotations::MyService_first_presult;
   switch (state.protocolId()) {
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
@@ -226,27 +226,27 @@ folly::exception_wrapper apache::thrift::Client<::test::fixtures::basic-structur
   return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
 }
 
-void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::recv_first(::test::fixtures::basic-structured-annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state) {
+void apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::recv_first(::test::fixtures::basic_structured_annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state) {
   auto ew = recv_wrapped_first(_return, state);
   if (ew) {
     ew.throw_exception();
   }
 }
 
-void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::recv_instance_first(::test::fixtures::basic-structured-annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state) {
+void apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::recv_instance_first(::test::fixtures::basic_structured_annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state) {
   return recv_first(_return, state);
 }
 
-folly::exception_wrapper apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::recv_instance_wrapped_first(::test::fixtures::basic-structured-annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state) {
+folly::exception_wrapper apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::recv_instance_wrapped_first(::test::fixtures::basic_structured_annotations::annotated_inline_string& _return, ::apache::thrift::ClientReceiveState& state) {
   return recv_wrapped_first(_return, state);
 }
 
-void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::second(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_count) {
+void apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::second(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_count) {
   ::apache::thrift::RpcOptions rpcOptions;
   second(rpcOptions, std::move(callback), p_count);
 }
 
-void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::second(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_count) {
+void apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::second(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_count) {
   auto [ctx, header] = secondCtx(&rpcOptions);
   if (ctx != nullptr) {
     auto argsAsRefs = std::tie(p_count);
@@ -256,10 +256,10 @@ void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MySe
   fbthrift_serialize_and_send_second(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_count);
 }
 
-apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::fbthrift_serialize_second(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int64_t p_count) {
+apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::fbthrift_serialize_second(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack, ::std::int64_t p_count) {
   return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
     using ProtocolWriter = std::decay_t<decltype(prot)>;
-    ::test::fixtures::basic-structured-annotations::MyService_second_pargs args;
+    ::test::fixtures::basic_structured_annotations::MyService_second_pargs args;
     args.get<0>().value = &p_count;
     const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
     const auto writer = [&](ProtocolWriter* p) { args.write(p); };
@@ -275,7 +275,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic
   });
 }
 
-void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::fbthrift_serialize_and_send_second(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_count, bool stealRpcOptions) {
+void apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::fbthrift_serialize_and_send_second(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_count, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_second(rpcOptions, *header, contextStack, p_count);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
@@ -288,7 +288,7 @@ void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MySe
   }
 }
 
-std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::secondCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::secondCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -306,12 +306,12 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   return {std::move(ctx), std::move(header)};
 }
 
-bool apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::sync_second(::std::int64_t p_count) {
+bool apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::sync_second(::std::int64_t p_count) {
   ::apache::thrift::RpcOptions rpcOptions;
   return sync_second(rpcOptions, p_count);
 }
 
-bool apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::sync_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
+bool apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::sync_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
   auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
@@ -350,7 +350,7 @@ bool apache::thrift::Client<::test::fixtures::basic-structured-annotations::MySe
 
 
 template <typename CallbackType>
-folly::SemiFuture<bool> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::fbthrift_semifuture_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
+folly::SemiFuture<bool> apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::fbthrift_semifuture_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
   using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<bool>;
   folly::Promise<CallbackHelper::PromiseResult> promise;
   auto semifuture = promise.getSemiFuture();
@@ -375,34 +375,34 @@ folly::SemiFuture<bool> apache::thrift::Client<::test::fixtures::basic-structure
   return std::move(semifuture).deferValue(CallbackHelper::processClientInterceptorsAndExtractResult);
 }
 
-folly::Future<bool> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::future_second(::std::int64_t p_count) {
+folly::Future<bool> apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::future_second(::std::int64_t p_count) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_second(rpcOptions, p_count);
 }
 
-folly::SemiFuture<bool> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::semifuture_second(::std::int64_t p_count) {
+folly::SemiFuture<bool> apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::semifuture_second(::std::int64_t p_count) {
   ::apache::thrift::RpcOptions rpcOptions;
   return semifuture_second(rpcOptions, p_count);
 }
 
-folly::Future<bool> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::future_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
+folly::Future<bool> apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::future_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
   using CallbackType = apache::thrift::FutureCallback<bool>;
   return fbthrift_semifuture_second<CallbackType>(rpcOptions, p_count).toUnsafeFuture();
 }
 
-folly::SemiFuture<bool> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::semifuture_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
+folly::SemiFuture<bool> apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::semifuture_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
   using CallbackType = apache::thrift::SemiFutureCallback<bool>;
   return fbthrift_semifuture_second<CallbackType>(rpcOptions, p_count);
 }
 
 
-void apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::second(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int64_t p_count) {
+void apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::second(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int64_t p_count) {
   second(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_count);
 }
 
 #if FOLLY_HAS_COROUTINES
 #endif // FOLLY_HAS_COROUTINES
-folly::exception_wrapper apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::recv_wrapped_second(bool& _return, ::apache::thrift::ClientReceiveState& state) {
+folly::exception_wrapper apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::recv_wrapped_second(bool& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
   }
@@ -410,7 +410,7 @@ folly::exception_wrapper apache::thrift::Client<::test::fixtures::basic-structur
     return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
   }
 
-  using result = ::test::fixtures::basic-structured-annotations::MyService_second_presult;
+  using result = ::test::fixtures::basic_structured_annotations::MyService_second_presult;
   switch (state.protocolId()) {
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
@@ -431,7 +431,7 @@ folly::exception_wrapper apache::thrift::Client<::test::fixtures::basic-structur
   return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
 }
 
-bool apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::recv_second(::apache::thrift::ClientReceiveState& state) {
+bool apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::recv_second(::apache::thrift::ClientReceiveState& state) {
   bool _return;
   auto ew = recv_wrapped_second(_return, state);
   if (ew) {
@@ -440,11 +440,11 @@ bool apache::thrift::Client<::test::fixtures::basic-structured-annotations::MySe
   return _return;
 }
 
-bool apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::recv_instance_second(::apache::thrift::ClientReceiveState& state) {
+bool apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::recv_instance_second(::apache::thrift::ClientReceiveState& state) {
   return recv_second(state);
 }
 
-folly::exception_wrapper apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::recv_instance_wrapped_second(bool& _return, ::apache::thrift::ClientReceiveState& state) {
+folly::exception_wrapper apache::thrift::Client<::test::fixtures::basic_structured_annotations::MyService>::recv_instance_wrapped_second(bool& _return, ::apache::thrift::ClientReceiveState& state) {
   return recv_wrapped_second(_return, state);
 }
 

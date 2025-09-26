@@ -12,8 +12,8 @@
 
 namespace apache { namespace thrift {
 
-template <> struct TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyEnum> {
-  using type = ::test::fixtures::basic-structured-annotations::MyEnum;
+template <> struct TEnumDataStorage<::test::fixtures::basic_structured_annotations::MyEnum> {
+  using type = ::test::fixtures::basic_structured_annotations::MyEnum;
   static constexpr const std::size_t size = 2;
   static constexpr std::array<type, size> values = { {
       type::UNKNOWN,
@@ -25,8 +25,8 @@ template <> struct TEnumDataStorage<::test::fixtures::basic-structured-annotatio
   }};
 };
 
-template <> struct TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyUnion::Type> {
-  using type = ::test::fixtures::basic-structured-annotations::MyUnion::Type;
+template <> struct TEnumDataStorage<::test::fixtures::basic_structured_annotations::MyUnion::Type> {
+  using type = ::test::fixtures::basic_structured_annotations::MyUnion::Type;
   static constexpr const std::size_t size = 2;
   static constexpr std::array<type, size> values = { {
       type::first,
@@ -38,7 +38,7 @@ template <> struct TEnumDataStorage<::test::fixtures::basic-structured-annotatio
   }};
 };
 
-template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::runtime_annotation> {
+template <> struct TStructDataStorage<::test::fixtures::basic_structured_annotations::runtime_annotation> {
   static constexpr const std::size_t fields_size = 0;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -53,7 +53,7 @@ template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotat
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_inline> {
+template <> struct TStructDataStorage<::test::fixtures::basic_structured_annotations::structured_annotation_inline> {
   static constexpr const std::size_t fields_size = 2;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -68,7 +68,7 @@ template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotat
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_with_default> {
+template <> struct TStructDataStorage<::test::fixtures::basic_structured_annotations::structured_annotation_with_default> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -83,7 +83,7 @@ template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotat
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> {
+template <> struct TStructDataStorage<::test::fixtures::basic_structured_annotations::structured_annotation_recursive> {
   static constexpr const std::size_t fields_size = 3;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -98,7 +98,7 @@ template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotat
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward> {
+template <> struct TStructDataStorage<::test::fixtures::basic_structured_annotations::structured_annotation_forward> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -113,7 +113,7 @@ template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotat
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_nested> {
+template <> struct TStructDataStorage<::test::fixtures::basic_structured_annotations::structured_annotation_nested> {
   static constexpr const std::size_t fields_size = 2;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -128,7 +128,7 @@ template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotat
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::MyStruct> {
+template <> struct TStructDataStorage<::test::fixtures::basic_structured_annotations::MyStruct> {
   static constexpr const std::size_t fields_size = 4;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -143,7 +143,7 @@ template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotat
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::MyException> {
+template <> struct TStructDataStorage<::test::fixtures::basic_structured_annotations::MyException> {
   static constexpr const std::size_t fields_size = 1;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
@@ -158,7 +158,7 @@ template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotat
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::MyUnion> {
+template <> struct TStructDataStorage<::test::fixtures::basic_structured_annotations::MyUnion> {
   static constexpr const std::size_t fields_size = 2;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;

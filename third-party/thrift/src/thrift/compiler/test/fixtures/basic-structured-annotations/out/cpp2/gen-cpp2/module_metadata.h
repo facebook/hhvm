@@ -13,9 +13,9 @@
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/included_metadata.h"
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/namespaced_metadata.h"
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 class MyService;
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations
 
 namespace apache {
 namespace thrift {
@@ -23,62 +23,62 @@ namespace detail {
 namespace md {
 
 template <>
-class EnumMetadata<::test::fixtures::basic-structured-annotations::MyEnum> {
+class EnumMetadata<::test::fixtures::basic_structured_annotations::MyEnum> {
  public:
   static void gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::basic-structured-annotations::runtime_annotation> {
+class StructMetadata<::test::fixtures::basic_structured_annotations::runtime_annotation> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::basic-structured-annotations::structured_annotation_inline> {
+class StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_inline> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::basic-structured-annotations::structured_annotation_with_default> {
+class StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_with_default> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> {
+class StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_recursive> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::basic-structured-annotations::structured_annotation_forward> {
+class StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_forward> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::basic-structured-annotations::structured_annotation_nested> {
+class StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_nested> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::basic-structured-annotations::MyStruct> {
+class StructMetadata<::test::fixtures::basic_structured_annotations::MyStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::basic-structured-annotations::MyException> {
+class StructMetadata<::test::fixtures::basic_structured_annotations::MyException> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::basic-structured-annotations::MyUnion> {
+class StructMetadata<::test::fixtures::basic_structured_annotations::MyUnion> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class ExceptionMetadata<::test::fixtures::basic-structured-annotations::MyException> {
+class ExceptionMetadata<::test::fixtures::basic_structured_annotations::MyException> {
  public:
   static void gen(ThriftMetadata& metadata);
 };
 template <>
-class ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>> {
+class ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>> {
  public:
   static void gen(ThriftServiceMetadataResponse& response);
  private:

@@ -23,7 +23,7 @@ class MyEnum(_fbthrift_python_types.Enum, int):
 
     @staticmethod
     def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
-        return "test.dev/fixtures/basic-structured-annotations/MyEnum"
+        return "test.dev/fixtures/basic_structured_annotations/MyEnum"
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

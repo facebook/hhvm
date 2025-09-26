@@ -18,8 +18,8 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
-import test.fixtures.basic-structured-annotations.module.thrift_types as _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_types
-import test.fixtures.basic-structured-annotations.module.thrift_metadata as _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_metadata
+import test.fixtures.basic_structured_annotations.module.thrift_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types
+import test.fixtures.basic_structured_annotations.module.thrift_metadata as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_metadata
 import included.thrift_types as _fbthrift__included__thrift_types
 import namespaced.thrift_types as _fbthrift__namespaced__thrift_types
 
@@ -45,11 +45,11 @@ class MyServiceInterface(
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_metadata.gen_metadata_service_MyService()
+        return _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_metadata.gen_metadata_service_MyService()
 
     @staticmethod
     def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
-        return _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_metadata._fbthrift_metadata_service_response_MyService()
+        return _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_metadata._fbthrift_metadata_service_response_MyService()
 
 
 
@@ -59,9 +59,9 @@ class MyServiceInterface(
         raise NotImplementedError("async def first is not implemented")
 
     async def _fbthrift__handler_first(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(_fbthrift__test__fixtures__basic-structured-annotations__module__thrift_types._fbthrift_MyService_first_args, args, protocol)
+        args_struct = deserialize(_fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types._fbthrift_MyService_first_args, args, protocol)
         value = await self.first()
-        return_struct = _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_types._fbthrift_MyService_first_result(success=value)
+        return_struct = _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types._fbthrift_MyService_first_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -72,8 +72,8 @@ class MyServiceInterface(
         raise NotImplementedError("async def second is not implemented")
 
     async def _fbthrift__handler_second(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(_fbthrift__test__fixtures__basic-structured-annotations__module__thrift_types._fbthrift_MyService_second_args, args, protocol)
+        args_struct = deserialize(_fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types._fbthrift_MyService_second_args, args, protocol)
         value = await self.second(args_struct.count,)
-        return_struct = _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_types._fbthrift_MyService_second_result(success=value)
+        return_struct = _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types._fbthrift_MyService_second_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 

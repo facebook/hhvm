@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
-import test.fixtures.basic-structured-annotations.module.thrift_enums as _fbthrift_current_module_enums
-import test.fixtures.basic-structured-annotations.module.thrift_enums
+import test.fixtures.basic_structured_annotations.module.thrift_enums as _fbthrift_current_module_enums
+import test.fixtures.basic_structured_annotations.module.thrift_enums
 
 
 import included.thrift_enums

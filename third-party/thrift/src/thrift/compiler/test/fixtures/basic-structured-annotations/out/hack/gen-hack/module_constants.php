@@ -6,7 +6,7 @@
  *  @generated
  */
 
-namespace test\fixtures\basic-structured-annotations;
+namespace test\fixtures\basic_structured_annotations;
 
 class module_CONSTANTS implements \IThriftConstants {
   /**
@@ -25,7 +25,7 @@ class module_CONSTANTS implements \IThriftConstants {
   public static function getAllStructuredAnnotations()[write_props]: dict<string, dict<string, \IThriftStruct>> {
     return dict[
       'MyConst' => dict[
-        '\test\fixtures\basic-structured-annotations\structured_annotation_inline' => \test\fixtures\basic-structured-annotations\structured_annotation_inline::fromShape(
+        '\test\fixtures\basic_structured_annotations\structured_annotation_inline' => \test\fixtures\basic_structured_annotations\structured_annotation_inline::fromShape(
           shape(
             "name" => "MyHackEnum",
           )

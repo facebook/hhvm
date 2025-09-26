@@ -14,14 +14,14 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct ForEachField<::test::fixtures::basic-structured-annotations::runtime_annotation> {
+struct ForEachField<::test::fixtures::basic_structured_annotations::runtime_annotation> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
   }
 };
 
 template <>
-struct ForEachField<::test::fixtures::basic-structured-annotations::structured_annotation_inline> {
+struct ForEachField<::test::fixtures::basic_structured_annotations::structured_annotation_inline> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).count_ref()...);
@@ -30,7 +30,7 @@ struct ForEachField<::test::fixtures::basic-structured-annotations::structured_a
 };
 
 template <>
-struct ForEachField<::test::fixtures::basic-structured-annotations::structured_annotation_with_default> {
+struct ForEachField<::test::fixtures::basic_structured_annotations::structured_annotation_with_default> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).name_ref()...);
@@ -38,7 +38,7 @@ struct ForEachField<::test::fixtures::basic-structured-annotations::structured_a
 };
 
 template <>
-struct ForEachField<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> {
+struct ForEachField<::test::fixtures::basic_structured_annotations::structured_annotation_recursive> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).name_ref()...);
@@ -48,7 +48,7 @@ struct ForEachField<::test::fixtures::basic-structured-annotations::structured_a
 };
 
 template <>
-struct ForEachField<::test::fixtures::basic-structured-annotations::structured_annotation_forward> {
+struct ForEachField<::test::fixtures::basic_structured_annotations::structured_annotation_forward> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).count_ref()...);
@@ -56,7 +56,7 @@ struct ForEachField<::test::fixtures::basic-structured-annotations::structured_a
 };
 
 template <>
-struct ForEachField<::test::fixtures::basic-structured-annotations::structured_annotation_nested> {
+struct ForEachField<::test::fixtures::basic_structured_annotations::structured_annotation_nested> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).name_ref()...);
@@ -65,7 +65,7 @@ struct ForEachField<::test::fixtures::basic-structured-annotations::structured_a
 };
 
 template <>
-struct ForEachField<::test::fixtures::basic-structured-annotations::MyStruct> {
+struct ForEachField<::test::fixtures::basic_structured_annotations::MyStruct> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).annotated_field_ref()...);
@@ -76,7 +76,7 @@ struct ForEachField<::test::fixtures::basic-structured-annotations::MyStruct> {
 };
 
 template <>
-struct ForEachField<::test::fixtures::basic-structured-annotations::MyException> {
+struct ForEachField<::test::fixtures::basic_structured_annotations::MyException> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).context_ref()...);
@@ -84,7 +84,7 @@ struct ForEachField<::test::fixtures::basic-structured-annotations::MyException>
 };
 
 template <>
-struct ForEachField<::test::fixtures::basic-structured-annotations::MyUnion> {
+struct ForEachField<::test::fixtures::basic_structured_annotations::MyUnion> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).first_ref()...);

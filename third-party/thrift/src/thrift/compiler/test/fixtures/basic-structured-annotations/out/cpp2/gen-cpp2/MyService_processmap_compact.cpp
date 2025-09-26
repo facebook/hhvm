@@ -8,5 +8,5 @@
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/MyService.h"
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/MyService.tcc"
 
-namespace test::fixtures::basic-structured-annotations {
-} // namespace test::fixtures::basic-structured-annotations
+namespace test::fixtures::basic_structured_annotations {
+} // namespace test::fixtures::basic_structured_annotations

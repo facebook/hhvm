@@ -23,8 +23,8 @@ from thrift.python.client.omni_client import InteractionMethodPosition as _fbthr
 from thrift.python.common import RpcOptions
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
-import test.fixtures.basic-structured-annotations.module.thrift_types as _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_types
-import test.fixtures.basic-structured-annotations.module.thrift_metadata as _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_metadata
+import test.fixtures.basic_structured_annotations.module.thrift_types as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types
+import test.fixtures.basic_structured_annotations.module.thrift_metadata as _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_metadata
 import included.thrift_types as _fbthrift__included__thrift_types
 import namespaced.thrift_types as _fbthrift__namespaced__thrift_types
 
@@ -37,7 +37,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
-        return "test.dev/fixtures/basic-structured-annotations/MyService"
+        return "test.dev/fixtures/basic_structured_annotations/MyService"
     
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -46,7 +46,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_metadata.gen_metadata_service_MyService()
+        return _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_metadata.gen_metadata_service_MyService()
     
     class Async(_fbthrift_python_AsyncClient):
         @staticmethod
@@ -55,11 +55,11 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
-            return "test.dev/fixtures/basic-structured-annotations/MyService"
+            return "test.dev/fixtures/basic_structured_annotations/MyService"
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_metadata.gen_metadata_service_MyService()
+            return _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_metadata.gen_metadata_service_MyService()
     
         async def first(
             self,
@@ -69,10 +69,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "first",
-                _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_types._fbthrift_MyService_first_args(),
-                _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_types._fbthrift_MyService_first_result,
+                _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types._fbthrift_MyService_first_args(),
+                _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types._fbthrift_MyService_first_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
-                uri_or_name="test.dev/fixtures/basic-structured-annotations/MyService",
+                uri_or_name="test.dev/fixtures/basic_structured_annotations/MyService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -92,11 +92,11 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "second",
-                _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_types._fbthrift_MyService_second_args(
+                _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types._fbthrift_MyService_second_args(
                     count=count,),
-                _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_types._fbthrift_MyService_second_result,
+                _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types._fbthrift_MyService_second_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
-                uri_or_name="test.dev/fixtures/basic-structured-annotations/MyService",
+                uri_or_name="test.dev/fixtures/basic_structured_annotations/MyService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -120,11 +120,11 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         @staticmethod
         def __get_thrift_uri__() -> _typing.Optional[str]:
-            return "test.dev/fixtures/basic-structured-annotations/MyService"
+            return "test.dev/fixtures/basic_structured_annotations/MyService"
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-            return _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_metadata.gen_metadata_service_MyService()
+            return _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_metadata.gen_metadata_service_MyService()
     
         def first(
             self,
@@ -134,9 +134,9 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "first",
-                _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_types._fbthrift_MyService_first_args(),
-                _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_types._fbthrift_MyService_first_result,
-                uri_or_name="test.dev/fixtures/basic-structured-annotations/MyService",
+                _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types._fbthrift_MyService_first_args(),
+                _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types._fbthrift_MyService_first_result,
+                uri_or_name="test.dev/fixtures/basic_structured_annotations/MyService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -156,10 +156,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "second",
-                _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_types._fbthrift_MyService_second_args(
+                _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types._fbthrift_MyService_second_args(
                     count=count,),
-                _fbthrift__test__fixtures__basic-structured-annotations__module__thrift_types._fbthrift_MyService_second_result,
-                uri_or_name="test.dev/fixtures/basic-structured-annotations/MyService",
+                _fbthrift__test__fixtures__basic_structured_annotations__module__thrift_types._fbthrift_MyService_second_result,
+                uri_or_name="test.dev/fixtures/basic_structured_annotations/MyService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns

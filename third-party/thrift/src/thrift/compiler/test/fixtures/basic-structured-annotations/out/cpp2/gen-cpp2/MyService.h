@@ -24,7 +24,7 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 class MyService;
 class MyServiceAsyncProcessor;
 
@@ -33,21 +33,21 @@ class MyServiceServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
    apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
    static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
 };
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations
 
 namespace apache::thrift {
 template <>
-class ServiceHandler<::test::fixtures::basic-structured-annotations::MyService> : public apache::thrift::ServerInterface {
-  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::test::fixtures::basic-structured-annotations::MyService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
+class ServiceHandler<::test::fixtures::basic_structured_annotations::MyService> : public apache::thrift::ServerInterface {
+  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, ::test::fixtures::basic_structured_annotations::MyService>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
 
  public:
   std::string_view getGeneratedName() const override { return "MyService"; }
 
   static std::string_view __fbthrift_thrift_uri() {
-    return "test.dev/fixtures/basic-structured-annotations/MyService";
+    return "test.dev/fixtures/basic_structured_annotations/MyService";
   }
 
-  typedef ::test::fixtures::basic-structured-annotations::MyServiceAsyncProcessor ProcessorType;
+  typedef ::test::fixtures::basic_structured_annotations::MyServiceAsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
   CreateMethodMetadataResult createMethodMetadata() override;
   bool isThriftGenerated() const override final { return true; }
@@ -55,15 +55,15 @@ class ServiceHandler<::test::fixtures::basic-structured-annotations::MyService> 
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:
 
-  virtual void sync_first(::test::fixtures::basic-structured-annotations::annotated_inline_string& /*_return*/);
-  [[deprecated("Use sync_first instead")]] virtual void first(::test::fixtures::basic-structured-annotations::annotated_inline_string& /*_return*/);
-  virtual folly::Future<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>> future_first();
-  virtual folly::SemiFuture<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>> semifuture_first();
+  virtual void sync_first(::test::fixtures::basic_structured_annotations::annotated_inline_string& /*_return*/);
+  [[deprecated("Use sync_first instead")]] virtual void first(::test::fixtures::basic_structured_annotations::annotated_inline_string& /*_return*/);
+  virtual folly::Future<std::unique_ptr<::test::fixtures::basic_structured_annotations::annotated_inline_string>> future_first();
+  virtual folly::SemiFuture<std::unique_ptr<::test::fixtures::basic_structured_annotations::annotated_inline_string>> semifuture_first();
 #if FOLLY_HAS_COROUTINES
-  virtual folly::coro::Task<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>> co_first();
-  virtual folly::coro::Task<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>> co_first(apache::thrift::RequestParams params);
+  virtual folly::coro::Task<std::unique_ptr<::test::fixtures::basic_structured_annotations::annotated_inline_string>> co_first();
+  virtual folly::coro::Task<std::unique_ptr<::test::fixtures::basic_structured_annotations::annotated_inline_string>> co_first(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_first(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>> callback);
+  virtual void async_tm_first(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test::fixtures::basic_structured_annotations::annotated_inline_string>> callback);
   virtual bool sync_second(::std::int64_t /*count*/);
   [[deprecated("Use sync_second instead")]] virtual bool second(::std::int64_t /*count*/);
   virtual folly::Future<bool> future_second(::std::int64_t p_count);
@@ -74,40 +74,40 @@ class ServiceHandler<::test::fixtures::basic-structured-annotations::MyService> 
 #endif
   virtual void async_tm_second(apache::thrift::HandlerCallbackPtr<bool> callback, ::std::int64_t p_count);
  private:
-  static ::test::fixtures::basic-structured-annotations::MyServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
+  static ::test::fixtures::basic_structured_annotations::MyServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_first{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_second{apache::thrift::detail::si::InvocationType::AsyncTm};
  public:
 
   virtual void fbthrift_execute_decorators_before_first(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
-  virtual void fbthrift_execute_decorators_after_first(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::test::fixtures::basic-structured-annotations::annotated_inline_string>::type /*result*/) {}
-  static void fbthrift_invoke_decorator_after_first(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::test::fixtures::basic-structured-annotations::annotated_inline_string>::type result) {
-    static_cast<ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>*>(iface)->fbthrift_execute_decorators_after_first(*ctx, result);
+  virtual void fbthrift_execute_decorators_after_first(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<::test::fixtures::basic_structured_annotations::annotated_inline_string>::type /*result*/) {}
+  static void fbthrift_invoke_decorator_after_first(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::test::fixtures::basic_structured_annotations::annotated_inline_string>::type result) {
+    static_cast<ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>*>(iface)->fbthrift_execute_decorators_after_first(*ctx, result);
   }
   virtual void fbthrift_execute_decorators_before_second(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorArgType<::std::int64_t>::type /*p_count*/) {}
   virtual void fbthrift_execute_decorators_after_second(apache::thrift::Cpp2RequestContext& /*requestCtx*/, apache::thrift::detail::DecoratorReturnType<bool>::type /*result*/) {}
   static void fbthrift_invoke_decorator_after_second(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<bool>::type result) {
-    static_cast<ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>*>(iface)->fbthrift_execute_decorators_after_second(*ctx, result);
+    static_cast<ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>*>(iface)->fbthrift_execute_decorators_after_second(*ctx, result);
   }
 };
 
 namespace detail {
-template <> struct TSchemaAssociation<::test::fixtures::basic-structured-annotations::MyService, false> {
+template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::MyService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 2611009038593588256;
-  static constexpr ::std::string_view definitionKey = {"\xc8\x2a\xeb\x8a\x75\x70\x9a\xe9\x31\x21\x27\x31\x60\xce\xcf\x00", 16};
+  static constexpr int64_t programId = 2227752972862751796;
+  static constexpr ::std::string_view definitionKey = {"\x87\x8c\x8c\x9a\x19\x91\x49\xc7\x08\x6c\x49\x48\xc6\x80\xa8\x94", 16};
 };
 }
 } // namespace apache::thrift
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 using MyServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<MyService> instead")]] = ::apache::thrift::ServiceHandler<MyService>;
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 class MyServiceSvNull : public ::apache::thrift::ServiceHandler<MyService> {
  public:
-  void first(::test::fixtures::basic-structured-annotations::annotated_inline_string& /*_return*/) override;
+  void first(::test::fixtures::basic_structured_annotations::annotated_inline_string& /*_return*/) override;
   bool second(::std::int64_t /*count*/) override;
 };
 
@@ -117,7 +117,7 @@ class MyServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
   using BaseAsyncProcessor = void;
  protected:
-  ::apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>* iface_;
+  ::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>* iface_;
  public:
   void processSerializedCompressedRequestWithMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) override;
   void executeRequest(apache::thrift::ServerRequest&& serverRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata) override;
@@ -149,7 +149,7 @@ class MyServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor
   template <class ProtocolIn_, class ProtocolOut_>
   static apache::thrift::SerializedResponse return_first(
       apache::thrift::ContextStack* ctx,
-      ::test::fixtures::basic-structured-annotations::annotated_inline_string const& _return);
+      ::test::fixtures::basic_structured_annotations::annotated_inline_string const& _return);
 
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_first(
@@ -203,9 +203,9 @@ class MyServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor
   // End of Service Methods
   //
  public:
-  MyServiceAsyncProcessor(::apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>* iface) :
+  MyServiceAsyncProcessor(::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>* iface) :
       iface_(iface) {}
   ~MyServiceAsyncProcessor() override {}
 };
 
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations

@@ -10,20 +10,20 @@
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/module_metadata.h"
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
-std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::getProcessor() {
-  return std::make_unique<::test::fixtures::basic-structured-annotations::MyServiceAsyncProcessor>(this);
+std::unique_ptr<apache::thrift::AsyncProcessor> apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::getProcessor() {
+  return std::make_unique<::test::fixtures::basic_structured_annotations::MyServiceAsyncProcessor>(this);
 }
 
-apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::CreateMethodMetadataResult apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::createMethodMetadata() {
-  return ::apache::thrift::detail::ap::createMethodMetadataMap<::test::fixtures::basic-structured-annotations::MyServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
+apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::CreateMethodMetadataResult apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::createMethodMetadata() {
+  return ::apache::thrift::detail::ap::createMethodMetadataMap<::test::fixtures::basic_structured_annotations::MyServiceAsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
 
-std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::getServiceRequestInfoMap() const {
+std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }
 
-::test::fixtures::basic-structured-annotations::MyServiceServiceInfoHolder apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::__fbthrift_serviceInfoHolder;
+::test::fixtures::basic_structured_annotations::MyServiceServiceInfoHolder apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::__fbthrift_serviceInfoHolder;
 
 //
 // Service Methods
@@ -33,28 +33,28 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 // Method 'first'
 //
 
-void apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::first(::test::fixtures::basic-structured-annotations::annotated_inline_string& /*_return*/) {
+void apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::first(::test::fixtures::basic_structured_annotations::annotated_inline_string& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("first");
 }
 
-void apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::sync_first(::test::fixtures::basic-structured-annotations::annotated_inline_string& _return) {
+void apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::sync_first(::test::fixtures::basic_structured_annotations::annotated_inline_string& _return) {
   return first(_return);
 }
 
-folly::SemiFuture<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>>
-apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::semifuture_first() {
+folly::SemiFuture<std::unique_ptr<::test::fixtures::basic_structured_annotations::annotated_inline_string>>
+apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::semifuture_first() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_first.compare_exchange_strong(
       expected,
       apache::thrift::detail::si::InvocationType::Sync,
       std::memory_order_relaxed);
-  auto ret = std::make_unique<::test::fixtures::basic-structured-annotations::annotated_inline_string>();
+  auto ret = std::make_unique<::test::fixtures::basic_structured_annotations::annotated_inline_string>();
   sync_first(*ret);
   return folly::makeSemiFuture(std::move(ret));
 }
 
-folly::Future<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>>
-apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::future_first() {
+folly::Future<std::unique_ptr<::test::fixtures::basic_structured_annotations::annotated_inline_string>>
+apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::future_first() {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
   __fbthrift_invocation_first.compare_exchange_strong(
       expected,
@@ -66,8 +66,8 @@ apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::M
 }
 
 #if FOLLY_HAS_COROUTINES
-folly::coro::Task<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>>
-apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::co_first() {
+folly::coro::Task<std::unique_ptr<::test::fixtures::basic_structured_annotations::annotated_inline_string>>
+apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::co_first() {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
   __fbthrift_invocation_first.compare_exchange_strong(
       expected,
@@ -77,7 +77,7 @@ apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::M
                              withCapturedArgs<>());
 }
 
-folly::coro::Task<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>> apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::co_first(
+folly::coro::Task<std::unique_ptr<::test::fixtures::basic_structured_annotations::annotated_inline_string>> apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::co_first(
     apache::thrift::RequestParams /* params */) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
   __fbthrift_invocation_first.compare_exchange_strong(
@@ -88,8 +88,8 @@ folly::coro::Task<std::unique_ptr<::test::fixtures::basic-structured-annotations
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::async_tm_first(
-    apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>> callback) {
+void apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::async_tm_first(
+    apache::thrift::HandlerCallbackPtr<std::unique_ptr<::test::fixtures::basic_structured_annotations::annotated_inline_string>> callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -157,7 +157,7 @@ determineInvocationType:
       }
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync: {
-        ::test::fixtures::basic-structured-annotations::annotated_inline_string _return;
+        ::test::fixtures::basic_structured_annotations::annotated_inline_string _return;
         sync_first(_return);
         callback->result(std::move(_return));
         return;
@@ -183,16 +183,16 @@ determineInvocationType:
 // Method 'second'
 //
 
-bool apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::second(::std::int64_t /*count*/) {
+bool apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::second(::std::int64_t /*count*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("second");
 }
 
-bool apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::sync_second(::std::int64_t p_count) {
+bool apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::sync_second(::std::int64_t p_count) {
   return second(p_count);
 }
 
 folly::SemiFuture<bool>
-apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::semifuture_second(::std::int64_t p_count) {
+apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::semifuture_second(::std::int64_t p_count) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_second.compare_exchange_strong(
       expected,
@@ -202,7 +202,7 @@ apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::M
 }
 
 folly::Future<bool>
-apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::future_second(::std::int64_t p_count) {
+apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::future_second(::std::int64_t p_count) {
   auto expected{apache::thrift::detail::si::InvocationType::Future};
   __fbthrift_invocation_second.compare_exchange_strong(
       expected,
@@ -215,7 +215,7 @@ apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::M
 
 #if FOLLY_HAS_COROUTINES
 folly::coro::Task<bool>
-apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::co_second(::std::int64_t p_count) {
+apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::co_second(::std::int64_t p_count) {
   auto expected{apache::thrift::detail::si::InvocationType::Coro};
   __fbthrift_invocation_second.compare_exchange_strong(
       expected,
@@ -225,7 +225,7 @@ apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::M
                              withCapturedArgs<::std::int64_t /*count*/>(p_count));
 }
 
-folly::coro::Task<bool> apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::co_second(
+folly::coro::Task<bool> apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::co_second(
     apache::thrift::RequestParams /* params */, ::std::int64_t p_count) {
   auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
   __fbthrift_invocation_second.compare_exchange_strong(
@@ -236,7 +236,7 @@ folly::coro::Task<bool> apache::thrift::ServiceHandler<::test::fixtures::basic-s
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::async_tm_second(
+void apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>::async_tm_second(
     apache::thrift::HandlerCallbackPtr<bool> callback, ::std::int64_t p_count) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
@@ -330,9 +330,9 @@ determineInvocationType:
 //
 
 
-namespace test::fixtures::basic-structured-annotations {
+namespace test::fixtures::basic_structured_annotations {
 
-void MyServiceSvNull::first(::test::fixtures::basic-structured-annotations::annotated_inline_string& /*_return*/) {  }
+void MyServiceSvNull::first(::test::fixtures::basic_structured_annotations::annotated_inline_string& /*_return*/) {  }
 
 bool MyServiceSvNull::second(::std::int64_t /*count*/) { 
   return 0;
@@ -344,7 +344,7 @@ std::string_view MyServiceAsyncProcessor::getServiceName() {
 }
 
 void MyServiceAsyncProcessor::getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
-  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>>::gen(response);
+  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen(response);
 }
 
 void MyServiceAsyncProcessor::processSerializedCompressedRequestWithMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
@@ -397,4 +397,4 @@ apache::thrift::ServiceRequestInfoMap MyServiceServiceInfoHolder::staticRequestI
 
   return requestInfoMap;
 }
-} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic_structured_annotations

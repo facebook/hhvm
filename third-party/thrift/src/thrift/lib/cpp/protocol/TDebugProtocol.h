@@ -152,6 +152,10 @@ class TDebugProtocolFactory : public TProtocolFactory {
  public:
   TDebugProtocolFactory() {}
   ~TDebugProtocolFactory() override {}
+  TDebugProtocolFactory(const TDebugProtocolFactory&) = delete;
+  TDebugProtocolFactory& operator=(const TDebugProtocolFactory&) = delete;
+  TDebugProtocolFactory(TDebugProtocolFactory&&) = delete;
+  TDebugProtocolFactory& operator=(TDebugProtocolFactory&&) = delete;
 
   std::shared_ptr<TProtocol> getProtocol(
       std::shared_ptr<TTransport> trans) override {

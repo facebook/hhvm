@@ -23,48 +23,92 @@ Structs and enums will be namespaced appropriately if they are either defined
 in a different thrift file, or defined in the same thrift file but this is
 in the client or server source rather than the type definition source.
 
-}}{{#if type:has_adapter?}}_fbthrift_python_types.AdaptedTypeInfo({{/if}}{{!
-}}{{#type:bool?}}_fbthrift_python_types.typeinfo_bool{{/type:bool?}}{{!
-}}{{#type:byte?}}_fbthrift_python_types.typeinfo_byte{{/type:byte?}}{{!
-}}{{#type:i16?}}_fbthrift_python_types.typeinfo_i16{{/type:i16?}}{{!
-}}{{#type:i32?}}_fbthrift_python_types.typeinfo_i32{{/type:i32?}}{{!
-}}{{#type:i64?}}_fbthrift_python_types.typeinfo_i64{{/type:i64?}}{{!
-}}{{#type:double?}}_fbthrift_python_types.typeinfo_double{{/type:double?}}{{!
-}}{{#type:float?}}_fbthrift_python_types.typeinfo_float{{/type:float?}}{{!
-}}{{#type:string?}}_fbthrift_python_types.typeinfo_string{{/type:string?}}{{!
-}}{{#type:binary?}}{{#type:iobuf?}}_fbthrift_python_types.typeinfo_iobuf{{/type:iobuf?}}{{^type:iobuf?}}_fbthrift_python_types.typeinfo_binary{{/type:iobuf?}}{{/type:binary?}}{{!
-}}{{#python.generate_immutable_types?}}{{!
-}}{{#type:structured}}_fbthrift_python_types.StructTypeInfo({{!
-  }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
-  }}{{> structs/unadapted_name}}){{!
-}}{{/type:structured}}{{!
-}}{{#type:list?}}_fbthrift_python_types.ListTypeInfo({{#type:list_elem_type}}{{> types/typeinfo }}{{/type:list_elem_type}}){{/type:list?}}{{!
-}}{{#type:set?}}_fbthrift_python_types.SetTypeInfo({{#type:set_elem_type}}{{> types/typeinfo }}{{/type:set_elem_type}}){{/type:set?}}{{!
-}}{{#type:map?}}_fbthrift_python_types.MapTypeInfo({{!
-  }}{{#type:key_type}}{{> types/typeinfo }}{{/type:key_type}}, {{!
-  }}{{#type:value_type}}{{> types/typeinfo }}{{/type:value_type}}{{!
-}}){{/type:map?}}{{!
-}}{{/python.generate_immutable_types?}}{{!
-}}{{#python.generate_mutable_types?}}{{!
-}}{{#type:structured}}_fbthrift_python_mutable_typeinfos.MutableStructTypeInfo({{!
-  }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
-  }}{{> structs/unadapted_name}}){{!
-}}{{/type:structured}}{{!
-}}{{#type:list?}}_fbthrift_python_mutable_typeinfos.MutableListTypeInfo({{#type:list_elem_type}}{{> types/typeinfo }}{{/type:list_elem_type}}){{/type:list?}}{{!
-}}{{#type:set?}}_fbthrift_python_mutable_typeinfos.MutableSetTypeInfo({{#type:set_elem_type}}{{> types/typeinfo }}{{/type:set_elem_type}}){{/type:set?}}{{!
-}}{{#type:map?}}_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo({{!
-  }}{{#type:key_type}}{{> types/typeinfo }}{{/type:key_type}}, {{!
-  }}{{#type:value_type}}{{> types/typeinfo }}{{/type:value_type}}{{!
-}}){{/type:map?}}{{!
-}}{{/python.generate_mutable_types?}}{{!
-}}{{#type:enum}}_fbthrift_python_types.EnumTypeInfo({{!
-  }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
-  }}{{enum:name}}){{/type:enum}}{{!
-}}{{#if type:has_adapter?}}{{#let adapter = type:adapter}}{{!
-  }}, {{adapter.name}}, lambda: {{!
-  }}{{#if (object.notnull? adapter.transitive_annotation)}}{{!
-    }}{{#with adapter.transitive_annotation}}{{> types/constant_value }}{{/with}}{{!
-  }}{{#else}}{{!
-    }}None{{!
-  }}{{/if (object.notnull? adapter.transitive_annotation)}}{{!
-}}){{/if type:has_adapter?}}
+}}{{#pragma ignore-newlines}}
+{{#if (not (object.is? this type="native_handle"))}}
+  {{! If we're dealing with a mstch object, recurse this template with its
+      Whisker prototype as the context. }}
+  {{#type:self}}
+{{> types/typeinfo }}
+  {{/type:self}}
+
+{{#else}}
+  {{! We're dealing with a native handle (Whisker prototype). !}}
+  {{#if type:has_adapter?}}
+    {{! If the type has an adapter, open AdaptedTypeInfo wrapper }}
+_fbthrift_python_types.AdaptedTypeInfo(
+  {{/if type:has_adapter?}}
+
+  {{! Primitives and enums }}
+  {{#if type:bool?}}
+_fbthrift_python_types.typeinfo_bool
+  {{#else if type:byte?}}
+_fbthrift_python_types.typeinfo_byte
+  {{#else if type:i16?}}
+_fbthrift_python_types.typeinfo_i16
+  {{#else if type:i32?}}
+_fbthrift_python_types.typeinfo_i32
+  {{#else if type:i64?}}
+_fbthrift_python_types.typeinfo_i64
+  {{#else if type:double?}}
+_fbthrift_python_types.typeinfo_double
+  {{#else if type:float?}}
+_fbthrift_python_types.typeinfo_float
+  {{#else if type:string?}}
+_fbthrift_python_types.typeinfo_string
+  {{#else if type:binary?}}
+_fbthrift_python_types.typeinfo_{{#if type:iobuf?}}iobuf{{#else}}binary{{/if}}
+  {{#else if type:enum?}}
+_fbthrift_python_types.EnumTypeInfo({{#if type:need_module_path?}}{{type:module_mangle}}.{{/if}}{{type:true_type.name}})
+  {{/if type:bool?}}
+
+  {{! Immutable type for structs and containers }}
+  {{#if python.generate_immutable_types?}}
+    {{#type:true_type}}
+    {{#if type:structured?}}
+_fbthrift_python_types.StructTypeInfo({{#if type:need_module_path?}}{{type:module_mangle}}.{{/if}}{{> structs/unadapted_name}})
+    {{#else if type:list?}}
+_fbthrift_python_types.ListTypeInfo({{#list:elem_type}}{{> types/typeinfo }}{{/list:elem_type}})
+    {{#else if type:set?}}
+_fbthrift_python_types.SetTypeInfo({{#set:elem_type}}{{> types/typeinfo }}{{/set:elem_type}})
+    {{#else if type:map?}}
+_fbthrift_python_types.MapTypeInfo(
+{{#map:key_type}}{{> types/typeinfo }}{{/map:key_type}}, {{!}}
+{{#map:val_type}}{{> types/typeinfo }}{{/map:val_type}}
+)
+    {{/if type:structured?}}
+    {{/type:true_type}}
+  {{/if python.generate_immutable_types?}}
+
+  {{! Mutable type for structs and containers }}
+  {{#if python.generate_mutable_types?}}
+    {{#type:true_type}}
+    {{#if type:structured?}}
+_fbthrift_python_mutable_typeinfos.MutableStructTypeInfo({{#if type:need_module_path?}}{{type:module_mangle}}.{{/if}}{{> structs/unadapted_name}})
+    {{#else if type:list?}}
+_fbthrift_python_mutable_typeinfos.MutableListTypeInfo({{#list:elem_type}}{{> types/typeinfo }}{{/list:elem_type}})
+    {{#else if type:set?}}
+_fbthrift_python_mutable_typeinfos.MutableSetTypeInfo({{#set:elem_type}}{{> types/typeinfo }}{{/set:elem_type}})
+    {{#else if type:map?}}
+_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(
+{{#map:key_type}}{{> types/typeinfo }}{{/map:key_type}}, {{!}}
+{{#map:val_type}}{{> types/typeinfo }}{{/map:val_type}}
+)
+    {{/if type:structured?}}
+    {{/type:true_type}}
+  {{/if python.generate_mutable_types?}}
+
+  {{#if type:has_adapter?}}
+    {{! Close AdaptedTypeInfo wrapper }}
+    {{#let adapter = type:adapter}}
+, {{adapter.name}}, lambda: {{!}}
+    {{#if (object.notnull? adapter.transitive_annotation)}}
+      {{#adapter.transitive_annotation}}
+{{> types/constant_value }}
+      {{/adapter.transitive_annotation}}
+    {{#else}}
+None
+    {{/if (object.notnull? adapter.transitive_annotation)}}
+)
+  {{/if type:has_adapter?}}
+
+{{/if (not (object.is? this type="native_handle"))}}

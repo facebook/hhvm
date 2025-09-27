@@ -40,6 +40,7 @@
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
+#include <thrift/lib/cpp2/async/ServerBiDiStreamFactory.h>
 #include <thrift/lib/cpp2/async/ServiceInfoHolder.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
@@ -371,6 +372,9 @@ namespace detail::ap {
 
 template <ErrorBlame Blame, typename Protocol, typename PResult, typename T>
 class StreamElementEncoderImpl;
+
+template <typename Protocol, typename PResult, typename T>
+class SinkElementDecoderImpl;
 
 template <typename Protocol, typename PResult, typename T>
 folly::Try<T> decode_stream_element(
@@ -1375,6 +1379,15 @@ class StreamElementEncoderImpl final
 };
 
 template <typename Protocol, typename PResult, typename T>
+class SinkElementDecoderImpl final
+    : public apache::thrift::detail::SinkElementDecoder<T> {
+  folly::Try<T> operator()(
+      folly::Try<apache::thrift::StreamPayload>&& payload) override {
+    return decode_stream_element<Protocol, PResult, T>(std::move(payload));
+  }
+};
+
+template <typename Protocol, typename PResult, typename T>
 T decode_stream_payload_impl(folly::IOBuf& payload, folly::tag_t<T>) {
   PResult args;
   T res{};
@@ -1493,13 +1506,24 @@ folly::exception_wrapper decode_stream_exception(folly::exception_wrapper ew) {
   return ew;
 }
 
+template <ErrorBlame Blame, typename Protocol, typename PResult, typename T>
+StreamElementEncoder<T>& get_encoder() {
+  static StreamElementEncoderImpl<Blame, Protocol, PResult, T> encoder;
+  return encoder;
+}
+
 template <typename Protocol, typename PResult, typename T>
 ServerStreamFactory encode_server_stream(
     apache::thrift::ServerStream<T>&& stream,
     folly::Executor::KeepAlive<> serverExecutor) {
-  static StreamElementEncoderImpl<ErrorBlame::SERVER, Protocol, PResult, T>
-      encode;
-  return stream(std::move(serverExecutor), &encode);
+  auto& encoder = get_encoder<ErrorBlame::SERVER, Protocol, PResult, T>();
+  return stream(std::move(serverExecutor), &encoder);
+}
+
+template <typename Protocol, typename PResult, typename T>
+SinkElementDecoder<T>& get_decoder() {
+  static SinkElementDecoderImpl<Protocol, PResult, T> decoder;
+  return decoder;
 }
 
 template <typename Protocol, typename PResult, typename T>
@@ -1574,6 +1598,26 @@ apache::thrift::detail::SinkConsumerImpl toSinkConsumerImpl(
 #else
   std::terminate();
 #endif
+}
+
+template <
+    typename Protocol,
+    typename SinkPResult,
+    typename StreamPResult,
+    typename InputType,
+    typename OutputType>
+apache::thrift::detail::ServerBiDiStreamFactory encode_server_bidi_stream(
+    apache::thrift::StreamTransformation<InputType, OutputType>&&
+        streamTransformation,
+    folly::Executor::KeepAlive<> serverExecutor) {
+  auto& decoder = get_decoder<Protocol, SinkPResult, InputType>();
+  auto& encoder =
+      get_encoder<ErrorBlame::SERVER, Protocol, StreamPResult, OutputType>();
+  return ServerBiDiStreamFactory(
+      std::move(streamTransformation),
+      decoder,
+      encoder,
+      std::move(serverExecutor));
 }
 
 } // namespace detail::ap

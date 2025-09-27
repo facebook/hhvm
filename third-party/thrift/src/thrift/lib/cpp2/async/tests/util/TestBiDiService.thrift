@@ -21,4 +21,7 @@ include "thrift/annotation/cpp.thrift"
 service TestBiDiService {
   // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<string>, stream<string> echo();
+
+  // @lint-ignore THRIFTCHECKS new unreleased feature
+  string, sink<string>, stream<string> echoWithResponse(1: string initial);
 }

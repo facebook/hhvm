@@ -434,7 +434,8 @@ func (p *procFuncMyServiceFoo) RunContext(ctx context.Context, reqStruct thrift.
     result := newRespMyServiceFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
-        return nil, thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Foo: " + err.Error(), err)
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Foo: " + err.Error(), err)
+        return x, x
     }
 
     return result, nil
@@ -565,7 +566,8 @@ func (p *procFuncFactoriesFoo) RunContext(ctx context.Context, reqStruct thrift.
     result := newRespFactoriesFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
-        return nil, thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Foo: " + err.Error(), err)
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Foo: " + err.Error(), err)
+        return x, x
     }
 
     return result, nil
@@ -696,7 +698,8 @@ func (p *procFuncPerformFoo) RunContext(ctx context.Context, reqStruct thrift.Re
     result := newRespPerformFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
-        return nil, thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Foo: " + err.Error(), err)
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Foo: " + err.Error(), err)
+        return x, x
     }
 
     return result, nil
@@ -827,7 +830,8 @@ func (p *procFuncInteractWithSharedDoSomeSimilarThings) RunContext(ctx context.C
     result := newRespInteractWithSharedDoSomeSimilarThings()
     retval, err := p.handler.DoSomeSimilarThings(ctx)
     if err != nil {
-        return nil, thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoSomeSimilarThings: " + err.Error(), err)
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoSomeSimilarThings: " + err.Error(), err)
+        return x, x
     }
 
     result.Success = retval

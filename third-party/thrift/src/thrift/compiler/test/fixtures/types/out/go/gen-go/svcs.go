@@ -172,7 +172,8 @@ func (p *procFuncSomeServiceBounceMap) RunContext(ctx context.Context, reqStruct
     result := newRespSomeServiceBounceMap()
     retval, err := p.handler.BounceMap(ctx, args.M)
     if err != nil {
-        return nil, thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing BounceMap: " + err.Error(), err)
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing BounceMap: " + err.Error(), err)
+        return x, x
     }
 
     result.Success = retval
@@ -219,7 +220,8 @@ func (p *procFuncSomeServiceBinaryKeyedMap) RunContext(ctx context.Context, reqS
     result := newRespSomeServiceBinaryKeyedMap()
     retval, err := p.handler.BinaryKeyedMap(ctx, args.R)
     if err != nil {
-        return nil, thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing BinaryKeyedMap: " + err.Error(), err)
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing BinaryKeyedMap: " + err.Error(), err)
+        return x, x
     }
 
     result.Success = retval

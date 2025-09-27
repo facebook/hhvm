@@ -154,7 +154,8 @@ func (p *procFuncServiceFunc) RunContext(ctx context.Context, reqStruct thrift.R
     result := newRespServiceFunc()
     retval, err := p.handler.Func(ctx, args.Arg1, args.Arg2, args.Arg3)
     if err != nil {
-        return nil, thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Func: " + err.Error(), err)
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Func: " + err.Error(), err)
+        return x, x
     }
 
     result.Success = &retval
@@ -304,7 +305,8 @@ func (p *procFuncAdapterServiceCount) RunContext(ctx context.Context, reqStruct 
     result := newRespAdapterServiceCount()
     retval, err := p.handler.Count(ctx)
     if err != nil {
-        return nil, thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Count: " + err.Error(), err)
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Count: " + err.Error(), err)
+        return x, x
     }
 
     result.Success = retval
@@ -351,7 +353,8 @@ func (p *procFuncAdapterServiceAdaptedTypes) RunContext(ctx context.Context, req
     result := newRespAdapterServiceAdaptedTypes()
     retval, err := p.handler.AdaptedTypes(ctx, args.Arg)
     if err != nil {
-        return nil, thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing AdaptedTypes: " + err.Error(), err)
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing AdaptedTypes: " + err.Error(), err)
+        return x, x
     }
 
     result.Success = retval

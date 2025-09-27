@@ -154,7 +154,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_do_some_similar_things(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse InteractWithSharedAsyncProcessor::return_do_some_similar_things(
+/* static */ apache::thrift::SerializedResponse InteractWithSharedAsyncProcessor::return_do_some_similar_things(
     apache::thrift::ContextStack* ctx,
     ::thrift::shared_interactions::DoSomethingResult const& _return) {
   ProtocolOut_ prot;
@@ -344,7 +344,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_frobnicate(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse InteractWithSharedAsyncProcessor::return_MyInteraction_frobnicate(
+/* static */ apache::thrift::SerializedResponse InteractWithSharedAsyncProcessor::return_MyInteraction_frobnicate(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -661,7 +661,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_truthify(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory InteractWithSharedAsyncProcessor::return_MyInteraction_truthify(
+/* static */ apache::thrift::ResponseAndServerStreamFactory InteractWithSharedAsyncProcessor::return_MyInteraction_truthify(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<bool>&& _return) {
@@ -831,7 +831,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_encode(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-std::pair<
+/* static */ std::pair<
     apache::thrift::SerializedResponse,
     apache::thrift::detail::SinkConsumerImpl>
 InteractWithSharedAsyncProcessor::return_MyInteraction_encode(
@@ -1025,7 +1025,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_init(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse InteractWithSharedAsyncProcessor::return_SharedInteraction_init(
+/* static */ apache::thrift::SerializedResponse InteractWithSharedAsyncProcessor::return_SharedInteraction_init(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -1193,7 +1193,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_do_somet
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse InteractWithSharedAsyncProcessor::return_SharedInteraction_do_something(
+/* static */ apache::thrift::SerializedResponse InteractWithSharedAsyncProcessor::return_SharedInteraction_do_something(
     apache::thrift::ContextStack* ctx,
     ::thrift::shared_interactions::DoSomethingResult const& _return) {
   ProtocolOut_ prot;
@@ -1361,7 +1361,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_tear_dow
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse InteractWithSharedAsyncProcessor::return_SharedInteraction_tear_down(
+/* static */ apache::thrift::SerializedResponse InteractWithSharedAsyncProcessor::return_SharedInteraction_tear_down(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::thrift::shared_interactions::InteractWithShared_SharedInteraction_tear_down_presult result;

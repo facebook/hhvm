@@ -18,6 +18,7 @@
 
 #include <thrift/lib/cpp2/async/BiDiStream.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
+#include <thrift/lib/cpp2/async/ServerBiDiStreamFactory.h>
 #include <thrift/lib/cpp2/async/processor/HandlerCallbackBase.h>
 
 #include <thrift/lib/cpp2/util/IntrusiveSharedPtr.h>

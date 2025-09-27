@@ -154,7 +154,7 @@ void DerivedServiceAsyncProcessor::executeRequest_get_six(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse DerivedServiceAsyncProcessor::return_get_six(
+/* static */ apache::thrift::SerializedResponse DerivedServiceAsyncProcessor::return_get_six(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;

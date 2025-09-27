@@ -44,7 +44,8 @@
 {{/function:cpp_recv_arg?}}
 {{#function:cpp_recv_arg?}}
  {{#if function:self.bidirectional_stream?}}
-  static /* TODO(ezou) needs to be something else */ void  return_{{function:prefixed_name}}(
+  static apache::thrift::ResponseAndServerBiDiStreamFactory
+  return_{{function:prefixed_name}}(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     {{function:cpp_return_type}}&& _return);

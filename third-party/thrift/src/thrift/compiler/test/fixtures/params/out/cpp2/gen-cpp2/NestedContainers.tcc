@@ -165,7 +165,7 @@ void NestedContainersAsyncProcessor::executeRequest_mapList(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse NestedContainersAsyncProcessor::return_mapList(
+/* static */ apache::thrift::SerializedResponse NestedContainersAsyncProcessor::return_mapList(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::NestedContainers_mapList_presult result;
@@ -332,7 +332,7 @@ void NestedContainersAsyncProcessor::executeRequest_mapSet(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse NestedContainersAsyncProcessor::return_mapSet(
+/* static */ apache::thrift::SerializedResponse NestedContainersAsyncProcessor::return_mapSet(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::NestedContainers_mapSet_presult result;
@@ -499,7 +499,7 @@ void NestedContainersAsyncProcessor::executeRequest_listMap(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse NestedContainersAsyncProcessor::return_listMap(
+/* static */ apache::thrift::SerializedResponse NestedContainersAsyncProcessor::return_listMap(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::NestedContainers_listMap_presult result;
@@ -666,7 +666,7 @@ void NestedContainersAsyncProcessor::executeRequest_listSet(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse NestedContainersAsyncProcessor::return_listSet(
+/* static */ apache::thrift::SerializedResponse NestedContainersAsyncProcessor::return_listSet(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::NestedContainers_listSet_presult result;
@@ -833,7 +833,7 @@ void NestedContainersAsyncProcessor::executeRequest_turtles(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse NestedContainersAsyncProcessor::return_turtles(
+/* static */ apache::thrift::SerializedResponse NestedContainersAsyncProcessor::return_turtles(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::NestedContainers_turtles_presult result;

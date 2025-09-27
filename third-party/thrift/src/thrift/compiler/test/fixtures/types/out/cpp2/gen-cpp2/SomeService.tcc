@@ -159,7 +159,7 @@ void SomeServiceAsyncProcessor::executeRequest_bounce_map(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SomeServiceAsyncProcessor::return_bounce_map(
+/* static */ apache::thrift::SerializedResponse SomeServiceAsyncProcessor::return_bounce_map(
     apache::thrift::ContextStack* ctx,
     ::apache::thrift::fixtures::types::SomeMap const& _return) {
   ProtocolOut_ prot;
@@ -329,7 +329,7 @@ void SomeServiceAsyncProcessor::executeRequest_binary_keyed_map(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SomeServiceAsyncProcessor::return_binary_keyed_map(
+/* static */ apache::thrift::SerializedResponse SomeServiceAsyncProcessor::return_binary_keyed_map(
     apache::thrift::ContextStack* ctx,
     ::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t> const& _return) {
   ProtocolOut_ prot;

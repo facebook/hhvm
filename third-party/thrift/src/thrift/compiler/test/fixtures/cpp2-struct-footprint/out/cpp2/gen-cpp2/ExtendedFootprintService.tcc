@@ -154,7 +154,7 @@ void ExtendedFootprintServiceAsyncProcessor::executeRequest_getComplexMap(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ExtendedFootprintServiceAsyncProcessor::return_getComplexMap(
+/* static */ apache::thrift::SerializedResponse ExtendedFootprintServiceAsyncProcessor::return_getComplexMap(
     apache::thrift::ContextStack* ctx,
     ::std::map<::std::int32_t, ::std::vector<::cpp2_struct_footprint::ComplexStruct>> const& _return) {
   ProtocolOut_ prot;

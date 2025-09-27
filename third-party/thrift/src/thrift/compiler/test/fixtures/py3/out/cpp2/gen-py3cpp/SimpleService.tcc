@@ -236,7 +236,7 @@ void SimpleServiceAsyncProcessor::executeRequest_get_five(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_five(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_five(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -406,7 +406,7 @@ void SimpleServiceAsyncProcessor::executeRequest_add_five(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_add_five(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_add_five(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -573,7 +573,7 @@ void SimpleServiceAsyncProcessor::executeRequest_do_nothing(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_do_nothing(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_do_nothing(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::py3::simple::SimpleService_do_nothing_presult result;
@@ -743,7 +743,7 @@ void SimpleServiceAsyncProcessor::executeRequest_concat(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_concat(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_concat(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;
@@ -913,7 +913,7 @@ void SimpleServiceAsyncProcessor::executeRequest_get_value(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_value(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_value(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -1083,7 +1083,7 @@ void SimpleServiceAsyncProcessor::executeRequest_negate(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_negate(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_negate(
     apache::thrift::ContextStack* ctx,
     bool const& _return) {
   ProtocolOut_ prot;
@@ -1253,7 +1253,7 @@ void SimpleServiceAsyncProcessor::executeRequest_tiny(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_tiny(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_tiny(
     apache::thrift::ContextStack* ctx,
     ::std::int8_t const& _return) {
   ProtocolOut_ prot;
@@ -1423,7 +1423,7 @@ void SimpleServiceAsyncProcessor::executeRequest_small(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_small(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_small(
     apache::thrift::ContextStack* ctx,
     ::std::int16_t const& _return) {
   ProtocolOut_ prot;
@@ -1593,7 +1593,7 @@ void SimpleServiceAsyncProcessor::executeRequest_big(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_big(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_big(
     apache::thrift::ContextStack* ctx,
     ::std::int64_t const& _return) {
   ProtocolOut_ prot;
@@ -1763,7 +1763,7 @@ void SimpleServiceAsyncProcessor::executeRequest_two(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_two(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_two(
     apache::thrift::ContextStack* ctx,
     double const& _return) {
   ProtocolOut_ prot;
@@ -1930,7 +1930,7 @@ void SimpleServiceAsyncProcessor::executeRequest_expected_exception(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_expected_exception(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_expected_exception(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::py3::simple::SimpleService_expected_exception_presult result;
@@ -2112,7 +2112,7 @@ void SimpleServiceAsyncProcessor::executeRequest_unexpected_exception(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_unexpected_exception(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_unexpected_exception(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -2282,7 +2282,7 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i16_list(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_sum_i16_list(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_sum_i16_list(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -2452,7 +2452,7 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i32_list(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_sum_i32_list(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_sum_i32_list(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -2622,7 +2622,7 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i64_list(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_sum_i64_list(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_sum_i64_list(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -2792,7 +2792,7 @@ void SimpleServiceAsyncProcessor::executeRequest_concat_many(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_concat_many(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_concat_many(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;
@@ -2962,7 +2962,7 @@ void SimpleServiceAsyncProcessor::executeRequest_count_structs(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_count_structs(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_count_structs(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -3132,7 +3132,7 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_set(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_sum_set(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_sum_set(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -3305,7 +3305,7 @@ void SimpleServiceAsyncProcessor::executeRequest_contains_word(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_contains_word(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_contains_word(
     apache::thrift::ContextStack* ctx,
     bool const& _return) {
   ProtocolOut_ prot;
@@ -3478,7 +3478,7 @@ void SimpleServiceAsyncProcessor::executeRequest_get_map_value(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_map_value(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_map_value(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;
@@ -3648,7 +3648,7 @@ void SimpleServiceAsyncProcessor::executeRequest_map_length(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_map_length(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_map_length(
     apache::thrift::ContextStack* ctx,
     ::std::int16_t const& _return) {
   ProtocolOut_ prot;
@@ -3818,7 +3818,7 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_map_values(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_sum_map_values(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_sum_map_values(
     apache::thrift::ContextStack* ctx,
     ::std::int16_t const& _return) {
   ProtocolOut_ prot;
@@ -3988,7 +3988,7 @@ void SimpleServiceAsyncProcessor::executeRequest_complex_sum_i32(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_complex_sum_i32(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_complex_sum_i32(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -4158,7 +4158,7 @@ void SimpleServiceAsyncProcessor::executeRequest_repeat_name(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_repeat_name(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_repeat_name(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;
@@ -4325,7 +4325,7 @@ void SimpleServiceAsyncProcessor::executeRequest_get_struct(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_struct(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_struct(
     apache::thrift::ContextStack* ctx,
     ::py3::simple::SimpleStruct const& _return) {
   ProtocolOut_ prot;
@@ -4495,7 +4495,7 @@ void SimpleServiceAsyncProcessor::executeRequest_fib(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_fib(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_fib(
     apache::thrift::ContextStack* ctx,
     ::std::vector<::std::int32_t> const& _return) {
   ProtocolOut_ prot;
@@ -4665,7 +4665,7 @@ void SimpleServiceAsyncProcessor::executeRequest_unique_words(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_unique_words(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_unique_words(
     apache::thrift::ContextStack* ctx,
     ::std::set<::std::string> const& _return) {
   ProtocolOut_ prot;
@@ -4835,7 +4835,7 @@ void SimpleServiceAsyncProcessor::executeRequest_words_count(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_words_count(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_words_count(
     apache::thrift::ContextStack* ctx,
     ::std::map<::std::string, ::std::int16_t> const& _return) {
   ProtocolOut_ prot;
@@ -5005,7 +5005,7 @@ void SimpleServiceAsyncProcessor::executeRequest_set_enum(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_set_enum(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_set_enum(
     apache::thrift::ContextStack* ctx,
     ::py3::simple::AnEnum const& _return) {
   ProtocolOut_ prot;
@@ -5178,7 +5178,7 @@ void SimpleServiceAsyncProcessor::executeRequest_list_of_lists(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_list_of_lists(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_list_of_lists(
     apache::thrift::ContextStack* ctx,
     ::std::vector<::std::vector<::std::int32_t>> const& _return) {
   ProtocolOut_ prot;
@@ -5348,7 +5348,7 @@ void SimpleServiceAsyncProcessor::executeRequest_word_character_frequency(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_word_character_frequency(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_word_character_frequency(
     apache::thrift::ContextStack* ctx,
     ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>> const& _return) {
   ProtocolOut_ prot;
@@ -5518,7 +5518,7 @@ void SimpleServiceAsyncProcessor::executeRequest_list_of_sets(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_list_of_sets(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_list_of_sets(
     apache::thrift::ContextStack* ctx,
     ::std::vector<::std::set<::std::string>> const& _return) {
   ProtocolOut_ prot;
@@ -5688,7 +5688,7 @@ void SimpleServiceAsyncProcessor::executeRequest_nested_map_argument(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_nested_map_argument(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_nested_map_argument(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -5858,7 +5858,7 @@ void SimpleServiceAsyncProcessor::executeRequest_make_sentence(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_make_sentence(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_make_sentence(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;
@@ -6028,7 +6028,7 @@ void SimpleServiceAsyncProcessor::executeRequest_get_union(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_union(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_union(
     apache::thrift::ContextStack* ctx,
     ::std::set<::std::int32_t> const& _return) {
   ProtocolOut_ prot;
@@ -6198,7 +6198,7 @@ void SimpleServiceAsyncProcessor::executeRequest_get_keys(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_keys(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_keys(
     apache::thrift::ContextStack* ctx,
     ::std::set<::std::string> const& _return) {
   ProtocolOut_ prot;
@@ -6368,7 +6368,7 @@ void SimpleServiceAsyncProcessor::executeRequest_lookup_double(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_lookup_double(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_lookup_double(
     apache::thrift::ContextStack* ctx,
     double const& _return) {
   ProtocolOut_ prot;
@@ -6538,7 +6538,7 @@ void SimpleServiceAsyncProcessor::executeRequest_retrieve_binary(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_retrieve_binary(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_retrieve_binary(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;
@@ -6708,7 +6708,7 @@ void SimpleServiceAsyncProcessor::executeRequest_contain_binary(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_contain_binary(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_contain_binary(
     apache::thrift::ContextStack* ctx,
     ::std::set<::std::string> const& _return) {
   ProtocolOut_ prot;
@@ -6878,7 +6878,7 @@ void SimpleServiceAsyncProcessor::executeRequest_contain_enum(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_contain_enum(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_contain_enum(
     apache::thrift::ContextStack* ctx,
     ::std::vector<::py3::simple::AnEnum> const& _return) {
   ProtocolOut_ prot;
@@ -7048,7 +7048,7 @@ void SimpleServiceAsyncProcessor::executeRequest_get_binary_union_struct(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_binary_union_struct(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_binary_union_struct(
     apache::thrift::ContextStack* ctx,
     ::py3::simple::BinaryUnionStruct const& _return) {
   ProtocolOut_ prot;
@@ -7215,7 +7215,7 @@ void SimpleServiceAsyncProcessor::executeRequest_get_struct_hidden(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_struct_hidden(
+/* static */ apache::thrift::SerializedResponse SimpleServiceAsyncProcessor::return_get_struct_hidden(
     apache::thrift::ContextStack* ctx,
     ::py3::simple::SimpleStruct const& _return) {
   ProtocolOut_ prot;

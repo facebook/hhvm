@@ -159,7 +159,7 @@ void HeaderClientMethodsAnnotationOnServiceAsyncProcessor::executeRequest_echo(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse HeaderClientMethodsAnnotationOnServiceAsyncProcessor::return_echo(
+/* static */ apache::thrift::SerializedResponse HeaderClientMethodsAnnotationOnServiceAsyncProcessor::return_echo(
     apache::thrift::ContextStack* ctx,
     ::cpp2::EchoResponse const& _return) {
   ProtocolOut_ prot;
@@ -329,7 +329,7 @@ void HeaderClientMethodsAnnotationOnServiceAsyncProcessor::executeRequest_echo_2
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse HeaderClientMethodsAnnotationOnServiceAsyncProcessor::return_echo_2(
+/* static */ apache::thrift::SerializedResponse HeaderClientMethodsAnnotationOnServiceAsyncProcessor::return_echo_2(
     apache::thrift::ContextStack* ctx,
     ::cpp2::EchoResponse const& _return) {
   ProtocolOut_ prot;

@@ -154,7 +154,7 @@ void MyLeafAsyncProcessor::executeRequest_do_leaf(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyLeafAsyncProcessor::return_do_leaf(
+/* static */ apache::thrift::SerializedResponse MyLeafAsyncProcessor::return_do_leaf(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyLeaf_do_leaf_presult result;

@@ -154,7 +154,7 @@ void MyRootAsyncProcessor::executeRequest_do_root(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyRootAsyncProcessor::return_do_root(
+/* static */ apache::thrift::SerializedResponse MyRootAsyncProcessor::return_do_root(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyRoot_do_root_presult result;

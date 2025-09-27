@@ -198,7 +198,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_returnstream(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProcessor::return_returnstream(
+/* static */ apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProcessor::return_returnstream(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<::cpp2::StreamItem>&& _return) {
@@ -370,7 +370,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_streamthrows(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProcessor::return_streamthrows(
+/* static */ apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProcessor::return_streamthrows(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<::cpp2::StreamItem>&& _return) {
@@ -542,7 +542,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProcessor::return_servicethrows(
+/* static */ apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProcessor::return_servicethrows(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<::cpp2::StreamItem>&& _return) {
@@ -732,7 +732,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows2(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProcessor::return_servicethrows2(
+/* static */ apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProcessor::return_servicethrows2(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<::cpp2::StreamItem>&& _return) {
@@ -922,7 +922,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_boththrows(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProcessor::return_boththrows(
+/* static */ apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProcessor::return_boththrows(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<::cpp2::StreamItem>&& _return) {
@@ -1112,7 +1112,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamstrea
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProcessor::return_responseandstreamstreamthrows(
+/* static */ apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProcessor::return_responseandstreamstreamthrows(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>&& _return) {
@@ -1286,7 +1286,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamservi
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProcessor::return_responseandstreamservicethrows(
+/* static */ apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProcessor::return_responseandstreamservicethrows(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>&& _return) {
@@ -1478,7 +1478,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreambotht
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProcessor::return_responseandstreamboththrows(
+/* static */ apache::thrift::ResponseAndServerStreamFactory PubSubStreamingServiceAsyncProcessor::return_responseandstreamboththrows(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ResponseAndServerStream<::cpp2::StreamItem, ::std::int32_t>&& _return) {

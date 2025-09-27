@@ -154,7 +154,7 @@ void RederivedServiceAsyncProcessor::executeRequest_get_seven(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse RederivedServiceAsyncProcessor::return_get_seven(
+/* static */ apache::thrift::SerializedResponse RederivedServiceAsyncProcessor::return_get_seven(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;

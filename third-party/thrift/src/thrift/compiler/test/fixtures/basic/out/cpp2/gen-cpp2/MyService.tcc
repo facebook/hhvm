@@ -171,7 +171,7 @@ void MyServiceAsyncProcessor::executeRequest_ping(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_ping(
+/* static */ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_ping(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::test::fixtures::basic::MyService_ping_presult result;
@@ -335,7 +335,7 @@ void MyServiceAsyncProcessor::executeRequest_getRandomData(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_getRandomData(
+/* static */ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_getRandomData(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;
@@ -505,7 +505,7 @@ void MyServiceAsyncProcessor::executeRequest_sink(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_sink(
+/* static */ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_sink(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::test::fixtures::basic::MyService_sink_presult result;
@@ -675,7 +675,7 @@ void MyServiceAsyncProcessor::executeRequest_putDataById(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_putDataById(
+/* static */ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_putDataById(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::test::fixtures::basic::MyService_putDataById_presult result;
@@ -842,7 +842,7 @@ void MyServiceAsyncProcessor::executeRequest_hasDataById(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_hasDataById(
+/* static */ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_hasDataById(
     apache::thrift::ContextStack* ctx,
     bool const& _return) {
   ProtocolOut_ prot;
@@ -1012,7 +1012,7 @@ void MyServiceAsyncProcessor::executeRequest_getDataById(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_getDataById(
+/* static */ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_getDataById(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;
@@ -1182,7 +1182,7 @@ void MyServiceAsyncProcessor::executeRequest_deleteDataById(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_deleteDataById(
+/* static */ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_deleteDataById(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::test::fixtures::basic::MyService_deleteDataById_presult result;
@@ -1481,7 +1481,7 @@ void MyServiceAsyncProcessor::executeRequest_invalid_return_for_hack(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_invalid_return_for_hack(
+/* static */ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_invalid_return_for_hack(
     apache::thrift::ContextStack* ctx,
     ::std::set<float> const& _return) {
   ProtocolOut_ prot;
@@ -1648,7 +1648,7 @@ void MyServiceAsyncProcessor::executeRequest_rpc_skipped_codegen(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_rpc_skipped_codegen(
+/* static */ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_rpc_skipped_codegen(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::test::fixtures::basic::MyService_rpc_skipped_codegen_presult result;

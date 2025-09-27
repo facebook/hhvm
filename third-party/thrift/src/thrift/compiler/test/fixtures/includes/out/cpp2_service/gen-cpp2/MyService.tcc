@@ -162,7 +162,7 @@ void MyServiceAsyncProcessor::executeRequest_query(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_query(
+/* static */ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_query(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyService_query_presult result;
@@ -332,7 +332,7 @@ void MyServiceAsyncProcessor::executeRequest_has_arg_docs(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_has_arg_docs(
+/* static */ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_has_arg_docs(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyService_has_arg_docs_presult result;

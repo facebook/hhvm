@@ -194,7 +194,7 @@ void SinkServiceAsyncProcessor::executeRequest_method(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-std::pair<
+/* static */ std::pair<
     apache::thrift::SerializedResponse,
     apache::thrift::detail::SinkConsumerImpl>
 SinkServiceAsyncProcessor::return_method(
@@ -372,7 +372,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodAndReponse(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-std::pair<
+/* static */ std::pair<
     apache::thrift::SerializedResponse,
     apache::thrift::detail::SinkConsumerImpl>
 SinkServiceAsyncProcessor::return_methodAndReponse(
@@ -552,7 +552,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodThrow(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-std::pair<
+/* static */ std::pair<
     apache::thrift::SerializedResponse,
     apache::thrift::detail::SinkConsumerImpl>
 SinkServiceAsyncProcessor::return_methodThrow(
@@ -748,7 +748,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodSinkThrow(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-std::pair<
+/* static */ std::pair<
     apache::thrift::SerializedResponse,
     apache::thrift::detail::SinkConsumerImpl>
 SinkServiceAsyncProcessor::return_methodSinkThrow(
@@ -926,7 +926,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodFinalThrow(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-std::pair<
+/* static */ std::pair<
     apache::thrift::SerializedResponse,
     apache::thrift::detail::SinkConsumerImpl>
 SinkServiceAsyncProcessor::return_methodFinalThrow(
@@ -1104,7 +1104,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodBothThrow(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-std::pair<
+/* static */ std::pair<
     apache::thrift::SerializedResponse,
     apache::thrift::detail::SinkConsumerImpl>
 SinkServiceAsyncProcessor::return_methodBothThrow(
@@ -1284,7 +1284,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodFast(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-std::pair<
+/* static */ std::pair<
     apache::thrift::SerializedResponse,
     apache::thrift::detail::SinkConsumerImpl>
 SinkServiceAsyncProcessor::return_methodFast(

@@ -154,7 +154,7 @@ void PerformAsyncProcessor::executeRequest_foo(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse PerformAsyncProcessor::return_foo(
+/* static */ apache::thrift::SerializedResponse PerformAsyncProcessor::return_foo(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::Perform_foo_presult result;
@@ -341,7 +341,7 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_frobnicate(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse PerformAsyncProcessor::return_MyInteraction_frobnicate(
+/* static */ apache::thrift::SerializedResponse PerformAsyncProcessor::return_MyInteraction_frobnicate(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -658,7 +658,7 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_truthify(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory PerformAsyncProcessor::return_MyInteraction_truthify(
+/* static */ apache::thrift::ResponseAndServerStreamFactory PerformAsyncProcessor::return_MyInteraction_truthify(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<bool>&& _return) {
@@ -828,7 +828,7 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_encode(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-std::pair<
+/* static */ std::pair<
     apache::thrift::SerializedResponse,
     apache::thrift::detail::SinkConsumerImpl>
 PerformAsyncProcessor::return_MyInteraction_encode(
@@ -1027,7 +1027,7 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_frobnicate(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse PerformAsyncProcessor::return_MyInteractionFast_frobnicate(
+/* static */ apache::thrift::SerializedResponse PerformAsyncProcessor::return_MyInteractionFast_frobnicate(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -1320,7 +1320,7 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_truthify(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory PerformAsyncProcessor::return_MyInteractionFast_truthify(
+/* static */ apache::thrift::ResponseAndServerStreamFactory PerformAsyncProcessor::return_MyInteractionFast_truthify(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<bool>&& _return) {
@@ -1487,7 +1487,7 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_encode(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-std::pair<
+/* static */ std::pair<
     apache::thrift::SerializedResponse,
     apache::thrift::detail::SinkConsumerImpl>
 PerformAsyncProcessor::return_MyInteractionFast_encode(
@@ -1677,7 +1677,7 @@ void PerformAsyncProcessor::executeRequest_SerialInteraction_frobnicate(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse PerformAsyncProcessor::return_SerialInteraction_frobnicate(
+/* static */ apache::thrift::SerializedResponse PerformAsyncProcessor::return_SerialInteraction_frobnicate(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::Perform_SerialInteraction_frobnicate_presult result;

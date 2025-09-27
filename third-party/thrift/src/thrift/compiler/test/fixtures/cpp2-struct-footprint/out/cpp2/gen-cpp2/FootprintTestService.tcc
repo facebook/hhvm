@@ -196,7 +196,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_processIOBuf(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_processIOBuf(
+/* static */ apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_processIOBuf(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2_struct_footprint::FootprintTestService_processIOBuf_presult result;
@@ -360,7 +360,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getStruct(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_getStruct(
+/* static */ apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_getStruct(
     apache::thrift::ContextStack* ctx,
     ::cpp2_struct_footprint::SimpleStruct const& _return) {
   ProtocolOut_ prot;
@@ -530,7 +530,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_setStruct(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_setStruct(
+/* static */ apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_setStruct(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2_struct_footprint::FootprintTestService_setStruct_presult result;
@@ -697,7 +697,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_setStructList(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_setStructList(
+/* static */ apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_setStructList(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2_struct_footprint::FootprintTestService_setStructList_presult result;
@@ -861,7 +861,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getStructList(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_getStructList(
+/* static */ apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_getStructList(
     apache::thrift::ContextStack* ctx,
     ::std::vector<::cpp2_struct_footprint::SimpleStruct> const& _return) {
   ProtocolOut_ prot;
@@ -1028,7 +1028,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getNestedContainer(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_getNestedContainer(
+/* static */ apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_getNestedContainer(
     apache::thrift::ContextStack* ctx,
     ::std::map<::std::string, ::std::vector<::cpp2_struct_footprint::SimpleStruct>> const& _return) {
   ProtocolOut_ prot;
@@ -1195,7 +1195,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getTypedefStruct(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_getTypedefStruct(
+/* static */ apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_getTypedefStruct(
     apache::thrift::ContextStack* ctx,
     ::cpp2_struct_footprint::MyStruct const& _return) {
   ProtocolOut_ prot;
@@ -1362,7 +1362,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getTypedefList(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_getTypedefList(
+/* static */ apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_getTypedefList(
     apache::thrift::ContextStack* ctx,
     ::cpp2_struct_footprint::StructList const& _return) {
   ProtocolOut_ prot;
@@ -1529,7 +1529,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getUnion(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_getUnion(
+/* static */ apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_getUnion(
     apache::thrift::ContextStack* ctx,
     ::cpp2_struct_footprint::TestUnion const& _return) {
   ProtocolOut_ prot;
@@ -1697,7 +1697,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_getCalculator(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_getCalculator(
+/* static */ apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_getCalculator(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2_struct_footprint::FootprintTestService_getCalculator_presult result;
@@ -1861,7 +1861,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_streamStructs(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory FootprintTestServiceAsyncProcessor::return_streamStructs(
+/* static */ apache::thrift::ResponseAndServerStreamFactory FootprintTestServiceAsyncProcessor::return_streamStructs(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<::cpp2_struct_footprint::SimpleStruct>&& _return) {
@@ -2033,7 +2033,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_streamWithSinkInitial(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory FootprintTestServiceAsyncProcessor::return_streamWithSinkInitial(
+/* static */ apache::thrift::ResponseAndServerStreamFactory FootprintTestServiceAsyncProcessor::return_streamWithSinkInitial(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ResponseAndServerStream<::cpp2_struct_footprint::Struct1, ::cpp2_struct_footprint::SimpleStruct>&& _return) {
@@ -2207,7 +2207,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_streamWithSinkException(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory FootprintTestServiceAsyncProcessor::return_streamWithSinkException(
+/* static */ apache::thrift::ResponseAndServerStreamFactory FootprintTestServiceAsyncProcessor::return_streamWithSinkException(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ResponseAndServerStream<::cpp2_struct_footprint::Struct1, ::cpp2_struct_footprint::SimpleStruct>&& _return) {
@@ -2413,7 +2413,7 @@ void FootprintTestServiceAsyncProcessor::executeRequest_Calculator_add(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_Calculator_add(
+/* static */ apache::thrift::SerializedResponse FootprintTestServiceAsyncProcessor::return_Calculator_add(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;

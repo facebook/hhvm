@@ -166,7 +166,7 @@ void DecoratedServiceAsyncProcessor::executeRequest_noop(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse DecoratedServiceAsyncProcessor::return_noop(
+/* static */ apache::thrift::SerializedResponse DecoratedServiceAsyncProcessor::return_noop(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::DecoratedService_noop_presult result;
@@ -333,7 +333,7 @@ void DecoratedServiceAsyncProcessor::executeRequest_echo(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse DecoratedServiceAsyncProcessor::return_echo(
+/* static */ apache::thrift::SerializedResponse DecoratedServiceAsyncProcessor::return_echo(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;
@@ -503,7 +503,7 @@ void DecoratedServiceAsyncProcessor::executeRequest_increment(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse DecoratedServiceAsyncProcessor::return_increment(
+/* static */ apache::thrift::SerializedResponse DecoratedServiceAsyncProcessor::return_increment(
     apache::thrift::ContextStack* ctx,
     ::std::int64_t const& _return) {
   ProtocolOut_ prot;
@@ -673,7 +673,7 @@ void DecoratedServiceAsyncProcessor::executeRequest_sum(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse DecoratedServiceAsyncProcessor::return_sum(
+/* static */ apache::thrift::SerializedResponse DecoratedServiceAsyncProcessor::return_sum(
     apache::thrift::ContextStack* ctx,
     ::std::int64_t const& _return) {
   ProtocolOut_ prot;
@@ -843,7 +843,7 @@ void DecoratedServiceAsyncProcessor::executeRequest_withStruct(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse DecoratedServiceAsyncProcessor::return_withStruct(
+/* static */ apache::thrift::SerializedResponse DecoratedServiceAsyncProcessor::return_withStruct(
     apache::thrift::ContextStack* ctx,
     ::cpp2::Response const& _return) {
   ProtocolOut_ prot;
@@ -1019,7 +1019,7 @@ void DecoratedServiceAsyncProcessor::executeRequest_multiParam(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse DecoratedServiceAsyncProcessor::return_multiParam(
+/* static */ apache::thrift::SerializedResponse DecoratedServiceAsyncProcessor::return_multiParam(
     apache::thrift::ContextStack* ctx,
     ::cpp2::Response const& _return) {
   ProtocolOut_ prot;
@@ -1187,7 +1187,7 @@ void DecoratedServiceAsyncProcessor::executeRequest_echoInteraction(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse DecoratedServiceAsyncProcessor::return_echoInteraction(
+/* static */ apache::thrift::SerializedResponse DecoratedServiceAsyncProcessor::return_echoInteraction(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::DecoratedService_echoInteraction_presult result;
@@ -1362,7 +1362,7 @@ void DecoratedServiceAsyncProcessor::executeRequest_LegacyPerforms_perform(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse DecoratedServiceAsyncProcessor::return_LegacyPerforms_perform(
+/* static */ apache::thrift::SerializedResponse DecoratedServiceAsyncProcessor::return_LegacyPerforms_perform(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::DecoratedService_LegacyPerforms_perform_presult result;
@@ -1539,7 +1539,7 @@ void DecoratedServiceAsyncProcessor::executeRequest_EchoInteraction_interactionE
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse DecoratedServiceAsyncProcessor::return_EchoInteraction_interactionEcho(
+/* static */ apache::thrift::SerializedResponse DecoratedServiceAsyncProcessor::return_EchoInteraction_interactionEcho(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;
@@ -1730,7 +1730,7 @@ void UndecoratedServiceAsyncProcessor::executeRequest_noop(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse UndecoratedServiceAsyncProcessor::return_noop(
+/* static */ apache::thrift::SerializedResponse UndecoratedServiceAsyncProcessor::return_noop(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::UndecoratedService_noop_presult result;
@@ -1897,7 +1897,7 @@ void UndecoratedServiceAsyncProcessor::executeRequest_echo(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse UndecoratedServiceAsyncProcessor::return_echo(
+/* static */ apache::thrift::SerializedResponse UndecoratedServiceAsyncProcessor::return_echo(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;
@@ -2067,7 +2067,7 @@ void UndecoratedServiceAsyncProcessor::executeRequest_increment(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse UndecoratedServiceAsyncProcessor::return_increment(
+/* static */ apache::thrift::SerializedResponse UndecoratedServiceAsyncProcessor::return_increment(
     apache::thrift::ContextStack* ctx,
     ::std::int64_t const& _return) {
   ProtocolOut_ prot;
@@ -2237,7 +2237,7 @@ void UndecoratedServiceAsyncProcessor::executeRequest_sum(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse UndecoratedServiceAsyncProcessor::return_sum(
+/* static */ apache::thrift::SerializedResponse UndecoratedServiceAsyncProcessor::return_sum(
     apache::thrift::ContextStack* ctx,
     ::std::int64_t const& _return) {
   ProtocolOut_ prot;
@@ -2407,7 +2407,7 @@ void UndecoratedServiceAsyncProcessor::executeRequest_withStruct(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse UndecoratedServiceAsyncProcessor::return_withStruct(
+/* static */ apache::thrift::SerializedResponse UndecoratedServiceAsyncProcessor::return_withStruct(
     apache::thrift::ContextStack* ctx,
     ::cpp2::Response const& _return) {
   ProtocolOut_ prot;
@@ -2583,7 +2583,7 @@ void UndecoratedServiceAsyncProcessor::executeRequest_multiParam(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse UndecoratedServiceAsyncProcessor::return_multiParam(
+/* static */ apache::thrift::SerializedResponse UndecoratedServiceAsyncProcessor::return_multiParam(
     apache::thrift::ContextStack* ctx,
     ::cpp2::Response const& _return) {
   ProtocolOut_ prot;
@@ -2753,7 +2753,7 @@ void UndecoratedServiceAsyncProcessor::executeRequest_adaptedRequest(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse UndecoratedServiceAsyncProcessor::return_adaptedRequest(
+/* static */ apache::thrift::SerializedResponse UndecoratedServiceAsyncProcessor::return_adaptedRequest(
     apache::thrift::ContextStack* ctx,
     ::cpp2::Response const& _return) {
   ProtocolOut_ prot;
@@ -2933,7 +2933,7 @@ void DecoratedService_ExtendsUndecoratedServiceAsyncProcessor::executeRequest_ex
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse DecoratedService_ExtendsUndecoratedServiceAsyncProcessor::return_extension(
+/* static */ apache::thrift::SerializedResponse DecoratedService_ExtendsUndecoratedServiceAsyncProcessor::return_extension(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::DecoratedService_ExtendsUndecoratedService_extension_presult result;
@@ -3110,7 +3110,7 @@ void DecoratedService_ExtendsDecoratedServiceAsyncProcessor::executeRequest_exte
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse DecoratedService_ExtendsDecoratedServiceAsyncProcessor::return_extension(
+/* static */ apache::thrift::SerializedResponse DecoratedService_ExtendsDecoratedServiceAsyncProcessor::return_extension(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::DecoratedService_ExtendsDecoratedService_extension_presult result;
@@ -3287,7 +3287,7 @@ void UndecoratedService_ExtendsDecoratedServiceAsyncProcessor::executeRequest_ex
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse UndecoratedService_ExtendsDecoratedServiceAsyncProcessor::return_extension(
+/* static */ apache::thrift::SerializedResponse UndecoratedService_ExtendsDecoratedServiceAsyncProcessor::return_extension(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::UndecoratedService_ExtendsDecoratedService_extension_presult result;
@@ -3467,7 +3467,7 @@ void DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceAsyncProc
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceAsyncProcessor::return_secondExtension(
+/* static */ apache::thrift::SerializedResponse DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceAsyncProcessor::return_secondExtension(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;

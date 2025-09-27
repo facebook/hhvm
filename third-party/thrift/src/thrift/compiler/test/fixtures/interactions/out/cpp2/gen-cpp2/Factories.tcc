@@ -163,7 +163,7 @@ void FactoriesAsyncProcessor::executeRequest_foo(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FactoriesAsyncProcessor::return_foo(
+/* static */ apache::thrift::SerializedResponse FactoriesAsyncProcessor::return_foo(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::Factories_foo_presult result;
@@ -331,7 +331,7 @@ void FactoriesAsyncProcessor::executeRequest_interact(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FactoriesAsyncProcessor::return_interact(
+/* static */ apache::thrift::SerializedResponse FactoriesAsyncProcessor::return_interact(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::Factories_interact_presult result;
@@ -496,7 +496,7 @@ void FactoriesAsyncProcessor::executeRequest_interactFast(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FactoriesAsyncProcessor::return_interactFast(
+/* static */ apache::thrift::SerializedResponse FactoriesAsyncProcessor::return_interactFast(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -664,7 +664,7 @@ void FactoriesAsyncProcessor::executeRequest_serialize(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory FactoriesAsyncProcessor::return_serialize(
+/* static */ apache::thrift::ResponseAndServerStreamFactory FactoriesAsyncProcessor::return_serialize(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>&& _return) {
@@ -858,7 +858,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_frobnicate(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FactoriesAsyncProcessor::return_MyInteraction_frobnicate(
+/* static */ apache::thrift::SerializedResponse FactoriesAsyncProcessor::return_MyInteraction_frobnicate(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -1175,7 +1175,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_truthify(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory FactoriesAsyncProcessor::return_MyInteraction_truthify(
+/* static */ apache::thrift::ResponseAndServerStreamFactory FactoriesAsyncProcessor::return_MyInteraction_truthify(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<bool>&& _return) {
@@ -1345,7 +1345,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteraction_encode(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-std::pair<
+/* static */ std::pair<
     apache::thrift::SerializedResponse,
     apache::thrift::detail::SinkConsumerImpl>
 FactoriesAsyncProcessor::return_MyInteraction_encode(
@@ -1544,7 +1544,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_frobnicate(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FactoriesAsyncProcessor::return_MyInteractionFast_frobnicate(
+/* static */ apache::thrift::SerializedResponse FactoriesAsyncProcessor::return_MyInteractionFast_frobnicate(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -1837,7 +1837,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_truthify(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory FactoriesAsyncProcessor::return_MyInteractionFast_truthify(
+/* static */ apache::thrift::ResponseAndServerStreamFactory FactoriesAsyncProcessor::return_MyInteractionFast_truthify(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<bool>&& _return) {
@@ -2004,7 +2004,7 @@ void FactoriesAsyncProcessor::executeRequest_MyInteractionFast_encode(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-std::pair<
+/* static */ std::pair<
     apache::thrift::SerializedResponse,
     apache::thrift::detail::SinkConsumerImpl>
 FactoriesAsyncProcessor::return_MyInteractionFast_encode(
@@ -2194,7 +2194,7 @@ void FactoriesAsyncProcessor::executeRequest_SerialInteraction_frobnicate(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FactoriesAsyncProcessor::return_SerialInteraction_frobnicate(
+/* static */ apache::thrift::SerializedResponse FactoriesAsyncProcessor::return_SerialInteraction_frobnicate(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::Factories_SerialInteraction_frobnicate_presult result;

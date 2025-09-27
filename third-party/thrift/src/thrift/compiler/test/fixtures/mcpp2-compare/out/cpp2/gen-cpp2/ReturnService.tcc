@@ -196,7 +196,7 @@ void ReturnServiceAsyncProcessor::executeRequest_noReturn(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_noReturn(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_noReturn(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::some::valid::ns::ReturnService_noReturn_presult result;
@@ -360,7 +360,7 @@ void ReturnServiceAsyncProcessor::executeRequest_boolReturn(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_boolReturn(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_boolReturn(
     apache::thrift::ContextStack* ctx,
     bool const& _return) {
   ProtocolOut_ prot;
@@ -527,7 +527,7 @@ void ReturnServiceAsyncProcessor::executeRequest_i16Return(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_i16Return(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_i16Return(
     apache::thrift::ContextStack* ctx,
     ::std::int16_t const& _return) {
   ProtocolOut_ prot;
@@ -694,7 +694,7 @@ void ReturnServiceAsyncProcessor::executeRequest_i32Return(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_i32Return(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_i32Return(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -861,7 +861,7 @@ void ReturnServiceAsyncProcessor::executeRequest_i64Return(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_i64Return(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_i64Return(
     apache::thrift::ContextStack* ctx,
     ::std::int64_t const& _return) {
   ProtocolOut_ prot;
@@ -1028,7 +1028,7 @@ void ReturnServiceAsyncProcessor::executeRequest_floatReturn(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_floatReturn(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_floatReturn(
     apache::thrift::ContextStack* ctx,
     float const& _return) {
   ProtocolOut_ prot;
@@ -1195,7 +1195,7 @@ void ReturnServiceAsyncProcessor::executeRequest_doubleReturn(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_doubleReturn(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_doubleReturn(
     apache::thrift::ContextStack* ctx,
     double const& _return) {
   ProtocolOut_ prot;
@@ -1364,7 +1364,7 @@ void ReturnServiceAsyncProcessor::executeRequest_stringReturn(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_stringReturn(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_stringReturn(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;
@@ -1531,7 +1531,7 @@ void ReturnServiceAsyncProcessor::executeRequest_binaryReturn(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_binaryReturn(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_binaryReturn(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;
@@ -1698,7 +1698,7 @@ void ReturnServiceAsyncProcessor::executeRequest_mapReturn(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_mapReturn(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_mapReturn(
     apache::thrift::ContextStack* ctx,
     ::std::map<::std::string, ::std::int64_t> const& _return) {
   ProtocolOut_ prot;
@@ -1865,7 +1865,7 @@ void ReturnServiceAsyncProcessor::executeRequest_simpleTypedefReturn(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_simpleTypedefReturn(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_simpleTypedefReturn(
     apache::thrift::ContextStack* ctx,
     ::some::valid::ns::simpleTypeDef const& _return) {
   ProtocolOut_ prot;
@@ -2032,7 +2032,7 @@ void ReturnServiceAsyncProcessor::executeRequest_complexTypedefReturn(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_complexTypedefReturn(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_complexTypedefReturn(
     apache::thrift::ContextStack* ctx,
     ::some::valid::ns::complexStructTypeDef const& _return) {
   ProtocolOut_ prot;
@@ -2199,7 +2199,7 @@ void ReturnServiceAsyncProcessor::executeRequest_list_mostComplexTypedefReturn(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_list_mostComplexTypedefReturn(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_list_mostComplexTypedefReturn(
     apache::thrift::ContextStack* ctx,
     ::std::vector<::some::valid::ns::mostComplexTypeDef> const& _return) {
   ProtocolOut_ prot;
@@ -2368,7 +2368,7 @@ void ReturnServiceAsyncProcessor::executeRequest_enumReturn(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_enumReturn(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_enumReturn(
     apache::thrift::ContextStack* ctx,
     ::some::valid::ns::MyEnumA const& _return) {
   ProtocolOut_ prot;
@@ -2537,7 +2537,7 @@ void ReturnServiceAsyncProcessor::executeRequest_list_EnumReturn(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_list_EnumReturn(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_list_EnumReturn(
     apache::thrift::ContextStack* ctx,
     ::std::vector<::some::valid::ns::MyEnumA> const& _return) {
   ProtocolOut_ prot;
@@ -2704,7 +2704,7 @@ void ReturnServiceAsyncProcessor::executeRequest_structReturn(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_structReturn(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_structReturn(
     apache::thrift::ContextStack* ctx,
     ::some::valid::ns::MyStruct const& _return) {
   ProtocolOut_ prot;
@@ -2871,7 +2871,7 @@ void ReturnServiceAsyncProcessor::executeRequest_set_StructReturn(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_set_StructReturn(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_set_StructReturn(
     apache::thrift::ContextStack* ctx,
     ::std::set<::some::valid::ns::MyStruct> const& _return) {
   ProtocolOut_ prot;
@@ -3040,7 +3040,7 @@ void ReturnServiceAsyncProcessor::executeRequest_unionReturn(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_unionReturn(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_unionReturn(
     apache::thrift::ContextStack* ctx,
     ::some::valid::ns::ComplexUnion const& _return) {
   ProtocolOut_ prot;
@@ -3207,7 +3207,7 @@ void ReturnServiceAsyncProcessor::executeRequest_list_UnionReturn(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_list_UnionReturn(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_list_UnionReturn(
     apache::thrift::ContextStack* ctx,
     ::std::vector<::some::valid::ns::ComplexUnion> const& _return) {
   ProtocolOut_ prot;
@@ -3379,7 +3379,7 @@ void ReturnServiceAsyncProcessor::executeRequest_readDataEb(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_readDataEb(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_readDataEb(
     apache::thrift::ContextStack* ctx,
     ::some::valid::ns::IOBuf const& _return) {
   ProtocolOut_ prot;
@@ -3549,7 +3549,7 @@ void ReturnServiceAsyncProcessor::executeRequest_readData(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_readData(
+/* static */ apache::thrift::SerializedResponse ReturnServiceAsyncProcessor::return_readData(
     apache::thrift::ContextStack* ctx,
     ::some::valid::ns::IOBufPtr const& _return) {
   ProtocolOut_ prot;

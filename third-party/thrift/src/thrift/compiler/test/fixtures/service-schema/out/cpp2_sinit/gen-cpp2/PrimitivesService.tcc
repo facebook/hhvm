@@ -164,7 +164,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_init(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse PrimitivesServiceAsyncProcessor::return_init(
+/* static */ apache::thrift::SerializedResponse PrimitivesServiceAsyncProcessor::return_init(
     apache::thrift::ContextStack* ctx,
     ::std::int64_t const& _return) {
   ProtocolOut_ prot;
@@ -331,7 +331,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_method_that_throws(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse PrimitivesServiceAsyncProcessor::return_method_that_throws(
+/* static */ apache::thrift::SerializedResponse PrimitivesServiceAsyncProcessor::return_method_that_throws(
     apache::thrift::ContextStack* ctx,
     ::facebook::thrift::test::Result const& _return) {
   ProtocolOut_ prot;
@@ -522,7 +522,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_return_void_method(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse PrimitivesServiceAsyncProcessor::return_return_void_method(
+/* static */ apache::thrift::SerializedResponse PrimitivesServiceAsyncProcessor::return_return_void_method(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::facebook::thrift::test::PrimitivesService_return_void_method_presult result;

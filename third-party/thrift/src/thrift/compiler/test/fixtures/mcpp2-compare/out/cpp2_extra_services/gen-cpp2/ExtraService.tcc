@@ -165,7 +165,7 @@ void ExtraServiceAsyncProcessor::executeRequest_simple_function(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ExtraServiceAsyncProcessor::return_simple_function(
+/* static */ apache::thrift::SerializedResponse ExtraServiceAsyncProcessor::return_simple_function(
     apache::thrift::ContextStack* ctx,
     bool const& _return) {
   ProtocolOut_ prot;
@@ -334,7 +334,7 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ExtraServiceAsyncProcessor::return_throws_function(
+/* static */ apache::thrift::SerializedResponse ExtraServiceAsyncProcessor::return_throws_function(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::extra::svc::ExtraService_throws_function_presult result;
@@ -519,7 +519,7 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function2(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ExtraServiceAsyncProcessor::return_throws_function2(
+/* static */ apache::thrift::SerializedResponse ExtraServiceAsyncProcessor::return_throws_function2(
     apache::thrift::ContextStack* ctx,
     bool const& _return) {
   ProtocolOut_ prot;
@@ -710,7 +710,7 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function3(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ExtraServiceAsyncProcessor::return_throws_function3(
+/* static */ apache::thrift::SerializedResponse ExtraServiceAsyncProcessor::return_throws_function3(
     apache::thrift::ContextStack* ctx,
     ::std::map<::std::int32_t, ::std::string> const& _return) {
   ProtocolOut_ prot;

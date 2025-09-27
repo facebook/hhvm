@@ -159,7 +159,7 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey0(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse DbMixedStackArgumentsAsyncProcessor::return_getDataByKey0(
+/* static */ apache::thrift::SerializedResponse DbMixedStackArgumentsAsyncProcessor::return_getDataByKey0(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;
@@ -329,7 +329,7 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey1(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse DbMixedStackArgumentsAsyncProcessor::return_getDataByKey1(
+/* static */ apache::thrift::SerializedResponse DbMixedStackArgumentsAsyncProcessor::return_getDataByKey1(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;

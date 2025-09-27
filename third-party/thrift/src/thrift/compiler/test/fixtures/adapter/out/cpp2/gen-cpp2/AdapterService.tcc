@@ -156,7 +156,7 @@ void AdapterServiceAsyncProcessor::executeRequest_count(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse AdapterServiceAsyncProcessor::return_count(
+/* static */ apache::thrift::SerializedResponse AdapterServiceAsyncProcessor::return_count(
     apache::thrift::ContextStack* ctx,
     ::facebook::thrift::test::CountingStruct const& _return) {
   ProtocolOut_ prot;
@@ -326,7 +326,7 @@ void AdapterServiceAsyncProcessor::executeRequest_adaptedTypes(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse AdapterServiceAsyncProcessor::return_adaptedTypes(
+/* static */ apache::thrift::SerializedResponse AdapterServiceAsyncProcessor::return_adaptedTypes(
     apache::thrift::ContextStack* ctx,
     ::facebook::thrift::test::HeapAllocated const& _return) {
   ProtocolOut_ prot;

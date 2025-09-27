@@ -154,7 +154,7 @@ void MyNodeAsyncProcessor::executeRequest_do_mid(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyNodeAsyncProcessor::return_do_mid(
+/* static */ apache::thrift::SerializedResponse MyNodeAsyncProcessor::return_do_mid(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyNode_do_mid_presult result;

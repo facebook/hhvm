@@ -160,7 +160,7 @@ void ExtendedServiceAsyncProcessor::executeRequest_init(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ExtendedServiceAsyncProcessor::return_init(
+/* static */ apache::thrift::SerializedResponse ExtendedServiceAsyncProcessor::return_init(
     apache::thrift::ContextStack* ctx,
     ::std::int64_t const& _return) {
   ProtocolOut_ prot;

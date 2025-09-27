@@ -164,7 +164,7 @@ void service1AsyncProcessor::executeRequest_method1(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service1AsyncProcessor::return_method1(
+/* static */ apache::thrift::SerializedResponse service1AsyncProcessor::return_method1(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::test_cpp2::cpp_reflection::service1_method1_presult result;
@@ -337,7 +337,7 @@ void service1AsyncProcessor::executeRequest_method2(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service1AsyncProcessor::return_method2(
+/* static */ apache::thrift::SerializedResponse service1AsyncProcessor::return_method2(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::test_cpp2::cpp_reflection::service1_method2_presult result;
@@ -501,7 +501,7 @@ void service1AsyncProcessor::executeRequest_method3(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service1AsyncProcessor::return_method3(
+/* static */ apache::thrift::SerializedResponse service1AsyncProcessor::return_method3(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -677,7 +677,7 @@ void service1AsyncProcessor::executeRequest_method4(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service1AsyncProcessor::return_method4(
+/* static */ apache::thrift::SerializedResponse service1AsyncProcessor::return_method4(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -844,7 +844,7 @@ void service1AsyncProcessor::executeRequest_method5(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service1AsyncProcessor::return_method5(
+/* static */ apache::thrift::SerializedResponse service1AsyncProcessor::return_method5(
     apache::thrift::ContextStack* ctx,
     ::test_cpp2::cpp_reflection::struct2 const& _return) {
   ProtocolOut_ prot;
@@ -1020,7 +1020,7 @@ void service1AsyncProcessor::executeRequest_method6(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service1AsyncProcessor::return_method6(
+/* static */ apache::thrift::SerializedResponse service1AsyncProcessor::return_method6(
     apache::thrift::ContextStack* ctx,
     ::test_cpp2::cpp_reflection::struct2 const& _return) {
   ProtocolOut_ prot;

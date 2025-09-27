@@ -156,7 +156,7 @@ void MyServiceAsyncProcessor::executeRequest_first(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_first(
+/* static */ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_first(
     apache::thrift::ContextStack* ctx,
     ::test::fixtures::basic_structured_annotations::annotated_inline_string const& _return) {
   ProtocolOut_ prot;
@@ -326,7 +326,7 @@ void MyServiceAsyncProcessor::executeRequest_second(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_second(
+/* static */ apache::thrift::SerializedResponse MyServiceAsyncProcessor::return_second(
     apache::thrift::ContextStack* ctx,
     bool const& _return) {
   ProtocolOut_ prot;

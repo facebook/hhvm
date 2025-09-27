@@ -82,6 +82,8 @@ struct StreamTransformation {
  */
 template <typename Response, typename InputElement, typename OutputElement>
 struct ResponseAndStreamTransformation {
+  using ResponseType = Response;
+
   Response response;
   StreamTransformation<InputElement, OutputElement> transform;
 };

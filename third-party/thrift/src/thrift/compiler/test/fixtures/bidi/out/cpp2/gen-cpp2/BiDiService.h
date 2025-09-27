@@ -13,6 +13,7 @@
 #include <thrift/lib/cpp2/async/ServerStream.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/async/BiDiStream.h>
+#include <thrift/lib/cpp2/async/ServerBiDiStreamFactory.h>
 
 namespace folly {
   class IOBuf;
@@ -142,7 +143,8 @@ class BiDiServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   void executeRequest_simple(apache::thrift::ServerRequest&& serverRequest);
 
   template <class ProtocolIn_, class ProtocolOut_>
-  static /* TODO(ezou) needs to be something else */ void  return_simple(
+  static apache::thrift::ResponseAndServerBiDiStreamFactory
+  return_simple(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>&& _return);
@@ -180,7 +182,8 @@ class BiDiServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   void executeRequest_response(apache::thrift::ServerRequest&& serverRequest);
 
   template <class ProtocolIn_, class ProtocolOut_>
-  static /* TODO(ezou) needs to be something else */ void  return_response(
+  static apache::thrift::ResponseAndServerBiDiStreamFactory
+  return_response(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>&& _return);

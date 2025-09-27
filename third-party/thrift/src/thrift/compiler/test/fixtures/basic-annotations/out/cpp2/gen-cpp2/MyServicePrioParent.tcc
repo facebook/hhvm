@@ -156,7 +156,7 @@ void MyServicePrioParentAsyncProcessor::executeRequest_ping(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServicePrioParentAsyncProcessor::return_ping(
+/* static */ apache::thrift::SerializedResponse MyServicePrioParentAsyncProcessor::return_ping(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyServicePrioParent_ping_presult result;
@@ -320,7 +320,7 @@ void MyServicePrioParentAsyncProcessor::executeRequest_pong(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServicePrioParentAsyncProcessor::return_pong(
+/* static */ apache::thrift::SerializedResponse MyServicePrioParentAsyncProcessor::return_pong(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyServicePrioParent_pong_presult result;

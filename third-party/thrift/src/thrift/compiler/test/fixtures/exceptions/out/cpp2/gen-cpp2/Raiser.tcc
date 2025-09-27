@@ -160,7 +160,7 @@ void RaiserAsyncProcessor::executeRequest_doBland(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse RaiserAsyncProcessor::return_doBland(
+/* static */ apache::thrift::SerializedResponse RaiserAsyncProcessor::return_doBland(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::Raiser_doBland_presult result;
@@ -324,7 +324,7 @@ void RaiserAsyncProcessor::executeRequest_doRaise(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse RaiserAsyncProcessor::return_doRaise(
+/* static */ apache::thrift::SerializedResponse RaiserAsyncProcessor::return_doRaise(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::Raiser_doRaise_presult result;
@@ -506,7 +506,7 @@ void RaiserAsyncProcessor::executeRequest_get200(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse RaiserAsyncProcessor::return_get200(
+/* static */ apache::thrift::SerializedResponse RaiserAsyncProcessor::return_get200(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;
@@ -673,7 +673,7 @@ void RaiserAsyncProcessor::executeRequest_get500(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse RaiserAsyncProcessor::return_get500(
+/* static */ apache::thrift::SerializedResponse RaiserAsyncProcessor::return_get500(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;

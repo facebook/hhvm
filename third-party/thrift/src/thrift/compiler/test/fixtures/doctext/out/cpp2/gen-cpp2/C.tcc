@@ -161,7 +161,7 @@ void CAsyncProcessor::executeRequest_f(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse CAsyncProcessor::return_f(
+/* static */ apache::thrift::SerializedResponse CAsyncProcessor::return_f(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::C_f_presult result;
@@ -325,7 +325,7 @@ void CAsyncProcessor::executeRequest_numbers(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory CAsyncProcessor::return_numbers(
+/* static */ apache::thrift::ResponseAndServerStreamFactory CAsyncProcessor::return_numbers(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<::cpp2::number>&& _return) {
@@ -503,7 +503,7 @@ void CAsyncProcessor::executeRequest_thing(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse CAsyncProcessor::return_thing(
+/* static */ apache::thrift::SerializedResponse CAsyncProcessor::return_thing(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;

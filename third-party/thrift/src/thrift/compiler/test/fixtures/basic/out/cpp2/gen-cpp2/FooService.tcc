@@ -154,7 +154,7 @@ void FooServiceAsyncProcessor::executeRequest_simple_rpc(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FooServiceAsyncProcessor::return_simple_rpc(
+/* static */ apache::thrift::SerializedResponse FooServiceAsyncProcessor::return_simple_rpc(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::test::fixtures::basic::FooService_simple_rpc_presult result;

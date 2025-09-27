@@ -157,7 +157,7 @@ void FB303ServiceAsyncProcessor::executeRequest_simple_rpc(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FB303ServiceAsyncProcessor::return_simple_rpc(
+/* static */ apache::thrift::SerializedResponse FB303ServiceAsyncProcessor::return_simple_rpc(
     apache::thrift::ContextStack* ctx,
     ::test::fixtures::basic::ReservedKeyword const& _return) {
   ProtocolOut_ prot;

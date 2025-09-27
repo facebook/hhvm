@@ -164,7 +164,7 @@ void MyServiceFastAsyncProcessor::executeRequest_hasDataById(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceFastAsyncProcessor::return_hasDataById(
+/* static */ apache::thrift::SerializedResponse MyServiceFastAsyncProcessor::return_hasDataById(
     apache::thrift::ContextStack* ctx,
     bool const& _return) {
   ProtocolOut_ prot;
@@ -336,7 +336,7 @@ void MyServiceFastAsyncProcessor::executeRequest_getDataById(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceFastAsyncProcessor::return_getDataById(
+/* static */ apache::thrift::SerializedResponse MyServiceFastAsyncProcessor::return_getDataById(
     apache::thrift::ContextStack* ctx,
     ::std::string const& _return) {
   ProtocolOut_ prot;
@@ -511,7 +511,7 @@ void MyServiceFastAsyncProcessor::executeRequest_putDataById(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse MyServiceFastAsyncProcessor::return_putDataById(
+/* static */ apache::thrift::SerializedResponse MyServiceFastAsyncProcessor::return_putDataById(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::MyServiceFast_putDataById_presult result;

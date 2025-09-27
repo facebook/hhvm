@@ -157,7 +157,7 @@ void TestServiceAsyncProcessor::executeRequest_init(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse TestServiceAsyncProcessor::return_init(
+/* static */ apache::thrift::SerializedResponse TestServiceAsyncProcessor::return_init(
     apache::thrift::ContextStack* ctx,
     ::std::int64_t const& _return) {
   ProtocolOut_ prot;

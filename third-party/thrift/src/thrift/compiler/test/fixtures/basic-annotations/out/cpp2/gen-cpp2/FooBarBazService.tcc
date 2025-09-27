@@ -158,7 +158,7 @@ void FooBarBazServiceAsyncProcessor::executeRequest_foo(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FooBarBazServiceAsyncProcessor::return_foo(
+/* static */ apache::thrift::SerializedResponse FooBarBazServiceAsyncProcessor::return_foo(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::FooBarBazService_foo_presult result;
@@ -322,7 +322,7 @@ void FooBarBazServiceAsyncProcessor::executeRequest_bar(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FooBarBazServiceAsyncProcessor::return_bar(
+/* static */ apache::thrift::SerializedResponse FooBarBazServiceAsyncProcessor::return_bar(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::FooBarBazService_bar_presult result;
@@ -486,7 +486,7 @@ void FooBarBazServiceAsyncProcessor::executeRequest_baz(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse FooBarBazServiceAsyncProcessor::return_baz(
+/* static */ apache::thrift::SerializedResponse FooBarBazServiceAsyncProcessor::return_baz(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::FooBarBazService_baz_presult result;

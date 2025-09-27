@@ -208,7 +208,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_get(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_get(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_get(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -375,7 +375,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_getter(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_getter(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_getter(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -542,7 +542,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_lists(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_lists(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_lists(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -709,7 +709,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_maps(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_maps(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_maps(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -876,7 +876,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_name(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_name(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_name(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -1043,7 +1043,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_name_to_value(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_name_to_value(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_name_to_value(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -1210,7 +1210,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_names(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_names(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_names(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -1377,7 +1377,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_prefix_tree(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_prefix_tree(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_prefix_tree(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -1544,7 +1544,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_sets(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_sets(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_sets(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -1711,7 +1711,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_setter(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_setter(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_setter(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -1878,7 +1878,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_str(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_str(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_str(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -2045,7 +2045,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_strings(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_strings(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_strings(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -2212,7 +2212,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_type(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_type(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_type(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -2379,7 +2379,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_value(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_value(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_value(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -2546,7 +2546,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_value_to_name(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_value_to_name(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_value_to_name(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -2713,7 +2713,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_values(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_values(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_values(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -2880,7 +2880,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_id(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_id(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_id(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -3047,7 +3047,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_ids(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_ids(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_ids(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -3214,7 +3214,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptor(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_descriptor(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_descriptor(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -3381,7 +3381,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptors(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_descriptors(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_descriptors(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -3548,7 +3548,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_key(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_key(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_key(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -3715,7 +3715,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_keys(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_keys(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_keys(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -3882,7 +3882,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotation(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_annotation(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_annotation(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -4049,7 +4049,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotations(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_annotations(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_annotations(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -4216,7 +4216,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_member(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_member(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_member(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -4383,7 +4383,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_members(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_members(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_members(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -4550,7 +4550,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_field(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_field(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_field(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -4717,7 +4717,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_fields(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_fields(
+/* static */ apache::thrift::SerializedResponse service_with_special_namesAsyncProcessor::return_fields(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;

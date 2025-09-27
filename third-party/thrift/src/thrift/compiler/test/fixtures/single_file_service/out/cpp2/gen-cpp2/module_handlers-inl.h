@@ -154,7 +154,7 @@ void AAsyncProcessor::executeRequest_foo(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse AAsyncProcessor::return_foo(
+/* static */ apache::thrift::SerializedResponse AAsyncProcessor::return_foo(
     apache::thrift::ContextStack* ctx,
     ::cpp2::Foo const& _return) {
   ProtocolOut_ prot;
@@ -332,7 +332,7 @@ void AAsyncProcessor::executeRequest_I_interact(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse AAsyncProcessor::return_I_interact(
+/* static */ apache::thrift::SerializedResponse AAsyncProcessor::return_I_interact(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::A_I_interact_presult result;
@@ -522,7 +522,7 @@ void BAsyncProcessor::executeRequest_bar(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse BAsyncProcessor::return_bar(
+/* static */ apache::thrift::SerializedResponse BAsyncProcessor::return_bar(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::B_bar_presult result;
@@ -686,7 +686,7 @@ void BAsyncProcessor::executeRequest_stream_stuff(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::ResponseAndServerStreamFactory BAsyncProcessor::return_stream_stuff(
+/* static */ apache::thrift::ResponseAndServerStreamFactory BAsyncProcessor::return_stream_stuff(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ServerStream<::std::int32_t>&& _return) {
@@ -855,7 +855,7 @@ void BAsyncProcessor::executeRequest_sink_stuff(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-std::pair<
+/* static */ std::pair<
     apache::thrift::SerializedResponse,
     apache::thrift::detail::SinkConsumerImpl>
 BAsyncProcessor::return_sink_stuff(
@@ -1055,7 +1055,7 @@ void CAsyncProcessor::executeRequest_I_interact(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse CAsyncProcessor::return_I_interact(
+/* static */ apache::thrift::SerializedResponse CAsyncProcessor::return_I_interact(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::C_I_interact_presult result;

@@ -154,7 +154,7 @@ void GoodServiceAsyncProcessor::executeRequest_bar(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse GoodServiceAsyncProcessor::return_bar(
+/* static */ apache::thrift::SerializedResponse GoodServiceAsyncProcessor::return_bar(
     apache::thrift::ContextStack* ctx,
     ::std::int32_t const& _return) {
   ProtocolOut_ prot;
@@ -332,7 +332,7 @@ void GoodServiceAsyncProcessor::executeRequest_BadInteraction_foo(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse GoodServiceAsyncProcessor::return_BadInteraction_foo(
+/* static */ apache::thrift::SerializedResponse GoodServiceAsyncProcessor::return_BadInteraction_foo(
     apache::thrift::ContextStack* ctx) {
   ProtocolOut_ prot;
   ::cpp2::GoodService_BadInteraction_foo_presult result;

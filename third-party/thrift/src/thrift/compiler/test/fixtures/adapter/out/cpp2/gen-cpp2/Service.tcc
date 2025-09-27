@@ -163,7 +163,7 @@ void ServiceAsyncProcessor::executeRequest_func(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ServiceAsyncProcessor::return_func(
+/* static */ apache::thrift::SerializedResponse ServiceAsyncProcessor::return_func(
     apache::thrift::ContextStack* ctx,
     ::facebook::thrift::test::MyI32_4873 const& _return) {
   ProtocolOut_ prot;

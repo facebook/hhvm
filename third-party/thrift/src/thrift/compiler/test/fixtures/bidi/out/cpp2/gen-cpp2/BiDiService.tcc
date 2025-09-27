@@ -64,14 +64,18 @@ void BiDiServiceAsyncProcessor::executeRequest_simple(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-/* TODO(ezou) needs to be something else */ void BiDiServiceAsyncProcessor::return_simple(
+/* static */ apache::thrift::ResponseAndServerBiDiStreamFactory BiDiServiceAsyncProcessor::return_simple(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::StreamTransformation<::std::int32_t, ::std::int16_t>&& _return) {
-  std::ignore = ctx;
-  std::ignore = _return;
-  std::ignore = executor;
-  apache::thrift::detail::si::throw_app_exn_unimplemented("Not Implemented Yet");
+  ProtocolOut_ prot;
+  BiDiService_simple_presult::InitialResponsePResultType result;
+  using SinkPResultType = BiDiService_simple_presult::SinkPResultType;
+  using StreamPResultType = BiDiService_simple_presult::StreamPResultType;
+  auto bidiStreamFactory = apache::thrift::detail::ap::encode_server_bidi_stream<
+    ProtocolIn_, SinkPResultType, ProtocolOut_, StreamPResultType>(
+      std::move(_return), std::move(executor));
+  return {serializeResponse("simple", &prot, ctx, result), std::move(bidiStreamFactory)};
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -131,14 +135,20 @@ void BiDiServiceAsyncProcessor::executeRequest_response(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-/* TODO(ezou) needs to be something else */ void BiDiServiceAsyncProcessor::return_response(
+/* static */ apache::thrift::ResponseAndServerBiDiStreamFactory BiDiServiceAsyncProcessor::return_response(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     ::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>&& _return) {
-  std::ignore = ctx;
-  std::ignore = _return;
-  std::ignore = executor;
-  apache::thrift::detail::si::throw_app_exn_unimplemented("Not Implemented Yet");
+  ProtocolOut_ prot;
+  BiDiService_response_presult::InitialResponsePResultType result;
+  using SinkPResultType = BiDiService_response_presult::SinkPResultType;
+  using StreamPResultType = BiDiService_response_presult::StreamPResultType;
+  result.get<0>().value = const_cast<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>::ResponseType*>(&_return.response);
+  result.setIsSet(0, true);
+  auto bidiStreamFactory = apache::thrift::detail::ap::encode_server_bidi_stream<
+    ProtocolIn_, SinkPResultType, ProtocolOut_, StreamPResultType>(
+      std::move(_return.transform), std::move(executor));
+  return {serializeResponse("response", &prot, ctx, result), std::move(bidiStreamFactory)};
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

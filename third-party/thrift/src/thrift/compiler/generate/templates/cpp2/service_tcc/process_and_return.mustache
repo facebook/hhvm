@@ -306,27 +306,27 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
 {{^function:oneway?}}
 template <class ProtocolIn_, class ProtocolOut_>
 {{^function:cpp_recv_arg?}}
-apache::thrift::SerializedResponse {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(
+/* static */ apache::thrift::SerializedResponse {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(
     apache::thrift::ContextStack* ctx) {
 {{/function:cpp_recv_arg?}}
 {{#function:cpp_recv_arg?}}
 {{^function:stream?}}{{^function:sink?}}
-apache::thrift::SerializedResponse {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(
+/* static */ apache::thrift::SerializedResponse {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(
     apache::thrift::ContextStack* ctx,
     {{function:cpp_return_type}} const& _return) {
 {{/function:sink?}}{{/function:stream?}}
 {{#if function:self.bidirectional_stream?}}
-/* TODO(ezou) needs to be something else */ void {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(
+/* static */ apache::thrift::ResponseAndServerBiDiStreamFactory {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     {{function:cpp_return_type}}&& _return) {
 {{#else if function:self.stream?}}
-apache::thrift::ResponseAndServerStreamFactory {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(
+/* static */ apache::thrift::ResponseAndServerStreamFactory {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(
     apache::thrift::ContextStack* ctx,
     folly::Executor::KeepAlive<> executor,
     {{function:cpp_return_type}}&& _return) {
 {{#else if function:self.sink?}}
-std::pair<
+/* static */ std::pair<
     apache::thrift::SerializedResponse,
     apache::thrift::detail::SinkConsumerImpl>
 {{service:parent_service_cpp_name}}AsyncProcessor::return_{{function:prefixed_name}}(
@@ -335,36 +335,45 @@ std::pair<
     folly::Executor::KeepAlive<> executor) {
 {{/if function:self.bidirectional_stream?}}
 {{/function:cpp_recv_arg?}}
-{{#if function:self.bidirectional_stream?}}
-  std::ignore = ctx;
-  std::ignore = _return;
-  std::ignore = executor;
-  apache::thrift::detail::si::throw_app_exn_unimplemented("Not Implemented Yet");
-{{#else}}
   ProtocolOut_ prot;
-{{#function:stream?}}
+{{#if function:bidirectional_stream?}}
+  {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::InitialResponsePResultType result;
+  using SinkPResultType = {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::SinkPResultType;
+  using StreamPResultType = {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::StreamPResultType;
+{{#if function:initial_response?}}
+  result.get<0>().value = const_cast<{{function:cpp_return_type}}::ResponseType*>(&_return.response);
+  result.setIsSet(0, true);
+  auto bidiStreamFactory = apache::thrift::detail::ap::encode_server_bidi_stream<
+    ProtocolIn_, SinkPResultType, ProtocolOut_, StreamPResultType>(
+      std::move(_return.transform), std::move(executor));
+  return {serializeResponse("{{> common/function_name}}", &prot, ctx, result), std::move(bidiStreamFactory)};
+{{#else}}
+  auto bidiStreamFactory = apache::thrift::detail::ap::encode_server_bidi_stream<
+    ProtocolIn_, SinkPResultType, ProtocolOut_, StreamPResultType>(
+      std::move(_return), std::move(executor));
+  return {serializeResponse("{{> common/function_name}}", &prot, ctx, result), std::move(bidiStreamFactory)};
+{{/if function:initial_response?}}
+{{#else if function:stream?}}
   {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::InitialResponsePResultType result;
   using StreamPResultType = {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::StreamPResultType;
-{{#function:stream_has_first_response?}}
+{{#if function:stream_has_first_response?}}
   result.get<0>().value = const_cast<{{function:cpp_return_type}}::ResponseType*>(&_return.response);
   result.setIsSet(0, true);
   auto& returnStream = _return.stream;
-{{/function:stream_has_first_response?}}
-{{^function:stream_has_first_response?}}
+{{#else}}
   auto& returnStream = _return;
-{{/function:stream_has_first_response?}}
+{{/if function:stream_has_first_response?}}
   auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType>(std::move(returnStream), std::move(executor));
   return {serializeResponse("{{> common/function_name}}", &prot, ctx, result), std::move(encodedStream)};
-{{/function:stream?}}
-{{#function:sink?}}
+{{#else if function:sink?}}
   {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::InitialResponsePResultType result;
   using SinkPResultType = {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::SinkPResultType;
   using FinalResponsePResultType =
       {{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult::FinalResponsePResultType;
-{{#function:sink_has_first_response?}}
+{{#if function:sink_has_first_response?}}
   result.get<0>().value = &_return.response;
   result.setIsSet(0, true);
-{{/function:sink_has_first_response?}}
+{{/if function:sink_has_first_response?}}
   auto sinkConsumerImpl = apache::thrift::detail::ap::toSinkConsumerImpl<
       ProtocolIn_,
       ProtocolOut_,
@@ -372,16 +381,14 @@ std::pair<
       FinalResponsePResultType>({{#function:sink_has_first_response?}}std::move(_return.sinkConsumer),{{/function:sink_has_first_response?}}{{^function:sink_has_first_response?}}std::move(_return), {{/function:sink_has_first_response?}}std::move(executor));
 
   return {serializeResponse("{{> common/function_name}}", &prot, ctx, result), std::move(sinkConsumerImpl)};
-{{/function:sink?}}
-{{^function:stream?}}{{^function:sink?}}
+{{#else}}
   ::{{service:qualified_namespace}}::{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult result;
 {{^type:void?}}
   result.get<0>().value = const_cast<{{function:cpp_return_type}}*>(&_return);
   result.setIsSet(0, true);
 {{/type:void?}}
   return serializeResponse("{{> common/function_name}}", &prot, ctx, result);
-{{/function:sink?}}{{/function:stream?}}
-{{/if function:self.bidirectional_stream?}}
+{{/if function:bidirectional_stream?}}
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

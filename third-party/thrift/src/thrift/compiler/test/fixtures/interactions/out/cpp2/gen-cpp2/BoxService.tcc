@@ -158,7 +158,7 @@ void BoxServiceAsyncProcessor::executeRequest_getABoxSession(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse BoxServiceAsyncProcessor::return_getABoxSession(
+/* static */ apache::thrift::SerializedResponse BoxServiceAsyncProcessor::return_getABoxSession(
     apache::thrift::ContextStack* ctx,
     ::cpp2::ShouldBeBoxed const& _return) {
   ProtocolOut_ prot;
@@ -336,7 +336,7 @@ void BoxServiceAsyncProcessor::executeRequest_BoxedInteraction_getABox(
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse BoxServiceAsyncProcessor::return_BoxedInteraction_getABox(
+/* static */ apache::thrift::SerializedResponse BoxServiceAsyncProcessor::return_BoxedInteraction_getABox(
     apache::thrift::ContextStack* ctx,
     ::cpp2::ShouldBeBoxed const& _return) {
   ProtocolOut_ prot;

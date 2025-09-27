@@ -1601,8 +1601,9 @@ apache::thrift::detail::SinkConsumerImpl toSinkConsumerImpl(
 }
 
 template <
-    typename Protocol,
+    typename ProtocolReader,
     typename SinkPResult,
+    typename ProtocolWriter,
     typename StreamPResult,
     typename InputType,
     typename OutputType>
@@ -1610,9 +1611,12 @@ apache::thrift::detail::ServerBiDiStreamFactory encode_server_bidi_stream(
     apache::thrift::StreamTransformation<InputType, OutputType>&&
         streamTransformation,
     folly::Executor::KeepAlive<> serverExecutor) {
-  auto& decoder = get_decoder<Protocol, SinkPResult, InputType>();
-  auto& encoder =
-      get_encoder<ErrorBlame::SERVER, Protocol, StreamPResult, OutputType>();
+  auto& decoder = get_decoder<ProtocolReader, SinkPResult, InputType>();
+  auto& encoder = get_encoder<
+      ErrorBlame::SERVER,
+      ProtocolWriter,
+      StreamPResult,
+      OutputType>();
   return ServerBiDiStreamFactory(
       std::move(streamTransformation),
       decoder,

@@ -1,4 +1,4 @@
-f [fromPackageV2] basic.php
+f [fromPackages] basic.php
 string(9) "in A::bar"
 string(4) "in a"
 

@@ -1,9 +1,9 @@
-f [fromPackageV2] basic-1.php
-f [fromPackageV2] basic-2.php
-f [fromPackageV2] basic-3.php
-f [fromPackageV2] basic-4.php
-f [fromPackageV2] prod/foo.inc.php
-f [fromPackageV2] prod/internal_prod/zap.inc.php
-f [fromPackageV2Soft] prod/qux.inc.php
-f [fromPackageV2Soft] softprod/quz.inc.php
+f [fromPackages] basic-1.php
+f [fromPackages] basic-2.php
+f [fromPackages] basic-3.php
+f [fromPackages] basic-4.php
+f [fromPackages] prod/foo.inc.php
+f [fromPackages] prod/internal_prod/zap.inc.php
+f [fromPackagesSoft] prod/qux.inc.php
+f [fromPackagesSoft] softprod/quz.inc.php
 I am in prod/internal_prod/

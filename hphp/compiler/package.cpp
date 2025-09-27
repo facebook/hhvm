@@ -1482,11 +1482,11 @@ const char* show(FileInBuildReason r) {
     case FileInBuildReason::fromSymbolRefs:
       return "fromSymbolRefs";
     case FileInBuildReason::fromPackages:
-      return "fromPackageV2";
+      return "fromPackages";
     case FileInBuildReason::fromPackagesSoft:
-      return "fromPackageV2Soft";
+      return "fromPackagesSoft";
     case FileInBuildReason::fromSymbolRefsAndPackages:
-      return "fromSymbolRefsAndPackageV2";
+      return "fromSymbolRefsAndPackages";
     case FileInBuildReason::notIncluded:
       return "notIncluded";
     case FileInBuildReason::noFilepath:
@@ -1514,7 +1514,8 @@ void saveFilesInBuild(const std::vector<FileInBuildInfo>& files_in_build,
 void logPackageDrift(const std::vector<FileInBuildInfo>& files_in_build) {
   StructuredLogEntry ent;
   for (auto const& file : files_in_build) {
-    if (file.m_reason != FileInBuildReason::fromSymbolRefsAndPackages) {
+    if (file.m_reason != FileInBuildReason::fromSymbolRefsAndPackages &&
+        file.m_reason != FileInBuildReason::fromIncludeDir) {
       ent.setStr("filepath", file.m_file->data());
       ent.setStr("reason", show(file.m_reason));
       ent.force_init = true;

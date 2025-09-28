@@ -46,10 +46,8 @@ class DeviousBatonClient {
 
   async connect() {
     try {
-      // Create WebTransport connection with deviousbaton-01 subprotocol
-      this.transport = new WebTransport(this.serverUrl.toString(), {
-        protocols: ["deviousbaton-01"]
-      });
+      // Create WebTransport connection
+      this.transport = new WebTransport(this.serverUrl.toString());
 
       // Wait for connection to be established
       await this.transport.ready;

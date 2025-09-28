@@ -7,7 +7,6 @@
  */
 
 #include <proxygen/httpserver/samples/hq/SampleHandlers.h>
-#include <proxygen/lib/http/webtransport/HTTPWebTransport.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -358,19 +357,6 @@ void DeviousBatonHandler::onHeadersComplete(
   } else {
     resp.setWantsKeepalive(false);
     devious_.reset();
-  }
-  std::vector<std::string> supportedProtocols{"deviousbaton-01"};
-  if (auto wtAvailableProtocols =
-          HTTPWebTransport::getWTAvailableProtocols(*msg)) {
-    if (auto wtProtocol = HTTPWebTransport::negotiateWTProtocol(
-            wtAvailableProtocols.value(), supportedProtocols)) {
-      // TODO: Set the version from the negotiated protocol instead of query
-      // param
-      HTTPWebTransport::setWTProtocol(resp, wtProtocol.value());
-    } else {
-      VLOG(4) << "Failed to negotiate WebTransport protocol";
-      resp.setStatusCode(400);
-    }
   }
   resp.dumpMessage(4);
   txn_->sendHeaders(resp);

@@ -26,7 +26,4 @@ extern const std::string kMasque;
 extern const std::string kWebsocketString;
 extern const std::string kStatus200;
 
-constexpr std::string_view kWTAvailableProtocols{"wt-available-protocols"};
-constexpr std::string_view kWTProtocol{"wt-protocol"};
-
 } // namespace proxygen::headers

@@ -65,6 +65,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/network.h"
 #include "hphp/util/process.h"
+#include "hphp/util/roar.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/struct-log.h"
@@ -1786,6 +1787,7 @@ ServiceData::CounterCallback s_build_info([](ServiceData::CounterMap& counters) 
 uintptr_t lowArenaMinAddr() {
   const char* str = getenv("HHVM_LOW_ARENA_START");
   if (str == nullptr) {
+    if (use_roar && use_lowptr) return 0x50000000; // 1GB + 256MB
 #if !defined(INSTRUMENTED_BUILD) && defined(USE_LOWPTR)
    return 1u << 30;
 #else

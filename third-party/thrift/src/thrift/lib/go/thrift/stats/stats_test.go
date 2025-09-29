@@ -32,7 +32,6 @@ func TestStats(t *testing.T) {
 		"connections.client_ended.60":               0,
 		"connections.connected":                     0,
 		"connections.connection_preempted_work.60":  0,
-		"connections.established.60":                0,
 		"connections.not_listening.avg.60":          0,
 		"connections.not_listening.p95.60":          0,
 		"connections.not_listening.p99.60":          0,

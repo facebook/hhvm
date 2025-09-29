@@ -27,7 +27,6 @@ type ServerStats struct {
 	statsPeriod time.Duration
 
 	// counters
-	ConnsEstablished        *TimingSeries // # of new connections
 	ClientClosed            *TimingSeries // # of client closed connections
 	ConnectionPreemptedWork *TimingSeries // event where we didn't perform work due to connection being closed
 	RequestNum              *TimingSeries // request # per connection
@@ -108,7 +107,6 @@ func NewServerStats(cfg *TimingConfig, statsPeriod time.Duration) *ServerStats {
 		WritingCount:         &AtomicCounter{Counter: 0},
 
 		// events/duration stats
-		ConnsEstablished:        NewTimingSeries(cfg),
 		ClientClosed:            NewTimingSeries(cfg),
 		ConnectionPreemptedWork: NewTimingSeries(cfg),
 		RequestNum:              NewTimingSeries(cfg),
@@ -150,9 +148,7 @@ func (stats *ServerStats) GetInts() map[string]int64 {
 	// server event counters
 	periodStr := fmt.Sprintf("%d", stats.statsPeriod/time.Second)
 
-	s := stats.ConnsEstablished.MustSummarize(stats.statsPeriod)
-	ints["connections.established."+periodStr] = int64(s.Count)
-	s = stats.ClientClosed.MustSummarize(stats.statsPeriod)
+	s := stats.ClientClosed.MustSummarize(stats.statsPeriod)
 	ints["connections.client_ended."+periodStr] = int64(s.Count)
 	s = stats.ConnectionPreemptedWork.MustSummarize(stats.statsPeriod)
 	ints["connections.connection_preempted_work."+periodStr] = int64(s.Count)

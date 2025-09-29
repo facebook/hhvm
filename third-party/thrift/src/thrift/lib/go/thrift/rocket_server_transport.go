@@ -138,9 +138,6 @@ func (r *rocketServerTransport) Close() error {
 }
 
 func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Conn) {
-	// keep track of the number of connections established and closed
-	// over time
-	r.stats.ConnsEstablished.RecordEvent()
 	// update current connection count
 	r.stats.ConnCount.Incr()
 	defer func() {

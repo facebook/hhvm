@@ -35,8 +35,6 @@ func TestStats(t *testing.T) {
 		"connections.not_listening.p95.60":          0,
 		"connections.not_listening.p99.60":          0,
 		"connections.protocol_error.60":             0,
-		"connections.request_number.avg.60":         0,
-		"connections.request_number.p99.60":         0,
 		"requests.duration_read.avg.60":             0,
 		"requests.duration_read.p95.60":             0,
 		"requests.duration_read.p99.60":             0,

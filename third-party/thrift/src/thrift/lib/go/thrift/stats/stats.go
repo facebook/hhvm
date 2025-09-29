@@ -48,7 +48,6 @@ type ServerStats struct {
 
 	// Instantaneous counts of current number of requests being worked on
 	ConnCount            *AtomicCounter
-	ReadingCount         *AtomicCounter
 	SchedulingWorkCount  *AtomicCounter
 	WorkingCount         *AtomicCounter
 	SchedulingWriteCount *AtomicCounter
@@ -104,7 +103,6 @@ func NewServerStats(cfg *TimingConfig, statsPeriod time.Duration) *ServerStats {
 
 		// instantaneous counters
 		ConnCount:            &AtomicCounter{Counter: 0},
-		ReadingCount:         &AtomicCounter{Counter: 0},
 		SchedulingWorkCount:  &AtomicCounter{Counter: 0},
 		WorkingCount:         &AtomicCounter{Counter: 0},
 		SchedulingWriteCount: &AtomicCounter{Counter: 0},
@@ -146,7 +144,6 @@ func (stats *ServerStats) GetInts() map[string]int64 {
 	ints["connections.connected"] = stats.ConnCount.Get()
 
 	// instantaneous request pipeline counters
-	ints["requests.reading"] = stats.ReadingCount.Get()
 	ints["requests.scheduling_work"] = stats.SchedulingWorkCount.Get()
 	ints["requests.working"] = stats.WorkingCount.Get()
 	ints["requests.scheduling_write"] = stats.SchedulingWriteCount.Get()

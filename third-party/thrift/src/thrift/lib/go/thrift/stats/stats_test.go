@@ -58,7 +58,6 @@ func TestStats(t *testing.T) {
 		"requests.no_such_thrift_function.60":       0,
 		"requests.pipelining_unsupported_client.60": 0,
 		"requests.processor_panics.60":              0,
-		"requests.reading":                          0,
 		"requests.scheduling_work":                  0,
 		"requests.scheduling_write":                 0,
 		"requests.task_expired.60":                  0,

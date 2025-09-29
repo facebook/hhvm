@@ -8546,6 +8546,39 @@ end = struct
       (sub_supportdyn, tys_sub)
       rhs
       env =
+    (* If we have an intersection containing a type variable e.g. #0 & dict<string,mixed>
+       and the type variable has a supportdyn or dynamic upper bound, then it's sound (and desirable)
+       to preserve supportdyn when making incomplete simplification of the intersection. In this
+       case we add supportdyn to the other conjuncts to preserve the "supports dynamic" property.
+    *)
+    let rec is_dynamic_or_supportdyn ty =
+      let (_, ty) = Env.expand_type env ty in
+      match get_node ty with
+      | Tnewtype (name_sub, [_], _)
+        when String.equal name_sub Naming_special_names.Classes.cSupportDyn ->
+        true
+      | Tdynamic
+      | Tprim _ ->
+        true
+      | Toption ty -> is_dynamic_or_supportdyn ty
+      | Tunion tyl -> List.for_all tyl ~f:is_dynamic_or_supportdyn
+      | Tintersection tyl -> List.exists tyl ~f:is_dynamic_or_supportdyn
+      | _ -> false
+    in
+    let add_supportdyn =
+      List.exists tys_sub ~f:(fun ty_sub ->
+          let (_, ty_sub) = Env.expand_type env ty_sub in
+          match get_node ty_sub with
+          | Tvar v ->
+            let upper_bounds = Env.get_tyvar_upper_bounds env v in
+            ITySet.exists
+              (fun ity ->
+                match ity with
+                | LoclType ty -> is_dynamic_or_supportdyn ty
+                | _ -> false)
+              upper_bounds
+          | _ -> false)
+    in
     let rec aux ty_subs ~env ~errs ~props =
       match ty_subs with
       | [] ->
@@ -8553,6 +8586,12 @@ end = struct
           TL.Disj (Typing_error.intersect_opt @@ List.filter_opt errs, props) )
       | ty_sub :: ty_subs ->
         let ty_sub = update_reason env ty_sub in
+        let (env, ty_sub) =
+          if add_supportdyn then
+            TUtils.make_supportdyn (get_reason ty_sub) env ty_sub
+          else
+            (env, ty_sub)
+        in
         let (env, prop) =
           mk_prop ~subtype_env ~this_ty ~lhs:{ sub_supportdyn; ty_sub } ~rhs env
         in

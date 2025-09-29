@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<71a9ef410457cce9c8f4ffbd1e440a92>>
+// @generated SignedSource<<74eb2542d0c690f5b60d4aab48387c8d>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -683,7 +683,7 @@ pub enum T_ {
     },
     /// Represents the projection of the sub- and supertype during subtype
     /// constraints simplifiction. [sub_prj] is the subtype resulting from the
-    /// projection whilst [sub] and [super] and the reasons for the parent
+    /// projection whilst [sub] and [super] are the reasons for the parent
     /// types
     #[rust_to_ocaml(name = "Prj_both")]
     PrjBoth {

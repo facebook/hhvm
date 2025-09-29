@@ -1625,7 +1625,7 @@ type _ t_ =
       -> locl_phase t_
       (** Represents the projection of the sub- and supertype during subtype
           constraints simplifiction. [sub_prj] is the subtype resulting from the
-          projection whilst [sub] and [super] and the reasons for the parent
+          projection whilst [sub] and [super] are the reasons for the parent
           types *)
   | Prj_one : {
       part: locl_phase t_;
@@ -4614,3 +4614,15 @@ let debug_reason ~sub ~super =
 let debug_derivation ~sub ~super =
   let json = Derivation.(to_json @@ of_reason ~sub ~super) in
   Explanation.debug (Hh_json.json_to_string ~pretty:true json)
+
+let rec get_top_fun_param_prj_idx r =
+  match r with
+  | Prj_both { prj = Prj_symm_fn_param (i, _); sub; _ } ->
+    (match get_top_fun_param_prj_idx sub with
+    | None -> Some i
+    | Some i -> Some i)
+  | Prj_both { sub; _ } -> get_top_fun_param_prj_idx sub
+  | Lower_bound { bound; _ } -> get_top_fun_param_prj_idx bound
+  | Axiom { prev; _ } -> get_top_fun_param_prj_idx prev
+  | Solved { in_; _ } -> get_top_fun_param_prj_idx in_
+  | _ -> None

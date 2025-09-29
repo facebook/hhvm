@@ -1431,6 +1431,7 @@ module rec Error : sig
     | Union of t list
     | Intersection of t list
     | With_code of t * Error_code.t
+    | With_pos of t * Pos.t
   [@@deriving show]
 
   val primary : Primary.t -> t
@@ -1492,6 +1493,7 @@ end = struct
     | Union of t list
     | Intersection of t list
     | With_code of t * Error_code.t
+    | With_pos of t * Pos.t
   [@@deriving show]
 
   (* -- Constructors ---------------------------------------------------------- *)
@@ -1566,7 +1568,8 @@ end = struct
     | Assert_in_current_decl _ ->
       1
     | Apply (_, t)
-    | With_code (t, _) ->
+    | With_code (t, _)
+    | With_pos (t, _) ->
       count t
     | Multiple ts
     | Union ts
@@ -2352,7 +2355,7 @@ and Reasons_callback : sig
     | Code
     | Reasons
     | Quickfixes
-  [@@deriving show]
+  [@@deriving show, eq]
 
   type t =
     | Always of Error.t
@@ -2484,7 +2487,7 @@ end = struct
     | Code
     | Reasons
     | Quickfixes
-  [@@deriving show]
+  [@@deriving show, eq]
 
   type t =
     | Always of Error.t

@@ -6491,6 +6491,11 @@ end = struct
           has_member_ty
           Typing_error.Callback.unify_error
       in
+      let ty_err_opt =
+        Option.map
+          ty_err_opt
+          ~f:(Typing_error_utils.update_error_for_method_call ~arg_posl)
+      in
       Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
       let ty_mismatch_opt =
         mk_ty_mismatch_opt ty1 (MakeType.nothing Reason.none) ty_err_opt

@@ -659,3 +659,7 @@ module Predicates : sig
 
   val outer_constructor_string : t -> string
 end
+
+(** Get the topmost function parameter projection, in the case that the reason
+    contains a function subtyping *)
+val get_top_fun_param_prj_idx : t -> int option

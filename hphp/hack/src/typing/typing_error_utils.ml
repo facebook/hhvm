@@ -5428,6 +5428,14 @@ end = struct
       | With_code (t, code) ->
         aux t ~k:(fun res ->
             k @@ Eval_result.map res ~f:(fun t -> { t with code }))
+      | With_pos (t, pos) ->
+        aux t ~k:(fun res ->
+            k
+            @@ Eval_result.map res ~f:(fun t ->
+                   {
+                     t with
+                     claim = Lazy.map t.claim ~f:(fun (_, s) -> (pos, s));
+                   }))
       | Intersection ts -> auxs ~k:(fun xs -> k @@ Eval_result.intersect xs) ts
       | Union ts -> auxs ~k:(fun xs -> k @@ Eval_result.union xs) ts
       | Multiple ts -> auxs ~k:(fun xs -> k @@ Eval_result.multiple xs) ts
@@ -7138,3 +7146,50 @@ let ambiguous_inheritance pos class_ origin error on_error ~env =
       }
     on_error
     ~env
+
+let discard_outermost (err : Typing_error.t) : Typing_error.t =
+  match err with
+  | Apply_reasons (_, Of_error err) -> err
+  | _ -> err
+
+let rec get_arg_idx_secondary (second : Typing_error.Secondary.t) =
+  let open Typing_error.Secondary in
+  match second with
+  | Subtyping_error { ty_sub; _ }
+  | Violated_constraint { ty_sub; _ } ->
+    Typing_reason.get_top_fun_param_prj_idx
+      (Typing_defs_core.get_reason_i ty_sub)
+  | Of_error err -> get_arg_idx err
+  | _ -> None
+
+(* Search the error to get the outermost parameter projection from the reason, and update
+   the primary position accordingly. *)
+and get_arg_idx (err : Typing_error.t) =
+  match err with
+  | Apply_reasons (_, second) -> get_arg_idx_secondary second
+  | With_code (err, _)
+  | With_pos (err, _)
+  | Apply (_, err) ->
+    get_arg_idx err
+  | Primary _
+  | Assert_in_current_decl _ ->
+    None
+  | Multiple errs
+  | Union errs
+  | Intersection errs ->
+    List.find_map errs ~f:get_arg_idx
+
+let update_error_for_method_call_prim ~arg_posl (err : Typing_error.t) :
+    Typing_error.t =
+  match get_arg_idx err with
+  | None -> discard_outermost err
+  | Some i ->
+    let pos = List.nth_exn arg_posl i in
+    With_pos (err, pos)
+
+let rec update_error_for_method_call ~arg_posl (err : Typing_error.t) :
+    Typing_error.t =
+  match err with
+  | Multiple errs ->
+    Multiple (List.map ~f:(update_error_for_method_call ~arg_posl) errs)
+  | _ -> update_error_for_method_call_prim ~arg_posl err

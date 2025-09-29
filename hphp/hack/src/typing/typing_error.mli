@@ -1407,6 +1407,8 @@ module rec Error : sig
     | Union of t list
     | Intersection of t list
     | With_code of t * Error_code.t
+    | With_pos of t * Pos.t
+  [@@deriving show]
 end
 
 and Secondary : sig
@@ -1814,7 +1816,7 @@ and Reasons_callback : sig
     | Code
     | Reasons
     | Quickfixes
-  [@@deriving show]
+  [@@deriving show, eq]
 
   type t =
     | Always of Error.t

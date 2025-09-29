@@ -1,16 +1,74 @@
-ERROR: File "call-error.php", line 7, characters 5-18:
+ERROR: File "call-error.php", line 11, characters 17-17:
 Invalid argument (Typing[4110])
-  File "call-error.php", line 4, characters 29-34:
+  File "call-error.php", line 8, characters 29-34:
   Expected `string`
-  File "call-error.php", line 7, characters 17-17:
+  File "call-error.php", line 11, characters 17-17:
   But got `int`
-ERROR: File "call-error.php", line 11, characters 5-20:
-Invalid argument (Typing[4053])
-  File "call-error.php", line 11, characters 12-18:
-  No instance method `missing` in `C`
-  File "call-error.php", line 6, characters 19-19:
+ERROR: File "call-error.php", line 16, characters 8-12:
+Invalid argument (Typing[4110])
+  File "call-error.php", line 8, characters 29-34:
+  Expected `string`
+  File "call-error.php", line 15, characters 26-26:
+  But got `int`
+ERROR: File "call-error.php", line 20, characters 12-18:
+No instance method `missing` in `C` (Typing[4053])
+  File "call-error.php", line 10, characters 19-19:
   Did you mean `g` instead?
-  File "call-error.php", line 3, characters 7-7:
+  File "call-error.php", line 7, characters 7-7:
   This is why I think it is an object of type C
-  File "call-error.php", line 3, characters 7-7:
+  File "call-error.php", line 7, characters 7-7:
   Declaration of `C` is here
+ERROR: File "call-error.php", line 25, characters 8-12:
+Invalid argument (Typing[4053])
+  File "call-error.php", line 24, characters 21-27:
+  No instance method `missing` in `C`
+  File "call-error.php", line 10, characters 19-19:
+  Did you mean `g` instead?
+  File "call-error.php", line 7, characters 7-7:
+  This is why I think it is an object of type C
+  File "call-error.php", line 7, characters 7-7:
+  Declaration of `C` is here
+ERROR: File "call-error.php", line 32, characters 14-15:
+Invalid argument (Typing[4110])
+  File "call-error.php", line 31, characters 38-40:
+  Expected `int`
+  File "call-error.php", line 28, characters 37-42:
+  But got `string`
+ERROR: File "call-error.php", line 39, characters 14-17:
+Invalid argument (Typing[4323])
+  File "call-error.php", line 35, characters 21-21:
+  `T` is a constrained type parameter
+  File "call-error.php", line 35, characters 26-33:
+  This type constraint is violated
+  File "call-error.php", line 35, characters 26-33:
+  Expected `arraykey`
+  File "call-error.php", line 39, characters 14-17:
+  But got `bool`
+ERROR: File "call-error.php", line 46, characters 14-14:
+Invalid argument (Typing[4323])
+  File "call-error.php", line 42, characters 21-21:
+  `T` is a constrained type parameter
+  File "call-error.php", line 42, characters 26-31:
+  This type constraint is violated
+  File "call-error.php", line 42, characters 26-31:
+  Expected `string`
+  File "call-error.php", line 46, characters 14-14:
+  But got `int`
+ERROR: File "call-error.php", line 53, characters 15-20:
+Invalid argument (Typing[4323])
+  File "call-error.php", line 49, characters 22-22:
+  `T` is a constrained type parameter
+  File "call-error.php", line 49, characters 27-37:
+  This type constraint is violated
+  File "call-error.php", line 49, characters 31-36:
+  Expected `string`
+  File "call-error.php", line 53, characters 19-19:
+  But got `int`
+ERROR: File "call-error.php", line 59, characters 5-23:
+Invalid argument (Typing[4110])
+  File "call-error.php", line 56, characters 33-38:
+  Expected `string`
+  File "call-error.php", line 59, characters 21-21:
+  But got `int`
+  File "call-error.php", line 59, characters 21-21:
+  This type argument to `Vector` must match exactly (it is invariant)

@@ -177,7 +177,7 @@ void clearValueInner(Value& value);
 class BaseObjectAdapter {
  public:
   static constexpr ProtocolType protocolType() { return {}; }
-  static constexpr bool kUsesFieldNames() { return true; }
+  static constexpr bool kUsesFieldNames() { return false; }
   static constexpr bool kOmitsContainerSizes() { return false; }
   static constexpr bool kSortKeys() { return false; }
   static constexpr bool kHasIndexSupport() { return false; }

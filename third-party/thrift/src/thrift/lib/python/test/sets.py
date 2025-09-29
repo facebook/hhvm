@@ -142,6 +142,8 @@ class SetTests(unittest.TestCase):
         x = self.SetI32(self.to_set({1, 2, 3, 4}))
         # pyre-ignore[6]: TODO: Thrift-Container init
         y = self.SetI32(self.to_set({1, 2, 3}))
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        z = self.SetI32(self.to_set({1, 2, 4}))
         x2 = copy.copy(x)
         y2 = {1, 2, 3}
 
@@ -176,24 +178,32 @@ class SetTests(unittest.TestCase):
         self.assertFalse(any(lt(x, y)))
         self.assertFalse(any(lt(x, x2)))
         self.assertFalse(any(lt(y2, y)))
+        self.assertFalse(any(lt(y, z)))
+        self.assertFalse(any(lt(z, y)))
 
         # gt
         self.assertTrue(all(gt(x, y)))
         self.assertFalse(any(gt(y, x)))
         self.assertFalse(any(gt(x, x2)))
         self.assertFalse(any(gt(y2, y)))
+        self.assertFalse(any(gt(y, z)))
+        self.assertFalse(any(gt(z, y)))
 
         # le
         self.assertTrue(all(le(y, x)))
         self.assertFalse(any(le(x, y)))
         self.assertTrue(all(le(x, x2)))
         self.assertTrue(all(le(y2, y)))
+        self.assertFalse(any(le(y, z)))
+        self.assertFalse(any(le(z, y)))
 
         # ge
         self.assertTrue(all(ge(x, y)))
         self.assertFalse(any(ge(y, x)))
         self.assertTrue(all(ge(x, x2)))
         self.assertTrue(all(ge(y2, y)))
+        self.assertFalse(any(ge(y, z)))
+        self.assertFalse(any(ge(z, y)))
 
     def test_None(self) -> None:
         with self.assertRaises(TypeError):
@@ -338,6 +348,22 @@ class ImmutableSetTests(unittest.TestCase):
         ):
             # pyre-ignore[16]: `AbstractSet` has no attribute `remove`
             constant_set.remove("3")
+
+    def test_subset_superset(self) -> None:
+        x = SetI32({0, 1})
+        y = SetI32({1, 2})
+        w = SetI32({2, 1})
+        z = SetI32({0})
+        # subset
+        self.assertFalse(x.issubset(y))
+        self.assertTrue(z.issubset(x))
+        self.assertFalse(x.issubset(z))
+        self.assertTrue(w.issubset(y))
+        # superset
+        self.assertFalse(x.issuperset(y))
+        self.assertTrue(x.issuperset(z))
+        self.assertFalse(z.issuperset(x))
+        self.assertTrue(w.issuperset(y))
 
 
 # TODO: Collapse these two test cases into parameterized test above

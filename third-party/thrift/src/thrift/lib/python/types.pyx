@@ -2252,13 +2252,17 @@ cdef class Set(Container):
         return self._fbthrift_elements < other
 
     def __gt__(Set self, other):
-        return not (self == other or self < other)
+        # For sets, `x > y` or `x >= y` can not be implemented using `not (x <= y)` or `not (x < y)`. 
+        # Because `<` for sets form partial order unlike integers which form total order.
+        # For example if `x > y` was implemented as `not (x <= y)` => `not (x == y or x < y)`, then we can 
+        # find a counter example. Let `x={0}` and `y={1}`: `x > y` is False, but `not (x == y or x < y)` is True.
+        return self._fbthrift_elements > other
 
     def __le__(Set self, other):
         return self == other or self < other
 
     def __ge__(Set self, other):
-        return not self < other
+        return self == other or self > other
 
     def __repr__(self):
         if not self:

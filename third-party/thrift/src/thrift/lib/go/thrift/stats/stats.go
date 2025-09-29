@@ -66,10 +66,6 @@ type ServerStats struct {
 	// durationWrite defines the duration it takes thwork to write out the
 	// response to the connection.
 	DurationWrite *TimingSeries
-	// totalResponseTime is the total time it takes thwork to process a request,
-	// starting from the moment it deserializes a msg header, ending when the
-	// response is finished being written out.
-	TotalResponseTime *TimingSeries
 
 	// workersBusy defines a server event where no workers are available to accept
 	// available work. This can signal that we should increase # workers (in the case
@@ -122,8 +118,6 @@ func NewServerStats(cfg *TimingConfig, statsPeriod time.Duration) *ServerStats {
 		DurationWorking:       NewTimingSeries(cfg),
 		DurationScheduleWrite: NewTimingSeries(cfg),
 		DurationWrite:         NewTimingSeries(cfg),
-
-		TotalResponseTime: NewTimingSeries(cfg),
 	}
 }
 
@@ -185,10 +179,6 @@ func (stats *ServerStats) GetInts() map[string]int64 {
 	ints["requests.duration_write.avg."+periodStr] = toμs(s.Average)
 	ints["requests.duration_write.p95."+periodStr] = toμs(s.P95)
 	ints["requests.duration_write.p99."+periodStr] = toμs(s.P99)
-	s = stats.TotalResponseTime.MustSummarize(stats.statsPeriod)
-	ints["requests.total_response_time.avg."+periodStr] = toμs(s.Average)
-	ints["requests.total_response_time.p95."+periodStr] = toμs(s.P95)
-	ints["requests.total_response_time.p99."+periodStr] = toμs(s.P99)
 
 	return ints
 }

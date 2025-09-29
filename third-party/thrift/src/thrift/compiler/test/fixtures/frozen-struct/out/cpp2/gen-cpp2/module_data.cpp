@@ -12,8 +12,8 @@
 
 namespace apache::thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::some::ns::ModuleA>::name = "ModuleA";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::some::ns::ModuleA>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::some::ns::ModuleA>::name = "ModuleA";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 6> TStructDataStorage<::some::ns::ModuleA>::fields_names = { {
   "i32Field"sv,
   "strField"sv,
   "listField"sv,
@@ -21,7 +21,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 6> TStructDataStorage<::so
   "inclAField"sv,
   "inclBField"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::some::ns::ModuleA>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 6> TStructDataStorage<::some::ns::ModuleA>::fields_ids = { {
   1,
   2,
   3,
@@ -29,7 +29,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::some::ns::M
   5,
   6,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::some::ns::ModuleA>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 6> TStructDataStorage<::some::ns::ModuleA>::fields_types = { {
   TType::T_I32,
   TType::T_STRING,
   TType::T_LIST,
@@ -37,7 +37,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::som
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::some::ns::ModuleA>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 6> TStructDataStorage<::some::ns::ModuleA>::isset_indexes = { {
   0,
   1,
   2,
@@ -46,61 +46,61 @@ THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::some::ns::Modul
   5,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::some::ns::ModuleB>::name = "ModuleB";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::some::ns::ModuleB>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::some::ns::ModuleB>::name = "ModuleB";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::some::ns::ModuleB>::fields_names = { {
   "i32Field"sv,
   "inclEnumB"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::some::ns::ModuleB>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::some::ns::ModuleB>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::some::ns::ModuleB>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::some::ns::ModuleB>::fields_types = { {
   TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::some::ns::ModuleB>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::some::ns::ModuleB>::isset_indexes = { {
   0,
   1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::some::ns::detail::DirectlyAdapted>::name = "DirectlyAdapted";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::some::ns::detail::DirectlyAdapted>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::some::ns::detail::DirectlyAdapted>::name = "DirectlyAdapted";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::some::ns::detail::DirectlyAdapted>::fields_names = { {
   "field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::some::ns::detail::DirectlyAdapted>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::some::ns::detail::DirectlyAdapted>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::some::ns::detail::DirectlyAdapted>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::some::ns::detail::DirectlyAdapted>::fields_types = { {
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::some::ns::detail::DirectlyAdapted>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::some::ns::detail::DirectlyAdapted>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::some::ns::CppRef>::name = "CppRef";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::some::ns::CppRef>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::some::ns::CppRef>::name = "CppRef";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 5> TStructDataStorage<::some::ns::CppRef>::fields_names = { {
   "shared_field"sv,
   "shared_const_field"sv,
   "opt_shared_field"sv,
   "opt_shared_const_field"sv,
   "boxed_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 5> TStructDataStorage<::some::ns::CppRef>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 5> TStructDataStorage<::some::ns::CppRef>::fields_ids = { {
   1,
   2,
   3,
   4,
   5,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::some::ns::CppRef>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 5> TStructDataStorage<::some::ns::CppRef>::fields_types = { {
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::some::ns::CppRef>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 5> TStructDataStorage<::some::ns::CppRef>::isset_indexes = { {
   -1,
   -1,
   -1,

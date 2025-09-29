@@ -24,8 +24,8 @@ class DbMixedStackArguments;
 } // namespace test::fixtures::basic
 namespace apache::thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::basic::MyStruct>::name = "MyStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::basic::MyStruct>::name = "MyStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::fields_names = { {
   "MyIntField"sv,
   "MyStringField"sv,
   "MyDataField"sv,
@@ -36,7 +36,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::te
   "floatSet"sv,
   "no_hack_codegen_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -47,7 +47,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 9> TStructDataStorage<::test::fixtu
   8,
   9,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::fields_types = { {
   TType::T_I64,
   TType::T_STRING,
   TType::T_STRUCT,
@@ -58,7 +58,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::tes
   TType::T_SET,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::isset_indexes = { {
   0,
   1,
   2,
@@ -70,141 +70,141 @@ THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::test::fixtures:
   8,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::basic::Containers>::name = "Containers";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::basic::Containers>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::basic::Containers>::name = "Containers";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::basic::Containers>::fields_names = { {
   "I32List"sv,
   "StringSet"sv,
   "StringToI64Map"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 3> TStructDataStorage<::test::fixtures::basic::Containers>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 3> TStructDataStorage<::test::fixtures::basic::Containers>::fields_ids = { {
   1,
   2,
   3,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::test::fixtures::basic::Containers>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 3> TStructDataStorage<::test::fixtures::basic::Containers>::fields_types = { {
   TType::T_LIST,
   TType::T_SET,
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::test::fixtures::basic::Containers>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 3> TStructDataStorage<::test::fixtures::basic::Containers>::isset_indexes = { {
   0,
   1,
   2,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::basic::MyDataItem>::name = "MyDataItem";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::basic::MyDataItem>::name = "MyDataItem";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::isset_indexes = { {
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::basic::MyUnion>::name = "MyUnion";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::basic::MyUnion>::name = "MyUnion";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::fields_names = { {
   "myEnum"sv,
   "myStruct"sv,
   "myDataItem"sv,
   "floatSet"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::fields_ids = { {
   1,
   2,
   3,
   4,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::fields_types = { {
   TType::T_I32,
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_SET,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::isset_indexes = { {
   0,
   1,
   2,
   3,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::basic::MyException>::name = "MyException";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::basic::MyException>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::basic::MyException>::name = "MyException";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::basic::MyException>::fields_names = { {
   "MyIntField"sv,
   "MyStringField"sv,
   "myStruct"sv,
   "myUnion"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::basic::MyException>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::basic::MyException>::fields_ids = { {
   1,
   2,
   3,
   4,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::basic::MyException>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::basic::MyException>::fields_types = { {
   TType::T_I64,
   TType::T_STRING,
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::basic::MyException>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 4> TStructDataStorage<::test::fixtures::basic::MyException>::isset_indexes = { {
   0,
   1,
   2,
   3,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>::name = "MyExceptionWithMessage";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>::name = "MyExceptionWithMessage";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>::fields_names = { {
   "MyIntField"sv,
   "MyStringField"sv,
   "myStruct"sv,
   "myUnion"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>::fields_ids = { {
   1,
   2,
   3,
   4,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>::fields_types = { {
   TType::T_I64,
   TType::T_STRING,
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 4> TStructDataStorage<::test::fixtures::basic::MyExceptionWithMessage>::isset_indexes = { {
   0,
   1,
   2,
   3,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::name = "ReservedKeyword";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::name = "ReservedKeyword";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::fields_names = { {
   "reserved_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::fields_types = { {
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::name = "UnionToBeRenamed";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::name = "UnionToBeRenamed";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::fields_names = { {
   "reserved_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::fields_types = { {
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::isset_indexes = { {
   0,
 }};
 

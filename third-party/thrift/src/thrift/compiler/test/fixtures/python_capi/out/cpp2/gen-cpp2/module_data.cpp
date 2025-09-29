@@ -12,8 +12,8 @@
 
 namespace apache::thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::MyStruct>::name = "MyStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 8> TStructDataStorage<::test::fixtures::python_capi::MyStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::python_capi::MyStruct>::name = "MyStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 8> TStructDataStorage<::test::fixtures::python_capi::MyStruct>::fields_names = { {
   "inty"sv,
   "stringy"sv,
   "myItemy"sv,
@@ -23,7 +23,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 8> TStructDataStorage<::te
   "strMappy"sv,
   "intSetty"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 8> TStructDataStorage<::test::fixtures::python_capi::MyStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 8> TStructDataStorage<::test::fixtures::python_capi::MyStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -33,7 +33,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 8> TStructDataStorage<::test::fixtu
   7,
   8,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 8> TStructDataStorage<::test::fixtures::python_capi::MyStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 8> TStructDataStorage<::test::fixtures::python_capi::MyStruct>::fields_types = { {
   TType::T_I64,
   TType::T_STRING,
   TType::T_STRUCT,
@@ -43,7 +43,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 8> TStructDataStorage<::tes
   TType::T_MAP,
   TType::T_SET,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::test::fixtures::python_capi::MyStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 8> TStructDataStorage<::test::fixtures::python_capi::MyStruct>::isset_indexes = { {
   0,
   1,
   2,
@@ -54,78 +54,78 @@ THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::test::fixtures:
   7,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::MyDataItem>::name = "MyDataItem";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::python_capi::MyDataItem>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::python_capi::MyDataItem>::name = "MyDataItem";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::test::fixtures::python_capi::MyDataItem>::fields_names = { {
   "s"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::python_capi::MyDataItem>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::python_capi::MyDataItem>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::python_capi::MyDataItem>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::python_capi::MyDataItem>::fields_types = { {
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::python_capi::MyDataItem>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::test::fixtures::python_capi::MyDataItem>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::TransitiveDoubler>::name = "TransitiveDoubler";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::python_capi::TransitiveDoubler>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::python_capi::TransitiveDoubler>::name = "TransitiveDoubler";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::python_capi::TransitiveDoubler>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::python_capi::TransitiveDoubler>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::python_capi::TransitiveDoubler>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::python_capi::TransitiveDoubler>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::python_capi::TransitiveDoubler>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::test::fixtures::python_capi::TransitiveDoubler>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<::test::fixtures::python_capi::TransitiveDoubler>::isset_indexes = { {
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::detail::DoubledPair>::name = "DoubledPair";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::python_capi::detail::DoubledPair>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::python_capi::detail::DoubledPair>::name = "DoubledPair";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::python_capi::detail::DoubledPair>::fields_names = { {
   "s"sv,
   "x"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::python_capi::detail::DoubledPair>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::python_capi::detail::DoubledPair>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::python_capi::detail::DoubledPair>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::python_capi::detail::DoubledPair>::fields_types = { {
   TType::T_STRING,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::python_capi::detail::DoubledPair>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::test::fixtures::python_capi::detail::DoubledPair>::isset_indexes = { {
   0,
   1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::StringPair>::name = "StringPair";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::python_capi::StringPair>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::python_capi::StringPair>::name = "StringPair";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::python_capi::StringPair>::fields_names = { {
   "normal"sv,
   "doubled"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::python_capi::StringPair>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::python_capi::StringPair>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::python_capi::StringPair>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::python_capi::StringPair>::fields_types = { {
   TType::T_STRING,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::python_capi::StringPair>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::test::fixtures::python_capi::StringPair>::isset_indexes = { {
   0,
   1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::VapidStruct>::name = "EmptyStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::python_capi::VapidStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::python_capi::VapidStruct>::name = "EmptyStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 0> TStructDataStorage<::test::fixtures::python_capi::VapidStruct>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::python_capi::VapidStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::python_capi::VapidStruct>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::python_capi::VapidStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::python_capi::VapidStruct>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::test::fixtures::python_capi::VapidStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<::test::fixtures::python_capi::VapidStruct>::isset_indexes = { {
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::PrimitiveStruct>::name = "PrimitiveStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 16> TStructDataStorage<::test::fixtures::python_capi::PrimitiveStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::python_capi::PrimitiveStruct>::name = "PrimitiveStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 16> TStructDataStorage<::test::fixtures::python_capi::PrimitiveStruct>::fields_names = { {
   "booly"sv,
   "charry"sv,
   "shorty"sv,
@@ -143,7 +143,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 16> TStructDataStorage<::t
   "managed_string_view"sv,
   "some_error"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 16> TStructDataStorage<::test::fixtures::python_capi::PrimitiveStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 16> TStructDataStorage<::test::fixtures::python_capi::PrimitiveStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -161,7 +161,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 16> TStructDataStorage<::test::fixt
   21,
   22,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 16> TStructDataStorage<::test::fixtures::python_capi::PrimitiveStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 16> TStructDataStorage<::test::fixtures::python_capi::PrimitiveStruct>::fields_types = { {
   TType::T_BOOL,
   TType::T_BYTE,
   TType::T_I16,
@@ -179,7 +179,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 16> TStructDataStorage<::te
   TType::T_STRING,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 16> TStructDataStorage<::test::fixtures::python_capi::PrimitiveStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 16> TStructDataStorage<::test::fixtures::python_capi::PrimitiveStruct>::isset_indexes = { {
   0,
   1,
   2,
@@ -198,34 +198,34 @@ THRIFT_DATA_MEMBER const std::array<int, 16> TStructDataStorage<::test::fixtures
   12,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::AdaptedFields>::name = "AdaptedFields";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::python_capi::AdaptedFields>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::python_capi::AdaptedFields>::name = "AdaptedFields";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 4> TStructDataStorage<::test::fixtures::python_capi::AdaptedFields>::fields_names = { {
   "adapted_int"sv,
   "list_adapted_int"sv,
   "set_adapted_int"sv,
   "inline_adapted_int"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::python_capi::AdaptedFields>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::python_capi::AdaptedFields>::fields_ids = { {
   1,
   2,
   3,
   4,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::python_capi::AdaptedFields>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::python_capi::AdaptedFields>::fields_types = { {
   TType::T_I64,
   TType::T_LIST,
   TType::T_SET,
   TType::T_I64,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::python_capi::AdaptedFields>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 4> TStructDataStorage<::test::fixtures::python_capi::AdaptedFields>::isset_indexes = { {
   0,
   1,
   2,
   3,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::ListStruct>::name = "ListStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::test::fixtures::python_capi::ListStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::python_capi::ListStruct>::name = "ListStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 9> TStructDataStorage<::test::fixtures::python_capi::ListStruct>::fields_names = { {
   "boolz"sv,
   "intz"sv,
   "stringz"sv,
@@ -236,7 +236,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::te
   "voxels"sv,
   "buf_ptrs"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 9> TStructDataStorage<::test::fixtures::python_capi::ListStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 9> TStructDataStorage<::test::fixtures::python_capi::ListStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -247,7 +247,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 9> TStructDataStorage<::test::fixtu
   8,
   9,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::test::fixtures::python_capi::ListStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 9> TStructDataStorage<::test::fixtures::python_capi::ListStruct>::fields_types = { {
   TType::T_LIST,
   TType::T_LIST,
   TType::T_LIST,
@@ -258,7 +258,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::tes
   TType::T_LIST,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::test::fixtures::python_capi::ListStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 9> TStructDataStorage<::test::fixtures::python_capi::ListStruct>::isset_indexes = { {
   0,
   1,
   -1,
@@ -270,8 +270,8 @@ THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::test::fixtures:
   7,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::SetStruct>::name = "SetStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::python_capi::SetStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::python_capi::SetStruct>::name = "SetStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::python_capi::SetStruct>::fields_names = { {
   "enumz"sv,
   "intz"sv,
   "binnaz"sv,
@@ -280,7 +280,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::te
   "charz"sv,
   "setz"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtures::python_capi::SetStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 7> TStructDataStorage<::test::fixtures::python_capi::SetStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -289,7 +289,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtu
   6,
   7,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::test::fixtures::python_capi::SetStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 7> TStructDataStorage<::test::fixtures::python_capi::SetStruct>::fields_types = { {
   TType::T_SET,
   TType::T_SET,
   TType::T_SET,
@@ -298,7 +298,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::tes
   TType::T_SET,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures::python_capi::SetStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 7> TStructDataStorage<::test::fixtures::python_capi::SetStruct>::isset_indexes = { {
   0,
   1,
   -1,
@@ -308,8 +308,8 @@ THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures:
   5,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::MapStruct>::name = "MapStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 10> TStructDataStorage<::test::fixtures::python_capi::MapStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::python_capi::MapStruct>::name = "MapStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 10> TStructDataStorage<::test::fixtures::python_capi::MapStruct>::fields_names = { {
   "enumz"sv,
   "intz"sv,
   "binnaz"sv,
@@ -321,7 +321,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 10> TStructDataStorage<::t
   "buf_map"sv,
   "unsigned_list_map"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 10> TStructDataStorage<::test::fixtures::python_capi::MapStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 10> TStructDataStorage<::test::fixtures::python_capi::MapStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -333,7 +333,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 10> TStructDataStorage<::test::fixt
   9,
   10,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 10> TStructDataStorage<::test::fixtures::python_capi::MapStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 10> TStructDataStorage<::test::fixtures::python_capi::MapStruct>::fields_types = { {
   TType::T_MAP,
   TType::T_MAP,
   TType::T_MAP,
@@ -345,7 +345,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 10> TStructDataStorage<::te
   TType::T_MAP,
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 10> TStructDataStorage<::test::fixtures::python_capi::MapStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 10> TStructDataStorage<::test::fixtures::python_capi::MapStruct>::isset_indexes = { {
   0,
   1,
   -1,
@@ -358,8 +358,8 @@ THRIFT_DATA_MEMBER const std::array<int, 10> TStructDataStorage<::test::fixtures
   8,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::ComposeStruct>::name = "ComposeStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 10> TStructDataStorage<::test::fixtures::python_capi::ComposeStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::python_capi::ComposeStruct>::name = "ComposeStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 10> TStructDataStorage<::test::fixtures::python_capi::ComposeStruct>::fields_names = { {
   "enum_"sv,
   "renamed_"sv,
   "primitive"sv,
@@ -371,7 +371,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 10> TStructDataStorage<::t
   "serial_union"sv,
   "serial_error"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 10> TStructDataStorage<::test::fixtures::python_capi::ComposeStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 10> TStructDataStorage<::test::fixtures::python_capi::ComposeStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -383,7 +383,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 10> TStructDataStorage<::test::fixt
   9,
   10,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 10> TStructDataStorage<::test::fixtures::python_capi::ComposeStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 10> TStructDataStorage<::test::fixtures::python_capi::ComposeStruct>::fields_types = { {
   TType::T_I32,
   TType::T_I32,
   TType::T_STRUCT,
@@ -395,7 +395,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 10> TStructDataStorage<::te
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 10> TStructDataStorage<::test::fixtures::python_capi::ComposeStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 10> TStructDataStorage<::test::fixtures::python_capi::ComposeStruct>::isset_indexes = { {
   0,
   1,
   2,
@@ -408,8 +408,8 @@ THRIFT_DATA_MEMBER const std::array<int, 10> TStructDataStorage<::test::fixtures
   8,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::Shallot>::name = "Onion";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::python_capi::Shallot>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::python_capi::Shallot>::name = "Onion";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 7> TStructDataStorage<::test::fixtures::python_capi::Shallot>::fields_names = { {
   "myEnum"sv,
   "myStruct"sv,
   "intSet"sv,
@@ -418,7 +418,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::te
   "strMap"sv,
   "adapted_int"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtures::python_capi::Shallot>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 7> TStructDataStorage<::test::fixtures::python_capi::Shallot>::fields_ids = { {
   1,
   2,
   6,
@@ -427,7 +427,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtu
   9,
   10,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::test::fixtures::python_capi::Shallot>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 7> TStructDataStorage<::test::fixtures::python_capi::Shallot>::fields_types = { {
   TType::T_I32,
   TType::T_STRUCT,
   TType::T_SET,
@@ -436,7 +436,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::tes
   TType::T_MAP,
   TType::T_I64,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures::python_capi::Shallot>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 7> TStructDataStorage<::test::fixtures::python_capi::Shallot>::isset_indexes = { {
   0,
   1,
   -1,
@@ -446,23 +446,23 @@ THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures:
   3,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::SomeBinary>::name = "SomeBinary";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::python_capi::SomeBinary>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::python_capi::SomeBinary>::name = "SomeBinary";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::python_capi::SomeBinary>::fields_names = { {
   "iobuf"sv,
   "iobuf_ptr"sv,
   "iobufRef"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 3> TStructDataStorage<::test::fixtures::python_capi::SomeBinary>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 3> TStructDataStorage<::test::fixtures::python_capi::SomeBinary>::fields_ids = { {
   1,
   2,
   3,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::test::fixtures::python_capi::SomeBinary>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 3> TStructDataStorage<::test::fixtures::python_capi::SomeBinary>::fields_types = { {
   TType::T_STRING,
   TType::T_STRING,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::test::fixtures::python_capi::SomeBinary>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 3> TStructDataStorage<::test::fixtures::python_capi::SomeBinary>::isset_indexes = { {
   0,
   1,
   -1,

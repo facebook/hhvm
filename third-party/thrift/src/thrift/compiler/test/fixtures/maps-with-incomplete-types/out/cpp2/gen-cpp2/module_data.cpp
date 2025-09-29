@@ -12,31 +12,31 @@
 
 namespace apache::thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::test::A>::name = "A";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::test::A>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::test::A>::name = "A";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::test::A>::fields_names = { {
   "some_map"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::test::A>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::test::A>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::test::A>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::test::A>::fields_types = { {
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::test::A>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::apache::thrift::test::A>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::test::B>::name = "B";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::test::B>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::test::B>::name = "B";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::test::B>::fields_names = { {
   "field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::test::B>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::test::B>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::test::B>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::test::B>::fields_types = { {
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::test::B>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::apache::thrift::test::B>::isset_indexes = { {
   0,
 }};
 

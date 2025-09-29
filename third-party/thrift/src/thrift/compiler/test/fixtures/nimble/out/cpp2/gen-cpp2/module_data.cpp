@@ -12,26 +12,26 @@
 
 namespace apache::thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::BasicTypes>::name = "BasicTypes";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::cpp2::BasicTypes>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::cpp2::BasicTypes>::name = "BasicTypes";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 4> TStructDataStorage<::cpp2::BasicTypes>::fields_names = { {
   "first"sv,
   "second"sv,
   "third"sv,
   "isTrue"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::cpp2::BasicTypes>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 4> TStructDataStorage<::cpp2::BasicTypes>::fields_ids = { {
   1,
   2,
   3,
   4,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::cpp2::BasicTypes>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 4> TStructDataStorage<::cpp2::BasicTypes>::fields_types = { {
   TType::T_I32,
   TType::T_I32,
   TType::T_I64,
   TType::T_BOOL,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::BasicTypes>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 4> TStructDataStorage<::cpp2::BasicTypes>::isset_indexes = { {
   -1,
   0,
   1,

@@ -15,32 +15,32 @@ class SomeService;
 } // namespace apache::thrift::fixtures::types
 namespace apache::thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::empty_struct>::name = "empty_struct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::apache::thrift::fixtures::types::empty_struct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::empty_struct>::name = "empty_struct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 0> TStructDataStorage<::apache::thrift::fixtures::types::empty_struct>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::empty_struct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::empty_struct>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::empty_struct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::empty_struct>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::empty_struct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::empty_struct>::isset_indexes = { {
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::name = "decorated_struct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::name = "decorated_struct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::fields_names = { {
   "field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::fields_types = { {
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::name = "ContainerStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 8> TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::name = "ContainerStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 8> TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::fields_names = { {
   "fieldA"sv,
   "fieldB"sv,
   "fieldC"sv,
@@ -50,7 +50,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 8> TStructDataStorage<::ap
   "fieldG"sv,
   "fieldH"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 8> TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 8> TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::fields_ids = { {
   12,
   2,
   3,
@@ -60,7 +60,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 8> TStructDataStorage<::apache::thr
   7,
   8,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 8> TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 8> TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::fields_types = { {
   TType::T_LIST,
   TType::T_LIST,
   TType::T_LIST,
@@ -70,7 +70,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 8> TStructDataStorage<::apa
   TType::T_MAP,
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 8> TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::isset_indexes = { {
   0,
   1,
   2,
@@ -81,147 +81,147 @@ THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::apache::thrift:
   7,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::name = "CppTypeStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::name = "CppTypeStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::fields_names = { {
   "fieldA"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::fields_types = { {
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::name = "VirtualStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::name = "VirtualStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::fields_names = { {
   "MyIntField"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::fields_types = { {
   TType::T_I64,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::name = "MyStructWithForwardRefEnum";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::name = "MyStructWithForwardRefEnum";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::fields_names = { {
   "a"sv,
   "b"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::fields_types = { {
   TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::isset_indexes = { {
   0,
   1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::name = "TrivialNumeric";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::name = "TrivialNumeric";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::fields_names = { {
   "a"sv,
   "b"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::fields_types = { {
   TType::T_I32,
   TType::T_BOOL,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::isset_indexes = { {
   0,
   1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::name = "TrivialNestedWithDefault";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::name = "TrivialNestedWithDefault";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::fields_names = { {
   "z"sv,
   "n"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::fields_types = { {
   TType::T_I32,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::isset_indexes = { {
   0,
   1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::name = "ComplexString";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::name = "ComplexString";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::fields_names = { {
   "a"sv,
   "b"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::fields_types = { {
   TType::T_STRING,
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::isset_indexes = { {
   0,
   1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::name = "ComplexNestedWithDefault";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::name = "ComplexNestedWithDefault";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::fields_names = { {
   "z"sv,
   "n"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::fields_types = { {
   TType::T_STRING,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::isset_indexes = { {
   0,
   1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::name = "MinPadding";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::name = "MinPadding";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::fields_names = { {
   "small"sv,
   "big"sv,
   "medium"sv,
   "biggish"sv,
   "tiny"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::fields_ids = { {
   1,
   2,
   3,
   4,
   5,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::fields_types = { {
   TType::T_BYTE,
   TType::T_I64,
   TType::T_I16,
   TType::T_I32,
   TType::T_BYTE,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::isset_indexes = { {
   -1,
   -1,
   -1,
@@ -229,29 +229,29 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::apache::thrift:
   -1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::name = "MinPaddingWithCustomType";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::name = "MinPaddingWithCustomType";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::fields_names = { {
   "small"sv,
   "biggish"sv,
   "medium"sv,
   "big"sv,
   "tiny"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::fields_ids = { {
   1,
   2,
   3,
   4,
   5,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::fields_types = { {
   TType::T_BYTE,
   TType::T_I32,
   TType::T_I16,
   TType::T_I64,
   TType::T_BYTE,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::isset_indexes = { {
   -1,
   -1,
   -1,
@@ -259,274 +259,274 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::apache::thrift:
   -1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::name = "MyStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::name = "MyStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::fields_names = { {
   "MyIntField"sv,
   "MyStringField"sv,
   "majorVer"sv,
   "data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::fields_ids = { {
   1,
   2,
   3,
   4,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::fields_types = { {
   TType::T_I64,
   TType::T_STRING,
   TType::T_I64,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::isset_indexes = { {
   0,
   1,
   2,
   3,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::name = "MyDataItem";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::name = "MyDataItem";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::isset_indexes = { {
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::name = "Renaming";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::name = "Renaming";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::fields_names = { {
   "foo"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::fields_types = { {
   TType::T_I64,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::name = "AnnotatedTypes";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::name = "AnnotatedTypes";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::fields_names = { {
   "binary_field"sv,
   "list_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::fields_types = { {
   TType::T_STRING,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::isset_indexes = { {
   0,
   1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::name = "ForwardUsageRoot";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::name = "ForwardUsageRoot";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::fields_names = { {
   "ForwardUsageStruct"sv,
   "ForwardUsageByRef"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::fields_types = { {
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::isset_indexes = { {
   0,
   -1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::name = "ForwardUsageStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::name = "ForwardUsageStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::fields_names = { {
   "foo"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::fields_types = { {
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::isset_indexes = { {
   -1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::name = "ForwardUsageByRef";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::name = "ForwardUsageByRef";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::fields_names = { {
   "foo"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::fields_types = { {
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::isset_indexes = { {
   -1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::name = "IncompleteMap";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::name = "IncompleteMap";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::fields_names = { {
   "field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::fields_types = { {
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::name = "IncompleteMapDep";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::name = "IncompleteMapDep";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::isset_indexes = { {
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::name = "CompleteMap";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::name = "CompleteMap";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::fields_names = { {
   "field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::fields_types = { {
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::name = "CompleteMapDep";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::name = "CompleteMapDep";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::isset_indexes = { {
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::name = "IncompleteList";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::name = "IncompleteList";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::fields_names = { {
   "field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::fields_types = { {
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::name = "IncompleteListDep";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::name = "IncompleteListDep";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::isset_indexes = { {
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::name = "CompleteList";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::name = "CompleteList";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::fields_names = { {
   "field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::fields_types = { {
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::name = "CompleteListDep";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::name = "CompleteListDep";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::isset_indexes = { {
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::name = "AdaptedList";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::name = "AdaptedList";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::fields_names = { {
   "field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::fields_types = { {
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::name = "AdaptedListDep";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::name = "AdaptedListDep";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::fields_names = { {
   "field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::fields_types = { {
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::name = "DependentAdaptedList";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::name = "DependentAdaptedList";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::fields_names = { {
   "field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::fields_types = { {
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::name = "DependentAdaptedListDep";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::name = "DependentAdaptedListDep";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::fields_names = { {
   "field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::fields_types = { {
   TType::T_I16,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::isset_indexes = { {
   -1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::name = "AllocatorAware";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::name = "AllocatorAware";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::fields_names = { {
   "aa_list"sv,
   "aa_set"sv,
   "aa_map"sv,
@@ -535,7 +535,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 7> TStructDataStorage<::ap
   "aa_unique"sv,
   "aa_shared"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::fields_ids = { {
   1,
   2,
   3,
@@ -544,7 +544,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::apache::thr
   6,
   7,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::fields_types = { {
   TType::T_LIST,
   TType::T_SET,
   TType::T_MAP,
@@ -553,7 +553,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::apa
   TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::isset_indexes = { {
   0,
   1,
   2,
@@ -563,57 +563,57 @@ THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::apache::thrift:
   -1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::name = "AllocatorAware2";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::name = "AllocatorAware2";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::fields_names = { {
   "not_a_container"sv,
   "box_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::fields_types = { {
   TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::isset_indexes = { {
   0,
   -1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::name = "TypedefStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::name = "TypedefStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::fields_names = { {
   "i32_field"sv,
   "IntTypedef_field"sv,
   "UintTypedef_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::fields_ids = { {
   1,
   2,
   3,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::fields_types = { {
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::isset_indexes = { {
   0,
   1,
   2,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::name = "StructWithDoubleUnderscores";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::name = "StructWithDoubleUnderscores";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::fields_names = { {
   "__field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::fields_types = { {
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::isset_indexes = { {
   0,
 }};
 

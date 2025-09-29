@@ -21,36 +21,36 @@ class RederivedService;
 } // namespace py3::simple
 namespace apache::thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::py3::simple::SimpleException>::name = "SimpleException";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::py3::simple::SimpleException>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::py3::simple::SimpleException>::name = "SimpleException";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::py3::simple::SimpleException>::fields_names = { {
   "err_code"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::py3::simple::SimpleException>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::py3::simple::SimpleException>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::SimpleException>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::SimpleException>::fields_types = { {
   TType::T_I16,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::py3::simple::SimpleException>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::py3::simple::SimpleException>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::py3::simple::OptionalRefStruct>::name = "OptionalRefStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::py3::simple::OptionalRefStruct>::name = "OptionalRefStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::fields_names = { {
   "optional_blob"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::fields_types = { {
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::py3::simple::SimpleStruct>::name = "SimpleStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 12> TStructDataStorage<::py3::simple::SimpleStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::py3::simple::SimpleStruct>::name = "SimpleStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 12> TStructDataStorage<::py3::simple::SimpleStruct>::fields_names = { {
   "is_on"sv,
   "tiny_int"sv,
   "small_int"sv,
@@ -64,7 +64,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 12> TStructDataStorage<::p
   "opt_default_str"sv,
   "opt_default_enum"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 12> TStructDataStorage<::py3::simple::SimpleStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 12> TStructDataStorage<::py3::simple::SimpleStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -78,7 +78,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 12> TStructDataStorage<::py3::simpl
   11,
   12,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 12> TStructDataStorage<::py3::simple::SimpleStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 12> TStructDataStorage<::py3::simple::SimpleStruct>::fields_types = { {
   TType::T_BOOL,
   TType::T_BYTE,
   TType::T_I16,
@@ -92,7 +92,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 12> TStructDataStorage<::py
   TType::T_STRING,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 12> TStructDataStorage<::py3::simple::SimpleStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 12> TStructDataStorage<::py3::simple::SimpleStruct>::isset_indexes = { {
   0,
   1,
   2,
@@ -107,58 +107,58 @@ THRIFT_DATA_MEMBER const std::array<int, 12> TStructDataStorage<::py3::simple::S
   11,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>::name = "HiddenTypeFieldsStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>::name = "HiddenTypeFieldsStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 3> TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>::fields_names = { {
   "field1"sv,
   "field2"sv,
   "field3"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 3> TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 3> TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>::fields_ids = { {
   1,
   2,
   3,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 3> TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_LIST,
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 3> TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>::isset_indexes = { {
   0,
   1,
   2,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::py3::simple::detail::AdaptedUnion>::name = "AdaptedUnion";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::py3::simple::detail::AdaptedUnion>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::py3::simple::detail::AdaptedUnion>::name = "AdaptedUnion";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::py3::simple::detail::AdaptedUnion>::fields_names = { {
   "best"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::py3::simple::detail::AdaptedUnion>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::py3::simple::detail::AdaptedUnion>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::detail::AdaptedUnion>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::detail::AdaptedUnion>::fields_types = { {
   TType::T_I16,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::py3::simple::detail::AdaptedUnion>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::py3::simple::detail::AdaptedUnion>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::py3::simple::HiddenException>::name = "HiddenException";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::py3::simple::HiddenException>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::py3::simple::HiddenException>::name = "HiddenException";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::py3::simple::HiddenException>::fields_names = { {
   "test"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::py3::simple::HiddenException>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::py3::simple::HiddenException>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::HiddenException>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::HiddenException>::fields_types = { {
   TType::T_I16,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::py3::simple::HiddenException>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::py3::simple::HiddenException>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::py3::simple::ComplexStruct>::name = "ComplexStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::py3::simple::ComplexStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::py3::simple::ComplexStruct>::name = "ComplexStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 9> TStructDataStorage<::py3::simple::ComplexStruct>::fields_names = { {
   "structOne"sv,
   "structTwo"sv,
   "an_integer"sv,
@@ -169,7 +169,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::py
   "cdef"sv,
   "bytes_with_cpp_type"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 9> TStructDataStorage<::py3::simple::ComplexStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 9> TStructDataStorage<::py3::simple::ComplexStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -180,7 +180,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 9> TStructDataStorage<::py3::simple
   8,
   9,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::py3::simple::ComplexStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 9> TStructDataStorage<::py3::simple::ComplexStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_I32,
@@ -191,7 +191,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::py3
   TType::T_STRING,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::py3::simple::ComplexStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 9> TStructDataStorage<::py3::simple::ComplexStruct>::isset_indexes = { {
   0,
   1,
   2,
@@ -203,36 +203,36 @@ THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::py3::simple::Co
   8,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::py3::simple::BinaryUnion>::name = "BinaryUnion";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::py3::simple::BinaryUnion>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::py3::simple::BinaryUnion>::name = "BinaryUnion";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::py3::simple::BinaryUnion>::fields_names = { {
   "iobuf_val"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::py3::simple::BinaryUnion>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::py3::simple::BinaryUnion>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::BinaryUnion>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::BinaryUnion>::fields_types = { {
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::py3::simple::BinaryUnion>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::py3::simple::BinaryUnion>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::py3::simple::BinaryUnionStruct>::name = "BinaryUnionStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::py3::simple::BinaryUnionStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::py3::simple::BinaryUnionStruct>::name = "BinaryUnionStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::py3::simple::BinaryUnionStruct>::fields_names = { {
   "u"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::py3::simple::BinaryUnionStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::py3::simple::BinaryUnionStruct>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::BinaryUnionStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::BinaryUnionStruct>::fields_types = { {
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::py3::simple::BinaryUnionStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::py3::simple::BinaryUnionStruct>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::py3::simple::CustomFields>::name = "CustomFields";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::py3::simple::CustomFields>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::py3::simple::CustomFields>::name = "CustomFields";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 9> TStructDataStorage<::py3::simple::CustomFields>::fields_names = { {
   "bool_field"sv,
   "integer_field"sv,
   "double_field"sv,
@@ -243,7 +243,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::py
   "map_field"sv,
   "struct_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 9> TStructDataStorage<::py3::simple::CustomFields>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 9> TStructDataStorage<::py3::simple::CustomFields>::fields_ids = { {
   1,
   2,
   3,
@@ -254,7 +254,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 9> TStructDataStorage<::py3::simple
   8,
   9,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::py3::simple::CustomFields>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 9> TStructDataStorage<::py3::simple::CustomFields>::fields_types = { {
   TType::T_BOOL,
   TType::T_I64,
   TType::T_DOUBLE,
@@ -265,53 +265,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::py3
   TType::T_MAP,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::py3::simple::CustomFields>::isset_indexes = { {
-  0,
-  1,
-  2,
-  3,
-  4,
-  5,
-  6,
-  7,
-  8,
-}};
-
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::py3::simple::CustomTypedefFields>::name = "CustomTypedefFields";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::py3::simple::CustomTypedefFields>::fields_names = { {
-  "bool_field"sv,
-  "integer_field"sv,
-  "double_field"sv,
-  "string_field"sv,
-  "binary_field"sv,
-  "list_field"sv,
-  "set_field"sv,
-  "map_field"sv,
-  "struct_field"sv,
-}};
-THRIFT_DATA_MEMBER const std::array<int16_t, 9> TStructDataStorage<::py3::simple::CustomTypedefFields>::fields_ids = { {
-  1,
-  2,
-  3,
-  4,
-  5,
-  6,
-  7,
-  8,
-  9,
-}};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::py3::simple::CustomTypedefFields>::fields_types = { {
-  TType::T_BOOL,
-  TType::T_I64,
-  TType::T_DOUBLE,
-  TType::T_STRING,
-  TType::T_STRING,
-  TType::T_LIST,
-  TType::T_SET,
-  TType::T_MAP,
-  TType::T_STRUCT,
-}};
-THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::py3::simple::CustomTypedefFields>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 9> TStructDataStorage<::py3::simple::CustomFields>::isset_indexes = { {
   0,
   1,
   2,
@@ -323,8 +277,8 @@ THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::py3::simple::Cu
   8,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::py3::simple::AdaptedTypedefFields>::name = "AdaptedTypedefFields";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::py3::simple::AdaptedTypedefFields>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::py3::simple::CustomTypedefFields>::name = "CustomTypedefFields";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 9> TStructDataStorage<::py3::simple::CustomTypedefFields>::fields_names = { {
   "bool_field"sv,
   "integer_field"sv,
   "double_field"sv,
@@ -335,7 +289,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::py
   "map_field"sv,
   "struct_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 9> TStructDataStorage<::py3::simple::AdaptedTypedefFields>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 9> TStructDataStorage<::py3::simple::CustomTypedefFields>::fields_ids = { {
   1,
   2,
   3,
@@ -346,7 +300,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 9> TStructDataStorage<::py3::simple
   8,
   9,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::py3::simple::AdaptedTypedefFields>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 9> TStructDataStorage<::py3::simple::CustomTypedefFields>::fields_types = { {
   TType::T_BOOL,
   TType::T_I64,
   TType::T_DOUBLE,
@@ -357,7 +311,53 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::py3
   TType::T_MAP,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::py3::simple::AdaptedTypedefFields>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 9> TStructDataStorage<::py3::simple::CustomTypedefFields>::isset_indexes = { {
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+}};
+
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::py3::simple::AdaptedTypedefFields>::name = "AdaptedTypedefFields";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 9> TStructDataStorage<::py3::simple::AdaptedTypedefFields>::fields_names = { {
+  "bool_field"sv,
+  "integer_field"sv,
+  "double_field"sv,
+  "string_field"sv,
+  "binary_field"sv,
+  "list_field"sv,
+  "set_field"sv,
+  "map_field"sv,
+  "struct_field"sv,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 9> TStructDataStorage<::py3::simple::AdaptedTypedefFields>::fields_ids = { {
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 9> TStructDataStorage<::py3::simple::AdaptedTypedefFields>::fields_types = { {
+  TType::T_BOOL,
+  TType::T_I64,
+  TType::T_DOUBLE,
+  TType::T_STRING,
+  TType::T_STRING,
+  TType::T_LIST,
+  TType::T_SET,
+  TType::T_MAP,
+  TType::T_STRUCT,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 9> TStructDataStorage<::py3::simple::AdaptedTypedefFields>::isset_indexes = { {
   0,
   1,
   2,

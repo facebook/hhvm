@@ -12,104 +12,104 @@
 
 namespace apache::thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::test::TerseFoo>::name = "TerseFoo";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::apache::thrift::test::TerseFoo>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::test::TerseFoo>::name = "TerseFoo";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 4> TStructDataStorage<::apache::thrift::test::TerseFoo>::fields_names = { {
   "field1"sv,
   "field2"sv,
   "field3"sv,
   "field4"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::apache::thrift::test::TerseFoo>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 4> TStructDataStorage<::apache::thrift::test::TerseFoo>::fields_ids = { {
   1,
   2,
   3,
   4,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::test::TerseFoo>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::test::TerseFoo>::fields_types = { {
   TType::T_LIST,
   TType::T_LIST,
   TType::T_LIST,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::apache::thrift::test::TerseFoo>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 4> TStructDataStorage<::apache::thrift::test::TerseFoo>::isset_indexes = { {
   0,
   1,
   2,
   3,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::test::TerseLazyFoo>::name = "TerseLazyFoo";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::apache::thrift::test::TerseLazyFoo>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::test::TerseLazyFoo>::name = "TerseLazyFoo";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 4> TStructDataStorage<::apache::thrift::test::TerseLazyFoo>::fields_names = { {
   "field1"sv,
   "field2"sv,
   "field3"sv,
   "field4"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::apache::thrift::test::TerseLazyFoo>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 4> TStructDataStorage<::apache::thrift::test::TerseLazyFoo>::fields_ids = { {
   1,
   2,
   3,
   4,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::test::TerseLazyFoo>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::test::TerseLazyFoo>::fields_types = { {
   TType::T_LIST,
   TType::T_LIST,
   TType::T_LIST,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::apache::thrift::test::TerseLazyFoo>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 4> TStructDataStorage<::apache::thrift::test::TerseLazyFoo>::isset_indexes = { {
   0,
   1,
   2,
   3,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::test::TerseOptionalFoo>::name = "TerseOptionalFoo";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::apache::thrift::test::TerseOptionalFoo>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::test::TerseOptionalFoo>::name = "TerseOptionalFoo";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 4> TStructDataStorage<::apache::thrift::test::TerseOptionalFoo>::fields_names = { {
   "field1"sv,
   "field2"sv,
   "field3"sv,
   "field4"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::apache::thrift::test::TerseOptionalFoo>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 4> TStructDataStorage<::apache::thrift::test::TerseOptionalFoo>::fields_ids = { {
   1,
   2,
   3,
   4,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::test::TerseOptionalFoo>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::test::TerseOptionalFoo>::fields_types = { {
   TType::T_LIST,
   TType::T_LIST,
   TType::T_LIST,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::apache::thrift::test::TerseOptionalFoo>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 4> TStructDataStorage<::apache::thrift::test::TerseOptionalFoo>::isset_indexes = { {
   0,
   1,
   2,
   3,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::test::TerseOptionalLazyFoo>::name = "TerseOptionalLazyFoo";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::apache::thrift::test::TerseOptionalLazyFoo>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::test::TerseOptionalLazyFoo>::name = "TerseOptionalLazyFoo";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 4> TStructDataStorage<::apache::thrift::test::TerseOptionalLazyFoo>::fields_names = { {
   "field1"sv,
   "field2"sv,
   "field3"sv,
   "field4"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::apache::thrift::test::TerseOptionalLazyFoo>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 4> TStructDataStorage<::apache::thrift::test::TerseOptionalLazyFoo>::fields_ids = { {
   1,
   2,
   3,
   4,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::test::TerseOptionalLazyFoo>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::test::TerseOptionalLazyFoo>::fields_types = { {
   TType::T_LIST,
   TType::T_LIST,
   TType::T_LIST,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::apache::thrift::test::TerseOptionalLazyFoo>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 4> TStructDataStorage<::apache::thrift::test::TerseOptionalLazyFoo>::isset_indexes = { {
   0,
   1,
   2,

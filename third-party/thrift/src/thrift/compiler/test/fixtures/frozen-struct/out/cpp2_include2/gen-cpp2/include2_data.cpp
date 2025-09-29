@@ -12,20 +12,20 @@
 
 namespace apache::thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::some::ns::IncludedB>::name = "IncludedB";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::some::ns::IncludedB>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::some::ns::IncludedB>::name = "IncludedB";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::some::ns::IncludedB>::fields_names = { {
   "i32Field"sv,
   "strField"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::some::ns::IncludedB>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::some::ns::IncludedB>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::some::ns::IncludedB>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::some::ns::IncludedB>::fields_types = { {
   TType::T_I32,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::some::ns::IncludedB>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::some::ns::IncludedB>::isset_indexes = { {
   0,
   1,
 }};

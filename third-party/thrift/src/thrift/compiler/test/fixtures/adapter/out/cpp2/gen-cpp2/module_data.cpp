@@ -18,26 +18,26 @@ class AdapterService;
 } // namespace facebook::thrift::test
 namespace apache::thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::MyAnnotation>::name = "MyAnnotation";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::MyAnnotation>::name = "MyAnnotation";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::fields_names = { {
   "signature"sv,
   "color"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::fields_types = { {
   TType::T_STRING,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::isset_indexes = { {
   0,
   1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::Foo>::name = "Foo";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 15> TStructDataStorage<::facebook::thrift::test::Foo>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::Foo>::name = "Foo";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 15> TStructDataStorage<::facebook::thrift::test::Foo>::fields_names = { {
   "intField"sv,
   "optionalIntField"sv,
   "intFieldWithDefault"sv,
@@ -54,7 +54,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 15> TStructDataStorage<::f
   "adapted_map"sv,
   "adapted_list_nested"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 15> TStructDataStorage<::facebook::thrift::test::Foo>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 15> TStructDataStorage<::facebook::thrift::test::Foo>::fields_ids = { {
   1,
   2,
   3,
@@ -71,7 +71,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 15> TStructDataStorage<::facebook::
   14,
   15,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 15> TStructDataStorage<::facebook::thrift::test::Foo>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 15> TStructDataStorage<::facebook::thrift::test::Foo>::fields_types = { {
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
@@ -88,7 +88,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 15> TStructDataStorage<::fa
   TType::T_MAP,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 15> TStructDataStorage<::facebook::thrift::test::Foo>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 15> TStructDataStorage<::facebook::thrift::test::Foo>::isset_indexes = { {
   0,
   1,
   2,
@@ -106,29 +106,29 @@ THRIFT_DATA_MEMBER const std::array<int, 15> TStructDataStorage<::facebook::thri
   14,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::Baz>::name = "Baz";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::facebook::thrift::test::Baz>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::Baz>::name = "Baz";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 5> TStructDataStorage<::facebook::thrift::test::Baz>::fields_names = { {
   "intField"sv,
   "setField"sv,
   "mapField"sv,
   "binaryField"sv,
   "longField"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 5> TStructDataStorage<::facebook::thrift::test::Baz>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 5> TStructDataStorage<::facebook::thrift::test::Baz>::fields_ids = { {
   1,
   4,
   6,
   8,
   9,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::facebook::thrift::test::Baz>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 5> TStructDataStorage<::facebook::thrift::test::Baz>::fields_types = { {
   TType::T_I32,
   TType::T_SET,
   TType::T_MAP,
   TType::T_STRING,
   TType::T_I64,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::facebook::thrift::test::Baz>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 5> TStructDataStorage<::facebook::thrift::test::Baz>::isset_indexes = { {
   0,
   1,
   2,
@@ -136,8 +136,8 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::facebook::thrif
   4,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::Bar>::name = "Bar";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 8> TStructDataStorage<::facebook::thrift::test::Bar>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::Bar>::name = "Bar";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 8> TStructDataStorage<::facebook::thrift::test::Bar>::fields_names = { {
   "structField"sv,
   "optionalStructField"sv,
   "structListField"sv,
@@ -147,7 +147,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 8> TStructDataStorage<::fa
   "adaptedStructField"sv,
   "structListFieldWithTypedef"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 8> TStructDataStorage<::facebook::thrift::test::Bar>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 8> TStructDataStorage<::facebook::thrift::test::Bar>::fields_ids = { {
   1,
   2,
   3,
@@ -157,7 +157,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 8> TStructDataStorage<::facebook::t
   7,
   8,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 8> TStructDataStorage<::facebook::thrift::test::Bar>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 8> TStructDataStorage<::facebook::thrift::test::Bar>::fields_types = { {
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_LIST,
@@ -167,7 +167,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 8> TStructDataStorage<::fac
   TType::T_STRUCT,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::facebook::thrift::test::Bar>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 8> TStructDataStorage<::facebook::thrift::test::Bar>::isset_indexes = { {
   0,
   1,
   2,
@@ -178,140 +178,140 @@ THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::facebook::thrif
   7,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdapted>::name = "DirectlyAdapted";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdapted>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdapted>::name = "DirectlyAdapted";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdapted>::fields_names = { {
   "field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdapted>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdapted>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdapted>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdapted>::fields_types = { {
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdapted>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdapted>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::name = "IndependentDirectlyAdapted";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::name = "IndependentDirectlyAdapted";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::fields_names = { {
   "field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::fields_types = { {
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::name = "StructWithFieldAdapter";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::name = "StructWithFieldAdapter";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 4> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::fields_names = { {
   "field"sv,
   "shared_field"sv,
   "opt_shared_field"sv,
   "opt_boxed_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 4> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::fields_ids = { {
   1,
   2,
   3,
   4,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 4> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::fields_types = { {
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 4> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::isset_indexes = { {
   0,
   -1,
   -1,
   -1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::TerseAdaptedFields>::name = "TerseAdaptedFields";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::facebook::thrift::test::TerseAdaptedFields>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::TerseAdaptedFields>::name = "TerseAdaptedFields";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 3> TStructDataStorage<::facebook::thrift::test::TerseAdaptedFields>::fields_names = { {
   "int_field"sv,
   "string_field"sv,
   "set_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 3> TStructDataStorage<::facebook::thrift::test::TerseAdaptedFields>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 3> TStructDataStorage<::facebook::thrift::test::TerseAdaptedFields>::fields_ids = { {
   1,
   2,
   3,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::facebook::thrift::test::TerseAdaptedFields>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 3> TStructDataStorage<::facebook::thrift::test::TerseAdaptedFields>::fields_types = { {
   TType::T_I32,
   TType::T_STRING,
   TType::T_SET,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::facebook::thrift::test::TerseAdaptedFields>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 3> TStructDataStorage<::facebook::thrift::test::TerseAdaptedFields>::isset_indexes = { {
   -1,
   -1,
   -1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::B>::name = "B";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::B>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::B>::name = "B";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::B>::fields_names = { {
   "a"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::B>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::B>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::B>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::B>::fields_types = { {
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::B>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::B>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::A>::name = "A";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::facebook::thrift::test::A>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::A>::name = "A";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 0> TStructDataStorage<::facebook::thrift::test::A>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::A>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::A>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::facebook::thrift::test::A>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 0> TStructDataStorage<::facebook::thrift::test::A>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::A>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::A>::isset_indexes = { {
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::Config>::name = "Config";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::Config>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::Config>::name = "Config";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::Config>::fields_names = { {
   "path"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::Config>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::Config>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::Config>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::Config>::fields_types = { {
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::Config>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::Config>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::MyStruct>::name = "MyStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::facebook::thrift::test::MyStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::MyStruct>::name = "MyStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::facebook::thrift::test::MyStruct>::fields_names = { {
   "field"sv,
   "set_string"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::facebook::thrift::test::MyStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::facebook::thrift::test::MyStruct>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::facebook::thrift::test::MyStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::facebook::thrift::test::MyStruct>::fields_types = { {
   TType::T_I32,
   TType::T_SET,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::facebook::thrift::test::MyStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::facebook::thrift::test::MyStruct>::isset_indexes = { {
   0,
   1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::AdaptTestStruct>::name = "AdaptTestStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 10> TStructDataStorage<::facebook::thrift::test::AdaptTestStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::AdaptTestStruct>::name = "AdaptTestStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 10> TStructDataStorage<::facebook::thrift::test::AdaptTestStruct>::fields_names = { {
   "delay"sv,
   "custom"sv,
   "timeout"sv,
@@ -323,7 +323,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 10> TStructDataStorage<::f
   "double_wrapped_integer"sv,
   "binary_data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 10> TStructDataStorage<::facebook::thrift::test::AdaptTestStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 10> TStructDataStorage<::facebook::thrift::test::AdaptTestStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -335,7 +335,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 10> TStructDataStorage<::facebook::
   9,
   10,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 10> TStructDataStorage<::facebook::thrift::test::AdaptTestStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 10> TStructDataStorage<::facebook::thrift::test::AdaptTestStruct>::fields_types = { {
   TType::T_I64,
   TType::T_STRING,
   TType::T_I64,
@@ -347,7 +347,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 10> TStructDataStorage<::fa
   TType::T_I32,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 10> TStructDataStorage<::facebook::thrift::test::AdaptTestStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 10> TStructDataStorage<::facebook::thrift::test::AdaptTestStruct>::isset_indexes = { {
   0,
   1,
   2,
@@ -360,8 +360,8 @@ THRIFT_DATA_MEMBER const std::array<int, 10> TStructDataStorage<::facebook::thri
   9,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::AdaptTemplatedTestStruct>::name = "AdaptTemplatedTestStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 22> TStructDataStorage<::facebook::thrift::test::AdaptTemplatedTestStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::AdaptTemplatedTestStruct>::name = "AdaptTemplatedTestStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 22> TStructDataStorage<::facebook::thrift::test::AdaptTemplatedTestStruct>::fields_names = { {
   "adaptedBool"sv,
   "adaptedByte"sv,
   "adaptedShort"sv,
@@ -385,7 +385,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 22> TStructDataStorage<::f
   "adaptedMapDefault"sv,
   "doubleTypedefBool"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 22> TStructDataStorage<::facebook::thrift::test::AdaptTemplatedTestStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 22> TStructDataStorage<::facebook::thrift::test::AdaptTemplatedTestStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -409,7 +409,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 22> TStructDataStorage<::facebook::
   21,
   22,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 22> TStructDataStorage<::facebook::thrift::test::AdaptTemplatedTestStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 22> TStructDataStorage<::facebook::thrift::test::AdaptTemplatedTestStruct>::fields_types = { {
   TType::T_BOOL,
   TType::T_BYTE,
   TType::T_I16,
@@ -433,7 +433,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 22> TStructDataStorage<::fa
   TType::T_MAP,
   TType::T_BOOL,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 22> TStructDataStorage<::facebook::thrift::test::AdaptTemplatedTestStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 22> TStructDataStorage<::facebook::thrift::test::AdaptTemplatedTestStruct>::isset_indexes = { {
   0,
   1,
   2,
@@ -458,291 +458,291 @@ THRIFT_DATA_MEMBER const std::array<int, 22> TStructDataStorage<::facebook::thri
   21,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::name = "AdaptTemplatedNestedTestStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::name = "AdaptTemplatedNestedTestStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::fields_names = { {
   "adaptedStruct"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::fields_types = { {
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion>::name = "AdaptTestUnion";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion>::name = "AdaptTestUnion";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion>::fields_names = { {
   "delay"sv,
   "custom"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion>::fields_types = { {
   TType::T_I64,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion>::isset_indexes = { {
   0,
   1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::ThriftAdaptedStruct>::name = "AdaptedStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::ThriftAdaptedStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::ThriftAdaptedStruct>::name = "AdaptedStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::ThriftAdaptedStruct>::fields_names = { {
   "data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::ThriftAdaptedStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::ThriftAdaptedStruct>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::ThriftAdaptedStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::ThriftAdaptedStruct>::fields_types = { {
   TType::T_I64,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::ThriftAdaptedStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::ThriftAdaptedStruct>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::name = "DirectlyAdaptedStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::name = "DirectlyAdaptedStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::fields_names = { {
   "data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::fields_types = { {
   TType::T_I64,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::StructFieldAdaptedStruct>::name = "StructFieldAdaptedStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::facebook::thrift::test::StructFieldAdaptedStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::StructFieldAdaptedStruct>::name = "StructFieldAdaptedStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 4> TStructDataStorage<::facebook::thrift::test::StructFieldAdaptedStruct>::fields_names = { {
   "adaptedStruct"sv,
   "adaptedTypedef"sv,
   "directlyAdapted"sv,
   "typedefOfAdapted"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::facebook::thrift::test::StructFieldAdaptedStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 4> TStructDataStorage<::facebook::thrift::test::StructFieldAdaptedStruct>::fields_ids = { {
   1,
   2,
   3,
   4,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::facebook::thrift::test::StructFieldAdaptedStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 4> TStructDataStorage<::facebook::thrift::test::StructFieldAdaptedStruct>::fields_types = { {
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::facebook::thrift::test::StructFieldAdaptedStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 4> TStructDataStorage<::facebook::thrift::test::StructFieldAdaptedStruct>::isset_indexes = { {
   0,
   1,
   2,
   3,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::CircularAdaptee>::name = "CircularAdaptee";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::CircularAdaptee>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::CircularAdaptee>::name = "CircularAdaptee";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::CircularAdaptee>::fields_names = { {
   "field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::CircularAdaptee>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::CircularAdaptee>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::CircularAdaptee>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::CircularAdaptee>::fields_types = { {
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::CircularAdaptee>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::CircularAdaptee>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::CircularStruct>::name = "CircularStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::CircularStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::CircularStruct>::name = "CircularStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::CircularStruct>::fields_names = { {
   "field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::CircularStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::CircularStruct>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::CircularStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::CircularStruct>::fields_types = { {
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::CircularStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::CircularStruct>::isset_indexes = { {
   -1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::ReorderedStruct>::name = "ReorderedStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::ReorderedStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::ReorderedStruct>::name = "ReorderedStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::ReorderedStruct>::fields_names = { {
   "reordered_dependent_adapted"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::ReorderedStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::ReorderedStruct>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::ReorderedStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::ReorderedStruct>::fields_types = { {
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::ReorderedStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::ReorderedStruct>::isset_indexes = { {
   -1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>::name = "DeclaredAfterStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>::name = "DeclaredAfterStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 0> TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 0> TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>::isset_indexes = { {
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::UnderlyingRenamedStruct>::name = "RenamedStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::UnderlyingRenamedStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::UnderlyingRenamedStruct>::name = "RenamedStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::UnderlyingRenamedStruct>::fields_names = { {
   "data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::UnderlyingRenamedStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::UnderlyingRenamedStruct>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::UnderlyingRenamedStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::UnderlyingRenamedStruct>::fields_types = { {
   TType::T_I64,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::UnderlyingRenamedStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::UnderlyingRenamedStruct>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::name = "SameNamespaceStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::name = "SameNamespaceStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::fields_names = { {
   "data"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::fields_types = { {
   TType::T_I64,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::detail::HeapAllocated>::name = "HeapAllocated";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::facebook::thrift::test::detail::HeapAllocated>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::detail::HeapAllocated>::name = "HeapAllocated";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 0> TStructDataStorage<::facebook::thrift::test::detail::HeapAllocated>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::detail::HeapAllocated>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::detail::HeapAllocated>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::facebook::thrift::test::detail::HeapAllocated>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 0> TStructDataStorage<::facebook::thrift::test::detail::HeapAllocated>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::detail::HeapAllocated>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::detail::HeapAllocated>::isset_indexes = { {
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::MoveOnly>::name = "MoveOnly";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::MoveOnly>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::MoveOnly>::name = "MoveOnly";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::MoveOnly>::fields_names = { {
   "ptr"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::MoveOnly>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::MoveOnly>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::MoveOnly>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::MoveOnly>::fields_types = { {
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::MoveOnly>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::MoveOnly>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::AlsoMoveOnly>::name = "AlsoMoveOnly";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::AlsoMoveOnly>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::AlsoMoveOnly>::name = "AlsoMoveOnly";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::AlsoMoveOnly>::fields_names = { {
   "ptr"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::AlsoMoveOnly>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::AlsoMoveOnly>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::AlsoMoveOnly>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::AlsoMoveOnly>::fields_types = { {
   TType::T_I64,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::AlsoMoveOnly>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::AlsoMoveOnly>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::ApplyAdapter>::name = "ApplyAdapter";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::facebook::thrift::test::ApplyAdapter>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::ApplyAdapter>::name = "ApplyAdapter";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 0> TStructDataStorage<::facebook::thrift::test::ApplyAdapter>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::ApplyAdapter>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::ApplyAdapter>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::facebook::thrift::test::ApplyAdapter>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 0> TStructDataStorage<::facebook::thrift::test::ApplyAdapter>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::ApplyAdapter>::isset_indexes = { {
-}};
-
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::detail::TransitiveAdapted>::name = "TransitiveAdapted";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::facebook::thrift::test::detail::TransitiveAdapted>::fields_names = { {
-}};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::detail::TransitiveAdapted>::fields_ids = { {
-}};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::facebook::thrift::test::detail::TransitiveAdapted>::fields_types = { {
-}};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::detail::TransitiveAdapted>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::ApplyAdapter>::isset_indexes = { {
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::CountingStruct>::name = "CountingStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::facebook::thrift::test::CountingStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::detail::TransitiveAdapted>::name = "TransitiveAdapted";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 0> TStructDataStorage<::facebook::thrift::test::detail::TransitiveAdapted>::fields_names = { {
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::detail::TransitiveAdapted>::fields_ids = { {
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 0> TStructDataStorage<::facebook::thrift::test::detail::TransitiveAdapted>::fields_types = { {
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::detail::TransitiveAdapted>::isset_indexes = { {
+}};
+
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::CountingStruct>::name = "CountingStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 3> TStructDataStorage<::facebook::thrift::test::CountingStruct>::fields_names = { {
   "regularInt"sv,
   "countingInt"sv,
   "regularString"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 3> TStructDataStorage<::facebook::thrift::test::CountingStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 3> TStructDataStorage<::facebook::thrift::test::CountingStruct>::fields_ids = { {
   1,
   2,
   3,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::facebook::thrift::test::CountingStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 3> TStructDataStorage<::facebook::thrift::test::CountingStruct>::fields_types = { {
   TType::T_I64,
   TType::T_I64,
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::facebook::thrift::test::CountingStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 3> TStructDataStorage<::facebook::thrift::test::CountingStruct>::isset_indexes = { {
   0,
   1,
   2,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::Person>::name = "Person";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::Person>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::Person>::name = "Person";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::Person>::fields_names = { {
   "name"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::Person>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::Person>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::Person>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::Person>::fields_types = { {
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::Person>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::Person>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::Person2>::name = "Person2";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::Person2>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::Person2>::name = "Person2";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::Person2>::fields_names = { {
   "name"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::Person2>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::Person2>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::Person2>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::Person2>::fields_types = { {
   TType::T_STRING,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::Person2>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::Person2>::isset_indexes = { {
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::Renamed>::name = "RenamedStructWithStructAdapterAndFieldAdapter";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::Renamed>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::test::Renamed>::name = "RenamedStructWithStructAdapterAndFieldAdapter";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::facebook::thrift::test::Renamed>::fields_names = { {
   "field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::Renamed>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::Renamed>::fields_ids = { {
   1,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::Renamed>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::Renamed>::fields_types = { {
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::Renamed>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::Renamed>::isset_indexes = { {
   0,
 }};
 

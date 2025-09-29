@@ -12,8 +12,8 @@
 
 namespace apache::thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::Limits>::name = "Limits";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 8> TStructDataStorage<::cpp2::Limits>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::cpp2::Limits>::name = "Limits";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 8> TStructDataStorage<::cpp2::Limits>::fields_names = { {
   "max_i64_field"sv,
   "min_i64_field"sv,
   "max_i32_field"sv,
@@ -23,7 +23,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 8> TStructDataStorage<::cp
   "max_byte_field"sv,
   "min_byte_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 8> TStructDataStorage<::cpp2::Limits>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 8> TStructDataStorage<::cpp2::Limits>::fields_ids = { {
   1,
   2,
   3,
@@ -33,7 +33,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 8> TStructDataStorage<::cpp2::Limit
   7,
   8,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 8> TStructDataStorage<::cpp2::Limits>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 8> TStructDataStorage<::cpp2::Limits>::fields_types = { {
   TType::T_I64,
   TType::T_I64,
   TType::T_I32,
@@ -43,7 +43,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 8> TStructDataStorage<::cpp
   TType::T_BYTE,
   TType::T_BYTE,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::cpp2::Limits>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 8> TStructDataStorage<::cpp2::Limits>::isset_indexes = { {
   0,
   1,
   2,

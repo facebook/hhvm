@@ -15,20 +15,20 @@ class InteractLocally;
 } // namespace thrift::shared_interactions
 namespace apache::thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::thrift::shared_interactions::DoSomethingResult>::name = "DoSomethingResult";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::thrift::shared_interactions::DoSomethingResult>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::thrift::shared_interactions::DoSomethingResult>::name = "DoSomethingResult";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::thrift::shared_interactions::DoSomethingResult>::fields_names = { {
   "s_res"sv,
   "i_res"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::thrift::shared_interactions::DoSomethingResult>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::thrift::shared_interactions::DoSomethingResult>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::thrift::shared_interactions::DoSomethingResult>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::thrift::shared_interactions::DoSomethingResult>::fields_types = { {
   TType::T_STRING,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::thrift::shared_interactions::DoSomethingResult>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::thrift::shared_interactions::DoSomethingResult>::isset_indexes = { {
   0,
   1,
 }};

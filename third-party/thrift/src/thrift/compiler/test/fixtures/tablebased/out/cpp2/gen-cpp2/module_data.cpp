@@ -12,29 +12,29 @@
 
 namespace apache::thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::name = "TrivialTypesStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::name = "TrivialTypesStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::fields_names = { {
   "fieldA"sv,
   "fieldB"sv,
   "fieldC"sv,
   "fieldD"sv,
   "fieldE"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::fields_ids = { {
   1,
   2,
   3,
   4,
   5,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::fields_types = { {
   TType::T_I32,
   TType::T_STRING,
   TType::T_STRING,
   TType::T_STRING,
   TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::isset_indexes = { {
   0,
   1,
   2,
@@ -42,8 +42,8 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures:
   4,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::name = "ContainerStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::name = "ContainerStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::fields_names = { {
   "fieldA"sv,
   "fieldB"sv,
   "fieldC"sv,
@@ -53,7 +53,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 8> TStructDataStorage<::te
   "fieldG"sv,
   "fieldH"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::fields_ids = { {
   12,
   2,
   3,
@@ -63,7 +63,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 8> TStructDataStorage<::test::fixtu
   7,
   8,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::fields_types = { {
   TType::T_LIST,
   TType::T_LIST,
   TType::T_LIST,
@@ -73,7 +73,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 8> TStructDataStorage<::tes
   TType::T_MAP,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::isset_indexes = { {
   0,
   1,
   2,
@@ -84,20 +84,20 @@ THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::test::fixtures:
   7,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::name = "ExampleUnion";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::name = "ExampleUnion";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::fields_names = { {
   "fieldA"sv,
   "fieldB"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::fields_ids = { {
   1,
   2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::fields_types = { {
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::isset_indexes = { {
   0,
   1,
 }};

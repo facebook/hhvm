@@ -12,18 +12,18 @@
 
 namespace apache::thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::test::MyStruct>::name = "MyStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::test::MyStruct>::name = "MyStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::fields_names = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::fields_ids = { {
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::fields_types = { {
 }};
-THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::isset_indexes = { {
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::test::EmptiableStruct>::name = "EmptiableStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::test::EmptiableStruct>::name = "EmptiableStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::fields_names = { {
   "bool_field"sv,
   "byte_field"sv,
   "short_field"sv,
@@ -39,7 +39,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::a
   "map_field"sv,
   "struct_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -55,7 +55,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 14> TStructDataStorage<::apache::th
   13,
   14,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::fields_types = { {
   TType::T_BOOL,
   TType::T_BYTE,
   TType::T_I16,
@@ -71,7 +71,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 14> TStructDataStorage<::ap
   TType::T_MAP,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::isset_indexes = { {
   0,
   1,
   2,
@@ -88,8 +88,8 @@ THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::apache::thrift
   13,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::name = "EmptiableTerseStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::name = "EmptiableTerseStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 14> TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::fields_names = { {
   "bool_field"sv,
   "byte_field"sv,
   "short_field"sv,
@@ -105,7 +105,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::a
   "map_field"sv,
   "struct_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 14> TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 14> TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -121,7 +121,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 14> TStructDataStorage<::apache::th
   13,
   14,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 14> TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 14> TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::fields_types = { {
   TType::T_BOOL,
   TType::T_BYTE,
   TType::T_I16,
@@ -137,7 +137,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 14> TStructDataStorage<::ap
   TType::T_MAP,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 14> TStructDataStorage<::apache::thrift::test::EmptiableTerseStruct>::isset_indexes = { {
   -1,
   -1,
   -1,
@@ -154,8 +154,8 @@ THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::apache::thrift
   -1,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::name = "NotEmptiableStruct";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::name = "NotEmptiableStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::fields_names = { {
   "bool_field"sv,
   "byte_field"sv,
   "short_field"sv,
@@ -171,7 +171,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::a
   "map_field"sv,
   "struct_field"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::fields_ids = { {
   1,
   2,
   3,
@@ -187,7 +187,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 14> TStructDataStorage<::apache::th
   13,
   14,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::fields_types = { {
   TType::T_BOOL,
   TType::T_BYTE,
   TType::T_I16,
@@ -203,7 +203,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 14> TStructDataStorage<::ap
   TType::T_MAP,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::isset_indexes = { {
   0,
   1,
   2,

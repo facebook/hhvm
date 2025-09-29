@@ -12,55 +12,55 @@
 
 namespace apache::thrift {
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::Color>::name = "Color";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 4> TStructDataStorage<::cpp2::Color>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::cpp2::Color>::name = "Color";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 4> TStructDataStorage<::cpp2::Color>::fields_names = { {
   "red"sv,
   "green"sv,
   "blue"sv,
   "alpha"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::cpp2::Color>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 4> TStructDataStorage<::cpp2::Color>::fields_ids = { {
   1,
   2,
   3,
   4,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::cpp2::Color>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 4> TStructDataStorage<::cpp2::Color>::fields_types = { {
   TType::T_DOUBLE,
   TType::T_DOUBLE,
   TType::T_DOUBLE,
   TType::T_DOUBLE,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::Color>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 4> TStructDataStorage<::cpp2::Color>::isset_indexes = { {
   0,
   1,
   2,
   3,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::Vehicle>::name = "Vehicle";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::cpp2::Vehicle>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::cpp2::Vehicle>::name = "Vehicle";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 5> TStructDataStorage<::cpp2::Vehicle>::fields_names = { {
   "color"sv,
   "licensePlate"sv,
   "description"sv,
   "name"sv,
   "hasAC"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 5> TStructDataStorage<::cpp2::Vehicle>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 5> TStructDataStorage<::cpp2::Vehicle>::fields_ids = { {
   1,
   2,
   3,
   4,
   5,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::cpp2::Vehicle>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 5> TStructDataStorage<::cpp2::Vehicle>::fields_types = { {
   TType::T_STRUCT,
   TType::T_STRING,
   TType::T_STRING,
   TType::T_STRING,
   TType::T_BOOL,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::cpp2::Vehicle>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 5> TStructDataStorage<::cpp2::Vehicle>::isset_indexes = { {
   0,
   1,
   2,
@@ -68,8 +68,8 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::cpp2::Vehicle>:
   4,
 }};
 
-THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::cpp2::Person>::name = "Person";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 10> TStructDataStorage<::cpp2::Person>::fields_names = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::cpp2::Person>::name = "Person";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 10> TStructDataStorage<::cpp2::Person>::fields_names = { {
   "id"sv,
   "name"sv,
   "age"sv,
@@ -81,7 +81,7 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 10> TStructDataStorage<::c
   "afraidOfAnimal"sv,
   "vehicles"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 10> TStructDataStorage<::cpp2::Person>::fields_ids = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 10> TStructDataStorage<::cpp2::Person>::fields_ids = { {
   1,
   2,
   3,
@@ -93,7 +93,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 10> TStructDataStorage<::cpp2::Pers
   9,
   10,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 10> TStructDataStorage<::cpp2::Person>::fields_types = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 10> TStructDataStorage<::cpp2::Person>::fields_types = { {
   TType::T_I64,
   TType::T_STRING,
   TType::T_I16,
@@ -105,7 +105,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 10> TStructDataStorage<::cp
   TType::T_I32,
   TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 10> TStructDataStorage<::cpp2::Person>::isset_indexes = { {
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 10> TStructDataStorage<::cpp2::Person>::isset_indexes = { {
   0,
   1,
   2,

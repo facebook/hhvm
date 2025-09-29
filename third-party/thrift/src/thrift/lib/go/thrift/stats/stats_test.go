@@ -30,7 +30,6 @@ func TestStats(t *testing.T) {
 	ints := stats.GetInts()
 	expectedInts := map[string]int64{
 		"connections.client_ended.60":               0,
-		"connections.connected":                     0,
 		"connections.connection_preempted_work.60":  0,
 		"connections.not_listening.avg.60":          0,
 		"connections.not_listening.p95.60":          0,

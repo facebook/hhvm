@@ -136,9 +136,6 @@ func (stats *ServerStats) GetInts() map[string]int64 {
 	// instantaneous workers
 	ints["running_workers"] = stats.WorkingCount.Get()
 
-	// instantaneous # connections
-	ints["connections.connected"] = stats.ConnCount.Get()
-
 	// instantaneous request pipeline counters
 	ints["requests.scheduling_work"] = stats.SchedulingWorkCount.Get()
 	ints["requests.working"] = stats.WorkingCount.Get()

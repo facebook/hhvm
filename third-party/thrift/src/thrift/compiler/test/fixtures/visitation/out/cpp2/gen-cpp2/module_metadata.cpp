@@ -26,51 +26,27 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::test_cpp2::cpp_reflection::enum1>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.enums()->emplace("module.enum1", ::apache::thrift::metadata::ThriftEnum{});
-  if (!res.second) {
+  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum1>(metadata);
+  if (res.preExists) {
     return;
-  }
-  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
-  enum_metadata.name() = "module.enum1";
-  using EnumTraits = TEnumTraits<::test_cpp2::cpp_reflection::enum1>;
-  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 void EnumMetadata<::test_cpp2::cpp_reflection::enum2>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.enums()->emplace("module.enum2", ::apache::thrift::metadata::ThriftEnum{});
-  if (!res.second) {
+  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum2>(metadata);
+  if (res.preExists) {
     return;
-  }
-  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
-  enum_metadata.name() = "module.enum2";
-  using EnumTraits = TEnumTraits<::test_cpp2::cpp_reflection::enum2>;
-  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 void EnumMetadata<::test_cpp2::cpp_reflection::enum3>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.enums()->emplace("module.enum3", ::apache::thrift::metadata::ThriftEnum{});
-  if (!res.second) {
+  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum3>(metadata);
+  if (res.preExists) {
     return;
-  }
-  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
-  enum_metadata.name() = "module.enum3";
-  using EnumTraits = TEnumTraits<::test_cpp2::cpp_reflection::enum3>;
-  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 void EnumMetadata<::test_cpp2::cpp_reflection::enum_with_special_names>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.enums()->emplace("module.enum_with_special_names", ::apache::thrift::metadata::ThriftEnum{});
-  if (!res.second) {
+  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum_with_special_names>(metadata);
+  if (res.preExists) {
     return;
-  }
-  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
-  enum_metadata.name() = "module.enum_with_special_names";
-  using EnumTraits = TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>;
-  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 

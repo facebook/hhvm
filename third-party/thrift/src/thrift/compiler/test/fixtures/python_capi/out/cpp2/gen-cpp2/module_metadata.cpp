@@ -26,29 +26,17 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::test::fixtures::python_capi::MyEnum>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.enums()->emplace("module.MyEnum", ::apache::thrift::metadata::ThriftEnum{});
-  if (!res.second) {
+  auto res = genEnumMetadata<::test::fixtures::python_capi::MyEnum>(metadata);
+  if (res.preExists) {
     return;
-  }
-  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
-  enum_metadata.name() = "module.MyEnum";
-  using EnumTraits = TEnumTraits<::test::fixtures::python_capi::MyEnum>;
-  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 void EnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.enums()->emplace("module.AnnoyingEnum", ::apache::thrift::metadata::ThriftEnum{});
-  if (!res.second) {
+  auto res = genEnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
-  enum_metadata.name() = "module.AnnoyingEnum";
-  using EnumTraits = TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>;
-  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
-  }
-  enum_metadata.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("NormalDecentEnum") } }).cv_struct());
+  res.metadata.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("NormalDecentEnum") } }).cv_struct());
 }
 
 const ::apache::thrift::metadata::ThriftStruct&

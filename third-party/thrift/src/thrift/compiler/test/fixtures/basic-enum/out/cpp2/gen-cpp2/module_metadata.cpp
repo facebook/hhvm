@@ -26,52 +26,28 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::test::fixtures::enumstrict::EmptyEnum>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.enums()->emplace("module.EmptyEnum", ::apache::thrift::metadata::ThriftEnum{});
-  if (!res.second) {
+  auto res = genEnumMetadata<::test::fixtures::enumstrict::EmptyEnum>(metadata);
+  if (res.preExists) {
     return;
-  }
-  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
-  enum_metadata.name() = "module.EmptyEnum";
-  using EnumTraits = TEnumTraits<::test::fixtures::enumstrict::EmptyEnum>;
-  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 void EnumMetadata<::test::fixtures::enumstrict::MyEnum>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.enums()->emplace("module.MyEnum", ::apache::thrift::metadata::ThriftEnum{});
-  if (!res.second) {
+  auto res = genEnumMetadata<::test::fixtures::enumstrict::MyEnum>(metadata);
+  if (res.preExists) {
     return;
-  }
-  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
-  enum_metadata.name() = "module.MyEnum";
-  using EnumTraits = TEnumTraits<::test::fixtures::enumstrict::MyEnum>;
-  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 void EnumMetadata<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.enums()->emplace("module.MyUseIntrinsicDefaultEnum", ::apache::thrift::metadata::ThriftEnum{});
-  if (!res.second) {
+  auto res = genEnumMetadata<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
-  enum_metadata.name() = "module.MyUseIntrinsicDefaultEnum";
-  using EnumTraits = TEnumTraits<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>;
-  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
-  }
-  enum_metadata.structured_annotations()->push_back(*cvStruct("java.UseIntrinsicDefault", {  }).cv_struct());
+  res.metadata.structured_annotations()->push_back(*cvStruct("java.UseIntrinsicDefault", {  }).cv_struct());
 }
 void EnumMetadata<::test::fixtures::enumstrict::MyBigEnum>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.enums()->emplace("module.MyBigEnum", ::apache::thrift::metadata::ThriftEnum{});
-  if (!res.second) {
+  auto res = genEnumMetadata<::test::fixtures::enumstrict::MyBigEnum>(metadata);
+  if (res.preExists) {
     return;
-  }
-  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
-  enum_metadata.name() = "module.MyBigEnum";
-  using EnumTraits = TEnumTraits<::test::fixtures::enumstrict::MyBigEnum>;
-  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }
 }
 

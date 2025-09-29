@@ -441,6 +441,17 @@ inline void readStringBody(
 }
 } // namespace detail
 
+template <typename Protocol>
+constexpr bool usesFieldNames() {
+  if constexpr (requires { typename Protocol::ProtocolReader; }) {
+    return usesFieldNames<typename Protocol::ProtocolReader>();
+  } else if constexpr (!requires { Protocol::kUsesFieldNames(); }) {
+    return true;
+  } else {
+    return Protocol::kUsesFieldNames();
+  }
+}
+
 } // namespace apache::thrift
 
 #endif

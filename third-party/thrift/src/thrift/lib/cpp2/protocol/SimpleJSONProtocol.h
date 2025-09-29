@@ -136,6 +136,9 @@ class SimpleJSONProtocolReader : public JSONProtocolReaderCommon {
   inline void skip(TType type, int depth = 0);
 };
 
+static_assert(usesFieldNames<SimpleJSONProtocolReader>());
+static_assert(usesFieldNames<SimpleJSONProtocolWriter>());
+
 } // namespace apache::thrift
 
 #include <thrift/lib/cpp2/protocol/SimpleJSONProtocol-inl.h>

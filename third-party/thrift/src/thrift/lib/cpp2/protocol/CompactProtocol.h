@@ -440,6 +440,9 @@ struct CompactProtocolReader::StructReadState {
   }
 };
 
+static_assert(!usesFieldNames<CompactProtocolReader>());
+static_assert(!usesFieldNames<CompactProtocolWriter>());
+
 namespace detail {
 
 template <class Protocol>

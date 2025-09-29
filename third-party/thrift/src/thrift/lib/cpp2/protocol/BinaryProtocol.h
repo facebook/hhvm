@@ -367,6 +367,9 @@ struct BinaryProtocolReader::StructReadState {
   }
 };
 
+static_assert(!usesFieldNames<BinaryProtocolReader>());
+static_assert(!usesFieldNames<BinaryProtocolWriter>());
+
 namespace detail {
 
 template <class Protocol>

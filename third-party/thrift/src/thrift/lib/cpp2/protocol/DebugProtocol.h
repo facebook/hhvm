@@ -184,6 +184,8 @@ class DebugProtocolWriter {
   Options options_;
 };
 
+static_assert(usesFieldNames<DebugProtocolWriter>());
+
 template <class T>
 std::string debugString(
     const T& obj, DebugProtocolWriter::Options options = {}) {

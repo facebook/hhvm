@@ -178,7 +178,7 @@ TEST(AnyRegistryTest, Behavior) {
 
   // Conflicting and duplicate registrations are rejected.
   EXPECT_FALSE(registry.registerType<int>(testThriftType("int")));
-  EXPECT_FALSE(registry.registerType<int>(testThriftType("other-int")));
+  EXPECT_FALSE(registry.registerType<int>(testThriftType("other_int")));
   EXPECT_FALSE(registry.registerType<double>(testThriftType("int")));
 
   EXPECT_TRUE(registry.registerSerializer<int>(&intCodec));

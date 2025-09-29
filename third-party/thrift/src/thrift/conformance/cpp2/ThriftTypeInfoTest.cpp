@@ -25,7 +25,7 @@ namespace {
 TEST(ThriftTypeInfoTest, ValidateThriftTypeInfo) {
   const auto bad = "foo.com:42/my/typeInfo";
   const auto good1 = "foo.com/my/typeInfo";
-  const auto good2 = "foo.com/my/other-typeInfo";
+  const auto good2 = "foo.com/my/other_typeInfo";
   ThriftTypeInfo typeInfo;
   EXPECT_THROW(validateThriftTypeInfo(typeInfo), std::invalid_argument);
   typeInfo.uri() = good1;

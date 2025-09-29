@@ -20,49 +20,68 @@ Definitions for constant values. These are included from the struct.pyx file
 and define Python objects that can be imported from the end-user's Python
 file.
 
-}}{{#value:bool?}}{{!
-  }}{{#value:nonzero?}}True{{/value:nonzero?}}{{!
-  }}{{^value:nonzero?}}False{{/value:nonzero?}}{{!
-}}{{/value:bool?}}{{!
-}}{{#value:integer?}}{{!
-    }}{{#if value:type.bool?}}{{!
-        }}{{#if value:nonzero?}}True{{#else}}False{{/if}}{{!
-    }}{{#else}}{{!
-        }}{{value:integer_value}}{{#if value:type.floating_point?}}.0{{/if}}{{!
-    }}{{/if value:type.bool?}}{{!
-}}{{/value:integer?}}{{!
-}}{{#value:double?}}float({{value:double_value}}){{/value:double?}}{{!
-}}{{#value:structured?}}{{!
-    }}{{#value:type.true_type}}{{!
-    }}{{#type:need_module_path?}}{{type:module_name}}.{{/type:need_module_path?}}{{!
-    }}{{> structs/unadapted_name}}{{!
-    }}{{/value:type.true_type}}{{!
-    }}({{#value:const_struct}}{{!
-        }}{{constant:name}}={{#constant:type}}{{#constant:value}}{{!
-            }}{{> types/constant_value }}{{!
-        }}{{/constant:value}}{{/constant:type}}{{^last?}}, {{/last?}}{{!
-    }}{{/value:const_struct}}){{!
-}}{{/value:structured?}}{{!
-}}{{#value:string?}}{{!
-    }}{{#if value:type.binary?}}b"{{value:string_value}}"{{#else}}"{{value:unicode_value}}"{{/if}}{{!
-}}{{/value:string?}}{{!
-}}{{#value:map?}}_fbthrift_python_types.Map({{!
-    }}{{#value:map_key_type}}{{> types/typeinfo }}{{/value:map_key_type}}, {{!
-    }}{{#value:map_val_type}}{{> types/typeinfo }}{{/value:map_val_type}}, { {{! purposeful open brace
-        }}{{#each (array.enumerate value:map_elements with_last=true) as |i map_elem last?|}}{{!
-            }}{{#map_elem.key}}{{> types/constant_value }}{{/map_elem.key}}: {{!
-            }}{{#map_elem.value}}{{> types/constant_value}}{{/map_elem.value}}{{^last?}}, {{/last?}}{{!
-        }}{{/each}}{{! purposeful close brace [next line]
-}}}){{/value:map?}}{{!
-}}{{#value:list?}}_fbthrift_python_types.{{!
-    }}{{#if value:type.set?}}Set{{#else}}List{{/if}}({{!
-        }}{{#value:list_elem_type}}{{> types/typeinfo }}{{/value:list_elem_type}}, {{!
-        }}({{#value:list_elements}}{{> types/constant_value }}, {{/value:list_elements}}){{!
-}}){{/value:list?}}{{!
-}}{{#value:enum?}}{{!
-    }}{{^value:enum_value?}}_fbthrift_python_types.BadEnum({{/value:enum_value?}}{{!
-    }}{{#value:type.true_type}}{{#type:need_module_path?}}{{type:module_name}}.{{!
-    }}{{/type:need_module_path?}}{{/value:type.true_type}}{{!
-    }}{{value:enum_name}}{{#value:enum_value?}}.{{value:py3_enum_value_name}}{{/value:enum_value?}}{{!
-    }}{{^value:enum_value?}}, {{value:integer_value}}){{/value:enum_value?}}{{!
-}}{{/value:enum?}}
+}}{{#pragma ignore-newlines}}
+  {{#if (or value:bool? (and value:integer? value:type.bool?))}}
+{{#if value:nonzero?}}True{{#else}}False{{/if}}
+  {{#else if value:integer?}}
+{{value:integer_value}}{{#if value:type.floating_point?}}.0{{/if}}
+  {{#else if value:double?}}
+float({{value:double_value}})
+  {{#else if value:string?}}
+    {{#if value:type.binary?}}
+b"{{value:string_value}}"
+    {{#else}}
+"{{value:unicode_value}}"
+    {{/if value:type.binary?}}
+  {{#else if value:structured?}}
+    {{#value:type.true_type}}
+{{#if type:need_module_path?}}{{type:module_name}}.{{/if}}{{> structs/unadapted_name}}
+    {{/value:type.true_type}}
+(
+    {{#value:const_struct}}
+{{constant:name}}=
+    {{#constant:type}}{{#constant:value}}
+{{> types/constant_value }}
+    {{/constant:value}}{{/constant:type}}
+{{^last?}}, {{/last?}}
+    {{/value:const_struct}}
+)
+  {{#else if value:map?}}
+_fbthrift_python_types.Map(
+{{#value:map_key_type}}{{> types/typeinfo }}{{/value:map_key_type}}, {{!}}
+{{#value:map_val_type}}{{> types/typeinfo }}{{/value:map_val_type}}, { {{! purposeful open brace}}
+    {{#each (array.enumerate value:map_elements with_last=true) as |i map_elem last?|}}
+{{#map_elem.key}}{{> types/constant_value }}{{/map_elem.key}}: {{!}}
+{{#map_elem.value}}{{> types/constant_value}}{{/map_elem.value}}{{^last?}}, {{/last?}}
+    {{/each}}{{! purposeful close brace [next line] }}
+})
+  {{#else if value:list?}}
+    {{#if value:type.set?}}
+_fbthrift_python_types.Set(
+    {{#else}}
+_fbthrift_python_types.List(
+    {{/if value:type.set?}}
+{{#value:list_elem_type}}{{> types/typeinfo }}{{/value:list_elem_type}}, (
+    {{#value:list_elements}}
+{{> types/constant_value }}, {{!}}
+    {{/value:list_elements}}
+))
+
+  {{#else if value:enum?}}
+    {{#let bad_enum = (not value:enum_value?)}}
+    {{#if bad_enum}}
+_fbthrift_python_types.BadEnum(
+    {{/if bad_enum}}
+
+    {{#value:type.true_type}}
+{{#if type:need_module_path?}}{{type:module_name}}.{{/if}}
+    {{/value:type.true_type}}
+{{value:enum_name}}
+
+    {{#if bad_enum}}
+      {{! Close BadEnum }}
+, {{value:integer_value}})
+    {{#else}}
+.{{value:py3_enum_value_name}}
+    {{/if bad_enum}}
+  {{/if (or value:bool? (and value:integer? value:type.bool?))}}

@@ -22,7 +22,7 @@ type {{service:go_name}} interface {
     {{/service:extends}}
     {{#service:functions}}
     {{#function:go_server_supported?}}
-    {{> svc/func_signature}}
+    {{> svc/handler_func_signature}}
 
     {{/function:go_server_supported?}}
     {{/service:functions}}

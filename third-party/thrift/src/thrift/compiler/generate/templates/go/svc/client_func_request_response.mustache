@@ -19,7 +19,7 @@
   This template defines the client request/response function.
 
 }}
-func (c *{{service:go_client_name}}) {{> svc/func_signature}} {
+func (c *{{service:go_client_name}}) {{> svc/client_func_signature}} {
     fbthriftReq := &req{{service:go_name}}{{function:go_name}}{
         {{#function:args}}
         {{#field:type}}

@@ -8009,6 +8009,20 @@ end = struct
         ~lhs:{ sub_supportdyn; ty_sub = newtype_ty }
         ~rhs:{ reason_super = r; has_member = has_member_ty }
         env
+    | (r, Tdynamic) when Option.is_some explicit_targs ->
+      let subtype_env = Subtype_env.set_is_dynamic_aware subtype_env true in
+      Subtype.(
+        simplify
+          ~subtype_env
+          ~this_ty
+          ~lhs:{ sub_supportdyn = None; ty_sub = MakeType.make_dynamic_tfun r }
+          ~rhs:
+            {
+              super_like = false;
+              super_supportdyn = false;
+              ty_super = member_ty;
+            })
+        env
     | ( _,
         ( Toption _ | Tdynamic | Tnonnull | Tany _ | Tprim _ | Tfun _ | Ttuple _
         | Tshape _ | Tgeneric _ | Tdependent _ | Tvec_or_dict _ | Taccess _

@@ -297,3 +297,43 @@ let default_construct (type ph) r : ph ty =
           ft_require_package = None;
           ft_instantiated = true;
         } )
+
+let make_dynamic_tfun r : locl_ty =
+  mk
+    ( r,
+      Tfun
+        {
+          ft_tparams = [];
+          ft_where_constraints = [];
+          ft_params =
+            [
+              {
+                fp_pos = Reason.to_pos r;
+                fp_name = None;
+                fp_type = dynamic r;
+                fp_flags =
+                  Typing_defs_flags.FunParam.make
+                    ~inout:false
+                    ~accept_disposable:false
+                    ~is_optional:false
+                    ~readonly:false
+                    ~ignore_readonly_error:false
+                    ~splat:true
+                    ~named:false;
+                fp_def_value = None;
+              };
+            ];
+          ft_implicit_params = { capability = CapDefaults (Reason.to_pos r) };
+          ft_flags =
+            Typing_defs_flags.Fun.make
+              Ast_defs.FSync
+              ~return_disposable:false
+              ~returns_readonly:false
+              ~readonly_this:false
+              ~support_dynamic_type:false
+              ~is_memoized:false
+              ~variadic:true;
+          ft_ret = dynamic r;
+          ft_require_package = None;
+          ft_instantiated = true;
+        } )

@@ -6418,6 +6418,99 @@ end = struct
         let result = make_call env wrapped_caller targs args unpacked_arg ty in
         (result, s)
       | _ -> ((env, expr, ty), s))
+    (* Call instance method with constraint-based inference *)
+    | Obj_get (e1, (_, pos_id, Id m), OG_nullthrows, Is_method)
+      when TCO.constraint_method_call env.genv.tcopt
+           && List.is_empty explicit_targs
+           && Option.is_none unpacked_element ->
+      (* Construct a function type from the types of the arguments, and check
+         that the receiver has a method that is a subtype of it. Since function parameters
+         are contravariant, this will check that the arguments are subtypes of the
+         parameters *)
+      let (env, te1, ty1) =
+        expr
+          ~expected:None
+          ~ctxt:Context.{ default with accept_using_var = true }
+          env
+          e1
+      in
+      let expr_with_edt env e =
+        let (env, tast, ty) = expr ~expected:None ~ctxt:Context.default env e in
+        let (env, ty) = ExprDepTy.make env ~cid:(CIexpr e) ty in
+        (env, tast, ty)
+      in
+      let (env, args_tast, arg_tys) =
+        argument_list_exprs expr_with_edt env el
+      in
+      let arg_posl =
+        List.map el ~f:(fun arg ->
+            match arg with
+            | Aast_defs.Ainout (_, (_, pos, _))
+            | Aast_defs.Anamed (_, (_, pos, _))
+            | Aast_defs.Anormal (_, pos, _) ->
+              pos)
+      in
+      let make_param pos ty =
+        {
+          fp_pos = Pos_or_decl.of_raw_pos pos;
+          fp_name = None;
+          fp_type = ty;
+          fp_flags = Typing_defs_flags.FunParam.default;
+          fp_def_value = None;
+        }
+      in
+      let (env, ty) = Env.fresh_type env p in
+      let tfty =
+        ( Reason.witness p,
+          Tfun
+            {
+              ft_tparams = [];
+              ft_where_constraints = [];
+              ft_params = List.map2_exn ~f:make_param arg_posl arg_tys;
+              ft_implicit_params = { capability = CapDefaults Pos_or_decl.none };
+              ft_ret = ty;
+              ft_flags = Typing_defs_flags.Fun.default;
+              ft_require_package = None;
+              ft_instantiated = true;
+            } )
+      in
+      let has_member_ty =
+        MakeType.has_member
+          (Reason.witness pos_id)
+          ~name:m
+          ~ty:tfty
+          ~class_id:(CIexpr e1)
+          ~explicit_targs:(Some [])
+      in
+      let (env, ty_err_opt) =
+        Type.sub_type_i
+          p
+          Reason.URparam
+          env
+          (LoclType ty1)
+          has_member_ty
+          Typing_error.Callback.unify_error
+      in
+      Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
+      let ty_mismatch_opt =
+        mk_ty_mismatch_opt ty1 (MakeType.nothing Reason.none) ty_err_opt
+      in
+      let (env, inner_te) =
+        Typing_helpers.make_simplify_typed_expr env pos_id tfty (Aast.Id m)
+      in
+      let (env, te) =
+        Typing_helpers.make_simplify_typed_expr
+          env
+          fpos
+          tfty
+          (Aast.Obj_get
+             ( hole_on_ty_mismatch ~ty_mismatch_opt te1,
+               inner_te,
+               OG_nullthrows,
+               Is_method ))
+      in
+      let result = make_call env te [] args_tast None ty in
+      (result, true)
     (* Call instance method *)
     | Obj_get (e1, (_, pos_id, Id m), nullflavor, Is_method) ->
       let (env, te1, ty1) =

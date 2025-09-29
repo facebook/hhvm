@@ -1,0 +1,16 @@
+ERROR: File "call-error.php", line 7, characters 5-18:
+Invalid argument (Typing[4110])
+  File "call-error.php", line 4, characters 29-34:
+  Expected `string`
+  File "call-error.php", line 7, characters 17-17:
+  But got `int`
+ERROR: File "call-error.php", line 11, characters 5-20:
+Invalid argument (Typing[4053])
+  File "call-error.php", line 11, characters 12-18:
+  No instance method `missing` in `C`
+  File "call-error.php", line 6, characters 19-19:
+  Did you mean `g` instead?
+  File "call-error.php", line 3, characters 7-7:
+  This is why I think it is an object of type C
+  File "call-error.php", line 3, characters 7-7:
+  Declaration of `C` is here

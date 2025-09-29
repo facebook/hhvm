@@ -24,6 +24,11 @@ from cpython.unicode cimport PyUnicode_AsUTF8String
 import enum
 import copy
 
+from thrift.python.mutable_containers cimport (
+    MutableList,
+    MutableSet,
+    MutableMap,
+)
 from thrift.python.mutable_exceptions cimport MutableGeneratedError
 from thrift.python.mutable_serializer cimport c_mutable_serialize, c_mutable_deserialize
 import thrift.python.mutable_serializer as mutable_serializer
@@ -136,6 +141,17 @@ cdef _resetFieldToStandardDefault(structOrError, field_index):
         (<MutableGeneratedError>structOrError)._fbthrift_reset_field_to_standard_default(field_index)
 
 
+def _repr_value_helper(value):
+    if isinstance(value, MutableList):
+        return f"to_thrift_list({repr(value)})"
+    elif isinstance(value, MutableSet):
+        return f"to_thrift_set({repr(value)})"
+    elif isinstance(value, MutableMap):
+        return f"to_thrift_map({repr(value)})"
+    else:
+        return f"{repr(value)}"
+
+
 @_cython__final
 cdef class _MutablePrimitiveField:
     """
@@ -180,7 +196,7 @@ cdef class _MutablePrimitiveField:
             (<MutableGeneratedError>obj)._fbthrift_set_field_value(self._field_index, value)
 
     def __delete__(self, obj):
-        raise AttributeError(f"Cannot delete attributes of mutable thrift-python struct") 
+        raise AttributeError(f"Cannot delete attributes of mutable thrift-python struct")
 
 
 @_cython__final
@@ -219,7 +235,7 @@ cdef class _MutableStructCachedField:
         obj._fbthrift_field_cache[self._field_index] = None
 
     def __delete__(self, obj):
-        raise AttributeError(f"Cannot delete attributes of mutable thrift-python struct") 
+        raise AttributeError(f"Cannot delete attributes of mutable thrift-python struct")
 
 
 cdef void set_mutable_struct_field(list struct_list, int16_t index, value) except *:
@@ -342,7 +358,7 @@ cdef class MutableStruct(MutableStructOrUnion):
     def __deepcopy__(self, memo):
         # Use serialization-deserialization to create a truly fresh copy.
         # Using deepcopy with memo has implications for containers of structs
-        # where references to the same struct in container in original 
+        # where references to the same struct in container in original
         # cause the same linking to be present in copied container.
         # For example, if we have lst = [s, s], then deepcopy(lst) with memo
         # yields [s1, s1]. But deepcopy semantic implies each object should
@@ -500,7 +516,7 @@ cdef class MutableStruct(MutableStructOrUnion):
         return dir(type(self))
 
     def __repr__(self):
-        fields = ", ".join(f"{name}={repr(value)}" for name, value in self)
+        fields = ", ".join(f"{name}={_repr_value_helper(value)}" for name, value in self)
         return f"{type(self).__name__}({fields})"
 
     def __reduce__(self):
@@ -740,7 +756,7 @@ cdef object _mutable_struct_meta_new(cls, cls_name, bases, dct):
         # if field has an adapter or is not primitive type, consider
         # as "non-primitive"
         if _is_primitive_field(field_info):
-            descriptor_kls = _MutablePrimitiveField 
+            descriptor_kls = _MutablePrimitiveField
         else:
             descriptor_kls = _MutableStructCachedField
         is_optional = field_info.qualifier == FieldQualifier.Optional
@@ -1194,7 +1210,7 @@ cdef class MutableUnion(MutableStructOrUnion):
         return self._fbthrift_current_field_enum()
 
     def __repr__(self):
-        return f"{type(self).__name__}({self._fbthrift_current_field_enum().name}={self.fbthrift_current_value!r})"
+        return f"{type(self).__name__}({self._fbthrift_current_field_enum().name}={_repr_value_helper(self.fbthrift_current_value)})"
 
 def _gen_mutable_union_field_enum_members(field_infos):
     yield ("EMPTY", 0)

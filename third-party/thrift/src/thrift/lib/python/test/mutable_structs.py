@@ -31,12 +31,15 @@ from thrift.python.mutable_types import (
     MutableStruct,
     MutableStructOrUnion,
     to_thrift_list,
+    to_thrift_map,
     to_thrift_set,
 )
 
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
+    TestComplexContainersStruct,
     TestContainersWithStructElements as TestContainersWithStructElementsMutable,
     TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesMutable,
+    TestStruct,
     TestStructAdaptedTypes as TestStructAdaptedTypesMutable,
     TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesMutable,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesMutable,
@@ -326,15 +329,48 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         _thrift_serialization_round_trip(self, mutable_serializer, struct_or_exception)
 
     def test_struct_repr(self) -> None:
-        mutable = TestStructAllThriftPrimitiveTypesMutable()
-        immutable = TestStructAllThriftPrimitiveTypesImmutable()
+        TestStructAllThriftPrimitiveTypes = TestStructAllThriftPrimitiveTypesMutable
+        mutable = TestStructAllThriftPrimitiveTypes()
+        self.assertEqual(mutable, eval(repr(mutable)))
+        self.assertEqual(
+            repr(mutable),
+            "TestStructAllThriftPrimitiveTypes(unqualified_bool=False, optional_bool=None, unqualified_byte=0, optional_byte=None, unqualified_i16=0, optional_i16=None, unqualified_i32=0, optional_i32=None, unqualified_i64=0, optional_i64=None, unqualified_float=0.0, optional_float=None, unqualified_double=0.0, optional_double=None, unqualified_string='', optional_string=None)",
+        )
 
-        self.assertEqual(repr(mutable), repr(immutable))
+        TestStructAllThriftContainerTypes = TestStructAllThriftContainerTypesMutable
+        mutable = TestStructAllThriftContainerTypes()
+        self.assertEqual(mutable, eval(repr(mutable)))
+        self.assertEqual(
+            repr(mutable),
+            "TestStructAllThriftContainerTypes(unqualified_list_i32=to_thrift_list([]), optional_list_i32=None, unqualified_set_string=to_thrift_set(set()), optional_set_string=None, unqualified_map_string_i32=to_thrift_map({}), optional_map_string_i32=None)",
+        )
 
-        mutable = TestStructAllThriftContainerTypesMutable()
-        immutable = TestStructAllThriftContainerTypesImmutable()
+    def test_complex_container_struct_repr(self) -> None:
+        mutable_struct = TestComplexContainersStruct(
+            list_int=to_thrift_list([]),
+            set_int=to_thrift_set(set()),
+            map_int_to_string=to_thrift_map({}),
+            list_of_list=to_thrift_list([[]]),
+            list_of_set=to_thrift_list([set()]),
+            set_of_list=to_thrift_set(set()),
+            list_map_int_to_set=to_thrift_list([{0: set()}]),
+            map_int_to_list_of_set=to_thrift_map({0: [set()]}),
+            list_of_struct=to_thrift_list([TestStruct()]),
+        )
+        self.assertEqual(mutable_struct, eval(repr(mutable_struct)))
 
-        self.assertEqual(repr(mutable), repr(immutable))
+        mutable_struct = TestComplexContainersStruct(
+            list_int=to_thrift_list([1, 2, 3]),
+            set_int=to_thrift_set({1, 2, 3}),
+            map_int_to_string=to_thrift_map({1: "abc", 2: "xyz"}),
+            list_of_list=to_thrift_list([[1], [2]]),
+            list_of_set=to_thrift_list([set()]),
+            set_of_list=to_thrift_set(set()),
+            list_map_int_to_set=to_thrift_list([{0: {1, 2, 3}}]),
+            map_int_to_list_of_set=to_thrift_map({0: [{1, 2, 3}]}),
+            list_of_struct=to_thrift_list([TestStruct(unqualified_string="abc")]),
+        )
+        self.assertEqual(mutable_struct, eval(repr(mutable_struct)))
 
     def test_struct_default_value_cache_primitives(self) -> None:
         # Immutable-types uses a default-value cache and initialize the fields

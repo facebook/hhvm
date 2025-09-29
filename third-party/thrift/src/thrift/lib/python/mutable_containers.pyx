@@ -146,8 +146,8 @@ cdef class MutableList:
 
     def __repr__(self):
         if not self:
-            return 'i[]'
-        return f'i[{", ".join(map(repr, self))}]'
+            return '[]'
+        return f'[{", ".join(map(repr, self))}]'
 
     def __contains__(self, value):
         if value is None:
@@ -504,8 +504,8 @@ cdef class MutableSet:
 
     def __repr__(MutableSet self):
         if not self:
-            return 'iset()'
-        return f'i{{{", ".join(map(repr, self))}}}'
+            return 'set()'
+        return f'{{{", ".join(map(repr, self))}}}'
 
     @classmethod
     def _from_iterable(cls, TypeInfoBase value_typeinfo, set set_data, object it):
@@ -600,7 +600,7 @@ cdef class MutableMap:
 
         if isinstance(other, MutableMap):
             if not self._is_same_type_of_map(other):
-                return False 
+                return False
             if self._use_internal_data_to_compare:
                 return self._map_data == (<MutableMap>other)._map_data
 
@@ -741,7 +741,7 @@ cdef class MutableMap:
     # s.map_field == {1: [1]}
     #
     # These is no `_key_to_internal_data` method because mutable containers
-    # cannot be used as keys (not hashable) 
+    # cannot be used as keys (not hashable)
     #
     # This method is called when an implicit wrapper is needed.
     cdef _value_to_internal_data(self, value):
@@ -752,8 +752,8 @@ cdef class MutableMap:
 
     def __repr__(self):
         if not self:
-            return 'i{}'
-        return f'i{{{", ".join(map(lambda i: f"{repr(i[0])}: {repr(i[1])}", self.items()))}}}'
+            return '{}'
+        return f'{{{", ".join(map(lambda i: f"{repr(i[0])}: {repr(i[1])}", self.items()))}}}'
 
     @classmethod
     def __class_getitem__(cls, _):

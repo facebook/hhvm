@@ -19,10 +19,11 @@ import unittest
 
 from testing.thrift_mutable_types import Digits, Integers
 
-from thrift.python.mutable_types import to_thrift_list
+from thrift.python.mutable_types import to_thrift_list, to_thrift_map, to_thrift_set
 from thrift.test.thrift_python.union_test.thrift_mutable_types import (
     TestStruct,
     TestUnion,
+    TestUnionContainerTypes,
 )
 
 
@@ -220,4 +221,31 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         self.assertEqual(
             TestStruct(unqualified_string="Hello"),
             u2_deepcopy.fbthrift_current_value,
+        )
+
+    def test_union_repr(self) -> None:
+        u = TestUnionContainerTypes()
+        self.assertEqual(u, eval(repr(u)))
+        self.assertEqual(repr(u), "TestUnionContainerTypes(EMPTY=None)")
+
+        u = TestUnionContainerTypes(int_field=3)
+        self.assertEqual(u, eval(repr(u)))
+        self.assertEqual(repr(u), "TestUnionContainerTypes(int_field=3)")
+
+        u = TestUnionContainerTypes(list_i32=to_thrift_list([1, 2, 3]))
+        self.assertEqual(u, eval(repr(u)))
+        self.assertEqual(
+            repr(u), "TestUnionContainerTypes(list_i32=to_thrift_list([1, 2, 3]))"
+        )
+
+        u = TestUnionContainerTypes(set_i32=to_thrift_set({1, 2, 3}))
+        self.assertEqual(u, eval(repr(u)))
+        self.assertEqual(
+            repr(u), "TestUnionContainerTypes(set_i32=to_thrift_set({1, 2, 3}))"
+        )
+
+        u = TestUnionContainerTypes(map_i32_str=to_thrift_map({1: "abc"}))
+        self.assertEqual(u, eval(repr(u)))
+        self.assertEqual(
+            repr(u), "TestUnionContainerTypes(map_i32_str=to_thrift_map({1: 'abc'}))"
         )

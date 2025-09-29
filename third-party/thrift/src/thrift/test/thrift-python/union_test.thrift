@@ -95,3 +95,10 @@ union DefaultFieldUnion {
   4: list<i32> default_list = [1];
   5: list<i32> useless_list_default = [];
 }
+
+union TestUnionContainerTypes {
+  1: i32 int_field;
+  2: list<i32> list_i32;
+  3: set<i32> set_i32;
+  4: map<i32, string> map_i32_str;
+}

@@ -160,6 +160,18 @@ struct TestStructContainerAssignment {
   8: map<i32, list<i32>> map_int_to_list_int;
 }
 
+struct TestComplexContainersStruct {
+  1: list<i32> list_int;
+  2: set<i32> set_int;
+  3: map<i32, string> map_int_to_string;
+  4: list<list<i32>> list_of_list;
+  5: list<set<i32>> list_of_set;
+  6: set<list<i32>> set_of_list;
+  7: list<map<i32, set<i32>>> list_map_int_to_set;
+  8: map<i32, list<set<i32>>> map_int_to_list_of_set;
+  9: list<TestStruct> list_of_struct;
+}
+
 exception TestExceptionAsListElement {
   1: string string_field;
   2: list<i32> list_int;

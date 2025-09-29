@@ -18,7 +18,6 @@ use hhbc_string_utils as string_utils;
 use itertools::Itertools;
 use naming_special_names_rust::members;
 use naming_special_names_rust::pseudo_consts;
-use naming_special_names_rust::pseudo_functions;
 use naming_special_names_rust::special_idents;
 use oxidized::aast::UserAttribute;
 use oxidized::aast_visitor;
@@ -439,8 +438,6 @@ struct ReadOnlyState {
     empty_namespace: Arc<namespace_env::Env>,
     /// For debugger eval
     for_debugger_eval: bool,
-    // Preserve UNSAFE_CAST for emitter
-    emit_checked_unsafe_cast: bool,
 }
 
 /// Mutable state used during visiting in ClosureVisitor. It's mutable and owned
@@ -1014,7 +1011,9 @@ impl<'ast, 'a: 'b, 'b> VisitorMut<'ast> for ClosureVisitor<'a, 'b> {
 
     fn visit_expr(&mut self, scope: &mut Scope<'b>, Expr(_, pos, e): &mut Expr) -> Result<()> {
         stack_limit::maybe_grow(|| {
-            *e = match strip_unsafe_casts(self.ro_state, e) {
+            let null = Expr_::mk_null();
+            let e_owned = std::mem::replace(e, null);
+            *e = match e_owned {
                 Expr_::Efun(x) => self.convert_lambda(scope, x.fun, Some(x.use_))?,
                 Expr_::Lfun(x) => self.convert_lambda(scope, x.0, None)?,
                 Expr_::Lvar(id_orig) => {
@@ -1409,47 +1408,6 @@ impl<'a: 'b, 'b> ClosureVisitor<'a, 'b> {
     }
 }
 
-/// Swap *e with Expr_::Null, then return it with UNSAFE_CAST
-/// and UNSAFE_NONNULL_CAST stripped off.
-fn strip_unsafe_casts(ro_state: &ReadOnlyState, e: &mut Expr_) -> Expr_ {
-    let null = Expr_::mk_null();
-    let mut e_owned = std::mem::replace(e, null);
-    /*
-        If this is a call of the form
-          HH\FIXME\UNSAFE_CAST(e, ...)
-        or
-          HH\FIXME\UNSAFE_NONNULL_CAST(e, ...)
-        then treat as a no-op by transforming it to
-          e
-        Repeat in case there are nested occurrences
-    */
-    loop {
-        match e_owned {
-            // Must have at least one argument
-            Expr_::Call(mut x)
-                if !x.args.is_empty() && {
-                    // Function name should be HH\FIXME\UNSAFE_CAST
-                    // or HH\FIXME\UNSAFE_NONNULL_CAST
-                    // Leave UNSAFE_CAST in place if emit_checked_unsafe_cast=true
-                    // because we will interpret it as a checked cast in emit_expression
-                    if let Expr_::Id(ref id) = (x.func).2 {
-                        id.1 == pseudo_functions::UNSAFE_CAST
-                            && !(ro_state.emit_checked_unsafe_cast && x.targs.len() == 2)
-                            || id.1 == pseudo_functions::UNSAFE_NONNULL_CAST
-                    } else {
-                        false
-                    }
-                } =>
-            {
-                // Select first argument
-                let Expr(_, _, e) = x.args.swap_remove(0).to_expr();
-                e_owned = e;
-            }
-            _ => break e_owned,
-        };
-    }
-}
-
 fn is_dyn_meth_caller(x: &CallExpr) -> bool {
     if let Expr_::Id(ref id) = (x.func).2 {
         match strip_id(id) {
@@ -1530,7 +1488,6 @@ pub fn convert_toplevel_prog<'d>(
     let ro_state = ReadOnlyState {
         empty_namespace: Arc::clone(&namespace_env),
         for_debugger_eval: e.for_debugger_eval,
-        emit_checked_unsafe_cast: e.options().hhbc.emit_checked_unsafe_cast,
     };
     let state = State::initial_state(namespace_env);
 

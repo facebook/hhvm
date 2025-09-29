@@ -164,6 +164,7 @@ fn build_ir<'a>(path: &'a Path, content: &[u8], opts: &'a Opts) -> Result<ir::Un
         &mut profile,
         &elab::CodegenOpts {
             textual_remove_memoize: !opts.keep_memo,
+            emit_checked_unsafe_cast: env.hhbc_flags.emit_checked_unsafe_cast,
         },
     )?;
     let ir = bc_to_ir::bc_to_ir(unit);

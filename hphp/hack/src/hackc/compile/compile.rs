@@ -203,7 +203,10 @@ pub fn from_text<'d>(
         &native_env.flags,
         source_text,
         profile,
-        &elab::CodegenOpts::default(),
+        &elab::CodegenOpts {
+            emit_checked_unsafe_cast: native_env.hhbc_flags.emit_checked_unsafe_cast,
+            ..Default::default()
+        },
     )?;
 
     if native_env.flags.enable_ir {
@@ -253,13 +256,11 @@ pub fn unit_from_text<'d>(
     decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
     profile: &mut Profile,
 ) -> Result<Unit> {
-    unit_from_text_with_opts(
-        source_text,
-        native_env,
-        decl_provider,
-        profile,
-        &elab::CodegenOpts::default(),
-    )
+    let opts = &elab::CodegenOpts {
+        emit_checked_unsafe_cast: native_env.hhbc_flags.emit_checked_unsafe_cast,
+        ..Default::default()
+    };
+    unit_from_text_with_opts(source_text, native_env, decl_provider, profile, opts)
 }
 
 pub fn unit_from_text_with_opts<'d>(

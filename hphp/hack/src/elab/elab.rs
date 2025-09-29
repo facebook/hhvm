@@ -49,6 +49,7 @@ use vec1::Vec1;
 #[derive(Clone, Debug, Default)]
 pub struct CodegenOpts {
     pub textual_remove_memoize: bool,
+    pub emit_checked_unsafe_cast: bool,
 }
 
 /// Provided for use in hackc, where we have an `ns_env` in hand already.
@@ -265,6 +266,10 @@ fn elaborate_for_codegen<T: Transform>(env: &Env, node: &mut T, opts: &CodegenOp
     }
     // Insert assertion that the package being cross-package accessed is loaded
     passes.push(Box::<passes::elab_cross_package::ElabCrossPackagePass>::default());
+
+    passes.push(Box::new(passes::drop_unsafe_cast::DropUnsafeCast {
+        emit_checked_unsafe_cast: opts.emit_checked_unsafe_cast,
+    }));
 
     let mut passes = pass::Passes { passes };
     node.transform(env, &mut passes);

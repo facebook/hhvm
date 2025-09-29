@@ -155,7 +155,7 @@ class BadService_BadInteraction extends \ThriftClientBase {
 abstract class BadServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as BadServiceAsyncIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BadServiceStaticMetadata::class;
+  const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BadServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = BadServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_bar(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {

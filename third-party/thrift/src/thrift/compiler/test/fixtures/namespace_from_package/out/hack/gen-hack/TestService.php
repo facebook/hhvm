@@ -85,7 +85,7 @@ class TestServiceClient extends \ThriftClientBase implements TestServiceClientIf
 abstract class TestServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as TestServiceAsyncIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
+  const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_init(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {

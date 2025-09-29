@@ -374,7 +374,7 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
 abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as PubSubStreamingServiceAsyncIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = PubSubStreamingServiceStaticMetadata::class;
+  const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = PubSubStreamingServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_returnstream(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {

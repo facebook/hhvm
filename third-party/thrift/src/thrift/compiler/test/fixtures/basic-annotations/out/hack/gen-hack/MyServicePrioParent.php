@@ -105,7 +105,7 @@ class MyServicePrioParentClient extends \ThriftClientBase implements MyServicePr
 abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as MyServicePrioParentAsyncIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServicePrioParentStaticMetadata::class;
+  const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServicePrioParentStaticMetadata::class;
   const string THRIFT_SVC_NAME = MyServicePrioParentStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {

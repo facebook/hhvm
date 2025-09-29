@@ -84,7 +84,7 @@ class RenamedServiceClient extends \ThriftClientBase implements RenamedServiceCl
 abstract class RenamedServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as RenamedServiceAsyncIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = RenamedServiceStaticMetadata::class;
+  const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = RenamedServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = RenamedServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_simple_rpc(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {

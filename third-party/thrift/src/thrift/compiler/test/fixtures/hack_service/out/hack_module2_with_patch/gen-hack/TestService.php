@@ -88,7 +88,7 @@ class TestServiceClient extends \foo\hack_ns\FooHackServiceClient implements Tes
 abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackServiceAsyncProcessorBase {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as TestServiceAsyncIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
+  const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {

@@ -5754,7 +5754,7 @@ void t_hack_generator::generate_service_processor(
              << indent() << "  abstract const type TThriftIf as " << long_name
              << "AsyncIf;\n"
              << indent()
-             << "  const classname<\\IThriftServiceStaticMetadata> "
+             << "  const class<\\IThriftServiceStaticMetadata> "
                 "SERVICE_METADATA_CLASS = "
              << long_name << "StaticMetadata::class;\n"
              << indent() << "  const string THRIFT_SVC_NAME = " << long_name

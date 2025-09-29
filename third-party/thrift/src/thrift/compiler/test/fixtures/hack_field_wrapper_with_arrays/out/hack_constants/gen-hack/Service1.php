@@ -153,7 +153,7 @@ class Service1Client extends \ThriftClientBase implements Service1ClientIf {
 abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as Service1AsyncIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = Service1StaticMetadata::class;
+  const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = Service1StaticMetadata::class;
   const string THRIFT_SVC_NAME = Service1StaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_func(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {

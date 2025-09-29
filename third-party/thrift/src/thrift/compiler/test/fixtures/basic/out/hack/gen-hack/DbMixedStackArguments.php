@@ -115,7 +115,7 @@ class DbMixedStackArgumentsClient extends \ThriftClientBase implements DbMixedSt
 abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as DbMixedStackArgumentsAsyncIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = DbMixedStackArgumentsStaticMetadata::class;
+  const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = DbMixedStackArgumentsStaticMetadata::class;
   const string THRIFT_SVC_NAME = DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_getDataByKey0(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {

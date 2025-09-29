@@ -86,7 +86,7 @@ class FB303ServiceClient extends \ThriftClientBase implements FB303ServiceClient
 abstract class FB303ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as FB303ServiceAsyncIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FB303ServiceStaticMetadata::class;
+  const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FB303ServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = FB303ServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_renamed_rpc(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {

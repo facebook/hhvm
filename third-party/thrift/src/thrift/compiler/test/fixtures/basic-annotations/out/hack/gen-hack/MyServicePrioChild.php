@@ -78,7 +78,7 @@ class MyServicePrioChildClient extends MyServicePrioParentClient implements MySe
 abstract class MyServicePrioChildAsyncProcessorBase extends MyServicePrioParentAsyncProcessorBase {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as MyServicePrioChildAsyncIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServicePrioChildStaticMetadata::class;
+  const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServicePrioChildStaticMetadata::class;
   const string THRIFT_SVC_NAME = MyServicePrioChildStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_pang(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {

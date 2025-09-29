@@ -132,7 +132,7 @@ class FooBarBazServiceClient extends \ThriftClientBase implements FooBarBazServi
 abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as FooBarBazServiceAsyncIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FooBarBazServiceStaticMetadata::class;
+  const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FooBarBazServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_foo(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {

@@ -55,7 +55,7 @@ class FooHackServiceClient extends \ThriftClientBase implements FooHackServiceCl
 abstract class FooHackServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as FooHackServiceAsyncIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FooHackServiceStaticMetadata::class;
+  const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FooHackServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {

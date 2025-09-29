@@ -80,7 +80,7 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
 abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as MyServiceAsyncIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServiceStaticMetadata::class;
+  const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_second(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {

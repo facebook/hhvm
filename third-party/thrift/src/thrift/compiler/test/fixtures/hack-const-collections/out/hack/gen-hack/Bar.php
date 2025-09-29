@@ -98,7 +98,7 @@ class BarClient extends \ThriftClientBase implements BarClientIf {
 abstract class BarAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as BarAsyncIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BarStaticMetadata::class;
+  const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BarStaticMetadata::class;
   const string THRIFT_SVC_NAME = BarStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_baz(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {

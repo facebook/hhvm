@@ -206,7 +206,7 @@ class NestedContainersClient extends \ThriftClientBase implements NestedContaine
 abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as NestedContainersAsyncIf;
-  const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = NestedContainersStaticMetadata::class;
+  const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = NestedContainersStaticMetadata::class;
   const string THRIFT_SVC_NAME = NestedContainersStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_mapList(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {

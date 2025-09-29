@@ -6238,6 +6238,11 @@ end = struct
       simplify_default ~subtype_env can_index.ci_key tk env
     in
     let simplify_val tv env =
+      let tv =
+        match sub_supportdyn with
+        | None -> tv
+        | Some r -> Typing_make_type.supportdyn r tv
+      in
       simplify_default ~subtype_env tv can_index.ci_val env
     in
     let return_val tv env = simplify_val tv env |> likely_solvable in

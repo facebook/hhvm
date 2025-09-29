@@ -1,0 +1,4 @@
+ERROR: File "array_supportdyn.php", line 11, characters 15-24:
+Cannot use experimental feature: supportdyn type hint (Other[0000])
+ERROR: File "array_supportdyn.php", line 10, characters 3-17:
+This attribute is not yet supported in user code (Typing[4474])

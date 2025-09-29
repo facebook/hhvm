@@ -30,7 +30,7 @@
 {{constant:name}} = {{adapter.name}}.from_thrift(
     _fbthrift_unadapted_{{constant:name}},
     transitive_annotation={{#if (object.notnull? adapter.transitive_annotation)}}{{!
-        }}{{#with adapter.transitive_annotation}}{{> types/constant_value }}{{/with}}{{!
+        }}{{#adapter.transitive_annotation}}{{> types/constant_value }}{{/adapter.transitive_annotation}}{{!
     }}{{#else}}{{!
         }}None
     }}{{/if (object.notnull? adapter.transitive_annotation)}},

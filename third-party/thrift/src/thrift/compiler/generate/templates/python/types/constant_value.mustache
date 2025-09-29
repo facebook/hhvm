@@ -38,18 +38,16 @@ b"{{value:string_value}}"
 {{#if type:need_module_path?}}{{type:module_name}}.{{/if}}{{> structs/unadapted_name}}
     {{/value:type.true_type}}
 (
-    {{#value:const_struct}}
-{{constant:name}}=
-    {{#constant:type}}{{#constant:value}}
-{{> types/constant_value }}
-    {{/constant:value}}{{/constant:type}}
-{{^last?}}, {{/last?}}
-    {{/value:const_struct}}
+    {{#each (array.enumerate value:structured_elements with_last=true) as |i elem last?|}}
+{{elem.field.py_name}}={{#elem.value}}{{> types/constant_value }}{{/elem.value}}{{^last?}}, {{/last?}}
+    {{/each}}
 )
   {{#else if value:map?}}
 _fbthrift_python_types.Map(
-{{#value:map_key_type}}{{> types/typeinfo }}{{/value:map_key_type}}, {{!}}
-{{#value:map_val_type}}{{> types/typeinfo }}{{/value:map_val_type}}, { {{! purposeful open brace}}
+    {{#value:type.true_type}}
+{{#map:key_type}}{{> types/typeinfo }}{{/map:key_type}}, {{!}}
+{{#map:val_type}}{{> types/typeinfo }}{{/map:val_type}}, { {{! purposeful open brace}}
+    {{/value:type.true_type}}
     {{#each (array.enumerate value:map_elements with_last=true) as |i map_elem last?|}}
 {{#map_elem.key}}{{> types/constant_value }}{{/map_elem.key}}: {{!}}
 {{#map_elem.value}}{{> types/constant_value}}{{/map_elem.value}}{{^last?}}, {{/last?}}
@@ -61,7 +59,7 @@ _fbthrift_python_types.Set(
     {{#else}}
 _fbthrift_python_types.List(
     {{/if value:type.set?}}
-{{#value:list_elem_type}}{{> types/typeinfo }}{{/value:list_elem_type}}, (
+{{#value:type.true_type.elem_type}}{{> types/typeinfo }}{{/value:type.true_type.elem_type}}, (
     {{#value:list_elements}}
 {{> types/constant_value }}, {{!}}
     {{/value:list_elements}}

@@ -18,11 +18,6 @@ namespace proxygen::coro {
 
 folly::coro::Task<HTTPHeaderEvent> HTTPBodyEventQueue::readHeaderEvent() {
   auto res = co_await co_nothrow(source_.readHeaderEvent());
-  const auto& ct = co_await folly::coro::co_current_cancellation_token;
-  if (ct.isCancellationRequested()) {
-    co_yield co_error(HTTPError{HTTPErrorCode::CORO_CANCELLED});
-  }
-
   if (res.headers->isResponse() && res.headers->getStatusCode() == 304) {
     skipContentLengthValidation();
   } else if (shouldValidateContentLength_ && res.isFinal()) {

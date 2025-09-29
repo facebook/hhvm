@@ -738,9 +738,6 @@ class HTTPCoroSession
 
   void resetOpenStreams(HTTPErrorCode error, std::string_view details);
 
-  bool handleDownstreamHTTPParseError(HTTPCodec::StreamID streamID,
-                                      const HTTPException& error);
-
   HTTPHeaderSize addPushPromiseToWriteBuf(StreamState& stream,
                                           HTTPBodyEvent& bodyEvent);
 

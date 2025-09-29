@@ -755,21 +755,18 @@ class BodyEventQueueTest : public testing::Test {
 };
 
 TEST_F(BodyEventQueueTest, TestCancelReadHeaders) {
-  auto coro = [this]() -> folly::coro::Task<void> {
-    EXPECT_CALL(source_, readHeaderEvent())
-        .WillOnce(folly::coro::gmock_helpers::CoInvoke(
-            []() -> folly::coro::Task<HTTPHeaderEvent> {
-              co_await folly::coro::sleepReturnEarlyOnCancel(
-                  std::chrono::minutes(1));
-              co_return HTTPHeaderEvent(
-                  std::make_unique<HTTPMessage>(getResponse(200)), false);
-            }));
-    EXPECT_CALL(source_, stopReading(_));
-    auto res = co_await co_awaitTry(queue_.readHeaderEvent());
-    EXPECT_TRUE(res.hasException());
-    EXPECT_EQ(getHTTPError(res).code, HTTPErrorCode::CORO_CANCELLED);
-  };
-  testCancelCoro(coro);
+  // yield an HTTPHeaderEvent from ::readHeaderEvent
+  EXPECT_CALL(source_, readHeaderEvent())
+      .WillOnce(Return(folly::coro::makeTask<HTTPHeaderEvent>(HTTPHeaderEvent(
+          std::make_unique<HTTPMessage>(getResponse(200)), false))));
+  EXPECT_CALL(source_, stopReading(_));
+
+  // despite cancellation, the header event will be yielded
+  folly::CancellationSource cs;
+  auto res = folly::coro::blockingWait(
+      co_withCancellation(cs.getToken(), co_awaitTry(queue_.readHeaderEvent())),
+      &evb_);
+  EXPECT_FALSE(res.hasException());
 }
 
 CO_TEST_F_X(BodyEventQueueTest, TestMatchingContentLength) {

@@ -82,6 +82,13 @@ using folly::coro::co_withCancellation;
 
 namespace proxygen::coro {
 
+HTTPSource* getErrorResponse(uint16_t statusCode, const std::string& body) {
+  auto resp = proxygen::coro::HTTPFixedSource::makeFixedResponse(
+      statusCode, folly::IOBuf::copyBuffer(body));
+  resp->msg_->setWantsKeepalive(false);
+  return resp;
+}
+
 struct HTTPCoroSession::StreamState {
  private:
   // Detach Criteria: source and egressCoro start as complete until the stream
@@ -113,7 +120,9 @@ struct HTTPCoroSession::StreamState {
   struct {
     folly::CancellationSource ingress, egress;
   } cs;
-  HTTPSourceHolder errorSource;
+
+  // handlers can only egress this status code on some ingress errors
+  uint16_t errorStatusCode{0};
 
   // Push state - these are left public because the session usually
   // has to manipulate state of two streams at the same time (parent & push)
@@ -275,12 +284,12 @@ struct HTTPCoroSession::StreamState {
     bodyEventQueue_.setSource(source);
   }
 
-  void setErrorSource(HTTPSourceHolder errSource) {
+  void setErrorStatusCode(uint16_t statusCode) {
     XCHECK(canSendHeaders());
     XCHECK(!egressCoroComplete_);
-    errorSource = std::move(errSource);
+    errorStatusCode = statusCode;
     cs.ingress.requestCancellation();
-    cs.egress.requestCancellation();
+    std::exchange(cs.egress, {}).requestCancellation();
   }
 
   folly::coro::Task<HTTPHeaderEvent> nextHeaderEvent() {
@@ -372,13 +381,6 @@ struct HTTPCoroSession::StreamState {
 };
 
 using quic::HTTPPriorityQueue;
-
-HTTPSource* getErrorResponse(uint16_t statusCode, const std::string& body) {
-  auto resp = proxygen::coro::HTTPFixedSource::makeFixedResponse(
-      statusCode, folly::IOBuf::copyBuffer(body));
-  resp->msg_->setWantsKeepalive(false);
-  return resp;
-}
 
 HTTPCoroSession::HTTPCoroSession(folly::EventBase* eventBase,
                                  folly::SocketAddress localAddr,
@@ -1138,36 +1140,21 @@ void HTTPCoroSession::onError(HTTPCodec::StreamID streamID,
     return;
   }
 
-  if (error.hasCodecStatusCode() || error.hasHttp3ErrorCode() || isUpstream() ||
-      !handleDownstreamHTTPParseError(streamID, error)) {
-    auto httpErrorCode = HTTPException2HTTPErrorCode(error);
-    egressResetStream(streamID, nullptr, httpErrorCode);
-
-    // Queue up an error for the handler, if there is a stream.  When a push
-    // stream is refused, newTxn is true, but the stream still needs the reset
-    if (auto* stream = findStream(streamID)) {
-      deliverAbort(*stream, httpErrorCode, error.what());
-    }
+  // queue up an error for the handler if stream exists
+  auto ec = HTTPException2HTTPErrorCode(error);
+  auto* stream = findStream(streamID);
+  if (isDownstream() && stream && stream->canSendHeaders() &&
+      error.hasHttpStatusCode()) {
+    stream->abortIngress(ec, error.what());
+    stream->setErrorStatusCode(error.getHttpStatusCode());
+  } else {
+    egressResetStream(streamID, stream, ec);
   }
+
   deliverLifecycleEvent(&LifecycleObserver::onIngressError,
                         *this,
                         error.hasProxygenError() ? error.getProxygenError()
                                                  : kErrorMessage);
-}
-
-bool HTTPCoroSession::handleDownstreamHTTPParseError(
-    HTTPCodec::StreamID streamID, const HTTPException& error) {
-  auto stream = findStream(streamID);
-  if (!stream) {
-    // Not sure this is possible
-    return false;
-  }
-  if (!stream->canSendHeaders() || stream->isEgressComplete()) {
-    // H1 parse error after headers, or after response complete
-    return false;
-  }
-  stream->setErrorSource(getErrorResponse(error.getHttpStatusCode()));
-  return true;
 }
 
 void HTTPCoroSession::onAbort(HTTPCodec::StreamID streamID, ErrorCode code) {
@@ -1638,50 +1625,48 @@ void HTTPCoroSession::sourceComplete(HTTPCodec::StreamID id,
                                      folly::Optional<HTTPError> error) {
   XLOG(DBG6) << __func__ << " sess=" << *this << " id=" << id
              << " error=" << (error.has_value() ? error->describe() : "");
-  auto stream = findStream(id);
-  XCHECK(stream);
+  auto stream = CHECK_NOTNULL(findStream(id));
   stream->markStreamSourceComplete();
   if (stream->streamSource.isEOMSeen() && !error) {
     checkForDetach(*stream);
-  } else {
-    XCHECK(error) << "StreamSource must supply an error when source complete "
-                  << "but not EOM seen";
-    if (isDownstream() && stream->canSendHeaders() &&
-        (stream->errorSource || error->code == HTTPErrorCode::READ_TIMEOUT)) {
-      // If there's an error source, don't reset, otherwise it's a timeout
-      if (!stream->errorSource) {
-        stream->setErrorSource(getErrorResponse(408, "timeout"));
-      }
-    } else if (!stream->streamSource.isEOMSeen() ||
-               !stream->isEgressComplete()) {
-      // Need to send a RST_STREAM
-      auto egressErrorCode = sourceCompleteErr2ErrorCode(error->code);
-      if (!stream->isUpgraded() ||
-          egressErrorCode == HTTPErrorCode::FLOW_CONTROL_ERROR ||
-          egressErrorCode == HTTPErrorCode::PROTOCOL_ERROR) {
-        if (isNoError(egressErrorCode) && isDownstream()) {
-          // delay STOP_SENDING w/ NO_ERROR until egress EOM (except for
-          // http/1.1)
-          stream->setDeferredStopSending(codec_->supportsParallelRequests());
-        } else {
-          // egress bidirectional reset
-          egressResetStream(id,
-                            stream,
-                            isNoError(egressErrorCode) ? HTTPErrorCode::CANCEL
-                                                       : egressErrorCode);
-        }
+    return;
+  }
+  XCHECK(error) << "StreamSource must supply an error when source complete "
+                << "but not EOM seen";
+  if (isDownstream() && stream->canSendHeaders() &&
+      (stream->errorStatusCode || error->code == HTTPErrorCode::READ_TIMEOUT)) {
+    // If there's an error source, don't reset, otherwise it's a timeout
+    if (!stream->errorStatusCode) {
+      stream->setErrorStatusCode(408);
+    }
+  } else if (!stream->streamSource.isEOMSeen() || !stream->isEgressComplete()) {
+    // Need to send a RST_STREAM
+    auto egressErrorCode = sourceCompleteErr2ErrorCode(error->code);
+    if (!stream->isUpgraded() ||
+        egressErrorCode == HTTPErrorCode::FLOW_CONTROL_ERROR ||
+        egressErrorCode == HTTPErrorCode::PROTOCOL_ERROR) {
+      if (isNoError(egressErrorCode) && isDownstream()) {
+        // delay STOP_SENDING w/ NO_ERROR until egress EOM (except for
+        // http/1.1)
+        stream->setDeferredStopSending(codec_->supportsParallelRequests());
       } else {
-        // Abandoned CONNECT streams are a no-op
-        checkForDetach(*stream);
+        // egress bidirectional reset
+        egressResetStream(id,
+                          stream,
+                          isNoError(egressErrorCode) ? HTTPErrorCode::CANCEL
+                                                     : egressErrorCode);
       }
     } else {
-      // The stream is complete, but there's nothing to egress on the wire.
-      XLOG(DBG4) << "Clearing stream state for stream=" << id
-                 << " sess=" << *this;
-      resetStreamState(*stream, *error);
+      // Abandoned CONNECT streams are a no-op
+      checkForDetach(*stream);
     }
-    writeEvent_.signal();
+  } else {
+    // The stream is complete, but there's nothing to egress on the wire.
+    XLOG(DBG4) << "Clearing stream state for stream=" << id
+               << " sess=" << *this;
+    resetStreamState(*stream, *error);
   }
+  writeEvent_.signal();
 }
 
 void HTTPUniplexTransportSession::handleDeferredStopSending(
@@ -1710,22 +1695,17 @@ folly::coro::Task<HTTPSourceHolder> HTTPCoroSession::handleRequest(
     StreamState& stream) {
   XLOG(DBG6) << "starting handleRequest id=" << stream.getID()
              << " sess=" << *this;
-  HTTPSourceHolder responseSource;
-  if (stream.cs.egress.isCancellationRequested()) {
-    // Don't invoke handleRequest if it's already been cancelled
-    responseSource = std::move(stream.errorSource); // ok if nullptr
-    stream.cs.egress = folly::CancellationSource();
-  } else {
+  HTTPSourceHolder responseSource{nullptr};
+  // Don't invoke handleRequest if egress is already complete
+  if (!stream.isEgressComplete()) {
     stream.streamSourceActive();
-    auto responseSourceTry = co_await co_awaitTry(handler_->handleRequest(
+    auto res = co_await co_awaitTry(handler_->handleRequest(
         eventBase_.get(), acquireKeepAlive(), &stream.streamSource));
-    if (responseSourceTry.hasException()) {
-      XLOG(DBG4) << "Handler generated exception: "
-                 << responseSourceTry.exception().what();
-      responseSource = getErrorResponse(
-          500, responseSourceTry.tryGetExceptionObject()->what());
+    if (auto* ex = res.tryGetExceptionObject()) {
+      XLOG(DBG4) << "Handler generated exception: " << ex->what();
+      responseSource = getErrorResponse(500, ex->what());
     } else {
-      responseSource = std::move(*responseSourceTry);
+      responseSource = std::move(res.value());
     }
   }
   co_return responseSource;
@@ -1742,15 +1722,9 @@ folly::coro::Task<void> HTTPCoroSession::readResponse(
 
   auto responseSource = co_await std::move(getRespSourceTask);
   if (stream.isEgressComplete()) {
-    if (responseSource) {
-      XLOG(DBG4)
-          << "Handler provided a response source for egress complete stream"
-          << ", ignoring id=" << stream.getID() << " sess=" << *this;
-    } else {
-      // Stream must have been reset, this is fine
-      XLOG(DBG6) << "readResponse no-op id=" << stream.getID()
-                 << " sess=" << *this;
-    }
+    XLOG(DBG4)
+        << "readResponse egressComplete responseSource=" << int(responseSource)
+        << " id=" << stream.getID() << " sess=" << *this;
     co_return;
   }
   if (!responseSource) {
@@ -1781,30 +1755,40 @@ folly::coro::Task<void> HTTPCoroSession::readResponse(
 
 HTTPCoroSession::ResponseState HTTPCoroSession::processResponseHeaderEvent(
     StreamState& stream, folly::Try<HTTPHeaderEvent> headerEvent) {
-  auto& wcs = stream.cs.egress;
-  if (headerEvent.hasException()) {
-    auto err = getHTTPError(headerEvent);
-    XLOG(DBG4) << "Error getting response headers sess=" << *this
-               << " err=" << err.msg;
-    stream.stopReading(err.code);
-
-    if (wcs.isCancellationRequested() && stream.errorSource) {
-      XLOG(DBG4) << "Switching to error source id=" << stream.getID()
-                 << " sess=" << *this;
-      stream.setEgressSource(stream.errorSource.release());
-      wcs = folly::CancellationSource();
-      return ResponseState::HEADERS;
-    }
-    if (!stream.isEgressComplete()) {
-      egressResetStream(stream.getID(), &stream, err.code, true);
-    }
+  if (stream.isEgressComplete()) {
     return ResponseState::DONE;
   }
+
+  auto switchToErrSource = [&](HTTPErrorCode ec) {
+    XLOG(DBG4) << "switchToErrSource sc=" << stream.errorStatusCode;
+    stream.stopReading(ec);
+    stream.setEgressSource(
+        getErrorResponse(std::exchange(stream.errorStatusCode, 0)));
+    return ResponseState::HEADERS;
+  };
+
+  if (headerEvent.hasException()) {
+    auto ex = getHTTPError(headerEvent);
+    XLOG(DBG4) << "Error getting response headers sess=" << *this
+               << " ex=" << ex.msg;
+    if (stream.errorStatusCode) {
+      return switchToErrSource(ex.code);
+    }
+    stream.stopReading(ex.code);
+    egressResetStream(stream.getID(), &stream, ex.code, true);
+    return ResponseState::DONE;
+  }
+
+  const auto& headers = *headerEvent->headers;
+  if (stream.errorStatusCode &&
+      headers.getStatusCode() != stream.errorStatusCode) {
+    return switchToErrSource(HTTPErrorCode::INTERNAL_ERROR);
+  }
+
   XLOG(DBG4) << "Got response headers eom=" << uint32_t(headerEvent->eom)
              << " sess=" << *this;
-  headerEvent->headers->dumpMessage(4);
-  auto upgrade =
-      stream.checkForUpgrade(*headerEvent->headers, /*isIngress=*/false);
+  headers.dumpMessage(4);
+  auto upgrade = stream.checkForUpgrade(headers, /*isIngress=*/false);
   if (upgrade & !codec_->supportsParallelRequests()) {
     codec_->setParserPaused(false);
   }
@@ -1814,11 +1798,8 @@ HTTPCoroSession::ResponseState HTTPCoroSession::processResponseHeaderEvent(
   }
 
   HTTPHeaderSize size;
-  codec_->generateHeader(stream.getWriteBuf(),
-                         stream.getID(),
-                         *headerEvent->headers,
-                         headerEvent->eom,
-                         &size);
+  codec_->generateHeader(
+      stream.getWriteBuf(), stream.getID(), headers, headerEvent->eom, &size);
   stream.addToStreamOffset(size.compressed);
   HTTPByteEvent::FieldSectionInfo fsInfo = {
       HTTPByteEvent::FieldSectionInfo::Type::HEADERS,
@@ -1836,10 +1817,8 @@ HTTPCoroSession::ResponseState HTTPCoroSession::processResponseHeaderEvent(
   notifyHeaderWrite(stream, headerEvent->eom);
   if (headerEvent->eom) {
     return ResponseState::DONE;
-  } else if (!headerEvent->isFinal()) {
-    return ResponseState::HEADERS;
   }
-  return ResponseState::BODY;
+  return !headerEvent->isFinal() ? ResponseState::HEADERS : ResponseState::BODY;
 }
 
 void HTTPUniplexTransportSession::notifyHeaderWrite(StreamState& stream,

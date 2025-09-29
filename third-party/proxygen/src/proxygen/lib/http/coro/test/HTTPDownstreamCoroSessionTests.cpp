@@ -6,15 +6,16 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "folly/coro/GmockHelpers.h"
+#include "proxygen/lib/http/coro/HTTPFixedSource.h"
 #include "proxygen/lib/http/coro/test/HTTPCoroSessionTests.h"
 #include "proxygen/lib/http/coro/test/HTTPTestSources.h"
 #include "proxygen/lib/http/coro/test/Mocks.h"
-#include <folly/logging/xlog.h>
-
-#include "proxygen/lib/http/coro/HTTPFixedSource.h"
-#include <folly/coro/Sleep.h>
+#include "proxygen/lib/http/coro/util/test/TestHelpers.h"
 #include <proxygen/lib/http/session/test/MockHTTPSessionStats.h>
+
+#include "folly/coro/GmockHelpers.h"
+#include <folly/coro/Sleep.h>
+#include <folly/logging/xlog.h>
 #include <quic/priority/HTTPPriorityQueue.h>
 
 using namespace proxygen;
@@ -2926,7 +2927,7 @@ TEST_P(HTTPDownstreamSessionTest, ReadTimeout) {
   if (IS_H1()) {
     expectedHeaders.add(HTTP_HEADER_CONNECTION, "close");
   }
-  expectResponse(id, 408, &expectedHeaders, true);
+  expectResponse(id, 408, &expectedHeaders, false);
   parseOutput();
 }
 
@@ -3015,7 +3016,7 @@ TEST_P(HQDownstreamSessionTest, HeadersReadTimeout) {
       });
   evb_.loop();
   // request was not received
-  expectResponse(id, 408);
+  expectResponse(id, 408, /*headers=*/nullptr, /*expectBody=*/false);
   parseOutput();
 }
 
@@ -3181,7 +3182,7 @@ TEST_P(HQDownstreamSessionTest, CodecHTTPError) {
                                 HTTPSourceHolder requestSource)
                                  -> folly::coro::Task<HTTPSourceHolder> {
         co_await expectHeaderError(requestSource,
-                                   HTTPErrorCode::CORO_CANCELLED);
+                                   HTTPErrorCode::HEADER_PARSE_ERROR);
         // This "408" never gets read, the session generates it's own 400
         co_return HTTPFixedSource::makeFixedResponse(408);
       });
@@ -3274,6 +3275,90 @@ TEST_P(HTTPDownstreamSessionTest, ResponseHeadersError) {
     expectStreamAbort(id, ErrorCode::ENHANCE_YOUR_CALM);
     parseOutput();
   }
+}
+
+CO_TEST_P_X(HTTPDownstreamSessionTest, IngressErrorCustomResponse) {
+  /**
+   * On specific ingress errors (e.g. timeout), we allow a handler to egress a
+   * custom http response as long as it contains the expected status code (e.g.
+   * 408 in timeout case).
+   *
+   * We send headers but no body event, causing the ::readBodyEvent invocation
+   * to timeout – since we're generating the expected status code (408), the
+   * session won't override the response
+   */
+  session_->setStreamReadTimeout(std::chrono::milliseconds(50));
+
+  auto handler =
+      addSimpleStrictHandler([&](folly::EventBase *evb,
+                                 HTTPSessionContextPtr /*ctx*/,
+                                 HTTPSourceHolder requestSource)
+                                 -> folly::coro::Task<HTTPSourceHolder> {
+        auto headers = co_await co_awaitTry(
+            expectRequest(requestSource, HTTPMethod::POST, "/", false));
+        CHECK(headers.hasValue());
+
+        auto res = co_await co_awaitTry(readBodyEventNoSuspend(requestSource));
+        auto err = res.tryGetExceptionObject<HTTPError>();
+        EXPECT_TRUE(err && err->code == HTTPErrorCode::READ_TIMEOUT);
+        co_return HTTPFixedSource::makeFixedResponse(
+            408, "custom response generated");
+      });
+
+  // send msg headers but no body triggering ::readBodyEvent to t/o
+  auto msg = getChunkedPostRequest();
+  auto id = sendRequestHeader(std::move(msg));
+  transport_->addReadEvent(id, writeBuf_.move(), /*eom=*/false);
+
+  folly::coro::Baton waitForEgressEom;
+  EXPECT_CALL(lifecycleObs_, onDrainStarted(_)).WillOnce([&]() {
+    waitForEgressEom.post();
+  });
+  co_await waitForEgressEom;
+  expectResponseHeaders(id, 408);
+  EXPECT_CALL(callbacks_, onBody(id, _, _)).WillOnce([](auto, auto body, auto) {
+    EXPECT_EQ(body->template to<std::string>(), "custom response generated");
+  });
+  expectResponseEOM(id);
+  parseOutput();
+}
+
+CO_TEST_P_X(HTTPDownstreamSessionTest, IngressErrorCustomResponseMismatch) {
+  /**
+   * Similar to the unit test above – but if the handler does not yield the
+   * expected response status code, we will generate a default http response on
+   * behalf the app/handler
+   */
+  session_->setStreamReadTimeout(std::chrono::milliseconds(50));
+
+  auto handler =
+      addSimpleStrictHandler([&](folly::EventBase *evb,
+                                 HTTPSessionContextPtr /*ctx*/,
+                                 HTTPSourceHolder requestSource)
+                                 -> folly::coro::Task<HTTPSourceHolder> {
+        auto headers = co_await co_awaitTry(
+            expectRequest(requestSource, HTTPMethod::POST, "/", false));
+        CHECK(headers.hasValue());
+
+        auto res = co_await co_awaitTry(readBodyEventNoSuspend(requestSource));
+        auto err = res.tryGetExceptionObject<HTTPError>();
+        EXPECT_TRUE(err && err->code == HTTPErrorCode::READ_TIMEOUT);
+        co_return HTTPFixedSource::makeFixedResponse(
+            500, "custom response generated");
+      });
+
+  // send msg headers but no body triggering ::readBodyEvent to t/o
+  auto msg = getChunkedPostRequest();
+  auto id = sendRequestHeader(std::move(msg));
+  transport_->addReadEvent(id, writeBuf_.move(), /*eom=*/false);
+
+  folly::coro::Baton waitForEgressEom;
+  EXPECT_CALL(lifecycleObs_, onDrainStarted(_)).WillOnce([&]() {
+    waitForEgressEom.post();
+  });
+  co_await waitForEgressEom;
+  expectResponse(id, 408, /*headers=*/nullptr, /*expectBody=*/false);
+  parseOutput();
 }
 
 // H3 specific tests
@@ -3683,7 +3768,7 @@ TEST_P(HQDownstreamSessionTest, DelayedQPACKTimeout) {
       });
 
   evb_.loop();
-  expectResponse(id, 408);
+  expectResponse(id, 408, /*headers=*/nullptr, /*expectBody=*/false);
   parseOutput();
 }
 
@@ -3712,7 +3797,7 @@ TEST_P(HQDownstreamSessionTest, DelayedQPACKTimeoutLoopOnceUAF) {
       });
 
   evb_.loop();
-  expectResponse(id, 408);
+  expectResponse(id, 408, /*headers=*/nullptr, /*expectBody=*/false);
   parseOutput();
 }
 

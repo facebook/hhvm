@@ -88,11 +88,6 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
                                          contextStack) mutable {
         DCHECK(evb->isInEventBaseThread());
 
-        // For Stream, ContextStack is co-owned by Several Steam components
-        if (contextStack && clientCallback) {
-          clientCallback->setContextStack(contextStack);
-        }
-
         auto stream =
             new ServerGeneratorStreamBridge(clientCallback, evb, contextStack);
         auto streamPtr = stream->copy();

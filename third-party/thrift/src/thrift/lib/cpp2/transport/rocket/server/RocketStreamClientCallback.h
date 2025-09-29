@@ -27,6 +27,10 @@ namespace folly {
 class EventBase;
 } // namespace folly
 
+namespace apache::thrift {
+class ContextStack;
+} // namespace apache::thrift
+
 namespace apache::thrift::rocket {
 
 class RocketStreamClientCallback final : public StreamClientCallback {
@@ -76,6 +80,10 @@ class RocketStreamClientCallback final : public StreamClientCallback {
 
   StreamId streamId() const { return streamId_; }
 
+  void setContextStack(std::shared_ptr<ContextStack> contextStack) {
+    contextStack_ = std::move(contextStack);
+  }
+
  private:
   StreamServerCallback* serverCallback() const {
     return reinterpret_cast<StreamServerCallback*>(serverCallbackOrCancelled_);
@@ -91,6 +99,7 @@ class RocketStreamClientCallback final : public StreamClientCallback {
   std::unique_ptr<CompressionConfig> compressionConfig_;
   std::string rpcMethodName_{"<unknown_stream_method>"};
   StreamMetricCallback& streamMetricCallback_;
+  std::shared_ptr<ContextStack> contextStack_{nullptr};
 
   void scheduleTimeout();
   void cancelTimeout();

@@ -34,6 +34,8 @@ struct ServerStreamFactory {
     contextStack_ = std::shared_ptr<ContextStack>(std::move(contextStack));
   }
 
+  std::shared_ptr<ContextStack> getContextStack() { return contextStack_; }
+
   void operator()(
       FirstResponsePayload&& payload,
       StreamClientCallback* cb,

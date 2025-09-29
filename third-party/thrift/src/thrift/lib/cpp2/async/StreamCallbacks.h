@@ -35,7 +35,6 @@
 #include <thrift/lib/cpp2/async/StreamPayload.h>
 
 namespace apache::thrift {
-class ContextStack;
 
 template <typename ClientBridgePtr>
 class FirstResponseClientCallback {
@@ -262,13 +261,6 @@ class StreamClientCallback {
 
   // not terminating
   virtual void resetServerCallback(StreamServerCallback&) = 0;
-
-  virtual void setContextStack(std::shared_ptr<ContextStack> contextStack) {
-    contextStack_ = std::move(contextStack);
-  }
-
- protected:
-  std::shared_ptr<ContextStack> contextStack_;
 };
 
 struct StreamServerCallbackCancel {

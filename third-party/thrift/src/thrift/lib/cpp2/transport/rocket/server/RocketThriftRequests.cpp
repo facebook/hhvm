@@ -707,6 +707,7 @@ void ThriftServerRequestStream::sendStreamThriftResponse(
   }
   context_.unsetMarkRequestComplete();
   clientCallback_->setProtoId(getProtoId());
+  clientCallback_->setContextStack(stream.getContextStack());
   auto payload = apache::thrift::FirstResponsePayload{
       std::move(data), std::move(metadata)};
   payload.fds =

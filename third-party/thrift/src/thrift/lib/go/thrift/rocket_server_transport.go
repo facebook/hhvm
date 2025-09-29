@@ -144,7 +144,6 @@ func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Co
 	// update current connection count
 	r.stats.ConnCount.Incr()
 	defer func() {
-		r.stats.ConnsClosed.RecordEvent()
 		r.stats.ConnCount.Decr()
 	}()
 

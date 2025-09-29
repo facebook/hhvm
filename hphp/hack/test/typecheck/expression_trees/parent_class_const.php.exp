@@ -1,0 +1,2 @@
+ERROR: File "parent_class_const.php", line 11, characters 28-42:
+Expression trees only support constants on named classes. (Parsing[1002])

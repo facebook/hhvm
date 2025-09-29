@@ -1198,6 +1198,7 @@ pub mod expression_trees {
     pub const VISIT_SHAPE: &str = "visitShape";
     pub const VISIT_KEYED_COLLECTION: &str = "visitKeyedCollection";
     pub const VISIT_OPTIONAL_PARAMETER: &str = "visitOptionalParameter";
+    pub const VISIT_CLASS_CONSTANT: &str = "visitClassConstant";
     pub const MAKE_KEYED_COLLECTION_TYPE: &str = "__makeType";
 
     pub const SPLICE: &str = "splice";

@@ -1,0 +1,6 @@
+ERROR: File "dynamic_class_const.php", line 11, characters 14-26:
+Expression trees only support constants on named classes. (Parsing[1002])
+ERROR: File "dynamic_class_const.php", line 11, characters 14-17:
+Variable `$cls` is undefined, or not always defined. (Naming[2050])
+  File "", line 0, characters 0-0:
+  Did you mean `$this` instead?

@@ -1,0 +1,41 @@
+<?hh
+<<file: __EnableUnstableFeatures('expression_trees')>>
+
+final class MyClass {
+  const FOO = "BAR";
+
+  public function test(): void {
+    ExampleDsl::makeTree(
+      darray[
+        "path" => __FILE__,
+        "start_line" => 8,
+        "end_line" => 8,
+        "start_column" => 15,
+        "end_column" => 27,
+      ],
+      darray[
+        "splices" => dict[],
+        "functions" => vec[],
+        "static_methods" => vec[],
+        "variables" => vec[],
+        "lexically_enclosing_tree" => NULL,
+      ],
+      (
+        (ExampleDsl $v) ==> {
+          return $v->visitClassConstant(
+            darray[
+              "path" => __FILE__,
+              "start_line" => 8,
+              "end_line" => 8,
+              "start_column" => 15,
+              "end_column" => 27,
+            ],
+            nameof MyClass,
+            "FOO",
+            \MyClass::FOO,
+          );
+        }
+      ),
+    );
+  }
+}

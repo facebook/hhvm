@@ -4,7 +4,7 @@ ERROR: File "await_in_tree.php", line 12, characters 14-39:
 `await` can only be used inside `async` functions (NastCheck[3003])
 ERROR: File "await_in_tree.php", line 12, characters 20-39:
 This value cannot be inserted (spliced) into a `ExampleDsl` expression tree (Typing[4110])
-  File "expr_tree.php", line 402, characters 5-24:
+  File "expr_tree.php", line 411, characters 5-24:
   Expected `ExampleExpression<T>` because you are splicing into a `ExampleDsl` expression or block
   File "await_in_tree.php", line 6, characters 14-42:
   But got `Awaitable<~ExampleExpression<int>>`

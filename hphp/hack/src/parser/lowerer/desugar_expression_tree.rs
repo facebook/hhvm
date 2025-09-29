@@ -1797,12 +1797,62 @@ impl RewriteState {
                     .push((pos, "`is` is not supported in expression trees.".into()));
                 unchanged_result
             }
-            ClassConst(_) => {
-                self.errors.push((
-                pos,
-                "Expression trees do not support directly referencing class consts. Consider splicing values defined outside the scope of an Expression Tree using ${...}.".into(),
-            ));
-                unchanged_result
+            // Source: MyDsl`MyClass::FOO`
+            // Virtualized: ${MyClass::FOO}
+            // Desugared: $0v->visitClassConstant(new ExprPos(...), nameof MyClass, 'FOO', MyClass::FOO)
+            ClassConst(box (cid, s)) => {
+                let is_supported = match &cid {
+                    ClassId(_, _, ClassId_::CIexpr(Expr(_, _, Id(box ast_defs::Id(_, name))))) => {
+                        name != classes::PARENT && name != classes::SELF && name != classes::STATIC
+                    }
+                    _ => false,
+                };
+
+                if !is_supported {
+                    self.errors.push((
+                        pos.clone(),
+                        "Expression trees only support constants on named classes.".into(),
+                    ));
+                }
+
+                let class_const = Expr::new(
+                    (),
+                    pos.clone(),
+                    Expr_::mk_class_const(cid.clone(), s.clone()),
+                );
+
+                let virtual_expr = Expr::new(
+                    (),
+                    pos.clone(),
+                    Expr_::mk_etsplice(aast::EtSplice {
+                        spliced_expr: static_meth_call(
+                            visitor_name,
+                            et::LIFT,
+                            vec![class_const.clone()],
+                            &pos,
+                        ),
+                        extract_client_type: true,
+                        contains_await: false,
+                        macro_variables: None,
+                        temp_lid: None,
+                    }),
+                );
+
+                let desugar_expr = v_meth_call(
+                    et::VISIT_CLASS_CONSTANT,
+                    vec![
+                        pos_expr,
+                        Expr::new((), pos.clone(), Expr_::mk_nameof(cid.clone())),
+                        string_literal(pos.clone(), &s.1),
+                        class_const,
+                    ],
+                    &pos,
+                );
+
+                RewriteResult {
+                    virtual_expr,
+                    desugar_expr,
+                }
             }
             Efun(_) => {
                 self.errors.push((

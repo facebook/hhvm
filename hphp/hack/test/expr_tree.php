@@ -374,6 +374,15 @@ class ExampleDsl {
     return "$expr?->$method";
   }
 
+  public function visitClassConstant<T>(
+    ?ExprPos $_,
+    classname<T> $classname,
+    string $name,
+    ?ExampleAutoLiftable $value,
+  ): ExampleDsl::TAst {
+    return $classname."::".$name."=".ExampleDsl::lift($value)->visit($this);
+  }
+
   public function visitXhp(
     ?ExprPos $_,
     string $class_name,

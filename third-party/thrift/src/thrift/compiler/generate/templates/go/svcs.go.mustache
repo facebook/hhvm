@@ -54,14 +54,18 @@ var _ = metadata.GoUnusedProtection__
 {{/program:gen_metadata?}}
 
 {{#program:interactions}}
-{{> svc/interface}}
+{{> svc/handler_interface}}
+
+{{> svc/client_interface}}
 
 {{> svc/client}}
 
 {{/program:interactions}}
 
 {{#program:services}}
-{{> svc/interface}}
+{{> svc/handler_interface}}
+
+{{> svc/client_interface}}
 
 {{> svc/client}}
 

@@ -27,19 +27,4 @@ type {{service:go_name}} interface {
     {{/function:go_server_supported?}}
     {{/service:functions}}
 }
-
-type {{service:go_name}}Client interface {
-    io.Closer
-    {{#service:extends}}
-    // Inherited/extended service
-    {{service:go_qualified_name}}Client
-
-    {{/service:extends}}
-    {{#service:functions}}
-    {{#function:go_client_supported?}}
-    {{> svc/func_signature}}
-
-    {{/function:go_client_supported?}}
-    {{/service:functions}}
-}
 {{! new line }}

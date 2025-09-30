@@ -220,6 +220,8 @@ final class ThriftPolicyZoneModuleContext
   public function __construct(
     private ThriftServiceMethodNameAssetXID $xid,
     private string $smcServiceName,
+    private ?ICIPPContextForThriftFlows $explicitDynamicAnnotation_LEGACY =
+      null,
   )[] {}
 
   public function getXID()[]: ThriftServiceMethodNameAssetXID {
@@ -236,5 +238,10 @@ final class ThriftPolicyZoneModuleContext
 
   public function getMethodName()[]: string {
     return $this->xid->getMethodName();
+  }
+
+  public function getExplicitDynamicZoneAnnotationSet_LEGACY(
+  )[]: ?ICIPPContextForThriftFlows {
+    return $this->explicitDynamicAnnotation_LEGACY;
   }
 }

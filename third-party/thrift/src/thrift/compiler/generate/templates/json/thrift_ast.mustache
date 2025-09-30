@@ -17,25 +17,37 @@
 }}
 {
   "__fbthrift": "@{{!}}generated",
-  "thrift_module" : "{{program:name}}",{{!
-  }}{{#program:includes?}}
+  "thrift_module" : "{{program:name}}",
+  {{#each (array.enumerate program:includes with_first=true with_last=true) as |index include first? last?|}}
+    {{#if first?}}
+    {{! Before the first entry, open the object}}
   "includes": {
-    {{#program:includes}}
-    "{{name}}": "{{path}}"{{^last?}},{{/last?}}
-    {{/program:includes}}
-  },{{/program:includes?}}{{!
-  }}{{#program:namespaces?}}
+    {{/if first?}}
+    "{{include.program.name}}": {{!
+}}"{{include.program.include_prefix}}{{include.program.name}}.thrift"{{#if (not last?)}},{{#else}}
+    {{! After the last entry, close the object on a new line}}
+  },{{/if (not last?)}}
+  {{/each}}
+  {{#each (array.enumerate (map.items program:namespaces) with_first=true with_last=true)
+      as |index namespace first? last?|}}
+    {{#if first?}}
   "namespaces": {
-    {{#program:namespaces}}
-    "{{key}}": "{{value}}"{{^last?}},{{/last?}}
-    {{/program:namespaces}}
-  },{{/program:namespaces?}}
-  {{#program:package?}}
+    {{/if first?}}
+    "{{namespace.key}}": "{{namespace.value}}"{{#if (not last?)}},{{#else}}
+  },{{/if (not last?)}}
+  {{/each}}
+  {{#if (not program:package.empty?)}}
+  {{#let package = program:package}}
   "package": {
-    {{#program:package}}
-    "{{key}}": "{{value}}"{{^last?}},{{/last?}}
-    {{/program:package}}
-  },{{/program:package?}}
+    {{#if package.domain?}}
+    "domain_prefix": "{{package.domain_prefix}}",
+    "domain_suffix": "{{package.domain_suffix}}",
+    {{/if package.domain?}}
+    {{#if (object.notnull? package.path)}}
+    "path": "{{package.path}}",
+    {{/if (object.notnull? package.path)}}
+    "filename": "{{program:name}}"
+  },{{/if (not program:package.empty?)}}
   {{#program:docs?}}
   "global_docstring": {{program:docstring}},{{/program:docs?}}{{!
   }}{{#program:typedefs?}}
@@ -83,5 +95,12 @@
   {{/program:services?}}
   {{! rearrange to avoid trailing comma issue}}
   "source_path" : "{{program:normalized_include_prefix}}{{program:name}}",
-  "py_namespace" : "{{program:py_namespace}}"
+  {{! This explicit 'self.' will need to be removed once json_experimental
+      generator is no extending mstch generator, and extends Whisker generator
+      directly.
+      When operating through mstch_compat, when 'program:namespace_of' is resolved
+      through implicit `self` fallback, the Whisker engine will not attach the
+      self prototype handle as the parent/'this' argument for the function.
+  }}
+  "py_namespace" : "{{(program:self.namespace_of language="py")}}"
 }

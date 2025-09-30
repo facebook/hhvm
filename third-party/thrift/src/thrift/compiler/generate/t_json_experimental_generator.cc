@@ -15,12 +15,9 @@
  */
 
 #include <filesystem>
-#include <memory>
 
 #include <thrift/compiler/generate/json.h>
-#include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
-#include <thrift/compiler/whisker/mstch_compat.h>
 
 namespace apache::thrift::compiler {
 namespace {
@@ -46,8 +43,6 @@ class t_json_experimental_generator : public t_mstch_generator {
   void generate_program() override;
 
  private:
-  void set_mstch_factories();
-
   whisker::map::raw globals() const override {
     whisker::map::raw globals = t_mstch_generator::globals();
     // To allow rendering a brace not surrounded by whitespace, without
@@ -95,6 +90,57 @@ class t_json_experimental_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
+  prototype<t_package>::ptr make_prototype_for_package(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_package(proto);
+    auto def = whisker::dsl::prototype_builder<h_package>::extends(base);
+
+    def.property("domain?", [](const t_package& self) {
+      return self.domain().size() > 1;
+    });
+    def.property("domain_prefix", [](const t_package& self) {
+      return self.domain().size() > 1
+          ? whisker::make::string(fmt::format(
+                "{}",
+                // Take everything but the last element (domain_suffix)
+                // E.g. "foo.bar.baz" -> "foo.bar"
+                fmt::join(
+                    self.domain().begin(),
+                    std::prev(self.domain().end()),
+                    ".")))
+          : whisker::make::null;
+    });
+    def.property("domain_suffix", [](const t_package& self) {
+      // Last element of the domain. E.g. "foo.bar.baz" -> "baz"
+      return self.domain().size() > 1
+          ? whisker::make::string(self.domain().back())
+          : whisker::make::null;
+    });
+    def.property("path", [](const t_package& self) {
+      return self.path().empty() ? whisker::make::null
+                                 : whisker::make::string(fmt::format(
+                                       "{}", fmt::join(self.path(), "/")));
+    });
+
+    return std::move(def).make();
+  }
+
+  prototype<t_program>::ptr make_prototype_for_program(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_program(proto);
+    auto def = whisker::dsl::prototype_builder<h_program>::extends(base);
+
+    def.property("normalized_include_prefix", [this](const t_program& self) {
+      const std::string& prefix = self.include_prefix();
+      return !prefix.empty() &&
+              std::filesystem::path(prefix).has_root_directory()
+          ? whisker::string(get_compiler_option("include_prefix").value_or(""))
+          : prefix;
+    });
+
+    return std::move(def).make();
+  }
+
   prototype<t_type>::ptr make_prototype_for_type(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_type(proto);
@@ -106,103 +152,12 @@ class t_json_experimental_generator : public t_mstch_generator {
   }
 };
 
-class json_experimental_program : public mstch_program {
- public:
-  json_experimental_program(
-      const t_program* p, mstch_context& ctx, mstch_element_position pos)
-      : mstch_program(p, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"program:py_namespace",
-             &json_experimental_program::get_py_namespace},
-            {"program:includes?", &json_experimental_program::has_includes},
-            {"program:includes", &json_experimental_program::includes},
-            {"program:namespaces?", &json_experimental_program::has_namespaces},
-            {"program:namespaces", &json_experimental_program::namespaces},
-            {"program:package?", &json_experimental_program::has_package},
-            {"program:package", &json_experimental_program::package},
-            {"program:normalized_include_prefix",
-             &json_experimental_program::include_prefix},
-        });
-  }
-
-  mstch::node get_py_namespace() { return program_->get_namespace("py"); }
-  mstch::node has_includes() { return !program_->includes().empty(); }
-  mstch::node includes() {
-    mstch::array includes;
-    auto last = program_->includes().size();
-    for (auto program : program_->get_included_programs()) {
-      includes.emplace_back(mstch::map{
-          {"name", program->name()},
-          {"path", program->include_prefix() + program->name() + ".thrift"},
-          {"last?", (--last) == 0}});
-    }
-    return includes;
-  }
-  mstch::node has_namespaces() { return !program_->namespaces().empty(); }
-  mstch::node namespaces() {
-    mstch::array result;
-    auto last = program_->namespaces().size();
-    for (auto it : program_->namespaces()) {
-      result.emplace_back(mstch::map{
-          {"key", it.first}, {"value", it.second}, {"last?", (--last) == 0}});
-    }
-    return result;
-  }
-  mstch::node has_package() { return !program_->package().empty(); }
-  mstch::node package() {
-    mstch::array result;
-    auto& package = program_->package();
-    auto domain = package.domain();
-    if (!domain.empty() && domain.size() > 1) {
-      auto domain_prefix = std::vector<std::string>();
-      domain_prefix.insert(
-          domain_prefix.end(), domain.begin(), std::prev(domain.end()));
-      result.emplace_back(mstch::map{
-          {"key", std::string("domain_prefix")},
-          {"value", fmt::format("{}", fmt::join(domain_prefix, "."))},
-          {"last?", false}});
-      result.emplace_back(mstch::map{
-          {"key", std::string("domain_suffix")},
-          {"value", package.domain()[domain.size() - 1]},
-          {"last?", false}});
-    }
-    if (!package.path().empty()) {
-      result.emplace_back(mstch::map{
-          {"key", std::string("path")},
-          {"value", fmt::format("{}", fmt::join(package.path(), "/"))},
-          {"last?", false}});
-    }
-    result.emplace_back(mstch::map{
-        {"key", std::string("filename")},
-        {"value", program_->name()},
-        {"last?", true}});
-    return result;
-  }
-
-  mstch::node include_prefix() {
-    auto prefix = program_->include_prefix();
-    if (prefix.empty()) {
-      return std::string();
-    }
-    return std::filesystem::path(prefix).has_root_directory()
-        ? context_.options["include_prefix"]
-        : prefix;
-  }
-};
-
 void t_json_experimental_generator::generate_program() {
   out_dir_base_ = "gen-json_experimental";
   const auto* program = get_program();
-  set_mstch_factories();
   auto mstch_program = mstch_context_.program_factory->make_mstch_object(
       program, mstch_context_);
   render_to_file(mstch_program, "thrift_ast", program->name() + ".json");
-}
-
-void t_json_experimental_generator::set_mstch_factories() {
-  mstch_context_.add<json_experimental_program>();
 }
 
 THRIFT_REGISTER_GENERATOR(json_experimental, "JSON_EXPERIMENTAL", "");

@@ -1874,7 +1874,152 @@ impl RewriteState {
                     .push((pos, "`yield` is not supported in expression trees.".into()));
                 unchanged_result
             }
-            _ => {
+            ValCollection(box (kind, _, _)) => match kind.1 {
+                aast::VcKind::Vector | aast::VcKind::ImmVector => {
+                    self.errors.push((
+                        pos,
+                        "PHP vectors are not supported in expression trees.".into(),
+                    ));
+                    unchanged_result
+                }
+                aast::VcKind::Set | aast::VcKind::ImmSet => {
+                    self.errors.push((
+                        pos,
+                        "PHP sets are not supported in expression trees.".into(),
+                    ));
+                    unchanged_result
+                }
+                aast::VcKind::Keyset => {
+                    self.errors
+                        .push((pos, "`keyset` is not supported in expression trees.".into()));
+                    unchanged_result
+                }
+                aast::VcKind::Vec => {
+                    self.errors
+                        .push((pos, "`vec` is not supported in expression trees.".into()));
+                    unchanged_result
+                }
+            },
+            KeyValCollection(box (kind, _, _)) => match kind.1 {
+                aast::KvcKind::Map | aast::KvcKind::ImmMap => {
+                    self.errors.push((
+                        pos,
+                        "PHP maps are not supported in expression trees.".into(),
+                    ));
+                    unchanged_result
+                }
+                aast::KvcKind::Dict => {
+                    self.errors
+                        .push((pos, "`dict` is not supported in expression trees.".into()));
+                    unchanged_result
+                }
+            },
+            This => {
+                self.errors
+                    .push((pos, "`$this` is not supported in expression trees.".into()));
+                unchanged_result
+            }
+            Dollardollar(_) => {
+                self.errors
+                    .push((pos, "`$$` is not supported in expression trees.".into()));
+                unchanged_result
+            }
+            Clone(_) => {
+                self.errors
+                    .push((pos, "`clone` is not supported in expression trees.".into()));
+                unchanged_result
+            }
+            ArrayGet(_) => {
+                self.errors.push((
+                    pos,
+                    "Indexing with `[]` is not supported in expression trees.".into(),
+                ));
+                unchanged_result
+            }
+            FunctionPointer(_) => {
+                self.errors.push((
+                    pos,
+                    "Function pointers are not supported in expression trees.".into(),
+                ));
+                unchanged_result
+            }
+            String2(_) => {
+                self.errors.push((
+                    pos,
+                    "String interpolation is not supported in expression trees.".into(),
+                ));
+                unchanged_result
+            }
+            Await(_) => {
+                self.errors
+                    .push((pos, "`await` is not supported in expression trees.".into()));
+                unchanged_result
+            }
+            ReadonlyExpr(_) => {
+                self.errors.push((
+                    pos,
+                    "`readonly` is not supported in expression trees.".into(),
+                ));
+                unchanged_result
+            }
+            Tuple(_) => {
+                self.errors
+                    .push((pos, "Tuples are not supported in expression trees.".into()));
+                unchanged_result
+            }
+            List(_) => {
+                self.errors
+                    .push((pos, "Lists are not supported in expression trees.".into()));
+                unchanged_result
+            }
+            Pair(_) => {
+                self.errors
+                    .push((pos, "Pairs are not supported in expression trees.".into()));
+                unchanged_result
+            }
+            Cast(_) => {
+                self.errors
+                    .push((pos, "Casts are not supported in expression trees.".into()));
+                unchanged_result
+            }
+            Pipe(_) => {
+                self.errors.push((
+                    pos,
+                    "The pipe operator `|>` is not supported in expression trees.".into(),
+                ));
+                unchanged_result
+            }
+            As(_) => {
+                self.errors
+                    .push((pos, "`as` is not supported in expression trees.".into()));
+                unchanged_result
+            }
+            New(_) => {
+                self.errors
+                    .push((pos, "`new` is not supported in expression trees.".into()));
+                unchanged_result
+            }
+            EnumClassLabel(_) => {
+                self.errors.push((
+                    pos,
+                    "Enum class labels are not supported in expression trees.".into(),
+                ));
+                unchanged_result
+            }
+            Nameof(_) => {
+                self.errors
+                    .push((pos, "`nameof` is not supported in expression trees.".into()));
+                unchanged_result
+            }
+            Id(_) => {
+                self.errors.push((
+                    pos,
+                    "Global constants are not supported in expression trees.".into(),
+                ));
+                unchanged_result
+            }
+            Omitted | Invalid(_) | ClassGet(_) | PrefixedString(_) | Upcast(_)
+            | Lplaceholder(_) | MethodCaller(_) | Import(_) | Hole(_) | Package(_) => {
                 self.errors
                     .push((pos, "Unsupported expression tree syntax.".into()));
                 unchanged_result

@@ -1,7 +1,7 @@
 ERROR: File "invalid_operator.php", line 13, characters 19-27:
-Unsupported expression tree syntax. (Parsing[1002])
+`new` is not supported in expression trees. (Parsing[1002])
 ERROR: File "invalid_operator.php", line 16, characters 19-26:
-Unsupported expression tree syntax. (Parsing[1002])
+Global constants are not supported in expression trees. (Parsing[1002])
 ERROR: File "invalid_operator.php", line 19, characters 19-42:
 Expression trees do not support PHP lambdas. Consider using Hack lambdas `() ==> {}` instead. (Parsing[1002])
 ERROR: File "invalid_operator.php", line 22, characters 28-45:
@@ -9,7 +9,7 @@ Expression trees do not support `do while` loops. Consider using a `while` loop 
 ERROR: File "invalid_operator.php", line 23, characters 43-67:
 Expression trees do not support `foreach` loops. Consider using a `for` loop or a `while` loop instead. (Parsing[1002])
 ERROR: File "invalid_operator.php", line 29, characters 38-42:
-Unsupported expression tree syntax. (Parsing[1002])
+Indexing with `[]` is not supported in expression trees. (Parsing[1002])
 ERROR: File "invalid_operator.php", line 32, characters 34-40:
 Expression trees do not support compound assignments. Try the long form style `$foo = $foo + $bar` instead. (Parsing[1002])
 ERROR: File "invalid_operator.php", line 29, characters 38-39:

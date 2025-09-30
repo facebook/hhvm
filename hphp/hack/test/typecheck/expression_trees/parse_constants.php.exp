@@ -1,5 +1,5 @@
 ERROR: File "parse_constants.php", line 8, characters 23-30:
-Unsupported expression tree syntax. (Parsing[1002])
+Global constants are not supported in expression trees. (Parsing[1002])
 ERROR: File "parse_constants.php", line 8, characters 23-30:
 Invalid argument (Typing[4110])
   File "expr_tree.php", line 86, characters 21-26:

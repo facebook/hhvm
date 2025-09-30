@@ -1,5 +1,5 @@
 ERROR: File "await_in_tree.php", line 12, characters 14-39:
-Unsupported expression tree syntax. (Parsing[1002])
+`await` is not supported in expression trees. (Parsing[1002])
 ERROR: File "await_in_tree.php", line 12, characters 14-39:
 `await` can only be used inside `async` functions (NastCheck[3003])
 ERROR: File "await_in_tree.php", line 12, characters 20-39:

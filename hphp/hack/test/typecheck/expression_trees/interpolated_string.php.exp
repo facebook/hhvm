@@ -1,4 +1,4 @@
 ERROR: File "interpolated_string.php", line 10, characters 7-19:
-Unsupported expression tree syntax. (Parsing[1002])
+String interpolation is not supported in expression trees. (Parsing[1002])
 ERROR: File "interpolated_string.php", line 10, characters 8-9:
 Variable `$x` is undefined, or not always defined. (Naming[2050])

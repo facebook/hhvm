@@ -1175,36 +1175,38 @@ TEST(SyntaxGraphTest, SerializableTypeSystemBuilder) {
     EXPECT_EQ(field1.type()->asUri(), "facebook.com/thrift/test/B");
   };
   auto testB = [](const type_system::SerializableTypeSystem& sts) {
-    auto& structA = sts.types()
+    auto& structB = sts.types()
                         ->at("facebook.com/thrift/test/B")
                         .definition()
                         ->structDef()
                         .value();
-    EXPECT_EQ(structA.fields()->size(), 1);
-    auto& field1 = structA.fields()[0];
+    EXPECT_EQ(structB.fields()->size(), 1);
+    auto& field1 = structB.fields()[0];
     EXPECT_EQ(field1.identity()->id(), FieldId{1});
     EXPECT_EQ(field1.identity()->name(), "field");
     EXPECT_EQ(field1.type()->asUri(), "facebook.com/thrift/test/C");
   };
   auto testC = [](const type_system::SerializableTypeSystem& sts) {
-    auto& structA = sts.types()
+    auto& structC = sts.types()
                         ->at("facebook.com/thrift/test/C")
                         .definition()
                         ->structDef()
                         .value();
-    EXPECT_EQ(structA.fields()->size(), 1);
+    EXPECT_EQ(structC.fields()->size(), 1);
     EXPECT_EQ(
-        structA.annotations()
+        structC.annotations()
             ->at("facebook.com/thrift/test/TestAnnot")
             .fieldSetDatum()
             ->at(FieldId{1})
             .textDatum()
             .value(),
         "struct");
-    auto& field1 = structA.fields()[0];
+    auto& field1 = structC.fields()[0];
     EXPECT_EQ(field1.identity()->id(), FieldId{1});
     EXPECT_EQ(field1.identity()->name(), "field");
     EXPECT_TRUE(field1.type()->isI32());
+    EXPECT_FALSE(field1.annotations()->contains(
+        "facebook.com/thrift/annotation/cpp/Type"));
   };
 
   auto& registry = SchemaRegistry::get();

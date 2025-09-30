@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/scope.thrift"
+include "thrift/annotation/cpp.thrift"
 
 package "facebook.com/thrift/test"
 
@@ -28,6 +29,7 @@ struct B {
 
 @TestAnnot{loc = "struct"}
 struct C {
+  @cpp.Type{name = "std::uint32_t"}
   1: i32 field;
 }
 

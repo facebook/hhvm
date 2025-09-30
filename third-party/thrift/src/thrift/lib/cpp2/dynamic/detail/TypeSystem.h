@@ -32,6 +32,11 @@ using AnnotationsMap = folly::
 inline RawAnnotations toRawAnnotations(const AnnotationsMap& annotations) {
   RawAnnotations raw;
   for (const auto& [uri, record] : annotations) {
+    // Standard annotations are not currently bundled due to circular dependency
+    // concerns. Skip it for now.
+    if (uri.starts_with("facebook.com/thrift/annotation/")) {
+      continue;
+    }
     raw.emplace(uri, SerializableRecord::toThrift(record));
   }
   return raw;

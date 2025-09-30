@@ -22,7 +22,6 @@ val solve_all_unsolved_tyvars : env -> env * Typing_error.t option
 
 val expand_type_and_solve :
   env ->
-  ?default:locl_ty ->
   ?freshen:bool ->
   description_of_expected:string ->
   Pos.t ->

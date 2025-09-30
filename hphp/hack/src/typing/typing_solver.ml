@@ -755,14 +755,11 @@ let is_tyvar_error tvid ~env:Typing_env_types.{ inference_env; _ } =
  * The optional `default` parameter is used to solve a type variable
  * if `widen_concrete_type` does not produce a result.
  *)
-let expand_type_and_solve
-    env ?default ?(freshen = true) ~description_of_expected p ty =
+let expand_type_and_solve env ?(freshen = true) ~description_of_expected p ty =
   (* If we're checking an SDT method or function under dynamic assumptions,
    * then attempt to solve to dynamic if we're left with a type variable *)
   let default =
-    if Option.is_some default then
-      default
-    else if Tast.is_under_dynamic_assumptions env.Typing_env_types.checked then
+    if Tast.is_under_dynamic_assumptions env.Typing_env_types.checked then
       Some (MakeType.dynamic (Reason.witness p))
     else
       None

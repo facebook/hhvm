@@ -270,6 +270,10 @@ class MockHTTPTransactionTransport : public HTTPTransaction::Transport {
               sendWTMaxData,
               (uint64_t));
 
+  MOCK_METHOD((folly::Expected<folly::Unit, WebTransport::ErrorCode>),
+              sendWTMaxStreams,
+              (uint64_t, bool));
+
   MOCK_METHOD(bool, usesEncodedApplicationErrorCodes, ());
 
   MOCK_METHOD(void, trackEgressBodyOffset, (uint64_t, ByteEvent::EventFlags));

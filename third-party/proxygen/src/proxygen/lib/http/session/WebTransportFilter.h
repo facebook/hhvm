@@ -150,6 +150,20 @@ class WebTransportFilter
     return folly::unit;
   }
 
+  folly::Expected<folly::Unit, WebTransport::ErrorCode> sendWTMaxStreams(
+      uint64_t maxStreams, bool isBidi) override {
+    WTMaxStreamsCapsule capsule{maxStreams};
+    folly::IOBufQueue buf{folly::IOBufQueue::cacheChainLength()};
+    auto writeRes = writeWTMaxStreams(buf, capsule, isBidi);
+    if (writeRes.hasError()) {
+      return folly::makeUnexpected(WebTransport::ErrorCode::SEND_ERROR);
+    }
+    if (txn_) {
+      txn_->sendBody(buf.move());
+    }
+    return folly::unit;
+  }
+
   folly::Expected<folly::Unit, WebTransport::ErrorCode> resetWebTransportEgress(
       HTTPCodec::StreamID /*id*/, uint32_t /*errorCode*/) override {
     return folly::unit;

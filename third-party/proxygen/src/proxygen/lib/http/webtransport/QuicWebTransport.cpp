@@ -205,6 +205,11 @@ QuicWebTransport::sendWTMaxData(uint64_t /*maxData*/) {
 }
 
 folly::Expected<folly::Unit, WebTransport::ErrorCode>
+QuicWebTransport::sendWTMaxStreams(uint64_t /*maxStreams*/, bool /*isBidi*/) {
+  return folly::unit;
+}
+
+folly::Expected<folly::Unit, WebTransport::ErrorCode>
 QuicWebTransport::closeSession(folly::Optional<uint32_t> error) {
   if (quicSocket_) {
     if (error) {

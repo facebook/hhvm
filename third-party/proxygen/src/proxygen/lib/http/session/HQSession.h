@@ -1511,6 +1511,11 @@ class HQSession
     void trackEgressBodyOffset(uint64_t bodyOffset,
                                proxygen::ByteEvent::EventFlags flags) override;
 
+    folly::Expected<folly::Unit, WebTransport::ErrorCode> sendWTMaxStreams(
+        uint64_t /*maxStreams*/, bool /*isBidi*/) override {
+      return folly::unit;
+    }
+
     /**
      * Returns whether or no we have any body bytes buffered in the stream, or
      * the txn has any body bytes buffered.

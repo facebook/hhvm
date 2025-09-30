@@ -257,13 +257,21 @@ struct GenMetadataResult {
   T& metadata;
 };
 
+std::mutex& schemaRegistryMutex();
+
+template <class T>
+const auto& getNodeWithLock() {
+  std::lock_guard lock(schemaRegistryMutex());
+  return SchemaRegistry::get().getNode<T>();
+}
+
 // Generate metadata of `node` inside `md`, return the generated metadata.
 GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
     metadata::ThriftMetadata& md, const syntax_graph::EnumNode& node);
 
 template <class E>
 auto genEnumMetadata(metadata::ThriftMetadata& md) {
-  return genEnumMetadata(md, SchemaRegistry::get().getNode<E>());
+  return genEnumMetadata(md, getNodeWithLock<E>());
 }
 
 } // namespace apache::thrift::detail::md

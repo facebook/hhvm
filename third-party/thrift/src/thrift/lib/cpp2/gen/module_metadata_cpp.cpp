@@ -73,8 +73,14 @@ ThriftConstValuePair cvPair(ThriftConstValue&& key, ThriftConstValue&& value) {
   return pair;
 }
 
+std::mutex& schemaRegistryMutex() {
+  static std::mutex mutex;
+  return mutex;
+}
+
 template <class Node>
 static std::string getName(const Node& node) {
+  std::lock_guard lock(schemaRegistryMutex());
   const auto& def = node.definition();
   return fmt::format("{}.{}", def.program().name(), def.name());
 }

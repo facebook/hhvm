@@ -1310,6 +1310,66 @@ const EnumNode& SyntaxGraph::asSyntaxGraphEnumNode(
   return asSyntaxGraphDefinition(node).asEnum();
 }
 
+TypeRef SyntaxGraph::asSyntaxGraphTypeRef(
+    const type_system::TypeRef& ref) const {
+  return ref.visit(
+      [](const type_system::TypeRef::Bool&) {
+        return TypeRef::of(Primitive::BOOL);
+      },
+      [](const type_system::TypeRef::Byte&) {
+        return TypeRef::of(Primitive::BYTE);
+      },
+      [](const type_system::TypeRef::I16&) {
+        return TypeRef::of(Primitive::I16);
+      },
+      [](const type_system::TypeRef::I32&) {
+        return TypeRef::of(Primitive::I32);
+      },
+      [](const type_system::TypeRef::I64&) {
+        return TypeRef::of(Primitive::I64);
+      },
+      [](const type_system::TypeRef::Float&) {
+        return TypeRef::of(Primitive::FLOAT);
+      },
+      [](const type_system::TypeRef::Double&) {
+        return TypeRef::of(Primitive::DOUBLE);
+      },
+      [](const type_system::TypeRef::String&) {
+        return TypeRef::of(Primitive::STRING);
+      },
+      [](const type_system::TypeRef::Binary&) {
+        return TypeRef::of(Primitive::BINARY);
+      },
+      [](const type_system::TypeRef::Any&) -> TypeRef {
+        folly::throw_exception<std::runtime_error>(
+            "Any type is not supported by SyntaxGraph");
+      },
+      [&](const type_system::TypeRef::List& l) {
+        return TypeRef::of(List::of(asSyntaxGraphTypeRef(l.elementType())));
+      },
+      [&](const type_system::TypeRef::Set& s) {
+        return TypeRef::of(Set::of(asSyntaxGraphTypeRef(s.elementType())));
+      },
+      [&](const type_system::TypeRef::Map& m) {
+        return TypeRef::of(Map::of(
+            asSyntaxGraphTypeRef(m.keyType()),
+            asSyntaxGraphTypeRef(m.valueType())));
+      },
+      [&](const type_system::StructNode& s) {
+        return TypeRef::of(asSyntaxGraphStructNode(s));
+      },
+      [&](const type_system::UnionNode& u) {
+        return TypeRef::of(asSyntaxGraphUnionNode(u));
+      },
+      [&](const type_system::EnumNode& e) {
+        return TypeRef::of(asSyntaxGraphEnumNode(e));
+      },
+      [&](const type_system::OpaqueAliasNode&) -> TypeRef {
+        folly::throw_exception<std::runtime_error>(
+            "OpaqueAlias is not supported by SyntaxGraph");
+      });
+}
+
 } // namespace apache::thrift::syntax_graph
 
 #endif // THRIFT_SCHEMA_AVAILABLE

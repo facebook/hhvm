@@ -1761,6 +1761,7 @@ class SyntaxGraph final : public detail::WithDebugPrinting<SyntaxGraph> {
       const type_system::UnionNode& node) const;
   const EnumNode& asSyntaxGraphEnumNode(
       const type_system::EnumNode& node) const;
+  TypeRef asSyntaxGraphTypeRef(const type_system::TypeRef& ref) const;
 
   explicit SyntaxGraph(std::unique_ptr<detail::Resolver> resolver);
 

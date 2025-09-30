@@ -980,6 +980,87 @@ TEST_F(ServiceSchemaTest, asTypeSystemTypeRef) {
   }
 }
 
+TEST_F(ServiceSchemaTest, asSyntaxGraphTypeRef) {
+  auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
+  auto& typeSystem = syntaxGraph.asTypeSystem();
+  auto& mainProgram = syntaxGraph.findProgramByName("syntax_graph");
+
+  // Test primitive types
+  {
+    auto tsRef = type_system::TypeSystem::Bool();
+    auto sgRef = syntaxGraph.asSyntaxGraphTypeRef(tsRef);
+    EXPECT_EQ(sgRef.asPrimitive(), Primitive::BOOL);
+  }
+  {
+    auto tsRef = type_system::TypeSystem::I32();
+    auto sgRef = syntaxGraph.asSyntaxGraphTypeRef(tsRef);
+    EXPECT_EQ(sgRef.asPrimitive(), Primitive::I32);
+  }
+  {
+    auto tsRef = type_system::TypeSystem::String();
+    auto sgRef = syntaxGraph.asSyntaxGraphTypeRef(tsRef);
+    EXPECT_EQ(sgRef.asPrimitive(), Primitive::STRING);
+  }
+  {
+    auto tsRef = type_system::TypeSystem::Any();
+    EXPECT_THROW(syntaxGraph.asSyntaxGraphTypeRef(tsRef), std::runtime_error);
+  }
+
+  // Test container types
+  {
+    auto tsRef = typeSystem.ListOf(type_system::TypeSystem::I32());
+    auto sgRef = syntaxGraph.asSyntaxGraphTypeRef(tsRef);
+    EXPECT_TRUE(sgRef.isList());
+    EXPECT_EQ(sgRef.asList().elementType().asPrimitive(), Primitive::I32);
+  }
+  {
+    auto tsRef = typeSystem.SetOf(type_system::TypeSystem::String());
+    auto sgRef = syntaxGraph.asSyntaxGraphTypeRef(tsRef);
+    EXPECT_TRUE(sgRef.isSet());
+    EXPECT_EQ(sgRef.asSet().elementType().asPrimitive(), Primitive::STRING);
+  }
+  {
+    auto tsRef = typeSystem.MapOf(
+        type_system::TypeSystem::I32(), type_system::TypeSystem::String());
+    auto sgRef = syntaxGraph.asSyntaxGraphTypeRef(tsRef);
+    EXPECT_TRUE(sgRef.isMap());
+    EXPECT_EQ(sgRef.asMap().keyType().asPrimitive(), Primitive::I32);
+    EXPECT_EQ(sgRef.asMap().valueType().asPrimitive(), Primitive::STRING);
+  }
+
+  // Test user-defined types
+  {
+    auto tsRef = typeSystem.getUserDefinedTypeOrThrow(
+        "meta.com/thrift_test/TestRecursiveStruct");
+    auto sgRef = syntaxGraph.asSyntaxGraphTypeRef(
+        type_system::TypeRef(tsRef.asStruct()));
+    EXPECT_TRUE(sgRef.isStruct());
+    EXPECT_EQ(
+        &sgRef.asStruct(),
+        &mainProgram.definitionsByName().at("TestRecursiveStruct")->asStruct());
+  }
+  {
+    auto tsRef =
+        typeSystem.getUserDefinedTypeOrThrow("meta.com/thrift_test/TestUnion");
+    auto sgRef =
+        syntaxGraph.asSyntaxGraphTypeRef(type_system::TypeRef(tsRef.asUnion()));
+    EXPECT_TRUE(sgRef.isUnion());
+    EXPECT_EQ(
+        &sgRef.asUnion(),
+        &mainProgram.definitionsByName().at("TestUnion")->asUnion());
+  }
+  {
+    auto tsRef =
+        typeSystem.getUserDefinedTypeOrThrow("meta.com/thrift_test/TestEnum");
+    auto sgRef =
+        syntaxGraph.asSyntaxGraphTypeRef(type_system::TypeRef(tsRef.asEnum()));
+    EXPECT_TRUE(sgRef.isEnum());
+    EXPECT_EQ(
+        &sgRef.asEnum(),
+        &mainProgram.definitionsByName().at("TestEnum")->asEnum());
+  }
+}
+
 TEST(SyntaxGraphTest, getSchemaMerge) {
   auto& registry = SchemaRegistry::get();
 

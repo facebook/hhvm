@@ -94,7 +94,7 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
     apache::thrift::ServerRequest&& serverRequest) {
 {{#if function:self.bidirectional_stream?}}
   std::ignore = serverRequest;
-  apache::thrift::detail::si::throw_app_exn_unimplemented("Not Implemented Yet");
+  apache::thrift::detail::si::throw_app_exn_unimplemented("{{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_");
 {{#else}}
 {{#if in_or_creates_interaction?}}
   auto tile = serverRequest.requestContext()->releaseTile();

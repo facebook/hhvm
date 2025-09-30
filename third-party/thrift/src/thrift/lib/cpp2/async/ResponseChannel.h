@@ -76,6 +76,8 @@ class ResponseChannelRequest {
 
   virtual bool isSink() const { return false; }
 
+  virtual bool isBiDiStream() const { return false; }
+
   virtual bool includeEnvelope() const = 0;
 
   apache::thrift::RpcKind rpcKind() const {
@@ -87,6 +89,9 @@ class ResponseChannelRequest {
     }
     if (isOneway()) {
       return apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE;
+    }
+    if (isBiDiStream()) {
+      return apache::thrift::RpcKind::BIDIRECTIONAL_STREAM;
     }
     return apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
   }

@@ -60,7 +60,7 @@ template <typename ProtocolIn_, typename ProtocolOut_>
 void BiDiServiceAsyncProcessor::executeRequest_simple(
     apache::thrift::ServerRequest&& serverRequest) {
   std::ignore = serverRequest;
-  apache::thrift::detail::si::throw_app_exn_unimplemented("Not Implemented Yet");
+  apache::thrift::detail::si::throw_app_exn_unimplemented("BiDiServiceAsyncProcessor::executeRequest_");
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -131,7 +131,7 @@ template <typename ProtocolIn_, typename ProtocolOut_>
 void BiDiServiceAsyncProcessor::executeRequest_response(
     apache::thrift::ServerRequest&& serverRequest) {
   std::ignore = serverRequest;
-  apache::thrift::detail::si::throw_app_exn_unimplemented("Not Implemented Yet");
+  apache::thrift::detail::si::throw_app_exn_unimplemented("BiDiServiceAsyncProcessor::executeRequest_");
 }
 
 template <class ProtocolIn_, class ProtocolOut_>

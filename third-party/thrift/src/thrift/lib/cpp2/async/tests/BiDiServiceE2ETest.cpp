@@ -75,17 +75,28 @@ class BiDiServiceTest : public Test {
 
 CO_TEST_F(BiDiServiceTest, BiDiNoResponse) {
   auto client = makeClient();
-  // Currently apache::thrift::TApplicationException - Function kind mismatch
   EXPECT_THROW(
       co_await client->co_echo(), apache::thrift::TApplicationException);
+  try {
+    co_await client->co_echo();
+    CO_FAIL() << "No error - error expected";
+  } catch (TApplicationException e) {
+    EXPECT_EQ(
+        e.getMessage(),
+        "AsyncProcessorHelper::executeRequest(...) caught an unhandled exception: apache::thrift::TrustedServerException: Function TestBiDiServiceAsyncProcessor::executeRequest_ is unimplemented");
+  }
 }
 
 CO_TEST_F(BiDiServiceTest, BiDiWithResponse) {
   auto client = makeClient();
-  // Currently apache::thrift::TApplicationException - Function kind mismatch
-  EXPECT_THROW(
-      co_await client->co_echoWithResponse("Test"),
-      apache::thrift::TApplicationException);
+  try {
+    co_await client->co_echoWithResponse("Test");
+    CO_FAIL() << "No error - error expected";
+  } catch (TApplicationException e) {
+    EXPECT_EQ(
+        e.getMessage(),
+        "AsyncProcessorHelper::executeRequest(...) caught an unhandled exception: apache::thrift::TrustedServerException: Function TestBiDiServiceAsyncProcessor::executeRequest_ is unimplemented");
+  }
 }
 
 } // namespace apache::thrift

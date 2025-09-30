@@ -358,6 +358,8 @@ class ThriftServerRequestBiDi final : public RocketThriftRequest {
       std::unique_ptr<folly::IOBuf>,
       BiDiServerCallbackPtr) noexcept override;
 
+  bool isBiDiStream() const override { return true; }
+
  private:
   const int32_t version_;
   RocketBiDiClientCallback* clientCallback_{nullptr};

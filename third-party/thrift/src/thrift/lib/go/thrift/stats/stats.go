@@ -58,11 +58,6 @@ type ServerStats struct {
 	DurationScheduleWork *TimingSeries
 	// durationWorking defines the amount of time it takes for an application method to execute
 	DurationWorking *TimingSeries
-	// durationScheduleWrite defines the duration it takes thwork to schedule
-	// a write that is ready to be serialized back as a response.
-	// This is the time bewtween finished processing a requestion, up until the
-	// start of durationWrite (where we begin actually writing to the connection)
-	DurationScheduleWrite *TimingSeries
 
 	// workersBusy defines a server event where no workers are available to accept
 	// available work. This can signal that we should increase # workers (in the case
@@ -110,10 +105,9 @@ func NewServerStats(cfg *TimingConfig, statsPeriod time.Duration) *ServerStats {
 		NoSuchFunction:              NewTimingSeries(cfg),
 		QueueingTimeout:             NewTimingSeries(cfg),
 
-		DurationRead:          NewTimingSeries(cfg),
-		DurationScheduleWork:  NewTimingSeries(cfg),
-		DurationWorking:       NewTimingSeries(cfg),
-		DurationScheduleWrite: NewTimingSeries(cfg),
+		DurationRead:         NewTimingSeries(cfg),
+		DurationScheduleWork: NewTimingSeries(cfg),
+		DurationWorking:      NewTimingSeries(cfg),
 	}
 }
 
@@ -167,10 +161,6 @@ func (stats *ServerStats) GetInts() map[string]int64 {
 	ints["requests.duration_working.avg."+periodStr] = toμs(s.Average)
 	ints["requests.duration_working.p95."+periodStr] = toμs(s.P95)
 	ints["requests.duration_working.p99."+periodStr] = toμs(s.P99)
-	s = stats.DurationScheduleWrite.MustSummarize(stats.statsPeriod)
-	ints["requests.duration_schedule_write.avg."+periodStr] = toμs(s.Average)
-	ints["requests.duration_schedule_write.p95."+periodStr] = toμs(s.P95)
-	ints["requests.duration_schedule_write.p99."+periodStr] = toμs(s.P99)
 
 	return ints
 }

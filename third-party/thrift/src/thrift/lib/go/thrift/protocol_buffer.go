@@ -44,21 +44,28 @@ type protocolBuffer struct {
 var _ Protocol = (*protocolBuffer)(nil)
 
 func newProtocolBuffer(respHeaders map[string]string, protoID types.ProtocolID, data []byte) (*protocolBuffer, error) {
+	wbuf := bytes.NewBuffer(nil)
+	rbuf := bytes.NewBuffer(data)
+	var decoder types.Decoder
+	var encoder types.Encoder
+	switch protoID {
+	case types.ProtocolIDBinary:
+		decoder = format.NewBinaryDecoder(rbuf)
+		encoder = format.NewBinaryEncoder(wbuf)
+	case types.ProtocolIDCompact:
+		decoder = format.NewCompactDecoder(rbuf)
+		encoder = format.NewCompactEncoder(wbuf)
+	default:
+		return nil, types.NewProtocolException(fmt.Errorf("Unknown protocol id: %d", protoID))
+	}
+
 	p := &protocolBuffer{
 		respHeaders: respHeaders,
 		reqHeaders:  map[string]string{},
-		wbuf:        new(bytes.Buffer),
-		rbuf:        bytes.NewBuffer(data),
-	}
-	switch protoID {
-	case types.ProtocolIDBinary:
-		p.Decoder = format.NewBinaryDecoder(p.rbuf)
-		p.Encoder = format.NewBinaryEncoder(p.wbuf)
-	case types.ProtocolIDCompact:
-		p.Decoder = format.NewCompactDecoder(p.rbuf)
-		p.Encoder = format.NewCompactEncoder(p.wbuf)
-	default:
-		return nil, types.NewProtocolException(fmt.Errorf("Unknown protocol id: %d", protoID))
+		wbuf:        wbuf,
+		rbuf:        rbuf,
+		Decoder:     decoder,
+		Encoder:     encoder,
 	}
 	return p, nil
 }

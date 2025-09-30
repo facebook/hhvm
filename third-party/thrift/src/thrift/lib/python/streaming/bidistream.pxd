@@ -29,6 +29,13 @@ cdef extern from "thrift/lib/cpp2/async/BiDiStream.h" namespace "::apache::thrif
         cIOBufClientSink sink
         # ClientBufferedStream will be imported from stream module
 
+    cdef cppclass cResponseAndStreamTransformation "::apache::thrift::ResponseAndStreamTransformation"[TResponse, TSinkElement, TStreamElement]:
+        TResponse response
+        cStreamTransformation[TSinkElement, TStreamElement] transform
+
+    cdef cppclass cStreamTransformation "::apache::thrift::StreamTransformation"[TSinkElement, TStreamElement]:
+        pass
+
 
 cdef class BidirectionalStream:
     cdef ClientSink _sink

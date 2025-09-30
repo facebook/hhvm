@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"net"
@@ -28,6 +29,7 @@ import (
 	rsocket "github.com/rsocket/rsocket-go"
 	"github.com/rsocket/rsocket-go/core/transport"
 	"github.com/rsocket/rsocket-go/payload"
+	"github.com/rsocket/rsocket-go/rx/flux"
 	"github.com/rsocket/rsocket-go/rx/mono"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/rocket"
@@ -140,6 +142,7 @@ func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload,
 		rsocket.MetadataPush(socket.metadataPush),
 		rsocket.RequestResponse(socket.requestResponse),
 		rsocket.FireAndForget(socket.fireAndForget),
+		rsocket.RequestStream(socket.requestStream),
 	), nil
 }
 
@@ -338,6 +341,10 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	// Track actual handler execution time
 	processTime := time.Since(processStartTime)
 	s.observer.ProcessTime(processTime)
+}
+
+func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
+	return flux.Error(errors.New("not implemented"))
 }
 
 func newProtocolBufferFromRequest(request *rocket.RequestPayload) (*protocolBuffer, error) {

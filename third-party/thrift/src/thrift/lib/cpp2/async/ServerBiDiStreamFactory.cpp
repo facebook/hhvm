@@ -27,6 +27,11 @@ void ServerBiDiStreamFactory::setInteraction(TilePtr&& interaction) {
   interaction_ = std::move(interaction);
 }
 
+bool ServerBiDiStreamFactory::valid() const {
+  // TODO(ezou) this is a stub, revisit this.
+  return startFunction_ != nullptr;
+}
+
 void ServerBiDiStreamFactory::start(
     FirstResponsePayload&& payload,
     BiDiClientCallback* clientCallback,

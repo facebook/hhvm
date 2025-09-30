@@ -50,15 +50,20 @@ class ServerBiDiStreamFactory {
                          std::shared_ptr<ContextStack>,
                          TilePtr&&,
                          FirstResponsePayload&&,
-                         BiDiClientCallback*,
+                         BiDiClientCallback* clientCallback,
                          folly::EventBase*) mutable -> void {
-      LOG(FATAL) << "Not implemented";
+      clientCallback->onFirstResponseError(
+          folly::make_exception_wrapper<rocket::RocketException>(
+              rocket::ErrorCode::APPLICATION_ERROR,
+              "TODO(ezou) in Transport not implemented"));
     };
   }
 
   void setContextStack(std::shared_ptr<ContextStack> contextStack);
 
   void setInteraction(TilePtr&& interaction);
+
+  bool valid() const;
 
   void start(
       FirstResponsePayload&& firstResponsePayload,

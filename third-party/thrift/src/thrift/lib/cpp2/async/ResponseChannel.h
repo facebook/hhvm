@@ -26,6 +26,7 @@
 #include <thrift/lib/cpp/Thrift.h>
 #include <thrift/lib/cpp/server/TServerObserver.h>
 #include <thrift/lib/cpp2/async/MessageChannel.h>
+#include <thrift/lib/cpp2/async/ServerBiDiStreamFactory.h>
 #include <thrift/lib/cpp2/async/ServerStream.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
@@ -146,6 +147,13 @@ class ResponseChannelRequest {
         std::move(payload), std::move(callback), crc32);
   }
 #endif
+
+  virtual void sendBiDiReply(
+      ResponsePayload&&,
+      detail::ServerBiDiStreamFactory&&,
+      folly::Optional<uint32_t> = folly::none) {
+    throw std::logic_error("unimplemented");
+  }
 
   FOLLY_NODISCARD static bool sendBiDiReply(
       ResponseChannelRequest::UniquePtr request,

@@ -142,12 +142,8 @@ class BiDiStreamReplyInfo {
         crc32c_{std::move(crc32c)} {}
 
   void operator()() noexcept {
-    // TODO(ezou) stubbed
-    req_->sendErrorWrapped(
-        folly::make_exception_wrapper<TApplicationException>(
-            TApplicationException::INTERNAL_ERROR,
-            "TODO(ezou) BiDiStreamReplyInfo not implemented"),
-        kUnknownErrorCode);
+    req_->sendBiDiReply(
+        std::move(response_), std::move(serverBiDiStreamFactory_), crc32c_);
   }
 
  private:

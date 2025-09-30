@@ -881,6 +881,36 @@ void ThriftServerRequestBiDi::sendSerializedError(
           FirstResponsePayload(std::move(exbuf), std::move(metadata))));
 }
 
+void ThriftServerRequestBiDi::sendBiDiThriftResponse(
+    ResponseRpcMetadata&& metadata,
+    std::unique_ptr<folly::IOBuf> data,
+    apache::thrift::detail::ServerBiDiStreamFactory&&
+        bidiStreamFactory) noexcept {
+  if (!bidiStreamFactory.valid()) {
+    sendSerializedError(std::move(metadata), std::move(data));
+    return;
+  }
+
+  if (auto responseRpcError = processFirstResponse(
+          metadata, data, getProtoId(), version_, getCompressionConfig())) {
+    auto ex = makeRocketException(
+        *responseRpcError, *context_.connection().getPayloadSerializer());
+    handleStreamError(std::move(ex), clientCallback_);
+    return;
+  }
+
+  context_.unsetMarkRequestComplete();
+  // Missing some configuration here
+  // clientCallback_->setProtoId(getProtoId());
+  // clientCallback_->setChunkTimeout(sinkConsumer.chunkTimeout);
+  auto payload = apache::thrift::FirstResponsePayload{
+      std::move(data), std::move(metadata)};
+  payload.fds =
+      std::move(getRequestContext()->getHeader()->fds.dcheckToSendOrEmpty());
+  std::move(bidiStreamFactory)
+      .start(std::move(payload), clientCallback_, getEventBase());
+}
+
 bool ThriftServerRequestBiDi::sendBiDiThriftResponse(
     ResponseRpcMetadata&& metadata,
     std::unique_ptr<folly::IOBuf> data,

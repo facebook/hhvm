@@ -353,6 +353,11 @@ class ThriftServerRequestBiDi final : public RocketThriftRequest {
   void sendSerializedError(
       ResponseRpcMetadata&&, std::unique_ptr<folly::IOBuf>) noexcept override;
 
+  void sendBiDiThriftResponse(
+      ResponseRpcMetadata&&,
+      std::unique_ptr<folly::IOBuf>,
+      apache::thrift::detail::ServerBiDiStreamFactory&&) noexcept override;
+
   bool sendBiDiThriftResponse(
       ResponseRpcMetadata&&,
       std::unique_ptr<folly::IOBuf>,

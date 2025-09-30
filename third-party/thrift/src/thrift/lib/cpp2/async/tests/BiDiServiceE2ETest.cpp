@@ -79,7 +79,7 @@ CO_TEST_F(BiDiServiceTest, BiDiNoResponse) {
     co_await client->co_echo();
     CO_FAIL() << "No error - error expected";
   } catch (TApplicationException e) {
-    EXPECT_EQ(e.getMessage(), "TODO(ezou) BiDiStreamReplyInfo not implemented");
+    EXPECT_EQ(e.getMessage(), "Unexpected error frame type: 513");
   }
 }
 
@@ -89,7 +89,7 @@ CO_TEST_F(BiDiServiceTest, BiDiWithResponse) {
     co_await client->co_echoWithResponse("Test");
     CO_FAIL() << "No error - error expected";
   } catch (TApplicationException e) {
-    EXPECT_EQ(e.getMessage(), "TODO(ezou) BiDiStreamReplyInfo not implemented");
+    EXPECT_EQ(e.getMessage(), "Unexpected error frame type: 513");
   }
 }
 

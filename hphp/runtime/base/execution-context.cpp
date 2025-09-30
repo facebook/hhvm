@@ -31,6 +31,7 @@
 #include "hphp/util/process.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/service-data.h"
+#include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -874,6 +875,10 @@ void ExecutionContext::handleError(const std::string& msg,
 
 bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
                                                 bool swallowExceptions) {
+  // If we raise an error while in the process of loading a Func or Class we
+  // need to re-allow autoloading while executing the user error handler.
+  AutoloadHandler::Inhibit allowAutoload{false};
+
   switch (getErrorState()) {
   case ErrorState::ExecutingUserHandler:
   case ErrorState::ErrorRaisedByUserHandler:

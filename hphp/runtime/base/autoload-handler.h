@@ -40,10 +40,12 @@ struct AutoloadHandler final : RequestEventHandler {
    * RAII helper to prevent autoloading within a particular scope.
    */
   struct Inhibit {
-    Inhibit() : prev(s_supressAutoloading ? *s_supressAutoloading : false) {
-      *s_supressAutoloading = true;
+    Inhibit(bool suppress = true)
+      : prev(s_suppressAutoloading ? *s_suppressAutoloading : false)
+    {
+      *s_suppressAutoloading = suppress;
     }
-    ~Inhibit() { *s_supressAutoloading = prev; }
+    ~Inhibit() { *s_suppressAutoloading = prev; }
 
     Inhibit(Inhibit&&) = delete;
     Inhibit& operator=(Inhibit&&) = delete;
@@ -119,7 +121,7 @@ private:
 
   // When true disables the various autoload functions. The map itself remains
   // accessible.
-  static RDS_LOCAL(bool, s_supressAutoloading);
+  static RDS_LOCAL(bool, s_suppressAutoloading);
 
   static std::unique_ptr<RepoAutoloadMap> s_repoAutoloadMap;
 };

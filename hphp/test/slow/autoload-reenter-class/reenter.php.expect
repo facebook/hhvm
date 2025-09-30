@@ -1,0 +1,2 @@
+string(70) "Cannot override async method Bar::x with non-async method in class Foo"
+int(8)

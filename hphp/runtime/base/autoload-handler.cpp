@@ -31,7 +31,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 RDS_LOCAL(AutoloadHandler, AutoloadHandler::s_instance);
-RDS_LOCAL(bool, AutoloadHandler::s_supressAutoloading);
+RDS_LOCAL(bool, AutoloadHandler::s_suppressAutoloading);
 
 static FactsFactory* s_mapFactory = nullptr;
 
@@ -209,7 +209,7 @@ AutoloadHandler::loadFromMapImpl(const String& name,
                                  AutoloadMap::KindOf kind,
                                  const T &checkExists,
                                  Variant& err) {
-  if (s_supressAutoloading && *s_supressAutoloading) return false;
+  if (s_suppressAutoloading && *s_suppressAutoloading) return false;
 
   auto fileRes = getFile(name, kind);
   if (!fileRes) {

@@ -624,6 +624,7 @@ watchman/GroupLookup.cpp
 watchman/IgnoreSet.cpp
 watchman/InMemoryView.cpp
 watchman/Options.cpp
+watchman/PathUtils.cpp
 watchman/PDU.cpp
 watchman/PendingCollection.cpp
 watchman/PerfSample.cpp

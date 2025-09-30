@@ -257,9 +257,34 @@ void HandlerCallbackBase::sendReply(
 }
 
 void HandlerCallbackBase::sendReply(
-    ResponseAndServerBiDiStreamFactory&& /*responseAndServerBiDiStreamFactory*/) {
-  throw std::logic_error(
-      "TODO(ezou) unimplemented HandlerCallbackBase::sendReply");
+    ResponseAndServerBiDiStreamFactory&& responseAndServerBiDiStreamFactory) {
+  folly::Optional<uint32_t> crc32c =
+      checksumIfNeeded(responseAndServerBiDiStreamFactory.response);
+  auto payload = std::move(responseAndServerBiDiStreamFactory.response)
+                     .extractPayload(
+                         req_->includeEnvelope(),
+                         reqCtx_->getHeader()->getProtocolId(),
+                         protoSeqId_,
+                         MessageType::T_REPLY,
+                         reqCtx_->getMethodName());
+  payload = transform(std::move(payload));
+  auto& bidiStreamFactory = responseAndServerBiDiStreamFactory.bidiStream;
+  bidiStreamFactory.setContextStack(std::move(this->ctx_));
+  bidiStreamFactory.setInteraction(std::move(interaction_));
+  if (getEventBase()->isInEventBaseThread()) {
+    BiDiStreamReplyInfo(
+        std::move(req_),
+        std::move(bidiStreamFactory),
+        std::move(payload),
+        crc32c)();
+  } else {
+    putMessageInReplyQueue(
+        std::in_place_type_t<BiDiStreamReplyInfo>(),
+        std::move(req_),
+        std::move(bidiStreamFactory),
+        std::move(payload),
+        crc32c);
+  }
 }
 
 bool HandlerCallbackBase::fulfillTilePromise(std::unique_ptr<Tile> ptr) {

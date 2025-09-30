@@ -18,6 +18,7 @@
 
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
+#include <thrift/lib/cpp2/async/ServerBiDiStreamFactory.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 
@@ -128,11 +129,40 @@ class TilePromiseReplyInfo {
   bool isRPEnabled_;
 };
 
+class BiDiStreamReplyInfo {
+ public:
+  explicit BiDiStreamReplyInfo(
+      ResponseChannelRequest::UniquePtr req,
+      detail::ServerBiDiStreamFactory serverBiDiStreamFactory,
+      ResponsePayload&& response,
+      folly::Optional<uint32_t> crc32c)
+      : req_{std::move(req)},
+        serverBiDiStreamFactory_{std::move(serverBiDiStreamFactory)},
+        response_{std::move(response)},
+        crc32c_{std::move(crc32c)} {}
+
+  void operator()() noexcept {
+    // TODO(ezou) stubbed
+    req_->sendErrorWrapped(
+        folly::make_exception_wrapper<TApplicationException>(
+            TApplicationException::INTERNAL_ERROR,
+            "TODO(ezou) BiDiStreamReplyInfo not implemented"),
+        kUnknownErrorCode);
+  }
+
+ private:
+  ResponseChannelRequest::UniquePtr req_;
+  detail::ServerBiDiStreamFactory serverBiDiStreamFactory_;
+  ResponsePayload response_;
+  folly::Optional<uint32_t> crc32c_;
+};
+
 using ReplyInfo = std::variant<
     QueueReplyInfo,
     StreamReplyInfo,
     SinkConsumerReplyInfo,
-    TilePromiseReplyInfo>;
+    TilePromiseReplyInfo,
+    BiDiStreamReplyInfo>;
 
 /**
  * Used in EventBaseAtomicNotificationQueue to process each dequeued item

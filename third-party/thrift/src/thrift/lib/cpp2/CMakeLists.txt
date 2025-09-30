@@ -298,6 +298,7 @@ add_library(
   async/RocketClientChannel.cpp
   async/RpcOptions.cpp
   async/RpcTypes.cpp
+  async/ServerBiDiStreamFactory.cpp
   async/ServerGeneratorStreamBridge.cpp
   async/ServerRequestData.cpp
   async/ServerSinkBridge.cpp

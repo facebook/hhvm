@@ -383,8 +383,7 @@ class HandlerCallbackBase {
   void sendReply(
       [[maybe_unused]] std::pair<SerializedResponse, detail::SinkConsumerImpl>&&
           responseAndSinkConsumer);
-  [[noreturn]] void sendReply(
-      ResponseAndServerBiDiStreamFactory&& responseAndStream);
+  void sendReply(ResponseAndServerBiDiStreamFactory&& responseAndStream);
 
   bool fulfillTilePromise(std::unique_ptr<Tile> ptr);
   void breakTilePromise();

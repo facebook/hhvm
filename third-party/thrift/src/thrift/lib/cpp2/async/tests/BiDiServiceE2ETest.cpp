@@ -75,15 +75,11 @@ class BiDiServiceTest : public Test {
 
 CO_TEST_F(BiDiServiceTest, BiDiNoResponse) {
   auto client = makeClient();
-  EXPECT_THROW(
-      co_await client->co_echo(), apache::thrift::TApplicationException);
   try {
     co_await client->co_echo();
     CO_FAIL() << "No error - error expected";
   } catch (TApplicationException e) {
-    EXPECT_EQ(
-        e.getMessage(),
-        "std::logic_error: TODO(ezou) unimplemented HandlerCallbackBase::sendReply");
+    EXPECT_EQ(e.getMessage(), "TODO(ezou) BiDiStreamReplyInfo not implemented");
   }
 }
 
@@ -93,9 +89,7 @@ CO_TEST_F(BiDiServiceTest, BiDiWithResponse) {
     co_await client->co_echoWithResponse("Test");
     CO_FAIL() << "No error - error expected";
   } catch (TApplicationException e) {
-    EXPECT_EQ(
-        e.getMessage(),
-        "std::logic_error: TODO(ezou) unimplemented HandlerCallbackBase::sendReply");
+    EXPECT_EQ(e.getMessage(), "TODO(ezou) BiDiStreamReplyInfo not implemented");
   }
 }
 

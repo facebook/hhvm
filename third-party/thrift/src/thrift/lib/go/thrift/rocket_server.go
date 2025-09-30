@@ -348,10 +348,11 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 }
 
 func newProtocolBufferFromRequest(request *rocket.RequestPayload) (*protocolBuffer, error) {
-	protocol, err := newProtocolBuffer(request.Headers(), request.ProtoID(), request.Data())
+	protocol, err := newProtocolBuffer(request.ProtoID(), request.Data())
 	if err != nil {
 		return nil, err
 	}
+	protocol.setResponseHeaders(request.Headers())
 	if err := protocol.WriteMessageBegin(request.Name(), request.TypeID(), 0); err != nil {
 		return nil, err
 	}

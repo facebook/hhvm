@@ -43,7 +43,7 @@ type protocolBuffer struct {
 
 var _ Protocol = (*protocolBuffer)(nil)
 
-func newProtocolBuffer(respHeaders map[string]string, protoID types.ProtocolID, data []byte) (*protocolBuffer, error) {
+func newProtocolBuffer(protoID types.ProtocolID, data []byte) (*protocolBuffer, error) {
 	wbuf := bytes.NewBuffer(nil)
 	rbuf := bytes.NewBuffer(data)
 	var decoder types.Decoder
@@ -60,7 +60,7 @@ func newProtocolBuffer(respHeaders map[string]string, protoID types.ProtocolID, 
 	}
 
 	p := &protocolBuffer{
-		respHeaders: respHeaders,
+		respHeaders: map[string]string{},
 		reqHeaders:  map[string]string{},
 		wbuf:        wbuf,
 		rbuf:        rbuf,
@@ -107,4 +107,8 @@ func (b *protocolBuffer) setRequestHeader(key, value string) {
 
 func (b *protocolBuffer) getRequestHeaders() map[string]string {
 	return b.reqHeaders
+}
+
+func (b *protocolBuffer) setResponseHeaders(headers map[string]string) {
+	b.respHeaders = headers
 }

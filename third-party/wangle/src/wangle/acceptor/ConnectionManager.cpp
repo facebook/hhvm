@@ -338,18 +338,93 @@ void ConnectionManager::dropAllConnections() {
   }
 }
 
-void ConnectionManager::dropConnections(double pct) {
+void ConnectionManager::dropConnections(size_t numToDrop) {
   DestructorGuard g(this);
 
   // Signal the drain helper in case that has not happened before.
   stopDrainingForShutdown();
 
-  const size_t N = conns_.size();
-  const size_t numToDrop = N * folly::constexpr_clamp(pct, 0., 1.);
-  for (size_t i = 0; i < numToDrop && !conns_.empty(); i++) {
+  const size_t N = std::min(conns_.size(), numToDrop);
+  for (size_t i = 0; i < N && !conns_.empty(); i++) {
     ManagedConnection& conn = conns_.front();
     removeConnection(&conn);
     conn.dropConnection();
+  }
+}
+
+void ConnectionManager::dropConnections(
+    double pct,
+    std::chrono::milliseconds dropDuration,
+    std::chrono::milliseconds roundInterval) {
+  const size_t connsNum = conns_.size();
+  const size_t numToDrop = connsNum * folly::constexpr_clamp(pct, 0., 1.);
+
+  if (dropDuration.count() <= 0) {
+    dropConnections(numToDrop);
+    return;
+  }
+  if (numToDrop <= 0 || roundInterval.count() <= 0) {
+    return; // Nothing to drop or invalid duration
+  }
+
+  const size_t targetConnsNum = connsNum - numToDrop;
+
+  // Start the first round immediately
+  dropConnectionsRound(targetConnsNum, dropDuration, roundInterval);
+}
+
+void ConnectionManager::dropConnectionsRound(
+    const size_t targetConnsNum,
+    std::chrono::milliseconds timeRemaining,
+    const std::chrono::milliseconds roundInterval) {
+  auto roundStartTime = std::chrono::steady_clock::now();
+
+  const size_t connsNum = conns_.size();
+  if (connsNum <= targetConnsNum) {
+    return;
+  }
+
+  const size_t connectionsToDrop = connsNum - targetConnsNum;
+
+  if (timeRemaining.count() <= 0) {
+    // TODO(oyermolenko): Raise alert here - time exceeded but connections
+    // remain to be dropped Drop all remaining connections at once
+
+    dropConnections(connectionsToDrop);
+    return;
+  }
+  // Calculate how many rounds are left (including this one)
+  const int roundsRemaining =
+      (timeRemaining.count() + roundInterval.count() - 1) /
+      roundInterval.count(); // Round up
+
+  // Calculate how many connections to drop this round
+  const size_t connsThisRound =
+      (connectionsToDrop + roundsRemaining - 1) / roundsRemaining;
+
+  // Drop connections for this round
+  dropConnections(connsThisRound);
+
+  // Calculate how much time was spent dropping connections
+  const auto roundEndTime = std::chrono::steady_clock::now();
+  const auto roundDurationMs =
+      std::chrono::duration_cast<std::chrono::milliseconds>(
+          roundEndTime - roundStartTime);
+
+  timeRemaining -= std::max(roundDurationMs, roundInterval);
+
+  // Schedule the next round
+  if (targetConnsNum < conns_.size()) {
+    // Calculate delay to maintain roundInterval intervals, accounting for
+    // execution time
+    auto nextDelayMs =
+        std::max(std::chrono::milliseconds(0), roundInterval - roundDurationMs);
+
+    eventBase_->timer().scheduleTimeoutFn(
+        [this, targetConnsNum, timeRemaining, roundInterval]() {
+          dropConnectionsRound(targetConnsNum, timeRemaining, roundInterval);
+        },
+        nextDelayMs);
   }
 }
 

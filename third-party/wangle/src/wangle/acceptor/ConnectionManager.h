@@ -26,7 +26,6 @@
 #include <folly/io/async/HHWheelTimer.h>
 #include <chrono>
 #include <iterator>
-#include <utility>
 
 namespace wangle {
 
@@ -164,9 +163,14 @@ class ConnectionManager : public folly::DelayedDestruction,
 
   /**
    * Force-stop "pct" (0.0 to 1.0) of remaining client connections,
-   * regardless of whether they are busy or idle.
+   * spread over "dropDuration" milliseconds with "roundInterval" intervals.
+   *
+   * If no dropDuration is specified, drop "pct" connections immediately.
    */
-  void dropConnections(double pct);
+  void dropConnections(
+      double pct,
+      std::chrono::milliseconds dropDuration = std::chrono::milliseconds(0),
+      std::chrono::milliseconds roundInterval = std::chrono::milliseconds(0));
 
   /**
    * Drop a specific connection with the provided peer address
@@ -342,6 +346,21 @@ class ConnectionManager : public folly::DelayedDestruction,
    * isBusy() method.
    */
   void drainAllConnections();
+
+  /**
+   * Force-stop "numToDrop" of remaining client connections,
+   * regardless of whether they are busy or idle.
+   */
+  void dropConnections(size_t numToDrop);
+
+  /**
+   * Helper method for dropConnections(pct, totalDuration, roundInterval)
+   * that handles one round of connection dropping and schedules the next round.
+   */
+  void dropConnectionsRound(
+      size_t targetConnsNum,
+      std::chrono::milliseconds timeRemaining,
+      std::chrono::milliseconds roundInterval);
 
   /**
    * Signal the drain helper that we are about to start dropping connections.

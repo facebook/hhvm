@@ -404,6 +404,108 @@ TEST_F(ConnectionManagerTest, testDropConnection) {
   }
 }
 
+// TODO(oyermolenko): revork without sleep
+TEST_F(ConnectionManagerTest, testDropConnectionsRoundNormal) {
+  // Set up 100 connections
+  setConns(100);
+  EXPECT_EQ(cm_->getNumConnections(), 100);
+
+  // Set up expectations
+  for (size_t i = 0; i < 60; i++) {
+    EXPECT_CALL(*conns_[i], dropConnection(_))
+        .WillOnce(Invoke([this, i](const std::string&) {
+          cm_->removeConnection(conns_[i].get());
+        }));
+  }
+
+  // Call dropConnections with 60% over 3 rounds
+  cm_->dropConnections(
+      0.6, std::chrono::milliseconds(1500), std::chrono::milliseconds(500));
+  // Run the first round (scheduled with delay 0)
+  EXPECT_EQ(cm_->getNumConnections(), 80);
+
+  // Run the second round
+  usleep(550 * 1000);
+  eventBase_.loopOnce();
+  EXPECT_EQ(cm_->getNumConnections(), 60);
+
+  // Run the third round
+  usleep(550 * 1000);
+  eventBase_.loopOnce();
+  EXPECT_EQ(cm_->getNumConnections(), 40);
+  EXPECT_EQ(eventBase_.timer().count(), 0);
+}
+
+// TODO(oyermolenko): revork without sleep
+TEST_F(ConnectionManagerTest, testDropConnectionsRoundTimeExceeded) {
+  // Set up 100 connections
+  setConns(100);
+  EXPECT_EQ(cm_->getNumConnections(), 100);
+
+  // This test simulates a scenario where the dropConnections call takes longer
+  // than expected, causing the round duration to exceed the allocated time.
+
+  // We'll directly test the dropConnectionsRound method to simulate this
+  // scenario
+  auto remainingTimeMs = std::chrono::milliseconds(300);
+  auto roundInterval = std::chrono::milliseconds(100);
+
+  // Slow down the first round of dropConnection calls to simulate a long
+  // dropConnections call
+  for (size_t i = 0; i < 60; i++) {
+    EXPECT_CALL(*conns_[i], dropConnection(_))
+        .WillOnce(Invoke([this, i](const std::string&) {
+          if (i < 20) {
+            // Simulate slow connection dropping by adding a small delay
+            /* sleep override */ usleep((220 / 20) * 1000);
+          }
+          cm_->removeConnection(conns_[i].get());
+        }));
+  }
+
+  // First round - this will drop 20 connections but take longer than expected
+  cm_->dropConnections(0.6, remainingTimeMs, roundInterval);
+  EXPECT_EQ(cm_->getNumConnections(), 80);
+
+  // Second round - this should drop all remaining connections at once due to
+  // time exceeded
+  usleep(10 * 1000);
+  eventBase_.loopOnce();
+
+  // We should have 40 connections left (the ones we didn't plan to drop)
+  EXPECT_EQ(cm_->getNumConnections(), 40);
+  // remainingToDrop should be 0 since all connections were dropped
+  EXPECT_EQ(eventBase_.timer().count(), 0);
+}
+
+TEST_F(ConnectionManagerTest, testDropConnectionsRoundEdgeCases) {
+  // Test with no connections to drop (pct = 0)
+  setConns(100);
+  cm_->dropConnections(
+      0.0, std::chrono::milliseconds(100), std::chrono::milliseconds(100));
+  EXPECT_EQ(eventBase_.timer().count(), 0);
+  EXPECT_EQ(cm_->getNumConnections(), 100);
+
+  // Test with invalid duration
+  for (size_t i = 0; i < 50; i++) {
+    EXPECT_CALL(*conns_[i], dropConnection(_))
+        .WillOnce(Invoke([this, i](const std::string&) {
+          cm_->removeConnection(conns_[i].get());
+        }));
+  }
+  cm_->dropConnections(
+      0.5, std::chrono::milliseconds(0), std::chrono::milliseconds(1000));
+  EXPECT_EQ(eventBase_.timer().count(), 0);
+  EXPECT_EQ(cm_->getNumConnections(), 50);
+
+  // Test with no connections left
+  setConns(0);
+  cm_->dropConnections(
+      0.5, std::chrono::milliseconds(100), std::chrono::milliseconds(100));
+  EXPECT_EQ(eventBase_.timer().count(), 0);
+  EXPECT_EQ(cm_->getNumConnections(), 0);
+}
+
 TEST_F(ConnectionManagerTest, testDrainPercent) {
   InSequence enforceOrder;
   double drain_percentage = .123;

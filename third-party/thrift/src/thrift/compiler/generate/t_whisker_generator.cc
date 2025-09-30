@@ -316,7 +316,7 @@ prototype<t_field>::ptr t_whisker_generator::make_prototype_for_field(
     return proto.create<t_type>(*self.get_type());
   });
   def.property("default_value", [&](const t_field& self) {
-    return proto.create_nullable<t_const_value>(self.get_default_value());
+    return proto.create_nullable<t_const_value>(self.default_value());
   });
   def.property("unqualified?", [](const t_field& self) {
     return self.qualifier() == t_field_qualifier::none;

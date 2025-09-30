@@ -696,39 +696,6 @@ class python_mstch_struct : public mstch_struct {
   }
 };
 
-class python_mstch_field : public mstch_field {
- public:
-  python_mstch_field(
-      const t_field* field, mstch_context& ctx, mstch_element_position pos)
-      : mstch_field(field, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"field:user_default_value",
-             &python_mstch_field::user_default_value},
-        });
-  }
-
-  mstch::node user_default_value() {
-    const t_const_value* value = field_->get_value();
-    if (!value) {
-      return mstch::node();
-    }
-    if (value->is_empty()) {
-      auto true_type = field_->get_type()->get_true_type();
-      if ((true_type->is<t_list>() || true_type->is<t_set>()) &&
-          value->kind() != t_const_value::CV_LIST) {
-        const_cast<t_const_value*>(value)->convert_empty_map_to_list();
-      }
-      if (true_type->is<t_map>() && value->kind() != t_const_value::CV_MAP) {
-        const_cast<t_const_value*>(value)->convert_empty_list_to_map();
-      }
-    }
-    return context_.const_value_factory->make_mstch_object(
-        value, context_, pos_, nullptr, nullptr);
-  }
-};
-
 // Generator-specific validator that enforces "name" and "value" are not used
 // as enum member or union field names (thrift-py3).
 namespace enum_member_union_field_names_validator {
@@ -1215,6 +1182,23 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
+  void initialize_context(context_visitor& visitor) override {
+    // Fix fields with mismatched empty const containers
+    visitor.add_field_visitor([](const t_field& node) {
+      const t_const_value* value = node.default_value();
+      if (value != nullptr && value->is_empty()) {
+        const t_type& true_type = *node.type()->get_true_type();
+        if (value->kind() == t_const_value::CV_MAP &&
+            (true_type.is<t_list>() || true_type.is<t_set>())) {
+          const_cast<t_const_value*>(value)->convert_empty_map_to_list();
+        } else if (
+            value->kind() == t_const_value::CV_LIST && true_type.is<t_map>()) {
+          const_cast<t_const_value*>(value)->convert_empty_list_to_map();
+        }
+      }
+    });
+  }
+
  private:
   prototype<python_generator_context>::ptr make_prototype_for_context() const {
     whisker::dsl::prototype_builder<
@@ -1309,7 +1293,8 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
   void generate_clients();
   void generate_services();
 
-  void initialize_context(context_visitor&) override {
+  void initialize_context(context_visitor& visitor) override {
+    t_mstch_python_prototypes_generator::initialize_context(visitor);
     python_context_ = std::make_shared<python_generator_context>(
         /*is_patch_file=*/false, type_kind::abstract);
   }
@@ -1323,7 +1308,6 @@ void t_mstch_python_generator::set_mstch_factories() {
   mstch_context_.add<python_mstch_interaction>();
   mstch_context_.add<python_mstch_function>();
   mstch_context_.add<python_mstch_struct>();
-  mstch_context_.add<python_mstch_field>();
 }
 
 void t_mstch_python_generator::generate_file(
@@ -1456,7 +1440,8 @@ class t_python_patch_generator : public t_mstch_python_prototypes_generator {
   }
 
  protected:
-  void initialize_context(context_visitor&) override {
+  void initialize_context(context_visitor& visitor) override {
+    t_mstch_python_prototypes_generator::initialize_context(visitor);
     python_context_ = std::make_shared<python_generator_context>(
         /*is_patch_file=*/true, type_kind::immutable);
   }
@@ -1465,7 +1450,6 @@ class t_python_patch_generator : public t_mstch_python_prototypes_generator {
   void set_mstch_factories() {
     mstch_context_.add<python_mstch_program>();
     mstch_context_.add<python_mstch_struct>();
-    mstch_context_.add<python_mstch_field>();
   }
 };
 

@@ -29,7 +29,6 @@ using testing::ThrowsMessage;
 const auto good_def_names = {
     "type",
     "Type",
-    "other-type",
     "other_type",
     "4",
 };
@@ -44,13 +43,12 @@ const auto bad_def_names = {
     "type#1",
     "type@",
     "type@1",
+    "other-type",
 };
 
 const auto good_package_names = {
     "foo.com/my",
     "foo.com/m_y",
-    "foo.com/m-y",
-    "foo-bar.com/my",
     "foo.com/my/type",
     "1.2/3",
 };
@@ -78,6 +76,8 @@ const auto bad_package_names = {
     "foo.com/m@y",
     "foo.com/my/ty@pe",
     "foo_bar.com/my",
+    "foo-bar.com/my",
+    "foo.com/m-y",
 };
 
 std::string gen_uri(const char* package, const char* name) {
@@ -128,9 +128,9 @@ TEST(UniversalNameTest, validate_universal_name_bulk) {
   // @lint-ignore-every CLANGTIDY facebook-hte-StdRegexIsAwful
   std::regex pattern(fmt::format(
       "{0}(\\.{0})+\\/{1}(\\/{1})*(\\/{2})",
-      "[a-z0-9-]+",
-      "[a-z0-9_-]+",
-      "[a-zA-Z0-9_-]+"));
+      "[a-z0-9]+",
+      "[a-z0-9_]+",
+      "[a-zA-Z0-9_]+"));
   for (const std::string& good : gen_good_def_uris()) {
     SCOPED_TRACE(good);
     EXPECT_TRUE(std::regex_match(good, pattern));

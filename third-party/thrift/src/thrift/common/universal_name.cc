@@ -65,7 +65,7 @@ void check(bool cond, fmt::format_string<T...> msg, T&&... args) {
 }
 
 bool is_domain_char(char c) {
-  return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || c == '-';
+  return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z');
 }
 
 bool is_path_char(char c) {

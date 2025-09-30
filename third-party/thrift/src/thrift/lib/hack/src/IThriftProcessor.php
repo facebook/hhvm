@@ -23,8 +23,7 @@
  */
 <<Oncalls('thrift')>> // @oss-disable
 interface IThriftProcessor {
-  abstract const classname<\IThriftServiceStaticMetadata>
-    SERVICE_METADATA_CLASS;
+  abstract const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS;
   abstract const string THRIFT_SVC_NAME;
 
   public function getEventHandler()[]: TProcessorEventHandler;

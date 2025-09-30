@@ -27,6 +27,9 @@ struct ResponseAndServerStream;
 template <typename Response, typename SinkElement, typename FinalResponse>
 class ResponseAndSinkConsumer;
 
+template <typename Response, typename InputElement, typename OutputElement>
+struct ResponseAndStreamTransformation;
+
 namespace detail {
 
 // I found 64 bytes from here https://fburl.com/wiki/nstmt10g
@@ -85,6 +88,17 @@ struct DecoratorReturnType<ResponseAndSinkConsumer<
     std::unique_ptr<Response>,
     SinkElement,
     FinalResponse>> : public DecoratorReturnType<Response> {};
+
+template <typename Response, typename InputElement, typename OutputElement>
+struct DecoratorReturnType<
+    ResponseAndStreamTransformation<Response, InputElement, OutputElement>>
+    : public DecoratorReturnType<Response> {};
+
+template <typename Response, typename InputElement, typename OutputElement>
+struct DecoratorReturnType<ResponseAndStreamTransformation<
+    std::unique_ptr<Response>,
+    InputElement,
+    OutputElement>> : public DecoratorReturnType<Response> {};
 
 } // namespace detail
 

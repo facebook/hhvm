@@ -256,6 +256,12 @@ void HandlerCallbackBase::sendReply(
 #endif
 }
 
+void HandlerCallbackBase::sendReply(
+    ResponseAndServerBiDiStreamFactory&& /*responseAndServerBiDiStreamFactory*/) {
+  throw std::logic_error(
+      "TODO(ezou) unimplemented HandlerCallbackBase::sendReply");
+}
+
 bool HandlerCallbackBase::fulfillTilePromise(std::unique_ptr<Tile> ptr) {
   if (!ptr) {
     DLOG(FATAL) << "Nullptr interaction yielded from handler";

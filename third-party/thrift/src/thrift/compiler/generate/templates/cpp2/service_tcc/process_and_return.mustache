@@ -92,10 +92,6 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::setUpAndProcess_{{functi
 template <typename ProtocolIn_, typename ProtocolOut_>
 void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}(
     apache::thrift::ServerRequest&& serverRequest) {
-{{#if function:self.bidirectional_stream?}}
-  std::ignore = serverRequest;
-  apache::thrift::detail::si::throw_app_exn_unimplemented("{{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_");
-{{#else}}
 {{#if in_or_creates_interaction?}}
   auto tile = serverRequest.requestContext()->releaseTile();
 {{/if in_or_creates_interaction?}}
@@ -300,7 +296,6 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
 #else
   makeExecuteHandler()(std::move(callback), std::move(args));
 #endif // FOLLY_HAS_COROUTINES
-{{/if function:self.bidirectional_stream?}}
 }
 
 {{^function:oneway?}}

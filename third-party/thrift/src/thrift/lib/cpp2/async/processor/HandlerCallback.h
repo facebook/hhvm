@@ -724,6 +724,60 @@ struct HandlerCallbackHelper<SinkConsumer<SinkElement, FinalResponse>>
             void> {};
 };
 
+template <typename In, typename Out>
+struct HandlerCallbackHelper<StreamTransformation<In, Out>> {
+  using InnerType = StreamTransformation<In, Out>&&;
+  using InputType = StreamTransformation<In, Out>&&;
+  using CobPtr = ResponseAndServerBiDiStreamFactory (*)(
+      ContextStack*, folly::Executor::KeepAlive<>, InputType);
+  static ResponseAndServerBiDiStreamFactory call(
+      CobPtr cob, ContextStack* ctx, folly::Executor* ex, InputType input) {
+    return cob(ctx, ex, std::move(input));
+  }
+
+  struct DecoratorAfterCallback : public DecoratorAfterCallbackWithResult<
+                                      DecoratorAfterCallback,
+                                      const StreamTransformation<In, Out>&,
+                                      void> {};
+};
+
+template <typename Response, typename In, typename Out>
+struct HandlerCallbackHelper<
+    ResponseAndStreamTransformation<Response, In, Out>> {
+  using InnerType = ResponseAndStreamTransformation<Response, In, Out>&&;
+  using InputType = ResponseAndStreamTransformation<Response, In, Out>&&;
+  using CobPtr = ResponseAndServerBiDiStreamFactory (*)(
+      ContextStack*, folly::Executor::KeepAlive<>, InputType);
+  static ResponseAndServerBiDiStreamFactory call(
+      CobPtr cob, ContextStack* ctx, folly::Executor* ex, InputType input) {
+    return cob(ctx, ex, std::move(input));
+  }
+
+  struct DecoratorAfterCallback
+      : public DecoratorAfterCallbackWithResult<
+            DecoratorAfterCallback,
+            const ResponseAndStreamTransformation<Response, In, Out>&,
+            typename DecoratorArgType<
+                typename inner_type<Response>::type>::type> {
+    using ArgType =
+        typename DecoratorArgType<typename inner_type<Response>::type>::type;
+
+    template <typename InnerResponseType>
+    static constexpr ArgType extractDecoratorArg(
+        const ResponseAndStreamTransformation<InnerResponseType, In, Out>&
+            result) {
+      return result.response;
+    }
+
+    template <ResponseIsUniquePtr InnerResponseType>
+    static constexpr ArgType extractDecoratorArg(
+        const ResponseAndStreamTransformation<InnerResponseType, In, Out>&
+            result) {
+      return *result.response;
+    }
+  };
+};
+
 } // namespace detail
 
 } // namespace apache::thrift

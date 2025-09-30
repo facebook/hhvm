@@ -18,6 +18,7 @@
 
 #include <thrift/lib/cpp2/TrustedServerException.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
+#include <thrift/lib/cpp2/async/ServerBiDiStreamFactory.h>
 #include <thrift/lib/cpp2/async/ServerRequestData.h>
 #include <thrift/lib/cpp2/server/DecoratorArgType.h>
 #include <thrift/lib/cpp2/server/IOWorkerContext.h>
@@ -376,6 +377,14 @@ class HandlerCallbackBase {
 
   void sendReply(SerializedResponse response);
   void sendReply(ResponseAndServerStreamFactory&& responseAndStream);
+#if !FOLLY_HAS_COROUTINES
+  [[noreturn]]
+#endif
+  void sendReply(
+      [[maybe_unused]] std::pair<SerializedResponse, detail::SinkConsumerImpl>&&
+          responseAndSinkConsumer);
+  [[noreturn]] void sendReply(
+      ResponseAndServerBiDiStreamFactory&& responseAndStream);
 
   bool fulfillTilePromise(std::unique_ptr<Tile> ptr);
   void breakTilePromise();
@@ -396,14 +405,6 @@ class HandlerCallbackBase {
       HandlerCallbackBase&,
       detail::ServiceInterceptorOnRequestArguments arguments);
 #endif // FOLLY_HAS_COROUTINES
-
-#if !FOLLY_HAS_COROUTINES
-  [[noreturn]]
-#endif
-  void sendReply(
-      [[maybe_unused]] std::pair<
-          apache::thrift::SerializedResponse,
-          apache::thrift::detail::SinkConsumerImpl>&& responseAndSinkConsumer);
 
   // Required for this call
   ResponseChannelRequest::UniquePtr req_;

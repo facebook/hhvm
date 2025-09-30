@@ -83,7 +83,7 @@ CO_TEST_F(BiDiServiceTest, BiDiNoResponse) {
   } catch (TApplicationException e) {
     EXPECT_EQ(
         e.getMessage(),
-        "AsyncProcessorHelper::executeRequest(...) caught an unhandled exception: apache::thrift::TrustedServerException: Function TestBiDiServiceAsyncProcessor::executeRequest_ is unimplemented");
+        "std::logic_error: TODO(ezou) unimplemented HandlerCallbackBase::sendReply");
   }
 }
 
@@ -95,7 +95,7 @@ CO_TEST_F(BiDiServiceTest, BiDiWithResponse) {
   } catch (TApplicationException e) {
     EXPECT_EQ(
         e.getMessage(),
-        "AsyncProcessorHelper::executeRequest(...) caught an unhandled exception: apache::thrift::TrustedServerException: Function TestBiDiServiceAsyncProcessor::executeRequest_ is unimplemented");
+        "std::logic_error: TODO(ezou) unimplemented HandlerCallbackBase::sendReply");
   }
 }
 

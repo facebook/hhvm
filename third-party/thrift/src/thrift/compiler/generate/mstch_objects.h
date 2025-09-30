@@ -735,6 +735,8 @@ class mstch_struct : public mstch_base {
             {"struct:fields", &mstch_struct::fields},
             {"struct:fields_in_serialization_order",
              &mstch_struct::fields_in_serialization_order},
+            {"struct:has_serialize_in_field_id_order_annotation?",
+             &mstch_struct::has_serialize_in_field_id_order_annotation},
             {"struct:structured_annotations",
              &mstch_struct::structured_annotations},
         });
@@ -766,6 +768,10 @@ class mstch_struct : public mstch_base {
 
   mstch::node fields_in_serialization_order() {
     return make_mstch_fields(get_members_in_serialization_order());
+  }
+
+  mstch::node has_serialize_in_field_id_order_annotation() {
+    return struct_->has_structured_annotation(kSerializeInFieldIdOrderUri);
   }
 
  protected:

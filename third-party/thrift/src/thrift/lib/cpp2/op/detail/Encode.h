@@ -544,7 +544,12 @@ struct StructEncode {
     uint32_t s = 0;
     s += prot.writeStructBegin(op::get_class_name_v<T>.data());
     op::for_each_ordinal<T>([&](auto id) {
-      using Id = decltype(id);
+      // To respect the SerializeInFieldIdOrder annotation, we perform a custom
+      // mapping to FieldId that may switch the current ordinal being visited.
+      // This new field id is the source of truth, and the old ordinal value
+      // should not be used in this function.
+      using Id = type::field_id<detail::pa::field_ids_in_serialization_order<
+          T>()[static_cast<size_t>(decltype(id)::value)]>;
       using Tag = op::get_type_tag<T, Id>;
       auto&& field = op::get<Id>(t);
       if (!should_write<Tag>(field)) {
@@ -554,7 +559,7 @@ struct StructEncode {
       s += prot.writeFieldBegin(
           &*op::get_name_v<T, Id>.begin(),
           typeTagToTType<Tag>,
-          folly::to_underlying(op::get_field_id<T, Id>::value));
+          folly::to_underlying(Id::value));
       s += Encode<Tag>{}(prot, *field);
       s += prot.writeFieldEnd();
     });

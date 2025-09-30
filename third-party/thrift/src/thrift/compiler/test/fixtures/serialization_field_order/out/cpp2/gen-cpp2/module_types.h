@@ -87,6 +87,7 @@ class Foo final  {
   static constexpr std::size_t __fbthrift_num_fields = 3;
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,3,1,2};
+  static constexpr const int16_t __fbthrift_reflection_field_ids_in_serialization_order[] = {0,1,2,3};
 
   using __fbthrift_reflection_idents = folly::tag_t<
     ::apache::thrift::ident::field1,

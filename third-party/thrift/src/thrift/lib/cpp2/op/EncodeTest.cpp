@@ -27,6 +27,7 @@
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/test/AdapterTest.h>
+#include <thrift/test/gen-cpp2/SerializationInFieldIdOrder_types.h>
 #include <thrift/test/testset/Testset.h>
 
 using namespace ::apache::thrift::conformance;
@@ -892,4 +893,20 @@ TEST(EncodeTest, kSortKeys) {
   EXPECT_EQ(readMap, (OrderPreservingMap{{{1, 0}, {2, 0}, {3, 0}}}));
 }
 
+TEST(EncodeTest, SerializeInFieldIdOrder) {
+  test::Foo foo;
+  folly::IOBufQueue queue;
+  CompactProtocolWriter writer;
+  writer.setOutput(&queue);
+  op::encode<type::struct_t<test::Foo>>(writer, foo);
+  auto serialized = queue.move();
+  CompactProtocolReader reader;
+  reader.setInput(serialized.get());
+  std::string ignore;
+  int16_t fieldId;
+  TType fieldType;
+  reader.readStructBegin(ignore);
+  reader.readFieldBegin(ignore, fieldType, fieldId);
+  EXPECT_EQ(fieldId, 1);
+}
 } // namespace apache::thrift::op::detail

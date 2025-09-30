@@ -234,6 +234,16 @@ struct struct_private_access {
   static constexpr const int16_t* field_ids() {
     return T::__fbthrift_reflection_field_ids;
   }
+  template <typename T>
+  static constexpr const int16_t* field_ids_in_serialization_order() {
+    if constexpr (requires {
+                    T::__fbthrift_reflection_field_ids_in_serialization_order;
+                  }) {
+      return T::__fbthrift_reflection_field_ids_in_serialization_order;
+    } else {
+      return T::__fbthrift_reflection_field_ids;
+    }
+  }
 
   // This is a function and not an alias to workaround a bug in clang 18 and
   // older: https://github.com/llvm/llvm-project/issues/66604.

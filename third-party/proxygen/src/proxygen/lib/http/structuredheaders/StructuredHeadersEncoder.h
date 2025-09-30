@@ -8,19 +8,14 @@
 
 #pragma once
 
-#include <boost/iostreams/device/back_inserter.hpp>
-#include <boost/iostreams/stream_buffer.hpp>
-#include <ostream>
 #include <proxygen/lib/http/structuredheaders/StructuredHeadersConstants.h>
+#include <sstream>
 #include <string>
 #include <vector>
 
 namespace proxygen {
 
 using namespace StructuredHeaders;
-
-using string_buf = boost::iostreams::stream_buffer<
-    boost::iostreams::back_insert_device<std::string>>;
 
 class StructuredHeadersEncoder {
 
@@ -56,9 +51,7 @@ class StructuredHeadersEncoder {
 
   EncodeError handleEncodeError(EncodeError err);
 
-  std::string output_;
-  string_buf buf_;
-  std::ostream outputStream_;
+  std::ostringstream outputStream_;
 };
 
 } // namespace proxygen

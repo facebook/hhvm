@@ -116,8 +116,7 @@ EncodeError StructuredHeadersEncoder::encodeParameterisedList(
   return EncodeError::OK;
 }
 
-StructuredHeadersEncoder::StructuredHeadersEncoder()
-    : output_(), buf_(output_), outputStream_(&buf_) {
+StructuredHeadersEncoder::StructuredHeadersEncoder() {
   outputStream_.precision(kMaxValidFloatLength - 1);
 }
 
@@ -240,8 +239,7 @@ EncodeError StructuredHeadersEncoder::handleEncodeError(EncodeError err) {
 }
 
 std::string StructuredHeadersEncoder::get() {
-  outputStream_.flush();
-  return std::move(output_);
+  return outputStream_.str();
 }
 
 } // namespace proxygen

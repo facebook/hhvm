@@ -30,6 +30,7 @@
 #include <folly/container/span.h>
 #include <folly/lang/Assume.h>
 #include <folly/lang/Exception.h>
+#include <folly/lang/SafeAssert.h>
 #include <folly/memory/not_null.h>
 
 #include <fmt/core.h>
@@ -895,6 +896,16 @@ struct FastFieldHandle {
    * The 1-based index into a StructuredNode's fields array.
    */
   std::uint16_t ordinal;
+  /**
+   * The 0-based index into a StructuredNode's fields array.
+   *
+   * Preconditions:
+   *   - valid() == true
+   */
+  std::uint16_t index() const noexcept {
+    FOLLY_SAFE_DCHECK(valid(), "invalid handle");
+    return ordinal - 1;
+  }
 
   /**
    * This is a sentinel value that indicates an invalid handle — i.e. a field is
@@ -905,6 +916,10 @@ struct FastFieldHandle {
   }
   bool valid() const noexcept { return ordinal != 0; }
   explicit operator bool() const noexcept { return valid(); }
+
+  static FastFieldHandle fromIndex(std::uint16_t index) noexcept {
+    return FastFieldHandle{std::uint16_t(index + 1)};
+  }
 
   friend bool operator==(
       const FastFieldHandle& lhs, const FastFieldHandle& rhs) {

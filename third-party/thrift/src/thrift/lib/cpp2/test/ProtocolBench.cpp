@@ -67,9 +67,8 @@ enum class SerializerMethod {
 template <
     SerializerMethod kSerializerMethod,
     typename Serializer,
-    typename Struct,
-    typename Counter>
-void writeBench(size_t iters, Counter&&) {
+    typename Struct>
+void writeBench(size_t iters) {
   folly::BenchmarkSuspender susp;
   auto strct = create<Struct>();
   protocol::Object obj;
@@ -103,9 +102,8 @@ void writeBench(size_t iters, Counter&&) {
 template <
     SerializerMethod kSerializerMethod,
     typename Serializer,
-    typename Struct,
-    typename Counter>
-void readBench(size_t iters, Counter&& counter) {
+    typename Struct>
+void readBench(size_t iters) {
   folly::BenchmarkSuspender susp;
   auto strct = create<Struct>();
   folly::IOBufQueue q;
@@ -126,7 +124,6 @@ void readBench(size_t iters, Counter&& counter) {
     }
   }
   susp.rehire();
-  counter["serialized_size"] = buf->computeChainDataLength();
 }
 
 constexpr SerializerMethod getSerializerMethod(std::string_view prefix) {
@@ -136,13 +133,12 @@ constexpr SerializerMethod getSerializerMethod(std::string_view prefix) {
       : throw std::invalid_argument(std::string(prefix) + " is invalid");
 }
 
-#define X1(Prefix, proto, rdwr, bench, benchprefix)               \
-  BENCHMARK_COUNTERS(                                             \
-      Prefix##proto##Protocol_##rdwr##_##bench, counter, iters) { \
-    rdwr##Bench<                                                  \
-        getSerializerMethod(#Prefix),                             \
-        proto##Serializer,                                        \
-        benchprefix##bench>(iters, counter);                      \
+#define X1(Prefix, proto, rdwr, bench, benchprefix)            \
+  BENCHMARK(Prefix##proto##Protocol_##rdwr##_##bench, iters) { \
+    rdwr##Bench<                                               \
+        getSerializerMethod(#Prefix),                          \
+        proto##Serializer,                                     \
+        benchprefix##bench>(iters);                            \
   }
 
 // clang-format off

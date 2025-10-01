@@ -34,6 +34,7 @@ import (
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/rocket"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 )
 
 type rocketServer struct {
@@ -221,14 +222,14 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 
 	requestReceivedTime := time.Now()
 
-	_, request, err := rocket.DecodeRequestPayload(msg)
+	metadata, request, err := rocket.DecodeRequestPayload(msg)
 	if err != nil {
 		// Notify observer that connection was dropped and task killed due to malformed rocket payload
 		s.observer.ConnDropped()
 		s.observer.TaskKilled()
 		return mono.Error(err)
 	}
-	protocol, err := newProtocolBufferFromRequest(request)
+	protocol, err := newProtocolBufferFromRequest(msg.Data(), metadata, request)
 	if err != nil {
 		// Notify observer that connection was dropped and task killed due to protocol buffer creation error
 		s.observer.ConnDropped()
@@ -300,7 +301,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 
 	requestReceivedTime := time.Now()
 
-	_, request, err := rocket.DecodeRequestPayload(msg)
+	metadata, request, err := rocket.DecodeRequestPayload(msg)
 	if err != nil {
 		// Notify observer that connection was dropped and task killed due to malformed rocket payload
 		s.observer.ConnDropped()
@@ -308,7 +309,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 		s.log("rocketServer fireAndForget decode request payload error: %v", err)
 		return
 	}
-	protocol, err := newProtocolBufferFromRequest(request)
+	protocol, err := newProtocolBufferFromRequest(msg.Data(), metadata, request)
 	if err != nil {
 		// Notify observer that connection was dropped and task killed due to protocol buffer creation error
 		s.observer.ConnDropped()
@@ -355,7 +356,7 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 	return flux.Error(errors.New("not implemented"))
 }
 
-func newProtocolBufferFromRequest(request *rocket.RequestPayload) (*protocolBuffer, error) {
+func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata.RequestRpcMetadata, request *rocket.RequestPayload) (*protocolBuffer, error) {
 	protocol, err := newProtocolBuffer(request.ProtoID(), request.Data())
 	if err != nil {
 		return nil, err

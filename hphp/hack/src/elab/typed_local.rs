@@ -486,23 +486,23 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                     }
                     self.add_local(name.to_string(), Some(as_hint.clone()), pos);
                     self.add_declared_id(name);
-                    if self.should_elab
-                        && let Some(expr) = expr
-                    {
-                        self.wrap_rhs_with_as(expr, as_hint, pos);
-                        let mut init_lid = Lid(Pos::NONE, (0, "".to_string()));
-                        std::mem::swap(&mut init_lid, lid);
-                        let mut init_expr = Expr((), Pos::NONE, Expr_::Null);
-                        std::mem::swap(expr, &mut init_expr);
-                        let assign_expr_ = Expr_::mk_assign(
-                            Expr((), pos.clone(), Expr_::Lvar(Box::new(init_lid))),
-                            None,
-                            init_expr,
-                        );
-                        let assign_expr = Expr((), pos.clone(), assign_expr_);
-                        *stmt_ = Stmt_::Expr(Box::new(assign_expr));
-                    } else if self.should_elab {
-                        *stmt_ = Stmt_::Noop;
+                    if self.should_elab {
+                        if let Some(expr) = expr {
+                            self.wrap_rhs_with_as(expr, as_hint, pos);
+                            let mut init_lid = Lid(Pos::NONE, (0, "".to_string()));
+                            std::mem::swap(&mut init_lid, lid);
+                            let mut init_expr = Expr((), Pos::NONE, Expr_::Null);
+                            std::mem::swap(expr, &mut init_expr);
+                            let assign_expr_ = Expr_::mk_assign(
+                                Expr((), pos.clone(), Expr_::Lvar(Box::new(init_lid))),
+                                None,
+                                init_expr,
+                            );
+                            let assign_expr = Expr((), pos.clone(), assign_expr_);
+                            *stmt_ = Stmt_::Expr(Box::new(assign_expr));
+                        } else {
+                            *stmt_ = Stmt_::Noop;
+                        }
                     } else {
                         std::mem::swap(hint, &mut as_hint);
                     }

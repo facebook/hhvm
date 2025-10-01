@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 #![feature(box_patterns)]
-#![cfg_attr(not(rust_lib_feature = "let_chains"), feature(let_chains))]
 
 mod elab_utils;
 mod env;

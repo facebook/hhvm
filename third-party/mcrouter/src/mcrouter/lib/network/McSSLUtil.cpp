@@ -158,7 +158,7 @@ folly::AsyncTransportWrapper::UniquePtr McSSLUtil::moveToPlaintext(
 
   // Get the stats for the socket
   SecurityTransportStats stats;
-  stats.tfoSuccess = sock.getTFOSucceded();
+  stats.tfoSuccess = sock.getTFOSucceeded();
   stats.tfoAttempted = sock.getTFOAttempted();
   stats.tfoFinished = sock.getTFOFinished();
   stats.sessionReuseSuccess = sock.getSSLSessionReused();

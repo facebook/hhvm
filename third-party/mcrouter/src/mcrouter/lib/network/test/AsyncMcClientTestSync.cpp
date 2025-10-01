@@ -998,7 +998,7 @@ TEST_P(AsyncMcClientTFOTest, testTfoWithSSL) {
               // we can not guarantee socket->getTFOSucceeded() will return true
               // unless there are specific kernel + host settings applied
               if (!serverEnabled) {
-                EXPECT_FALSE(socket->getTFOSucceded());
+                EXPECT_FALSE(socket->getTFOSucceeded());
               }
             } else {
               EXPECT_FALSE(socket->getTFOAttempted());

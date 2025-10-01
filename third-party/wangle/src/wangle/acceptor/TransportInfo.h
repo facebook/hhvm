@@ -343,14 +343,14 @@ struct TransportInfo {
   std::shared_ptr<fizz::server::HandshakeLogging> handshakeLogging;
 
   /*
-   * Whether or not TCP fast open succeded on this connection. Failure can occur
-   * due to several reasons, including cookies not matching or TFO not being
-   * advertised by the client.
+   * Whether or not TCP fast open succeeded on this connection. Failure can
+   * occur due to several reasons, including cookies not matching or TFO not
+   * being advertised by the client.
    */
-  bool tfoSucceded{false};
+  bool tfoSucceeded{false};
 
   /*
-   * Stores the TokenBindingKeyParameter that was negotiatied during the
+   * Stores the TokenBindingKeyParameter that was negotiated during the
    * handshake. Needed for the validation step of Token Binding.
    */
   folly::Optional<uint8_t> negotiatedTokenBindingKeyParameters;

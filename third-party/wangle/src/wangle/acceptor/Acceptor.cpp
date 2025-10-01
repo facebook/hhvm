@@ -407,7 +407,7 @@ void Acceptor::processEstablishedConnection(
       return;
     }
 
-    tinfo.tfoSucceded = sslSock->getTFOSucceded();
+    tinfo.tfoSucceeded = sslSock->getTFOSucceeded();
     for (const auto& cb : observerList_.getAll()) {
       cb->accept(sslSock.get());
     }
@@ -420,7 +420,7 @@ void Acceptor::processEstablishedConnection(
     if (observer) {
       sock->addLifecycleObserver(observer);
     }
-    tinfo.tfoSucceded = sock->getTFOSucceded();
+    tinfo.tfoSucceeded = sock->getTFOSucceeded();
     for (const auto& cb : observerList_.getAll()) {
       cb->accept(sock.get());
     }

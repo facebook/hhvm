@@ -615,8 +615,8 @@ function::ptr make_function(std::string name, F&& function) {
       [f = std::decay_t<F>(std::forward<F>(function))](
           function::context ctx) -> object {
         if constexpr (detail::function_returning<F, boolean>) {
-          return f(std::move(ctx)) ? whisker::make::true_
-                                   : whisker::make::false_;
+          return f(std::move(ctx)) ? whisker::make::true_value
+                                   : whisker::make::false_value;
         } else if constexpr (detail::function_returning<F, null>) {
           f(std::move(ctx));
           return whisker::make::null;

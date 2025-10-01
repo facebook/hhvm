@@ -609,8 +609,8 @@ TEST_F(StandardLibraryTest, object_eq) {
   }
 
   {
-    const map::raw m1{{"foo", w::string("bar")}, {"baz", w::true_}};
-    const map::raw m2{{"foo", w::string("bar")}, {"baz", w::false_}};
+    const map::raw m1{{"foo", w::string("bar")}, {"baz", w::true_value}};
+    const map::raw m2{{"foo", w::string("bar")}, {"baz", w::false_value}};
     const auto context = w::map({
         {"m1", w::map(m1)},
         {"wrapped_m1", custom_map::make(m1)},

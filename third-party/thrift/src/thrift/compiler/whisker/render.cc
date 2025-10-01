@@ -594,10 +594,10 @@ class virtual_machine {
           return whisker::make::null;
         },
         [](const expression::true_literal&) -> object {
-          return whisker::make::true_;
+          return whisker::make::true_value;
         },
         [](const expression::false_literal&) -> object {
-          return whisker::make::false_;
+          return whisker::make::false_value;
         },
         [&](const ast::variable_lookup& variable_lookup) -> object {
           return lookup_variable(variable_lookup).found;
@@ -610,28 +610,28 @@ class virtual_machine {
                 assert(func.positional_arguments.size() == 1);
                 assert(func.named_arguments.empty());
                 return evaluate_as_bool(func.positional_arguments[0])
-                    ? whisker::make::false_
-                    : whisker::make::true_;
+                    ? whisker::make::false_value
+                    : whisker::make::true_value;
               },
               [&](function_call::builtin_and) -> object {
                 // enforced by the parser
                 assert(func.named_arguments.empty());
                 for (const expression& arg : func.positional_arguments) {
                   if (!evaluate_as_bool(arg)) {
-                    return whisker::make::false_;
+                    return whisker::make::false_value;
                   }
                 }
-                return whisker::make::true_;
+                return whisker::make::true_value;
               },
               [&](function_call::builtin_or) -> object {
                 // enforced by the parser
                 assert(func.named_arguments.empty());
                 for (const expression& arg : func.positional_arguments) {
                   if (evaluate_as_bool(arg)) {
-                    return whisker::make::true_;
+                    return whisker::make::true_value;
                   }
                 }
-                return whisker::make::false_;
+                return whisker::make::false_value;
               },
               [&](function_call::builtin_ternary) -> object {
                 // enforced by the parser

@@ -217,11 +217,11 @@ TEST(ObjectTest, map_array_equality) {
 
 TEST(ObjectTest, prototype_find_descriptor) {
   auto parent = prototype<>::from(
-      {{"parent_prop", w::true_}, {"overridden", w::string("base")}},
+      {{"parent_prop", w::true_value}, {"overridden", w::string("base")}},
       nullptr,
       "parent");
   auto child = prototype<>::from(
-      {{"child_prop", w::true_}, {"overridden", w::string("inherited")}},
+      {{"child_prop", w::true_value}, {"overridden", w::string("inherited")}},
       parent,
       "child");
 
@@ -240,10 +240,11 @@ TEST(ObjectTest, prototype_find_descriptor) {
 
   // Parent
   EXPECT_EQ(
-      w::true_, unwrap_descriptor(parent->find_descriptor("", "parent_prop")))
+      w::true_value,
+      unwrap_descriptor(parent->find_descriptor("", "parent_prop")))
       << "parent_prop should be accessible with no name qualifier";
   EXPECT_EQ(
-      w::true_,
+      w::true_value,
       unwrap_descriptor(parent->find_descriptor("parent", "parent_prop")))
       << "parent_prop should be accessible with parent's name qualifier";
 
@@ -266,22 +267,24 @@ TEST(ObjectTest, prototype_find_descriptor) {
 
   // Child
   EXPECT_EQ(
-      w::true_, unwrap_descriptor(child->find_descriptor("", "parent_prop")))
+      w::true_value,
+      unwrap_descriptor(child->find_descriptor("", "parent_prop")))
       << "parent_prop should be accessible on child without name qualifier";
   EXPECT_EQ(
-      w::true_,
+      w::true_value,
       unwrap_descriptor(child->find_descriptor("child", "parent_prop")))
       << "parent_prop should be accessible with child's name qualifier";
   EXPECT_EQ(
-      w::true_,
+      w::true_value,
       unwrap_descriptor(child->find_descriptor("parent", "parent_prop")))
       << "parent_prop should be accessible with parent's name qualifier";
 
   EXPECT_EQ(
-      w::true_, unwrap_descriptor(child->find_descriptor("", "child_prop")))
+      w::true_value,
+      unwrap_descriptor(child->find_descriptor("", "child_prop")))
       << "child_prop should be accessible on child";
   EXPECT_EQ(
-      w::true_,
+      w::true_value,
       unwrap_descriptor(child->find_descriptor("child", "child_prop")))
       << "child_prop should be accessible with child's name qualifier";
 

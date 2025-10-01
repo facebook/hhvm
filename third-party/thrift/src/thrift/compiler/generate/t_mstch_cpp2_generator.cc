@@ -459,7 +459,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     // This restriction only applies within the same program - module_types.h
     // CAN include and reference consts from other programs.
     globals["cpp_enable_same_program_const_referencing?"] =
-        whisker::make::true_;
+        whisker::make::true_value;
     globals["cpp_fatal_string_id"] = whisker::dsl::make_function(
         "cpp_fatal_string_id",
         [](whisker::dsl::function::context ctx) -> whisker::object {

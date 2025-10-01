@@ -73,11 +73,16 @@ from thrift.python.streaming.sink cimport (
     cSinkConsumer,
     makeIOBufSinkConsumer,
 )
+from thrift.python.streaming.bidistream cimport (
+    cStreamTransformation,
+    cResponseAndStreamTransformation,
+)
 
 
 ctypedef unique_ptr[cIOBuf] UniqueIOBuf
 ctypedef cResponseAndServerStream[UniqueIOBuf, UniqueIOBuf] StreamResponse
 ctypedef cResponseAndSinkConsumer[UniqueIOBuf, UniqueIOBuf, UniqueIOBuf] SinkResponse
+ctypedef cResponseAndStreamTransformation[UniqueIOBuf, UniqueIOBuf, UniqueIOBuf] BiDiResponse
 
 @cython.final
 cdef class ServerSink_IOBuf:
@@ -210,6 +215,50 @@ cdef class ResponseAndServerStream:
         )
         return inst
 
+cdef class StreamTransformation_IOBuf:
+    cdef unique_ptr[cStreamTransformation[UniqueIOBuf, UniqueIOBuf]] _cBidi
+
+    @staticmethod
+    cdef _fbthrift_create(object sink_callback, object stream):
+        cdef StreamTransformation_IOBuf inst = StreamTransformation_IOBuf.__new__(StreamTransformation_IOBuf)
+        # TODO: Just bind the struct for now and create function to set instances
+        return inst
+
+cdef class ResponseAndStreamTransformation:
+    cdef unique_ptr[BiDiResponse] _cResponseBidi
+
+    @staticmethod
+    cdef _fbthrift_create(object val, object bidi):
+        cdef ResponseAndStreamTransformation inst = ResponseAndStreamTransformation.__new__(ResponseAndStreamTransformation)
+        # TODO: Just bind the struct for now and create function to set instances
+        return inst
+
+cdef class Promise_BiDi(Promise_Py):
+    cdef cFollyPromise[BiDiResponse]* _cPromise
+
+    def __cinit__(self):
+        self._cPromise = new cFollyPromise[BiDiResponse](cFollyPromise[BiDiResponse].makeEmpty())
+
+    def __dealloc__(self):
+        del self._cPromise
+
+    cdef error_ta(Promise_BiDi self, cTApplicationException err):
+        self._cPromise.setException(err)
+
+    cdef error_py(Promise_BiDi self, cPythonUserException err):
+        self._cPromise.setException(cmove(err))
+
+    cdef complete(Promise_BiDi self, object pyobj):
+        self._cPromise.setValue(
+            cmove(dereference(cmove((<ResponseAndStreamTransformation>pyobj)._cResponseBidi)))
+        )
+
+    @staticmethod
+    cdef create(cFollyPromise[BiDiResponse] promise):
+        cdef Promise_BiDi inst = Promise_BiDi.__new__(Promise_BiDi)
+        inst._cPromise[0] = cmove(promise)
+        return inst
+
 async def serverCallback_coro(object callFunc, str funcName, Promise_Py promise, IOBuf buf, Protocol prot, RpcKind kind):
     try:
         if kind is RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE:
@@ -220,6 +269,10 @@ async def serverCallback_coro(object callFunc, str funcName, Promise_Py promise,
             val, sink = await callFunc(buf, prot)
             sink = ServerSink_IOBuf._fbthrift_create(sink)
             val = ResponseAndSinkConsumer._fbthrift_create(val, sink)
+        elif kind is RpcKind.BIDIRECTIONAL_STREAM:
+            val, sink, stream = await callFunc(buf, prot)
+            bidi = StreamTransformation_IOBuf._fbthrift_create(sink, stream)
+            val = ResponseAndStreamTransformation._fbthrift_create(val.response, bidi)
         else:
             val = await callFunc(buf, prot)
     except PythonUserException as pyex:
@@ -342,6 +395,18 @@ cdef api int handleServerSinkCallback(
     RpcKind kind,
 ) except -1:
     cdef Promise_Sink __promise = Promise_Sink.create(cmove(cPromise))
+    return combinedHandler(func, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
+
+cdef api int handleServerBidiCallback(
+    object func,
+    string funcName,
+    Cpp2RequestContext* ctx,
+    cFollyPromise[cResponseAndStreamTransformation[unique_ptr[cIOBuf], unique_ptr[cIOBuf], unique_ptr[cIOBuf]]] cPromise,
+    SerializedRequest serializedRequest,
+    Protocol prot,
+    RpcKind kind,
+) except -1:
+    cdef Promise_BiDi __promise = Promise_BiDi.create(cmove(cPromise))
     return combinedHandler(func, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
 
 cdef api int handleServerCallbackOneway(

@@ -33,7 +33,6 @@ func TestStats(t *testing.T) {
 		"requests.scheduling_work":     0,
 		"requests.scheduling_write":    0,
 		"requests.working":             0,
-		"requests.writing":             0,
 		"running_workers":              0,
 	}
 	require.Equal(t, expectedInts, ints)

@@ -69,7 +69,6 @@ func (stats *ServerStats) GetInts() map[string]int64 {
 	ints["requests.scheduling_work"] = stats.SchedulingWorkCount.Get()
 	ints["requests.working"] = stats.WorkingCount.Get()
 	ints["requests.scheduling_write"] = stats.SchedulingWriteCount.Get()
-	ints["requests.writing"] = stats.WritingCount.Get()
 
 	// server event counters
 	periodStr := fmt.Sprintf("%d", stats.statsPeriod/time.Second)

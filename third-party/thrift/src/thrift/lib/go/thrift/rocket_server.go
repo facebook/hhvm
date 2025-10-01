@@ -271,6 +271,9 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 			return nil, err
 		}
 
+		// Notify observer that function processing completed successfully
+		s.observer.ProcessedFunction(rpcFuncName)
+
 		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats, s.totalActiveRequestCount)))
 
 		responseCompressionAlgo := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
@@ -351,6 +354,9 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 		s.log("rocketServer fireAndForget process error: %v", err)
 		return
 	}
+
+	// Notify observer that function processing completed successfully
+	s.observer.ProcessedFunction(rpcFuncName)
 
 	// Track actual handler execution time
 	processTime := time.Since(processStartTime)

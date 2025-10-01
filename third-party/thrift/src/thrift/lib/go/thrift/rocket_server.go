@@ -229,6 +229,7 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		s.observer.TaskKilled()
 		return mono.Error(err)
 	}
+	rpcFuncName := metadata.GetName()
 	protocol, err := newProtocolBufferFromRequest(msg.Data(), metadata, request)
 	if err != nil {
 		// Notify observer that connection was dropped and task killed due to protocol buffer creation error
@@ -239,7 +240,7 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 
 	// Notify observer that request was received
 	s.observer.ReceivedRequest()
-	s.observer.ReceivedRequestForFunction(protocol.name)
+	s.observer.ReceivedRequestForFunction(rpcFuncName)
 
 	if s.isOverloaded() {
 		// Track connection drops and server overload events when rejecting requests
@@ -273,7 +274,7 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats, s.totalActiveRequestCount)))
 
 		payload, err := rocket.EncodeResponsePayload(
-			protocol.name,
+			rpcFuncName,
 			protocol.messageType,
 			protocol.getRequestHeaders(),
 			request.GetCompressionForResponse(),
@@ -309,6 +310,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 		s.log("rocketServer fireAndForget decode request payload error: %v", err)
 		return
 	}
+	rpcFuncName := metadata.GetName()
 	protocol, err := newProtocolBufferFromRequest(msg.Data(), metadata, request)
 	if err != nil {
 		// Notify observer that connection was dropped and task killed due to protocol buffer creation error
@@ -320,7 +322,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 
 	// Notify observer that request was received
 	s.observer.ReceivedRequest()
-	s.observer.ReceivedRequestForFunction(protocol.name)
+	s.observer.ReceivedRequestForFunction(rpcFuncName)
 
 	if s.isOverloaded() {
 		// Track connection drops and server overload events when rejecting requests

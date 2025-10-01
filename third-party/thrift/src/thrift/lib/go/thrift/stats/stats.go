@@ -45,14 +45,6 @@ type ServerStats struct {
 	// that workers are all blocking) or that the server is overloaded
 	// (in the case the work is all CPU bound)
 	WorkersBusy *TimingSeries
-	// pipeliningUnsupportedClient is an event where a request is coming from
-	// a client that doesn't support out of order responses (see tHeader bit).
-	// This means thwork cannot return out of order responses, and in this case,
-	// thwork will execute the work + respond inline (no pipelining) rather than
-	// send work to worker pool and fan-in the responses in-order.
-	// In practice, this doesn't happen unless we are talking to thwork over raw
-	// connections (not SR/SRProxy) from a pipeline-unsupported client (like Golang)
-	PipeliningUnsupportedClient *TimingSeries
 }
 
 // NewServerStats creates a new ServerStats object.
@@ -71,10 +63,9 @@ func NewServerStats(cfg *TimingConfig, statsPeriod time.Duration) *ServerStats {
 		ClientClosed:            NewTimingSeries(cfg),
 		ConnectionPreemptedWork: NewTimingSeries(cfg),
 
-		ProtocolError:               NewTimingSeries(cfg),
-		PanicCount:                  NewTimingSeries(cfg),
-		WorkersBusy:                 NewTimingSeries(cfg),
-		PipeliningUnsupportedClient: NewTimingSeries(cfg),
+		ProtocolError: NewTimingSeries(cfg),
+		PanicCount:    NewTimingSeries(cfg),
+		WorkersBusy:   NewTimingSeries(cfg),
 	}
 }
 
@@ -102,8 +93,6 @@ func (stats *ServerStats) GetInts() map[string]int64 {
 	ints["connections.protocol_error."+periodStr] = int64(s.Count)
 	s = stats.WorkersBusy.MustSummarize(stats.statsPeriod)
 	ints["requests.workers_busy."+periodStr] = int64(s.Count)
-	s = stats.PipeliningUnsupportedClient.MustSummarize(stats.statsPeriod)
-	ints["requests.pipelining_unsupported_client."+periodStr] = int64(s.Count)
 	s = stats.PanicCount.MustSummarize(stats.statsPeriod)
 	ints["requests.processor_panics."+periodStr] = int64(s.Count)
 

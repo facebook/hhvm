@@ -29,17 +29,16 @@ func TestStats(t *testing.T) {
 
 	ints := stats.GetInts()
 	expectedInts := map[string]int64{
-		"connections.client_ended.60":               0,
-		"connections.connection_preempted_work.60":  0,
-		"connections.protocol_error.60":             0,
-		"requests.pipelining_unsupported_client.60": 0,
-		"requests.processor_panics.60":              0,
-		"requests.scheduling_work":                  0,
-		"requests.scheduling_write":                 0,
-		"requests.workers_busy.60":                  0,
-		"requests.working":                          0,
-		"requests.writing":                          0,
-		"running_workers":                           0,
+		"connections.client_ended.60":              0,
+		"connections.connection_preempted_work.60": 0,
+		"connections.protocol_error.60":            0,
+		"requests.processor_panics.60":             0,
+		"requests.scheduling_work":                 0,
+		"requests.scheduling_write":                0,
+		"requests.workers_busy.60":                 0,
+		"requests.working":                         0,
+		"requests.writing":                         0,
+		"running_workers":                          0,
 	}
 	require.Equal(t, expectedInts, ints)
 }

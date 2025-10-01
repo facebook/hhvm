@@ -29,9 +29,7 @@ func TestWithRequestHeadersDoNotOverride(t *testing.T) {
 	input1 := map[string]string{"key1": "value1"}
 	input2 := map[string]string{"key2": "value2"}
 	want := map[string]string{"key1": "value1", "key2": "value2"}
-	var err error
-	ctx, err = WithRequestHeader(ctx, "key1", "value1")
-	assert.NoError(t, err)
+	ctx = WithRequestHeader(ctx, "key1", "value1")
 	output1 := GetRequestHeadersFromContext(ctx)
 	assert.Equal(t, input1, output1)
 	ctx = WithRequestHeaders(ctx, input2)
@@ -43,9 +41,7 @@ func TestSetHeadersDoesOverride(t *testing.T) {
 	ctx := context.Background()
 	input1 := map[string]string{"key1": "value1"}
 	input2 := map[string]string{"key2": "value2"}
-	var err error
-	ctx, err = WithRequestHeader(ctx, "key1", "value1")
-	assert.NoError(t, err)
+	ctx = WithRequestHeader(ctx, "key1", "value1")
 	output1 := GetRequestHeadersFromContext(ctx)
 	assert.Equal(t, input1, output1)
 	ctx = SetHeaders(ctx, input2)

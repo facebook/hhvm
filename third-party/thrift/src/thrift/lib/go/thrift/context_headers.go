@@ -19,8 +19,6 @@ package thrift
 import (
 	"context"
 	"maps"
-
-	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // The headersKeyType type is unexported to prevent collisions with context keys.
@@ -36,18 +34,8 @@ const (
 // WithRequestHeader adds a header to the context, which will be sent as part of the request.
 // WithRequestHeader can be called multiple times to add multiple headers.
 // These headers are not persistent and will only be sent with the current request.
-func WithRequestHeader(ctx context.Context, key string, value string) (context.Context, error) {
-	headersMap := make(map[string]string)
-	if headers := ctx.Value(requestHeadersKey); headers != nil {
-		var ok bool
-		headersMap, ok = headers.(map[string]string)
-		if !ok {
-			return nil, types.NewTransportException(types.INVALID_HEADERS_TYPE, "Headers key in context value is not map[string]string")
-		}
-	}
-	headersMap[key] = value
-	ctx = context.WithValue(ctx, requestHeadersKey, headersMap)
-	return ctx, nil
+func WithRequestHeader(ctx context.Context, key string, value string) context.Context {
+	return WithRequestHeaders(ctx, map[string]string{key: value})
 }
 
 // WithRequestHeaders attaches thrift headers to a ctx.

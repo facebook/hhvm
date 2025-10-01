@@ -100,8 +100,8 @@ func ResponseHeadersFromContext(ctx context.Context) map[string]string {
 	return responseHeadersMap
 }
 
-// RequestHeadersFromContext returns the request headers from the context.
-func RequestHeadersFromContext(ctx context.Context) map[string]string {
+// GetRequestHeadersFromContext returns the request headers from the context.
+func GetRequestHeadersFromContext(ctx context.Context) map[string]string {
 	if ctx == nil {
 		return nil
 	}

@@ -30,8 +30,7 @@ type ServerStats struct {
 	ClientClosed            *TimingSeries // # of client closed connections
 	ConnectionPreemptedWork *TimingSeries // event where we didn't perform work due to connection being closed
 
-	ProtocolError *TimingSeries // event where client spoke invalid protocol
-	PanicCount    *TimingSeries // event where clients thrift handler panic'd
+	PanicCount *TimingSeries // event where clients thrift handler panic'd
 
 	// Instantaneous counts of current number of requests being worked on
 	ConnCount            *AtomicCounter
@@ -57,8 +56,7 @@ func NewServerStats(cfg *TimingConfig, statsPeriod time.Duration) *ServerStats {
 		ClientClosed:            NewTimingSeries(cfg),
 		ConnectionPreemptedWork: NewTimingSeries(cfg),
 
-		ProtocolError: NewTimingSeries(cfg),
-		PanicCount:    NewTimingSeries(cfg),
+		PanicCount: NewTimingSeries(cfg),
 	}
 }
 
@@ -82,8 +80,6 @@ func (stats *ServerStats) GetInts() map[string]int64 {
 	ints["connections.client_ended."+periodStr] = int64(s.Count)
 	s = stats.ConnectionPreemptedWork.MustSummarize(stats.statsPeriod)
 	ints["connections.connection_preempted_work."+periodStr] = int64(s.Count)
-	s = stats.ProtocolError.MustSummarize(stats.statsPeriod)
-	ints["connections.protocol_error."+periodStr] = int64(s.Count)
 	s = stats.PanicCount.MustSummarize(stats.statsPeriod)
 	ints["requests.processor_panics."+periodStr] = int64(s.Count)
 

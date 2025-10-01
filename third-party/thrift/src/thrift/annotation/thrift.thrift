@@ -210,7 +210,6 @@ struct Serial {}
 @scope.Enum
 @scope.Service
 @scope.Structured
-@scope.Typedef // Compiler validates this is only allowed with @AllowLegacyTypedefUri
 struct Uri {
   1: string value;
 }

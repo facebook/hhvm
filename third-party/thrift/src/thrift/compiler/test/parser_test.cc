@@ -225,22 +225,6 @@ TEST(ParserTest, typedef_uri_requires_annotation) {
     typedef MyStruct MyLegacyTypedef
   )");
 
-  // Virtual file with @thrift.Uri annotations - will have parse errors due to
-  // typedef explicit URIs being an error level validation
-  source_mgr.add_virtual_file("test_explicit.thrift", R"(
-    package "meta.com/thrift/test"
-
-    include "thrift/annotation/thrift.thrift"
-    include "test.thrift"
-
-    @thrift.Uri{value="meta.com/thrift/test_explicit/ExplicitTypedef"}
-    typedef test.MyStruct MyExplicitTypedef
-
-    @thrift.AllowLegacyTypedefUri
-    @thrift.Uri{value="meta.com/thrift/test_explicit/ExplicitLegacyTypedef"}
-    typedef test.MyStruct MyExplicitLegacyTypedef
-  )");
-
   parsing_params params;
   if (char* includes = std::getenv("IMPLICIT_INCLUDES")) {
     params.incl_searchpath.emplace_back(includes);
@@ -253,56 +237,24 @@ TEST(ParserTest, typedef_uri_requires_annotation) {
     EXPECT_EQ(uri, type->uri());
   };
 
-  {
-    diagnostics_engine diags(source_mgr, [](const diagnostic&) {});
-    std::unique_ptr<t_program_bundle> bundle =
-        parse_ast(source_mgr, diags, "test.thrift", params);
-    EXPECT_FALSE(diags.has_errors());
-    EXPECT_NE(nullptr, bundle);
+  diagnostics_engine diags(source_mgr, [](const diagnostic&) {});
+  std::unique_ptr<t_program_bundle> bundle =
+      parse_ast(source_mgr, diags, "test.thrift", params);
+  EXPECT_FALSE(diags.has_errors());
+  EXPECT_NE(nullptr, bundle);
 
-    expect_name_and_uri(
-        bundle->root_program()->structs_and_unions()[0],
-        "test.MyStruct",
-        "meta.com/thrift/test/MyStruct");
+  expect_name_and_uri(
+      bundle->root_program()->structs_and_unions()[0],
+      "test.MyStruct",
+      "meta.com/thrift/test/MyStruct");
 
-    expect_name_and_uri(
-        bundle->root_program()->typedefs()[0], "test.MyTypedef", "");
+  expect_name_and_uri(
+      bundle->root_program()->typedefs()[0], "test.MyTypedef", "");
 
-    expect_name_and_uri(
-        bundle->root_program()->typedefs()[1],
-        "test.MyLegacyTypedef",
-        "meta.com/thrift/test/MyLegacyTypedef");
-  }
-
-  // Parse with extra validation - expecting an error diagnostic from the
-  // explicit typedef URI
-  {
-    diagnostics_engine diags(source_mgr, [](const diagnostic&) {});
-    std::unique_ptr<t_program_bundle> bundle =
-        parse_ast(source_mgr, diags, "test_explicit.thrift", params);
-    EXPECT_TRUE(diags.has_errors());
-    EXPECT_NE(nullptr, bundle);
-
-    expect_name_and_uri(
-        bundle->root_program()->typedefs()[0],
-        "test_explicit.MyExplicitTypedef",
-        "");
-
-    expect_name_and_uri(
-        bundle->root_program()->typedefs()[0]->get_true_type(),
-        "test.MyStruct",
-        "meta.com/thrift/test/MyStruct");
-
-    expect_name_and_uri(
-        bundle->root_program()->typedefs()[1],
-        "test_explicit.MyExplicitLegacyTypedef",
-        "meta.com/thrift/test_explicit/ExplicitLegacyTypedef");
-
-    expect_name_and_uri(
-        bundle->root_program()->typedefs()[1]->get_true_type(),
-        "test.MyStruct",
-        "meta.com/thrift/test/MyStruct");
-  }
+  expect_name_and_uri(
+      bundle->root_program()->typedefs()[1],
+      "test.MyLegacyTypedef",
+      "meta.com/thrift/test/MyLegacyTypedef");
 }
 
 TEST(ParserTest, unresolved_include_circular_references) {

@@ -146,11 +146,6 @@ Options:
                   @thrift.AllowLegacyTypedefUri).
                   Default: warn
 
-                typedef_explicit_uri=none|warn|error
-                  Action to take on typedef with a non-empty explicit URI
-                  (specified using the @thrift.Uri annotation).
-                  Default: error
-
                 struct_optional_field_custom_default=none|warn|error
                   Action to take on optional fields in structs (and exceptions)
                   that have a custom default value.
@@ -928,13 +923,6 @@ std::string parse_args(
 
           if (maybe_parse_validation_level_flag(
                   /*flag=*/validator,
-                  /*prefix=*/"typedef_explicit_uri",
-                  &sparams.typedef_explicit_uri)) {
-            continue;
-          }
-
-          if (maybe_parse_validation_level_flag(
-                  /*flag=*/validator,
                   /*prefix=*/"struct_optional_field_custom_default",
                   &sparams.struct_optional_field_custom_default)) {
             continue;
@@ -1109,9 +1097,6 @@ void record_invocation_params(
   sema_params_metric.add(fmt::format(
       "nonallowed_typedef_with_uri={}",
       fmt::underlying(sparams.nonallowed_typedef_with_uri)));
-  sema_params_metric.add(fmt::format(
-      "typedef_explicit_uri={}",
-      fmt::underlying(sparams.typedef_explicit_uri)));
   sema_params_metric.add(fmt::format(
       "struct_optional_field_custom_default={}",
       fmt::underlying(sparams.struct_optional_field_custom_default)));

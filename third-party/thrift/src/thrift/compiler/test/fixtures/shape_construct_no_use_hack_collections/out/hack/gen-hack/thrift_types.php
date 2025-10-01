@@ -1204,10 +1204,6 @@ class Uri implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
           shape(
           )
         ),
-        '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::fromShape(
-          shape(
-          )
-        ),
       ],
       'fields' => dict[
       ],

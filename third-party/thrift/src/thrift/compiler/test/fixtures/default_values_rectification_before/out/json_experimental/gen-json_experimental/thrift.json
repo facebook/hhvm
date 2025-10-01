@@ -27,31 +27,31 @@
         "constants" : {
           "HIGH_IMPORTANT" : {
             "name" : "HIGH_IMPORTANT",
-            "lineno" : 226,
+            "lineno" : 225,
             "value" : 0
           },
           "HIGH" : {
             "name" : "HIGH",
-            "lineno" : 227,
+            "lineno" : 226,
             "value" : 1
           },
           "IMPORTANT" : {
             "name" : "IMPORTANT",
-            "lineno" : 228,
+            "lineno" : 227,
             "value" : 2
           },
           "NORMAL" : {
             "name" : "NORMAL",
-            "lineno" : 229,
+            "lineno" : 228,
             "value" : 3
           },
           "BEST_EFFORT" : {
             "name" : "BEST_EFFORT",
-            "lineno" : 230,
+            "lineno" : 229,
             "value" : 4
           }
         },
-        "lineno" : 225
+        "lineno" : 224
       }
   },
   "structs" :
@@ -365,14 +365,6 @@
           "path" : "thrift/annotation/scope.thrift"
         },
             "value" : {}
-          },
-          "scope.Typedef" : {
-            "type" : {
-          "type" : "struct",
-          "name" : "Typedef",
-          "path" : "thrift/annotation/scope.thrift"
-        },
-            "value" : {}
           }
         },
         "docstring" : "Changes the URI of this definition away from the default-generated one.\n",
@@ -380,7 +372,7 @@
           "value" : {
             "name" : "value",
             "key" : 1,
-            "lineno" : 215,
+            "lineno" : 214,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
@@ -406,7 +398,7 @@
           "level" : {
             "name" : "level",
             "key" : 1,
-            "lineno" : 223,
+            "lineno" : 222,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "enum",
@@ -416,7 +408,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 221
+        "lineno" : 220
       },
       "DeprecatedUnvalidatedAnnotations" : {
         "name" : "DeprecatedUnvalidatedAnnotations",
@@ -435,7 +427,7 @@
           "items" : {
             "name" : "items",
             "key" : 1,
-            "lineno" : 238,
+            "lineno" : 237,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "map",
@@ -446,7 +438,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 236
+        "lineno" : 235
       },
       "AllowReservedIdentifier" : {
         "name" : "AllowReservedIdentifier",
@@ -463,7 +455,7 @@
         "docstring" : "In addition to reserved words, Thrift reserves all identifiers\nthat contain the case-insensitive substring fbthrift preceded\nby one or more underscores.\nThe use of such identifiers requires users to explicitly annotate\nthe usage with\n  `@thrift.AllowReservedFilename` for filenames\n  `@thrift.AllowReservedIdentifier` for all other identifiers\nand may result in undefined behavior.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 251
+        "lineno" : 250
       },
       "AllowReservedFilename" : {
         "name" : "AllowReservedFilename",
@@ -479,7 +471,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 254
+        "lineno" : 253
       },
       "RuntimeAnnotation" : {
         "name" : "RuntimeAnnotation",
@@ -496,7 +488,7 @@
         "docstring" : "Applies to structured annotation that need to be accessed runtime in TypeSystem\nand C++ always-on reflection.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 261
+        "lineno" : 260
       },
       "AllowLegacyTypedefUri" : {
         "name" : "AllowLegacyTypedefUri",
@@ -513,7 +505,7 @@
         "docstring" : "Allows the Thrift compiler to add a URI to the target typedef.\n\nUse of this annotation is strongly DISCOURAGED, and is provided for\nbackwards-compatibility purposes only.\n\nIndeed, Thrift IDL [typedefs](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#typedefs)\ndo not correspond to the set of user-defined types that can have unique URIs\nper the [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#thrift-uri)\nWhile it may seem like typedefs correspond to\n[Opaque Alias Types](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#opaque-alias-types),\nthat is actually incorrect, as the \"aliased\" type that a typedef introduces\nis considered identical - at the Object Model level - to the original type.\n\nThis annotation is introduced to allow \"grandfathering in\" existing typedef\nURIs in preparation for the thrift compiler to reject such cases in the\nfuture (unless this annotation is specified).\n\nThis annoation MUST NOT be applied to a typedef for which no URI is\nspecified (either explicitly via @thrift.Uri, or implicitly through a\nnon-empty\n[package declaration](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#package-declaration)).\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 287
+        "lineno" : 286
       },
       "AllowUnsafeOptionalCustomDefaultValue" : {
         "name" : "AllowUnsafeOptionalCustomDefaultValue",
@@ -530,7 +522,7 @@
         "docstring" : "Allows the target field of a struct or exception, whose qualifier is\n`optional`, to have a custom default value specified in IDL.\n\nUse of this annotation is strongly DISCOURAGED, as custom default values for\noptional fields are both non-sensical and dangerous:\n  - non-sensical because, by definition, the \"default\" state of an optional\n    field is to have no value (i.e., be \"absent\") - as explicitly specified\n    in the [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#structured-types).\n  - dangerous because in practice, the runtime behavior of the generated code\n    for optional fields with custom default values is inconsistent (sometimes\n    even for the same programming language!).\n\nThis annotation is merely introduced to allow existing use cases to be\ngrandfathered into the new compiler validation logic, which will reject\noptional fields with custom default values unless this annotation is\nspecified.\n\nThis annotation MUST NOT be applied to a field whose qualifier is not\noptional, or that doesn't have a custom default value. If applied, the target\nfield MUST be in a struct or exception (but NOT a union).\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 312
+        "lineno" : 311
       },
       "AllowUnsafeUnionFieldCustomDefaultValue" : {
         "name" : "AllowUnsafeUnionFieldCustomDefaultValue",
@@ -547,7 +539,7 @@
         "docstring" : "Allows the target field of a union to have a custom default value specified\nin IDL.\n\nUse of this annotation is strongly DISCOURAGED, for reasons similar to\n`AllowUnsafeOptionalCustomDefaultValue` above, except that default values\nfor union fields make even less sense (imagine having multiple union fields\nwith custom default values!).\n\nThis annotation is merely introduced to allow existing use cases to be\ngrandfathered into the new compiler validation logic, which will reject\nunion fields with custom default values unless this annotation is\nspecified.\n\nThis annotation MUST NOT be applied to a field that doesn't have a custom\ndefault value, or that is not in a union.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 332
+        "lineno" : 331
       },
       "AllowUnsafeRequiredFieldQualifier" : {
         "name" : "AllowUnsafeRequiredFieldQualifier",
@@ -564,7 +556,7 @@
         "docstring" : "Allows the target field of a struct or exception to be marked \"required\".\n\nUse of this annotation is strongly DISCOURAGED and almost certainly in\nunexpected behavior. Indeed, the \"required\" field qualifier has been\ndeprecated since 2018, and the behavior in generated code is inconsistent\n(most notably, it does NOT enforce any expectation on user code in C++ since\n2021).\n\nThis annotation is merely introduced to allow existing use cases to be\ngrandfathered into the new compiler validation logic, which will otherwise\nreject any \"required\" field.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 348
+        "lineno" : 347
       }
   },
   "source_path" : "thrift/annotation/thrift",

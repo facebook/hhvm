@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <exception>
-#include <map>
 #include <memory>
 #include <string>
 #include <Python.h>
@@ -28,6 +26,7 @@
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/python/streaming/PythonUserException.h>
+#include <thrift/lib/python/streaming/SinkElementDecoder.h>
 #include <thrift/lib/python/streaming/StreamElementEncoder.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
@@ -186,6 +185,22 @@ return_sink(
           std::move(response.sinkConsumer), std::move(executor))};
 }
 
+template <class ProtocolIn_, class ProtocolOut_>
+static apache::thrift::ResponseAndServerBiDiStreamFactory return_bidistream(
+    apache::thrift::ContextStack* ctx,
+    folly::Executor::KeepAlive<> executor,
+    ::apache::thrift::ResponseAndStreamTransformation<
+        std::unique_ptr<::folly::IOBuf>,
+        std::unique_ptr<::folly::IOBuf>,
+        std::unique_ptr<::folly::IOBuf>>&& response) {
+  static PythonStreamElementEncoder<ProtocolOut_> encode;
+  static PythonSinkElementDecoder decode;
+  return {
+      return_serialized<ProtocolIn_, ProtocolOut_>(ctx, *(response.response)),
+      apache::thrift::detail::ServerBiDiStreamFactory(
+          std::move(response.transform), decode, encode, std::move(executor)),
+  };
+}
 } // namespace detail
 
 } // namespace apache::thrift::python

@@ -19,6 +19,9 @@
 #include <thrift/lib/cpp2/async/BiDiStream.h>
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/async/RpcTypes.h>
+#include <thrift/lib/cpp2/async/ServerBiDiSinkBridge.h>
+#include <thrift/lib/cpp2/async/ServerBiDiStreamBridge.h>
+#include <thrift/lib/cpp2/async/ServerCallbackStapler.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/async/StreamPayload.h>
 
@@ -43,19 +46,43 @@ class ServerBiDiStreamFactory {
       SinkElementDecoder<InputType>& decoder,
       StreamElementEncoder<OutputType>& encoder,
       folly::Executor::KeepAlive<> serverExecutor) {
-    startFunction_ = [transformFn = std::move(streamTransformation.func),
-                      &decoder,
-                      &encoder,
-                      serverExecutor = std::move(serverExecutor)](
-                         std::shared_ptr<ContextStack>,
-                         TilePtr&&,
-                         FirstResponsePayload&&,
-                         BiDiClientCallback* clientCallback,
-                         folly::EventBase*) mutable -> void {
-      clientCallback->onFirstResponseError(
-          folly::make_exception_wrapper<rocket::RocketException>(
-              rocket::ErrorCode::APPLICATION_ERROR,
-              "TODO(ezou) in Transport not implemented"));
+    startFunction_ =
+        [transformFn = std::move(streamTransformation.func),
+         &decoder,
+         &encoder,
+         serverExecutor = std::move(serverExecutor)](
+            // TODO(sazonovk): T239783600 Add support for ContextStack
+            std::shared_ptr<ContextStack> /* contextStack */,
+            // TODO(sazonovk): T239783647 Add support for Interactions
+            TilePtr&& /* interaction */,
+            FirstResponsePayload&& payload,
+            BiDiClientCallback* clientCb,
+            folly::EventBase* evb) mutable -> void {
+      auto stapled = new ServerCallbackStapler();
+      auto streamBridge = new ServerBiDiStreamBridge(stapled, evb);
+      auto sinkBridge = new ServerBiDiSinkBridge(stapled, evb);
+      stapled->setSinkServerCallback(sinkBridge);
+      stapled->setStreamServerCallback(streamBridge);
+      stapled->resetClientCallback(*clientCb);
+
+      // TODO(sazonovk): T239783814 Add the ability to specify buffer size in
+      // StreamTransformation
+      uint64_t bufferSize = 100;
+      sinkBridge->setBufferSize(bufferSize);
+
+      auto task = ServerBiDiStreamBridge::getTask(
+          streamBridge->copy(),
+          folly::coro::co_invoke(
+              std::move(transformFn),
+              ServerBiDiSinkBridge::getInput(sinkBridge->copy(), &decoder)),
+          &encoder);
+      folly::coro::co_withExecutor(serverExecutor, std::move(task)).start();
+
+      std::ignore = clientCb->onFirstResponse(std::move(payload), evb, stapled);
+
+      sinkBridge->serverPush(uint64_t(bufferSize));
+      sinkBridge->processClientMessages();
+      streamBridge->processClientMessages();
     };
   }
 

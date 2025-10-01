@@ -242,13 +242,14 @@ class TwoWayBridge {
 
   bool isServerClosed() { return serverQueue_.isClosed(); }
 
- private:
+ protected:
   void decref() {
     if (refCount_.fetch_sub(1, std::memory_order_acq_rel) == 1) {
       delete derived();
     }
   }
 
+ private:
   Derived* derived() { return static_cast<Derived*>(this); }
 
   ClientAtomicQueue clientQueue_;

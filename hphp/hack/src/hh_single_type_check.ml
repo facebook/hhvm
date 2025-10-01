@@ -10,6 +10,11 @@ open Hh_prelude
 open Sys_utils
 module Cls = Folded_class
 
+[@@@alert "-dependencies"]
+(* hh_single_type_check is not incremental, so
+   * we don't need to be careful about dependency-tracking
+*)
+
 (*****************************************************************************)
 (* Profiling utilities *)
 (*****************************************************************************)

@@ -26,12 +26,6 @@ import (
 	"github.com/rsocket/rsocket-go/payload"
 )
 
-type RequestPayload struct {
-	metadata *rpcmetadata.RequestRpcMetadata
-	typeID   types.MessageType
-	protoID  types.ProtocolID
-}
-
 // EncodeRequestPayload encodes a request payload.
 func EncodeRequestPayload(
 	name string,
@@ -65,68 +59,6 @@ func EncodeRequestPayload(
 	}
 	pay := payload.New(dataBytes, metadataBytes)
 	return pay, nil
-}
-
-// DecodeRequestPayload decodes a request payload.
-func DecodeRequestPayload(msg payload.Payload) (*rpcmetadata.RequestRpcMetadata, *RequestPayload, error) {
-	metadataBytes, ok := msg.Metadata()
-	if !ok {
-		return nil, nil, fmt.Errorf("request payload is missing metadata")
-	}
-
-	metadata := &rpcmetadata.RequestRpcMetadata{}
-	err := format.DecodeCompact(metadataBytes, metadata)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	typeID, err := RpcKindToMessageType(metadata.GetKind())
-	if err != nil {
-		return nil, nil, err
-	}
-
-	protoID, err := rpcProtocolIDToProtocolID(metadata.GetProtocol())
-	if err != nil {
-		return nil, nil, err
-	}
-
-	res := &RequestPayload{
-		metadata: metadata,
-		typeID:   typeID,
-		protoID:  protoID,
-	}
-	return metadata, res, nil
-}
-
-func (r *RequestPayload) Name() string {
-	if r.metadata == nil {
-		return ""
-	}
-	return r.metadata.GetName()
-}
-
-func (r *RequestPayload) TypeID() types.MessageType {
-	return r.typeID
-}
-
-func (r *RequestPayload) ProtoID() types.ProtocolID {
-	return r.protoID
-}
-
-func (r *RequestPayload) GetCompressionForResponse() rpcmetadata.CompressionAlgorithm {
-	if r.metadata != nil {
-		compressionConfig := r.metadata.GetCompressionConfig()
-		return CompressionAlgorithmFromCompressionConfig(compressionConfig)
-	}
-	return rpcmetadata.CompressionAlgorithm_NONE
-}
-
-func (r *RequestPayload) Headers() map[string]string {
-	if r.metadata == nil {
-		return nil
-	}
-
-	return GetRequestRpcMetadataHeaders(r.metadata)
 }
 
 func GetRequestRpcMetadataHeaders(metadata *rpcmetadata.RequestRpcMetadata) map[string]string {

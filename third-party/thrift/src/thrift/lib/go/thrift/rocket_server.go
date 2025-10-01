@@ -357,7 +357,12 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 }
 
 func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata.RequestRpcMetadata, request *rocket.RequestPayload) (*protocolBuffer, error) {
-	protocol, err := newProtocolBuffer(request.ProtoID(), request.Data())
+	dataBytes, err := rocket.MaybeDecompress(payloadDataBytes, metadata.GetCompression())
+	if err != nil {
+		return nil, fmt.Errorf("payload data bytes decompression failed: %w", err)
+	}
+
+	protocol, err := newProtocolBuffer(request.ProtoID(), dataBytes)
 	if err != nil {
 		return nil, err
 	}

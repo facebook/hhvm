@@ -28,7 +28,6 @@ import (
 
 type RequestPayload struct {
 	metadata *rpcmetadata.RequestRpcMetadata
-	data     []byte
 	typeID   types.MessageType
 	protoID  types.ProtocolID
 }
@@ -91,22 +90,12 @@ func DecodeRequestPayload(msg payload.Payload) (*rpcmetadata.RequestRpcMetadata,
 		return nil, nil, err
 	}
 
-	dataBytes, err := MaybeDecompress(msg.Data(), metadata.GetCompression())
-	if err != nil {
-		return nil, nil, fmt.Errorf("request payload decompression failed: %w", err)
-	}
-
 	res := &RequestPayload{
 		metadata: metadata,
 		typeID:   typeID,
 		protoID:  protoID,
-		data:     dataBytes,
 	}
 	return metadata, res, nil
-}
-
-func (r *RequestPayload) Data() []byte {
-	return r.data
 }
 
 func (r *RequestPayload) Name() string {

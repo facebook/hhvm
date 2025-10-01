@@ -77,6 +77,7 @@ from thrift.python.streaming.bidistream cimport (
     cStreamTransformation,
     cResponseAndStreamTransformation,
 )
+from cpython.contextvars cimport PyContextVar_Set, PyContextVar_Reset
 
 
 ctypedef unique_ptr[cIOBuf] UniqueIOBuf
@@ -340,22 +341,22 @@ cdef int combinedHandler(
     Protocol prot,
     RpcKind kind,
 ) except -1:
-    __context = RequestContext._fbthrift_create(ctx)
-    __context_token = THRIFT_REQUEST_CONTEXT.set(__context)
+    reset_token = PyContextVar_Set(THRIFT_REQUEST_CONTEXT, RequestContext._fbthrift_create(ctx))
 
-    asyncio.get_event_loop().create_task(
-        serverCallback_coro(
-            func,
-            funcName.decode('UTF-8'),
-            promise,
-            from_unique_ptr(cmove(serializedRequest.buffer)),
-            prot,
-            kind,
+    try:
+        asyncio.get_event_loop().create_task(
+            serverCallback_coro(
+                func,
+                funcName.decode('UTF-8'),
+                promise,
+                from_unique_ptr(cmove(serializedRequest.buffer)),
+                prot,
+                kind,
+            )
         )
-    )
-
-    THRIFT_REQUEST_CONTEXT.reset(__context_token)
-    return 0
+        return 0
+    finally:
+        PyContextVar_Reset(THRIFT_REQUEST_CONTEXT, reset_token)
 
 cdef api void handleLifecycleCallback(object func, string funcName, cFollyPromise[cFollyUnit] cPromise):
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit.create(cmove(cPromise))

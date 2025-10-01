@@ -32,7 +32,6 @@ type ServerStats struct {
 
 	ProtocolError   *TimingSeries // event where client spoke invalid protocol
 	PanicCount      *TimingSeries // event where clients thrift handler panic'd
-	NoSuchFunction  *TimingSeries // event where client called a non-existent function
 	QueueingTimeout *TimingSeries // event where we didn't perform work due to client timeout exceeded
 
 	// Instantaneous counts of current number of requests being worked on
@@ -77,7 +76,6 @@ func NewServerStats(cfg *TimingConfig, statsPeriod time.Duration) *ServerStats {
 		PanicCount:                  NewTimingSeries(cfg),
 		WorkersBusy:                 NewTimingSeries(cfg),
 		PipeliningUnsupportedClient: NewTimingSeries(cfg),
-		NoSuchFunction:              NewTimingSeries(cfg),
 		QueueingTimeout:             NewTimingSeries(cfg),
 	}
 }
@@ -112,8 +110,6 @@ func (stats *ServerStats) GetInts() map[string]int64 {
 	ints["requests.task_expired."+periodStr] = int64(s.Count)
 	s = stats.PanicCount.MustSummarize(stats.statsPeriod)
 	ints["requests.processor_panics."+periodStr] = int64(s.Count)
-	s = stats.NoSuchFunction.MustSummarize(stats.statsPeriod)
-	ints["requests.no_such_thrift_function."+periodStr] = int64(s.Count)
 
 	return ints
 }

@@ -32,7 +32,6 @@ func TestStats(t *testing.T) {
 		"connections.client_ended.60":               0,
 		"connections.connection_preempted_work.60":  0,
 		"connections.protocol_error.60":             0,
-		"requests.no_such_thrift_function.60":       0,
 		"requests.pipelining_unsupported_client.60": 0,
 		"requests.processor_panics.60":              0,
 		"requests.scheduling_work":                  0,

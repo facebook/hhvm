@@ -134,7 +134,24 @@ folly::AsyncTransport::UniquePtr createSocketWithEPoll(
         FizzStopTLSConnector connector;
         auto fut =
             connector.connect(cfg.serverHost, connThread.getEventBase(), evb);
-        return std::move(fut).get();
+        try {
+          // Wait for StopTLS negotiation to complete with timeout
+          auto result = std::move(fut).get(std::chrono::seconds(10));
+          // The result is nullptr; now create the actual socket on the correct
+          // thread
+          auto [fd, zeroCopyBufId] = connector.getSocketParams();
+
+          // Create socket directly - we're already on the correct EventBase
+          // thread during client initialization
+          return folly::AsyncSocket::UniquePtr(
+              new folly::AsyncSocket(evb, fd, zeroCopyBufId));
+        } catch (const std::exception& e) {
+          LOG(ERROR) << "StopTLSv1 negotiation failed: " << e.what()
+                     << ". Server may not support stopTLSv1. "
+                     << "Falling back to regular FIZZ connection.";
+          // Fall back to regular FIZZ connection if stopTLSv1 fails
+          return createFizzSocket(evb, cfg);
+        }
       } else {
         return createFizzSocket(evb, cfg);
       }

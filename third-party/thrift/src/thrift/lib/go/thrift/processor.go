@@ -88,15 +88,15 @@ func setRequestHeadersForResult(protocol Protocol, result types.WritableStruct) 
 
 // sendException is a utility function to send the exception for the specified
 // method.
-func sendException(prot types.Encoder, name string, seqID int32, err types.ApplicationExceptionIf) error {
-	if e2 := prot.WriteMessageBegin(name, types.EXCEPTION, seqID); e2 != nil {
-		return e2
-	} else if e2 := err.Write(prot); e2 != nil {
-		return e2
-	} else if e2 := prot.WriteMessageEnd(); e2 != nil {
-		return e2
-	} else if e2 := prot.Flush(); e2 != nil {
-		return e2
+func sendException(prot types.Encoder, name string, seqID int32, appEx types.ApplicationExceptionIf) error {
+	if err := prot.WriteMessageBegin(name, types.EXCEPTION, seqID); err != nil {
+		return err
+	} else if err := appEx.Write(prot); err != nil {
+		return err
+	} else if err := prot.WriteMessageEnd(); err != nil {
+		return err
+	} else if err := prot.Flush(); err != nil {
+		return err
 	}
 	return nil
 }

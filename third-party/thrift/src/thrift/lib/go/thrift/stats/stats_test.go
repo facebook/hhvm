@@ -31,7 +31,6 @@ func TestStats(t *testing.T) {
 	expectedInts := map[string]int64{
 		"requests.processor_panics.60": 0,
 		"requests.scheduling_work":     0,
-		"requests.scheduling_write":    0,
 		"requests.working":             0,
 		"running_workers":              0,
 	}

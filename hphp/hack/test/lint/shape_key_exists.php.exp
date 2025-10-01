@@ -1,0 +1,6 @@
+File "shape_key_exists.php", line 6, characters 20-22:
+The field `x` is required to exist in the shape. Consider using a subscript-expression instead, such as `$myshape['x']` (Lint[5005])
+File "shape_key_exists.php", line 7, characters 20-22:
+The field `y` is required to exist in the shape. Consider using a subscript-expression instead, such as `$myshape['y']` (Lint[5005])
+File "shape_key_exists.php", line 8, characters 20-22:
+The field `z` is required to exist in the shape. Consider using a subscript-expression instead, such as `$myshape['z']` (Lint[5005])

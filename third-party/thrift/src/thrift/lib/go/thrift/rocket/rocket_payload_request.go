@@ -126,16 +126,20 @@ func (r *RequestPayload) Headers() map[string]string {
 		return nil
 	}
 
+	return GetRequestRpcMetadataHeaders(r.metadata)
+}
+
+func GetRequestRpcMetadataHeaders(metadata *rpcmetadata.RequestRpcMetadata) map[string]string {
 	headersMap := make(map[string]string)
-	maps.Copy(headersMap, r.metadata.GetOtherMetadata())
-	if r.metadata.IsSetClientId() {
-		headersMap["client_id"] = r.metadata.GetClientId()
+	maps.Copy(headersMap, metadata.GetOtherMetadata())
+	if metadata.IsSetClientId() {
+		headersMap["client_id"] = metadata.GetClientId()
 	}
-	if r.metadata.IsSetLoadMetric() {
-		headersMap["load"] = r.metadata.GetLoadMetric()
+	if metadata.IsSetLoadMetric() {
+		headersMap["load"] = metadata.GetLoadMetric()
 	}
-	if r.metadata.IsSetClientTimeoutMs() {
-		headersMap["client_timeout"] = fmt.Sprintf("%d", r.metadata.GetClientTimeoutMs())
+	if metadata.IsSetClientTimeoutMs() {
+		headersMap["client_timeout"] = fmt.Sprintf("%d", metadata.GetClientTimeoutMs())
 	}
 	return headersMap
 }

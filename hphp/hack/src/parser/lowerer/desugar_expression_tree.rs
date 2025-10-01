@@ -624,7 +624,7 @@ fn create_temp_statement_parallel(
     let lhss = exprs
         .iter()
         .enumerate()
-        .map(|(i, expr)| (mk_lvar(&expr.1, i)))
+        .map(|(i, expr)| mk_lvar(&expr.1, i))
         .collect();
     // assign a tuple to a list to ensure any awaits can execute concurrently.
     // We don't use a concurrent statement because that requires each rhs to have

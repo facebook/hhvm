@@ -1402,7 +1402,7 @@ fn prep_string2<'a>(
         (!s.is_empty() && is_qoute(s[0])) || (s.len() > 1 && (s[0] == b'b' && s[1] == b'\"'))
     };
     let last_is_qoute = |s: &[u8]| !s.is_empty() && is_qoute(s[s.len() - 1]);
-    let is_heredoc = |s: &[u8]| (s.len() > 3 && &s[0..3] == b"<<<");
+    let is_heredoc = |s: &[u8]| s.len() > 3 && &s[0..3] == b"<<<";
     let mut nodes = nodes.iter();
     let first = nodes.next();
     match first.map(|n| &n.children) {

@@ -82,6 +82,18 @@ bool has_lazy_field(const t_structured& node) {
   return false;
 }
 
+diagnostic_level validation_to_diagnostic_level(
+    sema_params::validation_level validation_level) {
+  switch (validation_level) {
+    case sema_params::validation_level::error:
+      return diagnostic_level::error;
+    case sema_params::validation_level::warn:
+      return diagnostic_level::warning;
+    case sema_params::validation_level::none:
+      return diagnostic_level::debug;
+  }
+}
+
 // Reports an existing name was redefined within the given parent node.
 void report_redef_diag(
     diagnostics_engine& diags,
@@ -413,6 +425,17 @@ void validate_python_namespaces(sema_context& ctx, const t_program& program) {
       "the only officially supported variant: thrift-python.");
 }
 
+void validate_program_has_package(sema_context& ctx, const t_program& program) {
+  if (program.package().empty()) {
+    ctx.report(
+        program,
+        validation_to_diagnostic_level(ctx.sema_parameters().missing_package),
+        "Thrift file should have a (non-empty) package. Packages will soon be "
+        "required, at which point missing packages will trigger a Thrift compiler error. "
+        "For more details, see https://fburl.com/thrift-uri-add-package");
+  }
+}
+
 void validate_interface_function_name_uniqueness(
     sema_context& ctx, const t_interface& node) {
   // Check for a redefinition of a function in the same interface.
@@ -482,18 +505,6 @@ void validate_exception_message_annotation_is_only_in_exceptions(
           "@thrift.ExceptionMessage annotation is only allowed in exception definitions. '{}' is not an exception.",
           node.name());
     }
-  }
-}
-
-diagnostic_level validation_to_diagnostic_level(
-    sema_params::validation_level validation_level) {
-  switch (validation_level) {
-    case sema_params::validation_level::error:
-      return diagnostic_level::error;
-    case sema_params::validation_level::warn:
-      return diagnostic_level::warning;
-    case sema_params::validation_level::none:
-      return diagnostic_level::debug;
   }
 }
 
@@ -1822,6 +1833,7 @@ ast_validator standard_validator() {
   validator.add_definition_visitor(&validate_identifier_is_not_reserved);
   validator.add_program_visitor(&validate_filename_is_not_reserved);
   validator.add_program_visitor(&validate_python_namespaces);
+  validator.add_program_visitor(&validate_program_has_package);
   validator.add_program_visitor(&detail::validate_annotation_scopes<>);
 
   validator.add_root_definition_visitor(&detail::validate_annotation_scopes<>);

@@ -264,3 +264,14 @@ TEST(StandardValidatorTest, SetKeyCollision) {
     }
   )");
 }
+
+TEST(StandardValidatorTest, WarnProgramMissingPackage) {
+  check_compile(R"(
+    package ""
+    # expected-error@4: package name cannot be empty
+  )");
+
+  check_compile(R"(
+    # expected-warning@-1: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
+  )");
+}

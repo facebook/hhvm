@@ -159,6 +159,9 @@ struct sema_params {
 
   // Action to take on `required` (struct and exception) fields.
   validation_level required_field_qualifier = validation_level::warn;
+
+  // Action to take on files without a package.
+  validation_level missing_package = validation_level::warn;
 };
 
 // An AST visitor context for semantic analysis. It combines diagnostics

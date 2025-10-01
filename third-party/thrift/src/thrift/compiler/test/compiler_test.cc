@@ -18,6 +18,7 @@
 #include <string>
 #include <thrift/compiler/test/compiler.h>
 
+#include <fmt/std.h>
 #include <gtest/gtest.h>
 
 using apache::thrift::compiler::test::check_compile;
@@ -2742,6 +2743,7 @@ TEST(CompilerTest, base_service_defined_after_use) {
 
 TEST(CompilerTest, cpp_orderable) {
   check_compile(R"(
+# expected-warning@-1: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
@@ -3345,6 +3347,27 @@ TEST(CompilerTest, required_field_qualifier) {
     }
   )",
       {"--extra-validation", "required_field_qualifier=warn"});
+}
+
+TEST(CompilerTest, missing_package) {
+  static const char* kMissingPackage =
+      "Thrift file should have a (non-empty) package. Packages will soon be "
+      "required, at which point missing packages will trigger a Thrift compiler error. "
+      "For more details, see https://fburl.com/thrift-uri-add-package";
+  check_compile(
+      "struct TestStruct { }", {"--extra-validation", "missing_package=none"});
+  check_compile(
+      fmt::format(
+          "# expected-warning@1: {}\n"
+          "struct TestStruct {{ }}",
+          kMissingPackage),
+      {"--extra-validation", "missing_package=warn"});
+  check_compile(
+      fmt::format(
+          "# expected-error@1: {}\n"
+          "struct TestStruct {{ }}",
+          kMissingPackage),
+      {"--extra-validation", "missing_package=error"});
 }
 
 TEST(CompilerTest, bidirectional_streaming) {

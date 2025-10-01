@@ -30,9 +30,8 @@ type ServerStats struct {
 	ClientClosed            *TimingSeries // # of client closed connections
 	ConnectionPreemptedWork *TimingSeries // event where we didn't perform work due to connection being closed
 
-	ProtocolError   *TimingSeries // event where client spoke invalid protocol
-	PanicCount      *TimingSeries // event where clients thrift handler panic'd
-	QueueingTimeout *TimingSeries // event where we didn't perform work due to client timeout exceeded
+	ProtocolError *TimingSeries // event where client spoke invalid protocol
+	PanicCount    *TimingSeries // event where clients thrift handler panic'd
 
 	// Instantaneous counts of current number of requests being worked on
 	ConnCount            *AtomicCounter
@@ -76,7 +75,6 @@ func NewServerStats(cfg *TimingConfig, statsPeriod time.Duration) *ServerStats {
 		PanicCount:                  NewTimingSeries(cfg),
 		WorkersBusy:                 NewTimingSeries(cfg),
 		PipeliningUnsupportedClient: NewTimingSeries(cfg),
-		QueueingTimeout:             NewTimingSeries(cfg),
 	}
 }
 
@@ -106,8 +104,6 @@ func (stats *ServerStats) GetInts() map[string]int64 {
 	ints["requests.workers_busy."+periodStr] = int64(s.Count)
 	s = stats.PipeliningUnsupportedClient.MustSummarize(stats.statsPeriod)
 	ints["requests.pipelining_unsupported_client."+periodStr] = int64(s.Count)
-	s = stats.QueueingTimeout.MustSummarize(stats.statsPeriod)
-	ints["requests.task_expired."+periodStr] = int64(s.Count)
 	s = stats.PanicCount.MustSummarize(stats.statsPeriod)
 	ints["requests.processor_panics."+periodStr] = int64(s.Count)
 

@@ -36,7 +36,6 @@ func TestStats(t *testing.T) {
 		"requests.processor_panics.60":              0,
 		"requests.scheduling_work":                  0,
 		"requests.scheduling_write":                 0,
-		"requests.task_expired.60":                  0,
 		"requests.workers_busy.60":                  0,
 		"requests.working":                          0,
 		"requests.writing":                          0,

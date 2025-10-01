@@ -56,8 +56,6 @@ type ServerStats struct {
 	// durationScheduleWork defines the amount of time it takes for
 	// thwork to begin processing a request. (work scheduling overhead)
 	DurationScheduleWork *TimingSeries
-	// durationWorking defines the amount of time it takes for an application method to execute
-	DurationWorking *TimingSeries
 
 	// workersBusy defines a server event where no workers are available to accept
 	// available work. This can signal that we should increase # workers (in the case
@@ -107,7 +105,6 @@ func NewServerStats(cfg *TimingConfig, statsPeriod time.Duration) *ServerStats {
 
 		DurationRead:         NewTimingSeries(cfg),
 		DurationScheduleWork: NewTimingSeries(cfg),
-		DurationWorking:      NewTimingSeries(cfg),
 	}
 }
 
@@ -157,10 +154,6 @@ func (stats *ServerStats) GetInts() map[string]int64 {
 	ints["requests.duration_schedule_work.avg."+periodStr] = toμs(s.Average)
 	ints["requests.duration_schedule_work.p95."+periodStr] = toμs(s.P95)
 	ints["requests.duration_schedule_work.p99."+periodStr] = toμs(s.P99)
-	s = stats.DurationWorking.MustSummarize(stats.statsPeriod)
-	ints["requests.duration_working.avg."+periodStr] = toμs(s.Average)
-	ints["requests.duration_working.p95."+periodStr] = toμs(s.P95)
-	ints["requests.duration_working.p99."+periodStr] = toμs(s.P99)
 
 	return ints
 }

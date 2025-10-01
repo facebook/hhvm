@@ -45,4 +45,5 @@ type ServerObserver interface {
 	ReceivedReadForFunction(function string)        // request arguments read/deserialized for specific function
 	ProcessedFunction(function string)              // request processing completed for specific function
 	UndeclaredExceptionForFunction(function string) // undeclared exception thrown in specific function
+	AnyExceptionForFunction(function string)        // any exception (declared or undeclared) thrown in specific function
 }

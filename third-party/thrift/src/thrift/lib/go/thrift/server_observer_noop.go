@@ -57,3 +57,4 @@ func (*noopServerObserver) ReceivedRequestForFunction(_ string)     {}
 func (*noopServerObserver) ReceivedReadForFunction(_ string)        {}
 func (*noopServerObserver) ProcessedFunction(_ string)              {}
 func (*noopServerObserver) UndeclaredExceptionForFunction(_ string) {}
+func (*noopServerObserver) AnyExceptionForFunction(_ string)        {}

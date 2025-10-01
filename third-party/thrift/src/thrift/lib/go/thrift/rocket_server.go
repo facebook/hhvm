@@ -34,6 +34,7 @@ import (
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/rocket"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 )
 
@@ -364,12 +365,20 @@ func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata
 		return nil, fmt.Errorf("payload data bytes decompression failed: %w", err)
 	}
 
-	protocol, err := newProtocolBuffer(request.ProtoID(), dataBytes)
+	messageName := metadata.GetName()
+	protoID := types.ProtocolID(metadata.GetProtocol())
+	headersMap := rocket.GetRequestRpcMetadataHeaders(metadata)
+	messageTypeID, err := rocket.RpcKindToMessageType(metadata.GetKind())
 	if err != nil {
 		return nil, err
 	}
-	protocol.setResponseHeaders(request.Headers())
-	if err := protocol.WriteMessageBegin(request.Name(), request.TypeID(), 0); err != nil {
+
+	protocol, err := newProtocolBuffer(protoID, dataBytes)
+	if err != nil {
+		return nil, err
+	}
+	protocol.setResponseHeaders(headersMap)
+	if err := protocol.WriteMessageBegin(messageName, messageTypeID, 0); err != nil {
 		return nil, err
 	}
 	return protocol, nil

@@ -80,7 +80,7 @@ func DecodeRequestPayload(msg payload.Payload) (*rpcmetadata.RequestRpcMetadata,
 		return nil, nil, err
 	}
 
-	typeID, err := rpcKindToMessageType(metadata.GetKind())
+	typeID, err := RpcKindToMessageType(metadata.GetKind())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -164,7 +164,7 @@ func rpcProtocolIDToProtocolID(protocolID rpcmetadata.ProtocolId) (types.Protoco
 	return 0, fmt.Errorf("unsupported ProtocolId %v", protocolID)
 }
 
-func rpcKindToMessageType(kind rpcmetadata.RpcKind) (types.MessageType, error) {
+func RpcKindToMessageType(kind rpcmetadata.RpcKind) (types.MessageType, error) {
 	switch kind {
 	case rpcmetadata.RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE:
 		return types.CALL, nil

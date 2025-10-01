@@ -35,14 +35,6 @@ type ServerStats struct {
 	NoSuchFunction  *TimingSeries // event where client called a non-existent function
 	QueueingTimeout *TimingSeries // event where we didn't perform work due to client timeout exceeded
 
-	/*
-	 * the following measure count + latency on a per request basis in regards
-	 * to thwork server work scheduling and IO overhead. Diagram:
-	 * request --> <durationRead> --> <durationScheduleWork> --> <durationWorking> -->
-	 * <durationScheduleWrite> --> <durationWrite> -> response.
-	 * totalResponseTime is a (non-derived) sum of this, since it is the duration of request -> response.
-	 */
-
 	// Instantaneous counts of current number of requests being worked on
 	ConnCount            *AtomicCounter
 	SchedulingWorkCount  *AtomicCounter
@@ -63,13 +55,6 @@ type ServerStats struct {
 	// In practice, this doesn't happen unless we are talking to thwork over raw
 	// connections (not SR/SRProxy) from a pipeline-unsupported client (like Golang)
 	PipeliningUnsupportedClient *TimingSeries
-
-	// notListening defines the total duration a reader spends NOT listening
-	// for the next request on a connection. If we are pipelining, this duration
-	// will be low. If we are not, this duration will be equivalent to totalResponseTime.
-	// If we are pipelining and workersBusy event happens, we block, so this duration
-	// would increase.
-	NotListening *TimingSeries
 }
 
 // NewServerStats creates a new ServerStats object.
@@ -91,7 +76,6 @@ func NewServerStats(cfg *TimingConfig, statsPeriod time.Duration) *ServerStats {
 		ProtocolError:               NewTimingSeries(cfg),
 		PanicCount:                  NewTimingSeries(cfg),
 		WorkersBusy:                 NewTimingSeries(cfg),
-		NotListening:                NewTimingSeries(cfg),
 		PipeliningUnsupportedClient: NewTimingSeries(cfg),
 		NoSuchFunction:              NewTimingSeries(cfg),
 		QueueingTimeout:             NewTimingSeries(cfg),
@@ -131,15 +115,5 @@ func (stats *ServerStats) GetInts() map[string]int64 {
 	s = stats.NoSuchFunction.MustSummarize(stats.statsPeriod)
 	ints["requests.no_such_thrift_function."+periodStr] = int64(s.Count)
 
-	// server side latency durations (all in micros)
-	s = stats.NotListening.MustSummarize(stats.statsPeriod)
-	ints["connections.not_listening.avg."+periodStr] = toμs(s.Average)
-	ints["connections.not_listening.p95."+periodStr] = toμs(s.P95)
-	ints["connections.not_listening.p99."+periodStr] = toμs(s.P99)
-
 	return ints
-}
-
-func toμs(duration time.Duration) int64 {
-	return int64(duration / time.Microsecond)
 }

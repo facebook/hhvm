@@ -31,9 +31,6 @@ func TestStats(t *testing.T) {
 	expectedInts := map[string]int64{
 		"connections.client_ended.60":               0,
 		"connections.connection_preempted_work.60":  0,
-		"connections.not_listening.avg.60":          0,
-		"connections.not_listening.p95.60":          0,
-		"connections.not_listening.p99.60":          0,
 		"connections.protocol_error.60":             0,
 		"requests.no_such_thrift_function.60":       0,
 		"requests.pipelining_unsupported_client.60": 0,

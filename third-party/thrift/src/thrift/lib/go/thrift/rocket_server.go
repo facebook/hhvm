@@ -215,6 +215,10 @@ func (s *rocketServerSocket) metadataPush(msg payload.Payload) {
 }
 
 func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
+	// TODO: this clone helps prevent a race-condition where the payload gets
+	// released by the underlying rsocket layer before we are done with it.
+	msg = payload.Clone(msg)
+
 	requestReceivedTime := time.Now()
 
 	request, err := rocket.DecodeRequestPayload(msg)
@@ -290,6 +294,10 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 }
 
 func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
+	// TODO: this clone helps prevent a race-condition where the payload gets
+	// released by the underlying rsocket layer before we are done with it.
+	msg = payload.Clone(msg)
+
 	requestReceivedTime := time.Now()
 
 	request, err := rocket.DecodeRequestPayload(msg)

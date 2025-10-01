@@ -70,8 +70,6 @@ func EncodeRequestPayload(
 
 // DecodeRequestPayload decodes a request payload.
 func DecodeRequestPayload(msg payload.Payload) (*RequestPayload, error) {
-	msg = payload.Clone(msg)
-
 	metadataBytes, ok := msg.Metadata()
 	if !ok {
 		return nil, fmt.Errorf("request payload is missing metadata")

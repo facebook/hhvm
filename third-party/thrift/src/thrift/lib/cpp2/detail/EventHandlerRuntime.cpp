@@ -160,16 +160,16 @@ namespace apache::thrift::detail {
        serviceNameLocators = locatorsFor(bypassSets.serviceNames),
        methodNameLocators = locatorsFor(bypassSets.methodNames)](
           auto make) mutable -> MethodNameStorageImpl {
-        MethodNameStorageImpl storage;
-        storage.serviceNames = InlineNameList{
+        MethodNameStorageImpl result;
+        result.serviceNames = InlineNameList{
             bypassSets.serviceNames.size(),
             copyNames(
                 std::move(serviceNameLocators), bypassSets.serviceNames, make)};
-        storage.methodNames = InlineNameList{
+        result.methodNames = InlineNameList{
             bypassSets.methodNames.size(),
             copyNames(
                 std::move(methodNameLocators), bypassSets.methodNames, make)};
-        return storage;
+        return result;
       });
 
   // We are okay to throw away the custom deleter because there is a

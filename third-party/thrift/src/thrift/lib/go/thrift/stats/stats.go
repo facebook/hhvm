@@ -39,12 +39,6 @@ type ServerStats struct {
 	WorkingCount         *AtomicCounter
 	SchedulingWriteCount *AtomicCounter
 	WritingCount         *AtomicCounter
-
-	// workersBusy defines a server event where no workers are available to accept
-	// available work. This can signal that we should increase # workers (in the case
-	// that workers are all blocking) or that the server is overloaded
-	// (in the case the work is all CPU bound)
-	WorkersBusy *TimingSeries
 }
 
 // NewServerStats creates a new ServerStats object.
@@ -65,7 +59,6 @@ func NewServerStats(cfg *TimingConfig, statsPeriod time.Duration) *ServerStats {
 
 		ProtocolError: NewTimingSeries(cfg),
 		PanicCount:    NewTimingSeries(cfg),
-		WorkersBusy:   NewTimingSeries(cfg),
 	}
 }
 
@@ -91,8 +84,6 @@ func (stats *ServerStats) GetInts() map[string]int64 {
 	ints["connections.connection_preempted_work."+periodStr] = int64(s.Count)
 	s = stats.ProtocolError.MustSummarize(stats.statsPeriod)
 	ints["connections.protocol_error."+periodStr] = int64(s.Count)
-	s = stats.WorkersBusy.MustSummarize(stats.statsPeriod)
-	ints["requests.workers_busy."+periodStr] = int64(s.Count)
 	s = stats.PanicCount.MustSummarize(stats.statsPeriod)
 	ints["requests.processor_panics."+periodStr] = int64(s.Count)
 

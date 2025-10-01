@@ -35,11 +35,12 @@ void EnumMetadata<::cpp2::YourEnum>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::MyStructNestedAnnotation>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::MyStructNestedAnnotation>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.MyStructNestedAnnotation", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyStructNestedAnnotation = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_MyStructNestedAnnotation = res.first->second;
+  module_MyStructNestedAnnotation.name() = "module.MyStructNestedAnnotation";
   module_MyStructNestedAnnotation.is_union() = false;
   static const auto* const
   module_MyStructNestedAnnotation_fields = new std::array<EncodedThriftField, 1>{ {
@@ -53,39 +54,42 @@ StructMetadata<::cpp2::MyStructNestedAnnotation>::gen(ThriftMetadata& metadata) 
     field.structured_annotations() = f.structured_annotations;
     module_MyStructNestedAnnotation.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::detail::YourUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::detail::YourUnion>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.MyUnion", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyUnion = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_MyUnion = res.first->second;
+  module_MyUnion.name() = "module.MyUnion";
   module_MyUnion.is_union() = true;
   module_MyUnion.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::StaticCast") } }).cv_struct());
   module_MyUnion.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourUnion") } }).cv_struct());
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::detail::YourException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::detail::YourException>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.MyException", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyException = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_MyException = res.first->second;
+  module_MyException.name() = "module.MyException";
   module_MyException.is_union() = false;
   module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourException") } }).cv_struct());
   module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::StaticCast") } }).cv_struct());
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::detail::YourStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::detail::YourStruct>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.MyStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.first->second;
+  module_MyStruct.name() = "module.MyStruct";
   module_MyStruct.is_union() = false;
   static const auto* const
   module_MyStruct_fields = new std::array<EncodedThriftField, 9>{ {
@@ -102,15 +106,16 @@ StructMetadata<::cpp2::detail::YourStruct>::gen(ThriftMetadata& metadata) {
   module_MyStruct.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourStruct") } }).cv_struct());
   module_MyStruct.structured_annotations()->push_back(*cvStruct("hack.Attributes", { {"attributes", cvList({ cvString("\\SomeClass(\\AnotherClass::class)") }) } }).cv_struct());
   module_MyStruct.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::StaticCast") } }).cv_struct());
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::SecretStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::SecretStruct>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.SecretStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_SecretStruct = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_SecretStruct = res.first->second;
+  module_SecretStruct.name() = "module.SecretStruct";
   module_SecretStruct.is_union() = false;
   static const auto* const
   module_SecretStruct_fields = new std::array<EncodedThriftField, 2>{ {
@@ -124,7 +129,7 @@ StructMetadata<::cpp2::SecretStruct>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_SecretStruct.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 
 void ExceptionMetadata<::cpp2::detail::YourException>::gen(ThriftMetadata& metadata) {

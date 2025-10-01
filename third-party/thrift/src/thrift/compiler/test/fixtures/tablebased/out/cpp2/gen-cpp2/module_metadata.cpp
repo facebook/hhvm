@@ -34,11 +34,12 @@ void EnumMetadata<::test::fixtures::tablebased::ExampleEnum>::gen(ThriftMetadata
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::tablebased::TrivialTypesStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::tablebased::TrivialTypesStruct>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.TrivialTypesStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_TrivialTypesStruct = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_TrivialTypesStruct = res.first->second;
+  module_TrivialTypesStruct.name() = "module.TrivialTypesStruct";
   module_TrivialTypesStruct.is_union() = false;
   static const auto* const
   module_TrivialTypesStruct_fields = new std::array<EncodedThriftField, 5>{ {
@@ -52,15 +53,16 @@ StructMetadata<::test::fixtures::tablebased::TrivialTypesStruct>::gen(ThriftMeta
     field.structured_annotations() = f.structured_annotations;
     module_TrivialTypesStruct.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::tablebased::ContainerStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::tablebased::ContainerStruct>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.ContainerStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_ContainerStruct = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_ContainerStruct = res.first->second;
+  module_ContainerStruct.name() = "module.ContainerStruct";
   module_ContainerStruct.is_union() = false;
   static const auto* const
   module_ContainerStruct_fields = new std::array<EncodedThriftField, 8>{ {
@@ -74,15 +76,16 @@ StructMetadata<::test::fixtures::tablebased::ContainerStruct>::gen(ThriftMetadat
     field.structured_annotations() = f.structured_annotations;
     module_ContainerStruct.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::tablebased::ExampleUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::tablebased::ExampleUnion>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.ExampleUnion", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_ExampleUnion = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_ExampleUnion = res.first->second;
+  module_ExampleUnion.name() = "module.ExampleUnion";
   module_ExampleUnion.is_union() = true;
   static const auto* const
   module_ExampleUnion_fields = new std::array<EncodedThriftField, 2>{ {
@@ -96,7 +99,7 @@ StructMetadata<::test::fixtures::tablebased::ExampleUnion>::gen(ThriftMetadata& 
     field.structured_annotations() = f.structured_annotations;
     module_ExampleUnion.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 
 } // namespace md

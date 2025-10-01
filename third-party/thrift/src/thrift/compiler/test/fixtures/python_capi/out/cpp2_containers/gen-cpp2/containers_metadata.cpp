@@ -28,11 +28,12 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::TemplateLists>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::TemplateLists>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("containers.TemplateLists", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& containers_TemplateLists = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& containers_TemplateLists = res.first->second;
+  containers_TemplateLists.name() = "containers.TemplateLists";
   containers_TemplateLists.is_union() = false;
   static const auto* const
   containers_TemplateLists_fields = new std::array<EncodedThriftField, 5>{ {
@@ -46,15 +47,16 @@ StructMetadata<::test::fixtures::python_capi::TemplateLists>::gen(ThriftMetadata
     field.structured_annotations() = f.structured_annotations;
     containers_TemplateLists.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::TemplateSets>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::TemplateSets>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("containers.TemplateSets", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& containers_TemplateSets = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& containers_TemplateSets = res.first->second;
+  containers_TemplateSets.name() = "containers.TemplateSets";
   containers_TemplateSets.is_union() = false;
   static const auto* const
   containers_TemplateSets_fields = new std::array<EncodedThriftField, 7>{ {
@@ -69,15 +71,16 @@ StructMetadata<::test::fixtures::python_capi::TemplateSets>::gen(ThriftMetadata&
     containers_TemplateSets.fields()->push_back(std::move(field));
   }
   containers_TemplateSets.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct());
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::TemplateMaps>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::TemplateMaps>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("containers.TemplateMaps", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& containers_TemplateMaps = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& containers_TemplateMaps = res.first->second;
+  containers_TemplateMaps.name() = "containers.TemplateMaps";
   containers_TemplateMaps.is_union() = false;
   static const auto* const
   containers_TemplateMaps_fields = new std::array<EncodedThriftField, 7>{ {
@@ -92,15 +95,16 @@ StructMetadata<::test::fixtures::python_capi::TemplateMaps>::gen(ThriftMetadata&
     containers_TemplateMaps.fields()->push_back(std::move(field));
   }
   containers_TemplateMaps.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct());
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::TWrapped>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::TWrapped>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("containers.TWrapped", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& containers_TWrapped = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& containers_TWrapped = res.first->second;
+  containers_TWrapped.name() = "containers.TWrapped";
   containers_TWrapped.is_union() = false;
   static const auto* const
   containers_TWrapped_fields = new std::array<EncodedThriftField, 2>{ {
@@ -114,15 +118,16 @@ StructMetadata<::test::fixtures::python_capi::TWrapped>::gen(ThriftMetadata& met
     field.structured_annotations() = f.structured_annotations;
     containers_TWrapped.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::IndirectionA>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::IndirectionA>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("containers.IndirectionA", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& containers_IndirectionA = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& containers_IndirectionA = res.first->second;
+  containers_IndirectionA.name() = "containers.IndirectionA";
   containers_IndirectionA.is_union() = false;
   static const auto* const
   containers_IndirectionA_fields = new std::array<EncodedThriftField, 1>{ {
@@ -136,15 +141,16 @@ StructMetadata<::test::fixtures::python_capi::IndirectionA>::gen(ThriftMetadata&
     field.structured_annotations() = f.structured_annotations;
     containers_IndirectionA.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::IndirectionB>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::IndirectionB>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("containers.IndirectionB", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& containers_IndirectionB = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& containers_IndirectionB = res.first->second;
+  containers_IndirectionB.name() = "containers.IndirectionB";
   containers_IndirectionB.is_union() = false;
   static const auto* const
   containers_IndirectionB_fields = new std::array<EncodedThriftField, 1>{ {
@@ -158,15 +164,16 @@ StructMetadata<::test::fixtures::python_capi::IndirectionB>::gen(ThriftMetadata&
     field.structured_annotations() = f.structured_annotations;
     containers_IndirectionB.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::IndirectionC>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::IndirectionC>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("containers.IndirectionC", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& containers_IndirectionC = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& containers_IndirectionC = res.first->second;
+  containers_IndirectionC.name() = "containers.IndirectionC";
   containers_IndirectionC.is_union() = false;
   static const auto* const
   containers_IndirectionC_fields = new std::array<EncodedThriftField, 1>{ {
@@ -180,7 +187,7 @@ StructMetadata<::test::fixtures::python_capi::IndirectionC>::gen(ThriftMetadata&
     field.structured_annotations() = f.structured_annotations;
     containers_IndirectionC.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 
 } // namespace md

@@ -28,11 +28,12 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::RefUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::RefUnion>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module_no_uri.RefUnion", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_no_uri_RefUnion = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_no_uri_RefUnion = res.first->second;
+  module_no_uri_RefUnion.name() = "module_no_uri.RefUnion";
   module_no_uri_RefUnion.is_union() = true;
   static const auto* const
   module_no_uri_RefUnion_fields = new std::array<EncodedThriftField, 1>{ {
@@ -46,7 +47,7 @@ StructMetadata<::cpp2::RefUnion>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_no_uri_RefUnion.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 
 } // namespace md

@@ -28,11 +28,12 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::InterceptedFields>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::InterceptedFields>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.InterceptedFields", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_InterceptedFields = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_InterceptedFields = res.first->second;
+  module_InterceptedFields.name() = "module.InterceptedFields";
   module_InterceptedFields.is_union() = false;
   static const auto* const
   module_InterceptedFields_fields = new std::array<EncodedThriftField, 6>{ {
@@ -46,7 +47,7 @@ StructMetadata<::facebook::thrift::test::InterceptedFields>::gen(ThriftMetadata&
     field.structured_annotations() = f.structured_annotations;
     module_InterceptedFields.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 
 } // namespace md

@@ -149,6 +149,21 @@ inline thrift::benchmark::OpMixed create<thrift::benchmark::OpMixed>() {
   return d;
 }
 
+template <>
+inline thrift::benchmark::MixedUnion create<thrift::benchmark::MixedUnion>() {
+  thrift::benchmark::MixedUnion d;
+  d.int64() = 12345;
+  return d;
+}
+
+template <>
+inline thrift::benchmark::OpMixedUnion
+create<thrift::benchmark::OpMixedUnion>() {
+  thrift::benchmark::OpMixedUnion d;
+  d.int64() = 12345;
+  return d;
+}
+
 template <class T>
 inline T createList(int size) {
   std::mt19937 rng;

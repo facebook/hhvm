@@ -58,6 +58,13 @@ struct Mixed {
   4: string str;
 }
 
+union MixedUnion {
+  1: i32 int32;
+  2: i64 int64;
+  3: bool b;
+  4: string str;
+}
+
 struct SmallListInt {
   1: list<i32> lst;
 }
@@ -485,6 +492,14 @@ struct OpLargeBinary {
 
 @cpp.UseOpEncode
 struct OpMixed {
+  1: i32 int32;
+  2: i64 int64;
+  3: bool b;
+  4: string str;
+}
+
+@cpp.UseOpEncode
+union OpMixedUnion {
   1: i32 int32;
   2: i64 int64;
   3: bool b;

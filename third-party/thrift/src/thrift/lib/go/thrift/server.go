@@ -69,7 +69,7 @@ func loadFn(stats *thriftstats.ServerStats, totalActiveRequests *atomic.Int64) u
 		working = totalActiveRequests.Load()
 	} else {
 		// TODO: remove this once header server is gone
-		working = stats.WorkingCount.Get() + stats.SchedulingWorkCount.Get()
+		working = stats.WorkingCount.Get()
 	}
 	denominator := float64(runtime.NumCPU())
 	return uint(1000. * float64(working) / denominator)

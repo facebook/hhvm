@@ -251,13 +251,11 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		return mono.Error(loadSheddingError)
 	}
 
-	s.stats.SchedulingWorkCount.Incr()
 	workItem := func(ctx context.Context) (payload.Payload, error) {
 		// Increment active requests when processing actually starts
 		s.incrementActiveRequests()
 		defer s.decrementActiveRequests()
 
-		s.stats.SchedulingWorkCount.Decr()
 		s.stats.WorkingCount.Incr()
 		defer s.stats.WorkingCount.Decr()
 

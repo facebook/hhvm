@@ -33,7 +33,6 @@ type ServerStats struct {
 
 	// Instantaneous counts of current number of requests being worked on
 	ConnCount            *AtomicCounter
-	SchedulingWorkCount  *AtomicCounter
 	WorkingCount         *AtomicCounter
 	SchedulingWriteCount *AtomicCounter
 	WritingCount         *AtomicCounter
@@ -46,7 +45,6 @@ func NewServerStats(cfg *TimingConfig, statsPeriod time.Duration) *ServerStats {
 
 		// instantaneous counters
 		ConnCount:            &AtomicCounter{Counter: 0},
-		SchedulingWorkCount:  &AtomicCounter{Counter: 0},
 		WorkingCount:         &AtomicCounter{Counter: 0},
 		SchedulingWriteCount: &AtomicCounter{Counter: 0},
 		WritingCount:         &AtomicCounter{Counter: 0},

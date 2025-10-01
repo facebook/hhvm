@@ -88,7 +88,7 @@ const Request& unwrapRequest(std::reference_wrapper<const Request>& req) {
 bool srHostInfoPtrFuncCarbonRouterClient(
     const HostInfoPtr& host,
     const RequestClass& requestClass,
-    uint64_t& hash);
+    std::optional<uint64_t>& hash);
 
 } // namespace detail
 
@@ -205,8 +205,7 @@ CarbonRouterClient<RouterInfo>::findAffinitizedProxyIdx(
   assert(mode_ == ThreadMode::AffinitizedRemoteThread);
 
   // Create a traverser
-  uint64_t hash = 0;
-  bool skipThreadAffinity{false};
+  std::optional<uint64_t> hash;
   RouteHandleTraverser<typename RouterInfo::RouteHandleIf> t(
       /* start */
       nullptr,
@@ -223,13 +222,12 @@ CarbonRouterClient<RouterInfo>::findAffinitizedProxyIdx(
         return detail::srHostInfoPtrFuncCarbonRouterClient(
             host, requestClass, hash);
       },
-      [&hash, &skipThreadAffinity](
+      [&hash](
           const AccessPoint& srHost,
           const RequestClass& requestClass,
           bool stopTraversalByRh) {
         // Skip thread affinity when RH signals stop traversal
         if (stopTraversalByRh) {
-          skipThreadAffinity = true;
           return true;
         }
         if (!requestClass.is(RequestClass::kShadow) &&
@@ -244,11 +242,8 @@ CarbonRouterClient<RouterInfo>::findAffinitizedProxyIdx(
   {
     auto config = proxies_[proxyIdx_]->getConfigLocked();
     config.second.proxyRoute().traverse(req, t);
-  };
-  if (skipThreadAffinity) {
-    return std::nullopt;
   }
-  return std::make_optional(hash % proxies_.size());
+  return hash ? std::make_optional(*hash % proxies_.size()) : std::nullopt;
 }
 
 template <class RouterInfo>

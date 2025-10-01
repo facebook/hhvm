@@ -13,7 +13,7 @@ namespace facebook::memcache::mcrouter::detail {
 bool srHostInfoPtrFuncCarbonRouterClient(
     const HostInfoPtr& host,
     const RequestClass& requestClass,
-    uint64_t& hash) {
+    std::optional<uint64_t>& hash) {
   if (!requestClass.is(RequestClass::kShadow) && host) {
     // Host unique key is derived from IP and port
     hash = host->location().hostUniqueKey();

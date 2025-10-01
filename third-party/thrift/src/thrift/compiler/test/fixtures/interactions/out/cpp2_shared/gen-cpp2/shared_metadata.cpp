@@ -28,12 +28,11 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::thrift::shared_interactions::DoSomethingResult>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("shared.DoSomethingResult", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::thrift::shared_interactions::DoSomethingResult>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& shared_DoSomethingResult = res.first->second;
-  shared_DoSomethingResult.name() = "shared.DoSomethingResult";
+  ::apache::thrift::metadata::ThriftStruct& shared_DoSomethingResult = res.metadata;
   shared_DoSomethingResult.is_union() = false;
   static const auto* const
   shared_DoSomethingResult_fields = new std::array<EncodedThriftField, 2>{ {
@@ -47,7 +46,7 @@ StructMetadata<::thrift::shared_interactions::DoSomethingResult>::gen(ThriftMeta
     field.structured_annotations() = f.structured_annotations;
     shared_DoSomethingResult.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 
 

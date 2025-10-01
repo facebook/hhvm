@@ -28,12 +28,11 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::aliasing::Foo>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.Foo", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::aliasing::Foo>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Foo = res.first->second;
-  module_Foo.name() = "module.Foo";
+  ::apache::thrift::metadata::ThriftStruct& module_Foo = res.metadata;
   module_Foo.is_union() = false;
   static const auto* const
   module_Foo_fields = new std::array<EncodedThriftField, 2>{ {
@@ -47,7 +46,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::aliasing::Foo>::gen
     field.structured_annotations() = f.structured_annotations;
     module_Foo.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 
 } // namespace md

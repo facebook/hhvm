@@ -41,12 +41,11 @@ void EnumMetadata<::test::fixtures::basic::HackEnum>::gen(ThriftMetadata& metada
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::basic::MyStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.first->second;
-  module_MyStruct.name() = "module.MyStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.metadata;
   module_MyStruct.is_union() = false;
   static const auto* const
   module_MyStruct_fields = new std::array<EncodedThriftField, 9>{ {
@@ -60,16 +59,15 @@ StructMetadata<::test::fixtures::basic::MyStruct>::gen(ThriftMetadata& metadata)
     field.structured_annotations() = f.structured_annotations;
     module_MyStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::Containers>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.Containers", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::basic::Containers>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Containers = res.first->second;
-  module_Containers.name() = "module.Containers";
+  ::apache::thrift::metadata::ThriftStruct& module_Containers = res.metadata;
   module_Containers.is_union() = false;
   static const auto* const
   module_Containers_fields = new std::array<EncodedThriftField, 3>{ {
@@ -83,27 +81,25 @@ StructMetadata<::test::fixtures::basic::Containers>::gen(ThriftMetadata& metadat
     field.structured_annotations() = f.structured_annotations;
     module_Containers.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyDataItem>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyDataItem", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::basic::MyDataItem>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyDataItem = res.first->second;
-  module_MyDataItem.name() = "module.MyDataItem";
+  ::apache::thrift::metadata::ThriftStruct& module_MyDataItem = res.metadata;
   module_MyDataItem.is_union() = false;
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyUnion", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::basic::MyUnion>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyUnion = res.first->second;
-  module_MyUnion.name() = "module.MyUnion";
+  ::apache::thrift::metadata::ThriftStruct& module_MyUnion = res.metadata;
   module_MyUnion.is_union() = true;
   static const auto* const
   module_MyUnion_fields = new std::array<EncodedThriftField, 4>{ {
@@ -117,16 +113,15 @@ StructMetadata<::test::fixtures::basic::MyUnion>::gen(ThriftMetadata& metadata) 
     field.structured_annotations() = f.structured_annotations;
     module_MyUnion.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyException", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::basic::MyException>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyException = res.first->second;
-  module_MyException.name() = "module.MyException";
+  ::apache::thrift::metadata::ThriftStruct& module_MyException = res.metadata;
   module_MyException.is_union() = false;
   static const auto* const
   module_MyException_fields = new std::array<EncodedThriftField, 4>{ {
@@ -140,16 +135,15 @@ StructMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata& metada
     field.structured_annotations() = f.structured_annotations;
     module_MyException.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyExceptionWithMessage", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::basic::MyExceptionWithMessage>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyExceptionWithMessage = res.first->second;
-  module_MyExceptionWithMessage.name() = "module.MyExceptionWithMessage";
+  ::apache::thrift::metadata::ThriftStruct& module_MyExceptionWithMessage = res.metadata;
   module_MyExceptionWithMessage.is_union() = false;
   static const auto* const
   module_MyExceptionWithMessage_fields = new std::array<EncodedThriftField, 4>{ {
@@ -163,16 +157,15 @@ StructMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(ThriftMetad
     field.structured_annotations() = f.structured_annotations;
     module_MyExceptionWithMessage.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::ReservedKeyword>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.ReservedKeyword", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::basic::ReservedKeyword>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_ReservedKeyword = res.first->second;
-  module_ReservedKeyword.name() = "module.ReservedKeyword";
+  ::apache::thrift::metadata::ThriftStruct& module_ReservedKeyword = res.metadata;
   module_ReservedKeyword.is_union() = false;
   static const auto* const
   module_ReservedKeyword_fields = new std::array<EncodedThriftField, 1>{ {
@@ -187,16 +180,15 @@ StructMetadata<::test::fixtures::basic::ReservedKeyword>::gen(ThriftMetadata& me
     module_ReservedKeyword.fields()->push_back(std::move(field));
   }
   module_ReservedKeyword.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("MyRenamedStruct") } }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::UnionToBeRenamed>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.UnionToBeRenamed", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::basic::UnionToBeRenamed>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_UnionToBeRenamed = res.first->second;
-  module_UnionToBeRenamed.name() = "module.UnionToBeRenamed";
+  ::apache::thrift::metadata::ThriftStruct& module_UnionToBeRenamed = res.metadata;
   module_UnionToBeRenamed.is_union() = true;
   static const auto* const
   module_UnionToBeRenamed_fields = new std::array<EncodedThriftField, 1>{ {
@@ -211,7 +203,7 @@ StructMetadata<::test::fixtures::basic::UnionToBeRenamed>::gen(ThriftMetadata& m
     module_UnionToBeRenamed.fields()->push_back(std::move(field));
   }
   module_UnionToBeRenamed.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("MyRenamedUnion") } }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 
 void ExceptionMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata& metadata) {

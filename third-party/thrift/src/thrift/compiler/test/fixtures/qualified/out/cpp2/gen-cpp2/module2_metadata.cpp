@@ -28,12 +28,11 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::module2::Struct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module2.Struct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::module2::Struct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module2_Struct = res.first->second;
-  module2_Struct.name() = "module2.Struct";
+  ::apache::thrift::metadata::ThriftStruct& module2_Struct = res.metadata;
   module2_Struct.is_union() = false;
   static const auto* const
   module2_Struct_fields = new std::array<EncodedThriftField, 2>{ {
@@ -47,16 +46,15 @@ StructMetadata<::module2::Struct>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module2_Struct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::module2::BigStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module2.BigStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::module2::BigStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module2_BigStruct = res.first->second;
-  module2_BigStruct.name() = "module2.BigStruct";
+  ::apache::thrift::metadata::ThriftStruct& module2_BigStruct = res.metadata;
   module2_BigStruct.is_union() = false;
   static const auto* const
   module2_BigStruct_fields = new std::array<EncodedThriftField, 2>{ {
@@ -70,7 +68,7 @@ StructMetadata<::module2::BigStruct>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module2_BigStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 
 } // namespace md

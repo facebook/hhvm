@@ -28,25 +28,23 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Empty>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.Empty", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::Empty>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Empty = res.first->second;
-  module_Empty.name() = "module.Empty";
+  ::apache::thrift::metadata::ThriftStruct& module_Empty = res.metadata;
   module_Empty.is_union() = false;
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Nada>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.Nada", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::Nada>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Nada = res.first->second;
-  module_Nada.name() = "module.Nada";
+  ::apache::thrift::metadata::ThriftStruct& module_Nada = res.metadata;
   module_Nada.is_union() = true;
-  return res.first->second;
+  return res.metadata;
 }
 
 } // namespace md

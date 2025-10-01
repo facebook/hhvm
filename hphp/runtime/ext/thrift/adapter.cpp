@@ -46,7 +46,7 @@ Variant applyAdapter(Variant value, Class& adapter, const String& methodName) {
   }
   return Variant::attach(
       g_context->invokeFuncFew(method, &adapter, 1, value.asTypedValue(),
-                               RuntimeCoeffects::fixme()));
+                               RuntimeCoeffects::fixme(), false /* dynamic */));
 }
 
 } // namespace

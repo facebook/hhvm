@@ -616,7 +616,7 @@ class StreamedQueryResult {
 
   const size_t query_idx_;
   size_t num_rows_ = 0;
-  int64_t num_affected_rows_ = -1;
+  int64_t num_affected_rows_ = 0;
   int64_t last_insert_id_ = 0;
   std::string recv_gtid_;
   RespAttrs resp_attrs_;

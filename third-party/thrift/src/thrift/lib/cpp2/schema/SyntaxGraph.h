@@ -1618,6 +1618,7 @@ class ProgramNode final : folly::MoveOnly,
  public:
   using detail::WithName::name;
 
+  std::string_view package() const noexcept { return package_; }
   std::string_view path() const { return path_; }
 
   using IncludesList = std::vector<folly::not_null<const ProgramNode*>>;
@@ -1635,6 +1636,7 @@ class ProgramNode final : folly::MoveOnly,
 
   ProgramNode(
       const detail::Resolver& resolver,
+      std::string_view package,
       std::string_view path,
       std::string_view name,
       std::vector<apache::thrift::type::ProgramId> includes,
@@ -1642,6 +1644,7 @@ class ProgramNode final : folly::MoveOnly,
       Namespaces namespaces)
       : detail::WithResolver(resolver),
         detail::WithName(name),
+        package_(package),
         path_(path),
         includes_(std::move(includes)),
         definitions_(std::move(definitions)),
@@ -1651,6 +1654,7 @@ class ProgramNode final : folly::MoveOnly,
       tree_printer::scope& scope, detail::VisitationTracker& visited) const;
 
  private:
+  std::string_view package_;
   std::string_view path_;
   std::vector<apache::thrift::type::ProgramId> includes_;
   Definitions definitions_;

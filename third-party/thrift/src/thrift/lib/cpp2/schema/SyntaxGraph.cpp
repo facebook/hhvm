@@ -686,7 +686,7 @@ void Annotation::printTo(
 
 void ProgramNode::printTo(
     tree_printer::scope& scope, detail::VisitationTracker& visited) const {
-  scope.print("ProgramNode (path='{}')", path());
+  scope.print("ProgramNode (path='{}', package='{}')", path(), package());
   if (visited.mark(*this).already) {
     return;
   }

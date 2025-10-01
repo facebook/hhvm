@@ -777,6 +777,13 @@ TEST(SyntaxGraphTest, getNode) {
   EXPECT_EQ(annot.definition().name(), "Experimental");
 }
 
+TEST_F(ServiceSchemaTest, Package) {
+  auto& registry = SchemaRegistry::get();
+  const StructNode& structC = registry.getNode<facebook::thrift::test::C>();
+  EXPECT_EQ(
+      structC.definition().program().package(), "facebook.com/thrift/test");
+}
+
 TEST(SyntaxGraphTest, getTypeSystemDefinitionRefBySourceIdentifier) {
   auto& registry = SchemaRegistry::get();
 

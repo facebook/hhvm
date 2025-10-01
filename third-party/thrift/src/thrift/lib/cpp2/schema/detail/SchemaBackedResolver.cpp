@@ -548,6 +548,7 @@ void SchemaIndex::updateProgramsById(
         *program.id(),
         ProgramNode(
             resolver_,
+            *program.uri(),
             *program.path(),
             *program.name(),
             *program.includes(),

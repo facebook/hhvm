@@ -27,15 +27,10 @@ type ServerStats struct {
 	statsPeriod time.Duration
 
 	// counters
-	ClientClosed *TimingSeries // # of client closed connections
-
 	PanicCount *TimingSeries // event where clients thrift handler panic'd
 
 	// Instantaneous counts of current number of requests being worked on
-	ConnCount            *AtomicCounter
-	WorkingCount         *AtomicCounter
-	SchedulingWriteCount *AtomicCounter
-	WritingCount         *AtomicCounter
+	WorkingCount *AtomicCounter
 }
 
 // NewServerStats creates a new ServerStats object.
@@ -44,14 +39,9 @@ func NewServerStats(cfg *TimingConfig, statsPeriod time.Duration) *ServerStats {
 		statsPeriod: statsPeriod,
 
 		// instantaneous counters
-		ConnCount:            &AtomicCounter{Counter: 0},
-		WorkingCount:         &AtomicCounter{Counter: 0},
-		SchedulingWriteCount: &AtomicCounter{Counter: 0},
-		WritingCount:         &AtomicCounter{Counter: 0},
+		WorkingCount: &AtomicCounter{Counter: 0},
 
 		// events/duration stats
-		ClientClosed: NewTimingSeries(cfg),
-
 		PanicCount: NewTimingSeries(cfg),
 	}
 }

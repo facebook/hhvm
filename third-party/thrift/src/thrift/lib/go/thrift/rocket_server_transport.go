@@ -138,12 +138,6 @@ func (r *rocketServerTransport) Close() error {
 }
 
 func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Conn) {
-	// update current connection count
-	r.stats.ConnCount.Incr()
-	defer func() {
-		r.stats.ConnCount.Decr()
-	}()
-
 	connTransport := r.transportID
 	// Use Rocket protocol right away if the server is running
 	// in "UpgradeToRocket" mode and ALPN value is set to "rs".

@@ -106,27 +106,6 @@ func GetRequestHeadersFromContext(ctx context.Context) map[string]string {
 	return requestHeadersMap
 }
 
-// SetRequestHeaders sets the Headers in the protocol to send with the request.
-// These headers will be written via the Write method, inside the Call method for each generated request.
-// These Headers will be cleared with Flush, as they are not persistent.
-func SetRequestHeaders(ctx context.Context, protocol Protocol) error {
-	if ctx == nil {
-		return nil
-	}
-	headers := ctx.Value(requestHeadersKey)
-	if headers == nil {
-		return nil
-	}
-	headersMap, ok := headers.(map[string]string)
-	if !ok {
-		return types.NewTransportException(types.INVALID_HEADERS_TYPE, "Headers key in context value is not map[string]string")
-	}
-	for k, v := range headersMap {
-		protocol.setRequestHeader(k, v)
-	}
-	return nil
-}
-
 func setResponseHeaders(ctx context.Context, responseHeaders map[string]string) {
 	if ctx == nil {
 		return

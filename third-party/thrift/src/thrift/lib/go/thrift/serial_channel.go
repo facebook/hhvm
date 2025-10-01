@@ -44,8 +44,9 @@ func (c *serialChannel) sendMsg(ctx context.Context, method string, request Writ
 	c.seqID++
 	seqID := c.seqID
 
-	if err := SetRequestHeaders(ctx, c.protocol); err != nil {
-		return seqID, err
+	requestHeadersMap := GetRequestHeadersFromContext(ctx)
+	for k, v := range requestHeadersMap {
+		c.protocol.setRequestHeader(k, v)
 	}
 
 	if err := c.protocol.WriteMessageBegin(method, msgType, seqID); err != nil {

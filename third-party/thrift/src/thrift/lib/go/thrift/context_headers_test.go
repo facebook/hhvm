@@ -20,66 +20,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func TestHeaderProtocolSomeHeaders(t *testing.T) {
-	ctx := context.Background()
-	want := map[string]string{"key1": "value1", "key2": "value2"}
-	var err error
-	for key, value := range want {
-		ctx, err = AddHeader(ctx, key, value)
-		require.NoError(t, err)
-	}
-	protocol, err := newHeaderProtocol(newMockSocket(), types.ProtocolIDCompact, 0, nil)
-	require.NoError(t, err)
-	err = SetRequestHeaders(ctx, protocol)
-	require.NoError(t, err)
-	got := protocol.(*headerProtocol).trans.writeInfoHeaders
-	assert.Equal(t, want, got)
-}
-
-// somewhere we are still passing context as nil, so we need to support this for now
-func TestHeaderProtocolSetNilHeaders(t *testing.T) {
-	protocol, err := newHeaderProtocol(newMockSocket(), types.ProtocolIDCompact, 0, nil)
-	require.NoError(t, err)
-	err = SetRequestHeaders(nil, protocol)
-	require.NoError(t, err)
-}
-
-func TestRocketProtocolSomeHeaders(t *testing.T) {
-	ctx := context.Background()
-	want := map[string]string{"key1": "value1", "key2": "value2"}
-	var err error
-	for key, value := range want {
-		ctx, err = AddHeader(ctx, key, value)
-		require.NoError(t, err)
-	}
-	protocol, err := newRocketClient(newMockSocket(), types.ProtocolIDCompact, 0, nil)
-	require.NoError(t, err)
-	err = SetRequestHeaders(ctx, protocol)
-	require.NoError(t, err)
-	got := protocol.(*rocketClient).reqHeaders
-	assert.Equal(t, want, got)
-}
-
-// somewhere we are still passing context as nil, so we need to support this for now
-func TestRocketProtocolSetNilHeaders(t *testing.T) {
-	protocol, err := newRocketClient(newMockSocket(), types.ProtocolIDCompact, 0, nil)
-	require.NoError(t, err)
-	err = SetRequestHeaders(nil, protocol)
-	require.NoError(t, err)
-}
-
-// somewhere we are still passing context as nil, so we need to support this for now
-func TestUpgradeToRocketProtocolSetNilHeaders(t *testing.T) {
-	protocol, err := newUpgradeToRocketClient(newMockSocket(), types.ProtocolIDCompact, 0, nil)
-	require.NoError(t, err)
-	err = SetRequestHeaders(nil, protocol)
-	require.NoError(t, err)
-}
 
 func TestWithHeadersDoNotOverride(t *testing.T) {
 	ctx := context.Background()

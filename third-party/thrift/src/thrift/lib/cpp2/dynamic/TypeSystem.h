@@ -1042,6 +1042,8 @@ class StructNode final : folly::MoveOnly, public StructuredNode {
       std::vector<FieldDefinition>,
       bool isSealed,
       AnnotationsMap annotations);
+
+  TypeRef asRef() const noexcept { return TypeRef(*this); }
 };
 
 class UnionNode final : folly::MoveOnly, public StructuredNode {
@@ -1051,6 +1053,8 @@ class UnionNode final : folly::MoveOnly, public StructuredNode {
       std::vector<FieldDefinition>,
       bool isSealed,
       AnnotationsMap annotations);
+
+  TypeRef asRef() const noexcept { return TypeRef(*this); }
 };
 
 class EnumNode final : folly::MoveOnly, public DefinitionNode {
@@ -1088,6 +1092,8 @@ class EnumNode final : folly::MoveOnly, public DefinitionNode {
         values_(std::move(values)),
         annotations_(std::move(annotations)) {}
 
+  TypeRef asRef() const noexcept { return TypeRef(*this); }
+
  private:
   std::vector<Value> values_;
   AnnotationsMap annotations_;
@@ -1109,6 +1115,8 @@ class OpaqueAliasNode final : folly::MoveOnly, public DefinitionNode {
       : DefinitionNode(std::move(uri)),
         targetType_(std::move(targetType)),
         annotations_(std::move(annotations)) {}
+
+  TypeRef asRef() const noexcept { return TypeRef(*this); }
 
  private:
   TypeRef targetType_;

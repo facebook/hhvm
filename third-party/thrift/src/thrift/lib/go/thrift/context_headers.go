@@ -69,16 +69,6 @@ func SetHeaders(ctx context.Context, headers map[string]string) context.Context 
 	return context.WithValue(ctx, requestHeadersKey, headers)
 }
 
-// GetHeaders gets thrift headers from ctx.
-func GetHeaders(ctx context.Context) map[string]string {
-	// check for headersKey
-	v, ok := ctx.Value(requestHeadersKey).(map[string]string)
-	if ok {
-		return v
-	}
-	return nil
-}
-
 // NewResponseHeadersContext returns a new context with the response headers value.
 func NewResponseHeadersContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, responseHeadersKey, make(map[string]string))

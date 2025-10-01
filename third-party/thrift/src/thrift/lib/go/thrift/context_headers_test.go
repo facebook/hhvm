@@ -89,10 +89,10 @@ func TestWithHeadersDoNotOverride(t *testing.T) {
 	var err error
 	ctx, err = AddHeader(ctx, "key1", "value1")
 	assert.NoError(t, err)
-	output1 := GetHeaders(ctx)
+	output1 := GetRequestHeadersFromContext(ctx)
 	assert.Equal(t, input1, output1)
 	ctx = WithHeaders(ctx, input2)
-	output2 := GetHeaders(ctx)
+	output2 := GetRequestHeadersFromContext(ctx)
 	assert.Equal(t, want, output2)
 }
 
@@ -103,9 +103,30 @@ func TestSetHeadersDoesOverride(t *testing.T) {
 	var err error
 	ctx, err = AddHeader(ctx, "key1", "value1")
 	assert.NoError(t, err)
-	output1 := GetHeaders(ctx)
+	output1 := GetRequestHeadersFromContext(ctx)
 	assert.Equal(t, input1, output1)
 	ctx = SetHeaders(ctx, input2)
-	output2 := GetHeaders(ctx)
+	output2 := GetRequestHeadersFromContext(ctx)
 	assert.Equal(t, input2, output2)
+}
+
+func TestGetRequestHeadersFromContext(t *testing.T) {
+	// Case: nil context
+	headers := GetRequestHeadersFromContext(nil)
+	require.Nil(t, headers)
+
+	// Case: empty context
+	headers = GetRequestHeadersFromContext(context.TODO())
+	require.Nil(t, headers)
+
+	// Case: context with headers
+	headersMap := map[string]string{"foo": "bar"}
+	ctxWithHeaders := WithHeaders(context.TODO(), headersMap)
+	headers = GetRequestHeadersFromContext(ctxWithHeaders)
+	require.Equal(t, headersMap, headers)
+
+	// Case: context with invalid headers type
+	ctxWithInvalidHeadersType := context.WithValue(context.TODO(), requestHeadersKey, 1234)
+	headers = GetRequestHeadersFromContext(ctxWithInvalidHeadersType)
+	require.Nil(t, headers)
 }

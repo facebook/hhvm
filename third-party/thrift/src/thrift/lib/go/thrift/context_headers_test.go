@@ -24,17 +24,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestWithHeadersDoNotOverride(t *testing.T) {
+func TestWithRequestHeadersDoNotOverride(t *testing.T) {
 	ctx := context.Background()
 	input1 := map[string]string{"key1": "value1"}
 	input2 := map[string]string{"key2": "value2"}
 	want := map[string]string{"key1": "value1", "key2": "value2"}
 	var err error
-	ctx, err = AddHeader(ctx, "key1", "value1")
+	ctx, err = WithRequestHeader(ctx, "key1", "value1")
 	assert.NoError(t, err)
 	output1 := GetRequestHeadersFromContext(ctx)
 	assert.Equal(t, input1, output1)
-	ctx = WithHeaders(ctx, input2)
+	ctx = WithRequestHeaders(ctx, input2)
 	output2 := GetRequestHeadersFromContext(ctx)
 	assert.Equal(t, want, output2)
 }
@@ -44,7 +44,7 @@ func TestSetHeadersDoesOverride(t *testing.T) {
 	input1 := map[string]string{"key1": "value1"}
 	input2 := map[string]string{"key2": "value2"}
 	var err error
-	ctx, err = AddHeader(ctx, "key1", "value1")
+	ctx, err = WithRequestHeader(ctx, "key1", "value1")
 	assert.NoError(t, err)
 	output1 := GetRequestHeadersFromContext(ctx)
 	assert.Equal(t, input1, output1)
@@ -64,7 +64,7 @@ func TestGetRequestHeadersFromContext(t *testing.T) {
 
 	// Case: context with headers
 	headersMap := map[string]string{"foo": "bar"}
-	ctxWithHeaders := WithHeaders(context.TODO(), headersMap)
+	ctxWithHeaders := WithRequestHeaders(context.TODO(), headersMap)
 	headers = GetRequestHeadersFromContext(ctxWithHeaders)
 	require.Equal(t, headersMap, headers)
 

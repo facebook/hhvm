@@ -274,11 +274,13 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 
 		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats, s.totalActiveRequestCount)))
 
+		responseCompressionAlgo := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
+
 		payload, err := rocket.EncodeResponsePayload(
 			rpcFuncName,
 			protocol.messageType,
 			protocol.getRequestHeaders(),
-			request.GetCompressionForResponse(),
+			responseCompressionAlgo,
 			protocol.Bytes(),
 		)
 

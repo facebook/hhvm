@@ -116,7 +116,7 @@ func (r *RequestPayload) ProtoID() types.ProtocolID {
 func (r *RequestPayload) GetCompressionForResponse() rpcmetadata.CompressionAlgorithm {
 	if r.metadata != nil {
 		compressionConfig := r.metadata.GetCompressionConfig()
-		return compressionAlgorithmFromCompressionConfig(compressionConfig)
+		return CompressionAlgorithmFromCompressionConfig(compressionConfig)
 	}
 	return rpcmetadata.CompressionAlgorithm_NONE
 }
@@ -174,7 +174,7 @@ func RpcKindToMessageType(kind rpcmetadata.RpcKind) (types.MessageType, error) {
 	return 0, fmt.Errorf("unsupported RpcKind %v", kind)
 }
 
-func compressionAlgorithmFromCompressionConfig(compressionConfig *rpcmetadata.CompressionConfig) rpcmetadata.CompressionAlgorithm {
+func CompressionAlgorithmFromCompressionConfig(compressionConfig *rpcmetadata.CompressionConfig) rpcmetadata.CompressionAlgorithm {
 	if compressionConfig == nil {
 		return rpcmetadata.CompressionAlgorithm_NONE
 	}

@@ -30,7 +30,6 @@ func TestStats(t *testing.T) {
 	ints := stats.GetInts()
 	expectedInts := map[string]int64{
 		"requests.processor_panics.60": 0,
-		"requests.scheduling_work":     0,
 		"running_workers":              0,
 	}
 	require.Equal(t, expectedInts, ints)

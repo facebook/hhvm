@@ -65,9 +65,6 @@ func (stats *ServerStats) GetInts() map[string]int64 {
 	// instantaneous workers
 	ints["running_workers"] = stats.WorkingCount.Get()
 
-	// instantaneous request pipeline counters
-	ints["requests.scheduling_work"] = stats.SchedulingWorkCount.Get()
-
 	// server event counters
 	periodStr := fmt.Sprintf("%d", stats.statsPeriod/time.Second)
 

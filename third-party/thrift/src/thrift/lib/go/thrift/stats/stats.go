@@ -74,9 +74,7 @@ func (stats *ServerStats) GetInts() map[string]int64 {
 	// server event counters
 	periodStr := fmt.Sprintf("%d", stats.statsPeriod/time.Second)
 
-	s := stats.ClientClosed.MustSummarize(stats.statsPeriod)
-	ints["connections.client_ended."+periodStr] = int64(s.Count)
-	s = stats.PanicCount.MustSummarize(stats.statsPeriod)
+	s := stats.PanicCount.MustSummarize(stats.statsPeriod)
 	ints["requests.processor_panics."+periodStr] = int64(s.Count)
 
 	return ints

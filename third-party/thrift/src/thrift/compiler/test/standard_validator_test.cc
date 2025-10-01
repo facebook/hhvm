@@ -22,6 +22,7 @@ using apache::thrift::compiler::test::check_compile;
 
 TEST(StandardValidatorTest, BadPriority) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     service Service {
       void foo() (priority = "bad2");
     } (priority = "bad1")
@@ -42,6 +43,7 @@ TEST(StandardValidatorTest, BadPriority) {
 
 TEST(StandardValidatorTest, RepeatedNameInExtendedService) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     service Base {
       void bar();
       void baz();
@@ -56,6 +58,7 @@ TEST(StandardValidatorTest, RepeatedNameInExtendedService) {
 
 TEST(StandardValidatorTest, UnionErrors) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct Struct {}
 
     union Union {
@@ -71,6 +74,7 @@ TEST(StandardValidatorTest, UnionErrors) {
 
 TEST(StandardValidatorTest, ValidateExceptionMessage) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/thrift.thrift"
 
     exception MyValidException {
@@ -102,6 +106,7 @@ TEST(StandardValidatorTest, ValidateExceptionMessage) {
 
 TEST(StandardValidatorTest, ValidatePy3EnableCppAdapter) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/cpp.thrift"
     include "thrift/annotation/python.thrift"
 
@@ -124,6 +129,7 @@ TEST(StandardValidatorTest, ValidatePy3EnableCppAdapter) {
 
 TEST(StandardValidatorTest, ConstKeyCollision) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     enum FooBar {
       Foo = 1,
       Bar = 2,
@@ -177,7 +183,7 @@ TEST(StandardValidatorTest, ConstKeyCollision) {
 
     const list<map<i64, string>> CASCADING = [
       {1: "str"},
-      // Verify no duplicate error on USEFUL_DATA 
+      // Verify no duplicate error on USEFUL_DATA
       USEFUL_DATA,
       {1: "str"},
     ];
@@ -192,7 +198,7 @@ TEST(StandardValidatorTest, ConstKeyCollision) {
     };
 
     const Building C = Building {
-      // Verify no duplicate error on USEFUL_DATA 
+      // Verify no duplicate error on USEFUL_DATA
       int_str = USEFUL_DATA,
     };
 
@@ -202,6 +208,7 @@ TEST(StandardValidatorTest, ConstKeyCollision) {
 
 TEST(StandardValidatorTest, FieldDefaultKeyCollision) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     enum FooBar {
       Foo = 1,
       Bar = 2,
@@ -231,6 +238,7 @@ TEST(StandardValidatorTest, FieldDefaultKeyCollision) {
 
 TEST(StandardValidatorTest, SetKeyCollision) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const set<i64> SET_DUPE = [
       2,
       4,

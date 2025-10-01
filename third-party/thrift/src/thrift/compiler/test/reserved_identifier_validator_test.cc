@@ -29,7 +29,8 @@ using apache::thrift::compiler::test::check_compile;
 TEST(ReservedIdentifierValidatorTest, FilenameIsReservedAndShouldError) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["path/to/fbthrift_should_error.thrift"] = R"(
-    # expected-error@1: `fbthrift_should_error` is a reserved filename. Choose a different filename that does not contain `fbthrift`.
+    # expected-error@3: `fbthrift_should_error` is a reserved filename. Choose a different filename that does not contain `fbthrift`.
+    package "test.dev/test"
   )";
 
   check_compile(name_contents_map, "path/to/fbthrift_should_error.thrift");
@@ -41,7 +42,6 @@ TEST(
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["path/to/fbthrift_should_not_error_due_to_bypass.thrift"] =
       R"(
-
     include "thrift/annotation/thrift.thrift"
 
     @thrift.AllowReservedFilename
@@ -73,6 +73,7 @@ TEST(
 
 TEST(ReservedIdentifierValidatorTest, ServiceNameIsReserved) {
   check_compile(R"(
+    package "test.dev/test"
     include "thrift/annotation/thrift.thrift"
 
     service MyService {}
@@ -91,6 +92,7 @@ TEST(ReservedIdentifierValidatorTest, ServiceNameIsReserved) {
 
 TEST(ReservedIdentifierValidatorTest, InteractionNameIsReserved) {
   check_compile(R"(
+    package "test.dev/test"
     include "thrift/annotation/thrift.thrift"
 
     interaction MyInteraction {}
@@ -109,6 +111,7 @@ TEST(ReservedIdentifierValidatorTest, InteractionNameIsReserved) {
 
 TEST(ReservedIdentifierValidatorTest, StructNameIsReserved) {
   check_compile(R"(
+    package "test.dev/test"
     include "thrift/annotation/thrift.thrift"
 
     struct MyStruct {
@@ -135,6 +138,7 @@ TEST(ReservedIdentifierValidatorTest, StructNameIsReserved) {
 
 TEST(ReservedIdentifierValidatorTest, UnionNameIsReserved) {
   check_compile(R"(
+    package "test.dev/test"
     include "thrift/annotation/thrift.thrift"
 
     union MyUnion {}
@@ -153,6 +157,7 @@ TEST(ReservedIdentifierValidatorTest, UnionNameIsReserved) {
 
 TEST(ReservedIdentifierValidatorTest, ExceptionNameIsReserved) {
   check_compile(R"(
+    package "test.dev/test"
     include "thrift/annotation/thrift.thrift"
 
     exception MyException {}
@@ -171,6 +176,7 @@ TEST(ReservedIdentifierValidatorTest, ExceptionNameIsReserved) {
 
 TEST(ReservedIdentifierValidatorTest, EnumNameIsReserved) {
   check_compile(R"(
+    package "test.dev/test"
     include "thrift/annotation/thrift.thrift"
 
     enum MyEnum {
@@ -198,6 +204,7 @@ TEST(ReservedIdentifierValidatorTest, EnumNameIsReserved) {
 
 TEST(ReservedIdentifierValidatorTest, ConstNameIsReserved) {
   check_compile(R"(
+    package "test.dev/test"
     include "thrift/annotation/thrift.thrift"
 
     const i32 MY_CONSTANT = 42;
@@ -216,6 +223,7 @@ TEST(ReservedIdentifierValidatorTest, ConstNameIsReserved) {
 
 TEST(ReservedIdentifierValidatorTest, TypedefNameIsReserved) {
   check_compile(R"(
+    package "test.dev/test"
     include "thrift/annotation/thrift.thrift"
 
     typedef i16 MyTypedef;
@@ -322,6 +330,7 @@ TEST_P(GeneratedReservedIdentifierValidatorTest, GeneratedNodeMustNotError) {
   t_program program("path/to/program.thrift", "path/to/program.thrift");
   source_manager source_mgr;
   auto loc = source_mgr.add_virtual_file(program.path(), "").start;
+  program.set_package(t_package{"test.dev/test"});
   program.set_src_range({loc, loc});
   diagnostic_results results;
   sema_context ctx(source_mgr, results, diagnostic_params::keep_all());

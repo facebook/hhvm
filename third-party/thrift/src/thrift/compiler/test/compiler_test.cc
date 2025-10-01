@@ -27,6 +27,7 @@ using apache::thrift::compiler::test::check_compile_options;
 // in thrift/compiler/test/compiler.cc
 TEST(CompilerTest, diagnostic_in_last_line) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct S {
       1: i32 i;
       # expected-error: expected type)");
@@ -34,8 +35,9 @@ TEST(CompilerTest, diagnostic_in_last_line) {
 
 TEST(CompilerTest, absolute_line_number) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     foo
-    # expected-error@2: expected definition
+    # expected-error@3: expected definition
     )");
 }
 
@@ -48,6 +50,7 @@ TEST(CompilerTest, double_package) {
 
 TEST(CompilerTest, missing_type_definition) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct S {
       1: i32 i;
       2: MyStruct ms; # expected-error: Type `MyStruct` not defined.
@@ -57,6 +60,7 @@ TEST(CompilerTest, missing_type_definition) {
 
 TEST(CompilerTest, redefinition) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct A {}
     struct A {}      # expected-error: redefinition of 'A'
     union A {}       # expected-error: redefinition of 'A'
@@ -71,6 +75,7 @@ TEST(CompilerTest, redefinition) {
 
 TEST(CompilerTest, zero_as_field_id) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct Foo {
         0: i32 field; # expected-warning: Nonpositive field id (0) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): -1
                       # expected-error@-1: Zero value (0) not allowed as a field id for `field`
@@ -84,6 +89,7 @@ TEST(CompilerTest, zero_as_field_id) {
 TEST(CompilerTest, zero_as_field_id_neg_keys) {
   check_compile(
       R"(
+      package "facebook.com/thrift/test"
       struct Foo {
         0: i32 field; # expected-warning: Nonpositive field id (0) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): -1
                       # expected-error@-1: Zero value (0) not allowed as a field id for `field`
@@ -96,6 +102,7 @@ TEST(CompilerTest, zero_as_field_id_neg_keys) {
 TEST(CompilerTest, no_field_id) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     struct Experimental {} (thrift.uri = "facebook.com/thrift/annotation/Experimental") # expected-warning: The annotation thrift.uri is deprecated. Please use @thrift.Uri instead.
     struct Foo {
       @Experimental
@@ -109,6 +116,7 @@ TEST(CompilerTest, no_field_id) {
 
 TEST(CompilerTest, zero_as_field_id_annotation) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct Foo {
       0: i32 field (cpp.deprecated_allow_zero_as_field_id);
         # expected-warning@-1: Nonpositive field id (0) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): -1
@@ -121,6 +129,7 @@ TEST(CompilerTest, zero_as_field_id_annotation) {
 TEST(CompilerTest, neg_field_ids) {
   check_compile(
       R"(
+      package "facebook.com/thrift/test"
       struct Foo {
         i32 f1;  // auto id = -1
           # expected-error@-1: No field id specified for `f1`
@@ -138,6 +147,7 @@ TEST(CompilerTest, neg_field_ids) {
 TEST(CompilerTest, exhausted_neg_field_ids) {
   check_compile(
       R"(
+      package "facebook.com/thrift/test"
       struct Foo {
         -32: i32 f1; // min value.
           # expected-warning@-1: Nonpositive field id (-32) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): -1
@@ -150,6 +160,7 @@ TEST(CompilerTest, exhausted_neg_field_ids) {
 
 TEST(CompilerTest, exhausted_pos_field_ids) {
   std::string src;
+  src += "package \"facebook.com/thrift/test\"\n";
   src += "struct Foo {\n";
   for (int i = 0; i < 33; i++) {
     src += "  i32 field_" + std::to_string(i) + ";\n";
@@ -163,6 +174,7 @@ TEST(CompilerTest, exhausted_pos_field_ids) {
 
 TEST(CompilerTest, out_of_range_field_ids_overflow) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct Foo {
       -32768: i32 f1; # expected-warning: Nonpositive field id (-32768) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): -1
       32767: i32 f2;
@@ -175,6 +187,7 @@ TEST(CompilerTest, out_of_range_field_ids_overflow) {
 
 TEST(CompilerTest, out_of_range_field_ids_underflow) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct Foo {
       -32768: i32 f1; # expected-warning: Nonpositive field id (-32768) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): -1
       32767: i32 f2;
@@ -187,6 +200,7 @@ TEST(CompilerTest, out_of_range_field_ids_underflow) {
 
 TEST(CompilerTest, params) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     service MyService {
       void good(1: i32 i);
       void semi(1: i32 i;); # expected-warning: unexpected ';'
@@ -198,6 +212,7 @@ TEST(CompilerTest, params) {
 
 TEST(CompilerTest, oneway_exception) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     exception A {}
 
     service MyService {
@@ -209,6 +224,7 @@ TEST(CompilerTest, oneway_exception) {
 
 TEST(CompilerTest, oneway_return) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     interaction I {}
 
     service S {
@@ -221,6 +237,7 @@ TEST(CompilerTest, oneway_return) {
 
 TEST(CompilerTest, return_sink) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     service S {
       sink<i32, i32> getSink();
       i32, sink<i32, i32> getStreamWithInitialResponse();
@@ -231,6 +248,7 @@ TEST(CompilerTest, return_sink) {
 
 TEST(CompilerTest, return_stream) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     service S {
       stream<i32> getStream();
       i32, stream<i32> getStreamWithInitialResponse();
@@ -241,6 +259,7 @@ TEST(CompilerTest, return_stream) {
 
 TEST(CompilerTest, return_interaction) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     interaction I {
       void foo();
     }
@@ -254,6 +273,7 @@ TEST(CompilerTest, return_interaction) {
 
 TEST(CompilerTest, void_as_initial_response_type) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     service S {
       void, stream<i32> getStream(); # expected-error: cannot use 'void' as an initial response type
       void, sink<i32, i32> getSink(); # expected-error: cannot use 'void' as an initial response type
@@ -263,6 +283,7 @@ TEST(CompilerTest, void_as_initial_response_type) {
 
 TEST(CompilerTest, enum) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     enum Color {
       RED = 1,
       GREEN = 2; # expected-warning: unexpected ';'
@@ -273,6 +294,7 @@ TEST(CompilerTest, enum) {
 
 TEST(CompilerTest, enum_wrong_default_value) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     enum Color {
       RED = 1,
       GREEN = 2,
@@ -287,6 +309,7 @@ TEST(CompilerTest, enum_wrong_default_value) {
 
 TEST(CompilerTest, duplicate_enum_value_name) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     enum Foo {
       Bar = 1,
       Bar = 2, # expected-error: Enum value `Bar` is already defined for `Foo`.
@@ -296,6 +319,7 @@ TEST(CompilerTest, duplicate_enum_value_name) {
 
 TEST(CompilerTest, duplicate_enum_value) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     enum Foo {
       Bar = 1,
       Baz = 1, # expected-error: Duplicate value `Baz=1` with value `Bar` in enum `Foo`.
@@ -305,6 +329,7 @@ TEST(CompilerTest, duplicate_enum_value) {
 
 TEST(CompilerTest, unset_enum_value) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     enum Foo {
       Foo = 1,
       Bar, # expected-error: The enum value, `Bar`, must have an explicitly assigned value.
@@ -315,6 +340,7 @@ TEST(CompilerTest, unset_enum_value) {
 
 TEST(CompilerTest, enum_overflow) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     enum Foo {
       Bar = 2147483647,
       Baz = 2147483648 # expected-error: Integer constant 2147483648 outside the range of enum values ([-2147483648, 2147483647]).
@@ -324,6 +350,7 @@ TEST(CompilerTest, enum_overflow) {
 
 TEST(CompilerTest, enum_underflow) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     enum Foo {
       Bar = -2147483648,
       Baz = -2147483649 # expected-error: Integer constant -2147483649 outside the range of enum values ([-2147483648, 2147483647]).
@@ -333,11 +360,13 @@ TEST(CompilerTest, enum_underflow) {
 
 TEST(CompilerTest, integer_overflow_underflow) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     # Unsigned Ints
     const i64 overflowUint = 18446744073709551615;  # max uint64
     # expected-error@-1: integer constant 18446744073709551615 is too large
   )");
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const i64 overflowUint2 = 18446744073709551616;  # max uint64 + 1
     # expected-error@-1: integer constant 18446744073709551616 is too large
   )");
@@ -345,18 +374,22 @@ TEST(CompilerTest, integer_overflow_underflow) {
 
 TEST(CompilerTest, double_overflow_underflow) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const double overflowConst = 1.7976931348623159e+308;
     # expected-error@-1: floating-point constant 1.7976931348623159e+308 is out of range
   )");
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const double overflowConst = 1.7976931348623159e+309;
     # expected-error@-1: floating-point constant 1.7976931348623159e+309 is out of range
   )");
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const double overflowConst = 4.9406564584124654e-325;
     # expected-error@-1: magnitude of floating-point constant 4.9406564584124654e-325 is too small
   )");
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const double overflowConst = 1e-324;
     # expected-error@-1: magnitude of floating-point constant 1e-324 is too small
   )");
@@ -364,6 +397,7 @@ TEST(CompilerTest, double_overflow_underflow) {
 
 TEST(CompilerTest, void_data) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const void v = 42; # expected-error: `void` cannot be used as a data type
     struct S {
       1: void v; # expected-error: `void` cannot be used as a data type
@@ -373,6 +407,7 @@ TEST(CompilerTest, void_data) {
 
 TEST(CompilerTest, byte_initializer) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const byte c1 = 127;
     const byte c2 = 128;
     # expected-error@-1: 128 is out of range for `byte` in initialization of `c2`
@@ -385,6 +420,7 @@ TEST(CompilerTest, byte_initializer) {
 
 TEST(CompilerTest, i16_initializer) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const i16 c1 = 32767;
     const i16 c2 = 32768;
     # expected-error@-1: 32768 is out of range for `i16` in initialization of `c2`
@@ -397,6 +433,7 @@ TEST(CompilerTest, i16_initializer) {
 
 TEST(CompilerTest, i32_initializer) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const i32 c0 = 42;
 
     const i32 c1 = 4.2;
@@ -417,6 +454,7 @@ TEST(CompilerTest, i32_initializer) {
 
 TEST(CompilerTest, float_initializer) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const float c0 = 1e8;
 
     const float c1 = 3.4028234663852886e+38;
@@ -436,6 +474,7 @@ TEST(CompilerTest, float_initializer) {
 
 TEST(CompilerTest, double_initializer) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const double c0 = 1e8;
     const double c1 = 1.7976931348623157e+308;
     const double c2 = -1.7976931348623157e+308;
@@ -450,6 +489,7 @@ TEST(CompilerTest, double_initializer) {
 
 TEST(CompilerTest, binary_initializer) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const binary b0 = "foo";
 
     const binary b1 = 42;
@@ -459,6 +499,7 @@ TEST(CompilerTest, binary_initializer) {
 
 TEST(CompilerTest, struct_initializer) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct S {}
     const S s1 = {}; # OK
 
@@ -486,6 +527,7 @@ TEST(CompilerTest, struct_initializer) {
 
 TEST(CompilerTest, union_initializer) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     union U {
       1: i32 a;
       2: i32 b;
@@ -515,6 +557,7 @@ TEST(CompilerTest, union_initializer) {
 
 TEST(CompilerTest, enum_initializer) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     enum E {A = 1}
 
     const E e1 = E.A; # OK
@@ -546,6 +589,7 @@ TEST(CompilerTest, enum_initializer) {
 
 TEST(CompilerTest, list_initializer) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const list<i32> weirdList = {};
     # expected-warning@-1: converting empty map to `list` in initialization of `weirdList`
 
@@ -556,6 +600,7 @@ TEST(CompilerTest, list_initializer) {
 
 TEST(CompilerTest, set_initializer) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const set<string> wrongSet = {1: 2};
     # expected-error@-1: cannot convert map to `set<string>` in initialization of `wrongSet`
 
@@ -569,6 +614,7 @@ TEST(CompilerTest, set_initializer) {
 
 TEST(CompilerTest, map_initializer) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const map<i32, i32> wrongMap = [1, 32, 3];
     # expected-error@-1: cannot convert list to `map<i32, i32>` in initialization of `wrongMap`
 
@@ -583,6 +629,7 @@ TEST(CompilerTest, map_initializer) {
 
 TEST(CompilerTest, map_item_separator) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const map<i32, i32> m = {
       1: 2,
       3: 4; # expected-error: expected }
@@ -593,6 +640,7 @@ TEST(CompilerTest, map_item_separator) {
 
 TEST(CompilerTest, struct_fields_wrong_type) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct Annot {
       1: i32 val;
       2: list<string> otherVal;
@@ -615,6 +663,7 @@ TEST(CompilerTest, struct_fields_wrong_type) {
 
 TEST(CompilerTest, duplicate_method_name) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     service MySBB {
       void lol();
       i32 lol(); # expected-error: Function `lol` is already defined for `MySBB`.
@@ -624,6 +673,7 @@ TEST(CompilerTest, duplicate_method_name) {
 
 TEST(CompilerTest, undefined_type) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct S {
       1: bad.Type field; # expected-error: Type `bad.Type` not defined.
     }
@@ -632,18 +682,21 @@ TEST(CompilerTest, undefined_type) {
 
 TEST(CompilerTest, undefined_const) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const Type c = 42; # expected-error: Type `Type` not defined.
   )");
 }
 
 TEST(CompilerTest, undefined_const_external) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const bad.Type d = 42; # expected-error: Type `bad.Type` not defined.
   )");
 }
 
 TEST(CompilerTest, undefined_annotation) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     @BadAnnotation # expected-error: Type `BadAnnotation` not defined.
     struct S {}
   )");
@@ -651,6 +704,7 @@ TEST(CompilerTest, undefined_annotation) {
 
 TEST(CompilerTest, undefined_annotation_external) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     @bad.Annotation # expected-error: Type `bad.Annotation` not defined.
     struct T {}
   )");
@@ -658,6 +712,7 @@ TEST(CompilerTest, undefined_annotation_external) {
 
 TEST(CompilerTest, field_name_uniqueness) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct S {
       1: i32 a;
       2: i32 b;
@@ -668,6 +723,7 @@ TEST(CompilerTest, field_name_uniqueness) {
 
 TEST(CompilerTest, mixin_field_name_uniqueness) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct A { 1: i32 i; }
     struct B { 2: i64 i; }
     struct C {
@@ -676,6 +732,7 @@ TEST(CompilerTest, mixin_field_name_uniqueness) {
     } # expected-warning@-1: The annotation cpp.mixin is deprecated. Please use @thrift.Mixin instead.
   )");
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct A { 1: i32 i; }
 
     struct C {
@@ -687,6 +744,7 @@ TEST(CompilerTest, mixin_field_name_uniqueness) {
 
 TEST(CompilerTest, function_exception_field_name_uniqueness) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     exception Ex1 {}
     exception Ex2 {}
 
@@ -701,6 +759,7 @@ TEST(CompilerTest, function_exception_field_name_uniqueness) {
 
 TEST(CompilerTest, annotation_positions) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct Type {1: string name} (thrift.uri = "facebook.com/thrift/annotation/Type") # expected-warning: The annotation thrift.uri is deprecated. Please use @thrift.Uri instead.
     typedef set<set<i32> (annot)> T # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
     const i32 (annot) C = 42 # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
@@ -723,6 +782,7 @@ TEST(CompilerTest, annotation_positions) {
 TEST(CompilerTest, annotation_positions_field) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     struct Foo {
       1: i32 (annot) f # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
       2: i32 g
@@ -732,6 +792,7 @@ TEST(CompilerTest, annotation_positions_field) {
 
 TEST(CompilerTest, performs_in_interaction) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     interaction J {}
     interaction I {
       performs J; # expected-error: cannot use 'performs' in an interaction
@@ -741,6 +802,7 @@ TEST(CompilerTest, performs_in_interaction) {
 
 TEST(CompilerTest, interactions) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     interaction J {}
 
     interaction I {
@@ -756,6 +818,7 @@ TEST(CompilerTest, interactions) {
 
 TEST(CompilerTest, invalid_performs) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct S {}
 
     service T {
@@ -766,6 +829,7 @@ TEST(CompilerTest, invalid_performs) {
 
 TEST(CompilerTest, interactions_as_first_response_type) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     interaction I {}
     interaction J {}
 
@@ -779,6 +843,7 @@ TEST(CompilerTest, interactions_as_first_response_type) {
 
 TEST(CompilerTest, deprecated_annotations) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/cpp.thrift"
     include "thrift/annotation/hack.thrift"
     include "thrift/annotation/thrift.thrift"
@@ -800,6 +865,7 @@ TEST(CompilerTest, deprecated_annotations) {
 
 TEST(CompilerTest, removed_annotations) {
   check_compile(R"(
+    package "test.dev/thrift/removed_annotations"
     include "thrift/annotation/thrift.thrift"
 
     enum E1 {} (cpp2.declare_bitwise_ops)
@@ -834,6 +900,7 @@ TEST(CompilerTest, removed_annotations) {
 
 TEST(CompilerTest, invalid_enum_constant) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     enum E {}
     const list<E> c = [nonexistent.Value]; # expected-error: use of undeclared identifier 'nonexistent.Value'
   )");
@@ -841,6 +908,7 @@ TEST(CompilerTest, invalid_enum_constant) {
 
 TEST(CompilerTest, invalid_struct_constant) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct S {}
     const list<S> c = [nonexistent.Value]; # expected-error: use of undeclared identifier 'nonexistent.Value'
   )");
@@ -848,6 +916,7 @@ TEST(CompilerTest, invalid_struct_constant) {
 
 TEST(CompilerTest, cpp_type_compatibility) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/cpp.thrift"
 
     @cpp.Adapter{name="Adapter"} # expected-error: Definition `Bar1` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations
@@ -872,12 +941,14 @@ TEST(CompilerTest, cpp_type_compatibility) {
 TEST(CompilerTest, duplicate_method_name_base_base) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["foo.thrift"] = R"(
+    package "facebook.com/thrift/test"
     service MySBB {
       void lol();
     }
   )";
 
   name_contents_map["bar.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "foo.thrift"
 
     service MySB extends foo.MySBB {
@@ -886,6 +957,7 @@ TEST(CompilerTest, duplicate_method_name_base_base) {
   )";
 
   name_contents_map["baz.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "bar.thrift"
 
     service MyS extends bar.MySB {
@@ -900,9 +972,11 @@ TEST(CompilerTest, duplicate_method_name_base_base) {
 TEST(CompilerTest, circular_include_dependencies) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["foo.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "bar.thrift"
   )";
   name_contents_map["bar.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "foo.thrift"
       # expected-error@-1: Circular dependency found: file `foo.thrift` is already parsed.
   )";
@@ -912,6 +986,7 @@ TEST(CompilerTest, circular_include_dependencies) {
 
 TEST(CompilerTest, mixins_and_refs) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct C {
       1: i32 f1 (cpp.mixin); # expected-warning: The annotation cpp.mixin is deprecated. Please use @thrift.Mixin instead.
         # expected-error@-1: Mixin field `f1` type must be a struct or union. Found `i32`.
@@ -933,6 +1008,7 @@ TEST(CompilerTest, mixins_and_refs) {
 TEST(CompilerTest, bitpack_with_tablebased_seriliazation) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/cpp.thrift"
     struct A { 1: i32 i }
     @cpp.PackIsset
@@ -944,8 +1020,12 @@ TEST(CompilerTest, bitpack_with_tablebased_seriliazation) {
 
 TEST(CompilerTest, structured_annotations_uniqueness) {
   std::map<std::string, std::string> name_contents_map;
-  name_contents_map["foo.thrift"] = R"( struct Foo {} )";
+  name_contents_map["foo.thrift"] = R"(
+    package "facebook.com/thrift/test/foo"
+    struct Foo {}
+  )";
   name_contents_map["bar.thrift"] = R"(
+    package "facebook.com/thrift/test/bar"
     include "foo.thrift"
     struct Foo {
         1: i32 count;
@@ -965,6 +1045,7 @@ TEST(CompilerTest, structured_annotations_uniqueness) {
 
 TEST(CompilerTest, structured_annotations_type_resolved) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct Annotation {
         1: i32 count;
         2: TooForward forward;
@@ -983,6 +1064,7 @@ TEST(CompilerTest, structured_annotations_type_resolved) {
 
 TEST(CompilerTest, structured_ref) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/cpp.thrift"
 
     struct Foo {
@@ -1010,6 +1092,7 @@ TEST(CompilerTest, structured_ref) {
 
 TEST(CompilerTest, unstructured_and_structured_adapter) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/cpp.thrift"
     include "thrift/annotation/hack.thrift"
 
@@ -1036,6 +1119,7 @@ TEST(CompilerTest, unstructured_and_structured_adapter) {
 
 TEST(CompilerTest, typedef_adapter) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/cpp.thrift"
     include "thrift/annotation/hack.thrift"
 
@@ -1066,6 +1150,7 @@ TEST(CompilerTest, typedef_adapter) {
 
 TEST(CompilerTest, hack_wrapper_adapter) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/hack.thrift"
 
     @hack.Adapter{name = "\MyAdapter1"}
@@ -1124,6 +1209,7 @@ TEST(CompilerTest, hack_wrapper_adapter) {
 TEST(CompilerTest, invalid_and_too_many_splits) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     struct Foo { 1: i32 field }
     struct Bar { 1: i32 field }
     exception Baz { 1: i32 field }
@@ -1136,6 +1222,7 @@ TEST(CompilerTest, invalid_and_too_many_splits) {
 
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     # expected-error@-1: `types_cpp_splits=5` is misconfigured: it can not be greater than the number of objects, which is 4. [more-splits-than-objects-rule]
     struct Foo { 1: i32 field }
     struct Bar { 1: i32 field }
@@ -1149,6 +1236,7 @@ TEST(CompilerTest, invalid_and_too_many_splits) {
 
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     # expected-error@-1: Invalid types_cpp_splits value: `3a`
     struct Foo { 1: i32 field }
     struct Bar { 1: i32 field }
@@ -1164,6 +1252,7 @@ TEST(CompilerTest, invalid_and_too_many_splits) {
 TEST(CompilerTest, invalid_and_too_many_client_splits) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     service MyService1 {
       i32 func1(1: i32 num);
       i32 func2(1: i32 num);
@@ -1178,6 +1267,7 @@ TEST(CompilerTest, invalid_and_too_many_client_splits) {
 
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     service MyService1 {
       i32 func1(1: i32 num);
       i32 func2(1: i32 num);
@@ -1192,6 +1282,7 @@ TEST(CompilerTest, invalid_and_too_many_client_splits) {
       {"--gen", "mstch_cpp2:client_cpp_splits={MyService1:3,MyService2:3}"});
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     # expected-error@-1: Invalid pair `MyService1:3:1` in client_cpp_splits value: `MyService1:3:1,MyService2:2`
     service MyService1 {
       i32 func1(1: i32 num);
@@ -1209,6 +1300,7 @@ TEST(CompilerTest, invalid_and_too_many_client_splits) {
 TEST(CompilerTest, non_beneficial_lazy_fields) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     typedef double FP
     struct A {
       1: i32 field (cpp.experimental.lazy); # expected-warning: The annotation cpp.experimental.lazy is deprecated. Please use @cpp.Lazy instead.
@@ -1221,6 +1313,7 @@ TEST(CompilerTest, non_beneficial_lazy_fields) {
 
 TEST(CompilerTest, non_exception_type_in_throws) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct A {}
 
     service B {
@@ -1234,6 +1327,7 @@ TEST(CompilerTest, non_exception_type_in_throws) {
 
 TEST(CompilerTest, boxed_ref_and_optional) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/thrift.thrift"
 
     struct A {
@@ -1296,6 +1390,7 @@ TEST(CompilerTest, boxed_ref_and_optional) {
 
 TEST(CompilerTest, unique_ref) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/cpp.thrift"
 
     struct Bar {
@@ -1343,6 +1438,7 @@ TEST(CompilerTest, unique_ref) {
 TEST(CompilerTest, non_optional_ref_and_box_forbidden) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/cpp.thrift"
     include "thrift/annotation/thrift.thrift"
 
@@ -1397,6 +1493,7 @@ TEST(CompilerTest, non_optional_ref_and_box_forbidden) {
 TEST(CompilerTest, non_optional_ref_legacy_allowed_annotation_on_wrong_field) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/cpp.thrift"
     include "thrift/annotation/thrift.thrift"
 
@@ -1415,6 +1512,7 @@ TEST(CompilerTest, non_optional_ref_legacy_allowed_annotation_on_wrong_field) {
 
 TEST(CompilerTest, nonexistent_field_name) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct Foo {}
     typedef list<Foo> List
     const List l = [{"foo": "bar"}];
@@ -1425,6 +1523,7 @@ TEST(CompilerTest, nonexistent_field_name) {
 TEST(CompilerTest, annotation_scopes) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/scope.thrift"
 
     struct NotAnAnnot {}
@@ -1471,6 +1570,7 @@ TEST(CompilerTest, annotation_scopes) {
 
 TEST(CompilerTest, lazy_struct_compatibility) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct Foo { # expected-error: cpp.methods is incompatible with lazy deserialization in struct `Foo`
       1: list<i32> field (cpp.experimental.lazy) # expected-warning: The annotation cpp.experimental.lazy is deprecated. Please use @cpp.Lazy instead.
     } (cpp.methods = "")
@@ -1479,6 +1579,7 @@ TEST(CompilerTest, lazy_struct_compatibility) {
 
 TEST(CompilerTest, duplicate_field_id) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct A {
       1: i64 field1;
       1: i64 field2;
@@ -1490,10 +1591,12 @@ TEST(CompilerTest, duplicate_field_id) {
 TEST(CompilerTest, thrift_uri_uniqueness) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["file1.thrift"] = R"(
+    package "facebook.com/thrift/test"
     struct Foo1 {
     } (thrift.uri = "facebook.com/thrift/annotation/Foo")
   )";
   name_contents_map["file2.thrift"] = R"(
+    package "facebook.com/thrift/test"
     struct Foo2 {
     } (thrift.uri = "facebook.com/thrift/annotation/Foo")
       # expected-error@-2: Thrift URI `facebook.com/thrift/annotation/Foo` is already defined for `Foo2`.
@@ -1501,6 +1604,7 @@ TEST(CompilerTest, thrift_uri_uniqueness) {
     } (thrift.uri = "facebook.com/thrift/annotation/Bar")
   )";
   name_contents_map["main.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "file1.thrift"
     include "file2.thrift"
     struct Bar2 {
@@ -1545,6 +1649,7 @@ TEST(CompilerTest, terse_write_annotation) {
 // Time complexity of for_each_transitive_field should be O(1)
 TEST(CompilerTest, time_complexity_of_for_each_transitive_field) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct S_01 { 1: i32 i; }
     struct S_02 { 1: optional S_01 a (thrift.box); 2: optional S_01 b (thrift.box); }
     struct S_03 { 1: optional S_02 a (thrift.box); 2: optional S_02 b (thrift.box); }
@@ -1577,8 +1682,6 @@ TEST(CompilerTest, time_complexity_of_for_each_transitive_field) {
     struct S_30 { 1: optional S_29 a (thrift.box); 2: optional S_29 b (thrift.box); }
     struct S_31 { 1: optional S_30 a (thrift.box); 2: optional S_30 b (thrift.box); }
     struct S_32 { 1: optional S_31 a (thrift.box); 2: optional S_31 b (thrift.box); }
-    # expected-warning@3: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
-		# expected-warning@3: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
 		# expected-warning@4: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
 		# expected-warning@4: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
 		# expected-warning@5: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
@@ -1639,12 +1742,15 @@ TEST(CompilerTest, time_complexity_of_for_each_transitive_field) {
 		# expected-warning@32: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
 		# expected-warning@33: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
 		# expected-warning@33: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@34: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@34: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
   )");
 }
 
 TEST(CompilerTest, inject_metadata_fields_annotation) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["foo.thrift"] = R"(
+    package "facebook.com/thrift/test"
     struct Fields {
       1: i64 field1;
       2: optional i64 field2;
@@ -1652,6 +1758,7 @@ TEST(CompilerTest, inject_metadata_fields_annotation) {
     }
   )";
   name_contents_map["bar.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/internal.thrift"
 
     typedef i64 MyI64
@@ -1710,6 +1817,7 @@ TEST(CompilerTest, inject_metadata_fields_annotation) {
 TEST(CompilerTest, invalid_field_type_for_hack_codegen) {
   check_compile(
       R"(
+      package "facebook.com/thrift/test"
       struct S {
         1: i32 field;
 
@@ -1726,6 +1834,7 @@ TEST(CompilerTest, invalid_field_type_for_hack_codegen) {
 TEST(CompilerTest, invalid_return_type_for_hack_codegen) {
   check_compile(
       R"(
+      package "facebook.com/thrift/test"
       service Foo {
         set<float> invalid_rpc_return();
         # expected-error@-1: `float` cannot be used as a set element in Hack because it is not integer, string, binary or enum
@@ -1737,6 +1846,7 @@ TEST(CompilerTest, invalid_return_type_for_hack_codegen) {
 TEST(CompilerTest, invalid_param_type_for_hack_codegen) {
   check_compile(
       R"(
+      package "facebook.com/thrift/test"
       service Foo {
         void invalid_rpc_param(set<float> arg1);
         # expected-error@-1: `float` cannot be used as a set element in Hack because it is not integer, string, binary or enum
@@ -1747,8 +1857,9 @@ TEST(CompilerTest, invalid_param_type_for_hack_codegen) {
 
 TEST(CompilerTest, undefined_type_include) {
   std::map<std::string, std::string> name_contents_map;
-  name_contents_map["header.thrift"] = "";
+  name_contents_map["header.thrift"] = "package \"facebook.com/thrift/test\"";
   name_contents_map["main.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "header.thrift"
 
     service Foo {
@@ -1834,6 +1945,7 @@ TEST(CompilerTest, adapting_variable) {
 
 TEST(CompilerTest, reserved_ids) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/thrift.thrift"
 
     @thrift.ReserveIds{ids = [3, 8]}
@@ -1897,6 +2009,7 @@ TEST(CompilerTest, reserved_ids) {
 
 TEST(CompilerTest, required_key_specified_in_structured_annotation) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/cpp.thrift"
 
     struct Foo {
@@ -1922,6 +2035,7 @@ TEST(CompilerTest, required_key_specified_in_structured_annotation) {
 
 TEST(CompilerTest, nonexist_type_in_variable) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const map<i8, string> foo = {1: "str"}
       # expected-error@-1: Type `i8` not defined.
   )");
@@ -1929,6 +2043,7 @@ TEST(CompilerTest, nonexist_type_in_variable) {
 
 TEST(CompilerTest, cyclic_dependency) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     # expected-error@-1: Cyclic dependency: A -> B -> A
     struct A {
       1: B field;
@@ -1942,6 +2057,7 @@ TEST(CompilerTest, cyclic_dependency) {
 
 TEST(CompilerTest, invalid_utf8) {
   check_compile(
+      "package \"facebook.com/thrift/test\"\n"
       "const string s0 = '\x80';\n"
       "# expected-error@-1: invalid UTF-8 start byte '\\x80'\n"
       "const string s1 = '\xC2\x42';\n"
@@ -1968,6 +2084,7 @@ TEST(CompilerTest, invalid_utf8) {
 
 TEST(CompilerTest, invalid_hex_escape) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const string s = "\x";
       # expected-error@-1: invalid `\x` escape sequence
   )");
@@ -1975,6 +2092,7 @@ TEST(CompilerTest, invalid_hex_escape) {
 
 TEST(CompilerTest, invalid_unicode_escape) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const string s = "\u";
       # expected-error@-1: invalid `\u` escape sequence
   )");
@@ -1982,6 +2100,7 @@ TEST(CompilerTest, invalid_unicode_escape) {
 
 TEST(CompilerTest, invalid_escape) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const string s = "\*";
       # expected-error@-1: invalid escape sequence `\*`
   )");
@@ -1989,6 +2108,7 @@ TEST(CompilerTest, invalid_escape) {
 
 TEST(CompilerTest, surrogate_in_unicode_escape) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     const string s = "\ud800";
       # expected-error@-1: surrogate in `\u` escape sequence
   )");
@@ -1998,6 +2118,7 @@ TEST(CompilerTest, qualified_interaction_name) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["foo.thrift"] = "interaction I {}";
   name_contents_map["bar.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "foo.thrift"
     service S {
       foo.I createI();
@@ -2009,6 +2130,7 @@ TEST(CompilerTest, qualified_interaction_name) {
 TEST(CompilerTest, py3_enum_invalid_value_names) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     enum Foo {
       name = 1,
         # expected-error@-1: 'name' should not be used as an enum/union field name in thrift-py3. Use a different name or annotate the field with `(py3.name="<new_py_name>")` [enum-member-union-field-names-rule]
@@ -2029,6 +2151,7 @@ TEST(CompilerTest, py3_enum_invalid_value_names) {
 TEST(CompilerTest, py3_invalid_field_names) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     union Foo {
       1: string name;
         # expected-error@-1: 'name' should not be used as an enum/union field name in thrift-py3. Use a different name or annotate the field with `(py3.name="<new_py_name>")` [enum-member-union-field-names-rule]
@@ -2049,6 +2172,7 @@ TEST(CompilerTest, py3_invalid_field_names) {
 TEST(CompilerTest, error_on_non_explicit_includes) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["path/to/upstream.thrift"] = R"(
+    package "facebook.com/thrift/test"
     struct TransitiveStruct {}
     enum TransitiveEnum {
       BLAH = 2,
@@ -2065,6 +2189,7 @@ TEST(CompilerTest, error_on_non_explicit_includes) {
   )";
 
   name_contents_map["path/to/direct.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "path/to/upstream.thrift"
 
     struct IncludedStruct {}
@@ -2079,7 +2204,8 @@ TEST(CompilerTest, error_on_non_explicit_includes) {
   )";
 
   name_contents_map["path/to/transitive_struct_field.thrift"] = R"(
-    # expected-error@3#original[]#replacement[include "path/to/upstream.thrift"\n]@5: Your thrift file depends on a type that it did not include. Please add the following include. [implicit-include]
+    package "facebook.com/thrift/test"
+    # expected-error@4#original[]#replacement[include "path/to/upstream.thrift"\n]@5: Your thrift file depends on a type that it did not include. Please add the following include. [implicit-include]
     include "path/to/direct.thrift"
 
     struct A {
@@ -2145,12 +2271,15 @@ TEST(CompilerTest, error_on_non_explicit_includes) {
 TEST(CompilerTest, include_module_name_collision) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["path/to/dep_module.thrift"] = R"(
+    package "facebook.com/thrift/test"
     struct A {}
   )";
   name_contents_map["other_path/to/dep_module.thrift"] = R"(
+    package "facebook.com/thrift/test"
     struct B {}
   )";
   name_contents_map["path/to/my_module.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "path/to/dep_module.thrift"
     include "other_path/to/dep_module.thrift"
     struct C {
@@ -2163,6 +2292,7 @@ TEST(CompilerTest, include_module_name_collision) {
 
 TEST(CompilerTest, alias_enum) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     typedef Enum MyEnum
     enum Enum {
       ONE = 1,
@@ -2175,13 +2305,17 @@ TEST(CompilerTest, alias_enum) {
 
 TEST(CompilerTest, alias_enum_in_external_const) {
   std::map<std::string, std::string> name_contents_map;
-  name_contents_map["foo.thrift"] = "enum E {Val = 0}";
+  name_contents_map["foo.thrift"] =
+      "package \"facebook.com/thrift/test\"\n"
+      "enum E {Val = 0}";
   name_contents_map["bar.thrift"] = R"(
+    package "facebook.com/thrift/test/bar"
     include "foo.thrift"
     typedef foo.E MyEnum
     const MyEnum val = MyEnum.Val;
   )";
   name_contents_map["baz.thrift"] = R"(
+    package "facebook.com/thrift/test/baz"
     include "bar.thrift"
     const bar.MyEnum val = bar.val;
   )";
@@ -2190,6 +2324,7 @@ TEST(CompilerTest, alias_enum_in_external_const) {
 
 TEST(CompilerTest, same_named_field) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     struct S {
       1: i32 S;
       # expected-warning@-1: Field 'S' has the same name as the containing struct.
@@ -2207,6 +2342,7 @@ TEST(CompilerTest, same_named_field) {
 
 TEST(CompilerTest, cursor_serialization_adapter) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/cpp.thrift"
 
     struct Regular {
@@ -2231,6 +2367,7 @@ TEST(CompilerTest, cursor_serialization_adapter) {
 
 TEST(CompilerTest, exception_invalid_use) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     exception E {}
     struct S {
       1: E field; # TODO (T191018859)
@@ -2247,6 +2384,7 @@ TEST(CompilerTest, exception_invalid_use) {
 
 TEST(CompilerTest, duplicate_include) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/cpp.thrift"
     include "thrift/annotation/thrift.thrift"
     include "thrift/annotation/cpp.thrift" # expected-warning: Duplicate include of `thrift/annotation/cpp.thrift`
@@ -2263,6 +2401,7 @@ TEST(CompilerTest, not_bundled_annotation) {
 
   check_compile(
       R"(
+      package "facebook.com/thrift/test"
       include "thrift/annotation/baz.thrift"
       # expected-error-1: Could not find include file thrift/annotation/baz.thrift
       )",
@@ -2272,6 +2411,7 @@ TEST(CompilerTest, not_bundled_annotation) {
   // The (hard-coded) bundles should still exist without implicit includes.
   check_compile(
       R"(
+      package "facebook.com/thrift/test"
       include "thrift/annotation/cpp.thrift"
       include "thrift/lib/thrift/schema.thrift"
       )",
@@ -2281,6 +2421,7 @@ TEST(CompilerTest, not_bundled_annotation) {
 
 TEST(CompilerTest, circular_typedef) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     typedef Foo Bar # expected-error: Circular typedef: Foo --> Bar --> Foo
     typedef Bar Foo
   )");
@@ -2288,6 +2429,7 @@ TEST(CompilerTest, circular_typedef) {
 
 TEST(CompilerTest, combining_unstructured_annotations) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/thrift.thrift"
 
     @thrift.DeprecatedUnvalidatedAnnotations{items = {"foo": "bar"}}
@@ -2302,6 +2444,7 @@ TEST(CompilerTest, combining_unstructured_annotations) {
 TEST(Compilertest, custom_default_values) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/thrift.thrift"
 
     union TestUnion {}
@@ -2360,6 +2503,7 @@ TEST(Compilertest, custom_default_values) {
 TEST(Compilertest, redundant_custom_default_values_error) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/thrift.thrift"
 
     union TestUnion {}
@@ -2401,6 +2545,7 @@ TEST(Compilertest, redundant_custom_default_values_error) {
 TEST(Compilertest, struct_optional_field_custom_default_warn) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/thrift.thrift"
 
     struct TestStruct {
@@ -2417,6 +2562,7 @@ TEST(Compilertest, struct_optional_field_custom_default_warn) {
 TEST(Compilertest, union_field_custom_default_error) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/thrift.thrift"
 
     union TestUnion {
@@ -2435,6 +2581,7 @@ TEST(
     invalid_annotation_allow_unsafe_optional_custom_default_value) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/thrift.thrift"
 
     struct TestStruct {
@@ -2477,6 +2624,7 @@ TEST(
     invalid_annotation_allow_unsafe_union_field_custom_default_value) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/thrift.thrift"
 
     union TestUnion {
@@ -2506,6 +2654,7 @@ TEST(
 
 TEST(CompilerTest, cpp_deprecated_terse_write) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/cpp.thrift"
     include "thrift/annotation/thrift.thrift"
 
@@ -2545,6 +2694,7 @@ TEST(CompilerTest, cpp_deprecated_terse_write) {
 
 TEST(CompilerTest, cpp_deprecated_terse_write_ref) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/cpp.thrift"
     include "thrift/annotation/thrift.thrift"
 
@@ -2580,6 +2730,7 @@ TEST(CompilerTest, cpp_deprecated_terse_write_ref) {
 
 TEST(CompilerTest, base_service_defined_after_use) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     typedef Base BaseAlias
 
     service Derived extends Base {}  # expected-error: Service "Base" has not been defined.
@@ -2633,6 +2784,7 @@ struct ExplicitlyEnabledCustomTypeWithUri {
 TEST(CompilerTest, cpp_orderable_unnecessary_annotation_error) {
   check_compile(
       R"(
+package "facebook.com/thrift/test"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
@@ -2648,6 +2800,7 @@ struct UnnecessaryAnnotation {
 TEST(CompilerTest, cpp_orderable_unnecessary_annotation_warn) {
   check_compile(
       R"(
+package "facebook.com/thrift/test"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
@@ -2667,6 +2820,7 @@ TEST(CompilerTest, invalid_include_alias) {
   name_contents_map["bar.thrift"] = "";
   name_contents_map["baz.thrift"] = "";
   name_contents_map["main.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "baz.thrift" as const; # expected-error: Invalid include alias 'const'
     include "foo.thrift" as ; # expected-error: Include alias cannot be empty
     include "bar.thrift" as 123; # expected-error: Invalid include alias 'int literal'
@@ -2681,6 +2835,7 @@ TEST(CompilerTest, duplicate_include_alias) {
   name_contents_map["a/b/c/foo.thrift"] = "";
   name_contents_map["d/e/bar.thrift"] = "";
   name_contents_map["main.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "a/b/c/foo.thrift" as foo;
     include "d/e/bar.thrift" as foo; # expected-error: 'foo' is already an alias for 'a/b/c/foo.thrift'
     include "a/b/c/foo.thrift" as foo2; # expected-error: Include 'a/b/c/foo.thrift' has multiple aliases: 'foo' vs 'foo2'
@@ -2692,6 +2847,7 @@ TEST(CompilerTest, duplicate_include_alias) {
 TEST(CompilerTest, resolve_enum_typedefs_after_use) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["remote.thrift"] = R"(
+    package "facebook.com/thrift/test"
     typedef Remote LazyRemoteAlias;
 
     enum Remote {
@@ -2701,6 +2857,7 @@ TEST(CompilerTest, resolve_enum_typedefs_after_use) {
     typedef Remote RemoteAlias;
   )";
   name_contents_map["main.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "remote.thrift"
 
     typedef Local LazyLocalAlias;
@@ -2747,16 +2904,19 @@ TEST(CompilerTest, resolve_enum_typedefs_after_use) {
 TEST(CompilerTest, include_alias) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["foo.thrift"] = R"(
+    package "facebook.com/thrift/test/foo"
     struct FooBar {
       1: string name;
     }
   )";
   name_contents_map["bar.thrift"] = R"(
+    package "facebook.com/thrift/test/bar"
     struct FooBar {
       1: i32 id;
     }
   )";
   name_contents_map["main.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "foo.thrift" as foo_alias
     include "bar.thrift" as bar_alias
   )";
@@ -2768,6 +2928,7 @@ TEST(CompilerTest, include_alias) {
 TEST(CompilerTest, scope_resolution_for_unscoped_injected_metadata) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["module.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/internal.thrift"
 
     struct Foo {
@@ -2782,6 +2943,7 @@ TEST(CompilerTest, scope_resolution_for_unscoped_injected_metadata) {
 
   )";
   name_contents_map["main.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "module.thrift"
 
     @module.MyInjected
@@ -2800,6 +2962,7 @@ TEST(CompilerTest, local_vs_global_resolution_sanity) {
     std::map<std::string, std::string> name_content_map;
 
     name_content_map["c/foo.thrift"] = R"(
+      package "facebook.com/thrift/test/c"
       struct Something {
         1: i32 val;
       }
@@ -2810,6 +2973,7 @@ TEST(CompilerTest, local_vs_global_resolution_sanity) {
     )";
 
     name_content_map["a/foo.thrift"] = R"(
+      package "facebook.com/thrift/test/a"
       include "c/foo.thrift"
       struct Bar {
         1: string field;
@@ -2817,6 +2981,7 @@ TEST(CompilerTest, local_vs_global_resolution_sanity) {
     )";
 
     name_content_map["b/foo.thrift"] = R"(
+      package "facebook.com/thrift/test/b"
       include "a/foo.thrift"
 
       struct Bar {
@@ -2825,6 +2990,7 @@ TEST(CompilerTest, local_vs_global_resolution_sanity) {
     )";
 
     name_content_map["local/foo.thrift"] = R"(
+      package "facebook.com/thrift/test/local"
       include "a/foo.thrift"
       include "b/foo.thrift"
       include "c/foo.thrift"
@@ -2842,6 +3008,7 @@ TEST(CompilerTest, local_vs_global_resolution_sanity) {
     )";
 
     name_content_map["get_b/foo.thrift"] = R"(
+      package "facebook.com/thrift/test"
       include "a/foo.thrift"
       include "b/foo.thrift"
       include "c/foo.thrift"
@@ -2862,20 +3029,24 @@ TEST(CompilerTest, local_vs_global_resolution_sanity) {
 TEST(CompilerTest, include_alias_resolution_priority) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["foo.thrift"] = R"(
+    package "facebook.com/thrift/test"
     struct Bar {
       1: string name;
     }
   )";
   name_contents_map["other/Foo.thrift"] = R"(
+    package "facebook.com/thrift/test"
     struct Bar {
       1: i32 code;
     }
   )";
   name_contents_map["bar.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "other/Foo.thrift"
   )";
 
   name_contents_map["main.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "foo.thrift" as Foo
     // This transitively includes other/Foo.thrift & should overwrite Foo.Bar
     // Which clashes with the alias above
@@ -2889,6 +3060,7 @@ TEST(CompilerTest, include_alias_resolution_priority) {
 TEST(CompilerTest, include_alias_resolution_does_not_fallback) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["foo.thrift"] = R"(
+    package "facebook.com/thrift/test"
     struct Annot {
       1: i32 val;
     }
@@ -2896,14 +3068,17 @@ TEST(CompilerTest, include_alias_resolution_does_not_fallback) {
     const i32 MY_VAL = 11;
   )";
   name_contents_map["a/Foo.thrift"] = R"(
+    package "facebook.com/thrift/test"
     const string MY_VAL = "hello";
   )";
 
   name_contents_map["bar.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "a/Foo.thrift"
   )";
 
   name_contents_map["main.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "foo.thrift" as Foo
     include "bar.thrift"
 
@@ -2917,12 +3092,14 @@ TEST(CompilerTest, include_alias_resolution_does_not_fallback) {
 TEST(CompilerTest, scope_resolution_duplicate_include_as_alias) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["v1/foo.thrift"] = R"(
+    package "facebook.com/thrift/test/v1"
     struct Bar {
       1: string name;
     }
   )";
 
   name_contents_map["foo.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "v1/foo.thrift"
     include "v1/foo.thrift" as FooV2 # expected-warning: Duplicate include of `v1/foo.thrift`
 
@@ -2942,6 +3119,7 @@ TEST(CompilerTest, scope_resolution_duplicate_include_as_alias) {
 TEST(CompilerTest, report_unresolved_identifiers_in_structured_annotations) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["foo.thrift"] = R"(
+    package "facebook.com/thrift/test"
     struct MyAnnot {
       1: string name;
       2: i32 id;
@@ -2950,6 +3128,7 @@ TEST(CompilerTest, report_unresolved_identifiers_in_structured_annotations) {
   )";
 
   name_contents_map["main.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "foo.thrift"
 
     @foo.MyAnnot{ name = foo.DOES_NOT_EXIST } # expected-error: use of undeclared identifier 'foo.DOES_NOT_EXIST'
@@ -2970,9 +3149,11 @@ TEST(CompilerTest, report_unresolved_identifiers_in_structured_annotations) {
 TEST(CompilerTest, reported_unresolved_identifiers_in_constants) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["foo.thrift"] = R"(
+    package "facebook.com/thrift/test"
   )";
 
   name_contents_map["main.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "foo.thrift"
 
     const i32 MY_CONST = foo.MY_CONST; # expected-error: use of undeclared identifier 'foo.MY_CONST'
@@ -2994,6 +3175,7 @@ TEST(CompilerTest, reported_unresolved_identifiers_in_constants) {
 TEST(CompilerTest, unresolved_struct_in_const) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["main.thrift"] = R"(
+    package "facebook.com/thrift/test"
     struct MyDeclaredStruct {
         1: i64 some_field;
     }
@@ -3017,6 +3199,7 @@ TEST(CompilerTest, typedef_uri) {
   // Explicit URI, no validation
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/thrift.thrift"
 
     @thrift.Uri{value="facebook.com/thrift/MyExplicitUri"}
@@ -3037,6 +3220,7 @@ TEST(CompilerTest, typedef_uri) {
   // Explicit URI not applied by default, with validation defaulted to WARN
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/thrift.thrift"
 
     @thrift.Uri{value="facebook.com/thrift/MyExplicitUri"}
@@ -3047,6 +3231,7 @@ TEST(CompilerTest, typedef_uri) {
   // No URI, with validation defaulted to WARN
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     typedef i32 MyInt5;
   )",
       {"--extra-validation", "typedef_explicit_uri=none"});
@@ -3068,6 +3253,7 @@ TEST(CompilerTest, typedef_explicit_uri) {
   // Explicit URI, no validation
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/thrift.thrift"
 
     @thrift.AllowLegacyTypedefUri
@@ -3101,6 +3287,7 @@ TEST(CompilerTest, typedef_explicit_uri) {
   // Explicit *empty* URI, with validation defaulted to WARN
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/thrift.thrift"
 
     @thrift.AllowLegacyTypedefUri
@@ -3112,6 +3299,7 @@ TEST(CompilerTest, typedef_explicit_uri) {
   // Explicit URI, with validation defaulted to WARN
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/thrift.thrift"
 
     @thrift.AllowLegacyTypedefUri
@@ -3124,6 +3312,7 @@ TEST(CompilerTest, typedef_explicit_uri) {
   // No URI, with validation defaulted to WARN
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     typedef i32 MyInt6;
   )",
       {"--extra-validation", "nonallowed_typedef_with_uri=none"});
@@ -3132,6 +3321,7 @@ TEST(CompilerTest, typedef_explicit_uri) {
 TEST(CompilerTest, required_field_qualifier) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/thrift.thrift"
 
     struct TestStruct {
@@ -3160,6 +3350,7 @@ TEST(CompilerTest, required_field_qualifier) {
 TEST(CompilerTest, bidirectional_streaming) {
   check_compile(
       R"(
+      package "facebook.com/thrift/test"
       interaction I {}
       service S {
         sink<i32>, stream<i32> foo();
@@ -3172,6 +3363,7 @@ TEST(CompilerTest, bidirectional_streaming) {
 
   check_compile(
       R"(
+      package "facebook.com/thrift/test"
       service S {
         stream<i32>, sink<i32> foo(); # expected-error: expected 'sink' before 'stream'
       }
@@ -3180,6 +3372,7 @@ TEST(CompilerTest, bidirectional_streaming) {
 
   check_compile(
       R"(
+      package "facebook.com/thrift/test"
       service S {
         i32, stream<i32>, sink<i32> foo(); # expected-error: expected 'sink' before 'stream'
       }
@@ -3188,6 +3381,7 @@ TEST(CompilerTest, bidirectional_streaming) {
 
   check_compile(
       R"(
+      package "facebook.com/thrift/test"
       service S {
         sink<i32>, stream<i32>, i32 foo(); # expected-error: expected identifier
       }
@@ -3196,6 +3390,7 @@ TEST(CompilerTest, bidirectional_streaming) {
 
   check_compile(
       R"(
+      package "facebook.com/thrift/test"
       service S {
         sink<i32>, sink<i32>, stream<i32> foo(); # expected-error: duplicate 'sink'
       }
@@ -3204,6 +3399,7 @@ TEST(CompilerTest, bidirectional_streaming) {
 
   check_compile(
       R"(
+      package "facebook.com/thrift/test"
       service S {
         sink<i32>, stream<i32>, stream<i32> foo(); # expected-error: duplicate 'stream'
       }
@@ -3212,6 +3408,7 @@ TEST(CompilerTest, bidirectional_streaming) {
 
   check_compile(
       R"(
+      package "facebook.com/thrift/test"
       service S {
         i32, sink<i32>, stream<i32>, stream<i32> foo(); # expected-error: expected identifier
       }
@@ -3220,6 +3417,7 @@ TEST(CompilerTest, bidirectional_streaming) {
 
   check_compile(
       R"(
+      package "facebook.com/thrift/test"
       service S {
         i32, sink<i32, i32>, stream<i32> foo(); # expected-error: Final response type is not allowed with bidirectional streaming
       }
@@ -3228,6 +3426,7 @@ TEST(CompilerTest, bidirectional_streaming) {
 
   check_compile(
       R"(
+      package "facebook.com/thrift/test"
       service S {
         i32, sink<i32> foo(); # expected-error: Final response type is required
         i32, sink<i32>, stream<i32> foo(); # expected-error: Only one of sink or stream is allowed
@@ -3241,16 +3440,18 @@ TEST(CompilerTest, bidirectional_streaming) {
 TEST(CompilerTest, implicit_scope_addition_with_direct_include) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["a/foo.thrift"] = R"(
+    package "facebook.com/thrift/test"
     struct Foo {
       1: i32 val;
     }
   )";
 
   name_contents_map["b/foo.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "a/foo.thrift"
 
     struct Bar {
-    1: Foo val; # expected-warning@5#original[Foo]#replacement[foo.Foo]@8: Identifier 'Foo' refers to a definition in another thrift program. Use an explicit scoped identifier. [implicit_scope_usage]
+    1: Foo val; # expected-warning@6#original[Foo]#replacement[foo.Foo]@8: Identifier 'Foo' refers to a definition in another thrift program. Use an explicit scoped identifier. [implicit_scope_usage]
     }
   )";
   check_compile(name_contents_map, "b/foo.thrift");
@@ -3259,6 +3460,7 @@ TEST(CompilerTest, implicit_scope_addition_with_direct_include) {
 TEST(CompilerTest, implicit_scope_addition_with_multiple_includes) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["a/foo.thrift"] = R"(
+    package "facebook.com/thrift/test/a"
     include "b/foo.thrift"
 
     struct Foo {
@@ -3267,17 +3469,19 @@ TEST(CompilerTest, implicit_scope_addition_with_multiple_includes) {
   )";
 
   name_contents_map["b/foo.thrift"] = R"(
+    package "facebook.com/thrift/test/b"
     struct Foo {
       1: i16 val;
     }
   )";
 
   name_contents_map["main/foo.thrift"] = R"(
-    include "a/foo.thrift" # expected-warning@2#original[]#replacement[as a_foo]@27: Multiple programs named 'foo', please specify an appropriate include alias to disambiguate. [implicit_scope_usage]
+    package "facebook.com/thrift/test"
+    include "a/foo.thrift" # expected-warning@3#original[]#replacement[as a_foo]@27: Multiple programs named 'foo', please specify an appropriate include alias to disambiguate. [implicit_scope_usage]
     include "b/foo.thrift"
 
     struct Bar {
-      1: Foo val; # expected-warning@6#original[Foo]#replacement[a_foo.Foo]@10: Identifier 'Foo' refers to a definition in another thrift program. Use an explicit scoped identifier. [implicit_scope_usage]
+      1: Foo val; # expected-warning@7#original[Foo]#replacement[a_foo.Foo]@10: Identifier 'Foo' refers to a definition in another thrift program. Use an explicit scoped identifier. [implicit_scope_usage]
     }
   )";
   check_compile(name_contents_map, "main/foo.thrift");
@@ -3286,6 +3490,7 @@ TEST(CompilerTest, implicit_scope_addition_with_multiple_includes) {
 TEST(CompilerTest, unscoped_enum_values) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["other/foo.thrift"] = R"(
+    package "facebook.com/thrift/test"
     enum OtherThings {
       BAR = 1,
       BAZ = 2,
@@ -3293,6 +3498,7 @@ TEST(CompilerTest, unscoped_enum_values) {
   )";
 
   name_contents_map["foo.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "other/foo.thrift"
 
     enum Things {
@@ -3301,7 +3507,7 @@ TEST(CompilerTest, unscoped_enum_values) {
     }
 
     struct Bar {
-      1: i32 this_val = BAR; # expected-warning@10#original[BAR]#replacement[Things.BAR]@25: Using an enum value without the enum name is deprecated. Use a fully qualified name [unscoped_enum_value]
+      1: i32 this_val = BAR; # expected-warning@11#original[BAR]#replacement[Things.BAR]@25: Using an enum value without the enum name is deprecated. Use a fully qualified name [unscoped_enum_value]
     }
   )";
   check_compile(name_contents_map, "foo.thrift");

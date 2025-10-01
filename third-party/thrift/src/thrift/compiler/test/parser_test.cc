@@ -44,7 +44,10 @@ TEST(ParserTest, type_resolution) {
 
 TEST(ParserTest, missing_includes) {
   auto source_mgr = source_manager();
-  source_mgr.add_virtual_file("test.thrift", "include \"nonexist.thrift\"\n");
+  source_mgr.add_virtual_file("test.thrift", R"(
+    package "facebook.com/thrift/test"
+    include "nonexist.thrift"
+  )");
 
   {
     int count = 0;

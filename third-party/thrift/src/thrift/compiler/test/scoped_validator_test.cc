@@ -24,6 +24,7 @@ namespace apache::thrift::compiler {
 using test::check_compile;
 
 std::string kAnnotations = R"(
+  package "facebook.com/thrift/test"
   include "thrift/annotation/scope.thrift"
 
   @scope.Program
@@ -108,6 +109,7 @@ TEST(ScopedValidatorTest, InvalidStructScopeTest) {
   name_contents_map["annotations.thrift"] = kAnnotations;
 
   name_contents_map["invalid_struct_scope.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "annotations.thrift"
 
     @annotations.ProgramAnnotation            # expected-error: `ProgramAnnotation` cannot annotate `MyStruct`
@@ -137,6 +139,7 @@ TEST(ScopedValidatorTest, InvalidUnionScopeTest) {
   name_contents_map["annotations.thrift"] = kAnnotations;
 
   name_contents_map["invalid_union_scope.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "annotations.thrift"
 
     @annotations.ProgramAnnotation            # expected-error: `ProgramAnnotation` cannot annotate `MyUnion`
@@ -166,6 +169,7 @@ TEST(ScopedValidatorTest, InvalidExceptionScopeTest) {
   name_contents_map["annotations.thrift"] = kAnnotations;
 
   name_contents_map["invalid_exception_scope.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "annotations.thrift"
 
     @annotations.ProgramAnnotation            # expected-error: `ProgramAnnotation` cannot annotate `MyException`
@@ -195,6 +199,7 @@ TEST(ScopedValidatorTest, InvalidFieldScopeTest) {
   name_contents_map["annotations.thrift"] = kAnnotations;
 
   name_contents_map["invalid_field_scope.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "annotations.thrift"
 
     struct MyStruct {
@@ -226,6 +231,7 @@ TEST(ScopedValidatorTest, InvalidTypedefScopeTest) {
   name_contents_map["annotations.thrift"] = kAnnotations;
 
   name_contents_map["invalid_typedef_scope.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "annotations.thrift"
 
     @annotations.ProgramAnnotation            # expected-error: `ProgramAnnotation` cannot annotate `MyTypedef`
@@ -255,6 +261,7 @@ TEST(ScopedValidatorTest, InvalidServiceScopeTest) {
   name_contents_map["annotations.thrift"] = kAnnotations;
 
   name_contents_map["invalid_service_scope.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "annotations.thrift"
 
     @annotations.ProgramAnnotation            # expected-error: `ProgramAnnotation` cannot annotate `MyService`
@@ -284,6 +291,7 @@ TEST(ScopedValidatorTest, InvalidInteractionScopeTest) {
   name_contents_map["annotations.thrift"] = kAnnotations;
 
   name_contents_map["invalid_interaction_scope.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "annotations.thrift"
 
     @annotations.ProgramAnnotation            # expected-error: `ProgramAnnotation` cannot annotate `MyInteraction`
@@ -313,6 +321,7 @@ TEST(ScopedValidatorTest, InvalidFunctionScopeTest) {
   name_contents_map["annotations.thrift"] = kAnnotations;
 
   name_contents_map["invalid_function_scope.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "annotations.thrift"
 
     service MyService {
@@ -344,6 +353,7 @@ TEST(ScopedValidatorTest, InvalidFunctionParameterScopeTest) {
   name_contents_map["annotations.thrift"] = kAnnotations;
 
   name_contents_map["invalid_function_parameter_scope.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "annotations.thrift"
 
     service MyService {
@@ -377,6 +387,7 @@ TEST(ScopedValidatorTest, InvalidThrownExceptionScopeTest) {
   name_contents_map["annotations.thrift"] = kAnnotations;
 
   name_contents_map["invalid_thrown_exception_scope.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "annotations.thrift"
 
     exception MyException {}
@@ -412,6 +423,7 @@ TEST(ScopedValidatorTest, InvalidEnumScopeTest) {
   name_contents_map["annotations.thrift"] = kAnnotations;
 
   name_contents_map["invalid_enum_scope.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "annotations.thrift"
 
     @annotations.ProgramAnnotation            # expected-error: `ProgramAnnotation` cannot annotate `MyEnum`
@@ -441,6 +453,7 @@ TEST(ScopedValidatorTest, InvalidEnumValueScopeTest) {
   name_contents_map["annotations.thrift"] = kAnnotations;
 
   name_contents_map["invalid_enumvalue_scope.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "annotations.thrift"
 
     enum MyEnum {
@@ -472,6 +485,7 @@ TEST(ScopedValidatorTest, InvalidConstScopeTest) {
   name_contents_map["annotations.thrift"] = kAnnotations;
 
   name_contents_map["invalid_const_scope.thrift"] = R"(
+    package "facebook.com/thrift/test"
     include "annotations.thrift"
 
     @annotations.ProgramAnnotation            # expected-error: `ProgramAnnotation` cannot annotate `MyConst`
@@ -497,6 +511,7 @@ TEST(ScopedValidatorTest, InvalidConstScopeTest) {
 
 TEST(ScopedValidatorTest, TransitiveAnnotations) {
   check_compile(R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/scope.thrift"
 
     @scope.Struct
@@ -521,6 +536,7 @@ TEST(ScopedValidatorTest, TransitiveAnnotations) {
 TEST(ScopedValidatorTest, NonTransitiveAnnotations) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/scope.thrift"
 
     @scope.Struct
@@ -543,6 +559,7 @@ TEST(ScopedValidatorTest, NonTransitiveAnnotations) {
 TEST(ScopedValidatorTest, TypedefAnnotations) {
   check_compile(
       R"(
+    package "facebook.com/thrift/test"
     include "thrift/annotation/scope.thrift"
 
     @scope.Struct

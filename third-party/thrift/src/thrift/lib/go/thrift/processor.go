@@ -180,6 +180,7 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 		}
 		// Track undeclared exception only after successful write
 		observer.UndeclaredException()
+		observer.UndeclaredExceptionForFunction(name)
 		return nil
 	}
 	if appException != nil {
@@ -190,6 +191,7 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 		}
 		// Track undeclared exception only after successful write
 		observer.UndeclaredException()
+		observer.UndeclaredExceptionForFunction(name)
 	} else {
 		if writeErr := pfunc.Write(seqID, result, prot); writeErr != nil {
 			// close connection on write failure

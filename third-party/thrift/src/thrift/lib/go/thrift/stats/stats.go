@@ -50,10 +50,6 @@ type ServerStats struct {
 	SchedulingWriteCount *AtomicCounter
 	WritingCount         *AtomicCounter
 
-	// durationRead defines the duration it takes for thwork to finish reading
-	// out a request from the wire.
-	DurationRead *TimingSeries
-
 	// workersBusy defines a server event where no workers are available to accept
 	// available work. This can signal that we should increase # workers (in the case
 	// that workers are all blocking) or that the server is overloaded
@@ -99,8 +95,6 @@ func NewServerStats(cfg *TimingConfig, statsPeriod time.Duration) *ServerStats {
 		PipeliningUnsupportedClient: NewTimingSeries(cfg),
 		NoSuchFunction:              NewTimingSeries(cfg),
 		QueueingTimeout:             NewTimingSeries(cfg),
-
-		DurationRead: NewTimingSeries(cfg),
 	}
 }
 
@@ -142,10 +136,6 @@ func (stats *ServerStats) GetInts() map[string]int64 {
 	ints["connections.not_listening.avg."+periodStr] = toμs(s.Average)
 	ints["connections.not_listening.p95."+periodStr] = toμs(s.P95)
 	ints["connections.not_listening.p99."+periodStr] = toμs(s.P99)
-	s = stats.DurationRead.MustSummarize(stats.statsPeriod)
-	ints["requests.duration_read.avg."+periodStr] = toμs(s.Average)
-	ints["requests.duration_read.p95."+periodStr] = toμs(s.P95)
-	ints["requests.duration_read.p99."+periodStr] = toμs(s.P99)
 
 	return ints
 }

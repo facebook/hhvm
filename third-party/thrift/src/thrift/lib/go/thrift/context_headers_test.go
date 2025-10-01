@@ -130,3 +130,25 @@ func TestGetRequestHeadersFromContext(t *testing.T) {
 	headers = GetRequestHeadersFromContext(ctxWithInvalidHeadersType)
 	require.Nil(t, headers)
 }
+
+func TestGetResponseHeadersFromContext(t *testing.T) {
+	// Case: nil context
+	headers := GetResponseHeadersFromContext(nil)
+	require.Nil(t, headers)
+
+	// Case: empty context
+	headers = GetResponseHeadersFromContext(context.TODO())
+	require.Nil(t, headers)
+
+	// Case: context with headers
+	headersMap := map[string]string{"foo": "bar"}
+	ctxWithHeaders := NewResponseHeadersContext(context.TODO())
+	setResponseHeaders(ctxWithHeaders, headersMap)
+	headers = GetResponseHeadersFromContext(ctxWithHeaders)
+	require.Equal(t, headersMap, headers)
+
+	// Case: context with invalid headers type
+	ctxWithInvalidHeadersType := context.WithValue(context.TODO(), responseHeadersKey, 1234)
+	headers = GetResponseHeadersFromContext(ctxWithInvalidHeadersType)
+	require.Nil(t, headers)
+}

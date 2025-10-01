@@ -74,8 +74,8 @@ func NewResponseHeadersContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, responseHeadersKey, make(map[string]string))
 }
 
-// ResponseHeadersFromContext returns the response headers from the context.
-func ResponseHeadersFromContext(ctx context.Context) map[string]string {
+// GetResponseHeadersFromContext returns the response headers from the context.
+func GetResponseHeadersFromContext(ctx context.Context) map[string]string {
 	if ctx == nil {
 		return nil
 	}

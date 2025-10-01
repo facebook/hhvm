@@ -364,7 +364,7 @@ func TestUexHeaderFunctionality(t *testing.T) {
 		err = client.Close()
 		require.NoError(t, err)
 
-		responseHeaders := ResponseHeadersFromContext(ctx)
+		responseHeaders := GetResponseHeadersFromContext(ctx)
 		// read uex header for the exception
 		require.Contains(t, responseHeaders, "uex")
 		require.Contains(t, responseHeaders, "uexw")
@@ -562,7 +562,7 @@ func TestLoadHeader(t *testing.T) {
 		ctx := NewResponseHeadersContext(context.Background())
 		err := client.Sleep(ctx, 10 /* ms */)
 		assert.NoError(t, err)
-		responseHeaders := ResponseHeadersFromContext(ctx)
+		responseHeaders := GetResponseHeadersFromContext(ctx)
 		assert.Contains(t, responseHeaders, "load")
 		loadStr := responseHeaders["load"]
 		loadVal, err := strconv.ParseInt(loadStr, 10, 64)

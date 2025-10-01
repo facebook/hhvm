@@ -28,10 +28,8 @@ use oxidized::ast::Stmt;
 use oxidized::ast::Stmt_;
 use oxidized::ast_defs;
 use oxidized::ast_defs::*;
-use oxidized::experimental_features::FeatureName;
 use oxidized::local_id;
 use oxidized::pos::Pos;
-use parser_core_types::syntax_error;
 
 use crate::lowerer::Env;
 
@@ -251,20 +249,6 @@ pub fn desugar(
     let mut function_pointers = vec![];
     function_pointers.extend(function_pointer_assignments);
     function_pointers.extend(static_method_assignments);
-    if is_nested
-        && !free_vars.is_empty()
-        && !FeatureName::ExpressionTreeNestedBindings
-            .can_use(env.parser_options, &env.active_experimental_features)
-    {
-        state.errors.push((
-            et_literal_pos.clone(),
-            format!(
-                "{} Free variables: {}",
-                syntax_error::cannot_use_feature(FeatureName::ExpressionTreeNestedBindings.into()),
-                free_vars.keys().map(|x| x.1.clone()).join(", ")
-            ),
-        ))
-    }
     let make_tree = static_meth_call(
         visitor_name,
         et::MAKE_TREE,

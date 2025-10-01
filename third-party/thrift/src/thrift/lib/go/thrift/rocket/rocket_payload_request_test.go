@@ -32,7 +32,7 @@ func TestRequestRPCMetadata(t *testing.T) {
 	wantOther := map[string]string{"header": "1"}
 	data, err := EncodeRequestPayload(wantName, wantProto, rpcmetadata.RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE, wantOther, rpcmetadata.CompressionAlgorithm_NONE, nil)
 	require.NoError(t, err)
-	got, err := DecodeRequestPayload(data)
+	_, got, err := DecodeRequestPayload(data)
 	require.NoError(t, err)
 	require.Equal(t, wantName, got.Name())
 	require.Equal(t, wantType, got.TypeID())
@@ -40,6 +40,6 @@ func TestRequestRPCMetadata(t *testing.T) {
 	require.Equal(t, wantOther, got.Headers())
 
 	payloadNoMetadata := payload.New([]byte("data_bytes"), nil /* metadata bytes */)
-	_, err = DecodeRequestPayload(payloadNoMetadata)
+	_, _, err = DecodeRequestPayload(payloadNoMetadata)
 	require.ErrorContains(t, err, "request payload is missing metadata")
 }

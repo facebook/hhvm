@@ -221,7 +221,7 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 
 	requestReceivedTime := time.Now()
 
-	request, err := rocket.DecodeRequestPayload(msg)
+	_, request, err := rocket.DecodeRequestPayload(msg)
 	if err != nil {
 		// Notify observer that connection was dropped and task killed due to malformed rocket payload
 		s.observer.ConnDropped()
@@ -300,7 +300,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 
 	requestReceivedTime := time.Now()
 
-	request, err := rocket.DecodeRequestPayload(msg)
+	_, request, err := rocket.DecodeRequestPayload(msg)
 	if err != nil {
 		// Notify observer that connection was dropped and task killed due to malformed rocket payload
 		s.observer.ConnDropped()

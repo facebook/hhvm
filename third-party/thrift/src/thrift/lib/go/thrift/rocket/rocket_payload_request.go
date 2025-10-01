@@ -69,31 +69,31 @@ func EncodeRequestPayload(
 }
 
 // DecodeRequestPayload decodes a request payload.
-func DecodeRequestPayload(msg payload.Payload) (*RequestPayload, error) {
+func DecodeRequestPayload(msg payload.Payload) (*rpcmetadata.RequestRpcMetadata, *RequestPayload, error) {
 	metadataBytes, ok := msg.Metadata()
 	if !ok {
-		return nil, fmt.Errorf("request payload is missing metadata")
+		return nil, nil, fmt.Errorf("request payload is missing metadata")
 	}
 
 	metadata := &rpcmetadata.RequestRpcMetadata{}
 	err := format.DecodeCompact(metadataBytes, metadata)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	typeID, err := rpcKindToMessageType(metadata.GetKind())
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	protoID, err := rpcProtocolIDToProtocolID(metadata.GetProtocol())
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	dataBytes, err := MaybeDecompress(msg.Data(), metadata.GetCompression())
 	if err != nil {
-		return nil, fmt.Errorf("request payload decompression failed: %w", err)
+		return nil, nil, fmt.Errorf("request payload decompression failed: %w", err)
 	}
 
 	res := &RequestPayload{
@@ -102,7 +102,7 @@ func DecodeRequestPayload(msg payload.Payload) (*RequestPayload, error) {
 		protoID:  protoID,
 		data:     dataBytes,
 	}
-	return res, nil
+	return metadata, res, nil
 }
 
 func (r *RequestPayload) Data() []byte {

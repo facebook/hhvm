@@ -47,3 +47,7 @@ service Dummy {
   void GetDeclaredException() throws (1: DummyException ex);
   void GetUndeclaredException();
 }
+
+service DummyTwo {
+  void PingTwo();
+}

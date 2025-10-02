@@ -663,3 +663,41 @@ func TestNumWorkersOption(t *testing.T) {
 	err = serverEG.Wait()
 	require.ErrorIs(t, err, context.Canceled)
 }
+
+func TestUnknownFunction(t *testing.T) {
+	listener, err := net.Listen("tcp", "[::]:0")
+	require.NoError(t, err)
+	addr := listener.Addr()
+	t.Logf("Server listening on %v", addr)
+
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+	server := NewServer(processor, listener, TransportIDRocket, WithNumWorkers(1))
+
+	serverCtx, serverCancel := context.WithCancel(context.Background())
+	var serverEG errgroup.Group
+	serverEG.Go(func() error {
+		return server.ServeContext(serverCtx)
+	})
+
+	channel, err := NewClient(
+		WithRocket(),
+		WithIoTimeout(5*time.Second),
+		WithDialer(func() (net.Conn, error) {
+			return net.DialTimeout(addr.Network(), addr.String(), 5*time.Second)
+		}),
+	)
+	require.NoError(t, err)
+
+	client := dummyif.NewDummyTwoChannelClient(channel)
+	err = client.PingTwo(context.Background())
+	require.Error(t, err)
+	require.ErrorContains(t, err, "no such function")
+
+	err = client.Close()
+	require.NoError(t, err)
+
+	// Shut down server.
+	serverCancel()
+	err = serverEG.Wait()
+	require.ErrorIs(t, err, context.Canceled)
+}

@@ -41,11 +41,7 @@ func ChainInterceptors(interceptors ...Interceptor) Interceptor {
 			origHandler:  pf,
 			interceptors: interceptors,
 		}
-		ws, err := interceptors[0](ctx, name, handler, args)
-		if err != nil {
-			return ws, maybeWrapApplicationException(err)
-		}
-		return ws, nil
+		return interceptors[0](ctx, name, handler, args)
 	}
 }
 

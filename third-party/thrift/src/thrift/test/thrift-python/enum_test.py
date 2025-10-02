@@ -54,15 +54,31 @@ class ThriftPython_EnumClass_Test(unittest.TestCase):
         self.assertIs(enums.Color.__members__["red"], enums.Color.red)
         self.assertEqual(len(enums.Color.__members__), 3)
 
-        with self.assertRaisesRegex(
-            TypeError, "'mappingproxy' object does not support item assignment"
-        ):
-            enums.Color.__members__["foobar"] = None  # pyre-ignore[16]
+        # BAD: All tests below should fail: __members__should be read-only, and
+        # application logic should not be able to add members.
+        # Native Python enum error looks like:
+        # TypeError: 'mappingproxy' object does not support item assignment
 
-        with self.assertRaisesRegex(
-            TypeError, "'mappingproxy' object does not support item deletion"
-        ):
-            del enums.Color.__members__["red"]
+        # Creating copy of original, to restore before returning:
+        self.assertIs(type(enums.Color.__members__), dict)
+        members_backup = enums.Color.__members__.copy()  # pyre-ignore[16]
+
+        enums.Color.__members__["foobar"] = None  # pyre-ignore[16]
+        self.assertEqual(len(enums.Color.__members__), 4)
+
+        # BAD: All tests below should fail: __members__ should be read-only, and
+        # application logic should not be able to delete an existing member.
+        # Native Python enum error looks like:
+        # TypeError: 'mappingproxy' object does not support item deletion
+        del enums.Color.__members__["red"]
+        self.assertEqual(len(enums.Color.__members__), 3)
+        with self.assertRaisesRegex(KeyError, "'red'"):
+            enums.Color.__members__["red"]
+
+        # Restore original __members__
+        enums.Color.__members__.clear()  # pyre-ignore[16]
+        enums.Color.__members__.update(members_backup)  # pyre-ignore[16]
+        self.assertIs(enums.Color.__members__["red"], enums.Color.red)
 
     def test_getitem(self) -> None:
         """

@@ -121,14 +121,25 @@ struct PatchIfSetApplier<type::adapted<Adapter, Tag>> {
   template <typename Patch, typename FieldRef>
   void operator()(const Patch& patch, FieldRef&& ref) {
     using value_type = typename Patch::value_type;
-    if constexpr (std::is_same_v<value_type, type::native_type<Tag>>) {
+    if constexpr (std::is_same_v<
+                      value_type,
+                      type::native_type<type::adapted<Adapter, Tag>>>) {
+      // Usually patch itself should only understand the standard type. It
+      // should have zero knowledge of the adapted type. (e.g., the `assign`
+      // field inside patch struct should be standard type, not adapted type).
+      // We should always invoke the adapter when applying the patch.
+      //
+      // However, for some weird custom patch (Cough cough...
+      // https://fburl.com/code/pmubnhge) that can be applied
+      // to the adapted type directly, we just apply it directly without
+      // adapter.
+      patch.apply(std::forward<FieldRef>(ref));
+    } else {
       if (auto* value = get_value_or_null(ref)) {
         type::native_type<Tag> temp = Adapter::toThrift(std::move(*value));
         patch.apply(temp);
         ref = Adapter::fromThrift(std::move(temp));
       }
-    } else {
-      patch.apply(std::forward<FieldRef>(ref));
     }
   }
 };

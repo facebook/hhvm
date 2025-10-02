@@ -33,7 +33,7 @@ type Interceptor func(
 	methodName string,
 	pfunc types.ProcessorFunction,
 	args types.ReadableStruct,
-) (types.WritableStruct, types.ApplicationExceptionIf)
+) (types.WritableStruct, error)
 
 type interceptorProcessor struct {
 	// Embeds original Processor

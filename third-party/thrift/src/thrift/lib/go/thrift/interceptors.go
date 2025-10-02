@@ -31,7 +31,7 @@ func ChainInterceptors(interceptors ...Interceptor) Interceptor {
 		name string,
 		pf types.ProcessorFunction,
 		args types.ReadableStruct,
-	) (types.WritableStruct, types.ApplicationExceptionIf) {
+	) (types.WritableStruct, error) {
 		if len(interceptors) == 0 {
 			return pf.RunContext(ctx, args)
 		}

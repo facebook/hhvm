@@ -32,7 +32,7 @@ func dummyInterceptor(
 	methodName string,
 	pfunc types.ProcessorFunction,
 	args types.ReadableStruct,
-) (types.WritableStruct, types.ApplicationExceptionIf) {
+) (types.WritableStruct, error) {
 	if methodName == "Echo" {
 		if echoArg, ok := args.(*dummyif.DummyEchoArgsDeprecated); ok {
 			echoArg.Value = echoArg.Value + "-intercepted"
@@ -86,7 +86,7 @@ func TestChainInterceptors(t *testing.T) {
 		methodName string,
 		pfunc types.ProcessorFunction,
 		args types.ReadableStruct,
-	) (types.WritableStruct, types.ApplicationExceptionIf) {
+	) (types.WritableStruct, error) {
 		if methodName == "Echo" {
 			ws, ae := pfunc.RunContext(ctx, args)
 			echoResp := ws.(*dummyif.DummyEchoResultDeprecated)
@@ -100,7 +100,7 @@ func TestChainInterceptors(t *testing.T) {
 		methodName string,
 		pfunc types.ProcessorFunction,
 		args types.ReadableStruct,
-	) (types.WritableStruct, types.ApplicationExceptionIf) {
+	) (types.WritableStruct, error) {
 		if methodName == "Echo" {
 			ws, ae := pfunc.RunContext(ctx, args)
 			echoResp := ws.(*dummyif.DummyEchoResultDeprecated)
@@ -114,7 +114,7 @@ func TestChainInterceptors(t *testing.T) {
 		methodName string,
 		pfunc types.ProcessorFunction,
 		args types.ReadableStruct,
-	) (types.WritableStruct, types.ApplicationExceptionIf) {
+	) (types.WritableStruct, error) {
 		if methodName == "Echo" {
 			ws, ae := pfunc.RunContext(ctx, args)
 			echoResp := ws.(*dummyif.DummyEchoResultDeprecated)

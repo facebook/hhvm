@@ -858,6 +858,16 @@ TEST(StructTest, TerseFields) {
   EXPECT_FALSE(serializedField<ident::cpp_ref_struct_field>(terse));
   EXPECT_FALSE(serializedField<ident::cpp_ref_union_field>(terse));
   EXPECT_FALSE(serializedField<ident::cpp_ref_exception_field>(terse));
+
+  // Round-tripping an empty container with custom default does not preserve the
+  // value!
+  auto serialized = CompactSerializer::serialize<std::string>(terse);
+  CompactSerializer::deserialize(serialized, terse);
+  EXPECT_EQ(terse.list_field()->size(), 0);
+  EXPECT_EQ(terse.set_field()->size(), 0);
+  EXPECT_EQ(terse.map_field()->size(), 0);
+  EXPECT_EQ(terse.string_field(), "");
+  EXPECT_EQ(terse.binary_field(), "");
 }
 
 TEST(StructTest, TestInitListEmplaceContainers) {

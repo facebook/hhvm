@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+package "facebook.com/thrift/test/python"
+
 namespace py3 thrift.test.thrift_python
 
 enum PositiveNumber {

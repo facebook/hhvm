@@ -199,8 +199,9 @@ class ThriftPython_EnumClass_Test(unittest.TestCase):
         self.assertEqual(enums.Color.__get_thrift_name__(), "enum_test.Color")
 
     def test_get_thrift_uri(self) -> None:
-        # BAD: type should have a URI, which is returned here.
-        self.assertIsNone(enums.Color.__get_thrift_uri__())
+        self.assertEqual(
+            enums.Color.__get_thrift_uri__(), "facebook.com/thrift/test/python/Color"
+        )
 
     def test_get_metadata(self) -> None:
         self.assertIsNotNone(enums.Color.__get_metadata__())

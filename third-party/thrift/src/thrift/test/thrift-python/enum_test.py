@@ -147,19 +147,19 @@ class ThriftPython_EnumClass_Test(unittest.TestCase):
         Enum class attributes cannot be modified (set or deleted).
         """
 
-        # BAD: The error message is misleading, and does not capture the most important
-        # aspect: enum members cannot be addded dynamically.
-        with self.assertRaisesRegex(AttributeError, "'Color' has no attribute 'foo'"):
+        with self.assertRaisesRegex(
+            AttributeError, r"Thrift enum type 'Color': cannot assign member \('foo'\)"
+        ):
             enums.Color.foo = 42  # pyre-ignore[16]: Check runtime behavior
 
-        # BAD: The error message is misleading: Color does have an attribute 'red', but
-        # we cannot (re)assign a value to it.  For reference, the corresponding error
-        # when trying to assign a value to a native Python enum member looks like:
-        # "AttributeError: cannot reassign member 'RED'"
-        with self.assertRaisesRegex(AttributeError, "'Color' has no attribute 'red'"):
+        with self.assertRaisesRegex(
+            AttributeError, r"Thrift enum type 'Color': cannot assign member \('red'\)"
+        ):
             enums.Color.red = 42  # pyre-ignore[41]: Check behavior despite final hint
 
-        with self.assertRaisesRegex(AttributeError, "cannot delete"):
+        with self.assertRaisesRegex(
+            AttributeError, r"Thrift enum type 'Color': cannot delete member \('red'\)"
+        ):
             del enums.Color.red
 
     def test_call(self) -> None:

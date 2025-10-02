@@ -2544,10 +2544,10 @@ class EnumMeta(type):
         return reversed(cls.__members__.values())
 
     def __setattr__(cls, name, _):
-        raise AttributeError(f"'{cls.__qualname__}' has no attribute '{name}'")
+        raise AttributeError(f"Thrift enum type '{cls.__qualname__}': cannot assign member ('{name}').")
 
     def __delattr__(cls, name):
-        raise AttributeError(f"{cls.__name__}: cannot delete Enum member.")
+        raise AttributeError(f"Thrift enum type '{cls.__qualname__}': cannot delete member ('{name}').")
 
     def __call__(cls, value):
         if isinstance(value, cls):

@@ -14,6 +14,7 @@
 
 from collections import defaultdict
 from collections.abc import Iterable, Mapping, Sequence, Set as pySet, Sized
+from types import MappingProxyType
 import warnings
 
 from cpython cimport bool as pbool, int as pint, float as pfloat
@@ -2482,7 +2483,7 @@ class EnumMeta(type):
         # if no bases, it's creating Enum or Flag base class, no need to parse members.
         attrs = {
             # name -> arm
-            "__members__": {},
+            "_member_map_": {},
             # value -> arm
             "__reversed_map__": {},
         }
@@ -2508,16 +2509,24 @@ class EnumMeta(type):
             arm = klass.__new__(klass, value)
             arm._fbthrift_name_ = name
             arm._fbthrift_value_ = value
-            klass.__members__[name] = arm
+            klass._member_map_[name] = arm
             klass.__reversed_map__[value] = arm
             type.__setattr__(klass, name, arm)
         return klass
 
     def __len__(cls):
-        return len(cls.__members__)
+        return len(cls._member_map_)
 
     def __getitem__(cls, attribute):
-        return cls.__members__[attribute]
+        return cls._member_map_[attribute]
+
+    @property
+    def __members__(cls):
+        """
+        Returns a read-only mapping of all names to their instance for this Thrift enum
+        type.
+        """
+        return MappingProxyType(cls._member_map_)
 
     def __contains__(cls, item):
         if isinstance(item, cls):
@@ -2538,10 +2547,10 @@ class EnumMeta(type):
         return item in cls.__reversed_map__
 
     def __iter__(cls):
-        return iter(cls.__members__.values())
+        return iter(cls._member_map_.values())
 
     def __reversed__(cls):
-        return reversed(cls.__members__.values())
+        return reversed(cls._member_map_.values())
 
     def __setattr__(cls, name, _):
         raise AttributeError(f"'{cls.__qualname__}' has no attribute '{name}'")
@@ -2563,7 +2572,7 @@ class EnumMeta(type):
             ) from None
 
     def __dir__(cls):
-        return list(cls.__members__.keys()) + [
+        return list(cls._member_map_.keys()) + [
             '__class__',
             '__doc__',
             '__members__',

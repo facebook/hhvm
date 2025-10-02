@@ -434,8 +434,9 @@ func (p *procFuncMyServiceFoo) RunContext(ctx context.Context, reqStruct thrift.
     result := newRespMyServiceFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Foo: " + err.Error(), err)
-        return x, x
+        internalErr := fmt.Errorf("Internal error processing Foo: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
     }
 
     return result, nil
@@ -566,8 +567,9 @@ func (p *procFuncFactoriesFoo) RunContext(ctx context.Context, reqStruct thrift.
     result := newRespFactoriesFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Foo: " + err.Error(), err)
-        return x, x
+        internalErr := fmt.Errorf("Internal error processing Foo: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
     }
 
     return result, nil
@@ -698,8 +700,9 @@ func (p *procFuncPerformFoo) RunContext(ctx context.Context, reqStruct thrift.Re
     result := newRespPerformFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Foo: " + err.Error(), err)
-        return x, x
+        internalErr := fmt.Errorf("Internal error processing Foo: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
     }
 
     return result, nil
@@ -830,8 +833,9 @@ func (p *procFuncInteractWithSharedDoSomeSimilarThings) RunContext(ctx context.C
     result := newRespInteractWithSharedDoSomeSimilarThings()
     retval, err := p.handler.DoSomeSimilarThings(ctx)
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoSomeSimilarThings: " + err.Error(), err)
-        return x, x
+        internalErr := fmt.Errorf("Internal error processing DoSomeSimilarThings: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
     }
 
     result.Success = retval

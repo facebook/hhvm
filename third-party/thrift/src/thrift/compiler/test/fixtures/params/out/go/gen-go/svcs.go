@@ -224,8 +224,9 @@ func (p *procFuncNestedContainersMapList) RunContext(ctx context.Context, reqStr
     result := newRespNestedContainersMapList()
     err := p.handler.MapList(ctx, args.Foo)
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing MapList: " + err.Error(), err)
-        return x, x
+        internalErr := fmt.Errorf("Internal error processing MapList: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
     }
 
     return result, nil
@@ -271,8 +272,9 @@ func (p *procFuncNestedContainersMapSet) RunContext(ctx context.Context, reqStru
     result := newRespNestedContainersMapSet()
     err := p.handler.MapSet(ctx, args.Foo)
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing MapSet: " + err.Error(), err)
-        return x, x
+        internalErr := fmt.Errorf("Internal error processing MapSet: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
     }
 
     return result, nil
@@ -318,8 +320,9 @@ func (p *procFuncNestedContainersListMap) RunContext(ctx context.Context, reqStr
     result := newRespNestedContainersListMap()
     err := p.handler.ListMap(ctx, args.Foo)
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing ListMap: " + err.Error(), err)
-        return x, x
+        internalErr := fmt.Errorf("Internal error processing ListMap: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
     }
 
     return result, nil
@@ -365,8 +368,9 @@ func (p *procFuncNestedContainersListSet) RunContext(ctx context.Context, reqStr
     result := newRespNestedContainersListSet()
     err := p.handler.ListSet(ctx, args.Foo)
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing ListSet: " + err.Error(), err)
-        return x, x
+        internalErr := fmt.Errorf("Internal error processing ListSet: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
     }
 
     return result, nil
@@ -412,8 +416,9 @@ func (p *procFuncNestedContainersTurtles) RunContext(ctx context.Context, reqStr
     result := newRespNestedContainersTurtles()
     err := p.handler.Turtles(ctx, args.Foo)
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Turtles: " + err.Error(), err)
-        return x, x
+        internalErr := fmt.Errorf("Internal error processing Turtles: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
     }
 
     return result, nil

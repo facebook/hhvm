@@ -222,14 +222,7 @@ CarbonRouterClient<RouterInfo>::findAffinitizedProxyIdx(
         return detail::srHostInfoPtrFuncCarbonRouterClient(
             host, requestClass, hash);
       },
-      [&hash](
-          const AccessPoint& srHost,
-          const RequestClass& requestClass,
-          bool stopTraversalByRh) {
-        // Skip thread affinity when RH signals stop traversal
-        if (stopTraversalByRh) {
-          return true;
-        }
+      [&hash](const AccessPoint& srHost, const RequestClass& requestClass) {
         if (!requestClass.is(RequestClass::kShadow) &&
             srHost.getTaskId().has_value()) {
           hash = srHost.getTaskId().value();

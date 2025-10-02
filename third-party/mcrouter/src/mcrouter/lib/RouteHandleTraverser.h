@@ -59,7 +59,7 @@ class RouteHandleTraverser {
   using SRHostInfoPtrFunc =
       std::function<bool(const HostInfoPtr&, const RequestClass&)>;
   using SRHostFunc =
-      std::function<bool(const AccessPoint&, const RequestClass&, bool)>;
+      std::function<bool(const AccessPoint&, const RequestClass&)>;
 
   /**
    * Creates a route handle traverser.
@@ -116,11 +116,10 @@ class RouteHandleTraverser {
   bool operator()(
       const AccessPoint& srHost,
       const RequestClass& requestClass,
-      const Request&,
-      bool stopTraversalByRh) const {
+      const Request&) const {
     bool stopTraversal = false;
     if (srHostFn_) {
-      stopTraversal = srHostFn_(srHost, requestClass, stopTraversalByRh);
+      stopTraversal = srHostFn_(srHost, requestClass);
     }
     return stopTraversal;
   }

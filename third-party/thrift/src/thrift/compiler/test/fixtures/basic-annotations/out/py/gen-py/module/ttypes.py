@@ -869,7 +869,7 @@ MyStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 
 MyStruct.thrift_struct_annotations = {
   "android.generate_builder": "1",
-  "thrift.uri": "facebook.com/thrift/compiler/test/fixtures/basic-annotations/src/module/MyStruct",
+  "thrift.uri": "facebook.com/thrift/compiler/test/fixtures/basic_annotations/src/module/MyStruct",
 }
 MyStruct.thrift_field_annotations = {
   1: {

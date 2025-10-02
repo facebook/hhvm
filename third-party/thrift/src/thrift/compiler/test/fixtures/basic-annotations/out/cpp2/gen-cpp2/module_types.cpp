@@ -256,7 +256,7 @@ namespace cpp2 {
 namespace detail {
 
 std::string_view YourStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/compiler/test/fixtures/basic-annotations/src/module/MyStruct";
+  return "facebook.com/thrift/compiler/test/fixtures/basic_annotations/src/module/MyStruct";
 }
 
 std::string_view YourStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {

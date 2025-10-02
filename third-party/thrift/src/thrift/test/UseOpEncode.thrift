@@ -20,7 +20,7 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 cpp_include "thrift/test/AdapterTest.h"
 
-@thrift.Uri{value = "facebook.com/thrift/test/UseOpEncode/Foo"}
+@thrift.Uri{value = "facebook.com/thrift/test/use_op_encode/Foo"}
 struct Foo {
   1: i32 field;
 }

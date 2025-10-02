@@ -644,7 +644,7 @@ impl ::fbthrift::GetTType for self::MyStruct {
 
 impl ::fbthrift::GetUri for self::MyStruct {
     fn uri() -> &'static ::std::primitive::str {
-        "facebook.com/thrift/compiler/test/fixtures/basic-annotations/src/module/MyStruct"
+        "facebook.com/thrift/compiler/test/fixtures/basic_annotations/src/module/MyStruct"
     }
 }
 

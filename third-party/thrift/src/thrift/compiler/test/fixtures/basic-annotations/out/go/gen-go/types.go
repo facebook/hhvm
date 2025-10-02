@@ -4053,6 +4053,6 @@ func (x *respBadInteractionFoo) setDefaults() *respBadInteractionFoo {
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)
 }) {
-    registry.RegisterType("facebook.com/thrift/compiler/test/fixtures/basic-annotations/src/module/MyStruct", func() any { return NewMyStruct() })
+    registry.RegisterType("facebook.com/thrift/compiler/test/fixtures/basic_annotations/src/module/MyStruct", func() any { return NewMyStruct() })
 
 }

@@ -209,7 +209,7 @@
         }
 ,
         "thrift.uri" : {
-          "value" : "facebook.com/thrift/compiler/test/fixtures/basic-annotations/src/module/MyStruct",
+          "value" : "facebook.com/thrift/compiler/test/fixtures/basic_annotations/src/module/MyStruct",
           "source_range" : {
             "begin" : {
               "line" : 68,

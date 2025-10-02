@@ -65,7 +65,7 @@ struct MyStruct {
   9: MyUnion my_union;
 } (
   android.generate_builder,
-  thrift.uri = "facebook.com/thrift/compiler/test/fixtures/basic-annotations/src/module/MyStruct",
+  thrift.uri = "facebook.com/thrift/compiler/test/fixtures/basic_annotations/src/module/MyStruct",
 )
 
 @go.Name{name = "IncredibleStruct"}

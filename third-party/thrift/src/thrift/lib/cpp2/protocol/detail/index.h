@@ -217,8 +217,19 @@ class IndexWriterImpl {
 };
 
 template <class Protocol>
+constexpr bool hasIndexSupport = [] {
+  bool has = false;
+  if constexpr (requires { Protocol::ProtocolWriter::kHasIndexSupport(); }) {
+    has = Protocol::ProtocolWriter::kHasIndexSupport();
+  } else if constexpr (requires { Protocol::kHasIndexSupport(); }) {
+    has = Protocol::kHasIndexSupport();
+  }
+  return has && !std::is_base_of_v<VirtualReaderBase, Protocol>;
+}();
+
+template <class Protocol>
 using IndexWriter = std::conditional_t<
-    Protocol::kHasIndexSupport(),
+    hasIndexSupport<Protocol>,
     IndexWriterImpl<Protocol>,
     DummyIndexWriter>;
 
@@ -386,20 +397,8 @@ class ProtocolReaderStructReadStateWithIndexImpl
 };
 
 template <class Protocol>
-constexpr auto hasIndexSupport(long) {
-  return false;
-}
-
-template <class Protocol>
-constexpr auto hasIndexSupport(int)
-    -> decltype(Protocol::ProtocolWriter::kHasIndexSupport()) {
-  return !std::is_base_of_v<VirtualReaderBase, Protocol> &&
-      Protocol::ProtocolWriter::kHasIndexSupport();
-}
-
-template <class Protocol>
 using ProtocolReaderStructReadStateWithIndex = std::conditional_t<
-    hasIndexSupport<Protocol>(0),
+    hasIndexSupport<Protocol>,
     ProtocolReaderStructReadStateWithIndexImpl<Protocol>,
     ProtocolReaderStructReadState<Protocol>>;
 

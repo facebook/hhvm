@@ -105,7 +105,10 @@ let rec check_hint env (pos, hint) =
   | Aast.Hvec_or_dict (hopt1, h2) ->
     Option.iter hopt1 ~f:(check_hint env);
     check_hint env h2
-  | Aast.Hclass_ptr (_, h) ->
+  | Aast.Hclass_ptr (CKenum, h) ->
+    (* similar to Happly case for enumname *)
+    check_hint env h
+  | Aast.Hclass_ptr (CKclass, h) ->
     let Equal = Tast_env.eq_typing_env in
     validate_classname env h
   | Aast.Hoption h

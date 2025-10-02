@@ -1,0 +1,26 @@
+ERROR: File "enums_2.php", line 23, characters 5-12:
+Invalid argument (Typing[4110])
+  File "enums_2.php", line 14, characters 8-10:
+  Expected `int`
+  File "enums_2.php", line 6, characters 6-6:
+  But got `string`
+  File "enums_2.php", line 6, characters 19-24:
+    by the definition of `F`
+ERROR: File "enums_2.php", line 24, characters 5-12:
+Invalid argument (Typing[4110])
+  File "enums_2.php", line 14, characters 8-10:
+  Expected `int`
+  File "enums_2.php", line 9, characters 6-6:
+  But got `arraykey`
+  File "enums_2.php", line 9, characters 6-6:
+    by the definition of `G` arising from an implicit `as arraykey` constraint on this type
+ERROR: File "enums_2.php", line 25, characters 5-12:
+Invalid argument (Typing[4110])
+  File "enums_2.php", line 14, characters 3-11:
+  Expected `class<HH\BuiltinEnum<int>>`
+  File "enums_2.php", line 25, characters 5-12:
+  But got `string`
+  File "enums_2.php", line 25, characters 5-12:
+    by the definition of `classname`
+  File "enums_2.php", line 25, characters 5-12:
+    by the definition of `typename`

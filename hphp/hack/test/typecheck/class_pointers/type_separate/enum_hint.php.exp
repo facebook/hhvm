@@ -4,8 +4,6 @@ Invalid return type (Typing[4110])
   Expected `classname<HH\BuiltinEnum<Opaque>>`
   File "enum_hint.php", line 10, characters 12-23:
   But got `class<HH\BuiltinEnum<Opaque>>`
-ERROR: File "enum_hint.php", line 13, characters 35-37:
-Not a valid class name (Typing[4148])
 ERROR: File "enum_hint.php", line 14, characters 10-11:
 Invalid return type (Typing[4110])
   File "enum_hint.php", line 13, characters 35-37:
@@ -26,5 +24,3 @@ Invalid return type (Typing[4110])
     via this generic `T`
   File "enum_hint.php", line 16, characters 24-29:
     by the definition of `Opaque` arising from an implicit `as arraykey` constraint on this type
-ERROR: File "enum_hint.php", line 19, characters 34-36:
-Not a valid class name (Typing[4148])

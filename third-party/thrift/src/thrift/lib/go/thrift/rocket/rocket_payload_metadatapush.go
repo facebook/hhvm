@@ -27,20 +27,18 @@ import (
 // DecodeServerMetadataPush decodes the server metadata push.
 func DecodeServerMetadataPush(msg payload.Payload) (*rpcmetadata.ServerPushMetadata, error) {
 	msg = payload.Clone(msg)
+
 	// For documentation/reference see the CPP implementation
 	// https://www.internalfb.com/code/fbsource/[ec968d3ea0ab]/fbcode/thrift/lib/cpp2/transport/rocket/client/RocketClient.cpp?lines=181
-	metadataBytes, ok := msg.Metadata()
-	if !ok {
-		return nil, fmt.Errorf("no metadata in server metadata push")
+	metadata := &rpcmetadata.ServerPushMetadata{}
+	err := DecodePayloadMetadata(msg, metadata)
+	if err != nil {
+		return nil, fmt.Errorf("unable to decode ServerPushMetadata: %w", err)
 	}
-	result := &rpcmetadata.ServerPushMetadata{}
-	if err := format.DecodeCompact(metadataBytes, result); err != nil {
-		return nil, fmt.Errorf("unable to deserialize ServerPushMetadata: %w", err)
-	}
-	if err := validateServerPushMetadata(result); err != nil {
+	if err := validateServerPushMetadata(metadata); err != nil {
 		return nil, err
 	}
-	return result, nil
+	return metadata, nil
 }
 
 // EncodeServerMetadataPush encodes the server metadata push.
@@ -79,18 +77,16 @@ func validateServerPushMetadata(metadata *rpcmetadata.ServerPushMetadata) error 
 // DecodeClientMetadataPush decodes the client metadata push.
 func DecodeClientMetadataPush(msg payload.Payload) (*rpcmetadata.ClientPushMetadata, error) {
 	msg = payload.Clone(msg)
-	metadataBytes, ok := msg.Metadata()
-	if !ok {
-		panic("no metadata in client metadata push")
+
+	metadata := &rpcmetadata.ClientPushMetadata{}
+	err := DecodePayloadMetadata(msg, metadata)
+	if err != nil {
+		return nil, fmt.Errorf("unable to decode ClientPushMetadata: %w", err)
 	}
-	result := &rpcmetadata.ClientPushMetadata{}
-	if err := format.DecodeCompact(metadataBytes, result); err != nil {
-		return nil, fmt.Errorf("unable to deserialize ClientPushMetadata: %w", err)
-	}
-	if err := validateClientPushMetadata(result); err != nil {
+	if err := validateClientPushMetadata(metadata); err != nil {
 		return nil, err
 	}
-	return result, nil
+	return metadata, nil
 }
 
 func validateClientPushMetadata(metadata *rpcmetadata.ClientPushMetadata) error {

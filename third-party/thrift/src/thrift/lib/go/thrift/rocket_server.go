@@ -232,7 +232,7 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		return mono.Error(err)
 	}
 	rpcFuncName := metadata.GetName()
-	protocol, err := newProtocolBufferFromRequest(msg.Data(), metadata)
+	protocol, err := newProtocolBufferFromRequest(msg.Data(), metadata, s.observer, rpcFuncName)
 	if err != nil {
 		// Notify observer that connection was dropped and task killed due to protocol buffer creation error
 		s.observer.ConnDropped()
@@ -317,7 +317,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 		return
 	}
 	rpcFuncName := metadata.GetName()
-	protocol, err := newProtocolBufferFromRequest(msg.Data(), metadata)
+	protocol, err := newProtocolBufferFromRequest(msg.Data(), metadata, s.observer, rpcFuncName)
 	if err != nil {
 		// Notify observer that connection was dropped and task killed due to protocol buffer creation error
 		s.observer.ConnDropped()
@@ -367,11 +367,14 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 	return flux.Error(errors.New("not implemented"))
 }
 
-func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata.RequestRpcMetadata) (*protocolBuffer, error) {
+func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata.RequestRpcMetadata, observer ServerObserver, functionName string) (*protocolBuffer, error) {
 	dataBytes, err := rocket.MaybeDecompress(payloadDataBytes, metadata.GetCompression())
 	if err != nil {
 		return nil, fmt.Errorf("payload data bytes decompression failed: %w", err)
 	}
+
+	// Track the number of bytes read for this call
+	observer.BytesReadForFunction(functionName, len(dataBytes))
 
 	messageName := metadata.GetName()
 	protoID := types.ProtocolID(metadata.GetProtocol())

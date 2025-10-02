@@ -50,4 +50,5 @@ type ServerObserver interface {
 	BytesWrittenForFunction(function string, bytes int)               // bytes written during response serialization for specific function
 	TimeReadUsForFunction(function string, duration time.Duration)    // time spent reading/demarshaling for specific function
 	TimeProcessUsForFunction(function string, duration time.Duration) // time spent in processing for specific function
+	TimeWriteUsForFunction(function string, duration time.Duration)   // time spent marshaling/writing for specific function
 }

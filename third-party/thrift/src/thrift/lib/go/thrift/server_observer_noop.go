@@ -62,3 +62,4 @@ func (*noopServerObserver) BytesReadForFunction(_ string, _ int)               {
 func (*noopServerObserver) BytesWrittenForFunction(_ string, _ int)            {}
 func (*noopServerObserver) TimeReadUsForFunction(_ string, _ time.Duration)    {}
 func (*noopServerObserver) TimeProcessUsForFunction(_ string, _ time.Duration) {}
+func (*noopServerObserver) TimeWriteUsForFunction(_ string, _ time.Duration)   {}

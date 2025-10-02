@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
@@ -161,5 +162,23 @@ func TestChainInterceptors(t *testing.T) {
 		echoResp := resp.(*dummyif.DummyEchoResultDeprecated)
 		require.NoError(t, err)
 		require.Equal(t, "hello", *echoResp.Success)
+	})
+}
+
+func TestMaybeWrapApplicationException(t *testing.T) {
+	t.Run("ApplicationException_case", func(t *testing.T) {
+		appException := NewApplicationException(UNKNOWN_APPLICATION_EXCEPTION, "test")
+		err := maybeWrapApplicationException(appException)
+		require.Error(t, err)
+		require.Equal(t, appException, err)
+	})
+
+	t.Run("generic_error_case", func(t *testing.T) {
+		dummyErr := errors.New("dummy error")
+		err := maybeWrapApplicationException(dummyErr)
+		require.Error(t, err)
+		var appErr *ApplicationException
+		require.ErrorAs(t, err, &appErr)
+		require.Equal(t, dummyErr.Error(), appErr.Error())
 	})
 }

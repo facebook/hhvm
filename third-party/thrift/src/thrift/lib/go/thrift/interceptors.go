@@ -41,7 +41,11 @@ func ChainInterceptors(interceptors ...Interceptor) Interceptor {
 			origHandler:  pf,
 			interceptors: interceptors,
 		}
-		return interceptors[0](ctx, name, handler, args)
+		ws, err := interceptors[0](ctx, name, handler, args)
+		if err != nil {
+			return ws, maybeWrapApplicationException(err)
+		}
+		return ws, nil
 	}
 }
 
@@ -69,5 +73,9 @@ func (ch *chainHandler) RunContext(ctx context.Context, args types.ReadableStruc
 		return ch.origHandler.RunContext(ctx, args)
 	}
 	ch.curI++
-	return ch.interceptors[ch.curI](ctx, ch.name, ch, args)
+	ws, err := ch.interceptors[ch.curI](ctx, ch.name, ch, args)
+	if err != nil {
+		return ws, maybeWrapApplicationException(err)
+	}
+	return ws, nil
 }

@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"context"
+	"errors"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -76,5 +77,18 @@ type interceptorProcessorFunction struct {
 }
 
 func (pf *interceptorProcessorFunction) RunContext(ctx context.Context, args types.ReadableStruct) (types.WritableStruct, types.ApplicationExceptionIf) {
-	return pf.interceptor(ctx, pf.methodName, pf.ProcessorFunction, args)
+	ws, err := pf.interceptor(ctx, pf.methodName, pf.ProcessorFunction, args)
+	if err != nil {
+		return ws, maybeWrapApplicationException(err)
+	}
+	return ws, nil
+}
+
+// Wraps error into ApplicationException (if it's not one already)
+func maybeWrapApplicationException(err error) *types.ApplicationException {
+	var appException *types.ApplicationException
+	if errors.As(err, &appException) {
+		return appException
+	}
+	return types.NewApplicationException(types.UNKNOWN_APPLICATION_EXCEPTION, err.Error())
 }

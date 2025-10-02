@@ -40,7 +40,6 @@ type ReadableStruct = types.ReadableStruct
 
 type Encoder = types.Encoder
 
-type ApplicationExceptionIf = types.ApplicationExceptionIf
 type ApplicationException = types.ApplicationException
 
 type Type = types.Type
@@ -79,7 +78,6 @@ var FormatIDDebug types.ProtocolID = types.ProtocolIDDebug
 var FormatIDVirtual types.ProtocolID = types.ProtocolIDVirtual
 var FormatIDSimpleJSON types.ProtocolID = types.ProtocolIDSimpleJSON
 
-var NewApplicationExceptionCause = types.NewApplicationExceptionCause
 var NewApplicationException = types.NewApplicationException
 
 var INTERNAL_ERROR int32 = types.INTERNAL_ERROR

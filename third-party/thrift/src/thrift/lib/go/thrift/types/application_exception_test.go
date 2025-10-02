@@ -17,8 +17,6 @@
 package types
 
 import (
-	"errors"
-	"fmt"
 	"testing"
 )
 
@@ -36,18 +34,5 @@ func TestApplicationException(t *testing.T) {
 	}
 	if exc.TypeID() != WRONG_METHOD_NAME {
 		t.Fatalf("Expected type WRONG_METHOD_NAME for exception but found '%d'", exc.TypeID())
-	}
-}
-
-func TestApplicationExceptionCause(t *testing.T) {
-	err := fmt.Errorf("A specific error")
-	exc := NewApplicationExceptionCause(INTERNAL_ERROR, err.Error(), err)
-
-	if exc.Error() != "A specific error" {
-		t.Fatalf("Expected 'A specific error' for exception but found '%s'", exc.Error())
-	}
-
-	if errors.Unwrap(exc) != err {
-		t.Fatalf("Expected inner error from exception but found '%s'", errors.Unwrap(exc))
 	}
 }

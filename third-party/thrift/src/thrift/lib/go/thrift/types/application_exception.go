@@ -38,24 +38,10 @@ const (
 	TENANT_QUOTA_EXCEEDED          = 16
 )
 
-// ApplicationExceptionIf is an application level Thrift exception
-// TODO: to be deprecated and removed.
-type ApplicationExceptionIf interface {
-	error
-	Struct
-	TypeID() int32
-	// The state of interface assertions on ApplicationException type is extremely brittle.
-	// The following super-unique method ensures that only ApplicationException type can be
-	// asserted to ApplicationExceptionIf.
-	DoNotUseButEnsureInterfaceMatch()
-}
-
 // ApplicationException is an application level Thrift exception
 type ApplicationException struct {
 	message       string
 	exceptionType int32
-	// The original error that caused the application exception
-	cause error
 }
 
 var _ error = (*ApplicationException)(nil)
@@ -64,11 +50,6 @@ var _ Struct = (*ApplicationException)(nil)
 // NewApplicationException creates a new ApplicationException
 func NewApplicationException(exceptionType int32, message string) *ApplicationException {
 	return &ApplicationException{message: message, exceptionType: exceptionType}
-}
-
-// NewApplicationExceptionCause creates a new ApplicationException with a root cause error
-func NewApplicationExceptionCause(exceptionType int32, message string, cause error) *ApplicationException {
-	return &ApplicationException{message, exceptionType, cause}
 }
 
 // Error returns the error message
@@ -84,11 +65,6 @@ func (e *ApplicationException) TypeID() int32 {
 // DoNotUseButEnsureInterfaceMatch - do not call this method ever.
 func (e *ApplicationException) DoNotUseButEnsureInterfaceMatch() {
 	panic("do not call this method")
-}
-
-// Unwrap returns the original error that cause the application error. Returns nil if there was no wrapped error.
-func (e *ApplicationException) Unwrap() error {
-	return e.cause
 }
 
 // Read reads an ApplicationException from the protocol

@@ -468,9 +468,9 @@ where
     }
 }
 
-fn is_variadic_expression(node: S<'_>) -> bool {
+fn is_splat_expression(node: S<'_>) -> bool {
     is_decorated_expression(node, |x| x.is_ellipsis())
-        || test_decorated_expression_child(node, is_variadic_expression)
+        || test_decorated_expression_child(node, is_splat_expression)
 }
 
 fn is_variadic_parameter_declaration(node: S<'_>) -> bool {
@@ -507,8 +507,8 @@ fn misplaced_variadic_param<'a>(param: S<'a>) -> Option<S<'a>> {
 fn misplaced_splat_param<'a>(param: S<'a>) -> Option<S<'a>> {
     assert_last_in_list(is_splat_parameter_declaration, param)
 }
-fn misplaced_variadic_arg<'a>(args: S<'a>) -> Option<S<'a>> {
-    assert_last_in_list(is_variadic_expression, args)
+fn misplaced_splat_arg<'a>(args: S<'a>) -> Option<S<'a>> {
+    assert_last_in_list(is_splat_expression, args)
 }
 // If a list ends with a variadic parameter followed by a comma, return it
 fn ends_with_variadic_comma<'a>(params: S<'a>) -> Option<S<'a>> {
@@ -3183,7 +3183,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
             FunctionCallExpression(x) => {
                 let arg_list = &x.argument_list;
-                if let Some(h) = misplaced_variadic_arg(arg_list) {
+                if let Some(h) = misplaced_splat_arg(arg_list) {
                     self.errors.push(make_error_from_node(h, errors::error2033))
                 }
 

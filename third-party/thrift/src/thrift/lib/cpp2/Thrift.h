@@ -258,6 +258,16 @@ struct struct_private_access {
   static constexpr std::string_view __fbthrift_get_module_name() {
     return T::template __fbthrift_get_module_name<Args...>();
   }
+
+  template <typename T, typename Ident>
+  static constexpr bool is_deprecated_terse_field = requires {
+    std::declval<T>().__fbthrift_should_write_deprecated_terse_field(
+        folly::tag<Ident>);
+  };
+  template <typename T, typename Ident>
+  static bool should_write_deprecated_terse_field(const T& t) {
+    return t.__fbthrift_should_write_deprecated_terse_field(folly::tag<Ident>);
+  }
 };
 //  TODO(dokwon): Remove all usage of struct_private_access and standardize on
 //  private_access.

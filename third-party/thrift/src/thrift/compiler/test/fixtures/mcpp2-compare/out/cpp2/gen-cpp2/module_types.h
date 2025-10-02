@@ -1360,6 +1360,10 @@ class ASimpleStruct final  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::boolField>) const {
+    return this->__fbthrift_field_boolField != ::std::int64_t();
+  }
+
   friend class ::apache::thrift::Cpp2Ops<ASimpleStruct>;
   friend void swap(ASimpleStruct& a, ASimpleStruct& b);
 };
@@ -1493,6 +1497,10 @@ class ASimpleStructNoexcept final  {
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::boolField>) const {
+    return this->__fbthrift_field_boolField != ::std::int64_t();
+  }
 
   friend class ::apache::thrift::Cpp2Ops<ASimpleStructNoexcept>;
   friend void swap(ASimpleStructNoexcept& a, ASimpleStructNoexcept& b);
@@ -2166,6 +2174,38 @@ class MyStruct final  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyBoolField>) const {
+    return this->__fbthrift_field_MyBoolField != bool();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyIntField>) const {
+    return this->__fbthrift_field_MyIntField != static_cast<::std::int64_t>(12);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyStringField>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_MyStringField);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyStringField2>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_MyStringField2);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyBinaryField>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(this->__fbthrift_field_MyBinaryField);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyBinaryListField4>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::binary_t>>(this->__fbthrift_field_MyBinaryListField4);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyMapEnumAndInt>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>, ::apache::thrift::type::string_t>>(this->__fbthrift_field_MyMapEnumAndInt);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyCustomField>) const {
+    return !::apache::thrift::op::equal<::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>>>(this->__fbthrift_field_MyCustomField, ::some::valid::ns::CustomProtocolType());
+  }
+
   friend class ::apache::thrift::Cpp2Ops<MyStruct>;
   friend void swap(MyStruct& a, MyStruct& b);
 };
@@ -2462,6 +2502,14 @@ class SimpleUnion  {
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::intValue>) const {
+    return value_.intValue != ::std::int64_t();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::stringValue>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(value_.stringValue);
+  }
 
   friend class ::apache::thrift::Cpp2Ops<SimpleUnion>;
   friend void swap(SimpleUnion& a, SimpleUnion& b);
@@ -3463,6 +3511,54 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::code>) const {
+    return this->__fbthrift_field_code != ::std::int32_t();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::message2>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_message2);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::exception_list>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_exception_list);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::exception_set>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i64_t>>(this->__fbthrift_field_exception_set);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::exception_map>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>(this->__fbthrift_field_exception_map);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::enum_field>) const {
+    return this->__fbthrift_field_enum_field != ::some::valid::ns::MyEnumA();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::enum_container>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>>(this->__fbthrift_field_enum_container);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::a_set_struct>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>(this->__fbthrift_field_a_set_struct);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::a_union_list>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>(this->__fbthrift_field_a_union_list);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::union_typedef>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>(this->__fbthrift_field_union_typedef);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::a_union_typedef_list>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>>(this->__fbthrift_field_a_union_typedef_list);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyCustomField>) const {
+    return !::apache::thrift::op::equal<::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>>>(this->__fbthrift_field_MyCustomField, ::some::valid::ns::CustomProtocolType());
+  }
 
   friend class ::apache::thrift::Cpp2Ops<AnException>;
   friend void swap(AnException& a, AnException& b);
@@ -6093,6 +6189,94 @@ class ComplexUnion final  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::intValue>) const {
+    return value_.intValue != ::std::int64_t();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::opt_intValue>) const {
+    return value_.opt_intValue != ::std::int64_t();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::stringValue>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(value_.stringValue);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::opt_stringValue>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(value_.opt_stringValue);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::intValue2>) const {
+    return value_.intValue2 != ::std::int16_t();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::intValue3>) const {
+    return value_.intValue3 != ::std::int32_t();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::doubelValue>) const {
+    return value_.doubelValue != double();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::boolValue>) const {
+    return value_.boolValue != bool();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::union_list>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(value_.union_list);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::union_set>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i64_t>>(value_.union_set);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::union_map>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>(value_.union_map);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::opt_union_map>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>(value_.opt_union_map);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::enum_field>) const {
+    return value_.enum_field != ::some::valid::ns::MyEnumA();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::enum_container>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>>(value_.enum_container);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::a_set_struct>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>(value_.a_set_struct);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::a_union_list>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>(value_.a_union_list);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::a_union_typedef>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>(value_.a_union_typedef);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::a_union_typedef_list>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>>(value_.a_union_typedef_list);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyBinaryField>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(value_.MyBinaryField);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyBinaryField2>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(value_.MyBinaryField2);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyBinaryListField4>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::binary_t>>(value_.MyBinaryListField4);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyCustomField>) const {
+    return !::apache::thrift::op::equal<::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>>>(value_.MyCustomField, ::some::valid::ns::CustomProtocolType());
+  }
+
   friend class ::apache::thrift::Cpp2Ops<ComplexUnion>;
   friend void swap(ComplexUnion& a, ComplexUnion& b);
 };
@@ -6345,6 +6529,14 @@ class FOLLY_EXPORT AnotherException : public virtual apache::thrift::TException 
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::code>) const {
+    return this->__fbthrift_field_code != ::std::int32_t();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::message>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_message);
+  }
 
   friend class ::apache::thrift::Cpp2Ops<AnotherException>;
   friend void swap(AnotherException& a, AnotherException& b);
@@ -8042,6 +8234,118 @@ class containerStruct final  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldA>) const {
+    return this->fieldA != bool();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldB>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::bool_t>>(this->fieldB);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldC>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i32_t>>(this->fieldC);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldD>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->fieldD);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldE>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->fieldE);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldF>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::i32_t>>>(this->fieldF);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldG>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>>>(this->fieldG);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldH>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::i32_t>>>(this->fieldH);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldI>) const {
+    return this->fieldI != true;
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldJ>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>>(this->fieldJ);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldK>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::i32_t>>>>>(this->fieldK);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldL>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::set<::apache::thrift::type::set<::apache::thrift::type::bool_t>>>>(this->fieldL);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldM>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::set<::apache::thrift::type::list<::apache::thrift::type::i32_t>>, ::apache::thrift::type::map<::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::string_t>>, ::apache::thrift::type::string_t>>>(this->fieldM);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldN>) const {
+    return this->fieldN != ::some::valid::ns::simpleTypeDef();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldO>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::struct_t<::some::valid::ns::Empty>, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>>(this->fieldO);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldP>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::struct_t<::some::valid::ns::Empty>, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>>>>(this->fieldP);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldQ>) const {
+    return this->fieldQ != ::some::valid::ns::MyEnumA();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldR>) const {
+    return this->fieldR !=  ::some::valid::ns::MyEnumA::fieldB;
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldS>) const {
+    return this->fieldS !=  ::some::valid::ns::MyEnumA::fieldB;
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldT>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>>(this->fieldT);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldU>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>>(this->fieldU);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldW>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>(this->fieldW);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldY>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::union_t<::some::valid::ns::ComplexUnion>>>(this->fieldY);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldZ>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>(this->fieldZ);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldAA>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>>(this->fieldAA);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldAC>) const {
+    return this->fieldAC != ::some::valid::ns::MyEnumB();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldAD>) const {
+    return this->fieldAD != ::a::different::ns::AnEnum();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldAE>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>(this->fieldAE);
+  }
+
   friend class ::apache::thrift::Cpp2Ops<containerStruct>;
   friend void swap(containerStruct& a, containerStruct& b);
 };
@@ -8330,6 +8634,10 @@ class MyIncludedStruct final  {
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyIncludedInt>) const {
+    return this->__fbthrift_field_MyIncludedInt != static_cast<::a::different::ns::IncludedInt64>(42);
+  }
 
   friend class ::apache::thrift::Cpp2Ops<MyIncludedStruct>;
   friend void swap(MyIncludedStruct& a, MyIncludedStruct& b);
@@ -9561,6 +9869,82 @@ class AnnotatedStruct  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::container_with_ref>) const {
+    return this->container_with_ref && !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>(*this->container_with_ref);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::ref_type_const>) const {
+    return this->ref_type_const && !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>(*this->ref_type_const);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::base_type>) const {
+    return this->base_type != ::some::valid::ns::CppFakeI32();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::list_type>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<folly::small_vector<int64_t, 8 /* maxInline */>, ::apache::thrift::type::list<::apache::thrift::type::i64_t>>>(this->list_type);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::set_type>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<folly::sorted_vector_set<std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>(this->set_type);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::map_type>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<FakeMap, ::apache::thrift::type::map<::apache::thrift::type::i64_t, ::apache::thrift::type::double_t>>>(this->map_type);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::map_struct_type>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<std::unordered_map<std::string, containerStruct>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::struct_t<::some::valid::ns::containerStruct>>>>(this->map_struct_type);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::iobuf_type>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>>(this->iobuf_type);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::iobuf_ptr>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<std::unique_ptr<folly::IOBuf>, ::apache::thrift::type::binary_t>>(this->iobuf_ptr);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::list_i32_template>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<std::list<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>>(this->list_i32_template);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::list_string_template>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<std::deque<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>(this->list_string_template);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::set_template>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<folly::sorted_vector_set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>(this->set_template);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::map_template>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<folly::sorted_vector_map<::std::int64_t, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::i64_t, ::apache::thrift::type::string_t>>>(this->map_template);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::typedef_list_template>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<std::list<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>>(this->typedef_list_template);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::typedef_deque_template>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<std::deque<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>(this->typedef_deque_template);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::typedef_set_template>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<folly::sorted_vector_set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>(this->typedef_set_template);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::typedef_map_template>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<folly::sorted_vector_map<::std::int64_t, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::i64_t, ::apache::thrift::type::string_t>>>(this->typedef_map_template);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::iobuf_type_val>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>>(this->iobuf_type_val);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::iobuf_ptr_val>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<std::unique_ptr<folly::IOBuf>, ::apache::thrift::type::binary_t>>(this->iobuf_ptr_val);
+  }
+
   friend class ::apache::thrift::Cpp2Ops<AnnotatedStruct>;
   friend void swap(AnnotatedStruct& a, AnnotatedStruct& b);
 };
@@ -9759,6 +10143,14 @@ class ComplexContainerStruct final  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::map_of_iobufs>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>>>(this->__fbthrift_field_map_of_iobufs);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::map_of_iobuf_ptrs>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::cpp_type<std::unique_ptr<folly::IOBuf>, ::apache::thrift::type::binary_t>>>(this->__fbthrift_field_map_of_iobuf_ptrs);
+  }
+
   friend class ::apache::thrift::Cpp2Ops<ComplexContainerStruct>;
   friend void swap(ComplexContainerStruct& a, ComplexContainerStruct& b);
 };
@@ -9941,6 +10333,14 @@ class FloatStruct final  {
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::floatField>) const {
+    return this->__fbthrift_field_floatField != float();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::doubleField>) const {
+    return this->__fbthrift_field_doubleField != double();
+  }
 
   friend class ::apache::thrift::Cpp2Ops<FloatStruct>;
   friend void swap(FloatStruct& a, FloatStruct& b);
@@ -10216,6 +10616,14 @@ class FloatUnion final  {
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::floatSide>) const {
+    return value_.floatSide != float();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::doubleSide>) const {
+    return value_.doubleSide != double();
+  }
 
   friend class ::apache::thrift::Cpp2Ops<FloatUnion>;
   friend void swap(FloatUnion& a, FloatUnion& b);

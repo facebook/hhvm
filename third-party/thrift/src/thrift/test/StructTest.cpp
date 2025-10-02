@@ -743,6 +743,8 @@ bool serializedField(const T& t) {
 
 TEST(StructTest, TerseFields) {
   TerseFieldsWithCustomDefault terse;
+  // Other non-optional cpp.ref fields are initialized but exceptions aren't
+  terse.cpp_shared_ref_exception_field() = std::make_shared<NestedException>();
 
   static_assert(apache::thrift::detail::qualifier::
                     is_deprecated_terse_writes_with_custom_default_field<
@@ -825,9 +827,10 @@ TEST(StructTest, TerseFields) {
   terse.cpp_ref_struct_field() = nullptr;
   terse.cpp_ref_union_field() = nullptr;
   terse.cpp_ref_exception_field() = nullptr;
-  terse.cpp_shared_ref_struct_field() = nullptr;
-  terse.cpp_shared_ref_union_field() = nullptr;
-  terse.cpp_shared_ref_exception_field() = nullptr;
+  // Null non-optional cpp.ref is a bug so we have chosen not to preserve the
+  // behavior. terse.cpp_shared_ref_struct_field() = nullptr;
+  // terse.cpp_shared_ref_union_field() = nullptr;
+  // terse.cpp_shared_ref_exception_field() = nullptr;
 
   // Numeric fields are serialized if they don't equal custom default
   EXPECT_TRUE(serializedField<ident::bool_field>(terse));

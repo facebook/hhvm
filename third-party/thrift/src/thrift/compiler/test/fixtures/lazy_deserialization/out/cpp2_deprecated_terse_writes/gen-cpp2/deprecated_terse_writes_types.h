@@ -420,6 +420,22 @@ class TerseFoo final  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::field1>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::double_t>>(this->__fbthrift_field_field1);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::field2>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_field2);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::field3>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::double_t>>(this->__fbthrift_field_field3);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::field4>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_field4);
+  }
+
   friend class ::apache::thrift::Cpp2Ops<TerseFoo>;
   friend void swap(TerseFoo& a, TerseFoo& b);
 };
@@ -745,6 +761,22 @@ class TerseLazyFoo final  {
 
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::field1>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::double_t>>(this->__fbthrift_field_field1);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::field2>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_field2);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::field3>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::double_t>>(this->__fbthrift_field_field3);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::field4>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_field4);
+  }
 
   friend class ::apache::thrift::Cpp2Ops<TerseLazyFoo>;
   friend void swap(TerseLazyFoo& a, TerseLazyFoo& b);

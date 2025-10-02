@@ -381,6 +381,15 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
 {{> module_types_h/lazy_deserialization}}
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
+{{!}}
+{{#struct:fields}}
+{{#field:deprecated_terse_writes?}}{{#field:type}}{{^type:structured?}}
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::{{field:cpp_name}}>) const {
+    return {{> field/deprecated_terse_has_value}};
+  }
+{{/type:structured?}}{{/field:type}}{{/field:deprecated_terse_writes?}}
+{{/struct:fields}}
 
   friend class ::apache::thrift::Cpp2Ops<{{struct:cpp_underlying_name}}>;
   friend void swap({{struct:cpp_underlying_name}}& a, {{struct:cpp_underlying_name}}& b);

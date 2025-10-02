@@ -1115,6 +1115,58 @@ class EmptiableStruct final  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::bool_field>) const {
+    return this->__fbthrift_field_bool_field != bool();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::byte_field>) const {
+    return this->__fbthrift_field_byte_field != ::std::int8_t();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::short_field>) const {
+    return this->__fbthrift_field_short_field != ::std::int16_t();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::int_field>) const {
+    return this->__fbthrift_field_int_field != ::std::int32_t();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::long_field>) const {
+    return this->__fbthrift_field_long_field != ::std::int64_t();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::float_field>) const {
+    return this->__fbthrift_field_float_field != float();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::double_field>) const {
+    return this->__fbthrift_field_double_field != double();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::string_field>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_string_field);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::binary_field>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(this->__fbthrift_field_binary_field);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::enum_field>) const {
+    return this->__fbthrift_field_enum_field != ::apache::thrift::test::MyEnum();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::list_field>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::set_field>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i16_t>>(this->__fbthrift_field_set_field);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::map_field>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>>(this->__fbthrift_field_map_field);
+  }
+
   friend class ::apache::thrift::Cpp2Ops<EmptiableStruct>;
   friend void swap(EmptiableStruct& a, EmptiableStruct& b);
 };
@@ -1929,6 +1981,58 @@ class NotEmptiableStruct final  {
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::bool_field>) const {
+    return this->__fbthrift_field_bool_field != bool();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::byte_field>) const {
+    return this->__fbthrift_field_byte_field != ::std::int8_t();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::short_field>) const {
+    return this->__fbthrift_field_short_field != ::std::int16_t();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::int_field>) const {
+    return this->__fbthrift_field_int_field != ::std::int32_t();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::long_field>) const {
+    return this->__fbthrift_field_long_field != ::std::int64_t();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::float_field>) const {
+    return this->__fbthrift_field_float_field != float();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::double_field>) const {
+    return this->__fbthrift_field_double_field != double();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::string_field>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_string_field);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::binary_field>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(this->__fbthrift_field_binary_field);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::enum_field>) const {
+    return this->__fbthrift_field_enum_field != ::apache::thrift::test::MyEnum();
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::list_field>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::set_field>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i16_t>>(this->__fbthrift_field_set_field);
+  }
+
+  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::map_field>) const {
+    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>>(this->__fbthrift_field_map_field);
+  }
 
   friend class ::apache::thrift::Cpp2Ops<NotEmptiableStruct>;
   friend void swap(NotEmptiableStruct& a, NotEmptiableStruct& b);

@@ -59,8 +59,7 @@ template <class Tag, class T>
     const Tag&,
     const T& a,
     const T& b) {
-  static_assert(
-      type::is_thrift_type_tag_v<Tag>, "Tag must be a thrift type tag.");
+  static_assert(type::ThriftTypeTag<Tag>, "Tag must be a thrift type tag.");
   ::testing::AssertionResult result(false);
   if (facebook::thrift::debug_thrift_data_difference<Tag>(
           a,

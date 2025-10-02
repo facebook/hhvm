@@ -54,6 +54,9 @@ struct is_thrift_type_tag : is_concrete<Tag> {};
 template <typename Tag>
 constexpr bool is_thrift_type_tag_v = is_thrift_type_tag<Tag>::value;
 
+template <typename T>
+concept ThriftTypeTag = is_thrift_type_tag_v<T>;
+
 // If a given Thrift type tag is not concrete.
 //
 // For example:

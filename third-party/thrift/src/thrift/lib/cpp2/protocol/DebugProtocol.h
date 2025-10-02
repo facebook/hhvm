@@ -202,10 +202,9 @@ std::string debugString(
 
 // TODO: Replace `debugString()` with this function
 template <
-    class Tag,
+    type::ThriftTypeTag Tag,
     class...,
-    template <class> class Encode = op::detail::Encode,
-    typename = std::enable_if_t<type::is_thrift_type_tag_v<Tag>>>
+    template <class> class Encode = op::detail::Encode>
 std::string debugStringViaEncode(
     const type::native_type<Tag>& obj,
     DebugProtocolWriter::Options options = {}) {
@@ -219,11 +218,8 @@ std::string debugStringViaEncode(
   queue.appendToString(ret);
   return ret;
 }
-template <
-    class T,
-    class...,
-    template <class> class Encode = op::detail::Encode,
-    typename = std::enable_if_t<!type::is_thrift_type_tag_v<T>>>
+template <class T, class..., template <class> class Encode = op::detail::Encode>
+  requires(!type::ThriftTypeTag<T>)
 std::string debugStringViaEncode(
     const T& obj, DebugProtocolWriter::Options options = {}) {
   return debugStringViaEncode<type::infer_tag<T>>(obj, options);

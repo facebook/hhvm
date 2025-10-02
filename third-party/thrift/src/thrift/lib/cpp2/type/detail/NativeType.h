@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <map>
@@ -44,14 +45,14 @@ template <typename T, typename Tag>
 class Wrap;
 
 // All the NativeTypes for the given tag.
-template <typename Tag, typename = void>
+template <ThriftTypeTag Tag>
 struct NativeTypes {
   // No types to declare for non concrete types.
   static_assert(is_abstract_v<Tag>);
 };
 
 // Infers an appropriate type tag for given non-adapted native type.
-template <typename T, bool GuessStringTag, typename = void>
+template <typename T, bool GuessStringTag>
 struct InferTag;
 
 // Resolves the concrete template type when paramaterizing the given template,
@@ -104,9 +105,8 @@ template <bool GuessStringTag> // TODO: Consider also std::null_opt
 struct InferTag<std::nullptr_t, GuessStringTag> : StandardTag<void_t> {};
 template <typename T, size_t I = sizeof(T)>
 struct IntegerTag;
-template <typename T, bool GuessStringTag>
-struct InferTag<T, GuessStringTag, std::enable_if_t<folly::is_integral_v<T>>>
-    : IntegerTag<T> {};
+template <std::integral T, bool GuessStringTag>
+struct InferTag<T, GuessStringTag> : IntegerTag<T> {};
 
 // The native types for all primitive types.
 template <>
@@ -159,10 +159,8 @@ template <typename E>
 struct NativeTypes<enum_t<E>> : ConcreteType<E> {};
 
 template <typename T, bool GuessStringTag>
-struct InferTag<
-    T,
-    GuessStringTag,
-    std::enable_if_t<util::is_thrift_enum_v<T>>> {
+  requires util::is_thrift_enum_v<T>
+struct InferTag<T, GuessStringTag> {
   using type = type::enum_t<T>;
 };
 
@@ -183,23 +181,18 @@ template <typename VTag>
 struct NativeTypes<type::list<VTag>> : parameterized_type<std::vector, VTag> {};
 
 template <typename T, bool GuessStringTag>
-struct InferTag<
-    std::vector<T>,
-    GuessStringTag,
-    // Make InferTag SFINAE-friendly
-    folly::void_t<typename InferTag<T, GuessStringTag>::type>> {
+  requires requires { typename InferTag<T, GuessStringTag>::type; }
+struct InferTag<std::vector<T>, GuessStringTag> {
   using type = type::list<typename InferTag<T, GuessStringTag>::type>;
 };
 
 // Traits for sets.
 template <typename KTag>
 struct NativeTypes<set<KTag>> : parameterized_type<std::set, KTag> {};
+
 template <typename T, bool GuessStringTag>
-struct InferTag<
-    std::set<T>,
-    GuessStringTag,
-    // Make InferTag SFINAE-friendly
-    folly::void_t<typename InferTag<T, GuessStringTag>::type>> {
+  requires requires { typename InferTag<T, GuessStringTag>::type; }
+struct InferTag<std::set<T>, GuessStringTag> {
   using type = type::set<typename InferTag<T, GuessStringTag>::type>;
 };
 
@@ -207,14 +200,13 @@ struct InferTag<
 template <typename KTag, typename VTag>
 struct NativeTypes<map<KTag, VTag>> : parameterized_type<std::map, KTag, VTag> {
 };
+
 template <typename K, typename V, bool GuessStringTag>
-struct InferTag<
-    std::map<K, V>,
-    GuessStringTag,
-    folly::void_t<
-        // Make InferTag SFINAE-friendly
-        typename InferTag<K, GuessStringTag>::type,
-        typename InferTag<V, GuessStringTag>::type>> {
+  requires requires {
+    typename InferTag<K, GuessStringTag>::type;
+    typename InferTag<V, GuessStringTag>::type;
+  }
+struct InferTag<std::map<K, V>, GuessStringTag> {
   using type = type::map<
       typename InferTag<K, GuessStringTag>::type,
       typename InferTag<V, GuessStringTag>::type>;
@@ -262,32 +254,39 @@ struct NativeTypes<field<adapted<Adapter, Tag>, FieldContext<Struct, FieldId>>>
 
 // All generated structured types.
 template <typename T, bool GuessStringTag>
-struct InferTag<T, GuessStringTag, std::enable_if_t<is_thrift_union_v<T>>> {
+  requires is_thrift_union_v<T>
+struct InferTag<T, GuessStringTag> {
   using type = type::union_t<T>;
 };
+
 template <typename T, bool GuessStringTag>
-struct InferTag<T, GuessStringTag, std::enable_if_t<is_thrift_exception_v<T>>> {
+  requires is_thrift_exception_v<T>
+struct InferTag<T, GuessStringTag> {
   using type = type::exception_t<T>;
 };
+
 template <typename T, bool GuessStringTag>
-struct InferTag<T, GuessStringTag, std::enable_if_t<is_thrift_struct_v<T>>> {
+  requires is_thrift_struct_v<T>
+struct InferTag<T, GuessStringTag> {
   using type = type::struct_t<T>;
 };
 
 // Pass through type tags.
-template <typename Tag, bool GuessStringTag>
-struct InferTag<Tag, GuessStringTag, if_thrift_type_tag<Tag>> {
+template <ThriftTypeTag Tag, bool GuessStringTag>
+struct InferTag<Tag, GuessStringTag> {
   using type = Tag;
 };
 
 // For Wrap based adapted type, the adapter is InlineAdapter.
 template <typename T, bool GuessStringTag>
-struct InferTag<
-    T,
-    GuessStringTag,
-    std::enable_if_t<std::is_base_of<
-        Wrap<typename T::underlying_type, typename T::underlying_tag>,
-        T>::value>> {
+  requires requires {
+    typename T::underlying_type;
+    typename T::underlying_tag;
+  } &&
+    std::is_base_of_v<
+               Wrap<typename T::underlying_type, typename T::underlying_tag>,
+               T>
+struct InferTag<T, GuessStringTag> {
   using type = adapted<InlineAdapter<T>, typename T::underlying_tag>;
 };
 

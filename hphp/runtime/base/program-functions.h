@@ -93,7 +93,8 @@ void cli_client_thread_init();
 void cli_client_thread_exit();
 void hphp_session_init(Treadmill::SessionKind session_kind,
                        Transport* transport = nullptr,
-                       RequestId id = RequestId());
+                       RequestId id = RequestId(),
+                       RequestId root_req_id = RequestId());
 
 void invoke_prelude_script(
      const char* currentDir,

@@ -2957,14 +2957,15 @@ static bool hphp_warmup(ExecutionContext *context,
 
 void hphp_session_init(Treadmill::SessionKind session_kind,
                        Transport* transport,
-                       RequestId id) {
+                       RequestId id, 
+                       RequestId root_req_id) {
   if (id.unallocated()) id = RequestId::allocate();
   assertx(!*s_sessionInitialized);
   MemoryManager::requestInit();
   g_context.getCheck();
   AsioSession::Init();
   Socket::clearLastError();
-  RI().onSessionInit(id);
+  RI().onSessionInit(id, root_req_id);
   tl_heap->resetExternalStats();
   unitCacheClearSync();
 

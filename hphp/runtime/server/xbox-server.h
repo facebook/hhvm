@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/base/request-id.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/server/cli-server.h"
@@ -46,7 +47,7 @@ public:
    * Local tasklet for parallel processing.
    */
   static OptResource TaskStart(const String& msg, const String& reqInitDoc = "",
-      ServerTaskEvent<XboxServer, XboxTransport> *event = nullptr);
+      ServerTaskEvent<XboxServer, XboxTransport> *event = nullptr, RequestId m_root_req_id = RequestId());
   static bool TaskStatus(const OptResource& task);
   static int TaskResult(const OptResource& task, int timeout_ms, Variant *ret);
   static int TaskResult(XboxTransport* const job, int timeout_ms, Variant *ret);
@@ -78,6 +79,7 @@ extern const StaticString s_xbox;
 struct XboxTransport final : Transport, Synchronizable {
   explicit XboxTransport(
     const folly::StringPiece message,
+    const RequestId root_req_id,
     const folly::StringPiece reqInitDoc = "");
 
   timespec getStartTimer() const { return m_queueTime; }

@@ -134,10 +134,14 @@ void RequestInfo::InvokeOOMKiller(int maxToKill) {
   OOMKillerInvokeCounter->addValue(1);
 }
 
-void RequestInfo::onSessionInit(RequestId id) {
+void RequestInfo::onSessionInit(RequestId id, RequestId root_req_id) {
   assertx(!id.unallocated());
   assertx(m_id.unallocated());
   m_id = id;
+  // If the root_req_id is not set, it means the current request is the
+  // first request in the session. In this case, we set the root_req_id to
+  // the current request id.
+  m_root_req_id = root_req_id.unallocated() ? id : root_req_id;
   m_reqInjectionData.onSessionInit();
   m_coverage.onSessionInit();
 }

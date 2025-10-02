@@ -63,7 +63,7 @@ XboxRequestHandler::~XboxRequestHandler() {
 }
 
 void XboxRequestHandler::initState(RequestId requestId, Transport* transport) {
-  hphp_session_init(Treadmill::SessionKind::RpcRequest, transport, requestId);
+  hphp_session_init(Treadmill::SessionKind::RpcRequest, transport, requestId, transport->getRootRequestId());
   m_context = g_context.getNoCheck();
   if (!is_any_cli_mode() && !m_cli) {
     m_context->obStart(uninit_null(),
@@ -107,6 +107,8 @@ void XboxRequestHandler::handleRequest(Transport *transport) {
   GetAccessLog().onNewRequest();
   transport->enableCompression();
   InitFiniNode::RequestStart();
+
+  Logger::Verbose("Handling request %ld, associated root request %ld", requestId.id(), transport->getRootRequestId().id());
 
   ServerStatsHelper ssh("all", ServerStatsHelper::TRACK_MEMORY);
   Logger::Verbose("receiving %s", transport->getCommand().c_str());

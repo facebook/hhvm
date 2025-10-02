@@ -1449,7 +1449,11 @@ Variant HHVM_FUNCTION(fb_call_user_func_array_async, const String& initialDoc,
   if (msg.empty()) {
     return init_null();
   }
-  return XboxServer::TaskStart(internal_serialize(msg), initialDoc);
+  
+  RequestInfo *ti = RequestInfo::s_requestInfo.getNoCheck();
+  RequestId root_req_id = ti->getRootRequestId();
+  root_req_id = root_req_id.unallocated() ? ti->m_id : root_req_id;
+  return XboxServer::TaskStart(internal_serialize(msg), initialDoc, nullptr, root_req_id);
 }
 
 Variant HHVM_FUNCTION(fb_check_user_func_async, const OptResource& handle) {
@@ -1476,7 +1480,11 @@ Variant HHVM_FUNCTION(fb_gen_user_func_array, const String& initialDoc,
   event = new ServerTaskEvent<XboxServer, XboxTransport>();
 
   try {
-    XboxServer::TaskStart(internal_serialize(msg), initialDoc, event);
+    RequestInfo *ti = RequestInfo::s_requestInfo.getNoCheck();
+    RequestId root_req_id = ti->getRootRequestId();
+    root_req_id = root_req_id.unallocated() ? ti->m_id : root_req_id;
+    
+    XboxServer::TaskStart(internal_serialize(msg), initialDoc, event, root_req_id);
   } catch (...) {
     event->abandon();
     throw;

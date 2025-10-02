@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/runtime/base/debuggable.h"
+#include "hphp/runtime/base/request-id.h"
 #include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-string.h"
@@ -151,6 +152,12 @@ public:
   StructuredLogEntry* createStructuredLogEntry();
   StructuredLogEntry* getStructuredLogEntry();
   void resetStructuredLogEntry();
+
+  /*
+   * Manage root request id.
+   */
+  RequestId getRootRequestId() const { return m_root_req_id; }
+  void setRootRequestId(RequestId id) { m_root_req_id = id; }
 
   ///////////////////////////////////////////////////////////////////////////
   // Functions sub-classes have to implement.
@@ -567,6 +574,8 @@ protected:
   ThreadType m_threadType{ThreadType::RequestThread};
 
   Optional<rqtrace::Trace> m_requestTrace;
+
+  RequestId m_root_req_id;
 
   // helpers
   void parseGetParams();

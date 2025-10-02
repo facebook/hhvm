@@ -38,12 +38,14 @@ const StaticString s_xbox("xbox");
 using std::string;
 
 XboxTransport::XboxTransport(const folly::StringPiece message,
+                             RequestId root_req_id,
                              const folly::StringPiece reqInitDoc /* = "" */)
     : m_refCount(0), m_done(false), m_code(0), m_event(nullptr) {
   Timer::GetMonotonicTime(m_queueTime);
 
   m_message.append(message.data(), message.size());
   m_reqInitDoc.append(reqInitDoc.data(), reqInitDoc.size());
+  setRootRequestId(root_req_id);
   disableCompression(); // so we don't have to decompress during sendImpl()
 }
 
@@ -249,8 +251,8 @@ static bool isLocalHost(const String& host) {
 struct XboxTask : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(XboxTask)
 
-  XboxTask(const String& message, const String& reqInitDoc = "") {
-    m_job = new XboxTransport(message.toCppString(), reqInitDoc.toCppString());
+  XboxTask(const String& message, const String& reqInitDoc = "", const RequestId root_req_id = RequestId()) {
+    m_job = new XboxTransport(message.toCppString(), root_req_id, reqInitDoc.toCppString());
     m_job->incRefCount();
     if (cli_supports_clone()) {
       m_job->setCliContext(cli_clone_context());
@@ -277,9 +279,11 @@ IMPLEMENT_RESOURCE_ALLOCATION(XboxTask)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-OptResource XboxServer::TaskStart(const String& msg,
-                               const String& reqInitDoc /* = "" */,
-  ServerTaskEvent<XboxServer, XboxTransport> *event /* = nullptr */) {
+OptResource XboxServer::TaskStart(
+  const String& msg,
+  const String& reqInitDoc /* = "" */,
+  ServerTaskEvent<XboxServer, XboxTransport> *event /* = nullptr */, 
+  RequestId root_req_id /* = RequestId() */) {
   static auto xboxOverflowCounter =
     ServiceData::createTimeSeries("xbox_overflow",
                                   { ServiceData::StatsType::COUNT });
@@ -293,7 +297,7 @@ OptResource XboxServer::TaskStart(const String& msg,
          Cfg::Xbox::ServerInfoThreadCount ||
          s_dispatcher->getQueuedJobs() <
          Cfg::Xbox::ServerInfoMaxQueueLength)) {
-      auto task = req::make<XboxTask>(msg, reqInitDoc);
+      auto task = req::make<XboxTask>(msg, reqInitDoc, root_req_id);
       XboxTransport *job = task->getJob();
       job->incRefCount(); // paired with worker's decRefCount()
       xboxQueuedCounter->addValue(1);

@@ -92,7 +92,7 @@ struct RequestInfo {
    */
   void threadInit();
 
-  void onSessionInit(RequestId id);
+  void onSessionInit(RequestId id, RequestId root_req_id = RequestId());
   void onSessionExit();
 
   /*
@@ -106,6 +106,13 @@ struct RequestInfo {
    * Setting the pending exception.
    */
   void setPendingException(Exception*);
+
+  void setRootRequestId(RequestId root_req_id) {
+    m_root_req_id = root_req_id;
+  }
+  RequestId getRootRequestId() {
+    return m_root_req_id;
+  }
 
   static bool valid(RequestInfo*);
 
@@ -123,6 +130,12 @@ struct RequestInfo {
 
   /* Unique request ID */
   RequestId m_id;
+
+  /* 
+   * Request ID of the original hhvmwork request ID 
+   * from which the current request was recursively triggered 
+   */
+  RequestId m_root_req_id;
 
   RequestInjectionData m_reqInjectionData;
 

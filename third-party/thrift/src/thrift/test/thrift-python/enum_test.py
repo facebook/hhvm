@@ -134,8 +134,12 @@ class ThriftPython_EnumClass_Test(unittest.TestCase):
     def test_reversed(self) -> None:
         reversed_it = reversed(enums.Color)
         self.assertIs(iter(reversed_it), reversed_it)
-        # BAD: The following should not raise (i.e., __reversed__ should be supported)!
-        with self.assertRaises(KeyError):
+
+        self.assertIs(next(reversed_it), enums.Color.green)
+        self.assertIs(next(reversed_it), enums.Color.blue)
+        self.assertIs(next(reversed_it), enums.Color.red)
+
+        with self.assertRaises(StopIteration):
             next(reversed_it)
 
     def test_set_or_del_attr(self) -> None:

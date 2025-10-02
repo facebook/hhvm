@@ -2540,6 +2540,9 @@ class EnumMeta(type):
     def __iter__(cls):
         return iter(cls.__members__.values())
 
+    def __reversed__(cls):
+        return reversed(cls.__members__.values())
+
     def __setattr__(cls, name, _):
         raise AttributeError(f"'{cls.__qualname__}' has no attribute '{name}'")
 

@@ -5,13 +5,13 @@ Invalid return type (Typing[4110])
   File "expr_tree.php", line 146, characters 40-45:
   But got `string`
 ERROR: File "shape_at_wrong.php", line 18, characters 5-41:
-Too many arguments (expected 2 but got 3) (Typing[4105])
+Too many positional arguments (expected 2 but got 3) (Typing[4105])
   File "Shapes.hhi", line 83, characters 28-29:
   Definition is here
 ERROR: File "shape_at_wrong.php", line 21, characters 33-38:
 Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
 ERROR: File "shape_at_wrong.php", line 24, characters 5-31:
-Too few arguments (required 2 but got 1) (Typing[4104])
+Too few positional arguments (required 2 but got 1) (Typing[4104])
   File "Shapes.hhi", line 83, characters 28-29:
   Definition is here
 ERROR: File "shape_at_wrong.php", line 27, characters 33-35:

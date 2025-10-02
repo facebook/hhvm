@@ -3,7 +3,7 @@ Missing required named arguments: x, y, z (Typing[4499])
   File "named_params_arity_kitchen_sink.php", line 4, characters 10-14:
   Definition is here
 ERROR: File "named_params_arity_kitchen_sink.php", line 8, characters 3-9:
-Too few arguments (required 1 but got 0) (Typing[4104])
+Too few positional arguments (required 1 but got 0) (Typing[4104])
   File "named_params_arity_kitchen_sink.php", line 4, characters 10-14:
   Definition is here
 ERROR: File "named_params_arity_kitchen_sink.php", line 9, characters 3-6:
@@ -15,7 +15,7 @@ Missing required named arguments: x, y, z (Typing[4499])
   File "named_params_arity_kitchen_sink.php", line 4, characters 10-14:
   Definition is here
 ERROR: File "named_params_arity_kitchen_sink.php", line 10, characters 3-27:
-Too few arguments (required 1 but got 0) (Typing[4104])
+Too few positional arguments (required 1 but got 0) (Typing[4104])
   File "named_params_arity_kitchen_sink.php", line 4, characters 10-14:
   Definition is here
 ERROR: File "named_params_arity_kitchen_sink.php", line 10, characters 3-27:
@@ -27,7 +27,7 @@ Missing required named arguments: x, y, z (Typing[4499])
   File "named_params_arity_kitchen_sink.php", line 4, characters 10-14:
   Definition is here
 ERROR: File "named_params_arity_kitchen_sink.php", line 11, characters 3-35:
-Too many arguments (expected 1 but got 2) (Typing[4105])
+Too many positional arguments (expected 1 but got 2) (Typing[4105])
   File "named_params_arity_kitchen_sink.php", line 4, characters 10-14:
   Definition is here
 ERROR: File "named_params_arity_kitchen_sink.php", line 11, characters 3-35:

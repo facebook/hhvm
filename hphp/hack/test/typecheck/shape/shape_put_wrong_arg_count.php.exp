@@ -5,6 +5,6 @@ Invalid return type (Typing[4138])
   File "shape_put_wrong_arg_count.php", line 3, characters 32-38:
   It is incompatible with a shape that does not allow unknown fields.
 ERROR: File "shape_put_wrong_arg_count.php", line 4, characters 18-22:
-Too few arguments (required 3 but got 0) (Typing[4104])
+Too few positional arguments (required 3 but got 0) (Typing[4104])
   File "Shapes.hhi", line 108, characters 28-30:
   Definition is here

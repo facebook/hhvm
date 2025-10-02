@@ -2,7 +2,7 @@ Code actions available:
 ------------------------------------------
 Extract into variable (CodeActionKind: "refactor")
 Extract into method (CodeActionKind: "refactor")
-Devmate Quick Fix - Too few arguments (required 1 but got 0) (CodeActionKind: "quickfix")
-Devmate Agent Fix - Too few arguments (required 1 but got 0) (CodeActionKind: "quickfix")
+Devmate Quick Fix - Too few positional arguments (required 1 but got 0) (CodeActionKind: "quickfix")
+Devmate Agent Fix - Too few positional arguments (required 1 but got 0) (CodeActionKind: "quickfix")
 
 No code action titles match prefix: Inline method

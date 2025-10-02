@@ -11,7 +11,7 @@ Invalid argument (Typing[4110])
   File "named_params_errors.php", line 10, characters 28-36:
   But got `string`
 ERROR: File "named_params_errors.php", line 13, characters 3-26:
-Too few arguments (required 1 but got 0) (Typing[4104])
+Too few positional arguments (required 1 but got 0) (Typing[4104])
   File "named_params_errors.php", line 3, characters 10-19:
   Definition is here
 ERROR: File "named_params_errors.php", line 16, characters 3-32:

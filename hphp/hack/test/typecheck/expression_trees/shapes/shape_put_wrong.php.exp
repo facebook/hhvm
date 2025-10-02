@@ -5,11 +5,11 @@ Invalid return type (Typing[4110])
   File "expr_tree.php", line 143, characters 38-41:
   But got `bool`
 ERROR: File "shape_put_wrong.php", line 19, characters 5-47:
-Too many arguments (expected 3 but got 4) (Typing[4105])
+Too many positional arguments (expected 3 but got 4) (Typing[4105])
   File "Shapes.hhi", line 108, characters 28-30:
   Definition is here
 ERROR: File "shape_put_wrong.php", line 22, characters 5-32:
-Too few arguments (required 3 but got 1) (Typing[4104])
+Too few positional arguments (required 3 but got 1) (Typing[4104])
   File "Shapes.hhi", line 108, characters 28-30:
   Definition is here
 ERROR: File "shape_put_wrong.php", line 25, characters 34-39:

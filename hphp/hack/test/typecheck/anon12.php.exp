@@ -9,6 +9,6 @@ Invalid return type (Typing[4110])
   File "anon12.php", line 13, characters 22-22:
   But got `int`
 ERROR: File "anon12.php", line 16, characters 10-13:
-Too few arguments (required 1 but got 0) (Typing[4104])
+Too few positional arguments (required 1 but got 0) (Typing[4104])
   File "anon12.php", line 13, characters 8-48:
   Definition is here

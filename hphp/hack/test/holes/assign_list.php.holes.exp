@@ -1,6 +1,6 @@
 Errors:
   [17:3-42] Invalid assignment
-  [17:3-19] Too few arguments (required 3 but got 2)
+  [17:3-19] Too few positional arguments (required 3 but got 2)
   [7:37-47] Definition is here
 [(Fun
     { fd_namespace =

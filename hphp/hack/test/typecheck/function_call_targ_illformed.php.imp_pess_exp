@@ -5,7 +5,7 @@ Some type arguments violate their constraints (Typing[4323])
   File "function_call_targ_illformed.php", line 8, characters 7-9:
   Type `Foo` is not a subtype of `dynamic` under dynamic-aware subtyping
 ERROR: File "function_call_targ_illformed.php", line 8, characters 3-12:
-Too few arguments (required 1 but got 0) (Typing[4104])
+Too few positional arguments (required 1 but got 0) (Typing[4104])
   File "function_call_targ_illformed.php", line 5, characters 10-12:
   Definition is here
 ERROR: File "function_call_targ_illformed.php", line 8, characters 7-9:

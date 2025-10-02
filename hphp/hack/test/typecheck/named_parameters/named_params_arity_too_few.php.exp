@@ -23,6 +23,6 @@ Missing required named argument: x (Typing[4499])
   File "named_params_arity_too_few.php", line 5, characters 10-16:
   Definition is here
 ERROR: File "named_params_arity_too_few.php", line 18, characters 3-22:
-Too few arguments (required 1 but got 0) (Typing[4104])
+Too few positional arguments (required 1 but got 0) (Typing[4104])
   File "named_params_arity_too_few.php", line 4, characters 10-14:
   Definition is here

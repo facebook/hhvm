@@ -1,5 +1,5 @@
 ERROR: File "type_arguments.php", line 20, characters 3-37:
-Too many arguments (expected 1 but got 2) (Typing[4105])
+Too many positional arguments (expected 1 but got 2) (Typing[4105])
   File "printf.hhi", line 122, characters 12-30:
   Definition is here
 ERROR: File "type_arguments.php", line 20, characters 31-34:

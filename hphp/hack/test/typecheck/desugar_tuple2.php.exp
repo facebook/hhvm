@@ -1,6 +1,6 @@
 ERROR: File "desugar_tuple2.php", line 13, characters 5-25:
 Invalid assignment (Typing[4105])
   File "desugar_tuple2.php", line 13, characters 5-16:
-  Too many arguments (expected 2 but got 3)
+  Too many positional arguments (expected 2 but got 3)
   File "desugar_tuple2.php", line 12, characters 14-28:
   Definition is here

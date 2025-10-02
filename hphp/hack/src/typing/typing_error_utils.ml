@@ -35,7 +35,7 @@ module Common = struct
       lazy
         ( pos,
           Printf.sprintf
-            "Too many arguments (expected %d but got %d)"
+            "Too many positional arguments (expected %d but got %d)"
             expected
             actual )
     and reasons = lazy [(decl_pos, "Definition is here")] in
@@ -46,7 +46,7 @@ module Common = struct
       lazy
         ( pos,
           Printf.sprintf
-            "Too few arguments (required %d but got %d)"
+            "Too few positional arguments (required %d but got %d)"
             expected
             actual )
     and reasons = lazy [(decl_pos, "Definition is here")] in

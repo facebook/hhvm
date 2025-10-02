@@ -1,7 +1,7 @@
 ERROR: File "splat_destructure_tuple.php", line 6, characters 8-15:
 Invalid argument (Typing[4104])
   File "splat_destructure_tuple.php", line 6, characters 8-15:
-  Too few arguments (required 2 but got 1)
+  Too few positional arguments (required 2 but got 1)
   File "splat_destructure_tuple.php", line 3, characters 10-10:
   Definition is here
 ERROR: File "splat_destructure_tuple.php", line 11, characters 8-45:

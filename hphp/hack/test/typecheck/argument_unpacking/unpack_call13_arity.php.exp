@@ -1,19 +1,19 @@
 ERROR: File "unpack_call13_arity.php", line 14, characters 20-26:
 Invalid argument (Typing[4105])
   File "unpack_call13_arity.php", line 14, characters 20-26:
-  Too many arguments (expected 1 but got 2)
+  Too many positional arguments (expected 1 but got 2)
   File "unpack_call13_arity.php", line 36, characters 10-22:
   Definition is here
 ERROR: File "unpack_call13_arity.php", line 15, characters 23-29:
 Invalid argument (Typing[4105])
   File "unpack_call13_arity.php", line 15, characters 23-29:
-  Too many arguments (expected 2 but got 3)
+  Too many positional arguments (expected 2 but got 3)
   File "unpack_call13_arity.php", line 37, characters 10-22:
   Definition is here
 ERROR: File "unpack_call13_arity.php", line 16, characters 23-29:
 Invalid argument (Typing[4104])
   File "unpack_call13_arity.php", line 16, characters 23-29:
-  Too few arguments (required 3 but got 2)
+  Too few positional arguments (required 3 but got 2)
   File "unpack_call13_arity.php", line 42, characters 10-25:
   Definition is here
 ERROR: File "unpack_call13_arity.php", line 27, characters 20-24:

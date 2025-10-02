@@ -11,7 +11,7 @@ Invalid argument (Typing[4110])
   File "function_type_hint_optional_args.php", line 17, characters 9-13:
   But got `bool`
 ERROR: File "function_type_hint_optional_args.php", line 19, characters 3-21:
-Too many arguments (expected 3 but got 4) (Typing[4105])
+Too many positional arguments (expected 3 but got 4) (Typing[4105])
   File "function_type_hint_optional_args.php", line 11, characters 3-55:
   Definition is here
 ERROR: File "function_type_hint_optional_args.php", line 38, characters 11-19:

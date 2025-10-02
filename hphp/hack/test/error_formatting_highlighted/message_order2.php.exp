@@ -12,7 +12,7 @@ message_order2.php:7:16
     8 |   takes_one_arg(123, 1); // error 4105
     9 | }
 
-error: Typing[4105] Too many arguments (expected 1 but got 2) [1]
+error: Typing[4105] Too many positional arguments (expected 1 but got 2) [1]
 -> Definition is here [2]
 
 message_order2.php:8:3

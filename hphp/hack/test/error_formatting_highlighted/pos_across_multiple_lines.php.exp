@@ -12,7 +12,7 @@ pos_across_multiple_lines.php:6:10
     7 | }
     8 | 
 
-error: Typing[4105] Too many arguments (expected 0 but got 3) [1]
+error: Typing[4105] Too many positional arguments (expected 0 but got 3) [1]
 -> Definition is here [2]
 
 pos_across_multiple_lines.php:15:3

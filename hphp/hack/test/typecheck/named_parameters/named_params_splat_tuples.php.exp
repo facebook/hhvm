@@ -5,6 +5,6 @@ Missing required named argument: n (Typing[4499])
 ERROR: File "named_params_splat_tuples.php", line 28, characters 16-24:
 Invalid argument (Typing[4105])
   File "named_params_splat_tuples.php", line 28, characters 16-24:
-  Too many arguments (expected 3 but got 6)
+  Too many positional arguments (expected 3 but got 6)
   File "named_params_splat_tuples.php", line 6, characters 10-13:
   Definition is here

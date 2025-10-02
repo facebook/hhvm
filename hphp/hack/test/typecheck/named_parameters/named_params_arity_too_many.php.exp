@@ -1,0 +1,28 @@
+ERROR: File "named_params_arity_too_many.php", line 8, characters 3-19:
+Unexpected named argument: extra1 (Typing[4500])
+  File "named_params_arity_too_many.php", line 3, characters 10-11:
+  Definition is here
+ERROR: File "named_params_arity_too_many.php", line 9, characters 3-24:
+Unexpected named argument: extra1 (Typing[4500])
+  File "named_params_arity_too_many.php", line 3, characters 10-11:
+  Definition is here
+ERROR: File "named_params_arity_too_many.php", line 10, characters 3-46:
+Unexpected named arguments: extra1, extra2 (Typing[4500])
+  File "named_params_arity_too_many.php", line 4, characters 10-14:
+  Definition is here
+ERROR: File "named_params_arity_too_many.php", line 11, characters 3-36:
+Unexpected named argument: extra1 (Typing[4500])
+  File "named_params_arity_too_many.php", line 4, characters 10-14:
+  Definition is here
+ERROR: File "named_params_arity_too_many.php", line 12, characters 3-46:
+Unexpected named arguments: extra1, extra2 (Typing[4500])
+  File "named_params_arity_too_many.php", line 5, characters 10-16:
+  Definition is here
+ERROR: File "named_params_arity_too_many.php", line 16, characters 3-26:
+Too many arguments (expected 1 but got 3) (Typing[4105])
+  File "named_params_arity_too_many.php", line 3, characters 10-11:
+  Definition is here
+ERROR: File "named_params_arity_too_many.php", line 17, characters 3-30:
+Too many arguments (expected 1 but got 2) (Typing[4105])
+  File "named_params_arity_too_many.php", line 4, characters 10-14:
+  Definition is here

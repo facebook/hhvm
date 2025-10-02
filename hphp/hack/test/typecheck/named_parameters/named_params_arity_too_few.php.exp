@@ -1,0 +1,28 @@
+ERROR: File "named_params_arity_too_few.php", line 9, characters 3-13:
+Missing required named argument: x (Typing[4499])
+  File "named_params_arity_too_few.php", line 3, characters 10-11:
+  Definition is here
+ERROR: File "named_params_arity_too_few.php", line 10, characters 3-13:
+Missing required named argument: x (Typing[4499])
+  File "named_params_arity_too_few.php", line 3, characters 10-11:
+  Definition is here
+ERROR: File "named_params_arity_too_few.php", line 11, characters 3-11:
+Missing required named arguments: x, y, z (Typing[4499])
+  File "named_params_arity_too_few.php", line 4, characters 10-14:
+  Definition is here
+ERROR: File "named_params_arity_too_few.php", line 12, characters 3-21:
+Missing required named argument: z (Typing[4499])
+  File "named_params_arity_too_few.php", line 4, characters 10-14:
+  Definition is here
+ERROR: File "named_params_arity_too_few.php", line 13, characters 3-21:
+Missing required named argument: z (Typing[4499])
+  File "named_params_arity_too_few.php", line 4, characters 10-14:
+  Definition is here
+ERROR: File "named_params_arity_too_few.php", line 14, characters 3-29:
+Missing required named argument: x (Typing[4499])
+  File "named_params_arity_too_few.php", line 5, characters 10-16:
+  Definition is here
+ERROR: File "named_params_arity_too_few.php", line 18, characters 3-22:
+Too few arguments (required 1 but got 0) (Typing[4104])
+  File "named_params_arity_too_few.php", line 4, characters 10-14:
+  Definition is here

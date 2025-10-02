@@ -5590,6 +5590,64 @@ end = struct
     in
     create ~code:Error_code.FunVariadicityHhVsPhp56 ~reasons ()
 
+  let fun_extra_named_args pos decl_pos extra_names =
+    let names_str = String.concat ~sep:", " extra_names in
+    let reasons =
+      lazy
+        [
+          ( pos,
+            Printf.sprintf
+              "Unexpected named parameter%s: %s"
+              (if List.length extra_names > 1 then
+                "s"
+              else
+                "")
+              names_str );
+          (decl_pos, "Because of this definition");
+        ]
+    in
+    create ~code:Error_code.FunTooManyArgs ~reasons ()
+
+  let fun_missing_named_args pos decl_pos missing_names =
+    let names_str = String.concat ~sep:", " missing_names in
+    let reasons =
+      lazy
+        [
+          ( pos,
+            Printf.sprintf
+              "Missing required named parameter%s: %s"
+              (if List.length missing_names > 1 then
+                "s"
+              else
+                "")
+              names_str );
+          (decl_pos, "Because of this definition");
+        ]
+    in
+    create ~code:Error_code.FunTooFewArgs ~reasons ()
+
+  let fun_param_required_but_expected_optional pos decl_pos param_names =
+    let names_str = String.concat ~sep:", " param_names in
+    let reasons =
+      lazy
+        [
+          ( pos,
+            Printf.sprintf
+              "Named parameter%s %s %s required but expected to be optional"
+              (if List.length param_names > 1 then
+                "s"
+              else
+                "")
+              names_str
+              (if List.length param_names > 1 then
+                "are"
+              else
+                "is") );
+          (decl_pos, "Because of this definition");
+        ]
+    in
+    create ~code:Error_code.BadMethodOverride ~reasons ()
+
   let type_arity_mismatch pos actual decl_pos expected =
     let reasons =
       lazy
@@ -6584,6 +6642,13 @@ end = struct
       Eval_result.single (fun_unexpected_nonvariadic pos decl_pos)
     | Fun_variadicity_hh_vs_php56 { pos; decl_pos } ->
       Eval_result.single (fun_variadicity_hh_vs_php56 pos decl_pos)
+    | Fun_extra_named_args { pos; decl_pos; extra_names } ->
+      Eval_result.single (fun_extra_named_args pos decl_pos extra_names)
+    | Fun_missing_named_args { pos; decl_pos; missing_names } ->
+      Eval_result.single (fun_missing_named_args pos decl_pos missing_names)
+    | Fun_param_required_but_expected_optional { pos; decl_pos; param_names } ->
+      Eval_result.single
+        (fun_param_required_but_expected_optional pos decl_pos param_names)
     | Type_arity_mismatch { pos; actual; decl_pos; expected } ->
       Eval_result.single (type_arity_mismatch pos actual decl_pos expected)
     | Violated_constraint { cstrs; ty_sub; ty_sup; is_coeffect } ->

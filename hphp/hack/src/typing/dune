@@ -225,6 +225,7 @@
   typing_generic_rules
   typing_lenv
   typing_local_ops
+  typing_named_params
   typing_native
   typing_param
   typing_per_cont_ops

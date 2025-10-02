@@ -1718,6 +1718,21 @@ and Secondary : sig
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
       }
+    | Fun_extra_named_args of {
+        pos: Pos_or_decl.t;
+        decl_pos: Pos_or_decl.t;
+        extra_names: string list;
+      }
+    | Fun_missing_named_args of {
+        pos: Pos_or_decl.t;
+        decl_pos: Pos_or_decl.t;
+        missing_names: string list;
+      }
+    | Fun_param_required_but_expected_optional of {
+        pos: Pos_or_decl.t;
+        decl_pos: Pos_or_decl.t;
+        param_names: string list;
+      }
     | Required_field_is_optional of {
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
@@ -2025,6 +2040,21 @@ end = struct
     | Fun_variadicity_hh_vs_php56 of {
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
+      }
+    | Fun_extra_named_args of {
+        pos: Pos_or_decl.t;
+        decl_pos: Pos_or_decl.t;
+        extra_names: string list;
+      }
+    | Fun_missing_named_args of {
+        pos: Pos_or_decl.t;
+        decl_pos: Pos_or_decl.t;
+        missing_names: string list;
+      }
+    | Fun_param_required_but_expected_optional of {
+        pos: Pos_or_decl.t;
+        decl_pos: Pos_or_decl.t;
+        param_names: string list;
       }
     | Required_field_is_optional of {
         pos: Pos_or_decl.t;

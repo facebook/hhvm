@@ -1917,6 +1917,47 @@ end = struct
                         }))
       else
         Ok ()
+    and named_params_err =
+      let Typing_named_params.{ extra_names; missing_names; too_optional_names }
+          =
+        Typing_named_params.find_names_mismatch
+          ~actual_ft:ft_sub
+          ~expected_ft:ft_super
+      in
+      if
+        not
+          (List.is_empty extra_names
+          && List.is_empty missing_names
+          && List.is_empty too_optional_names)
+      then
+        Error
+          (Option.map
+             subtype_env.Subtype_env.on_error
+             ~f:
+               Typing_error.(
+                 fun on_error ->
+                   let apply_if_nonempty names f : Error.t list =
+                     if List.is_empty names then
+                       []
+                     else
+                       [apply_reasons ~on_error (f ())]
+                   in
+                   multiple
+                     (apply_if_nonempty extra_names (fun () ->
+                          Secondary.Fun_extra_named_args
+                            { extra_names; pos = p_sub; decl_pos = p_super })
+                     @ apply_if_nonempty missing_names (fun () ->
+                           Secondary.Fun_missing_named_args
+                             { missing_names; pos = p_sub; decl_pos = p_super })
+                     @ apply_if_nonempty too_optional_names (fun () ->
+                           Secondary.Fun_param_required_but_expected_optional
+                             {
+                               param_names = too_optional_names;
+                               pos = p_sub;
+                               decl_pos = p_super;
+                             }))))
+      else
+        Ok ()
     and variadic_err =
       let ft_sub_variadic =
         if get_ft_variadic ft_sub then
@@ -1988,7 +2029,7 @@ end = struct
           package_err;
           return_disposable_err;
           arity_required_err;
-          (* TODO(named_params): check named parameter names (not just arity of positional params) *)
+          named_params_err;
           variadic_err;
         ]
     in
@@ -2082,95 +2123,11 @@ end = struct
       (r_sub, idx_sub, fn_params_sub, variadic_sub_ty)
       (r_super, idx_super, fn_params_super, variadic_super_ty)
       env =
-    match (fn_params_sub, fn_params_super) with
-    (* When either list runs out, we still have to typecheck that
-       the remaining portion sub/super types with the other's variadic.
-       For example, if
-       ChildClass {
-         public function a(int $x = 0, string ... $args) // superl = [int], super_var = string
-       }
-       overrides
-       ParentClass {
-         public function a(string ... $args) // subl = [], sub_var = string
-       }
-       , there should be an error because the first argument will be checked against
-       int, not string that is, ChildClass::a("hello") would crash,
-       but ParentClass::a("hello") wouldn't.
-
-       Similarly, if the other list is longer, aka
-       ChildClass  extends ParentClass {
-         public function a(mixed ... $args) // superl = [], super_var = mixed
-       }
-       overrides
-       ParentClass {
-         //subl = [string], sub_var = string
-         public function a(string $x = 0, string ... $args)
-       }
-       It should also check that string is a subtype of mixed.
+    (* We use this for matching parameters fn_param_sub and fn_param_super
+       * Below we match using two separate strategies: by name (for named params) and by position
     *)
-    | ([{ fp_type = ty_sub; _ }], _) when variadic_sub_ty ->
-      simplify_subtype_params_with_variadic
-        ~subtype_env
-        (r_super, idx_super, fn_params_super)
-        (r_sub, idx_sub, ty_sub)
-        env
-    | (_, [{ fp_type = ty_super; _ }]) when variadic_super_ty ->
-      simplify_supertype_params_with_variadic
-        ~subtype_env
-        (r_sub, idx_sub, fn_params_sub)
-        (r_super, idx_super, ty_super)
-        env
-    (* Two splat parameters are just compared directly *)
-    | ( [({ fp_type = ty_sub; _ } as fn_param_sub)],
-        [({ fp_type = ty_super; _ } as fn_param_super)] )
-      when get_fp_splat fn_param_sub && get_fp_splat fn_param_super ->
-      env
-      |> simplify
-           ~subtype_env
-           ~this_ty:None
-           ~lhs:{ sub_supportdyn = None; ty_sub = ty_super }
-           ~rhs:
-             { super_like = false; super_supportdyn = false; ty_super = ty_sub }
-    (* If supertype is a splat parameter then package up remaining parameters in subtype as
-     * a tuple and compare that
-     *)
-    | (_, [({ fp_type = ty_super; _ } as fn_param_super)])
-      when get_fp_splat fn_param_super ->
-      let tuple_ty_sub =
-        params_to_tuple (Reason.to_pos r_sub) variadic_sub_ty fn_params_sub
-      in
-      env
-      |> simplify
-           ~subtype_env
-           ~this_ty:None
-           ~lhs:{ sub_supportdyn = None; ty_sub = ty_super }
-           ~rhs:
-             {
-               super_like = false;
-               super_supportdyn = false;
-               ty_super = tuple_ty_sub;
-             }
-    (* If subtype is a splat parameter then package up remaining parameters in supertype as
-     * a tuple and compare that
-     *)
-    | ([({ fp_type = ty_sub; _ } as fn_param_sub)], _)
-      when get_fp_splat fn_param_sub ->
-      let tuple_ty =
-        params_to_tuple
-          (Reason.to_pos r_super)
-          variadic_super_ty
-          fn_params_super
-      in
-      env
-      |> simplify
-           ~subtype_env
-           ~this_ty:None
-           ~lhs:{ sub_supportdyn = None; ty_sub = tuple_ty }
-           ~rhs:
-             { super_like = false; super_supportdyn = false; ty_super = ty_sub }
-    | ([], _) -> valid env
-    | (_, []) -> valid env
-    | (fn_param_sub :: fn_params_sub, fn_param_super :: fn_params_super) ->
+    let simplify_subtype_for_matching_parameters
+        subtype_env fn_param_sub fn_param_super env =
       let { fp_type = ty_sub; _ } = fn_param_sub
       and { fp_type = ty_super; _ } = fn_param_super in
 
@@ -2248,7 +2205,6 @@ end = struct
           (fun env -> subty_prop_contra true env &&& subty_prop_co)
         | _ -> (fun env -> subty_prop_contra false env)
       in
-
       (* Check that the calling conventions of the params are compatible. *)
       env
       |> simplify_param_modes ~subtype_env ~fn_param_sub ~fn_param_super
@@ -2258,11 +2214,139 @@ end = struct
             ~fn_param_sub
             ~fn_param_super
       &&& subty_prop
-      &&& simplify_subtype_params
-            ~subtype_env
-            ~for_override
-            (r_sub, idx_sub + 1, fn_params_sub, variadic_sub_ty)
-            (r_super, idx_super + 1, fn_params_super, variadic_super_ty)
+    in
+    let partition_by_namedness =
+      List.partition_tf ~f:(fun fp ->
+          Option.is_some (Named_params.name_of_named_param fp))
+    in
+    let (named_params_sub, positional_params_sub) =
+      partition_by_namedness fn_params_sub
+    in
+    let (named_params_super, positional_params_super) =
+      partition_by_namedness fn_params_super
+    in
+    (* Handle named parameters *)
+    let (env, prop) =
+      let name_to_named_param_super =
+        List.fold named_params_super ~init:String.Map.empty ~f:(fun acc fp ->
+            match Named_params.name_of_named_param fp with
+            | Some name -> begin
+              match Map.add ~key:name ~data:fp acc with
+              | `Ok acc -> acc
+              | `Duplicate -> acc
+            end
+            | None -> acc)
+      in
+      List.fold
+        named_params_sub
+        ~init:(env, TL.valid)
+        ~f:(fun (env, prop) fp_sub ->
+          let open Option.Let_syntax in
+          Option.value ~default:(env, prop)
+          @@ let* name = fp_sub.fp_name in
+             let+ fp_super = Map.find name_to_named_param_super name in
+             (* we can safely ignore when no matching named parameter is found, since arity checks happen elsewhere *)
+             (env, prop)
+             &&& simplify_subtype_for_matching_parameters
+                   subtype_env
+                   fp_sub
+                   fp_super)
+    in
+    (env, prop)
+    &&&
+    match (positional_params_sub, positional_params_super) with
+    (* When either list runs out, we still have to typecheck that
+       the remaining portion sub/super types with the other's variadic.
+       For example, if
+       ChildClass {
+         public function a(int $x = 0, string ... $args) // superl = [int], super_var = string
+       }
+       overrides
+       ParentClass {
+         public function a(string ... $args) // subl = [], sub_var = string
+       }
+       , there should be an error because the first argument will be checked against
+       int, not string that is, ChildClass::a("hello") would crash,
+       but ParentClass::a("hello") wouldn't.
+
+       Similarly, if th{ subtype_env with Subtype_env.ignore_likes = delay_push }e other list is longer, aka
+       ChildClass  extends ParentClass {
+         public function a(mixed ... $args) // superl = [], super_var = mixed
+       }
+       overrides
+       ParentClass {
+         //subl = [string], sub_var = string
+         public function a(string $x = 0, string ... $args)
+       }
+       It should also check that string is a subtype of mixed.
+    *)
+    | ([{ fp_type = ty_sub; _ }], _) when variadic_sub_ty ->
+      simplify_subtype_params_with_variadic
+        ~subtype_env
+        (r_super, idx_super, fn_params_super)
+        (r_sub, idx_sub, ty_sub)
+    | (_, [{ fp_type = ty_super; _ }]) when variadic_super_ty ->
+      simplify_supertype_params_with_variadic
+        ~subtype_env
+        (r_sub, idx_sub, fn_params_sub)
+        (r_super, idx_super, ty_super)
+    (* Two splat parameters are just compared directly *)
+    | ( [({ fp_type = ty_sub; _ } as fn_param_sub)],
+        [({ fp_type = ty_super; _ } as fn_param_super)] )
+      when get_fp_splat fn_param_sub && get_fp_splat fn_param_super ->
+      simplify
+        ~subtype_env
+        ~this_ty:None
+        ~lhs:{ sub_supportdyn = None; ty_sub = ty_super }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super = ty_sub }
+    (* If supertype is a splat parameter then package up remaining parameters in subtype as
+     * a tuple and compare that
+     *)
+    | (_, [({ fp_type = ty_super; _ } as fn_param_super)])
+      when get_fp_splat fn_param_super ->
+      let tuple_ty_sub =
+        params_to_tuple (Reason.to_pos r_sub) variadic_sub_ty fn_params_sub
+      in
+      simplify
+        ~subtype_env
+        ~this_ty:None
+        ~lhs:{ sub_supportdyn = None; ty_sub = ty_super }
+        ~rhs:
+          {
+            super_like = false;
+            super_supportdyn = false;
+            ty_super = tuple_ty_sub;
+          }
+    (* If subtype is a splat parameter then package up remaining parameters in supertype as
+     * a tuple and compare that
+     *)
+    | ([({ fp_type = ty_sub; _ } as fn_param_sub)], _)
+      when get_fp_splat fn_param_sub ->
+      let tuple_ty =
+        params_to_tuple
+          (Reason.to_pos r_super)
+          variadic_super_ty
+          fn_params_super
+      in
+      simplify
+        ~subtype_env
+        ~this_ty:None
+        ~lhs:{ sub_supportdyn = None; ty_sub = tuple_ty }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super = ty_sub }
+    | ([], _) -> valid
+    | (_, []) -> valid
+    | (fn_param_sub :: fn_params_sub, fn_param_super :: fn_params_super) ->
+      fun env ->
+        simplify_subtype_for_matching_parameters
+          subtype_env
+          fn_param_sub
+          fn_param_super
+          env
+        &&& simplify_subtype_params
+              ~subtype_env
+              ~for_override
+              (r_sub, idx_sub + 1, fn_params_sub, variadic_sub_ty)
+              (r_super, idx_super + 1, fn_params_super, variadic_super_ty)
 
   and simplify_funs
       ~subtype_env

@@ -373,6 +373,8 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 }
 
 func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata.RequestRpcMetadata, observer ServerObserver, functionName string) (*protocolBuffer, error) {
+	readStartTime := time.Now()
+
 	dataBytes, err := rocket.MaybeDecompress(payloadDataBytes, metadata.GetCompression())
 	if err != nil {
 		return nil, fmt.Errorf("payload data bytes decompression failed: %w", err)
@@ -397,5 +399,10 @@ func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata
 	if err := protocol.WriteMessageBegin(messageName, messageType, 0); err != nil {
 		return nil, err
 	}
+
+	// Record time spent reading/demarshaling
+	readDuration := time.Since(readStartTime)
+	observer.TimeReadUsForFunction(functionName, readDuration)
+
 	return protocol, nil
 }

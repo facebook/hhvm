@@ -695,7 +695,6 @@ class TerseLazyFoo final  {
   uint32_t write(Protocol_* prot_) const;
 
  private:
- private:
   mutable struct __fbthrift_SerializedData {
     folly::IOBuf field3;
     folly::IOBuf field4;
@@ -713,10 +712,36 @@ class TerseLazyFoo final  {
   ::std::vector<double>& __fbthrift_read_field_field3();
   void __fbthrift_read_field_field3_slow() const;
   template<class ProtocolReader> void __fbthrift_read_field_field3_impl() const;
+  template <typename Protocol_>
+  std::optional<uint32_t> __fbthrift_try_write_lazy_field(folly::tag_t<::apache::thrift::ident::field3>, Protocol_* prot_) const {
+    if constexpr (Protocol_::kHasIndexSupport()) {
+      if (prot_->protocolType() == __fbthrift_protocol_) {
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
+        if (__fbthrift_isDeserialized_.field3.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
+          return prot_->writeRaw(__fbthrift_serializedData_.field3);
+        }
+      }
+    }
+    std::as_const(*this).__fbthrift_read_field_field3();
+    return std::nullopt;
+  }
   const ::std::vector<::std::int32_t>& __fbthrift_read_field_field4() const;
   ::std::vector<::std::int32_t>& __fbthrift_read_field_field4();
   void __fbthrift_read_field_field4_slow() const;
   template<class ProtocolReader> void __fbthrift_read_field_field4_impl() const;
+  template <typename Protocol_>
+  std::optional<uint32_t> __fbthrift_try_write_lazy_field(folly::tag_t<::apache::thrift::ident::field4>, Protocol_* prot_) const {
+    if constexpr (Protocol_::kHasIndexSupport()) {
+      if (prot_->protocolType() == __fbthrift_protocol_) {
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
+        if (__fbthrift_isDeserialized_.field4.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
+          return prot_->writeRaw(__fbthrift_serializedData_.field4);
+        }
+      }
+    }
+    std::as_const(*this).__fbthrift_read_field_field4();
+    return std::nullopt;
+  }
 
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
@@ -1319,7 +1344,6 @@ class TerseOptionalLazyFoo final  {
   uint32_t write(Protocol_* prot_) const;
 
  private:
- private:
   mutable struct __fbthrift_SerializedData {
     folly::IOBuf field3;
     folly::IOBuf field4;
@@ -1337,10 +1361,36 @@ class TerseOptionalLazyFoo final  {
   ::std::vector<double>& __fbthrift_read_field_field3();
   void __fbthrift_read_field_field3_slow() const;
   template<class ProtocolReader> void __fbthrift_read_field_field3_impl() const;
+  template <typename Protocol_>
+  std::optional<uint32_t> __fbthrift_try_write_lazy_field(folly::tag_t<::apache::thrift::ident::field3>, Protocol_* prot_) const {
+    if constexpr (Protocol_::kHasIndexSupport()) {
+      if (prot_->protocolType() == __fbthrift_protocol_) {
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
+        if (__fbthrift_isDeserialized_.field3.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
+          return prot_->writeRaw(__fbthrift_serializedData_.field3);
+        }
+      }
+    }
+    std::as_const(*this).__fbthrift_read_field_field3();
+    return std::nullopt;
+  }
   const ::std::vector<::std::int32_t>& __fbthrift_read_field_field4() const;
   ::std::vector<::std::int32_t>& __fbthrift_read_field_field4();
   void __fbthrift_read_field_field4_slow() const;
   template<class ProtocolReader> void __fbthrift_read_field_field4_impl() const;
+  template <typename Protocol_>
+  std::optional<uint32_t> __fbthrift_try_write_lazy_field(folly::tag_t<::apache::thrift::ident::field4>, Protocol_* prot_) const {
+    if constexpr (Protocol_::kHasIndexSupport()) {
+      if (prot_->protocolType() == __fbthrift_protocol_) {
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
+        if (__fbthrift_isDeserialized_.field4.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
+          return prot_->writeRaw(__fbthrift_serializedData_.field4);
+        }
+      }
+    }
+    std::as_const(*this).__fbthrift_read_field_field4();
+    return std::nullopt;
+  }
 
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);

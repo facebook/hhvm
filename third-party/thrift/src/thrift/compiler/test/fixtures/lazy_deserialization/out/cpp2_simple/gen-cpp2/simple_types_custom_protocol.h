@@ -636,16 +636,10 @@ uint32_t LazyFoo::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 3, kPrevFieldId>(*prot_, "field3", previousFieldHasValue);
     previousFieldHasValue = true;
     indexWriter.recordFieldStart();
-    if constexpr (Protocol_::kHasIndexSupport()) {
-      if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
-        if (__fbthrift_isDeserialized_.field3.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
-          xfer += prot_->writeRaw(__fbthrift_serializedData_.field3);
-          goto written_lazy_field_field3;
-        }
-      }
+    if (auto read_ = __fbthrift_try_write_lazy_field(folly::tag<::apache::thrift::ident::field3>, prot_)) {
+      xfer += *read_;
+      goto written_lazy_field_field3;
     }
-    std::as_const(*this).__fbthrift_read_field_field3();
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::write(*prot_, this->__fbthrift_field_field3);
     written_lazy_field_field3:
     indexWriter.template recordFieldEnd<decltype(this->__fbthrift_field_field3)>(::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>{}, 3);
@@ -656,16 +650,10 @@ uint32_t LazyFoo::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 4, kPrevFieldId>(*prot_, "field4", previousFieldHasValue);
     previousFieldHasValue = true;
     indexWriter.recordFieldStart();
-    if constexpr (Protocol_::kHasIndexSupport()) {
-      if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
-        if (__fbthrift_isDeserialized_.field4.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
-          xfer += prot_->writeRaw(*__fbthrift_serializedData_.field4);
-          goto written_lazy_field_field4;
-        }
-      }
+    if (auto read_ = __fbthrift_try_write_lazy_field(folly::tag<::apache::thrift::ident::field4>, prot_)) {
+      xfer += *read_;
+      goto written_lazy_field_field4;
     }
-    std::as_const(*this).__fbthrift_read_field_field4();
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::write(*prot_, this->__fbthrift_field_field4);
     written_lazy_field_field4:
     indexWriter.template recordFieldEnd<decltype(this->__fbthrift_field_field4)>(::apache::thrift::type_class::list<::apache::thrift::type_class::integral>{}, 4);
@@ -1243,16 +1231,10 @@ uint32_t OptionalLazyFoo::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 3, kPrevFieldId>(*prot_, "field3", previousFieldHasValue);
     previousFieldHasValue = true;
     indexWriter.recordFieldStart();
-    if constexpr (Protocol_::kHasIndexSupport()) {
-      if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
-        if (__fbthrift_isDeserialized_.field3.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
-          xfer += prot_->writeRaw(__fbthrift_serializedData_.field3);
-          goto written_lazy_field_field3;
-        }
-      }
+    if (auto read_ = __fbthrift_try_write_lazy_field(folly::tag<::apache::thrift::ident::field3>, prot_)) {
+      xfer += *read_;
+      goto written_lazy_field_field3;
     }
-    std::as_const(*this).__fbthrift_read_field_field3();
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::write(*prot_, this->__fbthrift_field_field3);
     written_lazy_field_field3:
     indexWriter.template recordFieldEnd<decltype(this->__fbthrift_field_field3)>(::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>{}, 3);
@@ -1265,16 +1247,10 @@ uint32_t OptionalLazyFoo::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 4, kPrevFieldId>(*prot_, "field4", previousFieldHasValue);
     previousFieldHasValue = true;
     indexWriter.recordFieldStart();
-    if constexpr (Protocol_::kHasIndexSupport()) {
-      if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
-        if (__fbthrift_isDeserialized_.field4.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
-          xfer += prot_->writeRaw(__fbthrift_serializedData_.field4);
-          goto written_lazy_field_field4;
-        }
-      }
+    if (auto read_ = __fbthrift_try_write_lazy_field(folly::tag<::apache::thrift::ident::field4>, prot_)) {
+      xfer += *read_;
+      goto written_lazy_field_field4;
     }
-    std::as_const(*this).__fbthrift_read_field_field4();
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::write(*prot_, this->__fbthrift_field_field4);
     written_lazy_field_field4:
     indexWriter.template recordFieldEnd<decltype(this->__fbthrift_field_field4)>(::apache::thrift::type_class::list<::apache::thrift::type_class::integral>{}, 4);
@@ -1614,16 +1590,10 @@ uint32_t OptionalBoxedLazyFoo::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 3, kPrevFieldId>(*prot_, "field3", previousFieldHasValue);
     previousFieldHasValue = true;
     indexWriter.recordFieldStart();
-    if constexpr (Protocol_::kHasIndexSupport()) {
-      if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
-        if (__fbthrift_isDeserialized_.field3.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
-          xfer += prot_->writeRaw(__fbthrift_serializedData_.field3);
-          goto written_lazy_field_field3;
-        }
-      }
+    if (auto read_ = __fbthrift_try_write_lazy_field(folly::tag<::apache::thrift::ident::field3>, prot_)) {
+      xfer += *read_;
+      goto written_lazy_field_field3;
     }
-    std::as_const(*this).__fbthrift_read_field_field3();
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::write(*prot_, *this->__fbthrift_field_field3);
     written_lazy_field_field3:
     indexWriter.template recordFieldEnd<decltype(*this->__fbthrift_field_field3)>(::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>{}, 3);
@@ -1637,16 +1607,10 @@ uint32_t OptionalBoxedLazyFoo::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 4, kPrevFieldId>(*prot_, "field4", previousFieldHasValue);
     previousFieldHasValue = true;
     indexWriter.recordFieldStart();
-    if constexpr (Protocol_::kHasIndexSupport()) {
-      if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
-        if (__fbthrift_isDeserialized_.field4.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
-          xfer += prot_->writeRaw(__fbthrift_serializedData_.field4);
-          goto written_lazy_field_field4;
-        }
-      }
+    if (auto read_ = __fbthrift_try_write_lazy_field(folly::tag<::apache::thrift::ident::field4>, prot_)) {
+      xfer += *read_;
+      goto written_lazy_field_field4;
     }
-    std::as_const(*this).__fbthrift_read_field_field4();
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::write(*prot_, *this->__fbthrift_field_field4);
     written_lazy_field_field4:
     indexWriter.template recordFieldEnd<decltype(*this->__fbthrift_field_field4)>(::apache::thrift::type_class::list<::apache::thrift::type_class::integral>{}, 4);
@@ -2068,16 +2032,10 @@ uint32_t LazyCppRef::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 1, kPrevFieldId>(*prot_, "field1", previousFieldHasValue);
     previousFieldHasValue = true;
     indexWriter.recordFieldStart();
-    if constexpr (Protocol_::kHasIndexSupport()) {
-      if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
-        if (__fbthrift_isDeserialized_.field1.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
-          xfer += prot_->writeRaw(__fbthrift_serializedData_.field1);
-          goto written_lazy_field_field1;
-        }
-      }
+    if (auto read_ = __fbthrift_try_write_lazy_field(folly::tag<::apache::thrift::ident::field1>, prot_)) {
+      xfer += *read_;
+      goto written_lazy_field_field1;
     }
-    std::as_const(*this).__fbthrift_read_field_field1();
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::write(*prot_, *this->__fbthrift_field_field1);
     written_lazy_field_field1:
     indexWriter.template recordFieldEnd<decltype(*this->__fbthrift_field_field1)>(::apache::thrift::type_class::list<::apache::thrift::type_class::integral>{}, 1);
@@ -2091,16 +2049,10 @@ uint32_t LazyCppRef::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 2, kPrevFieldId>(*prot_, "field2", previousFieldHasValue);
     previousFieldHasValue = true;
     indexWriter.recordFieldStart();
-    if constexpr (Protocol_::kHasIndexSupport()) {
-      if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
-        if (__fbthrift_isDeserialized_.field2.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
-          xfer += prot_->writeRaw(__fbthrift_serializedData_.field2);
-          goto written_lazy_field_field2;
-        }
-      }
+    if (auto read_ = __fbthrift_try_write_lazy_field(folly::tag<::apache::thrift::ident::field2>, prot_)) {
+      xfer += *read_;
+      goto written_lazy_field_field2;
     }
-    std::as_const(*this).__fbthrift_read_field_field2();
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::write(*prot_, *this->__fbthrift_field_field2);
     written_lazy_field_field2:
     indexWriter.template recordFieldEnd<decltype(*this->__fbthrift_field_field2)>(::apache::thrift::type_class::list<::apache::thrift::type_class::integral>{}, 2);
@@ -2114,16 +2066,10 @@ uint32_t LazyCppRef::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 3, kPrevFieldId>(*prot_, "field3", previousFieldHasValue);
     previousFieldHasValue = true;
     indexWriter.recordFieldStart();
-    if constexpr (Protocol_::kHasIndexSupport()) {
-      if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
-        if (__fbthrift_isDeserialized_.field3.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
-          xfer += prot_->writeRaw(__fbthrift_serializedData_.field3);
-          goto written_lazy_field_field3;
-        }
-      }
+    if (auto read_ = __fbthrift_try_write_lazy_field(folly::tag<::apache::thrift::ident::field3>, prot_)) {
+      xfer += *read_;
+      goto written_lazy_field_field3;
     }
-    std::as_const(*this).__fbthrift_read_field_field3();
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::write(*prot_, *this->__fbthrift_field_field3);
     written_lazy_field_field3:
     indexWriter.template recordFieldEnd<decltype(*this->__fbthrift_field_field3)>(::apache::thrift::type_class::list<::apache::thrift::type_class::integral>{}, 3);
@@ -2136,16 +2082,10 @@ uint32_t LazyCppRef::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 4, kPrevFieldId>(*prot_, "field4", previousFieldHasValue);
     previousFieldHasValue = true;
     indexWriter.recordFieldStart();
-    if constexpr (Protocol_::kHasIndexSupport()) {
-      if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
-        if (__fbthrift_isDeserialized_.field4.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
-          xfer += prot_->writeRaw(__fbthrift_serializedData_.field4);
-          goto written_lazy_field_field4;
-        }
-      }
+    if (auto read_ = __fbthrift_try_write_lazy_field(folly::tag<::apache::thrift::ident::field4>, prot_)) {
+      xfer += *read_;
+      goto written_lazy_field_field4;
     }
-    std::as_const(*this).__fbthrift_read_field_field4();
     if (this->__fbthrift_field_field4) {
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int32_t>>::write(*prot_, *this->__fbthrift_field_field4);
     } else {

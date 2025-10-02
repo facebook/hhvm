@@ -24,18 +24,10 @@
 {{/struct:union?}}
 {{#field:lazy?}}
     indexWriter.recordFieldStart();
-{{/field:lazy?}}
-{{#field:lazy?}}
-    if constexpr (Protocol_::kHasIndexSupport()) {
-      if (prot_->protocolType() == __fbthrift_protocol_) {
-        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
-        if (__fbthrift_isDeserialized_.{{field:cpp_name}}.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
-          xfer += prot_->writeRaw({{#field:lazy_ref?}}*{{/field:lazy_ref?}}__fbthrift_serializedData_.{{field:cpp_name}});
-          goto written_lazy_field_{{field:cpp_name}};
-        }
-      }
+    if (auto read_ = __fbthrift_try_write_lazy_field(folly::tag<::apache::thrift::ident::{{field:cpp_name}}>, prot_)) {
+      xfer += *read_;
+      goto written_lazy_field_{{field:cpp_name}};
     }
-    std::as_const(*this).__fbthrift_read_field_{{field:cpp_name}}();
 {{/field:lazy?}}
 {{^field:non_opt_cpp_ref?}}
 {{#field:use_op_encode?}}

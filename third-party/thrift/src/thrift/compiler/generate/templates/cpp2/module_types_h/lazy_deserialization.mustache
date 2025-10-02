@@ -15,7 +15,6 @@
   limitations under the License.
 
 }}{{#struct:lazy_fields?}}
- private:
   {{! Stores serialized data of each lazy field }}
   mutable struct __fbthrift_SerializedData {
 {{#struct:fields}}{{#field:lazy?}}
@@ -40,6 +39,19 @@
   {{field:cpp_storage_type}}& __fbthrift_read_field_{{field:cpp_name}}();
   void __fbthrift_read_field_{{field:cpp_name}}_slow() const;
   template<class ProtocolReader> void __fbthrift_read_field_{{field:cpp_name}}_impl() const;
+  template <typename Protocol_>
+  std::optional<uint32_t> __fbthrift_try_write_lazy_field(folly::tag_t<::apache::thrift::ident::{{field:cpp_name}}>, Protocol_* prot_) const {
+    if constexpr (Protocol_::kHasIndexSupport()) {
+      if (prot_->protocolType() == __fbthrift_protocol_) {
+        auto lock = std::shared_lock(__fbthrift_deserializationMutex_);
+        if (__fbthrift_isDeserialized_.{{field:cpp_name}}.load() == ::apache::thrift::detail::LazyDeserializationState::UNTAINTED) {
+          return prot_->writeRaw({{#field:lazy_ref?}}*{{/field:lazy_ref?}}__fbthrift_serializedData_.{{field:cpp_name}});
+        }
+      }
+    }
+    std::as_const(*this).__fbthrift_read_field_{{field:cpp_name}}();
+    return std::nullopt;
+  }
 {{/field:lazy?}}{{/struct:fields}}
 
 {{/struct:lazy_fields?}}

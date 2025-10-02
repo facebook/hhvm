@@ -640,6 +640,33 @@ TEST(field_ref_test, subscript_map) {
   EXPECT_EQ(rmap[key()], 44);
 }
 
+TEST(field_ref_test, as_const) {
+  TestStruct s;
+  auto name_ref = s.name();
+  static_assert(
+      std::is_same_v<decltype(name_ref)::reference_type, std::string&>);
+  auto const_name_ref = name_ref.as_const();
+  static_assert(std::is_same_v<
+                decltype(const_name_ref)::reference_type,
+                const std::string&>);
+
+  auto opt_name_ref = s.opt_name();
+  static_assert(
+      std::is_same_v<decltype(opt_name_ref)::reference_type, std::string&>);
+  auto const_opt_name_ref = opt_name_ref.as_const();
+  static_assert(std::is_same_v<
+                decltype(const_opt_name_ref)::reference_type,
+                const std::string&>);
+
+  auto terse_name_ref = s.terse_name();
+  static_assert(
+      std::is_same_v<decltype(terse_name_ref)::reference_type, std::string&>);
+  auto const_terse_name_ref = terse_name_ref.as_const();
+  static_assert(std::is_same_v<
+                decltype(const_terse_name_ref)::reference_type,
+                const std::string&>);
+}
+
 template <typename T>
 class optional_field_ref_typed_test : public testing::Test {
  public:

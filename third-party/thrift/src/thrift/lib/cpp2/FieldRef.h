@@ -215,6 +215,11 @@ class field_ref {
     return emplace<typename U::value_type>(ilist, static_cast<Args&&>(args)...);
   }
 
+  /// Produces a field_ref<const T>
+  FOLLY_ERASE auto as_const() const {
+    return field_ref<folly::like_t<T, const value_type>>{*this};
+  }
+
  private:
   value_type& value_;
   BitRef bitref_;
@@ -511,6 +516,11 @@ class optional_field_ref {
       emplace(
           std::initializer_list<typename U::value_type> ilist, Args&&... args) {
     return emplace<typename U::value_type>(ilist, static_cast<Args&&>(args)...);
+  }
+
+  /// Produces a optional_field_ref<const T>
+  FOLLY_ERASE auto as_const() const {
+    return optional_field_ref<folly::like_t<T, const value_type>>{*this};
   }
 
  private:
@@ -814,6 +824,11 @@ class optional_boxed_field_ref {
     return *value_;
   }
 
+  /// Produces a optional_boxed_field_ref<const T>
+  FOLLY_ERASE auto as_const() const {
+    return optional_boxed_field_ref<folly::like_t<T, const value_type>>{*this};
+  }
+
  private:
   FOLLY_ERASE void throw_if_unset() const {
     if (!has_value()) {
@@ -1087,6 +1102,11 @@ class intern_boxed_field_ref {
     return value_.value();
   }
 
+  /// Produces a intern_boxed_field_ref<const T>
+  FOLLY_ERASE auto as_const() const {
+    return intern_boxed_field_ref<folly::like_t<T, const value_type>>{*this};
+  }
+
  private:
   boxed_value_type& value_;
   get_default_t get_default_;
@@ -1285,6 +1305,12 @@ class terse_intern_boxed_field_ref {
     value_.reset(
         std::make_unique<value_type>(ilist, static_cast<Args&&>(args)...));
     return value_.value();
+  }
+
+  /// Produces a terse_intern_boxed_field_ref<const T>
+  FOLLY_ERASE auto as_const() const {
+    return terse_intern_boxed_field_ref<folly::like_t<T, const value_type>>{
+        *this};
   }
 
  private:
@@ -1654,6 +1680,11 @@ class required_field_ref {
     return value_ = value_type(ilist, static_cast<Args&&>(args)...);
   }
 
+  /// Produces a required_field_ref<const T>
+  FOLLY_ERASE auto as_const() const {
+    return required_field_ref<folly::like_t<T, const value_type>>{*this};
+  }
+
  private:
   value_type& value_;
 };
@@ -1904,6 +1935,11 @@ class union_field_ref {
     return get_value();
   }
 
+  /// Produces a union_field_ref<const T>
+  FOLLY_ERASE auto as_const() const {
+    return union_field_ref<folly::like_t<T, const value_type>>{*this};
+  }
+
  private:
   FOLLY_ERASE void throw_if_unset() const {
     if (!has_value()) {
@@ -2138,6 +2174,11 @@ class terse_field_ref {
   emplace(std::initializer_list<U> ilist, Args&&... args) {
     value_ = value_type(ilist, static_cast<Args&&>(args)...);
     return value_;
+  }
+
+  /// Produces a terse_field_ref<const T>
+  FOLLY_ERASE auto as_const() const {
+    return terse_field_ref<folly::like_t<T, const value_type>>{*this};
   }
 
  private:

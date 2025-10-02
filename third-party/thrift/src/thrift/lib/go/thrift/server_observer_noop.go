@@ -59,3 +59,4 @@ func (*noopServerObserver) ProcessedFunction(_ string)              {}
 func (*noopServerObserver) UndeclaredExceptionForFunction(_ string) {}
 func (*noopServerObserver) AnyExceptionForFunction(_ string)        {}
 func (*noopServerObserver) BytesReadForFunction(_ string, _ int)    {}
+func (*noopServerObserver) BytesWrittenForFunction(_ string, _ int) {}

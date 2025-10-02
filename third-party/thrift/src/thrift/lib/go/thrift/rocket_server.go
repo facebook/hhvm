@@ -286,6 +286,11 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 			protocol.Bytes(),
 		)
 
+		// Track bytes written during response serialization for function-level stats
+		if err == nil {
+			s.observer.BytesWrittenForFunction(rpcFuncName, len(payload.Data()))
+		}
+
 		// Track actual handler execution time
 		processTime := time.Since(processStartTime)
 		s.observer.ProcessTime(processTime)

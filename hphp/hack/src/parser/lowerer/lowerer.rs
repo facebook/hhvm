@@ -2550,7 +2550,7 @@ fn p_constructor_call<'a>(
     Ok(Expr_::mk_new(
         ast::ClassId((), pos, ast::ClassId_::CIexpr(e)),
         hl,
-        args.into_iter().map(ast::Argument::to_expr).collect(),
+        args,
         varargs,
         (),
     ))

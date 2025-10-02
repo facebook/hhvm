@@ -4714,7 +4714,7 @@ end = struct
           env
           cid
           explicit_targs
-          (List.map ~f:(fun e -> Anormal e) el)
+          el
           unpacked_element
       in
       let env =
@@ -4726,12 +4726,7 @@ end = struct
       make_result
         env
         p
-        (Aast.New
-           ( tc,
-             tal,
-             List.map ~f:Aast_utils.arg_to_expr tel,
-             typed_unpack_element,
-             ctor_fty ))
+        (Aast.New (tc, tal, tel, typed_unpack_element, ctor_fty))
         ty
     | Cast (hint, e) ->
       let (env, te, ty2) =
@@ -4983,7 +4978,7 @@ end = struct
             New
               ( _,
                 _,
-                [_; (_, _, ValCollection ((_, Vec), _, children)); _; _],
+                [_; Anormal (_, _, ValCollection ((_, Vec), _, children)); _; _],
                 _,
                 _ ) ) ->
           (* Typing_xhp.rewrite_xml_into_new generates an AST node for a `varray[]` literal, which is interpreted as a vec[]  *)

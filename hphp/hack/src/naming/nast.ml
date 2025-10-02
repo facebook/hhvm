@@ -566,7 +566,7 @@ module Visitor_DEPRECATED = struct
 
       method on_class_id_ : 'a -> class_id_ -> 'a
 
-      method on_new : 'a -> class_id -> expr list -> expr option -> 'a
+      method on_new : 'a -> class_id -> argument list -> expr option -> 'a
 
       method on_record : 'a -> sid -> (expr * expr) list -> 'a
 
@@ -1061,7 +1061,7 @@ module Visitor_DEPRECATED = struct
 
       method on_new acc cid el unpacked_element =
         let acc = this#on_class_id acc cid in
-        let acc = List.fold_left el ~f:this#on_expr ~init:acc in
+        let acc = List.fold_left el ~f:this#on_argument ~init:acc in
         let acc =
           Option.value_map unpacked_element ~default:acc ~f:(this#on_expr acc)
         in

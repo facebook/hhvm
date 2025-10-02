@@ -138,7 +138,10 @@ and check_await_usage expr =
         | CI _ ->
           NoAwait
       in
-      let res = List.fold_right args ~init:res ~f:await_fold in
+      let arg_exprs =
+        List.map ~f:(fun arg -> ((), Aast_utils.arg_to_expr arg)) args
+      in
+      let res = List.fold_right arg_exprs ~init:res ~f:await_fold_tuple in
       (match unpacked_arg with
       | None -> res
       | Some arg -> combine_con (check_await_usage arg) res)

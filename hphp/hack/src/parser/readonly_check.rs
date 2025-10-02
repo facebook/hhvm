@@ -736,9 +736,14 @@ impl<'ast> VisitorMut<'ast> for Checker {
             }
             aast::Expr_::New(n) => {
                 let (_, _targs, args, _variadic, _) = &mut **n;
-                for param in args.iter_mut() {
-                    match rty_expr(context, param) {
-                        Rty::Readonly => explicit_readonly(param),
+                for arg in args.iter_mut() {
+                    let e = match arg {
+                        Argument::Ainout(_, e) => e,
+                        Argument::Anormal(e) => e,
+                        Argument::Anamed(_, e) => e,
+                    };
+                    match rty_expr(context, e) {
+                        Rty::Readonly => explicit_readonly(e),
                         Rty::Mutable => {}
                     }
                 }

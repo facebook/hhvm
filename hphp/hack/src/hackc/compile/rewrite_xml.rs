@@ -113,7 +113,12 @@ fn rewrite_xml_(
         Expr_::New(Box::new((
             cid,
             vec![],
-            vec![attribute_map, children_vec, filename, line],
+            vec![
+                ast::Argument::Anormal(attribute_map),
+                ast::Argument::Anormal(children_vec),
+                ast::Argument::Anormal(filename),
+                ast::Argument::Anormal(line),
+            ],
             None,
             (),
         ))),

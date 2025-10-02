@@ -448,7 +448,15 @@ fn print_expr(
                         }
                     }
                     write::paren(w, |w| {
-                        write::concat_by(w, ", ", es, |w, e| print_expr(ctx, w, env, e))?;
+                        write::concat_by(w, ", ", es, |w, arg| match arg {
+                            ast::Argument::Anormal(e) => print_expr(ctx, w, env, e),
+                            ast::Argument::Anamed(name, e) => {
+                                w.write_all(name.name().as_bytes())?;
+                                w.write_all(b"=")?;
+                                print_expr(ctx, w, env, e)
+                            }
+                            ast::Argument::Ainout(_, e) => print_expr(ctx, w, env, e),
+                        })?;
                         match unpacked_element {
                             None => Ok(()),
                             Some(e) => {
@@ -463,7 +471,16 @@ fn print_expr(
                         Some(id) => {
                             // Xml exprs rewritten as New exprs come
                             // through here.
-                            print_xml(ctx, w, env, &id.1, es)
+                            // TODO(named_params): Losing named argument information for XML expressions
+                            let exprs: Vec<ast::Expr> = es
+                                .iter()
+                                .map(|arg| match arg {
+                                    ast::Argument::Anormal(e) => e.clone(),
+                                    ast::Argument::Anamed(_, e) => e.clone(),
+                                    ast::Argument::Ainout(_, e) => e.clone(),
+                                })
+                                .collect();
+                            print_xml(ctx, w, env, &id.1, &exprs[..])
                         }
                         None => Err(Error::NotImpl(format!("{}:{}", file!(), line!())).into()),
                     }

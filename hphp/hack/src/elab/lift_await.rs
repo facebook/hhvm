@@ -197,7 +197,10 @@ fn check_await_usage(expr: &Expr) -> AwaitUsage {
                     NoAwait
                 }
             };
-            res = args.iter().map(check_await_usage).fold(res, combine_con);
+            res = args
+                .iter()
+                .map(|arg| check_await_usage(arg.to_expr_ref()))
+                .fold(res, combine_con);
             unpacked_arg
                 .iter()
                 .map(check_await_usage)
@@ -579,7 +582,7 @@ impl LiftAwait {
                     | ClassId_::CI(_) => {}
                 }
                 for arg in args {
-                    self.extract_await(arg, con, seq, tmps)
+                    self.extract_await(arg.to_expr_mut(), con, seq, tmps)
                 }
                 if let Some(unpack) = unpacked_arg {
                     self.extract_await(unpack, con, seq, tmps)

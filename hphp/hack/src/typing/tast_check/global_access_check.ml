@@ -1147,7 +1147,8 @@ let visitor =
                 GlobalAccessCheck.PossibleGlobalWriteViaReference
           | _ -> super#on_expr (env, (ctx, fun_name)) e)
       | New (_, _, el, _, _) ->
-        List.iter el ~f:(fun ((ty, pos, _) as expr) ->
+        List.iter el ~f:(fun arg ->
+            let ((ty, pos, _) as expr) = Aast_utils.arg_to_expr arg in
             let e_global_opt =
               get_global_vars_from_expr ~include_immutable:false env ctx expr
             in

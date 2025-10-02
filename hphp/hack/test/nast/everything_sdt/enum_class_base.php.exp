@@ -109,7 +109,7 @@
            (Some ([19:11-14],
                   (Happly (([19:11-14], "\\HH\\MemberOf"),
                      [([19:11-14], (Happly (([19:11-14], "\\PessAbstracEnumClas"), []))); ([19:11-14], (Hlike ([19:3-10], (Happly (([19:3-10], "\\HasName"), [])))))]))));
-           cc_id = ([19:11-14], "Bar"); cc_kind = (CCConcrete ((), [19:17-35], (New (((), [19:21-28], (CI ([19:21-28], "\\HasName"))), [], [((), [19:29-34], (String "bar"))], None, ()))));
+           cc_id = ([19:11-14], "Bar"); cc_kind = (CCConcrete ((), [19:17-35], (New (((), [19:21-28], (CI ([19:21-28], "\\HasName"))), [], [(Anormal ((), [19:29-34], (String "bar")))], None, ()))));
            cc_span = [17:1-20:2]; cc_doc_comment = None }
          ];
        c_typeconsts = []; c_vars = []; c_methods = []; c_xhp_children = []; 

@@ -594,7 +594,11 @@ fn emit_exprs_and_error_on_inout_or_named<'a, 'd>(
     }
 }
 
-fn emit_exprs<'a, 'd>(e: &mut Emitter<'d>, env: &Env<'a>, exprs: &[ast::Expr]) -> Result<InstrSeq> {
+fn emit_exprs<'a, 'd>(
+    e: &mut Emitter<'d>,
+    env: &Env<'a>,
+    exprs: &[&ast::Expr],
+) -> Result<InstrSeq> {
     if exprs.is_empty() {
         Ok(instr::empty())
     } else {
@@ -3751,7 +3755,7 @@ fn emit_new<'a, 'd>(
     (cid, targs, args, uarg, _): &(
         ast::ClassId,
         Vec<ast::Targ>,
-        Vec<ast::Expr>,
+        Vec<ast::Argument>,
         Option<ast::Expr>,
         (),
     ),
@@ -3781,7 +3785,17 @@ fn emit_new<'a, 'd>(
     let cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, resolve_self, cid);
     if is_reflection_class_builtin {
         scope::with_unnamed_locals(e, |e| {
-            let instr_args = emit_exprs(e, env, args)?;
+            // TODO(named_params): Losing named argument information for reflection classes
+            // TODO(named_params): Losing named argument information for constructor calls
+            let arg_exprs: Vec<&ast::Expr> = args
+                .iter()
+                .map(|arg| match arg {
+                    ast::Argument::Anormal(expr) => expr,
+                    ast::Argument::Ainout(_, expr) => expr,
+                    ast::Argument::Anamed(_, expr) => expr,
+                })
+                .collect();
+            let instr_args = emit_exprs(e, env, &arg_exprs)?;
             let instr_uargs = match uarg {
                 None => instr::empty(),
                 Some(uarg) => emit_expr(e, env, uarg)?,
@@ -3825,7 +3839,15 @@ fn emit_new<'a, 'd>(
             ]),
         };
         scope::with_unnamed_locals(e, |e| {
-            let instr_args = emit_exprs(e, env, args)?;
+            let arg_exprs: Vec<&ast::Expr> = args
+                .iter()
+                .map(|arg| match arg {
+                    ast::Argument::Anormal(expr) => expr,
+                    ast::Argument::Ainout(_, expr) => expr,
+                    ast::Argument::Anamed(_, expr) => expr,
+                })
+                .collect();
+            let instr_args = emit_exprs(e, env, &arg_exprs)?;
             let instr_uargs = match uarg {
                 None => instr::empty(),
                 Some(uarg) => emit_expr(e, env, uarg)?,
@@ -3839,15 +3861,26 @@ fn emit_new<'a, 'd>(
                     instr_args,
                     instr_uargs,
                     emit_pos(pos),
-                    instr::f_call_ctor(get_fcall_args_no_inout(
-                        args,
-                        uarg.as_ref(),
-                        None,
-                        env.call_context,
-                        true,
-                        true,  // we do not need to enforce readonly return for constructors
-                        false, // we do not need to enforce readonly this for constructors
-                    )),
+                    {
+                        // TODO(named_params): Losing named argument information for constructor fcall args
+                        let arg_exprs: Vec<ast::Expr> = args
+                            .iter()
+                            .map(|arg| match arg {
+                                ast::Argument::Anormal(expr) => expr.clone(),
+                                ast::Argument::Ainout(_, expr) => expr.clone(),
+                                ast::Argument::Anamed(_, expr) => expr.clone(),
+                            })
+                            .collect();
+                        instr::f_call_ctor(get_fcall_args_no_inout(
+                            &arg_exprs,
+                            uarg.as_ref(),
+                            None,
+                            env.call_context,
+                            true,
+                            true,  // we do not need to enforce readonly return for constructors
+                            false, // we do not need to enforce readonly this for constructors
+                        ))
+                    },
                     instr::pop_c(),
                     instr::lock_obj(),
                 ]),

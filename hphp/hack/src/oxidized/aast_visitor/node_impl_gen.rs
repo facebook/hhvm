@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<47d1cb54ed74db32339ce836c93f34b0>>
+// @generated SignedSource<<2342ec22c82e06f4a9b47e7f2e61b117>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -994,7 +994,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
             a: &'node Box<(
                 ClassId<Ex, En>,
                 Vec<Targ<Ex>>,
-                Vec<Expr<Ex, En>>,
+                Vec<Argument<Ex, En>>,
                 Option<Expr<Ex, En>>,
                 Ex,
             )>,

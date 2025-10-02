@@ -2,11 +2,3 @@ ERROR: File "named_params_todo.php", line 12, characters 13-23:
 Encountered unexpected text `...$numbers`, was expecting a unary operator. (Parsing[1002])
 ERROR: File "named_params_todo.php", line 12, characters 13-23:
 The splat operator `...` for unpacking variadic arguments may only appear at the **end** of an argument list. (Parsing[1002])
-ERROR: File "named_params_todo.php", line 22, characters 14-20:
-Missing required named argument: name (Typing[4499])
-  File "named_params_todo.php", line 15, characters 33-43:
-  Definition is here
-ERROR: File "named_params_todo.php", line 22, characters 14-20:
-Too many arguments (expected 1 but got 2) (Typing[4105])
-  File "named_params_todo.php", line 15, characters 33-43:
-  Definition is here

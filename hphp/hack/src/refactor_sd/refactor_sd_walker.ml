@@ -208,13 +208,14 @@ let rec expr_
       (env, Some var)
     else
       (env, None)
-  | A.New ((_, _, A.CI (_, id)), _, expr_list, e, _) ->
+  | A.New ((_, _, A.CI (_, id)), _, arg_list, e, _) ->
     if String.equal upcasted_info.element_name id then
-      let handle_init (env : env) (e : T.expr) =
+      let handle_init (env : env) (arg : (T.ty, T.saved_env) A.argument) =
+        let e = Aast_utils.arg_to_expr arg in
         let (env, _entity_rhs) = expr_ upcasted_info env e in
         env
       in
-      let env = List.fold ~init:env ~f:handle_init expr_list in
+      let env = List.fold ~init:env ~f:handle_init arg_list in
       let env =
         match e with
         | Some e -> fst (expr_ upcasted_info env e)

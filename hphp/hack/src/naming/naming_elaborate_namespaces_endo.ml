@@ -345,7 +345,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         New
           ( ((), p1, CIexpr (ty, p2, Id x)),
             List.map tal ~f:(self#on_targ env),
-            List.map el ~f:(self#on_expr env),
+            List.map el ~f:(map_arg env),
             Option.map unpacked_element ~f:(self#on_expr env),
             ex )
       | Class_const ((_, p1, CIexpr (ty, p2, Id x1)), pstr) ->

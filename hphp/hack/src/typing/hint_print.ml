@@ -433,8 +433,7 @@ and pp_expr_ ppf = function
       @@ pair ~sep:nop pp_class_id
       @@ pair ~sep:nop pp_targs pp_arg_exprs)
       ppf
-      ( class_id,
-        (targs, (List.map ~f:(fun e -> Aast_defs.Anormal e) exprs, expr_opt)) )
+      (class_id, (targs, (exprs, expr_opt)))
   | Aast.Lplaceholder _ -> Fmt.string ppf "$_"
   | Aast.Pair (targs_opt, fst, snd) ->
     Fmt.(

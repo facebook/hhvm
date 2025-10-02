@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<49589fe401687faebc6c29d853ced342>>
+// @generated SignedSource<<9572d522645d7c824bad7ec65cb6dfe5>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1004,7 +1004,7 @@ pub enum Expr_<Ex, En> {
         Box<(
             ClassId<Ex, En>,
             Vec<Targ<Ex>>,
-            Vec<Expr<Ex, En>>,
+            Vec<Argument<Ex, En>>,
             Option<Expr<Ex, En>>,
             Ex,
         )>,

@@ -318,7 +318,7 @@ module Visitor_DEPRECATED : sig
 
       method on_method_caller : 'a -> sid -> Aast.pstring -> 'a
 
-      method on_new : 'a -> class_id -> expr list -> expr option -> 'a
+      method on_new : 'a -> class_id -> argument list -> expr option -> 'a
 
       method on_noop : 'a -> 'a
 

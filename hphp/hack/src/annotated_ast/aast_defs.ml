@@ -652,7 +652,7 @@ and ('ex, 'en) expr_ =
   | New of
       ('ex, 'en) class_id
       * 'ex targ list
-      * ('ex, 'en) expr list
+      * ('ex, 'en) argument list
       * ('ex, 'en) expr option
       * (* constructor *)
       'ex

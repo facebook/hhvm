@@ -550,7 +550,11 @@ let visitor =
 
     method! on_New env cid targs args var_arg constr_ty =
       let named_params =
-        process_constructor_arg_names !class_name !parent_class_hint cid args
+        process_constructor_arg_names
+          !class_name
+          !parent_class_hint
+          cid
+          (List.map ~f:Aast_utils.arg_to_expr args)
       in
       self#plus named_params (super#on_New env cid targs args var_arg constr_ty)
 

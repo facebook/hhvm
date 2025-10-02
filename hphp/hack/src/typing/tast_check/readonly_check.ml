@@ -654,7 +654,7 @@ let check =
           pos
           constructor_fty
           Mut
-          (List.map ~f:(fun e -> Aast_defs.Anormal e) args)
+          args
           unpacked_arg;
         super#on_expr env e
       | (_, _, Obj_get _)

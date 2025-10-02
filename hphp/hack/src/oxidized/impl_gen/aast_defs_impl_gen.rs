@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b1fd9d8cdfd19e9a866755249c6b8bd5>>
+// @generated SignedSource<<0de9e063de5350653a199c039a1f7a66>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1069,7 +1069,7 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_new(
         p0: ClassId<Ex, En>,
         p1: Vec<Targ<Ex>>,
-        p2: Vec<Expr<Ex, En>>,
+        p2: Vec<Argument<Ex, En>>,
         p3: Option<Expr<Ex, En>>,
         p4: Ex,
     ) -> Self {
@@ -1652,7 +1652,7 @@ impl<Ex, En> Expr_<Ex, En> {
     ) -> Option<(
         &ClassId<Ex, En>,
         &Vec<Targ<Ex>>,
-        &Vec<Expr<Ex, En>>,
+        &Vec<Argument<Ex, En>>,
         &Option<Expr<Ex, En>>,
         &Ex,
     )> {
@@ -1993,7 +1993,7 @@ impl<Ex, En> Expr_<Ex, En> {
     ) -> Option<(
         &mut ClassId<Ex, En>,
         &mut Vec<Targ<Ex>>,
-        &mut Vec<Expr<Ex, En>>,
+        &mut Vec<Argument<Ex, En>>,
         &mut Option<Expr<Ex, En>>,
         &mut Ex,
     )> {
@@ -2321,7 +2321,7 @@ impl<Ex, En> Expr_<Ex, En> {
     ) -> Option<(
         ClassId<Ex, En>,
         Vec<Targ<Ex>>,
-        Vec<Expr<Ex, En>>,
+        Vec<Argument<Ex, En>>,
         Option<Expr<Ex, En>>,
         Ex,
     )> {

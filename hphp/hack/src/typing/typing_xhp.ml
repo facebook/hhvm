@@ -206,7 +206,10 @@ let rewrite_xml_into_new pos sid attributes children =
   let children = ((), pos, ValCollection ((pos, Vec), None, children)) in
   let file = ((), pos, Aast.String "") in
   let line = ((), pos, Aast.Int "1") in
-  let args = [attributes; children; file; line] in
+  let args =
+    List.map [attributes; children; file; line] ~f:(fun expr ->
+        Aast_defs.Anormal expr)
+  in
   let sid_ann = fst sid in
   ((), sid_ann, New (((), sid_ann, cid), [], args, None, ()))
 

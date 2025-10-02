@@ -92,16 +92,17 @@
                       ((C), [12:5-20],
                        (New (((C), [12:9-10], (CI ([12:9-10], "\\C"))), 
                           [],
-                          [((dict<nothing, nothing>), [12:11-19],
-                            (Call
-                               { func = (((function<Tk as arraykey, Tv>(KeyedTraversable<nothing, nothing> $arr)[]: dict<nothing, nothing>)), [12:11-15], (Id ([12:11-15], "\\HH\\dict")));
-                                 targs = [((nothing), ([12:11-15], Hwildcard)); ((nothing), ([12:11-15], Hwildcard))];
-                                 args =
-                                 [(Anormal
-                                     ((~AnyArray<arraykey, mixed>), [12:16-18],
-                                      (Hole (((~AnyArray<arraykey, mixed>), [12:16-18], (Lvar ([12:16-18], $x))), (~AnyArray<arraykey, mixed>), (KeyedTraversable<nothing, nothing>), Typing))))
-                                   ];
-                                 unpacked_arg = None }))
+                          [(Anormal
+                              ((dict<nothing, nothing>), [12:11-19],
+                               (Call
+                                  { func = (((function<Tk as arraykey, Tv>(KeyedTraversable<nothing, nothing> $arr)[]: dict<nothing, nothing>)), [12:11-15], (Id ([12:11-15], "\\HH\\dict")));
+                                    targs = [((nothing), ([12:11-15], Hwildcard)); ((nothing), ([12:11-15], Hwildcard))];
+                                    args =
+                                    [(Anormal
+                                        ((~AnyArray<arraykey, mixed>), [12:16-18],
+                                         (Hole (((~AnyArray<arraykey, mixed>), [12:16-18], (Lvar ([12:16-18], $x))), (~AnyArray<arraykey, mixed>), (KeyedTraversable<nothing, nothing>), Typing))))
+                                      ];
+                                    unpacked_arg = None })))
                             ],
                           None, ((function(dict<string, mixed> $spec): void)))))))
                    ],
@@ -167,7 +168,9 @@
                        ((C), [21:5-14],
                         (New (((C), [21:9-10], (CI ([21:9-10], "\\C"))), 
                            [],
-                           [((~dict<arraykey, mixed>), [21:11-13], (Hole (((~dict<arraykey, mixed>), [21:11-13], (Lvar ([21:11-13], $y))), (~dict<arraykey, mixed>), (dict<string, mixed>), Typing)))],
+                           [(Anormal
+                               ((~dict<arraykey, mixed>), [21:11-13], (Hole (((~dict<arraykey, mixed>), [21:11-13], (Lvar ([21:11-13], $y))), (~dict<arraykey, mixed>), (dict<string, mixed>), Typing))))
+                             ],
                            None, ((function(dict<string, mixed> $spec): void)))))))
                    ],
                  [([Pos.none], Noop)])))

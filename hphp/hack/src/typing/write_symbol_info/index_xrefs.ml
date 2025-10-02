@@ -71,7 +71,8 @@ let call_handler ~path fa_ref (pos_map : Xrefs.pos_map) =
     method! at_expr _env expr =
       match expr with
       | (_, _, Aast.New ((_, callee_pos, _), _, args, _, _)) ->
-        let arg_processor (_, arg_pos, exp) =
+        let arg_processor arg =
+          let (_, arg_pos, exp) = Aast_utils.arg_to_expr arg in
           process_arg pos_map (exp, arg_pos)
         in
         process_call

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bcc4b4250f6ef448192e8867863ce1ee>>
+// @generated SignedSource<<8e0592de6d32fe2f3fa30cde5a746304>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -994,7 +994,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             a: &'node mut Box<(
                 ClassId<Ex, En>,
                 Vec<Targ<Ex>>,
-                Vec<Expr<Ex, En>>,
+                Vec<Argument<Ex, En>>,
                 Option<Expr<Ex, En>>,
                 Ex,
             )>,

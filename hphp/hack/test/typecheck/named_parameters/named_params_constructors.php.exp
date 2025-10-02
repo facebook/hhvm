@@ -1,0 +1,14 @@
+ERROR: File "named_params_constructors.php", line 11, characters 20-23:
+Invalid argument (Typing[4110])
+  File "named_params_constructors.php", line 3, characters 59-64:
+  Expected `string`
+  File "named_params_constructors.php", line 11, characters 20-23:
+  But got `bool`
+ERROR: File "named_params_constructors.php", line 12, characters 7-13:
+Unexpected named argument: extra_param (Typing[4500])
+  File "named_params_constructors.php", line 3, characters 33-43:
+  Definition is here
+ERROR: File "named_params_constructors.php", line 13, characters 7-13:
+Missing required named argument: y (Typing[4499])
+  File "named_params_constructors.php", line 3, characters 33-43:
+  Definition is here

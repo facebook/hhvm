@@ -27,13 +27,30 @@ from parameterized import parameterized
 from thrift.python.mutable_types import to_thrift_list
 
 
-class ThriftPython_Enum(unittest.TestCase):
+class ThriftPython_Enums_Test(unittest.TestCase):
+    """
+    Tests thrift-python enums, as exposed directly by the `thrift_enums` module.
+    """
+
+    def test_int_equality(self) -> None:
+        self.assertEqual(0, enums.PositiveNumber.NONE)
+        self.assertEqual(1, enums.PositiveNumber.ONE)
+        self.assertEqual(2, enums.PositiveNumber.TWO)
+        self.assertEqual(5, enums.PositiveNumber.FIVE)
+
+
+class ThriftPython_TypesEnum_Test(unittest.TestCase):
+    """
+    Tests thrift-python enums exposed via the mutable and immutable type modules
+    (i.e., `thrift_mutable_types` and `thrift_types`, respectively).
+    """
+
     def setUp(self) -> None:
         # Disable maximum printed diff length.
         self.maxDiff = None
 
-    @parameterized.expand([immutable_types, mutable_types])
-    def test_enum_default(self, test_types: types.ModuleType) -> None:
+    @parameterized.expand([("immutable", immutable_types), ("mutable", mutable_types)])
+    def test_enum_default(self, _name: str, test_types: types.ModuleType) -> None:
         self.assertEqual(0, test_types.PositiveNumber.NONE)
         self.assertEqual(1, test_types.PositiveNumber.ONE)
 
@@ -44,9 +61,9 @@ class ThriftPython_Enum(unittest.TestCase):
         self.assertEqual(test_types.Color.red, s.color)
         self.assertEqual([], s.color_list)
 
-    @parameterized.expand([immutable_types, mutable_types])
-    def test_enum_initialize(self, test_types: types.ModuleType) -> None:
-        is_mutable_run: bool = test_types.__name__.endswith("mutable_types")
+    @parameterized.expand([("immutable", immutable_types), ("mutable", mutable_types)])
+    def test_enum_initialize(self, name: str, test_types: types.ModuleType) -> None:
+        is_mutable_run: bool = name == "mutable"
         number_list = [
             test_types.PositiveNumber.ONE,
             test_types.PositiveNumber.TWO,
@@ -67,8 +84,8 @@ class ThriftPython_Enum(unittest.TestCase):
         self.assertEqual(2, s.color)
         self.assertEqual([test_types.Color.blue, test_types.Color.blue], s.color_list)
 
-    @parameterized.expand([mutable_types])
-    def test_enum_update(self, test_types: types.ModuleType) -> None:
+    @parameterized.expand([("mutable", mutable_types)])
+    def test_enum_update(self, _name: str, test_types: types.ModuleType) -> None:
         s = test_types.TestStruct()
 
         self.assertEqual(test_types.PositiveNumber.NONE, s.number)
@@ -92,19 +109,10 @@ class ThriftPython_Enum(unittest.TestCase):
             s.number_list.append(test_types.Color.green)
         self.assertEqual([2, 5], s.number_list)
 
-    def test_enum_identity(self) -> None:
-        self.assertIs(enums.PositiveNumber, immutable_types.PositiveNumber)
-        self.assertIs(enums.PositiveNumber, mutable_types.PositiveNumber)
-        self.assertIs(immutable_types.PositiveNumber, mutable_types.PositiveNumber)
+    @parameterized.expand([("immutable", immutable_types), ("mutable", mutable_types)])
+    def test_enum_identity(self, _name: str, test_types: types.ModuleType) -> None:
+        self.assertIs(enums.PositiveNumber, test_types.PositiveNumber)
 
-    def test_value(self) -> None:
-        self.assertEqual(0, enums.PositiveNumber.NONE)
-        self.assertEqual(1, enums.PositiveNumber.ONE)
-        self.assertEqual(2, enums.PositiveNumber.TWO)
-        self.assertEqual(5, enums.PositiveNumber.FIVE)
-
-        self.assertEqual(
-            immutable_types.PositiveNumber.NONE, mutable_types.PositiveNumber.NONE
-        )
-        self.assertEqual(enums.PositiveNumber.ONE, mutable_types.PositiveNumber.ONE)
-        self.assertEqual(enums.PositiveNumber.TWO, immutable_types.PositiveNumber.TWO)
+    @parameterized.expand([("immutable", immutable_types), ("mutable", mutable_types)])
+    def test_enum_equality(self, _name: str, test_types: types.ModuleType) -> None:
+        self.assertEqual(enums.PositiveNumber.ONE, test_types.PositiveNumber.ONE)

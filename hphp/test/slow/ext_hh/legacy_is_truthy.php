@@ -1,5 +1,9 @@
 <?hh
 
+function takes_readonly(readonly Vector<int> $x): bool {
+  return HH\legacy_is_truthy($x);
+}
+
 <<__EntryPoint>>
 function main(): void {
   foreach (
@@ -25,4 +29,5 @@ function main(): void {
     $is_or_is_not = HH\legacy_is_truthy($value) ? 'is' : 'is not';
     echo "$name $is_or_is_not truthy\n";
   }
+  takes_readonly(Vector {});
 }

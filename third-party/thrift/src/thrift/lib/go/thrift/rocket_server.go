@@ -376,9 +376,9 @@ func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata
 	messageName := metadata.GetName()
 	protoID := types.ProtocolID(metadata.GetProtocol())
 	headersMap := rocket.GetRequestRpcMetadataHeaders(metadata)
-	messageTypeID, err := rocket.RpcKindToMessageType(metadata.GetKind())
-	if err != nil {
-		return nil, err
+	messageType := types.CALL
+	if metadata.GetKind() == rpcmetadata.RpcKind_SINGLE_REQUEST_NO_RESPONSE {
+		messageType = types.ONEWAY
 	}
 
 	protocol, err := newProtocolBuffer(protoID, dataBytes)
@@ -386,7 +386,7 @@ func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata
 		return nil, err
 	}
 	protocol.setResponseHeaders(headersMap)
-	if err := protocol.WriteMessageBegin(messageName, messageTypeID, 0); err != nil {
+	if err := protocol.WriteMessageBegin(messageName, messageType, 0); err != nil {
 		return nil, err
 	}
 	return protocol, nil

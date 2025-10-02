@@ -96,16 +96,6 @@ func rpcProtocolIDToProtocolID(protocolID rpcmetadata.ProtocolId) (types.Protoco
 	return 0, fmt.Errorf("unsupported ProtocolId %v", protocolID)
 }
 
-func RpcKindToMessageType(kind rpcmetadata.RpcKind) (types.MessageType, error) {
-	switch kind {
-	case rpcmetadata.RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE:
-		return types.CALL, nil
-	case rpcmetadata.RpcKind_SINGLE_REQUEST_NO_RESPONSE:
-		return types.ONEWAY, nil
-	}
-	return 0, fmt.Errorf("unsupported RpcKind %v", kind)
-}
-
 func CompressionAlgorithmFromCompressionConfig(compressionConfig *rpcmetadata.CompressionConfig) rpcmetadata.CompressionAlgorithm {
 	if compressionConfig == nil {
 		return rpcmetadata.CompressionAlgorithm_NONE

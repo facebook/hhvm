@@ -82,7 +82,7 @@ void ServerSinkBridge::resetClientCallback(SinkClientCallback& clientCallback) {
   clientCallback_ = &clientCallback;
 }
 
-// start should be called on threadmanager's thread
+// start should be called on thread manager's thread
 folly::coro::Task<void> ServerSinkBridge::start() {
   serverPush(consumer_.bufferSize);
   folly::Try<StreamPayload> finalResponse =

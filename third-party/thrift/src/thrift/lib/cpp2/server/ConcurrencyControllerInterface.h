@@ -36,7 +36,7 @@ class ServerRequest;
 // a request pile.
 class ConcurrencyControllerInterface : public RequestCompletionCallback {
  public:
-  // Set the limit for simultanous requests. 0 indicates unlimites. This is
+  // Set the limit for simultaneous requests. 0 indicates unlimited. This is
   // thread safe. If it is increased the concurrency controller must attempt
   // to dispatch more requests to reach the limit. If it is reduced the
   // concurrency controller waits for enough existing requests to complete to

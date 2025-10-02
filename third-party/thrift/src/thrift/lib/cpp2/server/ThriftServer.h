@@ -1014,7 +1014,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   mutable folly::SharedMutex threadManagerMutex_;
   std::shared_ptr<apache::thrift::concurrency::ThreadManager> threadManager_;
   // we need to make the wrapper stick to the server because the users calling
-  // getThreadManager are relying on the server to maintatin the tm lifetime
+  // getThreadManager are relying on the server to maintain the tm lifetime
   std::shared_ptr<apache::thrift::ThreadManagerLoggingWrapper>
       tmLoggingWrapper_;
 

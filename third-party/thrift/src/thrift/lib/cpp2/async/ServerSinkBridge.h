@@ -74,7 +74,7 @@ class ServerSinkBridge : public TwoWayBridge<
       folly::EventBase& evb,
       SinkClientCallback* callback);
 
-  // start should be called on threadmanager's thread
+  // start() should be called on the CPU thread
   folly::coro::Task<void> start();
 
   //
@@ -127,10 +127,10 @@ class ServerSinkBridge : public TwoWayBridge<
   folly::Executor::KeepAlive<folly::EventBase> evb_;
   SinkClientCallback* clientCallback_;
 
-  // only access in threadManager thread
+  // only access on the CPU thread
   bool clientException_{false};
 
-  // only access in evb_ thread
+  // only access on the IO thread
   bool sinkComplete_{false};
 
   TileStreamGuard interaction_;

@@ -262,7 +262,7 @@ void RocketServerConnection::flushWritesWithFds(
       // interleaved, so there is no explicit logic around this, but this
       // invariant must be preserved going forward.
       writeChainWithFds(socket_.get(), this, std::move(write), std::move(fds));
-      // Return here so clangtidy linter won't think the context is moved twice
+      // Return here so clang-tidy linter won't think the context is moved twice
       return;
     } else {
       inflightWritesQueue_.push_back(WriteBatchContext{});

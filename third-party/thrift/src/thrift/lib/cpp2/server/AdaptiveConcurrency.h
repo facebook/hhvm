@@ -119,7 +119,7 @@ class AdaptiveConcurrencyController {
   std::chrono::microseconds minTargetRtt() const;
 
   size_t getMinConcurrency() const;
-  // Similar to getMaxRequests() except that it wont drop
+  // Similar to getMaxRequests() except that it won't drop
   // to minConcurrency when controller is in the rtt calibration state.
   size_t getConcurrency() const;
 

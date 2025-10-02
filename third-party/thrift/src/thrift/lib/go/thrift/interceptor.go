@@ -76,7 +76,7 @@ type interceptorProcessorFunction struct {
 	methodName  string
 }
 
-func (pf *interceptorProcessorFunction) RunContext(ctx context.Context, args types.ReadableStruct) (types.WritableStruct, types.ApplicationExceptionIf) {
+func (pf *interceptorProcessorFunction) RunContext(ctx context.Context, args types.ReadableStruct) (types.WritableStruct, error) {
 	ws, err := pf.interceptor(ctx, pf.methodName, pf.ProcessorFunction, args)
 	if err != nil {
 		return ws, maybeWrapApplicationException(err)

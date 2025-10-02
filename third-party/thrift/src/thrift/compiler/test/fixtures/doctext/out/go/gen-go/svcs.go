@@ -223,7 +223,7 @@ func (p *procFuncCF) Write(seqId int32, result thrift.WritableStruct, encoder th
     return encoder.Flush()
 }
 
-func (p *procFuncCF) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncCF) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespCF()
     err := p.handler.F(ctx)
     if err != nil {
@@ -273,7 +273,7 @@ func (p *procFuncCThing) Write(seqId int32, result thrift.WritableStruct, encode
     return encoder.Flush()
 }
 
-func (p *procFuncCThing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncCThing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqCThing)
     result := newRespCThing()
     retval, err := p.handler.Thing(ctx, args.A, args.B, args.C)

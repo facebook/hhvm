@@ -430,7 +430,7 @@ func (p *procFuncMyServiceFoo) Write(seqId int32, result thrift.WritableStruct, 
     return encoder.Flush()
 }
 
-func (p *procFuncMyServiceFoo) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncMyServiceFoo) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespMyServiceFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
@@ -562,7 +562,7 @@ func (p *procFuncFactoriesFoo) Write(seqId int32, result thrift.WritableStruct, 
     return encoder.Flush()
 }
 
-func (p *procFuncFactoriesFoo) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncFactoriesFoo) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespFactoriesFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
@@ -694,7 +694,7 @@ func (p *procFuncPerformFoo) Write(seqId int32, result thrift.WritableStruct, en
     return encoder.Flush()
 }
 
-func (p *procFuncPerformFoo) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncPerformFoo) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespPerformFoo()
     err := p.handler.Foo(ctx)
     if err != nil {
@@ -826,7 +826,7 @@ func (p *procFuncInteractWithSharedDoSomeSimilarThings) Write(seqId int32, resul
     return encoder.Flush()
 }
 
-func (p *procFuncInteractWithSharedDoSomeSimilarThings) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncInteractWithSharedDoSomeSimilarThings) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespInteractWithSharedDoSomeSimilarThings()
     retval, err := p.handler.DoSomeSimilarThings(ctx)
     if err != nil {

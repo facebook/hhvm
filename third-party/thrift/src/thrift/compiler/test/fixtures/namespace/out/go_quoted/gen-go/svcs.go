@@ -147,7 +147,7 @@ func (p *procFuncTestServiceInit) Write(seqId int32, result thrift.WritableStruc
     return encoder.Flush()
 }
 
-func (p *procFuncTestServiceInit) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncTestServiceInit) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqTestServiceInit)
     result := newRespTestServiceInit()
     retval, err := p.handler.Init(ctx, args.Int1)

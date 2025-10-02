@@ -26,7 +26,7 @@ type ProcessorFunction interface {
 	// Read a serializable message from the protocol.
 	Read(prot Decoder) (Struct, error)
 	// RunContext processes a message handing it to the client handler.
-	RunContext(ctx context.Context, args ReadableStruct) (WritableStruct, ApplicationExceptionIf)
+	RunContext(ctx context.Context, args ReadableStruct) (WritableStruct, error)
 	// Write a serializable response
 	Write(seqID int32, result WritableStruct, prot Encoder) error
 }

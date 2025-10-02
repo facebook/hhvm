@@ -131,7 +131,7 @@ func (p *procFuncExtendTestServiceCheck) Write(seqId int32, result thrift.Writab
     return encoder.Flush()
 }
 
-func (p *procFuncExtendTestServiceCheck) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncExtendTestServiceCheck) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqExtendTestServiceCheck)
     result := newRespExtendTestServiceCheck()
     retval, err := p.handler.Check(ctx, args.Struct1)

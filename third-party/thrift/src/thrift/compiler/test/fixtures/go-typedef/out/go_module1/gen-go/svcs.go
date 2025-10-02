@@ -187,7 +187,7 @@ func (p *procFuncFinderByPlate) Write(seqId int32, result thrift.WritableStruct,
     return encoder.Flush()
 }
 
-func (p *procFuncFinderByPlate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncFinderByPlate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqFinderByPlate)
     result := newRespFinderByPlate()
     retval, err := p.handler.ByPlate(ctx, args.Plate)
@@ -235,7 +235,7 @@ func (p *procFuncFinderAliasByPlate) Write(seqId int32, result thrift.WritableSt
     return encoder.Flush()
 }
 
-func (p *procFuncFinderAliasByPlate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncFinderAliasByPlate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqFinderAliasByPlate)
     result := newRespFinderAliasByPlate()
     retval, err := p.handler.AliasByPlate(ctx, args.Plate)
@@ -283,7 +283,7 @@ func (p *procFuncFinderPreviousPlate) Write(seqId int32, result thrift.WritableS
     return encoder.Flush()
 }
 
-func (p *procFuncFinderPreviousPlate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncFinderPreviousPlate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqFinderPreviousPlate)
     result := newRespFinderPreviousPlate()
     retval, err := p.handler.PreviousPlate(ctx, args.Plate)

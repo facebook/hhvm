@@ -88,7 +88,7 @@ func setRequestHeadersForResult(protocol Protocol, result types.WritableStruct) 
 
 // sendException is a utility function to send the exception for the specified
 // method.
-func sendException(prot types.Encoder, name string, seqID int32, appEx types.ApplicationExceptionIf) error {
+func sendException(prot types.Encoder, name string, seqID int32, appEx *types.ApplicationException) error {
 	if err := prot.WriteMessageBegin(name, types.EXCEPTION, seqID); err != nil {
 		return err
 	} else if err := appEx.Write(prot); err != nil {
@@ -116,7 +116,7 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 		return readErr
 	}
 	var argStruct types.Struct
-	var appException types.ApplicationExceptionIf
+	var appException *types.ApplicationException
 
 	pfunc, pfuncErr := getProcessorFunction(processor, messageType, name)
 	if pfuncErr != nil {
@@ -146,12 +146,16 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 
 	// Step 2: Processing the message without using the Protocol.
 	var result types.WritableStruct
+	var runError error
 	if pfunc != nil {
 		pfuncStartTime := time.Now()
-		result, appException = pfunc.RunContext(ctx, argStruct)
+		result, runError = pfunc.RunContext(ctx, argStruct)
 		pfuncDuration := time.Since(pfuncStartTime)
 		if timingSeries := processorStats[name]; timingSeries != nil {
-			timingSeries.RecordWithStatus(pfuncDuration, appException == nil)
+			timingSeries.RecordWithStatus(pfuncDuration, runError == nil)
+		}
+		if runError != nil {
+			appException = maybeWrapApplicationException(runError)
 		}
 		// Record function-level process timing for stats collection
 		observer.TimeProcessUsForFunction(name, pfuncDuration)

@@ -167,7 +167,7 @@ func (p *procFuncSomeServiceBounceMap) Write(seqId int32, result thrift.Writable
     return encoder.Flush()
 }
 
-func (p *procFuncSomeServiceBounceMap) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncSomeServiceBounceMap) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqSomeServiceBounceMap)
     result := newRespSomeServiceBounceMap()
     retval, err := p.handler.BounceMap(ctx, args.M)
@@ -215,7 +215,7 @@ func (p *procFuncSomeServiceBinaryKeyedMap) Write(seqId int32, result thrift.Wri
     return encoder.Flush()
 }
 
-func (p *procFuncSomeServiceBinaryKeyedMap) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncSomeServiceBinaryKeyedMap) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqSomeServiceBinaryKeyedMap)
     result := newRespSomeServiceBinaryKeyedMap()
     retval, err := p.handler.BinaryKeyedMap(ctx, args.R)

@@ -64,7 +64,7 @@ func (ch *chainHandler) Write(_ int32, _ types.WritableStruct, _ types.Encoder) 
 	return nil
 }
 
-func (ch *chainHandler) RunContext(ctx context.Context, args types.ReadableStruct) (types.WritableStruct, types.ApplicationExceptionIf) {
+func (ch *chainHandler) RunContext(ctx context.Context, args types.ReadableStruct) (types.WritableStruct, error) {
 	if ch.curI == len(ch.interceptors)-1 {
 		return ch.origHandler.RunContext(ctx, args)
 	}

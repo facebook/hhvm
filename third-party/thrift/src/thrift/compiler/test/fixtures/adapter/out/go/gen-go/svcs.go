@@ -149,7 +149,7 @@ func (p *procFuncServiceFunc) Write(seqId int32, result thrift.WritableStruct, e
     return encoder.Flush()
 }
 
-func (p *procFuncServiceFunc) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncServiceFunc) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqServiceFunc)
     result := newRespServiceFunc()
     retval, err := p.handler.Func(ctx, args.Arg1, args.Arg2, args.Arg3)
@@ -301,7 +301,7 @@ func (p *procFuncAdapterServiceCount) Write(seqId int32, result thrift.WritableS
     return encoder.Flush()
 }
 
-func (p *procFuncAdapterServiceCount) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncAdapterServiceCount) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespAdapterServiceCount()
     retval, err := p.handler.Count(ctx)
     if err != nil {
@@ -348,7 +348,7 @@ func (p *procFuncAdapterServiceAdaptedTypes) Write(seqId int32, result thrift.Wr
     return encoder.Flush()
 }
 
-func (p *procFuncAdapterServiceAdaptedTypes) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncAdapterServiceAdaptedTypes) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqAdapterServiceAdaptedTypes)
     result := newRespAdapterServiceAdaptedTypes()
     retval, err := p.handler.AdaptedTypes(ctx, args.Arg)

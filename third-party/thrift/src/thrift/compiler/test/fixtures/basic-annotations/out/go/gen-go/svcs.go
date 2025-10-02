@@ -290,7 +290,7 @@ func (p *procFuncMyServicePing) Write(seqId int32, result thrift.WritableStruct,
     return encoder.Flush()
 }
 
-func (p *procFuncMyServicePing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncMyServicePing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespMyServicePing()
     err := p.handler.Ping(ctx)
     if err != nil {
@@ -342,7 +342,7 @@ func (p *procFuncMyServiceGetRandomData) Write(seqId int32, result thrift.Writab
     return encoder.Flush()
 }
 
-func (p *procFuncMyServiceGetRandomData) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncMyServiceGetRandomData) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespMyServiceGetRandomData()
     retval, err := p.handler.GetRandomData(ctx)
     if err != nil {
@@ -389,7 +389,7 @@ func (p *procFuncMyServiceHasDataById) Write(seqId int32, result thrift.Writable
     return encoder.Flush()
 }
 
-func (p *procFuncMyServiceHasDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncMyServiceHasDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqMyServiceHasDataById)
     result := newRespMyServiceHasDataById()
     retval, err := p.handler.HasDataById(ctx, args.Id)
@@ -437,7 +437,7 @@ func (p *procFuncMyServiceGoGetDataById) Write(seqId int32, result thrift.Writab
     return encoder.Flush()
 }
 
-func (p *procFuncMyServiceGoGetDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncMyServiceGoGetDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqMyServiceGoGetDataById)
     result := newRespMyServiceGoGetDataById()
     retval, err := p.handler.GoGetDataById(ctx, args.Id)
@@ -485,7 +485,7 @@ func (p *procFuncMyServicePutDataById) Write(seqId int32, result thrift.Writable
     return encoder.Flush()
 }
 
-func (p *procFuncMyServicePutDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncMyServicePutDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqMyServicePutDataById)
     result := newRespMyServicePutDataById()
     err := p.handler.PutDataById(ctx, args.Id, args.Data)
@@ -532,7 +532,7 @@ func (p *procFuncMyServiceLobDataById) Write(seqId int32, result thrift.Writable
     return encoder.Flush()
 }
 
-func (p *procFuncMyServiceLobDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncMyServiceLobDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqMyServiceLobDataById)
     err := p.handler.LobDataById(ctx, args.Id, args.Data)
     if err != nil {
@@ -578,7 +578,7 @@ func (p *procFuncMyServiceGoDoNothing) Write(seqId int32, result thrift.Writable
     return encoder.Flush()
 }
 
-func (p *procFuncMyServiceGoDoNothing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncMyServiceGoDoNothing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespMyServiceGoDoNothing()
     err := p.handler.GoDoNothing(ctx)
     if err != nil {
@@ -727,7 +727,7 @@ func (p *procFuncMyServicePrioParentPing) Write(seqId int32, result thrift.Writa
     return encoder.Flush()
 }
 
-func (p *procFuncMyServicePrioParentPing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncMyServicePrioParentPing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespMyServicePrioParentPing()
     err := p.handler.Ping(ctx)
     if err != nil {
@@ -773,7 +773,7 @@ func (p *procFuncMyServicePrioParentPong) Write(seqId int32, result thrift.Writa
     return encoder.Flush()
 }
 
-func (p *procFuncMyServicePrioParentPong) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncMyServicePrioParentPong) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespMyServicePrioParentPong()
     err := p.handler.Pong(ctx)
     if err != nil {
@@ -887,7 +887,7 @@ func (p *procFuncMyServicePrioChildPang) Write(seqId int32, result thrift.Writab
     return encoder.Flush()
 }
 
-func (p *procFuncMyServicePrioChildPang) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncMyServicePrioChildPang) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespMyServicePrioChildPang()
     err := p.handler.Pang(ctx)
     if err != nil {
@@ -1019,7 +1019,7 @@ func (p *procFuncBadServiceBar) Write(seqId int32, result thrift.WritableStruct,
     return encoder.Flush()
 }
 
-func (p *procFuncBadServiceBar) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncBadServiceBar) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespBadServiceBar()
     retval, err := p.handler.Bar(ctx)
     if err != nil {
@@ -1186,7 +1186,7 @@ func (p *procFuncFooBarBazServiceFooStructured) Write(seqId int32, result thrift
     return encoder.Flush()
 }
 
-func (p *procFuncFooBarBazServiceFooStructured) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncFooBarBazServiceFooStructured) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespFooBarBazServiceFooStructured()
     err := p.handler.FooStructured(ctx)
     if err != nil {
@@ -1232,7 +1232,7 @@ func (p *procFuncFooBarBazServiceBarNonStructured) Write(seqId int32, result thr
     return encoder.Flush()
 }
 
-func (p *procFuncFooBarBazServiceBarNonStructured) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncFooBarBazServiceBarNonStructured) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespFooBarBazServiceBarNonStructured()
     err := p.handler.BarNonStructured(ctx)
     if err != nil {
@@ -1278,7 +1278,7 @@ func (p *procFuncFooBarBazServiceBaz) Write(seqId int32, result thrift.WritableS
     return encoder.Flush()
 }
 
-func (p *procFuncFooBarBazServiceBaz) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, thrift.ApplicationExceptionIf) {
+func (p *procFuncFooBarBazServiceBaz) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespFooBarBazServiceBaz()
     err := p.handler.Baz(ctx)
     if err != nil {

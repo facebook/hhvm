@@ -69,9 +69,5 @@ func (ch *chainHandler) RunContext(ctx context.Context, args types.ReadableStruc
 		return ch.origHandler.RunContext(ctx, args)
 	}
 	ch.curI++
-	ws, err := ch.interceptors[ch.curI](ctx, ch.name, ch, args)
-	if err != nil {
-		return ws, maybeWrapApplicationException(err)
-	}
-	return ws, nil
+	return ch.interceptors[ch.curI](ctx, ch.name, ch, args)
 }

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <concepts>
 #include <type_traits>
 
 #include <folly/Portability.h>
@@ -76,13 +77,6 @@ concept ConcreteThriftTypeTag = ThriftTypeTag<T> && is_concrete_v<T>;
 template <typename T>
 concept AbstractThriftTypeTag = ThriftTypeTag<T> && is_abstract_v<T>;
 
-namespace detail {
-template <typename... Tags>
-constexpr void checkTags() {
-  static_assert((is_thrift_type_tag_v<Tags> && ...));
-}
-} // namespace detail
-
 // Is `true` iff `Tag` is in the type class, `CTag`.
 //
 // For example:
@@ -95,17 +89,10 @@ constexpr void checkTags() {
 //     is_a_v<list<i64_t>, list_c> -> true
 //     is_a_v<list<i64_t>, list<integral_c>> -> true
 //     is_a_v<list<i64_t>, list<i64_t>> -> true
-template <typename Tag, typename CTag>
-constexpr bool is_a_v =
-    (detail::checkTags<Tag, CTag>(), std::is_base_of_v<CTag, Tag>);
+template <ThriftTypeTag Tag, ThriftTypeTag CTag>
+constexpr bool is_a_v = std::derived_from<Tag, CTag>;
 
-// Helpers to enable/disable declarations based on if a type tag matches
-// a constraint.
-template <typename CTag, typename Tag, typename R = void, typename...>
-using if_is_a = std::enable_if_t<is_a_v<CTag, Tag>, R>;
-
-////
-// Implemnation details
+// Implementation details
 
 template <>
 struct is_concrete<void_t> : std::true_type {};

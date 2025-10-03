@@ -1,5 +1,5 @@
 <?hh
-
+//
 abstract class C1 {
   public static function m1(): void {}
 }

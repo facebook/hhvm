@@ -707,6 +707,45 @@ module Uninstantiable_class_via_static = struct
   let quickfixes _ = []
 end
 
+module Needs_concrete_override = struct
+  type t = Typing_warning.Needs_concrete_override.t
+
+  let code = Codes.NeedsConcreteOverride
+
+  let codes = [code]
+
+  let code _ = code
+
+  let claim
+      {
+        Typing_warning.Needs_concrete_override
+        .method_name_for_method_defined_outside_class;
+        _;
+      } =
+    let method_text =
+      match method_name_for_method_defined_outside_class with
+      | Some method_name -> Printf.sprintf "Method `%s`" method_name
+      | None -> "This method"
+    in
+    method_text
+    ^ " is declared as `__NeedsConcrete` but overrides a non-`__NeedsConcrete` method. Please add `__NeedsConcrete` to the overridden method or remove it from the current method. (The `__NeedsConcrete` attribute indicates that a method requires `static` to point to a concrete class)"
+
+  let reasons
+      {
+        Typing_warning.Needs_concrete_override.pos;
+        parent_pos;
+        method_name_for_method_defined_outside_class = _;
+      } =
+    [
+      ( pos,
+        "It is unsafe to declare this method as `__NeedsConcrete`, since it overrides a non-`__NeedsConcrete` method"
+      );
+      (parent_pos, "Previously defined here");
+    ]
+
+  let quickfixes _ = []
+end
+
 let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
@@ -730,6 +769,7 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Abstract_access_via_static)
   | Typing_warning.Uninstantiable_class_via_static ->
     (module Uninstantiable_class_via_static)
+  | Typing_warning.Needs_concrete_override -> (module Needs_concrete_override)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :

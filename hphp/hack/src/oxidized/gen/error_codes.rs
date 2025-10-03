@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<64a9c66d309a4a2bfcd0a768ac221b26>>
+// @generated SignedSource<<2abf2d7b419a65fae9c5b1d22e059609>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -598,7 +598,6 @@ pub enum Typing {
     OptionalParameterNotSupported = 4484,
     InvalidRecursiveType = 4485,
     StaticCallOnTraitRequireThisAs = 4486,
-    NeedsConcreteOverride = 4487,
     StringToClassPointer = 4488,
     SwitchNeedsDefault = 4489,
     SimpliHackRunPrompt = 4493,
@@ -656,6 +655,7 @@ pub enum Warning {
     CallNeedsConcrete = 12024,
     AbstractAccessViaStatic = 12025,
     UninstantiableClassViaStatic = 12026,
+    NeedsConcreteOverride = 12027,
 }
 impl TrivialDrop for Warning {}
 arena_deserializer::impl_deserialize_in_arena!(Warning);

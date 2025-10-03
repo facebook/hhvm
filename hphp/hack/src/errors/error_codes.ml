@@ -776,7 +776,6 @@ module Typing = struct
     | OptionalParameterNotSupported [@value 4484]
     | InvalidRecursiveType [@value 4485]
     | StaticCallOnTraitRequireThisAs [@value 4486]
-    | NeedsConcreteOverride [@value 4487]
     | StringToClassPointer [@value 4488]
     | SwitchNeedsDefault [@value 4489]
     | SimpliHackRunPrompt [@value 4493]
@@ -818,6 +817,7 @@ module Warning = struct
     | CallNeedsConcrete [@value 12024]
     | AbstractAccessViaStatic [@value 12025]
     | UninstantiableClassViaStatic [@value 12026]
+    | NeedsConcreteOverride [@value 12027]
   [@@deriving enum, ord, show { with_path = false }]
 end
 

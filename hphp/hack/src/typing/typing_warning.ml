@@ -200,6 +200,21 @@ module Uninstantiable_class_via_static = struct
   }
 end
 
+module Needs_concrete_override = struct
+  type t = {
+    pos: Pos_or_decl.t;
+    parent_pos: Pos_or_decl.t;
+    method_name_for_method_defined_outside_class: string option;
+        (** `Some m` iff `m` is a trait method of a trait that is used by the class.
+     * In such cases, the location for the warning will be a class name, so we need
+     * to preserve the method name to give a meaningful error message.
+     * Example:   `class Child extends Parent { use Tr; }`
+     *                   ~~~~~
+     * where trait `Tr` defines the method with the incorrect override of `Parent::m`
+     *)
+  }
+end
+
 type (_, _) kind =
   | Sketchy_equality : (Sketchy_equality.t, warn) kind
   | Is_as_always : (Is_as_always.t, migrated) kind
@@ -220,5 +235,6 @@ type (_, _) kind =
   | Abstract_access_via_static : (Abstract_access_via_static.t, warn) kind
   | Uninstantiable_class_via_static
       : (Uninstantiable_class_via_static.t, warn) kind
+  | Needs_concrete_override : (Needs_concrete_override.t, warn) kind
 
 type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

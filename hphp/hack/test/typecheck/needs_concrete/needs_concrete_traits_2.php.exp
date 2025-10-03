@@ -1,6 +1,6 @@
-ERROR: File "needs_concrete_traits_2.php", line 12, characters 27-28:
-Some members in class `C2` are incompatible with those declared in type `C1` (Typing[4487])
+WARN: File "needs_concrete_traits_2.php", line 12, characters 16-17:
+Method `m1` is declared as `__NeedsConcrete` but overrides a non-`__NeedsConcrete` method. Please add `__NeedsConcrete` to the overridden method or remove it from the current method. (The `__NeedsConcrete` attribute indicates that a method requires `static` to point to a concrete class) (Warn[12027])
   File "needs_concrete_traits_2.php", line 9, characters 26-27:
-  Cannot declare this method as __NeedsConcrete, since it overrides a non-__NeedsConcrete method
+  It is unsafe to declare this method as `__NeedsConcrete`, since it overrides a non-`__NeedsConcrete` method
   File "needs_concrete_traits_2.php", line 4, characters 26-27:
   Previously defined here

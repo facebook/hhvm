@@ -737,22 +737,36 @@ let check_abstract_overrides_concrete
                    `property);
              })
 
-let check_needs_concrete_override env parent_class_elt class_elt on_error =
+(** Why this check: It would be unsound for a class that needs concrete (`<<__NeedsConcrete>>`) to override one that does not,
+  * since a __NeedsConcrete method imposes stricter requirements on its input (`static` must point to a concrete class) *)
+let check_needs_concrete_override
+    env ~parent_class_elt class_ class_elt ~class_pos ~member_name =
   if
     (not (get_ce_readonly_prop_or_needs_concrete parent_class_elt))
     && get_ce_readonly_prop_or_needs_concrete class_elt
   then
-    (* It would be unsound for a class that needs concrete (`<<__NeedsConcrete>>`) to override one that does not, because
-     * then `<<__NeedsConcrete>>` methods have stricter requirements (`static` must point to a concrete class). *)
-    Typing_error_utils.add_typing_error
-      ~env
-      Typing_error.(
-        apply_reasons ~on_error
-        @@ Secondary.Needs_concrete_override
-             {
-               pos = Lazy.force class_elt.ce_pos;
-               parent_pos = Lazy.force parent_class_elt.ce_pos;
-             })
+    let defined_in_same_class =
+      String.equal class_elt.ce_origin (Cls.name class_)
+    in
+    let (error_pos, method_name_for_method_defined_outside_class) =
+      match
+        Pos_or_decl.get_raw_pos_or_decl_reference (Lazy.force class_elt.ce_pos)
+      with
+      | `Raw pos when defined_in_same_class -> (pos, None)
+      | `Raw _
+      | `Decl_ref _ ->
+        (class_pos, Some member_name)
+    in
+    Typing_warning_utils.add
+      env
+      ( error_pos,
+        Typing_warning.Needs_concrete_override,
+        {
+          Typing_warning.Needs_concrete_override.pos =
+            Lazy.force class_elt.ce_pos;
+          method_name_for_method_defined_outside_class;
+          parent_pos = Lazy.force parent_class_elt.ce_pos;
+        } )
 
 let detect_multiple_concrete_defs
     (class_elt, class_) (parent_class_elt, parent_class) =
@@ -1002,6 +1016,7 @@ let check_override
     ~parent_class
     ~(parent_type : decl_ty)
     ~parent_pos
+    ~class_pos
     ~(class_elt : class_elt)
     ~parent_class_elt
     on_error =
@@ -1059,7 +1074,13 @@ let check_override
     parent_class_elt
     class_elt
     on_error;
-  check_needs_concrete_override env parent_class_elt class_elt on_error;
+  check_needs_concrete_override
+    env
+    ~parent_class_elt
+    class_
+    class_elt
+    ~class_pos
+    ~member_name;
 
   let (lazy pos) = class_elt.ce_pos in
 
@@ -1582,6 +1603,7 @@ let check_class_against_parent_class_elt
           ~parent_type
           ~parent_pos
           ~class_elt
+          ~class_pos
           (on_error (parent_pos, Cls.name parent_class)) )
   | None ->
     (* The only case when a member belongs to a parent but not the child is if the parent is an
@@ -1770,7 +1792,13 @@ let default_constructor_ce class_ =
 
 (* When an interface defines a constructor, we check that they are compatible *)
 let check_constructors
-    ~parent_pos env (parent_class, parent_type) class_ psubst on_error =
+    ~parent_pos
+    env
+    (parent_class, parent_type)
+    class_
+    ~class_pos
+    psubst
+    on_error =
   let parent_is_interface = Ast_defs.is_c_interface (Cls.kind parent_class) in
   let parent_is_consistent =
     constructor_is_consistent (snd (Cls.construct parent_class))
@@ -1808,6 +1836,7 @@ let check_constructors
             ~parent_type
             ~parent_pos
             ~parent_class_elt:parent_cstr
+            ~class_pos
             ~class_elt:cstr
             on_error
         else
@@ -2166,6 +2195,7 @@ let check_class_extends_parent_constructors
     env
     (parent_class : (Pos.t * string) * decl_ty * decl_ty list * Cls.t)
     class_
+    ~class_pos
     on_error =
   let (_, parent_type, parent_tparaml, parent_class) = parent_class in
   let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
@@ -2175,6 +2205,7 @@ let check_class_extends_parent_constructors
       env
       (parent_class, parent_type)
       class_
+      ~class_pos
       psubst
       on_error
   in
@@ -2935,6 +2966,7 @@ let check_implements_extends_uses
           ~parent_pos:(fst parent_name)
           env
           parent
+          ~class_pos:name_pos
           class_
           (on_error parent_name))
   in

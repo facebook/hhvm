@@ -6593,18 +6593,6 @@ end = struct
     in
     create ~code:Error_code.EnumClassLabelUnknown ~reasons ()
 
-  let needs_concrete_override pos parent_pos =
-    let reasons =
-      lazy
-        [
-          ( pos,
-            "Cannot declare this method as __NeedsConcrete, since it overrides a non-__NeedsConcrete method"
-          );
-          (parent_pos, "Previously defined here");
-        ]
-    in
-    create ~code:Error_code.NeedsConcreteOverride ~reasons ()
-
   let higher_rank_tparam_escape
       tvar_pos pos_with_generic generic_reason generic_name =
     let reasons =
@@ -6841,8 +6829,6 @@ end = struct
       Eval_result.single (violated_refinement_constraint cstr)
     | Unknown_label { enum_name; decl_pos; most_similar } ->
       Eval_result.single (label_unknown enum_name decl_pos most_similar)
-    | Needs_concrete_override { pos; parent_pos } ->
-      Eval_result.single (needs_concrete_override pos parent_pos)
     | Higher_rank_tparam_escape
         { tvar_pos; pos_with_generic; generic_reason; generic_name } ->
       Eval_result.single

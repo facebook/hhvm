@@ -160,7 +160,7 @@ class AnyBase {
       : type_(std::move(type)), data_(std::move(data)) {}
 
   // Inplace constructor.
-  template <typename Tag, typename = if_concrete<Tag>, typename... Args>
+  template <ConcreteThriftTypeTag Tag, typename... Args>
   constexpr explicit AnyBase(Tag t, Args&&... args) noexcept
       : type_(t), data_(AnyData<Tag>{{std::forward<Args&&>(args)...}}) {}
 
@@ -231,7 +231,7 @@ class AnyRefWrapper : AnyBase<I> {
   AnyRefWrapper& operator=(AnyRefWrapper&&) noexcept = default;
 
   // Inplace constructor.
-  template <typename Tag, typename = if_concrete<Tag>, typename... Args>
+  template <ConcreteThriftTypeTag Tag, typename... Args>
   constexpr explicit AnyRefWrapper(Tag t, Args&&... args) noexcept
       : Base(std::move(t), std::forward<Args&&>(args)...) {}
 

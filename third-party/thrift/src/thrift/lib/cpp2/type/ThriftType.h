@@ -54,9 +54,6 @@ struct is_thrift_type_tag : is_concrete<Tag> {};
 template <typename Tag>
 constexpr bool is_thrift_type_tag_v = is_thrift_type_tag<Tag>::value;
 
-template <typename T>
-concept ThriftTypeTag = is_thrift_type_tag_v<T>;
-
 // If a given Thrift type tag is not concrete.
 //
 // For example:
@@ -69,6 +66,15 @@ concept ThriftTypeTag = is_thrift_type_tag_v<T>;
 template <typename Tag>
 constexpr bool is_abstract_v =
     is_thrift_type_tag<Tag>::value && !is_concrete<Tag>::value;
+
+template <typename T>
+concept ThriftTypeTag = is_thrift_type_tag_v<T>;
+
+template <typename T>
+concept ConcreteThriftTypeTag = ThriftTypeTag<T> && is_concrete_v<T>;
+
+template <typename T>
+concept AbstractThriftTypeTag = ThriftTypeTag<T> && is_abstract_v<T>;
 
 namespace detail {
 template <typename... Tags>
@@ -95,12 +101,6 @@ constexpr bool is_a_v =
 
 // Helpers to enable/disable declarations based on if a type tag matches
 // a constraint.
-template <typename Tag, typename R = void, typename...>
-using if_concrete = std::enable_if_t<is_concrete_v<Tag>, R>;
-template <typename Tag, typename R = void, typename...>
-using if_abstract = std::enable_if_t<is_abstract_v<Tag>, R>;
-template <typename Tag, typename R = void, typename...>
-using if_not_concrete = if_abstract<Tag, R>;
 template <typename CTag, typename Tag, typename R = void, typename...>
 using if_is_a = std::enable_if_t<is_a_v<CTag, Tag>, R>;
 

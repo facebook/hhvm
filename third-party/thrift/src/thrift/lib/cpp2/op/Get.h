@@ -39,7 +39,7 @@ namespace detail {
 
 using pa = ::apache::thrift::detail::st::private_access;
 
-template <typename Id, typename T, typename Enable = void>
+template <typename Id, typename T>
 struct Get;
 
 // Similar to std::find, but returns ordinal.
@@ -491,15 +491,15 @@ ord_result_t<F> find_by_ordinal_impl(F&& f, std::index_sequence<I...>) {
   return result;
 }
 
-template <typename Id, typename T, typename>
+template <typename Id, typename T>
 struct Get {
   template <typename U>
   constexpr decltype(auto) operator()(U&& obj) const {
     return access_field<get_ident<T, Id>>(std::forward<U>(obj));
   }
 };
-template <typename Id, typename Tag>
-struct Get<Id, Tag, type::if_concrete<Tag>> {
+template <typename Id, type::ConcreteThriftTypeTag Tag>
+struct Get<Id, Tag> {
   using T = type::native_type<Tag>;
   constexpr decltype(auto) operator()(T& obj) const {
     return op::get<Id, T>(obj);

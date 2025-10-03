@@ -306,13 +306,13 @@ static_assert(!is_a_v<cpp_type<int, i32_t>, cpp_type<int, i16_t>>);
 static_assert(!is_a_v<cpp_type<int, integral_c>, cpp_type<int, i32_t>>);
 
 // Test concrete helpers.
-template <typename Tag>
-constexpr if_concrete<Tag, bool> isConcrete() {
+template <ConcreteThriftTypeTag Tag>
+constexpr bool isConcrete() {
   return true;
 }
 
-template <typename Tag>
-constexpr if_not_concrete<Tag, bool> isConcrete() {
+template <AbstractThriftTypeTag Tag>
+constexpr bool isConcrete() {
   return false;
 }
 

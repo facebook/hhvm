@@ -23,23 +23,23 @@ namespace apache::thrift::op {
 
 /// Returns the serialized size of the avlue using the type tag.
 /// For example: serialized_size<false, type::int16_t>(prot, 1);
-template <bool ZeroCopy, typename Tag>
+template <bool ZeroCopy, type::ThriftTypeTag Tag>
 inline constexpr detail::SerializedSize<ZeroCopy, Tag> serialized_size{};
 
 /// Encodes the given value to the given protocol using the type tag.
 /// This handles adapted type.
 /// For example: encode<type::int16_t>(prot, 1);
-template <typename Tag>
+template <type::ThriftTypeTag Tag>
 inline constexpr detail::Encode<Tag> encode{};
 
 /// Decodes the value from the given protocol using the type tag.
 /// This handles adapted type.
 /// For example: decode<type::int16_t>(prot, i); // decode to variable i
-template <typename Tag>
+template <type::ThriftTypeTag Tag>
 inline constexpr detail::Decode<Tag> decode{};
 
 // Converts from a type tag to a wire type used on the protocol level.
-template <typename Tag>
+template <type::ThriftTypeTag Tag>
 inline constexpr apache::thrift::protocol::TType typeTagToTType =
     detail::typeTagToTType<Tag>;
 

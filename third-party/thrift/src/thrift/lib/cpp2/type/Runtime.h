@@ -47,7 +47,7 @@ class ConstRef final : public detail::BaseRef<ConstRef> {
   // 'capture' any other runtime type.
   /* implicit */ ConstRef(const detail::Dyn& other) noexcept : Base(other) {}
   // 'capture' any native type we can safely infer the tag for.
-  template <typename T, typename Tag = infer_tag<T>>
+  template <typename T, ConcreteThriftTypeTag Tag = infer_tag<T>>
   /* implicit */ ConstRef(T&& val) noexcept
       : ConstRef(Tag{}, std::forward<T>(val)) {}
   // 'capture' a std::string.
@@ -55,7 +55,7 @@ class ConstRef final : public detail::BaseRef<ConstRef> {
   /* implicit */ ConstRef(const std::string& val) noexcept
       : ConstRef(binary_t{}, val) {}
 
-  template <typename Tag, typename T>
+  template <ConcreteThriftTypeTag Tag, typename T>
   ConstRef(Tag, T&& val) : Base(op::detail::getAnyType<Tag, T>(), &val) {}
 
   template <typename IdT>
@@ -121,13 +121,13 @@ class Ref final : private detail::DynCmp<Ref, ConstRef>,
   using Base::ensure;
 
   // Throws on mismatch or if const.
-  template <typename Tag>
+  template <ConcreteThriftTypeTag Tag>
   native_type<Tag>& mut() {
     return Base::mut<Tag>();
   }
 
   // Returns nullptr on mismatch or if const.
-  template <typename Tag>
+  template <ConcreteThriftTypeTag Tag>
   native_type<Tag>* tryMut() noexcept {
     return Base::tryMut<Tag>();
   }
@@ -168,7 +168,7 @@ class Ref final : private detail::DynCmp<Ref, ConstRef>,
   friend Base;
   using Base::asRef;
 
-  template <typename Tag, typename T>
+  template <ConcreteThriftTypeTag Tag, typename T>
   Ref(Tag, T&& val) : Base(op::detail::getAnyType<Tag>(), &val) {}
 };
 
@@ -197,15 +197,15 @@ class Value : private detail::DynCmp<Value, ConstRef>,
   static Value create() {
     return create<infer_tag<T>>();
   }
-  template <typename Tag>
+  template <ConcreteThriftTypeTag Tag>
   static Value of(const native_type<Tag>& val) {
     return {Tag{}, val};
   }
-  template <typename Tag>
+  template <ConcreteThriftTypeTag Tag>
   static Value of(native_type<Tag>&& val) {
     return {Tag{}, std::move(val)};
   }
-  template <typename Tag>
+  template <ConcreteThriftTypeTag Tag>
   static Value of(std::unique_ptr<native_type<Tag>> val) {
     if (val == nullptr) {
       return {};
@@ -334,26 +334,26 @@ class Value : private detail::DynCmp<Value, ConstRef>,
  private:
   using Base::Base;
 
-  template <typename Tag, typename T = native_type<Tag>>
+  template <ConcreteThriftTypeTag Tag, typename T = native_type<Tag>>
   explicit Value(Tag, std::nullptr_t)
       : Base(
             op::detail::getAnyType<Tag, T>(),
             op::detail::getAnyType<Tag, T>()->make(nullptr, false)) {
     assert(ptr_ != nullptr);
   }
-  template <typename Tag, typename T>
+  template <ConcreteThriftTypeTag Tag, typename T>
   Value(Tag, std::unique_ptr<T> val)
       : Base(op::detail::getAnyType<Tag, T>(), val.release()) {
     assert(ptr_ != nullptr);
   }
-  template <typename Tag, typename T>
+  template <ConcreteThriftTypeTag Tag, typename T>
   Value(Tag, const T& val)
       : Base(
             op::detail::getAnyType<Tag, T>(),
             op::detail::getAnyType<Tag, T>()->make(&val, false)) {
     assert(ptr_ != nullptr);
   }
-  template <typename Tag, typename T>
+  template <ConcreteThriftTypeTag Tag, typename T>
   Value(Tag, T&& val)
       : Base(
             op::detail::getAnyType<Tag, T>(),

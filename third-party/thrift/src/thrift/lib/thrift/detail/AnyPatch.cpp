@@ -168,10 +168,16 @@ template <class Patch>
 void AnyPatch<Patch>::patchIfTypeIsImpl(
     type::Type type, type::AnyStruct any, bool after) {
   DynamicPatch patch{DynamicPatch::fromPatch(any)};
+  patchIfTypeIsImpl(std::move(type), std::move(patch), after);
+}
+
+template <class Patch>
+void AnyPatch<Patch>::patchIfTypeIsImpl(
+    type::Type type, protocol::DynamicPatch dynamicPatch, bool after) {
   if (after) {
-    data_.patchIfTypeIsAfter()[type].merge(patch);
+    data_.patchIfTypeIsAfter()[type].merge(std::move(dynamicPatch));
   } else {
-    data_.patchIfTypeIsPrior()[type].merge(patch);
+    data_.patchIfTypeIsPrior()[type].merge(std::move(dynamicPatch));
   }
 }
 

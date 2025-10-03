@@ -245,6 +245,16 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
     patchIfTypeIsImpl(std::move(type), std::move(patch), true);
   }
 
+  // WARNING TO USERS: This method does not do any type checking on the patch,
+  // meaning you need to make sure the DynamicPatch you provide applies to the
+  // type represented by the ensured Any. If not you will corrupt your data.
+  void ensureAndPatch(type::AnyStruct ensure, protocol::DynamicPatch patch) {
+    throwIfInvalidOrUnsupportedAny(ensure);
+    type::Type type = ensure.type().value();
+    ensureAny(std::move(ensure));
+    patchIfTypeIsImpl(std::move(type), std::move(patch), true);
+  }
+
   // Interop with AnyData
   // TODO(pranavtbhat): Replace with actual adapter/typedef support in patch
   void assign(const type::AnyData& val) { assign(val.toThrift()); }
@@ -357,6 +367,8 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   }
 
   void patchIfTypeIsImpl(type::Type type, type::AnyStruct any, bool after);
+  void patchIfTypeIsImpl(
+      type::Type type, protocol::DynamicPatch dynamicPatch, bool after);
 
   // Needed for merge.
   void patchIfTypeIs(

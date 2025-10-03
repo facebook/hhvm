@@ -213,6 +213,7 @@
   type_parameter_env_ops
   typing_alias
   typing_ast_print
+  typing_argument
   typing_arithmetic
   typing_array_access
   typing_async

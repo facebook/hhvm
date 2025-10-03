@@ -57,8 +57,6 @@ val file_attributes :
 val type_param :
   Typing_env_types.env -> Nast.tparam -> Typing_env_types.env * Tast.tparam
 
-type dyn_func_kind
-
 (** Typechecks a call.
  * Returns in this order the typed expressions for the arguments, for the
  * variadic arguments, the return type, and a boolean indicating whether fake
@@ -71,7 +69,7 @@ val call :
   expected:Typing_helpers.ExpectedTy.t option ->
   ?nullsafe:Pos.t option ->
   ?in_await:Typing_reason.t ->
-  ?dynamic_func:dyn_func_kind ->
+  ?dynamic_func:Typing_argument.dyn_func_kind ->
   expr_pos:Pos.t ->
   recv_pos:Pos.t ->
   id_pos:Pos.t ->

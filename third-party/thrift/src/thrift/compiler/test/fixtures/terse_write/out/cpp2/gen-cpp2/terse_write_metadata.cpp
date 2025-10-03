@@ -34,23 +34,21 @@ void EnumMetadata<::facebook::thrift::test::terse_write::MyEnum>::gen(ThriftMeta
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("terse_write.MyStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& terse_write_MyStruct = res.first->second;
-  terse_write_MyStruct.name() = "terse_write.MyStruct";
+  ::apache::thrift::metadata::ThriftStruct& terse_write_MyStruct = res.metadata;
   terse_write_MyStruct.is_union() = false;
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("terse_write.MyUnion", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyUnion>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& terse_write_MyUnion = res.first->second;
-  terse_write_MyUnion.name() = "terse_write.MyUnion";
+  ::apache::thrift::metadata::ThriftStruct& terse_write_MyUnion = res.metadata;
   terse_write_MyUnion.is_union() = true;
   static const auto* const
   terse_write_MyUnion_fields = new std::array<EncodedThriftField, 14>{ {
@@ -64,16 +62,15 @@ StructMetadata<::facebook::thrift::test::terse_write::MyUnion>::gen(ThriftMetada
     field.structured_annotations() = f.structured_annotations;
     terse_write_MyUnion.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("terse_write.MyStructWithCustomDefault", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& terse_write_MyStructWithCustomDefault = res.first->second;
-  terse_write_MyStructWithCustomDefault.name() = "terse_write.MyStructWithCustomDefault";
+  ::apache::thrift::metadata::ThriftStruct& terse_write_MyStructWithCustomDefault = res.metadata;
   terse_write_MyStructWithCustomDefault.is_union() = false;
   static const auto* const
   terse_write_MyStructWithCustomDefault_fields = new std::array<EncodedThriftField, 1>{ {
@@ -87,16 +84,15 @@ StructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>
     field.structured_annotations() = f.structured_annotations;
     terse_write_MyStructWithCustomDefault.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("terse_write.StructLevelTerseStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& terse_write_StructLevelTerseStruct = res.first->second;
-  terse_write_StructLevelTerseStruct.name() = "terse_write.StructLevelTerseStruct";
+  ::apache::thrift::metadata::ThriftStruct& terse_write_StructLevelTerseStruct = res.metadata;
   terse_write_StructLevelTerseStruct.is_union() = false;
   static const auto* const
   terse_write_StructLevelTerseStruct_fields = new std::array<EncodedThriftField, 15>{ {
@@ -111,16 +107,15 @@ StructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::g
     terse_write_StructLevelTerseStruct.fields()->push_back(std::move(field));
   }
   terse_write_StructLevelTerseStruct.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("terse_write.FieldLevelTerseStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& terse_write_FieldLevelTerseStruct = res.first->second;
-  terse_write_FieldLevelTerseStruct.name() = "terse_write.FieldLevelTerseStruct";
+  ::apache::thrift::metadata::ThriftStruct& terse_write_FieldLevelTerseStruct = res.metadata;
   terse_write_FieldLevelTerseStruct.is_union() = false;
   static const auto* const
   terse_write_FieldLevelTerseStruct_fields = new std::array<EncodedThriftField, 30>{ {
@@ -134,16 +129,15 @@ StructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::ge
     field.structured_annotations() = f.structured_annotations;
     terse_write_FieldLevelTerseStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("terse_write.AdaptedFields", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& terse_write_AdaptedFields = res.first->second;
-  terse_write_AdaptedFields.name() = "terse_write.AdaptedFields";
+  ::apache::thrift::metadata::ThriftStruct& terse_write_AdaptedFields = res.metadata;
   terse_write_AdaptedFields.is_union() = false;
   static const auto* const
   terse_write_AdaptedFields_fields = new std::array<EncodedThriftField, 3>{ {
@@ -158,16 +152,15 @@ StructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>::gen(Thrift
     terse_write_AdaptedFields.fields()->push_back(std::move(field));
   }
   terse_write_AdaptedFields.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("terse_write.TerseException", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::TerseException>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& terse_write_TerseException = res.first->second;
-  terse_write_TerseException.name() = "terse_write.TerseException";
+  ::apache::thrift::metadata::ThriftStruct& terse_write_TerseException = res.metadata;
   terse_write_TerseException.is_union() = false;
   static const auto* const
   terse_write_TerseException_fields = new std::array<EncodedThriftField, 1>{ {
@@ -182,7 +175,7 @@ StructMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(Thrif
     terse_write_TerseException.fields()->push_back(std::move(field));
   }
   terse_write_TerseException.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 
 void ExceptionMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(ThriftMetadata& metadata) {

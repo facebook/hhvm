@@ -34,12 +34,11 @@ void EnumMetadata<::a::different::ns::AnEnum>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::a::different::ns::AStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("includes.AStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::a::different::ns::AStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& includes_AStruct = res.first->second;
-  includes_AStruct.name() = "includes.AStruct";
+  ::apache::thrift::metadata::ThriftStruct& includes_AStruct = res.metadata;
   includes_AStruct.is_union() = false;
   static const auto* const
   includes_AStruct_fields = new std::array<EncodedThriftField, 1>{ {
@@ -53,16 +52,15 @@ StructMetadata<::a::different::ns::AStruct>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     includes_AStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::a::different::ns::AStructB>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("includes.AStructB", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::a::different::ns::AStructB>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& includes_AStructB = res.first->second;
-  includes_AStructB.name() = "includes.AStructB";
+  ::apache::thrift::metadata::ThriftStruct& includes_AStructB = res.metadata;
   includes_AStructB.is_union() = false;
   static const auto* const
   includes_AStructB_fields = new std::array<EncodedThriftField, 1>{ {
@@ -76,7 +74,7 @@ StructMetadata<::a::different::ns::AStructB>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     includes_AStructB.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 
 } // namespace md

@@ -53,12 +53,11 @@ void EnumMetadata<::test::fixtures::enumstrict::MyBigEnum>::gen(ThriftMetadata& 
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::enumstrict::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::enumstrict::MyStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.first->second;
-  module_MyStruct.name() = "module.MyStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.metadata;
   module_MyStruct.is_union() = false;
   static const auto* const
   module_MyStruct_fields = new std::array<EncodedThriftField, 2>{ {
@@ -72,7 +71,7 @@ StructMetadata<::test::fixtures::enumstrict::MyStruct>::gen(ThriftMetadata& meta
     field.structured_annotations() = f.structured_annotations;
     module_MyStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 
 } // namespace md

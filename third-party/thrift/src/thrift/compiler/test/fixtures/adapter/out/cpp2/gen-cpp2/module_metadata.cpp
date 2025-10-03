@@ -40,12 +40,11 @@ void EnumMetadata<::facebook::thrift::test::ThriftAdaptedEnum>::gen(ThriftMetada
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MyAnnotation>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyAnnotation", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::MyAnnotation>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyAnnotation = res.first->second;
-  module_MyAnnotation.name() = "module.MyAnnotation";
+  ::apache::thrift::metadata::ThriftStruct& module_MyAnnotation = res.metadata;
   module_MyAnnotation.is_union() = false;
   static const auto* const
   module_MyAnnotation_fields = new std::array<EncodedThriftField, 2>{ {
@@ -61,16 +60,15 @@ StructMetadata<::facebook::thrift::test::MyAnnotation>::gen(ThriftMetadata& meta
   }
   module_MyAnnotation.structured_annotations()->push_back(*cvStruct("python.Adapter", { {"name", cvString("my.module.Adapter2") }, {"typeHint", cvString("my.another.module.AdaptedType2[]") } }).cv_struct());
   module_MyAnnotation.structured_annotations()->push_back(*cvStruct("scope.Transitive", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.Foo", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::Foo>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Foo = res.first->second;
-  module_Foo.name() = "module.Foo";
+  ::apache::thrift::metadata::ThriftStruct& module_Foo = res.metadata;
   module_Foo.is_union() = false;
   static const auto* const
   module_Foo_fields = new std::array<EncodedThriftField, 15>{ {
@@ -85,16 +83,15 @@ StructMetadata<::facebook::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
     module_Foo.fields()->push_back(std::move(field));
   }
   module_Foo.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Baz>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.Baz", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::Baz>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Baz = res.first->second;
-  module_Baz.name() = "module.Baz";
+  ::apache::thrift::metadata::ThriftStruct& module_Baz = res.metadata;
   module_Baz.is_union() = true;
   static const auto* const
   module_Baz_fields = new std::array<EncodedThriftField, 5>{ {
@@ -109,16 +106,15 @@ StructMetadata<::facebook::thrift::test::Baz>::gen(ThriftMetadata& metadata) {
     module_Baz.fields()->push_back(std::move(field));
   }
   module_Baz.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Bar>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.Bar", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::Bar>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Bar = res.first->second;
-  module_Bar.name() = "module.Bar";
+  ::apache::thrift::metadata::ThriftStruct& module_Bar = res.metadata;
   module_Bar.is_union() = false;
   static const auto* const
   module_Bar_fields = new std::array<EncodedThriftField, 8>{ {
@@ -132,16 +128,15 @@ StructMetadata<::facebook::thrift::test::Bar>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_Bar.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::detail::DirectlyAdapted>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.DirectlyAdapted", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::detail::DirectlyAdapted>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_DirectlyAdapted = res.first->second;
-  module_DirectlyAdapted.name() = "module.DirectlyAdapted";
+  ::apache::thrift::metadata::ThriftStruct& module_DirectlyAdapted = res.metadata;
   module_DirectlyAdapted.is_union() = false;
   static const auto* const
   module_DirectlyAdapted_fields = new std::array<EncodedThriftField, 1>{ {
@@ -157,16 +152,15 @@ StructMetadata<::facebook::thrift::test::detail::DirectlyAdapted>::gen(ThriftMet
   }
   module_DirectlyAdapted.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter") } }).cv_struct());
   module_DirectlyAdapted.structured_annotations()->push_back(*cvStruct("python.Adapter", { {"name", cvString("my.module.Adapter") }, {"typeHint", cvString("my.another.module.AdaptedType") } }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.IndependentDirectlyAdapted", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::detail::IndependentDirectlyAdapted>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_IndependentDirectlyAdapted = res.first->second;
-  module_IndependentDirectlyAdapted.name() = "module.IndependentDirectlyAdapted";
+  ::apache::thrift::metadata::ThriftStruct& module_IndependentDirectlyAdapted = res.metadata;
   module_IndependentDirectlyAdapted.is_union() = false;
   static const auto* const
   module_IndependentDirectlyAdapted_fields = new std::array<EncodedThriftField, 1>{ {
@@ -181,16 +175,15 @@ StructMetadata<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::ge
     module_IndependentDirectlyAdapted.fields()->push_back(std::move(field));
   }
   module_IndependentDirectlyAdapted.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter") }, {"adaptedType", cvString("::my::Type") } }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::StructWithFieldAdapter>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.StructWithFieldAdapter", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::StructWithFieldAdapter>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_StructWithFieldAdapter = res.first->second;
-  module_StructWithFieldAdapter.name() = "module.StructWithFieldAdapter";
+  ::apache::thrift::metadata::ThriftStruct& module_StructWithFieldAdapter = res.metadata;
   module_StructWithFieldAdapter.is_union() = false;
   static const auto* const
   module_StructWithFieldAdapter_fields = new std::array<EncodedThriftField, 4>{ {
@@ -204,16 +197,15 @@ StructMetadata<::facebook::thrift::test::StructWithFieldAdapter>::gen(ThriftMeta
     field.structured_annotations() = f.structured_annotations;
     module_StructWithFieldAdapter.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::TerseAdaptedFields>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.TerseAdaptedFields", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::TerseAdaptedFields>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_TerseAdaptedFields = res.first->second;
-  module_TerseAdaptedFields.name() = "module.TerseAdaptedFields";
+  ::apache::thrift::metadata::ThriftStruct& module_TerseAdaptedFields = res.metadata;
   module_TerseAdaptedFields.is_union() = false;
   static const auto* const
   module_TerseAdaptedFields_fields = new std::array<EncodedThriftField, 3>{ {
@@ -227,16 +219,15 @@ StructMetadata<::facebook::thrift::test::TerseAdaptedFields>::gen(ThriftMetadata
     field.structured_annotations() = f.structured_annotations;
     module_TerseAdaptedFields.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::B>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.B", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::B>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_B = res.first->second;
-  module_B.name() = "module.B";
+  ::apache::thrift::metadata::ThriftStruct& module_B = res.metadata;
   module_B.is_union() = false;
   static const auto* const
   module_B_fields = new std::array<EncodedThriftField, 1>{ {
@@ -250,27 +241,25 @@ StructMetadata<::facebook::thrift::test::B>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_B.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::A>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.A", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::A>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_A = res.first->second;
-  module_A.name() = "module.A";
+  ::apache::thrift::metadata::ThriftStruct& module_A = res.metadata;
   module_A.is_union() = false;
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Config>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.Config", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::Config>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Config = res.first->second;
-  module_Config.name() = "module.Config";
+  ::apache::thrift::metadata::ThriftStruct& module_Config = res.metadata;
   module_Config.is_union() = false;
   static const auto* const
   module_Config_fields = new std::array<EncodedThriftField, 1>{ {
@@ -288,16 +277,15 @@ StructMetadata<::facebook::thrift::test::Config>::gen(ThriftMetadata& metadata) 
   module_Config.structured_annotations()->push_back(*cvStruct("python.Adapter", { {"name", cvString("my.ConfigAdapter") }, {"typeHint", cvString("my.ConfiguredVar[]") } }).cv_struct());
   module_Config.structured_annotations()->push_back(*cvStruct("scope.Transitive", {  }).cv_struct());
   module_Config.structured_annotations()->push_back(*cvStruct("thrift.Experimental", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::MyStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.first->second;
-  module_MyStruct.name() = "module.MyStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.metadata;
   module_MyStruct.is_union() = false;
   static const auto* const
   module_MyStruct_fields = new std::array<EncodedThriftField, 2>{ {
@@ -312,16 +300,15 @@ StructMetadata<::facebook::thrift::test::MyStruct>::gen(ThriftMetadata& metadata
     module_MyStruct.fields()->push_back(std::move(field));
   }
   module_MyStruct.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::AdaptTestStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.AdaptTestStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::AdaptTestStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_AdaptTestStruct = res.first->second;
-  module_AdaptTestStruct.name() = "module.AdaptTestStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_AdaptTestStruct = res.metadata;
   module_AdaptTestStruct.is_union() = false;
   static const auto* const
   module_AdaptTestStruct_fields = new std::array<EncodedThriftField, 10>{ {
@@ -335,16 +322,15 @@ StructMetadata<::facebook::thrift::test::AdaptTestStruct>::gen(ThriftMetadata& m
     field.structured_annotations() = f.structured_annotations;
     module_AdaptTestStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::AdaptTemplatedTestStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.AdaptTemplatedTestStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::AdaptTemplatedTestStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_AdaptTemplatedTestStruct = res.first->second;
-  module_AdaptTemplatedTestStruct.name() = "module.AdaptTemplatedTestStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_AdaptTemplatedTestStruct = res.metadata;
   module_AdaptTemplatedTestStruct.is_union() = false;
   static const auto* const
   module_AdaptTemplatedTestStruct_fields = new std::array<EncodedThriftField, 22>{ {
@@ -358,16 +344,15 @@ StructMetadata<::facebook::thrift::test::AdaptTemplatedTestStruct>::gen(ThriftMe
     field.structured_annotations() = f.structured_annotations;
     module_AdaptTemplatedTestStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.AdaptTemplatedNestedTestStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_AdaptTemplatedNestedTestStruct = res.first->second;
-  module_AdaptTemplatedNestedTestStruct.name() = "module.AdaptTemplatedNestedTestStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_AdaptTemplatedNestedTestStruct = res.metadata;
   module_AdaptTemplatedNestedTestStruct.is_union() = false;
   static const auto* const
   module_AdaptTemplatedNestedTestStruct_fields = new std::array<EncodedThriftField, 1>{ {
@@ -381,16 +366,15 @@ StructMetadata<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::gen(Th
     field.structured_annotations() = f.structured_annotations;
     module_AdaptTemplatedNestedTestStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::ThriftAdaptTestUnion>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.AdaptTestUnion", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::ThriftAdaptTestUnion>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_AdaptTestUnion = res.first->second;
-  module_AdaptTestUnion.name() = "module.AdaptTestUnion";
+  ::apache::thrift::metadata::ThriftStruct& module_AdaptTestUnion = res.metadata;
   module_AdaptTestUnion.is_union() = true;
   static const auto* const
   module_AdaptTestUnion_fields = new std::array<EncodedThriftField, 2>{ {
@@ -405,16 +389,15 @@ StructMetadata<::facebook::thrift::test::ThriftAdaptTestUnion>::gen(ThriftMetada
     module_AdaptTestUnion.fields()->push_back(std::move(field));
   }
   module_AdaptTestUnion.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("ThriftAdaptTestUnion") } }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::ThriftAdaptedStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.AdaptedStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::ThriftAdaptedStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_AdaptedStruct = res.first->second;
-  module_AdaptedStruct.name() = "module.AdaptedStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_AdaptedStruct = res.metadata;
   module_AdaptedStruct.is_union() = false;
   static const auto* const
   module_AdaptedStruct_fields = new std::array<EncodedThriftField, 1>{ {
@@ -429,16 +412,15 @@ StructMetadata<::facebook::thrift::test::ThriftAdaptedStruct>::gen(ThriftMetadat
     module_AdaptedStruct.fields()->push_back(std::move(field));
   }
   module_AdaptedStruct.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("ThriftAdaptedStruct") } }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.DirectlyAdaptedStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::detail::DirectlyAdaptedStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_DirectlyAdaptedStruct = res.first->second;
-  module_DirectlyAdaptedStruct.name() = "module.DirectlyAdaptedStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_DirectlyAdaptedStruct = res.metadata;
   module_DirectlyAdaptedStruct.is_union() = false;
   static const auto* const
   module_DirectlyAdaptedStruct_fields = new std::array<EncodedThriftField, 1>{ {
@@ -453,16 +435,15 @@ StructMetadata<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::gen(Thr
     module_DirectlyAdaptedStruct.fields()->push_back(std::move(field));
   }
   module_DirectlyAdaptedStruct.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::StructFieldAdaptedStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.StructFieldAdaptedStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::StructFieldAdaptedStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_StructFieldAdaptedStruct = res.first->second;
-  module_StructFieldAdaptedStruct.name() = "module.StructFieldAdaptedStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_StructFieldAdaptedStruct = res.metadata;
   module_StructFieldAdaptedStruct.is_union() = false;
   static const auto* const
   module_StructFieldAdaptedStruct_fields = new std::array<EncodedThriftField, 4>{ {
@@ -476,16 +457,15 @@ StructMetadata<::facebook::thrift::test::StructFieldAdaptedStruct>::gen(ThriftMe
     field.structured_annotations() = f.structured_annotations;
     module_StructFieldAdaptedStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::CircularAdaptee>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.CircularAdaptee", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::CircularAdaptee>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_CircularAdaptee = res.first->second;
-  module_CircularAdaptee.name() = "module.CircularAdaptee";
+  ::apache::thrift::metadata::ThriftStruct& module_CircularAdaptee = res.metadata;
   module_CircularAdaptee.is_union() = false;
   static const auto* const
   module_CircularAdaptee_fields = new std::array<EncodedThriftField, 1>{ {
@@ -499,16 +479,15 @@ StructMetadata<::facebook::thrift::test::CircularAdaptee>::gen(ThriftMetadata& m
     field.structured_annotations() = f.structured_annotations;
     module_CircularAdaptee.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::CircularStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.CircularStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::CircularStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_CircularStruct = res.first->second;
-  module_CircularStruct.name() = "module.CircularStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_CircularStruct = res.metadata;
   module_CircularStruct.is_union() = false;
   static const auto* const
   module_CircularStruct_fields = new std::array<EncodedThriftField, 1>{ {
@@ -522,16 +501,15 @@ StructMetadata<::facebook::thrift::test::CircularStruct>::gen(ThriftMetadata& me
     field.structured_annotations() = f.structured_annotations;
     module_CircularStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::ReorderedStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.ReorderedStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::ReorderedStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_ReorderedStruct = res.first->second;
-  module_ReorderedStruct.name() = "module.ReorderedStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_ReorderedStruct = res.metadata;
   module_ReorderedStruct.is_union() = false;
   static const auto* const
   module_ReorderedStruct_fields = new std::array<EncodedThriftField, 1>{ {
@@ -545,28 +523,26 @@ StructMetadata<::facebook::thrift::test::ReorderedStruct>::gen(ThriftMetadata& m
     field.structured_annotations() = f.structured_annotations;
     module_ReorderedStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::detail::DeclaredAfterStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.DeclaredAfterStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::detail::DeclaredAfterStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_DeclaredAfterStruct = res.first->second;
-  module_DeclaredAfterStruct.name() = "module.DeclaredAfterStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_DeclaredAfterStruct = res.metadata;
   module_DeclaredAfterStruct.is_union() = false;
   module_DeclaredAfterStruct.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>") } }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::UnderlyingRenamedStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.RenamedStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::UnderlyingRenamedStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_RenamedStruct = res.first->second;
-  module_RenamedStruct.name() = "module.RenamedStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_RenamedStruct = res.metadata;
   module_RenamedStruct.is_union() = false;
   static const auto* const
   module_RenamedStruct_fields = new std::array<EncodedThriftField, 1>{ {
@@ -581,16 +557,15 @@ StructMetadata<::facebook::thrift::test::UnderlyingRenamedStruct>::gen(ThriftMet
     module_RenamedStruct.fields()->push_back(std::move(field));
   }
   module_RenamedStruct.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") }, {"underlyingName", cvString("UnderlyingRenamedStruct") } }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.SameNamespaceStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::UnderlyingSameNamespaceStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_SameNamespaceStruct = res.first->second;
-  module_SameNamespaceStruct.name() = "module.SameNamespaceStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_SameNamespaceStruct = res.metadata;
   module_SameNamespaceStruct.is_union() = false;
   static const auto* const
   module_SameNamespaceStruct_fields = new std::array<EncodedThriftField, 1>{ {
@@ -605,28 +580,26 @@ StructMetadata<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::gen(Thr
     module_SameNamespaceStruct.fields()->push_back(std::move(field));
   }
   module_SameNamespaceStruct.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") }, {"underlyingName", cvString("UnderlyingSameNamespaceStruct") }, {"extraNamespace", cvString("") } }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::detail::HeapAllocated>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.HeapAllocated", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::detail::HeapAllocated>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_HeapAllocated = res.first->second;
-  module_HeapAllocated.name() = "module.HeapAllocated";
+  ::apache::thrift::metadata::ThriftStruct& module_HeapAllocated = res.metadata;
   module_HeapAllocated.is_union() = false;
   module_HeapAllocated.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::MoveOnlyAdapter") }, {"moveOnly", cvBool(true) } }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MoveOnly>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MoveOnly", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::MoveOnly>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MoveOnly = res.first->second;
-  module_MoveOnly.name() = "module.MoveOnly";
+  ::apache::thrift::metadata::ThriftStruct& module_MoveOnly = res.metadata;
   module_MoveOnly.is_union() = false;
   static const auto* const
   module_MoveOnly_fields = new std::array<EncodedThriftField, 1>{ {
@@ -640,16 +613,15 @@ StructMetadata<::facebook::thrift::test::MoveOnly>::gen(ThriftMetadata& metadata
     field.structured_annotations() = f.structured_annotations;
     module_MoveOnly.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::AlsoMoveOnly>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.AlsoMoveOnly", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::AlsoMoveOnly>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_AlsoMoveOnly = res.first->second;
-  module_AlsoMoveOnly.name() = "module.AlsoMoveOnly";
+  ::apache::thrift::metadata::ThriftStruct& module_AlsoMoveOnly = res.metadata;
   module_AlsoMoveOnly.is_union() = false;
   static const auto* const
   module_AlsoMoveOnly_fields = new std::array<EncodedThriftField, 1>{ {
@@ -663,41 +635,38 @@ StructMetadata<::facebook::thrift::test::AlsoMoveOnly>::gen(ThriftMetadata& meta
     field.structured_annotations() = f.structured_annotations;
     module_AlsoMoveOnly.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::ApplyAdapter>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.ApplyAdapter", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::ApplyAdapter>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_ApplyAdapter = res.first->second;
-  module_ApplyAdapter.name() = "module.ApplyAdapter";
+  ::apache::thrift::metadata::ThriftStruct& module_ApplyAdapter = res.metadata;
   module_ApplyAdapter.is_union() = false;
   module_ApplyAdapter.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct());
   module_ApplyAdapter.structured_annotations()->push_back(*cvStruct("scope.Transitive", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::detail::TransitiveAdapted>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.TransitiveAdapted", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::detail::TransitiveAdapted>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_TransitiveAdapted = res.first->second;
-  module_TransitiveAdapted.name() = "module.TransitiveAdapted";
+  ::apache::thrift::metadata::ThriftStruct& module_TransitiveAdapted = res.metadata;
   module_TransitiveAdapted.is_union() = false;
   module_TransitiveAdapted.structured_annotations()->push_back(*cvStruct("module.ApplyAdapter", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::CountingStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.CountingStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::CountingStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_CountingStruct = res.first->second;
-  module_CountingStruct.name() = "module.CountingStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_CountingStruct = res.metadata;
   module_CountingStruct.is_union() = false;
   static const auto* const
   module_CountingStruct_fields = new std::array<EncodedThriftField, 3>{ {
@@ -711,16 +680,15 @@ StructMetadata<::facebook::thrift::test::CountingStruct>::gen(ThriftMetadata& me
     field.structured_annotations() = f.structured_annotations;
     module_CountingStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Person>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.Person", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::Person>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Person = res.first->second;
-  module_Person.name() = "module.Person";
+  ::apache::thrift::metadata::ThriftStruct& module_Person = res.metadata;
   module_Person.is_union() = false;
   static const auto* const
   module_Person_fields = new std::array<EncodedThriftField, 1>{ {
@@ -736,16 +704,15 @@ StructMetadata<::facebook::thrift::test::Person>::gen(ThriftMetadata& metadata) 
   }
   module_Person.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::VariableAdapter") } }).cv_struct());
   module_Person.structured_annotations()->push_back(*cvStruct("scope.Transitive", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Person2>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.Person2", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::Person2>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Person2 = res.first->second;
-  module_Person2.name() = "module.Person2";
+  ::apache::thrift::metadata::ThriftStruct& module_Person2 = res.metadata;
   module_Person2.is_union() = false;
   static const auto* const
   module_Person2_fields = new std::array<EncodedThriftField, 1>{ {
@@ -759,16 +726,15 @@ StructMetadata<::facebook::thrift::test::Person2>::gen(ThriftMetadata& metadata)
     field.structured_annotations() = f.structured_annotations;
     module_Person2.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Renamed>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.RenamedStructWithStructAdapterAndFieldAdapter", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::Renamed>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_RenamedStructWithStructAdapterAndFieldAdapter = res.first->second;
-  module_RenamedStructWithStructAdapterAndFieldAdapter.name() = "module.RenamedStructWithStructAdapterAndFieldAdapter";
+  ::apache::thrift::metadata::ThriftStruct& module_RenamedStructWithStructAdapterAndFieldAdapter = res.metadata;
   module_RenamedStructWithStructAdapterAndFieldAdapter.is_union() = false;
   static const auto* const
   module_RenamedStructWithStructAdapterAndFieldAdapter_fields = new std::array<EncodedThriftField, 1>{ {
@@ -783,7 +749,7 @@ StructMetadata<::facebook::thrift::test::Renamed>::gen(ThriftMetadata& metadata)
     module_RenamedStructWithStructAdapterAndFieldAdapter.fields()->push_back(std::move(field));
   }
   module_RenamedStructWithStructAdapterAndFieldAdapter.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::StructAdapter") }, {"underlyingName", cvString("Renamed") } }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>>::gen_func([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {

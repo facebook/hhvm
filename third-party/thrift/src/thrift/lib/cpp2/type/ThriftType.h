@@ -104,23 +104,6 @@ constexpr bool is_a_v =
 template <typename CTag, typename Tag, typename R = void, typename...>
 using if_is_a = std::enable_if_t<is_a_v<CTag, Tag>, R>;
 
-// Helpers for applying the conditions.
-namespace bound {
-struct is_concrete {
-  template <typename Tag>
-  using apply = type::is_concrete<Tag>;
-};
-struct is_thrift_type_tag {
-  template <typename Tag>
-  using apply = type::is_thrift_type_tag<Tag>;
-};
-template <typename CTag>
-struct is_a {
-  template <typename Tag>
-  using apply = std::bool_constant<type::is_a_v<Tag, CTag>>;
-};
-} // namespace bound
-
 ////
 // Implemnation details
 

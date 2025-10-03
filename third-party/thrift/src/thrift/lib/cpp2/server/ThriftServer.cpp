@@ -104,8 +104,6 @@ THRIFT_FLAG_DEFINE_bool(server_fizz_enable_aegis, false);
 THRIFT_FLAG_DEFINE_bool(server_fizz_prefer_psk_ke, false);
 THRIFT_FLAG_DEFINE_bool(server_fizz_enable_receiving_dc, false);
 THRIFT_FLAG_DEFINE_bool(server_fizz_enable_presenting_dc, false);
-THRIFT_FLAG_DEFINE_bool(
-    init_decorated_processor_factory_only_resource_pools_checks, false);
 THRIFT_FLAG_DEFINE_bool(default_sync_max_requests_to_concurrency_limit, false);
 THRIFT_FLAG_DEFINE_bool(default_sync_max_qps_to_execution_rate, false);
 
@@ -270,9 +268,7 @@ ThriftServer::ThriftServer()
       addresses_(1),
       wShutdownSocketSet_(folly::tryGetShutdownSocketSet()),
       lastRequestTime_(
-          std::chrono::steady_clock::now().time_since_epoch().count()),
-      initDecoratedProcessorFactoryOnlyResourcePools_(THRIFT_FLAG(
-          init_decorated_processor_factory_only_resource_pools_checks)) {
+          std::chrono::steady_clock::now().time_since_epoch().count()) {
   tracker_.emplace(instrumentation::kThriftServerTrackerKey, *this);
   initializeDefaults();
 }
@@ -1216,18 +1212,8 @@ bool ThriftServer::runtimeResourcePoolsChecksImpl() {
     }
     runtimeDisableResourcePoolsDeprecated("setupThreadManagerBeforeHandler");
   } else {
-    // A call to ensureProcessedServiceDescriptionInitialized causes any
-    // ServerModule added afterwards to not work, since this
-    // call finalizes the list of modules.
-    // The fix for this bug is to call
-    // ensureDecoratedProcessorFactoryInitialized instead. We are branching
-    // here based on the value of the flag used to gate the rollout of this fix.
-    if (initDecoratedProcessorFactoryOnlyResourcePools_) {
-      ensureDecoratedProcessorFactoryInitialized();
-    } else {
-      ensureProcessedServiceDescriptionInitialized();
-    }
-    runtimeServerActions_.moduleListFinalized = true;
+    // Initialize decorated processor factory, if not done yet.
+    ensureDecoratedProcessorFactoryInitialized();
 
     // Check whether there are any wildcard services.
     auto methodMetadata = getDecoratedProcessorFactory().createMethodMetadata();
@@ -1812,6 +1798,7 @@ void ThriftServer::ensureProcessedServiceDescriptionInitialized() {
     processedServiceDescription_ =
         ProcessedServiceDescription::createAndActivate(
             *this, ProcessedServiceDescription{std::move(modules)});
+    runtimeServerActions_.moduleListFinalized = true;
   }
 }
 

@@ -34,11 +34,12 @@ void EnumMetadata<::facebook::thrift::test::Result>::gen(ThriftMetadata& metadat
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::CustomException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::CustomException>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.CustomException", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_CustomException = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_CustomException = res.first->second;
+  module_CustomException.name() = "module.CustomException";
   module_CustomException.is_union() = false;
   static const auto* const
   module_CustomException_fields = new std::array<EncodedThriftField, 2>{ {
@@ -52,7 +53,7 @@ StructMetadata<::facebook::thrift::test::CustomException>::gen(ThriftMetadata& m
     field.structured_annotations() = f.structured_annotations;
     module_CustomException.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 
 void ExceptionMetadata<::facebook::thrift::test::CustomException>::gen(ThriftMetadata& metadata) {

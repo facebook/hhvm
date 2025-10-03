@@ -41,11 +41,12 @@ void EnumMetadata<::cpp2::TypedEnum>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::MyUnion>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.MyUnion", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyUnion = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_MyUnion = res.first->second;
+  module_MyUnion.name() = "module.MyUnion";
   module_MyUnion.is_union() = true;
   static const auto* const
   module_MyUnion_fields = new std::array<EncodedThriftField, 2>{ {
@@ -59,15 +60,16 @@ StructMetadata<::cpp2::MyUnion>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_MyUnion.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::NonTriviallyDestructibleUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::NonTriviallyDestructibleUnion>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.NonTriviallyDestructibleUnion", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_NonTriviallyDestructibleUnion = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_NonTriviallyDestructibleUnion = res.first->second;
+  module_NonTriviallyDestructibleUnion.name() = "module.NonTriviallyDestructibleUnion";
   module_NonTriviallyDestructibleUnion.is_union() = true;
   static const auto* const
   module_NonTriviallyDestructibleUnion_fields = new std::array<EncodedThriftField, 1>{ {
@@ -81,15 +83,16 @@ StructMetadata<::cpp2::NonTriviallyDestructibleUnion>::gen(ThriftMetadata& metad
     field.structured_annotations() = f.structured_annotations;
     module_NonTriviallyDestructibleUnion.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::MyField>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::MyField>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.MyField", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyField = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_MyField = res.first->second;
+  module_MyField.name() = "module.MyField";
   module_MyField.is_union() = false;
   static const auto* const
   module_MyField_fields = new std::array<EncodedThriftField, 9>{ {
@@ -103,15 +106,16 @@ StructMetadata<::cpp2::MyField>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_MyField.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::MyStruct>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.MyStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.first->second;
+  module_MyStruct.name() = "module.MyStruct";
   module_MyStruct.is_union() = false;
   static const auto* const
   module_MyStruct_fields = new std::array<EncodedThriftField, 3>{ {
@@ -125,15 +129,16 @@ StructMetadata<::cpp2::MyStruct>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_MyStruct.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::StructWithUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::StructWithUnion>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.StructWithUnion", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_StructWithUnion = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_StructWithUnion = res.first->second;
+  module_StructWithUnion.name() = "module.StructWithUnion";
   module_StructWithUnion.is_union() = false;
   static const auto* const
   module_StructWithUnion_fields = new std::array<EncodedThriftField, 3>{ {
@@ -147,15 +152,16 @@ StructMetadata<::cpp2::StructWithUnion>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_StructWithUnion.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::RecursiveStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::RecursiveStruct>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.RecursiveStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_RecursiveStruct = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_RecursiveStruct = res.first->second;
+  module_RecursiveStruct.name() = "module.RecursiveStruct";
   module_RecursiveStruct.is_union() = false;
   static const auto* const
   module_RecursiveStruct_fields = new std::array<EncodedThriftField, 1>{ {
@@ -169,15 +175,16 @@ StructMetadata<::cpp2::RecursiveStruct>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_RecursiveStruct.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::StructWithContainers>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::StructWithContainers>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.StructWithContainers", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_StructWithContainers = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_StructWithContainers = res.first->second;
+  module_StructWithContainers.name() = "module.StructWithContainers";
   module_StructWithContainers.is_union() = false;
   static const auto* const
   module_StructWithContainers_fields = new std::array<EncodedThriftField, 6>{ {
@@ -191,15 +198,16 @@ StructMetadata<::cpp2::StructWithContainers>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_StructWithContainers.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::StructWithSharedConst>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::StructWithSharedConst>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.StructWithSharedConst", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_StructWithSharedConst = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_StructWithSharedConst = res.first->second;
+  module_StructWithSharedConst.name() = "module.StructWithSharedConst";
   module_StructWithSharedConst.is_union() = false;
   static const auto* const
   module_StructWithSharedConst_fields = new std::array<EncodedThriftField, 3>{ {
@@ -213,25 +221,27 @@ StructMetadata<::cpp2::StructWithSharedConst>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_StructWithSharedConst.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Empty>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Empty>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.Empty", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Empty = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_Empty = res.first->second;
+  module_Empty.name() = "module.Empty";
   module_Empty.is_union() = false;
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::StructWithRef>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::StructWithRef>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.StructWithRef", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_StructWithRef = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_StructWithRef = res.first->second;
+  module_StructWithRef.name() = "module.StructWithRef";
   module_StructWithRef.is_union() = false;
   static const auto* const
   module_StructWithRef_fields = new std::array<EncodedThriftField, 3>{ {
@@ -245,15 +255,16 @@ StructMetadata<::cpp2::StructWithRef>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_StructWithRef.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::StructWithBox>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::StructWithBox>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.StructWithBox", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_StructWithBox = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_StructWithBox = res.first->second;
+  module_StructWithBox.name() = "module.StructWithBox";
   module_StructWithBox.is_union() = false;
   static const auto* const
   module_StructWithBox_fields = new std::array<EncodedThriftField, 3>{ {
@@ -267,15 +278,16 @@ StructMetadata<::cpp2::StructWithBox>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_StructWithBox.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::StructWithInternBox>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::StructWithInternBox>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.StructWithInternBox", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_StructWithInternBox = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_StructWithInternBox = res.first->second;
+  module_StructWithInternBox.name() = "module.StructWithInternBox";
   module_StructWithInternBox.is_union() = false;
   static const auto* const
   module_StructWithInternBox_fields = new std::array<EncodedThriftField, 2>{ {
@@ -289,15 +301,16 @@ StructMetadata<::cpp2::StructWithInternBox>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_StructWithInternBox.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::StructWithTerseInternBox>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::StructWithTerseInternBox>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.StructWithTerseInternBox", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_StructWithTerseInternBox = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_StructWithTerseInternBox = res.first->second;
+  module_StructWithTerseInternBox.name() = "module.StructWithTerseInternBox";
   module_StructWithTerseInternBox.is_union() = false;
   static const auto* const
   module_StructWithTerseInternBox_fields = new std::array<EncodedThriftField, 2>{ {
@@ -312,15 +325,16 @@ StructMetadata<::cpp2::StructWithTerseInternBox>::gen(ThriftMetadata& metadata) 
     module_StructWithTerseInternBox.fields()->push_back(std::move(field));
   }
   module_StructWithTerseInternBox.structured_annotations()->push_back(*cvStruct("thrift.Experimental", {  }).cv_struct());
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::AdaptedStructWithInternBox>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::AdaptedStructWithInternBox>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.AdaptedStructWithInternBox", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_AdaptedStructWithInternBox = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_AdaptedStructWithInternBox = res.first->second;
+  module_AdaptedStructWithInternBox.name() = "module.AdaptedStructWithInternBox";
   module_AdaptedStructWithInternBox.is_union() = false;
   static const auto* const
   module_AdaptedStructWithInternBox_fields = new std::array<EncodedThriftField, 2>{ {
@@ -334,15 +348,16 @@ StructMetadata<::cpp2::AdaptedStructWithInternBox>::gen(ThriftMetadata& metadata
     field.structured_annotations() = f.structured_annotations;
     module_AdaptedStructWithInternBox.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::AdaptedStructWithTerseInternBox>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::AdaptedStructWithTerseInternBox>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.AdaptedStructWithTerseInternBox", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_AdaptedStructWithTerseInternBox = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_AdaptedStructWithTerseInternBox = res.first->second;
+  module_AdaptedStructWithTerseInternBox.name() = "module.AdaptedStructWithTerseInternBox";
   module_AdaptedStructWithTerseInternBox.is_union() = false;
   static const auto* const
   module_AdaptedStructWithTerseInternBox_fields = new std::array<EncodedThriftField, 2>{ {
@@ -357,15 +372,16 @@ StructMetadata<::cpp2::AdaptedStructWithTerseInternBox>::gen(ThriftMetadata& met
     module_AdaptedStructWithTerseInternBox.fields()->push_back(std::move(field));
   }
   module_AdaptedStructWithTerseInternBox.structured_annotations()->push_back(*cvStruct("thrift.Experimental", {  }).cv_struct());
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::StructWithRefTypeUnique>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::StructWithRefTypeUnique>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.StructWithRefTypeUnique", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_StructWithRefTypeUnique = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_StructWithRefTypeUnique = res.first->second;
+  module_StructWithRefTypeUnique.name() = "module.StructWithRefTypeUnique";
   module_StructWithRefTypeUnique.is_union() = false;
   static const auto* const
   module_StructWithRefTypeUnique_fields = new std::array<EncodedThriftField, 3>{ {
@@ -379,15 +395,16 @@ StructMetadata<::cpp2::StructWithRefTypeUnique>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_StructWithRefTypeUnique.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::StructWithRefTypeShared>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::StructWithRefTypeShared>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.StructWithRefTypeShared", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_StructWithRefTypeShared = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_StructWithRefTypeShared = res.first->second;
+  module_StructWithRefTypeShared.name() = "module.StructWithRefTypeShared";
   module_StructWithRefTypeShared.is_union() = false;
   static const auto* const
   module_StructWithRefTypeShared_fields = new std::array<EncodedThriftField, 3>{ {
@@ -401,15 +418,16 @@ StructMetadata<::cpp2::StructWithRefTypeShared>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_StructWithRefTypeShared.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::StructWithRefTypeSharedConst>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::StructWithRefTypeSharedConst>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.StructWithRefTypeSharedConst", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_StructWithRefTypeSharedConst = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_StructWithRefTypeSharedConst = res.first->second;
+  module_StructWithRefTypeSharedConst.name() = "module.StructWithRefTypeSharedConst";
   module_StructWithRefTypeSharedConst.is_union() = false;
   static const auto* const
   module_StructWithRefTypeSharedConst_fields = new std::array<EncodedThriftField, 3>{ {
@@ -423,15 +441,16 @@ StructMetadata<::cpp2::StructWithRefTypeSharedConst>::gen(ThriftMetadata& metada
     field.structured_annotations() = f.structured_annotations;
     module_StructWithRefTypeSharedConst.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.StructWithRefAndAnnotCppNoexceptMoveCtor", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_StructWithRefAndAnnotCppNoexceptMoveCtor = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_StructWithRefAndAnnotCppNoexceptMoveCtor = res.first->second;
+  module_StructWithRefAndAnnotCppNoexceptMoveCtor.name() = "module.StructWithRefAndAnnotCppNoexceptMoveCtor";
   module_StructWithRefAndAnnotCppNoexceptMoveCtor.is_union() = false;
   static const auto* const
   module_StructWithRefAndAnnotCppNoexceptMoveCtor_fields = new std::array<EncodedThriftField, 1>{ {
@@ -445,15 +464,16 @@ StructMetadata<::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor>::gen(ThriftMeta
     field.structured_annotations() = f.structured_annotations;
     module_StructWithRefAndAnnotCppNoexceptMoveCtor.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::StructWithString>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::StructWithString>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.StructWithString", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_StructWithString = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_StructWithString = res.first->second;
+  module_StructWithString.name() = "module.StructWithString";
   module_StructWithString.is_union() = false;
   static const auto* const
   module_StructWithString_fields = new std::array<EncodedThriftField, 5>{ {
@@ -467,7 +487,7 @@ StructMetadata<::cpp2::StructWithString>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_StructWithString.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 
 } // namespace md

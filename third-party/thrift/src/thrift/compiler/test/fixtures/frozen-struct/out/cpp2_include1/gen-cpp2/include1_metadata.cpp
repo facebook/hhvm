@@ -28,11 +28,12 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::ns::IncludedA>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::ns::IncludedA>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("include1.IncludedA", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& include1_IncludedA = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& include1_IncludedA = res.first->second;
+  include1_IncludedA.name() = "include1.IncludedA";
   include1_IncludedA.is_union() = false;
   static const auto* const
   include1_IncludedA_fields = new std::array<EncodedThriftField, 2>{ {
@@ -46,7 +47,7 @@ StructMetadata<::some::ns::IncludedA>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     include1_IncludedA.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 
 } // namespace md

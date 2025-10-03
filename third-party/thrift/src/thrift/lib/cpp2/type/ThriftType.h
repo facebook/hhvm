@@ -104,8 +104,6 @@ using if_not_concrete = if_abstract<Tag, R>;
 template <typename CTag, typename Tag, typename R = void, typename...>
 using if_is_a = std::enable_if_t<is_a_v<CTag, Tag>, R>;
 template <typename Tag, typename R = void, typename...>
-using if_thrift_type_tag = std::enable_if_t<is_thrift_type_tag_v<Tag>, R>;
-template <typename Tag, typename R = void, typename...>
 using if_not_thrift_type_tag = std::enable_if_t<!is_thrift_type_tag_v<Tag>, R>;
 
 // Helpers for applying the conditions.

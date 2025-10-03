@@ -430,8 +430,8 @@ struct ClearField<adapted_field_tag<Adapter, UTag, Struct, FieldId>>
   }
 };
 
-template <typename Id, typename Tag>
-struct Clear<Id, Tag, type::if_thrift_type_tag<Tag>> {
+template <typename Id, type::ThriftTypeTag Tag>
+struct Clear<Id, Tag> {
   static_assert(type::is_id_v<Id>);
   using T = type::native_type<Tag>;
   constexpr void operator()(T& val) const {

@@ -188,12 +188,13 @@ class Value : private detail::DynCmp<Value, ConstRef>,
   using Dyn = detail::Dyn;
 
  public:
-  template <typename Tag>
-  static if_thrift_type_tag<Tag, Value> create() {
+  template <ThriftTypeTag Tag>
+  static Value create() {
     return Value{Tag{}, nullptr};
   }
   template <typename T>
-  static if_not_thrift_type_tag<T, Value> create() {
+    requires(!ThriftTypeTag<T>)
+  static Value create() {
     return create<infer_tag<T>>();
   }
   template <typename Tag>

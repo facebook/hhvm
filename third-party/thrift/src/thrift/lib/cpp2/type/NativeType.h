@@ -24,14 +24,14 @@ namespace apache::thrift::type {
 // The default standard type associated with the given concrete ThriftType.
 //
 // This is the type that is used by default, to represent the given ThriftType.
-template <typename Tag>
+template <ThriftTypeTag Tag>
 using standard_type = typename detail::NativeTypes<Tag>::standard_type;
 
 // The native type associated with the given concrete ThriftType.
 //
 // This is actual used by thrift to represent a value, taking
 // into account any IDL annotations that modify the c++ type.
-template <typename Tag>
+template <ThriftTypeTag Tag>
 using native_type = typename detail::NativeTypes<Tag>::native_type;
 
 // Infer the Thrift type tag from a standard type.

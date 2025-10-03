@@ -131,8 +131,10 @@ struct Vgen {
     emit(call{tc::ustubs().inlineSideExit, i.args});
   }
   void emit(const restoreripm& i);
-  void emit(const restorerips& /*i*/) {}
-  void emit(const saverips& /*i*/) {}
+  // saverips and restorerips don't need to save the rip, which is already on
+  // the stack. However, they still need to align the stack.
+  void emit(const restorerips& /*i*/) { a.addq(8, reg::rsp); }
+  void emit(const saverips& /*i*/)    { a.subq(8, reg::rsp); }
   void emit(const phpret& i);
   void emit(const contenter& i);
 

@@ -1489,7 +1489,8 @@ ProfDataDeserializer::~ProfDataDeserializer() {
 }
 
 bool ProfDataDeserializer::done() {
-  return totalBytesRead == extraDataOffset;
+  const int32_t leftOnBuffer = buffer_size - offset;
+  return totalBytesRead - leftOnBuffer == extraDataOffset;
 }
 
 ProfDataSerializer::Mappers ProfDataDeserializer::getMappers() const {

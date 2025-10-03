@@ -207,6 +207,9 @@ func (r *rocketServerTransport) processRocketRequests(ctx context.Context, conn 
 }
 
 func (r *rocketServerTransport) processHeaderRequest(ctx context.Context, protocol Protocol, processor Processor) error {
+	// Track each individual header request being processed
+	r.observer.ReceivedHeaderRequest()
+
 	exc := process(ctx, processor, protocol, r.pstats, r.observer)
 	if isEOF(exc) {
 		return exc

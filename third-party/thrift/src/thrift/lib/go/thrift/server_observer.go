@@ -22,9 +22,10 @@ import "time"
 // for monitoring and troubleshooting purposes.
 type ServerObserver interface {
 	// Connection lifecycle events
-	ConnDropped()     // server-initiated connection close
-	ConnAccepted()    // new connection successfully accepted
-	ConnTLSAccepted() // new TLS connection successfully accepted
+	ConnDropped()           // server-initiated connection close
+	ConnAccepted()          // new connection successfully accepted
+	ConnTLSAccepted()       // new TLS connection successfully accepted
+	ReceivedHeaderRequest() // header request processing initiated
 
 	// Request processing events
 	TaskKilled()                    // request rejected due to parsing errors or shutdown

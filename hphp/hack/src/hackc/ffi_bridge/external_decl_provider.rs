@@ -70,29 +70,27 @@ unsafe extern "C" {
 ///
 /// This class avoids repeatedly deserializing the same data by memoizing
 /// deserialized decls, indexed by content hash of the serialized data.
-pub struct ExternalDeclProvider<'a> {
+pub struct ExternalDeclProvider {
     pub provider: *const c_void,
-    pub arena: &'a bumpalo::Bump,
     decls: RefCell<HashMap<Box<[u8]>, Decls>>,
 }
 
-impl<'a> ExternalDeclProvider<'a> {
-    pub fn new(provider: *const c_void, arena: &'a bumpalo::Bump) -> Self {
+impl ExternalDeclProvider {
+    pub fn new(provider: *const c_void) -> Self {
         Self {
             provider,
-            arena,
             decls: Default::default(),
         }
     }
 }
 
-impl<'a> std::fmt::Debug for ExternalDeclProvider<'a> {
+impl std::fmt::Debug for ExternalDeclProvider {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str("ExternalDeclProvider")
     }
 }
 
-impl<'a> DeclProvider<'a> for ExternalDeclProvider<'a> {
+impl DeclProvider for ExternalDeclProvider {
     fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl> {
         let result = unsafe {
             // Invoke extern C/C++ provider implementation.
@@ -121,7 +119,7 @@ impl<'a> DeclProvider<'a> for ExternalDeclProvider<'a> {
     }
 }
 
-impl<'a> ExternalDeclProvider<'a> {
+impl ExternalDeclProvider {
     /// Search for the decl we asked for in the list of decls returned.
     /// This is O(N) for now.
     fn find_decl<T>(

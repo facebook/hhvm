@@ -14,7 +14,7 @@ use crate::emit_attribute;
 use crate::emit_body;
 use crate::emit_type_constant;
 
-pub fn emit_typedefs_from_program(e: &mut Emitter<'_>, prog: &[ast::Def]) -> Result<Vec<Typedef>> {
+pub fn emit_typedefs_from_program(e: &mut Emitter, prog: &[ast::Def]) -> Result<Vec<Typedef>> {
     prog.iter()
         .filter_map(|def| {
             def.as_typedef().and_then(|td| {
@@ -28,7 +28,7 @@ pub fn emit_typedefs_from_program(e: &mut Emitter<'_>, prog: &[ast::Def]) -> Res
         .collect()
 }
 
-fn emit_typedef(emitter: &mut Emitter<'_>, typedef: &ast::Typedef) -> Result<Typedef> {
+fn emit_typedef(emitter: &mut Emitter, typedef: &ast::Typedef) -> Result<Typedef> {
     let name = ClassName::from_ast_name_and_mangle(&typedef.name.1);
     let attributes_res = emit_attribute::from_asts(emitter, &typedef.user_attributes);
     let tparams = emit_body::get_tp_names(typedef.tparams.as_slice());

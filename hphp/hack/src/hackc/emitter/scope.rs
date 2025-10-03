@@ -19,9 +19,9 @@ use oxidized::local_id;
 /// blocks. If emit () registered any unnamed locals, the block will unset these
 /// temporaries at the end, and also be wrapped in a try/catch that will unset
 /// these unnamed locals upon exception.
-pub fn with_unnamed_temps<'d, F>(e: &mut Emitter<'d>, lids: &[Lid], emit: F) -> Result<InstrSeq>
+pub fn with_unnamed_temps<F>(e: &mut Emitter, lids: &[Lid], emit: F) -> Result<InstrSeq>
 where
-    F: FnOnce(&mut Emitter<'d>) -> Result<InstrSeq>,
+    F: FnOnce(&mut Emitter) -> Result<InstrSeq>,
 {
     let local_counter = e.local_gen().counter;
     e.local_gen_mut().dedicated.temp_map.push();
@@ -47,9 +47,9 @@ where
 /// blocks -- before, inner, after. If emit () registered any unnamed locals, the
 /// inner block will be wrapped in a try/catch that will unset these unnamed
 /// locals upon exception.
-pub fn with_unnamed_locals<F>(e: &mut Emitter<'_>, emit: F) -> Result<InstrSeq>
+pub fn with_unnamed_locals<F>(e: &mut Emitter, emit: F) -> Result<InstrSeq>
 where
-    F: FnOnce(&mut Emitter<'_>) -> Result<(InstrSeq, InstrSeq, InstrSeq)>,
+    F: FnOnce(&mut Emitter) -> Result<(InstrSeq, InstrSeq, InstrSeq)>,
 {
     let local_counter = e.local_gen().counter;
     e.local_gen_mut().dedicated.temp_map.push();
@@ -78,9 +78,9 @@ where
 /// instruction blocks -- before, inner, after. If emit () registered any unnamed
 /// locals or iterators, the inner block will be wrapped in a try/catch that will
 /// unset these unnamed locals and free these iterators upon exception.
-pub fn with_unnamed_locals_and_iterators<F>(e: &mut Emitter<'_>, emit: F) -> Result<InstrSeq>
+pub fn with_unnamed_locals_and_iterators<F>(e: &mut Emitter, emit: F) -> Result<InstrSeq>
 where
-    F: FnOnce(&mut Emitter<'_>) -> Result<(InstrSeq, InstrSeq, InstrSeq)>,
+    F: FnOnce(&mut Emitter) -> Result<(InstrSeq, InstrSeq, InstrSeq)>,
 {
     let local_counter = e.local_gen().counter;
     e.local_gen_mut().dedicated.temp_map.push();
@@ -107,9 +107,9 @@ where
 
 /// An equivalent of with_unnamed_locals that allocates a single local and
 /// passes it to emit
-pub fn with_unnamed_local<F>(e: &mut Emitter<'_>, emit: F) -> Result<InstrSeq>
+pub fn with_unnamed_local<F>(e: &mut Emitter, emit: F) -> Result<InstrSeq>
 where
-    F: FnOnce(&mut Emitter<'_>, Local) -> Result<(InstrSeq, InstrSeq, InstrSeq)>,
+    F: FnOnce(&mut Emitter, Local) -> Result<(InstrSeq, InstrSeq, InstrSeq)>,
 {
     with_unnamed_locals(e, |e| {
         let tmp = e.local_gen_mut().get_unnamed();
@@ -117,9 +117,9 @@ where
     })
 }
 
-pub fn stash_top_in_unnamed_local<F>(e: &mut Emitter<'_>, emit: F) -> Result<InstrSeq>
+pub fn stash_top_in_unnamed_local<F>(e: &mut Emitter, emit: F) -> Result<InstrSeq>
 where
-    F: FnOnce(&mut Emitter<'_>) -> Result<InstrSeq>,
+    F: FnOnce(&mut Emitter) -> Result<InstrSeq>,
 {
     with_unnamed_locals(e, |e| {
         let tmp = e.local_gen_mut().get_unnamed();

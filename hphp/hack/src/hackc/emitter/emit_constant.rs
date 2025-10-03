@@ -25,7 +25,7 @@ use crate::emit_body;
 use crate::emit_expression;
 
 fn emit_constant_cinit<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     constant: &'a ast::Gconst,
     init: Option<InstrSeq>,
@@ -83,7 +83,7 @@ fn emit_constant_cinit<'a, 'd>(
 }
 
 fn emit_constant<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     constant: &'a ast::Gconst,
 ) -> Result<(Constant, Option<Function>)> {
@@ -93,7 +93,7 @@ fn emit_constant<'a, 'd>(
 }
 
 pub fn emit_constants_from_program<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     defs: &'a [ast::Def],
 ) -> Result<(Vec<Constant>, Vec<Function>)> {
@@ -106,7 +106,7 @@ pub fn emit_constants_from_program<'a, 'd>(
 }
 
 pub fn from_ast<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     env: &Env<'a>,
     id: &'a ast::Id,
     is_abstract: bool,

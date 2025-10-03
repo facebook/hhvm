@@ -47,7 +47,7 @@ pub fn has_splat(params: &[ParamEntry]) -> bool {
 }
 
 pub fn from_asts<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
     scope: &Scope<'a>,
@@ -97,7 +97,7 @@ fn rename_params(
 }
 
 fn from_ast<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
     scope: &Scope<'a>,
@@ -198,7 +198,7 @@ fn from_ast<'a, 'd>(
 }
 
 pub fn emit_param_default_value_setter<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
     params: &[(Param, Option<(Label, a::Expr)>)],
@@ -238,19 +238,19 @@ struct ResolverVisitor<'a, 'd: 'a> {
 }
 
 #[allow(dead_code)]
-struct Ctx<'a, 'd> {
-    emitter: &'a mut Emitter<'d>,
+struct Ctx<'a> {
+    emitter: &'a mut Emitter,
     scope: &'a Scope<'a>,
 }
 
 impl<'ast, 'a, 'd> aast_visitor::Visitor<'ast> for ResolverVisitor<'a, 'd> {
-    type Params = AstParams<Ctx<'a, 'd>, ()>;
+    type Params = AstParams<Ctx<'a>, ()>;
 
     fn object(&mut self) -> &mut dyn aast_visitor::Visitor<'ast, Params = Self::Params> {
         self
     }
 
-    fn visit_expr(&mut self, c: &mut Ctx<'a, 'd>, p: &a::Expr) -> Result<(), ()> {
+    fn visit_expr(&mut self, c: &mut Ctx<'a>, p: &a::Expr) -> Result<(), ()> {
         p.recurse(c, self.object())
         // TODO(hrust) implement on_CIexpr & remove dead_code on struct Ctx
     }

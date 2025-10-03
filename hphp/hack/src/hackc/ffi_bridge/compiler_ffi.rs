@@ -577,13 +577,11 @@ fn compile_from_text(env: &ffi::NativeEnv, source_text: &[u8]) -> Result<Vec<u8>
         std::sync::Arc::new(native_env.filepath.clone()),
         source_text,
     );
-    let decl_allocator = bumpalo::Bump::new();
 
-    let external_decl_provider: Option<Arc<dyn DeclProvider<'_> + '_>> = if env.decl_provider != 0 {
+    let external_decl_provider: Option<Arc<dyn DeclProvider>> = if env.decl_provider != 0 {
         #[allow(clippy::arc_with_non_send_sync)]
         Some(Arc::new(ExternalDeclProvider::new(
             env.decl_provider as *const c_void,
-            &decl_allocator,
         )))
     } else {
         None
@@ -692,12 +690,10 @@ fn compile_unit_from_text(
         source_text,
     );
 
-    let decl_allocator = bumpalo::Bump::new();
-    let external_decl_provider: Option<Arc<dyn DeclProvider<'_> + '_>> = if env.decl_provider != 0 {
+    let external_decl_provider: Option<Arc<dyn DeclProvider>> = if env.decl_provider != 0 {
         #[allow(clippy::arc_with_non_send_sync)]
         Some(Arc::new(ExternalDeclProvider::new(
             env.decl_provider as *const c_void,
-            &decl_allocator,
         )))
     } else {
         None

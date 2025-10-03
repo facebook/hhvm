@@ -40,7 +40,7 @@ use crate::emit_memoize_helpers;
 use crate::emit_param;
 
 pub(crate) fn get_attrs_for_fun(
-    emitter: &mut Emitter<'_>,
+    emitter: &mut Emitter,
     fd: &ast::FunDef,
     user_attrs: &[Attribute],
     is_memoize_impl: bool,
@@ -69,7 +69,7 @@ pub(crate) fn get_attrs_for_fun(
 }
 
 pub(crate) fn emit_wrapper_function<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     original_id: hhbc::FunctionName,
     renamed_id: hhbc::FunctionName,
     deprecation_info: Option<&[TypedValue]>,
@@ -161,7 +161,7 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
 }
 
 fn make_memoize_function_code<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     deprecation_info: Option<&[TypedValue]>,
@@ -202,7 +202,7 @@ fn make_memoize_function_code<'a, 'd>(
 }
 
 fn make_memoize_function_with_params_code<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     deprecation_info: Option<&[TypedValue]>,
@@ -325,7 +325,7 @@ fn make_memoize_function_with_params_code<'a, 'd>(
 }
 
 fn make_memoize_function_no_params_code<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     deprecation_info: Option<&[TypedValue]>,
     renamed_id: hhbc::FunctionName,
@@ -390,7 +390,7 @@ fn make_memoize_function_no_params_code<'a, 'd>(
 }
 
 fn make_wrapper_body<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     env: Env<'a>,
     return_type: TypeInfo,
     attributes: Vec<Attribute>,

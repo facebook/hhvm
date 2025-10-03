@@ -95,7 +95,7 @@ fn try_type_intlike(s: &str) -> Option<i64> {
 }
 
 fn nameof_to_typed_value(
-    emitter: &Emitter<'_>,
+    emitter: &Emitter,
     scope: &Scope<'_>,
     cid: &ast::ClassId,
 ) -> Result<TypedValue, Error> {
@@ -108,7 +108,7 @@ fn nameof_to_typed_value(
 }
 
 fn class_const_to_typed_value(
-    emitter: &Emitter<'_>,
+    emitter: &Emitter,
     scope: &Scope<'_>,
     cid: &ast::ClassId,
     id: &ast::Pstring,
@@ -124,7 +124,7 @@ fn class_const_to_typed_value(
 }
 
 fn set_afield_to_typed_value_pair(
-    e: &Emitter<'_>,
+    e: &Emitter,
     scope: &Scope<'_>,
     afield: &ast::Afield,
 ) -> Result<(TypedValue, TypedValue), Error> {
@@ -137,7 +137,7 @@ fn set_afield_to_typed_value_pair(
 }
 
 fn set_afield_value_to_typed_value_pair(
-    e: &Emitter<'_>,
+    e: &Emitter,
     scope: &Scope<'_>,
     v: &ast::Expr,
 ) -> Result<(TypedValue, TypedValue), Error> {
@@ -146,7 +146,7 @@ fn set_afield_value_to_typed_value_pair(
 }
 
 fn afield_to_typed_value_pair(
-    emitter: &Emitter<'_>,
+    emitter: &Emitter,
     scope: &Scope<'_>,
     afield: &ast::Afield,
 ) -> Result<(TypedValue, TypedValue), Error> {
@@ -159,7 +159,7 @@ fn afield_to_typed_value_pair(
 }
 
 fn kv_to_typed_value_pair(
-    emitter: &Emitter<'_>,
+    emitter: &Emitter,
     scope: &Scope<'_>,
     key: &ast::Expr,
     value: &ast::Expr,
@@ -171,7 +171,7 @@ fn kv_to_typed_value_pair(
 }
 
 fn value_afield_to_typed_value(
-    emitter: &Emitter<'_>,
+    emitter: &Emitter,
     scope: &Scope<'_>,
     afield: &ast::Afield,
 ) -> Result<TypedValue, Error> {
@@ -184,7 +184,7 @@ fn value_afield_to_typed_value(
 }
 
 fn key_expr_to_typed_value(
-    emitter: &Emitter<'_>,
+    emitter: &Emitter,
     scope: &Scope<'_>,
     expr: &ast::Expr,
 ) -> Result<TypedValue, Error> {
@@ -198,7 +198,7 @@ fn key_expr_to_typed_value(
 }
 
 fn keyset_value_afield_to_typed_value(
-    emitter: &Emitter<'_>,
+    emitter: &Emitter,
     scope: &Scope<'_>,
     afield: &ast::Afield,
 ) -> Result<TypedValue, Error> {
@@ -212,7 +212,7 @@ fn keyset_value_afield_to_typed_value(
 }
 
 fn shape_to_typed_value(
-    emitter: &Emitter<'_>,
+    emitter: &Emitter,
     scope: &Scope<'_>,
     fields: &[(ast::ShapeFieldName, ast::Expr)],
 ) -> Result<TypedValue, Error> {
@@ -241,7 +241,7 @@ fn shape_to_typed_value(
 }
 
 pub fn vec_to_typed_value(
-    e: &Emitter<'_>,
+    e: &Emitter,
     scope: &Scope<'_>,
     fields: &[ast::Afield],
 ) -> Result<TypedValue, Error> {
@@ -253,7 +253,7 @@ pub fn vec_to_typed_value(
 }
 
 pub fn expr_to_typed_value(
-    e: &Emitter<'_>,
+    e: &Emitter,
     scope: &Scope<'_>,
     expr: &ast::Expr,
 ) -> Result<TypedValue, Error> {
@@ -261,7 +261,7 @@ pub fn expr_to_typed_value(
 }
 
 pub fn expr_to_typed_value_(
-    emitter: &Emitter<'_>,
+    emitter: &Emitter,
     scope: &Scope<'_>,
     expr: &ast::Expr,
     allow_maps: bool,
@@ -329,7 +329,7 @@ pub fn expr_to_typed_value_(
 }
 
 fn valcollection_keyset_expr_to_typed_value(
-    emitter: &Emitter<'_>,
+    emitter: &Emitter,
     scope: &Scope<'_>,
     (_, _, exprs): &((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
 ) -> Result<TypedValue, Error> {
@@ -350,7 +350,7 @@ fn valcollection_keyset_expr_to_typed_value(
 }
 
 fn keyvalcollection_expr_to_typed_value(
-    emitter: &Emitter<'_>,
+    emitter: &Emitter,
     scope: &Scope<'_>,
     (_, _, fields): &(
         (Pos, ast::KvcKind),
@@ -368,7 +368,7 @@ fn keyvalcollection_expr_to_typed_value(
 }
 
 fn valcollection_set_expr_to_typed_value(
-    emitter: &Emitter<'_>,
+    emitter: &Emitter,
     scope: &Scope<'_>,
     (_, _, exprs): &((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
 ) -> Result<TypedValue, Error> {
@@ -382,7 +382,7 @@ fn valcollection_set_expr_to_typed_value(
 }
 
 fn valcollection_vec_expr_to_typed_value(
-    emitter: &Emitter<'_>,
+    emitter: &Emitter,
     scope: &Scope<'_>,
     (_, _, exprs): &((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
 ) -> Result<TypedValue, Error> {
@@ -394,7 +394,7 @@ fn valcollection_vec_expr_to_typed_value(
 }
 
 fn tuple_expr_to_typed_value(
-    emitter: &Emitter<'_>,
+    emitter: &Emitter,
     scope: &Scope<'_>,
     x: &[ast::Expr],
 ) -> Result<TypedValue, Error> {
@@ -406,7 +406,7 @@ fn tuple_expr_to_typed_value(
 }
 
 fn set_expr_to_typed_value(
-    emitter: &Emitter<'_>,
+    emitter: &Emitter,
     scope: &Scope<'_>,
     (_, _, fields): &(
         ast::ClassName,
@@ -424,7 +424,7 @@ fn set_expr_to_typed_value(
 }
 
 fn dict_expr_to_typed_value(
-    emitter: &Emitter<'_>,
+    emitter: &Emitter,
     scope: &Scope<'_>,
     (_, _, fields): &(
         ast::ClassName,
@@ -442,7 +442,7 @@ fn dict_expr_to_typed_value(
 }
 
 fn keyset_expr_to_typed_value(
-    emitter: &Emitter<'_>,
+    emitter: &Emitter,
     scope: &Scope<'_>,
     (_, _, fields): &(
         ast::ClassName,
@@ -460,7 +460,7 @@ fn keyset_expr_to_typed_value(
     Ok(TypedValue::keyset(keys))
 }
 
-fn float_expr_to_typed_value(_emitter: &Emitter<'_>, s: &str) -> Result<TypedValue, Error> {
+fn float_expr_to_typed_value(_emitter: &Emitter, s: &str) -> Result<TypedValue, Error> {
     if s == math::INF {
         Ok(TypedValue::float(f64::INFINITY))
     } else if s == math::NEG_INF {
@@ -563,29 +563,29 @@ fn value_to_expr_(v: TypedValue) -> Result<ast::Expr_, Error> {
     }
 }
 
-struct FolderVisitorMut<'a, 'd> {
-    emitter: &'a Emitter<'d>,
+struct FolderVisitorMut<'a> {
+    emitter: &'a Emitter,
     scope: &'a mut Scope<'a>,
 }
 
-impl<'a, 'd> FolderVisitorMut<'a, 'd> {
-    fn new(emitter: &'a Emitter<'d>, scope: &'a mut Scope<'a>) -> Self {
+impl<'a> FolderVisitorMut<'a> {
+    fn new(emitter: &'a Emitter, scope: &'a mut Scope<'a>) -> Self {
         Self { emitter, scope }
     }
 }
 
-struct FolderVisitor<'a, 'd> {
-    emitter: &'a Emitter<'d>,
+struct FolderVisitor<'a> {
+    emitter: &'a Emitter,
     scope: &'a Scope<'a>,
 }
 
-impl<'a, 'd> FolderVisitor<'a, 'd> {
-    fn new(emitter: &'a Emitter<'d>, scope: &'a Scope<'a>) -> Self {
+impl<'a> FolderVisitor<'a> {
+    fn new(emitter: &'a Emitter, scope: &'a Scope<'a>) -> Self {
         Self { emitter, scope }
     }
 }
 
-impl<'ast, 'd> VisitorMut<'ast> for FolderVisitor<'_, 'd> {
+impl<'ast> VisitorMut<'ast> for FolderVisitor<'_> {
     type Params = AstParams<(), Error>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
@@ -618,7 +618,7 @@ impl<'ast, 'd> VisitorMut<'ast> for FolderVisitor<'_, 'd> {
     }
 }
 
-impl<'ast, 'd> VisitorMut<'ast> for FolderVisitorMut<'_, 'd> {
+impl<'ast> VisitorMut<'ast> for FolderVisitorMut<'_> {
     type Params = AstParams<(), Error>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
@@ -655,15 +655,15 @@ impl<'ast, 'd> VisitorMut<'ast> for FolderVisitorMut<'_, 'd> {
     }
 }
 
-pub fn fold_expr<'a, 'd: 'a>(
+pub fn fold_expr<'a>(
     expr: &mut ast::Expr,
     scope: &'a Scope<'a>,
-    e: &'a mut Emitter<'d>,
+    e: &'a mut Emitter,
 ) -> Result<(), Error> {
     visit_mut(&mut FolderVisitor::new(e, scope), &mut (), expr)
 }
 
-pub fn fold_program<'d>(p: &mut ast::Program, e: &mut Emitter<'d>) -> Result<(), Error> {
+pub fn fold_program<'d>(p: &mut ast::Program, e: &mut Emitter) -> Result<(), Error> {
     visit_mut(
         &mut FolderVisitorMut::new(e, &mut ast_scope::Scope::default()),
         &mut (),
@@ -674,7 +674,7 @@ pub fn fold_program<'d>(p: &mut ast::Program, e: &mut Emitter<'d>) -> Result<(),
 pub fn literals_from_exprs<'d>(
     exprs: &mut [ast::Expr],
     scope: &Scope<'_>,
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
 ) -> Result<Vec<TypedValue>, Error> {
     for expr in exprs.iter_mut() {
         fold_expr(expr, scope, e)?;

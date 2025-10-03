@@ -49,13 +49,13 @@ use crate::emit_fatal;
 use crate::try_finally_rewriter as tfr;
 
 // Expose a mutable ref to state for emit_body so that it can set it appropriately
-pub(crate) fn set_state(e: &mut Emitter<'_>, state: StatementState) {
+pub(crate) fn set_state(e: &mut Emitter, state: StatementState) {
     *e.statement_state_mut() = state;
 }
 
 // Wrapper functions
 
-fn emit_return<'a, 'd>(e: &mut Emitter<'d>, env: &mut Env<'a>) -> Result<InstrSeq> {
+fn emit_return<'a, 'd>(e: &mut Emitter, env: &mut Env<'a>) -> Result<InstrSeq> {
     tfr::emit_return(e, false, env)
 }
 
@@ -106,11 +106,7 @@ fn is_single_await_all_block(lids: &[a::Lid], stmts: &[ast::Stmt]) -> bool {
 }
 
 #[allow(clippy::todo)]
-pub fn emit_stmt<'a, 'd>(
-    e: &mut Emitter<'d>,
-    env: &mut Env<'a>,
-    stmt: &ast::Stmt,
-) -> Result<InstrSeq> {
+pub fn emit_stmt<'a, 'd>(e: &mut Emitter, env: &mut Env<'a>, stmt: &ast::Stmt) -> Result<InstrSeq> {
     let pos = &stmt.0;
     match &stmt.1 {
         a::Stmt_::YieldBreak => emit_yieldbreak(e, env, pos),
@@ -150,7 +146,7 @@ pub fn emit_stmt<'a, 'd>(
 }
 
 fn emit_await_<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     e_: &ast::Expr,
     _pos: &Pos,
@@ -163,7 +159,7 @@ fn emit_await_<'a, 'd>(
 }
 
 fn emit_assign<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     e_: &ast::Expr,
     pos: &Pos,
@@ -209,12 +205,12 @@ fn emit_assign<'a, 'd>(
     }
 }
 
-fn emit_yieldbreak<'a, 'd>(e: &mut Emitter<'d>, env: &mut Env<'a>, _pos: &Pos) -> Result<InstrSeq> {
+fn emit_yieldbreak<'a, 'd>(e: &mut Emitter, env: &mut Env<'a>, _pos: &Pos) -> Result<InstrSeq> {
     Ok(InstrSeq::gather(vec![instr::null(), emit_return(e, env)?]))
 }
 
 fn emit_try<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     x: &(ast::Block, Vec<ast::Catch>, ast::FinallyBlock),
     pos: &Pos,
@@ -230,7 +226,7 @@ fn emit_try<'a, 'd>(
 }
 
 fn emit_throw<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     x: &ast::Expr,
     pos: &Pos,
@@ -243,7 +239,7 @@ fn emit_throw<'a, 'd>(
 }
 
 fn emit_return_<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     r_opt: Option<&ast::Expr>,
     pos: &Pos,
@@ -267,7 +263,7 @@ fn emit_return_<'a, 'd>(
 }
 
 fn emit_call<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     e_: &ast::Expr,
     _pos: &Pos,
@@ -301,7 +297,7 @@ fn emit_call<'a, 'd>(
 }
 
 fn emit_case<'c, 'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     case: &'c ast::Case,
     addbreak: bool,
@@ -317,7 +313,7 @@ fn emit_case<'c, 'a, 'd>(
 }
 
 fn emit_default_case<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     dfl: &ast::DefaultCase,
 ) -> Result<(InstrSeq, Label)> {
@@ -331,7 +327,7 @@ fn emit_default_case<'a, 'd>(
 }
 
 fn emit_check_case<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     scrutinee_expr: &ast::Expr,
     (case_expr, case_handler_label): (&ast::Expr, Label),
@@ -358,7 +354,7 @@ fn emit_check_case<'a, 'd>(
 }
 
 fn emit_awaitall<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     el: &[(ast::Lid, ast::Expr)],
@@ -376,7 +372,7 @@ fn emit_awaitall<'a, 'd>(
 // with_unnamed_temps which is what the Block would otherwise cause. We could
 // make this more uniform in the future.
 fn emit_block_awaitall_single<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     block: &[ast::Stmt],
 ) -> Result<InstrSeq> {
@@ -399,7 +395,7 @@ fn emit_block_awaitall_single<'a, 'd>(
 }
 
 fn emit_awaitall_single<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     lval: &ast::Lid,
@@ -413,7 +409,7 @@ fn emit_awaitall_single<'a, 'd>(
 }
 
 fn emit_awaitall_multi<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     el: &[(ast::Lid, ast::Expr)],
@@ -458,7 +454,7 @@ fn emit_awaitall_multi<'a, 'd>(
 }
 
 fn emit_using<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     using: &ast::UsingStmt,
 ) -> Result<InstrSeq> {
@@ -542,7 +538,7 @@ fn emit_using<'a, 'd>(
                 tfr::cleanup_try_body(body)
             };
 
-            let emit_finally = |e: &mut Emitter<'_>,
+            let emit_finally = |e: &mut Emitter,
                                 local: Local,
                                 has_await: bool,
                                 is_block_scoped: bool|
@@ -633,7 +629,7 @@ fn block_pos(block: &[ast::Stmt]) -> Result<Pos> {
 
 fn emit_cases<'a, 'd>(
     env: &mut Env<'a>,
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     pos: &Pos,
     scrutinee_expr: &ast::Expr,
     cases: &[ast::Case],
@@ -683,7 +679,7 @@ fn emit_cases<'a, 'd>(
 }
 
 fn emit_switch<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     scrutinee_expr: &ast::Expr,
@@ -719,7 +715,7 @@ fn is_empty_block(b: &[ast::Stmt]) -> bool {
 }
 
 fn emit_try_catch_finally<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     r#try: &[ast::Stmt],
@@ -727,7 +723,7 @@ fn emit_try_catch_finally<'a, 'd>(
     finally: &[ast::Stmt],
 ) -> Result<InstrSeq> {
     let is_try_block_empty = false;
-    let emit_try_block = |env: &mut Env<'a>, e: &mut Emitter<'d>, finally_start: Label| {
+    let emit_try_block = |env: &mut Env<'a>, e: &mut Emitter, finally_start: Label| {
         env.do_in_try_catch_body(e, finally_start, r#try, catch, |env, e, t, c| {
             emit_try_catch(e, env, pos, t, c)
         })
@@ -736,14 +732,14 @@ fn emit_try_catch_finally<'a, 'd>(
 }
 
 fn emit_try_finally<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     try_block: &[ast::Stmt],
     finally_block: &[ast::Stmt],
 ) -> Result<InstrSeq> {
     let is_try_block_empty = is_empty_block(try_block);
-    let emit_try_block = |env: &mut Env<'a>, e: &mut Emitter<'d>, finally_start: Label| {
+    let emit_try_block = |env: &mut Env<'a>, e: &mut Emitter, finally_start: Label| {
         env.do_in_try_body(e, finally_start, try_block, emit_block)
     };
     e.local_scope(|e| {
@@ -758,8 +754,8 @@ fn emit_try_finally<'a, 'd>(
     })
 }
 
-fn emit_try_finally_<'a, 'd, E: Fn(&mut Env<'a>, &mut Emitter<'d>, Label) -> Result<InstrSeq>>(
-    e: &mut Emitter<'d>,
+fn emit_try_finally_<'a, 'd, E: Fn(&mut Env<'a>, &mut Emitter, Label) -> Result<InstrSeq>>(
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     emit_try_block: E,
@@ -860,7 +856,7 @@ fn emit_try_finally_<'a, 'd, E: Fn(&mut Env<'a>, &mut Emitter<'d>, Label) -> Res
     ]))
 }
 
-fn make_finally_catch(e: &mut Emitter<'_>, exn_local: Local, finally_body: InstrSeq) -> InstrSeq {
+fn make_finally_catch(e: &mut Emitter, exn_local: Local, finally_body: InstrSeq) -> InstrSeq {
     let l2 = instr::unset_l(*e.local_gen_mut().get_retval());
     let l1 = instr::unset_l(*e.local_gen_mut().get_label());
     InstrSeq::gather(vec![
@@ -880,7 +876,7 @@ fn make_finally_catch(e: &mut Emitter<'_>, exn_local: Local, finally_body: Instr
 }
 
 fn emit_try_catch<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     try_block: &[ast::Stmt],
@@ -890,7 +886,7 @@ fn emit_try_catch<'a, 'd>(
 }
 
 fn emit_try_catch_<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     try_block: &[ast::Stmt],
@@ -923,7 +919,7 @@ fn emit_try_catch_<'a, 'd>(
 }
 
 fn emit_catch<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     end_label: Label,
@@ -948,7 +944,7 @@ fn emit_catch<'a, 'd>(
 }
 
 fn emit_foreach<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     collection: &ast::Expr,
@@ -983,7 +979,7 @@ fn emit_foreach<'a, 'd>(
 ///  - Lval->... (which would mutate an object collection)
 ///  - foreach (.. as Lval => Lval); foreach (.. as Lval)
 fn check_l_iter<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     collection: &ast::Expr,
@@ -1168,7 +1164,7 @@ fn check_l_iter<'a, 'd>(
 }
 
 fn emit_foreach_<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     collection: &ast::Expr,
@@ -1198,7 +1194,7 @@ fn emit_foreach_<'a, 'd>(
 }
 
 fn emit_foreach_non_local<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     collection: &ast::Expr,
@@ -1219,7 +1215,7 @@ fn emit_foreach_non_local<'a, 'd>(
 }
 
 fn emit_foreach_local<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     iterator: &ast::AsExpr,
@@ -1274,7 +1270,7 @@ fn emit_foreach_local<'a, 'd>(
 }
 
 fn emit_foreach_await<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     collection: &ast::Expr,
@@ -1348,7 +1344,7 @@ fn emit_foreach_await<'a, 'd>(
 // - key_preamble - list of instructions to populate foreach-key
 // - value_preamble - list of instructions to populate foreach-value
 fn emit_iterator_key_value_storage<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     iterator: &ast::AsExpr,
 ) -> Result<(Option<Local>, Local, InstrSeq)> {
@@ -1424,7 +1420,7 @@ fn emit_iterator_key_value_storage<'a, 'd>(
 }
 
 fn emit_iterator_lvalue_storage<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     lvalue: &ast::Expr,
     local: Local,
@@ -1472,7 +1468,7 @@ fn emit_iterator_lvalue_storage<'a, 'd>(
 }
 
 fn emit_load_list_elements<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     base: InstrSeq,
     index_prefix: Vec<InstrSeq>,
@@ -1499,7 +1495,7 @@ fn emit_load_list_elements<'a, 'd>(
 }
 
 fn emit_load_list_element<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     base: InstrSeq,
     mut index_prefix: Vec<InstrSeq>,
@@ -1570,7 +1566,7 @@ fn emit_load_list_element<'a, 'd>(
 // and [1;0] (for $b[0]) and [1;1] (for $c->g) indices of the array returned
 // from the `next` method.
 fn emit_foreach_await_key_value_storage<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     iterator: &ast::AsExpr,
 ) -> Result<InstrSeq> {
@@ -1593,7 +1589,7 @@ fn emit_foreach_await_key_value_storage<'a, 'd>(
 //
 // TODO: we don't need unnamed local if the target is a local
 fn emit_foreach_await_lvalue_storage<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     lvalue: &ast::Expr,
     indices: &[emit_expr::VecDictIndex<'_>],
@@ -1622,11 +1618,7 @@ fn emit_foreach_await_lvalue_storage<'a, 'd>(
     })
 }
 
-fn emit_stmts<'a, 'd>(
-    e: &mut Emitter<'d>,
-    env: &mut Env<'a>,
-    stl: &[ast::Stmt],
-) -> Result<InstrSeq> {
+fn emit_stmts<'a, 'd>(e: &mut Emitter, env: &mut Env<'a>, stl: &[ast::Stmt]) -> Result<InstrSeq> {
     Ok(InstrSeq::gather(
         stl.iter()
             .map(|s| emit_stmt(e, env, s))
@@ -1636,7 +1628,7 @@ fn emit_stmts<'a, 'd>(
 
 fn emit_block_with_temps<'a, 'd>(
     env: &mut Env<'a>,
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     lids: &Option<Vec<ast::Lid>>,
     block: &[ast::Stmt],
 ) -> Result<InstrSeq> {
@@ -1649,14 +1641,14 @@ fn emit_block_with_temps<'a, 'd>(
 
 fn emit_block<'a, 'd>(
     env: &mut Env<'a>,
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     block: &[ast::Stmt],
 ) -> Result<InstrSeq> {
     emit_stmts(emitter, env, block)
 }
 
 fn emit_do<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     body: &[ast::Stmt],
     cond: &ast::Expr,
@@ -1675,7 +1667,7 @@ fn emit_do<'a, 'd>(
 }
 
 fn emit_while<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     cond: &ast::Expr,
     body: &[ast::Stmt],
@@ -1706,7 +1698,7 @@ fn emit_while<'a, 'd>(
 }
 
 fn emit_for<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     e1: &[ast::Expr],
     e2: Option<&ast::Expr>,
@@ -1717,7 +1709,7 @@ fn emit_for<'a, 'd>(
     let cont_label = e.label_gen_mut().next_regular();
     let start_label = e.label_gen_mut().next_regular();
     fn emit_cond<'a, 'd>(
-        emitter: &mut Emitter<'d>,
+        emitter: &mut Emitter,
         env: &mut Env<'a>,
         jmpz: bool,
         label: Label,
@@ -1769,7 +1761,7 @@ fn emit_for<'a, 'd>(
     ]))
 }
 
-pub fn emit_dropthrough_return<'a, 'd>(e: &mut Emitter<'d>, env: &mut Env<'a>) -> Result<InstrSeq> {
+pub fn emit_dropthrough_return<'a, 'd>(e: &mut Emitter, env: &mut Env<'a>) -> Result<InstrSeq> {
     match e.statement_state().default_dropthrough.as_ref() {
         Some(instrs) => Ok(InstrSeq::clone(instrs)),
         None => {
@@ -1785,7 +1777,7 @@ pub fn emit_dropthrough_return<'a, 'd>(e: &mut Emitter<'d>, env: &mut Env<'a>) -
 }
 
 pub fn emit_final_stmt<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     stmt: &ast::Stmt,
 ) -> Result<InstrSeq> {
@@ -1801,7 +1793,7 @@ pub fn emit_final_stmt<'a, 'd>(
 
 pub fn emit_final_stmts<'a, 'd>(
     env: &mut Env<'a>,
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     block: &[ast::Stmt],
 ) -> Result<InstrSeq> {
     match block {
@@ -1822,7 +1814,7 @@ pub fn emit_final_stmts<'a, 'd>(
 }
 
 pub fn emit_markup<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     (_, s): &ast::Pstring,
     check_for_hashbang: bool,
@@ -1853,18 +1845,18 @@ pub fn emit_markup<'a, 'd>(
     Ok(markup)
 }
 
-fn emit_break<'a, 'd>(e: &mut Emitter<'d>, env: &mut Env<'a>, pos: &Pos) -> InstrSeq {
+fn emit_break<'a, 'd>(e: &mut Emitter, env: &mut Env<'a>, pos: &Pos) -> InstrSeq {
     use tfr::EmitBreakOrContinueFlags as Flags;
     tfr::emit_break_or_continue(e, Flags::IS_BREAK, env, pos)
 }
 
-fn emit_continue<'a, 'd>(e: &mut Emitter<'d>, env: &mut Env<'a>, pos: &Pos) -> InstrSeq {
+fn emit_continue<'a, 'd>(e: &mut Emitter, env: &mut Env<'a>, pos: &Pos) -> InstrSeq {
     use tfr::EmitBreakOrContinueFlags as Flags;
     tfr::emit_break_or_continue(e, Flags::empty(), env, pos)
 }
 
 fn emit_await_assignment<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     lval: &ast::Expr,
@@ -1902,7 +1894,7 @@ fn emit_await_assignment<'a, 'd>(
 }
 
 fn emit_if<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     condition: &ast::Expr,
@@ -1938,7 +1930,7 @@ fn emit_if<'a, 'd>(
 // TODO: clone less
 // TODO: Enforce the type hint from the declaration?
 fn emit_declare_local<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     id: &ast::Lid,

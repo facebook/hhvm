@@ -206,10 +206,10 @@ pub(crate) fn compile_from_text(hackc_opts: &mut crate::Opts, w: &mut impl Write
     Ok(())
 }
 
-fn compile_impl<'d>(
+fn compile_impl(
     env: NativeEnv,
     source_text: Vec<u8>,
-    decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
+    decl_provider: Option<Arc<dyn DeclProvider>>,
 ) -> Result<Vec<u8>> {
     let text = SourceText::make(Arc::new(env.filepath.clone()), &source_text);
     let mut hhas = Vec::new();
@@ -241,7 +241,7 @@ pub(crate) fn test_decl_compile(hackc_opts: &mut crate::Opts, w: &mut impl Write
         let parsed_file =
             direct_decl_parser::parse_decls_for_bytecode(&decl_opts, filename, &source_text);
         #[allow(clippy::arc_with_non_send_sync)]
-        let provider: Arc<SingleDeclProvider<'_, NReason>> =
+        let provider: Arc<SingleDeclProvider<NReason>> =
             Arc::new(SingleDeclProvider::make(parsed_file.decls, hackc_opts)?);
         let env = hackc_opts.native_env(path)?;
         let hhas = compile_impl(env, source_text, Some(provider.clone()))?;
@@ -301,17 +301,16 @@ struct Access {
 }
 
 #[derive(Debug)]
-struct SingleDeclProvider<'a, R: Reason> {
+struct SingleDeclProvider<R: Reason> {
     decls: DeclsHolder,
     shallow_decl_provider: Option<Arc<dyn ShallowDeclProvider<R>>>,
     type_requests: RefCell<Vec<Access>>,
     func_requests: RefCell<Vec<Access>>,
     const_requests: RefCell<Vec<Access>>,
     module_requests: RefCell<Vec<Access>>,
-    _marker: std::marker::PhantomData<&'a ()>,
 }
 
-impl<'a, R: Reason> DeclProvider<'a> for SingleDeclProvider<'a, R> {
+impl<R: Reason> DeclProvider for SingleDeclProvider<R> {
     fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl, Error> {
         let decl = {
             let decl = self.find_decl(|decls| decl_provider::find_type_decl(decls, symbol));
@@ -428,7 +427,7 @@ fn make_naming_table_powered_shallow_decl_provider<R: Reason>(
     ))
 }
 
-impl<'a, R: Reason> SingleDeclProvider<'a, R> {
+impl<R: Reason> SingleDeclProvider<R> {
     fn make(decls: Decls, hackc_opts: &crate::Opts) -> Result<Self> {
         Ok(SingleDeclProvider {
             decls: match hackc_opts.use_serialized_decls {
@@ -448,7 +447,6 @@ impl<'a, R: Reason> SingleDeclProvider<'a, R> {
             func_requests: Default::default(),
             const_requests: Default::default(),
             module_requests: Default::default(),
-            _marker: std::marker::PhantomData,
         })
     }
 

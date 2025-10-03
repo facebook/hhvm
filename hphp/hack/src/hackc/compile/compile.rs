@@ -190,11 +190,11 @@ impl Profile {
 /// Compile Hack source code, write HHAS text to `writer`.
 /// Update `profile` with stats from any passes that run,
 /// even if the compiler ultimately returns Err.
-pub fn from_text<'d>(
+pub fn from_text(
     writer: &mut dyn std::io::Write,
     source_text: SourceText<'_>,
     native_env: &NativeEnv,
-    decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
+    decl_provider: Option<Arc<dyn DeclProvider>>,
     profile: &mut Profile,
 ) -> Result<()> {
     let mut emitter = create_emitter(native_env, decl_provider);
@@ -224,7 +224,7 @@ pub fn from_text<'d>(
 }
 
 fn rewrite_and_emit<'p, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     namespace_env: Arc<NamespaceEnv>,
     mut ast: ast::Program,
     profile: &'p mut Profile,
@@ -250,10 +250,10 @@ fn rewrite_and_emit<'p, 'd>(
     unit
 }
 
-pub fn unit_from_text<'d>(
+pub fn unit_from_text(
     source_text: SourceText<'_>,
     native_env: &NativeEnv,
-    decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
+    decl_provider: Option<Arc<dyn DeclProvider>>,
     profile: &mut Profile,
 ) -> Result<Unit> {
     let opts = &elab::CodegenOpts {
@@ -263,10 +263,10 @@ pub fn unit_from_text<'d>(
     unit_from_text_with_opts(source_text, native_env, decl_provider, profile, opts)
 }
 
-pub fn unit_from_text_with_opts<'d>(
+pub fn unit_from_text_with_opts(
     source_text: SourceText<'_>,
     native_env: &NativeEnv,
-    decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
+    decl_provider: Option<Arc<dyn DeclProvider>>,
     profile: &mut Profile,
     opts: &elab::CodegenOpts,
 ) -> Result<Unit> {
@@ -304,7 +304,7 @@ pub fn unit_to_string(
     Ok(())
 }
 
-fn create_namespace_env(emitter: &Emitter<'_>) -> NamespaceEnv {
+fn create_namespace_env(emitter: &Emitter) -> NamespaceEnv {
     NamespaceEnv::empty(
         emitter.options().hhvm.aliased_namespaces_cloned().collect(),
         Mode::ForCodegen,
@@ -316,8 +316,8 @@ fn create_namespace_env(emitter: &Emitter<'_>) -> NamespaceEnv {
     )
 }
 
-fn emit_unit_from_text<'d>(
-    emitter: &mut Emitter<'d>,
+fn emit_unit_from_text(
+    emitter: &mut Emitter,
     flags: &EnvFlags,
     source_text: SourceText<'_>,
     profile: &mut Profile,
@@ -597,10 +597,7 @@ fn emit_fatal(fatal_op: FatalOp, pos: Pos, msg: impl Into<String>) -> Result<Uni
     emit_unit::emit_fatal_unit(fatal_op, pos, msg)
 }
 
-fn create_emitter<'d>(
-    native_env: &NativeEnv,
-    decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
-) -> Emitter<'d> {
+fn create_emitter(native_env: &NativeEnv, decl_provider: Option<Arc<dyn DeclProvider>>) -> Emitter {
     Emitter::new(
         NativeEnv::to_options(native_env),
         native_env.flags.is_systemlib,

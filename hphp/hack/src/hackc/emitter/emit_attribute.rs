@@ -16,7 +16,7 @@ use oxidized::ast as a;
 
 use crate::emit_expression;
 
-pub fn from_asts(e: &mut Emitter<'_>, attrs: &[a::UserAttribute]) -> Result<Vec<Attribute>> {
+pub fn from_asts(e: &mut Emitter, attrs: &[a::UserAttribute]) -> Result<Vec<Attribute>> {
     attrs
         .iter()
         // Filter out __SimpliHack attributes as they may contain expressions not normally
@@ -26,7 +26,7 @@ pub fn from_asts(e: &mut Emitter<'_>, attrs: &[a::UserAttribute]) -> Result<Vec<
         .collect()
 }
 
-pub fn from_ast(e: &mut Emitter<'_>, attr: &a::UserAttribute) -> Result<Attribute> {
+pub fn from_ast(e: &mut Emitter, attr: &a::UserAttribute) -> Result<Attribute> {
     let mut arguments: Vec<Expr<_, _>> = attr
         .params
         .iter()

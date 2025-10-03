@@ -10,22 +10,22 @@ use oxidized::ast;
 use oxidized::ast_defs;
 use oxidized::pos::Pos;
 
-struct RewriteXmlVisitor<'e, 'd> {
-    phantom: std::marker::PhantomData<&'e &'d ()>,
+struct RewriteXmlVisitor<'e> {
+    phantom: std::marker::PhantomData<&'e ()>,
 }
 
-struct Ctx<'e, 'd> {
-    emitter: &'e mut Emitter<'d>,
+struct Ctx<'e> {
+    emitter: &'e mut Emitter,
 }
 
-impl<'ast, 'e, 'd> VisitorMut<'ast> for RewriteXmlVisitor<'e, 'd> {
-    type Params = AstParams<Ctx<'e, 'd>, Error>;
+impl<'ast, 'e> VisitorMut<'ast> for RewriteXmlVisitor<'e> {
+    type Params = AstParams<Ctx<'e>, Error>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
         self
     }
 
-    fn visit_expr(&mut self, c: &mut Ctx<'e, 'd>, e: &'ast mut ast::Expr) -> Result<()> {
+    fn visit_expr(&mut self, c: &mut Ctx<'e>, e: &'ast mut ast::Expr) -> Result<()> {
         let ast::Expr(_, pos, expr) = e;
         let emitter = &mut c.emitter;
         if let ast::Expr_::Xml(cs) = expr {
@@ -36,7 +36,7 @@ impl<'ast, 'e, 'd> VisitorMut<'ast> for RewriteXmlVisitor<'e, 'd> {
     }
 }
 
-pub fn rewrite_xml(emitter: &mut Emitter<'_>, prog: &mut ast::Program) -> Result<()> {
+pub fn rewrite_xml(emitter: &mut Emitter, prog: &mut ast::Program) -> Result<()> {
     let mut xml_visitor = RewriteXmlVisitor {
         phantom: std::marker::PhantomData,
     };
@@ -45,7 +45,7 @@ pub fn rewrite_xml(emitter: &mut Emitter<'_>, prog: &mut ast::Program) -> Result
 }
 
 fn rewrite_xml_(
-    e: &mut Emitter<'_>,
+    e: &mut Emitter,
     pos: &Pos,
     (id, attributes, children): (ast::Sid, Vec<ast::XhpAttribute>, Vec<ast::Expr>),
 ) -> Result<ast::Expr> {

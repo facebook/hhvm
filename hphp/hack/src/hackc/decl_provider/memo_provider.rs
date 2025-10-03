@@ -17,16 +17,16 @@ use crate::Result;
 use crate::TypeDecl;
 
 /// A DeclProvider that memoizes results of previous queries.
-pub struct MemoProvider<'d> {
-    next: Arc<dyn DeclProvider<'d> + 'd>,
+pub struct MemoProvider {
+    next: Arc<dyn DeclProvider>,
     types: RefCell<HashMap<String, TypeDecl>>,
     funcs: RefCell<HashMap<String, FunDecl>>,
     consts: RefCell<HashMap<String, ConstDecl>>,
     modules: RefCell<HashMap<String, ModuleDecl>>,
 }
 
-impl<'d> MemoProvider<'d> {
-    pub fn new(next: Arc<dyn DeclProvider<'d> + 'd>) -> Self {
+impl MemoProvider {
+    pub fn new(next: Arc<dyn DeclProvider>) -> Self {
         Self {
             next,
             types: Default::default(),
@@ -53,7 +53,7 @@ impl<'d> MemoProvider<'d> {
     }
 }
 
-impl<'d> DeclProvider<'d> for MemoProvider<'d> {
+impl DeclProvider for MemoProvider {
     fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl> {
         Self::fetch_or_insert(&self.types, symbol, || self.next.type_decl(symbol, depth))
     }
@@ -71,7 +71,7 @@ impl<'d> DeclProvider<'d> for MemoProvider<'d> {
     }
 }
 
-impl<'d> std::fmt::Debug for MemoProvider<'d> {
+impl std::fmt::Debug for MemoProvider {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.next.fmt(f)
     }

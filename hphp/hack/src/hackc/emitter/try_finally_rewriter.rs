@@ -95,7 +95,7 @@ pub(super) fn emit_save_label_id(local_gen: &mut LocalGen, id: jt::StateId) -> I
 }
 
 pub(super) fn emit_return<'a>(
-    e: &mut Emitter<'_>,
+    e: &mut Emitter,
     in_finally_epilogue: bool,
     env: &mut Env<'a>,
 ) -> Result<InstrSeq> {
@@ -203,7 +203,7 @@ bitflags! {
 }
 
 pub(super) fn emit_break_or_continue<'a>(
-    e: &mut Emitter<'_>,
+    e: &mut Emitter,
     flags: EmitBreakOrContinueFlags,
     env: &mut Env<'a>,
     pos: &Pos,
@@ -253,14 +253,14 @@ pub(super) fn emit_break_or_continue<'a>(
 }
 
 pub(super) fn emit_finally_epilogue<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     jump_instrs: JumpInstructions<'_>,
     finally_end: Label,
 ) -> Result<InstrSeq> {
     fn emit_instr<'a, 'd>(
-        e: &mut Emitter<'d>,
+        e: &mut Emitter,
         env: &mut Env<'a>,
         pos: &Pos,
         i: &Instruct,

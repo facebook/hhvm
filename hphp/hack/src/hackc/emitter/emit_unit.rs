@@ -87,7 +87,7 @@ pub fn emit_fatal_unit(op: FatalOp, pos: Pos, msg: impl Into<String>) -> Result<
 
 /// This is the entry point from hh_single_compile
 pub fn emit_unit(
-    emitter: &mut Emitter<'_>,
+    emitter: &mut Emitter,
     namespace: Arc<namespace_env::Env>,
     ast: ast::Program,
 ) -> Result<Unit> {
@@ -117,7 +117,7 @@ fn record_error(
     }
 }
 
-fn scan_types<'d, F>(p: &dyn DeclProvider<'d>, q: &mut VecDeque<(StringId, u64)>, mut efunc: F)
+fn scan_types<F>(p: &dyn DeclProvider, q: &mut VecDeque<(StringId, u64)>, mut efunc: F)
 where
     F: FnMut(StringId, decl_provider::Error),
 {
@@ -154,7 +154,7 @@ where
 }
 
 fn emit_unit_<'d>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     namespace: Arc<namespace_env::Env>,
     prog: ast::Program,
 ) -> Result<Unit> {

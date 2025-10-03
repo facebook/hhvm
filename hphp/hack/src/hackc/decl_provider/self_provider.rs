@@ -24,14 +24,14 @@ use crate::TypeDecl;
 ///
 /// Useful when the file under compilation is not indexed by the HHVM autoloader
 /// or similar circumstances.
-pub struct SelfProvider<'d> {
-    fallback_decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
+pub struct SelfProvider {
+    fallback_decl_provider: Option<Arc<dyn DeclProvider>>,
     decls: Decls,
 }
 
-impl<'d> SelfProvider<'d> {
+impl SelfProvider {
     pub fn new(
-        fallback_decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
+        fallback_decl_provider: Option<Arc<dyn DeclProvider>>,
         decl_opts: DeclParserOptions,
         source_text: SourceText<'_>,
     ) -> Self {
@@ -52,10 +52,10 @@ impl<'d> SelfProvider<'d> {
     /// When decls are turned on everywhere by default and it is no longer optional
     /// this can simply return a nonoption decl provider
     pub fn wrap_existing_provider(
-        fallback_decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
+        fallback_decl_provider: Option<Arc<dyn DeclProvider>>,
         decl_opts: DeclParserOptions,
         source_text: SourceText<'_>,
-    ) -> Option<Arc<dyn DeclProvider<'d> + 'd>> {
+    ) -> Option<Arc<dyn DeclProvider>> {
         if fallback_decl_provider.is_none() {
             None
         } else {
@@ -63,14 +63,14 @@ impl<'d> SelfProvider<'d> {
                 fallback_decl_provider,
                 decl_opts,
                 source_text,
-            )) as Arc<dyn DeclProvider<'d> + 'd>)
+            )) as Arc<dyn DeclProvider>)
         }
     }
 
     fn result_or_else<T>(
         &self,
         decl: Result<T>,
-        get_fallback_decl: impl Fn(&Arc<dyn DeclProvider<'d> + 'd>) -> Result<T>,
+        get_fallback_decl: impl Fn(&Arc<dyn DeclProvider>) -> Result<T>,
     ) -> Result<T> {
         decl.or_else(|_| {
             self.fallback_decl_provider
@@ -80,7 +80,7 @@ impl<'d> SelfProvider<'d> {
     }
 }
 
-impl<'d> DeclProvider<'d> for SelfProvider<'d> {
+impl DeclProvider for SelfProvider {
     fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl> {
         self.result_or_else(crate::find_type_decl(&self.decls, symbol), |provider| {
             provider.type_decl(symbol, depth)
@@ -106,7 +106,7 @@ impl<'d> DeclProvider<'d> for SelfProvider<'d> {
     }
 }
 
-impl<'d> std::fmt::Debug for SelfProvider<'d> {
+impl std::fmt::Debug for SelfProvider {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if let Some(p) = &self.fallback_decl_provider {
             write!(f, "SelfProvider({:?})", p)

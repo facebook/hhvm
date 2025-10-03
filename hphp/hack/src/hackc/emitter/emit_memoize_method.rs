@@ -104,7 +104,7 @@ pub fn make_info(
 }
 
 pub fn emit_wrapper_methods<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     env: &mut Env<'a>,
     info: &MemoizeInfo,
     class: &'a ast::Class_,
@@ -126,7 +126,7 @@ pub fn emit_wrapper_methods<'a, 'd>(
 
 // This is cut-and-paste from emit_method, with special casing for wrappers
 fn make_memoize_wrapper_method<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     env: &mut Env<'a>,
     info: &MemoizeInfo,
     class: &'a ast::Class_,
@@ -203,7 +203,7 @@ fn make_memoize_wrapper_method<'a, 'd>(
 }
 
 fn emit_memoize_wrapper_body<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     env: &mut Env<'a>,
     args: &mut Args<'_, 'a>,
     span: Span,
@@ -244,7 +244,7 @@ fn emit_memoize_wrapper_body<'a, 'd>(
 }
 
 fn emit<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     env: &mut Env<'a>,
     hhas_params: Vec<(Param, Option<(Label, ast::Expr)>)>,
     return_type: TypeInfo,
@@ -278,7 +278,7 @@ fn emit<'a, 'd>(
 }
 
 fn make_memoize_method_code<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
@@ -306,7 +306,7 @@ fn make_memoize_method_code<'a, 'd>(
 
 // method is the already-renamed memoize method that must be wrapped
 fn make_memoize_method_with_params_code<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
@@ -459,7 +459,7 @@ fn make_memoize_method_with_params_code<'a, 'd>(
 }
 
 fn make_memoize_method_no_params_code<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     args: &Args<'_, 'a>,
     deprecation_info: Option<&[TypedValue]>,
     coeffects: &Coeffects,
@@ -551,7 +551,7 @@ fn make_memoize_method_no_params_code<'a, 'd>(
 
 // Construct the wrapper function
 fn make_wrapper<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     env: &Env<'a>,
     instrs: InstrSeq,
     params: Vec<(Param, Option<(Label, ast::Expr)>)>,

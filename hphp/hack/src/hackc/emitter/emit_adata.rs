@@ -10,7 +10,7 @@ use hhbc::TypedValue;
 use instruction_sequence::InstrSeq;
 use instruction_sequence::instr;
 
-pub fn typed_value_into_instr(e: &mut Emitter<'_>, tv: TypedValue) -> Result<InstrSeq> {
+pub fn typed_value_into_instr(e: &mut Emitter, tv: TypedValue) -> Result<InstrSeq> {
     match tv {
         TypedValue::Uninit => Err(Error::unrecoverable("rewrite_typed_value: uninit")),
         TypedValue::Null => Ok(instr::null()),
@@ -27,6 +27,6 @@ pub fn typed_value_into_instr(e: &mut Emitter<'_>, tv: TypedValue) -> Result<Ins
 }
 
 /// Identical array literals will be shared between funcs in the same unit
-fn intern_array(e: &mut Emitter<'_>, tv: TypedValue) -> TypedValue {
+fn intern_array(e: &mut Emitter, tv: TypedValue) -> TypedValue {
     e.adata_state.intern_value(tv).clone()
 }

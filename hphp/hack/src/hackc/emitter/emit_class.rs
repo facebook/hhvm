@@ -63,7 +63,7 @@ use crate::emit_xhp;
 use crate::xhp_attribute::XhpAttribute;
 
 fn add_symbol_refs<'d>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     base: Option<&ClassName>,
     implements: &[ClassName],
     uses: &[ClassName],
@@ -80,7 +80,7 @@ fn add_symbol_refs<'d>(
 }
 
 fn make_86method<'d>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     name: MethodName,
     params: Vec<Param>,
     is_static: bool,
@@ -169,7 +169,7 @@ fn from_includes(includes: &[ast::Hint]) -> Vec<ClassName> {
 }
 
 fn from_type_constant<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     tc: &'a ast::ClassTypeconstDef,
 ) -> Result<TypeConstant> {
     use ast::ClassTypeconst;
@@ -240,7 +240,7 @@ fn from_ctx_constant(tc: &ast::ClassTypeconstDef) -> Result<CtxConstant> {
 }
 
 fn from_class_elt_classvars<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     ast_class: &'a ast::Class_,
     class_is_const: bool,
     tparams: &[&str],
@@ -278,7 +278,7 @@ fn from_class_elt_classvars<'a, 'd>(
 }
 
 fn from_class_elt_constants<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     env: &Env<'a>,
     class_: &'a ast::Class_,
 ) -> Result<Vec<(Constant, Option<InstrSeq>)>> {
@@ -329,7 +329,7 @@ fn from_enum_type(opt: Option<&ast::Enum_>) -> Result<Option<TypeInfo>> {
 }
 
 fn emit_reified_extends_params<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &Env<'a>,
     ast_class: &'a ast::Class_,
 ) -> Result<InstrSeq> {
@@ -355,7 +355,7 @@ pub(crate) static REIFIED_PROP_NAME: hhbc::Lazy<PropName> =
     hhbc::Lazy::new(|| PropName::intern(string_utils::reified::PROP_NAME));
 
 fn emit_reified_init_body<'a, 'd>(
-    e: &mut Emitter<'d>,
+    e: &mut Emitter,
     env: &Env<'a>,
     num_reified: usize,
     ast_class: &'a ast::Class_,
@@ -398,7 +398,7 @@ fn emit_reified_init_body<'a, 'd>(
 }
 
 fn emit_reified_init_method<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     env: &Env<'a>,
     ast_class: &'a ast::Class_,
 ) -> Result<Option<Method>> {
@@ -446,7 +446,7 @@ fn emit_reified_init_method<'a, 'd>(
 }
 
 fn make_init_method<'d>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     properties: &mut [PropAndInit],
     filter: impl Fn(&Property) -> bool,
     name: &'static str,
@@ -483,7 +483,7 @@ fn make_init_method<'d>(
     }
 }
 
-pub fn emit_class<'a, 'd>(emitter: &mut Emitter<'d>, ast_class: &'a ast::Class_) -> Result<Class> {
+pub fn emit_class<'a, 'd>(emitter: &mut Emitter, ast_class: &'a ast::Class_) -> Result<Class> {
     let mut env = Env::make_class_env(ast_class);
     // TODO: communicate this without looking at the name
     let is_closure = ast_class.name.1.starts_with("Closure$");
@@ -824,7 +824,7 @@ pub fn emit_class<'a, 'd>(emitter: &mut Emitter<'d>, ast_class: &'a ast::Class_)
 }
 
 pub fn emit_classes_from_program<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     ast: &'a [ast::Def],
 ) -> Result<Vec<Class>> {
     ast.iter()

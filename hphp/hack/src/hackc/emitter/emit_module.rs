@@ -13,7 +13,7 @@ use oxidized::ast;
 use crate::emit_attribute;
 
 pub fn emit_module<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     ast_module: &'a ast::ModuleDef,
 ) -> Result<Module> {
     let attributes = emit_attribute::from_asts(emitter, &ast_module.user_attributes)?;
@@ -32,7 +32,7 @@ pub fn emit_module<'a, 'd>(
 }
 
 pub fn emit_modules_from_program<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     ast: &'a [ast::Def],
 ) -> Result<Vec<Module>> {
     ast.iter()

@@ -23,7 +23,7 @@ use crate::emit_body;
 use crate::emit_param;
 
 pub fn emit_body<'a, 'd>(
-    emitter: &mut Emitter<'d>,
+    emitter: &mut Emitter,
     scope: &Scope<'a>,
     class_name: &ast::Sid,
     class_attrs: &[ast::UserAttribute],

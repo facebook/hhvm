@@ -1500,19 +1500,19 @@ void UniqueStubs::add(const char* name,
     // the start address).
     if (&cb == &startBlock) start = mainStart;
 
-    FTRACE(1, "unique stub: {} @ {} -- {:4} bytes: {}\n",
-           cb.name(),
-           static_cast<void*>(start),
-           static_cast<size_t>(end - start),
-           name);
-
-    ONTRACE(2,
-            [&]{
-              std::ostringstream os;
-              disasmRange(os, TransKind::Optimize, start, end, 0);
-              FTRACE(2, "{}\n", os.str());
-            }()
-           );
+    if (Trace::moduleEnabledRelease(Trace::ustubs, 1)) {
+      std::string disasm;
+      if (Trace::moduleEnabledRelease(Trace::ustubs, 2)) {
+        std::ostringstream os;
+        disasmRange(os, TransKind::Optimize, start, end, 0);
+        disasm = os.str() + "\n";
+      }
+      Trace::ftraceRelease("unique stub: {} @ {} -- {:4} bytes: {}\n{}",
+                           cb.name(),
+                           static_cast<void*>(start),
+                           static_cast<size_t>(end - start),
+                           name, disasm);
+    }
 
     if (!Cfg::Jit::NoGdb) {
       dbg.recordStub(Debug::TCRange(start, end, &cb == &code.cold()),

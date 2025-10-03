@@ -617,6 +617,15 @@ function openssl_x509_checkpurpose(mixed $x509cert,
                                    varray<string> $cainfo = vec[],
                                    string $untrustedfile = ""): mixed;
 
+/* openssl_x509_get_upn() returns the User Principal Name from the given certificate.
+ * @param mixed $certificate - An x509 certificate that can be loaded by openssl_get_publickey
+ * @return string - Returns the UPN if the certificate contains a valid one.
+ * @throws Exception if the certificate could not be parsed, or if the it does not
+ *  contain a valid UPN.
+ */
+<<__Native>>
+function openssl_x509_get_upn(mixed $certificate): string;
+
 /* openssl_x509_export_to_file() stores x509 into a file named by outfilename
  * in a PEM encoded format.
  * @param mixed $x509 - See Key/Certificate parameters for a list of valid

@@ -8,8 +8,8 @@
 
 #include <proxygen/lib/http/structuredheaders/StructuredHeadersBuffer.h>
 
-#include <boost/lexical_cast.hpp>
 #include <cctype>
+#include <folly/Conv.h>
 #include <folly/Try.h>
 #include <folly/base64.h>
 #include <glog/logging.h>
@@ -199,23 +199,23 @@ DecodeError StructuredHeadersBuffer::parseIdentifier(std::string& result) {
 
 DecodeError StructuredHeadersBuffer::parseInteger(
     const std::string& input, StructuredHeaderItem& result) {
-  try {
-    result.value = boost::lexical_cast<int64_t>(input);
-    result.tag = StructuredHeaderItem::Type::INT64;
-  } catch (boost::bad_lexical_cast&) {
+  auto maybeInt = folly::tryTo<int64_t>(input);
+  if (maybeInt.hasError()) {
     return handleDecodeError(DecodeError::UNPARSEABLE_NUMERIC_TYPE);
   }
+  result.value = maybeInt.value();
+  result.tag = StructuredHeaderItem::Type::INT64;
   return DecodeError::OK;
 }
 
 DecodeError StructuredHeadersBuffer::parseFloat(const std::string& input,
                                                 StructuredHeaderItem& result) {
-  try {
-    result.value = boost::lexical_cast<double>(input);
-    result.tag = StructuredHeaderItem::Type::DOUBLE;
-  } catch (boost::bad_lexical_cast&) {
+  auto maybeDouble = folly::tryTo<double>(input);
+  if (maybeDouble.hasError()) {
     return handleDecodeError(DecodeError::UNPARSEABLE_NUMERIC_TYPE);
   }
+  result.value = maybeDouble.value();
+  result.tag = StructuredHeaderItem::Type::DOUBLE;
   return DecodeError::OK;
 }
 

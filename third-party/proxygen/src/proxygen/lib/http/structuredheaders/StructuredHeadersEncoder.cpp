@@ -6,7 +6,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <boost/lexical_cast.hpp>
 #include <folly/base64.h>
 #include <glog/logging.h>
 #include <proxygen/lib/http/structuredheaders/StructuredHeadersEncoder.h>

@@ -8,8 +8,9 @@
 
 #pragma once
 
-#include <boost/variant.hpp>
+#include <string>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 namespace proxygen::StructuredHeaders {
@@ -30,11 +31,11 @@ class StructuredHeaderItem {
     BOOLEAN
   };
 
-  using VariantType = boost::variant<bool, int64_t, double, std::string>;
+  using VariantType = std::variant<bool, int64_t, double, std::string>;
 
   StructuredHeaderItem() = default;
   StructuredHeaderItem(Type tagIn, VariantType valueIn)
-      : tag(tagIn), value(valueIn) {
+      : tag(tagIn), value(std::move(valueIn)) {
   }
 
   template <typename T>
@@ -45,15 +46,15 @@ class StructuredHeaderItem {
   template <typename T>
   bool operator==(const T& other) const {
     try {
-      return boost::get<T>(value) == other;
-    } catch (boost::bad_get&) {
+      return std::get<T>(value) == other;
+    } catch (std::bad_variant_access&) {
       return false;
     }
   }
 
   template <typename T>
   T get() const {
-    return boost::get<T>(value);
+    return std::get<T>(value);
   }
 
   Type tag;

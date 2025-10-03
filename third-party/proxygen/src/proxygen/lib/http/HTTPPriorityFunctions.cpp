@@ -27,7 +27,7 @@ T getWithDefault(StructuredHeaders::Dictionary& dict,
 
   try {
     return it->second.get<T>();
-  } catch (const boost::bad_get&) {
+  } catch (const std::bad_variant_access&) {
     malformed = true;
     return value;
   }

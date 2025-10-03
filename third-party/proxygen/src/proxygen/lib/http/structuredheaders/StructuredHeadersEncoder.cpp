@@ -7,7 +7,6 @@
  */
 
 #include <boost/lexical_cast.hpp>
-#include <boost/variant.hpp>
 #include <folly/base64.h>
 #include <glog/logging.h>
 #include <proxygen/lib/http/structuredheaders/StructuredHeadersEncoder.h>
@@ -129,15 +128,15 @@ EncodeError StructuredHeadersEncoder::encodeItem(
 
   switch (input.tag) {
     case StructuredHeaderItem::Type::STRING:
-      return encodeString(boost::get<std::string>(input.value));
+      return encodeString(std::get<std::string>(input.value));
     case StructuredHeaderItem::Type::INT64:
-      return encodeInteger(boost::get<int64_t>(input.value));
+      return encodeInteger(std::get<int64_t>(input.value));
     case StructuredHeaderItem::Type::BOOLEAN:
-      return encodeBoolean(boost::get<bool>(input.value));
+      return encodeBoolean(std::get<bool>(input.value));
     case StructuredHeaderItem::Type::DOUBLE:
-      return encodeFloat(boost::get<double>(input.value));
+      return encodeFloat(std::get<double>(input.value));
     case StructuredHeaderItem::Type::BINARYCONTENT:
-      return encodeBinaryContent(boost::get<std::string>(input.value));
+      return encodeBinaryContent(std::get<std::string>(input.value));
     default:
       return handleEncodeError(EncodeError::ENCODING_NULL_ITEM);
   }
@@ -196,7 +195,7 @@ EncodeError StructuredHeadersEncoder::encodeInteger(int64_t input) {
 
 bool StructuredHeadersEncoder::skipBoolean(const StructuredHeaderItem& input) {
   return input.tag == StructuredHeaderItem::Type::BOOLEAN &&
-         boost::get<bool>(input.value);
+         std::get<bool>(input.value);
 }
 
 EncodeError StructuredHeadersEncoder::encodeBoolean(bool input) {

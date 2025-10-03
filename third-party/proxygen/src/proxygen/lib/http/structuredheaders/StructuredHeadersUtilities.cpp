@@ -82,13 +82,13 @@ bool itemTypeMatchesContent(const StructuredHeaderItem& input) {
     case StructuredHeaderItem::Type::BINARYCONTENT:
     case StructuredHeaderItem::Type::IDENTIFIER:
     case StructuredHeaderItem::Type::STRING:
-      return input.value.type() == typeid(std::string);
+      return std::holds_alternative<std::string>(input.value);
     case StructuredHeaderItem::Type::INT64:
-      return input.value.type() == typeid(int64_t);
+      return std::holds_alternative<int64_t>(input.value);
     case StructuredHeaderItem::Type::BOOLEAN:
-      return input.value.type() == typeid(bool);
+      return std::holds_alternative<bool>(input.value);
     case StructuredHeaderItem::Type::DOUBLE:
-      return input.value.type() == typeid(double);
+      return std::holds_alternative<double>(input.value);
     case StructuredHeaderItem::Type::NONE:
       return true;
   }

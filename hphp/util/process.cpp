@@ -235,24 +235,6 @@ int64_t readCgroup2FileMb(const char* fileName) {
   return -1;
 }
 
-/*
- * If cgroup2 is enabled, update the MemInfo in `info' based on cgroup2 limits.
- */
-void updateMemInfoWithCgroup2Info(MemInfo& info) {
-  if (!ProcStatus::valid()) return;
-  const int64_t cgroup2TotalMb = readCgroup2FileMb("max");
-  const int64_t currUsageMb = ProcStatus::totalRssKb() / 1024;
-  if (cgroup2TotalMb >= 0) {
-    auto const availableMb_approx =
-      std::max(cgroup2TotalMb - currUsageMb, int64_t{});
-    if (availableMb_approx < info.availableMb) {
-      info.availableMb = availableMb_approx;
-    }
-    if (cgroup2TotalMb < info.totalMb) {
-      info.totalMb = cgroup2TotalMb;
-    }
-  }
-}
 
 // Files such as /proc/meminfo and /proc/self/status contain many lines
 // formatted as one of the following:
@@ -276,7 +258,7 @@ int64_t readSize(const char* line, bool expectKB = false) {
 
 /////////////////////////////////////////////////////////////////////////
 
-bool Process::GetMemoryInfo(MemInfo& info, bool checkCgroup2) {
+bool Process::GetMemoryInfo(MemInfo& info) {
   info = MemInfo{};
   FILE* f = fopen("/proc/meminfo", "r");
   if (f) {
@@ -297,7 +279,6 @@ bool Process::GetMemoryInfo(MemInfo& info, bool checkCgroup2) {
         if (kb >= 0) info.availableMb = kb / 1024;
       }
       if (info.valid()) {
-        if (checkCgroup2) updateMemInfoWithCgroup2Info(info);
         return true;
       }
     }

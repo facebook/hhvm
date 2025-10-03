@@ -25,6 +25,9 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "hphp/vixl/a64/cpu-a64.h"
+#ifndef NDEBUG
+#include "hphp/vixl/utils.h"
+#endif
 
 namespace vixl {
 

@@ -290,9 +290,7 @@ class EnumMetaTests(unittest.TestCase):
 
     def test_enum_metaclass_iter(self) -> None:
         self.assertEqual(list(Color), [Color.red, Color.blue, Color.green])
-        with self.assertRaises(KeyError):
-            for _ in reversed(Color):
-                pass
+        self.assertEqual(list(reversed(Color)), [Color.green, Color.blue, Color.red])
 
     def test_enum_metaclass_contains(self) -> None:
         self.assertIn(Color.red, Color)

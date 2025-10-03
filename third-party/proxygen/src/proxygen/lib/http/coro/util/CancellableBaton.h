@@ -19,6 +19,10 @@ namespace proxygen::coro::detail {
 class CancellableBaton {
  public:
   CancellableBaton() = default;
+  CancellableBaton(const CancellableBaton&) = delete;
+  CancellableBaton& operator=(const CancellableBaton&) = delete;
+  CancellableBaton(CancellableBaton&&) = delete;
+  CancellableBaton& operator=(CancellableBaton&&) = delete;
   ~CancellableBaton() {
     XCHECK_EQ(status_, nullptr);
   }

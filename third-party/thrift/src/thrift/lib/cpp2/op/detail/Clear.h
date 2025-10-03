@@ -54,7 +54,7 @@ struct GetIntrinsicDefault : GetDefault<Tag> {
 };
 
 // Clear the given value, setting it to it's intrinsic default.
-template <typename TagOrId, typename PTag = void, typename = void>
+template <typename TagOrId, typename PTag = void>
 struct Clear {
   using Tag = TagOrId;
   constexpr void operator()(type::native_type<Tag>& val) const {
@@ -76,7 +76,8 @@ struct Clear {
   }
 };
 template <typename Id>
-struct Clear<Id, type::if_id<Id>, type::if_not_thrift_type_tag<Id>> {
+  requires(type::is_id_v<Id> && !type::ThriftTypeTag<Id>)
+struct Clear<Id> {
   template <typename T>
   constexpr void operator()(T& val) const {
     Clear<Id, type::infer_tag<T>>{}(val);

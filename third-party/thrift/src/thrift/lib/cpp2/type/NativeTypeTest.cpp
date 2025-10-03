@@ -28,10 +28,11 @@
 namespace apache::thrift::type {
 namespace {
 
-template <typename Tag>
+template <ThriftTypeTag Tag>
 native_type<Tag> foo();
 template <typename T>
-if_not_thrift_type_tag<T, T> foo();
+  requires(!ThriftTypeTag<T>)
+T foo();
 
 TEST(NativeTypeTest, UndefinedOverloading) {
   static_assert(std::is_same_v<int, decltype(foo<int>())>);

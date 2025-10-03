@@ -273,31 +273,34 @@ class Value : private detail::DynCmp<Value, ConstRef>,
 
   // Throwing type-safe casting functions.
   using Base::as;
-  template <typename Tag>
+  template <ThriftTypeTag Tag>
   native_type<Tag>& as() & {
     return type_->as<native_type<Tag>>(ptr_);
   }
   template <typename T>
-  if_not_thrift_type_tag<T, T&> as() & {
+    requires(!ThriftTypeTag<T>)
+  T& as() & {
     return as<infer_tag<T>>();
   }
-  template <typename Tag>
+  template <ThriftTypeTag Tag>
   native_type<Tag>&& as() && {
     return std::move(type_->as<native_type<Tag>>(ptr_));
   }
   template <typename T>
-  if_not_thrift_type_tag<T, T&&> as() && {
+    requires(!ThriftTypeTag<T>)
+  T&& as() && {
     return as<infer_tag<T>>();
   }
 
   // Non-throwing type-safe casting functions.
   using Base::tryAs;
-  template <typename Tag>
+  template <ThriftTypeTag Tag>
   native_type<Tag>* tryAs() noexcept {
     return type_->tryAs<native_type<Tag>>(ptr_);
   }
   template <typename T>
-  if_not_thrift_type_tag<T, T*> tryAs() noexcept {
+    requires(!ThriftTypeTag<T>)
+  T* tryAs() noexcept {
     return tryAs<infer_tag<T>>();
   }
 

@@ -128,24 +128,26 @@ class Dyn {
   const std::type_info& typeId() const noexcept { return type_->cppType; }
 
   // Throws on mismatch.
-  template <typename Tag>
+  template <ThriftTypeTag Tag>
   const native_type<Tag>& as() const {
     // TODO(afuller): Check thrift types match.
     return type_->as<native_type<Tag>>(ptr_);
   }
   template <typename T>
-  if_not_thrift_type_tag<T, const T&> as() const {
+    requires(!ThriftTypeTag<T>)
+  const T& as() const {
     return as<infer_tag<T>>();
   }
 
   // Returns nullptr on mismatch.
-  template <typename Tag>
+  template <ThriftTypeTag Tag>
   FOLLY_NODISCARD const native_type<Tag>* tryAs() const noexcept {
     // TODO(afuller): Check thrift types match.
     return type_->tryAs<native_type<Tag>>(ptr_);
   }
   template <typename T>
-  if_not_thrift_type_tag<T, const T*> tryAs() const {
+    requires(!ThriftTypeTag<T>)
+  const T* tryAs() const {
     return tryAs<infer_tag<T>>();
   }
 

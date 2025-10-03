@@ -75,22 +75,53 @@ class BiDiServiceTest : public Test {
 
 CO_TEST_F(BiDiServiceTest, BiDiNoResponse) {
   auto client = makeClient();
-  try {
-    co_await client->co_echo();
-    CO_FAIL() << "No error - error expected";
-  } catch (TApplicationException e) {
-    EXPECT_EQ(e.getMessage(), "Unexpected error frame type: 513");
-  }
+  BidirectionalStream<std::string, std::string> stream =
+      co_await client->co_echo();
+  auto sinkGen = folly::coro::co_invoke(
+      []() -> folly::coro::AsyncGenerator<std::string&&> {
+        co_yield "Hello";
+        co_yield "World";
+      });
+  co_await stream.sink.sink(std::move(sinkGen));
+
+  auto streamGen = std::move(stream.stream).toAsyncGenerator();
+  auto firstItem = co_await streamGen.next();
+  EXPECT_TRUE(firstItem.has_value());
+  EXPECT_EQ(*firstItem, "Hello");
+
+  auto secondItem = co_await streamGen.next();
+  EXPECT_TRUE(secondItem.has_value());
+  EXPECT_EQ(*secondItem, "World");
+
+  auto exhausted = co_await streamGen.next();
+  EXPECT_FALSE(exhausted.has_value());
 }
 
 CO_TEST_F(BiDiServiceTest, BiDiWithResponse) {
   auto client = makeClient();
-  try {
-    co_await client->co_echoWithResponse("Test");
-    CO_FAIL() << "No error - error expected";
-  } catch (TApplicationException e) {
-    EXPECT_EQ(e.getMessage(), "Unexpected error frame type: 513");
-  }
+  ResponseAndBidirectionalStream<std::string, std::string, std::string> result =
+      co_await client->co_echoWithResponse("Test");
+
+  EXPECT_EQ(result.response, "Test");
+
+  auto sinkGen = folly::coro::co_invoke(
+      []() -> folly::coro::AsyncGenerator<std::string&&> {
+        co_yield "Hello";
+        co_yield "World";
+      });
+  co_await result.sink.sink(std::move(sinkGen));
+
+  auto streamGen = std::move(result.stream).toAsyncGenerator();
+  auto firstItem = co_await streamGen.next();
+  EXPECT_TRUE(firstItem.has_value());
+  EXPECT_EQ(*firstItem, "Hello");
+
+  auto secondItem = co_await streamGen.next();
+  EXPECT_TRUE(secondItem.has_value());
+  EXPECT_EQ(*secondItem, "World");
+
+  auto exhausted = co_await streamGen.next();
+  EXPECT_FALSE(exhausted.has_value());
 }
 
 } // namespace apache::thrift

@@ -141,7 +141,8 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 
     ifThen(v, cc, sf, [&] (Vout& v) {
       v << load{d, dataVal};
-      v << call{releaseFake, dataVal | typeVal};
+      v << call{releaseFake, dataVal | typeVal, nullptr /* watch */,
+                true /* stackUnaligned */};
     });
   };
 

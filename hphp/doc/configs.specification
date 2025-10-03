@@ -1769,6 +1769,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool Jit.LayoutPruneCatchArcs = true, UNKNOWN
 - bool Jit.KeepDbgFiles = false, UNKNOWN
 - uint32_t Jit.EnableRenameFunction = 0, UNKNOWN, globaldata|compileroption(JitEnableRenameFunction)|unitcacheflag
+- bool Jit.TrapUnalignedStackCalls = false, UNKNOWN
 
   This controls function renaming.
   0 - Renaming not allowed

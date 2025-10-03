@@ -261,7 +261,10 @@ struct Vgen {
 
   // native function abi
   void emit(const call& i);
-  void emit(const callr& i) { a->Blr(X(i.target)); }
+  void emit(const callr& i) {
+    if (!i.stackUnaligned) trap_unaligned_stack();
+    a->Blr(X(i.target));
+  }
   void emit(const calls& i);
   void emit(const ret& /*i*/) { a->Ret(); }
 
@@ -463,6 +466,8 @@ private:
     env.meta.addressImmediates.insert(env.cb->frontier());
   }
 
+  void trap_unaligned_stack();
+
 private:
   Venv& env;
   vixl::MacroAssembler assem;
@@ -478,6 +483,19 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void Vgen::trap_unaligned_stack() {
+  if (!Cfg::Jit::TrapUnalignedStackCalls) return;
+
+  // We can't test rsp directly, so copy it to rVixlScratch0.
+  a->Mov(rVixlScratch0, X(arm::rsp()));
+  a->Tst(rVixlScratch0, 0xf); // should be 0 => 16-byte aligned
+  vixl::Label Call;
+  a->B(&Call, C(jit::CC_Z));
+  env.meta.trapReasons.emplace_back(a->frontier(), "unaligned native call");
+  a->Brk(1);
+  a->bind(&Call);
+}
 
 static CodeBlock* getBlock(Venv& env, CodeAddress a) {
   for (auto const& area : env.text.areas()) {
@@ -836,6 +854,7 @@ void Vgen::emit(const mcprep& i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const call& i) {
+  if (!i.stackUnaligned) trap_unaligned_stack();
   recordAddressImmediate();
   a->Mov(rAsm, i.target);
   a->Blr(rAsm);
@@ -846,6 +865,7 @@ void Vgen::emit(const call& i) {
 }
 
 void Vgen::emit(const calls& i) {
+  trap_unaligned_stack();
   emitSmashableCall(*env.cb, env.meta, i.target);
   if (i.watch) {
     *i.watch = a->frontier();

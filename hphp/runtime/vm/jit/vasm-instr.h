@@ -646,9 +646,10 @@ struct vinvoke { CallSpec call; VcallArgsId args; Vtuple d; Vlabel targets[2];
  * If `watch' is set, *watch will be set to the address immediately following
  * the call instruction---useful for various unwinder hijinks.
  */
-struct call  { CodeAddress target; RegSet args; TCA* watch; };
+struct call  { CodeAddress target; RegSet args; TCA* watch;
+               bool stackUnaligned=false; };
 struct callm { Vptr target; RegSet args; };
-struct callr { Vreg64 target; RegSet args; };
+struct callr { Vreg64 target; RegSet args; bool stackUnaligned=false; };
 struct calls { CodeAddress target; RegSet args; TCA* watch; };
 
 /*

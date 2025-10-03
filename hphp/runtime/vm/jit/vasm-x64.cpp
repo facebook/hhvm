@@ -100,8 +100,14 @@ struct Vgen {
 
   // native function abi
   void emit(const call& i);
-  void emit(const callm& i) { a.prefix(i.target.mr()).call(i.target); }
-  void emit(const callr& i) { a.call(i.target); }
+  void emit(const callm& i) {
+    trap_unaligned_stack();
+    a.prefix(i.target.mr()).call(i.target);
+  }
+  void emit(const callr& i) {
+    if (!i.stackUnaligned) trap_unaligned_stack();
+    a.call(i.target);
+  }
   void emit(const calls& i);
   void emit(const ret& /*i*/) { a.ret(); }
 
@@ -335,6 +341,8 @@ private:
   template<class Inst> void noncommute(Inst&);
 
   CodeBlock& frozen() { return env.text.frozen().code; }
+
+  void trap_unaligned_stack();
 
 private:
   Venv& env;
@@ -696,7 +704,20 @@ void Vgen<X64Asm>::emit(const mcprep& i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class X64Asm>
+void Vgen<X64Asm>::trap_unaligned_stack() {
+  if (!Cfg::Jit::TrapUnalignedStackCalls) return;
+
+  a.testb(0xf, rbyte(reg::rsp)); // should be 0 => 16-byte aligned
+  Label Call;
+  a.jcc(ConditionCode::CC_Z, Call);
+  env.meta.trapReasons.emplace_back(a.frontier(), "unaligned native call");
+  a.ud2();
+  asm_label(a, Call);
+}
+
+template<class X64Asm>
 void Vgen<X64Asm>::emit(const call& i) {
+  if (!i.stackUnaligned) trap_unaligned_stack();
   if (a.jmpDeltaFits(i.target)) {
     a.call(i.target);
   } else {
@@ -716,6 +737,7 @@ void Vgen<X64Asm>::emit(const call& i) {
 
 template<class X64Asm>
 void Vgen<X64Asm>::emit(const calls& i) {
+  trap_unaligned_stack();
   auto addr = emitSmashableCall(a.code(), env.meta, i.target);
   (void)addr;
   // When using ROAR, track the native call so we can register them with ROAR
@@ -1168,7 +1190,7 @@ void lower(Vunit& unit, phplogue& inst, Vlabel b, size_t i) {
 
 void lower(Vunit& unit, resumetc& inst, Vlabel b, size_t i) {
   lower_impl(unit, b, i, [&] (Vout& v) {
-    v << callr{inst.target, inst.args};
+    v << callr{inst.target, inst.args, true /* stackUnaligned */};
     v << jmpi{inst.exittc};
   });
 }

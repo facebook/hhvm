@@ -233,10 +233,18 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
       if (!isAbsent(op::get<Id>(v))) {
         return;
       }
-      if (def) {
-        op::ensure<Id>(v) = std::make_unique<folly::IOBuf>(*def);
+      if constexpr (is_thrift_union_v<T>) {
+        if (def) {
+          op::ensure<Id>(v) = *def;
+        } else {
+          op::ensure<Id>(v) = folly::IOBuf();
+        }
       } else {
-        op::ensure<Id>(v) = std::make_unique<folly::IOBuf>();
+        if (def) {
+          op::ensure<Id>(v) = std::make_unique<folly::IOBuf>(*def);
+        } else {
+          op::ensure<Id>(v) = std::make_unique<folly::IOBuf>();
+        }
       }
     }
 
@@ -366,10 +374,18 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   template <typename Id>
   std::enable_if_t<type::is_optional_or_union_field_v<T, Id>> ensure(
       const std::unique_ptr<folly::IOBuf>& defaultVal) {
-    if (defaultVal) {
-      ensure<Id>(std::make_unique<folly::IOBuf>(*defaultVal));
+    if constexpr (is_thrift_union_v<T>) {
+      if (defaultVal) {
+        ensure<Id>(*defaultVal);
+      } else {
+        ensure<Id>(folly::IOBuf());
+      }
     } else {
-      ensure<Id>(std::make_unique<folly::IOBuf>());
+      if (defaultVal) {
+        ensure<Id>(std::make_unique<folly::IOBuf>(*defaultVal));
+      } else {
+        ensure<Id>(std::make_unique<folly::IOBuf>());
+      }
     }
   }
 
@@ -452,7 +468,8 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
           v.template patchIfSet<Id>(FieldPatchType{});
           v.template ensure<Id>();
           if constexpr (type::is_optional_or_union_field_v<T, Id>) {
-            v.template ensure<Id>(FieldType<Id>{});
+            const FieldType<Id> tmp{};
+            v.template ensure<Id>(tmp);
           }
         }
       });

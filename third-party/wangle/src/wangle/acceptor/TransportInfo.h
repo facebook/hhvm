@@ -49,11 +49,11 @@ struct ProtocolInfo {
 };
 
 /**
- * A struct that can store additional information specific to the security
- * protocol being used (TLS, other encryption, etc.).
+ * A struct that can store additional information for security
+ * (e.g. additional fingerprints and signals)
  */
-struct SecurityProtocolInfo {
-  virtual ~SecurityProtocolInfo() = default;
+struct SecurityInfo {
+  virtual ~SecurityInfo() = default;
 };
 
 struct TransportInfo {
@@ -296,7 +296,7 @@ struct TransportInfo {
   /*
    * Additional security protocol information, not guaranteed to be present
    */
-  std::shared_ptr<SecurityProtocolInfo> securityProtocolInfo{nullptr};
+  std::shared_ptr<SecurityInfo> securityInfo{nullptr};
 
   /*
    * time used to get a usable connection.

@@ -264,15 +264,6 @@ func (p *procFuncMyServicePing) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServicePing()
 }
 
-func (p *procFuncMyServicePing) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqMyServicePing()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncMyServicePing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespMyServicePing()
     err := p.handler.Ping(ctx)
@@ -301,15 +292,6 @@ func (p *procFuncMyServiceGetRandomData) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServiceGetRandomData()
 }
 
-func (p *procFuncMyServiceGetRandomData) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqMyServiceGetRandomData()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncMyServiceGetRandomData) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespMyServiceGetRandomData()
     retval, err := p.handler.GetRandomData(ctx)
@@ -331,15 +313,6 @@ var _ thrift.ProcessorFunction = (*procFuncMyServiceHasDataById)(nil)
 
 func (p *procFuncMyServiceHasDataById) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServiceHasDataById()
-}
-
-func (p *procFuncMyServiceHasDataById) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqMyServiceHasDataById()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncMyServiceHasDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -366,15 +339,6 @@ func (p *procFuncMyServiceGoGetDataById) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServiceGoGetDataById()
 }
 
-func (p *procFuncMyServiceGoGetDataById) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqMyServiceGoGetDataById()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncMyServiceGoGetDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqMyServiceGoGetDataById)
     result := newRespMyServiceGoGetDataById()
@@ -397,15 +361,6 @@ var _ thrift.ProcessorFunction = (*procFuncMyServicePutDataById)(nil)
 
 func (p *procFuncMyServicePutDataById) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServicePutDataById()
-}
-
-func (p *procFuncMyServicePutDataById) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqMyServicePutDataById()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncMyServicePutDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -431,15 +386,6 @@ func (p *procFuncMyServiceLobDataById) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServiceLobDataById()
 }
 
-func (p *procFuncMyServiceLobDataById) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqMyServiceLobDataById()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncMyServiceLobDataById) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqMyServiceLobDataById)
     err := p.handler.LobDataById(ctx, args.Id, args.Data)
@@ -460,15 +406,6 @@ var _ thrift.ProcessorFunction = (*procFuncMyServiceGoDoNothing)(nil)
 
 func (p *procFuncMyServiceGoDoNothing) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServiceGoDoNothing()
-}
-
-func (p *procFuncMyServiceGoDoNothing) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqMyServiceGoDoNothing()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncMyServiceGoDoNothing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -596,15 +533,6 @@ func (p *procFuncMyServicePrioParentPing) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServicePrioParentPing()
 }
 
-func (p *procFuncMyServicePrioParentPing) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqMyServicePrioParentPing()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncMyServicePrioParentPing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespMyServicePrioParentPing()
     err := p.handler.Ping(ctx)
@@ -625,15 +553,6 @@ var _ thrift.ProcessorFunction = (*procFuncMyServicePrioParentPong)(nil)
 
 func (p *procFuncMyServicePrioParentPong) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServicePrioParentPong()
-}
-
-func (p *procFuncMyServicePrioParentPong) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqMyServicePrioParentPong()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncMyServicePrioParentPong) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -724,15 +643,6 @@ var _ thrift.ProcessorFunction = (*procFuncMyServicePrioChildPang)(nil)
 
 func (p *procFuncMyServicePrioChildPang) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServicePrioChildPang()
-}
-
-func (p *procFuncMyServicePrioChildPang) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqMyServicePrioChildPang()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncMyServicePrioChildPang) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -841,15 +751,6 @@ var _ thrift.ProcessorFunction = (*procFuncBadServiceBar)(nil)
 
 func (p *procFuncBadServiceBar) NewReqArgs() thrift.ReadableStruct {
     return newReqBadServiceBar()
-}
-
-func (p *procFuncBadServiceBar) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqBadServiceBar()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncBadServiceBar) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -995,15 +896,6 @@ func (p *procFuncFooBarBazServiceFooStructured) NewReqArgs() thrift.ReadableStru
     return newReqFooBarBazServiceFooStructured()
 }
 
-func (p *procFuncFooBarBazServiceFooStructured) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqFooBarBazServiceFooStructured()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncFooBarBazServiceFooStructured) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespFooBarBazServiceFooStructured()
     err := p.handler.FooStructured(ctx)
@@ -1026,15 +918,6 @@ func (p *procFuncFooBarBazServiceBarNonStructured) NewReqArgs() thrift.ReadableS
     return newReqFooBarBazServiceBarNonStructured()
 }
 
-func (p *procFuncFooBarBazServiceBarNonStructured) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqFooBarBazServiceBarNonStructured()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncFooBarBazServiceBarNonStructured) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespFooBarBazServiceBarNonStructured()
     err := p.handler.BarNonStructured(ctx)
@@ -1055,15 +938,6 @@ var _ thrift.ProcessorFunction = (*procFuncFooBarBazServiceBaz)(nil)
 
 func (p *procFuncFooBarBazServiceBaz) NewReqArgs() thrift.ReadableStruct {
     return newReqFooBarBazServiceBaz()
-}
-
-func (p *procFuncFooBarBazServiceBaz) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqFooBarBazServiceBaz()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncFooBarBazServiceBaz) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {

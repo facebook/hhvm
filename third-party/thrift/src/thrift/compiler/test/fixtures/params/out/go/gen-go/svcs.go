@@ -197,15 +197,6 @@ func (p *procFuncNestedContainersMapList) NewReqArgs() thrift.ReadableStruct {
     return newReqNestedContainersMapList()
 }
 
-func (p *procFuncNestedContainersMapList) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqNestedContainersMapList()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncNestedContainersMapList) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqNestedContainersMapList)
     result := newRespNestedContainersMapList()
@@ -227,15 +218,6 @@ var _ thrift.ProcessorFunction = (*procFuncNestedContainersMapSet)(nil)
 
 func (p *procFuncNestedContainersMapSet) NewReqArgs() thrift.ReadableStruct {
     return newReqNestedContainersMapSet()
-}
-
-func (p *procFuncNestedContainersMapSet) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqNestedContainersMapSet()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncNestedContainersMapSet) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -261,15 +243,6 @@ func (p *procFuncNestedContainersListMap) NewReqArgs() thrift.ReadableStruct {
     return newReqNestedContainersListMap()
 }
 
-func (p *procFuncNestedContainersListMap) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqNestedContainersListMap()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncNestedContainersListMap) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqNestedContainersListMap)
     result := newRespNestedContainersListMap()
@@ -293,15 +266,6 @@ func (p *procFuncNestedContainersListSet) NewReqArgs() thrift.ReadableStruct {
     return newReqNestedContainersListSet()
 }
 
-func (p *procFuncNestedContainersListSet) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqNestedContainersListSet()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncNestedContainersListSet) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqNestedContainersListSet)
     result := newRespNestedContainersListSet()
@@ -323,15 +287,6 @@ var _ thrift.ProcessorFunction = (*procFuncNestedContainersTurtles)(nil)
 
 func (p *procFuncNestedContainersTurtles) NewReqArgs() thrift.ReadableStruct {
     return newReqNestedContainersTurtles()
-}
-
-func (p *procFuncNestedContainersTurtles) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqNestedContainersTurtles()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncNestedContainersTurtles) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {

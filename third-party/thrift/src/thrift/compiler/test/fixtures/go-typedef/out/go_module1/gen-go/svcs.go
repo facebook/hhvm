@@ -165,15 +165,6 @@ func (p *procFuncFinderByPlate) NewReqArgs() thrift.ReadableStruct {
     return newReqFinderByPlate()
 }
 
-func (p *procFuncFinderByPlate) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqFinderByPlate()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncFinderByPlate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqFinderByPlate)
     result := newRespFinderByPlate()
@@ -198,15 +189,6 @@ func (p *procFuncFinderAliasByPlate) NewReqArgs() thrift.ReadableStruct {
     return newReqFinderAliasByPlate()
 }
 
-func (p *procFuncFinderAliasByPlate) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqFinderAliasByPlate()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncFinderAliasByPlate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqFinderAliasByPlate)
     result := newRespFinderAliasByPlate()
@@ -229,15 +211,6 @@ var _ thrift.ProcessorFunction = (*procFuncFinderPreviousPlate)(nil)
 
 func (p *procFuncFinderPreviousPlate) NewReqArgs() thrift.ReadableStruct {
     return newReqFinderPreviousPlate()
-}
-
-func (p *procFuncFinderPreviousPlate) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqFinderPreviousPlate()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncFinderPreviousPlate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {

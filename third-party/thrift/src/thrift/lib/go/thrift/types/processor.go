@@ -25,8 +25,6 @@ import (
 type ProcessorFunction interface {
 	// Returns the argument struct for the processor function.
 	NewReqArgs() ReadableStruct
-	// Read a serializable message from the protocol.
-	Read(prot Decoder) (Struct, error)
 	// RunContext processes a message handing it to the client handler.
 	RunContext(ctx context.Context, args ReadableStruct) (WritableStruct, error)
 }

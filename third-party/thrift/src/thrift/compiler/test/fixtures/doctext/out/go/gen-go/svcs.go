@@ -201,15 +201,6 @@ func (p *procFuncCF) NewReqArgs() thrift.ReadableStruct {
     return newReqCF()
 }
 
-func (p *procFuncCF) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqCF()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncCF) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespCF()
     err := p.handler.F(ctx)
@@ -230,15 +221,6 @@ var _ thrift.ProcessorFunction = (*procFuncCThing)(nil)
 
 func (p *procFuncCThing) NewReqArgs() thrift.ReadableStruct {
     return newReqCThing()
-}
-
-func (p *procFuncCThing) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqCThing()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncCThing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {

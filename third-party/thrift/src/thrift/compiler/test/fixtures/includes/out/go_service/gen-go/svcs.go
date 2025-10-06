@@ -149,15 +149,6 @@ func (p *procFuncMyServiceQuery) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServiceQuery()
 }
 
-func (p *procFuncMyServiceQuery) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqMyServiceQuery()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncMyServiceQuery) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqMyServiceQuery)
     result := newRespMyServiceQuery()
@@ -179,15 +170,6 @@ var _ thrift.ProcessorFunction = (*procFuncMyServiceHasArgDocs)(nil)
 
 func (p *procFuncMyServiceHasArgDocs) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServiceHasArgDocs()
-}
-
-func (p *procFuncMyServiceHasArgDocs) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqMyServiceHasArgDocs()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncMyServiceHasArgDocs) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {

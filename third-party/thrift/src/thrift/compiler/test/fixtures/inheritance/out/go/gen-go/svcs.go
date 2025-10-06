@@ -124,15 +124,6 @@ func (p *procFuncMyRootDoRoot) NewReqArgs() thrift.ReadableStruct {
     return newReqMyRootDoRoot()
 }
 
-func (p *procFuncMyRootDoRoot) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqMyRootDoRoot()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncMyRootDoRoot) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespMyRootDoRoot()
     err := p.handler.DoRoot(ctx)
@@ -223,15 +214,6 @@ func (p *procFuncMyNodeDoMid) NewReqArgs() thrift.ReadableStruct {
     return newReqMyNodeDoMid()
 }
 
-func (p *procFuncMyNodeDoMid) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqMyNodeDoMid()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncMyNodeDoMid) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespMyNodeDoMid()
     err := p.handler.DoMid(ctx)
@@ -320,15 +302,6 @@ var _ thrift.ProcessorFunction = (*procFuncMyLeafDoLeaf)(nil)
 
 func (p *procFuncMyLeafDoLeaf) NewReqArgs() thrift.ReadableStruct {
     return newReqMyLeafDoLeaf()
-}
-
-func (p *procFuncMyLeafDoLeaf) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqMyLeafDoLeaf()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncMyLeafDoLeaf) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {

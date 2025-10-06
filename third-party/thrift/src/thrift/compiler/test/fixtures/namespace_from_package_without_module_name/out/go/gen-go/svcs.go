@@ -125,15 +125,6 @@ func (p *procFuncTestServiceInit) NewReqArgs() thrift.ReadableStruct {
     return newReqTestServiceInit()
 }
 
-func (p *procFuncTestServiceInit) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqTestServiceInit()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncTestServiceInit) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqTestServiceInit)
     result := newRespTestServiceInit()

@@ -175,15 +175,6 @@ func (p *procFuncRaiserDoBland) NewReqArgs() thrift.ReadableStruct {
     return newReqRaiserDoBland()
 }
 
-func (p *procFuncRaiserDoBland) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqRaiserDoBland()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncRaiserDoBland) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespRaiserDoBland()
     err := p.handler.DoBland(ctx)
@@ -204,15 +195,6 @@ var _ thrift.ProcessorFunction = (*procFuncRaiserDoRaise)(nil)
 
 func (p *procFuncRaiserDoRaise) NewReqArgs() thrift.ReadableStruct {
     return newReqRaiserDoRaise()
-}
-
-func (p *procFuncRaiserDoRaise) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqRaiserDoRaise()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncRaiserDoRaise) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -249,15 +231,6 @@ func (p *procFuncRaiserGet200) NewReqArgs() thrift.ReadableStruct {
     return newReqRaiserGet200()
 }
 
-func (p *procFuncRaiserGet200) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqRaiserGet200()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncRaiserGet200) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespRaiserGet200()
     retval, err := p.handler.Get200(ctx)
@@ -279,15 +252,6 @@ var _ thrift.ProcessorFunction = (*procFuncRaiserGet500)(nil)
 
 func (p *procFuncRaiserGet500) NewReqArgs() thrift.ReadableStruct {
     return newReqRaiserGet500()
-}
-
-func (p *procFuncRaiserGet500) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqRaiserGet500()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncRaiserGet500) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {

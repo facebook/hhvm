@@ -109,15 +109,6 @@ func (p *procFuncExtendTestServiceCheck) NewReqArgs() thrift.ReadableStruct {
     return newReqExtendTestServiceCheck()
 }
 
-func (p *procFuncExtendTestServiceCheck) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqExtendTestServiceCheck()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncExtendTestServiceCheck) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqExtendTestServiceCheck)
     result := newRespExtendTestServiceCheck()

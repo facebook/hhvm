@@ -517,15 +517,6 @@ func (p *procFuncGetEntityGetEntity) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetEntity()
 }
 
-func (p *procFuncGetEntityGetEntity) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetEntity()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncGetEntityGetEntity) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqGetEntityGetEntity)
     result := newRespGetEntityGetEntity()
@@ -548,15 +539,6 @@ var _ thrift.ProcessorFunction = (*procFuncGetEntityGetBool)(nil)
 
 func (p *procFuncGetEntityGetBool) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetBool()
-}
-
-func (p *procFuncGetEntityGetBool) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetBool()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncGetEntityGetBool) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -582,15 +564,6 @@ func (p *procFuncGetEntityGetByte) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetByte()
 }
 
-func (p *procFuncGetEntityGetByte) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetByte()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncGetEntityGetByte) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespGetEntityGetByte()
     retval, err := p.handler.GetByte(ctx)
@@ -612,15 +585,6 @@ var _ thrift.ProcessorFunction = (*procFuncGetEntityGetI16)(nil)
 
 func (p *procFuncGetEntityGetI16) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetI16()
-}
-
-func (p *procFuncGetEntityGetI16) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetI16()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncGetEntityGetI16) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -646,15 +610,6 @@ func (p *procFuncGetEntityGetI32) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetI32()
 }
 
-func (p *procFuncGetEntityGetI32) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetI32()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncGetEntityGetI32) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespGetEntityGetI32()
     retval, err := p.handler.GetI32(ctx)
@@ -676,15 +631,6 @@ var _ thrift.ProcessorFunction = (*procFuncGetEntityGetI64)(nil)
 
 func (p *procFuncGetEntityGetI64) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetI64()
-}
-
-func (p *procFuncGetEntityGetI64) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetI64()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncGetEntityGetI64) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -710,15 +656,6 @@ func (p *procFuncGetEntityGetDouble) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetDouble()
 }
 
-func (p *procFuncGetEntityGetDouble) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetDouble()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncGetEntityGetDouble) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespGetEntityGetDouble()
     retval, err := p.handler.GetDouble(ctx)
@@ -740,15 +677,6 @@ var _ thrift.ProcessorFunction = (*procFuncGetEntityGetString)(nil)
 
 func (p *procFuncGetEntityGetString) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetString()
-}
-
-func (p *procFuncGetEntityGetString) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetString()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncGetEntityGetString) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -774,15 +702,6 @@ func (p *procFuncGetEntityGetBinary) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetBinary()
 }
 
-func (p *procFuncGetEntityGetBinary) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetBinary()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncGetEntityGetBinary) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespGetEntityGetBinary()
     retval, err := p.handler.GetBinary(ctx)
@@ -804,15 +723,6 @@ var _ thrift.ProcessorFunction = (*procFuncGetEntityGetMap)(nil)
 
 func (p *procFuncGetEntityGetMap) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetMap()
-}
-
-func (p *procFuncGetEntityGetMap) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetMap()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncGetEntityGetMap) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -838,15 +748,6 @@ func (p *procFuncGetEntityGetSet) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetSet()
 }
 
-func (p *procFuncGetEntityGetSet) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetSet()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncGetEntityGetSet) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespGetEntityGetSet()
     retval, err := p.handler.GetSet(ctx)
@@ -870,15 +771,6 @@ func (p *procFuncGetEntityGetList) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetList()
 }
 
-func (p *procFuncGetEntityGetList) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetList()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncGetEntityGetList) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespGetEntityGetList()
     retval, err := p.handler.GetList(ctx)
@@ -900,15 +792,6 @@ var _ thrift.ProcessorFunction = (*procFuncGetEntityGetLegacyStuff)(nil)
 
 func (p *procFuncGetEntityGetLegacyStuff) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetLegacyStuff()
-}
-
-func (p *procFuncGetEntityGetLegacyStuff) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetLegacyStuff()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncGetEntityGetLegacyStuff) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -935,15 +818,6 @@ func (p *procFuncGetEntityGetCtxCollision) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetCtxCollision()
 }
 
-func (p *procFuncGetEntityGetCtxCollision) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetCtxCollision()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncGetEntityGetCtxCollision) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqGetEntityGetCtxCollision)
     result := newRespGetEntityGetCtxCollision()
@@ -966,15 +840,6 @@ var _ thrift.ProcessorFunction = (*procFuncGetEntityGetCtx1Collision)(nil)
 
 func (p *procFuncGetEntityGetCtx1Collision) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetCtx1Collision()
-}
-
-func (p *procFuncGetEntityGetCtx1Collision) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetCtx1Collision()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncGetEntityGetCtx1Collision) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -1001,15 +866,6 @@ func (p *procFuncGetEntityGetContextCollision) NewReqArgs() thrift.ReadableStruc
     return newReqGetEntityGetContextCollision()
 }
 
-func (p *procFuncGetEntityGetContextCollision) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetContextCollision()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncGetEntityGetContextCollision) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqGetEntityGetContextCollision)
     result := newRespGetEntityGetContextCollision()
@@ -1032,15 +888,6 @@ var _ thrift.ProcessorFunction = (*procFuncGetEntityGetOutCollision)(nil)
 
 func (p *procFuncGetEntityGetOutCollision) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetOutCollision()
-}
-
-func (p *procFuncGetEntityGetOutCollision) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetOutCollision()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncGetEntityGetOutCollision) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -1067,15 +914,6 @@ func (p *procFuncGetEntityGetOut1Collision) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetOut1Collision()
 }
 
-func (p *procFuncGetEntityGetOut1Collision) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetOut1Collision()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncGetEntityGetOut1Collision) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqGetEntityGetOut1Collision)
     result := newRespGetEntityGetOut1Collision()
@@ -1098,15 +936,6 @@ var _ thrift.ProcessorFunction = (*procFuncGetEntityGetInCollision)(nil)
 
 func (p *procFuncGetEntityGetInCollision) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetInCollision()
-}
-
-func (p *procFuncGetEntityGetInCollision) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetInCollision()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncGetEntityGetInCollision) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -1133,15 +962,6 @@ func (p *procFuncGetEntityGetIn1Collision) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetIn1Collision()
 }
 
-func (p *procFuncGetEntityGetIn1Collision) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetIn1Collision()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncGetEntityGetIn1Collision) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqGetEntityGetIn1Collision)
     result := newRespGetEntityGetIn1Collision()
@@ -1164,15 +984,6 @@ var _ thrift.ProcessorFunction = (*procFuncGetEntityGetErrCollision)(nil)
 
 func (p *procFuncGetEntityGetErrCollision) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetErrCollision()
-}
-
-func (p *procFuncGetEntityGetErrCollision) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetErrCollision()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncGetEntityGetErrCollision) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -1199,15 +1010,6 @@ func (p *procFuncGetEntityGetErr1Collision) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityGetErr1Collision()
 }
 
-func (p *procFuncGetEntityGetErr1Collision) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityGetErr1Collision()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncGetEntityGetErr1Collision) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqGetEntityGetErr1Collision)
     result := newRespGetEntityGetErr1Collision()
@@ -1230,15 +1032,6 @@ var _ thrift.ProcessorFunction = (*procFuncGetEntityMyMethodWithConflictingParam
 
 func (p *procFuncGetEntityMyMethodWithConflictingParamAccessors) NewReqArgs() thrift.ReadableStruct {
     return newReqGetEntityMyMethodWithConflictingParamAccessors()
-}
-
-func (p *procFuncGetEntityMyMethodWithConflictingParamAccessors) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqGetEntityMyMethodWithConflictingParamAccessors()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncGetEntityMyMethodWithConflictingParamAccessors) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {

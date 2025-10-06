@@ -127,15 +127,6 @@ func (p *procFuncServiceFunc) NewReqArgs() thrift.ReadableStruct {
     return newReqServiceFunc()
 }
 
-func (p *procFuncServiceFunc) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqServiceFunc()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncServiceFunc) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqServiceFunc)
     result := newRespServiceFunc()
@@ -264,15 +255,6 @@ func (p *procFuncAdapterServiceCount) NewReqArgs() thrift.ReadableStruct {
     return newReqAdapterServiceCount()
 }
 
-func (p *procFuncAdapterServiceCount) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqAdapterServiceCount()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncAdapterServiceCount) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespAdapterServiceCount()
     retval, err := p.handler.Count(ctx)
@@ -294,15 +276,6 @@ var _ thrift.ProcessorFunction = (*procFuncAdapterServiceAdaptedTypes)(nil)
 
 func (p *procFuncAdapterServiceAdaptedTypes) NewReqArgs() thrift.ReadableStruct {
     return newReqAdapterServiceAdaptedTypes()
-}
-
-func (p *procFuncAdapterServiceAdaptedTypes) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqAdapterServiceAdaptedTypes()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncAdapterServiceAdaptedTypes) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {

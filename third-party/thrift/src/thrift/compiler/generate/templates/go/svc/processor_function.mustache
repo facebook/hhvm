@@ -29,15 +29,6 @@ func (p *{{> svc/proc_func_name}}) NewReqArgs() thrift.ReadableStruct {
     return newReq{{service:go_name}}{{function:go_name}}()
 }
 
-func (p *{{> svc/proc_func_name}}) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReq{{service:go_name}}{{function:go_name}}()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     {{#function:params.fields?}}
     args := reqStruct.(*req{{service:go_name}}{{function:go_name}})

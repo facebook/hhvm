@@ -145,15 +145,6 @@ func (p *procFuncSomeServiceBounceMap) NewReqArgs() thrift.ReadableStruct {
     return newReqSomeServiceBounceMap()
 }
 
-func (p *procFuncSomeServiceBounceMap) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqSomeServiceBounceMap()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncSomeServiceBounceMap) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqSomeServiceBounceMap)
     result := newRespSomeServiceBounceMap()
@@ -176,15 +167,6 @@ var _ thrift.ProcessorFunction = (*procFuncSomeServiceBinaryKeyedMap)(nil)
 
 func (p *procFuncSomeServiceBinaryKeyedMap) NewReqArgs() thrift.ReadableStruct {
     return newReqSomeServiceBinaryKeyedMap()
-}
-
-func (p *procFuncSomeServiceBinaryKeyedMap) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqSomeServiceBinaryKeyedMap()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncSomeServiceBinaryKeyedMap) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {

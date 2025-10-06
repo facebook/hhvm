@@ -59,11 +59,6 @@ func (ch *chainHandler) NewReqArgs() types.ReadableStruct {
 	return nil
 }
 
-// Read does nothing here, it is not used and shouldn't be called
-func (ch *chainHandler) Read(_ types.Decoder) (types.Struct, error) {
-	return nil, nil
-}
-
 func (ch *chainHandler) RunContext(ctx context.Context, args types.ReadableStruct) (types.WritableStruct, error) {
 	if ch.curI == len(ch.interceptors)-1 {
 		return ch.origHandler.RunContext(ctx, args)

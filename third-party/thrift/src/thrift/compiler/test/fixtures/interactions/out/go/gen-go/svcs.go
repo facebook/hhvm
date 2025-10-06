@@ -408,15 +408,6 @@ func (p *procFuncMyServiceFoo) NewReqArgs() thrift.ReadableStruct {
     return newReqMyServiceFoo()
 }
 
-func (p *procFuncMyServiceFoo) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqMyServiceFoo()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncMyServiceFoo) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespMyServiceFoo()
     err := p.handler.Foo(ctx)
@@ -523,15 +514,6 @@ var _ thrift.ProcessorFunction = (*procFuncFactoriesFoo)(nil)
 
 func (p *procFuncFactoriesFoo) NewReqArgs() thrift.ReadableStruct {
     return newReqFactoriesFoo()
-}
-
-func (p *procFuncFactoriesFoo) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqFactoriesFoo()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncFactoriesFoo) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -642,15 +624,6 @@ func (p *procFuncPerformFoo) NewReqArgs() thrift.ReadableStruct {
     return newReqPerformFoo()
 }
 
-func (p *procFuncPerformFoo) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqPerformFoo()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
-}
-
 func (p *procFuncPerformFoo) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespPerformFoo()
     err := p.handler.Foo(ctx)
@@ -757,15 +730,6 @@ var _ thrift.ProcessorFunction = (*procFuncInteractWithSharedDoSomeSimilarThings
 
 func (p *procFuncInteractWithSharedDoSomeSimilarThings) NewReqArgs() thrift.ReadableStruct {
     return newReqInteractWithSharedDoSomeSimilarThings()
-}
-
-func (p *procFuncInteractWithSharedDoSomeSimilarThings) Read(decoder thrift.Decoder) (thrift.Struct, error) {
-    args := newReqInteractWithSharedDoSomeSimilarThings()
-    if err := args.Read(decoder); err != nil {
-        return nil, err
-    }
-    decoder.ReadMessageEnd()
-    return args, nil
 }
 
 func (p *procFuncInteractWithSharedDoSomeSimilarThings) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {

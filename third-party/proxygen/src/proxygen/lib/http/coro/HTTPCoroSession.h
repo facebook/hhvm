@@ -40,6 +40,8 @@
 #include <wangle/acceptor/ManagedConnection.h>
 #include <wangle/acceptor/TransportInfo.h>
 
+#include <algorithm>
+
 namespace proxygen {
 class HTTPSessionStats;
 class WebTransport;
@@ -350,8 +352,7 @@ class HTTPCoroSession
   }
 
   void removeLifecycleObserver(LifecycleObserver* cb) override {
-    auto it =
-        std::find(lifecycleObservers_.begin(), lifecycleObservers_.end(), cb);
+    auto it = std::ranges::find(lifecycleObservers_, cb);
     if (it != lifecycleObservers_.end()) {
       lifecycleObservers_.erase(it);
     }

@@ -14,6 +14,8 @@
 
 #include <glog/logging.h>
 
+#include <algorithm>
+
 namespace proxygen {
 
 namespace {
@@ -113,10 +115,9 @@ extern bool serverAcceptedUpgrade(const std::string& clientUpgrade,
 
   for (const auto& cp : clientProtocols) {
     auto cpt = folly::trimWhitespace(cp);
-    return std::any_of(
-        serverProtocols.begin(), serverProtocols.end(), [cpt](const auto& sp) {
-          return cpt.equals(sp, folly::AsciiCaseInsensitive{});
-        });
+    return std::ranges::any_of(serverProtocols, [cpt](const auto& sp) {
+      return cpt.equals(sp, folly::AsciiCaseInsensitive{});
+    });
   }
 
   return false;

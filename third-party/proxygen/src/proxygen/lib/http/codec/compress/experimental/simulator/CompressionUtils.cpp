@@ -11,6 +11,8 @@
 
 #include <proxygen/lib/http/HeaderConstants.h>
 
+#include <algorithm>
+
 using std::string;
 using std::vector;
 
@@ -20,7 +22,7 @@ using namespace proxygen;
 
 std::string combineCookieCrumbsSorted(std::vector<std::string> crumbs) {
   std::string retval;
-  sort(crumbs.begin(), crumbs.end());
+  std::ranges::sort(crumbs);
   folly::join("; ", crumbs.begin(), crumbs.end(), retval);
   return retval;
 }

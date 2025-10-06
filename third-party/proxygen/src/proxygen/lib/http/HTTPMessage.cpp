@@ -8,6 +8,7 @@
 
 #include <proxygen/lib/http/HTTPMessage.h>
 
+#include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <folly/Format.h>
 #include <folly/Range.h>
@@ -255,10 +256,10 @@ void HTTPMessage::setMethod(folly::StringPiece method) {
   } else {
     req.method_ = std::make_unique<std::string>(method.str());
     auto& storedMethod = *boost::get<std::unique_ptr<std::string>>(req.method_);
-    std::transform(storedMethod.begin(),
-                   storedMethod.end(),
-                   storedMethod.begin(),
-                   ::toupper);
+    std::ranges::transform(storedMethod,
+
+                           storedMethod.begin(),
+                           ::toupper);
   }
 }
 

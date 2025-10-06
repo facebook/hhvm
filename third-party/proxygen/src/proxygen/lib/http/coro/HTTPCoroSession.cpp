@@ -20,6 +20,8 @@
 #include <quic/state/QuicStreamUtilities.h>
 #include <wangle/acceptor/ConnectionManager.h>
 
+#include <algorithm>
+
 namespace {
 
 using namespace proxygen;
@@ -611,7 +613,7 @@ size_t HTTPQuicCoroSession::sendPushPriority(uint64_t pushId,
 
   // TODO: improve efficiency – this is linear with respect to streams_
   if (!found) {
-    found = std::find_if(streams_.cbegin(), streams_.cend(), [=](auto& entry) {
+    found = std::ranges::find_if(streams_, [=](auto& entry) {
               return quic::isServerUnidirectionalStream(entry.first) &&
                      entry.second->currentPushID &&
                      *entry.second->currentPushID == pushId;
@@ -3716,7 +3718,7 @@ using WtReqResult = HTTPCoroSession::WtReqResult;
 bool supportsWt(std::initializer_list<const HTTPSettings*> settings) {
   constexpr auto kEnableConnectProto = SettingsId::ENABLE_CONNECT_PROTOCOL;
   constexpr auto kEnableWtMaxSess = SettingsId::WEBTRANSPORT_MAX_SESSIONS;
-  return std::all_of(settings.begin(), settings.end(), [](auto* settings) {
+  return std::ranges::all_of(settings, [](auto* settings) {
     return settings &&
            settings->getSetting(kEnableConnectProto, /*defaultVal=*/0) &&
            settings->getSetting(kEnableWtMaxSess, /*defaultVal=*/0);

@@ -49,16 +49,16 @@ SettingsValue HTTPSettings::getSetting(SettingsId id,
 }
 
 std::vector<HTTPSetting>::iterator HTTPSettings::getSettingIter(SettingsId id) {
-  return std::find_if(settings_.begin(),
-                      settings_.end(),
-                      [&](HTTPSetting const& s) { return s.id == id; });
+  return std::ranges::find_if(settings_,
+
+                              [&](HTTPSetting const& s) { return s.id == id; });
 }
 
 std::vector<HTTPSetting>::const_iterator HTTPSettings::getSettingConstIter(
     SettingsId id) const {
-  return std::find_if(settings_.begin(),
-                      settings_.end(),
-                      [&](HTTPSetting const& s) { return s.id == id; });
+  return std::ranges::find_if(settings_,
+
+                              [&](HTTPSetting const& s) { return s.id == id; });
 }
 
 } // namespace proxygen

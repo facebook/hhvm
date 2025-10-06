@@ -18,6 +18,8 @@
 #ifndef incl_HPHP_EXT_ASIO_CONDITION_WAIT_HANDLE_H_
 #define incl_HPHP_EXT_ASIO_CONDITION_WAIT_HANDLE_H_
 
+#include <vector>
+
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 #include "hphp/runtime/ext/extension.h"
@@ -48,7 +50,7 @@ struct c_ConditionWaitHandle final :
   }
 
   String getName();
-  void onUnblocked();
+  void onUnblocked(std::vector<AsioBlockableChain>& worklist);
   c_WaitableWaitHandle* getChild();
 
   static const int8_t STATE_BLOCKED = 2;

@@ -113,7 +113,7 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 		// close connection on read failure
 		return readErr
 	}
-	var argStruct types.Struct
+	var argStruct types.ReadableStruct
 	var appException *types.ApplicationException
 
 	pfunc, pfuncErr := getProcessorFunction(processor, messageType, name)
@@ -130,8 +130,12 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 			return readErr
 		}
 	} else {
-		argStruct, readErr = pfunc.Read(prot)
-		if readErr != nil {
+		argStruct = pfunc.NewReqArgs()
+		if readErr := argStruct.Read(prot); readErr != nil {
+			// close connection on read failure
+			return readErr
+		}
+		if readErr := prot.ReadMessageEnd(); readErr != nil {
 			// close connection on read failure
 			return readErr
 		}

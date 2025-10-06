@@ -138,3 +138,7 @@ cdef class WriteHeaders(Headers):
     cdef _fbthrift_create(RequestContext ctx)
 
 cdef object THRIFT_REQUEST_CONTEXT
+
+cdef api Cpp2RequestContext* extract_cpp_request_context(object ctx) except NULL
+
+cdef api Cpp2ConnContext* extract_cpp_connection_context(object ctx) except NULL

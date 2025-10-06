@@ -234,3 +234,9 @@ cdef inline _get_SocketAddress(const cfollySocketAddress* sadr):
             os.fsdecode(sadr.getPath())
         )
     )
+
+cdef api Cpp2RequestContext* extract_cpp_request_context(object ctx) except NULL:
+    return (<RequestContext?>ctx)._ctx
+
+cdef api Cpp2ConnContext* extract_cpp_connection_context(object ctx) except NULL:
+    return (<ConnectionContext?>ctx)._ctx

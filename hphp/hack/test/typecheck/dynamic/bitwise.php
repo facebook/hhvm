@@ -1,17 +1,17 @@
 <?hh
 
 function testBitwise(dynamic $x): void {
-  $y = $x & 5; // $y : num
+  $y = $x & 5; // $y : int
   hh_show($y);
-  $y = $x | 5; // $y : num
+  $y = $x | 5; // $y : int
   hh_show($y);
-  $y = $x ^ 5; // $y : num
+  $y = $x ^ 5; // $y : int
   hh_show($y);
-  $y = $x >> 5; // $y : num
+  $y = $x >> 5; // $y : int
   hh_show($y);
-  $y = $x << 5; // $y : num
+  $y = $x << 5; // $y : int
   hh_show($y);
-  $y = $x ^ $x; // $y : dynamic
+  $y = $x ^ $x; // $y : ~int
   hh_show($y);
   $y = ~$x; // $y : dynamic
   hh_show($y);

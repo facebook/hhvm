@@ -1,11 +1,11 @@
-ERROR: File "xor_bad3.php", line 13, characters 3-9:
-Typing error (Typing[4423])
+ERROR: File "xor_bad3.php", line 13, characters 3-4:
+Invalid argument (Typing[4110])
   File "xor_bad3.php", line 13, characters 3-4:
   Expected `int` because this is used in a bitwise operation
   File "xor_bad3.php", line 12, characters 14-19:
   But got `string`
-ERROR: File "xor_bad3.php", line 13, characters 3-9:
-Typing error (Typing[4423])
+ERROR: File "xor_bad3.php", line 13, characters 8-9:
+Invalid argument (Typing[4110])
   File "xor_bad3.php", line 13, characters 8-9:
   Expected `int` because this is used in a bitwise operation
   File "xor_bad3.php", line 12, characters 25-30:

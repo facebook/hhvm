@@ -82,20 +82,20 @@ Typing error (Typing[4423])
   Expected `int` because this is used in an arithmetic operation
   File "bad_math.php", line 5, characters 33-33:
   But got `C`
-ERROR: File "bad_math.php", line 18, characters 3-8:
-Typing error (Typing[4423])
+ERROR: File "bad_math.php", line 18, characters 3-4:
+Invalid argument (Typing[4110])
   File "bad_math.php", line 18, characters 3-4:
   Expected `int` because this is used in a bitwise operation
   File "bad_math.php", line 5, characters 33-33:
   But got `C`
-ERROR: File "bad_math.php", line 19, characters 3-8:
-Typing error (Typing[4423])
+ERROR: File "bad_math.php", line 19, characters 3-4:
+Invalid argument (Typing[4110])
   File "bad_math.php", line 19, characters 3-4:
   Expected `int` because this is used in a bitwise operation
   File "bad_math.php", line 5, characters 33-33:
   But got `C`
-ERROR: File "bad_math.php", line 20, characters 3-8:
-Typing error (Typing[4423])
+ERROR: File "bad_math.php", line 20, characters 3-4:
+Invalid argument (Typing[4110])
   File "bad_math.php", line 20, characters 3-4:
   Expected `int` because this is used in a bitwise operation
   File "bad_math.php", line 5, characters 33-33:

@@ -48,7 +48,7 @@ let check_dynamic_or_enforce_int env p t r err =
   in
   Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
   let ty_mismatch = Option.map ty_err_opt ~f:Fn.(const (t, ty)) in
-  (env, Typing_utils.is_dynamic env t, ty_mismatch)
+  (env, Typing_defs.is_dynamic t, ty_mismatch)
 
 (** [check_like_num p_exp p env ty] ensures that [ty] is a subtype of num or ~num.
   In the former case, it returns false and the type, in the latter, it returns
@@ -364,29 +364,38 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
   | Ast_defs.Amp
   | Ast_defs.Bar
     when not contains_any ->
-    let (env, is_dynamic1, err_opt1) =
-      check_dynamic_or_enforce_int
+    (* Type-check a bitwise operation as if it's a call to a function of type
+     *   <<__SupportDynamicType>> function bitwise_math(int $x, int $y): int
+     * With one samll improvement: if checking of *either* argument succeeds against int
+     * rather than ~int, then return int, because we know that it will simply throw if
+     * the other argument is not int at runtime.
+     *)
+    let (env, err_opt1, used_dynamic1) =
+      Typing_argument.check_argument_type_against_parameter_type
+        ~ignore_readonly:false
+        ~dynamic_func:(Some Typing_argument.Supportdyn_function)
         env
-        p
+        (Typing_make_type.int (Reason.bitwise p1))
+        p1
         ty1
-        (Reason.bitwise p1)
-        Typing_error.Callback.bitwise_math_invalid_argument
     in
-    let (env, is_dynamic2, err_opt2) =
-      check_dynamic_or_enforce_int
+    let (env, err_opt2, used_dynamic2) =
+      Typing_argument.check_argument_type_against_parameter_type
+        ~ignore_readonly:false
+        ~dynamic_func:(Some Typing_argument.Supportdyn_function)
         env
-        p
+        (Typing_make_type.int (Reason.bitwise p2))
+        p2
         ty2
-        (Reason.bitwise p2)
-        Typing_error.Callback.bitwise_math_invalid_argument
     in
-    let result_ty =
-      if is_dynamic1 && is_dynamic2 then
-        MakeType.dynamic (Reason.bitwise_dynamic p)
-      else
-        MakeType.int (Reason.bitwise_ret p)
-    in
-    make_result env te1 err_opt1 te2 err_opt2 result_ty
+    make_result
+      ~is_like:(used_dynamic1 && used_dynamic2)
+      env
+      te1
+      err_opt1
+      te2
+      err_opt2
+      (MakeType.int (Reason.bitwise_ret p))
   | Ast_defs.Eqeq
   | Ast_defs.Diff ->
     begin

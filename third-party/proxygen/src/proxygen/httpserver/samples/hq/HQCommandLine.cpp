@@ -193,23 +193,21 @@ void initializeCommonSettings(HQToolParams& hqParams) {
     hqParams.setMode(HQMode::SERVER);
     hqParams.logprefix = "server";
     auto& serverParams = boost::get<HQToolServerParams>(hqParams.params);
-    serverParams.host = FLAGS_host;
     serverParams.port = FLAGS_port;
     serverParams.serverThreads = FLAGS_threads;
     serverParams.localAddress =
-        folly::SocketAddress(serverParams.host, serverParams.port, true);
+        folly::SocketAddress(FLAGS_host, serverParams.port, true);
   } else if (FLAGS_mode == "client") {
     hqParams.setMode(HQMode::CLIENT);
     hqParams.logprefix = "client";
     auto& clientParams = boost::get<HQToolClientParams>(hqParams.params);
     clientParams.host = FLAGS_host;
-    clientParams.port = FLAGS_port;
     if (FLAGS_connect_to_address.empty()) {
       clientParams.remoteAddress =
-          folly::SocketAddress(clientParams.host, clientParams.port, true);
+          folly::SocketAddress(clientParams.host, FLAGS_port, true);
     } else {
-      clientParams.remoteAddress = folly::SocketAddress(
-          FLAGS_connect_to_address, clientParams.port, false);
+      clientParams.remoteAddress =
+          folly::SocketAddress(FLAGS_connect_to_address, FLAGS_port, false);
     }
     if (!FLAGS_local_address.empty()) {
       clientParams.localAddress = folly::SocketAddress();
@@ -347,7 +345,7 @@ void initializeHttpServerSettings(HQToolServerParams& hqParams) {
   // before starting.
   hqParams.h2port = FLAGS_h2port;
   hqParams.localH2Address =
-      folly::SocketAddress(hqParams.host, hqParams.h2port, true);
+      folly::SocketAddress(FLAGS_host, hqParams.h2port, true);
   hqParams.httpServerThreads = FLAGS_threads;
   hqParams.httpServerIdleTimeout = std::chrono::milliseconds(60000);
   hqParams.httpServerShutdownOn = {SIGINT, SIGTERM};
@@ -443,7 +441,7 @@ HQInvalidParams validate(const HQToolParams& params) {
     if (clientParams.host.empty()) {
       INVALID_PARAM(host, "HQClient expected --host");
     }
-    if (clientParams.port == 0) {
+    if (FLAGS_port == 0) {
       INVALID_PARAM(port, "HQClient expected --port");
     }
   }

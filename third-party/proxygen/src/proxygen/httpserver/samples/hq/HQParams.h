@@ -48,8 +48,6 @@ std::ostream& operator<<(std::ostream& o, const HTTPVersion& v);
  */
 struct HQBaseParams {
   // Transport section
-  std::string host;
-  uint16_t port{0};
   folly::Optional<folly::SocketAddress> localAddress;
   std::vector<quic::QuicVersion> quicVersions{
       quic::QuicVersion::MVFST,
@@ -83,12 +81,14 @@ struct HQBaseParams {
 };
 
 struct HQServerParams : public HQBaseParams {
+  uint16_t port{0};
   size_t serverThreads{0};
   std::string ccpConfig;
   folly::Optional<int64_t> rateLimitPerThread;
 };
 
 struct HQClientParams : public HQBaseParams {
+  std::string host;
   uint8_t clientCidLength{0};
 };
 

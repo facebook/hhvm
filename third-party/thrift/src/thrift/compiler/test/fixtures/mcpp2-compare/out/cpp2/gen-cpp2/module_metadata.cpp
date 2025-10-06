@@ -17,6 +17,21 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
+template <> struct TSchemaAssociation<::some::valid::ns::EmptyService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 7015249176354003585;
+  static constexpr ::std::string_view definitionKey = {"\x55\x93\x05\x8b\x4e\x1d\x3f\x2c\xf1\x08\x21\xb9\xf4\x2d\x0c\x15", 16};
+};
+template <> struct TSchemaAssociation<::some::valid::ns::ReturnService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 7015249176354003585;
+  static constexpr ::std::string_view definitionKey = {"\x4e\xc4\x42\xc9\x22\xaa\x49\x12\x4b\x56\x6b\x0c\xf6\x79\x5f\x8a", 16};
+};
+template <> struct TSchemaAssociation<::some::valid::ns::ParamService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 7015249176354003585;
+  static constexpr ::std::string_view definitionKey = {"\x9b\xf2\x42\x9a\x0a\xd1\x3d\xda\xeb\xaf\xf8\xf4\x7f\xb1\x09\xb6", 16};
+};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -421,8 +436,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::EmptySe
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::EmptyService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_EmptyService;
-  module_EmptyService.name() = "module.EmptyService";
+  ::apache::thrift::metadata::ThriftService module_EmptyService = genServiceMetadata<::some::valid::ns::EmptyService>();
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
@@ -634,8 +648,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ReturnS
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_ReturnService;
-  module_ReturnService.name() = "module.ReturnService";
+  ::apache::thrift::metadata::ThriftService module_ReturnService = genServiceMetadata<::some::valid::ns::ReturnService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>>::gen_noReturn,
     ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>>::gen_boolReturn,
@@ -1368,8 +1381,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamSe
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_ParamService;
-  module_ParamService.name() = "module.ParamService";
+  ::apache::thrift::metadata::ThriftService module_ParamService = genServiceMetadata<::some::valid::ns::ParamService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamService>>::gen_void_ret_i16_param,
     ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamService>>::gen_void_ret_byte_i16_param,

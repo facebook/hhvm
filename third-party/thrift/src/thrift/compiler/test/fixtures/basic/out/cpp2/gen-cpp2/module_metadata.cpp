@@ -17,6 +17,26 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
+template <> struct TSchemaAssociation<::test::fixtures::basic::FooService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 8924281123066096965;
+  static constexpr ::std::string_view definitionKey = {"\x37\x4e\xff\x88\x7f\xf8\xd2\x44\xdf\x64\x1f\x98\x6a\xaf\x8c\x54", 16};
+};
+template <> struct TSchemaAssociation<::test::fixtures::basic::FB303Service, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 8924281123066096965;
+  static constexpr ::std::string_view definitionKey = {"\xbe\x62\x1f\x2c\xea\xe1\xe4\xe3\xf2\x8c\x43\x61\x08\xa8\x65\x24", 16};
+};
+template <> struct TSchemaAssociation<::test::fixtures::basic::MyService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 8924281123066096965;
+  static constexpr ::std::string_view definitionKey = {"\x2e\xcf\xb9\x8c\x99\xa4\xcc\xaf\x6f\x90\x89\x13\x69\x24\x5e\xd1", 16};
+};
+template <> struct TSchemaAssociation<::test::fixtures::basic::DbMixedStackArguments, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 8924281123066096965;
+  static constexpr ::std::string_view definitionKey = {"\x90\x3a\x60\x8d\x78\xf7\x64\x97\x92\x8d\x4c\x84\x38\x6d\xed\x0e", 16};
+};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -264,8 +284,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::F
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_FooService;
-  module_FooService.name() = "module.FooService";
+  ::apache::thrift::metadata::ThriftService module_FooService = genServiceMetadata<::test::fixtures::basic::FooService>();
   module_FooService.uri() = "test.dev/fixtures/basic/FooService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>>::gen_simple_rpc,
@@ -316,8 +335,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::F
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::FB303Service>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_FB303Service;
-  module_FB303Service.name() = "module.FB303Service";
+  ::apache::thrift::metadata::ThriftService module_FB303Service = genServiceMetadata<::test::fixtures::basic::FB303Service>();
   module_FB303Service.uri() = "test.dev/fixtures/basic/FB303Service";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::FB303Service>>::gen_simple_rpc,
@@ -486,8 +504,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::M
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_MyService;
-  module_MyService.name() = "module.MyService";
+  ::apache::thrift::metadata::ThriftService module_MyService = genServiceMetadata<::test::fixtures::basic::MyService>();
   module_MyService.uri() = "test.dev/fixtures/basic/MyService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>>::gen_ping,
@@ -557,8 +574,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::D
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_DbMixedStackArguments;
-  module_DbMixedStackArguments.name() = "module.DbMixedStackArguments";
+  ::apache::thrift::metadata::ThriftService module_DbMixedStackArguments = genServiceMetadata<::test::fixtures::basic::DbMixedStackArguments>();
   module_DbMixedStackArguments.uri() = "test.dev/fixtures/basic/DbMixedStackArguments";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>>::gen_getDataByKey0,

@@ -17,6 +17,36 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
+template <> struct TSchemaAssociation<::cpp2::DecoratedService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -7896720196583643065;
+  static constexpr ::std::string_view definitionKey = {"\xd1\x44\x52\x11\x2f\xc7\x1d\x23\xd8\x24\x12\xd8\xd4\x37\xdf\xe7", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::UndecoratedService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -7896720196583643065;
+  static constexpr ::std::string_view definitionKey = {"\x8d\xfa\xf4\xc5\x87\xb9\x4e\xf1\x30\x60\xe6\xb9\x4e\xe2\x55\x98", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::DecoratedService_ExtendsUndecoratedService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -7896720196583643065;
+  static constexpr ::std::string_view definitionKey = {"\x00\xf8\x19\x31\x00\xa6\xc2\xc8\xf4\x48\x29\xb0\x5c\xc1\x03\x9d", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::DecoratedService_ExtendsDecoratedService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -7896720196583643065;
+  static constexpr ::std::string_view definitionKey = {"\xbe\x01\xa1\x22\xd0\x33\xd3\xa3\x12\xe6\x3f\x43\x70\xda\x3d\x4c", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::UndecoratedService_ExtendsDecoratedService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -7896720196583643065;
+  static constexpr ::std::string_view definitionKey = {"\x44\x7c\x5c\x76\x45\x8e\xab\x3c\x6d\xe7\x3a\xfb\xd5\x12\xfc\x27", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -7896720196583643065;
+  static constexpr ::std::string_view definitionKey = {"\xa3\x0c\xe2\xd7\x03\x5d\xc4\x45\x5f\xca\x1c\xe1\x14\xd7\x4c\x9b", 16};
+};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -211,8 +241,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_DecoratedService;
-  module_DecoratedService.name() = "module.DecoratedService";
+  ::apache::thrift::metadata::ThriftService module_DecoratedService = genServiceMetadata<::cpp2::DecoratedService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::gen_noop,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::gen_echo,
@@ -361,8 +390,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_UndecoratedService;
-  module_UndecoratedService.name() = "module.UndecoratedService";
+  ::apache::thrift::metadata::ThriftService module_UndecoratedService = genServiceMetadata<::cpp2::UndecoratedService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::gen_noop,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::gen_echo,
@@ -406,8 +434,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_E
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_DecoratedService_ExtendsUndecoratedService;
-  module_DecoratedService_ExtendsUndecoratedService.name() = "module.DecoratedService_ExtendsUndecoratedService";
+  ::apache::thrift::metadata::ThriftService module_DecoratedService_ExtendsUndecoratedService = genServiceMetadata<::cpp2::DecoratedService_ExtendsUndecoratedService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>>::gen_extension,
   };
@@ -448,8 +475,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_E
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_DecoratedService_ExtendsDecoratedService;
-  module_DecoratedService_ExtendsDecoratedService.name() = "module.DecoratedService_ExtendsDecoratedService";
+  ::apache::thrift::metadata::ThriftService module_DecoratedService_ExtendsDecoratedService = genServiceMetadata<::cpp2::DecoratedService_ExtendsDecoratedService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>>::gen_extension,
   };
@@ -490,8 +516,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService_ExtendsDecoratedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_UndecoratedService_ExtendsDecoratedService;
-  module_UndecoratedService_ExtendsDecoratedService.name() = "module.UndecoratedService_ExtendsDecoratedService";
+  ::apache::thrift::metadata::ThriftService module_UndecoratedService_ExtendsDecoratedService = genServiceMetadata<::cpp2::UndecoratedService_ExtendsDecoratedService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService_ExtendsDecoratedService>>::gen_extension,
   };
@@ -538,8 +563,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_E
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService;
-  module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService.name() = "module.DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService";
+  ::apache::thrift::metadata::ThriftService module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService = genServiceMetadata<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>>::gen_secondExtension,
   };

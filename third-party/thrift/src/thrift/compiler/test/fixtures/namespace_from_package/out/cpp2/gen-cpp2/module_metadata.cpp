@@ -17,6 +17,11 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
+template <> struct TSchemaAssociation<::test::namespace_from_package::module::TestService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -329397207201317601;
+  static constexpr ::std::string_view definitionKey = {"\xfd\xc7\xa9\x30\xb3\x49\xfe\xdd\xf3\x02\xd6\x87\x71\x2a\x3c\x60", 16};
+};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -76,8 +81,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_pac
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_package::module::TestService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_TestService;
-  module_TestService.name() = "module.TestService";
+  ::apache::thrift::metadata::ThriftService module_TestService = genServiceMetadata<::test::namespace_from_package::module::TestService>();
   module_TestService.uri() = "test.dev/namespace_from_package/module/TestService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_package::module::TestService>>::gen_init,

@@ -17,6 +17,16 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
+template <> struct TSchemaAssociation<::cpp2::HeaderClientMethodsAnnotationOnService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 8289997534464861998;
+  static constexpr ::std::string_view definitionKey = {"\xd3\x04\x79\x51\xe1\x0e\xe4\x64\x58\xde\xf0\x95\x04\x48\xb9\xb4", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::HeaderClientMethodsAnnotationOnFunction, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 8289997534464861998;
+  static constexpr ::std::string_view definitionKey = {"\x9c\xdd\xc7\xa5\x1c\x0f\xae\x50\xa3\x27\xa7\xe4\xe1\x56\xea\x62", 16};
+};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -113,8 +123,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethod
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_HeaderClientMethodsAnnotationOnService;
-  module_HeaderClientMethodsAnnotationOnService.name() = "module.HeaderClientMethodsAnnotationOnService";
+  ::apache::thrift::metadata::ThriftService module_HeaderClientMethodsAnnotationOnService = genServiceMetadata<::cpp2::HeaderClientMethodsAnnotationOnService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::gen_echo,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::gen_echo_2,
@@ -177,8 +186,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethod
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_HeaderClientMethodsAnnotationOnFunction;
-  module_HeaderClientMethodsAnnotationOnFunction.name() = "module.HeaderClientMethodsAnnotationOnFunction";
+  ::apache::thrift::metadata::ThriftService module_HeaderClientMethodsAnnotationOnFunction = genServiceMetadata<::cpp2::HeaderClientMethodsAnnotationOnFunction>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::gen_echo,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::gen_echo_2,

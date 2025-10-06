@@ -17,6 +17,11 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
+template <> struct TSchemaAssociation<::extra::svc::ExtraService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -1731276921098640572;
+  static constexpr ::std::string_view definitionKey = {"\x62\xe6\x56\xb8\x62\xe2\x42\xd4\x4a\xb6\x57\x96\xe0\x39\x18\xd2", 16};
+};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -268,8 +273,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService extra_services_ExtraService;
-  extra_services_ExtraService.name() = "extra_services.ExtraService";
+  ::apache::thrift::metadata::ThriftService extra_services_ExtraService = genServiceMetadata<::extra::svc::ExtraService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_simple_function,
     ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_throws_function,

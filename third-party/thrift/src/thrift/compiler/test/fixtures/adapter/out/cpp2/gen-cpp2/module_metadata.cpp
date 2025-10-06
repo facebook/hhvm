@@ -17,6 +17,16 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
+template <> struct TSchemaAssociation<::facebook::thrift::test::Service, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -3402983759148418281;
+  static constexpr ::std::string_view definitionKey = {"\xf6\xc8\x7b\x66\x77\x63\x8d\xe1\xb9\x5f\xf2\x05\x85\xed\xc6\xf4", 16};
+};
+template <> struct TSchemaAssociation<::facebook::thrift::test::AdapterService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -3402983759148418281;
+  static constexpr ::std::string_view definitionKey = {"\x79\xbe\xa6\x4f\x3a\x0d\xbe\x6c\x5d\xbe\xf1\xff\x5c\xf3\x9f\x6f", 16};
+};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -793,8 +803,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_Service;
-  module_Service.name() = "module.Service";
+  ::apache::thrift::metadata::ThriftService module_Service = genServiceMetadata<::facebook::thrift::test::Service>();
   module_Service.uri() = "facebook.com/thrift/test/Service";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>>::gen_func,
@@ -848,8 +857,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_AdapterService;
-  module_AdapterService.name() = "module.AdapterService";
+  ::apache::thrift::metadata::ThriftService module_AdapterService = genServiceMetadata<::facebook::thrift::test::AdapterService>();
   module_AdapterService.uri() = "facebook.com/thrift/test/AdapterService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::gen_count,

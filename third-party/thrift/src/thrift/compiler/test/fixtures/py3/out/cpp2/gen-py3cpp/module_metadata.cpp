@@ -17,6 +17,21 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
+template <> struct TSchemaAssociation<::py3::simple::SimpleService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -8607107063930754448;
+  static constexpr ::std::string_view definitionKey = {"\xdf\xb1\xae\x13\x68\x8d\x49\x6b\x34\x02\x72\x3d\xba\xb1\x90\xf6", 16};
+};
+template <> struct TSchemaAssociation<::py3::simple::DerivedService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -8607107063930754448;
+  static constexpr ::std::string_view definitionKey = {"\xb6\xfb\x1c\x3a\xe8\x84\xfa\xaa\x15\xd1\xba\xd9\x15\x60\x63\x2f", 16};
+};
+template <> struct TSchemaAssociation<::py3::simple::RederivedService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -8607107063930754448;
+  static constexpr ::std::string_view definitionKey = {"\x0e\x71\x8a\x50\x92\x6e\xa8\xf0\xca\x6b\x29\x99\x82\x5b\xd2\x1d", 16};
+};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -988,8 +1003,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_SimpleService;
-  module_SimpleService.name() = "module.SimpleService";
+  ::apache::thrift::metadata::ThriftService module_SimpleService = genServiceMetadata<::py3::simple::SimpleService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_five,
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_add_five,
@@ -1068,8 +1082,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedServ
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_DerivedService;
-  module_DerivedService.name() = "module.DerivedService";
+  ::apache::thrift::metadata::ThriftService module_DerivedService = genServiceMetadata<::py3::simple::DerivedService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::gen_get_six,
   };
@@ -1109,8 +1122,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedSe
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_RederivedService;
-  module_RederivedService.name() = "module.RederivedService";
+  ::apache::thrift::metadata::ThriftService module_RederivedService = genServiceMetadata<::py3::simple::RederivedService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::gen_get_seven,
   };

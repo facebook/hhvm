@@ -170,24 +170,6 @@ func (p *procFuncFinderByPlate) Read(decoder thrift.Decoder) (thrift.Struct, err
     return args, nil
 }
 
-func (p *procFuncFinderByPlate) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
-    messageType := thrift.REPLY
-    if _, ok := result.(*thrift.ApplicationException); ok {
-        messageType = thrift.EXCEPTION
-    }
-
-    if err := encoder.WriteMessageBegin("byPlate", messageType, seqId); err != nil {
-        return err
-    }
-    if err := result.Write(encoder); err != nil {
-        return err
-    }
-    if err := encoder.WriteMessageEnd(); err != nil {
-        return err
-    }
-    return encoder.Flush()
-}
-
 func (p *procFuncFinderByPlate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqFinderByPlate)
     result := newRespFinderByPlate()
@@ -217,24 +199,6 @@ func (p *procFuncFinderAliasByPlate) Read(decoder thrift.Decoder) (thrift.Struct
     return args, nil
 }
 
-func (p *procFuncFinderAliasByPlate) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
-    messageType := thrift.REPLY
-    if _, ok := result.(*thrift.ApplicationException); ok {
-        messageType = thrift.EXCEPTION
-    }
-
-    if err := encoder.WriteMessageBegin("aliasByPlate", messageType, seqId); err != nil {
-        return err
-    }
-    if err := result.Write(encoder); err != nil {
-        return err
-    }
-    if err := encoder.WriteMessageEnd(); err != nil {
-        return err
-    }
-    return encoder.Flush()
-}
-
 func (p *procFuncFinderAliasByPlate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqFinderAliasByPlate)
     result := newRespFinderAliasByPlate()
@@ -262,24 +226,6 @@ func (p *procFuncFinderPreviousPlate) Read(decoder thrift.Decoder) (thrift.Struc
     }
     decoder.ReadMessageEnd()
     return args, nil
-}
-
-func (p *procFuncFinderPreviousPlate) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
-    messageType := thrift.REPLY
-    if _, ok := result.(*thrift.ApplicationException); ok {
-        messageType = thrift.EXCEPTION
-    }
-
-    if err := encoder.WriteMessageBegin("previousPlate", messageType, seqId); err != nil {
-        return err
-    }
-    if err := result.Write(encoder); err != nil {
-        return err
-    }
-    if err := encoder.WriteMessageEnd(); err != nil {
-        return err
-    }
-    return encoder.Flush()
 }
 
 func (p *procFuncFinderPreviousPlate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {

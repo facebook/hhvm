@@ -129,24 +129,6 @@ func (p *procFuncMyRootDoRoot) Read(decoder thrift.Decoder) (thrift.Struct, erro
     return args, nil
 }
 
-func (p *procFuncMyRootDoRoot) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
-    messageType := thrift.REPLY
-    if _, ok := result.(*thrift.ApplicationException); ok {
-        messageType = thrift.EXCEPTION
-    }
-
-    if err := encoder.WriteMessageBegin("do_root", messageType, seqId); err != nil {
-        return err
-    }
-    if err := result.Write(encoder); err != nil {
-        return err
-    }
-    if err := encoder.WriteMessageEnd(); err != nil {
-        return err
-    }
-    return encoder.Flush()
-}
-
 func (p *procFuncMyRootDoRoot) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespMyRootDoRoot()
     err := p.handler.DoRoot(ctx)
@@ -242,24 +224,6 @@ func (p *procFuncMyNodeDoMid) Read(decoder thrift.Decoder) (thrift.Struct, error
     return args, nil
 }
 
-func (p *procFuncMyNodeDoMid) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
-    messageType := thrift.REPLY
-    if _, ok := result.(*thrift.ApplicationException); ok {
-        messageType = thrift.EXCEPTION
-    }
-
-    if err := encoder.WriteMessageBegin("do_mid", messageType, seqId); err != nil {
-        return err
-    }
-    if err := result.Write(encoder); err != nil {
-        return err
-    }
-    if err := encoder.WriteMessageEnd(); err != nil {
-        return err
-    }
-    return encoder.Flush()
-}
-
 func (p *procFuncMyNodeDoMid) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespMyNodeDoMid()
     err := p.handler.DoMid(ctx)
@@ -353,24 +317,6 @@ func (p *procFuncMyLeafDoLeaf) Read(decoder thrift.Decoder) (thrift.Struct, erro
     }
     decoder.ReadMessageEnd()
     return args, nil
-}
-
-func (p *procFuncMyLeafDoLeaf) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
-    messageType := thrift.REPLY
-    if _, ok := result.(*thrift.ApplicationException); ok {
-        messageType = thrift.EXCEPTION
-    }
-
-    if err := encoder.WriteMessageBegin("do_leaf", messageType, seqId); err != nil {
-        return err
-    }
-    if err := result.Write(encoder); err != nil {
-        return err
-    }
-    if err := encoder.WriteMessageEnd(); err != nil {
-        return err
-    }
-    return encoder.Flush()
 }
 
 func (p *procFuncMyLeafDoLeaf) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {

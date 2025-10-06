@@ -114,24 +114,6 @@ func (p *procFuncExtendTestServiceCheck) Read(decoder thrift.Decoder) (thrift.St
     return args, nil
 }
 
-func (p *procFuncExtendTestServiceCheck) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
-    messageType := thrift.REPLY
-    if _, ok := result.(*thrift.ApplicationException); ok {
-        messageType = thrift.EXCEPTION
-    }
-
-    if err := encoder.WriteMessageBegin("check", messageType, seqId); err != nil {
-        return err
-    }
-    if err := result.Write(encoder); err != nil {
-        return err
-    }
-    if err := encoder.WriteMessageEnd(); err != nil {
-        return err
-    }
-    return encoder.Flush()
-}
-
 func (p *procFuncExtendTestServiceCheck) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqExtendTestServiceCheck)
     result := newRespExtendTestServiceCheck()

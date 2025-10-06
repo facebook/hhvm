@@ -206,24 +206,6 @@ func (p *procFuncCF) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     return args, nil
 }
 
-func (p *procFuncCF) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
-    messageType := thrift.REPLY
-    if _, ok := result.(*thrift.ApplicationException); ok {
-        messageType = thrift.EXCEPTION
-    }
-
-    if err := encoder.WriteMessageBegin("f", messageType, seqId); err != nil {
-        return err
-    }
-    if err := result.Write(encoder); err != nil {
-        return err
-    }
-    if err := encoder.WriteMessageEnd(); err != nil {
-        return err
-    }
-    return encoder.Flush()
-}
-
 func (p *procFuncCF) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     result := newRespCF()
     err := p.handler.F(ctx)
@@ -249,24 +231,6 @@ func (p *procFuncCThing) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     }
     decoder.ReadMessageEnd()
     return args, nil
-}
-
-func (p *procFuncCThing) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
-    messageType := thrift.REPLY
-    if _, ok := result.(*thrift.ApplicationException); ok {
-        messageType = thrift.EXCEPTION
-    }
-
-    if err := encoder.WriteMessageBegin("thing", messageType, seqId); err != nil {
-        return err
-    }
-    if err := result.Write(encoder); err != nil {
-        return err
-    }
-    if err := encoder.WriteMessageEnd(); err != nil {
-        return err
-    }
-    return encoder.Flush()
 }
 
 func (p *procFuncCThing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {

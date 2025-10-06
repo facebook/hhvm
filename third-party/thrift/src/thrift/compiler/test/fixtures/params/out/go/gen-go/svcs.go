@@ -202,24 +202,6 @@ func (p *procFuncNestedContainersMapList) Read(decoder thrift.Decoder) (thrift.S
     return args, nil
 }
 
-func (p *procFuncNestedContainersMapList) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
-    messageType := thrift.REPLY
-    if _, ok := result.(*thrift.ApplicationException); ok {
-        messageType = thrift.EXCEPTION
-    }
-
-    if err := encoder.WriteMessageBegin("mapList", messageType, seqId); err != nil {
-        return err
-    }
-    if err := result.Write(encoder); err != nil {
-        return err
-    }
-    if err := encoder.WriteMessageEnd(); err != nil {
-        return err
-    }
-    return encoder.Flush()
-}
-
 func (p *procFuncNestedContainersMapList) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqNestedContainersMapList)
     result := newRespNestedContainersMapList()
@@ -246,24 +228,6 @@ func (p *procFuncNestedContainersMapSet) Read(decoder thrift.Decoder) (thrift.St
     }
     decoder.ReadMessageEnd()
     return args, nil
-}
-
-func (p *procFuncNestedContainersMapSet) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
-    messageType := thrift.REPLY
-    if _, ok := result.(*thrift.ApplicationException); ok {
-        messageType = thrift.EXCEPTION
-    }
-
-    if err := encoder.WriteMessageBegin("mapSet", messageType, seqId); err != nil {
-        return err
-    }
-    if err := result.Write(encoder); err != nil {
-        return err
-    }
-    if err := encoder.WriteMessageEnd(); err != nil {
-        return err
-    }
-    return encoder.Flush()
 }
 
 func (p *procFuncNestedContainersMapSet) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
@@ -294,24 +258,6 @@ func (p *procFuncNestedContainersListMap) Read(decoder thrift.Decoder) (thrift.S
     return args, nil
 }
 
-func (p *procFuncNestedContainersListMap) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
-    messageType := thrift.REPLY
-    if _, ok := result.(*thrift.ApplicationException); ok {
-        messageType = thrift.EXCEPTION
-    }
-
-    if err := encoder.WriteMessageBegin("listMap", messageType, seqId); err != nil {
-        return err
-    }
-    if err := result.Write(encoder); err != nil {
-        return err
-    }
-    if err := encoder.WriteMessageEnd(); err != nil {
-        return err
-    }
-    return encoder.Flush()
-}
-
 func (p *procFuncNestedContainersListMap) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqNestedContainersListMap)
     result := newRespNestedContainersListMap()
@@ -340,24 +286,6 @@ func (p *procFuncNestedContainersListSet) Read(decoder thrift.Decoder) (thrift.S
     return args, nil
 }
 
-func (p *procFuncNestedContainersListSet) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
-    messageType := thrift.REPLY
-    if _, ok := result.(*thrift.ApplicationException); ok {
-        messageType = thrift.EXCEPTION
-    }
-
-    if err := encoder.WriteMessageBegin("listSet", messageType, seqId); err != nil {
-        return err
-    }
-    if err := result.Write(encoder); err != nil {
-        return err
-    }
-    if err := encoder.WriteMessageEnd(); err != nil {
-        return err
-    }
-    return encoder.Flush()
-}
-
 func (p *procFuncNestedContainersListSet) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     args := reqStruct.(*reqNestedContainersListSet)
     result := newRespNestedContainersListSet()
@@ -384,24 +312,6 @@ func (p *procFuncNestedContainersTurtles) Read(decoder thrift.Decoder) (thrift.S
     }
     decoder.ReadMessageEnd()
     return args, nil
-}
-
-func (p *procFuncNestedContainersTurtles) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
-    messageType := thrift.REPLY
-    if _, ok := result.(*thrift.ApplicationException); ok {
-        messageType = thrift.EXCEPTION
-    }
-
-    if err := encoder.WriteMessageBegin("turtles", messageType, seqId); err != nil {
-        return err
-    }
-    if err := result.Write(encoder); err != nil {
-        return err
-    }
-    if err := encoder.WriteMessageEnd(); err != nil {
-        return err
-    }
-    return encoder.Flush()
 }
 
 func (p *procFuncNestedContainersTurtles) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {

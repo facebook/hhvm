@@ -59,11 +59,6 @@ func (ch *chainHandler) Read(_ types.Decoder) (types.Struct, error) {
 	return nil, nil
 }
 
-// Write does nothing here, it is not used and shouldn't be called
-func (ch *chainHandler) Write(_ int32, _ types.WritableStruct, _ types.Encoder) error {
-	return nil
-}
-
 func (ch *chainHandler) RunContext(ctx context.Context, args types.ReadableStruct) (types.WritableStruct, error) {
 	if ch.curI == len(ch.interceptors)-1 {
 		return ch.origHandler.RunContext(ctx, args)

@@ -34,24 +34,6 @@ func (p *{{> svc/proc_func_name}}) Read(decoder thrift.Decoder) (thrift.Struct, 
     return args, nil
 }
 
-func (p *{{> svc/proc_func_name}}) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
-    messageType := thrift.REPLY
-    if _, ok := result.(*thrift.ApplicationException); ok {
-        messageType = thrift.EXCEPTION
-    }
-
-    if err := encoder.WriteMessageBegin("{{function:name}}", messageType, seqId); err != nil {
-        return err
-    }
-    if err := result.Write(encoder); err != nil {
-        return err
-    }
-    if err := encoder.WriteMessageEnd(); err != nil {
-        return err
-    }
-    return encoder.Flush()
-}
-
 func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     {{#function:params.fields?}}
     args := reqStruct.(*req{{service:go_name}}{{function:go_name}})

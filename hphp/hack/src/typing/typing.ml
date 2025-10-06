@@ -7361,30 +7361,43 @@ end = struct
               let remaining_actual_tys =
                 List.drop (List.map argtys ~f:snd) consumed
               in
-              let (env, actual_ty, opt_te, p1) =
+              let (env, actual_ty, opt_te, remaining_pos) =
                 match unpacked_element with
                 | None ->
+                  (* Compute a span for the remaining args *)
+                  let remaining_args = List.drop args_with_result consumed in
+                  let remaining_pos =
+                    match
+                      (List.hd remaining_args, List.last remaining_args)
+                    with
+                    | (Some (_, arg1, _), Some (_, arg2, _)) ->
+                      Pos.btw
+                        (Aast_utils.get_argument_pos arg1)
+                        (Aast_utils.get_argument_pos arg2)
+                      (* We have no more arguments so just use position of function id *)
+                    | _ -> id_pos
+                  in
                   ( env,
                     MakeType.tuple
-                      (Reason.witness expr_pos)
+                      (Reason.witness remaining_pos)
                       remaining_actual_tys,
                     None,
-                    expr_pos )
+                    remaining_pos )
                 | Some e ->
-                  let (_, p1, _) = e in
+                  let (_, splat_pos, _) = e in
                   let (env, te, unpacked_element_ty) =
                     expr ~expected:None ~ctxt:Context.default env e
                   in
                   ( env,
                     mk
-                      ( Reason.witness p1,
+                      ( Reason.witness splat_pos,
                         Ttuple
                           {
                             t_required = remaining_actual_tys;
                             t_extra = Tsplat unpacked_element_ty;
                           } ),
                     Some te,
-                    p1 )
+                    splat_pos )
               in
               let expected_ty =
                 mk
@@ -7403,7 +7416,7 @@ end = struct
                   ~ignore_readonly:false
                   env
                   expected_ty
-                  p1
+                  remaining_pos
                   actual_ty
               in
               let used_dynamic_info =

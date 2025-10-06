@@ -664,19 +664,24 @@ func TestNumWorkersOption(t *testing.T) {
 	require.ErrorIs(t, err, context.Canceled)
 }
 
-func TestUnknownFunction(t *testing.T) {
+func TestProcessorScenarios(t *testing.T) {
 	listener, err := net.Listen("tcp", "[::]:0")
 	require.NoError(t, err)
 	addr := listener.Addr()
-	t.Logf("Server listening on %v", addr)
-
 	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
-	server := NewServer(processor, listener, TransportIDRocket, WithNumWorkers(1))
+	server := NewServer(processor, listener, TransportIDRocket)
 
 	serverCtx, serverCancel := context.WithCancel(context.Background())
 	var serverEG errgroup.Group
 	serverEG.Go(func() error {
 		return server.ServeContext(serverCtx)
+	})
+
+	t.Cleanup(func() {
+		// Shut down server.
+		serverCancel()
+		err = serverEG.Wait()
+		require.ErrorIs(t, err, context.Canceled)
 	})
 
 	channel, err := NewClient(
@@ -688,16 +693,44 @@ func TestUnknownFunction(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	client := dummyif.NewDummyTwoChannelClient(channel)
-	err = client.PingTwo(context.Background())
-	require.Error(t, err)
-	require.ErrorContains(t, err, "no such function")
+	t.Cleanup(func() {
+		err = channel.Close()
+		require.NoError(t, err)
+	})
 
-	err = client.Close()
-	require.NoError(t, err)
-
-	// Shut down server.
-	serverCancel()
-	err = serverEG.Wait()
-	require.ErrorIs(t, err, context.Canceled)
+	t.Run("no_such_function", func(t *testing.T) {
+		client := dummyif.NewDummyTwoChannelClient(channel)
+		err := client.PingTwo(context.Background())
+		require.Error(t, err)
+		require.ErrorContains(t, err, "no such function")
+	})
+	t.Run("regular_void_call", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+		err := client.Ping(context.Background())
+		require.NoError(t, err)
+	})
+	t.Run("regular_non_void_call", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+		result, err := client.Echo(context.Background(), "hello")
+		require.NoError(t, err)
+		require.Equal(t, "hello", result)
+	})
+	t.Run("undeclared_exception", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+		err := client.GetUndeclaredException(context.Background())
+		require.Error(t, err)
+		require.ErrorContains(t, err, "undeclared exception")
+	})
+	t.Run("declared_exception", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+		err := client.GetDeclaredException(context.Background())
+		require.Error(t, err)
+		var dummyEx *dummyif.DummyException
+		require.ErrorAs(t, err, &dummyEx)
+	})
+	t.Run("oneway", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+		err := client.OnewayRPC(context.Background(), "hello")
+		require.NoError(t, err)
+	})
 }

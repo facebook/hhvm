@@ -28,28 +28,6 @@ let is_int env t =
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) e;
   r
 
-(* Checking of numeric operands for arithmetic operators that work only
- * on integers:
- *   (1) Enforce that it coerce to int
- *   (2) Check if it's dynamic
- *)
-let check_dynamic_or_enforce_int env p t r err =
-  let ty = MakeType.int r in
-  let (env, ty_err_opt) =
-    Typing_coercion.coerce_type
-      ~coerce_for_op:true
-      p
-      Reason.URnone
-      env
-      t
-      ty
-      Enforced
-      err
-  in
-  Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
-  let ty_mismatch = Option.map ty_err_opt ~f:Fn.(const (t, ty)) in
-  (env, Typing_defs.is_dynamic t, ty_mismatch)
-
 (** [check_like_num p_exp p env ty] ensures that [ty] is a subtype of num or ~num.
   In the former case, it returns false and the type, in the latter, it returns
   true, and the type with the ~ removed. If it is not a subtype of either, the
@@ -635,16 +613,19 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
       make_result env te1 None te2 None ty2
 
 let unop p env uop te ty =
-  let make_result env te err_opt result_ty =
+  let make_result ?(is_like = false) env te err_opt ty =
+    let (env, ty) =
+      if is_like then
+        Typing_union.union env ty (MakeType.dynamic (Reason.witness p))
+      else
+        (env, ty)
+    in
+
     let hte = hole_on_err te err_opt in
     let (env, te) =
-      Typing_helpers.make_simplify_typed_expr
-        env
-        p
-        result_ty
-        (Aast.Unop (uop, hte))
+      Typing_helpers.make_simplify_typed_expr env p ty (Aast.Unop (uop, hte))
     in
-    (env, te, result_ty)
+    (env, te, ty)
   in
   let is_any = Typing_utils.is_any env in
   match uop with
@@ -659,22 +640,21 @@ let unop p env uop te ty =
     if is_any ty then
       make_result env te None ty
     else
-      (* args isn't any or a variant thereof so can actually do stuff *)
-      let (env, is_dynamic, err_opt) =
-        check_dynamic_or_enforce_int
+      let (env, err_opt, used_dynamic) =
+        Typing_argument.check_argument_type_against_parameter_type
+          ~ignore_readonly:false
+          ~dynamic_func:(Some Typing_argument.Supportdyn_function)
           env
+          (Typing_make_type.int (Reason.bitwise p))
           p
           ty
-          (Reason.bitwise p)
-          Typing_error.Callback.bitwise_math_invalid_argument
       in
-      let result_ty =
-        if is_dynamic then
-          MakeType.dynamic (Reason.bitwise_dynamic p)
-        else
-          MakeType.int (Reason.bitwise_ret p)
-      in
-      make_result env te err_opt result_ty
+      make_result
+        ~is_like:used_dynamic
+        env
+        te
+        err_opt
+        (MakeType.int (Reason.bitwise_ret p))
   | Ast_defs.Uplus
   | Ast_defs.Uminus
   | Ast_defs.Uincr

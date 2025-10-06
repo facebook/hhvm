@@ -13,6 +13,6 @@ function testBitwise(dynamic $x): void {
   hh_show($y);
   $y = $x ^ $x; // $y : ~int
   hh_show($y);
-  $y = ~$x; // $y : dynamic
+  $y = ~$x; // $y : ~int
   hh_show($y);
 }

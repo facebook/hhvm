@@ -28,11 +28,12 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::EchoRequest>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::EchoRequest>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.EchoRequest", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_EchoRequest = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_EchoRequest = res.first->second;
+  module_EchoRequest.name() = "module.EchoRequest";
   module_EchoRequest.is_union() = false;
   static const auto* const
   module_EchoRequest_fields = new std::array<EncodedThriftField, 1>{ {
@@ -46,15 +47,16 @@ StructMetadata<::cpp2::EchoRequest>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_EchoRequest.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::EchoResponse>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::EchoResponse>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.EchoResponse", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_EchoResponse = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_EchoResponse = res.first->second;
+  module_EchoResponse.name() = "module.EchoResponse";
   module_EchoResponse.is_union() = false;
   static const auto* const
   module_EchoResponse_fields = new std::array<EncodedThriftField, 1>{ {
@@ -68,7 +70,7 @@ StructMetadata<::cpp2::EchoResponse>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_EchoResponse.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::gen_echo([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {

@@ -28,11 +28,12 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Limits>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Limits>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.Limits", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Limits = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_Limits = res.first->second;
+  module_Limits.name() = "module.Limits";
   module_Limits.is_union() = false;
   static const auto* const
   module_Limits_fields = new std::array<EncodedThriftField, 8>{ {
@@ -46,7 +47,7 @@ StructMetadata<::cpp2::Limits>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_Limits.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 
 } // namespace md

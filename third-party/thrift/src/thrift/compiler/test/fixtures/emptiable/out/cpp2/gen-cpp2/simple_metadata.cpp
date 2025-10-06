@@ -34,21 +34,23 @@ void EnumMetadata<::apache::thrift::test::MyEnum>::gen(ThriftMetadata& metadata)
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::MyStruct>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("simple.MyStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& simple_MyStruct = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& simple_MyStruct = res.first->second;
+  simple_MyStruct.name() = "simple.MyStruct";
   simple_MyStruct.is_union() = false;
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::EmptiableStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::EmptiableStruct>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("simple.EmptiableStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& simple_EmptiableStruct = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& simple_EmptiableStruct = res.first->second;
+  simple_EmptiableStruct.name() = "simple.EmptiableStruct";
   simple_EmptiableStruct.is_union() = false;
   static const auto* const
   simple_EmptiableStruct_fields = new std::array<EncodedThriftField, 14>{ {
@@ -62,15 +64,16 @@ StructMetadata<::apache::thrift::test::EmptiableStruct>::gen(ThriftMetadata& met
     field.structured_annotations() = f.structured_annotations;
     simple_EmptiableStruct.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::EmptiableTerseStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::EmptiableTerseStruct>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("simple.EmptiableTerseStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& simple_EmptiableTerseStruct = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& simple_EmptiableTerseStruct = res.first->second;
+  simple_EmptiableTerseStruct.name() = "simple.EmptiableTerseStruct";
   simple_EmptiableTerseStruct.is_union() = false;
   static const auto* const
   simple_EmptiableTerseStruct_fields = new std::array<EncodedThriftField, 14>{ {
@@ -86,15 +89,16 @@ StructMetadata<::apache::thrift::test::EmptiableTerseStruct>::gen(ThriftMetadata
   }
   simple_EmptiableTerseStruct.structured_annotations()->push_back(*cvStruct("thrift.Experimental", {  }).cv_struct());
   simple_EmptiableTerseStruct.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::NotEmptiableStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::NotEmptiableStruct>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("simple.NotEmptiableStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& simple_NotEmptiableStruct = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& simple_NotEmptiableStruct = res.first->second;
+  simple_NotEmptiableStruct.name() = "simple.NotEmptiableStruct";
   simple_NotEmptiableStruct.is_union() = false;
   static const auto* const
   simple_NotEmptiableStruct_fields = new std::array<EncodedThriftField, 14>{ {
@@ -108,7 +112,7 @@ StructMetadata<::apache::thrift::test::NotEmptiableStruct>::gen(ThriftMetadata& 
     field.structured_annotations() = f.structured_annotations;
     simple_NotEmptiableStruct.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 
 } // namespace md

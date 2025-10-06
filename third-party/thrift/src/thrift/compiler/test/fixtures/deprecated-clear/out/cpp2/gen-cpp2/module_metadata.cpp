@@ -34,11 +34,12 @@ void EnumMetadata<::apache::thrift::test::MyEnum>::gen(ThriftMetadata& metadata)
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::StructWithDefaultStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::StructWithDefaultStruct>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.StructWithDefaultStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_StructWithDefaultStruct = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_StructWithDefaultStruct = res.first->second;
+  module_StructWithDefaultStruct.name() = "module.StructWithDefaultStruct";
   module_StructWithDefaultStruct.is_union() = false;
   static const auto* const
   module_StructWithDefaultStruct_fields = new std::array<EncodedThriftField, 13>{ {
@@ -52,7 +53,7 @@ StructMetadata<::apache::thrift::test::StructWithDefaultStruct>::gen(ThriftMetad
     field.structured_annotations() = f.structured_annotations;
     module_StructWithDefaultStruct.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 
 } // namespace md

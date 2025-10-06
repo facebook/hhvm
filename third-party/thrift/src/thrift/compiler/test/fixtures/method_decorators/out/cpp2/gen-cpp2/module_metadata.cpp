@@ -28,11 +28,12 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Request>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Request>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.Request", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Request = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_Request = res.first->second;
+  module_Request.name() = "module.Request";
   module_Request.is_union() = false;
   static const auto* const
   module_Request_fields = new std::array<EncodedThriftField, 1>{ {
@@ -46,15 +47,16 @@ StructMetadata<::cpp2::Request>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_Request.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::detail::AdaptedRequest>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::detail::AdaptedRequest>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.AdaptedRequest", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_AdaptedRequest = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_AdaptedRequest = res.first->second;
+  module_AdaptedRequest.name() = "module.AdaptedRequest";
   module_AdaptedRequest.is_union() = false;
   static const auto* const
   module_AdaptedRequest_fields = new std::array<EncodedThriftField, 1>{ {
@@ -69,15 +71,16 @@ StructMetadata<::cpp2::detail::AdaptedRequest>::gen(ThriftMetadata& metadata) {
     module_AdaptedRequest.fields()->push_back(std::move(field));
   }
   module_AdaptedRequest.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::AdaptedStruct<MyAdapter>") } }).cv_struct());
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Response>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Response>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.Response", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Response = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_Response = res.first->second;
+  module_Response.name() = "module.Response";
   module_Response.is_union() = false;
   static const auto* const
   module_Response_fields = new std::array<EncodedThriftField, 1>{ {
@@ -91,7 +94,7 @@ StructMetadata<::cpp2::Response>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_Response.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::gen_noop([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {

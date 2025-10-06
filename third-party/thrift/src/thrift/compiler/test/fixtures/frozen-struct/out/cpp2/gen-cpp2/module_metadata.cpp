@@ -34,11 +34,12 @@ void EnumMetadata<::some::ns::EnumB>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::ns::ModuleA>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::ns::ModuleA>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.ModuleA", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_ModuleA = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_ModuleA = res.first->second;
+  module_ModuleA.name() = "module.ModuleA";
   module_ModuleA.is_union() = false;
   static const auto* const
   module_ModuleA_fields = new std::array<EncodedThriftField, 6>{ {
@@ -52,15 +53,16 @@ StructMetadata<::some::ns::ModuleA>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_ModuleA.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::ns::ModuleB>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::ns::ModuleB>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.ModuleB", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_ModuleB = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_ModuleB = res.first->second;
+  module_ModuleB.name() = "module.ModuleB";
   module_ModuleB.is_union() = false;
   static const auto* const
   module_ModuleB_fields = new std::array<EncodedThriftField, 2>{ {
@@ -74,15 +76,16 @@ StructMetadata<::some::ns::ModuleB>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_ModuleB.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::ns::detail::DirectlyAdapted>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::ns::detail::DirectlyAdapted>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.DirectlyAdapted", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_DirectlyAdapted = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_DirectlyAdapted = res.first->second;
+  module_DirectlyAdapted.name() = "module.DirectlyAdapted";
   module_DirectlyAdapted.is_union() = false;
   static const auto* const
   module_DirectlyAdapted_fields = new std::array<EncodedThriftField, 1>{ {
@@ -97,15 +100,16 @@ StructMetadata<::some::ns::detail::DirectlyAdapted>::gen(ThriftMetadata& metadat
     module_DirectlyAdapted.fields()->push_back(std::move(field));
   }
   module_DirectlyAdapted.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter") } }).cv_struct());
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::ns::CppRef>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::ns::CppRef>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.CppRef", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_CppRef = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_CppRef = res.first->second;
+  module_CppRef.name() = "module.CppRef";
   module_CppRef.is_union() = false;
   static const auto* const
   module_CppRef_fields = new std::array<EncodedThriftField, 5>{ {
@@ -119,7 +123,7 @@ StructMetadata<::some::ns::CppRef>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_CppRef.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 
 } // namespace md

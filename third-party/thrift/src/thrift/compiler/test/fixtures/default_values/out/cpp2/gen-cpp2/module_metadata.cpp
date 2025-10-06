@@ -28,11 +28,12 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.TrivialStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_TrivialStruct = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_TrivialStruct = res.first->second;
+  module_TrivialStruct.name() = "module.TrivialStruct";
   module_TrivialStruct.is_union() = false;
   static const auto* const
   module_TrivialStruct_fields = new std::array<EncodedThriftField, 1>{ {
@@ -46,15 +47,16 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Tri
     field.structured_annotations() = f.structured_annotations;
     module_TrivialStruct.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.StructWithNoCustomDefaultValues", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_StructWithNoCustomDefaultValues = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_StructWithNoCustomDefaultValues = res.first->second;
+  module_StructWithNoCustomDefaultValues.name() = "module.StructWithNoCustomDefaultValues";
   module_StructWithNoCustomDefaultValues.is_union() = false;
   static const auto* const
   module_StructWithNoCustomDefaultValues_fields = new std::array<EncodedThriftField, 6>{ {
@@ -68,15 +70,16 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Str
     field.structured_annotations() = f.structured_annotations;
     module_StructWithNoCustomDefaultValues.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.StructWithCustomDefaultValues", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_StructWithCustomDefaultValues = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_StructWithCustomDefaultValues = res.first->second;
+  module_StructWithCustomDefaultValues.name() = "module.StructWithCustomDefaultValues";
   module_StructWithCustomDefaultValues.is_union() = false;
   static const auto* const
   module_StructWithCustomDefaultValues_fields = new std::array<EncodedThriftField, 6>{ {
@@ -90,7 +93,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Str
     field.structured_annotations() = f.structured_annotations;
     module_StructWithCustomDefaultValues.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 
 } // namespace md

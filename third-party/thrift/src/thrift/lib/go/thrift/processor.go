@@ -101,6 +101,19 @@ func sendException(prot types.Encoder, name string, seqID int32, appEx *types.Ap
 	return nil
 }
 
+func sendWritableStruct(prot types.Encoder, name string, messageType types.MessageType, seqID int32, strct WritableStruct) error {
+	if err := prot.WriteMessageBegin(name, messageType, seqID); err != nil {
+		return err
+	}
+	if err := strct.Write(prot); err != nil {
+		return err
+	}
+	if err := prot.WriteMessageEnd(); err != nil {
+		return err
+	}
+	return prot.Flush()
+}
+
 // process is a utility function to take a processor and a protocol, and fully process a message.
 // It is broken up into 3 steps:
 // 1. Read the message from the protocol.
@@ -192,7 +205,7 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 	}
 	if appException != nil {
 		// it's an application generated error, so serialize it to the client
-		if writeErr := pfunc.Write(seqID, appException, prot); writeErr != nil {
+		if writeErr := sendWritableStruct(prot, name, types.EXCEPTION, seqID, appException); writeErr != nil {
 			// close connection on write failure
 			return writeErr
 		}
@@ -201,7 +214,7 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 		observer.UndeclaredExceptionForFunction(name)
 		observer.AnyExceptionForFunction(name)
 	} else {
-		if writeErr := pfunc.Write(seqID, result, prot); writeErr != nil {
+		if writeErr := sendWritableStruct(prot, name, types.REPLY, seqID, result); writeErr != nil {
 			// close connection on write failure
 			return writeErr
 		}

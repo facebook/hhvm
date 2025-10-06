@@ -67,14 +67,20 @@ func EncodeStreamPayload(
 	compression rpcmetadata.CompressionAlgorithm,
 	dataBytes []byte,
 ) (payload.Payload, error) {
+	payloadMetadata := rpcmetadata.NewPayloadMetadata()
+	if messageType == types.EXCEPTION {
+		exceptionMetadata := newUnknownPayloadExceptionMetadataBase(name, string(dataBytes))
+		payloadMetadata.SetExceptionMetadata(exceptionMetadata)
+	} else {
+		responseMetadata := rpcmetadata.NewPayloadResponseMetadata()
+		payloadMetadata.SetResponseMetadata(responseMetadata)
+	}
+
 	metadata := rpcmetadata.NewStreamPayloadMetadata().
 		SetOtherMetadata(headers).
-		SetCompression(&compression)
+		SetCompression(&compression).
+		SetPayloadMetadata(payloadMetadata)
 
-	if messageType == types.EXCEPTION {
-		excpetionMetadata := newUnknownPayloadExceptionMetadataBase(name, string(dataBytes))
-		metadata.SetPayloadMetadata(rpcmetadata.NewPayloadMetadata().SetExceptionMetadata(excpetionMetadata))
-	}
 	metadataBytes, err := format.EncodeCompact(metadata)
 	if err != nil {
 		return nil, err

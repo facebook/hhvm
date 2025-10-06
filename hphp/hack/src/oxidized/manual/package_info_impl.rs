@@ -86,45 +86,50 @@ impl TryFrom<package::PackageInfo> for PackageInfo {
     fn try_from(info: package::PackageInfo) -> Result<Self, Errors> {
         let result = package_info_to_vec("PACKAGES.toml", info);
         match result {
-            Ok(packages) => Ok(PackageInfo {
-                existing_packages: packages
-                    .into_iter()
-                    .map(|package| (package.name.1.clone(), package))
-                    .collect(),
-            }),
+            Ok(packages) => {
+                let existing_packages = packages
+                    .iter()
+                    .map(|package| (package.name.1.clone(), package.clone()))
+                    .collect();
+                // Build include_path_to_package_map, sorted by anti-lexicographic include_path
+                // order so a simple linear search returns the most precise path that includes
+                // a given file.
+                let mut include_path_pairs: Vec<_> = packages
+                    .iter()
+                    .flat_map(|package| {
+                        package
+                            .include_paths
+                            .iter()
+                            .map(move |include_path| (include_path.1.clone(), package.clone()))
+                    })
+                    .collect();
+                include_path_pairs.sort_by(|(a, _), (b, _)| b.cmp(a));
+                let include_path_to_package_map = include_path_pairs.into_iter().collect();
+                Ok(PackageInfo {
+                    existing_packages,
+                    include_path_to_package_map,
+                })
+            }
             Err(err) => Err(err),
         }
     }
 }
 
 impl PackageInfo {
-    pub fn get_package_for_file(&self, support_multifile_tests: bool, path: &str) -> Option<&str> {
+    pub fn get_package_for_file(
+        &self,
+        support_multifile_tests: bool,
+        path: &str,
+    ) -> Option<&Package> {
         let path = if support_multifile_tests {
             let re = regex::Regex::new(r"[^/]*--").unwrap();
             re.replace(path, "")
         } else {
             Cow::Borrowed(path)
         };
-        let mut matching_includepath_and_package_pairs = Vec::new();
-        for package in self.existing_packages.values() {
-            if let Some(PosId(_, include_path)) = package
-                .include_paths
-                .iter()
-                .find(|PosId(_, prefix)| path.starts_with(prefix))
-            {
-                // If the package's include_path is an exact match,
-                // return the package immediately.
-                if *include_path == path {
-                    return Some(package.name.1.as_str());
-                }
-                matching_includepath_and_package_pairs.push((include_path, package));
-            }
-        }
-        // If there is no exact match, return the package with the longest prefix-matching include_path.
-        matching_includepath_and_package_pairs
-            .sort_by(|(include_path1, _), (include_path2, _)| include_path2.cmp(include_path1));
-        matching_includepath_and_package_pairs
-            .first()
-            .map(|(_, package)| package.name.1.as_str())
+        self.include_path_to_package_map
+            .iter()
+            .find(|(include_path, _)| path.starts_with(include_path))
+            .map(|(_, package)| package)
     }
 }

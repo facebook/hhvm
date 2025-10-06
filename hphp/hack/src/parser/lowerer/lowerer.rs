@@ -5913,7 +5913,7 @@ fn get_current_package<'a>(env: &mut Env<'a>, node: S<'a>) -> Option<PackageMemb
     let package = parser_options
         .package_info
         .get_package_for_file(parser_options.package_support_multifile_tests, filepath)
-        .map(|p| PackageMembership::PackageConfigAssignment(String::from(p)));
+        .map(|p| PackageMembership::PackageConfigAssignment(p.name.1.clone()));
     env.package = package.clone();
     package
 }

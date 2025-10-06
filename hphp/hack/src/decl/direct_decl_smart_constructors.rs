@@ -150,9 +150,9 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             .package_info
             .get_package_for_file(opts.package_support_multifile_tests, path)
         {
-            Some(package_name) => {
+            Some(package) => {
                 let package: nast::PackageMembership =
-                    nast::PackageMembership::PackageConfigAssignment(String::from(package_name));
+                    nast::PackageMembership::PackageConfigAssignment(package.name.1.clone());
                 Some(package)
             }
             None => None,

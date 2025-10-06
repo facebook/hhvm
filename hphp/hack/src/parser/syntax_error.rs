@@ -276,7 +276,7 @@ pub const error2030: Error = Cow::Borrowed("Only traits may use `require impleme
 pub const error2032: Error = Cow::Borrowed("The array type is not allowed in `strict` mode.");
 pub const error2033: Error = Cow::Borrowed(concat!(
     "The splat operator `...` for unpacking variadic arguments ",
-    "may only appear at the **end** of an argument list."
+    "may not appear before other positional arguments."
 ));
 pub const error2034: Error = Cow::Borrowed(concat!(
     "A type alias declaration cannot both use `type` and have a ",
@@ -632,6 +632,10 @@ pub const error2083: Error = Cow::Borrowed(concat!(
     "A splat parameter `...` cannot have a modifier ",
     "that changes the calling convention, like `inout`.",
 ));
+
+pub const error2084: Error = Cow::Borrowed(
+    "Too many splat operators `...`. An argument list can have at most one splat operator.",
+);
 
 pub const splat_readonly_param: Error = Cow::Borrowed("Splat parameters cannot be marked readonly");
 

@@ -507,9 +507,21 @@ fn misplaced_variadic_param<'a>(param: S<'a>) -> Option<S<'a>> {
 fn misplaced_splat_param<'a>(param: S<'a>) -> Option<S<'a>> {
     assert_last_in_list(is_splat_parameter_declaration, param)
 }
-fn misplaced_splat_arg<'a>(args: S<'a>) -> Option<S<'a>> {
-    assert_last_in_list(is_splat_expression, args)
+
+fn is_named_argument(node: S<'_>) -> bool {
+    match &node.children {
+        NamedArgument(_) => true,
+        _ => false,
+    }
 }
+
+fn misplaced_splat_arg<'a>(args: S<'a>) -> Option<S<'a>> {
+    syntax_to_list_no_separators(args)
+        .skip_while(|x| !is_splat_expression(x))
+        .skip(1)
+        .find(|x| !is_named_argument(x) && !is_splat_expression(x))
+}
+
 // If a list ends with a variadic parameter followed by a comma, return it
 fn ends_with_variadic_comma<'a>(params: S<'a>) -> Option<S<'a>> {
     let mut iter = syntax_to_list_with_separators(params).rev();

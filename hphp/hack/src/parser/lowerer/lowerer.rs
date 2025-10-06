@@ -1720,29 +1720,32 @@ fn p_expr_recurse<'a>(
     }
 }
 
-fn split_args_vararg<'a>(
+fn split_args_unpacked_arg<'a>(
     arg_list_node: S<'a>,
     e: &mut Env<'a>,
 ) -> Result<(Vec<ast::Argument>, Option<ast::Expr>)> {
-    let mut arg_list: Vec<_> = arg_list_node.syntax_node_to_list_skip_separator().collect();
-    if let Some(last_arg) = arg_list.last() {
-        if let DecoratedExpression(c) = &last_arg.children {
-            if token_kind(&c.decorator) == Some(TK::DotDotDot) {
-                let _ = arg_list.pop();
-                let args: Result<Vec<_>, _> = arg_list
-                    .iter()
-                    .map(|a| p_expr_for_function_call_arguments(a, e))
-                    .collect();
-                let args = args?;
-                let vararg = p_expr(&c.expression, e)?;
-                return Ok((args, Some(vararg)));
+    let mut iter = arg_list_node.syntax_node_to_list_skip_separator();
+    let (cap, _) = iter.size_hint();
+    iter.try_fold(
+        (Vec::with_capacity(cap), None),
+        |(mut args, unpacked_arg), arg| {
+            if let DecoratedExpression(c) = &arg.children
+                && token_kind(&c.decorator) == Some(TK::DotDotDot)
+            {
+                if unpacked_arg.is_some() {
+                    raise_parsing_error(arg, e, &syntax_error::error2084);
+                    Ok((args, unpacked_arg))
+                } else {
+                    let parsed_splat = p_expr(&c.expression, e)?;
+                    Ok((args, Some(parsed_splat)))
+                }
+            } else {
+                let parsed_arg = p_expr_for_function_call_arguments(arg, e)?;
+                args.push(parsed_arg);
+                Ok((args, unpacked_arg))
             }
-        }
-    }
-    Ok((
-        could_map(arg_list_node, e, p_expr_for_function_call_arguments)?,
-        None,
-    ))
+        },
+    )
 }
 
 fn p_expr_impl<'a>(
@@ -2057,13 +2060,13 @@ fn p_function_call_expr<'a>(
     // Mark expression as CallReceiver so that we can correctly set
     // PropOrMethod field in ObjGet and ClassGet
     let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, env, None)?;
-    let (args, varargs) = split_args_vararg(args, env)?;
+    let (args, unpacked_arg) = split_args_unpacked_arg(args, env)?;
 
     Ok(Expr_::mk_call(ast::CallExpr {
         func: recv,
         targs,
         args,
-        unpacked_arg: varargs,
+        unpacked_arg,
     }))
 }
 
@@ -2532,7 +2535,7 @@ fn p_constructor_call<'a>(
     env: &mut Env<'a>,
     pos: Pos,
 ) -> Result<Expr_> {
-    let (args, varargs) = split_args_vararg(&c.argument_list, env)?;
+    let (args, unpacked_arg) = split_args_unpacked_arg(&c.argument_list, env)?;
     let (e, hl) = match &c.type_.children {
         GenericTypeSpecifier(c) => {
             let name = pos_name(&c.class_type, env)?;
@@ -2556,7 +2559,7 @@ fn p_constructor_call<'a>(
         ast::ClassId((), pos, ast::ClassId_::CIexpr(e)),
         hl,
         args,
-        varargs,
+        unpacked_arg,
         (),
     ))
 }
@@ -2838,12 +2841,12 @@ fn p_special_call<'a>(recv: S<'a>, args: S<'a>, e: &mut Env<'a>) -> Result<Expr_
     // Mark expression as CallReceiver so that we can correctly set
     // PropOrMethod field in ObjGet and ClassGet
     let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, e, None)?;
-    let (args, varargs) = split_args_vararg(args, e)?;
+    let (args, unpacked_arg) = split_args_unpacked_arg(args, e)?;
     Ok(Expr_::mk_call(ast::CallExpr {
         func: recv,
         targs: vec![],
         args,
-        unpacked_arg: varargs,
+        unpacked_arg,
     }))
 }
 

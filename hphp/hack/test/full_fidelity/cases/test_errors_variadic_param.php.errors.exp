@@ -3,5 +3,5 @@
 (4,1)-(4,29) Cannot redeclare `f()` (previously declared in test_errors_variadic_param.php:3)
 (5,1)-(5,33) Cannot redeclare `f()` (previously declared in test_errors_variadic_param.php:4)
 (5,17)-(5,22) A variadic parameter `...` may only appear at the end of a parameter list.
-(8,4)-(8,9) The splat operator `...` for unpacking variadic arguments may only appear at the **end** of an argument list.
-(9,8)-(9,13) The splat operator `...` for unpacking variadic arguments may only appear at the **end** of an argument list.
+(8,11)-(8,13) The splat operator `...` for unpacking variadic arguments may not appear before other positional arguments.
+(9,15)-(9,17) The splat operator `...` for unpacking variadic arguments may not appear before other positional arguments.

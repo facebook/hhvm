@@ -1,4 +1,0 @@
-ERROR: File "named_params_todo.php", line 12, characters 13-23:
-Encountered unexpected text `...$numbers`, was expecting a unary operator. (Parsing[1002])
-ERROR: File "named_params_todo.php", line 12, characters 13-23:
-The splat operator `...` for unpacking variadic arguments may only appear at the **end** of an argument list. (Parsing[1002])

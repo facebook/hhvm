@@ -1,4 +1,0 @@
-ERROR: File "named_arguments.php", line 9, characters 7-11:
-Encountered unexpected text `...$x`, was expecting a unary operator. (Parsing[1002])
-ERROR: File "named_arguments.php", line 9, characters 7-11:
-The splat operator `...` for unpacking variadic arguments may only appear at the **end** of an argument list. (Parsing[1002])

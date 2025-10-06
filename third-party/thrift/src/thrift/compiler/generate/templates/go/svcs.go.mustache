@@ -27,6 +27,7 @@ import (
     "fmt"
     "io"
     "reflect"
+    "sync"
 
     {{#program:thrift_imports}}
     {{program:go_package_alias}} "{{program:go_import_path}}"
@@ -46,6 +47,7 @@ var _ = errors.New
 var _ = fmt.Printf
 var _ = io.EOF
 var _ = reflect.Ptr
+var _ = sync.OnceFunc
 var _ = thrift.VOID
 {{#program:gen_metadata?}}
 {{#program:import_metadata_package?}}

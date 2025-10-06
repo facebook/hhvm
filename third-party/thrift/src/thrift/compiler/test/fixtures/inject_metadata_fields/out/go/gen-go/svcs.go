@@ -11,6 +11,7 @@ import (
     "fmt"
     "io"
     "reflect"
+    "sync"
 
     foo "foo"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -24,6 +25,7 @@ var _ = errors.New
 var _ = fmt.Printf
 var _ = io.EOF
 var _ = reflect.Ptr
+var _ = sync.OnceFunc
 var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
 

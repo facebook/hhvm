@@ -11,6 +11,7 @@ import (
     "fmt"
     "io"
     "reflect"
+    "sync"
 
     module0 "module0"
     module2 "module2"
@@ -26,6 +27,7 @@ var _ = errors.New
 var _ = fmt.Printf
 var _ = io.EOF
 var _ = reflect.Ptr
+var _ = sync.OnceFunc
 var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
 

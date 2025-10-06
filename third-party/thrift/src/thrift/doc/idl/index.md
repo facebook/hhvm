@@ -300,11 +300,12 @@ Package name conflicts can be difficult to resolve, so choose these names carefu
 The lexical structure of a package name is defined below.
 
 ```grammar
-package_name  ::=  '"' domain_path '"' | "'" domain_path "'"
-domain_path   ::=  domain "/" path
-domain        ::=  domain_prefix "." identifier
-domain_prefix ::=  identifier ("." identifier)*
-path          ::=  identifier ("/" identifier)*
+package_name   ::=  '"' domain_path '"' | "'" domain_path "'"
+domain_path    ::=  domain "/" path
+domain         ::=  domain_segment ("." domain_segment)+
+domain_segment ::=  ("a"..."z" | "0"..."9")+
+path           ::=  path_segment ("/" path_segment)*
+path_segment   ::=  ("a"..."z" | "0"..."9" | "_")+
 ```
 
 Let `namespace_path` denote `path` where every `/` is replaced with `.` and `reverse(d)` denote the domain `d` with components in reverse order. Then the default namespaces are derived from the package name in the following way.

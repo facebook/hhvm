@@ -2,6 +2,7 @@
 
 import json
 import os
+import sys
 
 from typing import List, Optional, Tuple
 
@@ -56,6 +57,9 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
 
         expected_tests_dict = dict(expected_test_files)
 
+        print(
+            self.test_driver.get_all_logs(self.test_driver.repo_dir).current_server_log
+        )
         self.assertSetEqual(
             set(actual_tests_dict.keys()), set(expected_tests_dict.keys())
         )
@@ -80,12 +84,12 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
         )
 
     def test_filter_non_test_files(self) -> None:
-        """Tests that we don't return files from non __tests__ folders
+        """Tests that we don't return files from non __tests__ folders and only files that include a class extending a test base class (e.g., WWWTest)
 
         Uses files from the a/ subdirectory (all of which have prefix A_)
         """
 
-        # Crucially, this does not include A_NotATest.php
+        # Crucially, this does not include A_NotATest.php or A_AlsoNotATest.php
         self.check_has_tests(
             symbols=["A_Sub::target"], expected_test_files=["A_SubTest.php"]
         )

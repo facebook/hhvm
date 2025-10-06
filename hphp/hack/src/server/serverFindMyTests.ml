@@ -14,10 +14,52 @@ type member = Method of string
 let findrefs_member_of_member = function
   | Method m -> SearchTypes.Find_refs.Method m
 
-let is_test_file path =
-  Option.is_some (String.substr_index path ~pattern:"/__tests__/")
+let supported_test_framework_classes = SSet.of_list ["WWWTest"]
 
 let strip_ns results = List.map results ~f:(fun (s, p) -> (Utils.strip_ns s, p))
+
+let is_test_file ctx file_path file_nast =
+  let is_test_class class_name =
+    match Decl_provider.get_class ctx class_name with
+    | Decl_entry.DoesNotExist ->
+      failwith
+        (Printf.sprintf
+           "Internal error: Could not find class %s, even though we encountered it during traversal"
+           class_name)
+    | NotYetAvailable ->
+      failwith
+        (Printf.sprintf
+           "Internal error: Class %s, marked as not yet available"
+           class_name)
+    | Found class_ ->
+      let ancestors = Folded_class.all_ancestor_names class_ in
+      List.exists ancestors ~f:(fun ancestor ->
+          SSet.mem (Utils.strip_ns ancestor) supported_test_framework_classes)
+  in
+
+  match String.substr_index file_path ~pattern:"/__tests__/" with
+  | None -> false
+  | Some _ ->
+    let classes_in_file =
+      let visitor =
+        object
+          inherit [_] Aast.reduce
+
+          method! on_class_ _ctx class_ =
+            SSet.singleton (Ast_defs.get_id class_.c_name)
+
+          method! on_method_ _ctx _ = SSet.empty
+
+          method! on_fun_ _ctx _ = SSet.empty
+
+          method plus = SSet.union
+
+          method zero = SSet.empty
+        end
+      in
+      visitor#on_program () file_nast
+    in
+    SSet.exists is_test_class classes_in_file
 
 let search ctx target include_defs ~files genv =
   List.iter files ~f:(fun file ->
@@ -109,16 +151,8 @@ type result_entry = ServerCommandTypes.Find_my_tests.result_entry
   Ideally, FindRefsService (or an alternative to it) would give us the enclosing SymbolDefinition
   directly, but that would require piping that information through IdentifySymbolService.
 *)
-let enclosing_def_of_symbol_occurrence ctx (symbol_occurrence_pos : Pos.t) :
-    symbol_def option =
-  (* We could implement all this without NASTs, but just CSTs and their
-     Full_fidelity_positioned_syntax.parentage function.
-
-     But those never seem to be cached, whereas the NAST may still be in cache after we just
-     constructed the TAST in FindRefsService. *)
-  let path = Pos.filename symbol_occurrence_pos in
-  let nast = Ast_provider.get_ast ~full:true ctx path in
-
+let enclosing_def_of_symbol_occurrence
+    (symbol_occurrence_pos : Pos.t) symbol_occurrence_nast : symbol_def option =
   let visitor =
     object
       inherit [_] Aast.reduce as super
@@ -149,7 +183,7 @@ let enclosing_def_of_symbol_occurrence ctx (symbol_occurrence_pos : Pos.t) :
         | (Some _, _) -> r1
     end
   in
-  visitor#on_program None nast
+  visitor#on_program None symbol_occurrence_nast
 
 (**
   Find references to the given symbol.
@@ -172,13 +206,22 @@ let get_references
         env
   in
   let resolve_found_position (acc_symbol_defs, acc_files) (_, referencing_pos) =
-    let file = Pos.filename referencing_pos |> Relative_path.suffix in
-    if is_test_file file then
+    let relative_path = Pos.filename referencing_pos in
+    let path = Relative_path.suffix relative_path in
+
+    (* We could implement all of our traversals without NASTs, but just CSTs and their
+       Full_fidelity_positioned_syntax.parentage function.
+
+       But those never seem to be cached, whereas the NAST may still be in cache after we just
+       constructed the TAST in FindRefsService. *)
+    let nast = Ast_provider.get_ast ~full:true ctx relative_path in
+
+    if is_test_file ctx path nast then
       Result.Ok
         ( acc_symbol_defs,
           (Pos.to_absolute referencing_pos |> Pos.filename) :: acc_files )
     else
-      match enclosing_def_of_symbol_occurrence ctx referencing_pos with
+      match enclosing_def_of_symbol_occurrence referencing_pos nast with
       | Some referencing_def ->
         Result.Ok (referencing_def :: acc_symbol_defs, acc_files)
       | None ->

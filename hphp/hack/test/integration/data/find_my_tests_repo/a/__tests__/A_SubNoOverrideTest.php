@@ -1,6 +1,6 @@
 <?hh
 
-class A_SubNoOverrideTest {
+class A_SubNoOverrideTest extends WWWTest {
 
   public function testTarget(A_SubNoOverride $a): void {
     // We statically know that this may call A_Mid::target (directly)

@@ -343,22 +343,30 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
   | Ast_defs.Ltlt
   | Ast_defs.Gtgt
     when not contains_any ->
-    let err =
-      match bop with
-      | Ast_defs.Percent -> Typing_error.Callback.math_invalid_argument
-      | _ -> Typing_error.Callback.bitwise_math_invalid_argument
+    let (env, err_opt1, _used_dynamic1) =
+      Typing_argument.check_argument_type_against_parameter_type
+        ~ignore_readonly:false
+        ~dynamic_func:(Some Typing_argument.Supportdyn_function)
+        env
+        (Typing_make_type.int (Reason.arith p1))
+        p1
+        ty1
     in
-    let (env, _, err_opt1) =
-      check_dynamic_or_enforce_int env p1 ty1 (Reason.arith p) err
-    in
-    let (env, _, err_opt2) =
-      check_dynamic_or_enforce_int env p2 ty2 (Reason.arith p) err
+    let (env, err_opt2, _used_dynamic2) =
+      Typing_argument.check_argument_type_against_parameter_type
+        ~ignore_readonly:false
+        ~dynamic_func:(Some Typing_argument.Supportdyn_function)
+        env
+        (Typing_make_type.int (Reason.arith p2))
+        p2
+        ty2
     in
     let r =
       match bop with
       | Ast_defs.Percent -> Reason.arith_ret_int p
       | _ -> Reason.bitwise_ret p
     in
+    (* Result is int regardless of whether the arguments are int or ~int *)
     make_result env te1 err_opt1 te2 err_opt2 (MakeType.int r)
   | Ast_defs.Xor
   | Ast_defs.Amp

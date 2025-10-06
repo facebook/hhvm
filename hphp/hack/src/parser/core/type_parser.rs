@@ -6,6 +6,7 @@
 
 use parser_core_types::lexable_token::LexableToken;
 use parser_core_types::syntax_error::SyntaxError;
+use parser_core_types::syntax_error::SyntaxQuickfix;
 use parser_core_types::syntax_error::{self as Errors};
 use parser_core_types::token_kind::TokenKind;
 
@@ -631,12 +632,22 @@ where
                     Some(start_offset) => (start_offset, start_offset + token_node.full_width()),
                     None => self.error_offsets(true), // This fallback is probably unreachable
                 };
+                let quickfixes = vec![
+                    SyntaxQuickfix {
+                        title: "Add `named` keyword".into(),
+                        edits: vec![(start_offset, start_offset, "named ".into())],
+                    },
+                    SyntaxQuickfix {
+                        title: "Remove parameter name".into(),
+                        edits: vec![(start_offset - /*whitespace*/1, end_offset, "".into())],
+                    },
+                ];
                 let error = {
                     SyntaxError::make(
                         start_offset,
                         end_offset,
                         Errors::named_param_without_named_keyword,
-                        Vec::new(),
+                        quickfixes,
                     )
                 };
 

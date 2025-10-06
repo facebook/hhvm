@@ -1090,9 +1090,11 @@ struct
     | ClosureParameterTypeSpecifier of {
         closure_parameter_optional: t;
         closure_parameter_call_convention: t;
+        closure_parameter_named: t;
         closure_parameter_readonly: t;
         closure_parameter_pre_ellipsis: t;
         closure_parameter_type: t;
+        closure_parameter_name: t;
         closure_parameter_ellipsis: t;
       }
     | TupleOrUnionOrIntersectionElementTypeSpecifier of {

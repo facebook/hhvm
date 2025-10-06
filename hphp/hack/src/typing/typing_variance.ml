@@ -774,7 +774,7 @@ let fun_param : Env.t -> variance -> Nast.fun_param -> unit =
                 hfparam_readonlyness = None;
                 hfparam_optional = None;
                 hfparam_splat = param_splat;
-                hfparam_named = None (* Shouldn't affect variance analysis. *);
+                hfparam_named = None;
               }))
 
 let fun_where_constraint : Env.t -> Aast.where_constraint_hint -> unit =

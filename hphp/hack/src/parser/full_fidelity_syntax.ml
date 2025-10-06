@@ -2388,16 +2388,20 @@ module WithToken (Token : TokenType) = struct
           {
             closure_parameter_optional;
             closure_parameter_call_convention;
+            closure_parameter_named;
             closure_parameter_readonly;
             closure_parameter_pre_ellipsis;
             closure_parameter_type;
+            closure_parameter_name;
             closure_parameter_ellipsis;
           } ->
         let acc = f acc closure_parameter_optional in
         let acc = f acc closure_parameter_call_convention in
+        let acc = f acc closure_parameter_named in
         let acc = f acc closure_parameter_readonly in
         let acc = f acc closure_parameter_pre_ellipsis in
         let acc = f acc closure_parameter_type in
+        let acc = f acc closure_parameter_name in
         let acc = f acc closure_parameter_ellipsis in
         acc
       | TupleOrUnionOrIntersectionElementTypeSpecifier
@@ -4196,17 +4200,21 @@ module WithToken (Token : TokenType) = struct
           {
             closure_parameter_optional;
             closure_parameter_call_convention;
+            closure_parameter_named;
             closure_parameter_readonly;
             closure_parameter_pre_ellipsis;
             closure_parameter_type;
+            closure_parameter_name;
             closure_parameter_ellipsis;
           } ->
         [
           closure_parameter_optional;
           closure_parameter_call_convention;
+          closure_parameter_named;
           closure_parameter_readonly;
           closure_parameter_pre_ellipsis;
           closure_parameter_type;
+          closure_parameter_name;
           closure_parameter_ellipsis;
         ]
       | TupleOrUnionOrIntersectionElementTypeSpecifier
@@ -6016,17 +6024,21 @@ module WithToken (Token : TokenType) = struct
           {
             closure_parameter_optional;
             closure_parameter_call_convention;
+            closure_parameter_named;
             closure_parameter_readonly;
             closure_parameter_pre_ellipsis;
             closure_parameter_type;
+            closure_parameter_name;
             closure_parameter_ellipsis;
           } ->
         [
           "closure_parameter_optional";
           "closure_parameter_call_convention";
+          "closure_parameter_named";
           "closure_parameter_readonly";
           "closure_parameter_pre_ellipsis";
           "closure_parameter_type";
+          "closure_parameter_name";
           "closure_parameter_ellipsis";
         ]
       | TupleOrUnionOrIntersectionElementTypeSpecifier
@@ -8047,18 +8059,22 @@ module WithToken (Token : TokenType) = struct
           [
             closure_parameter_optional;
             closure_parameter_call_convention;
+            closure_parameter_named;
             closure_parameter_readonly;
             closure_parameter_pre_ellipsis;
             closure_parameter_type;
+            closure_parameter_name;
             closure_parameter_ellipsis;
           ] ) ->
         ClosureParameterTypeSpecifier
           {
             closure_parameter_optional;
             closure_parameter_call_convention;
+            closure_parameter_named;
             closure_parameter_readonly;
             closure_parameter_pre_ellipsis;
             closure_parameter_type;
+            closure_parameter_name;
             closure_parameter_ellipsis;
           }
       | ( SyntaxKind.TupleOrUnionOrIntersectionElementTypeSpecifier,
@@ -10589,18 +10605,22 @@ module WithToken (Token : TokenType) = struct
       let make_closure_parameter_type_specifier
           closure_parameter_optional
           closure_parameter_call_convention
+          closure_parameter_named
           closure_parameter_readonly
           closure_parameter_pre_ellipsis
           closure_parameter_type
+          closure_parameter_name
           closure_parameter_ellipsis =
         let syntax =
           ClosureParameterTypeSpecifier
             {
               closure_parameter_optional;
               closure_parameter_call_convention;
+              closure_parameter_named;
               closure_parameter_readonly;
               closure_parameter_pre_ellipsis;
               closure_parameter_type;
+              closure_parameter_name;
               closure_parameter_ellipsis;
             }
         in

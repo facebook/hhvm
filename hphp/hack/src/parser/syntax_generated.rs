@@ -1740,13 +1740,15 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_closure_parameter_type_specifier(_: &C, closure_parameter_optional: Self, closure_parameter_call_convention: Self, closure_parameter_readonly: Self, closure_parameter_pre_ellipsis: Self, closure_parameter_type: Self, closure_parameter_ellipsis: Self) -> Self {
+    fn make_closure_parameter_type_specifier(_: &C, closure_parameter_optional: Self, closure_parameter_call_convention: Self, closure_parameter_named: Self, closure_parameter_readonly: Self, closure_parameter_pre_ellipsis: Self, closure_parameter_type: Self, closure_parameter_name: Self, closure_parameter_ellipsis: Self) -> Self {
         let syntax = SyntaxVariant::ClosureParameterTypeSpecifier(Box::new(ClosureParameterTypeSpecifierChildren {
             closure_parameter_optional,
             closure_parameter_call_convention,
+            closure_parameter_named,
             closure_parameter_readonly,
             closure_parameter_pre_ellipsis,
             closure_parameter_type,
+            closure_parameter_name,
             closure_parameter_ellipsis,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
@@ -3316,12 +3318,14 @@ where
                 acc
             },
             SyntaxVariant::ClosureParameterTypeSpecifier(x) => {
-                let ClosureParameterTypeSpecifierChildren { closure_parameter_optional, closure_parameter_call_convention, closure_parameter_readonly, closure_parameter_pre_ellipsis, closure_parameter_type, closure_parameter_ellipsis } = *x;
+                let ClosureParameterTypeSpecifierChildren { closure_parameter_optional, closure_parameter_call_convention, closure_parameter_named, closure_parameter_readonly, closure_parameter_pre_ellipsis, closure_parameter_type, closure_parameter_name, closure_parameter_ellipsis } = *x;
                 let acc = f(closure_parameter_optional, acc);
                 let acc = f(closure_parameter_call_convention, acc);
+                let acc = f(closure_parameter_named, acc);
                 let acc = f(closure_parameter_readonly, acc);
                 let acc = f(closure_parameter_pre_ellipsis, acc);
                 let acc = f(closure_parameter_type, acc);
+                let acc = f(closure_parameter_name, acc);
                 let acc = f(closure_parameter_ellipsis, acc);
                 acc
             },
@@ -4825,11 +4829,13 @@ where
                  closure_outer_left_paren: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::ClosureParameterTypeSpecifier, 6) => SyntaxVariant::ClosureParameterTypeSpecifier(Box::new(ClosureParameterTypeSpecifierChildren {
+             (SyntaxKind::ClosureParameterTypeSpecifier, 8) => SyntaxVariant::ClosureParameterTypeSpecifier(Box::new(ClosureParameterTypeSpecifierChildren {
                  closure_parameter_ellipsis: ts.pop().unwrap(),
+                 closure_parameter_name: ts.pop().unwrap(),
                  closure_parameter_type: ts.pop().unwrap(),
                  closure_parameter_pre_ellipsis: ts.pop().unwrap(),
                  closure_parameter_readonly: ts.pop().unwrap(),
+                 closure_parameter_named: ts.pop().unwrap(),
                  closure_parameter_call_convention: ts.pop().unwrap(),
                  closure_parameter_optional: ts.pop().unwrap(),
                  
@@ -5177,7 +5183,7 @@ where
             SyntaxVariant::DarrayTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.darray_keyword, 7) },
             SyntaxVariant::DictionaryTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.dictionary_type_keyword, 4) },
             SyntaxVariant::ClosureTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.closure_outer_left_paren, 12) },
-            SyntaxVariant::ClosureParameterTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.closure_parameter_optional, 6) },
+            SyntaxVariant::ClosureParameterTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.closure_parameter_optional, 8) },
             SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.tuple_or_union_or_intersection_element_optional, 4) },
             SyntaxVariant::TypeRefinement(x) => unsafe { std::slice::from_raw_parts(&x.type_refinement_type, 5) },
             SyntaxVariant::TypeInRefinement(x) => unsafe { std::slice::from_raw_parts(&x.type_in_refinement_keyword, 6) },
@@ -5369,7 +5375,7 @@ where
             SyntaxVariant::DarrayTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.darray_keyword, 7) },
             SyntaxVariant::DictionaryTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.dictionary_type_keyword, 4) },
             SyntaxVariant::ClosureTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.closure_outer_left_paren, 12) },
-            SyntaxVariant::ClosureParameterTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.closure_parameter_optional, 6) },
+            SyntaxVariant::ClosureParameterTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.closure_parameter_optional, 8) },
             SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.tuple_or_union_or_intersection_element_optional, 4) },
             SyntaxVariant::TypeRefinement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_refinement_type, 5) },
             SyntaxVariant::TypeInRefinement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_in_refinement_keyword, 6) },
@@ -6810,9 +6816,11 @@ pub struct ClosureTypeSpecifierChildren<T, V> {
 pub struct ClosureParameterTypeSpecifierChildren<T, V> {
     pub closure_parameter_optional: Syntax<T, V>,
     pub closure_parameter_call_convention: Syntax<T, V>,
+    pub closure_parameter_named: Syntax<T, V>,
     pub closure_parameter_readonly: Syntax<T, V>,
     pub closure_parameter_pre_ellipsis: Syntax<T, V>,
     pub closure_parameter_type: Syntax<T, V>,
+    pub closure_parameter_name: Syntax<T, V>,
     pub closure_parameter_ellipsis: Syntax<T, V>,
 }
 
@@ -8824,13 +8832,15 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ClosureParameterTypeSpecifier(x) => {
-                get_index(6).and_then(|index| { match index {
+                get_index(8).and_then(|index| { match index {
                         0 => Some(&x.closure_parameter_optional),
                     1 => Some(&x.closure_parameter_call_convention),
-                    2 => Some(&x.closure_parameter_readonly),
-                    3 => Some(&x.closure_parameter_pre_ellipsis),
-                    4 => Some(&x.closure_parameter_type),
-                    5 => Some(&x.closure_parameter_ellipsis),
+                    2 => Some(&x.closure_parameter_named),
+                    3 => Some(&x.closure_parameter_readonly),
+                    4 => Some(&x.closure_parameter_pre_ellipsis),
+                    5 => Some(&x.closure_parameter_type),
+                    6 => Some(&x.closure_parameter_name),
+                    7 => Some(&x.closure_parameter_ellipsis),
                         _ => None,
                     }
                 })

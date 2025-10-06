@@ -1746,13 +1746,15 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_closure_parameter_type_specifier(ctx: &C, optional: Self, call_convention: Self, readonly: Self, pre_ellipsis: Self, type_: Self, ellipsis: Self) -> Self {
+    fn make_closure_parameter_type_specifier(ctx: &C, optional: Self, call_convention: Self, named: Self, readonly: Self, pre_ellipsis: Self, type_: Self, name: Self, ellipsis: Self) -> Self {
         let syntax = SyntaxVariant::ClosureParameterTypeSpecifier(ctx.get_arena().alloc(ClosureParameterTypeSpecifierChildren {
             optional,
             call_convention,
+            named,
             readonly,
             pre_ellipsis,
             type_,
+            name,
             ellipsis,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));

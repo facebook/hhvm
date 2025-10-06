@@ -635,6 +635,9 @@ pub const error2083: Error = Cow::Borrowed(concat!(
 
 pub const splat_readonly_param: Error = Cow::Borrowed("Splat parameters cannot be marked readonly");
 
+pub const named_param_without_named_keyword: Error =
+    Cow::Borrowed("Unexpected parameter name. Only `named` parameters can have names.");
+
 pub const reassign_this: Error = Cow::Borrowed("Cannot re-assign `$this`");
 
 pub fn not_allowed_in_write(what: &str) -> Error {

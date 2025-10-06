@@ -1,0 +1,153 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes =
+      [{ fa_user_attributes = [{ ua_name = ([2:9-33], "__EnableUnstableFeatures"); ua_params = [((), [2:34-52], (String "named_parameters")); ((), [2:54-76], (String "named_parameters_use"))] }];
+         fa_namespace =
+         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+           ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+           ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+         }
+        ];
+      fd_mode = Mstrict; fd_name = ([4:10-14], "\\test");
+      fd_fun =
+      { f_span = [4:1-86]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([4:79-83], (Hprim Tvoid))));
+        f_params =
+        [{ param_annotation = ();
+           param_type_hint =
+           ((),
+            (Some ([4:15-73],
+                   (Happly (([4:15-73], "\\HH\\supportdyn"),
+                      [([4:15-73],
+                        (Hfun
+                           { hf_is_readonly = None; hf_tparams = []; 
+                             hf_param_tys = [([4:25-28], (Hprim Tint)); ([4:36-39], (Hprim Tint)); ([4:59-62], (Hprim Tint))];
+                             hf_param_info =
+                             [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None });
+                               (Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = (Some "$x") });
+                               (Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = (Some Optional); hfparam_splat = None; hfparam_named = (Some "$y") })];
+                             hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([4:68-72], (Hlike ([4:68-72], (Hprim Tvoid)))); 
+                             hf_is_readonly_return = None }))
+                        ]
+                      )))));
+           param_pos = [4:74-76]; param_name = "$f"; param_info = Param_required; 
+           param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+           param_named = None; param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([2:9-33], "__EnableUnstableFeatures"); ua_params = [((), [2:34-52], (String "named_parameters")); ((), [2:54-76], (String "named_parameters_use"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([6:10-14], "\\main");
+       fd_fun =
+       { f_span = [6:1-8:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([6:18-22], (Hprim Tvoid)))); 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([7:3-57],
+             (Expr
+                ((), [7:3-56],
+                 (Call
+                    { func = ((), [7:3-7], (Id ([7:3-7], "\\test"))); 
+                      targs = [];
+                      args =
+                      [(Anormal
+                          ((), [7:8-55],
+                           (Lfun (
+                              { f_span = [7:8-55]; f_readonly_this = None; 
+                                f_annotation = (); f_readonly_ret = None; 
+                                f_tparams = []; f_ret = ((), None);
+                                f_params =
+                                [{ param_annotation = (); param_type_hint = ((), (Some ([7:9-12], (Hprim Tint)))); 
+                                   param_pos = [7:13-15]; param_name = "$_"; 
+                                   param_info = Param_required; param_readonly = None; 
+                                   param_splat = None; param_callconv = Pnormal; 
+                                   param_named = None; param_user_attributes = []; 
+                                   param_visibility = None };
+                                  { param_annotation = (); param_type_hint = ((), (Some ([7:23-26], (Hprim Tint)))); 
+                                    param_pos = [7:27-29]; param_name = "$x"; 
+                                    param_info = Param_required; param_readonly = None; 
+                                    param_splat = None; param_callconv = Pnormal; 
+                                    param_named = (Some Param_named); 
+                                    param_user_attributes = []; param_visibility = None };
+                                  { param_annotation = (); param_type_hint = ((), (Some ([7:37-40], (Hprim Tint)))); 
+                                    param_pos = [7:41-43]; param_name = "$y"; 
+                                    param_info = (Param_optional (Some ((), [7:46-47], (Int "1")))); 
+                                    param_readonly = None; param_splat = None; 
+                                    param_callconv = Pnormal; param_named = (Some Param_named); 
+                                    param_user_attributes = []; param_visibility = None }
+                                  ];
+                                f_ctxs = None; f_unsafe_ctxs = None; 
+                                f_body = { fb_ast = [([Pos.none], Noop)] }; 
+                                f_fun_kind = FSync; f_user_attributes = []; 
+                                f_external = false; f_doc_comment = None },
+                              []))))
+                        ];
+                      unpacked_arg = None }))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([6:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([2:9-33], "__EnableUnstableFeatures"); ua_params = [((), [2:34-52], (String "named_parameters")); ((), [2:54-76], (String "named_parameters_use"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([10:10-13], "\\bad");
+       fd_fun =
+       { f_span = [10:1-76]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([10:69-73], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = ();
+            param_type_hint =
+            ((),
+             (Some ([10:14-63],
+                    (Happly (([10:14-63], "\\HH\\supportdyn"),
+                       [([10:14-63],
+                         (Hfun
+                            { hf_is_readonly = None; hf_tparams = []; 
+                              hf_param_tys = [([10:24-27], (Hprim Tint))];
+                              hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None })];
+                              hf_variadic_ty = None; hf_ctxs = None; 
+                              hf_return_ty = ([10:58-62], (Hlike ([10:58-62], (Hprim Tvoid)))); 
+                              hf_is_readonly_return = None }))
+                         ]
+                       )))));
+            param_pos = [10:64-66]; param_name = "$f"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([10:10-13], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None })
+  ]

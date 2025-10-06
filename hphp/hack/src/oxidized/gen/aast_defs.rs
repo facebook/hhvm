@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9572d522645d7c824bad7ec65cb6dfe5>>
+// @generated SignedSource<<d7d6474cc0efa639272298495cffe1ac>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -2632,7 +2632,7 @@ pub struct HfParamInfo {
     pub readonlyness: Option<ast_defs::ReadonlyKind>,
     pub optional: Option<ast_defs::OptionalKind>,
     pub splat: Option<ast_defs::SplatKind>,
-    pub named: Option<ast_defs::ParamNamed>,
+    pub named: Option<String>,
 }
 
 #[derive(

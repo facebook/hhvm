@@ -1249,7 +1249,7 @@ and hf_param_info = {
   hfparam_readonlyness: Ast_defs.readonly_kind option;
   hfparam_optional: Ast_defs.optional_kind option;
   hfparam_splat: Ast_defs.splat_kind option;
-  hfparam_named: Ast_defs.param_named option;
+  hfparam_named: string option;
 }
 [@@transform.opaque]
 

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2abf2d7b419a65fae9c5b1d22e059609>>
+// @generated SignedSource<<f75161687631c19c65504961205cd905>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -609,6 +609,7 @@ pub enum Typing {
     MissingNamedArgs = 4499,
     UnexpectedNamedArgs = 4500,
     DuplicateNamedArgs = 4501,
+    LambdaNamedParamMismatch = 4502,
 }
 impl TrivialDrop for Typing {}
 arena_deserializer::impl_deserialize_in_arena!(Typing);

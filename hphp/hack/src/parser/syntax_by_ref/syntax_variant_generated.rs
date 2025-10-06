@@ -1464,9 +1464,11 @@ pub struct ClosureTypeSpecifierChildren<'a, T, V> {
 pub struct ClosureParameterTypeSpecifierChildren<'a, T, V> {
     pub optional: Syntax<'a, T, V>,
     pub call_convention: Syntax<'a, T, V>,
+    pub named: Syntax<'a, T, V>,
     pub readonly: Syntax<'a, T, V>,
     pub pre_ellipsis: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
     pub ellipsis: Syntax<'a, T, V>,
 }
 

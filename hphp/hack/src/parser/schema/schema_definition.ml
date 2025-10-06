@@ -2235,9 +2235,11 @@ let schema : schema_node list =
         [
           ("optional", ZeroOrOne Token);
           ("call_convention", ZeroOrOne Token);
+          ("named", ZeroOrOne Token);
           ("readonly", ZeroOrOne Token);
           ("pre_ellipsis", ZeroOrOne Token);
           ("type", Aggregate Specifier);
+          ("name", ZeroOrOne Token);
           ("ellipsis", ZeroOrOne Token);
         ];
     };

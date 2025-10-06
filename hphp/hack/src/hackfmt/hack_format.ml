@@ -2372,9 +2372,11 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         {
           closure_parameter_optional = optional;
           closure_parameter_call_convention = callconv;
+          closure_parameter_named = named;
           closure_parameter_readonly = readonly;
           closure_parameter_pre_ellipsis = pre_ellipsis;
           closure_parameter_type = cp_type;
+          closure_parameter_name = cp_name;
           closure_parameter_ellipsis = ellipsis;
         } ->
       Concat
@@ -2383,10 +2385,14 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           when_present optional space;
           t env callconv;
           when_present callconv space;
+          t env named;
+          when_present named space;
           t env readonly;
           when_present readonly space;
           t env pre_ellipsis;
           t env cp_type;
+          when_present cp_name space;
+          t env cp_name;
           t env ellipsis;
         ]
     | Syntax.TupleOrUnionOrIntersectionElementTypeSpecifier

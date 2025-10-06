@@ -567,6 +567,19 @@ where
         }
     }
 
+    fn parse_named_opt(&mut self) -> S::Output {
+        match self.peek_token_kind() {
+            TokenKind::Named => {
+                let token = self.next_token();
+                self.sc_mut().make_token(token)
+            }
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
+        }
+    }
+
     // SPEC
     //
     // TODO: Add this to the specification.
@@ -603,10 +616,39 @@ where
     fn parse_closure_param_type_or_ellipsis(&mut self) -> S::Output {
         let optional = self.parse_optional_opt();
         let callconv = self.parse_call_convention_opt();
+        let named = self.parse_named_opt();
         let readonly = self.parse_readonly_opt();
+
         let ellipsis1 = self.parse_ellipsis_opt();
         let ts =
             self.parse_type_specifier_opt(/* allow_var = */ false, /* allow_attr */ true);
+
+        let param_name = if self.peek_token_kind() == TokenKind::Variable {
+            let token_node = self.next_token();
+
+            if named.is_missing() {
+                let (start_offset, end_offset) = match token_node.leading_start_offset() {
+                    Some(start_offset) => (start_offset, start_offset + token_node.full_width()),
+                    None => self.error_offsets(true), // This fallback is probably unreachable
+                };
+                let error = {
+                    SyntaxError::make(
+                        start_offset,
+                        end_offset,
+                        Errors::named_param_without_named_keyword,
+                        Vec::new(),
+                    )
+                };
+
+                self.add_error(error);
+            }
+
+            self.sc_mut().make_token(token_node)
+        } else {
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
+        };
+
         let (pre_ellipsis, ellipsis) = if ts.is_missing() {
             let pos = self.pos();
             (self.sc_mut().make_missing(pos), ellipsis1)
@@ -619,9 +661,11 @@ where
         sc_mut.make_closure_parameter_type_specifier(
             optional,
             callconv,
+            named,
             readonly,
             pre_ellipsis,
             ts,
+            param_name,
             ellipsis,
         )
     }

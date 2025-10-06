@@ -955,9 +955,11 @@ module type Syntax_S = sig
     | ClosureParameterTypeSpecifier of {
         closure_parameter_optional: t;
         closure_parameter_call_convention: t;
+        closure_parameter_named: t;
         closure_parameter_readonly: t;
         closure_parameter_pre_ellipsis: t;
         closure_parameter_type: t;
+        closure_parameter_name: t;
         closure_parameter_ellipsis: t;
       }
     | TupleOrUnionOrIntersectionElementTypeSpecifier of {
@@ -1487,7 +1489,8 @@ module type Syntax_S = sig
   val make_closure_type_specifier :
     t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
-  val make_closure_parameter_type_specifier : t -> t -> t -> t -> t -> t -> t
+  val make_closure_parameter_type_specifier :
+    t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_tuple_or_union_or_intersection_element_type_specifier :
     t -> t -> t -> t -> t

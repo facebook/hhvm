@@ -137,17 +137,12 @@ and hint_ p env = function
         hf_is_readonly_return = readonly_ret;
       } ->
     let make_param ((p, _) as x) param_info =
-      let (is_optional, readonly, named, splat, kind) =
+      let (is_optional, readonly, splat, kind, named_param_name) =
         match param_info with
         | Some p ->
           let readonly =
             match p.hfparam_readonlyness with
             | Some Ast_defs.Readonly -> true
-            | _ -> false
-          in
-          let named =
-            match p.hfparam_named with
-            | Some Ast_defs.Param_named -> true
             | _ -> false
           in
           let is_optional =
@@ -161,12 +156,16 @@ and hint_ p env = function
             | _ -> false
           in
           let param_kind = get_param_mode p.hfparam_kind in
-          (is_optional, readonly, named, splat, param_kind)
-        | None -> (false, false, false, false, FPnormal)
+          (is_optional, readonly, splat, param_kind, p.hfparam_named)
+        | None -> (false, false, false, FPnormal, None)
       in
       {
         fp_pos = Decl_env.make_decl_pos env p;
-        fp_name = None;
+        fp_name =
+          named_param_name
+          (* Here `is_some fp_name` iff the param is a named parameter (type-relevant)
+             * Note that in a later pass this field can become populated for unnamed params (not type-relevant)
+          *);
         fp_type = hint env x;
         fp_flags =
           make_fp_flags
@@ -176,7 +175,7 @@ and hint_ p env = function
             ~readonly
             ~ignore_readonly_error:false
             ~splat
-            ~named;
+            ~named:(Option.is_some named_param_name);
         fp_def_value = None;
       }
     in

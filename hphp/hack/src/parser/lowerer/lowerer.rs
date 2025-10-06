@@ -751,12 +751,17 @@ fn p_closure_parameter<'a>(
             let kind = p_param_kind(&c.call_convention, env)?;
             let readonlyness = map_optional(&c.readonly, env, p_readonly)?;
             let splat = map_optional(&c.pre_ellipsis, env, p_splat)?;
+            let named = if c.named.is_missing() {
+                None
+            } else {
+                Some(text(&c.name, env).to_string())
+            };
             let info = Some(ast::HfParamInfo {
                 kind,
                 readonlyness,
                 optional,
                 splat,
-                named: None, // todo(named_parameters)
+                named,
             });
             let hint = p_hint(&c.type_, env)?;
             Ok((hint, info))

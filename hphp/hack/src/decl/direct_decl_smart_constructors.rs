@@ -5943,10 +5943,13 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             if fp.splat {
                 flags |= FunParamFlags::SPLAT;
             }
+            if fp.named {
+                flags |= FunParamFlags::NAMED;
+            }
 
             FunParam {
                 pos,
-                name: None,
+                name: fp.name.clone(),
                 type_: param_type,
                 flags,
                 def_value: None, // Not supported for closures
@@ -6049,9 +6052,11 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         &mut self,
         optional: Self::Output,
         inout: Self::Output,
+        named: Self::Output,
         readonly: Self::Output,
         pre_ellipsis: Self::Output,
         hint: Self::Output,
+        param_name: Self::Output,
         ellipsis: Self::Output,
     ) -> Self::Output {
         let kind = if inout.is_token(TokenKind::Inout) {
@@ -6067,10 +6072,12 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             hint,
             optional: optional.is_token(TokenKind::Optional),
             readonly: readonly.is_token(TokenKind::Readonly),
-            // TODO(named_parameters): Support named parameters in closure type signatures
-            named: false,
+            named: named.is_token(TokenKind::Named),
             pos,
-            name: Some("".into()),
+            name: match &param_name {
+                Node::Variable(name_str, _) => Some(name_str.clone()),
+                _ => None,
+            },
             variadic: ellipsis.is_token(TokenKind::DotDotDot),
             splat: pre_ellipsis.is_token(TokenKind::DotDotDot),
             initializer: Node::Ignored(SK::Missing),

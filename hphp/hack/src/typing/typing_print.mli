@@ -17,7 +17,8 @@ val error : ?ignore_dynamic:bool -> env -> Typing_defs.locl_ty -> string
 
 val full : hide_internals:bool -> env -> Typing_defs.locl_ty -> string
 
-val full_i : hide_internals:bool -> env -> Typing_defs.internal_type -> string
+val full_i :
+  hide_internals:bool -> env -> Typing_defs_constraints.internal_type -> string
 
 val full_rec :
   hide_internals:bool -> env -> Tvid.t -> Typing_defs.locl_ty -> string
@@ -25,7 +26,7 @@ val full_rec :
 val full_strip_ns : hide_internals:bool -> env -> Typing_defs.locl_ty -> string
 
 val full_strip_ns_i :
-  hide_internals:bool -> env -> Typing_defs.internal_type -> string
+  hide_internals:bool -> env -> Typing_defs_constraints.internal_type -> string
 
 (** Print a decl type, stripping backslash namespaces.
 
@@ -68,7 +69,7 @@ val debug : env -> Typing_defs.locl_ty -> string
 val debug_decl : env -> Typing_defs.decl_ty -> string
 
 (** Print an internal type to a string, stripping namespaces, including exact annotations and type variable numbering *)
-val debug_i : env -> Typing_defs.internal_type -> string
+val debug_i : env -> Typing_defs_constraints.internal_type -> string
 
 val constraints_for_type :
   hide_internals:bool -> env -> Typing_defs.locl_ty -> string

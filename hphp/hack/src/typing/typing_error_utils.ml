@@ -5502,7 +5502,7 @@ end = struct
         | Either.Second (Custom_error_eval.Value.Ty ty) ->
           (Markdown_lite.md_codify
           @@ Typing_print.full_strip_ns_i ~hide_internals:true env
-          @@ Typing_defs_core.LoclType ty)
+          @@ Typing_defs_constraints.LoclType ty)
           ^ acc)
       ~init:""
 
@@ -5674,11 +5674,13 @@ end = struct
       describe_ty_default
     else
       fun env -> function
-       | Typing_defs_core.LoclType ty -> Lazy.force @@ describe_coeffect env ty
+       | Typing_defs_constraints.LoclType ty ->
+         Lazy.force @@ describe_coeffect env ty
        | ty -> describe_ty_default env ty
 
   let rec describe_ty_super ~is_coeffect env ty =
     let open Typing_defs_core in
+    let open Typing_defs_constraints in
     let describe_ty_super = describe_ty_super ~is_coeffect in
     let print = (describe_ty ~is_coeffect) env in
     let default () = print ty in
@@ -5692,13 +5694,14 @@ end = struct
         in
         (* The constraint graph is transitively closed so we can filter tyvars. *)
         let upper_bounds =
-          List.filter upper_bounds ~f:(fun t -> not (Typing_defs.is_tyvar_i t))
+          List.filter upper_bounds ~f:(fun t ->
+              not (Typing_defs_constraints.is_tyvar_i t))
         in
         (match upper_bounds with
         | [] -> "some type not known yet"
         | tyl ->
           let (locl_tyl, cstr_tyl) =
-            List.partition_tf tyl ~f:Typing_defs.is_locl_type
+            List.partition_tf tyl ~f:Typing_defs_constraints.is_locl_type
           in
           let sep =
             match (locl_tyl, cstr_tyl) with
@@ -5782,9 +5785,9 @@ end = struct
     let ty_descr = describe_ty ~is_coeffect env ety in
     let ty_constraints =
       match ety with
-      | Typing_defs.LoclType ty ->
+      | Typing_defs_constraints.LoclType ty ->
         Typing_print.constraints_for_type ~hide_internals:true env ty
-      | Typing_defs.ConstraintType _ -> ""
+      | Typing_defs_constraints.ConstraintType _ -> ""
     in
 
     let ( = ) = String.equal in
@@ -5800,8 +5803,10 @@ end = struct
     Markdown_lite.md_codify (ty_descr ^ ty_constraints)
 
   let explain_subtype_failure is_coeffect ~ty_sub ~ty_sup env =
-    let r_super = Typing_reason.reverse_flow @@ Typing_defs.reason ty_sup in
-    let r_sub = Typing_defs.reason ty_sub in
+    let r_super =
+      Typing_reason.reverse_flow @@ Typing_defs_constraints.reason ty_sup
+    in
+    let r_sub = Typing_defs_constraints.reason ty_sub in
     let reasons =
       lazy
         (let ty_super_descr = describe_ty_super ~is_coeffect env ty_sup in
@@ -7209,7 +7214,7 @@ let rec get_arg_idx_secondary (second : Typing_error.Secondary.t) =
   | Subtyping_error { ty_sub; _ }
   | Violated_constraint { ty_sub; _ } ->
     Typing_reason.get_top_fun_param_prj_idx
-      (Typing_defs_core.get_reason_i ty_sub)
+      (Typing_defs_constraints.get_reason_i ty_sub)
   | Of_error err -> get_arg_idx err
   | _ -> None
 

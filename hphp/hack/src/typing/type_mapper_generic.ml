@@ -15,6 +15,7 @@ open Hh_prelude
 
 open Common
 open Typing_defs_core
+open Typing_defs_constraints
 module Reason = Typing_reason
 
 let fresh_env env = env

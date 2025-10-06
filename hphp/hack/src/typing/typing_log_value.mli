@@ -15,7 +15,7 @@ type value =
   | List of value list
   | Set of SSet.t
   | Map of value SMap.t
-  | Type of Typing_defs.internal_type
+  | Type of Typing_defs_constraints.internal_type
   | SubtypeProp of Typing_logic.subtype_prop
 [@@deriving eq]
 

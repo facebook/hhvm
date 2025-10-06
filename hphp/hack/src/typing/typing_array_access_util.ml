@@ -11,6 +11,7 @@ open Hh_prelude
 open Common
 open Aast
 open Typing_defs
+open Typing_defs_constraints
 module Env = Typing_env
 module MakeType = Typing_make_type
 module SN = Naming_special_names

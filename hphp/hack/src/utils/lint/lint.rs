@@ -81,5 +81,5 @@ pub struct LintsCore<Pos> {
     /// flag bypasses that behavior
     pub bypass_changed_lines: bool,
     pub autofix: Option<(String, pos::Pos)>,
-    pub check_status: Option<tast::CheckStatus>,
+    pub check_status: Option<aast_defs::CheckStatus>,
 }

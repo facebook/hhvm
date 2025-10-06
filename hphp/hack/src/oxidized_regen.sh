@@ -168,12 +168,9 @@ run_hh_oxidize \
   hphp/hack/src/typing/service/tast_hashes.ml                                 \
   hphp/hack/src/typing/service/type_counter.ml                                \
   hphp/hack/src/typing/service/map_reduce_ffi.ml                               \
-  hphp/hack/src/typing/tast.ml                                                \
-  hphp/hack/src/typing/tast_with_dynamic.ml                                   \
   hphp/hack/src/typing/type_parameter_env.ml                                  \
   hphp/hack/src/typing/typing_defs_core.ml                                    \
   hphp/hack/src/typing/typing_defs.ml                                         \
-  hphp/hack/src/typing/typing_inference_env.ml                                \
   hphp/hack/src/typing/typing_kinding_defs.ml                                 \
   hphp/hack/src/typing/typing_reason.ml                                       \
   hphp/hack/src/typing/typing_tyvar_occurrences.ml                            \

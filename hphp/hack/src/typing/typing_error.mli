@@ -1466,8 +1466,8 @@ and Secondary : sig
     (* == Secondary only ====================================================== *)
     | Violated_constraint of {
         cstrs: (Pos_or_decl.t * Pos_or_decl.t Message.t) list;
-        ty_sub: Typing_defs_core.internal_type;
-        ty_sup: Typing_defs_core.internal_type;
+        ty_sub: Typing_defs_constraints.internal_type;
+        ty_sup: Typing_defs_constraints.internal_type;
         is_coeffect: bool;
       }
     | Concrete_const_interface_override of {
@@ -1680,8 +1680,8 @@ and Secondary : sig
         dynamic_part: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Subtyping_error of {
-        ty_sub: Typing_defs_core.internal_type;
-        ty_sup: Typing_defs_core.internal_type;
+        ty_sub: Typing_defs_constraints.internal_type;
+        ty_sup: Typing_defs_constraints.internal_type;
         is_coeffect: bool;
       }
     | Method_not_dynamically_callable of {

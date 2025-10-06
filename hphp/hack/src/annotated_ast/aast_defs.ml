@@ -1467,3 +1467,20 @@ let tparam_of_hint_tparam { htp_name; htp_user_attributes; htp_constraints } =
     tp_user_attributes =
       List.map (fun ua_name -> { ua_name; ua_params = [] }) htp_user_attributes;
   }
+
+(* The below definition is placed here so that oxidized picks it up. *)
+
+(** When an error arose. *)
+type check_status =
+  | COnce
+      (** The definition is checked only once. *)
+  | CUnderNormalAssumptions
+      (** The definition is checked twice and this is the check under normal
+          assumptions that is using the parameter and return types that are
+          written in the source code (but potentially implicitly pessimised).
+          *)
+  | CUnderDynamicAssumptions
+      (** The definition is checked twice and this is the check under dynamic
+          assumptions that is using the dynamic type for parameters and return.
+          *)
+[@@deriving hash, show]

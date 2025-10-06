@@ -7,6 +7,7 @@
  *)
 
 open Typing_defs
+open Typing_defs_constraints
 
 exception InconsistentTypeVarState of string
 

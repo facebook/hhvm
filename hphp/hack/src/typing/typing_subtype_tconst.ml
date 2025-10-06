@@ -1,5 +1,6 @@
 open Hh_prelude
 open Typing_defs
+open Typing_defs_constraints
 module Env = Typing_env
 module ITySet = Internal_type_set
 module Utils = Typing_utils

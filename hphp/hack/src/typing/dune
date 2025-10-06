@@ -38,6 +38,7 @@
     expression_id
     tanySentinel
     tvid
+    typing_defs_constraints
     typing_defs_core
     typing_defs_flags
     typing_reason

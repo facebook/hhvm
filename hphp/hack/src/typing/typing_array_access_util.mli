@@ -9,7 +9,7 @@
 open Typing_defs
 
 val widen_for_array_get_ci :
-  can_index ->
+  Typing_defs_constraints.can_index ->
   Typing_env_types.env ->
   locl_ty ->
   Typing_env_types.env * locl_ty option

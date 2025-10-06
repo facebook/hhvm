@@ -187,9 +187,10 @@ class type ['a] internal_type_visitor_type =
   object
     inherit ['a] locl_type_visitor_type
 
-    method on_internal_type : 'a -> Typing_defs.internal_type -> 'a
+    method on_internal_type : 'a -> Typing_defs_constraints.internal_type -> 'a
 
-    method on_constraint_type : 'a -> Typing_defs.constraint_type -> 'a
+    method on_constraint_type :
+      'a -> Typing_defs_constraints.constraint_type -> 'a
 
     method on_locl_type : 'a -> Typing_defs.locl_ty -> 'a
 
@@ -198,50 +199,53 @@ class type ['a] internal_type_visitor_type =
     method on_locl_type_option : 'a -> Typing_defs.locl_ty option -> 'a
 
     method on_thas_member :
-      'a -> Typing_reason.t -> Typing_defs.has_member -> 'a
+      'a -> Typing_reason.t -> Typing_defs_constraints.has_member -> 'a
 
-    method on_has_member : 'a -> Typing_reason.t -> Typing_defs.has_member -> 'a
+    method on_has_member :
+      'a -> Typing_reason.t -> Typing_defs_constraints.has_member -> 'a
 
     method on_thas_type_member :
-      'a -> Typing_reason.t -> Typing_defs.has_type_member -> 'a
+      'a -> Typing_reason.t -> Typing_defs_constraints.has_type_member -> 'a
 
     method on_has_type_member :
-      'a -> Typing_reason.t -> Typing_defs.has_type_member -> 'a
+      'a -> Typing_reason.t -> Typing_defs_constraints.has_type_member -> 'a
 
-    method on_tcan_index : 'a -> Typing_reason.t -> Typing_defs.can_index -> 'a
+    method on_tcan_index :
+      'a -> Typing_reason.t -> Typing_defs_constraints.can_index -> 'a
 
     method on_tcan_index_assign :
-      'a -> Typing_reason.t -> Typing_defs.can_index_assign -> 'a
+      'a -> Typing_reason.t -> Typing_defs_constraints.can_index_assign -> 'a
 
     method on_tcan_traverse :
-      'a -> Typing_reason.t -> Typing_defs.can_traverse -> 'a
+      'a -> Typing_reason.t -> Typing_defs_constraints.can_traverse -> 'a
 
-    method on_can_index : 'a -> Typing_reason.t -> Typing_defs.can_index -> 'a
+    method on_can_index :
+      'a -> Typing_reason.t -> Typing_defs_constraints.can_index -> 'a
 
     method on_can_index_assign :
-      'a -> Typing_reason.t -> Typing_defs.can_index_assign -> 'a
+      'a -> Typing_reason.t -> Typing_defs_constraints.can_index_assign -> 'a
 
     method on_can_traverse :
-      'a -> Typing_reason.t -> Typing_defs.can_traverse -> 'a
+      'a -> Typing_reason.t -> Typing_defs_constraints.can_traverse -> 'a
 
     method on_tdestructure :
-      'a -> Typing_reason.t -> Typing_defs.destructure -> 'a
+      'a -> Typing_reason.t -> Typing_defs_constraints.destructure -> 'a
 
     method on_destructure :
-      'a -> Typing_reason.t -> Typing_defs.destructure -> 'a
+      'a -> Typing_reason.t -> Typing_defs_constraints.destructure -> 'a
 
     method on_tcunion :
       'a ->
       Typing_reason.t ->
       Typing_defs.locl_ty ->
-      Typing_defs.constraint_type ->
+      Typing_defs_constraints.constraint_type ->
       'a
 
     method on_tcintersection :
       'a ->
       Typing_reason.t ->
       Typing_defs.locl_ty ->
-      Typing_defs.constraint_type ->
+      Typing_defs_constraints.constraint_type ->
       'a
 
     method on_ttype_switch :

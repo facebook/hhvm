@@ -8,6 +8,7 @@
 
 open Hh_prelude
 open Typing_defs
+open Typing_defs_constraints
 open Typing_env_types
 module Env = Typing_env
 module ITySet = Internal_type_set

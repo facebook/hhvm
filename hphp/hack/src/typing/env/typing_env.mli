@@ -9,6 +9,7 @@
 open Typing_env_types
 open Decl_provider
 open Typing_defs
+open Typing_defs_constraints
 module Cls = Folded_class
 module TPEnv = Type_parameter_env
 
@@ -588,7 +589,11 @@ val save : TPEnv.t -> env -> Tast.saved_env
 val add_subtype_prop : env -> Typing_logic.subtype_prop -> env
 
 val set_tyvar_variance_i :
-  env -> ?flip:bool -> ?for_all_vars:bool -> Typing_defs.internal_type -> env
+  env ->
+  ?flip:bool ->
+  ?for_all_vars:bool ->
+  Typing_defs_constraints.internal_type ->
+  env
 
 val set_tyvar_variance :
   env -> ?flip:bool -> ?for_all_vars:bool -> Typing_defs.locl_ty -> env

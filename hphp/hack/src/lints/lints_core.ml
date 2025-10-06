@@ -36,7 +36,7 @@ type 'pos t = {
        * lines they are raised on overlap with lines changed in a diff. This
        * flag bypasses that behavior *)
   autofix: (string * Pos.t) option;
-  check_status: Tast.check_status option;
+  check_status: Aast_defs.check_status option;
 }
 [@@deriving show]
 

@@ -10,6 +10,7 @@
 open Hh_prelude
 open Common
 open Typing_defs
+open Typing_defs_constraints
 open Typing_env_types
 open Typing_logic_helpers
 module Reason = Typing_reason
@@ -96,12 +97,12 @@ module VisitedGoalsInternal = VisitedGoalsFunctor (Internal_type_set)
 
 module Pretty : sig
   val describe_ty_default :
-    Typing_env_types.env -> Typing_defs.internal_type -> string
+    Typing_env_types.env -> Typing_defs_constraints.internal_type -> string
 
   val describe_ty_super :
     is_coeffect:bool ->
     Typing_env_types.env ->
-    Typing_defs.internal_type ->
+    Typing_defs_constraints.internal_type ->
     string
 end = struct
   let describe_ty_default env ty =
@@ -399,8 +400,8 @@ module Logging : sig
     this_ty:Typing_defs.locl_ty option ->
     function_name:string ->
     Typing_env_types.env ->
-    Typing_defs.internal_type ->
-    Typing_defs.internal_type ->
+    Typing_defs_constraints.internal_type ->
+    Typing_defs_constraints.internal_type ->
     (unit -> 'a) ->
     'a
 
@@ -423,8 +424,8 @@ module Logging : sig
   val should_log_subtype_i :
     Typing_env_types.env ->
     level:Core__Int.t ->
-    Typing_defs.internal_type ->
-    Typing_defs.internal_type ->
+    Typing_defs_constraints.internal_type ->
+    Typing_defs_constraints.internal_type ->
     bool
 end = struct
   (* Given a pair of types `ty_sub` and `ty_super` attempt to apply simplifications
@@ -8581,8 +8582,8 @@ and Common : sig
     subtype_env:Subtype_env.t ->
     this_ty:Typing_defs.locl_ty option ->
     sub_supportdyn:Reason.t option ->
-    Typing_defs.internal_type ->
-    Typing_defs.internal_type ->
+    Typing_defs_constraints.internal_type ->
+    Typing_defs_constraints.internal_type ->
     Typing_env_types.env ->
     Typing_env_types.env * TL.subtype_prop
 end = struct
@@ -9169,21 +9170,21 @@ and Subtype_ask : sig
     is_dynamic_aware:bool ->
     sub_supportdyn:Reason.t option ->
     Typing_env_types.env ->
-    Typing_defs.internal_type ->
-    Typing_defs.internal_type ->
+    Typing_defs_constraints.internal_type ->
+    Typing_defs_constraints.internal_type ->
     bool option
 
   val is_sub_type_for_union_i :
     Typing_env_types.env ->
     ?is_dynamic_aware:bool ->
-    Typing_defs.internal_type ->
-    Typing_defs.internal_type ->
+    Typing_defs_constraints.internal_type ->
+    Typing_defs_constraints.internal_type ->
     bool
 
   val is_sub_type_ignore_generic_params_i :
     Typing_env_types.env ->
-    Typing_defs.internal_type ->
-    Typing_defs.internal_type ->
+    Typing_defs_constraints.internal_type ->
+    Typing_defs_constraints.internal_type ->
     bool
 end = struct
   let is_sub_type_alt_i
@@ -9267,9 +9268,9 @@ and Subtype_simplify : sig
   val try_intersect_i :
     ?ignore_tyvars:bool ->
     Typing_env_types.env ->
-    Typing_defs.internal_type ->
-    Typing_defs.internal_type list ->
-    Typing_defs.internal_type list
+    Typing_defs_constraints.internal_type ->
+    Typing_defs_constraints.internal_type list ->
+    Typing_defs_constraints.internal_type list
 
   val try_intersect :
     ?ignore_tyvars:bool ->
@@ -9294,9 +9295,9 @@ and Subtype_simplify : sig
    *)
   val try_union_i :
     Typing_env_types.env ->
-    Typing_defs.internal_type ->
-    Typing_defs.internal_type list ->
-    Typing_defs.internal_type list
+    Typing_defs_constraints.internal_type ->
+    Typing_defs_constraints.internal_type list ->
+    Typing_defs_constraints.internal_type list
 
   val try_union :
     Typing_env_types.env ->
@@ -9394,8 +9395,8 @@ and Subtype_trans : sig
     unsatisfiable. If any unsatisfiable disjunct remains, return it.
    *)
   val prop_to_env :
-    Typing_defs.internal_type ->
-    Typing_defs.internal_type ->
+    Typing_defs_constraints.internal_type ->
+    Typing_defs_constraints.internal_type ->
     Typing_env_types.env ->
     TL.subtype_prop ->
     Typing_error.Reasons_callback.t option ->

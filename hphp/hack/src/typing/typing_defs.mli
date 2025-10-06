@@ -242,17 +242,9 @@ val add_type_expansion_check_cycles :
 (** Returns whether there was an attempt at expanding a cyclic type. *)
 val cyclic_expansion : expand_env -> bool
 
-val get_var : locl_phase ty -> Tvid.t option
-
 val get_class_type : locl_phase ty -> (pos_id * exact * locl_ty list) option
 
-val get_var_i : internal_type -> Tvid.t option
-
 val is_tyvar : locl_phase ty -> bool
-
-val is_tyvar_i : internal_type -> bool
-
-val is_var_v : locl_phase ty -> Tvid.t -> bool
 
 val is_generic : 'a ty -> bool
 
@@ -276,18 +268,10 @@ val is_union : 'a ty -> bool
 
 val is_neg : locl_ty -> bool
 
-val is_has_member : constraint_type -> bool
-
 (** Can the type be written down in a Hack program?
   - [false] result is sound but potentially incomplete;
   - [true] result is complete but potentially unsound.  *)
 val is_denotable : locl_ty -> bool
-
-val is_locl_type : internal_type -> bool
-
-val reason : internal_type -> locl_phase Reason.t_
-
-val is_constraint_type : internal_type -> bool
 
 (** Whether the given type is a union, intersection or option. *)
 val is_union_or_inter_type : locl_ty -> bool
@@ -298,14 +282,6 @@ module Named_params : sig
 
   (** (Some name) iff arg is named *)
   val name_of_arg : ('a, 'b) Aast_defs.argument -> string option
-end
-
-module InternalType : sig
-  val get_var : internal_type -> Tvid.t option
-
-  val is_var_v : internal_type -> v:Tvid.t -> bool
-
-  val is_not_var_v : internal_type -> v:Tvid.t -> bool
 end
 
 val this : Local_id.t

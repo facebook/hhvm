@@ -12,7 +12,7 @@ open Hh_prelude
 
 [@@@warning "+33"]
 
-open Typing_defs
+open Typing_defs_constraints
 module Reason = Typing_reason
 
 (*****************************************************************************)

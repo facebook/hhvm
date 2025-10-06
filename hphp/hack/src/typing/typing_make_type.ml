@@ -8,6 +8,7 @@
  *)
 
 open Typing_defs
+open Typing_defs_constraints
 module SN = Naming_special_names
 module Reason = Typing_reason
 module Nast = Aast

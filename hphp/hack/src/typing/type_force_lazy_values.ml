@@ -17,7 +17,7 @@ let locl_ty (ty : Typing_defs_core.locl_ty) : Typing_defs_core.locl_ty =
   let ((), ty) = visitor#on_type () ty in
   ty
 
-let internal_type (ty : Typing_defs_core.internal_type) =
+let internal_type (ty : Typing_defs_constraints.internal_type) =
   let visitor =
     object
       inherit [unit] Type_mapper_generic.internal_type_mapper

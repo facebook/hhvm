@@ -17,6 +17,7 @@ open Common
 open Aast
 open Tast
 open Typing_defs
+open Typing_defs_constraints
 open Typing_env_types
 open Utils
 open Typing_helpers

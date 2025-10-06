@@ -444,8 +444,8 @@ module Uninstantiated_typing_logic = struct
       in
       TL.IsSubtype
         ( false,
-          Typing_defs_core.LoclType sub_ty,
-          Typing_defs_core.LoclType super_ty )
+          Typing_defs_constraints.LoclType sub_ty,
+          Typing_defs_constraints.LoclType super_ty )
     | Conj (p1, p2) ->
       TL.conj (instantiate_prop map pos p1) (instantiate_prop map pos p2)
     | Disj (p1, p2) ->

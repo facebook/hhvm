@@ -1,4 +1,5 @@
 open Typing_defs
+open Typing_defs_constraints
 open Typing_env_types
 
 (** Non-side-effecting test for subtypes.

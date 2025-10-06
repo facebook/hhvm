@@ -13,7 +13,7 @@ type value =
   | List of value list
   | Set of SSet.t
   | Map of value SMap.t
-  | Type of Typing_defs.internal_type
+  | Type of Typing_defs_constraints.internal_type
   | SubtypeProp of Typing_logic.subtype_prop
 [@@deriving eq]
 
@@ -29,7 +29,8 @@ let list_as_value l = List l
 
 let internal_type_as_value ty = Type ty
 
-let locl_type_as_value ty = internal_type_as_value (Typing_defs.LoclType ty)
+let locl_type_as_value ty =
+  internal_type_as_value (Typing_defs_constraints.LoclType ty)
 
 let internal_type_set_as_value tys =
   Internal_type_set.elements tys

@@ -8,7 +8,7 @@
 
 open Hh_prelude
 open OUnit2
-open Typing_defs_core
+open Typing_defs_constraints
 module Eval = Custom_error_eval
 module Ty = Typing_defs_core
 

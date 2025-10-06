@@ -10,6 +10,7 @@
 open Hh_prelude
 open Common
 open Typing_defs
+open Typing_defs_constraints
 open Typing_env_types
 module SN = Naming_special_names
 module Reason = Typing_reason

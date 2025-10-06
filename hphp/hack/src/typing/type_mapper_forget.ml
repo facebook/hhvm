@@ -8,6 +8,7 @@
 
 open Hh_prelude
 open Typing_defs
+open Typing_defs_constraints
 module Map = Type_mapper_generic
 
 type env = {

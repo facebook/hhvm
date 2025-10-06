@@ -8,7 +8,7 @@
  *)
 
 open Hh_prelude
-open Typing_defs
+open Typing_defs_constraints
 
 (* See comment in .mli file *)
 type subtype_prop =

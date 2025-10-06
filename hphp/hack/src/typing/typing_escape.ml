@@ -10,6 +10,7 @@
 open Hh_prelude
 open Common
 open Typing_defs
+open Typing_defs_constraints
 module Env = Typing_env
 module ITySet = Internal_type_set
 module Reason = Typing_reason

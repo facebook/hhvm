@@ -1,4 +1,5 @@
 aast_defs::Abstraction
+aast_defs::CheckStatus
 aast_defs::ClassPtrKind
 aast_defs::ConstraintKind
 aast_defs::EmitId
@@ -107,7 +108,6 @@ naming_types::NameKind
 saved_state_rollouts::Flag
 search_types::AutocompleteType
 search_types::SiComplete
-tast::CheckStatus
 reason_collector::Category
 reason_collector::LoggedType
 type_counter::Category

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0de9e063de5350653a199c039a1f7a66>>
+// @generated SignedSource<<86d90941412ca6e6a3d9ef1c7d56e784>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -4537,6 +4537,35 @@ impl VcKind {
     pub fn is_keyset(&self) -> bool {
         match self {
             VcKind::Keyset => true,
+            _ => false,
+        }
+    }
+}
+impl CheckStatus {
+    pub fn mk_conce() -> Self {
+        CheckStatus::COnce
+    }
+    pub fn mk_cunder_normal_assumptions() -> Self {
+        CheckStatus::CUnderNormalAssumptions
+    }
+    pub fn mk_cunder_dynamic_assumptions() -> Self {
+        CheckStatus::CUnderDynamicAssumptions
+    }
+    pub fn is_conce(&self) -> bool {
+        match self {
+            CheckStatus::COnce => true,
+            _ => false,
+        }
+    }
+    pub fn is_cunder_normal_assumptions(&self) -> bool {
+        match self {
+            CheckStatus::CUnderNormalAssumptions => true,
+            _ => false,
+        }
+    }
+    pub fn is_cunder_dynamic_assumptions(&self) -> bool {
+        match self {
+            CheckStatus::CUnderDynamicAssumptions => true,
             _ => false,
         }
     }

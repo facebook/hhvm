@@ -7,7 +7,7 @@ pub(crate) use rc_pos as pos;
 
 mod lint;
 pub use lint::*;
-use oxidized::tast;
+use oxidized::aast_defs;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[derive(ocamlrep::FromOcamlRep, ocamlrep::ToOcamlRep)]
@@ -32,7 +32,7 @@ impl LintError {
             message,
             bypass_changed_lines: false,
             autofix: None,
-            check_status: None::<tast::CheckStatus>,
+            check_status: None::<aast_defs::CheckStatus>,
         }
     }
 }

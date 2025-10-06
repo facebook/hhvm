@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c1b2dee07e855aa71d2585ccd21e1c7f>>
+// @generated SignedSource<<40ff6c9c70b6c5b398574280b0639794>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -53,16 +53,13 @@ pub mod saved_state_rollouts;
 pub mod scoured_comments;
 pub mod search_types;
 pub mod shallow_decl_defs;
-pub mod tast;
 pub mod tast_collector;
 pub mod tast_hashes;
-pub mod tast_with_dynamic;
 pub mod type_counter;
 pub mod type_parameter_env;
 pub mod typechecker_options;
 pub mod typing_defs;
 pub mod typing_defs_core;
-pub mod typing_inference_env;
 pub mod typing_kinding_defs;
 pub mod typing_reason;
 pub mod typing_tyvar_occurrences;

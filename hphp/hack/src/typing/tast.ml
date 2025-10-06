@@ -36,19 +36,6 @@ type fun_tast_info = {
 }
 [@@deriving hash, show]
 
-type check_status =
-  | COnce  (** The definition is checked only once. *)
-  | CUnderNormalAssumptions
-      (** The definition is checked twice and this is the check under normal
-          assumptions that is using the parameter and return types that are
-          written in the source code (but potentially implicitly pessimised).
-          *)
-  | CUnderDynamicAssumptions
-      (** The definition is checked twice and this is the check under dynamic
-          assumptions that is using the dynamic type for parameters and return.
-          *)
-[@@deriving hash, show]
-
 let is_under_dynamic_assumptions = function
   | COnce
   | CUnderNormalAssumptions ->

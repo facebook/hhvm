@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d7d6474cc0efa639272298495cffe1ac>>
+// @generated SignedSource<<298192f80b47bbabe4d7ddc39e557cdd>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -3127,3 +3127,36 @@ pub struct Enum_ {
        }))"#)]
 #[repr(C)]
 pub struct WhereConstraintHint(pub Hint, pub ast_defs::ConstraintKind, pub Hint);
+
+/// When an error arose.
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (hash, show)")]
+#[repr(u8)]
+pub enum CheckStatus {
+    /// The definition is checked only once.
+    COnce,
+    /// The definition is checked twice and this is the check under normal
+    /// assumptions that is using the parameter and return types that are
+    /// written in the source code (but potentially implicitly pessimised).
+    CUnderNormalAssumptions,
+    /// The definition is checked twice and this is the check under dynamic
+    /// assumptions that is using the dynamic type for parameters and return.
+    CUnderDynamicAssumptions,
+}
+impl TrivialDrop for CheckStatus {}
+arena_deserializer::impl_deserialize_in_arena!(CheckStatus);

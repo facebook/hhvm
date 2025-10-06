@@ -9,4 +9,4 @@
 val locl_ty : Typing_defs_core.locl_ty -> Typing_defs_core.locl_ty
 
 val internal_type :
-  Typing_defs_core.internal_type -> Typing_defs_core.internal_type
+  Typing_defs_constraints.internal_type -> Typing_defs_constraints.internal_type

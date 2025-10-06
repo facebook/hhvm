@@ -13,6 +13,7 @@
  *)
 open Hh_prelude
 open Typing_defs
+open Typing_defs_constraints
 
 module Ty_ = struct
   type t = internal_type [@@deriving show]

@@ -11,6 +11,7 @@ open Hh_prelude
 open Common
 open Decl_env
 open Typing_env_types
+open Typing_defs_constraints
 open Typing_defs
 open Aast
 module Inf = Typing_inference_env

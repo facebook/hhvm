@@ -9,6 +9,7 @@
 
 open Hh_prelude
 open Typing_defs
+open Typing_defs_constraints
 module Reason = Typing_reason
 
 class type ['a] decl_type_visitor_type =

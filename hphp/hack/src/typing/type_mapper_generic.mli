@@ -141,49 +141,51 @@ class ['env] deep_type_mapper : ['env] type_mapper_type
 class type ['env] constraint_type_mapper_type =
   object
     method on_constraint_type :
-      'env -> Typing_defs.constraint_type -> 'env * Typing_defs.constraint_type
+      'env ->
+      Typing_defs_constraints.constraint_type ->
+      'env * Typing_defs_constraints.constraint_type
 
     method on_constraint_type_ :
       'env ->
       Typing_reason.t ->
-      Typing_defs.constraint_type_ ->
-      'env * Typing_defs.constraint_type
+      Typing_defs_constraints.constraint_type_ ->
+      'env * Typing_defs_constraints.constraint_type
 
     method on_Thas_member :
       'env ->
       Typing_reason.t ->
-      Typing_defs.has_member ->
-      'env * Typing_defs.constraint_type
+      Typing_defs_constraints.has_member ->
+      'env * Typing_defs_constraints.constraint_type
 
     method on_Thas_type_member :
       'env ->
       Typing_reason.t ->
-      Typing_defs.has_type_member ->
-      'env * Typing_defs.constraint_type
+      Typing_defs_constraints.has_type_member ->
+      'env * Typing_defs_constraints.constraint_type
 
     method on_Tcan_index :
       'env ->
       Typing_reason.t ->
-      Typing_defs.can_index ->
-      'env * Typing_defs.constraint_type
+      Typing_defs_constraints.can_index ->
+      'env * Typing_defs_constraints.constraint_type
 
     method on_Tcan_index_assign :
       'env ->
       Typing_reason.t ->
-      Typing_defs.can_index_assign ->
-      'env * Typing_defs.constraint_type
+      Typing_defs_constraints.can_index_assign ->
+      'env * Typing_defs_constraints.constraint_type
 
     method on_Tcan_traverse :
       'env ->
       Typing_reason.t ->
-      Typing_defs.can_traverse ->
-      'env * Typing_defs.constraint_type
+      Typing_defs_constraints.can_traverse ->
+      'env * Typing_defs_constraints.constraint_type
 
     method on_Tdestructure :
       'env ->
       Typing_reason.t ->
-      Typing_defs.destructure ->
-      'env * Typing_defs.constraint_type
+      Typing_defs_constraints.destructure ->
+      'env * Typing_defs_constraints.constraint_type
 
     method on_Ttype_switch :
       'env ->
@@ -191,14 +193,14 @@ class type ['env] constraint_type_mapper_type =
       Typing_defs.type_predicate ->
       Typing_defs.locl_ty ->
       Typing_defs.locl_ty ->
-      'env * Typing_defs.constraint_type
+      'env * Typing_defs_constraints.constraint_type
 
     method on_Thas_const :
       'env ->
       Typing_reason.t ->
       string ->
       Typing_defs.locl_ty ->
-      'env * Typing_defs.constraint_type
+      'env * Typing_defs_constraints.constraint_type
   end
 
 class type ['env] locl_constraint_type_mapper_type =
@@ -215,13 +217,19 @@ class type ['env] internal_type_mapper_type =
     inherit ['env] locl_constraint_type_mapper_type
 
     method on_internal_type :
-      'env -> Typing_defs.internal_type -> 'env * Typing_defs.internal_type
+      'env ->
+      Typing_defs_constraints.internal_type ->
+      'env * Typing_defs_constraints.internal_type
 
     method on_LoclType :
-      'env -> Typing_defs.locl_ty -> 'env * Typing_defs.internal_type
+      'env ->
+      Typing_defs.locl_ty ->
+      'env * Typing_defs_constraints.internal_type
 
     method on_ConstraintType :
-      'env -> Typing_defs.constraint_type -> 'env * Typing_defs.internal_type
+      'env ->
+      Typing_defs_constraints.constraint_type ->
+      'env * Typing_defs_constraints.internal_type
   end
 
 class ['env] internal_type_mapper : ['env] internal_type_mapper_type

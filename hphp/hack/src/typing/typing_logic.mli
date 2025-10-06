@@ -7,7 +7,7 @@
  *
  *)
 
-open Typing_defs
+open Typing_defs_constraints
 
 (* Logical proposition about types *)
 type subtype_prop =

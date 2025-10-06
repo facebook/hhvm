@@ -13,6 +13,7 @@
 
 open Hh_prelude
 open Typing_defs
+open Typing_defs_constraints
 open Typing_env_types
 open Typing_logic
 module SN = Naming_special_names

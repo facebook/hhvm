@@ -6,6 +6,7 @@
  *
  *)
 open Typing_defs
+open Typing_defs_constraints
 open Typing_env_types
 
 val filter_locl_types : Internal_type_set.t -> Typing_set.t

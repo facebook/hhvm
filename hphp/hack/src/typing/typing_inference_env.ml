@@ -9,6 +9,7 @@
 
 open Hh_prelude
 open Typing_defs
+open Typing_defs_constraints
 module ITySet = Internal_type_set
 module Occ = Typing_tyvar_occurrences
 module TL = Typing_logic

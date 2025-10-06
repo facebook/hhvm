@@ -9,6 +9,7 @@
 
 open Hh_prelude
 open Typing_defs
+open Typing_defs_constraints
 open Typing_env_types
 module Inf = Typing_inference_env
 module Pr = Typing_print
@@ -681,7 +682,7 @@ type log_structure =
   | Log_head of string * log_structure list
   | Log_type of string * Typing_defs.locl_ty
   | Log_decl_type of string * Typing_defs.decl_ty
-  | Log_type_i of string * Typing_defs.internal_type
+  | Log_type_i of string * Typing_defs_constraints.internal_type
 
 let print_key_value (key, value) =
   lprintf (Bold Green) "%s: " key;

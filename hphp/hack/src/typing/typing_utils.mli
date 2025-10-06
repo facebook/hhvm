@@ -45,8 +45,8 @@ val sub_type : sub_type
 type sub_type_i =
   Typing_env_types.env ->
   ?is_coeffect:bool ->
-  Typing_defs.internal_type ->
-  Typing_defs.internal_type ->
+  Typing_defs_constraints.internal_type ->
+  Typing_defs_constraints.internal_type ->
   Typing_error.Reasons_callback.t option ->
   Typing_env_types.env * Typing_error.t option
 
@@ -74,8 +74,8 @@ val is_sub_type_for_union_ref :
 
 val is_sub_type_for_union_i_ref :
   (Typing_env_types.env ->
-  Typing_defs.internal_type ->
-  Typing_defs.internal_type ->
+  Typing_defs_constraints.internal_type ->
+  Typing_defs_constraints.internal_type ->
   bool)
   ref
 
@@ -84,8 +84,8 @@ val is_sub_type_for_union :
 
 val is_sub_type_for_union_i :
   Typing_env_types.env ->
-  Typing_defs.internal_type ->
-  Typing_defs.internal_type ->
+  Typing_defs_constraints.internal_type ->
+  Typing_defs_constraints.internal_type ->
   bool
 
 val is_sub_type_ignore_generic_params_ref : is_sub_type_type ref
@@ -149,15 +149,17 @@ val localize_disjoint_union_ref : localize ref
 
 val localize_disjoint_union : localize
 
-val is_class_i : Typing_defs.internal_type -> bool
+val is_class_i : Typing_defs_constraints.internal_type -> bool
 
 val is_class : Typing_defs.locl_ty -> bool
 
-val is_mixed_i : Typing_env_types.env -> Typing_defs.internal_type -> bool
+val is_mixed_i :
+  Typing_env_types.env -> Typing_defs_constraints.internal_type -> bool
 
 val is_mixed : Typing_env_types.env -> Typing_defs.locl_ty -> bool
 
-val is_nothing_i : Typing_env_types.env -> Typing_defs.internal_type -> bool
+val is_nothing_i :
+  Typing_env_types.env -> Typing_defs_constraints.internal_type -> bool
 
 val is_nothing : Typing_env_types.env -> Typing_defs.locl_ty -> bool
 
@@ -476,7 +478,7 @@ val make_like_if_enforced :
 
 val is_capability : Typing_defs.locl_ty -> bool
 
-val is_capability_i : Typing_defs.internal_type -> bool
+val is_capability_i : Typing_defs_constraints.internal_type -> bool
 
 val supports_dynamic :
   Typing_env_types.env ->

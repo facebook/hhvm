@@ -12,8 +12,8 @@ val sub_type_i :
   Pos.t ->
   Typing_reason.ureason ->
   Typing_env_types.env ->
-  Typing_defs.internal_type ->
-  Typing_defs.internal_type ->
+  Typing_defs_constraints.internal_type ->
+  Typing_defs_constraints.internal_type ->
   Typing_error.Callback.t ->
   Typing_env_types.env * Typing_error.t option
 

@@ -483,7 +483,8 @@ let matches_typing_error t ~scrut ~env =
   (* -- Internal types: we don't expose contraint types so handle here ------ *)
   and aux_internal_ty patt_locl_ty internal_ty ~env =
     match internal_ty with
-    | Ty.LoclType scrut -> matches_locl_ty patt_locl_ty ~scrut ~env
+    | Typing_defs_constraints.LoclType scrut ->
+      matches_locl_ty patt_locl_ty ~scrut ~env
     | _ -> Match.no_match
   (* -- Type parameters ----------------------------------------------------- *)
   and aux_param patt_name (_, (_, scrut)) ~env =

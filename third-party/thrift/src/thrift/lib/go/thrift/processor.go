@@ -86,21 +86,6 @@ func setRequestHeadersForResult(protocol Protocol, result types.WritableStruct) 
 	}
 }
 
-// sendException is a utility function to send the exception for the specified
-// method.
-func sendException(prot types.Encoder, name string, seqID int32, appEx *types.ApplicationException) error {
-	if err := prot.WriteMessageBegin(name, types.EXCEPTION, seqID); err != nil {
-		return err
-	} else if err := appEx.Write(prot); err != nil {
-		return err
-	} else if err := prot.WriteMessageEnd(); err != nil {
-		return err
-	} else if err := prot.Flush(); err != nil {
-		return err
-	}
-	return nil
-}
-
 func sendWritableStruct(prot types.Encoder, name string, messageType types.MessageType, seqID int32, strct WritableStruct) error {
 	if err := prot.WriteMessageBegin(name, messageType, seqID); err != nil {
 		return err
@@ -193,7 +178,7 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 
 	// Step 3b: Write the message using only the Decoder interface on the protocol.
 	if pfunc == nil {
-		if writeErr := sendException(prot, name, seqID, appException); writeErr != nil {
+		if writeErr := sendWritableStruct(prot, name, types.EXCEPTION, seqID, appException); writeErr != nil {
 			// close connection on write failure
 			return writeErr
 		}

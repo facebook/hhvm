@@ -1,0 +1,72 @@
+> lines and columns in ranges are 1-indexed
+received code:
+1 <?hh
+2 <<file: __EnableUnstableFeatures('named_parameters', 'named_parameters_use')>>
+3 
+4 function test1((function(int,
+5 named                       int       $x    , optional       named   int  $y ): void) $f): void {}
+6 function test2((function(
+7   int, named it          $x, optional named int $y, optional
+8   named int $j2afsjsdjfklasjflasdjfklajsflkjadsfkjasdfljasdlkfjdsklfjsdklsdajfsadklfd): void) $f): void {}
+9 
+10 function main(): void {
+11   test1((int $_, named int $x, named int $y = 1) ==> {});
+12   test1((
+13     int $_, named int $x, named int $y = 1,
+14 named int $j2afsjsdjfklasjflasdjfklajsflkjadsfkjasdfljasdlkfjdsklfjsdklsdajfsadklfd = 3
+15   ) ==> {});
+16 }
+
+New text at range 4:1-15:1 (1-indexed) is
+'function test1(
+  (function(int, named int $x, optional named int $y): void) $f,
+): void {}
+function test2(
+  (function(
+    int,
+    named it $x,
+    optional named int $y,
+    optional named int $j2afsjsdjfklasjflasdjfklajsflkjadsfkjasdfljasdlkfjdsklfjsdklsdajfsadklfd,
+  ): void) $f,
+): void {}
+
+function main(): void {
+  test1((int $_, named int $x, named int $y = 1) ==> {});
+  test1((
+    int $_,
+    named int $x,
+    named int $y = 1,
+    named int
+      $j2afsjsdjfklasjflasdjfklajsflkjadsfkjasdfljasdlkfjdsklfjsdklsdajfsadklfd =
+      3,
+'
+
+Code after applying language server edits:
+'<?hh
+<<file: __EnableUnstableFeatures('named_parameters', 'named_parameters_use')>>
+
+function test1(
+  (function(int, named int $x, optional named int $y): void) $f,
+): void {}
+function test2(
+  (function(
+    int,
+    named it $x,
+    optional named int $y,
+    optional named int $j2afsjsdjfklasjflasdjfklajsflkjadsfkjasdfljasdlkfjdsklfjsdklsdajfsadklfd,
+  ): void) $f,
+): void {}
+
+function main(): void {
+  test1((int $_, named int $x, named int $y = 1) ==> {});
+  test1((
+    int $_,
+    named int $x,
+    named int $y = 1,
+    named int
+      $j2afsjsdjfklasjflasdjfklajsflkjadsfkjasdfljasdlkfjdsklfjsdklsdajfsadklfd =
+      3,
+  ) ==> {});
+}
+'
+

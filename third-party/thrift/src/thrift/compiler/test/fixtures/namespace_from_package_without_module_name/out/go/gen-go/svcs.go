@@ -163,4 +163,3 @@ func (p *procFuncTestServiceInit) RunContext(ctx context.Context, reqStruct thri
     return result, nil
 }
 
-

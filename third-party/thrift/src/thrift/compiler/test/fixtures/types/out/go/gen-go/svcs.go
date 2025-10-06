@@ -183,7 +183,6 @@ func (p *procFuncSomeServiceBounceMap) RunContext(ctx context.Context, reqStruct
     return result, nil
 }
 
-
 type procFuncSomeServiceBinaryKeyedMap struct {
     handler SomeService
 }
@@ -231,5 +230,4 @@ func (p *procFuncSomeServiceBinaryKeyedMap) RunContext(ctx context.Context, reqS
     result.Success = retval
     return result, nil
 }
-
 

@@ -555,7 +555,6 @@ func (p *procFuncGetEntityGetEntity) RunContext(ctx context.Context, reqStruct t
     return result, nil
 }
 
-
 type procFuncGetEntityGetBool struct {
     handler GetEntity
 }
@@ -602,7 +601,6 @@ func (p *procFuncGetEntityGetBool) RunContext(ctx context.Context, reqStruct thr
     result.Success = &retval
     return result, nil
 }
-
 
 type procFuncGetEntityGetByte struct {
     handler GetEntity
@@ -651,7 +649,6 @@ func (p *procFuncGetEntityGetByte) RunContext(ctx context.Context, reqStruct thr
     return result, nil
 }
 
-
 type procFuncGetEntityGetI16 struct {
     handler GetEntity
 }
@@ -698,7 +695,6 @@ func (p *procFuncGetEntityGetI16) RunContext(ctx context.Context, reqStruct thri
     result.Success = &retval
     return result, nil
 }
-
 
 type procFuncGetEntityGetI32 struct {
     handler GetEntity
@@ -747,7 +743,6 @@ func (p *procFuncGetEntityGetI32) RunContext(ctx context.Context, reqStruct thri
     return result, nil
 }
 
-
 type procFuncGetEntityGetI64 struct {
     handler GetEntity
 }
@@ -794,7 +789,6 @@ func (p *procFuncGetEntityGetI64) RunContext(ctx context.Context, reqStruct thri
     result.Success = &retval
     return result, nil
 }
-
 
 type procFuncGetEntityGetDouble struct {
     handler GetEntity
@@ -843,7 +837,6 @@ func (p *procFuncGetEntityGetDouble) RunContext(ctx context.Context, reqStruct t
     return result, nil
 }
 
-
 type procFuncGetEntityGetString struct {
     handler GetEntity
 }
@@ -890,7 +883,6 @@ func (p *procFuncGetEntityGetString) RunContext(ctx context.Context, reqStruct t
     result.Success = &retval
     return result, nil
 }
-
 
 type procFuncGetEntityGetBinary struct {
     handler GetEntity
@@ -939,7 +931,6 @@ func (p *procFuncGetEntityGetBinary) RunContext(ctx context.Context, reqStruct t
     return result, nil
 }
 
-
 type procFuncGetEntityGetMap struct {
     handler GetEntity
 }
@@ -986,7 +977,6 @@ func (p *procFuncGetEntityGetMap) RunContext(ctx context.Context, reqStruct thri
     result.Success = retval
     return result, nil
 }
-
 
 type procFuncGetEntityGetSet struct {
     handler GetEntity
@@ -1035,7 +1025,6 @@ func (p *procFuncGetEntityGetSet) RunContext(ctx context.Context, reqStruct thri
     return result, nil
 }
 
-
 type procFuncGetEntityGetList struct {
     handler GetEntity
 }
@@ -1082,7 +1071,6 @@ func (p *procFuncGetEntityGetList) RunContext(ctx context.Context, reqStruct thr
     result.Success = retval
     return result, nil
 }
-
 
 type procFuncGetEntityGetLegacyStuff struct {
     handler GetEntity
@@ -1132,7 +1120,6 @@ func (p *procFuncGetEntityGetLegacyStuff) RunContext(ctx context.Context, reqStr
     return result, nil
 }
 
-
 type procFuncGetEntityGetCtxCollision struct {
     handler GetEntity
 }
@@ -1180,7 +1167,6 @@ func (p *procFuncGetEntityGetCtxCollision) RunContext(ctx context.Context, reqSt
     result.Success = &retval
     return result, nil
 }
-
 
 type procFuncGetEntityGetCtx1Collision struct {
     handler GetEntity
@@ -1230,7 +1216,6 @@ func (p *procFuncGetEntityGetCtx1Collision) RunContext(ctx context.Context, reqS
     return result, nil
 }
 
-
 type procFuncGetEntityGetContextCollision struct {
     handler GetEntity
 }
@@ -1278,7 +1263,6 @@ func (p *procFuncGetEntityGetContextCollision) RunContext(ctx context.Context, r
     result.Success = &retval
     return result, nil
 }
-
 
 type procFuncGetEntityGetOutCollision struct {
     handler GetEntity
@@ -1328,7 +1312,6 @@ func (p *procFuncGetEntityGetOutCollision) RunContext(ctx context.Context, reqSt
     return result, nil
 }
 
-
 type procFuncGetEntityGetOut1Collision struct {
     handler GetEntity
 }
@@ -1376,7 +1359,6 @@ func (p *procFuncGetEntityGetOut1Collision) RunContext(ctx context.Context, reqS
     result.Success = &retval
     return result, nil
 }
-
 
 type procFuncGetEntityGetInCollision struct {
     handler GetEntity
@@ -1426,7 +1408,6 @@ func (p *procFuncGetEntityGetInCollision) RunContext(ctx context.Context, reqStr
     return result, nil
 }
 
-
 type procFuncGetEntityGetIn1Collision struct {
     handler GetEntity
 }
@@ -1474,7 +1455,6 @@ func (p *procFuncGetEntityGetIn1Collision) RunContext(ctx context.Context, reqSt
     result.Success = &retval
     return result, nil
 }
-
 
 type procFuncGetEntityGetErrCollision struct {
     handler GetEntity
@@ -1524,7 +1504,6 @@ func (p *procFuncGetEntityGetErrCollision) RunContext(ctx context.Context, reqSt
     return result, nil
 }
 
-
 type procFuncGetEntityGetErr1Collision struct {
     handler GetEntity
 }
@@ -1573,7 +1552,6 @@ func (p *procFuncGetEntityGetErr1Collision) RunContext(ctx context.Context, reqS
     return result, nil
 }
 
-
 type procFuncGetEntityMyMethodWithConflictingParamAccessors struct {
     handler GetEntity
 }
@@ -1620,5 +1598,4 @@ func (p *procFuncGetEntityMyMethodWithConflictingParamAccessors) RunContext(ctx 
 
     return result, nil
 }
-
 

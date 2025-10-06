@@ -237,7 +237,6 @@ func (p *procFuncCF) RunContext(ctx context.Context, reqStruct thrift.ReadableSt
     return result, nil
 }
 
-
 type procFuncCThing struct {
     handler C
 }
@@ -295,5 +294,4 @@ func (p *procFuncCThing) RunContext(ctx context.Context, reqStruct thrift.Readab
     result.Success = &retval
     return result, nil
 }
-
 

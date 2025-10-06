@@ -203,7 +203,6 @@ func (p *procFuncFinderByPlate) RunContext(ctx context.Context, reqStruct thrift
     return result, nil
 }
 
-
 type procFuncFinderAliasByPlate struct {
     handler Finder
 }
@@ -252,7 +251,6 @@ func (p *procFuncFinderAliasByPlate) RunContext(ctx context.Context, reqStruct t
     return result, nil
 }
 
-
 type procFuncFinderPreviousPlate struct {
     handler Finder
 }
@@ -300,5 +298,4 @@ func (p *procFuncFinderPreviousPlate) RunContext(ctx context.Context, reqStruct 
     result.Success = &retval
     return result, nil
 }
-
 

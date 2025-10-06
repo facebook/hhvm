@@ -211,7 +211,6 @@ func (p *procFuncRaiserDoBland) RunContext(ctx context.Context, reqStruct thrift
     return result, nil
 }
 
-
 type procFuncRaiserDoRaise struct {
     handler Raiser
 }
@@ -282,7 +281,6 @@ func (p *procFuncRaiserDoRaise) RunContext(ctx context.Context, reqStruct thrift
     return result, nil
 }
 
-
 type procFuncRaiserGet200 struct {
     handler Raiser
 }
@@ -329,7 +327,6 @@ func (p *procFuncRaiserGet200) RunContext(ctx context.Context, reqStruct thrift.
     result.Success = &retval
     return result, nil
 }
-
 
 type procFuncRaiserGet500 struct {
     handler Raiser
@@ -401,5 +398,4 @@ func (p *procFuncRaiserGet500) RunContext(ctx context.Context, reqStruct thrift.
     result.Success = &retval
     return result, nil
 }
-
 

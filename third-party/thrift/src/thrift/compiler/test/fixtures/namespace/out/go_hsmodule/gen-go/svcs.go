@@ -121,6 +121,10 @@ type procFuncHsTestServiceInit struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncHsTestServiceInit)(nil)
 
+func (p *procFuncHsTestServiceInit) NewReqArgs() thrift.ReadableStruct {
+    return newReqHsTestServiceInit()
+}
+
 func (p *procFuncHsTestServiceInit) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqHsTestServiceInit()
     if err := args.Read(decoder); err != nil {

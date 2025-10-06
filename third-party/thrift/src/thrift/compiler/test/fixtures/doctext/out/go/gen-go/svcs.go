@@ -197,6 +197,10 @@ type procFuncCF struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncCF)(nil)
 
+func (p *procFuncCF) NewReqArgs() thrift.ReadableStruct {
+    return newReqCF()
+}
+
 func (p *procFuncCF) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqCF()
     if err := args.Read(decoder); err != nil {
@@ -223,6 +227,10 @@ type procFuncCThing struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncCThing)(nil)
+
+func (p *procFuncCThing) NewReqArgs() thrift.ReadableStruct {
+    return newReqCThing()
+}
 
 func (p *procFuncCThing) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqCThing()

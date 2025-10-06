@@ -120,6 +120,10 @@ type procFuncFooServiceSimpleRPC struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncFooServiceSimpleRPC)(nil)
 
+func (p *procFuncFooServiceSimpleRPC) NewReqArgs() thrift.ReadableStruct {
+    return newReqFooServiceSimpleRPC()
+}
+
 func (p *procFuncFooServiceSimpleRPC) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqFooServiceSimpleRPC()
     if err := args.Read(decoder); err != nil {
@@ -233,6 +237,10 @@ type procFuncFB303ServiceSimpleRPC struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncFB303ServiceSimpleRPC)(nil)
+
+func (p *procFuncFB303ServiceSimpleRPC) NewReqArgs() thrift.ReadableStruct {
+    return newReqFB303ServiceSimpleRPC()
+}
 
 func (p *procFuncFB303ServiceSimpleRPC) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqFB303ServiceSimpleRPC()
@@ -503,6 +511,10 @@ type procFuncMyServicePing struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyServicePing)(nil)
 
+func (p *procFuncMyServicePing) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyServicePing()
+}
+
 func (p *procFuncMyServicePing) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyServicePing()
     if err := args.Read(decoder); err != nil {
@@ -529,6 +541,10 @@ type procFuncMyServiceGetRandomData struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyServiceGetRandomData)(nil)
+
+func (p *procFuncMyServiceGetRandomData) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyServiceGetRandomData()
+}
 
 func (p *procFuncMyServiceGetRandomData) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyServiceGetRandomData()
@@ -558,6 +574,10 @@ type procFuncMyServiceSink struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyServiceSink)(nil)
 
+func (p *procFuncMyServiceSink) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyServiceSink()
+}
+
 func (p *procFuncMyServiceSink) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyServiceSink()
     if err := args.Read(decoder); err != nil {
@@ -586,6 +606,10 @@ type procFuncMyServicePutDataById struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyServicePutDataById)(nil)
 
+func (p *procFuncMyServicePutDataById) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyServicePutDataById()
+}
+
 func (p *procFuncMyServicePutDataById) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyServicePutDataById()
     if err := args.Read(decoder); err != nil {
@@ -613,6 +637,10 @@ type procFuncMyServiceHasDataById struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyServiceHasDataById)(nil)
+
+func (p *procFuncMyServiceHasDataById) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyServiceHasDataById()
+}
 
 func (p *procFuncMyServiceHasDataById) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyServiceHasDataById()
@@ -643,6 +671,10 @@ type procFuncMyServiceGetDataById struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyServiceGetDataById)(nil)
 
+func (p *procFuncMyServiceGetDataById) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyServiceGetDataById()
+}
+
 func (p *procFuncMyServiceGetDataById) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyServiceGetDataById()
     if err := args.Read(decoder); err != nil {
@@ -672,6 +704,10 @@ type procFuncMyServiceDeleteDataById struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyServiceDeleteDataById)(nil)
 
+func (p *procFuncMyServiceDeleteDataById) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyServiceDeleteDataById()
+}
+
 func (p *procFuncMyServiceDeleteDataById) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyServiceDeleteDataById()
     if err := args.Read(decoder); err != nil {
@@ -700,6 +736,10 @@ type procFuncMyServiceLobDataById struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyServiceLobDataById)(nil)
 
+func (p *procFuncMyServiceLobDataById) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyServiceLobDataById()
+}
+
 func (p *procFuncMyServiceLobDataById) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyServiceLobDataById()
     if err := args.Read(decoder); err != nil {
@@ -726,6 +766,10 @@ type procFuncMyServiceInvalidReturnForHack struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyServiceInvalidReturnForHack)(nil)
+
+func (p *procFuncMyServiceInvalidReturnForHack) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyServiceInvalidReturnForHack()
+}
 
 func (p *procFuncMyServiceInvalidReturnForHack) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyServiceInvalidReturnForHack()
@@ -754,6 +798,10 @@ type procFuncMyServiceRpcSkippedCodegen struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyServiceRpcSkippedCodegen)(nil)
+
+func (p *procFuncMyServiceRpcSkippedCodegen) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyServiceRpcSkippedCodegen()
+}
 
 func (p *procFuncMyServiceRpcSkippedCodegen) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyServiceRpcSkippedCodegen()
@@ -887,6 +935,10 @@ type procFuncDbMixedStackArgumentsGetDataByKey0 struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncDbMixedStackArgumentsGetDataByKey0)(nil)
 
+func (p *procFuncDbMixedStackArgumentsGetDataByKey0) NewReqArgs() thrift.ReadableStruct {
+    return newReqDbMixedStackArgumentsGetDataByKey0()
+}
+
 func (p *procFuncDbMixedStackArgumentsGetDataByKey0) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqDbMixedStackArgumentsGetDataByKey0()
     if err := args.Read(decoder); err != nil {
@@ -915,6 +967,10 @@ type procFuncDbMixedStackArgumentsGetDataByKey1 struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncDbMixedStackArgumentsGetDataByKey1)(nil)
+
+func (p *procFuncDbMixedStackArgumentsGetDataByKey1) NewReqArgs() thrift.ReadableStruct {
+    return newReqDbMixedStackArgumentsGetDataByKey1()
+}
 
 func (p *procFuncDbMixedStackArgumentsGetDataByKey1) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqDbMixedStackArgumentsGetDataByKey1()

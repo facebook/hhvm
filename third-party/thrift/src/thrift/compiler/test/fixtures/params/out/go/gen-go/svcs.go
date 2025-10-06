@@ -193,6 +193,10 @@ type procFuncNestedContainersMapList struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncNestedContainersMapList)(nil)
 
+func (p *procFuncNestedContainersMapList) NewReqArgs() thrift.ReadableStruct {
+    return newReqNestedContainersMapList()
+}
+
 func (p *procFuncNestedContainersMapList) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqNestedContainersMapList()
     if err := args.Read(decoder); err != nil {
@@ -220,6 +224,10 @@ type procFuncNestedContainersMapSet struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncNestedContainersMapSet)(nil)
+
+func (p *procFuncNestedContainersMapSet) NewReqArgs() thrift.ReadableStruct {
+    return newReqNestedContainersMapSet()
+}
 
 func (p *procFuncNestedContainersMapSet) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqNestedContainersMapSet()
@@ -249,6 +257,10 @@ type procFuncNestedContainersListMap struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncNestedContainersListMap)(nil)
 
+func (p *procFuncNestedContainersListMap) NewReqArgs() thrift.ReadableStruct {
+    return newReqNestedContainersListMap()
+}
+
 func (p *procFuncNestedContainersListMap) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqNestedContainersListMap()
     if err := args.Read(decoder); err != nil {
@@ -277,6 +289,10 @@ type procFuncNestedContainersListSet struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncNestedContainersListSet)(nil)
 
+func (p *procFuncNestedContainersListSet) NewReqArgs() thrift.ReadableStruct {
+    return newReqNestedContainersListSet()
+}
+
 func (p *procFuncNestedContainersListSet) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqNestedContainersListSet()
     if err := args.Read(decoder); err != nil {
@@ -304,6 +320,10 @@ type procFuncNestedContainersTurtles struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncNestedContainersTurtles)(nil)
+
+func (p *procFuncNestedContainersTurtles) NewReqArgs() thrift.ReadableStruct {
+    return newReqNestedContainersTurtles()
+}
 
 func (p *procFuncNestedContainersTurtles) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqNestedContainersTurtles()

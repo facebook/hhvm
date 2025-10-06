@@ -25,6 +25,10 @@ type {{> svc/proc_func_name}} struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*{{> svc/proc_func_name}})(nil)
 
+func (p *{{> svc/proc_func_name}}) NewReqArgs() thrift.ReadableStruct {
+    return newReq{{service:go_name}}{{function:go_name}}()
+}
+
 func (p *{{> svc/proc_func_name}}) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReq{{service:go_name}}{{function:go_name}}()
     if err := args.Read(decoder); err != nil {

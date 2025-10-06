@@ -120,6 +120,10 @@ type procFuncMyRootDoRoot struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyRootDoRoot)(nil)
 
+func (p *procFuncMyRootDoRoot) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyRootDoRoot()
+}
+
 func (p *procFuncMyRootDoRoot) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyRootDoRoot()
     if err := args.Read(decoder); err != nil {
@@ -215,6 +219,10 @@ type procFuncMyNodeDoMid struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyNodeDoMid)(nil)
 
+func (p *procFuncMyNodeDoMid) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyNodeDoMid()
+}
+
 func (p *procFuncMyNodeDoMid) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyNodeDoMid()
     if err := args.Read(decoder); err != nil {
@@ -309,6 +317,10 @@ type procFuncMyLeafDoLeaf struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyLeafDoLeaf)(nil)
+
+func (p *procFuncMyLeafDoLeaf) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyLeafDoLeaf()
+}
 
 func (p *procFuncMyLeafDoLeaf) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyLeafDoLeaf()

@@ -161,6 +161,10 @@ type procFuncFinderByPlate struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncFinderByPlate)(nil)
 
+func (p *procFuncFinderByPlate) NewReqArgs() thrift.ReadableStruct {
+    return newReqFinderByPlate()
+}
+
 func (p *procFuncFinderByPlate) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqFinderByPlate()
     if err := args.Read(decoder); err != nil {
@@ -190,6 +194,10 @@ type procFuncFinderAliasByPlate struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncFinderAliasByPlate)(nil)
 
+func (p *procFuncFinderAliasByPlate) NewReqArgs() thrift.ReadableStruct {
+    return newReqFinderAliasByPlate()
+}
+
 func (p *procFuncFinderAliasByPlate) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqFinderAliasByPlate()
     if err := args.Read(decoder); err != nil {
@@ -218,6 +226,10 @@ type procFuncFinderPreviousPlate struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncFinderPreviousPlate)(nil)
+
+func (p *procFuncFinderPreviousPlate) NewReqArgs() thrift.ReadableStruct {
+    return newReqFinderPreviousPlate()
+}
 
 func (p *procFuncFinderPreviousPlate) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqFinderPreviousPlate()

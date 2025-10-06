@@ -404,6 +404,10 @@ type procFuncMyServiceFoo struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyServiceFoo)(nil)
 
+func (p *procFuncMyServiceFoo) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyServiceFoo()
+}
+
 func (p *procFuncMyServiceFoo) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyServiceFoo()
     if err := args.Read(decoder); err != nil {
@@ -516,6 +520,10 @@ type procFuncFactoriesFoo struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncFactoriesFoo)(nil)
+
+func (p *procFuncFactoriesFoo) NewReqArgs() thrift.ReadableStruct {
+    return newReqFactoriesFoo()
+}
 
 func (p *procFuncFactoriesFoo) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqFactoriesFoo()
@@ -630,6 +638,10 @@ type procFuncPerformFoo struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncPerformFoo)(nil)
 
+func (p *procFuncPerformFoo) NewReqArgs() thrift.ReadableStruct {
+    return newReqPerformFoo()
+}
+
 func (p *procFuncPerformFoo) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqPerformFoo()
     if err := args.Read(decoder); err != nil {
@@ -742,6 +754,10 @@ type procFuncInteractWithSharedDoSomeSimilarThings struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncInteractWithSharedDoSomeSimilarThings)(nil)
+
+func (p *procFuncInteractWithSharedDoSomeSimilarThings) NewReqArgs() thrift.ReadableStruct {
+    return newReqInteractWithSharedDoSomeSimilarThings()
+}
 
 func (p *procFuncInteractWithSharedDoSomeSimilarThings) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqInteractWithSharedDoSomeSimilarThings()

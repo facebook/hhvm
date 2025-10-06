@@ -513,6 +513,10 @@ type procFuncGetEntityGetEntity struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetEntity)(nil)
 
+func (p *procFuncGetEntityGetEntity) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetEntity()
+}
+
 func (p *procFuncGetEntityGetEntity) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetEntity()
     if err := args.Read(decoder); err != nil {
@@ -542,6 +546,10 @@ type procFuncGetEntityGetBool struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetBool)(nil)
 
+func (p *procFuncGetEntityGetBool) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetBool()
+}
+
 func (p *procFuncGetEntityGetBool) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetBool()
     if err := args.Read(decoder); err != nil {
@@ -569,6 +577,10 @@ type procFuncGetEntityGetByte struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetByte)(nil)
+
+func (p *procFuncGetEntityGetByte) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetByte()
+}
 
 func (p *procFuncGetEntityGetByte) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetByte()
@@ -598,6 +610,10 @@ type procFuncGetEntityGetI16 struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetI16)(nil)
 
+func (p *procFuncGetEntityGetI16) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetI16()
+}
+
 func (p *procFuncGetEntityGetI16) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetI16()
     if err := args.Read(decoder); err != nil {
@@ -625,6 +641,10 @@ type procFuncGetEntityGetI32 struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetI32)(nil)
+
+func (p *procFuncGetEntityGetI32) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetI32()
+}
 
 func (p *procFuncGetEntityGetI32) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetI32()
@@ -654,6 +674,10 @@ type procFuncGetEntityGetI64 struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetI64)(nil)
 
+func (p *procFuncGetEntityGetI64) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetI64()
+}
+
 func (p *procFuncGetEntityGetI64) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetI64()
     if err := args.Read(decoder); err != nil {
@@ -681,6 +705,10 @@ type procFuncGetEntityGetDouble struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetDouble)(nil)
+
+func (p *procFuncGetEntityGetDouble) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetDouble()
+}
 
 func (p *procFuncGetEntityGetDouble) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetDouble()
@@ -710,6 +738,10 @@ type procFuncGetEntityGetString struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetString)(nil)
 
+func (p *procFuncGetEntityGetString) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetString()
+}
+
 func (p *procFuncGetEntityGetString) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetString()
     if err := args.Read(decoder); err != nil {
@@ -737,6 +769,10 @@ type procFuncGetEntityGetBinary struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetBinary)(nil)
+
+func (p *procFuncGetEntityGetBinary) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetBinary()
+}
 
 func (p *procFuncGetEntityGetBinary) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetBinary()
@@ -766,6 +802,10 @@ type procFuncGetEntityGetMap struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetMap)(nil)
 
+func (p *procFuncGetEntityGetMap) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetMap()
+}
+
 func (p *procFuncGetEntityGetMap) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetMap()
     if err := args.Read(decoder); err != nil {
@@ -793,6 +833,10 @@ type procFuncGetEntityGetSet struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetSet)(nil)
+
+func (p *procFuncGetEntityGetSet) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetSet()
+}
 
 func (p *procFuncGetEntityGetSet) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetSet()
@@ -822,6 +866,10 @@ type procFuncGetEntityGetList struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetList)(nil)
 
+func (p *procFuncGetEntityGetList) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetList()
+}
+
 func (p *procFuncGetEntityGetList) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetList()
     if err := args.Read(decoder); err != nil {
@@ -849,6 +897,10 @@ type procFuncGetEntityGetLegacyStuff struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetLegacyStuff)(nil)
+
+func (p *procFuncGetEntityGetLegacyStuff) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetLegacyStuff()
+}
 
 func (p *procFuncGetEntityGetLegacyStuff) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetLegacyStuff()
@@ -879,6 +931,10 @@ type procFuncGetEntityGetCtxCollision struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetCtxCollision)(nil)
 
+func (p *procFuncGetEntityGetCtxCollision) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetCtxCollision()
+}
+
 func (p *procFuncGetEntityGetCtxCollision) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetCtxCollision()
     if err := args.Read(decoder); err != nil {
@@ -907,6 +963,10 @@ type procFuncGetEntityGetCtx1Collision struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetCtx1Collision)(nil)
+
+func (p *procFuncGetEntityGetCtx1Collision) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetCtx1Collision()
+}
 
 func (p *procFuncGetEntityGetCtx1Collision) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetCtx1Collision()
@@ -937,6 +997,10 @@ type procFuncGetEntityGetContextCollision struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetContextCollision)(nil)
 
+func (p *procFuncGetEntityGetContextCollision) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetContextCollision()
+}
+
 func (p *procFuncGetEntityGetContextCollision) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetContextCollision()
     if err := args.Read(decoder); err != nil {
@@ -965,6 +1029,10 @@ type procFuncGetEntityGetOutCollision struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetOutCollision)(nil)
+
+func (p *procFuncGetEntityGetOutCollision) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetOutCollision()
+}
 
 func (p *procFuncGetEntityGetOutCollision) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetOutCollision()
@@ -995,6 +1063,10 @@ type procFuncGetEntityGetOut1Collision struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetOut1Collision)(nil)
 
+func (p *procFuncGetEntityGetOut1Collision) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetOut1Collision()
+}
+
 func (p *procFuncGetEntityGetOut1Collision) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetOut1Collision()
     if err := args.Read(decoder); err != nil {
@@ -1023,6 +1095,10 @@ type procFuncGetEntityGetInCollision struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetInCollision)(nil)
+
+func (p *procFuncGetEntityGetInCollision) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetInCollision()
+}
 
 func (p *procFuncGetEntityGetInCollision) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetInCollision()
@@ -1053,6 +1129,10 @@ type procFuncGetEntityGetIn1Collision struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetIn1Collision)(nil)
 
+func (p *procFuncGetEntityGetIn1Collision) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetIn1Collision()
+}
+
 func (p *procFuncGetEntityGetIn1Collision) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetIn1Collision()
     if err := args.Read(decoder); err != nil {
@@ -1081,6 +1161,10 @@ type procFuncGetEntityGetErrCollision struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetErrCollision)(nil)
+
+func (p *procFuncGetEntityGetErrCollision) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetErrCollision()
+}
 
 func (p *procFuncGetEntityGetErrCollision) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetErrCollision()
@@ -1111,6 +1195,10 @@ type procFuncGetEntityGetErr1Collision struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityGetErr1Collision)(nil)
 
+func (p *procFuncGetEntityGetErr1Collision) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityGetErr1Collision()
+}
+
 func (p *procFuncGetEntityGetErr1Collision) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityGetErr1Collision()
     if err := args.Read(decoder); err != nil {
@@ -1139,6 +1227,10 @@ type procFuncGetEntityMyMethodWithConflictingParamAccessors struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncGetEntityMyMethodWithConflictingParamAccessors)(nil)
+
+func (p *procFuncGetEntityMyMethodWithConflictingParamAccessors) NewReqArgs() thrift.ReadableStruct {
+    return newReqGetEntityMyMethodWithConflictingParamAccessors()
+}
 
 func (p *procFuncGetEntityMyMethodWithConflictingParamAccessors) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqGetEntityMyMethodWithConflictingParamAccessors()

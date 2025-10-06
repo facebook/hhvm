@@ -123,6 +123,10 @@ type procFuncServiceFunc struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncServiceFunc)(nil)
 
+func (p *procFuncServiceFunc) NewReqArgs() thrift.ReadableStruct {
+    return newReqServiceFunc()
+}
+
 func (p *procFuncServiceFunc) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqServiceFunc()
     if err := args.Read(decoder); err != nil {
@@ -256,6 +260,10 @@ type procFuncAdapterServiceCount struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncAdapterServiceCount)(nil)
 
+func (p *procFuncAdapterServiceCount) NewReqArgs() thrift.ReadableStruct {
+    return newReqAdapterServiceCount()
+}
+
 func (p *procFuncAdapterServiceCount) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqAdapterServiceCount()
     if err := args.Read(decoder); err != nil {
@@ -283,6 +291,10 @@ type procFuncAdapterServiceAdaptedTypes struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncAdapterServiceAdaptedTypes)(nil)
+
+func (p *procFuncAdapterServiceAdaptedTypes) NewReqArgs() thrift.ReadableStruct {
+    return newReqAdapterServiceAdaptedTypes()
+}
 
 func (p *procFuncAdapterServiceAdaptedTypes) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqAdapterServiceAdaptedTypes()

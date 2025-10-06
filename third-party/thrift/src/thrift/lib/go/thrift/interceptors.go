@@ -54,6 +54,11 @@ type chainHandler struct {
 	interceptors []Interceptor
 }
 
+// NewReqArgs...
+func (ch *chainHandler) NewReqArgs() types.ReadableStruct {
+	return nil
+}
+
 // Read does nothing here, it is not used and shouldn't be called
 func (ch *chainHandler) Read(_ types.Decoder) (types.Struct, error) {
 	return nil, nil

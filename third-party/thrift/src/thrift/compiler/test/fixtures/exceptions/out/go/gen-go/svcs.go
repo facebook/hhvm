@@ -171,6 +171,10 @@ type procFuncRaiserDoBland struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncRaiserDoBland)(nil)
 
+func (p *procFuncRaiserDoBland) NewReqArgs() thrift.ReadableStruct {
+    return newReqRaiserDoBland()
+}
+
 func (p *procFuncRaiserDoBland) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqRaiserDoBland()
     if err := args.Read(decoder); err != nil {
@@ -197,6 +201,10 @@ type procFuncRaiserDoRaise struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncRaiserDoRaise)(nil)
+
+func (p *procFuncRaiserDoRaise) NewReqArgs() thrift.ReadableStruct {
+    return newReqRaiserDoRaise()
+}
 
 func (p *procFuncRaiserDoRaise) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqRaiserDoRaise()
@@ -237,6 +245,10 @@ type procFuncRaiserGet200 struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncRaiserGet200)(nil)
 
+func (p *procFuncRaiserGet200) NewReqArgs() thrift.ReadableStruct {
+    return newReqRaiserGet200()
+}
+
 func (p *procFuncRaiserGet200) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqRaiserGet200()
     if err := args.Read(decoder); err != nil {
@@ -264,6 +276,10 @@ type procFuncRaiserGet500 struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncRaiserGet500)(nil)
+
+func (p *procFuncRaiserGet500) NewReqArgs() thrift.ReadableStruct {
+    return newReqRaiserGet500()
+}
 
 func (p *procFuncRaiserGet500) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqRaiserGet500()

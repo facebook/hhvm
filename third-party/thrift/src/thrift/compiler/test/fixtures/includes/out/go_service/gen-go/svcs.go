@@ -145,6 +145,10 @@ type procFuncMyServiceQuery struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyServiceQuery)(nil)
 
+func (p *procFuncMyServiceQuery) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyServiceQuery()
+}
+
 func (p *procFuncMyServiceQuery) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyServiceQuery()
     if err := args.Read(decoder); err != nil {
@@ -172,6 +176,10 @@ type procFuncMyServiceHasArgDocs struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyServiceHasArgDocs)(nil)
+
+func (p *procFuncMyServiceHasArgDocs) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyServiceHasArgDocs()
+}
 
 func (p *procFuncMyServiceHasArgDocs) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyServiceHasArgDocs()

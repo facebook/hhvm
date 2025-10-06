@@ -141,6 +141,10 @@ type procFuncSomeServiceBounceMap struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncSomeServiceBounceMap)(nil)
 
+func (p *procFuncSomeServiceBounceMap) NewReqArgs() thrift.ReadableStruct {
+    return newReqSomeServiceBounceMap()
+}
+
 func (p *procFuncSomeServiceBounceMap) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqSomeServiceBounceMap()
     if err := args.Read(decoder); err != nil {
@@ -169,6 +173,10 @@ type procFuncSomeServiceBinaryKeyedMap struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncSomeServiceBinaryKeyedMap)(nil)
+
+func (p *procFuncSomeServiceBinaryKeyedMap) NewReqArgs() thrift.ReadableStruct {
+    return newReqSomeServiceBinaryKeyedMap()
+}
 
 func (p *procFuncSomeServiceBinaryKeyedMap) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqSomeServiceBinaryKeyedMap()

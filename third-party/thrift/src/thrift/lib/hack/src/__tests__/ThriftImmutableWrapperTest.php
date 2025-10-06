@@ -29,12 +29,12 @@ final class ThriftImmutableWrapperTest extends WWWTest {
     $test = new TestThriftImmutableWrapper($underlying);
 
     $test_serialized =
-      $test->serialize(SignalsPipeSerializationProtocol::BINARY);
+      $test->serialize(SignalsPipeSerializationProtocol::COMPACT_64);
 
     $test_deserialized = SignalsPipeUtils::deserializeThrift(
       AdsConsentPlatformParams::withDefaultValues(),
       $test_serialized,
-      SignalsPipeSerializationProtocol::BINARY,
+      SignalsPipeSerializationProtocol::COMPACT_64,
     );
     expect($test_deserialized)->toBePHPEqual($underlying);
     expect($test_deserialized?->__toShape())->toBePHPEqual(

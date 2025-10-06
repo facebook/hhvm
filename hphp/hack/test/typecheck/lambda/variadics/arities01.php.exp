@@ -47,6 +47,6 @@ Too few positional arguments (required 1 but got 0) (Typing[4104])
 ERROR: File "arities01.php", line 34, characters 13-19:
 Invalid argument (Typing[4040])
   File "arities01.php", line 33, characters 13-20:
-  Too few arguments (required 1 but got 0)
+  Too few positional arguments (required 1 but got 0)
   File "arities01.php", line 14, characters 20-37:
   Because of this definition

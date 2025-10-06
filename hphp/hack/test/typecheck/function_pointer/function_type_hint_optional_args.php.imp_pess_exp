@@ -17,7 +17,7 @@ Too many positional arguments (expected 3 but got 4) (Typing[4105])
 ERROR: File "function_type_hint_optional_args.php", line 38, characters 11-19:
 Invalid argument (Typing[4040])
   File "function_type_hint_optional_args.php", line 28, characters 10-16:
-  Too few arguments (required 3 but got 1)
+  Too few positional arguments (required 3 but got 1)
   File "function_type_hint_optional_args.php", line 11, characters 3-55:
   Because of this definition
 ERROR: File "function_type_hint_optional_args.php", line 40, characters 11-20:

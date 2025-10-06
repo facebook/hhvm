@@ -1,6 +1,6 @@
 ERROR: File "anon9.php", line 16, characters 10-11:
 Invalid return type (Typing[4040])
   File "anon9.php", line 13, characters 8-38:
-  Too few arguments (required 1 but got 0)
+  Too few positional arguments (required 1 but got 0)
   File "anon9.php", line 12, characters 18-43:
   Because of this definition

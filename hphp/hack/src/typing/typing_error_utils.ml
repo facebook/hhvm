@@ -5562,7 +5562,7 @@ end = struct
         [
           ( pos,
             Printf.sprintf
-              "Too few arguments (required %d but got %d)"
+              "Too few positional arguments (required %d but got %d)"
               expected
               actual );
           (decl_pos, "Because of this definition");

@@ -37,7 +37,7 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   File "optional_parameters_bad.php", line 18, characters 19-21:
   Type `(function(int $x): void)` is not a subtype of `(function(int $x, optional bool $y, optional string $z): void)`
   File "optional_parameters_bad.php", line 18, characters 19-21:
-  Too few arguments (required 3 but got 1)
+  Too few positional arguments (required 3 but got 1)
   File "optional_parameters_bad.php", line 4, characters 19-21:
   Because of this definition
 ERROR: File "optional_parameters_bad.php", line 22, characters 28-30:
@@ -49,7 +49,7 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
   File "optional_parameters_bad.php", line 22, characters 28-30:
   Type `(function(int $x, optional bool $y): void)` is not a subtype of `(function(int $x, optional bool $y, optional string $z): void)`
   File "optional_parameters_bad.php", line 22, characters 28-30:
-  Too few arguments (required 3 but got 2)
+  Too few positional arguments (required 3 but got 2)
   File "optional_parameters_bad.php", line 4, characters 19-21:
   Because of this definition
 ERROR: File "optional_parameters_bad.php", line 24, characters 37-38:

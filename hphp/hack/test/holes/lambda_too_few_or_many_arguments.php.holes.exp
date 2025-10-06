@@ -1,6 +1,6 @@
 Errors:
   [10:13-15] Invalid argument
-  [9:17-36] Too few arguments (required 1 but got 0)
+  [9:17-36] Too few positional arguments (required 1 but got 0)
   [7:20-42] Because of this definition
   [11:13-15] Invalid argument
   [9:41-68] Too many mandatory arguments (expected 1 but got 2)

@@ -60,27 +60,27 @@ template <typename T>
 static folly::ssl::X509UniquePtr getCert();
 
 template <>
-folly::ssl::X509UniquePtr getCert<P256Test>() {
+inline folly::ssl::X509UniquePtr getCert<P256Test>() {
   return fizz::test::getCert(kP256Certificate);
 }
 
 template <>
-folly::ssl::X509UniquePtr getCert<P384Test>() {
+inline folly::ssl::X509UniquePtr getCert<P384Test>() {
   return fizz::test::getCert(kP384Certificate);
 }
 
 template <>
-folly::ssl::X509UniquePtr getCert<P521Test>() {
+inline folly::ssl::X509UniquePtr getCert<P521Test>() {
   return fizz::test::getCert(kP521Certificate);
 }
 
 template <>
-folly::ssl::X509UniquePtr getCert<RSATest>() {
+inline folly::ssl::X509UniquePtr getCert<RSATest>() {
   return fizz::test::getCert(kRSACertificate);
 }
 
 template <>
-folly::ssl::X509UniquePtr getCert<Ed25519Test>() {
+inline folly::ssl::X509UniquePtr getCert<Ed25519Test>() {
   return fizz::test::getCert(kEd25519Certificate);
 }
 
@@ -88,27 +88,27 @@ template <typename T>
 static folly::ssl::EvpPkeyUniquePtr getKey();
 
 template <>
-folly::ssl::EvpPkeyUniquePtr getKey<P256Test>() {
+inline folly::ssl::EvpPkeyUniquePtr getKey<P256Test>() {
   return getPrivateKey(kP256Key);
 }
 
 template <>
-folly::ssl::EvpPkeyUniquePtr getKey<P384Test>() {
+inline folly::ssl::EvpPkeyUniquePtr getKey<P384Test>() {
   return getPrivateKey(kP384Key);
 }
 
 template <>
-folly::ssl::EvpPkeyUniquePtr getKey<P521Test>() {
+inline folly::ssl::EvpPkeyUniquePtr getKey<P521Test>() {
   return getPrivateKey(kP521Key);
 }
 
 template <>
-folly::ssl::EvpPkeyUniquePtr getKey<RSATest>() {
+inline folly::ssl::EvpPkeyUniquePtr getKey<RSATest>() {
   return getPrivateKey(kRSAKey);
 }
 
 template <>
-folly::ssl::EvpPkeyUniquePtr getKey<Ed25519Test>() {
+inline folly::ssl::EvpPkeyUniquePtr getKey<Ed25519Test>() {
   return getPrivateKey(kEd25519Key);
 }
 

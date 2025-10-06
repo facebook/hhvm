@@ -271,12 +271,7 @@ func (p *procFuncMyServicePing) Read(decoder thrift.Decoder) (thrift.Struct, err
 
 func (p *procFuncMyServicePing) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch v := result.(type) {
-    case *MyException:
-        result = &respMyServicePing{
-            MyExcept: v,
-        }
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -327,8 +322,7 @@ func (p *procFuncMyServiceGetRandomData) Read(decoder thrift.Decoder) (thrift.St
 
 func (p *procFuncMyServiceGetRandomData) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -374,8 +368,7 @@ func (p *procFuncMyServiceHasDataById) Read(decoder thrift.Decoder) (thrift.Stru
 
 func (p *procFuncMyServiceHasDataById) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -422,8 +415,7 @@ func (p *procFuncMyServiceGoGetDataById) Read(decoder thrift.Decoder) (thrift.St
 
 func (p *procFuncMyServiceGoGetDataById) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -470,8 +462,7 @@ func (p *procFuncMyServicePutDataById) Read(decoder thrift.Decoder) (thrift.Stru
 
 func (p *procFuncMyServicePutDataById) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -517,8 +508,7 @@ func (p *procFuncMyServiceLobDataById) Read(decoder thrift.Decoder) (thrift.Stru
 
 func (p *procFuncMyServiceLobDataById) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -563,8 +553,7 @@ func (p *procFuncMyServiceGoDoNothing) Read(decoder thrift.Decoder) (thrift.Stru
 
 func (p *procFuncMyServiceGoDoNothing) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -712,8 +701,7 @@ func (p *procFuncMyServicePrioParentPing) Read(decoder thrift.Decoder) (thrift.S
 
 func (p *procFuncMyServicePrioParentPing) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -758,8 +746,7 @@ func (p *procFuncMyServicePrioParentPong) Read(decoder thrift.Decoder) (thrift.S
 
 func (p *procFuncMyServicePrioParentPong) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -872,8 +859,7 @@ func (p *procFuncMyServicePrioChildPang) Read(decoder thrift.Decoder) (thrift.St
 
 func (p *procFuncMyServicePrioChildPang) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -1004,8 +990,7 @@ func (p *procFuncBadServiceBar) Read(decoder thrift.Decoder) (thrift.Struct, err
 
 func (p *procFuncBadServiceBar) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -1171,8 +1156,7 @@ func (p *procFuncFooBarBazServiceFooStructured) Read(decoder thrift.Decoder) (th
 
 func (p *procFuncFooBarBazServiceFooStructured) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -1217,8 +1201,7 @@ func (p *procFuncFooBarBazServiceBarNonStructured) Read(decoder thrift.Decoder) 
 
 func (p *procFuncFooBarBazServiceBarNonStructured) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -1263,8 +1246,7 @@ func (p *procFuncFooBarBazServiceBaz) Read(decoder thrift.Decoder) (thrift.Struc
 
 func (p *procFuncFooBarBazServiceBaz) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 

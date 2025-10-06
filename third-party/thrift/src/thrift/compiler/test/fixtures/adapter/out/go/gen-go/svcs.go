@@ -134,8 +134,7 @@ func (p *procFuncServiceFunc) Read(decoder thrift.Decoder) (thrift.Struct, error
 
 func (p *procFuncServiceFunc) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -286,8 +285,7 @@ func (p *procFuncAdapterServiceCount) Read(decoder thrift.Decoder) (thrift.Struc
 
 func (p *procFuncAdapterServiceCount) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -333,8 +331,7 @@ func (p *procFuncAdapterServiceAdaptedTypes) Read(decoder thrift.Decoder) (thrif
 
 func (p *procFuncAdapterServiceAdaptedTypes) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 

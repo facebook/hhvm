@@ -204,8 +204,7 @@ func (p *procFuncNestedContainersMapList) Read(decoder thrift.Decoder) (thrift.S
 
 func (p *procFuncNestedContainersMapList) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -251,8 +250,7 @@ func (p *procFuncNestedContainersMapSet) Read(decoder thrift.Decoder) (thrift.St
 
 func (p *procFuncNestedContainersMapSet) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -298,8 +296,7 @@ func (p *procFuncNestedContainersListMap) Read(decoder thrift.Decoder) (thrift.S
 
 func (p *procFuncNestedContainersListMap) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -345,8 +342,7 @@ func (p *procFuncNestedContainersListSet) Read(decoder thrift.Decoder) (thrift.S
 
 func (p *procFuncNestedContainersListSet) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -392,8 +388,7 @@ func (p *procFuncNestedContainersTurtles) Read(decoder thrift.Decoder) (thrift.S
 
 func (p *procFuncNestedContainersTurtles) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 

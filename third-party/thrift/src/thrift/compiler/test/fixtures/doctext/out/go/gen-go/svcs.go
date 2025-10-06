@@ -208,8 +208,7 @@ func (p *procFuncCF) Read(decoder thrift.Decoder) (thrift.Struct, error) {
 
 func (p *procFuncCF) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -254,12 +253,7 @@ func (p *procFuncCThing) Read(decoder thrift.Decoder) (thrift.Struct, error) {
 
 func (p *procFuncCThing) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch v := result.(type) {
-    case *Bang:
-        result = &respCThing{
-            Bang: v,
-        }
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 

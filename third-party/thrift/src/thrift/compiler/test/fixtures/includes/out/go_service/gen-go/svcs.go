@@ -156,8 +156,7 @@ func (p *procFuncMyServiceQuery) Read(decoder thrift.Decoder) (thrift.Struct, er
 
 func (p *procFuncMyServiceQuery) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -203,8 +202,7 @@ func (p *procFuncMyServiceHasArgDocs) Read(decoder thrift.Decoder) (thrift.Struc
 
 func (p *procFuncMyServiceHasArgDocs) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 

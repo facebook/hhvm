@@ -131,8 +131,7 @@ func (p *procFuncMyRootDoRoot) Read(decoder thrift.Decoder) (thrift.Struct, erro
 
 func (p *procFuncMyRootDoRoot) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -245,8 +244,7 @@ func (p *procFuncMyNodeDoMid) Read(decoder thrift.Decoder) (thrift.Struct, error
 
 func (p *procFuncMyNodeDoMid) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -359,8 +357,7 @@ func (p *procFuncMyLeafDoLeaf) Read(decoder thrift.Decoder) (thrift.Struct, erro
 
 func (p *procFuncMyLeafDoLeaf) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 

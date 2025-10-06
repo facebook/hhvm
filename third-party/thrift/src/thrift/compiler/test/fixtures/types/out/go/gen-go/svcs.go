@@ -152,8 +152,7 @@ func (p *procFuncSomeServiceBounceMap) Read(decoder thrift.Decoder) (thrift.Stru
 
 func (p *procFuncSomeServiceBounceMap) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -200,8 +199,7 @@ func (p *procFuncSomeServiceBinaryKeyedMap) Read(decoder thrift.Decoder) (thrift
 
 func (p *procFuncSomeServiceBinaryKeyedMap) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 

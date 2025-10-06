@@ -415,8 +415,7 @@ func (p *procFuncMyServiceFoo) Read(decoder thrift.Decoder) (thrift.Struct, erro
 
 func (p *procFuncMyServiceFoo) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -547,8 +546,7 @@ func (p *procFuncFactoriesFoo) Read(decoder thrift.Decoder) (thrift.Struct, erro
 
 func (p *procFuncFactoriesFoo) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -679,8 +677,7 @@ func (p *procFuncPerformFoo) Read(decoder thrift.Decoder) (thrift.Struct, error)
 
 func (p *procFuncPerformFoo) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -811,8 +808,7 @@ func (p *procFuncInteractWithSharedDoSomeSimilarThings) Read(decoder thrift.Deco
 
 func (p *procFuncInteractWithSharedDoSomeSimilarThings) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 

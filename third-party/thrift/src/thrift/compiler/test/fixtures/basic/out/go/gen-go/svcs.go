@@ -131,8 +131,7 @@ func (p *procFuncFooServiceSimpleRPC) Read(decoder thrift.Decoder) (thrift.Struc
 
 func (p *procFuncFooServiceSimpleRPC) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -264,8 +263,7 @@ func (p *procFuncFB303ServiceSimpleRPC) Read(decoder thrift.Decoder) (thrift.Str
 
 func (p *procFuncFB303ServiceSimpleRPC) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -552,8 +550,7 @@ func (p *procFuncMyServicePing) Read(decoder thrift.Decoder) (thrift.Struct, err
 
 func (p *procFuncMyServicePing) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -598,8 +595,7 @@ func (p *procFuncMyServiceGetRandomData) Read(decoder thrift.Decoder) (thrift.St
 
 func (p *procFuncMyServiceGetRandomData) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -645,8 +641,7 @@ func (p *procFuncMyServiceSink) Read(decoder thrift.Decoder) (thrift.Struct, err
 
 func (p *procFuncMyServiceSink) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -692,8 +687,7 @@ func (p *procFuncMyServicePutDataById) Read(decoder thrift.Decoder) (thrift.Stru
 
 func (p *procFuncMyServicePutDataById) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -739,8 +733,7 @@ func (p *procFuncMyServiceHasDataById) Read(decoder thrift.Decoder) (thrift.Stru
 
 func (p *procFuncMyServiceHasDataById) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -787,8 +780,7 @@ func (p *procFuncMyServiceGetDataById) Read(decoder thrift.Decoder) (thrift.Stru
 
 func (p *procFuncMyServiceGetDataById) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -835,8 +827,7 @@ func (p *procFuncMyServiceDeleteDataById) Read(decoder thrift.Decoder) (thrift.S
 
 func (p *procFuncMyServiceDeleteDataById) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -882,8 +873,7 @@ func (p *procFuncMyServiceLobDataById) Read(decoder thrift.Decoder) (thrift.Stru
 
 func (p *procFuncMyServiceLobDataById) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -928,8 +918,7 @@ func (p *procFuncMyServiceInvalidReturnForHack) Read(decoder thrift.Decoder) (th
 
 func (p *procFuncMyServiceInvalidReturnForHack) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -975,8 +964,7 @@ func (p *procFuncMyServiceRpcSkippedCodegen) Read(decoder thrift.Decoder) (thrif
 
 func (p *procFuncMyServiceRpcSkippedCodegen) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -1126,8 +1114,7 @@ func (p *procFuncDbMixedStackArgumentsGetDataByKey0) Read(decoder thrift.Decoder
 
 func (p *procFuncDbMixedStackArgumentsGetDataByKey0) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -1174,8 +1161,7 @@ func (p *procFuncDbMixedStackArgumentsGetDataByKey1) Read(decoder thrift.Decoder
 
 func (p *procFuncDbMixedStackArgumentsGetDataByKey1) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 

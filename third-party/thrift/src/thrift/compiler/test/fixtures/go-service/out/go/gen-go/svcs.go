@@ -524,8 +524,7 @@ func (p *procFuncGetEntityGetEntity) Read(decoder thrift.Decoder) (thrift.Struct
 
 func (p *procFuncGetEntityGetEntity) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -572,8 +571,7 @@ func (p *procFuncGetEntityGetBool) Read(decoder thrift.Decoder) (thrift.Struct, 
 
 func (p *procFuncGetEntityGetBool) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -619,8 +617,7 @@ func (p *procFuncGetEntityGetByte) Read(decoder thrift.Decoder) (thrift.Struct, 
 
 func (p *procFuncGetEntityGetByte) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -666,8 +663,7 @@ func (p *procFuncGetEntityGetI16) Read(decoder thrift.Decoder) (thrift.Struct, e
 
 func (p *procFuncGetEntityGetI16) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -713,8 +709,7 @@ func (p *procFuncGetEntityGetI32) Read(decoder thrift.Decoder) (thrift.Struct, e
 
 func (p *procFuncGetEntityGetI32) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -760,8 +755,7 @@ func (p *procFuncGetEntityGetI64) Read(decoder thrift.Decoder) (thrift.Struct, e
 
 func (p *procFuncGetEntityGetI64) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -807,8 +801,7 @@ func (p *procFuncGetEntityGetDouble) Read(decoder thrift.Decoder) (thrift.Struct
 
 func (p *procFuncGetEntityGetDouble) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -854,8 +847,7 @@ func (p *procFuncGetEntityGetString) Read(decoder thrift.Decoder) (thrift.Struct
 
 func (p *procFuncGetEntityGetString) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -901,8 +893,7 @@ func (p *procFuncGetEntityGetBinary) Read(decoder thrift.Decoder) (thrift.Struct
 
 func (p *procFuncGetEntityGetBinary) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -948,8 +939,7 @@ func (p *procFuncGetEntityGetMap) Read(decoder thrift.Decoder) (thrift.Struct, e
 
 func (p *procFuncGetEntityGetMap) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -995,8 +985,7 @@ func (p *procFuncGetEntityGetSet) Read(decoder thrift.Decoder) (thrift.Struct, e
 
 func (p *procFuncGetEntityGetSet) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -1042,8 +1031,7 @@ func (p *procFuncGetEntityGetList) Read(decoder thrift.Decoder) (thrift.Struct, 
 
 func (p *procFuncGetEntityGetList) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -1089,8 +1077,7 @@ func (p *procFuncGetEntityGetLegacyStuff) Read(decoder thrift.Decoder) (thrift.S
 
 func (p *procFuncGetEntityGetLegacyStuff) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -1137,8 +1124,7 @@ func (p *procFuncGetEntityGetCtxCollision) Read(decoder thrift.Decoder) (thrift.
 
 func (p *procFuncGetEntityGetCtxCollision) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -1185,8 +1171,7 @@ func (p *procFuncGetEntityGetCtx1Collision) Read(decoder thrift.Decoder) (thrift
 
 func (p *procFuncGetEntityGetCtx1Collision) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -1233,8 +1218,7 @@ func (p *procFuncGetEntityGetContextCollision) Read(decoder thrift.Decoder) (thr
 
 func (p *procFuncGetEntityGetContextCollision) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -1281,8 +1265,7 @@ func (p *procFuncGetEntityGetOutCollision) Read(decoder thrift.Decoder) (thrift.
 
 func (p *procFuncGetEntityGetOutCollision) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -1329,8 +1312,7 @@ func (p *procFuncGetEntityGetOut1Collision) Read(decoder thrift.Decoder) (thrift
 
 func (p *procFuncGetEntityGetOut1Collision) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -1377,8 +1359,7 @@ func (p *procFuncGetEntityGetInCollision) Read(decoder thrift.Decoder) (thrift.S
 
 func (p *procFuncGetEntityGetInCollision) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -1425,8 +1406,7 @@ func (p *procFuncGetEntityGetIn1Collision) Read(decoder thrift.Decoder) (thrift.
 
 func (p *procFuncGetEntityGetIn1Collision) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -1473,8 +1453,7 @@ func (p *procFuncGetEntityGetErrCollision) Read(decoder thrift.Decoder) (thrift.
 
 func (p *procFuncGetEntityGetErrCollision) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -1521,8 +1500,7 @@ func (p *procFuncGetEntityGetErr1Collision) Read(decoder thrift.Decoder) (thrift
 
 func (p *procFuncGetEntityGetErr1Collision) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -1569,8 +1547,7 @@ func (p *procFuncGetEntityMyMethodWithConflictingParamAccessors) Read(decoder th
 
 func (p *procFuncGetEntityMyMethodWithConflictingParamAccessors) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 

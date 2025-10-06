@@ -36,14 +36,7 @@ func (p *{{> svc/proc_func_name}}) Read(decoder thrift.Decoder) (thrift.Struct, 
 
 func (p *{{> svc/proc_func_name}}) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch {{#function:exceptions?}}v := {{/function:exceptions?}}result.(type) {
-    {{#function:exceptions}}
-    case *{{#field:type}}{{> common/type}}{{/field:type}}:
-        result = &resp{{service:go_name}}{{function:go_name}}{
-            {{field:go_name}}: v,
-        }
-    {{/function:exceptions}}
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 

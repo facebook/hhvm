@@ -132,8 +132,7 @@ func (p *procFuncTestServiceInit) Read(decoder thrift.Decoder) (thrift.Struct, e
 
 func (p *procFuncTestServiceInit) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 

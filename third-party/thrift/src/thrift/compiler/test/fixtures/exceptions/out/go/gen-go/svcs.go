@@ -182,8 +182,7 @@ func (p *procFuncRaiserDoBland) Read(decoder thrift.Decoder) (thrift.Struct, err
 
 func (p *procFuncRaiserDoBland) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -228,20 +227,7 @@ func (p *procFuncRaiserDoRaise) Read(decoder thrift.Decoder) (thrift.Struct, err
 
 func (p *procFuncRaiserDoRaise) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch v := result.(type) {
-    case *Banal:
-        result = &respRaiserDoRaise{
-            B: v,
-        }
-    case *Fiery:
-        result = &respRaiserDoRaise{
-            F: v,
-        }
-    case *Serious:
-        result = &respRaiserDoRaise{
-            S: v,
-        }
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -298,8 +284,7 @@ func (p *procFuncRaiserGet200) Read(decoder thrift.Decoder) (thrift.Struct, erro
 
 func (p *procFuncRaiserGet200) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch result.(type) {
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 
@@ -345,20 +330,7 @@ func (p *procFuncRaiserGet500) Read(decoder thrift.Decoder) (thrift.Struct, erro
 
 func (p *procFuncRaiserGet500) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) error {
     messageType := thrift.REPLY
-    switch v := result.(type) {
-    case *Fiery:
-        result = &respRaiserGet500{
-            F: v,
-        }
-    case *Banal:
-        result = &respRaiserGet500{
-            B: v,
-        }
-    case *Serious:
-        result = &respRaiserGet500{
-            S: v,
-        }
-    case *thrift.ApplicationException:
+    if _, ok := result.(*thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
 

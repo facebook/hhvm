@@ -3738,7 +3738,7 @@ folly::coro::Task<WtReqResult> makeInternalEx(std::string_view err) {
  */
 folly::coro::Task<WtReqResult> HTTPCoroSession::sendWtReq(
     RequestReservation reservation, const HTTPMessage& msg) noexcept {
-  XLOG_IF(FATAL, !folly::kIsDebug) << "wt wip"; // crash in non-debug modes
+  // XLOG_IF(FATAL, !folly::kIsDebug) << "wt wip"; // crash in non-debug modes
   if (!reservation.fromSession(this)) {
     return makeInternalEx("Invalid reservation");
   }

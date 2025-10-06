@@ -464,4 +464,94 @@ INSTANTIATE_TEST_SUITE_P(HTTPStatsFilter,
                                          TransportType::TLS),
                          transportTypeToString);
 
+class MultiAcceptorHttpServerTest : public HTTPServerTests {
+ protected:
+  void startServer(std::vector<folly::SocketAddress>&& addresses,
+                   MockServerObserver* mockObserver = nullptr) {
+    CHECK(handler_);
+    HTTPServer::SocketAcceptorConfigFactoryFn socketAcceptorConfigFactoryFn =
+        [this, addresses](folly::EventBase& evb,
+                          [[maybe_unused]] const HTTPServer::Config& config) {
+          auto tlsConfig = this->getTLSConfig();
+          std::vector<HTTPServer::SocketAcceptorConfig> configs;
+          auto accConfig = std::make_shared<proxygen::AcceptorConfiguration>();
+          accConfig->sslContextConfigs.push_back(tlsConfig);
+          for (const auto& address : addresses) {
+            folly::AsyncServerSocket::UniquePtr serverSocket(
+                new folly::AsyncServerSocket(&evb));
+            serverSocket->bind(address);
+            serverSocket->listen(1024);
+            configs.emplace_back(std::move(serverSocket), accConfig);
+          }
+          return configs;
+        };
+
+    server_ = ScopedHTTPServer::start(std::move(serverConfig_),
+                                      handler_,
+                                      mockObserver,
+                                      socketAcceptorConfigFactoryFn);
+  }
+};
+
+TEST_F(MultiAcceptorHttpServerTest, TestMultiplePorts) {
+  initClient();
+  std::vector<std::string> ips = {"127.0.0.1", "::1"};
+  std::vector<folly::SocketAddress> addresses;
+  addresses.reserve(ips.size());
+  for (const auto& ip : ips) {
+    addresses.emplace_back(ip, 0);
+  }
+  startServer(std::move(addresses));
+
+  auto boundAddresses = server_->addresses();
+  EXPECT_EQ(boundAddresses.size(), 2);
+  EXPECT_NE(boundAddresses[0].getPort(), boundAddresses[1].getPort());
+
+  EventBase evb;
+  for (const auto& address : boundAddresses) {
+    auto url = fmt::format("https://{}/test", address.describe());
+    auto response = folly::coro::blockingWait(
+        HTTPClient::get(&evb, url, std::chrono::milliseconds(500), false),
+        &evb);
+    CHECK(response.headers.get());
+    EXPECT_EQ(response.headers->getStatusCode(), 200);
+  }
+
+  // Hit a bad port and confirm that we get an error.
+  auto badAddress = folly::SocketAddress(listenAddress_, 9999);
+  auto url = fmt::format("https://{}/test", badAddress.describe());
+  auto result = folly::coro::blockingWait(
+      folly::coro::co_awaitTry(
+          HTTPClient::get(&evb, url, std::chrono::milliseconds(500), false)),
+      &evb);
+  EXPECT_TRUE(result.hasException());
+
+  stopServer();
+}
+
+TEST_F(MultiAcceptorHttpServerTest, TestShutdown) {
+  initClient();
+  std::vector<std::string> ips = {"127.0.0.1", "::1"};
+  std::vector<folly::SocketAddress> addresses;
+  addresses.reserve(ips.size());
+  for (const auto& ip : ips) {
+    addresses.emplace_back(ip, 0);
+  }
+  startServer(std::move(addresses));
+
+  auto boundAddresses = server_->addresses();
+  EXPECT_EQ(boundAddresses.size(), 2);
+
+  stopServer();
+
+  EventBase evb;
+  for (const auto& address : boundAddresses) {
+    auto url = fmt::format("https://{}/test", address.describe());
+    auto result = folly::coro::blockingWait(
+        folly::coro::co_awaitTry(
+            HTTPClient::get(&evb, url, std::chrono::milliseconds(500), false)),
+        &evb);
+    EXPECT_TRUE(result.hasException());
+  }
+}
 } // namespace proxygen::coro::test

@@ -189,28 +189,42 @@ HTTPServer::getQuicAcceptor(folly::EventBase* evb) {
 }
 
 void HTTPServer::startTcp(const KeepAliveEventBaseVec& keepAliveEvbs) {
-  auto serverSocket = folly::AsyncServerSocket::UniquePtr(
-      new folly::AsyncServerSocket(&eventBase_));
-  try {
-    serverSocket->setReusePortEnabled(setReusePortSocketOption_);
-    if (config_.preboundSocket.has_value()) {
-      serverSocket->useExistingSocket(
-          folly::NetworkSocket::fromFd(config_.preboundSocket.value()));
-    } else {
-      serverSocket->bind(config_.socketConfig.bindAddress);
+  std::vector<SocketAcceptorConfig> socketAcceptorConfigs;
+  if (socketAcceptorConfigFactoryFn_) {
+    XLOG(DBG4) << "Using custom socket acceptor config factory";
+    socketAcceptorConfigs = socketAcceptorConfigFactoryFn_(eventBase_, config_);
+    for (auto& socketAcceptorConfig : socketAcceptorConfigs) {
+      socketAcceptorConfig.socket->startAccepting();
     }
-    serverSocket->listen(config_.socketConfig.acceptBacklog);
-    serverSocket->startAccepting();
-  } catch (const std::exception& ex) {
-    XLOG(ERR) << "Failed to setup server socket ex=" << ex.what();
-    throw;
+  } else {
+    auto serverSocket = folly::AsyncServerSocket::UniquePtr(
+        new folly::AsyncServerSocket(&eventBase_));
+    try {
+      serverSocket->setReusePortEnabled(setReusePortSocketOption_);
+      if (config_.preboundSocket.has_value()) {
+        serverSocket->useExistingSocket(
+            folly::NetworkSocket::fromFd(config_.preboundSocket.value()));
+      } else {
+        serverSocket->bind(config_.socketConfig.bindAddress);
+      }
+      serverSocket->listen(config_.socketConfig.acceptBacklog);
+      serverSocket->startAccepting();
+    } catch (const std::exception& ex) {
+      XLOG(ERR) << "Failed to setup server socket ex=" << ex.what();
+      throw;
+    }
+    socketAcceptorConfigs.push_back({
+        .socket = std::move(serverSocket),
+        .acceptorConfig = toAcceptorConfig(config_),
+    });
   }
-  auto acceptorConfig = toAcceptorConfig(config_);
-  for (auto& evb : keepAliveEvbs) {
-    createAcceptor(evb.get(), acceptorConfig)
-        ->init(serverSocket.get(), evb.get());
+  for (auto& socketAcceptorConfig : socketAcceptorConfigs) {
+    for (auto& evb : keepAliveEvbs) {
+      createAcceptor(evb.get(), socketAcceptorConfig.acceptorConfig)
+          ->init(socketAcceptorConfig.socket.get(), evb.get());
+    }
+    serverSockets_.emplace_back(std::move(socketAcceptorConfig.socket));
   }
-  serverSockets_.emplace_back(std::move(serverSocket));
 }
 
 void HTTPServer::run(std::function<void()> onSuccess) {

@@ -85,8 +85,24 @@ class HTTPServer : public quic::QuicHandshakeSocketHolder::Callback {
     return defaultConfig;
   }
 
+  struct SocketAcceptorConfig {
+    folly::AsyncServerSocket::UniquePtr socket;
+    std::shared_ptr<const AcceptorConfiguration> acceptorConfig;
+  };
+  using SocketAcceptorConfigFactoryFn =
+      std::function<std::vector<SocketAcceptorConfig>(
+          folly::EventBase&, const HTTPServer::Config&)>;
+
   HTTPServer(Config config, std::shared_ptr<HTTPHandler> handler)
-      : config_(std::move(config)), handler_(std::move(handler)) {
+      : HTTPServer(std::move(config), std::move(handler), nullptr) {
+  }
+
+  HTTPServer(Config config,
+             std::shared_ptr<HTTPHandler> handler,
+             SocketAcceptorConfigFactoryFn fn)
+      : config_(std::move(config)),
+        handler_(std::move(handler)),
+        socketAcceptorConfigFactoryFn_(std::move(fn)) {
   }
 
   ~HTTPServer() override;
@@ -134,6 +150,23 @@ class HTTPServer : public quic::QuicHandshakeSocketHolder::Callback {
     } else {
       return std::nullopt;
     }
+  }
+
+  /**
+   * Returns all addresses the server is listening on - useful for
+   * implementations that support multiple sockets, but can still be
+   * called by single socket implementations too.
+   */
+  std::vector<folly::SocketAddress> addresses() const {
+    std::vector<folly::SocketAddress> addresses;
+    if (quicServer_) {
+      addresses.emplace_back(quicServer_->getAddress());
+    } else {
+      for (auto& socket : serverSockets_) {
+        addresses.emplace_back(socket->getAddress());
+      }
+    }
+    return addresses;
   }
 
   /**
@@ -217,6 +250,7 @@ class HTTPServer : public quic::QuicHandshakeSocketHolder::Callback {
   bool setReusePortSocketOption_{false};
   folly::F14NodeMap<folly::EventBase*, std::list<HTTPCoroAcceptor>> acceptors_;
   std::shared_ptr<quic::QuicServer> quicServer_;
+  SocketAcceptorConfigFactoryFn socketAcceptorConfigFactoryFn_{nullptr};
   enum class State : uint8_t {
     UNINIT = 0,
     RUNNING = 1,

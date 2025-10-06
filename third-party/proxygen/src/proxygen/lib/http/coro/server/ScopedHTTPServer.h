@@ -17,9 +17,13 @@ class ScopedHTTPServer {
   static std::unique_ptr<ScopedHTTPServer> start(
       HTTPServer::Config config,
       std::shared_ptr<HTTPHandler> handler,
-      HTTPServer::Observer* observer = nullptr) {
+      HTTPServer::Observer* observer = nullptr,
+      HTTPServer::SocketAcceptorConfigFactoryFn socketAcceptorConfigFactoryFn_ =
+          nullptr) {
     std::unique_ptr<ScopedHTTPServer> server(
-        new ScopedHTTPServer(std::move(config), std::move(handler)));
+        new ScopedHTTPServer(std::move(config),
+                             std::move(handler),
+                             std::move(socketAcceptorConfigFactoryFn_)));
     if (observer) {
       server->getServer().addObserver(observer);
     }
@@ -35,6 +39,10 @@ class ScopedHTTPServer {
 
   std::optional<folly::SocketAddress> address() {
     return server_.address();
+  }
+
+  std::vector<folly::SocketAddress> addresses() {
+    return server_.addresses();
   }
 
   void start() {
@@ -63,9 +71,13 @@ class ScopedHTTPServer {
   }
 
  protected:
-  ScopedHTTPServer(HTTPServer::Config config,
-                   std::shared_ptr<HTTPHandler> handler)
-      : server_(std::move(config), std::move(handler)) {
+  ScopedHTTPServer(
+      HTTPServer::Config config,
+      std::shared_ptr<HTTPHandler> handler,
+      HTTPServer::SocketAcceptorConfigFactoryFn socketAcceptorConfigFactoryFn_)
+      : server_(std::move(config),
+                std::move(handler),
+                std::move(socketAcceptorConfigFactoryFn_)) {
   }
 
  private:

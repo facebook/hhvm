@@ -33,7 +33,7 @@ from xplat.thrift.compiler.test import fixture_utils
 See instructions in the epilog of the argparse parser below
 in the parsed_args() function.
 """
-DEFAULT_FIXTURE_ROOT = "."
+DEFAULT_FIXTURE_ROOT = os.path.dirname(os.path.realpath(__file__))
 
 
 def _build_parser():
@@ -213,11 +213,17 @@ async def main(argv: List[str]) -> int:
     )
 
     repo_root_dir_abspath = Path(args.repo_root_dir).resolve(strict=True)
+
     fixture_utils.validate_that_root_path_is_a_dir(repo_root_dir_abspath)
-    repo_root_dir_abspath = repo_root_dir_abspath / "xplat"
+    FIXTURE_SUBDIR = "thrift/compiler/test/fixtures"
+    while (
+        not (repo_root_dir_abspath / FIXTURE_SUBDIR).is_dir()
+        and repo_root_dir_abspath != repo_root_dir_abspath.parent
+    ):
+        repo_root_dir_abspath = repo_root_dir_abspath.parent
 
     # Directory that contains all fixture directories (one fixture per sub-dir).
-    fixtures_root_dir_abspath = repo_root_dir_abspath / "thrift/compiler/test/fixtures"
+    fixtures_root_dir_abspath = repo_root_dir_abspath / FIXTURE_SUBDIR
 
     fixture_names = await _get_fixture_names(args, fixtures_root_dir_abspath)
 

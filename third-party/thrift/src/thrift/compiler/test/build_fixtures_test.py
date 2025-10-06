@@ -72,9 +72,11 @@ class TestBuildFixtures(unittest.TestCase):
             # THEN
             with self.assertRaisesRegex(
                 RuntimeError,
-                r"Expected .*/xplat/thrift/compiler/test/fixtures to be a directory.*",
+                r"Expected .*/thrift/compiler/test/fixtures to be a directory.*",
             ):
-                asyncio.run(build_fixtures.main(["build_fixtures.par"]))
+                asyncio.run(
+                    build_fixtures.main(["build_fixtures.par", "--fixture-root", "."])
+                )
 
 
 if __name__ == "__main__":

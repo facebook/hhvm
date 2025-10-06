@@ -15,7 +15,6 @@
   limitations under the License.
 
 }}
-{{#import "types/schema_association" as schema_association}}
 {{> Autogen}}
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 #include "{{program:include_prefix}}{{program:name}}_metadata.h"
@@ -30,9 +29,6 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
-{{#program:services}}
-{{#partial schema_association.declaration node=service:self}}
-{{/program:services}}
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -166,7 +162,8 @@ void ServiceMetadata<::{{> service_common/service_class_name}}>::gen(::apache::t
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::{{> service_common/service_class_name}}>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService {{service:metadata_name}} = genServiceMetadata<{{service:qualified_name}}>();
+  ::apache::thrift::metadata::ThriftService {{service:metadata_name}};
+  {{service:metadata_name}}.name() = "{{program:name}}.{{service:name}}";
   {{#if (not (string.empty? service:uri))}}
   {{service:metadata_name}}.uri() = "{{service:uri}}";
   {{/if (not (string.empty? service:uri))}}

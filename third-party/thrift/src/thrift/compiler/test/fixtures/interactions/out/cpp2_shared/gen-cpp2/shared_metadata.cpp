@@ -17,11 +17,6 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
-template <> struct TSchemaAssociation<::thrift::shared_interactions::InteractLocally, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -4220872492017656570;
-  static constexpr ::std::string_view definitionKey = {"\x56\xd1\x04\xc3\x6f\x07\x7b\x82\x7b\x8a\x05\x38\xf1\xf1\x9b\xc8", 16};
-};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -66,7 +61,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::thrift::shared_interacti
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::thrift::shared_interactions::InteractLocally>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService shared_InteractLocally = genServiceMetadata<::thrift::shared_interactions::InteractLocally>();
+  ::apache::thrift::metadata::ThriftService shared_InteractLocally;
+  shared_InteractLocally.name() = "shared.InteractLocally";
   static const ThriftFunctionGenerator functions[] = {
   };
   for (auto& function_gen : functions) {

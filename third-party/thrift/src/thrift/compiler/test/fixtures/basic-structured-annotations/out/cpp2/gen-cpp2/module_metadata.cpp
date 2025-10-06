@@ -17,11 +17,6 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
-template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::MyService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 2227752972862751796;
-  static constexpr ::std::string_view definitionKey = {"\x87\x8c\x8c\x9a\x19\x91\x49\xc7\x08\x6c\x49\x48\xc6\x80\xa8\x94", 16};
-};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -294,7 +289,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_st
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_MyService = genServiceMetadata<::test::fixtures::basic_structured_annotations::MyService>();
+  ::apache::thrift::metadata::ThriftService module_MyService;
+  module_MyService.name() = "module.MyService";
   module_MyService.uri() = "test.dev/fixtures/basic_structured_annotations/MyService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen_first,

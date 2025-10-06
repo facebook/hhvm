@@ -17,11 +17,6 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
-template <> struct TSchemaAssociation<::cpp2::MyService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -3909934904338841385;
-  static constexpr ::std::string_view definitionKey = {"\x17\x54\x9d\x5d\x8e\x2b\xc4\x59\x71\x23\x01\xf0\x0c\xf5\xe7\x00", 16};
-};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -113,7 +108,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen(:
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_MyService = genServiceMetadata<::cpp2::MyService>();
+  ::apache::thrift::metadata::ThriftService module_MyService;
+  module_MyService.name() = "module.MyService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_ping,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_getRandomData,

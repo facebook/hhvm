@@ -17,11 +17,6 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
-template <> struct TSchemaAssociation<::cpp2::NullService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 1205150269192565637;
-  static constexpr ::std::string_view definitionKey = {"\x8c\xed\x4e\x40\x8d\x25\xb0\xaf\x62\xfc\xe5\x34\x19\x22\x66\x6c", 16};
-};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -44,7 +39,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NullService>>::gen
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NullService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService empty_NullService = genServiceMetadata<::cpp2::NullService>();
+  ::apache::thrift::metadata::ThriftService empty_NullService;
+  empty_NullService.name() = "empty.NullService";
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();

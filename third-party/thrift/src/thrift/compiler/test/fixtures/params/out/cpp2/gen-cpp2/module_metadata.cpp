@@ -17,11 +17,6 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
-template <> struct TSchemaAssociation<::cpp2::NestedContainers, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -4068262488431456951;
-  static constexpr ::std::string_view definitionKey = {"\x5c\x58\xe5\x01\x5d\xdc\x62\xf0\x13\x7c\x68\x6d\xff\x81\xae\x6b", 16};
-};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -119,7 +114,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_NestedContainers = genServiceMetadata<::cpp2::NestedContainers>();
+  ::apache::thrift::metadata::ThriftService module_NestedContainers;
+  module_NestedContainers.name() = "module.NestedContainers";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>::gen_mapList,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>::gen_mapSet,

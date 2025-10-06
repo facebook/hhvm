@@ -17,16 +17,6 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
-template <> struct TSchemaAssociation<::cpp2::MyService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 1560411752922467026;
-  static constexpr ::std::string_view definitionKey = {"\xf5\x63\xe0\x45\x58\xc2\x4d\x1b\xd0\xe9\x18\xf7\x59\x45\x2e\xd1", 16};
-};
-template <> struct TSchemaAssociation<::cpp2::DbMixedStackArguments, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 1560411752922467026;
-  static constexpr ::std::string_view definitionKey = {"\x70\xcb\xbc\x37\x35\x91\x5d\x36\xfe\xb3\xf3\x60\x33\x91\x54\x88", 16};
-};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -229,7 +219,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen(:
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_MyService = genServiceMetadata<::cpp2::MyService>();
+  ::apache::thrift::metadata::ThriftService module_MyService;
+  module_MyService.name() = "module.MyService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_ping,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_getRandomData,
@@ -296,7 +287,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DbMixedStackArgume
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_DbMixedStackArguments = genServiceMetadata<::cpp2::DbMixedStackArguments>();
+  ::apache::thrift::metadata::ThriftService module_DbMixedStackArguments;
+  module_DbMixedStackArguments.name() = "module.DbMixedStackArguments";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>>::gen_getDataByKey0,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>>::gen_getDataByKey1,

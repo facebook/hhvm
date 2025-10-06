@@ -21,6 +21,8 @@ from cpython.ref cimport PyObject
 from folly.executor cimport get_executor
 from folly.range cimport StringPiece
 from libcpp.utility cimport move as cmove
+from libcpp.memory cimport make_unique
+
 
 import asyncio
 import collections
@@ -53,6 +55,7 @@ from thrift.python.server_impl.request_context import ( # noqa
 )
 from thrift.python.server_impl.request_context cimport handleAddressCallback
 from thrift.python.server_impl.interceptor.server_module cimport PythonServerModule
+from thrift.python.types cimport cServiceHealth, cServiceHealth_OK, cServiceHealth_ERROR
 
 AsyncProcessorFactory = AsyncProcessorFactory_
 
@@ -78,7 +81,8 @@ cdef class StatusServerInterface:
 cdef class ThriftServer:
     def __cinit__(self):
         self.server = make_shared[cThriftServer]()
-
+        self._health_polling_task = None
+        self._health_polling_interval = 5  #5 seconds for default
     def __init__(self, handler, int port=0, ip=None, path=None, socket_fd=None):
         # thrift-python path
         if isinstance(handler, PythonServiceInterface):
@@ -297,6 +301,60 @@ cdef class ThriftServer:
 
     def set_stream_expire_time(self, seconds):
         self.server.get().setStreamExpireTime(milliseconds(<int64_t>(seconds * 1000)))
+    def set_service_health(self, int health):
+        """Set the service health status. 1 = OK, !1 = ERROR"""
+        cdef cServiceHealth c_health = <cServiceHealth><int>health
+        # using unique_ptr for automatic cleanup
+        # must use heap allocation (new) because Cython cannot create a stack-allocated C++ object that requires constructor arguments.
+        # it requires C++ class must have a nullary constructor to be stack allocated
+        cdef unique_ptr[cThriftServerInternals] internals_ptr = make_unique[cThriftServerInternals]((deref(self.server.get())))
+        internals_ptr.get().setServiceHealth(c_health)
+
+    def start_health_polling(self):
+        """Start periodic health polling if handler supports getServiceHealth"""
+        cdef unique_ptr[cThriftServerInternals] internals_ptr
+        handler = None
+        if (self.handler is not None and
+            # need to check if handler implements getServiceHealth.
+            hasattr(self.handler, 'getServiceHealth')):
+            handler = self.handler
+        elif (self.factory is not None and
+            # this is for py3 async interface
+            hasattr(self.factory, 'getServiceHealth')):
+            handler = self.factory
+
+        if handler is not None:
+            # Disable service health poller before we start Python health polling
+            internals_ptr = make_unique[cThriftServerInternals](deref(self.server.get()))
+            internals_ptr.get().disableServiceHealthPoller()
+
+            self._health_polling_task = self.loop.create_task(self._health_polling_loop(handler))
+
+    def stop_health_polling(self):
+        """Stop periodic health polling"""
+        if self._health_polling_task is not None:
+            self._health_polling_task.cancel()
+            self._health_polling_task = None
+
+    async def _health_polling_loop(self, handler):
+        """Background task that periodically polls handler health and caches status"""
+        try:
+            while True:
+                try:
+                    health_status = await handler.getServiceHealth()
+                    # Poll the handler's health status and cache it
+                    self.set_service_health(health_status)
+
+                except Exception as e:
+                    # If handler throws exception, treat as ERROR
+                    self.set_service_health(cServiceHealth_ERROR)
+
+                # Sleep until next poll
+                await asyncio.sleep(self._health_polling_interval)
+
+        except asyncio.CancelledError:
+            # Polling was stopped
+            pass
 
     @property
     def handler(self):

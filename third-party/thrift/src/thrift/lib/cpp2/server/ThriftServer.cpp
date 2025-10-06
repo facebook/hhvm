@@ -20,6 +20,7 @@
 #include <thrift/lib/cpp2/server/IOUringUtil.h>
 
 #include <thrift/lib/cpp2/server/ThriftServer.h>
+#include <thrift/lib/cpp2/server/ThriftServerInternals.h>
 
 #include <iostream>
 #include <memory>
@@ -794,8 +795,9 @@ void ThriftServer::setup() {
     internalStatus_.store(ServerStatus::RUNNING, std::memory_order_release);
 
 #if FOLLY_HAS_COROUTINES
-    // Set up polling for PolledServiceHealth handlers if necessary
-    {
+    // Set up polling for PolledServiceHealth handlers if Python health polling
+    // is not up.
+    if (!isServiceHealthPollerDisabled()) {
       DCHECK(!getServiceHealth().has_value());
       auto handlers = collectServiceHandlers<PolledServiceHealth>();
       if (!handlers.empty()) {

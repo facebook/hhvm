@@ -21,6 +21,13 @@ from libcpp.memory cimport unique_ptr
 
 from thrift.python.protocol cimport Protocol
 
+# Service health enum for server status
+cdef extern from "thrift/lib/cpp2/server/ThriftServer.h" \
+        namespace "apache::thrift":
+    cpdef enum cServiceHealth "apache::thrift::PolledServiceHealth::ServiceHealth":
+        cServiceHealth_OK "apache::thrift::PolledServiceHealth::ServiceHealth::OK"
+        cServiceHealth_ERROR "apache::thrift::PolledServiceHealth::ServiceHealth::ERROR"
+
 # gcc's `serializeintrin.h` header defines a macro named `_serialize`, which
 # clobbers the `_serialize` method on IOBufs.  This should be fixed in more
 # recent versions, but add this to avoid compile errors on older ones

@@ -44,5 +44,5 @@ function test_err7(): void {
 
 function take_err8((function (named int $x): void) $_): void {}
 function test_err8(): void {
-  take_err8((named string $x) ==> {}); // TODO: should be ERROR: type mismatch
+  take_err8((named string $x) ==> {}); // ERROR: type mismatch
 }

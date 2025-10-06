@@ -53,5 +53,5 @@ function test_err7(): void {
 function take_err8((function (named int $x): void) $_): void {}
 function f_err8(named string $x): void {}
 function test_err8(): void {
-  take_err8(f_err8<>); // TODO: should be ERROR: Named parameter x is required but expected to be optional
+  take_err8(f_err8<>); // ERROR: Named parameter x is required but expected to be optional
 }

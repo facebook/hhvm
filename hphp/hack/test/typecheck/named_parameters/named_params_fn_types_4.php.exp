@@ -64,3 +64,9 @@ Invalid argument (Typing[4341])
   Named parameter x is required but expected to be optional
   File "named_params_fn_types_4.php", line 40, characters 20-59:
   Because of this definition
+ERROR: File "named_params_fn_types_4.php", line 47, characters 13-36:
+Invalid argument (Typing[4110])
+  File "named_params_fn_types_4.php", line 47, characters 20-25:
+  Expected `string`
+  File "named_params_fn_types_4.php", line 45, characters 37-39:
+  But got `int`

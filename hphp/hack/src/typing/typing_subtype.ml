@@ -2246,7 +2246,7 @@ end = struct
         ~f:(fun (env, prop) fp_sub ->
           let open Option.Let_syntax in
           Option.value ~default:(env, prop)
-          @@ let* name = fp_sub.fp_name in
+          @@ let* name = Named_params.name_of_named_param fp_sub in
              let+ fp_super = Map.find name_to_named_param_super name in
              (* we can safely ignore when no matching named parameter is found, since arity checks happen elsewhere *)
              (env, prop)

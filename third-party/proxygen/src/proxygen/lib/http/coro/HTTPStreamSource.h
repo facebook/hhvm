@@ -45,8 +45,12 @@ class HTTPStreamSource : public HTTPSource {
    */
   class Callback {
    public:
-    virtual ~Callback() {
-    }
+    virtual ~Callback() = default;
+    Callback() = default;
+    Callback(const Callback&) = delete;
+    Callback& operator=(const Callback&) = delete;
+    Callback(Callback&&) = delete;
+    Callback& operator=(Callback&&) = delete;
 
     // The ID parameter to the callbacks can be HTTPCodec::kMaxStreamId if the
     // source is an async producer that did not provide a stream ID.
@@ -90,6 +94,10 @@ class HTTPStreamSource : public HTTPSource {
     auto* evb = event_.getEventBase();
     XCHECK(evb->isInEventBaseThread());
   }
+  HTTPStreamSource(const HTTPStreamSource&) = delete;
+  HTTPStreamSource& operator=(const HTTPStreamSource&) = delete;
+  HTTPStreamSource(HTTPStreamSource&&) = delete;
+  HTTPStreamSource& operator=(HTTPStreamSource&&) = delete;
 
   // Maybe collapse with getStreamID?
   HTTPCodec::StreamID getID() const {

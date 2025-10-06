@@ -1989,8 +1989,11 @@ end = struct
                    @@ Secondary.Fun_variadicity_hh_vs_php56
                         { pos = p_sub; decl_pos = p_super }))
       | (None, None) when not splat_super ->
-        let sub_max = List.length ft_sub.ft_params in
-        let super_max = List.length ft_super.ft_params in
+        let count_positional_params ft =
+          List.count ft.ft_params ~f:(Fn.non Typing_defs_core.get_fp_is_named)
+        in
+        let sub_max = count_positional_params ft_sub in
+        let super_max = count_positional_params ft_super in
         if sub_max < super_max then
           Error
             (Option.map

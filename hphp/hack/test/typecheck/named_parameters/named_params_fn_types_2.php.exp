@@ -1,0 +1,66 @@
+ERROR: File "named_params_fn_types_2.php", line 8, characters 13-20:
+Invalid argument (Typing[4040])
+  File "named_params_fn_types_2.php", line 6, characters 10-15:
+  Missing required named parameter: y
+  File "named_params_fn_types_2.php", line 5, characters 20-67:
+  Because of this definition
+ERROR: File "named_params_fn_types_2.php", line 15, characters 13-20:
+Invalid argument (Typing[4041])
+  File "named_params_fn_types_2.php", line 13, characters 10-15:
+  Unexpected named parameter: y
+  File "named_params_fn_types_2.php", line 12, characters 20-50:
+  Because of this definition
+ERROR: File "named_params_fn_types_2.php", line 22, characters 13-20:
+Invalid argument (Typing[4040])
+  File "named_params_fn_types_2.php", line 20, characters 10-15:
+  Missing required named parameter: x
+  File "named_params_fn_types_2.php", line 19, characters 20-50:
+  Because of this definition
+ERROR: File "named_params_fn_types_2.php", line 22, characters 13-20:
+Invalid argument (Typing[4041])
+  File "named_params_fn_types_2.php", line 20, characters 10-15:
+  Unexpected named parameter: wrong
+  File "named_params_fn_types_2.php", line 19, characters 20-50:
+  Because of this definition
+ERROR: File "named_params_fn_types_2.php", line 29, characters 13-20:
+Invalid argument (Typing[4040])
+  File "named_params_fn_types_2.php", line 27, characters 10-15:
+  Missing required named parameter: b
+  File "named_params_fn_types_2.php", line 26, characters 20-67:
+  Because of this definition
+ERROR: File "named_params_fn_types_2.php", line 29, characters 13-20:
+Invalid argument (Typing[4041])
+  File "named_params_fn_types_2.php", line 27, characters 10-15:
+  Unexpected named parameter: wrong
+  File "named_params_fn_types_2.php", line 26, characters 20-67:
+  Because of this definition
+ERROR: File "named_params_fn_types_2.php", line 36, characters 13-20:
+Invalid argument (Typing[4040])
+  File "named_params_fn_types_2.php", line 34, characters 10-15:
+  Missing required named parameters: y, x
+  File "named_params_fn_types_2.php", line 33, characters 20-67:
+  Because of this definition
+ERROR: File "named_params_fn_types_2.php", line 36, characters 13-20:
+Invalid argument (Typing[4041])
+  File "named_params_fn_types_2.php", line 34, characters 10-15:
+  Unexpected named parameters: q, p
+  File "named_params_fn_types_2.php", line 33, characters 20-67:
+  Because of this definition
+ERROR: File "named_params_fn_types_2.php", line 43, characters 13-20:
+Invalid argument (Typing[4040])
+  File "named_params_fn_types_2.php", line 41, characters 10-15:
+  Missing required named parameters: c, b
+  File "named_params_fn_types_2.php", line 40, characters 20-82:
+  Because of this definition
+ERROR: File "named_params_fn_types_2.php", line 43, characters 13-20:
+Invalid argument (Typing[4041])
+  File "named_params_fn_types_2.php", line 41, characters 10-15:
+  Unexpected named parameter: d
+  File "named_params_fn_types_2.php", line 40, characters 20-82:
+  Because of this definition
+ERROR: File "named_params_fn_types_2.php", line 50, characters 13-20:
+Invalid argument (Typing[4341])
+  File "named_params_fn_types_2.php", line 48, characters 10-15:
+  Named parameter x is required but expected to be optional
+  File "named_params_fn_types_2.php", line 47, characters 20-59:
+  Because of this definition

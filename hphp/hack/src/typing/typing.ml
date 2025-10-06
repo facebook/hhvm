@@ -1870,13 +1870,8 @@ let check_lambda_arity env lambda_pos def_pos lambda_ft expected_ft =
   with
   | ((_, None), (_, None)) ->
     (* what's the fewest arguments this type can take *)
-    let (expected_min, _expected_required_named_params) =
-      Typing_defs.arity_and_names_required expected_ft
-    in
-    let (actual_min, _actual_required_named_params) =
-      Typing_defs.arity_and_names_required lambda_ft
-    in
-    (* TODO(named_params): use _expected_required_named_params and _actual_required_named_params *)
+    let (expected_min, _) = Typing_defs.arity_and_names_required expected_ft in
+    let (actual_min, _) = Typing_defs.arity_and_names_required lambda_ft in
     let positional_params_of ft =
       List.filter ft.ft_params ~f:(fun fp ->
           not (Typing_defs_core.get_fp_is_named fp))
@@ -11011,10 +11006,12 @@ end = struct
           then
             []
           else
-            (* This means the expected_ft params list can have more parameters
-             * than declared parameters in the lambda. For variadics, this is OK.
+            (* This means the expected_ft params list can have more positional parameters
+             * than declared parameters in the lambda.
              *)
-            expected_ft_params
+            List.filter
+              expected_ft_params
+              ~f:(Fn.non Typing_defs_core.get_fp_is_named)
         | _ ->
           failwith
             "declared_decl_ft_params length not same as declared_ft_params"

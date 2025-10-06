@@ -207,11 +207,27 @@ StringData* stringBitOp(BitOp bop, SzOp sop, StringData* s1, StringData* s2) {
   return newStr;
 }
 
+void raiseBitwiseOpInvalidType() {
+  switch (Cfg::Eval::WarnOnBitwiseOpInvalidType) {
+    case 0:
+      break;
+    case 1:
+      raise_warning("Deprecated operand type (string) for bitwise operation");
+      break;
+    case 2:
+      raise_error("Unsupported operand type (string) for bitwise operation");
+      [[fallthrough]];
+    default:
+      always_assert(false);
+  }
+}
+
 template<template<class> class BitOp, class StrLenOp>
 TypedValue tvBitOp(StrLenOp strLenOp, TypedValue c1, TypedValue c2) {
   assertx(tvIsPlausible(c1));
   assertx(tvIsPlausible(c2));
   if (isStringType(c1.m_type) && isStringType(c2.m_type)) {
+    raiseBitwiseOpInvalidType();
     return make_tv<KindOfString>(
       stringBitOp(
         BitOp<char>(),
@@ -524,6 +540,7 @@ void tvBitNot(TypedValue& cell) {
       if (cell.m_data.pstr->cowCheck()) {
       [[fallthrough]];
     case KindOfPersistentString:
+        raiseBitwiseOpInvalidType();
         auto const sl = cell.m_data.pstr->slice();
         USDT(hhvm, hhvm_cow_bitnot, sl.size());
         auto const newSd = StringData::Make(sl, CopyString);
@@ -531,6 +548,7 @@ void tvBitNot(TypedValue& cell) {
         cell.m_data.pstr = newSd;
         cell.m_type = KindOfString;
       } else {
+        raiseBitwiseOpInvalidType();
         // Unless we go through this branch, the string was just freshly
         // created, so the following mutation will be safe wrt its
         // internal hash caching.

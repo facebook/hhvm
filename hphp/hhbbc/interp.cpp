@@ -1243,7 +1243,8 @@ void in(ISS& env, const bc::BitNot& /*op*/) {
     return push(env, TBottom);
   }
 
-  if (v) {
+  // If it's a string we raise a warning or error if Eval.WarnOnBitwiseOpInvalidType is set
+  if (v && !t.subtypeOf(BStr)) {
     constprop(env);
     auto cell = eval_cell([&] {
       auto c = *v;

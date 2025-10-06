@@ -41,8 +41,9 @@ Type bitwise_impl(Type t1, Type t2, Fun op) {
       !(t1.couldBe(BStr) && t2.couldBe(BStr))) {
     return TBottom;
   }
-  if (auto t = eval_const(t1, t2, op))          return *t;
+  // If operands are strings we raise a warning or error if Eval.WarnOnBitwiseOpInvalidType is set
   if (t1.subtypeOf(BStr) && t2.subtypeOf(BStr)) return TStr;
+  if (auto t = eval_const(t1, t2, op))          return *t;
   if (!t1.couldBe(BStr) || !t2.couldBe(BStr))   return TInt;
   return TInitCell;
 }

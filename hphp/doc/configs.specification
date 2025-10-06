@@ -774,6 +774,12 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   1 - Warn when incrementing or decrementing non numeric types
   2 - Throw when incrementing or decrementing non numeric types
 
+- uint32_t Eval.WarnOnBitwiseOpInvalidType = 0, UNKNOWN
+
+  0 - Bitwise operations are supported on strings
+  1 - Warn when using bitwise operations on strings
+  2 - Throw when using bitwise operations on strings
+
 - uint32_t Eval.WarnOnImplicitCoercionOfEnumValue = 0, UNKNOWN
 
   This flag exists to control behaviour when implicit coercion is

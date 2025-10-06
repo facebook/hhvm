@@ -33,6 +33,11 @@ class SampleServer {
   explicit SampleServer(std::shared_ptr<Service> handler);
   virtual ~SampleServer();
 
+  SampleServer(const SampleServer&) = delete;
+  SampleServer& operator=(const SampleServer&) = delete;
+  SampleServer(SampleServer&&) = default;
+  SampleServer& operator=(SampleServer&&) = default;
+
   // Don't forget to start the server before running the tests.
   void startServer();
 
